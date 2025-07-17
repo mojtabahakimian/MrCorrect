@@ -1,0 +1,223 @@
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET.BUDGET5"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET"
+        mc:Ignorable="d"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        FontFamily="IRANYekanFN"
+        Background="{x:Null}" AllowsTransparency="True"
+        AllowDrop="True"
+        Height="528" Width="1033" WindowStyle="None" MinWidth="1033" MinHeight="528" Margin="0" WindowStartupLocation="CenterOwner" Loaded="Window_Loaded">
+    <Window.Resources>
+        <ControlTemplate TargetType="{x:Type Button}" x:Key="ButtonTemplateRed">
+            <Border x:Name="RootElement">
+                <Border.Background>
+                    <SolidColorBrush x:Name="BorderBrush" Color="Black" />
+                </Border.Background>
+
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal" />
+                        <VisualState x:Name="MouseOver">
+                            <Storyboard>
+                                <ColorAnimation Storyboard.TargetName="ButtonBackground"
+                                    Storyboard.TargetProperty="Color" To="Red" />
+                            </Storyboard>
+                        </VisualState>
+                        <VisualState x:Name="Pressed">
+                            <Storyboard>
+                                <ColorAnimation Storyboard.TargetName="ButtonBackground"
+                                    Storyboard.TargetProperty="Color" To="Red" />
+                            </Storyboard>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+
+                <Grid>
+                    <Grid.Background>
+                        <SolidColorBrush x:Name="ButtonBackground" Color="Black" />
+                    </Grid.Background>
+                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="4,5,4,4" />
+                </Grid>
+            </Border>
+        </ControlTemplate>
+        <Style x:Key="FocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <SolidColorBrush x:Key="Button.Static.Background" Color="#FFDDDDDD"/>
+        <SolidColorBrush x:Key="Button.Static.Border" Color="#FF707070"/>
+        <SolidColorBrush x:Key="Button.MouseOver.Background" Color="#FFBEE6FD"/>
+        <SolidColorBrush x:Key="Button.MouseOver.Border" Color="#FF3C7FB1"/>
+        <SolidColorBrush x:Key="Button.Pressed.Background" Color="#FFC4E5F6"/>
+        <SolidColorBrush x:Key="Button.Pressed.Border" Color="#FF2C628B"/>
+        <SolidColorBrush x:Key="Button.Disabled.Background" Color="#FFF4F4F4"/>
+        <SolidColorBrush x:Key="Button.Disabled.Border" Color="#FFADB2B5"/>
+        <SolidColorBrush x:Key="Button.Disabled.Foreground" Color="#FF838383"/>
+        <Style x:Key="RONDBtn" TargetType="{x:Type Button}">
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
+            <Setter Property="Background" Value="{StaticResource Button.Static.Background}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Button.Static.Border}"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="border" CornerRadius="18,18,18,18" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
+                            <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsDefaulted" Value="true">
+                                <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Background" TargetName="border" Value="{StaticResource Button.MouseOver.Background}"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.MouseOver.Border}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter Property="Background" TargetName="border" Value="{StaticResource Button.Pressed.Background}"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.Pressed.Border}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Background" TargetName="border" Value="{StaticResource Button.Disabled.Background}"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.Disabled.Border}"/>
+                                <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource Button.Disabled.Foreground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Storyboard x:Key="Scaler_Btn" RepeatBehavior="Forever" AutoReverse="True">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" Storyboard.TargetName="Command4">
+                <EasingDoubleKeyFrame KeyTime="0" Value="1">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <PowerEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1.901">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <PowerEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.8" Value="1.46">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <PowerEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="0:0:1.2" Value="2.793">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <PowerEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="0:0:2" Value="1">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <PowerEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" Storyboard.TargetName="Command4">
+                <EasingDoubleKeyFrame KeyTime="0" Value="1">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <PowerEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1.901">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <PowerEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.8" Value="1.46">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <PowerEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="0:0:1.2" Value="2.793">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <PowerEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="0:0:2" Value="1">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <PowerEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+    </Window.Resources>
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+    <Grid x:Name="mygrid">
+        <Border Background="{DynamicResource MaterialDesign.Brush.Background}" BorderBrush="{Binding ElementName=GENERAL_RANG,Path=Background}" CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{DynamicResource BordG}" Background="{Binding ElementName=GENERAL_RANG,Path=Background}" Margin="-7.999,-7.928,-8,0" VerticalAlignment="Top" MinHeight="50" UseLayoutRounding="False" Height="52" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid/>
+            </Border>
+        </Border>
+        <Button x:Name="Command4" Content="تایید" Margin="562,0,341,49"   Style="{DynamicResource GerdC}" Width="130" Click="Command4_Click" BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5" TabIndex="2" Height="40" Foreground="#DDFFFFFF" VerticalAlignment="Bottom"/>
+        <xctk:MaskedTextBox  x:Name="TextBM_Date_N" Mask="0000/00/00" HorizontalAlignment="Left" IsReadOnly="True" Height="20" Margin="870,76,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="73"  BorderThickness="0" TabIndex="0" />
+        <TextBlock HorizontalAlignment="Left" Margin="943,76,0,0" TextWrapping="Wrap" TextAlignment="Justify"  Text="تاریخ محاسبه :" VerticalAlignment="Top" Height="25" Width="72"  FlowDirection="RightToLeft"  />
+        <TextBlock x:Name="Label2" Margin="447,151,150,0"  TextWrapping="Wrap" LineHeight="22" TextAlignment="Justify"  Padding="0" FlowDirection="RightToLeft"  Height="98" VerticalAlignment="Top" Text="مبنای محاسبه MR CORRECT برای این بخش میانگین روی داد های مالی گذشته در بازه زملنی خواهد بود که شما انتخاب میکنید.سعی کنید بازه زمانی را انتخاب کنید که بیشترین شباهت به روی دادهای مالی مجموعه شما در ماه های آینده داشته باشد."/>
+        <Button x:Name="Command3" Content="لغو" Margin="423,0,480,49"   Style="{DynamicResource GerdC}" Width="130" Height="40" Click="Command3_Click" BorderBrush="{x:Null}" TabIndex="3" Foreground="#DDFFFFFF" VerticalAlignment="Bottom"/>
+        <ComboBox x:Name="dbnam"
+                    Padding="7,3,10,3"
+			Style="{StaticResource MaterialDesignOutlinedComboBox}"   BorderThickness="1" 
+                  IsTextSearchEnabled="True" Margin="0,344,202,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft"   IsEditable="True" HorizontalAlignment="Right" Width="152" SelectedIndex="0" TabIndex="1">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <TextBlock Margin="0,350,110,0" TextWrapping="Wrap" TextAlignment="Justify" VerticalAlignment="Top" Height="18"  FlowDirection="RightToLeft"  HorizontalAlignment="Right" Width="87"><Run FlowDirection="RightToLeft" Text="نام بانک اطلاعاتی"/></TextBlock>
+        <Image x:Name="imgBudget0" Margin="46,179,671,121"  Stretch="None" Source="/UiDrive/IMGS/budget.jpg"/>
+        <TextBlock Margin="836,274,155,0"  TextWrapping="Wrap" LineHeight="22" TextAlignment="Right"  Padding="0" FontSize="10" FlowDirection="RightToLeft"  Height="16" VerticalAlignment="Top"><Run FlowDirection="RightToLeft" Text="از تاریخ :"/></TextBlock>
+        <xctk:MaskedTextBox  x:Name="DT1" Mask="0000/00/00" Text="11110101" HorizontalAlignment="Left" Height="21" Margin="760,273,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="74"  BorderThickness="0" TabIndex="0" />
+        <TextBlock Margin="632,273,357,0"  TextWrapping="Wrap" LineHeight="22" TextAlignment="Right"  Padding="0" FontSize="10" FlowDirection="RightToLeft"  Height="18" VerticalAlignment="Top"><Run FlowDirection="RightToLeft" Text="تا تاریخ :"/></TextBlock>
+        <xctk:MaskedTextBox  x:Name="DT2" Mask="0000/00/00" Text="99991230"  HorizontalAlignment="Left" Height="21" Margin="552,273,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="75"  BorderThickness="0" TabIndex="0" />
+        <TextBlock Margin="834,312,99,0"  TextWrapping="Wrap" LineHeight="22" TextAlignment="Justify"  Padding="0" FlowDirection="RightToLeft"  Height="20" VerticalAlignment="Top" Text="حساب فروش نقدی"/>
+
+        <ComboBox x:Name="FRCHASH" 
+                    Padding="7,3,10,3"
+			Style="{StaticResource MaterialDesignOutlinedComboBox}"   BorderThickness="1" 
+                  SelectedValuePath="SelectedValuePath" IsTextSearchEnabled="True" Margin="0,309,202,0"  VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft"   IsEditable="True" HorizontalAlignment="Right" Width="402" TabIndex="0" >
+            <ComboBox.ItemsPanel  >
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding nam}" TextAlignment="Justify" Width="500"  />
+                        <TextBlock Text="{Binding Expr1}" TextAlignment="Justify" Width="100"  />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <Button x:Name="Btn_Close" Margin="0,15,16,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+            <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+        </Button>
+        <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,15,45,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+            <materialDesign:PackIcon Kind="WindowRestore" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+        </Button>
+        <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,15,74,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+            <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+        </Button>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="95,56,0,0"  Width="1"/>
+    </Grid>
+</Window>

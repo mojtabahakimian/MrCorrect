@@ -1,0 +1,8 @@
+﻿ALTER TABLE PAY_GETD
+  ADD ID BIGINT IDENTITY(1,1) NOT NULL
+  GO
+
+  --------------------------------------------
+
+  INSERT INTO dbo.PRICE_PAYNO ([PPID], [PPAME], [MODAT])
+	VALUES ( 0, N'آزاد' , 0 )

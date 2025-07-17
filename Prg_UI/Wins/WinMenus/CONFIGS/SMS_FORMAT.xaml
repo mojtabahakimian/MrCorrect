@@ -1,0 +1,821 @@
+﻿<Window x:Class="Wins.WinMenus.CONFIGS.SMS_FORMAT"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Wins.WinMenus.CONFIGS"
+        mc:Ignorable="d"
+        
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        MaxHeight="{Binding Height, Source={x:Static SystemParameters.WorkArea}}"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="IRANYekanFN"
+        WindowStartupLocation="CenterScreen"
+        Height="600" Width="953" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+
+        <Style TargetType="{x:Type TabControl}" BasedOn="{StaticResource MaterialDesignTabControl}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid KeyboardNavigation.TabNavigation="Local">
+                            <Grid.RowDefinitions>
+                                <!-- Row for the tab headers -->
+                                <RowDefinition Height="Auto"/>
+                                <!-- Row for the tab content -->
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <!-- Wrap the TabPanel inside a ScrollViewer -->
+                            <ScrollViewer Grid.Row="0"
+                                          HorizontalScrollBarVisibility="Auto"
+                                          VerticalScrollBarVisibility="Disabled"
+                                          CanContentScroll="True">
+                                <TabPanel x:Name="HeaderPanel"
+                                          IsItemsHost="True"
+                                          Margin="2,2,2,0"
+                                          Background="Transparent"/>
+                            </ScrollViewer>
+                            <!-- Content presenter for the selected tab content -->
+                            <ContentPresenter x:Name="PART_SelectedContentHost"
+                                              Margin="{TemplateBinding Padding}"
+                                              ContentSource="SelectedContent"
+                                              Focusable="False"
+                                              Grid.Row="1"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+
+    <Grid x:Name="mygrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,242,8"  Width="1"/>
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label x:Name="LBL_HEADER" Content="فرمت ارسال اس ام اس" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Button x:Name="Btn_Close" Click="Btn_Close_Click" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowMaximize" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                </Grid>
+            </Border>
+        </Border>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                                                       Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+        <!--HEADER↑-->
+
+        <!--Start.......................................................................................-->
+        <Button x:Name="BTN_DELETE" Visibility="Visible" Content="حذف" Tag="hazfer" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,54,126,0" Height="1" Width="1" VerticalAlignment="Top" HorizontalAlignment="Right" Click="BTN_DELETE_Click" />
+
+        <TabControl Margin="10,46,293,10" SelectionChanged="TabControl_SelectionChanged">
+            <TabItem Tag="1" Header="فاکتور فروش" IsSelected="True">
+                <Grid>
+                    <DataGrid   
+                        d:ItemsSource="{d:SampleData ItemCount=1}"
+                        EnableColumnVirtualization="True"
+                        EnableRowVirtualization="True"
+                        VirtualizingPanel.IsVirtualizing="True"
+                        VirtualizingPanel.VirtualizationMode="Recycling"
+                        ScrollViewer.CanContentScroll="False"
+                        SelectedIndex="0"
+                        ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                        CellStyle="{StaticResource CellFocusyBorder}"
+                        HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                        VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                        ItemsSource="{Binding SMS_FORMATS_MODEL_DATA}"
+                        KeyboardNavigation.TabNavigation="Contained"
+                        AutoGenerateColumns="False" 
+                        FlowDirection="RightToLeft" 
+                        SelectionUnit="FullRow" 
+                        CanUserDeleteRows="False"
+                        Margin="1,13,8,0" BorderThickness="1" IsKeyboardFocusWithinChanged="DG_FORMAT_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="DG_FORMAT_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_FORMAT_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_FORMAT_SUB_SelectionChanged" RowEditEnding="DG_FORMAT_SUB_RowEditEnding" PreviewKeyDown="DG_FORMAT_SUB_PreviewKeyDown" PreparingCellForEdit="DG_FORMAT_SUB_PreparingCellForEdit" BeginningEdit="DG_FORMAT_SUB_BeginningEdit" >
+
+                        <DataGrid.Style>
+                            <!--خط بندی سطر های دیتاگرید-->
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                <Setter Property="GridLinesVisibility" Value="All"/>
+                            </Style>
+                        </DataGrid.Style>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ردیف" Binding="{Binding RADIF,UpdateSourceTrigger=LostFocus}" Width="auto">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="254" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="عنوان فیلد" Binding="{Binding SMS_CAPTION,UpdateSourceTrigger=LostFocus}" Width="auto" MinWidth="150">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="100" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridComboBoxColumn Width="*" Header="فيلد (انتخابی)" SelectedValueBinding="{Binding SMS_FIELS,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="STR_NAME" SelectedValuePath="STR_ID">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                                <DataGridComboBoxColumn.ElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.ElementStyle>
+                            </DataGridComboBoxColumn>
+
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem Tag="2" Header="فاکتور خرید" >
+                <Grid>
+                    <DataGrid   
+                         Tag="2"
+                         d:ItemsSource="{d:SampleData ItemCount=2}"
+                         EnableColumnVirtualization="True"
+                         EnableRowVirtualization="True"
+                         VirtualizingPanel.IsVirtualizing="True"
+                         VirtualizingPanel.VirtualizationMode="Recycling"
+                         ScrollViewer.CanContentScroll="False"
+                         SelectedIndex="0"
+                         ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                         CellStyle="{StaticResource CellFocusyBorder}"
+                         HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                         VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                        
+                         ItemsSource="{Binding SMS_FORMATS_MODEL_DATA}"
+                         KeyboardNavigation.TabNavigation="Contained"
+                         AutoGenerateColumns="False" 
+                         FlowDirection="RightToLeft" 
+                         SelectionUnit="FullRow" 
+                         CanUserDeleteRows="False"
+                         Margin="1,13,8,0" BorderThickness="1" IsKeyboardFocusWithinChanged="DG_FORMAT_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="DG_FORMAT_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_FORMAT_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_FORMAT_SUB_SelectionChanged" RowEditEnding="DG_FORMAT_SUB_RowEditEnding" PreviewKeyDown="DG_FORMAT_SUB_PreviewKeyDown" PreparingCellForEdit="DG_FORMAT_SUB_PreparingCellForEdit" BeginningEdit="DG_FORMAT_SUB_BeginningEdit" >
+
+                        <DataGrid.Style>
+                            <!--خط بندی سطر های دیتاگرید-->
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                <Setter Property="GridLinesVisibility" Value="All"/>
+                            </Style>
+                        </DataGrid.Style>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ردیف" Binding="{Binding RADIF,UpdateSourceTrigger=LostFocus}" Width="auto">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="254" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="عنوان فیلد" Binding="{Binding SMS_CAPTION,UpdateSourceTrigger=LostFocus}" Width="auto" MinWidth="150">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="100" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridComboBoxColumn Width="*" Header="فيلد (انتخابی)" SelectedValueBinding="{Binding SMS_FIELS,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="STR_NAME" SelectedValuePath="STR_ID">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                                <DataGridComboBoxColumn.ElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.ElementStyle>
+                            </DataGridComboBoxColumn>
+
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem Tag="3" Header="برگشت فروش" >
+                <Grid>
+                    <DataGrid   
+                        d:ItemsSource="{d:SampleData ItemCount=2}"
+                        EnableColumnVirtualization="True"
+                        EnableRowVirtualization="True"
+                        VirtualizingPanel.IsVirtualizing="True"
+                        VirtualizingPanel.VirtualizationMode="Recycling"
+                        ScrollViewer.CanContentScroll="False"
+                        SelectedIndex="0"
+                        ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                        CellStyle="{StaticResource CellFocusyBorder}"
+                        HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                        VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+              
+                        ItemsSource="{Binding SMS_FORMATS_MODEL_DATA}"
+                        KeyboardNavigation.TabNavigation="Contained"
+                        AutoGenerateColumns="False" 
+                        FlowDirection="RightToLeft" 
+                        SelectionUnit="FullRow" 
+                        CanUserDeleteRows="False"
+                        Margin="1,13,8,0" BorderThickness="1" IsKeyboardFocusWithinChanged="DG_FORMAT_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="DG_FORMAT_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_FORMAT_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_FORMAT_SUB_SelectionChanged" RowEditEnding="DG_FORMAT_SUB_RowEditEnding" PreviewKeyDown="DG_FORMAT_SUB_PreviewKeyDown" PreparingCellForEdit="DG_FORMAT_SUB_PreparingCellForEdit" BeginningEdit="DG_FORMAT_SUB_BeginningEdit" >
+
+                        <DataGrid.Style>
+                            <!--خط بندی سطر های دیتاگرید-->
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                <Setter Property="GridLinesVisibility" Value="All"/>
+                            </Style>
+                        </DataGrid.Style>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ردیف" Binding="{Binding RADIF,UpdateSourceTrigger=LostFocus}" Width="auto">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="254" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="عنوان فیلد" Binding="{Binding SMS_CAPTION,UpdateSourceTrigger=LostFocus}" Width="auto" MinWidth="150">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="100" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridComboBoxColumn Width="*" Header="فيلد (انتخابی)" SelectedValueBinding="{Binding SMS_FIELS,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="STR_NAME" SelectedValuePath="STR_ID">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                                <DataGridComboBoxColumn.ElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.ElementStyle>
+                            </DataGridComboBoxColumn>
+
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem Tag="4" Header="برگشت خرید" >
+                <Grid>
+                    <DataGrid   
+            d:ItemsSource="{d:SampleData ItemCount=2}"
+            EnableColumnVirtualization="True"
+            EnableRowVirtualization="True"
+            VirtualizingPanel.IsVirtualizing="True"
+            VirtualizingPanel.VirtualizationMode="Recycling"
+            ScrollViewer.CanContentScroll="False"
+            SelectedIndex="0"
+            ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+            CellStyle="{StaticResource CellFocusyBorder}"
+            HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+            VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+  
+            ItemsSource="{Binding SMS_FORMATS_MODEL_DATA}"
+            KeyboardNavigation.TabNavigation="Contained"
+            AutoGenerateColumns="False" 
+            FlowDirection="RightToLeft" 
+            SelectionUnit="FullRow" 
+            CanUserDeleteRows="False"
+            Margin="1,13,8,0" BorderThickness="1" IsKeyboardFocusWithinChanged="DG_FORMAT_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="DG_FORMAT_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_FORMAT_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_FORMAT_SUB_SelectionChanged" RowEditEnding="DG_FORMAT_SUB_RowEditEnding" PreviewKeyDown="DG_FORMAT_SUB_PreviewKeyDown" PreparingCellForEdit="DG_FORMAT_SUB_PreparingCellForEdit" BeginningEdit="DG_FORMAT_SUB_BeginningEdit" >
+
+                        <DataGrid.Style>
+                            <!--خط بندی سطر های دیتاگرید-->
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                <Setter Property="GridLinesVisibility" Value="All"/>
+                            </Style>
+                        </DataGrid.Style>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ردیف" Binding="{Binding RADIF,UpdateSourceTrigger=LostFocus}" Width="auto">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="254" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="عنوان فیلد" Binding="{Binding SMS_CAPTION,UpdateSourceTrigger=LostFocus}" Width="auto" MinWidth="150">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="100" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridComboBoxColumn Width="*" Header="فيلد (انتخابی)" SelectedValueBinding="{Binding SMS_FIELS,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="STR_NAME" SelectedValuePath="STR_ID">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                                <DataGridComboBoxColumn.ElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.ElementStyle>
+                            </DataGridComboBoxColumn>
+
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem Tag="5" Header="سند دریافت">
+                <Grid>
+                    <DataGrid   
+                        d:ItemsSource="{d:SampleData ItemCount=2}"
+                        EnableColumnVirtualization="True"
+                        EnableRowVirtualization="True"
+                        VirtualizingPanel.IsVirtualizing="True"
+                        VirtualizingPanel.VirtualizationMode="Recycling"
+                        ScrollViewer.CanContentScroll="False"
+                        SelectedIndex="0"
+                        ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                        CellStyle="{StaticResource CellFocusyBorder}"
+                        HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                        VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                          
+                        ItemsSource="{Binding SMS_FORMATS_MODEL_DATA}"
+                        KeyboardNavigation.TabNavigation="Contained"
+                        AutoGenerateColumns="False" 
+                        FlowDirection="RightToLeft" 
+                        SelectionUnit="FullRow" 
+                        CanUserDeleteRows="False"
+                        Margin="1,13,8,0" BorderThickness="1" IsKeyboardFocusWithinChanged="DG_FORMAT_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="DG_FORMAT_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_FORMAT_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_FORMAT_SUB_SelectionChanged" RowEditEnding="DG_FORMAT_SUB_RowEditEnding" PreviewKeyDown="DG_FORMAT_SUB_PreviewKeyDown" PreparingCellForEdit="DG_FORMAT_SUB_PreparingCellForEdit" BeginningEdit="DG_FORMAT_SUB_BeginningEdit" >
+
+                        <DataGrid.Style>
+                            <!--خط بندی سطر های دیتاگرید-->
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                <Setter Property="GridLinesVisibility" Value="All"/>
+                            </Style>
+                        </DataGrid.Style>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ردیف" Binding="{Binding RADIF,UpdateSourceTrigger=LostFocus}" Width="auto">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="254" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="عنوان فیلد" Binding="{Binding SMS_CAPTION,UpdateSourceTrigger=LostFocus}" Width="auto" MinWidth="150">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="100" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridComboBoxColumn Width="*" Header="فيلد (انتخابی)" SelectedValueBinding="{Binding SMS_FIELS,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="STR_NAME" SelectedValuePath="STR_ID">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                                <DataGridComboBoxColumn.ElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.ElementStyle>
+                            </DataGridComboBoxColumn>
+
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem Tag="6" Header="سند پرداخت">
+                <Grid>
+                    <DataGrid   
+            d:ItemsSource="{d:SampleData ItemCount=2}"
+            EnableColumnVirtualization="True"
+            EnableRowVirtualization="True"
+            VirtualizingPanel.IsVirtualizing="True"
+            VirtualizingPanel.VirtualizationMode="Recycling"
+            ScrollViewer.CanContentScroll="False"
+            SelectedIndex="0"
+            ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+            CellStyle="{StaticResource CellFocusyBorder}"
+            HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+            VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+              
+            ItemsSource="{Binding SMS_FORMATS_MODEL_DATA}"
+            KeyboardNavigation.TabNavigation="Contained"
+            AutoGenerateColumns="False" 
+            FlowDirection="RightToLeft" 
+            SelectionUnit="FullRow" 
+            CanUserDeleteRows="False"
+            Margin="1,13,8,0" BorderThickness="1" IsKeyboardFocusWithinChanged="DG_FORMAT_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="DG_FORMAT_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_FORMAT_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_FORMAT_SUB_SelectionChanged" RowEditEnding="DG_FORMAT_SUB_RowEditEnding" PreviewKeyDown="DG_FORMAT_SUB_PreviewKeyDown" PreparingCellForEdit="DG_FORMAT_SUB_PreparingCellForEdit" BeginningEdit="DG_FORMAT_SUB_BeginningEdit" >
+
+                        <DataGrid.Style>
+                            <!--خط بندی سطر های دیتاگرید-->
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                <Setter Property="GridLinesVisibility" Value="All"/>
+                            </Style>
+                        </DataGrid.Style>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ردیف" Binding="{Binding RADIF,UpdateSourceTrigger=LostFocus}" Width="auto">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="254" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="عنوان فیلد" Binding="{Binding SMS_CAPTION,UpdateSourceTrigger=LostFocus}" Width="auto" MinWidth="150">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="100" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridComboBoxColumn Width="*" Header="فيلد (انتخابی)" SelectedValueBinding="{Binding SMS_FIELS,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="STR_NAME" SelectedValuePath="STR_ID">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                                <DataGridComboBoxColumn.ElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.ElementStyle>
+                            </DataGridComboBoxColumn>
+
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem Tag="7" Header="چکهای دریافتی">
+                <Grid>
+                    <DataGrid   
+                        d:ItemsSource="{d:SampleData ItemCount=2}"
+                        EnableColumnVirtualization="True"
+                        EnableRowVirtualization="True"
+                        VirtualizingPanel.IsVirtualizing="True"
+                        VirtualizingPanel.VirtualizationMode="Recycling"
+                        ScrollViewer.CanContentScroll="False"
+                        SelectedIndex="0"
+                        ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                        CellStyle="{StaticResource CellFocusyBorder}"
+                        HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                        VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                          
+                        ItemsSource="{Binding SMS_FORMATS_MODEL_DATA}"
+                        KeyboardNavigation.TabNavigation="Contained"
+                        AutoGenerateColumns="False" 
+                        FlowDirection="RightToLeft" 
+                        SelectionUnit="FullRow" 
+                        CanUserDeleteRows="False"
+                        Margin="1,13,8,0" BorderThickness="1" IsKeyboardFocusWithinChanged="DG_FORMAT_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="DG_FORMAT_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_FORMAT_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_FORMAT_SUB_SelectionChanged" RowEditEnding="DG_FORMAT_SUB_RowEditEnding" PreviewKeyDown="DG_FORMAT_SUB_PreviewKeyDown" PreparingCellForEdit="DG_FORMAT_SUB_PreparingCellForEdit" BeginningEdit="DG_FORMAT_SUB_BeginningEdit" >
+
+                        <DataGrid.Style>
+                            <!--خط بندی سطر های دیتاگرید-->
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                <Setter Property="GridLinesVisibility" Value="All"/>
+                            </Style>
+                        </DataGrid.Style>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ردیف" Binding="{Binding RADIF,UpdateSourceTrigger=LostFocus}" Width="auto">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="254" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="عنوان فیلد" Binding="{Binding SMS_CAPTION,UpdateSourceTrigger=LostFocus}" Width="auto" MinWidth="150">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="100" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridComboBoxColumn Width="*" Header="فيلد (انتخابی)" SelectedValueBinding="{Binding SMS_FIELS,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="STR_NAME" SelectedValuePath="STR_ID">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                                <DataGridComboBoxColumn.ElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.ElementStyle>
+                            </DataGridComboBoxColumn>
+
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem Tag="8" Header="چکهای پرداختی">
+                <Grid>
+                    <DataGrid   
+                        d:ItemsSource="{d:SampleData ItemCount=2}"
+                        EnableColumnVirtualization="True"
+                        EnableRowVirtualization="True"
+                        VirtualizingPanel.IsVirtualizing="True"
+                        VirtualizingPanel.VirtualizationMode="Recycling"
+                        ScrollViewer.CanContentScroll="False"
+                        SelectedIndex="0"
+                        ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                        CellStyle="{StaticResource CellFocusyBorder}"
+                        HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                        VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                          
+                        ItemsSource="{Binding SMS_FORMATS_MODEL_DATA}"
+                        KeyboardNavigation.TabNavigation="Contained"
+                        AutoGenerateColumns="False" 
+                        FlowDirection="RightToLeft" 
+                        SelectionUnit="FullRow" 
+                        CanUserDeleteRows="False"
+                        Margin="1,13,8,0" BorderThickness="1" IsKeyboardFocusWithinChanged="DG_FORMAT_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="DG_FORMAT_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_FORMAT_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_FORMAT_SUB_SelectionChanged" RowEditEnding="DG_FORMAT_SUB_RowEditEnding" PreviewKeyDown="DG_FORMAT_SUB_PreviewKeyDown" PreparingCellForEdit="DG_FORMAT_SUB_PreparingCellForEdit" BeginningEdit="DG_FORMAT_SUB_BeginningEdit" >
+
+                        <DataGrid.Style>
+                            <!--خط بندی سطر های دیتاگرید-->
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                <Setter Property="GridLinesVisibility" Value="All"/>
+                            </Style>
+                        </DataGrid.Style>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ردیف" Binding="{Binding RADIF,UpdateSourceTrigger=LostFocus}" Width="auto">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="254" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="عنوان فیلد" Binding="{Binding SMS_CAPTION,UpdateSourceTrigger=LostFocus}" Width="auto" MinWidth="150">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="100" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridComboBoxColumn Width="*" Header="فيلد (انتخابی)" SelectedValueBinding="{Binding SMS_FIELS,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="STR_NAME" SelectedValuePath="STR_ID">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                                <DataGridComboBoxColumn.ElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.ElementStyle>
+                            </DataGridComboBoxColumn>
+
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem Tag="9" Header="پذیرش و تعمیرگاه">
+                <Grid>
+                    <DataGrid   
+                         d:ItemsSource="{d:SampleData ItemCount=2}"
+                         EnableColumnVirtualization="True"
+                         EnableRowVirtualization="True"
+                         VirtualizingPanel.IsVirtualizing="True"
+                         VirtualizingPanel.VirtualizationMode="Recycling"
+                         ScrollViewer.CanContentScroll="False"
+                         SelectedIndex="0"
+                         ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                         CellStyle="{StaticResource CellFocusyBorder}"
+                         HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                         VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                           
+                         ItemsSource="{Binding SMS_FORMATS_MODEL_DATA}"
+                         KeyboardNavigation.TabNavigation="Contained"
+                         AutoGenerateColumns="False" 
+                         FlowDirection="RightToLeft" 
+                         SelectionUnit="FullRow" 
+                         CanUserDeleteRows="False"
+                         Margin="1,13,8,0" BorderThickness="1" IsKeyboardFocusWithinChanged="DG_FORMAT_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="DG_FORMAT_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_FORMAT_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_FORMAT_SUB_SelectionChanged" RowEditEnding="DG_FORMAT_SUB_RowEditEnding" PreviewKeyDown="DG_FORMAT_SUB_PreviewKeyDown" PreparingCellForEdit="DG_FORMAT_SUB_PreparingCellForEdit" BeginningEdit="DG_FORMAT_SUB_BeginningEdit" >
+
+                        <DataGrid.Style>
+                            <!--خط بندی سطر های دیتاگرید-->
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                <Setter Property="GridLinesVisibility" Value="All"/>
+                            </Style>
+                        </DataGrid.Style>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ردیف" Binding="{Binding RADIF,UpdateSourceTrigger=LostFocus}" Width="auto">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="254" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="عنوان فیلد" Binding="{Binding SMS_CAPTION,UpdateSourceTrigger=LostFocus}" Width="auto" MinWidth="150">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="100" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridComboBoxColumn Width="*" Header="فيلد (انتخابی)" SelectedValueBinding="{Binding SMS_FIELS,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="STR_NAME" SelectedValuePath="STR_ID">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                                <DataGridComboBoxColumn.ElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                        <Setter Property="ItemsSource" Value="{Binding DataContext.OFILEDS_COMBO_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.ElementStyle>
+                            </DataGridComboBoxColumn>
+
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <Button x:Name="BTN_SENDSMS" Content="ارسال پیامک" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,0,57,13" Height="34" VerticalAlignment="Bottom" Click="BTN_SENDSMS_Click" HorizontalAlignment="Right" Width="222" />
+        <TextBox x:Name="PAYAM" Text="سلام , ین یک پیامکی تستی برای تست نرم افزار است." AcceptsReturn="True" Margin="0,107,57,103" Style="{StaticResource FuzzyOut}" Padding="3" TextWrapping="Wrap" Visibility="Visible" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="222"/>
+        <CNC:NumericTextBox x:Name="NUM" Text="09" MaxLength="11" TextAlignment="Left" FlowDirection="LeftToRight" DoesAcceptDouble="False" LastValueShouldZero="False" Height="30" Margin="0,0,57,59" VerticalAlignment="Bottom" Visibility="Visible" HorizontalAlignment="Right" Width="222"/>
+        <Label FlowDirection="RightToLeft" Content="متن :" Margin="0,99,17,473" HorizontalAlignment="Right" Width="35"/>
+        <Label FlowDirection="RightToLeft" Content="موبایل:" Margin="0,0,10,62" HorizontalAlignment="Right" Width="42" Height="27" VerticalAlignment="Bottom"/>
+
+
+    </Grid>
+</Window>

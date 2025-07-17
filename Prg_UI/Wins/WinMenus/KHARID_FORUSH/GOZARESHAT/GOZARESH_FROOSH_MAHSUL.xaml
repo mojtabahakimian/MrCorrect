@@ -1,0 +1,136 @@
+﻿<Window x:Class="Wins.WinMenus.KHARID_FORUSH.GOZARESHAT.GOZARESH_FROOSH_MAHSUL"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Wins.WinMenus.KHARID_FORUSH.GOZARESHAT"
+        mc:Ignorable="d"
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="IRANYekanFN"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterScreen"
+        Title="" Height="712" Width="1517" Loaded="Window_Loaded">
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"  VirtualizingPanel.VirtualizationMode="Recycling"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+    </Window.Resources>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+    <Grid x:Name="mygrid">
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1" Margin="0,0,0,2">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label Content="گزارش فروش روزانه محصولات" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMaximize" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+
+                </Grid>
+            </Border>
+        </Border>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                             Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+        <!--HEADER↑-->
+
+
+        <!--RowEditEnding="" BeginningEdit="" CellEditEnding="" PreviewKeyDown="" PreviewMouseLeftButtonUp="" SelectionChanged=""-->
+        <DataGrid   
+                                      x:Name="FROOSH_COUNT_SUB"
+                                      EnableColumnVirtualization="True"
+                                      EnableRowVirtualization="True"
+                                      VirtualizingPanel.IsVirtualizing="True"
+                                      VirtualizingPanel.VirtualizationMode="Recycling"
+                                      ScrollViewer.CanContentScroll="False"
+                                      SelectedIndex="0"
+                                      ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                                      CellStyle="{StaticResource CellFocusyBorder}"
+                                      HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                                      VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                                      ItemsSource="{Binding FROOSH_COUNT_DATA}"
+                                      KeyboardNavigation.TabNavigation="Contained"
+                                      AutoGenerateColumns="False" 
+                                      FlowDirection="RightToLeft" 
+                                      SelectionUnit="FullRow" 
+                                      IsReadOnly="True"
+                                      CanUserDeleteRows="False"
+                                      Margin="4,0,4,66" BorderThickness="1" Height="257" VerticalAlignment="Bottom" >
+
+            <DataGrid.Style>
+                <!--خط بندی سطر های دیتاگرید-->
+                <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                    <Setter Property="GridLinesVisibility" Value="All"/>
+                </Style>
+            </DataGrid.Style>
+
+            <DataGrid.Columns>
+                <DataGridTextColumn x:Name="CODE_COLUMN" Binding="{Binding CODE, UpdateSourceTrigger=LostFocus}" Header="کد کالا"  Width="auto" MinWidth="150" Visibility="Visible" />
+                <DataGridTextColumn x:Name="NAME_COLUMN" Binding="{Binding NAME, UpdateSourceTrigger=LostFocus}" Header="نام کالا"  Width="auto" MinWidth="600" Visibility="Visible" />
+                <DataGridTextColumn x:Name="SMEGHk_COLUMN" Binding="{Binding SMEGHk, UpdateSourceTrigger=LostFocus}" Header="مقدار کل"  Width="auto" MinWidth="200" Visibility="Visible" />
+                <DataGridTextColumn x:Name="TEDAD_COLUMN" Binding="{Binding TEDAD, UpdateSourceTrigger=LostFocus}" Header="تعداد فاکتور"  Width="auto" MinWidth="200" Visibility="Visible" />
+                <DataGridTextColumn x:Name="SMABL_COLUMN" Binding="{Binding SMABL, UpdateSourceTrigger=LostFocus}" Header="مبلغ"  Width="auto" MinWidth="200" Visibility="Visible" />
+
+                <DataGridTextColumn x:Name="DEPATMAN_COLUMN" Binding="{Binding DEPATMAN, UpdateSourceTrigger=LostFocus}" Header="دپاتمان"  Width="auto" MinWidth="150" Visibility="Hidden" />
+            </DataGrid.Columns>
+
+        </DataGrid>
+        <Button x:Name="Command46"  Content="اطلاعات تخفیفات"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,0,615,344" Click="Command46_Click" Height="32" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="144" />
+        <CNC:NumericTextBox x:Name="Text41" DoesAcceptDouble="False"  LastValueShouldZero="False" Text="" Height="30" Margin="710,0,0,17" VerticalAlignment="Bottom" Visibility="Visible"  HorizontalAlignment="Left" Width="144"/>
+        <Button x:Name="Command47"  Content="چاپ"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,0,763,344" Click="Command47_Click" Height="32" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="144" />
+        <CNC:NumericTextBox x:Name="Text42" DoesAcceptDouble="False"  LastValueShouldZero="False" Text="" Height="30" Margin="560,0,0,17" VerticalAlignment="Bottom" Visibility="Visible"  HorizontalAlignment="Left" Width="144"/>
+        <Label Content="جمع کل :" HorizontalAlignment="Left" Margin="912,0,0,20" VerticalAlignment="Bottom" FlowDirection="RightToLeft" Width="auto"/>
+        <DataGrid   
+                                      x:Name="DEPART_SUB"
+                                      EnableColumnVirtualization="True"
+                                      EnableRowVirtualization="True"
+                                      VirtualizingPanel.IsVirtualizing="True"
+                                      VirtualizingPanel.VirtualizationMode="Recycling"
+                                      ScrollViewer.CanContentScroll="False"
+                                      SelectedIndex="0"
+                                      ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                                      CellStyle="{StaticResource CellFocusyBorder}"
+                                      HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                                      VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                                      ItemsSource="{Binding DEPART_DATA}"
+                                      KeyboardNavigation.TabNavigation="Contained"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True"
+                                      FlowDirection="RightToLeft" 
+                                      SelectionUnit="FullRow" 
+                                      CanUserDeleteRows="False"
+                                      Margin="-1,51,10,0" BorderThickness="1" SelectionChanged="DEPART_SUB_SelectionChanged" Height="259" VerticalAlignment="Top" >
+
+            <DataGrid.Style>
+                <!--خط بندی سطر های دیتاگرید-->
+                <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                    <Setter Property="GridLinesVisibility" Value="All"/>
+                </Style>
+            </DataGrid.Style>
+
+            <DataGrid.Columns>
+                <DataGridTextColumn x:Name="DEPNAME_COLUMN" Binding="{Binding DEPNAME, UpdateSourceTrigger=LostFocus}" Header="دپارتمان"  Width="*" Visibility="Visible" />
+            </DataGrid.Columns>
+
+        </DataGrid>
+
+    </Grid>
+</Window>

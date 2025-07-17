@@ -1,0 +1,314 @@
+﻿<Window x:Class="Wins.WinMenus.Taarif.TDETA_HES_SHEET2"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Wins.WinMenus.Taarif"
+        mc:Ignorable="d"
+        
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="IRANYekanFN"
+        WindowStartupLocation="CenterScreen"
+        Title="" WindowState="Maximized" Height="450" Width="800" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" ContentRendered="Window_ContentRendered" Closing="Window_Closing">
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"  VirtualizingPanel.VirtualizationMode="Recycling"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+
+    </Window.Resources>
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+
+    <Grid x:Name="mygrid">
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label Content="سرفصل حسابهاي تفضیلی سطح 2" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMaximize" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+
+                </Grid>
+            </Border>
+        </Border>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                 Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+
+        <Label Content="جستجو نام حساب تفضیلی 2 : " VerticalContentAlignment="Center" Margin="0,50,10,0" FlowDirection="RightToLeft" Height="29" VerticalAlignment="Top" HorizontalAlignment="Right" Width="159" />
+        <TextBox x:Name="SearchText" Text="" TextChanged="SearchText_TextChanged" Height="29" Margin="10,50,169,0" Style="{StaticResource FuzzyOut}" Padding="3" TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right" Visibility="Visible"/>
+
+        <DataGrid x:Name="TDETA_HES2_SUB" ItemsSource="{Binding TDETA_HES2_DATA}"
+              ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+              CellStyle="{StaticResource CellFocusyBorder}"
+              HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+              VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+              FlowDirection="RightToLeft"
+              SelectionUnit="FullRow"
+              SelectedIndex="0"
+              IsKeyboardFocusWithinChanged="TDETA_HES2_SUB_IsKeyboardFocusWithinChanged"
+              AutoGenerateColumns="False" Margin="10,90,10,55" RowEditEnding="TDETA_HES2_SUB_RowEditEnding" BeginningEdit="TDETA_HES2_SUB_BeginningEdit" CellEditEnding="TDETA_HES2_SUB_CellEditEnding" PreviewKeyDown="TDETA_HES2_SUB_PreviewKeyDown" PreviewMouseLeftButtonUp="TDETA_HES2_SUB_PreviewMouseLeftButtonUp" SelectionChanged="TDETA_HES2_SUB_SelectionChanged" PreparingCellForEdit="TDETA_HES2_SUB_PreparingCellForEdit">
+            <DataGrid.Style>
+                <!--خط بندی سطر های دیتاگرید-->
+                <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                    <Setter Property="GridLinesVisibility" Value="All"/>
+                </Style>
+            </DataGrid.Style>
+
+            <DataGrid.Columns>
+
+                <DataGridTextColumn Header="حساب کل" Binding="{Binding N_KOL, UpdateSourceTrigger=LostFocus}" IsReadOnly="True" Width="auto">
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}"/>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="حساب معین" Binding="{Binding NUMBER, UpdateSourceTrigger=LostFocus}" IsReadOnly="True" Width="auto">
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}"/>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="حساب تفضیلی" Binding="{Binding TNUMBER, UpdateSourceTrigger=LostFocus}" IsReadOnly="True" Width="auto">
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}"/>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTemplateColumn IsReadOnly="True" CanUserResize="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button x:Name="SubSectionBtn" Click="SubSectionBtn_Click" Tag="{Binding}" materialDesign:ButtonAssist.CornerRadius="2"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                                    Margin="-14,-7,-14,-7" HorizontalContentAlignment="Center">
+                                <materialDesign:PackIcon Kind="SubdirectoryArrowLeft"/>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn Header="حساب تفضیلی 2" Binding="{Binding TNUMBER2, UpdateSourceTrigger=LostFocus}" Width="auto">
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}"/>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="نام حساب" Binding="{Binding NAME, UpdateSourceTrigger=LostFocus}" MinWidth="200" >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="49"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridComboBoxColumn x:Name="OSTANID_COLUMN" MinWidth="100" Width="auto" Header="کد استان"
+                                    SelectedValueBinding="{Binding OSTANID,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="OSNAME" SelectedValuePath="OSCODE">
+                    <DataGridComboBoxColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                            <Setter Property="IsEditable" Value="True"/>
+                            <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                            <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                            <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                        </Style>
+                    </DataGridComboBoxColumn.EditingElementStyle>
+                    <DataGridComboBoxColumn.ElementStyle>
+                        <Style TargetType="{x:Type ComboBox}"/>
+                    </DataGridComboBoxColumn.ElementStyle>
+                </DataGridComboBoxColumn>
+
+                <DataGridComboBoxColumn x:Name="SHAHRID_COLUMN" MinWidth="100" Width="auto" Header="کد شهرستان"
+                    SelectedValueBinding="{Binding SHAHRID,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="CITYNAME" SelectedValuePath="CITYCODE">
+                    <DataGridComboBoxColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                            <Setter Property="IsEditable" Value="True"/>
+                            <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                            <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                            <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                        </Style>
+                    </DataGridComboBoxColumn.EditingElementStyle>
+                    <DataGridComboBoxColumn.ElementStyle>
+                        <Style TargetType="{x:Type ComboBox}"/>
+                    </DataGridComboBoxColumn.ElementStyle>
+                </DataGridComboBoxColumn>
+
+                <DataGridTextColumn Header="توضیحات" Binding="{Binding TOZIH, UpdateSourceTrigger=LostFocus}"  >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="254"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="آدرس" Binding="{Binding ADDRESS, UpdateSourceTrigger=LostFocus}"  >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="99"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="تلفن" Binding="{Binding TEL, UpdateSourceTrigger=LostFocus}"  >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="49"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="حساب" Binding="{Binding HESAB, UpdateSourceTrigger=LostFocus}" IsReadOnly="True" >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="49"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="کد اقتصادی" Binding="{Binding ECODE, UpdateSourceTrigger=LostFocus}" >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="20"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="کد پستی" Binding="{Binding PCODE, UpdateSourceTrigger=LostFocus}" >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="10"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="کد ملی" Binding="{Binding MCODEM, UpdateSourceTrigger=LostFocus}" >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="20"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="موبایل جهت ارسال پیامک" Binding="{Binding MOBILE, UpdateSourceTrigger=LostFocus}" >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="54"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridComboBoxColumn x:Name="CUST_COD_COLUMN" MinWidth="100" Width="auto" Header="نوع مشتری"
+                                    SelectedValueBinding="{Binding CUST_COD,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="CUSTKNAME" SelectedValuePath="CUST_COD">
+                    <DataGridComboBoxColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                            <Setter Property="IsEditable" Value="True"/>
+                            <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                            <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                            <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                        </Style>
+                    </DataGridComboBoxColumn.EditingElementStyle>
+                    <DataGridComboBoxColumn.ElementStyle>
+                        <Style TargetType="{x:Type ComboBox}"/>
+                    </DataGridComboBoxColumn.ElementStyle>
+                </DataGridComboBoxColumn>
+
+                <DataGridComboBoxColumn x:Name="ROUTE_NAME_COLUMN" MinWidth="100" Width="auto" Header="مسیر ویزیت"
+                                    SelectedValueBinding="{Binding ROUTE_NAME,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="Expr1" SelectedValuePath="ROUTE_NAME">
+                    <DataGridComboBoxColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                            <Setter Property="IsEditable" Value="True"/>
+                            <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                            <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                            <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                        </Style>
+                    </DataGridComboBoxColumn.EditingElementStyle>
+                    <DataGridComboBoxColumn.ElementStyle>
+                        <Style TargetType="{x:Type ComboBox}"/>
+                    </DataGridComboBoxColumn.ElementStyle>
+                </DataGridComboBoxColumn>
+
+                <DataGridTextColumn Header="طول جغرافیایی" Binding="{Binding Longitude, UpdateSourceTrigger=LostFocus}" >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="20"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="عرض جغرافیایی" Binding="{Binding Latitude, UpdateSourceTrigger=LostFocus}" >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="20"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="کد کاربر" Binding="{Binding USERCO, UpdateSourceTrigger=LostFocus}" IsReadOnly="True">
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}"/>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="نام کاربر" Binding="{Binding USER_NAME, UpdateSourceTrigger=LostFocus}" IsReadOnly="True">
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}"/>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTemplateColumn Header="اطلاعات بیشتر" IsReadOnly="True" CanUserResize="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button x:Name="MOREINFOBtn" Click="MOREINFOBtn_Click" Tag="{Binding}" materialDesign:ButtonAssist.CornerRadius="2"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                                Margin="-14,-7,-14,-7" HorizontalContentAlignment="Center">
+                                <materialDesign:PackIcon Kind="More"/>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridComboBoxColumn x:Name="TOB_COLUMN" MinWidth="100" Width="auto" Header="شخصیت"
+                    SelectedValueBinding="{Binding tob,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAMES" SelectedValuePath="CODE">
+                    <DataGridComboBoxColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                            <Setter Property="IsEditable" Value="True"/>
+                            <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                            <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                            <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                        </Style>
+                    </DataGridComboBoxColumn.EditingElementStyle>
+                    <DataGridComboBoxColumn.ElementStyle>
+                        <Style TargetType="{x:Type ComboBox}"/>
+                    </DataGridComboBoxColumn.ElementStyle>
+                </DataGridComboBoxColumn>
+
+            </DataGrid.Columns>
+        </DataGrid>
+        <CNC:DataGridNavigationControl x:Name="GR_NAV_DATAGRID" NewButtonEnabled="False" Height="55" TargetDataGrid="{Binding ElementName=TDETA_HES2_SUB}" VerticalAlignment="Bottom"/>
+    </Grid>
+    
+</Window>

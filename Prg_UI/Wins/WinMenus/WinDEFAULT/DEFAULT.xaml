@@ -1,0 +1,49 @@
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.WinDEFAULT.DEFAULT"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.WinDEFAULT"
+        mc:Ignorable="d"
+        Background="{x:Null}" AllowsTransparency="True"
+        FontFamily="IRANYekanFN"
+        AllowDrop="True"
+        WindowStyle="None"
+        Title="DEFAULT" Height="200" Width="620" MinHeight="200" MinWidth="455" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" ContentRendered="Window_ContentRendered">
+    <Grid x:Name="default_grid" >
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderBrush="{Binding Background, ElementName=DEFAULT_VSH_SAVE}" BorderThickness="1,5,1,1" Grid.ColumnSpan="2">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}"  Margin="-9,-13,-8,0" VerticalAlignment="Top"  UseLayoutRounding="False" Height="35" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown" Background="{Binding Background, ElementName=DEFAULT_VSH_SAVE}">
+            </Border>
+        </Border>
+        <ComboBox x:Name="TFSAZMAN_CMB"
+		    
+		          Padding="7,5,10,5"
+                  IsTextSearchEnabled="True" Margin="0,63,188,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft"   IsEditable="True" HorizontalAlignment="Right" Width="352" SelectedIndex="0" TabIndex="1"  LostFocus="TFSAZMAN_CMB_LostFocus" BorderThickness="0">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Label Content="واحد سیستم جاری :" HorizontalAlignment="Left"  Height="30" Margin="437,63,0,0" VerticalAlignment="Top" Width="110" FlowDirection="RightToLeft"/>
+        <Label Content="شیفت جاری :" HorizontalAlignment="Left"  Height="30" Margin="437,107,0,0" VerticalAlignment="Top" Width="79" FlowDirection="RightToLeft"/>
+        <ComboBox x:Name="SHIFT_CMB"
+		          Padding="7,5,10,5"
+                  IsTextSearchEnabled="True" Margin="0,106,188,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft"   IsEditable="True" HorizontalAlignment="Right" Width="351" SelectedIndex="0" TabIndex="1"  LostFocus="SHIFT_CMB_LostFocus" BorderThickness="0">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Button x:Name="DEFAULT_VSH_SAVE" TabIndex="13" Content="ذخیره و خروج" Click="DEFAULT_VSH_SAVE_Click" IsDefault="True" Foreground="#DDFFFFFF" FontSize="11" Margin="249,149,253,16" Height="Auto"/>
+        <Label x:Name="preloader" Visibility="Hidden" HorizontalContentAlignment="Center" Style="{StaticResource LBLG}" VerticalContentAlignment="Center" Content="کاربر گرامی خوش آمدید"  FontSize="30" Foreground="WhiteSmoke"  Grid.ColumnSpan="2">
+            <Label.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FF20BF55" Offset="0"/>
+                    <GradientStop Color="#FF01BAEF" Offset="1"/>
+                </LinearGradientBrush>
+            </Label.Background>
+        </Label>
+    </Grid>
+</Window>

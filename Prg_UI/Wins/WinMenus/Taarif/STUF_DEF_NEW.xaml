@@ -1,0 +1,273 @@
+﻿<Window x:Class="Wins.WinMenus.Taarif.STUF_DEF_NEW"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Wins.WinMenus.Taarif"
+        mc:Ignorable="d"
+        
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
+        MaxHeight="{Binding Height, Source={x:Static SystemParameters.WorkArea}}"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="IRANYekanFN"
+        WindowStartupLocation="CenterScreen"
+        Title="" Height="487" Width="1024" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+    </Window.Resources>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+    <Grid x:Name="mygrid">
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label Content="تعریف مشخصات کالا بر اساس کدینگ" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Button x:Name="Btn_Close" Click="Btn_Close_Click" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowMaximize" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                </Grid>
+            </Border>
+        </Border>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                                                     Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+        
+        <Button x:Name="GOADD_BTN" Content="اضافه"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="59,99,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Click="GOADD_BTN_Click" />
+        <Button x:Name="BEGINEW_BTN"  Content="از نو"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="59,148,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Click="BEGINEW_BTN_Click" />
+        <Label Content="کد فنی (بارکد):" HorizontalAlignment="Right" Margin="0,55,19,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <TextBox x:Name="Text0" Text="" Height="30" Margin="59,54,431,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" IsReadOnly="True" />
+        <CNC:NumericTextBox x:Name="CODE" DoesAcceptDouble="False" MaxLength="30" LastValueShouldZero="False" Text="" Height="30" Margin="0,54,102,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Right" Width="265" IsReadOnly="True"/>
+        <Label Content="نام کالا:" HorizontalAlignment="Right" Margin="0,55,382,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+
+        <UniformGrid Columns="1" Rows="10" Margin="0,99,10,0" HorizontalAlignment="Right" Width="88" Height="358" VerticalAlignment="Top" >
+            <Label x:Name="L1"    Content="سایز:"  d:Visibility="Visible" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"  FlowDirection="RightToLeft" Width="auto"/>
+            <Label x:Name="L2"    Content="درجه:"  d:Visibility="Visible" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"  Visibility="Hidden" FlowDirection="RightToLeft" Width="auto"/>
+            <Label x:Name="L3"    Content="طرح:"   d:Visibility="Visible" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"  Visibility="Hidden"  FlowDirection="RightToLeft" Width="auto"/>
+            <Label x:Name="L4"    Content="رده:"   d:Visibility="Visible" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"  Visibility="Hidden"  FlowDirection="RightToLeft" Width="auto"/>
+            <Label x:Name="L5"    Content="کدکالا:" d:Visibility="Visible" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"  Visibility="Hidden"  FlowDirection="RightToLeft" Width="auto"/>
+            <Label x:Name="L6"    Content="کدکالا:" d:Visibility="Visible" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"  Visibility="Hidden"  FlowDirection="RightToLeft" Width="auto"/>
+            <Label x:Name="L7"    Content="کدکالا:" d:Visibility="Visible" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"  Visibility="Hidden"  FlowDirection="RightToLeft" Width="auto"/>
+            <Label x:Name="L8"    Content="کدکالا:" d:Visibility="Visible" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"  Visibility="Hidden"  FlowDirection="RightToLeft" Width="auto"/>
+            <Label x:Name="L9"    Content="کدکالا:" d:Visibility="Visible" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"  Visibility="Hidden"  FlowDirection="RightToLeft" Width="auto"/>
+            <Label x:Name="L10"   Content="کدکالا:" d:Visibility="Visible" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"  Visibility="Hidden"  FlowDirection="RightToLeft" Width="auto"/>
+        </UniformGrid>
+
+        <ComboBox x:Name="T1" 
+                  Text="{Binding Path=SelectedItem.MPNAME, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                  TextSearch.TextPath="MPNAME"
+                  SelectedValuePath="MPCODE"
+                  Padding="7,0,10,0"
+                  Visibility="{Binding Visibility, ElementName=L1}"  Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="486,101,103,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" SelectionChanged="T1_SelectionChanged">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding MPNAME}" TextAlignment="Justify" MinWidth="200" Width="Auto" />
+                        <TextBlock Text="{Binding MPCODE}" TextAlignment="Center" MinWidth="70"  Width="Auto" />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+
+        </ComboBox>
+        <ComboBox x:Name="T2"
+                  Text="{Binding Path=SelectedItem.MPNAME, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                  TextSearch.TextPath="MPNAME"
+                  SelectedValuePath="MPCODE"
+                  Padding="7,0,10,0" Visibility="{Binding Visibility, ElementName=L2}" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="486,139,103,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1" IsEnabled="False" SelectionChanged="T2_SelectionChanged" >
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding MPNAME}" TextAlignment="Justify" MinWidth="200" Width="Auto" />
+                        <TextBlock Text="{Binding MPCODE}" TextAlignment="Center" MinWidth="70"  Width="Auto" />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <ComboBox x:Name="T3" 
+                  Text="{Binding Path=SelectedItem.MPNAME, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                  TextSearch.TextPath="MPNAME"
+                  SelectedValuePath="MPCODE"
+                  Visibility="{Binding Visibility, ElementName=L3}" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="486,174,103,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1" IsEnabled="False" SelectionChanged="T3_SelectionChanged">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding MPNAME}" TextAlignment="Justify" MinWidth="200" Width="Auto" />
+                        <TextBlock Text="{Binding MPCODE}" TextAlignment="Center" MinWidth="70"  Width="Auto" />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <ComboBox x:Name="T4" 
+                  Text="{Binding Path=SelectedItem.MPNAME, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                  TextSearch.TextPath="MPNAME"
+                  SelectedValuePath="MPCODE"
+                  Padding="7,0,10,0" Visibility="{Binding Visibility, ElementName=L4}" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="486,209,103,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1" IsEnabled="False" SelectionChanged="T4_SelectionChanged">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding MPNAME}" TextAlignment="Justify" MinWidth="200" Width="Auto" />
+                        <TextBlock Text="{Binding MPCODE}" TextAlignment="Center" MinWidth="70"  Width="Auto" />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <ComboBox x:Name="T5" 
+                  Text="{Binding Path=SelectedItem.MPNAME, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                  TextSearch.TextPath="MPNAME"
+                  SelectedValuePath="MPCODE"
+                  Padding="7,0,10,0" Visibility="{Binding Visibility, ElementName=L5}" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="486,245,103,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1" IsEnabled="False" SelectionChanged="T5_SelectionChanged">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding MPNAME}" TextAlignment="Justify" MinWidth="200" Width="Auto" />
+                        <TextBlock Text="{Binding MPCODE}" TextAlignment="Center" MinWidth="70"  Width="Auto" />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <ComboBox x:Name="T6" 
+                  Text="{Binding Path=SelectedItem.MPNAME, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                  TextSearch.TextPath="MPNAME"
+                  SelectedValuePath="MPCODE"
+                  Padding="7,0,10,0" Visibility="{Binding Visibility, ElementName=L6}" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="486,281,103,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1" IsEnabled="False" SelectionChanged="T6_SelectionChanged">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding MPNAME}" TextAlignment="Justify" MinWidth="200" Width="Auto" />
+                        <TextBlock Text="{Binding MPCODE}" TextAlignment="Center" MinWidth="70"  Width="Auto" />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <ComboBox x:Name="T7" 
+                  Text="{Binding Path=SelectedItem.MPNAME, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                  TextSearch.TextPath="MPNAME"
+                  SelectedValuePath="MPCODE"
+                  Padding="7,0,10,0" Visibility="{Binding Visibility, ElementName=L7}" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="486,318,103,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1" IsEnabled="False" SelectionChanged="T7_SelectionChanged">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding MPNAME}" TextAlignment="Justify" MinWidth="200" Width="Auto" />
+                        <TextBlock Text="{Binding MPCODE}" TextAlignment="Center" MinWidth="70"  Width="Auto" />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <ComboBox x:Name="T8"
+                  Text="{Binding Path=SelectedItem.MPNAME, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                  TextSearch.TextPath="MPNAME"
+                  SelectedValuePath="MPCODE"
+                  Padding="7,0,10,0" Visibility="{Binding Visibility, ElementName=L8}" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="486,354,103,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1" IsEnabled="False" SelectionChanged="T8_SelectionChanged">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding MPNAME}" TextAlignment="Justify" MinWidth="200" Width="Auto" />
+                        <TextBlock Text="{Binding MPCODE}" TextAlignment="Center" MinWidth="70"  Width="Auto" />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <ComboBox x:Name="T9"
+                  Text="{Binding Path=SelectedItem.MPNAME, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                  TextSearch.TextPath="MPNAME"
+                  SelectedValuePath="MPCODE"
+                  Padding="7,0,10,0" Visibility="{Binding Visibility, ElementName=L9}" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="486,389,103,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1" IsEnabled="False" SelectionChanged="T9_SelectionChanged">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding MPNAME}" TextAlignment="Justify" MinWidth="200" Width="Auto" />
+                        <TextBlock Text="{Binding MPCODE}" TextAlignment="Center" MinWidth="70"  Width="Auto" />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <ComboBox x:Name="T10" 
+                  Text="{Binding Path=SelectedItem.MPNAME, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                  TextSearch.TextPath="MPNAME"
+                  SelectedValuePath="MPCODE"
+                  Padding="7,0,10,0" Visibility="{Binding Visibility, ElementName=L10}" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="486,425,103,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1" IsEnabled="False" SelectionChanged="T10_SelectionChanged">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding MPNAME}" TextAlignment="Justify" MinWidth="200" Width="Auto" />
+                        <TextBlock Text="{Binding MPCODE}" TextAlignment="Center" MinWidth="70"  Width="Auto" />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        
+        <Label Content="طول بخش سريالی كد (رقم):" HorizontalAlignment="Left" Margin="293,102,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <CNC:NumericTextBox x:Name="digi" NumericLostFocus="digi_NumericLostFocus" TextAlignment="Center" DoesAcceptDouble="False" LastValueShouldZero="False" Text="1" Height="30" Margin="176,101,0,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="112"/>
+        <Button x:Name="ADDTOKALA_BTN" Content="انتقال به تعريف كالا" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="293,0,0,30" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="174" Click="ADDTOKALA_BTN_Click" IsEnabled="False" />
+
+    </Grid>
+</Window>

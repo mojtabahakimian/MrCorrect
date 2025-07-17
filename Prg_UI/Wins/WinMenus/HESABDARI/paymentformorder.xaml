@@ -1,0 +1,207 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Wins.WinMenus.HESABDARI"
+
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="Wins.WinMenus.HESABDARI.paymentformorder"
+        mc:Ignorable="d"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+    
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="IRANYekanFN"
+        WindowState="Maximized"
+        WindowStartupLocation="CenterScreen"
+        Title="فرم درخواست پرداخت" Height="746" Width="1000" MinHeight="746" MinWidth="1000" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+    </Window.Resources>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+    <Grid x:Name="mygrid">
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,302,238"  Width="1"/>
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label Content="درخواست پرداخت" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMaximize" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                </Grid>
+            </Border>
+        </Border>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                                                 Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+        <!--HEADER↑-->
+
+        <Button x:Name="BTN_SAVE" Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="37,466,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Click="BTN_SAVE_Click" TabIndex="14" />
+        <Label Content="شماره" HorizontalAlignment="Right" Margin="0,52,94,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <TextBox x:Name="IDD" Text="" Height="30" Margin="0,51,136,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" HorizontalAlignment="Right" Width="67" IsReadOnly="True" />
+        <Label Content="تاریخ" HorizontalAlignment="Right" Margin="0,88,96,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="مبلغ" HorizontalAlignment="Right" Margin="0,125,101,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="بابت" HorizontalAlignment="Right" Margin="0,163,100,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="حساب دریافت کننده" HorizontalAlignment="Right" Margin="0,198,18,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="دریافت کننده(نماینده)" HorizontalAlignment="Right" Margin="0,236,12,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="توضیحات" HorizontalAlignment="Right" Margin="0,273,73,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="درخواست کننده" HorizontalAlignment="Right" Margin="0,343,43,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+
+
+        <xctk:MaskedTextBox x:Name="PAYDATE" Style="{StaticResource FuzzyOut}" Padding="3" Mask="0000/00/00" Height="30" Margin="0,88,136,0" TextWrapping="Wrap" VerticalAlignment="Top" BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="77" TabIndex="0"/>
+        <CNC:NumericTextBox x:Name="MABLS"  DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True"   Text="0" Height="30" Margin="0,125,136,0"   VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  MaxLength="16" TabIndex="1" />
+        <TextBox x:Name="BABAT" Text="" Height="30" Margin="37,161,136,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top"  Visibility="Visible" MaxLength="499" TabIndex="2" FlowDirection="RightToLeft" />
+        <ComboBox x:Name="CUST_NO" PreviewLostKeyboardFocus="CUST_NO_PreviewLostKeyboardFocus"  DisplayMemberPath="NAME" SelectedValuePath="hes"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="188,198,136,0" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" VerticalAlignment="Top" TabIndex="3">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <ComboBox x:Name="CUST_NO2"  DisplayMemberPath="hes" SelectedValuePath="hes"   Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="37,198,0,0" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="146" VerticalAlignment="Top">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+            <ComboBox.SelectedItem>
+                <Binding Path="SelectedItem" ElementName="CUST_NO" Mode="TwoWay" />
+            </ComboBox.SelectedItem>
+        </ComboBox>
+        <TextBox x:Name="CUST_NO_TXT" Text="" Height="30" Margin="37,235,136,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" Visibility="Visible" MaxLength="249" TabIndex="4" FlowDirection="RightToLeft" />
+        <TextBox x:Name="TOZIH" Text="" Height="61" Margin="37,273,136,0"  Style="{StaticResource FuzzyOut}" FlowDirection="RightToLeft" Padding="3" TextWrapping="Wrap" VerticalAlignment="Top" Visibility="Visible" MaxLength="498" TabIndex="5" />
+        <ComboBox x:Name="ORDERER" PreviewLostKeyboardFocus="ORDERER_PreviewLostKeyboardFocus" DisplayMemberPath="NAME" SelectedValuePath="hes"   Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="188,342,136,0" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" VerticalAlignment="Top" TabIndex="6">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <ComboBox x:Name="ORDERERID"  DisplayMemberPath="hes" SelectedValuePath="hes"   Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="37,342,0,0" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="146" VerticalAlignment="Top">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+            <ComboBox.SelectedItem>
+                <Binding Path="SelectedItem" ElementName="ORDERER" Mode="TwoWay"/>
+            </ComboBox.SelectedItem>
+        </ComboBox>
+        <TextBox x:Name="USERNAME" Text="" Height="30" Margin="37,51,0,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" HorizontalAlignment="Left" Width="120" IsReadOnly="True" />
+        <Label Content="کاربر" HorizontalAlignment="Left" Margin="162,51,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <CheckBox x:Name="CACHTIC" Content="نقد" HorizontalAlignment="Right" Margin="0,401,136,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto" IsTabStop="False" TabIndex="7"/>
+        <CheckBox x:Name="CHEKTIC" Content="چک شرکت" HorizontalAlignment="Right" Margin="0,441,136,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto" IsTabStop="False" TabIndex="9"/>
+        <CheckBox x:Name="CHEKMTIC" Content="چک مشتری" HorizontalAlignment="Right" Margin="0,481,136,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto" IsTabStop="False" TabIndex="13"/>
+        <CNC:NumericTextBox x:Name="CHACHMABL"  DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True"   Text="0" Height="30" Margin="0,397,275,0"   VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  MaxLength="16" TabIndex="8" />
+        <CNC:NumericTextBox x:Name="CHEKMABL"  DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True"   Text="0" Height="30" Margin="0,437,275,0"   VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  MaxLength="16" TabIndex="10" />
+        <CNC:NumericTextBox x:Name="CHEKMMABL"  DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True"   Text="0" Height="30" Margin="0,477,275,0"   VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  MaxLength="16" TabIndex="14" />
+        <Label Content="مبلغ" HorizontalAlignment="Right" Margin="0,398,234,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="مبلغ" HorizontalAlignment="Right" Margin="0,438,234,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="مبلغ" HorizontalAlignment="Right" Margin="0,479,234,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="تعداد فقره" HorizontalAlignment="Right" Margin="0,439,413,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="تعداد فقره" HorizontalAlignment="Right" Margin="0,479,413,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <CNC:NumericTextBox x:Name="CHEKFAGH"  DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True"   Text="0" Height="30" Margin="0,437,478,0"   VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="50"  MaxLength="16" TabIndex="11" />
+        <CNC:NumericTextBox x:Name="CHEKMFAGH"  DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True"   Text="0" Height="30" Margin="0,477,478,0"   VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="50"  MaxLength="16" TabIndex="15" />
+        <Label Content="با فاصله" HorizontalAlignment="Right" Margin="0,439,533,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <CNC:NumericTextBox x:Name="CHEKDIST"  DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True"   Text="0" Height="30" Margin="0,437,586,0"   VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="50"  MaxLength="16" TabIndex="12" />
+        <Label Content="با راس" HorizontalAlignment="Right" Margin="0,478,533,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <CNC:NumericTextBox x:Name="CHEKMDIST"  DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True"   Text="0" Height="30" Margin="0,477,586,0"   VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="50"  MaxLength="16" TabIndex="16" />
+        <Label Content="روز" HorizontalAlignment="Right" Margin="0,437,642,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="روز" HorizontalAlignment="Right" Margin="0,479,642,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+
+
+        <CheckBox x:Name="SGN1" Content="مدیر واحد" HorizontalAlignment="Right" Margin="0,0,81,150" VerticalAlignment="Bottom" Width="NaN" Click="SGN1_Click">
+            <CheckBox.Style>
+                <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=IDD, Path=Text}" Value=""/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </MultiDataTrigger>
+                        <DataTrigger Binding="{Binding ElementName=IDD, Path=Text}" Value="0">
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </CheckBox.Style>
+        </CheckBox>
+        <CheckBox x:Name="SGN2" Content="حسابداری" HorizontalAlignment="Right" Margin="0,0,83,117" VerticalAlignment="Bottom" Width="NaN" Click="SGN2_Click">
+            <CheckBox.Style>
+                <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=IDD, Path=Text}" Value=""/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </MultiDataTrigger>
+                        <DataTrigger Binding="{Binding ElementName=IDD, Path=Text}" Value="0">
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </CheckBox.Style>
+        </CheckBox>
+        <CheckBox x:Name="SGN3" Content="مدير عامل" HorizontalAlignment="Right" Margin="0,0,80,85" VerticalAlignment="Bottom" Width="NaN" Click="SGN3_Click">
+            <CheckBox.Style>
+                <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=IDD, Path=Text}" Value=""/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </MultiDataTrigger>
+                        <DataTrigger Binding="{Binding ElementName=IDD, Path=Text}" Value="0">
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </CheckBox.Style>
+        </CheckBox>
+        <TextBox x:Name="SGN1usid"   Style="{StaticResource FuzzyOut}" Padding="3"  Margin="0,0,158,147" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="202" IsReadOnly="True"/>
+        <TextBox x:Name="SGN2usid"   Style="{StaticResource FuzzyOut}" Padding="3"  Margin="0,0,158,114" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="202" IsReadOnly="True"/>
+        <TextBox x:Name="SGN3usid"   Style="{StaticResource FuzzyOut}" Padding="3"  Margin="0,0,158,82" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft"  HorizontalAlignment="Right" Width="202" IsReadOnly="True"/>
+        <Label Content="ارجاع به:" Margin="0,0,109,51"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="43" Height="26" VerticalAlignment="Bottom"/>
+        <ComboBox x:Name="PERSONEL"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,0,158,49" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" SelectionChanged="PERSONEL_SelectionChanged" HorizontalAlignment="Right" Width="254">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Button x:Name="Command77" Click="Command77_Click" Content="چاپ"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="37,425,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" />
+        <Button x:Name="Command81" Click="Command81_Click" Content="چاپ با امضاء"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="37,383,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" />
+
+        <Border Background="{Binding Background, ElementName=GENERAL_RANG}" Height="11" VerticalAlignment="Top" CornerRadius="1" Opacity="0.3" Margin="0,550,0,0" />
+        <Button x:Name="BTN_NEW_PAYORDER" Content="درخواست جدید"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="37,505,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" TabIndex="14" Click="BTN_NEW_PAYORDER_Click" />
+
+
+
+    </Grid>
+</Window>
+

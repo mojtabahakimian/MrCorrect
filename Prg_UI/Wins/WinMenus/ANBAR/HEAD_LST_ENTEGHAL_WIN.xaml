@@ -1,0 +1,308 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:local="clr-namespace:Wins.WinMenus.ANBAR"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="Wins.WinMenus.ANBAR.HEAD_LST_ENTEGHAL_WIN"
+        mc:Ignorable="d"
+    
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+    
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="IRANYekanFN"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        Title="HEAD_LST_ENTEGHAL_WIN" Height="64" MinHeight="657" Width="1225" MinWidth="1214" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" ContentRendered="Window_ContentRendered">
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"  VirtualizingPanel.VirtualizationMode="Recycling"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+    </Window.Resources>
+
+    <Grid x:Name="mygrid">
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True" Grid.RowSpan="2">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                  Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10">
+                <Grid>
+                    <Label Content="انتقال از انبار به انبار" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowRestore" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+
+                </Grid>
+            </Border>
+        </Border>
+
+        <TextBox x:Name="NUMBER"  Text="" IsReadOnly="True" Tag="RD" Height="30" Margin="0,60,71,0"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="114" IsTabStop="False" IsHitTestVisible="False" Focusable="False" />
+        <Label x:Name="Label11" Content="شماره برگه : " Margin="0,62,10,0"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right" Width="57"/>
+        <ComboBox x:Name="ANBAR" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Width="320" IsTextSearchEnabled="True" Margin="0,96,71,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" PreviewLostKeyboardFocus="ANBAR_PreviewLostKeyboardFocus" TabIndex="1">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Label x:Name="Label11_Copy" Content="از انبار : " Margin="0,97,28,0"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right" Width="39"/>
+        <ComboBox x:Name="ANBARF" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,131,70,0" VerticalAlignment="Top" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="321" Height="30" IsTabStop="True" PreviewLostKeyboardFocus="ANBARF_PreviewLostKeyboardFocus" TabIndex="2" >
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+
+        <Label x:Name="Label11_Copy1" Content="به انبار : " Margin="0,133,25,0"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right" Width="41"/>
+        <TextBox x:Name="FNUMCO"  Text="" Tag="RD" Height="30" Margin="0,60,278,0"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="114"  />
+        <Label x:Name="Label11_Copy2" Content="شماره برگه داخلی : " Margin="0,62,190,0"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right" Width="88"/>
+        <Label x:Name="Label11_Copy3" Content="تاریخ برگه : " Margin="0,62,419,0"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right" Width="56"/>
+        <TextBox x:Name="USER_NAME"  Text="" IsReadOnly="True" Tag="RD" Height="30" Margin="0,60,621,0"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="100" IsTabStop="False" IsHitTestVisible="False" Focusable="False" />
+        <Label x:Name="Label11_Copy4" Content="کاربر : " Margin="0,62,585,0"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right" Width="32"/>
+        <TextBox x:Name="TAH"  Text=""  Tag="RD" Height="30" Margin="0,97,475,0"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="246" TabIndex="3"  />
+        <Label x:Name="Label11_Copy5" Content="تحویل گیرنده : " Margin="0,98,404,0"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Top" HorizontalAlignment="Right" Width="70"/>
+        <TextBox x:Name="MOLAH"  Text="" Tag="RD" Height="30" Margin="0,132,475,0"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="246" TabIndex="4" />
+        <Label x:Name="Label11_Copy6" Content="تحویل دهنده : " Margin="0,132,404,0"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Top" HorizontalAlignment="Right" Width="70"/>
+
+        <Button x:Name="ESLAH"  Content="اصلاح برگه"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="199,119,0,0" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Click="ESLAH_Click" />
+        <Button x:Name="BTN_INVOCES" Content="لیست انتقالی ها" Margin="15,162,0,0"  Style="{StaticResource GerdC}" BorderBrush="{x:Null}" FontSize="10" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="142" Foreground="#DDFFFFFF" FontWeight="Normal" Click="BTN_INVOCES_Click"/>
+        <CheckBox x:Name="SGN1" IsEnabled="False" Content="انبار فرستنده" HorizontalAlignment="Right" Margin="0,0,25,92" VerticalAlignment="Bottom" Width="80" FontSize="10" Click="SGN1_Click" />
+        <CheckBox x:Name="SGN2" IsEnabled="False" Content="انبار گیرنده" HorizontalAlignment="Right" Margin="0,0,25,56" VerticalAlignment="Bottom" Width="80" FontSize="10" Click="SGN2_Click" />
+        <CheckBox x:Name="SGN3" IsEnabled="False" Content="حسابداری" HorizontalAlignment="Right" Margin="0,0,25,23" VerticalAlignment="Bottom" Width="80" FontSize="10" Click="SGN3_Click" />
+
+        <TextBox x:Name="sgn1usid"  Text="" IsReadOnly="True" Height="30" Margin="0,0,111,87"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="206" IsTabStop="False" IsHitTestVisible="False" />
+        <TextBox x:Name="sgn2usid"  Text="" IsReadOnly="True" Height="30" Margin="0,0,111,53"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="206" IsTabStop="False" IsHitTestVisible="False" />
+        <TextBox x:Name="sgn3usid"  Text="" IsReadOnly="True" Height="30" Margin="0,0,111,19"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" IsTabStop="False" IsHitTestVisible="False" HorizontalAlignment="Right" Width="206" />
+        <TextBox x:Name="MOGU2"  Text="" IsReadOnly="True" Tag="RD" Margin="0,0,405,86"  Style="{StaticResource FuzzyOut}" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="132" IsTabStop="False" IsHitTestVisible="False" Height="30" VerticalAlignment="Bottom" />
+        <Label x:Name="Label11_Copy7" Content="موجودی به انبار : " Margin="0,0,325,88"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="80"/>
+
+        <ComboBox x:Name="PERSONEL" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,0,404,21" VerticalAlignment="Bottom" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="355" Height="30" SelectionChanged="PERSONEL_SelectionChanged" >
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+
+        <Label x:Name="Label11_Copy8" Content="ارجاع به : " Margin="0,0,357,22"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="47"/>
+        <TextBox x:Name="MOGU"  Text="" IsReadOnly="True" Tag="RD" Height="30" Margin="0,0,622,86"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="140" IsTabStop="False" IsHitTestVisible="False" />
+        <Label x:Name="Label11_Copy9" Content="موجودی از انبار : " Margin="0,0,541,88"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="76"/>
+        <TextBox x:Name="Text59"  Text="" IsReadOnly="True" Tag="RD" Height="30" Margin="15,0,0,85"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Left" Width="183" IsTabStop="False" IsHitTestVisible="False" />
+        <Label x:Name="Label11_Copy10" Content="جمع کل : " Margin="199,0,0,87"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="48"/>
+
+        <Border   FlowDirection="RightToLeft" Background="#FF03A9F4" Height="51" Margin="14,60,0,0"  VerticalAlignment="Top" CornerRadius="10,10,10,10" HorizontalAlignment="Left" Width="472">
+            <StackPanel Margin="0,10,0,0" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top" Width="405">
+                <StackPanel Orientation="Horizontal">
+                    <Label x:Name="Label5" Width="auto" Content="شماره سند:" Foreground="#DDFFFFFF"/>
+                    <TextBox x:Name="N_S" Text="0" IsReadOnly="True" Width="56" HorizontalContentAlignment="Center"  Style="{x:Null}" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label x:Name="Label55" Width="auto" Content="ثبت در سند شماره:" Foreground="#DDFFFFFF"/>
+                    <TextBox x:Name="lsanad" Text="0" IsReadOnly="True" Width="49" HorizontalContentAlignment="Center"  Style="{x:Null}" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label x:Name="Label556" Width="auto" Content="شماره مبنا:" Foreground="#DDFFFFFF"/>
+                    <TextBox x:Name="MABNA" Text="0" IsReadOnly="True" Width="59" HorizontalContentAlignment="Center"  Style="{x:Null}" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        <DataGrid   x:Name="INVO_LST_ENTEGHAL_SUB"
+                EnableColumnVirtualization="True"
+                EnableRowVirtualization="True"
+                VirtualizingPanel.IsVirtualizing="True"
+                VirtualizingPanel.VirtualizationMode="Recycling"
+                ScrollViewer.CanContentScroll="False"
+                SelectedIndex="0"
+                ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                CellStyle="{StaticResource CellFocusyBorder}"
+                HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                KeyboardNavigation.TabNavigation="Contained"
+                ItemsSource="{Binding HEAD_ENTEGHAL_DATA}"    
+                Margin="15,207,15,127" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" CellEditEnding="INVO_LST_ENTEGHAL_SUB_CellEditEnding" RowEditEnding="INVO_LST_ENTEGHAL_SUB_RowEditEnding" BeginningEdit="INVO_LST_ENTEGHAL_SUB_BeginningEdit" PreparingCellForEdit="INVO_LST_ENTEGHAL_SUB_PreparingCellForEdit" IsKeyboardFocusWithinChanged="INVO_LST_ENTEGHAL_SUB_IsKeyboardFocusWithinChanged" PreviewKeyDown="INVO_LST_ENTEGHAL_SUB_PreviewKeyDown" PreviewMouseDown="INVO_LST_ENTEGHAL_SUB_PreviewMouseDown" CanUserDeleteRows="False" TabIndex="6">
+
+            <DataGrid.Style>
+                <!--خط بندی سطر های دیتاگرید-->
+                <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                    <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+                </Style>
+            </DataGrid.Style>
+
+
+            <DataGrid.Columns>
+                <DataGridTextColumn 	x:Name="NUMBER_COLUMN"        Binding="{Binding NUMBER, UpdateSourceTrigger=LostFocus}"          Header="NUMBER"              Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridTextColumn 	x:Name="TAG_COLUMN"        	  Binding="{Binding TAG, UpdateSourceTrigger=LostFocus}"              Header="TAG"                 Width="auto" MinWidth="50" Visibility="Hidden"  />
+                <DataGridTextColumn 	x:Name="CODEO_COLUMN"        	  Binding="{Binding CODEO, UpdateSourceTrigger=LostFocus}"        Header="CODEO"                 Width="auto" MinWidth="50"  Visibility="Hidden" />
+                <DataGridComboBoxColumn x:Name="ANBAR_COLUMN" MinWidth="80" Width="auto" Header=" انبار" Visibility="Hidden"  SelectedValueBinding="{Binding ANBAR, UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAMES" SelectedValuePath="CODE">
+                    <DataGridComboBoxColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                            <Setter Property="IsEditable" Value="True"/>
+                            <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                            <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                            <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                        </Style>
+                    </DataGridComboBoxColumn.EditingElementStyle>
+                    <DataGridComboBoxColumn.ElementStyle>
+                        <Style TargetType="{x:Type ComboBox}"/>
+                    </DataGridComboBoxColumn.ElementStyle>
+                </DataGridComboBoxColumn>
+                <DataGridTextColumn 	x:Name="RADIF_COLUMN" 	      Binding="{Binding RADIF, UpdateSourceTrigger=LostFocus}"            Header="RADIF"               Width="auto" MinWidth="50"  Visibility="Hidden" />
+                <DataGridTextColumn 	x:Name="CODEh_COLUMN"         Binding="{Binding CODE, UpdateSourceTrigger=LostFocus}"            Header="کد کالا"               Width="auto" MinWidth="50" IsReadOnly="True"  Visibility="Hidden" />
+                <DataGridTextColumn 	x:Name="NAME_CODE_COLUMN"	  Binding="{Binding NAME_CODE, UpdateSourceTrigger=LostFocus}"        Header="کالا"           Width="500" MinWidth="450" >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}"/>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+
+                <DataGridComboBoxColumn x:Name="VAHED_K_COLUMN"  
+                    Width="150"   MinWidth="90" Header=" واحد کالا " Visibility="Visible" 
+                    SelectedValueBinding="{Binding VAHED_K, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="NAMES" SelectedValuePath="VAHED">
+                    <DataGridComboBoxColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                            <Setter Property="IsEditable" Value="True"/>
+                            <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                            <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                            <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                        </Style>
+                    </DataGridComboBoxColumn.EditingElementStyle>
+                    <DataGridComboBoxColumn.ElementStyle>
+                        <Style TargetType="{x:Type ComboBox}"/>
+                    </DataGridComboBoxColumn.ElementStyle>
+                    <DataGridComboBoxColumn.CellStyle>
+                        <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                            <Setter Property = "IsTabStop" Value = "False" />
+                        </Style>
+                    </DataGridComboBoxColumn.CellStyle>
+                </DataGridComboBoxColumn>
+
+                <DataGridTextColumn 	x:Name="MEGH_COLUMN"	  Binding="{Binding MEGH, UpdateSourceTrigger=LostFocus}"       Header="مقدار کالا"           Width="150" MinWidth="70" >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="20" />
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn 	x:Name="MEGHK_COLUMN" 	     Binding="{Binding MEGHk, UpdateSourceTrigger=LostFocus}"    Header="مقدار کل"               Width="150" MinWidth="90" >
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                            <Setter Property = "IsTabStop" Value = "False" />
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="30" />
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn 	x:Name="MEGH_MAR_COLUMN" 	  Binding="{Binding MEGH_MAR, UpdateSourceTrigger=LostFocus}"                               Header="MEGH MAR"            Width="auto" MinWidth="50" Visibility="Hidden"  />
+                <DataGridTextColumn 	x:Name="MABL_COLUMN"          Binding="{Binding MABL, StringFormat=\{0:N0\}, UpdateSourceTrigger=LostFocus}"   Visibility="Hidden"          Header="مبلغ"                Width="auto" MinWidth="80"   >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="30" />
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn 	x:Name="MABL_K_COLUMN" 	      Binding="{Binding MABL_K, StringFormat=\{0:N0\}, UpdateSourceTrigger=LostFocus}"    Visibility="Hidden"       Header="مبلغ کل"             Width="auto" MinWidth="90" >
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                            <Setter Property = "IsTabStop" Value = "False" />
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="30" />
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+                <DataGridCheckBoxColumn x:Name="FROM_A_COLUMN" 	      Binding="{Binding FROM_A, UpdateSourceTrigger=LostFocus}"           Header="FROM A"              Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridTextColumn 	x:Name="N_RASID_COLUMN"       Binding="{Binding N_RASID, UpdateSourceTrigger=LostFocus}"          Header="N RASID"             Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridTextColumn 	x:Name="MEGH_R_COLUMN" 	      Binding="{Binding MEGH_R, UpdateSourceTrigger=LostFocus}"           Header="MEGH R"              Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridTextColumn 	x:Name="RADAH_COLUMN" 	      Binding="{Binding RADAH, UpdateSourceTrigger=LostFocus}"            Header="RADAH"               Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridTextColumn 	x:Name="SANAD_NO_COLUMN" 	  Binding="{Binding SANAD_NO, UpdateSourceTrigger=LostFocus}"         Header="SANAD NO"            Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridTextColumn 	x:Name="CUST_NO_COLUMN" 	  Binding="{Binding CUST_NO, UpdateSourceTrigger=LostFocus}"          Header="CUST NO"             Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridTextColumn 	x:Name="ANBARF_COLUMN" 	      Binding="{Binding ANBARF, UpdateSourceTrigger=LostFocus}"           Header="ANBARF"              Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridTextColumn 	                              Binding="{Binding VAHED_K, UpdateSourceTrigger=LostFocus}"          Header="VAHED K"             Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridTextColumn 	x:Name="N_KOL_COLUMN" 	      Binding="{Binding N_KOL, StringFormat=\{0:F2\}, UpdateSourceTrigger=LostFocus}"            Header="%تخفیف"               Width="auto" MinWidth="70" Visibility="Hidden" >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="5" />
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn 	x:Name="TKHN_COLUMN"          Binding="{Binding TKHN, UpdateSourceTrigger=LostFocus}"             Header="ت.ن%"               Width="auto" MinWidth="70" Visibility="Hidden" >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="4" />
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn 	x:Name="N_MOIN_COLUMN" 	      Binding="{Binding N_MOIN, StringFormat=\{0:N0\}, UpdateSourceTrigger=LostFocus}"           Header="مبلغ تخفیف"          Width="auto" MinWidth="100" Visibility="Hidden" >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}"/>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn 	x:Name="IMBAA_COLUMN" 	      Binding="{Binding IMBAA, StringFormat=\{0:N0\}, UpdateSourceTrigger=LostFocus}"  IsReadOnly="True"          Header="مالیات ب.ا.ا"       Width="auto" MinWidth="120" Visibility="Hidden" >
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                            <Setter Property = "IsTabStop" Value = "False"/>
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn 	x:Name="MANDAH_COLUMN" 	      Binding="{Binding MANDAH, UpdateSourceTrigger=LostFocus}"           Header="ملاحظات"              Width="*" MinWidth="130" Visibility="Visible" >
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="MaxLength" Value="48" />
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+
+                </DataGridTextColumn>
+                <DataGridTextColumn 	x:Name="N_TAF_COLUMN" 	      Binding="{Binding N_TAF, UpdateSourceTrigger=LostFocus}"            Header="N TAF"               Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridTextColumn 	x:Name="AVRAGE_COLUMN" 	      Binding="{Binding AVRAGE, UpdateSourceTrigger=LostFocus}"           Header="AVRAGE"              Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridTextColumn 	x:Name="ID_COLUMN"            Binding="{Binding id, UpdateSourceTrigger=LostFocus}"               Header="id"                  Width="auto" MinWidth="50" Visibility="Hidden"  IsReadOnly="True"/>
+                <DataGridTextColumn 	x:Name="AVRAGE2_COLUMN" 	  Binding="{Binding AVRAGE2, UpdateSourceTrigger=LostFocus}"          Header="AVRAGE 2"            Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridTextColumn 	x:Name="TOTALARZ_COLUMN" 	  Binding="{Binding TOTALARZ, UpdateSourceTrigger=LostFocus}"         Header="TOTALARZ"            Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridTextColumn 	x:Name="VISITOR_COLUMN" 	  Binding="{Binding VISITOR, UpdateSourceTrigger=LostFocus}"          Header="VISITOR"             Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridTextColumn 	                              Binding="{Binding JAYO, UpdateSourceTrigger=LostFocus}"                          Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridComboBoxColumn 	x:Name="JAYO_COLUMN"      SelectedValueBinding="{Binding JAYO, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="NAMES" SelectedValuePath="VAHED"            Header="الگوي جايزه"                Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridTemplateColumn x:Name="CRT_COLUMN"                                              							     Header="CRT"                 Width="auto" MinWidth="50" Visibility="Hidden" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <DatePicker SelectedDate="{Binding CRT, Mode=TwoWay, NotifyOnValidationError=true, UpdateSourceTrigger=LostFocus, ValidatesOnExceptions=true}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn 	x:Name="UID_COLUMN"   Binding="{Binding UID, UpdateSourceTrigger=LostFocus}"   Header="UID"  Visibility="Hidden"    Width="auto"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Button x:Name="SAVE_BTN"  Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="305,119,0,0" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Click="SAVE_BTN_Click" TabIndex="5"  />
+
+        <xctk:MaskedTextBox x:Name="DATE_N" Tag="RD"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="30" Margin="0,60,475,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="91"  PreviewLostKeyboardFocus="DATE_N_PreviewLostKeyboardFocus" TabIndex="0"/>
+        <Button x:Name="DELETE_BTN"  Tag="hazfer"  Content="حذف"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="181,162,0,0" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Click="DELETE_BTN_Click"/>
+        <Button x:Name="Command100" IsEnabled="False" Content="چاپ برگه"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="14,119,0,0" Height="32" VerticalAlignment="Top" Click="Command100_Click" HorizontalAlignment="Left" Width="91" />
+        <Button x:Name="custprint" IsEnabled="False" Content="C"  BorderBrush="{x:Null}" FontSize="10" Foreground="White" Margin="110,119,0,0" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="86" />
+        <CheckBox x:Name="OKF" Content="تایید حواله" HorizontalAlignment="Left" Margin="415,125,0,0" VerticalAlignment="Top" Width="71" FontSize="10" IsHitTestVisible="False" IsTabStop="False" IsEnabled="False" />
+        <Button x:Name="BTN_NEW_CLEAR"  Content="برگه جدید" Click="BTN_NEW_CLEAR_Click" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="305,162,0,0" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" />
+
+    </Grid>
+</Window>

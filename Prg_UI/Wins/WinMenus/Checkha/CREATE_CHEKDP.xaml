@@ -1,0 +1,139 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.Checkha"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:CUC="clr-namespace:Prg_UI.CUC" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="Prg_UI.Wins.WinMenus.Checkha.CREATE_CHEKDP"
+        mc:Ignorable="d"
+        FontFamily="IRANYekanFN"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        WindowStartupLocation="CenterScreen" 
+        Title="CREATE_CHEKPDP" Height="450" Width="930" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" ContentRendered="Window_ContentRendered">
+    <Grid x:Name="mygrid" Margin="-1,0,1,0" DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Border  Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1" Margin="3,0,2,0">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="28.579" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label Padding="5" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="0,0,107,0" Foreground="White"  FontSize="11">
+                        <Label.Content>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Draft"  Margin="0,0,5,0" Height="26" Foreground="White"/>
+                                <TextBlock Text=" چک گروهی دریافتی"  FontSize="15" Foreground="White" Width="138"/>
+                            </StackPanel>
+                        </Label.Content>
+                    </Label>
+                    <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowRestore" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                </Grid>
+            </Border>
+        </Border>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="512,237,417,181"  Width="1"/>
+        <ComboBox x:Name="CUST_NO" IsSynchronizedWithCurrentItem="True" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,0,98,350" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" IsTabStop="True" TabIndex="1" HorizontalAlignment="Right" Width="470" PreviewLostKeyboardFocus="CUST_NO_PreviewLostKeyboardFocus">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Label x:Name="Label3" Content=": مشتری" HorizontalAlignment="Left" Margin="839,72,0,0" VerticalAlignment="Top" Width="auto"/>
+        <ComboBox x:Name="CUST_NO2" IsSynchronizedWithCurrentItem="True"  Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,0,573,350" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" IsTabStop="True" TabIndex="2" HorizontalAlignment="Right" Width="137" LostFocus="CUST_NO2_LostFocus">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+
+        <Label x:Name="Label1" Width="auto" VerticalAlignment="Top" Margin="812,146,0,0" HorizontalAlignment="Left" Content=": شماره سریال"/>
+        <CUC:NumericTextBox DoesAcceptDouble="False"  x:Name="N_SERI" Height="27" Margin="0,0,123,276" IsReadOnly="False" Tag="RD" MaxLength="5" Text="" VerticalAlignment="Bottom" Visibility="Visible"  HorizontalAlignment="Right" Width="120" TabIndex="3" IsTabStop="True" Focusable="True" >
+
+        </CUC:NumericTextBox>
+
+        <xctk:MaskedTextBox x:Name="DATE_S" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="26" Margin="0,0,396,277" TextWrapping="Wrap" VerticalAlignment="Bottom"  BorderThickness="1" FontSize="12" HorizontalAlignment="Right" Width="86" TabIndex="4" PreviewLostKeyboardFocus="DATE_S_PreviewLostKeyboardFocus" />
+        <Label x:Name="Label1_Copy" Width="auto" VerticalAlignment="Top" Margin="539,147,0,0" HorizontalAlignment="Left" Content=": تاریخ سر رسید اولین چک"/>
+        <ComboBox x:Name="BANK"  Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,0,526,274" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft"   IsEditable="False" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" IsTabStop="True" TabIndex="5" HorizontalAlignment="Right" Width="141">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Label x:Name="Label3_Copy" Content=": بانک" HorizontalAlignment="Left" Margin="406,147,0,0" VerticalAlignment="Top" Width="auto"/>
+        <ComboBox x:Name="SHOBEH"  Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,0,734,274" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft"   IsEditable="False" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" IsTabStop="True" TabIndex="6" HorizontalAlignment="Right" Width="155">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Label x:Name="Label3_Copy1" Content=": نام شعبه" HorizontalAlignment="Left" Margin="198,147,0,0" VerticalAlignment="Top" Width="auto"/>
+        <ComboBox x:Name="LIST_NO"  Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="744,0,0,0" Height="28" FlowDirection="RightToLeft"   IsEditable="False" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" IsTabStop="True" TabIndex="7" HorizontalAlignment="Left" Width="83" >
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Label x:Name="Label3_Copy2" Content=": کد شعبه" HorizontalAlignment="Left" Margin="829,0,0,0" VerticalAlignment="Center" Width="auto"/>
+        <CUC:NumericTextBox DoesAcceptDouble="False" TabIndex="8" ThreeTwoZero="True" Text="" x:Name="MABL" Height="26" Margin="523,0,0,0" IsReadOnly="False" Tag="RD" VerticalAlignment="Center" Visibility="Visible"  HorizontalAlignment="Left" Width="140" Focusable="True" IsTabStop="True"/>
+        <Label x:Name="Label3_Copy3" Content=": مبلغ هر چک" HorizontalAlignment="Left" Margin="663,0,0,0" VerticalAlignment="Center" Width="auto"/>
+        <TextBox x:Name="NAME_TAH" TabIndex="9" Height="26" Margin="243,0,0,0" IsReadOnly="False" Tag="RD"  Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Center" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Left" Width="130" />
+        <Label x:Name="Label3_Copy4" Content=": نام پرداخت کننده و شرح" HorizontalAlignment="Left" Margin="379,0,0,0" VerticalAlignment="Center" Width="auto"/>
+        <TextBox x:Name="N_HESAB" TabIndex="10" Height="26" Margin="41,0,0,0" IsReadOnly="False" Tag="RD"  Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Center" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Left" Width="136" />
+        <Label x:Name="Label3_Copy5" Content=": جاری چک" HorizontalAlignment="Left" VerticalAlignment="Center" Width="auto" Margin="177,0,0,0"/>
+        <ComboBox x:Name="VAZ" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="590,269,0,0" Height="28" FlowDirection="RightToLeft"   IsEditable="False" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" IsTabStop="True" TabIndex="11" HorizontalAlignment="Left" Width="237" VerticalAlignment="Top">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Label x:Name="Label3_Copy6" Content=": نزد صندوق" HorizontalAlignment="Left" Margin="829,269,0,0" VerticalAlignment="Top" Width="auto"/>
+        <ComboBox x:Name="SANDUGH"  Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="590,303,0,0" Height="28" FlowDirection="RightToLeft"   IsEditable="False" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" IsTabStop="True" TabIndex="15" HorizontalAlignment="Left" Width="237" VerticalAlignment="Top">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Label x:Name="Label3_Copy7" Content=": موقعیت چک" HorizontalAlignment="Left" Margin="829,303,0,0" VerticalAlignment="Top" Width="auto"/>
+        <ComboBox x:Name="KIND"  Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="430,269,0,0" Height="28" FlowDirection="RightToLeft"   IsEditable="False" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" IsTabStop="True" TabIndex="12" HorizontalAlignment="Left" Width="92" VerticalAlignment="Top">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Label x:Name="Label3_Copy8" Content=": نوع چک" HorizontalAlignment="Left" Margin="524,269,0,0" VerticalAlignment="Top" Width="auto"/>
+        <CUC:NumericTextBox DoesAcceptDouble="False" TabIndex="13" MaxLength="2" Text="" x:Name="NUM" Height="28" Margin="283,271,0,0" IsReadOnly="False" Tag="RD" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="78" Focusable="True" IsTabStop="True" />
+        <Label x:Name="Label3_Copy9" Content=": تعداد فقره" HorizontalAlignment="Left" Margin="361,270,0,0" VerticalAlignment="Top" Width="auto"/>
+        <CUC:NumericTextBox DoesAcceptDouble="False" TabIndex="14" MaxLength="2" Text="" x:Name="GAP" Height="28" Margin="89,270,0,0" IsReadOnly="False" Tag="RD" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="118" Focusable="True" IsTabStop="True" />
+        <Label x:Name="Label3_Copy10" Content=": فاصله چکها" HorizontalAlignment="Left" Margin="207,269,0,0" VerticalAlignment="Top" Width="auto"/>
+        <Button x:Name="_Cancel" Content="لغو" Margin="350,387,0,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="12" Height="37" VerticalAlignment="Top" HorizontalAlignment="Left" Width="112" Foreground="#DDFFFFFF" FontWeight="Bold" Click="_Cancel_Click"/>
+        <Button x:Name="_Confirm" Content="تایید" Margin="476,387,0,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="12" Height="37" VerticalAlignment="Top" HorizontalAlignment="Left" Width="112" Foreground="#DDFFFFFF" FontWeight="Bold" Click="_Confirm_Click"/>
+        <Label Content="(ماه به ماه)" HorizontalAlignment="Left" Margin="220,287,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Width="61" FontSize="10">
+            <Label.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="1"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Label.RenderTransform>
+        </Label>
+
+    </Grid>
+</Window>

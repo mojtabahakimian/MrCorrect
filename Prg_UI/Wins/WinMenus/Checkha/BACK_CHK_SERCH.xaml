@@ -1,0 +1,55 @@
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.Checkha.BACK_CHK_SERCH"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.Checkha"
+        mc:Ignorable="d"
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        FontFamily="IRANYekanFN"
+	    Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        WindowStartupLocation="CenterScreen" 
+        Title="Window1" Height="455" Width="1014" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <Grid x:Name="mygrid" DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="95,56,0,0"  Width="1"/>
+        <Border  Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="28.579" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label x:Name="WINTILENAME" Content="نتیجه جستجو شماره سریال چک های برگشتی" Padding="21,9,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowRestore" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" IsEnabled="False" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                </Grid>
+            </Border>
+        </Border>
+        
+        <DataGrid x:Name="SUB_BACK_CHK_SERCH" Visibility="Visible" ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" AutoGenerateColumns="False" SelectedIndex="0" SelectionMode="Single" IsReadOnly="True" EnableRowVirtualization="True" Margin="14,50,10,10" FlowDirection="RightToLeft">
+            <DataGrid.Columns>
+                <DataGridTextColumn x:Name="n_TAFColumn" Binding="{Binding N_TAF}" Header="تفضیلی" Visibility="Hidden" Width="Auto"/>
+                <DataGridTextColumn x:Name="n_MOINColumn" Binding="{Binding N_MOIN}" Header="معین" Visibility="Hidden" Width="Auto"/>
+                <DataGridTextColumn x:Name="n_KOLColumn" Binding="{Binding N_KOL}" Header="کل" Visibility="Hidden" Width="Auto"/>
+                <DataGridTextColumn x:Name="hES1Column" Binding="{Binding HES1}" Header="HES 1" Visibility="Hidden" Width="Auto"/>
+                <DataGridTextColumn x:Name="rADIFColumn" Binding="{Binding RADIF}" Header="ردیف" Width="Auto"/>
+                <DataGridTextColumn x:Name="n_SERIColumn" Binding="{Binding N_SERI}" Header="شماره سریال" Width="Auto"/>
+                <DataGridTextColumn x:Name="nAMESColumn" Binding="{Binding NAMES}" Header="نام بانک" Width="Auto"/>
+                <DataGridTextColumn x:Name="sHOBEHColumn" Binding="{Binding SHOBEH}" Header="نام شعبه" Width="Auto"/>
+                <DataGridTextColumn x:Name="dATE_SColumn" Binding="{Binding DATE_S, StringFormat=####/##/##}" Header="تاریخ سررسید" Width="Auto"/>
+                <DataGridTextColumn x:Name="mABLColumn" Binding="{Binding MABL ,StringFormat=\{0:N0\}}" Header="مبلغ" Width="Auto"/>
+                <DataGridTextColumn x:Name="nAME_TAHColumn" Binding="{Binding NAME_TAH}" Header="نام تحویل دهنده" Width="240"/>
+                <DataGridTextColumn x:Name="n_HESABColumn" Binding="{Binding N_HESAB}" Header="شماره حساب" Width="Auto"/>
+                <DataGridTextColumn x:Name="dATEColumn" Binding="{Binding DATE , StringFormat=####/##/##}" Header="تاریخ دریافت" Width="Auto"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+    </Grid>
+</Window>

@@ -1,0 +1,1154 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<StiSerializer version="1.02" type="Net" application="StiReport">
+  <Culture isNull="true" />
+  <Dictionary Ref="1" type="Dictionary" isKey="true">
+    <BusinessObjects isList="true" count="0" />
+    <Databases isList="true" count="1">
+      <MS_x0020_SQL Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
+        <Alias>MS SQL</Alias>
+        <ConnectionStringEncrypted>9BrNoe9K+yFqe73M+lTjF9U0gS5FWVKk4k25gHM9InvVeHfP5wX6XX0IqNRjbCIPxHD7z2J9c91qbFm9ehnrG8lwdytTe0mIx1rZzOnc</ConnectionStringEncrypted>
+        <Key>42ad9e8e1779499ca416c4480d7bfbd5</Key>
+        <Name>MS SQL</Name>
+      </MS_x0020_SQL>
+    </Databases>
+    <DataSources isList="true" count="1">
+      <QSL_INVOICE_PISHFROOSH Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
+        <Alias>QSL_INVOICE_PISHFROOSH</Alias>
+        <Columns isList="true" count="99">
+          <value>ORIGINAL,ADDRESS,ADDRESS,ADDRESS,System.String,_x0031_e3837cc5900480d94b1a378dc2aea27</value>
+          <value>ORIGINAL,ANBAR,ANBAR,ANBAR,System.Int32,_x0034_7ab8d47f6b14b52846d54bccfaac7ba</value>
+          <value>ORIGINAL,ANBARF,ANBARF,ANBARF,System.Int32,_x0037_2a73a77a50140a29bad1f2bad9c52e1</value>
+          <value>ORIGINAL,BARNAMEH,BARNAMEH,BARNAMEH,System.String,_x0039_346c39fcd604e9a8e88ca8d816f65b3</value>
+          <value>ORIGINAL,CAM_KHALY,CAM_KHALY,CAM_KHALY,System.Decimal,c51cd868babb4f1fa9c6dfc29c75b8dc</value>
+          <value>ORIGINAL,CAM_POOR,CAM_POOR,CAM_POOR,System.Decimal,_x0037_210fa756b9a4642864f85d255dede58</value>
+          <value>ORIGINAL,CAMIUN_NUM,CAMIUN_NUM,CAMIUN_NUM,System.String,c9378aba5d1c4c3995355d76561a6423</value>
+          <value>ORIGINAL,CITY,CITY,CITY,System.String,_x0036_c29544a6bc44f97a05e5eea88c28a20</value>
+          <value>ORIGINAL,CODE,CODE,CODE,System.String,_x0033_7e7c62ebf114c94b204dc4ce69108cf</value>
+          <value>ORIGINAL,CODE_E,CODE_E,CODE_E,System.String,ec80a4059fe441caa302a98768f510f5</value>
+          <value>ORIGINAL,CODEn,CODEn,CODEn,System.Int64,ee12dc363c104c74a4f7d7778cd273bd</value>
+          <value>ORIGINAL,CUST_NO,CUST_NO,CUST_NO,System.String,b1c9db1ecb04426080b65f26a942fd1e</value>
+          <value>ORIGINAL,DATE_N,DATE_N,DATE_N,System.Int64,_x0034_c9820d75b5e497d8e6f417b5d59a2ec</value>
+          <value>ORIGINAL,DEPNAME,DEPNAME,DEPNAME,System.String,e0bfd2de90234c23a0422e40f1d0bc0c</value>
+          <value>ORIGINAL,DRIVER,DRIVER,DRIVER,System.String,cfe82752d7384e49b9fa4b57ea1112b0</value>
+          <value>ORIGINAL,DRIVER_MOB,DRIVER_MOB,DRIVER_MOB,System.String,_x0032_1312d95bbb5441ebb4e4c308a7be70c</value>
+          <value>ORIGINAL,ECODE,ECODE,ECODE,System.String,_x0038_50502f235754732b62e4e956db13f12</value>
+          <value>ORIGINAL,FNUMCO,FNUMCO,FNUMCO,System.Decimal,_x0036_e422d4238ba4fca9b6cc986043b4524</value>
+          <value>ORIGINAL,FROM_A,FROM_A,FROM_A,System.Boolean,ddbf7ce6fba64603a11025a4d490f47e</value>
+          <value>ORIGINAL,hes,hes,hes,System.String,e409bdc225434e4ca9706044f8787a7a</value>
+          <value>ORIGINAL,HESAB,HESAB,HESAB,System.String,b8d939dc85fd4fc681a7588ef59f8db2</value>
+          <value>ORIGINAL,HMBAA,HMBAA,HMBAA,System.String,_x0033_1acc0519da54c34be296dece2f1b1ac</value>
+          <value>ORIGINAL,IANBAR,IANBAR,IANBAR,System.Int32,_x0035_71e7a39ec98473d85df9fc7968a7ac5</value>
+          <value>ORIGINAL,ICUST_NO,ICUST_NO,ICUST_NO,System.Double,e742cd693e32454c9e7a01e936e47f0a</value>
+          <value>ORIGINAL,IMBAA,IMBAA,IMBAA,System.Single,_x0035_f237b81dc2d4f659970492e3bc51ec8</value>
+          <value>ORIGINAL,INUMBER,INUMBER,INUMBER,System.Single,_x0035_8ae67c785ed4e47a699a7f559f71753</value>
+          <value>ORIGINAL,ITAG,ITAG,ITAG,System.Single,a7881980d777452fa0814ce5648f3df1</value>
+          <value>ORIGINAL,IYALAT,IYALAT,IYALAT,System.String,_x0038_6e58f4566ae4929b49c29eecdca4481</value>
+          <value>ORIGINAL,KALA,KALA,KALA,System.String,f1fc42445ef740e797c8bb29085ed39e</value>
+          <value>ORIGINAL,kala2,kala2,kala2,System.String,fd6186a232d0450da665760a63d4a7c3</value>
+          <value>ORIGINAL,M_NAGHD,M_NAGHD,M_NAGHD,System.Single,_x0034_49d846efe7c402d9bd08814a76e6c6a</value>
+          <value>ORIGINAL,mabkbt,mabkbt,mabkbt,System.Single,be05b94cddfb4a25b82bf3434e134472</value>
+          <value>ORIGINAL,mabkn,mabkn,mabkn,System.Single,_x0034_8f1543894a947fb8f3bcb5388f09afd</value>
+          <value>ORIGINAL,MABL,MABL,MABL,System.Decimal,b06a884d18bc4aa49315d89a19a763be</value>
+          <value>ORIGINAL,MABL_HAV,MABL_HAV,MABL_HAV,System.Single,_x0032_88ae2d57ffc4426ac0ce8d06360e664</value>
+          <value>ORIGINAL,MABL_HAZ,MABL_HAZ,MABL_HAZ,System.Single,e98d2b1f2c65437e8bcbb764f9ed69b7</value>
+          <value>ORIGINAL,MABL_K,MABL_K,MABL_K,System.Decimal,a40c9d862fee4ea09fc0ed5e495de1a8</value>
+          <value>ORIGINAL,MABL_VAR,MABL_VAR,MABL_VAR,System.Single,b9c7358b0e4a4fbfb55b782f235f88bb</value>
+          <value>ORIGINAL,MAGHSAD,MAGHSAD,MAGHSAD,System.Single,_x0039_8c24ecc835f484491a3c53952cdc509</value>
+          <value>ORIGINAL,MANDAH,MANDAH,MANDAH,System.String,c30665cbd7cb45ae959859fd94d02276</value>
+          <value>ORIGINAL,MAS,MAS,MAS,System.Single,da9deda649184938a424af0a6e571aaf</value>
+          <value>ORIGINAL,MBAA,MBAA,MBAA,System.Single,_x0038_ccbd342a9574aa4adeaa3bf3e08f8ff</value>
+          <value>ORIGINAL,MCODEM,MCODEM,MCODEM,System.String,_x0034_cbda7e9e55f41b8921ab584444ccba1</value>
+          <value>ORIGINAL,MEGH,MEGH,MEGH,System.Decimal,fb56d7eaacaf4662be69edbcd144053b</value>
+          <value>ORIGINAL,MEGH_MAR,MEGH_MAR,MEGH_MAR,System.Single,_x0039_ce96ed56b5c4a99bc51448d88130aee</value>
+          <value>ORIGINAL,MEGH_R,MEGH_R,MEGH_R,System.Single,b132c7ff2b0340b495ab89c41a14db67</value>
+          <value>ORIGINAL,MEGHk,MEGHk,MEGHk,System.Decimal,_x0038_37f55b90410490288971c546464acb3</value>
+          <value>ORIGINAL,MOBILE,MOBILE,MOBILE,System.String,_x0033_fd4f71d2d5141119e941c0ffab90709</value>
+          <value>ORIGINAL,MOIN_HAV,MOIN_HAV,MOIN_HAV,System.String,_x0034_4f9a9e662c94ffd841b9c87e6937c29</value>
+          <value>ORIGINAL,MOIN_HAZ,MOIN_HAZ,MOIN_HAZ,System.String,_x0032_678a19091f84b05bf5c5b618e21b7e2</value>
+          <value>ORIGINAL,MOIN_KHF,MOIN_KHF,MOIN_KHF,System.String,_x0039_c6131659673411ea529bc5c0f573f8e</value>
+          <value>ORIGINAL,MOIN_VAR,MOIN_VAR,MOIN_VAR,System.String,_x0032_7f3369f4c63420989cd140b72a1940e</value>
+          <value>ORIGINAL,MOLAH,MOLAH,MOLAH,System.String,ceb528f97d48476e8bb6672a3e52d899</value>
+          <value>ORIGINAL,N_FANI,N_FANI,N_FANI,System.String,_x0030_beb8bcac55c4146867dda9fe6e21f7b</value>
+          <value>ORIGINAL,N_KOL,N_KOL,N_KOL,System.Single,_x0037_778b05fb6984b3bb2d7ece79ba59218</value>
+          <value>ORIGINAL,N_MOIN,N_MOIN,N_MOIN,System.Single,_x0034_feca883a1ea471f9cf0a395b5d5422c</value>
+          <value>ORIGINAL,N_RASID,N_RASID,N_RASID,System.String,_x0032_f88a82ebf71415da546022d000b5eea</value>
+          <value>ORIGINAL,N_S,N_S,N_S,System.Single,_x0030_121793e7cfd43afa0ac5ddb7c95a10e</value>
+          <value>ORIGINAL,NAME,NAME,NAME,System.String,f5648e527d794fbea856f63d9d9e6c7d</value>
+          <value>ORIGINAL,NAMES,NAMES,NAMES,System.String,eb00f61a38a14ea198165609138e1198</value>
+          <value>ORIGINAL,NUMBER,NUMBER,NUMBER,System.Single,_x0030_7c5edcbbd4549fe96bbcc97f3a1b6bd</value>
+          <value>ORIGINAL,NUMBER1,NUMBER1,NUMBER1,System.Single,bbfe1f75acb7404ab6a295dba4b6934a</value>
+          <value>ORIGINAL,PCODE,PCODE,PCODE,System.String,_x0035_89d25158cc44ea48a25bcaf8dc917b2</value>
+          <value>ORIGINAL,POSITION,POSITION,POSITION,System.String,_x0037_96cae13d9324aa9af8c62cad17047d1</value>
+          <value>ORIGINAL,RADAH,RADAH,RADAH,System.Single,_x0039_85cfda7f87f4bb8a539418495fc51b7</value>
+          <value>ORIGINAL,RADIF,RADIF,RADIF,System.Single,abbb773874f34351aa06308d154740db</value>
+          <value>ORIGINAL,REQUEST_NO,REQUEST_NO,REQUEST_NO,System.String,b67f4314983c4df28c77201d87b5336c</value>
+          <value>ORIGINAL,SANAD_NO,SANAD_NO,SANAD_NO,System.Single,d1fd27bb373c4d4d8cff052a17348686</value>
+          <value>ORIGINAL,SHARAYET,SHARAYET,SHARAYET,System.String,_x0038_daee0b1b75c4a4f971a4af45dec1d9c</value>
+          <value>ORIGINAL,SHNAME,SHNAME,SHNAME,System.String,f109078246d44d609707441db0e5918b</value>
+          <value>ORIGINAL,TAG,TAG,TAG,System.Single,c12d79306e2545b8b4fed59291c7397d</value>
+          <value>ORIGINAL,TAH,TAH,TAH,System.String,_x0033_3081c2994df49b3b1fdb1e4e656a169</value>
+          <value>ORIGINAL,TAKHFIF,TAKHFIF,TAKHFIF,System.Single,_x0039_32c7549997c46e2bdf79f7320e1230b</value>
+          <value>ORIGINAL,TEL,TEL,TEL,System.String,_x0030_2b93855012141d79ec35f6d3203446c</value>
+          <value>ORIGINAL,TKHN,TKHN,TKHN,System.Single,cb0fa04ccbba4d829322109c0460d67c</value>
+          <value>ORIGINAL,TOZIH,TOZIH,TOZIH,System.String,a9d7ad8d3fa14da985382c258663f943</value>
+          <value>ORIGINAL,USER_NAME,USER_NAME,USER_NAME,System.String,_x0038_5658ce44079468f9b31b331af626d54</value>
+          <value>ORIGINAL,VAS,VAS,VAS,System.Single,_x0032_610cba0599045e1a0566a09e1ec3709</value>
+          <value>ORIGINAL,VNAMES,VNAMES,VNAMES,System.String,_x0035_87db97a5f9043c69d0819f7f2ef84e4</value>
+          <value>CUST_COD,System.Int32</value>
+          <value>DEPART,System.String</value>
+          <value>ORIGINAL,MABKBT,MABKBT1,MABKBT1,System.Double</value>
+          <value>ORIGINAL,MABKN,MABKN1,MABKN1,System.Double</value>
+          <value>ORIGINAL,KALA2,KALA21,KALA21,System.String</value>
+          <value>sgn1usid,System.Int32</value>
+          <value>sgn2usid,System.Int32</value>
+          <value>sgn3usid,System.Int32</value>
+          <value>EMZA1,System.Byte[]</value>
+          <value>EMZA2,System.Byte[]</value>
+          <value>EMZA3,System.Byte[]</value>
+          <value>Barcode,System.String</value>
+          <value>CAMIUN,System.String</value>
+          <value>CODEG,System.String</value>
+          <value>CAM_KHALYG,System.Double</value>
+          <value>CAM_POORG,System.Double</value>
+          <value>MEGHkG,System.Double</value>
+          <value>TOZIHG,System.String</value>
+          <value>VAZNH,System.Double</value>
+          <value>NAMEG,System.String</value>
+        </Columns>
+        <CommandTimeout>30</CommandTimeout>
+        <Dictionary isRef="1" />
+        <Key>41b7654f5de64171a3a54302c090e7a5</Key>
+        <Name>QSL_INVOICE_PISHFROOSH</Name>
+        <NameInSource>MS SQL</NameInSource>
+        <Parameters isList="true" count="1">
+          <value>NUMBER_PARAM,,6,7</value>
+        </Parameters>
+        <SqlCommand>SELECT HEAD_LST.NUMBER, HEAD_LST.DATE_N, HEAD_LST.TAG, INVO_LST.RADIF, INVO_LST.CODE, INVO_LST.MEGH, INVO_LST.MEGHk, CUST_HESAB.NAME AS HESAB, CUST_HESAB.ADDRESS, CUST_HESAB.TEL, HEAD_LST.CUST_NO, CUST_HESAB.ECODE, CUST_HESAB.PCODE, CUST_HESAB.IYALAT, CUST_HESAB.MCODEM, CUST_HESAB.CITY, CUST_HESAB.CODE_E, OTHER_DTL.REQUEST_NO, OTHER_DTL.BARNAMEH, OTHER_DTL.DRIVER, OTHER_DTL.DRIVER_MOB, OTHER_DTL.CAMIUN_NUM, OTHER_DTL.MAGHSAD, OTHER_DTL.CAM_KHALY, OTHER_DTL.CAM_POOR, OTHER_DTL.TOZIH, OTHER_DTL.CAMIUN, OTHER_DTL_SUB.CODE AS CODEG, OTHER_DTL_SUB.CAM_KHALY AS CAM_KHALYG, OTHER_DTL_SUB.CAM_POOR AS CAM_POORG, OTHER_DTL_SUB.MEGHk AS MEGHkG, OTHER_DTL_SUB.TOZIH AS TOZIHG, OTHER_DTL_SUB.VAZNH, STUF_DEF_1.NAME AS NAMEG
+	FROM OTHER_DTL_SUB
+	RIGHT OUTER JOIN CUST_HESAB
+                      RIGHT OUTER JOIN HEAD_LST ON CUST_HESAB.hes=HEAD_LST.CUST_NO
+                      RIGHT OUTER JOIN STUF_DEF STUF_DEF_1
+                                       INNER JOIN INVO_LST ON STUF_DEF_1.CODE=INVO_LST.CODE ON HEAD_LST.TAG=INVO_LST.TAG AND HEAD_LST.NUMBER=INVO_LST.NUMBER ON OTHER_DTL_SUB.CODE=INVO_LST.CODE AND OTHER_DTL_SUB.NUMBER=INVO_LST.NUMBER AND OTHER_DTL_SUB.TAGG=INVO_LST.TAG
+     LEFT OUTER JOIN OTHER_DTL ON HEAD_LST.NUMBER=OTHER_DTL.NUMBER AND HEAD_LST.TAG=OTHER_DTL.TAG
+WHERE(HEAD_LST.TAG=20) AND (HEAD_LST.NUMBER=@NUMBER_PARAM)</SqlCommand>
+      </QSL_INVOICE_PISHFROOSH>
+    </DataSources>
+    <Relations isList="true" count="0" />
+    <Report isRef="0" />
+    <Resources isList="true" count="0" />
+    <Variables isList="true" count="1">
+      <value>,Variable1,Variable1,,System.Int64,,False,False,False,False,,_x0038_4057d6739bb4c6e850411c886a61add</value>
+    </Variables>
+  </Dictionary>
+  <EngineVersion>EngineV2</EngineVersion>
+  <GlobalizationStrings isList="true" count="1">
+    <Item3 Ref="4" type="Stimulsoft.Report.StiGlobalizationContainer" isKey="true">
+      <CultureName>fa-IR</CultureName>
+      <Items isList="true" count="0" />
+    </Item3>
+  </GlobalizationStrings>
+  <Key>afb6c885199e4f74b66673b8f9dcacd8</Key>
+  <MetaTags isList="true" count="0" />
+  <Pages isList="true" count="1">
+    <Page1 Ref="5" type="Page" isKey="true">
+      <Border>All;Black;2;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <Components isList="true" count="6">
+        <PageHeaderBand1 Ref="6" type="PageHeaderBand" isKey="true">
+          <Border>None;[43:43:43];1;Solid;False;4;Black</Border>
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0,0.4,19,3.5</ClientRectangle>
+          <Components isList="true" count="22">
+            <Text11 Ref="7" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>2.05,0.61,0.8,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text11</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>تاريخ :</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <VertAlignment>Center</VertAlignment>
+            </Text11>
+            <Text10 Ref="8" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>2.09,0.01,1,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text10</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>شماره :</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <VertAlignment>Center</VertAlignment>
+            </Text10>
+            <Text12 Ref="9" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>18,1.4,1,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text12</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>مشتری:</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text12>
+            <Text14 Ref="10" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>18,2,0.8,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text14</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>نشانی:</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text14>
+            <Text15 Ref="11" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>3.63,2.03,0.71,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text15</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>تلفن:</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <VertAlignment>Center</VertAlignment>
+            </Text15>
+            <Text2 Ref="12" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>4.4,2,13.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text2</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>{QSL_INVOICE_PISHFROOSH.ADDRESS}</Text>
+              <TextBrush>Black</TextBrush>
+              <VertAlignment>Center</VertAlignment>
+            </Text2>
+            <Text4 Ref="13" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>4.35,1.4,13.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text4</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>{QSL_INVOICE_PISHFROOSH.HESAB} / {QSL_INVOICE_PISHFROOSH.CUST_NO}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text4>
+            <Text17 Ref="14" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.14,2.02,3.47,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text17</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>{QSL_INVOICE_PISHFROOSH.TEL}</Text>
+              <TextBrush>Black</TextBrush>
+              <VertAlignment>Center</VertAlignment>
+            </Text17>
+            <Text37 Ref="15" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.08,0.01,2,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text37</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>{QSL_INVOICE_PISHFROOSH.NUMBER}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text37>
+            <WIDTH_D Ref="16" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>3.24,0,15.74,0.65</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>WIDTH_D</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </WIDTH_D>
+            <Text13 Ref="17" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,0.6,2.08,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text13</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>{QSL_INVOICE_PISHFROOSH.DATE_N}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="18" type="CustomFormat" isKey="true">
+                <StringFormat>####/##/##</StringFormat>
+              </TextFormat>
+              <VertAlignment>Center</VertAlignment>
+            </Text13>
+            <Text3 Ref="19" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>3.24,0.6,15.74,0.65</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text3</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>حواله انبار فروش</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text3>
+            <Text16 Ref="20" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>3.2,1.4,1,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text16</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>ش.ملی:</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text16>
+            <Text18 Ref="21" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,1.4,3.2,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text18</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>{QSL_INVOICE_PISHFROOSH.MCODEM}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text18>
+            <Text5 Ref="22" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>17.2,2.8,1.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text5</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>شماره ماشین:</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text5>
+            <Text19 Ref="23" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>11.8,2.8,1.2,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text19</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>نام راننده:</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text19>
+            <Text20 Ref="24" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>13.2,2.8,4,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text20</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>{QSL_INVOICE_PISHFROOSH.CAMIUN_NUM}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text20>
+            <Text21 Ref="25" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>1.8,2.8,10,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text21</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>{QSL_INVOICE_PISHFROOSH.DRIVER}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text21>
+            <HorizontalLinePrimitive1 Ref="26" type="HorizontalLinePrimitive" isKey="true">
+              <ClientRectangle>0,1.27,19.01,0.0254</ClientRectangle>
+              <Color>Black</Color>
+              <Conditions isList="true" count="0" />
+              <EndCap Ref="27" type="Cap" isKey="true">
+                <Color>Black</Color>
+              </EndCap>
+              <Expressions isList="true" count="0" />
+              <Name>HorizontalLinePrimitive1</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Size>3</Size>
+              <StartCap Ref="28" type="Cap" isKey="true">
+                <Color>Black</Color>
+              </StartCap>
+            </HorizontalLinePrimitive1>
+            <HorizontalLinePrimitive2 Ref="29" type="HorizontalLinePrimitive" isKey="true">
+              <ClientRectangle>0,2.7,19,0.0254</ClientRectangle>
+              <Color>Black</Color>
+              <Conditions isList="true" count="0" />
+              <EndCap Ref="30" type="Cap" isKey="true">
+                <Color>Black</Color>
+              </EndCap>
+              <Expressions isList="true" count="0" />
+              <Name>HorizontalLinePrimitive2</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Size>3</Size>
+              <StartCap Ref="31" type="Cap" isKey="true">
+                <Color>Black</Color>
+              </StartCap>
+            </HorizontalLinePrimitive2>
+            <StartPointPrimitive2 Ref="32" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+              <ClientRectangle>3.2,0,0,0</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Name>StartPointPrimitive2</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <ReferenceToGuid>d09490bba39245108f6d3a32ed21cb61</ReferenceToGuid>
+            </StartPointPrimitive2>
+            <EndPointPrimitive2 Ref="33" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+              <ClientRectangle>3.2,1.3,0,0</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Name>EndPointPrimitive2</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <ReferenceToGuid>d09490bba39245108f6d3a32ed21cb61</ReferenceToGuid>
+            </EndPointPrimitive2>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Name>PageHeaderBand1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+        </PageHeaderBand1>
+        <PageFooterBand1 Ref="34" type="PageFooterBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0,26.7,19,1</ClientRectangle>
+          <Components isList="true" count="5">
+            <Text22 Ref="35" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>18,0.2,0.8,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text22</Name>
+              <Page isRef="5" />
+              <Parent isRef="34" />
+              <Text>آدرس:</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text22>
+            <TFADDRESS Ref="36" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>4.8,0.2,13.2,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>TFADDRESS</Name>
+              <Page isRef="5" />
+              <Parent isRef="34" />
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </TFADDRESS>
+            <Text24 Ref="37" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>4,0.2,0.8,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text24</Name>
+              <Page isRef="5" />
+              <Parent isRef="34" />
+              <Text>تلفن:</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text24>
+            <TFTEL Ref="38" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.13,0.16,3.84,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>TFTEL</Name>
+              <Page isRef="5" />
+              <Parent isRef="34" />
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </TFTEL>
+            <HorizontalLinePrimitive3 Ref="39" type="HorizontalLinePrimitive" isKey="true">
+              <ClientRectangle>0,0.1,19.01,0.0254</ClientRectangle>
+              <Color>Black</Color>
+              <Conditions isList="true" count="0" />
+              <EndCap Ref="40" type="Cap" isKey="true">
+                <Color>Black</Color>
+              </EndCap>
+              <Expressions isList="true" count="0" />
+              <Name>HorizontalLinePrimitive3</Name>
+              <Page isRef="5" />
+              <Parent isRef="34" />
+              <Size>2</Size>
+              <StartCap Ref="41" type="Cap" isKey="true">
+                <Color>Black</Color>
+              </StartCap>
+            </HorizontalLinePrimitive3>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Name>PageFooterBand1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+        </PageFooterBand1>
+        <Table1 Ref="42" type="Stimulsoft.Report.Components.Table.StiTable" isKey="true">
+          <Border>None;[0:0:0];1;Solid;False;4;Black</Border>
+          <Brush>Transparent</Brush>
+          <BusinessObjectGuid isNull="true" />
+          <ClientRectangle>0,4.7,19,1.6</ClientRectangle>
+          <ColumnCount>7</ColumnCount>
+          <Components isList="true" count="14">
+            <Table1_Cell1 Ref="43" type="TableCell" isKey="true">
+              <Border>All;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>[255:251:154]</Brush>
+              <ClientRectangle>0,0,3.2,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <ID>71</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell1</Name>
+              <Page isRef="5" />
+              <Parent isRef="42" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>تحویل دهنده</Text>
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Table1_Cell1>
+            <Table1_Cell2 Ref="44" type="TableCell" isKey="true">
+              <Border>All;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>[255:251:154]</Brush>
+              <ClientRectangle>3.2,0,1.8,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <ID>72</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell2</Name>
+              <Page isRef="5" />
+              <Parent isRef="42" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>وزن خالص</Text>
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Table1_Cell2>
+            <Table1_Cell3 Ref="45" type="TableCell" isKey="true">
+              <Border>All;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>[255:251:154]</Brush>
+              <ClientRectangle>5,0,1.8,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <ID>73</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell3</Name>
+              <Page isRef="5" />
+              <Parent isRef="42" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>وزن پر</Text>
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Table1_Cell3>
+            <Table1_Cell4 Ref="46" type="TableCell" isKey="true">
+              <Border>All;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>[255:251:154]</Brush>
+              <ClientRectangle>6.8,0,2,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <ID>74</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell4</Name>
+              <Page isRef="5" />
+              <Parent isRef="42" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>وزن خالی</Text>
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Table1_Cell4>
+            <Table1_Cell5 Ref="47" type="TableCell" isKey="true">
+              <Border>All;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>[255:251:154]</Brush>
+              <ClientRectangle>8.8,0,1.8,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <ID>77</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell5</Name>
+              <Page isRef="5" />
+              <Parent isRef="42" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>وزن کالا</Text>
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Table1_Cell5>
+            <Table1_Cell6 Ref="48" type="TableCell" isKey="true">
+              <Border>All;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>[255:251:154]</Brush>
+              <ClientRectangle>10.6,0,7.6,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <ID>75</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell6</Name>
+              <Page isRef="5" />
+              <Parent isRef="42" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>شرح کالا</Text>
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Table1_Cell6>
+            <Table1_Cell7 Ref="49" type="TableCell" isKey="true">
+              <Border>All;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>[255:251:154]</Brush>
+              <ClientRectangle>18.2,0,0.8,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <ID>76</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell7</Name>
+              <Page isRef="5" />
+              <Parent isRef="42" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>ردیف</Text>
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Table1_Cell7>
+            <Table1_Cell8 Ref="50" type="TableCell" isKey="true">
+              <Border>All;Black;1;Solid;False;4;Black</Border>
+              <Brush>White</Brush>
+              <ClientRectangle>0,0.8,3.2,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <GrowToHeight>True</GrowToHeight>
+              <HorAlignment>Center</HorAlignment>
+              <ID>25</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell8</Name>
+              <Page isRef="5" />
+              <Parent isRef="42" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="51" type="NumberFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <GroupSeparator>,</GroupSeparator>
+                <NegativePattern>3</NegativePattern>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Table1_Cell8>
+            <Table1_Cell9 Ref="52" type="TableCell" isKey="true">
+              <Border>All;Black;1;Solid;False;4;Black</Border>
+              <Brush>White</Brush>
+              <CanBreak>True</CanBreak>
+              <CanGrow>True</CanGrow>
+              <ClientRectangle>3.2,0.8,1.8,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <GrowToHeight>True</GrowToHeight>
+              <HorAlignment>Center</HorAlignment>
+              <ID>26</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell9</Name>
+              <Page isRef="5" />
+              <Parent isRef="42" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>{QSL_INVOICE_PISHFROOSH.MEGHkG}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="53" type="CustomFormat" isKey="true">
+                <StringFormat>0.##;-0.##;0</StringFormat>
+              </TextFormat>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Table1_Cell9>
+            <Table1_Cell10 Ref="54" type="TableCell" isKey="true">
+              <Border>All;Black;1;Solid;False;4;Black</Border>
+              <Brush>White</Brush>
+              <ClientRectangle>5,0.8,1.8,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <GrowToHeight>True</GrowToHeight>
+              <HorAlignment>Center</HorAlignment>
+              <ID>27</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell10</Name>
+              <Page isRef="5" />
+              <Parent isRef="42" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>{QSL_INVOICE_PISHFROOSH.CAM_POORG}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="55" type="CustomFormat" isKey="true">
+                <StringFormat>0.##;-0.##;0</StringFormat>
+              </TextFormat>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Table1_Cell10>
+            <Table1_Cell11 Ref="56" type="TableCell" isKey="true">
+              <Border>All;Black;1;Solid;False;4;Black</Border>
+              <Brush>White</Brush>
+              <ClientRectangle>6.8,0.8,2,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <GrowToHeight>True</GrowToHeight>
+              <HorAlignment>Center</HorAlignment>
+              <ID>28</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell11</Name>
+              <Page isRef="5" />
+              <Parent isRef="42" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>{QSL_INVOICE_PISHFROOSH.CAM_KHALYG}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="57" type="CustomFormat" isKey="true">
+                <StringFormat>0.##;-0.##;0</StringFormat>
+              </TextFormat>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Table1_Cell11>
+            <Table1_Cell12 Ref="58" type="TableCell" isKey="true">
+              <Border>All;Black;1;Solid;False;4;Black</Border>
+              <Brush>White</Brush>
+              <ClientRectangle>8.8,0.8,1.8,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <GrowToHeight>True</GrowToHeight>
+              <HorAlignment>Center</HorAlignment>
+              <ID>78</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell12</Name>
+              <Page isRef="5" />
+              <Parent isRef="42" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>{QSL_INVOICE_PISHFROOSH.MEGHk}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="59" type="CustomFormat" isKey="true">
+                <StringFormat>0.##;-0.##;0</StringFormat>
+              </TextFormat>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Table1_Cell12>
+            <Table1_Cell13 Ref="60" type="TableCell" isKey="true">
+              <Border>All;Black;1;Solid;False;4;Black</Border>
+              <Brush>White</Brush>
+              <CanGrow>True</CanGrow>
+              <ClientRectangle>10.6,0.8,7.6,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <GrowToHeight>True</GrowToHeight>
+              <HorAlignment>Center</HorAlignment>
+              <ID>29</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell13</Name>
+              <Page isRef="5" />
+              <Parent isRef="42" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>{QSL_INVOICE_PISHFROOSH.NAMEG}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Table1_Cell13>
+            <Table1_Cell14 Ref="61" type="TableCell" isKey="true">
+              <Border>Right, Bottom;Black;1;Solid;False;4;Black</Border>
+              <Brush>White</Brush>
+              <ClientRectangle>18.2,0.8,0.8,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <GrowToHeight>True</GrowToHeight>
+              <HorAlignment>Center</HorAlignment>
+              <ID>30</ID>
+              <JoinCells isList="true" count="0" />
+              <Margins>0,0,0,0</Margins>
+              <Name>Table1_Cell14</Name>
+              <Page isRef="5" />
+              <Parent isRef="42" />
+              <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
+              <Text>{Line}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>SystemVariables</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Table1_Cell14>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <DataSourceName>QSL_INVOICE_PISHFROOSH</DataSourceName>
+          <Expressions isList="true" count="0" />
+          <Filters isList="true" count="0" />
+          <HeaderRowsCount>1</HeaderRowsCount>
+          <MinHeight>0.4</MinHeight>
+          <Name>Table1</Name>
+          <NumberID>79</NumberID>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <RowCount>2</RowCount>
+          <Sort isList="true" count="0" />
+        </Table1>
+        <FooterBand1 Ref="62" type="FooterBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0,7.1,19,2.4</ClientRectangle>
+          <Components isList="true" count="9">
+            <USER_LABEL Ref="63" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>1.8,1,1.46,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>USER_LABEL</Name>
+              <Page isRef="5" />
+              <Parent isRef="62" />
+              <Text>صادر کننده:</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </USER_LABEL>
+            <USER_TEXT Ref="64" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>1.4,1.6,2.26,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>USER_TEXT</Name>
+              <Page isRef="5" />
+              <Parent isRef="62" />
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </USER_TEXT>
+            <Text8 Ref="65" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>16.8,1.6,2,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text8</Name>
+              <Page isRef="5" />
+              <Parent isRef="62" />
+              <Text>کل مانده حساب:</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text8>
+            <MANDAH Ref="66" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>11.8,1.6,5,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>MANDAH</Name>
+              <Page isRef="5" />
+              <Parent isRef="62" />
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="67" type="CurrencyFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <GroupSeparator>,</GroupSeparator>
+                <NegativePattern>6</NegativePattern>
+                <PositivePattern>1</PositivePattern>
+                <Symbol>ريال</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </MANDAH>
+            <Text6 Ref="68" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>8.8,0.04,1.81,0.83</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text6</Name>
+              <Page isRef="5" />
+              <Parent isRef="62" />
+              <Text>{Sum(Table1,QSL_INVOICE_PISHFROOSH.MEGHk)}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Totals</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text6>
+            <Text7 Ref="69" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>10.71,0,1.09,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text7</Name>
+              <Page isRef="5" />
+              <Parent isRef="62" />
+              <Text>جمع کل:</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text7>
+            <Text206 Ref="70" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>17,0,2,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text206</Name>
+              <Page isRef="5" />
+              <Parent isRef="62" />
+              <Text>{Time.ToString("HH:mm")}</Text>
+              <TextBrush>[0:0:0]</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text206>
+            <EndPointPrimitive1 Ref="71" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+              <ClientRectangle>10.6,0.9,0,0</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Name>EndPointPrimitive1</Name>
+              <Page isRef="5" />
+              <Parent isRef="62" />
+              <ReferenceToGuid>0db879b12ba34954bf047d0344e85567</ReferenceToGuid>
+            </EndPointPrimitive1>
+            <StartPointPrimitive1 Ref="72" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+              <ClientRectangle>8.8,0.02,0,0</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Name>StartPointPrimitive1</Name>
+              <Page isRef="5" />
+              <Parent isRef="62" />
+              <ReferenceToGuid>0db879b12ba34954bf047d0344e85567</ReferenceToGuid>
+            </StartPointPrimitive1>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Name>FooterBand1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+        </FooterBand1>
+        <RectanglePrimitive1 Ref="73" type="RectanglePrimitive" isKey="true">
+          <ClientRectangle>8.8,7.12,1.8,0.88</ClientRectangle>
+          <Color>Black</Color>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Guid>0db879b12ba34954bf047d0344e85567</Guid>
+          <Name>RectanglePrimitive1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Size>2</Size>
+        </RectanglePrimitive1>
+        <VerticalLinePrimitive1 Ref="74" type="VerticalLinePrimitive" isKey="true">
+          <ClientRectangle>3.2,0.4,0.0254,1.3</ClientRectangle>
+          <Color>Black</Color>
+          <Conditions isList="true" count="0" />
+          <EndCap Ref="75" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </EndCap>
+          <Expressions isList="true" count="0" />
+          <Guid>d09490bba39245108f6d3a32ed21cb61</Guid>
+          <Name>VerticalLinePrimitive1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Size>2</Size>
+          <StartCap Ref="76" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </StartCap>
+        </VerticalLinePrimitive1>
+      </Components>
+      <Conditions isList="true" count="0" />
+      <Expressions isList="true" count="0" />
+      <Guid>f95c2735ffa9496480b7295ba25b08f6</Guid>
+      <Margins>1,1,1,1</Margins>
+      <Name>Page1</Name>
+      <PageHeight>29.7</PageHeight>
+      <PageWidth>21</PageWidth>
+      <Report isRef="0" />
+      <UnlimitedHeight>True</UnlimitedHeight>
+    </Page1>
+  </Pages>
+  <ReferencedAssemblies isList="true" count="8">
+    <value>System.Dll</value>
+    <value>System.Drawing.Dll</value>
+    <value>System.Windows.Forms.Dll</value>
+    <value>System.Data.Dll</value>
+    <value>System.Xml.Dll</value>
+    <value>Stimulsoft.Controls.Dll</value>
+    <value>Stimulsoft.Base.Dll</value>
+    <value>Stimulsoft.Report.Dll</value>
+  </ReferencedAssemblies>
+  <ReportAlias>Report</ReportAlias>
+  <ReportChanged>5/16/2024 4:34:15 PM</ReportChanged>
+  <ReportCreated>9/5/2021 1:38:11 PM</ReportCreated>
+  <ReportFile>E:\prg\MrCorrect160\Prg_UI\Rpts\PishFactor\p1.mrt</ReportFile>
+  <ReportGuid>708e6b4d03404635b9ba6ff10485464c</ReportGuid>
+  <ReportName>Report</ReportName>
+  <ReportUnit>Centimeters</ReportUnit>
+  <ReportVersion>2023.1.1.0</ReportVersion>
+  <Script>using System;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Data;
+using Stimulsoft.Controls;
+using Stimulsoft.Base.Drawing;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Dialogs;
+using Stimulsoft.Report.Components;
+
+namespace Reports
+{
+    public class Report : Stimulsoft.Report.StiReport
+    {
+        public Report()        {
+            this.InitializeComponent();
+        }
+
+        #region StiReport Designer generated code - do not modify
+		#endregion StiReport Designer generated code - do not modify
+    }
+}
+</Script>
+  <ScriptLanguage>CSharp</ScriptLanguage>
+  <Styles isList="true" count="0" />
+</StiSerializer>

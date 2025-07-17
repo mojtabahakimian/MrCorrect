@@ -1,0 +1,23 @@
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.SALARY.ERSAL_SANAD"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.SALARY"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        Title="تهیه دیسکت بیمه" Height="177" Width="379" Loaded="Window_Loaded" Activated="Window_Activated" >
+    <Grid>
+        <ComboBox x:Name="MMO" Padding="7,0,10,0" Style="{StaticResource MaterialDesignOutlinedComboBox}" IsTextSearchEnabled="False" Margin="59,52,91,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" BorderBrush="#8C000000">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <TextBox x:Name="TEXTBOXPATH"  Text="C:\CORRECT" Height="28" Margin="60,14,10,0"    Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3" TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" FlowDirection="RightToLeft" TextChanged="TEXTBOXPATH_TextChanged"/>
+        <Button x:Name="Command13" Content="تهیه دیسکت"  Margin="145,95,126,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="37" VerticalAlignment="Top" Foreground="#DDFFFFFF" FontWeight="Bold" Click="Command13_Click"/>
+        <Label Content="مسیر :" HorizontalAlignment="Left" Height="32" Margin="10,14,0,0" VerticalAlignment="Top" Width="45"/>
+        <Label Content="ماه :" HorizontalAlignment="Left" Height="32" Margin="20,51,0,0" VerticalAlignment="Top" Width="35"/>
+    </Grid>
+</Window>

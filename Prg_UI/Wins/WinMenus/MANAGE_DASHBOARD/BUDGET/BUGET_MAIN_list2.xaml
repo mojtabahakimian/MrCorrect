@@ -1,0 +1,139 @@
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET.BUGET_MAIN_list2"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET"
+        mc:Ignorable="d"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Background="{x:Null}" AllowsTransparency="True"
+        AllowDrop="True"
+        
+        Height="528" Width="1033" WindowStyle="None" MinWidth="1033" MinHeight="528" Margin="0" WindowStartupLocation="CenterOwner" ContentRendered="Window_ContentRendered" FontFamily="IRANYekanFN">
+    <Window.Resources>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+        <ControlTemplate TargetType="{x:Type Button}" x:Key="ButtonTemplateRed">
+            <Border x:Name="RootElement">
+                <Border.Background>
+                    <SolidColorBrush x:Name="BorderBrush" Color="Black" />
+                </Border.Background>
+
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal" />
+                        <VisualState x:Name="MouseOver">
+                            <Storyboard>
+                                <ColorAnimation Storyboard.TargetName="ButtonBackground"
+                                    Storyboard.TargetProperty="Color" To="Red" />
+                            </Storyboard>
+                        </VisualState>
+                        <VisualState x:Name="Pressed">
+                            <Storyboard>
+                                <ColorAnimation Storyboard.TargetName="ButtonBackground"
+                                    Storyboard.TargetProperty="Color" To="Red" />
+                            </Storyboard>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+
+                <Grid x:Name="mygrid">
+                    <Grid.Background>
+                        <SolidColorBrush x:Name="ButtonBackground" Color="Black" />
+                    </Grid.Background>
+                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="4,5,4,4" />
+                </Grid>
+            </Border>
+        </ControlTemplate>
+        <Style x:Key="FocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <SolidColorBrush x:Key="Button.Static.Background" Color="#FFDDDDDD"/>
+        <SolidColorBrush x:Key="Button.Static.Border" Color="#FF707070"/>
+        <SolidColorBrush x:Key="Button.MouseOver.Background" Color="#FFBEE6FD"/>
+        <SolidColorBrush x:Key="Button.MouseOver.Border" Color="#FF3C7FB1"/>
+        <SolidColorBrush x:Key="Button.Pressed.Background" Color="#FFC4E5F6"/>
+        <SolidColorBrush x:Key="Button.Pressed.Border" Color="#FF2C628B"/>
+        <SolidColorBrush x:Key="Button.Disabled.Background" Color="#FFF4F4F4"/>
+        <SolidColorBrush x:Key="Button.Disabled.Border" Color="#FFADB2B5"/>
+        <SolidColorBrush x:Key="Button.Disabled.Foreground" Color="#FF838383"/>
+    </Window.Resources>
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+
+    <Grid>
+        <Border 	  Background="{DynamicResource MaterialDesign.Brush.Background}" BorderBrush="{Binding ElementName=GENERAL_RANG,Path=Background}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{DynamicResource BordG}" Background="{Binding ElementName=GENERAL_RANG,Path=Background}" Margin="-7.999,-7.928,-8,0" VerticalAlignment="Top" MinHeight="50" UseLayoutRounding="False" Height="52" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Label Content="لیست بودجه های گرفته شده" Padding="25,15,15,15" Foreground="White"/>
+            </Border>
+        </Border>
+        <Label x:Name="cnnparamlbl"  Content="اتصال به دیتابیس" Margin="10,488,903,10"  MouseLeftButtonUp="cnnparamlbl_MouseLeftButtonUp" FontSize="14" TabIndex="1"/>
+        <Label x:Name="preloader" Visibility="Collapsed" HorizontalContentAlignment="Center" Style="{DynamicResource LBLG}" VerticalContentAlignment="Center" Content=". . . تحلیل بودجه" Margin="0,50,0,0"  MouseLeftButtonUp="cnnparamlbl_MouseLeftButtonUp" FontSize="40" Foreground="WhiteSmoke">
+            <Label.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FF20BF55" Offset="0"/>
+                    <GradientStop Color="#FF01BAEF" Offset="1"/>
+                </LinearGradientBrush>
+            </Label.Background>
+        </Label>
+        <DataGrid x:Name="DGR_ProcessBudget" d:ItemsSource="{d:SampleData ItemCount=5}"
+                    Style="{StaticResource DATAGRIDSTYLISH}"
+                    ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"           
+                    HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+					VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                    Margin="10,65,10,45" AutoGenerateColumns="False"  FlowDirection="RightToLeft" Loaded="DGR_ProcessBudget_Loaded" PreviewKeyDown="DGR_ProcessBudget_PreviewKeyDown">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button x:Name="BTN_ISEND" IsTabStop="False" Padding="2" Click="Button_Click_1" Tag="{Binding BGID}"
+                                    materialDesign:ButtonAssist.CornerRadius="2"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                                    HorizontalContentAlignment="Center">
+                                <materialDesign:PackIcon Kind="PrintPreview"/>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn Header="شماره بودجه" Binding="{Binding BGID}" MinWidth="90" Width="auto">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <!--<Setter Property="HorizontalAlignment" Value="Right"/>-->
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="تاریخ بودجه" Binding="{Binding BGCDATE, StringFormat=####/##/##}" Width="auto" MinWidth="100" >
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="ماه بودجه" Binding="{Binding BGMAH}" Width="auto"  MinWidth="60" >
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="سال بودجه" Binding="{Binding BGSAL}" Width="auto"  MinWidth="100" >
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="مبلغ ورود جریان نقد" Binding="{Binding BGBUGETMON, StringFormat=0\,0}" Width="*"  >
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+
+        </DataGrid>
+
+        <Button x:Name="Btn_Close" Margin="0,15,16,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+            <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+        </Button>
+        <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,15,45,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+            <materialDesign:PackIcon Kind="WindowRestore" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+        </Button>
+        <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,15,74,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+            <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+        </Button>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="95,56,0,0"  Width="1"/>
+    </Grid>
+</Window>

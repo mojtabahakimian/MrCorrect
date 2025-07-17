@@ -1,0 +1,42 @@
+﻿<Window x:Class="Prg_UI.Wins.WinOther.SERCHK"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinOther"
+        mc:Ignorable="d"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Background="{x:Null}"
+        FontFamily="IRANYekanFN"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        Title="" Height="105" Width="460"  WindowStartupLocation="CenterScreen"  KeyDown="Window_KeyDown">
+
+    <Grid x:Name="mygrid">
+        <Border CornerRadius="10,10,10,10"  Padding="8" RenderTransformOrigin="0.5,0.5" Background="{DynamicResource MaterialDesign.Brush.Background}" BorderBrush="{Binding ElementName=GENERAL_RANG,Path=Background}" Grid.ColumnSpan="5">
+            <Border x:Name="TitleDrawBar" Style="{DynamicResource BordG}" Background="{Binding ElementName=GENERAL_RANG,Path=Background}"  Margin="-7.999,-7.928,-8,0" VerticalAlignment="Top" MinHeight="27" UseLayoutRounding="False" Height="16.667" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Label Content="جستجوی نام کالا" Padding="10,6,6,6" Foreground="White" FontSize="9"/>
+            </Border>
+        </Border>
+        <TextBox x:Name="Text0" HorizontalAlignment="Left" Height="30" Style="{StaticResource MaterialDesignOutlinedTextBox}"  Padding="5,0,0,0" Margin="103,48,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="285" FlowDirection="RightToLeft" TabIndex="0" KeyDown="Text0_KeyDown" Focusable="True"/>
+        <TextBlock Text="جستجو :" HorizontalAlignment="Left" Height="23" Margin="390,51,0,0" VerticalAlignment="Top" Width="50" FlowDirection="RightToLeft"/>
+        <Button x:Name="SearchK_Btn" FontSize="8"   Width="87" Height="35" Content="شروع جستجو" HorizontalAlignment="Left" Margin="8,45,0,0" VerticalAlignment="Top"  Padding="1,1,1,4" Click="SearchK_Btn_Click" TabIndex="1" BorderBrush="{x:Null}" Foreground="#DDFFFFFF"/>
+        <Label x:Name="WaitLBL" Foreground="White" Content="... در حال جستجو" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" Visibility="Collapsed">
+            <Label.Background>
+                <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+                    <GradientStop Color="#B21B1B1C" Offset="0.608"/>
+                    <GradientStop Color="#FF3E3E42" Offset="1"/>
+                </LinearGradientBrush>
+            </Label.Background>
+        </Label>
+
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="95,56,0,0"  Width="1"/>
+        <Button x:Name="Btn_Close_Copy" Margin="0,4,11,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+            <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+        </Button>
+        <Button x:Name="Btn_Minimize_Copy" Click="Btn_Minimize_Click" Margin="0,4,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+            <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+        </Button>
+
+    </Grid>
+</Window>

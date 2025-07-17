@@ -1,0 +1,266 @@
+﻿<Page x:Class="Wins.ThePages.PG_MYSETTINGS"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Wins.ThePages"
+      mc:Ignorable="d" 
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+  FontFamily="IRANYekanFN"
+  d:DesignHeight="450" d:DesignWidth="800"
+  Title="">
+    <Page.Resources>
+        <Storyboard x:Key="OnMouseCome">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="2"/>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="31">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="OnMouseLeave">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)">
+                <SplineDoubleKeyFrame KeyTime="00:00:00" Value="31"/>
+                <SplineDoubleKeyFrame KeyTime="00:00:00.2000000" Value="2"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="OnMousePressed">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.ShadowDepth)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="10">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.4000000" Value="0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="40">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.4000000" Value="2">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+            <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Color)">
+                <EasingColorKeyFrame KeyTime="00:00:00" Value="White">
+                    <EasingColorKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingColorKeyFrame.EasingFunction>
+                </EasingColorKeyFrame>
+            </ColorAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Direction)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="315">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="600">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.4000000" Value="315">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <Style TargetType="Image" x:Key="LightyBlue">
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="White" Direction="0" ShadowDepth="0" BlurRadius="2"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <EventTrigger RoutedEvent="MouseEnter">
+                    <BeginStoryboard Storyboard="{StaticResource OnMouseCome}" />
+                </EventTrigger>
+                <EventTrigger RoutedEvent="MouseLeave">
+                    <BeginStoryboard Storyboard="{StaticResource OnMouseLeave}" />
+                </EventTrigger>
+                <EventTrigger RoutedEvent="MouseDown">
+                    <BeginStoryboard Storyboard="{StaticResource OnMousePressed}" />
+                </EventTrigger>
+                <EventTrigger RoutedEvent="MouseLeftButtonUp">
+                    <BeginStoryboard Storyboard="{StaticResource OnMouseCome}" />
+                </EventTrigger>
+            </Style.Triggers>
+        </Style>
+    </Page.Resources>
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="{Binding Background.Color, ElementName=GENERAL_RANG}" Offset="0"/>
+                <GradientStop Color="{Binding Background.Color, ElementName=GENERAL_RANG}" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Width="1" IsHitTestVisible="False" Focusable="False" IsTabStop="False"/>
+
+        <Button x:Name="BackerBtn" Margin="10,10,0,0" FontSize="20"  Height="28" FontFamily="Tahoma" Foreground="White" Width="35" Padding="1,-2,1,1" IsTabStop="False" Background="{x:Null}" BorderBrush="Transparent" Click="BackerBtn_Click" VerticalAlignment="Top" HorizontalAlignment="Left" >
+            <materialDesign:PackIcon Kind="ArrowBack" Height="23" Width="25" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" />
+        </Button>
+
+        <!--HEADER-->
+
+        <ScrollViewer FlowDirection="RightToLeft" Margin="55,15,45,20" VerticalScrollBarVisibility="Auto">
+            <ItemsControl>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel/>
+                        <!--MotherbasePanel-->
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/MYSETTING/New_User.png" CacheOption="OnLoad"/>
+                        </Image.Source>
+                    </Image>
+                    <TextBlock Text="تعریف کاربر جدید"  TextAlignment="Center" TextWrapping="Wrap"  Foreground="#DDFFFFFF"  Height="40" Width="120"/>
+                </WrapPanel>
+
+                <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_1" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/MYSETTING/Access_Level.png" CacheOption="OnLoad"/>
+                        </Image.Source>
+                    </Image>
+                    <TextBlock Text="تعیین سطح دسترسی"  TextAlignment="Center" TextWrapping="Wrap"  Foreground="#DDFFFFFF"  Height="40" Width="120"/>
+                </WrapPanel>
+
+                <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/MYSETTING/Password_Change.png" CacheOption="OnLoad"/>
+                        </Image.Source>
+                    </Image>
+                    <TextBlock Text="تغییر رمز عبور"  TextAlignment="Center" TextWrapping="Wrap"  Foreground="#DDFFFFFF"  Height="40" Width="120"/>
+                </WrapPanel>
+
+                <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/MYSETTING/Taghir_User.png" CacheOption="OnLoad"/>
+                        </Image.Source>
+                    </Image>
+                    <TextBlock Text="تغییر نام یا حذف کاربر"  TextAlignment="Center" TextWrapping="Wrap"  Foreground="#DDFFFFFF"  Height="40" Width="120"/>
+                </WrapPanel>
+
+                <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/MYSETTING/Send_Info.png" CacheOption="OnLoad"/>
+                        </Image.Source>
+                    </Image>
+                    <TextBlock Text="ارسال اطلاعات"  TextAlignment="Center" TextWrapping="Wrap"  Foreground="#DDFFFFFF"  Height="40" Width="120"/>
+                </WrapPanel>
+
+                <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/MYSETTING/Download_Info.png" CacheOption="OnLoad"/>
+                        </Image.Source>
+                    </Image>
+                    <TextBlock Text="دریافت اطلاعات"  TextAlignment="Center" TextWrapping="Wrap"  Foreground="#DDFFFFFF"  Height="40" Width="120"/>
+                </WrapPanel>
+
+                <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewKeyDown="Image_PreviewKeyDown" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/MYSETTING/Shift.png" CacheOption="OnLoad"/>
+                        </Image.Source>
+                    </Image>
+                    <TextBlock Text="پیش فرض واحد و شیفت"  TextAlignment="Center" TextWrapping="Wrap"  Foreground="#DDFFFFFF"  Height="40" Width="120"/>
+                </WrapPanel>
+
+                <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/MYSETTING/About.png" CacheOption="OnLoad"/>
+                        </Image.Source>
+                    </Image>
+                    <TextBlock Text="درباره تهیه کنندگان"  TextAlignment="Center" TextWrapping="Wrap"  Foreground="#DDFFFFFF"  Height="40" Width="120"/>
+                </WrapPanel>
+
+                <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10" PreviewMouseDown="WrapPanel_PreviewMouseDown">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/MYSETTING/System_Info.png" CacheOption="OnLoad"/>
+                        </Image.Source>
+                    </Image>
+                    <TextBlock Text="مشخصات سیستم"  TextAlignment="Center" TextWrapping="Wrap"  Foreground="#DDFFFFFF"  Height="40" Width="120"/>
+                </WrapPanel>
+
+                <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/MYSETTING/History.png" CacheOption="OnLoad"/>
+                        </Image.Source>
+                    </Image>
+                    <TextBlock Text="سوابق"  TextAlignment="Center" TextWrapping="Wrap"  Foreground="#DDFFFFFF"  Height="40" Width="120"/>
+                </WrapPanel>
+                
+                <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/MYSETTING/Users_Group.png" CacheOption="OnLoad"/>
+                        </Image.Source>
+                    </Image>
+                    <TextBlock Text="تنظیمات گروه کاربران"  TextAlignment="Center" TextWrapping="Wrap"  Foreground="#DDFFFFFF"  Height="40" Width="120"/>
+                </WrapPanel>
+
+                <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/MYSETTING/Blac_List.png" CacheOption="OnLoad"/>
+                        </Image.Source>
+                    </Image>
+                    <TextBlock Text="بلک لیست"  TextAlignment="Center" TextWrapping="Wrap"  Foreground="#DDFFFFFF"  Height="40" Width="120"/>
+                </WrapPanel>
+
+                <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_2" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/MrCorrect.png" CacheOption="OnLoad"/>
+                        </Image.Source>
+                    </Image>
+                    <TextBlock Text="تنظیمات قالب و رنگ"  TextAlignment="Center" TextWrapping="Wrap"  Foreground="#DDFFFFFF"  Height="40" Width="120"/>
+                </WrapPanel>
+
+                <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_2" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/Tanzimat.png" CacheOption="OnLoad"/>
+                        </Image.Source>
+                    </Image>
+                    <TextBlock Text="حالت ریموت"  TextAlignment="Center" Foreground="#DDFFFFFF"  Width="120"/>
+                    <ToggleButton x:Name="RemoteModeTB" Click="RemoteModeTB_Click" Foreground="White" Margin="0,3,0,0"/>
+                </WrapPanel>
+
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</Page>

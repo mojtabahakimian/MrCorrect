@@ -1,0 +1,80 @@
+﻿<Window x:Class="Wins.WinMenus.ANBAR.ANBAR_REPORTS.F_MENU_ANBAR_FRKH_GRP"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Wins.WinMenus.ANBAR.ANBAR_REPORTS"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="IRANYekanFN"
+        WindowStartupLocation="CenterScreen"
+        Title="F_MENU_KART" Height="296" Width="518" MinHeight="230" MinWidth="505" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" >
+    <Grid>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True" Grid.RowSpan="2">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                  Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10">
+                <Grid>
+                    <Label Content="گزارش حواله انبار گروهی" Padding="21,10,10,10" Foreground="White"/>
+                    <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowRestore" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+
+                </Grid>
+            </Border>
+        </Border>
+
+
+
+        <Button x:Name="Command5" Width="81" VerticalAlignment="Top" TabIndex="6" Margin="0,249,0,0" Height="37" HorizontalAlignment="Center" FontSize="12" Foreground="#DDFFFFFF" Content="تایید" Click="Commnd5_Click"/>
+        <Label Width="auto" VerticalAlignment="Top" Margin="0,69,40,0" HorizontalAlignment="Right" FlowDirection="RightToLeft" Content="انبار :"/>
+        <Label Content="از فاکتور :" FlowDirection="RightToLeft" HorizontalAlignment="Right" Margin="0,121,40,0" VerticalAlignment="Top" Width="auto"/>
+        <ComboBox x:Name="CANBAR"    FlowDirection="RightToLeft"
+            Style="{StaticResource FuzzyOutComboBox}"  
+            IsEditable="True"
+            materialDesign:HintAssist.Hint="کد انبار"
+            IsSynchronizedWithCurrentItem="True"
+            Margin="0,71,76,0" Padding="7,0,10,0" Height="27"  TabIndex="1" VerticalAlignment="Top" HorizontalAlignment="Right" Width="142" PreviewLostKeyboardFocus="CANBAR_PreviewLostKeyboardFocus" IsTabStop="True">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <ComboBox x:Name="ANBAR"    FlowDirection="RightToLeft"
+            Style="{StaticResource FuzzyOutComboBox}"  
+            IsEditable="True"
+            materialDesign:HintAssist.Hint="نام انبار"
+            IsSynchronizedWithCurrentItem="True"
+            Margin="18,71,223,0" Padding="7,0,10,0" Height="27" TabIndex="2"  VerticalAlignment="Top" PreviewLostKeyboardFocus="ANBAR_PreviewLostKeyboardFocus" IsTabStop="True">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Label Content="تا فاکتور :" FlowDirection="RightToLeft" HorizontalAlignment="Right" Margin="0,121,223,0" VerticalAlignment="Top" Width="auto"/>
+        <Label Width="auto" VerticalAlignment="Top" Margin="0,171,10,0" HorizontalAlignment="Right" FlowDirection="RightToLeft" Content="و فاکتور های :"/>
+        <TextBox x:Name="VF"  Text="" Tag="RD" Height="25" Margin="0,175,90,0"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="410" TabIndex="5" />
+        <TextBox x:Name="F1"  Text="" Tag="RD" Height="25" Margin="0,125,99,0"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="109" TabIndex="3" PreviewLostKeyboardFocus="F1_PreviewLostKeyboardFocus" />
+        <TextBox x:Name="F2"  Text="" Tag="RD" Height="25" Margin="0,123,281,0"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="109" TabIndex="4" PreviewLostKeyboardFocus="F2_PreviewLostKeyboardFocus" />
+
+    </Grid>
+</Window>

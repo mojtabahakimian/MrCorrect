@@ -1,0 +1,254 @@
+﻿<Page x:Class="Wins.ThePages.PG_FACTORHA"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Wins.ThePages"
+      mc:Ignorable="d" 
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      FontFamily="IRANYekanFN"
+      d:DesignHeight="600" d:DesignWidth="1000">
+    <Page.Resources>
+        <Storyboard x:Key="OnMouseCome">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="2"/>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="31">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="OnMouseLeave">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)">
+                <SplineDoubleKeyFrame KeyTime="00:00:00" Value="31"/>
+                <SplineDoubleKeyFrame KeyTime="00:00:00.2000000" Value="2"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="OnMousePressed">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.ShadowDepth)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="10">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.4000000" Value="0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="40">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.4000000" Value="2">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+            <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Color)">
+                <EasingColorKeyFrame KeyTime="00:00:00" Value="White">
+                    <EasingColorKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingColorKeyFrame.EasingFunction>
+                </EasingColorKeyFrame>
+            </ColorAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Direction)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="315">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="600">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.4000000" Value="315">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <Style TargetType="Image" x:Key="LightyBlue">
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="White" Direction="0" ShadowDepth="0" BlurRadius="2"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <EventTrigger RoutedEvent="MouseEnter">
+                    <BeginStoryboard Storyboard="{StaticResource OnMouseCome}" />
+                </EventTrigger>
+                <EventTrigger RoutedEvent="MouseLeave">
+                    <BeginStoryboard Storyboard="{StaticResource OnMouseLeave}" />
+                </EventTrigger>
+                <EventTrigger RoutedEvent="MouseDown">
+                    <BeginStoryboard Storyboard="{StaticResource OnMousePressed}" />
+                </EventTrigger>
+                <EventTrigger RoutedEvent="MouseLeftButtonUp">
+                    <BeginStoryboard Storyboard="{StaticResource OnMouseCome}" />
+                </EventTrigger>
+            </Style.Triggers>
+        </Style>
+    </Page.Resources>
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="{Binding Background.Color, ElementName=GENERAL_RANG}" Offset="0"/>
+                <GradientStop Color="{Binding Background.Color, ElementName=GENERAL_RANG}" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Width="1" IsHitTestVisible="False" Focusable="False" IsTabStop="False"/>
+
+        <Button x:Name="BackerBtn" Margin="10,10,0,0" FontSize="20"  Height="28" FontFamily="Tahoma" Foreground="White" Width="35" Padding="1,-2,1,1" IsTabStop="False" Background="{x:Null}" BorderBrush="Transparent" Click="BackerBtn_Click" VerticalAlignment="Top" HorizontalAlignment="Left" >
+            <materialDesign:PackIcon Kind="ArrowBack" Height="23" Width="25" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" />
+        </Button>
+
+        <!--HEADER-->
+
+        <ScrollViewer FlowDirection="RightToLeft" Margin="50,35,50,20" VerticalScrollBarVisibility="Auto">
+            <ItemsControl>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel/>
+                        <!--MotherbasePanel-->
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <StackPanel FlowDirection="RightToLeft" Orientation="Vertical" Width="315">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                            <Image.Source>
+                                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/FACTORHA/Pre-Factor.png" CacheOption="OnLoad"/>
+                            </Image.Source>
+                        </Image>
+                        <Label Content="پیش فاکتور" Foreground="#DDFFFFFF" Height="27"/>
+                    </WrapPanel>
+
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_1" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                            <Image.Source>
+                                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/FACTORHA/FactorForoosh.png" CacheOption="OnLoad"/>
+                            </Image.Source>
+                        </Image>
+                        <Label Content="فاکتور فروش" Foreground="#DDFFFFFF" Height="27"/>
+                    </WrapPanel>
+
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" PreviewMouseDown="Image_PreviewMouseDown_2"  VerticalAlignment="Top" Cursor="Hand">
+                            <Image.Source>
+                                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/FACTORHA/ReturnFactorForoosh.png" CacheOption="OnLoad"/>
+                            </Image.Source>
+                        </Image>
+                        <Label Content="برگشت فروش" Foreground="#DDFFFFFF" Height="27"/>
+                    </WrapPanel>
+
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" PreviewMouseDown="Image_PreviewMouseDown_3"  VerticalAlignment="Top" Cursor="Hand">
+                            <Image.Source>
+                                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/FACTORHA/FactorForoosh.png" CacheOption="OnLoad"/>
+                            </Image.Source>
+                        </Image>
+                        <Label Content="فاکتور خدمات" Foreground="#DDFFFFFF" Height="27"/>
+                    </WrapPanel>
+
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" PreviewMouseDown="Image_PreviewMouseDown_4" VerticalAlignment="Top" Cursor="Hand">
+                            <Image.Source>
+                                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/FACTORHA/KharidFactor.png" CacheOption="OnLoad"/>
+                            </Image.Source>
+                        </Image>
+                        <Label Content="فاکتور خرید" Foreground="#DDFFFFFF" Height="27"/>
+                    </WrapPanel>
+
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" PreviewMouseDown="Image_PreviewMouseDown_5" VerticalAlignment="Top" Cursor="Hand">
+                            <Image.Source>
+                                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/FACTORHA/ReturnSellFactor.png" CacheOption="OnLoad"/>
+                            </Image.Source>
+                        </Image>
+                        <Label Content="فاکتور برگشت خرید" Foreground="#DDFFFFFF" Height="27"/>
+                    </WrapPanel>
+
+                </StackPanel>
+
+                <StackPanel FlowDirection="RightToLeft" Orientation="Vertical">
+
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_6" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                            <Image.Source>
+                                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/FACTORHA/KharidSaderati.png" CacheOption="OnLoad"/>
+                            </Image.Source>
+                        </Image>
+                        <Label Content="فاکتور خرید صادراتی" Foreground="#DDFFFFFF" Height="27"/>
+                    </WrapPanel>
+
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                            <Image.Source>
+                                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/FACTORHA/KalaMasrafMostaghim.png" CacheOption="OnLoad"/>
+                            </Image.Source>
+                        </Image>
+                        <Label Content="فاکتور خرید کالای مصرف مستقیم" Foreground="#DDFFFFFF" Height="27"/>
+                    </WrapPanel>
+
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                            <Image.Source>
+                                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/FACTORHA/SellFactors.png" CacheOption="OnLoad"/>
+                            </Image.Source>
+                        </Image>
+                        <Label Content="مشاهده فاکتور های فروش" Foreground="#DDFFFFFF" Height="27"/>
+                    </WrapPanel>
+
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                            <Image.Source>
+                                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/FACTORHA/RasGiri.png" CacheOption="OnLoad"/>
+                            </Image.Source>
+                        </Image>
+                        <Label Content="راس گیری" Foreground="#DDFFFFFF" Height="27"/>
+                    </WrapPanel>
+
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                            <Image.Source>
+                                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/FACTORHA/Pre-Order.png" CacheOption="OnLoad"/>
+                            </Image.Source>
+                        </Image>
+                        <Label Content="ثبت سفارشات" Foreground="#DDFFFFFF" Height="27"/>
+                    </WrapPanel>
+
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_7" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                            <Image.Source>
+                                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/FACTORHA/SaderatFactors.png" CacheOption="OnLoad"/>
+                            </Image.Source>
+                        </Image>
+                        <Label Content="فاکتور فروش های صادراتی" Foreground="#DDFFFFFF" Height="27"/>
+                    </WrapPanel>
+
+
+                </StackPanel>
+
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</Page>

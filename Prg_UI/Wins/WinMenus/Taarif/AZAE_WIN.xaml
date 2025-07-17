@@ -1,0 +1,373 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Wins.WinMenus.Taarif"
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:sf="http://schemas.syncfusion.com/wpf" x:Class="Wins.WinMenus.Taarif.AZAE_WIN"
+        mc:Ignorable="d"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="IRANYekanFN"
+        WindowStartupLocation="CenterScreen"
+        Title="" Height="550" Width="1000" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"  VirtualizingPanel.VirtualizationMode="Recycling"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+    </Window.Resources>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+    <Grid x:Name="mygrid">
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label Content="مشخصات مشتریان - اعضاء  و اعتبارات" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMaximize" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+
+                </Grid>
+            </Border>
+        </Border>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                             Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+        <!--HEADER↑-->
+
+        <DataGrid x:Name="GRADE_CUST_TAB_SUB"
+                  ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                  RowDetailsVisibilityMode="Collapsed"
+                  HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                  VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                  ItemsSource="{Binding MasterData}" 
+                  Margin="4,235,4,65" AutoGenerateColumns="False"
+                  FlowDirection="RightToLeft"
+                  BorderThickness="1" PreviewKeyDown="GRADE_CUST_TAB_SUB_PreviewKeyDown" RowEditEnding="GRADE_CUST_TAB_SUB_RowEditEnding" CellEditEnding="GRADE_CUST_TAB_SUB_CellEditEnding" TabIndex="6" IsTabStop="True">
+
+            <DataGrid.Style>
+                <!--خط بندی سطر های دیتاگرید-->
+                <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                    <Setter Property="GridLinesVisibility" Value="All"/>
+                </Style>
+            </DataGrid.Style>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn IsReadOnly="True" CanUserResize="False">
+                    <DataGridTemplateColumn.CellStyle>
+                        <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                            <Setter Property="IsTabStop" Value="False" />
+                        </Style>
+                    </DataGridTemplateColumn.CellStyle>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button x:Name="DBXPANDER" Click="DBXPANDER_Click" Tag="{Binding}" IsTabStop="False" materialDesign:ButtonAssist.CornerRadius="2"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                                    Margin="-14,-7,-14,-7" HorizontalContentAlignment="Center">
+                                <materialDesign:PackIcon Kind="Plus"/>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="شماره" Binding="{Binding GCTABID, UpdateSourceTrigger=LostFocus}" Visibility="Hidden" />
+                <DataGridTextColumn Header="نام گروه" Binding="{Binding GCNAME, UpdateSourceTrigger=LostFocus}" Width="*" />
+                <DataGridTextColumn Header="ضریب طبقه" Binding="{Binding GCZARIB, UpdateSourceTrigger=LostFocus}" Width="auto" MinWidth="90" />
+                <!--<DataGridTextColumn Header="مشتری" Binding="{Binding GCCUST_HES,UpdateSourceTrigger=LostFocus}" Width="auto" Visibility="Hidden" />-->
+                <DataGridTextColumn Header="تاریخ ثبت" Binding="{Binding GCDATE, StringFormat=####/##/##, UpdateSourceTrigger=LostFocus}" Width="auto" MinWidth="90" IsReadOnly="True" >
+                    <!--<DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                            <Setter Property="IsTabStop" Value="False" />
+                        </Style>
+                    </DataGridTextColumn.CellStyle>-->
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="نام کاربر" Binding="{Binding USERNAME, UpdateSourceTrigger=LostFocus}" Width="auto" MinWidth="100" IsReadOnly="True" >
+                    <!--<DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                            <Setter Property="IsTabStop" Value="False" />
+                        </Style>
+                    </DataGridTextColumn.CellStyle>-->
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+
+            <DataGrid.RowDetailsTemplate>
+                <DataTemplate>
+                    <DataGrid x:Name="GRADE_GRP_SUB"
+                              ItemsSource="{Binding DETAILROWDATA}" 
+                              HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                              VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                              AutoGenerateColumns="False"
+                              CellEditEnding="GRADE_GRP_SUB_CellEditEnding"
+                              CanUserReorderColumns="False"
+                              RowEditEnding="GRADE_GRP_SUB_RowEditEnding" RowHeight="50" PreviewKeyDown="GRADE_GRP_SUB_PreviewKeyDown" PreparingCellForEdit="GRADE_GRP_SUB_PreparingCellForEdit">
+                        <DataGrid.Style>
+                            <!--خط بندی سطر های دیتاگرید-->
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                <Setter Property="GridLinesVisibility" Value="All"/>
+                            </Style>
+                        </DataGrid.Style>
+                        <DataGrid.ColumnHeaderStyle>
+                            <!--متن سربرگ ستون ها-->
+                            <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource CenteryHeaderstyle}" />
+                        </DataGrid.ColumnHeaderStyle>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="شماره" Binding="{Binding GCGRPID, UpdateSourceTrigger=LostFocus}" Width="auto" IsReadOnly="True" >
+                                <DataGridTextColumn.CellStyle>
+                                    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                        <Setter Property="IsTabStop" Value="False" />
+                                    </Style>
+                                </DataGridTextColumn.CellStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="عنوان سنجش" Binding="{Binding GCGRPNAME, UpdateSourceTrigger=LostFocus}" Width="250"/>
+
+                            <!--مقدار-->
+                            <DataGridTemplateColumn Header="مقدار" Width="auto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Text, ElementName=THECMB, UpdateSourceTrigger=LostFocus}" Width="auto" />
+                                            <ComboBox x:Name="THECMB"
+                                                      ItemsSource="{Binding DataContext.GSCADTL_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                      DisplayMemberPath="GSCANAME" SelectedValuePath="GSCADTCOD"
+                                                      Visibility="Hidden"
+                                                      IsEditable="True"
+                                                      Width="auto"
+                                                      SelectedValue="{Binding GCVALUESCAL, UpdateSourceTrigger=LostFocus}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn.CellEditingTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding DataContext.GSCADTL_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                  DisplayMemberPath="GSCANAME" SelectedValuePath="GSCADTCOD"
+                                                  IsEditable="True"
+                                                  Width="auto"
+                                                  SelectedValue="{Binding GCVALUESCAL, UpdateSourceTrigger=LostFocus}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellEditingTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!--<DataGridTextColumn Header="شماره طبقه" Binding="{Binding GCTABID,UpdateSourceTrigger=LostFocus}" Width="auto"/>-->
+                            <DataGridTextColumn Header="امتیاز" Binding="{Binding GCGRPGRADE, UpdateSourceTrigger=LostFocus}" Width="auto"/>
+                            <DataGridTextColumn Header="ضریب" Binding="{Binding GCGRPZARIB, UpdateSourceTrigger=LostFocus}" Width="auto"/>
+
+                            <!--مدارک-->
+                            <DataGridTemplateColumn Header="مدارک" CanUserResize="False">
+                                <DataGridTemplateColumn.CellStyle>
+                                    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                        <Setter Property="IsTabStop" Value="False" />
+                                    </Style>
+                                </DataGridTemplateColumn.CellStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock x:Name="TBN" PreviewKeyDown="TBN_PreviewKeyDown">
+                                            <TextBlock.Style>
+                                                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MaterialDesignDataGridTextColumnStyle}">
+                                                    <Setter Property="Text" Value="دارد" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding GCPS}" Value="{x:Null}">
+                                                            <Setter Property="Text" Value="{x:Null}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn.CellEditingTemplate>
+                                    <DataTemplate>
+                                        <Viewbox StretchDirection="DownOnly" Height="30" MaxHeight="30" Width="30" MaxWidth="30">
+                                            <Button  
+                                                x:Name="MADAREK_BTN"
+                                                Click="MADAREK_BTN_Click"
+                                                Tag="{Binding}"
+                                                Cursor="Hand" 
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                materialDesign:ButtonAssist.CornerRadius="2"
+                                                IsTabStop="False"
+                                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                                                Margin="-14,-7,-14,-7" HorizontalContentAlignment="Center">
+                                                <materialDesign:PackIcon Kind="FileDocument"/>
+                                            </Button>
+                                        </Viewbox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellEditingTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!--ارزش-->
+                            <DataGridTemplateColumn Header="ارزش" Width="auto" IsReadOnly="True" Visibility="Visible">
+                                <DataGridTemplateColumn.CellStyle>
+                                    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                        <Setter Property="IsTabStop" Value="False" />
+                                    </Style>
+                                </DataGridTemplateColumn.CellStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Text, ElementName=THECMB, UpdateSourceTrigger=LostFocus}" Width="auto" />
+
+                                            <ComboBox x:Name="THECMB"
+                                            ItemsSource="{Binding DataContext.GSCALE_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                            DisplayMemberPath="GSCANAME" SelectedValuePath="GSCACOD"
+                                            Visibility="Hidden"
+                                            IsEditable="True"
+                                            Width="auto"
+                                            SelectedValue="{Binding GCVALUE, UpdateSourceTrigger=LostFocus}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn.CellEditingTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding DataContext.GSCALE_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                        DisplayMemberPath="GSCANAME" SelectedValuePath="GSCACOD"
+                                        IsEditable="True"
+                                        Width="auto"
+                                        SelectedValue="{Binding GCVALUE, UpdateSourceTrigger=LostFocus}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellEditingTemplate>
+                            </DataGridTemplateColumn>
+
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DataTemplate>
+            </DataGrid.RowDetailsTemplate>
+        </DataGrid>
+
+        <CNC:NumericTextBox x:Name="TOPETEB" DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True"  LastValueShouldZero="True" Text="0" Height="30" Margin="0,93,128,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Right" Width="160" MaxLength="16" TabIndex="1"/>
+        <Label Content="سقف اعتباری ریالی:" HorizontalAlignment="Right" Margin="0,94,14,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Button x:Name="SAVE_AVZ"  Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,181,14,0" Height="36" VerticalAlignment="Top" HorizontalAlignment="Right" Width="125" Click="SAVE_AVZ_Click" TabIndex="5" />
+        <CheckBox x:Name="TOPASN" Content="اسناد پاس نشده از اعتبار كسر شود" HorizontalAlignment="Right" Margin="0,144,14,0" VerticalAlignment="Top" Width="174" FontSize="10" Padding="4,0,0,0" />
+        <Label Content="مشتری :" Margin="0,53,14,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="43" Height="25" VerticalAlignment="Top"/>
+        <ComboBox x:Name="HES" DisplayMemberPath="NAME" SelectedValuePath="hes" IsSynchronizedWithCurrentItem="True" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="264,52,63,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" PreviewLostKeyboardFocus="HES_PreviewLostKeyboardFocus" IsTabStop="True" TabIndex="0">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <ComboBox x:Name="HES_CODE" DisplayMemberPath="hes" SelectedValuePath="hes"  IsSynchronizedWithCurrentItem="True" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="17,52,0,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" PreviewLostKeyboardFocus="HES_CODE_PreviewLostKeyboardFocus" HorizontalAlignment="Left" Width="229">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Label Content="سقف اعتبار مقداری:" HorizontalAlignment="Right" Margin="0,94,293,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="اگر سقف اعتبار مقداری را صفر بزنید اعتبار مقداری كنترل نمی شود" HorizontalAlignment="Left" Margin="17,186,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto" Foreground="#FFFF2525"/>
+        <CNC:NumericTextBox x:Name="TOPMEGH"  DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True"  LastValueShouldZero="True" Text="0" Height="30" Margin="0,93,404,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Right" Width="160" MaxLength="16" TabIndex="2"/>
+        <CheckBox x:Name="ENDIS" Content="اعتبار سنجی كنترل شود" HorizontalAlignment="Right" Margin="0,144,205,0" VerticalAlignment="Top" Width="128" FontSize="10" Padding="4,0,0,0" />
+        <Label Content="جمع ضرائب گروه:" d:IsHidden="False" HorizontalAlignment="Right" Margin="0,185,367,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto" Visibility="Hidden"/>
+        <CNC:NumericTextBox x:Name="JAMZARIB" d:IsHidden="False" DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True"  LastValueShouldZero="True" Text="0" Height="30" Margin="0,184,470,0" VerticalAlignment="Top" Visibility="Hidden"  HorizontalAlignment="Right" Width="160" MaxLength="16"/>
+        <Button x:Name="ADDGRADE"  Content="اضافه کردن رده بندی"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="154,139,0,0" Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Width="126" Click="ADDGRADE_Click" />
+        <Button x:Name="Command14"  Content="چاپ"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="17,139,0,0" Height="36" VerticalAlignment="Top" Click="Command14_Click" HorizontalAlignment="Left" Width="125" />
+        <Button x:Name="ESLAH"  Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,181,150,0" Height="36" VerticalAlignment="Top" HorizontalAlignment="Right" Width="90" Click="ESLAH_Click" />
+        <Button x:Name="DELETE_AVZ"  Content="حذف کامل" Tag="hazfer"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,181,245,0" Height="36" VerticalAlignment="Top" HorizontalAlignment="Right" Width="90" Click="DELETE_AVZ_Click" />
+        <Button x:Name="End" Tag ="RD" Click="End_Click" Style="{StaticResource GerdB}" BorderBrush="{x:Null}"
+            RenderTransformOrigin="0.5,0.5"  FontSize="10" Margin="0,0,147,20" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="34">
+            <materialDesign:PackIcon  Kind="SkipNext"  HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" Width="21" Foreground="#CCFFFFFF" RenderTransformOrigin="0.206,0.45"  FontSize="10" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="26,-44,0,0" Margin="-19,0,-18,0">
+                <materialDesign:PackIcon.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </materialDesign:PackIcon.RenderTransform>
+            </materialDesign:PackIcon>
+        </Button>
+        <Button x:Name="First" Click="First_Click"  Tag ="RD"  Style="{StaticResource GerdB}" BorderBrush="{x:Null}"
+            RenderTransformOrigin="0.5,0.5"  FontSize="10" Margin="0,0,343,20" HorizontalAlignment="Right" Width="34" Height="26" VerticalAlignment="Bottom">
+            <materialDesign:PackIcon Kind="SkipNext"  HorizontalAlignment="Right" VerticalAlignment="Top" Height="20" Width="23" Foreground="#CCFFFFFF" RenderTransformOrigin="0.515,0.533"  FontSize="10" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="-30,-1,-5,0">
+                <materialDesign:PackIcon.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="-1"/>
+                        <SkewTransform/>
+                        <RotateTransform/>
+                        <TranslateTransform X="4.946"/>
+                    </TransformGroup>
+                </materialDesign:PackIcon.RenderTransform>
+            </materialDesign:PackIcon>
+        </Button>
+        <Button x:Name="Next" Click="Next_Click" Tag ="RD" Style="{StaticResource GerdB}" BorderBrush="{x:Null}"
+            RenderTransformOrigin="0.5,0.5"  FontSize="10" Margin="0,0,189,20"  Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="34">
+            <materialDesign:PackIcon Kind="triangle"  HorizontalAlignment="Center" VerticalAlignment="Center" Height="15" Width="15" Foreground="#CCFFFFFF" RenderTransformOrigin="0.254,0.083"  FontSize="1" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0" Margin="-24,-13,-32,0">
+                <materialDesign:PackIcon.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="90"/>
+                        <TranslateTransform X="5" Y="10"/>
+                    </TransformGroup>
+                </materialDesign:PackIcon.RenderTransform>
+            </materialDesign:PackIcon>
+        </Button>
+        <Button x:Name="Back"  Tag ="RD" Click="Back_Click" Style="{StaticResource GerdB}" BorderBrush="{x:Null}"
+            RenderTransformOrigin="0.5,0.5"  FontSize="10" Margin="0,0,303,20" HorizontalAlignment="Right" Width="34"  Height="26" VerticalAlignment="Bottom">
+            <Button.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="-1"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Button.RenderTransform>
+            <materialDesign:PackIcon  Kind="triangle"  HorizontalAlignment="Center" VerticalAlignment="Center" Height="15" Width="15" Foreground="#CCFFFFFF" RenderTransformOrigin="0.254,0.083"  FontSize="1" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0" Margin="-24,-13,-32,0">
+                <materialDesign:PackIcon.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="90"/>
+                        <TranslateTransform X="5" Y="10"/>
+                    </TransformGroup>
+                </materialDesign:PackIcon.RenderTransform>
+            </materialDesign:PackIcon>
+        </Button>
+        <Button x:Name="NEWRECORD_BTN" Click="NEWRECORD_BTN_Click"  Tag ="RD" Style="{StaticResource GerdB}" BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10"  Margin="0,0,107,20" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="34">
+            <materialDesign:PackIcon Kind="AddBold"  HorizontalAlignment="Center" VerticalAlignment="Center" Height="15" Width="15" Foreground="#CCFFFFFF" RenderTransformOrigin="0.254,0.083"  FontSize="1" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0" Margin="-24,-13,-32,0">
+                <materialDesign:PackIcon.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="90"/>
+                        <TranslateTransform X="5" Y="10"/>
+                    </TransformGroup>
+                </materialDesign:PackIcon.RenderTransform>
+            </materialDesign:PackIcon>
+        </Button>
+        <TextBox x:Name="RecCount"  HorizontalContentAlignment="Center" TextAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource FuzzyOut}" IsReadOnly="True" Tag="RD" Padding="7,0,10,0" Margin="0,0,30,18" VerticalAlignment="Bottom" FlowDirection="RightToLeft" Background="{x:Null}" BorderThickness="1" Height="30" HorizontalAlignment="Right" Width="72" />
+        <TextBox x:Name="Current_Rec"   HorizontalContentAlignment="Center" TextAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource FuzzyOut}" IsReadOnly="True" Tag="RD" Padding="7,0,10,0" Margin="0,0,228,18" VerticalAlignment="Bottom" FlowDirection="RightToLeft" Background="{x:Null}" BorderThickness="1" Height="30" HorizontalAlignment="Right" Width="72" />
+        <Button x:Name="SERVERRELOAD_Btn" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Tag ="RD"  Style="{StaticResource GerdB}" BorderBrush="{x:Null}"  FontSize="10" Margin="0,0,382,20" HorizontalAlignment="Right" VerticalAlignment="Bottom" Foreground="#DDFFFFFF" Height="26" Width="34" Click="SERVERRELOAD_Btn_Click">
+            <Viewbox Margin="-9,0,-9,0" >
+                <materialDesign:PackIcon Kind="Refresh" />
+            </Viewbox>
+        </Button>
+        <Label Content="گرید:" HorizontalAlignment="Right" Margin="0,94,586,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="امتیاز کل:" HorizontalAlignment="Right" Margin="0,94,789,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <ComboBox x:Name="gradeid"  Padding="7,0,10,0" SelectedValuePath="GID" DisplayMemberPath="GNAME" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,94,627,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1"  HorizontalAlignment="Right" Width="160" IsTabStop="True" TabIndex="3">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <CNC:NumericTextBox x:Name="EMTIAZ" DoesAcceptDouble="True" LastValueShouldZero="False" Text="0" Height="30" Margin="0,93,849,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Right" Width="134" MaxLength="15" TabIndex="4"/>
+    </Grid>
+
+</Window>

@@ -1,0 +1,76 @@
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.HESABDARI.F_MENU_KOL_MOIN_TAFZIL"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.HESABDARI"
+        mc:Ignorable="d"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        FontFamily="IRANYekanFN"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        Title="" MaxHeight="250" MaxWidth="505" Height="250" Width="505" MinHeight="250" MinWidth="505" ResizeMode="NoResize" WindowStartupLocation="CenterScreen"  Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" ContentRendered="Window_ContentRendered">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+
+    <Grid x:Name="mygrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Border  	  Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label x:Name="LBL_WIN" Content="لیست دفتر تفضیلی" Padding="21,10,10,10" Foreground="White"/>
+                    <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                </Grid>
+            </Border>
+        </Border>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="300,137,204,81"  Width="1"/>
+        <Button x:Name="Command5" Content="تایید"  HorizontalAlignment="Left" Margin="250,193,0,0" VerticalAlignment="Top" Width="80" Height="37" Foreground="#DDFFFFFF" FontSize="12" Click="Command5_Click" TabIndex="4"/>
+        <Label Content="حساب :" FlowDirection="RightToLeft" HorizontalAlignment="Left" Margin="443,70,0,0" VerticalAlignment="Top" Width="auto"/>
+        <xctk:MaskedTextBox x:Name="DT1" Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3"  Mask="0000/00/00" Height="30" Margin="306,107,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Left" Width="88" TabIndex="2" />
+        <Label Content="از تاریخ:" FlowDirection="RightToLeft" HorizontalAlignment="Left" Margin="395,108,0,0" VerticalAlignment="Top" Width="auto"/>
+        <RadioButton x:Name="Option40" GroupName="FrameGRP" Content="شماره سند" FlowDirection="RightToLeft" HorizontalAlignment="Left" Margin="311,149,0,0" VerticalAlignment="Top" Width="78"/>
+        <RadioButton x:Name="Option42" GroupName="FrameGRP"  Content="شماره مبنا" FlowDirection="RightToLeft" HorizontalAlignment="Left" Margin="224,149,0,0" VerticalAlignment="Top" Width="82"/>
+        <RadioButton x:Name="Option45" GroupName="FrameGRP"  Content="صورت حساب" FlowDirection="RightToLeft" HorizontalAlignment="Left" Margin="129,149,0,0" VerticalAlignment="Top" Width="90" IsChecked="True"/>
+        <Label Content="براساس:" FlowDirection="RightToLeft" HorizontalAlignment="Left" Margin="394,147,0,0" VerticalAlignment="Top" Width="auto"/>
+        <Button x:Name="Command6" Content="انصراف"  HorizontalAlignment="Left" Margin="165,193,0,0" VerticalAlignment="Top" Width="80" Height="37" Foreground="#DDFFFFFF" FontSize="12" Click="Command6_Click"/>
+        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3"  Mask="0000/00/00" Height="30" Margin="161,107,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Left" Width="88" TabIndex="3" />
+        <Label Content="تا تاریخ:" FlowDirection="RightToLeft" HorizontalAlignment="Left" Margin="250,108,0,0" VerticalAlignment="Top" Width="auto"/>
+
+        <ComboBox x:Name="Combo34"    FlowDirection="RightToLeft"
+            Style="{StaticResource MaterialDesignOutlinedComboBox}"  
+            IsEditable="True"
+                  materialDesign:HintAssist.Hint="کد حساب"
+            IsSynchronizedWithCurrentItem="True"
+             Margin="306,71,62,0" Padding="7,0,10,0" Height="30" PreviewLostKeyboardFocus="Combo34_PreviewLostKeyboardFocus" TabIndex="0" VerticalAlignment="Top">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <ComboBox x:Name="Combo36"    FlowDirection="RightToLeft"
+            Style="{StaticResource MaterialDesignOutlinedComboBox}"  
+            IsEditable="True"
+                   materialDesign:HintAssist.Hint="نام حساب"
+            IsSynchronizedWithCurrentItem="True"
+             Margin="19,71,204,0" Padding="7,0,10,0" Height="30" TabIndex="1" PreviewLostKeyboardFocus="Combo36_PreviewLostKeyboardFocus" VerticalAlignment="Top">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+
+    </Grid>
+</Window>

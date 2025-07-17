@@ -1,0 +1,86 @@
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.ANBAR.MOGUDI_SEARCH_MAIN"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.ANBAR"
+        mc:Ignorable="d"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        FontFamily="IRANYekanFN"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        Title="" Height="450" Width="800"  WindowStartupLocation="CenterScreen" WindowState="Maximized" BorderBrush="White" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <Window.Resources>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+    </Window.Resources>
+    <Grid x:Name="mygrid">
+        <Border CornerRadius="10,10,0,0" Background="{DynamicResource MaterialDesign.Brush.Background}" BorderBrush="{Binding ElementName=GENERAL_RANG,Path=Background}"  Padding="8" RenderTransformOrigin="0.5,0.5"  Grid.ColumnSpan="5">
+            <Border x:Name="TitleDrawBar" Background="{Binding ElementName=GENERAL_RANG,Path=Background}" Style="{DynamicResource BordG}"  Margin="-7.999,-7.928,-8,0" VerticalAlignment="Top" MinHeight="50" UseLayoutRounding="False" Height="34.928" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Label Content="جستجو گر موجودی" Padding="25,15,15,15" Foreground="White"/>
+            </Border>
+        </Border>
+        <CheckBox x:Name="ONS" Content="جستجوی لحظه ای" HorizontalAlignment="Left" Margin="404,67,0,0" VerticalAlignment="Top" Width="auto" RenderTransformOrigin="0.5,0.5" Padding="4,-4,0,0"/>
+
+        <TextBox x:Name="set_box_josteju"  Text="" Height="27" Margin="522,61,62,0"   Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" TextChanged="set_box_josteju_TextChanged" PreviewLostKeyboardFocus="set_box_josteju_PreviewLostKeyboardFocus"  />
+        <ComboBox x:Name="ANBAR" IsSynchronizedWithCurrentItem="True"   Style="{StaticResource MaterialDesignOutlinedComboBox}" Padding="7,3,10,3"  IsTextSearchEnabled="True" Margin="10,62,0,0" VerticalAlignment="Top" Height="26" FlowDirection="RightToLeft"   IsEditable="True" HorizontalAlignment="Left" Width="244" SelectedIndex="0">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Label Content="جستجو:" Width="50" Margin="0,58,10,0" VerticalAlignment="Top"  FlowDirection="RightToLeft" HorizontalAlignment="Right"/>
+        <ComboBox x:Name="CANBAR"      Style="{StaticResource MaterialDesignOutlinedComboBox}" Padding="7,3,10,3"  IsSynchronizedWithCurrentItem="True"  IsTextSearchEnabled="True" Margin="264,62,0,0" VerticalAlignment="Top" Height="26" FlowDirection="RightToLeft"   IsEditable="True" HorizontalAlignment="Left" Width="104">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Label Content="انبار:" Width="32" Margin="368,58,0,0" VerticalAlignment="Top"  FlowDirection="RightToLeft" HorizontalAlignment="Left"/>
+
+        <DataGrid x:Name="mogudi_search" FlowDirection="RightToLeft" IsReadOnly="True"
+                    Style="{StaticResource DATAGRIDSTYLISH}"
+                    ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"           
+                    HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+					VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                  AutoGenerateColumns="False" EnableRowVirtualization="True"  Margin="10,107,10,8" BorderThickness="1" >
+            <DataGrid.Columns>
+                <DataGridTextColumn x:Name="cODEColumn" Binding="{Binding CODE}" Header="کدکالا" MinWidth="50" Width="auto"/>
+                <DataGridTextColumn x:Name="n_FANIColumn" Binding="{Binding N_FANI}" Header="شماره فنی" Width="auto"/>
+                <DataGridTextColumn x:Name="nAMEColumn" Binding="{Binding NAME}" Header="نام کالا" Width="auto"/>
+                <DataGridTextColumn x:Name="nAMESColumn" Binding="{Binding NAMES}" Header="نام واحد" Width="auto"/>
+                <DataGridTextColumn x:Name="mANDColumn" Binding="{Binding MAND}" Header="موجودی" MinWidth="50" IsReadOnly="True" Width="auto"/>
+                <DataGridTextColumn x:Name="nESBATColumn" Binding="{Binding NESBAT}" Header="ضریب" IsReadOnly="True" Width="auto"/>
+                <DataGridTextColumn x:Name="mANDFColumn" Binding="{Binding MANDF}" Header="موجودی ثانویه" MinWidth="70" IsReadOnly="True" Width="auto"/>
+                <DataGridTextColumn x:Name="mEGHRESColumn" Binding="{Binding MEGHRES}" Header="رزرو شده" MinWidth="60" IsReadOnly="True" Width="auto"/>
+                <DataGridTextColumn x:Name="mEGHBARColumn" Binding="{Binding MEGHBAR}" Header="بارگیری نشده" MinWidth="70" IsReadOnly="True" Width="auto"/>
+                <DataGridTextColumn x:Name="fisiclymandColumn" Binding="{Binding fisiclymand}" Header="موجودی فیزیکی" MinWidth="90" IsReadOnly="True" Width="auto"/>
+                <DataGridTextColumn x:Name="vAZNColumn" Binding="{Binding VAZN}" Header="وزن واحد" Width="auto"/>
+                <DataGridTextColumn x:Name="vAZNKColumn" Binding="{Binding VAZNK}" Header="وزن کل" IsReadOnly="True" Width="auto"/>
+                <DataGridTextColumn x:Name="b_SEFColumn" Binding="{Binding B_SEF}" Header="فی خرده فروش" MinWidth="85" Width="auto"/>
+                <DataGridTextColumn x:Name="mABL_FColumn" Binding="{Binding MABL_F}" Header="فی عمده فروش" MinWidth="85" Width="auto"/>
+                <DataGridTextColumn x:Name="gRCODColumn" Binding="{Binding GRCOD}" Header="کد گروه کالا" MinWidth="65" Width="auto"/>
+                <DataGridTextColumn x:Name="vCODColumn" Binding="{Binding VCOD}" Header="کد کالا" MinWidth="50" IsReadOnly="True" Width="auto"/>
+                <DataGridTextColumn x:Name="gRNAMEColumn" Binding="{Binding GRNAME}" Header="نام گروه کالا" MinWidth="65" Width="auto"/>
+                <DataGridTextColumn x:Name="menuitColumn" Binding="{Binding menuit}" Header="منوی کالا" MinWidth="85" Width="auto"/>
+                <DataGridTextColumn x:Name="aNBARNColumn" Binding="{Binding ANBARN}" Header="کد انبار" Width="auto"/>
+                <DataGridTextColumn x:Name="aNBARColumn" Binding="{Binding ANBAR}" Header="انبار" MinWidth="30" Width="auto"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Button x:Name="Btn_Close" Margin="0,12,12,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+            <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+        </Button>
+        <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,12,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+            <materialDesign:PackIcon Kind="WindowRestore" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+        </Button>
+        <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,12,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+            <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+        </Button>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="95,56,0,0"  Width="1"/>
+    </Grid>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+</Window>

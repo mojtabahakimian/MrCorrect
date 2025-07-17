@@ -1,0 +1,991 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<UseWindowsForms>true</UseWindowsForms>
+
+		<ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
+
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+
+		<ApplicationIcon>UiDrive\IMGS\MyMrCorrect.ico</ApplicationIcon>
+
+		<AssemblyVersion></AssemblyVersion>
+
+		<FileVersion>1.0.0.189</FileVersion>
+
+		<Title>MrCorrect</Title>
+		<AssemblyName>MrCorrect</AssemblyName>
+		<AssemblyTitle>MrCorrect</AssemblyTitle>
+
+
+		<PublishTrimmed>false</PublishTrimmed>
+		<EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<!--<PublishSingleFile>true</PublishSingleFile>-->
+		<!--<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>-->
+
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="DLLS\stimulydlls\**" />
+	  <EmbeddedResource Remove="DLLS\stimulydlls\**" />
+	  <None Remove="DLLS\stimulydlls\**" />
+	  <Page Remove="DLLS\stimulydlls\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Remove="DLLS\AxInterop.TINYLib.dll" />
+		<None Remove="DLLS\Interop.TINYLib.dll" />
+		<None Remove="DLLS\Stimulsoft.Base.dll" />
+		<None Remove="DLLS\Stimulsoft.Data.dll" />
+		<None Remove="DLLS\Stimulsoft.Report.dll" />
+		<None Remove="DLLS\Stimulsoft.Report.Wpf.dll" />
+		<None Remove="DLLS\Syncfusion.Data.WPF.dll" />
+		<None Remove="DLLS\Syncfusion.SfChart.WPF.dll" />
+		<None Remove="DLLS\Syncfusion.SfGrid.WPF.dll" />
+		<None Remove="DLLS\Syncfusion.Shared.WPF.dll" />
+		<None Remove="DLLS\ZoomerControl.dll" />
+		<None Remove="Rpts\ANBAR\BARGEH_ENTEGHAL.mrt" />
+		<None Remove="Rpts\ANBAR\ccc.mrt" />
+		<None Remove="Rpts\ANBAR\DARKHST_KHARID.mrt" />
+		<None Remove="Rpts\ANBAR\HAVALE_ANBAR_RASID.mrt" />
+		<None Remove="Rpts\ANBAR\HAV_OTHER_RASID.mrt" />
+		<None Remove="Rpts\ANBAR\LIST_FROOSH_ANBARS_BAR.mrt" />
+		<None Remove="Rpts\ANBAR\LIST_FROOSH_ANBARS_HAVALA.mrt" />
+		<None Remove="Rpts\ANBAR\R_AK_MOGUDI_ANBAR.mrt" />
+		<None Remove="Rpts\ANBAR\R_AK_MOGUDI_ANBAR_NO_WHERE.mrt" />
+		<None Remove="Rpts\ANBAR\r_anbargrd.mrt" />
+		<None Remove="Rpts\ANBAR\r_counter1.mrt" />
+		<None Remove="Rpts\ANBAR\r_counter2.mrt" />
+		<None Remove="Rpts\ANBAR\r_counter3.mrt" />
+		<None Remove="Rpts\ANBAR\R_KA_KALA.mrt" />
+		<None Remove="Rpts\ANBAR\R_KA_KALA2.mrt" />
+		<None Remove="Rpts\ANBAR\R_TAG.mrt" />
+		<None Remove="Rpts\ANBAR\R_TARAZ_ANBARHA.mrt" />
+		<None Remove="Rpts\ANBAR\R_TARAZ_ANBARHA_KHAS.mrt" />
+		<None Remove="Rpts\ANBAR\R_TARAZ_ANBARHA_KHAS_GRP.mrt" />
+		<None Remove="Rpts\BUGETRP.mrt" />
+		<None Remove="Rpts\BUGETRP_tahlil.mrt" />
+		<None Remove="Rpts\Checkha\CHAPCHEK.mrt" />
+		<None Remove="Rpts\Checkha\CHEK_DLISTS.mrt" />
+		<None Remove="Rpts\Checkha\ELVSL_ADA.mrt" />
+		<None Remove="Rpts\Factors\HAVLAH_BRDIRECT.mrt" />
+		<None Remove="Rpts\Factors\HAVLAH_ENTER.mrt" />
+		<None Remove="Rpts\Factors\HAVLAH_ENTER_BACK.mrt" />
+		<None Remove="Rpts\Factors\HAVLAH_ENTER_MABL.mrt" />
+		<None Remove="Rpts\Factors\HAVLAH_KHBACK.mrt" />
+		<None Remove="Rpts\Factors\InterInvoice.mrt" />
+		<None Remove="Rpts\Factors\InterOrderInvoice.mrt" />
+		<None Remove="Rpts\Factors\INVOICE_FRBK_2_MBA.mrt" />
+		<None Remove="Rpts\Factors\INVOICE_FRBK_3_BMA.mrt" />
+		<None Remove="Rpts\Factors\INVOICE_FROOSH_22.mrt" />
+		<None Remove="Rpts\Factors\INVOICE_FROOSH_2_1.mrt" />
+		<None Remove="Rpts\Factors\INVOICE_FROOSH_2_MBA.mrt" />
+		<None Remove="Rpts\Factors\INVOICE_FROOSH_2_MBA_22.mrt" />
+		<None Remove="Rpts\Factors\INVOICE_FROOSH_BRFR.mrt" />
+		<None Remove="Rpts\Factors\INVOICE_KHADAMAT.mrt" />
+		<None Remove="Rpts\Factors\INVOICE_KHADAMAT2.mrt" />
+		<None Remove="Rpts\Factors\INVOICE_KHAD_2_MBA.mrt" />
+		<None Remove="Rpts\Factors\INVOICE_KHAREED_1.mrt" />
+		<None Remove="Rpts\Factors\INVOICE_KH_BACK.mrt" />
+		<None Remove="Rpts\Factors\INVOICE_KH_BACK_AZAD.mrt" />
+		<None Remove="Rpts\Factors\INVOIC_FROOSH_BACK2.mrt" />
+		<None Remove="Rpts\Factors\R_FROOSH_DAYLY_1.mrt" />
+		<None Remove="Rpts\Factors\R_KHARED_DAYLY_1.mrt" />
+		<None Remove="Rpts\HAVALAH_ANVAR_VROUD.mrt" />
+		<None Remove="Rpts\HAVALAH_ANVAR_VROUD.rar" />
+		<None Remove="Rpts\havlah_anbar.mrt" />
+		<None Remove="Rpts\HAVLAH_ANBARh.mrt" />
+		<None Remove="Rpts\HESABDARI\DAFTAR_ROOZNAMEH.mrt" />
+		<None Remove="Rpts\HESABDARI\MOGHAYERAT.mrt" />
+		<None Remove="Rpts\HESABDARI\R_DAFTAR_KOL.mrt" />
+		<None Remove="Rpts\HESABDARI\R_DAFTAR_KOL_kh.mrt" />
+		<None Remove="Rpts\HESABDARI\R_DAFTAR_MOIN.mrt" />
+		<None Remove="Rpts\HESABDARI\R_DAFTAR_MOIN_TAFKIK.mrt" />
+		<None Remove="Rpts\HESABDARI\R_DP_DAYLY.mrt" />
+		<None Remove="Rpts\HESABDARI\R_SANAD_PRINT_GRP.mrt" />
+		<None Remove="Rpts\HESABDARI\R_TARAZ_4.mrt" />
+		<None Remove="Rpts\HESABDARI\SURATMABEVAMASAREF.mrt" />
+		<None Remove="Rpts\HESABDARI\TARAZ4_TAFZIL.mrt" />
+		<None Remove="Rpts\HESABDARI\TARAZ4_TAFZIL2.mrt" />
+		<None Remove="Rpts\HESABDARI\TARAZ4_TAFZIL_other.mrt" />
+		<None Remove="Rpts\HESABDARI\TARAZNAMAH2.mrt" />
+		<None Remove="Rpts\HESABDARI\TARAZ_moin2.mrt" />
+		<None Remove="Rpts\HESABDARI\TOTA_HES.mrt" />
+		<None Remove="Rpts\IK1.mrt" />
+		<None Remove="Rpts\INVOICE_PISHFROOSH2.mrt" />
+		<None Remove="Rpts\INVOICE_PISH_2_MBA.mrt" />
+		<None Remove="Rpts\Khazane_Reports\KHAZANE_AMALKARD.mrt" />
+		<None Remove="Rpts\Khazane_Reports\SANAD_DARYAFT.mrt" />
+		<None Remove="Rpts\Khazane_Reports\SANAD_PARDAKHT.mrt" />
+		<None Remove="Rpts\PishFactor\INVOICE_PISH_2_MBA.mrt" />
+		<None Remove="Rpts\PishFactor\order_list_p.mrt" />
+		<None Remove="Rpts\PishFactor\p1.mrt" />
+		<None Remove="Rpts\R_DAFTAR_TAFZILY_2_2.mrt" />
+		<None Remove="Rpts\R_DAFTAR_TAFZILY_2_2.rar" />
+		<None Remove="Rpts\SALARY\MORAKHASI.mrt" />
+		<None Remove="Rpts\SANAD_Reports\R_SANAD_PRINT.mrt" />
+		<None Remove="Rpts\SANAD_Reports\R_SANAD_PRINT_B.mrt" />
+		<None Remove="Rpts\SANATI\HAVLAH_ENTER.mrt" />
+		<None Remove="Rpts\SANATI\HAVLAH_EXIT.mrt" />
+		<None Remove="Rpts\SETPERMIS\userobjectpermision.mrt" />
+		<None Remove="Rpts\STUF_DEF.mrt" />
+		<None Remove="Rpts\TAARIF\GRADE_REP.mrt" />
+		<None Remove="Rpts\Visitory\R_LIST_MASIR.mrt" />
+		<None Remove="UiDrive\EXEFILES\Preloader.exe" />
+		<None Remove="UiDrive\FNT\IranYekanRG.TTF" />
+		<None Remove="UiDrive\IMGS\budget.jpg" />
+		<None Remove="UiDrive\IMGS\CHECKGUIDE.png" />
+		<None Remove="UiDrive\IMGS\FirstBaseDesk.png" />
+		<None Remove="UiDrive\IMGS\MCR.ico" />
+		<None Remove="UiDrive\IMGS\MCR.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\AnbargardaniSanad.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR\Anbar_Gardani.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR\Barge_Havale.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR\Darkhast_Kharid.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR\Gozareshat.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR\Kala_Search.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR\List_Status.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR\Resid_Anbar.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR\Sayer_Havale.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR\Sayer_Resid.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR\Transfer_Kala.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\AnbarStock.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\AnbarStockReport.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\AnbarTarazReportByGroup.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\CartAnbarKala.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\CountingDaily.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\GroupAnabarHalaveh.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\KalaStockByAnbar.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\KalaStockReportByAnbar.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\ListTarazAnbarStock.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\MergedAnbarStock.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\RepairAnbarStock.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\ReportStockAllAnbar.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\SearcherKalaStock.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\Automasion.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\Barnamerizitolid.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\Budget.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\BUDGET\Budget.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\BUDGET\List_Budget.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\BUDGET\Tahlil_Budget.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\CHECKHA\Check_Daryafti.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\CHECKHA\Check_Pardakhti.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\CHECKHA\Daftar_Daryafti.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\CHECKHA\Daftar_Pardakhti.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\CHECKHA\Daryafti_List.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\CHECKHA\Daryafti_Mah.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\CHECKHA\Daryafti_NazdBank.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\CHECKHA\Daryafti_Sarresid.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\CHECKHA\Daryafti_Sarresid_List.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\CHECKHA\Nazd_bank.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\CHECKHA\Pardakhti_BeMah.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\CHECKHA\Pardakhti_List.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\CHECKHA\Pardakhti_Sarresid.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\CHECKHA\Pardakhti_Sarresid_Report.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\CHECKHA\Pardakhti_Vosool_Nashode.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\CHECKHA\Savabegh.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\CHECKHA\Sayer_Reports.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\Customer.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\DaryaftExit.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\Dashboard.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\EMPM\Calendar.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\EMPM\Elam_Kharabi.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\EMPM\Kala_Anbar.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\EMPM\List_Order.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\EMPM\Mange_List_order.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\EMPM\Noe_Kharabi.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\EMPM\Tamir.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\EMPM\TarifHowUseDevice.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\EMPM\Tarif_Device.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\FACTORHA\FactorForoosh.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\FACTORHA\KalaMasrafMostaghim.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\FACTORHA\KharidFactor.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\FACTORHA\KharidSaderati.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\FACTORHA\Pre-Factor.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\FACTORHA\Pre-Order.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\FACTORHA\RasGiri.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\FACTORHA\ReturnFactorForoosh.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\FACTORHA\ReturnSellFactor.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\FACTORHA\SaderatFactors.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\FACTORHA\SellFactors.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\AdvancedReport.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\AmarSellByDay.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\BargeBedoonGhabzeBascool.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\KalaBuyReportByAnbar.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\KharidListByKala.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SayerGozareshat.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SearchInKalaF12.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SellListSumByKala.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SellreportByVahed.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SellReportsByGroup.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SellReportsByPerson.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SooratStatusCheckByDate.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SooratStatusPerson.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SummorizeDailyBuybyPerson.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SummorizeDailySellbyPerson.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\UsersDailySellList.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_DARA\ArzeshAfzoodeKharid.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_DARA\ForsooshByFactors.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_DARA\KharidByFactors.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_DARA\SeasonForooshBargasht.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_DARA\SeasonFrooshBargasht.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_DARA\SeasonKharidBarsgasht.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\CtrlF8.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\DaftarKol.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\F8.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\F9.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\GroupAsnadPrint.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\KhazaneAmalkard.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\LimitedBedehkaran.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\MoeenDaftar.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\NewsPaper.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\NotTaraz.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\PaymentRequestsList.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\PrintKholaseDaftar.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\SanadKholaseAmaliat.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\SarfaslPrint.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\SmartBillCustomer.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\TafziliTafkiki.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\Hesabdari.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI\Anbar.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI\Checkha.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI\Dastmozd.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI\KharidFroosh.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI\Tanzimat.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI\Tarif.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\Hesabdari_1.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI_SUB\AmvalJam.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI_SUB\AsnadAndGroupMali.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI_SUB\AsnadControl.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI_SUB\CreateAndChange.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI_SUB\EndOfYear.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI_SUB\Gozareshat.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI_SUB\HesabFixAmount.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI_SUB\HesabReplace.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI_SUB\MoratabSaziAsnad.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI_SUB\PaymentRequest.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI_SUB\SearchInAsnad.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI_SUB\SearchInKhazane copy.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI_SUB\SendRecive.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HESABDARI_SUB\TarazHazine.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\HesabSanati.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\KalaMadeEnter.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\KalaSend.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\KharidFactorSanad.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\KHARIDFORUSH\DaraiReports.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\KHARIDFORUSH\Factors.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\KHARIDFORUSH\SellAndBuyReports.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\KHARIDFORUSH\Visitory.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\MaliGroup.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\MavadExit.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\MianginRepair.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\MrCorrect.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\MYSETTING\About.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\MYSETTING\Access_Level.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\MYSETTING\Blac_List.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\MYSETTING\Download_Info.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\MYSETTING\History.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\MYSETTING\New_User.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\MYSETTING\Password_Change.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\MYSETTING\Send_Info.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\MYSETTING\Shift.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\MYSETTING\System_Info.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\MYSETTING\Taghir_User.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\MYSETTING\Users_Group.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\people.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SALARY\BillPrint.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SALARY\Bill_Hooghoogh.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SALARY\Bill_List.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SALARY\Bime_Disk.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SALARY\Bime_List.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SALARY\CheckOut.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SALARY\Eydi_Sanavat.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SALARY\Full_Parvandeh.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SALARY\Gharardad.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SALARY\Hokm.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SALARY\Koosoorat.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SALARY\Tax.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SALARY\User_Carcard.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SALARY\User_DayOff.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SALARY\User_Detail.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SALARY\Vam.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SanadBargashtForoosh.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SanadFactorForoosh.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SanadFactorService.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SanadKhazaneDari.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SANATI\Amalkard_End_kala.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SANATI\Amalkard_Ens2.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SANATI\Dastmozd_Tolid.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SANATI\Formool_Sakht.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SANATI\Khorooj_Sayer.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SANATI\Masraf_Chart.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SANATI\Mavad_Enter.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SANATI\Mavad_Exit.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SANATI\Price_End.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SANATI\Price_Sell.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SANATI\Tolid_Chart.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SANATI\User_Karkard.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\BuyH.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\BuyReturnH.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\DayOffH.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\EnteghalH.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\HavaleSellH.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\KalaTarifH.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\Kargozini.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\KharidReturnH.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\KhazaneH.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\MavalExitH.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\PishFactorH.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\ResidBuyH.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\SanadDastiH.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\SayerExitH.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\SellH.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\ServiceH.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\SystemChangeH.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAVABEGH\TolidH.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SayerMavadExit.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAYER_INVOCE\BannedCutomers.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAYER_INVOCE\DailySellList.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAYER_INVOCE\KalaSellListByPerson.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAYER_INVOCE\KharidListBascool.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAYER_INVOCE\ListDetailKalas.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAYER_INVOCE\NotSellKalaList.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAYER_INVOCE\NotSellToPerson.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAYER_INVOCE\PrintFormat.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAYER_INVOCE\SellListBascool.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SAYER_INVOCE\SellReportByFactor.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SellManagment.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SMART_SALES\Customer_Status.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SMART_SALES\Elamieh_Takhfif.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SMART_SALES\Enhesar.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SMART_SALES\GradBandi_Customer.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SMART_SALES\Grade_For_Customer.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SMART_SALES\Grade_Shart.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SMART_SALES\Khrid_Foroosh.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SMART_SALES\Mohasebe_Pardakht.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SMART_SALES\Nahve_Pardakht.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SMART_SALES\Parameter.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SMART_SALES\Status.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SMART_SALES\Takgir_Pardakht.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SMART_SALES\Takhfif.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\SMART_SALES\Tarif_Price.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\Tamir.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\Tanzimat.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\Bank.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\Customer_Moin.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\Hesab_Group.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\Hesab_Kol.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\Kala_Group.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\Kala_Vahed.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\Khdamat.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\Khodgardan.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\Kind_Customer.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\Kol_Moin.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\New_Customer.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\New_Kala.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\Pay_Sector.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\Shift.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\Tarif_Anbar.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\Usage_Sector.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\Vahed_Sazman.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TARIF\Visitor_Menu.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TOLID\Bargiri_Nashodeh.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TOLID\Hesab_Kol.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TOLID\Mohasebe_Mavad.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TOLID\Month_Tafkik_Tolid.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TOLID\Sell_Chart.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TOLID\Sell_Chart_Month.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\TOLID\Tolid_Month.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\VISITORY\DailyVistForVisitor.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\VISITORY\GroupVisitorAmalkardByMonthReturn.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\VISITORY\HandList.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\VISITORY\KalaListPrint.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\VISITORY\PointsForVisitor.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\VISITORY\PoorsantForVisitor.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\VISITORY\VisitorAmalkard.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\VISITORY\VisitorAmalkardReport.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\VISITORY\VisitorAmalkardReturnByMonth.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\VISITORY\VisitorKalaAmalkardByMonth.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\VISITORY\VisitorOnMap.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\VISITORY\VisitorReturnKalaByMonth.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\VISITORY\VisitorSellListByFactor.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\VISITORY\VisitorsListByFactor.png" />
+		<None Remove="UiDrive\IMGS\PICMENU\VISITORY\VisitWayForCustomers.png" />
+		<None Remove="UiDrive\IMGS\SplashHandwrite.gif" />
+		<None Remove="UiDrive\IMGS\Tanzimat.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+    <COMReference Include="TINYLib">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>0</VersionMinor>
+      <VersionMajor>1</VersionMajor>
+      <Guid>df1d4b1e-d56e-4a40-ba98-2cc06080e796</Guid>
+      <Lcid>0</Lcid>
+      <Isolated>false</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+
+	<ItemGroup>
+		<Content Include="UiDrive\IMGS\MyMrCorrect.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Rpts\ANBAR\BARGEH_ENTEGHAL.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\ccc.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\DARKHST_KHARID.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\HAVALE_ANBAR_RASID.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\HAV_OTHER_RASID.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\LIST_FROOSH_ANBARS_BAR.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\LIST_FROOSH_ANBARS_HAVALA.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\R_AK_MOGUDI_ANBAR.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\R_AK_MOGUDI_ANBAR_NO_WHERE.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\r_anbargrd.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\r_counter1.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\r_counter2.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\r_counter3.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\R_KA_KALA.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\R_KA_KALA2.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\R_TAG.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\R_TARAZ_ANBARHA.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\R_TARAZ_ANBARHA_KHAS.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\R_TARAZ_ANBARHA_KHAS_GRP.mrt" />
+		<EmbeddedResource Include="Rpts\BUGETRP.mrt" />
+		<EmbeddedResource Include="Rpts\BUGETRP_tahlil.mrt" />
+		<EmbeddedResource Include="Rpts\Checkha\CHAPCHEK.mrt" />
+		<EmbeddedResource Include="Rpts\Checkha\CHEK_DLISTS.mrt" />
+		<EmbeddedResource Include="Rpts\Checkha\ELVSL_ADA.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\HAVLAH_BRDIRECT.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\HAVLAH_ENTER.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\HAVLAH_ENTER_BACK.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\HAVLAH_ENTER_MABL.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\HAVLAH_KHBACK.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\InterInvoice.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\InterOrderInvoice.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\INVOICE_FRBK_2_MBA.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\INVOICE_FRBK_3_BMA.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\INVOICE_FROOSH_22.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\INVOICE_FROOSH_2_1.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\INVOICE_FROOSH_2_MBA.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\INVOICE_FROOSH_2_MBA_22.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\INVOICE_FROOSH_BRFR.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\INVOICE_KHADAMAT.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\INVOICE_KHADAMAT2.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\INVOICE_KHAD_2_MBA.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\INVOICE_KHAREED_1.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\INVOICE_KH_BACK.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\INVOICE_KH_BACK_AZAD.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\INVOIC_FROOSH_BACK2.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\R_FROOSH_DAYLY_1.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\R_KHARED_DAYLY_1.mrt" />
+		<EmbeddedResource Include="Rpts\HAVALAH_ANVAR_VROUD.mrt" />
+		<EmbeddedResource Include="Rpts\havlah_anbar.mrt" />
+		<EmbeddedResource Include="Rpts\HAVLAH_ANBARh.mrt" />
+		<EmbeddedResource Include="Rpts\HESABDARI\DAFTAR_ROOZNAMEH.mrt" />
+		<EmbeddedResource Include="Rpts\HESABDARI\MOGHAYERAT.mrt" />
+		<EmbeddedResource Include="Rpts\HESABDARI\R_DAFTAR_KOL.mrt" />
+		<EmbeddedResource Include="Rpts\HESABDARI\R_DAFTAR_KOL_kh.mrt" />
+		<EmbeddedResource Include="Rpts\HESABDARI\R_DAFTAR_MOIN.mrt" />
+		<EmbeddedResource Include="Rpts\HESABDARI\R_DAFTAR_MOIN_TAFKIK.mrt" />
+		<EmbeddedResource Include="Rpts\HESABDARI\R_DP_DAYLY.mrt" />
+		<EmbeddedResource Include="Rpts\HESABDARI\R_SANAD_PRINT_GRP.mrt" />
+		<EmbeddedResource Include="Rpts\HESABDARI\R_TARAZ_4.mrt" />
+		<EmbeddedResource Include="Rpts\HESABDARI\SURATMABEVAMASAREF.mrt" />
+		<EmbeddedResource Include="Rpts\HESABDARI\TARAZ4_TAFZIL.mrt" />
+		<EmbeddedResource Include="Rpts\HESABDARI\TARAZ4_TAFZIL2.mrt" />
+		<EmbeddedResource Include="Rpts\HESABDARI\TARAZ4_TAFZIL_other.mrt" />
+		<EmbeddedResource Include="Rpts\HESABDARI\TARAZNAMAH2.mrt" />
+		<EmbeddedResource Include="Rpts\HESABDARI\TARAZ_moin2.mrt" />
+		<EmbeddedResource Include="Rpts\HESABDARI\TOTA_HES.mrt" />
+		<EmbeddedResource Include="Rpts\IK1.mrt" />
+		<EmbeddedResource Include="Rpts\INVOICE_PISHFROOSH2.mrt" />
+		<EmbeddedResource Include="Rpts\INVOICE_PISH_2_MBA.mrt" />
+		<EmbeddedResource Include="Rpts\Khazane_Reports\KHAZANE_AMALKARD.mrt" />
+		<EmbeddedResource Include="Rpts\Khazane_Reports\SANAD_DARYAFT.mrt" />
+		<EmbeddedResource Include="Rpts\Khazane_Reports\SANAD_PARDAKHT.mrt" />
+		<EmbeddedResource Include="Rpts\PishFactor\INVOICE_PISH_2_MBA.mrt" />
+		<EmbeddedResource Include="Rpts\PishFactor\order_list_p.mrt" />
+		<EmbeddedResource Include="Rpts\PishFactor\p1.mrt" />
+		<EmbeddedResource Include="Rpts\R_DAFTAR_TAFZILY_2_2.mrt" />
+		<EmbeddedResource Include="Rpts\SALARY\MORAKHASI.mrt" />
+		<EmbeddedResource Include="Rpts\SANAD_Reports\R_SANAD_PRINT.mrt" />
+		<EmbeddedResource Include="Rpts\SANAD_Reports\R_SANAD_PRINT_B.mrt" />
+		<EmbeddedResource Include="Rpts\SANATI\HAVLAH_ENTER.mrt" />
+		<EmbeddedResource Include="Rpts\SANATI\HAVLAH_EXIT.mrt" />
+		<EmbeddedResource Include="Rpts\SETPERMIS\userobjectpermision.mrt" />
+		<EmbeddedResource Include="Rpts\STUF_DEF.mrt" />
+		<EmbeddedResource Include="Rpts\TAARIF\GRADE_REP.mrt" />
+		<EmbeddedResource Include="Rpts\Visitory\R_LIST_MASIR.mrt" />
+		<EmbeddedResource Include="UiDrive\EXEFILES\Preloader.exe" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="DocumentFormat.OpenXml" Version="3.1.1" />
+		<PackageReference Include="EPPlus" Version="7.5.1" />
+		<PackageReference Include="Extended.Wpf.Toolkit" Version="4.5.0" />
+		<!--<PackageReference Include="Dapper" Version="2.0.143" />-->
+		<PackageReference Include="IPE.SmsIr" Version="1.2.7" />
+		<PackageReference Include="itext7" Version="8.0.3" />
+		<PackageReference Include="Magick.NET-Q16-AnyCPU" Version="13.5.0" />
+		<PackageReference Include="MaterialDesignThemes" Version="5.2.1" />
+		<PackageReference Include="Microsoft.Office.Interop.Excel" Version="15.0.4795.1001" />
+		<PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
+		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+		<PackageReference Include="Mime-Detective" Version="23.10.1" />
+		<PackageReference Include="MimeTypeMapOfficial" Version="1.0.17" />
+		<PackageReference Include="MimeTypesMap" Version="1.0.8" />
+		<PackageReference Include="OpenMcdf" Version="2.3.0" />
+		<PackageReference Include="syncfusion.ui.wpf.net" Version="20.4.0.48" />
+		<PackageReference Include="System.IO.Ports" Version="7.0.0" />
+		<PackageReference Include="XamlAnimatedGif" Version="2.3.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\AUTO_BAZ\AUTO_BAZ.csproj" />
+		<ProjectReference Include="..\Prg_Proccessy\Prg_Proccessy.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="AxInterop.TINYLib">
+			<HintPath>DLLS\AxInterop.TINYLib.dll</HintPath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+			<Private>True</Private>
+		</Reference>
+
+		<Reference Include="Microsoft.CodeAnalysis">
+			<HintPath>DLLS\stimulydlls\Microsoft.CodeAnalysis.dll</HintPath>
+		</Reference>
+		<Reference Include="Microsoft.CodeAnalysis.CSharp">
+			<HintPath>DLLS\stimulydlls\Microsoft.CodeAnalysis.CSharp.dll</HintPath>
+		</Reference>
+		<Reference Include="Microsoft.CodeAnalysis.VisualBasic">
+			<HintPath>DLLS\stimulydlls\Microsoft.CodeAnalysis.VisualBasic.dll</HintPath>
+		</Reference>
+		<Reference Include="Microsoft.Data.SqlClient">
+			<HintPath>DLLS\stimulydlls\Microsoft.Data.SqlClient.dll</HintPath>
+		</Reference>
+		
+		<Reference Include="SixLabors.Fonts">
+			<HintPath>DLLS\stimulydlls\SixLabors.Fonts.dll</HintPath>
+		</Reference>
+		<Reference Include="SixLabors.ImageSharp">
+			<HintPath>DLLS\stimulydlls\SixLabors.ImageSharp.dll</HintPath>
+		</Reference>
+		<Reference Include="SixLabors.ImageSharp.Drawing">
+			<HintPath>DLLS\stimulydlls\SixLabors.ImageSharp.Drawing.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.Base">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Base.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.Blockly">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Blockly.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.BlocklyEditor.Wpf">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.BlocklyEditor.Wpf.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.Client.Designer">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Client.Designer.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.Controls">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Controls.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.Controls.Win">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Controls.Win.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.Controls.Wpf">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Controls.Wpf.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.Dashboard.Viewer">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Dashboard.Viewer.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.Dashboard.Viewer.Wpf">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Dashboard.Viewer.Wpf.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.Data">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Data.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.Database.Wpf">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Database.Wpf.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.Drawing">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Drawing.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.Editor.Wpf">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Editor.Wpf.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.Map">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Map.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.MathFX">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.MathFX.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.Report">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Report.dll</HintPath>
+			<Private>True</Private>
+		</Reference>
+		<Reference Include="Stimulsoft.Report.Check">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Report.Check.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.Report.Helper">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Report.Helper.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.Report.Win">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Report.Win.dll</HintPath>
+			<Private>True</Private>
+		</Reference>
+		<Reference Include="Stimulsoft.Report.Wpf">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Report.Wpf.dll</HintPath>
+			<Private>True</Private>
+		</Reference>
+		<Reference Include="Stimulsoft.Report.WpfDesign">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Report.WpfDesign.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.Svg">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.Svg.dll</HintPath>
+		</Reference>
+		<Reference Include="Stimulsoft.System">
+			<HintPath>DLLS\stimulydlls\Stimulsoft.System.dll</HintPath>
+		</Reference>
+		<Reference Include="Syncfusion.Data.WPF">
+			<HintPath>DLLS\Syncfusion.Data.WPF.dll</HintPath>
+		</Reference>
+		<Reference Include="Syncfusion.SfChart.WPF">
+			<HintPath>DLLS\Syncfusion.SfChart.WPF.dll</HintPath>
+		</Reference>
+		<Reference Include="Syncfusion.SfGrid.WPF">
+			<HintPath>DLLS\Syncfusion.SfGrid.WPF.dll</HintPath>
+		</Reference>
+		<Reference Include="Syncfusion.Shared.WPF">
+			<HintPath>DLLS\Syncfusion.Shared.WPF.dll</HintPath>
+		</Reference>
+		<Reference Include="System.Data.Odbc">
+			<HintPath>DLLS\stimulydlls\System.Data.Odbc.dll</HintPath>
+		</Reference>
+		<Reference Include="System.Data.OleDb">
+			<HintPath>DLLS\stimulydlls\System.Data.OleDb.dll</HintPath>
+		</Reference>
+		<Reference Include="System.IdentityModel.Tokens.Jwt">
+			<HintPath>DLLS\stimulydlls\System.IdentityModel.Tokens.Jwt.dll</HintPath>
+		</Reference>
+		<Reference Include="System.Memory.Data">
+			<HintPath>DLLS\stimulydlls\System.Memory.Data.dll</HintPath>
+		</Reference>
+		<Reference Include="System.Runtime.Caching">
+			<HintPath>DLLS\stimulydlls\System.Runtime.Caching.dll</HintPath>
+		</Reference>
+		<Reference Include="ZoomerControl">
+			<HintPath>DLLS\ZoomerControl.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Resource Include="UiDrive\FNT\IranYekanRG.TTF" />
+		<Resource Include="UiDrive\IMGS\budget.jpg" />
+		<Resource Include="UiDrive\IMGS\CHECKGUIDE.png" />
+		<Resource Include="UiDrive\IMGS\FirstBaseDesk.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\AnbargardaniSanad.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR\Anbar_Gardani.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR\Barge_Havale.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR\Darkhast_Kharid.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR\Gozareshat.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR\Kala_Search.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR\List_Status.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR\Resid_Anbar.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR\Sayer_Havale.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR\Sayer_Resid.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR\Transfer_Kala.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\AnbarStock.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\AnbarStockReport.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\AnbarTarazReportByGroup.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\CartAnbarKala.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\CountingDaily.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\GroupAnabarHalaveh.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\KalaStockByAnbar.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\KalaStockReportByAnbar.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\ListTarazAnbarStock.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\MergedAnbarStock.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\RepairAnbarStock.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\ReportStockAllAnbar.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR_GOZARESHAT\SearcherKalaStock.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\Automasion.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\Barnamerizitolid.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\Budget.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\BUDGET\Budget.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\BUDGET\List_Budget.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\BUDGET\Tahlil_Budget.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\CHECKHA\Check_Daryafti.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\CHECKHA\Check_Pardakhti.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\CHECKHA\Daftar_Daryafti.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\CHECKHA\Daftar_Pardakhti.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\CHECKHA\Daryafti_List.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\CHECKHA\Daryafti_Mah.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\CHECKHA\Daryafti_NazdBank.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\CHECKHA\Daryafti_Sarresid.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\CHECKHA\Daryafti_Sarresid_List.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\CHECKHA\Nazd_bank.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\CHECKHA\Pardakhti_BeMah.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\CHECKHA\Pardakhti_List.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\CHECKHA\Pardakhti_Sarresid.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\CHECKHA\Pardakhti_Sarresid_Report.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\CHECKHA\Pardakhti_Vosool_Nashode.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\CHECKHA\Savabegh.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\CHECKHA\Sayer_Reports.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\Customer.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\DaryaftExit.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\Dashboard.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\EMPM\Calendar.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\EMPM\Elam_Kharabi.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\EMPM\Kala_Anbar.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\EMPM\List_Order.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\EMPM\Mange_List_order.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\EMPM\Noe_Kharabi.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\EMPM\Tamir.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\EMPM\TarifHowUseDevice.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\EMPM\Tarif_Device.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\FACTORHA\FactorForoosh.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\FACTORHA\KalaMasrafMostaghim.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\FACTORHA\KharidFactor.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\FACTORHA\KharidSaderati.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\FACTORHA\Pre-Factor.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\FACTORHA\Pre-Order.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\FACTORHA\RasGiri.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\FACTORHA\ReturnFactorForoosh.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\FACTORHA\ReturnSellFactor.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\FACTORHA\SaderatFactors.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\FACTORHA\SellFactors.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\AdvancedReport.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\AmarSellByDay.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\BargeBedoonGhabzeBascool.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\KalaBuyReportByAnbar.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\KharidListByKala.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SayerGozareshat.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SearchInKalaF12.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SellListSumByKala.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SellreportByVahed.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SellReportsByGroup.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SellReportsByPerson.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SooratStatusCheckByDate.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SooratStatusPerson.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SummorizeDailyBuybyPerson.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\SummorizeDailySellbyPerson.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESHAT_INVOCE\UsersDailySellList.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_DARA\ArzeshAfzoodeKharid.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_DARA\ForsooshByFactors.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_DARA\KharidByFactors.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_DARA\SeasonForooshBargasht.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_DARA\SeasonFrooshBargasht.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_DARA\SeasonKharidBarsgasht.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\CtrlF8.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\DaftarKol.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\F8.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\F9.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\GroupAsnadPrint.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\KhazaneAmalkard.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\LimitedBedehkaran.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\MoeenDaftar.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\NewsPaper.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\NotTaraz.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\PaymentRequestsList.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\PrintKholaseDaftar.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\SanadKholaseAmaliat.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\SarfaslPrint.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\SmartBillCustomer.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\GOZARESH_SANAD\TafziliTafkiki.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\Hesabdari.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI\Anbar.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI\Checkha.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI\Dastmozd.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI\KharidFroosh.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI\Tanzimat.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI\Tarif.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\Hesabdari_1.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI_SUB\AmvalJam.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI_SUB\AsnadAndGroupMali.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI_SUB\AsnadControl.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI_SUB\CreateAndChange.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI_SUB\EndOfYear.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI_SUB\Gozareshat.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI_SUB\HesabFixAmount.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI_SUB\HesabReplace.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI_SUB\MoratabSaziAsnad.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI_SUB\PaymentRequest.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI_SUB\SearchInAsnad.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI_SUB\SearchInKhazane copy.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI_SUB\SendRecive.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HESABDARI_SUB\TarazHazine.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\HesabSanati.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\KalaMadeEnter.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\KalaSend.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\KharidFactorSanad.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\KHARIDFORUSH\DaraiReports.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\KHARIDFORUSH\Factors.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\KHARIDFORUSH\SellAndBuyReports.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\KHARIDFORUSH\Visitory.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\MaliGroup.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\MavadExit.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\MianginRepair.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\MrCorrect.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\MYSETTING\About.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\MYSETTING\Access_Level.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\MYSETTING\Blac_List.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\MYSETTING\Download_Info.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\MYSETTING\History.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\MYSETTING\New_User.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\MYSETTING\Password_Change.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\MYSETTING\Send_Info.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\MYSETTING\Shift.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\MYSETTING\System_Info.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\MYSETTING\Taghir_User.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\MYSETTING\Users_Group.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\people.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SALARY\BillPrint.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SALARY\Bill_Hooghoogh.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SALARY\Bill_List.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SALARY\Bime_Disk.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SALARY\Bime_List.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SALARY\CheckOut.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SALARY\Eydi_Sanavat.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SALARY\Full_Parvandeh.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SALARY\Gharardad.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SALARY\Hokm.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SALARY\Koosoorat.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SALARY\Tax.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SALARY\User_Carcard.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SALARY\User_DayOff.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SALARY\User_Detail.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SALARY\Vam.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SanadBargashtForoosh.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SanadFactorForoosh.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SanadFactorService.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SanadKhazaneDari.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SANATI\Amalkard_End_kala.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SANATI\Amalkard_Ens2.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SANATI\Dastmozd_Tolid.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SANATI\Formool_Sakht.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SANATI\Khorooj_Sayer.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SANATI\Masraf_Chart.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SANATI\Mavad_Enter.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SANATI\Mavad_Exit.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SANATI\Price_End.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SANATI\Price_Sell.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SANATI\Tolid_Chart.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SANATI\User_Karkard.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\BuyH.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\BuyReturnH.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\DayOffH.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\EnteghalH.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\HavaleSellH.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\KalaTarifH.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\Kargozini.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\KharidReturnH.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\KhazaneH.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\MavalExitH.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\PishFactorH.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\ResidBuyH.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\SanadDastiH.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\SayerExitH.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\SellH.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\ServiceH.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\SystemChangeH.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAVABEGH\TolidH.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SayerMavadExit.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAYER_INVOCE\BannedCutomers.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAYER_INVOCE\DailySellList.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAYER_INVOCE\KalaSellListByPerson.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAYER_INVOCE\KharidListBascool.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAYER_INVOCE\ListDetailKalas.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAYER_INVOCE\NotSellKalaList.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAYER_INVOCE\NotSellToPerson.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAYER_INVOCE\PrintFormat.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAYER_INVOCE\SellListBascool.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SAYER_INVOCE\SellReportByFactor.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SellManagment.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SMART_SALES\Customer_Status.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SMART_SALES\Elamieh_Takhfif.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SMART_SALES\Enhesar.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SMART_SALES\GradBandi_Customer.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SMART_SALES\Grade_For_Customer.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SMART_SALES\Grade_Shart.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SMART_SALES\Khrid_Foroosh.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SMART_SALES\Mohasebe_Pardakht.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SMART_SALES\Nahve_Pardakht.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SMART_SALES\Parameter.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SMART_SALES\Status.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SMART_SALES\Takgir_Pardakht.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SMART_SALES\Takhfif.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\SMART_SALES\Tarif_Price.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\Tamir.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\Tanzimat.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\Bank.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\Customer_Moin.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\Hesab_Group.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\Hesab_Kol.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\Kala_Group.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\Kala_Vahed.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\Khdamat.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\Khodgardan.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\Kind_Customer.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\Kol_Moin.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\New_Customer.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\New_Kala.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\Pay_Sector.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\Shift.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\Tarif_Anbar.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\Usage_Sector.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\Vahed_Sazman.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TARIF\Visitor_Menu.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TOLID\Bargiri_Nashodeh.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TOLID\Hesab_Kol.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TOLID\Mohasebe_Mavad.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TOLID\Month_Tafkik_Tolid.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TOLID\Sell_Chart.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TOLID\Sell_Chart_Month.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\TOLID\Tolid_Month.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\VISITORY\DailyVistForVisitor.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\VISITORY\GroupVisitorAmalkardByMonthReturn.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\VISITORY\HandList.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\VISITORY\KalaListPrint.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\VISITORY\PointsForVisitor.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\VISITORY\PoorsantForVisitor.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\VISITORY\VisitorAmalkard.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\VISITORY\VisitorAmalkardReport.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\VISITORY\VisitorAmalkardReturnByMonth.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\VISITORY\VisitorKalaAmalkardByMonth.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\VISITORY\VisitorOnMap.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\VISITORY\VisitorReturnKalaByMonth.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\VISITORY\VisitorSellListByFactor.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\VISITORY\VisitorsListByFactor.png" />
+		<Resource Include="UiDrive\IMGS\PICMENU\VISITORY\VisitWayForCustomers.png" />
+		<Resource Include="UiDrive\IMGS\SplashHandwrite.gif" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="AddonPrg\" />
+		<Folder Include="DLLS\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="Properties\Settings.Designer.cs">
+			<DesignTimeSharedInput>True</DesignTimeSharedInput>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Settings.settings</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="Properties\Settings.settings">
+			<Generator>SettingsSingleFileGenerator</Generator>
+			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
+		</None>
+	</ItemGroup>
+
+</Project>

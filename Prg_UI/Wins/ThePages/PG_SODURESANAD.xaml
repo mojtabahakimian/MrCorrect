@@ -1,0 +1,206 @@
+﻿<Page x:Class="Wins.ThePages.PG_SODURESANAD"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Wins.ThePages"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      FontFamily="IRANYekanFN"
+      Title="PG_SODURESANAD">
+    <Page.Resources>
+        <Storyboard x:Key="OnMouseCome">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="2"/>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="31">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="OnMouseLeave">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)">
+                <SplineDoubleKeyFrame KeyTime="00:00:00" Value="31"/>
+                <SplineDoubleKeyFrame KeyTime="00:00:00.2000000" Value="2"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="OnMousePressed">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.ShadowDepth)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="10">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.4000000" Value="0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="0">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="40">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.4000000" Value="2">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+            <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Color)">
+                <EasingColorKeyFrame KeyTime="00:00:00" Value="White">
+                    <EasingColorKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingColorKeyFrame.EasingFunction>
+                </EasingColorKeyFrame>
+            </ColorAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Direction)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="315">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="600">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+                <EasingDoubleKeyFrame KeyTime="00:00:00.4000000" Value="315">
+                    <EasingDoubleKeyFrame.EasingFunction>
+                        <ExponentialEase EasingMode="EaseInOut"/>
+                    </EasingDoubleKeyFrame.EasingFunction>
+                </EasingDoubleKeyFrame>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <Style TargetType="Image" x:Key="LightyBlue">
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="White" Direction="0" ShadowDepth="0" BlurRadius="2"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <EventTrigger RoutedEvent="MouseEnter">
+                    <BeginStoryboard Storyboard="{StaticResource OnMouseCome}" />
+                </EventTrigger>
+                <EventTrigger RoutedEvent="MouseLeave">
+                    <BeginStoryboard Storyboard="{StaticResource OnMouseLeave}" />
+                </EventTrigger>
+                <EventTrigger RoutedEvent="MouseDown">
+                    <BeginStoryboard Storyboard="{StaticResource OnMousePressed}" />
+                </EventTrigger>
+                <EventTrigger RoutedEvent="MouseLeftButtonUp">
+                    <BeginStoryboard Storyboard="{StaticResource OnMouseCome}" />
+                </EventTrigger>
+            </Style.Triggers>
+        </Style>
+
+
+    </Page.Resources>
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="{Binding Background.Color, ElementName=GENERAL_RANG}" Offset="0"/>
+                <GradientStop Color="{Binding Background.Color, ElementName=GENERAL_RANG}" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Width="1" IsHitTestVisible="False" Focusable="False" IsTabStop="False"/>
+
+        <Button x:Name="BackerBtn" Margin="10,10,0,0" FontSize="20"  Height="28" FontFamily="Tahoma" Foreground="White" Width="30" Padding="1,-2,1,1" IsTabStop="False" Background="{x:Null}" BorderBrush="Transparent" Click="BackerBtn_Click" VerticalAlignment="Top" HorizontalAlignment="Left" >
+            <materialDesign:PackIcon Kind="ArrowBack" Height="23" Width="25" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" />
+        </Button>
+        <Image Stretch="Uniform" Tag="صدور سند فاکتور های فروش" Style="{StaticResource LightyBlue}" HorizontalAlignment="Right" Width="68" Height="63" VerticalAlignment="Top" Cursor="Hand" Margin="0,25,23,0" PreviewMouseLeftButtonDown="Image_PreviewMouseLeftButtonDown" >
+
+            <Image.Source>
+                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SanadFactorForoosh.png" CacheOption="OnLoad"/>
+            </Image.Source>
+        </Image>
+        <Label Content="صدور سند فاکتور های فروش" HorizontalAlignment="Right" Margin="0,44,95,0" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Top" FontSize="11"/>
+        <Label Content="صدور سند گروهی خروج مواد اولیه" HorizontalAlignment="Right" Margin="0,110,95,0" Foreground="#DDFFFFFF" Height="28" VerticalAlignment="Top" FontSize="11"/>
+        <Label Content="صدور سند برگه های خروج سایر مواد" HorizontalAlignment="Right" Margin="0,178,95,0" Foreground="#DDFFFFFF" Height="26" VerticalAlignment="Top" FontSize="11"/>
+        <TextBlock Text="صدور سند برگه های ورود کالای ساخته شده" HorizontalAlignment="Right" Margin="0,245,95,0" Foreground="#DDFFFFFF" Height="38" VerticalAlignment="Top" FontSize="11" TextAlignment="Center" TextWrapping="Wrap" Width="142"/>
+        <Label Content="صدور سند های خزانه داری" HorizontalAlignment="Right" Margin="0,312,95,0" Foreground="#DDFFFFFF" Height="26" VerticalAlignment="Top" FontSize="11"/>
+        <Label Content="صدور سند فاکتور های خدمات" HorizontalAlignment="Right" Margin="0,43,353,0" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Top" FontSize="11"/>
+        <Label Content="انتقال کالا از انبار به انبار" HorizontalAlignment="Right" Margin="0,110,353,0" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Top" FontSize="11"/>
+        <Label Content="صدور برگه های وصولی اسناد دریافتنی" HorizontalAlignment="Right" Margin="0,178,353,0" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Top" FontSize="11"/>
+        <Image Stretch="Uniform"  Style="{StaticResource LightyBlue}" HorizontalAlignment="Right" Width="68" Height="62" VerticalAlignment="Top" Cursor="Hand" Margin="0,93,23,0" PreviewMouseLeftButtonDown="Image_PreviewMouseLeftButtonDown_1" >
+            <Image.Source>
+                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/MavadExit.png" CacheOption="OnLoad"/>
+            </Image.Source>
+        </Image>
+        <Image Stretch="Uniform"  Style="{StaticResource LightyBlue}" HorizontalAlignment="Right" Width="68" Height="62" VerticalAlignment="Top" Cursor="Hand" Margin="0,160,23,0" PreviewMouseLeftButtonDown="Image_PreviewMouseLeftButtonDown_2" >
+            <Image.Source>
+                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SayerMavadExit.png" CacheOption="OnLoad"/>
+            </Image.Source>
+        </Image>
+        <Image Stretch="Uniform"  Style="{StaticResource LightyBlue}" HorizontalAlignment="Right" Width="68" Height="62" VerticalAlignment="Top" Cursor="Hand" Margin="0,227,23,0" PreviewMouseLeftButtonDown="Image_PreviewMouseLeftButtonDown_3" >
+            <Image.Source>
+                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/KalaMadeEnter.png" CacheOption="OnLoad"/>
+            </Image.Source>
+        </Image>
+        <Image Stretch="Uniform"  Style="{StaticResource LightyBlue}" HorizontalAlignment="Right" Width="68" Height="62" VerticalAlignment="Top" Cursor="Hand" Margin="0,294,23,0" PreviewMouseLeftButtonDown="Image_PreviewMouseLeftButtonDown_4" >
+            <Image.Source>
+                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SanadKhazaneDari.png" CacheOption="OnLoad"/>
+            </Image.Source>
+        </Image>
+        <Image Stretch="Uniform"  Style="{StaticResource LightyBlue}" HorizontalAlignment="Right" Width="68" Height="63" VerticalAlignment="Top" Cursor="Hand" Margin="0,25,284,0" PreviewMouseLeftButtonDown="Image_PreviewMouseLeftButtonDown_5" >
+            <Image.Source>
+                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SanadFactorService.png" CacheOption="OnLoad"/>
+            </Image.Source>
+        </Image>
+        <Image Stretch="Uniform"  Style="{StaticResource LightyBlue}" HorizontalAlignment="Right" Width="68" Height="63" VerticalAlignment="Top" Cursor="Hand" Margin="0,92,284,0" PreviewMouseLeftButtonDown="Image_PreviewMouseLeftButtonDown_6" >
+            <Image.Source>
+                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/KalaSend.png" CacheOption="OnLoad"/>
+            </Image.Source>
+        </Image>
+        <Image Stretch="Uniform"  Style="{StaticResource LightyBlue}" HorizontalAlignment="Right" Width="68" Height="63" VerticalAlignment="Top" Cursor="Hand" Margin="0,160,284,0" PreviewMouseLeftButtonDown="Image_PreviewMouseLeftButtonDown_7" >
+            <Image.Source>
+                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/DaryaftExit.png" CacheOption="OnLoad"/>
+            </Image.Source>
+        </Image>
+        <Image Stretch="Uniform"  Style="{StaticResource LightyBlue}" HorizontalAlignment="Right" Width="68" Height="63" VerticalAlignment="Top" Cursor="Hand" Margin="0,227,284,0" PreviewMouseLeftButtonDown="Image_PreviewMouseLeftButtonDown_8" >
+            <Image.Source>
+                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/KharidFactorSanad.png" CacheOption="OnLoad"/>
+            </Image.Source>
+        </Image>
+        <Label Content="صدور سند فاکتور های خرید" HorizontalAlignment="Right" Margin="0,246,353,0" Foreground="#DDFFFFFF" Height="28" VerticalAlignment="Top" FontSize="11"/>
+        <Image Stretch="Uniform"  Style="{StaticResource LightyBlue}" HorizontalAlignment="Right" Width="68" Height="63" VerticalAlignment="Top" Cursor="Hand" Margin="0,357,23,0" PreviewMouseLeftButtonDown="Image_PreviewMouseLeftButtonDown_9" >
+            <Image.Source>
+                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/AnbargardaniSanad.png" CacheOption="OnLoad"/>
+            </Image.Source>
+        </Image>
+        <Label Content="صدور سند انبار گردانی" HorizontalAlignment="Right" Margin="0,374,92,0" Foreground="#DDFFFFFF" Height="28" VerticalAlignment="Top" FontSize="11"/>
+
+        <Image Stretch="Uniform"  Style="{StaticResource LightyBlue}" HorizontalAlignment="Right" Width="68" Height="63" VerticalAlignment="Top" Cursor="Hand" Margin="0,357,284,0" PreviewMouseLeftButtonDown="Image_PreviewMouseLeftButtonDown_11">
+            <Image.Source>
+                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/SanadBargashtForoosh.png" CacheOption="OnLoad"/>
+            </Image.Source>
+        </Image>
+        <Label Content="صدور اسناد برگشت فروش" HorizontalAlignment="Right" Margin="0,375,352,0" Foreground="#DDFFFFFF" Height="28" VerticalAlignment="Top" FontSize="11"/>
+        <Image Stretch="Uniform"  Style="{StaticResource LightyBlue}" HorizontalAlignment="Right" Width="68" Height="63" VerticalAlignment="Top" Cursor="Hand" Margin="0,293,284,0" PreviewMouseLeftButtonDown="Image_PreviewMouseLeftButtonDown_10" >
+            <Image.Source>
+                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/MianginRepair.png" CacheOption="OnLoad"/>
+            </Image.Source>
+        </Image>
+        <Label Content="بازسازی نرخ میانگین انبار" HorizontalAlignment="Right" Margin="0,312,352,0" Foreground="#DDFFFFFF" Height="28" VerticalAlignment="Top" FontSize="11"/>
+
+
+
+
+
+    </Grid>
+</Page>

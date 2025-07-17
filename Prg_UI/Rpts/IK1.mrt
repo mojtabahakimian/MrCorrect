@@ -1,0 +1,1850 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<StiSerializer version="1.02" type="Net" application="StiReport">
+  <Dictionary Ref="1" type="Dictionary" isKey="true">
+    <BusinessObjects isList="true" count="0" />
+    <Databases isList="true" count="1">
+      <MS_x0020_SQL Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
+        <Alias>MS SQL</Alias>
+        <ConnectionStringEncrypted>9FxzSE1KctX5CE29/ZjhJ9FU0YJICauk4kztBOHcYi/FVLXr1gwa3eJGuezDhLFuw3D7iEVxatlrSSmAcYDge8lg1wleSvKAaUQxmOkJ42fTxFMCYQVzbe0ThNRjgOjnxHi3g2E=</ConnectionStringEncrypted>
+        <Key>8d042f7ef681457d8ed8f78790e44bde</Key>
+        <Name>MS SQL</Name>
+      </MS_x0020_SQL>
+    </Databases>
+    <DataSources isList="true" count="1">
+      <RASID_ANBAR Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
+        <Alias>RASID_ANBAR</Alias>
+        <Columns isList="true" count="70">
+          <value>MEGH_R,System.Single</value>
+          <value>MABL,System.Single</value>
+          <value>MABL_K,System.Single</value>
+          <value>FROM_A,System.Boolean</value>
+          <value>NAMES,System.String</value>
+          <value>KALA,System.String</value>
+          <value>VNAMES,System.String</value>
+          <value>MAS,System.Single</value>
+          <value>VAS,System.Single</value>
+          <value>M_NAGHD,System.Single</value>
+          <value>MABL_VAR,System.Single</value>
+          <value>NUMBER,System.Single</value>
+          <value>TAG,System.Single</value>
+          <value>DATE_N,System.Int64</value>
+          <value>MABL_HAV,System.Single</value>
+          <value>MABL_HAZ,System.Single</value>
+          <value>TAKHFIF,System.Single</value>
+          <value>INUMBER,System.Single</value>
+          <value>ITAG,System.Single</value>
+          <value>IANBAR,System.Int32</value>
+          <value>CODE,System.String</value>
+          <value>MEGH,System.Single</value>
+          <value>MEGHk,System.Single</value>
+          <value>MEGH_MAR,System.Single</value>
+          <value>MANDAH,System.String</value>
+          <value>RADIF,System.Single</value>
+          <value>MOIN_KHF,System.String</value>
+          <value>ANBARF,System.Int32</value>
+          <value>FNUMCO,System.Single</value>
+          <value>MOIN_HAZ,System.String</value>
+          <value>MOIN_HAV,System.String</value>
+          <value>CUST_NO,System.String</value>
+          <value>ANBAR,System.Int32</value>
+          <value>NUMBER1,System.Single</value>
+          <value>TAH,System.String</value>
+          <value>MOIN_VAR,System.String</value>
+          <value>N_S,System.Single</value>
+          <value>MOLAH,System.String</value>
+          <value>USER_NAME,System.String</value>
+          <value>hes,System.String</value>
+          <value>NAME,System.String</value>
+          <value>ADDRESS,System.String</value>
+          <value>N_FANI,System.String</value>
+          <value>SHARAYET,System.String</value>
+          <value>VAHED_K,System.Int32</value>
+          <value>TEL,System.String</value>
+          <value>REQUEST_NO,System.String</value>
+          <value>BARNAMEH,System.String</value>
+          <value>DRIVER,System.String</value>
+          <value>DRIVER_MOB,System.String</value>
+          <value>CAMIUN_NUM,System.String</value>
+          <value>MAGHSAD,System.Single</value>
+          <value>CAM_KHALY,System.Single</value>
+          <value>CAM_POOR,System.Single</value>
+          <value>TOZIH,System.String</value>
+          <value>CAMIUN,System.String</value>
+          <value>CAM_KHALYG,System.Single</value>
+          <value>CAM_POORG,System.Single</value>
+          <value>MEGHkG,System.Single</value>
+          <value>TOZIHG,System.String</value>
+          <value>VAZNH,System.Single</value>
+          <value>NAMEG,System.String</value>
+          <value>CODEG,System.String</value>
+          <value>BARCODE,System.String</value>
+          <value>HESAB,System.String</value>
+          <value>EMZA1,System.Byte[]</value>
+          <value>EMZA2,System.Byte[]</value>
+          <value>EMZA3,System.Byte[]</value>
+          <value>N_RASID,System.String</value>
+          <value>ICUST_NO,System.Single</value>
+        </Columns>
+        <CommandTimeout>30</CommandTimeout>
+        <Dictionary isRef="1" />
+        <Key>6f5e3d35caf344ce9bbfce24ef292809</Key>
+        <Name>RASID_ANBAR</Name>
+        <NameInSource>MS SQL</NameInSource>
+        <Parameters isList="true" count="2">
+          <value>NUMBER_Param,,6,0</value>
+          <value>TAG_Param,,8,0</value>
+        </Parameters>
+        <SqlCommand>select * from RASID_ANBAR WHERE NUMBER = @NUMBER_Param
+AND TAG = @TAG_Param</SqlCommand>
+      </RASID_ANBAR>
+    </DataSources>
+    <Relations isList="true" count="0" />
+    <Report isRef="0" />
+    <Resources isList="true" count="0" />
+    <Variables isList="true" count="0" />
+  </Dictionary>
+  <EngineVersion>EngineV2</EngineVersion>
+  <GlobalizationStrings isList="true" count="0" />
+  <Key>4d6bcef83d0048d794b83b45790f5097</Key>
+  <MetaTags isList="true" count="0" />
+  <Pages isList="true" count="1">
+    <Page1 Ref="4" type="Page" isKey="true">
+      <Border>None;Black;2;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <Components isList="true" count="7">
+        <DataBand1 Ref="5" type="DataBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <BusinessObjectGuid isNull="true" />
+          <ClientRectangle>0,0.2,7.72,5.1</ClientRectangle>
+          <Components isList="true" count="2">
+            <CrossDataBand1 Ref="6" type="CrossDataBand" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,0,3.85,5.1</ClientRectangle>
+              <Components isList="true" count="56">
+                <Text1 Ref="7" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.9,0.1,0.5,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text1</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: ش . ملی</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text1>
+                <Text2 Ref="8" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.9,0.4,0.8,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text2</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: ش . اقتصادی</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text2>
+                <Text3 Ref="9" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.8,0.6,1.1,0.3</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,10,Bold</Font>
+                  <HorAlignment>Center</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text3</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>قبض باسکول وارده</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text3>
+                <Text5 Ref="10" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>3.2,1,0.5,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text5</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: فروشنده</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text5>
+                <Text6 Ref="11" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>3.2,1.3,0.5,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text6</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: نشانی</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text6>
+                <Text7 Ref="12" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.1,0.1,1.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <HorAlignment>Center</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text7</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>( نسخه حسابداری )</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text7>
+                <Text8 Ref="13" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.8,0.4,0.4,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text8</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: شماره</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text8>
+                <Text9 Ref="14" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.8,0.7,0.4,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text9</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: تاریخ</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text9>
+                <Text10 Ref="15" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.8,1,0.4,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text10</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: تلفن</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text10>
+                <Text21 Ref="16" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.9,1.6,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text21</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: کد/نام کالا</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text21>
+                <Text22 Ref="17" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.9,2,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text22</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: شماره ماشین</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text22>
+                <Text23 Ref="18" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.9,2.4,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text23</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: نوع ماشین</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text23>
+                <Text24 Ref="19" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.9,2.8,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text24</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: شماره حواله</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text24>
+                <Text25 Ref="20" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.9,3.2,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text25</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: وزن حواله</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text25>
+                <Text26 Ref="21" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.9,3.6,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text26</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: توضیحات</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text26>
+                <Text27 Ref="22" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1,2,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text27</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: نام راننده</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text27>
+                <Text28 Ref="23" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1,2.4,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text28</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: وزن پر</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text28>
+                <Text29 Ref="24" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1,2.8,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text29</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: وزن ماشین</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text29>
+                <Text30 Ref="25" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1,3.2,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text30</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: وزن خالص</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text30>
+                <Text31 Ref="26" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.4,4,1.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text31</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: مهر و امضاء صادرکننده</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text31>
+                <Text32 Ref="27" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.4,4,1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text32</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: مهر و امضاء راننده</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text32>
+                <Text33 Ref="28" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>3.2,4.7,0.5,0.3</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text33</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: آدرس</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text33>
+                <Text34 Ref="29" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.9,4.7,0.4,0.3</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text34</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>: تلفن</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text34>
+                <Text4 Ref="30" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.3,1,1.9,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text4</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>{RASID_ANBAR.HESAB}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text4>
+                <Text51 Ref="31" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.1,1.3,3.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text51</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>{RASID_ANBAR.ADDRESS}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text51>
+                <Text52 Ref="32" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.1,1,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text52</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>{RASID_ANBAR.TEL}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text52>
+                <Text54 Ref="33" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.1,0.4,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text54</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>{RASID_ANBAR.NUMBER}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text54>
+                <Text56 Ref="34" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.1,0.7,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text56</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>{RASID_ANBAR.DATE_N}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text56>
+                <Text68 Ref="35" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.6,1.6,0.3,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Center</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text68</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>{RASID_ANBAR.CODEG}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text68>
+                <Text69 Ref="36" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.1,1.6,2.4,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text69</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>{RASID_ANBAR.NAMEG}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text69>
+                <Text70 Ref="37" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.8,2,1.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text70</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>{RASID_ANBAR.CAMIUN_NUM}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text70>
+                <Text71 Ref="38" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.8,2.4,1.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text71</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>{RASID_ANBAR.CAMIUN}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text71>
+                <Text72 Ref="39" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.8,2.8,1.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text72</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>{RASID_ANBAR.BARNAMEH}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text72>
+                <Text73 Ref="40" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.8,3.2,1.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text73</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>{RASID_ANBAR.VAZNH}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text73>
+                <Text74 Ref="41" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.1,3.6,2.8,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text74</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>{RASID_ANBAR.TOZIH}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text74>
+                <Text75 Ref="42" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.1,2,0.9,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text75</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>{RASID_ANBAR.DRIVER}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text75>
+                <Text76 Ref="43" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.1,2.4,0.9,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text76</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>{RASID_ANBAR.CAM_POORG}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text76>
+                <Text77 Ref="44" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.1,2.8,0.9,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text77</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>{RASID_ANBAR.CAM_KHALYG}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text77>
+                <Text78 Ref="45" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.1,3.2,0.9,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text78</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>{RASID_ANBAR.MEGHkG}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text78>
+                <Text80 Ref="46" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.4,4.2,1,0.3</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Center</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text80</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>{RASID_ANBAR.DRIVER}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text80>
+                <Text81 Ref="47" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.5,1.6,0.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>Arial,8</Font>
+                  <HorAlignment>Center</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text81</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <Text>/</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text81>
+                <TFADDRES Ref="48" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.3,4.7,1.9,0.3</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,7</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>TFADDRES</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </TFADDRES>
+                <TFTE Ref="49" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.1,4.7,0.8,0.3</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,7</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>TFTE</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </TFTE>
+                <zaman1 Ref="50" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.4,4.5,1.2,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>zaman1</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </zaman1>
+                <Users Ref="51" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.4,4.2,1.1,0.3</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Center</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Users</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Users>
+                <MCODE Ref="52" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.8,0.1,1.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>MCODE</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </MCODE>
+                <ECOD Ref="53" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.8,0.4,1.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>ECOD</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </ECOD>
+                <StartPointPrimitive1 Ref="54" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+                  <ClientRectangle>0.1,0.1,0,0</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Name>StartPointPrimitive1</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <ReferenceToGuid>46a5b62b5cdb4d80a5a9c41283a9b4ad</ReferenceToGuid>
+                </StartPointPrimitive1>
+                <StartPointPrimitive3 Ref="55" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+                  <ClientRectangle>1.2,0.1,0,0</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Name>StartPointPrimitive3</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <ReferenceToGuid>b733ee9456c14e219313f1e968fc33d3</ReferenceToGuid>
+                </StartPointPrimitive3>
+                <EndPointPrimitive3 Ref="56" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+                  <ClientRectangle>1.2,0.9,0,0</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Name>EndPointPrimitive3</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <ReferenceToGuid>b733ee9456c14e219313f1e968fc33d3</ReferenceToGuid>
+                </EndPointPrimitive3>
+                <HorizontalLinePrimitive1 Ref="57" type="HorizontalLinePrimitive" isKey="true">
+                  <ClientRectangle>1.2,0.6,2.5,0.01</ClientRectangle>
+                  <Color>Black</Color>
+                  <Conditions isList="true" count="0" />
+                  <EndCap Ref="58" type="Cap" isKey="true">
+                    <Color>Black</Color>
+                  </EndCap>
+                  <Expressions isList="true" count="0" />
+                  <Name>HorizontalLinePrimitive1</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <StartCap Ref="59" type="Cap" isKey="true">
+                    <Color>Black</Color>
+                  </StartCap>
+                </HorizontalLinePrimitive1>
+                <EndPointPrimitive1 Ref="60" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+                  <ClientRectangle>3.7,1.5,0,0</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Name>EndPointPrimitive1</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <ReferenceToGuid>46a5b62b5cdb4d80a5a9c41283a9b4ad</ReferenceToGuid>
+                </EndPointPrimitive1>
+                <StartPointPrimitive5 Ref="61" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+                  <ClientRectangle>0.1,1.5,0,0</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Name>StartPointPrimitive5</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <ReferenceToGuid>597d76c4d133488f9e994e26177650ad</ReferenceToGuid>
+                </StartPointPrimitive5>
+                <EndPointPrimitive5 Ref="62" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+                  <ClientRectangle>3.7,5,0,0</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Name>EndPointPrimitive5</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <ReferenceToGuid>597d76c4d133488f9e994e26177650ad</ReferenceToGuid>
+                </EndPointPrimitive5>
+                <HorizontalLinePrimitive5 Ref="63" type="HorizontalLinePrimitive" isKey="true">
+                  <ClientRectangle>0.1,4.7,3.6,0.01</ClientRectangle>
+                  <Color>Black</Color>
+                  <Conditions isList="true" count="0" />
+                  <EndCap Ref="64" type="Cap" isKey="true">
+                    <Color>Black</Color>
+                  </EndCap>
+                  <Expressions isList="true" count="0" />
+                  <Name>HorizontalLinePrimitive5</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <StartCap Ref="65" type="Cap" isKey="true">
+                    <Color>Black</Color>
+                  </StartCap>
+                </HorizontalLinePrimitive5>
+                <HorizontalLinePrimitive3 Ref="66" type="HorizontalLinePrimitive" isKey="true">
+                  <ClientRectangle>0.1,0.9,3.6,0.01</ClientRectangle>
+                  <Color>Black</Color>
+                  <Conditions isList="true" count="0" />
+                  <EndCap Ref="67" type="Cap" isKey="true">
+                    <Color>Black</Color>
+                  </EndCap>
+                  <Expressions isList="true" count="0" />
+                  <Name>HorizontalLinePrimitive3</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="6" />
+                  <StartCap Ref="68" type="Cap" isKey="true">
+                    <Color>Black</Color>
+                  </StartCap>
+                </HorizontalLinePrimitive3>
+              </Components>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Filters isList="true" count="0" />
+              <Name>CrossDataBand1</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Sort isList="true" count="0" />
+            </CrossDataBand1>
+            <CrossDataBand2 Ref="69" type="CrossDataBand" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>3.85,0,3.85,5.1</ClientRectangle>
+              <Components isList="true" count="56">
+                <Text11 Ref="70" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.9,0.1,0.5,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text11</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: ش . ملی</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text11>
+                <Text12 Ref="71" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.9,0.4,0.8,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text12</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: ش . اقتصادی</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text12>
+                <Text13 Ref="72" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.85,0.6,1.1,0.3</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,10,Bold</Font>
+                  <HorAlignment>Center</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text13</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>قبض باسکول وارده</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text13>
+                <Text15 Ref="73" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>3.25,1,0.5,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text15</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: فروشنده</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text15>
+                <Text16 Ref="74" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>3.25,1.3,0.5,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text16</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: نشانی</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text16>
+                <Text17 Ref="75" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.15,0.1,1.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <HorAlignment>Center</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text17</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>( نسخه مشتری )</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text17>
+                <Text18 Ref="76" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.85,0.4,0.4,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text18</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: شماره</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text18>
+                <Text19 Ref="77" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.85,0.7,0.4,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text19</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: تاریخ</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text19>
+                <Text20 Ref="78" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.85,1,0.4,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text20</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: تلفن</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text20>
+                <Text35 Ref="79" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>3,1.6,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text35</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: کد/نام کالا</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text35>
+                <Text36 Ref="80" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>3,2,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text36</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: شماره ماشین</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text36>
+                <Text37 Ref="81" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>3,2.4,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text37</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: نوع ماشین</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text37>
+                <Text38 Ref="82" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>3,2.8,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text38</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: شماره حواله</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text38>
+                <Text39 Ref="83" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>3,3.2,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text39</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: وزن حواله</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text39>
+                <Text40 Ref="84" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>3,3.6,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text40</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: توضیحات</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text40>
+                <Text41 Ref="85" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.1,2,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text41</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: نام راننده</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text41>
+                <Text42 Ref="86" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.1,2.4,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text42</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: وزن پر</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text42>
+                <Text43 Ref="87" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.1,2.8,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text43</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: وزن ماشین</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text43>
+                <Text44 Ref="88" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.1,3.2,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text44</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: وزن خالص</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text44>
+                <Text45 Ref="89" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.4,4,1.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text45</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: مهر و امضاء صادرکننده</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text45>
+                <Text46 Ref="90" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.4,4,1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <HorAlignment>Center</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text46</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: مهر و امضاء راننده</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                </Text46>
+                <Text47 Ref="91" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>3.2,4.7,0.5,0.3</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text47</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: آدرس</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text47>
+                <Text48 Ref="92" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.9,4.7,0.4,0.3</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8,Bold</Font>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text48</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>: تلفن</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text48>
+                <Text49 Ref="93" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.35,1,1.9,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text49</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>{RASID_ANBAR.HESAB}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text49>
+                <Text14 Ref="94" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.15,1.3,3.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text14</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>{RASID_ANBAR.ADDRESS}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text14>
+                <Text50 Ref="95" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.15,1,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text50</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>{RASID_ANBAR.TEL}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text50>
+                <Text53 Ref="96" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.15,0.4,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text53</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>{RASID_ANBAR.NUMBER}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text53>
+                <Text55 Ref="97" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.15,0.7,0.7,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text55</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>{RASID_ANBAR.DATE_N}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text55>
+                <Text57 Ref="98" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.7,1.6,0.3,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Center</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text57</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>{RASID_ANBAR.CODEG}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text57>
+                <Text58 Ref="99" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.2,1.6,2.4,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text58</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>{RASID_ANBAR.NAMEG}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text58>
+                <Text59 Ref="100" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.9,2,1.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text59</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>{RASID_ANBAR.CAMIUN_NUM}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text59>
+                <Text60 Ref="101" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.9,2.4,1.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text60</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>{RASID_ANBAR.CAMIUN}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text60>
+                <Text61 Ref="102" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.9,2.8,1.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text61</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>{RASID_ANBAR.BARNAMEH}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text61>
+                <Text62 Ref="103" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.9,3.2,1.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text62</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>{RASID_ANBAR.VAZNH}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text62>
+                <Text63 Ref="104" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.2,3.6,2.8,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text63</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>{RASID_ANBAR.TOZIH}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text63>
+                <Text64 Ref="105" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.2,2,0.9,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text64</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>{RASID_ANBAR.DRIVER}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text64>
+                <Text65 Ref="106" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.2,2.4,0.9,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text65</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>{RASID_ANBAR.CAM_POORG}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text65>
+                <Text66 Ref="107" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.2,2.8,0.9,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text66</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>{RASID_ANBAR.CAM_KHALYG}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text66>
+                <Text67 Ref="108" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.2,3.2,0.9,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text67</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>{RASID_ANBAR.MEGHkG}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text67>
+                <Text79 Ref="109" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.4,4.2,1,0.3</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Center</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text79</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>{RASID_ANBAR.DRIVER}</Text>
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </Text79>
+                <Text82 Ref="110" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.6,1.6,0.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>Arial,8</Font>
+                  <HorAlignment>Center</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>Text82</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <Text>/</Text>
+                  <TextBrush>Black</TextBrush>
+                  <Type>Expression</Type>
+                  <VertAlignment>Center</VertAlignment>
+                </Text82>
+                <TFADDRESS Ref="111" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.3,4.7,1.9,0.3</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,7</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>TFADDRESS</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </TFADDRESS>
+                <TFTEL Ref="112" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>0.2,4.7,0.7,0.3</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,7</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>TFTEL</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </TFTEL>
+                <zaman Ref="113" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.4,4.5,1.3,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>zaman</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </zaman>
+                <User Ref="114" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>2.4,4.2,1.1,0.3</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Center</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>User</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </User>
+                <MCODEM Ref="115" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.8,0.1,1.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>MCODEM</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </MCODEM>
+                <ECODE Ref="116" type="Text" isKey="true">
+                  <Brush>Transparent</Brush>
+                  <ClientRectangle>1.8,0.4,1.1,0.2</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Font>IRANYekanFN,8</Font>
+                  <HorAlignment>Right</HorAlignment>
+                  <Margins>0,0,0,0</Margins>
+                  <Name>ECODE</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <TextBrush>Black</TextBrush>
+                  <VertAlignment>Center</VertAlignment>
+                </ECODE>
+                <StartPointPrimitive2 Ref="117" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+                  <ClientRectangle>0.15,0.1,0,0</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Name>StartPointPrimitive2</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <ReferenceToGuid>2808b675a786416b90eafe982c083c6e</ReferenceToGuid>
+                </StartPointPrimitive2>
+                <EndPointPrimitive2 Ref="118" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+                  <ClientRectangle>3.75,1.5,0,0</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Name>EndPointPrimitive2</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <ReferenceToGuid>2808b675a786416b90eafe982c083c6e</ReferenceToGuid>
+                </EndPointPrimitive2>
+                <HorizontalLinePrimitive2 Ref="119" type="HorizontalLinePrimitive" isKey="true">
+                  <ClientRectangle>1.25,0.6,2.5,0.01</ClientRectangle>
+                  <Color>Black</Color>
+                  <Conditions isList="true" count="0" />
+                  <EndCap Ref="120" type="Cap" isKey="true">
+                    <Color>Black</Color>
+                  </EndCap>
+                  <Expressions isList="true" count="0" />
+                  <Name>HorizontalLinePrimitive2</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <StartCap Ref="121" type="Cap" isKey="true">
+                    <Color>Black</Color>
+                  </StartCap>
+                </HorizontalLinePrimitive2>
+                <HorizontalLinePrimitive4 Ref="122" type="HorizontalLinePrimitive" isKey="true">
+                  <ClientRectangle>0.15,0.9,3.6,0.01</ClientRectangle>
+                  <Color>Black</Color>
+                  <Conditions isList="true" count="0" />
+                  <EndCap Ref="123" type="Cap" isKey="true">
+                    <Color>Black</Color>
+                  </EndCap>
+                  <Expressions isList="true" count="0" />
+                  <Name>HorizontalLinePrimitive4</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <StartCap Ref="124" type="Cap" isKey="true">
+                    <Color>Black</Color>
+                  </StartCap>
+                </HorizontalLinePrimitive4>
+                <StartPointPrimitive4 Ref="125" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+                  <ClientRectangle>1.25,0.1,0,0</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Name>StartPointPrimitive4</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <ReferenceToGuid>673fa1515a874115954df93cc0406216</ReferenceToGuid>
+                </StartPointPrimitive4>
+                <EndPointPrimitive4 Ref="126" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+                  <ClientRectangle>1.25,0.9,0,0</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Name>EndPointPrimitive4</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <ReferenceToGuid>673fa1515a874115954df93cc0406216</ReferenceToGuid>
+                </EndPointPrimitive4>
+                <HorizontalLinePrimitive6 Ref="127" type="HorizontalLinePrimitive" isKey="true">
+                  <ClientRectangle>0.15,4.7,3.6,0.01</ClientRectangle>
+                  <Color>Black</Color>
+                  <Conditions isList="true" count="0" />
+                  <EndCap Ref="128" type="Cap" isKey="true">
+                    <Color>Black</Color>
+                  </EndCap>
+                  <Expressions isList="true" count="0" />
+                  <Name>HorizontalLinePrimitive6</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <StartCap Ref="129" type="Cap" isKey="true">
+                    <Color>Black</Color>
+                  </StartCap>
+                </HorizontalLinePrimitive6>
+                <StartPointPrimitive6 Ref="130" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+                  <ClientRectangle>0.15,1.5,0,0</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Name>StartPointPrimitive6</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <ReferenceToGuid>805356a912fb4ff7a33b0caef948b909</ReferenceToGuid>
+                </StartPointPrimitive6>
+                <EndPointPrimitive6 Ref="131" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+                  <ClientRectangle>3.75,5,0,0</ClientRectangle>
+                  <Conditions isList="true" count="0" />
+                  <Expressions isList="true" count="0" />
+                  <Name>EndPointPrimitive6</Name>
+                  <Page isRef="4" />
+                  <Parent isRef="69" />
+                  <ReferenceToGuid>805356a912fb4ff7a33b0caef948b909</ReferenceToGuid>
+                </EndPointPrimitive6>
+              </Components>
+              <Conditions isList="true" count="0" />
+              <DataRelationName isNull="true" />
+              <Expressions isList="true" count="0" />
+              <Filters isList="true" count="0" />
+              <Name>CrossDataBand2</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Sort isList="true" count="0" />
+            </CrossDataBand2>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <DataRelationName isNull="true" />
+          <DataSourceName>RASID_ANBAR</DataSourceName>
+          <Expressions isList="true" count="0" />
+          <Filters isList="true" count="0" />
+          <Name>DataBand1</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Sort isList="true" count="0" />
+        </DataBand1>
+        <RectanglePrimitive1 Ref="132" type="RectanglePrimitive" isKey="true">
+          <ClientRectangle>0.1,0.3,3.6,1.4</ClientRectangle>
+          <Color>Black</Color>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Guid>46a5b62b5cdb4d80a5a9c41283a9b4ad</Guid>
+          <Name>RectanglePrimitive1</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+        </RectanglePrimitive1>
+        <VerticalLinePrimitive1 Ref="133" type="VerticalLinePrimitive" isKey="true">
+          <ClientRectangle>1.2,0.3,0.01,0.8</ClientRectangle>
+          <Color>Black</Color>
+          <Conditions isList="true" count="0" />
+          <EndCap Ref="134" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </EndCap>
+          <Expressions isList="true" count="0" />
+          <Guid>b733ee9456c14e219313f1e968fc33d3</Guid>
+          <Name>VerticalLinePrimitive1</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <StartCap Ref="135" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </StartCap>
+        </VerticalLinePrimitive1>
+        <RectanglePrimitive3 Ref="136" type="RectanglePrimitive" isKey="true">
+          <ClientRectangle>0.1,1.7,3.6,3.5</ClientRectangle>
+          <Color>Black</Color>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Guid>597d76c4d133488f9e994e26177650ad</Guid>
+          <Name>RectanglePrimitive3</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+        </RectanglePrimitive3>
+        <RectanglePrimitive2 Ref="137" type="RectanglePrimitive" isKey="true">
+          <ClientRectangle>4,0.3,3.6,1.4</ClientRectangle>
+          <Color>Black</Color>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Guid>2808b675a786416b90eafe982c083c6e</Guid>
+          <Name>RectanglePrimitive2</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+        </RectanglePrimitive2>
+        <VerticalLinePrimitive2 Ref="138" type="VerticalLinePrimitive" isKey="true">
+          <ClientRectangle>5.1,0.3,0.01,0.8</ClientRectangle>
+          <Color>Black</Color>
+          <Conditions isList="true" count="0" />
+          <EndCap Ref="139" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </EndCap>
+          <Expressions isList="true" count="0" />
+          <Guid>673fa1515a874115954df93cc0406216</Guid>
+          <Name>VerticalLinePrimitive2</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <StartCap Ref="140" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </StartCap>
+        </VerticalLinePrimitive2>
+        <RectanglePrimitive4 Ref="141" type="RectanglePrimitive" isKey="true">
+          <ClientRectangle>4,1.7,3.6,3.5</ClientRectangle>
+          <Color>Black</Color>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Guid>805356a912fb4ff7a33b0caef948b909</Guid>
+          <Name>RectanglePrimitive4</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+        </RectanglePrimitive4>
+      </Components>
+      <Conditions isList="true" count="0" />
+      <Expressions isList="true" count="0" />
+      <Guid>a0bfc4f96c4c409ba4e0f892c4c077c1</Guid>
+      <Margins>0.39,0.39,0.39,0.39</Margins>
+      <Name>Page1</Name>
+      <PageHeight>11</PageHeight>
+      <PageWidth>8.5</PageWidth>
+      <PaperSize>Letter</PaperSize>
+      <Report isRef="0" />
+    </Page1>
+  </Pages>
+  <ReferencedAssemblies isList="true" count="8">
+    <value>System.Dll</value>
+    <value>System.Drawing.Dll</value>
+    <value>System.Windows.Forms.Dll</value>
+    <value>System.Data.Dll</value>
+    <value>System.Xml.Dll</value>
+    <value>Stimulsoft.Controls.Dll</value>
+    <value>Stimulsoft.Base.Dll</value>
+    <value>Stimulsoft.Report.Dll</value>
+  </ReferencedAssemblies>
+  <ReportAlias>Report</ReportAlias>
+  <ReportChanged>5/1/2023 10:41:15 AM</ReportChanged>
+  <ReportCreated>4/25/2023 8:55:42 AM</ReportCreated>
+  <ReportFile>C:\prg\Budget\WpfApp5\Rpts\IK1.mrt</ReportFile>
+  <ReportGuid>b0845d76be454e26942c65488ac99312</ReportGuid>
+  <ReportName>Report</ReportName>
+  <ReportUnit>Inches</ReportUnit>
+  <ReportVersion>2023.1.1.0</ReportVersion>
+  <Script>using System;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Data;
+using Stimulsoft.Controls;
+using Stimulsoft.Base.Drawing;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Dialogs;
+using Stimulsoft.Report.Components;
+
+namespace Reports
+{
+    public class Report : Stimulsoft.Report.StiReport
+    {
+        public Report()        {
+            this.InitializeComponent();
+        }
+
+        #region StiReport Designer generated code - do not modify
+		#endregion StiReport Designer generated code - do not modify
+    }
+}
+</Script>
+  <ScriptLanguage>CSharp</ScriptLanguage>
+  <Styles isList="true" count="0" />
+</StiSerializer>

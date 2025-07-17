@@ -1,0 +1,394 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.HESABDARI"
+        
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:VERT="clr-namespace:Prg_UI.CNVR"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED"
+        mc:Ignorable="d"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
+   	    Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        FontFamily="IRANYekanFN"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        Title="" Height="845" Width="1360" Loaded="Window_Loaded" Closing="Window_Closing" ContentRendered="Window_ContentRendered" PreviewKeyDown="Window_PreviewKeyDown">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"  VirtualizingPanel.VirtualizationMode="Recycling"/>
+        </ItemsPanelTemplate>
+
+        <CollectionViewSource x:Key="FHESCollectionViewSource" Source="{Binding KHAZANEH_DATA}"/>
+
+        <DataTemplate x:Key="ComboBoxItemTemplate">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding NAME_FHES}" TextAlignment="Justify" Width="200" />
+                <TextBlock Text="{Binding FHES}" TextAlignment="Justify" Width="100" />
+            </StackPanel>
+        </DataTemplate>
+
+        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="IRANYekanFN">
+            <MenuItem Header="صورت حساب" x:Name="F8_CUSTOMER" Click="F8_CUSTOMER_Click">
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="FileDocument"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Header="کپـــی | Copy" Click="COPY_CLICK" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="ContentCopy" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="انتقال کپی | Paste" Click="PASTE_CLICK" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="ContentPaste" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Header="خروجی اکسل" Click="EXPORTEXCEL_BTN" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="FileExcelOutline" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+
+        </ContextMenu>
+
+    </Window.Resources>
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+
+    <Grid x:Name="mygrid" Margin="-1,0,1,0" DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+        <Border  Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5"  Grid.ColumnSpan="5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="28.579" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label x:Name="WINTILENAME" Content="خزانه داری" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowRestore" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                </Grid>
+            </Border>
+        </Border>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="95,56,0,0"  Width="1"/>
+        <Label x:Name="GENERAL_TEXTRANG" Visibility="Collapsed" Margin="95,56,0,0"  Width="1"/>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True" Grid.RowSpan="2">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                     Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+        <!--EndOfHeader ↑-->
+        <Grid Margin="0,40,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <xctk:MaskedTextBox x:Name="DATE" Tag="RD"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="27" Margin="0,10,45,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" PreviewGotKeyboardFocus="DATE_PreviewGotKeyboardFocus" PreviewLostKeyboardFocus="DATE_PreviewLostKeyboardFocus" TabIndex="0" />
+            <Label x:Name="label1" Content="تاریخ:" Margin="0,10,10,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="34" Height="27" VerticalAlignment="Top"/>
+            <Label x:Name="label20" Content="شماره خزانه:" Margin="0,10,138,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="65" Height="27" VerticalAlignment="Top"/>
+            <TextBox x:Name="ID" Text="0" Height="27" Margin="0,10,208,0" IsReadOnly="True" Tag="RD"  Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="44" />
+            <ComboBox x:Name="KIND" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,10,317,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="103">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <Label x:Name="label26" Content="نوع برگه:" Margin="0,13,263,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="49" Height="26" VerticalAlignment="Top"/>
+            <TextBox x:Name="IDK" IsReadOnly="True" Tag="RD"  Text="0" Height="27" Margin="0,11,478,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="93" />
+            <Label x:Name="label31" Content="شماره برگه:" Margin="0,11,425,0"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Top" HorizontalAlignment="Right" Width="54"/>
+            <TextBox x:Name="USER_NAME" IsReadOnly="True" Tag="RD"  Text="" Height="27" Margin="0,12,605,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="154" />
+            <Label x:Name="label2" Content="کاربر:" Margin="0,13,573,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="30" Height="27" VerticalAlignment="Top"/>
+            <CheckBox x:Name="OKF" Content="تایید خزانه" Margin="281,13,0,0" HorizontalAlignment="Left" Width="88" Height="27" VerticalAlignment="Top" Focusable="False" IsHitTestVisible="False" IsChecked="True"/>
+            <Button x:Name="Command23" Content="سند دریافت" Margin="181,13,0,0" BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="32" VerticalAlignment="Top" IsEnabled="False" Foreground="#DDFFFFFF" FontWeight="Bold" Click="Command23_Click" HorizontalAlignment="Left" Width="84" Padding="15,4,16,4"/>
+            <Button x:Name="Command12" Content="چاپ عملکرد خزانه" Margin="11,12,0,0" BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Foreground="#DDFFFFFF" IsEnabled="False" FontWeight="Bold" Height="32" VerticalAlignment="Top" Click="Command12_Click" HorizontalAlignment="Left" Width="161"/>
+            <Button x:Name="Command24" Content="سند پرداخت" Margin="181,54,0,0" BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Foreground="#DDFFFFFF" IsEnabled="False" FontWeight="Bold" Height="32" VerticalAlignment="Top" Click="Command24_Click" HorizontalAlignment="Left" Width="84" Padding="12,4,16,4"/>
+
+            <Border   FlowDirection="RightToLeft" Background="#FF03A9F4" Height="78" Margin="11,54,0,0"  VerticalAlignment="Top" CornerRadius="10,10,10,10" HorizontalAlignment="Left" Width="161">
+                <StackPanel Margin="10">
+                    <StackPanel Orientation="Horizontal">
+                        <Label x:Name="Label5" Width="auto" Content="شماره سند:" Foreground="#DDFFFFFF"/>
+                        <TextBox x:Name="N_S" Text="0" IsReadOnly="True" PreviewMouseDoubleClick="N_S_PreviewMouseDoubleClick" Width="87" HorizontalContentAlignment="Center" Style="{x:Null}" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label x:Name = "Label33"  Width="auto" BorderThickness="0,1,0,0" Content="شماره مبنا :" Foreground="#DDFFFFFF"/>
+                        <TextBox x:Name = "MABNA" IsReadOnly="True" Text="0" HorizontalContentAlignment="Center"  Style="{x:Null}" Background="{x:Null}" BorderBrush="{x:Null}"  Height="29" Width="87" Foreground="White"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+
+            <Label x:Name="Label3" Content="ملاحظات:" Margin="0,53,10,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="47" Height="25" VerticalAlignment="Top"/>
+            <TextBox x:Name="MOLAH" Tag="RD"  Text="" Height="31" Margin="0,53,62,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" HorizontalAlignment="Right" Width="280" TabIndex="1" TextChanged="MOLAH_TextChanged" />
+            <Label x:Name="Label107" Content="واحد:" Margin="0,55,343,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="32" Height="26" VerticalAlignment="Top"/>
+            <ComboBox x:Name="DEPATMAN" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,55,377,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="229">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <Label x:Name="Label109" Content="شیفت:" Margin="0,55,613,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="39" Height="26" VerticalAlignment="Top"/>
+            <ComboBox x:Name="SHIFT" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,54,654,0" VerticalAlignment="Top" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="104" Height="28">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <Button x:Name="ESLAH" Content="اصلاح خزانه" Margin="289,54,0,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Width="84" Foreground="#DDFFFFFF" FontWeight="Bold" Click="ESLAH_Click"/>
+            <Label x:Name="Label11" Content="به حساب:" Margin="1026,0,10,182"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Bottom"/>
+            <Label x:Name="Label9" Content="از حساب:" Margin="1026,0,10,153"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Bottom"/>
+            <CheckBox x:Name="SGN1" IsEnabled="True"  Content="تنظیم کننده" Click="SGN1_Click" Margin="0,0,10,115" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="89" IsChecked="False"/>
+            <TextBox x:Name="sgn1usid" Style="{StaticResource FuzzyOut}" IsReadOnly="True" Tag="RD" Padding="7,0,10,0" Margin="0,0,104,111" VerticalAlignment="Bottom" FlowDirection="RightToLeft" Background="{x:Null}" BorderThickness="1" Height="30" HorizontalAlignment="Right" Width="126" />
+            <CheckBox x:Name="SGN2"  IsEnabled="True" Content="مدیر مالی" Click="SGN2_Click" Margin="0,0,235,115" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="74" IsChecked="False"/>
+            <TextBox x:Name="sgn2usid" Style="{StaticResource FuzzyOut}" IsReadOnly="True" Padding="7,0,10,0" Margin="0,0,316,111" VerticalAlignment="Bottom" FlowDirection="RightToLeft" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="120" Height="31" />
+            <CheckBox x:Name="SGN3"  IsEnabled="True" Content="مدیر عامل" Click="SGN3_Click" Margin="0,0,441,115" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="79" IsChecked="False"/>
+            <TextBox x:Name="sgn3usid" Style="{StaticResource FuzzyOut}" IsReadOnly="True" Padding="7,0,10,0" Margin="0,0,529,111" VerticalAlignment="Bottom" FlowDirection="RightToLeft"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="120" Height="29" />
+            <Label x:Name="LPERSONEL" Content="ارجاع به:" Margin="374,0,0,113"  FlowDirection="RightToLeft" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="52"/>
+            <ComboBox x:Name="PERSONEL" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="57,0,0,111" VerticalAlignment="Bottom" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" Height="28" LostFocus="PERSONEL_LostFocus" SelectionChanged="PERSONEL_SelectionChanged" HorizontalAlignment="Left" Width="312">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <TextBox x:Name="MANDS" IsReadOnly="True" Tag="RD"  Height="25" Margin="0,0,478,181"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="171" />
+            <TextBox x:Name="MANDB" IsReadOnly="True" Tag="RD"  Text="" Height="25" Margin="0,0,478,151"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="171" />
+            <CNC:NumericTextBox DoesAcceptDouble="False" x:Name="MABL" IsReadOnly="True" Tag="RD"  Text="{Binding SUM_OF_MABL, UpdateSourceTrigger=PropertyChanged}" Height="25" Margin="57,0,0,181" DigitGroupOnEnter="True" IsDigitGroupActive="True"  VerticalAlignment="Bottom"   Visibility="Visible" HorizontalAlignment="Left" Width="128" />
+            <Label x:Name="Label19" Content="جمع مبالغ:" Margin="186,0,0,180"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="54"/>
+
+            <!--For Manually Dark/Ligh
+                         Background="{DynamicResource BackgroundBrush}"
+                Foreground="{Binding ElementName=GENERAL_TEXTRANG,Path=Foreground}"-->
+
+            <DataGrid x:Name="PGET_LST_SUB" AutoGenerateColumns="False" Margin="11,147,10,220"   MouseRightButtonUp="PGET_LST_SUB_MouseRightButtonUp"
+                    FlowDirection="RightToLeft"   
+                    d:ItemsSource="{d:SampleData ItemCount=5}"
+                    ItemsSource="{Binding KHAZANEH_DATA}" BeginningEdit="PGET_LST_SUB_BeginningEdit" SelectionChanged="PGET_LST_SUB_SelectionChanged" PreviewMouseLeftButtonUp="PGET_LST_SUB_PreviewMouseLeftButtonUp" CellEditEnding="PGET_LST_SUB_CellEditEnding" RowEditEnding="PGET_LST_SUB_RowEditEnding"
+                    EnableRowVirtualization="True"
+                    VirtualizingPanel.IsVirtualizing="True"
+                    VirtualizingPanel.VirtualizationMode="Recycling"
+                      
+                    Tag="RD"
+                      
+                    IsKeyboardFocusWithinChanged="PGET_LST_SUB_IsKeyboardFocusWithinChanged"
+                    SelectedIndex="0"
+                    KeyboardNavigation.TabNavigation="Contained"
+                    ContextMenu="{StaticResource ContextUtilityMenu1}" 
+                    ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"           
+                    HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+					VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}" GotFocus="PGET_LST_SUB_GotFocus" TabIndex="3" PreviewKeyDown="PGET_LST_SUB_PreviewKeyDown" PreviewMouseDoubleClick="PGET_LST_SUB_PreviewMouseDoubleClick" CanUserDeleteRows="False"                     
+                      >
+         
+                <DataGrid.Style>
+                    <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                        <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                        <Setter Property="GridLinesVisibility" Value="All"/>
+                    </Style>
+                </DataGrid.Style>
+                <DataGrid.Columns>
+                    <DataGridTextColumn x:Name="iDColumn" Binding="{Binding ID,UpdateSourceTrigger=LostFocus}" Header="شماره دريافت پرداخت" Width="auto" Visibility="Hidden"/>
+                    <DataGridTextColumn x:Name="IDHColumn" Binding="{Binding IDH,UpdateSourceTrigger=LostFocus}" Header="آیدی" Width="auto" Visibility="Hidden"/>
+                    <DataGridTextColumn x:Name="dATEColumn" Binding="{Binding DATE}" Header="تاریخ" Width="auto" Visibility="Hidden"/>
+                    <DataGridTextColumn x:Name="rADIFColumn" Binding="{Binding RADIF}" Header="ردیف" Width="auto" Visibility="Hidden"/>
+
+                    <DataGridComboBoxColumn x:Name="nO_AMColumn" SelectedValueBinding="{Binding NO_AM,UpdateSourceTrigger=LostFocus}" Header="نوع عملیات" MinWidth="100" Width="150">
+                        <DataGridComboBoxColumn.EditingElementStyle>
+                            <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                <Setter Property="IsEditable" Value="True"/>
+                                <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                <Setter Property="IsTextSearchEnabled" Value="True"/>
+                                <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                            </Style>
+                        </DataGridComboBoxColumn.EditingElementStyle>
+                    </DataGridComboBoxColumn>
+
+
+                    <DataGridComboBoxColumn x:Name="nAHVAColumn" SelectedValueBinding="{Binding NAHVA,UpdateSourceTrigger=LostFocus}" Header="نحوه"  MinWidth="100" Width="120">
+                        <DataGridComboBoxColumn.EditingElementStyle>
+                            <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                <Setter Property="IsEditable" Value="True"/>
+                            </Style>
+                        </DataGridComboBoxColumn.EditingElementStyle>
+                    </DataGridComboBoxColumn>
+
+                    <DataGridTextColumn x:Name="tHESColumn" MinWidth="70" Header="به حساب" Binding="{Binding THES,UpdateSourceTrigger=LostFocus}"  Width="200" Visibility="Visible">
+                        <DataGridTextColumn.EditingElementStyle>
+                            <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="MaxLength" Value="39" />
+                            </Style>
+                        </DataGridTextColumn.EditingElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn x:Name="FHES_COLUMN" MinWidth="70" Header="از حساب" Binding="{Binding FHES,UpdateSourceTrigger=LostFocus}"  Width="200" Visibility="Visible">
+                        <DataGridTextColumn.EditingElementStyle>
+                            <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="MaxLength" Value="39" />
+                            </Style>
+                        </DataGridTextColumn.EditingElementStyle>
+                    </DataGridTextColumn>
+
+
+                    <DataGridTextColumn x:Name="sHARHColumn" Binding="{Binding SHARH,UpdateSourceTrigger=LostFocus}" MinWidth="450" Header="شرح" Width="*">
+                        <DataGridTextColumn.EditingElementStyle>
+                            <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="MaxLength" Value="250" />
+                            </Style>
+                        </DataGridTextColumn.EditingElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn x:Name="mABLColum" Binding="{Binding MABL,UpdateSourceTrigger=LostFocus, StringFormat=\{0:N0\}}" Header="مبلغ" MinWidth="50" Width="200"/>
+
+                    <!--<DataGridTextColumn x:Name="mABLColumn"
+                                        Header="مبلغ"
+                                        Binding="{Binding MABL, UpdateSourceTrigger=LostFocus, StringFormat={}{0:N0}, 
+                                        ValidatesOnDataErrors=True, NotifyOnValidationError=True}"
+                                        MinWidth="50"
+                                        Width="200">
+                        <DataGridTextColumn.EditingElementStyle>
+                            <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                <Setter Property="MaxLength" Value="250" />
+                            </Style>
+                        </DataGridTextColumn.EditingElementStyle>
+                    </DataGridTextColumn>-->
+
+
+
+
+                    <DataGridTextColumn x:Name="fHES_KColumn" Binding="{Binding FHES_K}" Header="از کل" Width="auto" Visibility="Hidden"/>
+                    <DataGridTextColumn x:Name="fHES_MColumn" Binding="{Binding FHES_M}" Header="از معین" Width="auto" Visibility="Hidden"/>
+                    <DataGridTextColumn x:Name="fHES_TColumn" Binding="{Binding FHES_T}" Header="از تفضیلی" Width="auto" Visibility="Hidden"/>
+                    <DataGridTextColumn x:Name="tHES_KColumn" Binding="{Binding THES_K}" Header="به کل" Width="auto" Visibility="Hidden"/>
+                    <DataGridTextColumn x:Name="tHES_MColumn" Binding="{Binding THES_M}" Header="به معین" Width="auto" Visibility="Hidden"/>
+                    <DataGridTextColumn x:Name="tHES_TColumn" Binding="{Binding THES_T}" Header="به تفضیلی" Width="auto" Visibility="Hidden"/>
+                    <DataGridTextColumn x:Name="n_SERIColumn" Binding="{Binding N_SERI}" Header="شماره سریال" Width="auto" Visibility="Hidden"/>
+                    <DataGridTextColumn x:Name="bANKColumn" Binding="{Binding BANK}" Header="بانک" Width="auto" Visibility="Hidden"/>
+                    <DataGridTextColumn x:Name="iDHColumn" Binding="{Binding IDH}" Header="IDH" IsReadOnly="True" Width="auto" Visibility="Hidden"/>
+                    <DataGridTextColumn x:Name="aRZDColumn" Binding="{Binding ARZD}" Header="نرخ ارز" Width="auto" Visibility="Hidden"/>
+
+
+
+                    <DataGridTextColumn x:Name="fHES_T2Column" Binding="{Binding FHES_T2}" Header="از تفضیلی 2" Width="auto" Visibility="Hidden"/>
+                    <DataGridTextColumn x:Name="tHES_T2Column" Binding="{Binding THES_T2}" Header="به تفضیلی 2" Width="auto" Visibility="Hidden"/>
+                    <DataGridTextColumn x:Name="fHES_T3Column" Binding="{Binding FHES_T3}" Header="از تفضیلی 3" Width="auto" Visibility="Hidden"/>
+                    <DataGridTextColumn x:Name="tHES_T3Column" Binding="{Binding THES_T3}" Header="به تفضیلی 3" Width="auto" Visibility="Hidden"/>
+                    <DataGridTextColumn x:Name="fHES_T4Column" Binding="{Binding FHES_T4}" Header="از تفضیلی 4" Width="auto" Visibility="Hidden"/>
+                    <DataGridTextColumn x:Name="tHES_T4Column" Binding="{Binding THES_T4}" Header="به تفضیلی 4" Width="auto" Visibility="Hidden"/>
+                    <DataGridTemplateColumn x:Name="cRTColumn" Header="CRT" Width="auto" Visibility="Hidden">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <DatePicker SelectedDate="{Binding CRT, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn x:Name="uIDColumn" Binding="{Binding UID}" Header="UID" Width="auto" Visibility="Hidden"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <Button x:Name="SAVEBTN" Content="ذخیره" Margin="289,96,0,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" Foreground="#DDFFFFFF" FontWeight="Bold" Click="SAVEBTN_Click" TabIndex="2" HorizontalAlignment="Left" Width="84"/>
+            <Button x:Name="DELETE_FACTOR22" Tag="hazfer" Content="حذف" Margin="182,96,0,0"  Click="DELETE_FACTOR22_Click"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" Foreground="#DDFFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Width="84"/>
+            <TextBox x:Name="Text10" IsReadOnly="True" Text="{Binding ElementName=PGET_LST_SUB, Path=SelectedItem.NAME_THES}" Tag="RD" Height="25" Margin="0,0,62,181"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="395" />
+            <TextBox x:Name="Text8" IsReadOnly="True"  Tag="RD" Text="{Binding ElementName=PGET_LST_SUB, Path=SelectedItem.NAME_FHES}" Height="25" Margin="0,0,62,151"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="395" />
+            <Button x:Name="Khazane_List_Button" Content="لیست خزانه ها" Margin="406,96,0,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" Foreground="#DDFFFFFF" FontWeight="Bold" TabIndex="2" HorizontalAlignment="Left" Width="100" Click="Khazane_List_Button_Click"/>
+            <Button x:Name="GDCHECK" Content="اضافه چک گروهی دریافتی" Margin="0,96,13,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" Foreground="#DDFFFFFF" FontWeight="Bold" TabIndex="2" HorizontalAlignment="Right" Width="154" Click="GDCHECK_Click"/>
+            <Button x:Name="GPAYCHECK" Content="اضافه چک گروهی پرداختی" Margin="0,96,182,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" Foreground="#DDFFFFFF" FontWeight="Bold" TabIndex="2" HorizontalAlignment="Right" Width="154" Click="GPAYCHECK_Click"/>
+        </Grid>
+        <Button Content="Button" HorizontalAlignment="Left" Margin="1100,300,0,0" VerticalAlignment="Top" Width="0"/>
+        <Button x:Name="End" Tag ="RD" Click="End_Click" Style="{StaticResource GerdB}" BorderBrush="{x:Null}"
+            RenderTransformOrigin="0.5,0.5"  FontSize="10" Margin="0,0,155,33" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="34">
+            <materialDesign:PackIcon  Kind="SkipNext"  HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" Width="21" Foreground="#CCFFFFFF" RenderTransformOrigin="0.206,0.45"  FontSize="10" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="26,-44,0,0" Margin="-19,0,-18,0">
+                <materialDesign:PackIcon.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </materialDesign:PackIcon.RenderTransform>
+            </materialDesign:PackIcon>
+        </Button>
+        <Button x:Name="First" Click="First_Click"  Tag ="RD"  Style="{StaticResource GerdB}" BorderBrush="{x:Null}"
+            RenderTransformOrigin="0.5,0.5"  FontSize="10" Margin="0,0,351,33" HorizontalAlignment="Right" Width="34" Height="26" VerticalAlignment="Bottom">
+            <materialDesign:PackIcon Kind="SkipNext"  HorizontalAlignment="Right" VerticalAlignment="Top" Height="20" Width="23" Foreground="#CCFFFFFF" RenderTransformOrigin="0.515,0.533"  FontSize="10" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="-30,-1,-5,0">
+                <materialDesign:PackIcon.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="-1"/>
+                        <SkewTransform/>
+                        <RotateTransform/>
+                        <TranslateTransform X="4.946"/>
+                    </TransformGroup>
+                </materialDesign:PackIcon.RenderTransform>
+            </materialDesign:PackIcon>
+        </Button>
+        <Button x:Name="Next" Click="Next_Click" Tag ="RD" Style="{StaticResource GerdB}" BorderBrush="{x:Null}"
+            RenderTransformOrigin="0.5,0.5"  FontSize="10" Margin="0,0,197,33"  Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="34">
+            <materialDesign:PackIcon Kind="triangle"  HorizontalAlignment="Center" VerticalAlignment="Center" Height="15" Width="15" Foreground="#CCFFFFFF" RenderTransformOrigin="0.254,0.083"  FontSize="1" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0" Margin="-24,-13,-32,0">
+                <materialDesign:PackIcon.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="90"/>
+                        <TranslateTransform X="5" Y="10"/>
+                    </TransformGroup>
+                </materialDesign:PackIcon.RenderTransform>
+            </materialDesign:PackIcon>
+        </Button>
+        <Button x:Name="Back"  Tag ="RD" Click="Back_Click" Style="{StaticResource GerdB}" BorderBrush="{x:Null}"
+            RenderTransformOrigin="0.5,0.5"  FontSize="10" Margin="0,0,311,33" HorizontalAlignment="Right" Width="34"  Height="26" VerticalAlignment="Bottom">
+            <Button.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="-1"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Button.RenderTransform>
+            <materialDesign:PackIcon  Kind="triangle"  HorizontalAlignment="Center" VerticalAlignment="Center" Height="15" Width="15" Foreground="#CCFFFFFF" RenderTransformOrigin="0.254,0.083"  FontSize="1" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0" Margin="-24,-13,-32,0">
+                <materialDesign:PackIcon.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="90"/>
+                        <TranslateTransform X="5" Y="10"/>
+                    </TransformGroup>
+                </materialDesign:PackIcon.RenderTransform>
+            </materialDesign:PackIcon>
+        </Button>
+        <Button x:Name="NEWRECORD_BTN" Click="NEWRECORD_BTN_Click"  Tag ="RD" Style="{StaticResource GerdB}" BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10"  Margin="0,0,115,33" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="34">
+            <materialDesign:PackIcon Kind="AddBold"  HorizontalAlignment="Center" VerticalAlignment="Center" Height="15" Width="15" Foreground="#CCFFFFFF" RenderTransformOrigin="0.254,0.083"  FontSize="1" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0" Margin="-24,-13,-32,0">
+                <materialDesign:PackIcon.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="90"/>
+                        <TranslateTransform X="5" Y="10"/>
+                    </TransformGroup>
+                </materialDesign:PackIcon.RenderTransform>
+            </materialDesign:PackIcon>
+        </Button>
+        <TextBox x:Name="RecCount"  HorizontalContentAlignment="Center" TextAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource FuzzyOut}" IsReadOnly="True" Tag="RD" Padding="7,0,10,0" Margin="0,0,38,31" VerticalAlignment="Bottom" FlowDirection="RightToLeft" Background="{x:Null}" BorderThickness="1" Height="30" HorizontalAlignment="Right" Width="72" />
+        <TextBox x:Name="Current_Rec"   HorizontalContentAlignment="Center" TextAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource FuzzyOut}" IsReadOnly="True" Tag="RD" Padding="7,0,10,0" Margin="0,0,236,31" VerticalAlignment="Bottom" FlowDirection="RightToLeft" Background="{x:Null}" BorderThickness="1" Height="30" HorizontalAlignment="Right" Width="72" />
+        <Button x:Name="SERVERRELOAD_Btn" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Tag ="RD"  Style="{StaticResource GerdB}" BorderBrush="{x:Null}"  FontSize="10" Margin="0,0,390,33" HorizontalAlignment="Right" VerticalAlignment="Bottom" Foreground="#DDFFFFFF" Height="26" Width="34" Click="SERVERRELOAD_Btn_Click">
+            <Viewbox Margin="-9,0,-9,0" >
+                <materialDesign:PackIcon Kind="Refresh" />
+            </Viewbox>
+        </Button>
+
+    </Grid>
+</Window>

@@ -1,0 +1,26 @@
+﻿<Window x:Class="Prg_UI.Wins.WinSamplesEmpty.Window1"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinSamplesEmpty"
+        mc:Ignorable="d"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Window1" Height="597" Width="1009">
+    <Window.Resources>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel IsVirtualizing="True" ScrollViewer.CanContentScroll="True"  VirtualizationMode="Recycling"/>
+        </ItemsPanelTemplate>
+    </Window.Resources>
+    <Grid>
+        <WrapPanel>
+            
+        </WrapPanel>
+       
+
+
+
+    </Grid>
+</Window>

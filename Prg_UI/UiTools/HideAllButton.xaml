@@ -1,0 +1,34 @@
+﻿<Window x:Class="UiTools.HideAllButton"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UiTools"
+        mc:Ignorable="d"
+        Height="45" 
+        Width="350"
+        WindowStyle="None" 
+        AllowsTransparency="True" 
+        Background="Transparent" 
+        ShowInTaskbar="False" 
+        Topmost = "True"
+        FontFamily="IRANYekanFN">
+    <Grid>
+        <Border Background="#FF333333" CornerRadius="10">
+            <Button x:Name="CloseAllButton" 
+                Style="{StaticResource MaterialDesignFlatButton}"
+                Foreground="White"
+                BorderThickness="0"
+                FontSize="14"
+                Height="45"
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center"
+                Click="CloseAllButton_Click">
+                <StackPanel Orientation="Horizontal">
+                    <!--<materialDesign:PackIcon Kind="Close" Width="20" Height="20" Margin="0,0,10,0" VerticalAlignment="Center"/>-->
+                    <TextBlock Text="بستن همه" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,114 @@
+﻿<Window x:Class="Wins.WinMenus.Taarif.LIST_KALA_TAKHPERS"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Wins.WinMenus.Taarif"
+        mc:Ignorable="d"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="IRANYekanFN"
+        WindowStartupLocation="CenterScreen"
+        Title="Window3" Height="450" Width="800" Loaded="Window_Loaded">
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"  VirtualizingPanel.VirtualizationMode="Recycling"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+    </Window.Resources>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+    <Grid x:Name="mygrid">
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label Content="لیست کالا و تخفیفات" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMaximize" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+
+                </Grid>
+            </Border>
+        </Border>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+         Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+        <!--HEADER↑-->
+
+        <DataGrid   
+            EnableColumnVirtualization="True"
+            EnableRowVirtualization="True"
+            VirtualizingPanel.IsVirtualizing="True"
+            VirtualizingPanel.VirtualizationMode="Recycling"
+            ScrollViewer.CanContentScroll="False"
+            SelectedIndex="0"
+            ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+            CellStyle="{StaticResource CellFocusyBorder}"
+            HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+            VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+            ItemsSource="{Binding }"
+            KeyboardNavigation.TabNavigation="Contained"
+            x:Name="LGT_SUB"
+            Margin="10,50,12,10" AutoGenerateColumns="False" IsReadOnly="True" FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1">
+
+            <DataGrid.Style>
+                <!--خط بندی سطر های دیتاگرید-->
+                <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                    <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+                </Style>
+            </DataGrid.Style>
+
+            <DataGrid.Columns>
+                <DataGridTextColumn x:Name="cODEColumn" Binding="{Binding CODE,IsAsync=True}" Header="کد کالا" Width="auto"/>
+                <DataGridTextColumn x:Name="nAMEColumn" Binding="{Binding NAME,IsAsync=True}" Header="نام کالا" Width="auto"/>
+                <DataGridTextColumn x:Name="n_FANIColumn" Binding="{Binding N_FANI,IsAsync=True}" Header="شماره فنی" Width="auto"/>
+                <DataGridTextColumn x:Name="tOZIHColumn" Binding="{Binding TOZIH,IsAsync=True}" Header="توضیح" Width="auto"/>
+
+                <DataGridComboBoxColumn x:Name="VAHED_COLUMN" Width="auto" Header="واحد" SelectedValueBinding="{Binding VAHED,IsAsync=True}" SelectedValuePath="CODE" DisplayMemberPath="NAMES"/>
+
+                <DataGridTextColumn x:Name="b_SEFColumn" Binding="{Binding B_SEF,IsAsync=True}" Header="فی خرده فروش" Width="auto"/>
+                <DataGridTextColumn x:Name="n_SEFColumn" Binding="{Binding N_SEF,IsAsync=True}" Header="نقطه سفارش" Width="auto"/>
+                <DataGridTextColumn x:Name="mIN_MColumn" Binding="{Binding MIN_M,IsAsync=True}" Header="حداقل موجودی" Width="auto"/>
+                <DataGridTextColumn x:Name="mAX_MColumn" Binding="{Binding MAX_M,IsAsync=True}" Header="قيمت مصرف كننده" Width="auto"/>
+
+                <DataGridComboBoxColumn x:Name="RADAH_COLUMN" Width="auto" Header="گروه كالا" SelectedValueBinding="{Binding RADAH,IsAsync=True}" SelectedValuePath="CODE" DisplayMemberPath="NAMES"/>
+
+                <DataGridTextColumn x:Name="kINDKColumn" Binding="{Binding KINDK,IsAsync=True}" Header="نوع" Width="auto"/>
+                <DataGridTextColumn x:Name="mABL_FColumn" Binding="{Binding MABL_F,IsAsync=True}" Header="فی عمده فروش" Width="auto"/>
+                <DataGridTextColumn x:Name="dEPARTColumn" Binding="{Binding DEPART,IsAsync=True}" Header="واحد ارائه كننده" Width="auto"/>
+                <DataGridTextColumn x:Name="iDDColumn" Binding="{Binding IDD,IsAsync=True}" Header="آیدی" IsReadOnly="True" Width="auto"/>
+                <DataGridCheckBoxColumn x:Name="cMBAAColumn" Binding="{Binding CMBAA,IsAsync=True}" Header="مشمول ماليات ب.ا.ا" Width="auto"/>
+                <DataGridTextColumn x:Name="vAZNColumn" Binding="{Binding VAZN,IsAsync=True}" Header="وزن" Width="auto"/>
+                <DataGridCheckBoxColumn x:Name="oKFColumn" Binding="{Binding OKF,IsAsync=True}" Header="تایید" Width="auto"/>
+                <DataGridTextColumn x:Name="mENUITColumn" Binding="{Binding MENUIT,IsAsync=True}" Header="زيرمجموعه منوی" Width="auto"/>
+                <DataGridTextColumn x:Name="mEGHTAColumn" Binding="{Binding MEGHTA,IsAsync=True}" Header="به ازاي هر" Width="auto"/>
+                <DataGridTextColumn x:Name="mEGHJAYColumn" Binding="{Binding MEGHJAY,IsAsync=True}" Header="جايزه" Width="auto"/>
+                <DataGridTextColumn x:Name="tAKH_CODColumn" Binding="{Binding TAKH_COD,IsAsync=True}" Header="كد كالا و خدمات" Width="auto"/>
+
+                <DataGridComboBoxColumn x:Name="CUST_CO_COLUMN"  Width="auto" Header="كد نوع مشتری" SelectedValueBinding="{Binding CUST_CO,IsAsync=True}" SelectedValuePath="CUST_COD" DisplayMemberPath="CUSTKNAME"/>
+
+                <DataGridTextColumn x:Name="tAFPERColumn" Binding="{Binding TAFPER,IsAsync=True}" Header="% تخفيف" Width="auto"/>
+                <DataGridTextColumn x:Name="pRICE_MColumn" Binding="{Binding PRICE_M,IsAsync=True}" Header="قيمت" Width="auto"/>
+                <DataGridTextColumn x:Name="pERSColumn" Binding="{Binding PERS,IsAsync=True}" Header="درصد +-" Width="auto"/>
+                <DataGridTextColumn x:Name="bLNSColumn" Binding="{Binding BLNS,IsAsync=True}" Header="بالانس+-" Width="auto"/>
+                <DataGridCheckBoxColumn x:Name="pUTColumn" Binding="{Binding PUT,IsAsync=True}" Header="قيمت گذاري گروهی" Width="auto"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+    </Grid>
+</Window>

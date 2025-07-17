@@ -1,0 +1,1699 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<StiSerializer version="1.02" type="Net" application="StiReport">
+  <Culture isNull="true" />
+  <Dictionary Ref="1" type="Dictionary" isKey="true">
+    <BusinessObjects isList="true" count="0" />
+    <Databases isList="true" count="1">
+      <MS_x0020_SQL Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
+        <Alias>MS SQL</Alias>
+        <ConnectionStringEncrypted>9Fxlz00NQ4H5CE3UcQDhJ9HW0aJISquk4kztBOHEol7FOqHr0Qj63eJGnJzDSbH/33D7iEYDSrxoXH3Mc/y1f/latQnJA0IN4U3tmPn462fEyMECXkFJIW9N1dxxAbUn4A==</ConnectionStringEncrypted>
+        <Key>75ba241a8df64214aaa86dd37daf966b</Key>
+        <Name>MS SQL</Name>
+      </MS_x0020_SQL>
+    </Databases>
+    <DataSources isList="true" count="1">
+      <BUGET_MAIN Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
+        <Alias>BUGET_MAIN</Alias>
+        <Columns isList="true" count="62">
+          <value>ORIGINAL,BGID,BGID,BGID,System.Int64,b79a76395f684634bffe398f8bd068bd</value>
+          <value>ORIGINAL,BGCDATE,BGCDATE,BGCDATE,System.Int64,_x0035_f19872660464804bd078dfba53c57c3</value>
+          <value>ORIGINAL,BGMAH,BGMAH,BGMAH,System.Int32,b9aa708342d24fa4b300647e0e13970d</value>
+          <value>ORIGINAL,BGSAL,BGSAL,BGSAL,System.Int32,_x0032_726268cef0f47fe921a633a27727605</value>
+          <value>ORIGINAL,BGFOCXDAY,BGFOCXDAY,BGFOCXDAY,System.Decimal,_x0030_e20523bb94649a0b188ed3ae1565a0b</value>
+          <value>ORIGINAL,BGFOCN1MON,BGFOCN1MON,BGFOCN1MON,System.Decimal,_x0039_b60fa46a52847dabb195a16da3743a0</value>
+          <value>ORIGINAL,BGFOCN2MON,BGFOCN2MON,BGFOCN2MON,System.Decimal,d690bb4ec6bd417fbaae0cdab6f4018c</value>
+          <value>ORIGINAL,BGFOCN3MON,BGFOCN3MON,BGFOCN3MON,System.Decimal,_x0031_d68adf02c884618902c92668aa18635</value>
+          <value>ORIGINAL,BGFOCN4MON,BGFOCN4MON,BGFOCN4MON,System.Decimal,_x0038_1f8e2f3c6a24057a9618b7c0faadc6a</value>
+          <value>ORIGINAL,BGFOCN5MON,BGFOCN5MON,BGFOCN5MON,System.Decimal,b781ecfe4a9348219d554d3d7ed0e8e5</value>
+          <value>ORIGINAL,BGFOCN6MON,BGFOCN6MON,BGFOCN6MON,System.Decimal,_x0037_6e3951c186042e98c84363e8621de15</value>
+          <value>ORIGINAL,BGFOCN7MON,BGFOCN7MON,BGFOCN7MON,System.Decimal,_x0033_363773c2cba4c8c8f2d6663abe702b3</value>
+          <value>ORIGINAL,BGFOCN8MON,BGFOCN8MON,BGFOCN8MON,System.Decimal,c435cd69c8114aefb0b5848581004de0</value>
+          <value>ORIGINAL,BGFOCN9MON,BGFOCN9MON,BGFOCN9MON,System.Decimal,ee14328b12b142aface889aca7043d34</value>
+          <value>ORIGINAL,BGFOCN10MON,BGFOCN10MON,BGFOCN10MON,System.Decimal,_x0039_50eafe4f4d949d086a5711f1bcd6b5a</value>
+          <value>ORIGINAL,BGFOCN11MON,BGFOCN11MON,BGFOCN11MON,System.Decimal,_x0037_e9612ef53cb40608af67447b85d7c4a</value>
+          <value>ORIGINAL,BGFOCNDMON,BGFOCNDMON,BGFOCNDMON,System.Decimal,c62303ae153f4b41b7651f0345eefade</value>
+          <value>ORIGINAL,BGBUGETMON,BGBUGETMON,BGBUGETMON,System.Decimal,c010eec6a224480894d518198d5a2af3</value>
+          <value>ORIGINAL,BGMBDARAM,BGMBDARAM,BGMBDARAM,System.Decimal,_x0038_710911ed1ea44738e8f6e2ff960841c</value>
+          <value>ORIGINAL,BGMBCHEKMON,BGMBCHEKMON,BGMBCHEKMON,System.Decimal,_x0034_107115dede04411aef21d7b454df3c1</value>
+          <value>ORIGINAL,BGMBCASH,BGMBCASH,BGMBCASH,System.Decimal,f97eacbebb3b487bbbf30f6c5f18676f</value>
+          <value>ORIGINAL,BGMBCHEK0,BGMBCHEK0,BGMBCHEK0,System.Decimal,_x0033_56f769e3c874aad9ae6e876ba912369</value>
+          <value>ORIGINAL,BGMBCHEK1,BGMBCHEK1,BGMBCHEK1,System.Decimal,ea05705a50644d7290c2441b5deacf8e</value>
+          <value>ORIGINAL,BGMBCHEK2,BGMBCHEK2,BGMBCHEK2,System.Decimal,dcaf81c8b8244ec08ac6032610319b29</value>
+          <value>ORIGINAL,BGMBCHEK3,BGMBCHEK3,BGMBCHEK3,System.Decimal,_x0038_1a6ac7e78804e57a8313fc58ffda730</value>
+          <value>ORIGINAL,BGMBCHEK4,BGMBCHEK4,BGMBCHEK4,System.Decimal,e5a3b1199f5d4a1084bb7dd31c038134</value>
+          <value>ORIGINAL,BGMBCHEK5,BGMBCHEK5,BGMBCHEK5,System.Decimal,db792fe17c684a91b6f42824c9215cff</value>
+          <value>ORIGINAL,BGMBCHEK6,BGMBCHEK6,BGMBCHEK6,System.Decimal,_x0037_ed6d45e169c48f4b424cf1b2270f155</value>
+          <value>ORIGINAL,BGMBCHEK7,BGMBCHEK7,BGMBCHEK7,System.Decimal,_x0030_9e91d60aef14a7099552cbc71d9d200</value>
+          <value>ORIGINAL,BGMBCHEK8,BGMBCHEK8,BGMBCHEK8,System.Decimal,_x0036_e9c04c507e742b6a2100714bba9c3db</value>
+          <value>ORIGINAL,BGMBCHEK9,BGMBCHEK9,BGMBCHEK9,System.Decimal,f9c00e269c1b4cffa8e20370d453a43f</value>
+          <value>ORIGINAL,BGMBCHEK10,BGMBCHEK10,BGMBCHEK10,System.Decimal,_x0030_8c67585d0d84608a829747c4c08372d</value>
+          <value>ORIGINAL,BGMBCHEK11,BGMBCHEK11,BGMBCHEK11,System.Decimal,e1672d413f5c4ad6baadadfb2d22d79a</value>
+          <value>ORIGINAL,BGMBCHEK12,BGMBCHEK12,BGMBCHEK12,System.Decimal,_x0030_5692dd6c26a4223b1b0bbe2a156e2b1</value>
+          <value>ORIGINAL,BGPCASH,BGPCASH,BGPCASH,System.Decimal,_x0035_d6fd374f6684063a9693435f5548dca</value>
+          <value>ORIGINAL,BGPCH0,BGPCH0,BGPCH0,System.Decimal,_x0034_e8a12e6d7264f1a889ffa547ca55b2f</value>
+          <value>ORIGINAL,BGPCH1,BGPCH1,BGPCH1,System.Decimal,cd3968e3122e470ebe720caf6c0e72b9</value>
+          <value>ORIGINAL,BGPCH2,BGPCH2,BGPCH2,System.Decimal,_x0034_f79149a73b04a95b7dee9d3ce00979f</value>
+          <value>ORIGINAL,BGPCH3,BGPCH3,BGPCH3,System.Decimal,aa1c5ecb28bc416f81faf0b9f8629117</value>
+          <value>ORIGINAL,BGPCH4,BGPCH4,BGPCH4,System.Decimal,_x0038_9c00e00caeb41279c41456d7dd1a776</value>
+          <value>ORIGINAL,BGPCH5,BGPCH5,BGPCH5,System.Decimal,e117dc4f65124b168241508c16916a38</value>
+          <value>ORIGINAL,BGPCH6,BGPCH6,BGPCH6,System.Decimal,_x0032_9729cef9d894b25952a8f184e709b8d</value>
+          <value>ORIGINAL,BGPCH7,BGPCH7,BGPCH7,System.Decimal,_x0035_51470bc8e034b8eb067a341ef4c460c</value>
+          <value>ORIGINAL,BGPCH8,BGPCH8,BGPCH8,System.Decimal,_x0038_9076d642f494b5f94aac98981da46d3</value>
+          <value>ORIGINAL,BGPCH9,BGPCH9,BGPCH9,System.Decimal,_x0036_b7bab13146a4602b95b5d17f4931767</value>
+          <value>ORIGINAL,BGPCH10,BGPCH10,BGPCH10,System.Decimal,_x0030_986cb4af05f4dabba421ad0c996967c</value>
+          <value>ORIGINAL,BGPCH11,BGPCH11,BGPCH11,System.Decimal,_x0033_038703fca1443f2a7f435a4c09ad43c</value>
+          <value>ORIGINAL,BGPCH12,BGPCH12,BGPCH12,System.Decimal,ffc47980e6ec416b9ddc435b6e6bf02d</value>
+          <value>ORIGINAL,NTDZBMCHDABD,NTDZBMCHDABD,NTDZBMCHDABD,System.String,c5e17d163a934b9db68c4bed6bf46f01</value>
+          <value>ORIGINAL,BGMBCHEKJM12,BGMBCHEKJM12,BGMBCHEKJM12,System.Decimal,_x0030_8adda5470fd46ee9a5be9c68a1457e4</value>
+          <value>ORIGINAL,BGMBCHEKJM11,BGMBCHEKJM11,BGMBCHEKJM11,System.Decimal,_x0030_ada4b8881fe4ee79178d76de9457111</value>
+          <value>ORIGINAL,BGMBCHEKJM10,BGMBCHEKJM10,BGMBCHEKJM10,System.Decimal,_x0034_1cb41c5057d4fbdb84f00cb2dcdfe34</value>
+          <value>ORIGINAL,BGMBCHEKJM9,BGMBCHEKJM9,BGMBCHEKJM9,System.Decimal,_x0036_bb3ca12e987454f89a7c595752e1eb3</value>
+          <value>ORIGINAL,BGMBCHEKJM8,BGMBCHEKJM8,BGMBCHEKJM8,System.Decimal,b942964cea084127bf78797bb1d2c105</value>
+          <value>ORIGINAL,BGMBCHEKJM7,BGMBCHEKJM7,BGMBCHEKJM7,System.Decimal,_x0034_16e692d901e4308b5b74e1045d39d5c</value>
+          <value>ORIGINAL,BGMBCHEKJM6,BGMBCHEKJM6,BGMBCHEKJM6,System.Decimal,effa05ed50a649c28888c5903404eab5</value>
+          <value>ORIGINAL,BGMBCHEKJM5,BGMBCHEKJM5,BGMBCHEKJM5,System.Decimal,d9dea7b41d3d41d4bf473249a9493395</value>
+          <value>ORIGINAL,BGMBCHEKJM4,BGMBCHEKJM4,BGMBCHEKJM4,System.Decimal,e879bb48ff654d6ea9fa5471b4459ddf</value>
+          <value>ORIGINAL,BGMBCHEKJM3,BGMBCHEKJM3,BGMBCHEKJM3,System.Decimal,a51d112efb104ee39d84b6d93cadd74c</value>
+          <value>ORIGINAL,BGMBCHEKJM2,BGMBCHEKJM2,BGMBCHEKJM2,System.Decimal,_x0035_a615e3b58744b039e320d63c44d57d8</value>
+          <value>ORIGINAL,BGMBCHEKJM1,BGMBCHEKJM1,BGMBCHEKJM1,System.Decimal,_x0037_7ad9c8f0f184d509fc3fb1665c4c4a0</value>
+          <value>ORIGINAL,BGMBCHEKJM0,BGMBCHEKJM0,BGMBCHEKJM0,System.Decimal,a0014ab51ef14958a1b130f01b238dbd</value>
+        </Columns>
+        <CommandTimeout>30</CommandTimeout>
+        <Dictionary isRef="1" />
+        <Key>183f148aa0d54133b6fb3ca1d65c8c8a</Key>
+        <Name>BUGET_MAIN</Name>
+        <NameInSource>MS SQL</NameInSource>
+        <Parameters isList="true" count="1">
+          <value>BGID_PARAM,,8,0,1f7f287e57a042efb416f032bd430ac4</value>
+        </Parameters>
+        <SqlCommand>select BGID,BGCDATE,BGMAH,BGSAL,BGFOCXDAY,BGFOCN1MON,BGFOCN2MON,BGFOCN3MON,BGFOCN4MON,BGFOCN5MON,BGFOCN6MON,BGFOCN7MON,BGFOCN8MON,BGFOCN9MON,BGFOCN10MON,BGFOCN11MON,BGFOCNDMON,BGBUGETMON,BGMBCHEKMON,BGMBDARAM,BGMBCASH,BGMBCHEK0,BGMBCHEK1,BGMBCHEK2,BGMBCHEK3,BGMBCHEK4,BGMBCHEK5,BGMBCHEK6,BGMBCHEK7,BGMBCHEK8,BGMBCHEK9,BGMBCHEK10,BGMBCHEK11,BGMBCHEK12,BGPCASH,BGPCH0,BGPCH1,BGPCH2,BGPCH3,BGPCH4,BGPCH5,BGPCH6,BGPCH7,BGPCH8,BGPCH9,BGPCH10,BGPCH11,BGPCH12,NTDZBMCHDABD,BGMBCHEKJM12,BGMBCHEKJM11,BGMBCHEKJM10,BGMBCHEKJM9,BGMBCHEKJM8,BGMBCHEKJM7,BGMBCHEKJM6,BGMBCHEKJM5,BGMBCHEKJM4,BGMBCHEKJM3,BGMBCHEKJM2,BGMBCHEKJM1,BGMBCHEKJM0 FROM BUGET_MAIN WHERE BGID = @BGID_PARAM</SqlCommand>
+      </BUGET_MAIN>
+    </DataSources>
+    <Relations isList="true" count="0" />
+    <Report isRef="0" />
+    <Resources isList="true" count="0" />
+    <Variables isList="true" count="1">
+      <value>,Variable1,Variable1,,System.String,,False,False,False,False</value>
+    </Variables>
+  </Dictionary>
+  <EngineVersion>EngineV2</EngineVersion>
+  <GlobalizationStrings isList="true" count="1">
+    <Item3 Ref="4" type="Stimulsoft.Report.StiGlobalizationContainer" isKey="true">
+      <CultureName>fa-IR</CultureName>
+      <Items isList="true" count="0" />
+    </Item3>
+  </GlobalizationStrings>
+  <Key>afb6c885199e4f74b66673b8f9dcacd8</Key>
+  <MetaTags isList="true" count="0" />
+  <Pages isList="true" count="1">
+    <Page1 Ref="5" type="Page" isKey="true">
+      <Border>None;Black;2;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <Components isList="true" count="74">
+        <PageHeaderBand1 Ref="6" type="PageHeaderBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0,0.4,19,0.8</ClientRectangle>
+          <Components isList="true" count="3">
+            <Text1 Ref="7" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>8.6,0.2,1.8,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>B Yekan,20</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text1</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>بودجه</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text1>
+            <Text2 Ref="8" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>2.6,0.2,1,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>B Yekan,10</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text2</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>تاریخ :</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text2>
+            <BGDATE Ref="9" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.6,0.2,2,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>B Yekan,10</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>BGDATE</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </BGDATE>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Name>PageHeaderBand1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+        </PageHeaderBand1>
+        <PageFooterBand1 Ref="10" type="PageFooterBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0,25.9,19,1.8</ClientRectangle>
+          <Components isList="true" count="3">
+            <Shape9 Ref="11" type="Shape" isKey="true">
+              <BackgroundColor>Transparent</BackgroundColor>
+              <BorderColor>Black</BorderColor>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.19,1.49,18.61,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <ForeColor>Black</ForeColor>
+              <Margins>0,0,0,0</Margins>
+              <Name>Shape9</Name>
+              <Page isRef="5" />
+              <Parent isRef="10" />
+              <ShapeType Ref="12" type="Stimulsoft.Report.Components.ShapeTypes.StiHorizontalLineShapeType" isKey="true" />
+              <Size>2</Size>
+            </Shape9>
+            <Shape10 Ref="13" type="Shape" isKey="true">
+              <BackgroundColor>Transparent</BackgroundColor>
+              <BorderColor>Black</BorderColor>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.2,-0.1,18.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <ForeColor>Black</ForeColor>
+              <Margins>0,0,0,0</Margins>
+              <Name>Shape10</Name>
+              <Page isRef="5" />
+              <Parent isRef="10" />
+              <ShapeType Ref="14" type="Stimulsoft.Report.Components.ShapeTypes.StiHorizontalLineShapeType" isKey="true" />
+              <Size>2</Size>
+            </Shape10>
+            <Text19 Ref="15" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>6.8,0.3,5,1</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>B Yekan,10</Font>
+              <HideZeros>True</HideZeros>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text19</Name>
+              <Page isRef="5" />
+              <Parent isRef="10" />
+              <Text>{BUGET_MAIN.BGBUGETMON}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="16" type="NumberFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <GroupSeparator>,</GroupSeparator>
+                <NegativePattern>3</NegativePattern>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <VertAlignment>Center</VertAlignment>
+            </Text19>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Name>PageFooterBand1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+        </PageFooterBand1>
+        <Text8 Ref="17" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>12.4,4,6.2,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,9</Font>
+          <HorAlignment>Right</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text8</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>جمع چکهای موجود در بانک و صندوق در تاریخ بودجه</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text8>
+        <Text9 Ref="18" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>12.4,5,6.2,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,9</Font>
+          <HorAlignment>Right</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text9</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>درآمد های غیر عملیاتی که در ماه بودجه تزریق میشود</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text9>
+        <Text10 Ref="19" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>12.4,6,6.2,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,9</Font>
+          <HorAlignment>Right</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text10</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>مبلغ فروش نقدی در ماه بودجه</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text10>
+        <Shape1 Ref="20" type="Shape" isKey="true">
+          <BackgroundColor>Transparent</BackgroundColor>
+          <BorderColor>Black</BorderColor>
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.2,3.38,18.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>Arial,8</Font>
+          <ForeColor>Black</ForeColor>
+          <Margins>0,0,0,0</Margins>
+          <Name>Shape1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <ShapeType Ref="21" type="Stimulsoft.Report.Components.ShapeTypes.StiHorizontalLineShapeType" isKey="true" />
+          <Size>2</Size>
+        </Shape1>
+        <Shape2 Ref="22" type="Shape" isKey="true">
+          <BackgroundColor>Transparent</BackgroundColor>
+          <BorderColor>Black</BorderColor>
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.2,7,18.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>Arial,8</Font>
+          <ForeColor>Black</ForeColor>
+          <Margins>0,0,0,0</Margins>
+          <Name>Shape2</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <ShapeType Ref="23" type="Stimulsoft.Report.Components.ShapeTypes.StiHorizontalLineShapeType" isKey="true" />
+          <Size>2</Size>
+        </Shape2>
+        <Shape3 Ref="24" type="Shape" isKey="true">
+          <BackgroundColor>Transparent</BackgroundColor>
+          <BorderColor>Black</BorderColor>
+          <Brush>Transparent</Brush>
+          <ClientRectangle>6.4,3.68,0.6,23.74</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>Arial,8</Font>
+          <ForeColor>Black</ForeColor>
+          <Margins>0,0,0,0</Margins>
+          <Name>Shape3</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <ShapeType Ref="25" type="Stimulsoft.Report.Components.ShapeTypes.StiVerticalLineShapeType" isKey="true" />
+          <Size>2</Size>
+        </Shape3>
+        <Shape4 Ref="26" type="Shape" isKey="true">
+          <BackgroundColor>Transparent</BackgroundColor>
+          <BorderColor>Black</BorderColor>
+          <Brush>Transparent</Brush>
+          <ClientRectangle>11.6,3.68,0.6,23.74</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>Arial,8</Font>
+          <ForeColor>Black</ForeColor>
+          <Margins>0,0,0,0</Margins>
+          <Name>Shape4</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <ShapeType Ref="27" type="Stimulsoft.Report.Components.ShapeTypes.StiVerticalLineShapeType" isKey="true" />
+          <Size>2</Size>
+        </Shape4>
+        <Shape5 Ref="28" type="Shape" isKey="true">
+          <BackgroundColor>Transparent</BackgroundColor>
+          <BorderColor>Black</BorderColor>
+          <Brush>Transparent</Brush>
+          <ClientRectangle>18.4,3.68,0.8,23.75</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>Arial,8</Font>
+          <ForeColor>Black</ForeColor>
+          <Margins>0,0,0,0</Margins>
+          <Name>Shape5</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <ShapeType Ref="29" type="Stimulsoft.Report.Components.ShapeTypes.StiVerticalLineShapeType" isKey="true" />
+          <Size>2</Size>
+        </Shape5>
+        <Text14 Ref="30" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>16,7.49,2.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text14</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>ماه</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text14>
+        <Text15 Ref="31" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>12.6,7.49,2.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text15</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>پیش بینی فروش</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text15>
+        <Text16 Ref="32" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>7.2,7.49,4,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text16</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>مبلغ چکها با سررسید </Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text16>
+        <Text17 Ref="33" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>1.2,7.49,4.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text17</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>جمع چکهای دریافتی</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text17>
+        <Shape6 Ref="34" type="Shape" isKey="true">
+          <BackgroundColor>Transparent</BackgroundColor>
+          <BorderColor>Black</BorderColor>
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.2,8,18.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>Arial,8</Font>
+          <ForeColor>Black</ForeColor>
+          <Margins>0,0,0,0</Margins>
+          <Name>Shape6</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <ShapeType Ref="35" type="Stimulsoft.Report.Components.ShapeTypes.StiHorizontalLineShapeType" isKey="true" />
+        </Shape6>
+        <Shape7 Ref="36" type="Shape" isKey="true">
+          <BackgroundColor>Transparent</BackgroundColor>
+          <BorderColor>Black</BorderColor>
+          <Brush>Transparent</Brush>
+          <ClientRectangle>15.4,7.28,0.6,20.14</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>Arial,8</Font>
+          <ForeColor>Black</ForeColor>
+          <Margins>0,0,0,0</Margins>
+          <Name>Shape7</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <ShapeType Ref="37" type="Stimulsoft.Report.Components.ShapeTypes.StiVerticalLineShapeType" isKey="true" />
+          <Size>2</Size>
+        </Shape7>
+        <Shape8 Ref="38" type="Shape" isKey="true">
+          <BackgroundColor>Transparent</BackgroundColor>
+          <BorderColor>Black</BorderColor>
+          <Brush>Transparent</Brush>
+          <ClientRectangle>-0.09,3.68,0.6,23.74</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>Arial,8</Font>
+          <ForeColor>Black</ForeColor>
+          <Margins>0,0,0,0</Margins>
+          <Name>Shape8</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <ShapeType Ref="39" type="Stimulsoft.Report.Components.ShapeTypes.StiVerticalLineShapeType" isKey="true" />
+          <Size>2</Size>
+        </Shape8>
+        <M1 Ref="40" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>15.99,8.45,2.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>M1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </M1>
+        <M2 Ref="41" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>16,9.31,2.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>M2</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </M2>
+        <M3 Ref="42" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>16.01,10.17,2.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>M3</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </M3>
+        <M4 Ref="43" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>16,11.03,2.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>M4</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>
+</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </M4>
+        <M5 Ref="44" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>16,11.89,2.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>M5</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </M5>
+        <M6 Ref="45" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>15.98,12.75,2.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>M6</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </M6>
+        <M7 Ref="46" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>16,13.61,2.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>M7</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </M7>
+        <M8 Ref="47" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>16,14.47,2.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>M8</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </M8>
+        <M9 Ref="48" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>15.99,15.33,2.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>M9</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </M9>
+        <M10 Ref="49" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>16,16.19,2.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>M10</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </M10>
+        <M11 Ref="50" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>16,17.05,2.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>M11</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </M11>
+        <M12 Ref="51" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>15.95,17.91,2.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>M12</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </M12>
+        <BGFOCXDAY Ref="52" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>12.07,8.42,3.53,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGFOCXDAY</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGFOCXDAY}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="53" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGFOCXDAY>
+        <BGFOCN1MON Ref="54" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>12.07,9.27,3.53,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGFOCN1MON</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGFOCN1MON}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="55" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGFOCN1MON>
+        <BGFOCN2MON Ref="56" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>12.07,10.12,3.53,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGFOCN2MON</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGFOCN2MON}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="57" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGFOCN2MON>
+        <BGFOCN3MON Ref="58" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>12.07,10.97,3.53,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGFOCN3MON</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGFOCN3MON}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="59" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGFOCN3MON>
+        <BGFOCN4MON Ref="60" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>12.06,11.82,3.53,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGFOCN4MON</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGFOCN4MON}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="61" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGFOCN4MON>
+        <BGFOCN5MON Ref="62" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>12.07,12.67,3.53,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGFOCN5MON</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGFOCN5MON}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="63" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGFOCN5MON>
+        <BGFOCN7MON Ref="64" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>12.06,14.37,3.53,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGFOCN7MON</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGFOCN7MON}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="65" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGFOCN7MON>
+        <BGFOCN6MON Ref="66" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>12.07,13.52,3.53,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGFOCN6MON</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGFOCN6MON}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="67" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGFOCN6MON>
+        <BGFOCN8MON Ref="68" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>12.06,15.22,3.53,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGFOCN8MON</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGFOCN8MON}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="69" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGFOCN8MON>
+        <BGFOCN9MON Ref="70" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>12.05,16.07,3.53,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGFOCN9MON</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGFOCN9MON}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="71" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGFOCN9MON>
+        <BGFOCN10MON Ref="72" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>12.06,16.92,3.53,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGFOCN10MON</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGFOCN10MON}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="73" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGFOCN10MON>
+        <BGFOCN11MON Ref="74" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>12.07,17.79,3.53,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGFOCN11MON</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGFOCN11MON}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="75" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGFOCN11MON>
+        <Text4 Ref="76" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>14.4,2,2.4,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,18</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text4</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>بودجه ماه:</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text4>
+        <BGMAH1 Ref="77" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>9.4,2,5,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,16</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMAH1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>=MAHNAME([BGMAH])</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </BGMAH1>
+        <Text6 Ref="78" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>5.4,2,1.8,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,18</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text6</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>درسال :</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text6>
+        <BGMBCHEK0 Ref="79" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>6.95,8.42,4.71,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEK0</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEK0}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="80" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEK0>
+        <BGMBCHEK1 Ref="81" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>6.95,9.28,4.71,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEK1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEK1}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="82" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEK1>
+        <BGMBCHEK2 Ref="83" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>6.95,10.14,4.71,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEK2</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEK2}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="84" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEK2>
+        <BGMBCHEK3 Ref="85" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>6.94,11,4.71,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEK3</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEK3}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="86" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEK3>
+        <BGMBCHEK4 Ref="87" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>6.94,11.83,4.71,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEK4</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEK4}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="88" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEK4>
+        <BGMBCHEK5 Ref="89" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>6.94,12.66,4.71,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEK5</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEK5}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="90" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEK5>
+        <BGMBCHEK6 Ref="91" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>6.94,13.53,4.71,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEK6</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEK6}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="92" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEK6>
+        <BGMBCHEK7 Ref="93" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>6.94,14.41,4.71,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEK7</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEK7}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="94" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEK7>
+        <BGMBCHEK8 Ref="95" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>6.94,15.19,4.71,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEK8</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEK8}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="96" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEK8>
+        <BGMBCHEK9 Ref="97" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>6.94,16.08,4.71,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEK9</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEK9}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="98" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEK9>
+        <BGMBCHEK10 Ref="99" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>6.94,16.94,4.71,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEK10</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEK10}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="100" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEK10>
+        <BGMBCHEK11 Ref="101" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>6.94,17.76,4.71,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEK11</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEK11}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="102" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEK11>
+        <BGMBCHEK12 Ref="103" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>6.94,18.6,4.71,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEK12</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEK12}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="104" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEK12>
+        <BGMBCHEKJM0 Ref="105" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.7,8.4,5.4,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEKJM0</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEKJM0}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="106" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEKJM0>
+        <BGMBCHEKJM1 Ref="107" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.7,9.25,5.4,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEKJM1</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEKJM1}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="108" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEKJM1>
+        <BGMBCHEKJM2 Ref="109" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.7,10.1,5.4,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEKJM2</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEKJM2}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="110" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEKJM2>
+        <BGMBCHEKJM3 Ref="111" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.7,10.95,5.4,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEKJM3</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEKJM3}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="112" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEKJM3>
+        <BGMBCHEKJM4 Ref="113" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.7,11.8,5.4,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEKJM4</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEKJM4}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="114" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEKJM4>
+        <BGMBCHEKJM5 Ref="115" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.7,12.65,5.4,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEKJM5</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEKJM5}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="116" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEKJM5>
+        <BGMBCHEKJM6 Ref="117" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.7,13.5,5.4,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEKJM6</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEKJM6}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="118" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEKJM6>
+        <BGMBCHEKJM7 Ref="119" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.7,14.35,5.4,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEKJM7</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEKJM7}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="120" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEKJM7>
+        <BGMBCHEKJM8 Ref="121" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.7,15.2,5.4,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEKJM8</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEKJM8}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="122" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEKJM8>
+        <BGMBCHEKJM9 Ref="123" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.7,16.05,5.4,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEKJM9</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEKJM9}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="124" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEKJM9>
+        <BGMBCHEKJM10 Ref="125" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.7,16.9,5.4,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEKJM10</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEKJM10}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="126" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEKJM10>
+        <BGMBCHEKJM11 Ref="127" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.7,17.75,5.4,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEKJM11</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEKJM11}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="128" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEKJM11>
+        <BGMBCHEKJM12 Ref="129" type="Text" isKey="true">
+          <Alias>BGMBCHEKJM12</Alias>
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.7,18.6,5.4,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,8</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>BGMBCHEKJM12</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEKJM12}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="130" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </BGMBCHEKJM12>
+        <Text3 Ref="131" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>3.2,2,2.2,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,16</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text3</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGSAL}</Text>
+          <TextBrush>Black</TextBrush>
+          <VertAlignment>Center</VertAlignment>
+        </Text3>
+        <Text18 Ref="132" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>7.4,6,4,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text18</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCASH}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="133" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </Text18>
+        <Text13 Ref="134" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>7.4,5,4,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text13</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBDARAM}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="135" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </Text13>
+        <Text12 Ref="136" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>7.4,4,4,0.8</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Font>B Yekan,10</Font>
+          <HideZeros>True</HideZeros>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text12</Name>
+          <Page isRef="5" />
+          <Parent isRef="5" />
+          <Text>{BUGET_MAIN.BGMBCHEKMON}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextFormat Ref="137" type="NumberFormat" isKey="true">
+            <DecimalDigits>0</DecimalDigits>
+            <GroupSeparator>,</GroupSeparator>
+            <NegativePattern>3</NegativePattern>
+            <UseLocalSetting>False</UseLocalSetting>
+          </TextFormat>
+          <VertAlignment>Center</VertAlignment>
+        </Text12>
+      </Components>
+      <Conditions isList="true" count="0" />
+      <Expressions isList="true" count="0" />
+      <Guid>f95c2735ffa9496480b7295ba25b08f6</Guid>
+      <Margins>1,1,1,1</Margins>
+      <Name>Page1</Name>
+      <PageHeight>29.7</PageHeight>
+      <PageWidth>21</PageWidth>
+      <Report isRef="0" />
+    </Page1>
+  </Pages>
+  <ReferencedAssemblies isList="true" count="8">
+    <value>System.Dll</value>
+    <value>System.Drawing.Dll</value>
+    <value>System.Windows.Forms.Dll</value>
+    <value>System.Data.Dll</value>
+    <value>System.Xml.Dll</value>
+    <value>Stimulsoft.Controls.Dll</value>
+    <value>Stimulsoft.Base.Dll</value>
+    <value>Stimulsoft.Report.Dll</value>
+  </ReferencedAssemblies>
+  <ReportAlias>Report</ReportAlias>
+  <ReportChanged>6/8/2025 5:33:13 PM</ReportChanged>
+  <ReportCreated>9/5/2021 1:38:11 PM</ReportCreated>
+  <ReportFile>E:\prg\MrCorrect408\Prg_UI\Rpts\BUGETRP.mrt</ReportFile>
+  <ReportGuid>a407cac1bd5d453a9202ed309652f18f</ReportGuid>
+  <ReportName>Report</ReportName>
+  <ReportUnit>Centimeters</ReportUnit>
+  <ReportVersion>2023.1.1.0</ReportVersion>
+  <Script>using System;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Data;
+using Stimulsoft.Controls;
+using Stimulsoft.Base.Drawing;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Dialogs;
+using Stimulsoft.Report.Components;
+
+namespace Reports
+{
+    public class Report : Stimulsoft.Report.StiReport
+    {
+        public Report()        {
+            this.InitializeComponent();
+        }
+
+        #region StiReport Designer generated code - do not modify
+		#endregion StiReport Designer generated code - do not modify
+    }
+}
+</Script>
+  <ScriptLanguage>CSharp</ScriptLanguage>
+  <Styles isList="true" count="0" />
+</StiSerializer>

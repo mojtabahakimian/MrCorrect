@@ -1,0 +1,136 @@
+﻿using Prg_Proccessy.MODELS;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AUTO_BAZ.Functions
+{
+    public static class Tarikh
+    {
+        public static bool IsSyncedDateNow(string dt, bool flag)
+        {
+            string sal = dt.Substring(0, 4);
+            bool res = true;
+            if (flag)//آیا تیک کنترل شود تاریخ وارد شده با تاریخ سال مالی یکی است ؟
+            {
+                if (sal != Baseknow.YEA.ToString())
+                {
+                    res = false;
+                }
+                else
+                {
+                    res = true;//تاریخ صحیح است
+                }
+            }
+            return res;
+        }
+
+        private static string _fullcurrentdate;
+        /// <summary>
+        /// تاریخ بدون اسلش
+        /// </summary>
+        public static string FullCurrentDate
+        {
+            get
+            {
+                _fullcurrentdate = GoGetPersianDate(true);
+                return _fullcurrentdate;
+            }
+            set { _fullcurrentdate = value; }
+        }
+        private static string _slashy;
+        public static string SlashyFullDate
+        {
+            get
+            {
+                _slashy = GoGetPersianDate(false);
+                return _slashy;
+            }
+            set { _slashy = value; }
+        }
+
+
+        /// <summary>
+        /// Item1: SAL | Item2: MAH | Item3: ROOZ | 
+        /// </summary>
+        /// <param name="_the_date_"></param>
+        /// <returns></returns>
+        public static Tuple<string, string, string> GetSplitPersianDate(string _the_date_)
+        {
+            var SAL = _the_date_.Substring(0, 4); //Year
+            var MAH = _the_date_.Substring(4, 2); //Month
+            var ROOZ = _the_date_.Substring(6, 2); //Day
+
+            return Tuple.Create(SAL, MAH, ROOZ);
+        }
+        /// <summary>
+        /// Get Miladi Date | AD Date
+        /// </summary>
+        /// <param name="persianDate"></param>
+        /// <returns></returns>
+        public static DateTime GetRawGregorianDateTime(string persianDate)
+        {
+            int persianYear = int.Parse(persianDate.Substring(0, 4));
+            int persianMonth = int.Parse(persianDate.Substring(4, 2));
+            int persianDay = int.Parse(persianDate.Substring(6, 2));
+
+            PersianCalendar persianCalendar = new PersianCalendar();
+            DateTime dateTime = persianCalendar.ToDateTime(persianYear, persianMonth, persianDay, 0, 0, 0, 0);
+            //var now = new DateTimeOffset(TheFunctions.GetGregorianDateTime("14020224")).ToUnixTimeMilliseconds();
+            return dateTime;
+        }
+        public static string GoGetPersianDate(bool IsRawdate)
+        {
+            string resulty = "";
+            DateTime miladi = DateTime.Now;
+            System.Globalization.PersianCalendar shamsi = new System.Globalization.PersianCalendar();
+
+            if (IsRawdate)
+                resulty = string.Format("{0}{1}{2}", shamsi.GetYear(miladi).ToString("00.##"), shamsi.GetMonth(miladi).ToString("00.##"), shamsi.GetDayOfMonth(miladi).ToString("00.##"));
+            else
+                resulty = string.Format("{0}/{1}/{2}", shamsi.GetYear(miladi).ToString("00.##"), shamsi.GetMonth(miladi).ToString("00.##"), shamsi.GetDayOfMonth(miladi).ToString("00.##"));
+            string slashydate = string.Format("{0}/{1}/{2}", shamsi.GetYear(miladi).ToString("00.##"), shamsi.GetMonth(miladi).ToString("00.##"), shamsi.GetDayOfMonth(miladi).ToString("00.##"));
+
+            return resulty;
+        }
+        public static bool IsValidedDate(string date)
+        {
+            var flag = false;
+            if (date.Length != 8) // اگر طول تاریخ درست وارد نشده برگرد و بگو درست نیست11112233
+            {
+                return flag = false;
+            }
+            if (!date.Contains("/"))
+            {
+                string sal = date.Substring(0, 4);
+                string mah = date.Substring(4, 2);
+                string rooz = date.Substring(6, 2);
+                date = $"{sal}/{mah}/{rooz}";
+            }
+            flag = DateTime.TryParseExact(date, "yyyy/MM/dd", new System.Globalization.CultureInfo("fa-IR"), System.Globalization.DateTimeStyles.None, out _);
+            return flag;
+        }
+        /// <summary>
+        /// تاریخ عددی سیستمی
+        /// </summary>
+        /// <returns></returns>
+        public static double GET_OADATE_DAO()
+        {
+            return Convert.ToDouble(DateTime.Now.ToOADate());
+        }
+        public static string GetMiladiDateTimeForSQL(bool isOnlyTime = false, bool IsGetASSqlcast = false)
+        {
+            if (isOnlyTime)
+                return DateTime.Now.ToString("HH:mm:ss.fff", CultureInfo.GetCultureInfo("en-US"));
+
+            if (IsGetASSqlcast)
+                return $"CAST('{DateTime.Now.ToString("HH:mm:ss.fff", CultureInfo.GetCultureInfo("en-US"))}' AS DATETIME)"; ;
+
+
+            return DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.GetCultureInfo("en-US"));
+        }
+    }
+}

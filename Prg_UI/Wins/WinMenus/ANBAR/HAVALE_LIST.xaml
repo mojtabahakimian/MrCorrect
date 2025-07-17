@@ -1,0 +1,89 @@
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.ANBAR.HAVALE_LIST"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.ANBAR"
+        mc:Ignorable="d"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Background="{x:Null}"
+        FontFamily="IRANYekanFN"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        Title="حواله ها" Height="450" Width="840" Closed="Window_Closed" WindowState="Maximized" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen"  Activated="Window_Activated" PreviewKeyDown="Window_PreviewKeyDown">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+    <Window.Resources>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+    </Window.Resources>
+    <Grid  x:Name="mygrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Border CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" 	  Background="{DynamicResource MaterialDesign.Brush.Background}" BorderBrush="{Binding ElementName=GENERAL_RANG,Path=Background}">
+            <Border x:Name="TitleDrawBar" Style="{DynamicResource BordG}" Background="{Binding ElementName=GENERAL_RANG,Path=Background}" Margin="-7.999,-7.928,-8,0" VerticalAlignment="Top" MinHeight="50" UseLayoutRounding="False" Height="34.928" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Label Content="مشاهده حواله های فروش" Padding="25,15,15,15" Foreground="White"/>
+            </Border>
+        </Border>
+
+
+        <DataGrid x:Name="DGR_HEADLST_HAVL_2" 
+                  Margin="10,215,8,10" AutoGenerateColumns="False"
+                  Style="{StaticResource DATAGRIDSTYLISH}"
+                  ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"           
+                  HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}" VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                  FlowDirection="RightToLeft"
+                  CanUserAddRows="False"
+                  IsReadOnly="True"
+                  BorderThickness="1" PreviewKeyDown="DGR_HEADLST_HAVL_2_PreviewKeyDown" PreviewMouseDoubleClick="DGR_HEADLST_HAVL_2_PreviewMouseDoubleClick">
+
+            <DataGrid.Columns >
+                <DataGridTextColumn Header="شماره" Binding="{Binding NUMBER,IsAsync=True}" Width="auto" MinWidth="80"/>
+                <DataGridTextColumn Header="تاریخ"  Binding="{Binding DATE_N, StringFormat=####/##/##,IsAsync=True}" Width="auto"   MinWidth="65"/>
+                <DataGridTextColumn Header="نام مشتری" Binding="{Binding NAME,IsAsync=True}" Width="auto"  MinWidth="150"/>
+                <DataGridTextColumn x:Name="cUST_NOColumn" Binding="{Binding CUST_NO,IsAsync=True}" Width="auto"  Header="کد مشتری" />
+                <DataGridTextColumn x:Name="tAHColumn" Binding="{Binding TAH,IsAsync=True}" Width="auto"  Header="تحویل دهنده" />
+                <DataGridTextColumn x:Name="mOLAHColumn" Binding="{Binding MOLAH,IsAsync=True}" Header="توسط"  Width="auto" />
+                <DataGridTextColumn x:Name="sHARAYETColumn" Binding="{Binding SHARAYET,IsAsync=True}" Header="ملاحظات" Width="auto" />
+                <DataGridTextColumn x:Name="aNBARFColumn" Binding="{Binding ANBAR,IsAsync=True}" Header="شماره برگه"  Width="auto" />
+                <DataGridTextColumn x:Name="fNUMCOColumn" Binding="{Binding FNUMCO,IsAsync=True}" Header="شماره داخلی"  Width="auto" />
+            </DataGrid.Columns>
+
+        </DataGrid>
+        <TextBox x:Name="NUMBER_SR" Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3" HorizontalAlignment="Right" Height="28" Margin="0,63,56,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="68" FlowDirection="RightToLeft" PreviewLostKeyboardFocus="NUMBER_SR_PreviewLostKeyboardFocus" TabIndex="0" />
+        <Label Content="نام مشتری :" HorizontalAlignment="Right" Height="30" Margin="0,62,128,0" VerticalAlignment="Top" Width="69" FlowDirection="RightToLeft" />
+        <TextBox x:Name="CUST_NO_SR"  Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3"  Height="28" Margin="439,65,199,0" TextWrapping="Wrap" VerticalAlignment="Top" FlowDirection="RightToLeft" PreviewLostKeyboardFocus="CUST_NO_SR_PreviewLostKeyboardFocus" TabIndex="1"/>
+        <Label Content="تاریخ :" Height="30" Margin="392,63,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft"  HorizontalAlignment="Left" Width="42"/>
+
+        <xctk:MaskedTextBox x:Name="DATE_N_SR" Mask="0000/00/00"  Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3"  Height="28" Margin="312,65,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Left" Width="80" PreviewLostKeyboardFocus="DATE_N_SR_PreviewLostKeyboardFocus" TabIndex="2" />
+        <Label Content="ملاحظات :" Height="30" Margin="0,107,456,0" VerticalAlignment="Top" FlowDirection="RightToLeft"  HorizontalAlignment="Right" Width="60"/>
+        <TextBox x:Name="SHARAYET_SR"  Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3"  Height="28" Margin="13,109,519,0" TextWrapping="Wrap" VerticalAlignment="Top" FlowDirection="RightToLeft" PreviewLostKeyboardFocus="SHARAYET_SR_PreviewLostKeyboardFocus" TabIndex="7"/>
+        <Label Content="شماره:" HorizontalAlignment="Right" Height="30" Margin="0,62,10,0" VerticalAlignment="Top" Width="42" FlowDirection="RightToLeft" />
+
+        <Button x:Name="Btn_Close" Margin="0,13,12,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+            <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+        </Button>
+        <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,13,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+            <materialDesign:PackIcon Kind="WindowRestore" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+        </Button>
+        <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,13,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+            <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+        </Button>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="467,237,372,181"  Width="1"/>
+        <Label Content="تحویل دهنده :" Height="30" Margin="0,107,8,0" VerticalAlignment="Top" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="81"/>
+        <TextBox x:Name="TAH_SR"  Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3"  Height="28" Margin="0,109,92,0" TextWrapping="Wrap" VerticalAlignment="Top" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="150" PreviewLostKeyboardFocus="TAH_SR_PreviewLostKeyboardFocus" TabIndex="5"/>
+        <Label Content="توسط:" Height="30" Margin="0,107,247,0" VerticalAlignment="Top" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="40"/>
+        <TextBox x:Name="MOLAH_SR"  Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3"  Height="28" Margin="0,109,289,0" TextWrapping="Wrap" VerticalAlignment="Top" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="162" PreviewLostKeyboardFocus="MOLAH_SR_PreviewLostKeyboardFocus" TabIndex="6"/>
+        <Label Content="شماره داخلی :" Height="30" Margin="230,63,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" HorizontalAlignment="Left" Width="77"/>
+        <TextBox x:Name="FNUMCO_SR"  Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3"  Height="28" Margin="157,64,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FlowDirection="RightToLeft" HorizontalAlignment="Left" Width="71" PreviewLostKeyboardFocus="FNUMCO_SR_PreviewLostKeyboardFocus" TabIndex="3"/>
+        <Label Content="شماره برگه:" Height="30" Margin="94,61,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" HorizontalAlignment="Left" Width="64"/>
+        <TextBox x:Name="ANBAR_SR"  Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3"  Height="28" Margin="13,63,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FlowDirection="RightToLeft" HorizontalAlignment="Left" Width="79" PreviewLostKeyboardFocus="ANBAR_SR_PreviewLostKeyboardFocus" TabIndex="4"/>
+        <Button x:Name="REFLOAD_ALL"  Content="باز خوانی مجدد" Margin="0,155,12,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="37" VerticalAlignment="Top" HorizontalAlignment="Right" Width="114" Foreground="#DDFFFFFF" FontWeight="Bold" Click="REFLOAD_ALL_Click" />
+        <Button x:Name="CLEANFILTERS"  Content="حذف همه فیلتر ها" Margin="0,155,250,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="37" VerticalAlignment="Top" HorizontalAlignment="Right" Width="114" Foreground="#DDFFFFFF" FontWeight="Bold" Click="CLEANFILTERS_Click" />
+        <Button x:Name="BTN_SEARCH"  Content="جستجو" Margin="0,155,131,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="37" VerticalAlignment="Top" HorizontalAlignment="Right" Width="114" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_SEARCH_Click" />
+        <Label Content="تعداد ردیف ها : " HorizontalAlignment="Left" Margin="13,174,0,0" VerticalAlignment="Top" Width="87"/>
+        <Label Content="{Binding ElementName=DGR_HEADLST_HAVL_2,Path=Items.Count,IsAsync=True}" HorizontalAlignment="Left" Margin="105,174,0,0" VerticalAlignment="Top" Width="87"/>
+    </Grid>
+</Window>

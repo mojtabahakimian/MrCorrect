@@ -1,0 +1,173 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Wins.WinMenus.Taarif"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
+      	xmlns:CUC="clr-namespace:Prg_UI.CUC" x:Class="Wins.WinMenus.Taarif.STUF_DEF_LST"
+        mc:Ignorable="d" 
+    
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+      	Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        WindowStartupLocation="CenterScreen" 
+        FontFamily="IRANYekanFN"
+        Title="PGET_HED_LIST" Height="578" Width="988" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <Window.Resources>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+    </Window.Resources>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+    <Grid>
+        <Border  Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5"  Grid.ColumnSpan="5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="28.579" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label Foreground="White" VerticalContentAlignment="Center" Content="لیست کالا ها" Margin="10,1,99,0"/>
+                    <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMaximize" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                </Grid>
+            </Border>
+        </Border>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="95,56,0,0"  Width="1"/>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True" Grid.RowSpan="2">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"  Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+        <UniformGrid Columns="1" Margin="10,338,10,10">
+
+            <DataGrid x:Name="MasterDataGrid" 
+                  ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                  CellStyle="{StaticResource CellFocusyBorder}"
+                  HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                  VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                  AutoGenerateColumns="False"
+                  
+                  IsReadOnly="True" FlowDirection="RightToLeft" IsTabStop="True" TabIndex="2">
+                <DataGrid.Style>
+                    <!--خط بندی سطر های دیتاگرید-->
+                    <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                        <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                        <Setter Property="GridLinesVisibility" Value="All"/>
+                    </Style>
+                </DataGrid.Style>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="کد کالا" Binding="{Binding CODE}" Width="auto" />
+                    <DataGridTextColumn Header="نام کالا" Binding="{Binding NAME}"  Width="auto" />
+                    <DataGridTextColumn Header="کد فنی" Binding="{Binding N_FANI}" Width="auto"  />
+                    <DataGridTextColumn Header="توضیح" Binding="{Binding TOZIH}"  Width="auto" />
+                    <!--<DataGridTextColumn Header="واحد" Binding="{Binding VAHED}"  Width="auto" />-->
+                    <DataGridTextColumn Header="فی خرده فروش" Binding="{Binding B_SEF}" Width="auto"  />
+                    <DataGridTextColumn Header="نقطه سفارش" Binding="{Binding N_SEF}"  Width="auto" />
+                    <DataGridTextColumn Header="حداقل موجودی" Binding="{Binding MIN_M}"  Width="auto" />
+                    <DataGridTextColumn Header="حداکثر موجودی" Binding="{Binding MAX_M}"  Width="auto" />
+                    <!--<DataGridTextColumn Header="گروه کالا" Binding="{Binding RADAH}"  Width="auto" />-->
+                    <DataGridTextColumn Header="فی عمده فروش" Binding="{Binding MABL_F}" Width="auto"  />
+                    <DataGridCheckBoxColumn Header="مشمول مالیات ب.ا.ا" Binding="{Binding CMBAA}"  Width="auto" />
+                    <DataGridTextColumn Header="وزن" Binding="{Binding VAZN}"  Width="auto" />
+                    <!--<DataGridTextColumn Header="زیر مجموعه منوی" Binding="{Binding MENUIT}"  Width="auto" />-->
+                    <!--<DataGridTextColumn Header="گروه قیمت گذاری" Binding="{Binding PGID}" Width="auto"  />-->
+                    <DataGridTextColumn Header="بارکد" Binding="{Binding BARCODE}" Width="auto"  />
+                    <!--<DataGridTextColumn Header="واحد مودیان" Binding="{Binding mu}"  Width="auto" />-->
+                    <DataGridTextColumn Header="شناسه کالا" Binding="{Binding sstid}" Width="auto"  />
+                    <DataGridTextColumn Header="درصد ارزش افزوده مودیان" Binding="{Binding vra}"  Width="auto" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </UniformGrid>
+
+        <Grid FlowDirection="RightToLeft" HorizontalAlignment="Center" Width="966" Margin="0,281,0,245">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="47*"/>
+                <RowDefinition Height="5*"/>
+            </Grid.RowDefinitions>
+            <Button x:Name="BTN_SEARCH"  Content="جستجو"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="38" VerticalAlignment="Top" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_SEARCH_Click" TabIndex="1" HorizontalAlignment="Left" Width="114" Margin="0,7,0,0"/>
+            <Button x:Name="REFLOAD_ALL"  Content="باز خوانی مجدد"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="38" VerticalAlignment="Top" Foreground="#DDFFFFFF" FontWeight="Bold" Click="REFLOAD_ALL_Click" HorizontalAlignment="Left" Width="114" Margin="123,7,0,0" />
+            <Button x:Name="CLEANFILTERS"  Content="حذف همه فیلتر ها"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="38" VerticalAlignment="Top" Foreground="#DDFFFFFF" FontWeight="Bold" Click="CLEANFILTERS_Click" HorizontalAlignment="Left" Width="114" Margin="248,7,0,0" />
+        </Grid>
+
+        <Label Content="تعداد ردیف ها : " HorizontalAlignment="Left" Margin="10,297,0,0" VerticalAlignment="Top" Width="87"/>
+        <Label Content="{Binding Items.Count, ElementName=MasterDataGrid, IsAsync=True}" HorizontalAlignment="Left" Margin="102,297,0,0" VerticalAlignment="Top" Width="94" Height="28"/>
+
+        <Label Width="auto" VerticalAlignment="Top" Margin="0,49,22,0" HorizontalAlignment="Right" FlowDirection="RightToLeft" Content="کد کالا:"/>
+        <Label Width="auto" VerticalAlignment="Top" Margin="0,49,307,0" HorizontalAlignment="Right" FlowDirection="RightToLeft" Content="نام کالا:"/>
+        <Label Width="auto" VerticalAlignment="Top" Margin="224,49,0,0" HorizontalAlignment="Left" FlowDirection="RightToLeft" Content="شماره فنی:"/>
+        <Label Width="auto" VerticalAlignment="Top" Margin="0,84,331,0" HorizontalAlignment="Right" FlowDirection="RightToLeft" Content="بارکد:"/>
+        <Label Width="auto" VerticalAlignment="Top" Margin="0,84,554,0" HorizontalAlignment="Right" FlowDirection="RightToLeft" Content="واحد:"/>
+        <Label Width="auto" VerticalAlignment="Top" Margin="0,121,12,0" HorizontalAlignment="Right" FlowDirection="RightToLeft" Content="گروه کالا:"/>
+        <Label Width="auto" VerticalAlignment="Top" Margin="0,194,9,0" HorizontalAlignment="Right" FlowDirection="RightToLeft" Content="شناسه کالا در سامانه مودیان:"/>
+        <CUC:NumericTextBox x:Name="CODE" DoesAcceptDouble="False"  LastValueShouldZero="False" Text="" Height="30" Margin="0,48,69,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Right" Width="119" MaxLength="10"/>
+        <TextBox x:Name="NAM" Text="" Height="30" Margin="288,48,359,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="80" />
+        <TextBox x:Name="N_FANI" Text="" Height="30" Margin="20,48,0,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="30" Width="200" HorizontalAlignment="Left" />
+        <TextBox x:Name="Barcode" Text="" Height="30" Margin="0,84,370,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="100" HorizontalAlignment="Right" Width="180" />
+        <ComboBox x:Name="VAHED" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="179,84,592,0" DisplayMemberPath="NAMES" SelectedValuePath="VAHED" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" >
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel d:IsVirtualizing="True" d:VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <ComboBox x:Name="RADAH" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,122,69,0" DisplayMemberPath="NAMES" SelectedValuePath="CODE" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="337" >
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel d:IsVirtualizing="True" d:VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <TextBox x:Name="sstid" Text="" Height="30" Margin="0,195,165,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="13" HorizontalAlignment="Right" Width="209" />
+        <CheckBox x:Name="CMBAA"  Content="مشمول مالیات ب.ا.ا" HorizontalAlignment="Left" Margin="685,54,0,0" VerticalAlignment="Top" Width="110" FontSize="10" />
+        <TextBox x:Name="TOZIH" Text="" Height="30" Margin="0,85,69,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="40" HorizontalAlignment="Right" Width="257" />
+        <Label Content="توضیح:" HorizontalAlignment="Right" Margin="0,84,21,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <CUC:NumericTextBox x:Name="N_SEF" DoesAcceptDouble="False" ThreeTwoZero="True" DigitGroupOnEnter="True" IsDigitGroupActive="True" LastValueShouldZero="False" Text="" Height="30" Margin="0,159,220,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Right" Width="109" MaxLength="15"/>
+        <Label Content="نقطه سفارش:" HorizontalAlignment="Right" Margin="0,158,140,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="فی عمده فروش:" HorizontalAlignment="Right" Margin="0,158,333,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <CUC:NumericTextBox x:Name="MABL_F" DoesAcceptDouble="False"  ThreeTwoZero="True" DigitGroupOnEnter="True" IsDigitGroupActive="True"  LastValueShouldZero="False" Text="" Height="30" Margin="0,159,425,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Right" Width="108" MaxLength="15"/>
+        <Label Content="فی خرده فروش:" HorizontalAlignment="Right" Margin="0,158,536,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="قیمت مصرف کننده:" HorizontalAlignment="Right" Margin="0,158,748,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <CUC:NumericTextBox x:Name="B_SEF" DoesAcceptDouble="False"  ThreeTwoZero="True" DigitGroupOnEnter="True" IsDigitGroupActive="True" LastValueShouldZero="False" Text="" Height="30" Margin="0,159,627,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Right" Width="109" MaxLength="15"/>
+        <CUC:NumericTextBox x:Name="MAX_M" DoesAcceptDouble="False" ThreeTwoZero="True" DigitGroupOnEnter="True" IsDigitGroupActive="True"  LastValueShouldZero="False" Text="" Height="30" Margin="0,159,860,0" VerticalAlignment="Top" Visibility="Visible" MaxLength="15" HorizontalAlignment="Right" Width="109"/>
+        <Label Content="زیر مجموعه منوی:" Margin="880,231,10,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <ComboBox x:Name="MENUIT" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" SelectedValuePath="CODE" DisplayMemberPath="NAMES" IsTextSearchEnabled="True" Margin="614,232,109,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" >
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel d:IsVirtualizing="True" d:VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Label Content="وزن واحد:" Margin="921,158,10,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <CUC:NumericTextBox x:Name="VAZN" DoesAcceptDouble="True"  LastValueShouldZero="False" Text="" Height="30" Margin="0,159,69,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Right" Width="69" MaxLength="15"/>
+        <Label Content="حداقل موجودی:" HorizontalAlignment="Left" Margin="88,84,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <CUC:NumericTextBox x:Name="MIN_M" DoesAcceptDouble="False"  LastValueShouldZero="False" Text="" Height="30" Margin="19,85,0,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="69" MaxLength="15"/>
+        <ComboBox x:Name="PGID" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" DisplayMemberPath="PGNAME" SelectedValuePath="PGID" Margin="19,121,514,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" >
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel d:IsVirtualizing="True" d:VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Label Content="گروه قیمت گذاری:" Margin="0,121,409,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="101" HorizontalAlignment="Right"/>
+        <ComboBox x:Name="mu" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}"  DisplayMemberPath="NAME_MO" SelectedValuePath="IDD" IsTextSearchEnabled="True" Margin="226,194,530,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" >
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel d:IsVirtualizing="True" d:VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Label Content="واحد کالا در سامانه مودیان:" HorizontalAlignment="Right" Margin="0,194,384,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="درصد ارزش افزوده مودیان:" HorizontalAlignment="Left" Margin="80,194,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <CUC:NumericTextBox x:Name="vra" DoesAcceptDouble="False"  LastValueShouldZero="False" Text="" Height="30" Margin="20,195,0,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="60" MaxLength="2"/>
+
+    </Grid>
+</Window>

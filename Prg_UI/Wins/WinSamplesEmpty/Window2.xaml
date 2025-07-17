@@ -1,0 +1,164 @@
+﻿<Window x:Class="Prg_UI.Wins.WinSamplesEmpty.Window2"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinSamplesEmpty"
+        mc:Ignorable="d"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        Title="" Height="450" Width="800"  WindowStartupLocation="CenterScreen">
+
+    <Grid x:Name="mygrid">
+        <Border  	  Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding ElementName=GENERAL_RANG,Path=Background}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5"  Grid.ColumnSpan="5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding ElementName=GENERAL_RANG,Path=Background}" Margin="-8,-8,-8,0" VerticalAlignment="Top" MinHeight="50" UseLayoutRounding="False" Height="31">
+                <Grid>
+
+                    <Button x:Name="Btn_Close" Margin="0,14,15,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <Button.Content>
+                            <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                        </Button.Content>
+                    </Button>
+                    <Button x:Name="Btn_Max"  Margin="0,14,44,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <Button.Content>
+                            <materialDesign:PackIcon Kind="WindowRestore" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                        </Button.Content>
+                    </Button>
+                    <Button x:Name="Btn_Minimize"  Margin="0,14,73,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <Button.Content>
+                            <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                        </Button.Content>
+                    </Button>
+
+                </Grid>
+            </Border>
+        </Border>
+        <TextBlock x:Name="Label24_Cop2y2" Margin="0,128,52,0"    TextWrapping="Wrap" LineHeight="22" TextAlignment="Left"   Style="{StaticResource TxBLOCK}" Padding="0" FontSize="10" FlowDirection="RightToLeft" FontFamily="/WpfApp5;component/FNT/#IRANSans" Height="15" VerticalAlignment="Top" Visibility="Visible" RenderTransformOrigin="0.674,0.588" HorizontalAlignment="Right" Width="43"><Run FlowDirection="RightToLeft" Text="ملاحظات :"/></TextBlock>
+        <TextBox  Text="محمد حکیمیان" Height="24"   BorderBrush="#FFADEEB4"  Margin="0,125,103,0"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="481" MaxLength="48" />
+        <Button  Content="چاپ" Margin="80,67,0,0"  FontFamily="/WpfApp5;component/FNT/#IRANSans" Style="{StaticResource Ony}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="37" VerticalAlignment="Top"  HorizontalAlignment="Left" Width="100">
+            <Button.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FF41CD52" Offset="0"/>
+                    <GradientStop Color="#FF5AE66A" Offset="1"/>
+                </LinearGradientBrush>
+            </Button.Background>
+        </Button>
+
+        <ComboBox    FlowDirection="RightToLeft"
+                     Style="{StaticResource MaterialDesignOutlinedComboBox}"  
+                     materialDesign:HintAssist.Hint="لطفا یه آیتمی انتخاب کنید"
+                     IsEditable="True"
+                     Text="مجتبی حکیمیانم"
+                     FontFamily="/WpfApp5;component/FNT/#IRANYekanFN" Margin="17,201,548,202" Padding="16,11,16,16" Background="{x:Null}"
+                     >
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+
+        <TextBox
+            Style="{StaticResource MaterialDesignOutlinedTextBox}"
+            VerticalAlignment="Top"
+            TextWrapping="Wrap"
+            materialDesign:HintAssist.Hint="نام مشتری را وارد کنید"
+            Text="محمد حکیمیانم"
+            FlowDirection="RightToLeft"
+            Margin="266,208,67,0" Height="40" Padding="16,8,12,10" />
+        <TextBox
+            Style="{StaticResource MaterialDesignOutlinedTextBox}"
+            VerticalAlignment="Top"
+            TextWrapping="Wrap"
+            
+            Text="محمد حکیمیانم"
+            FlowDirection="RightToLeft"
+            Margin="284,87,49,0" Height="24" Padding="5,0,0,0" />
+        <ComboBox    FlowDirection="RightToLeft"
+            Style="{StaticResource MaterialDesignOutlinedComboBox}"  
+            materialDesign:HintAssist.Hint="لطفا یه آیتمی انتخاب کنید"
+            IsEditable="True"
+            Text="مجتبی حکیمیانم"
+            FontFamily="/WpfApp5;component/FNT/#IRANYekanFN" Margin="327,173,235,251" Padding="7,0,10,0" Background="{x:Null}" Height="26"
+                     >
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <TextBox
+            Style="{StaticResource MaterialDesignOutlinedTextBox}"
+            VerticalAlignment="Top"
+            TextWrapping="Wrap"
+            materialDesign:HintAssist.Hint="نام مشتری را وارد کنید"
+            Text="محمد حکیمیانم"
+            FlowDirection="RightToLeft"
+            Margin="281,282,52,0" Height="28"   Padding="7,3,10,3" />
+        <ComboBox    FlowDirection="RightToLeft"
+            Style="{StaticResource MaterialDesignOutlinedComboBox}"  
+            IsEditable="True"
+            Text="مجتبی حکیمیانم"
+            FontFamily="/WpfApp5;component/FNT/#IRANYekanFN" Margin="474,337,88,84"   Padding="7,0,10,0" Background="{x:Null}" Height="24"
+                     >
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <ComboBox x:Name="TAMIR"
+              
+		             Padding="7,5,10,5"
+                  IsTextSearchEnabled="True" Margin="0,293,618,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft" IsEditable="True" Background="White" HorizontalAlignment="Right" Width="102"  BorderBrush="#FFADEEB4" >
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+            <ComboBoxItem Content="عادی" Tag="0" HorizontalAlignment="Left" x:Name="Normaly" Height="18" VerticalAlignment="Top" Width="100"/>
+            <ComboBoxItem Content="رزرو شده" Tag="1" HorizontalAlignment="Left" x:Name="Reserved" Height="18" VerticalAlignment="Top" Width="100"/>
+            <ComboBoxItem Content="تبدیل به حواله" Tag="2" HorizontalAlignment="Left" x:Name="ConvertedHavale" Height="18" VerticalAlignment="Top" Width="100"/>
+            <ComboBoxItem Content="لغو" Tag="3" HorizontalAlignment="Left" Height="18" x:Name="Cancely" VerticalAlignment="Top" Width="100"/>
+            <ComboBoxItem Content="رزرو قطعی" Tag="4" HorizontalAlignment="Left" Height="18" x:Name="StrongReserve" VerticalAlignment="Top" Width="100"/>
+        </ComboBox>
+        <ComboBox x:Name="CUST_NO" Tag="RD" 
+            Padding="7,3,10,3"
+            Height="30"
+            FlowDirection="RightToLeft"   IsEditable="True" Background="White" BorderBrush="#FFADEEB4"   BorderThickness="1" 
+            IsSynchronizedWithCurrentItem="True" IsTextSearchEnabled="False" VerticalAlignment="Top" HorizontalAlignment="Right" Width="442" TabIndex="0" Margin="0,336,341,0">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+
+            <ComboBox.Style>
+                <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
+
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding SelectedItem, ElementName=CUST_KIND, UpdateSourceTrigger=PropertyChanged}" Value="{x:Null}">
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ComboBox.Style>
+
+        </ComboBox>
+        <Button  Content="چاپ" Margin="80,129,0,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="37" VerticalAlignment="Top"  HorizontalAlignment="Left" Width="100">
+            <Button.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FF41CD52" Offset="0"/>
+                    <GradientStop Color="#FF5AE66A" Offset="1"/>
+                </LinearGradientBrush>
+            </Button.Background>
+        </Button>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="95,56,0,0"  Width="1"/>
+
+    </Grid>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+</Window>

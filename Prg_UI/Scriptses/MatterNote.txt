@@ -1,0 +1,6 @@
+﻿1- دسترسی به فاکتور فروش حتما روی مستقیم و غیر مستقیم تنظیم بشود , نه فاکتور فروش : برای جستجو در تعیین سطح دسترسی
+
+2- فقط برای تیک دیدن یا همون مشاهده برای باز و بسته کردن دسترسی فاکتور فروش استفاده کرد
+
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("ODc4NkAzMjMwMkUzNDJFMzBsa2MvT0xqRTVEaHV1d01nNjUveFFoV2dWbHhhTVBIWVZ4alJjS3ltaVZnPQ==");
+            //"ODc4NkAzMjMwMkUzNDJFMzBsa2MvT0xqRTVEaHV1d01nNjUveFFoV2dWbHhhTVBIWVZ4alJjS3ltaVZnPQ=="

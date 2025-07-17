@@ -1,0 +1,1348 @@
+﻿<Window x:Class="Wins.WinSetting.F_USER_PERMITION_FORMS"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Wins.WinSetting"
+        mc:Ignorable="d"
+
+        MaxHeight="{Binding Height, Source={x:Static SystemParameters.WorkArea}}"
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="IRANYekanFN"
+        WindowStartupLocation="CenterScreen"
+        d:Width="5000"
+        Title="تعیین سطح دسترسی" Height="600" Width="978" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+
+        <Style TargetType="{x:Type TabControl}" BasedOn="{StaticResource MaterialDesignTabControl}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid KeyboardNavigation.TabNavigation="Local">
+                            <Grid.RowDefinitions>
+                                <!-- Row for the tab headers -->
+                                <RowDefinition Height="Auto"/>
+                                <!-- Row for the tab content -->
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <!-- Wrap the TabPanel inside a ScrollViewer -->
+                            <ScrollViewer Grid.Row="0"
+                                      HorizontalScrollBarVisibility="Auto"
+                                      VerticalScrollBarVisibility="Disabled"
+                                      CanContentScroll="True">
+                                <TabPanel x:Name="HeaderPanel"
+                                      IsItemsHost="True"
+                                      Margin="2,2,2,0"
+                                      Background="Transparent"/>
+                            </ScrollViewer>
+                            <!-- Content presenter for the selected tab content -->
+                            <ContentPresenter x:Name="PART_SelectedContentHost"
+                                          Margin="{TemplateBinding Padding}"
+                                          ContentSource="SelectedContent"
+                                          Focusable="False"
+                                          Grid.Row="1"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+    <Grid x:Name="mygrid">
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label x:Name="HEADWIN_LABEL" Content="تعیین سطح دسترسی" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMaximize" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                </Grid>
+            </Border>
+        </Border>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                                                       Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+        <!--HEADER↑-->
+        <!--Start.......................................................................................-->
+
+        <TabControl Margin="10,46,10,10" SelectionChanged="TabControl_SelectionChanged">
+            <TabItem Header="مجوز" x:Name="Page52" IsSelected="True">
+                <Grid>
+                    <Border BorderThickness="1,1,1,1" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}" CornerRadius="5" Margin="302,109,10,195">
+
+                        <ListBox x:Name="PermissionListBox" IsEnabled="False" Cursor="Hand" FlowDirection="RightToLeft" ItemsSource="{Binding PERMISIONS_DATA, UpdateSourceTrigger=PropertyChanged,IsAsync=True}" SelectionMode="Single" d:ItemsSource="{d:SampleData ItemCount=5}" SelectionChanged="PermissionListBox_SelectionChanged">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="ItemCheckBox" 
+                                                  IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                  VerticalAlignment="Center"
+                                                  Margin="5,0,5,0"/>
+                                        <TextBlock Text="{Binding CAPTION}" 
+                                                   Grid.Column="1" 
+                                                   VerticalAlignment="Center"/>
+                                    </Grid>
+
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource MaterialDesignListBoxItem}">
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
+                    </Border>
+
+                    <Button x:Name="BTN_USERS_PERMIS" Content="چاپ دسترسی کاربر" Click="BTN_USERS_PERMIS_Click" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="10,0,0,150" HorizontalAlignment="Left" Width="126" VerticalAlignment="Bottom" Height="34"/>
+                    <Label Content="منو ها و عملیات ها:" Cursor="Hand" HorizontalAlignment="Right" Margin="0,13,10,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+                    <TextBox x:Name="srch" Text="" Height="30" Margin="302,13,118,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" TextChanged="srch_TextChanged" />
+                    <TextBox x:Name="serus" Text="" Height="30" Margin="10,13,0,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" HorizontalAlignment="Left" Width="253" TextChanged="serus_TextChanged" />
+
+
+                    <Button x:Name="BTN_ITEM_PERCHAP" Content="چاپ دسترسی آیتم"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="141,0,0,150" HorizontalAlignment="Left" Width="122" Click="BTN_ITEM_PERCHAP_Click" VerticalAlignment="Bottom" Height="34" IsEnabled="False">
+
+
+                    </Button>
+                    <Button x:Name="BTN_MAKE_ACTIVE_ALL"  Content="همه فعال"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="302,0,0,148"  HorizontalAlignment="Left" Width="98" VerticalAlignment="Bottom" Click="BTN_MAKE_ACTIVE_ALL_Click" Height="34" />
+                    <Button x:Name="BTN_MAKE_DEACTIVE_ALL"  Content="همه غیر فعال"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="302,0,0,98"  HorizontalAlignment="Left" Width="100" VerticalAlignment="Bottom" Click="BTN_MAKE_DEACTIVE_ALL_Click" Height="34" />
+                    <Button x:Name="BTN_SAVE" Click="BTN_SAVE_Click" Content="ذخیره دسترسی ها"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,0,6,103" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="126" />
+                    <CheckBox x:Name="read"   FlowDirection="RightToLeft" IsEnabled="false" IsChecked="{Binding ElementName=PermissionListBox,Path=SelectedItem.SEE,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Content="مشاهده داده ها" Margin="0,0,256,155" Height="24" VerticalAlignment="Bottom" HorizontalAlignment="Right" Cursor="Hand" Click="read_Click"/>
+                    <CheckBox x:Name="insert" FlowDirection="RightToLeft" IsEnabled="false" IsChecked="{Binding ElementName=PermissionListBox,Path=SelectedItem.INP,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Content="اضافه کردن داده ها (ورود داده)" Margin="0,0,374,110" Height="24" VerticalAlignment="Bottom" HorizontalAlignment="Right" Cursor="Hand" Click="insert_Click"/>
+                    <CheckBox x:Name="update" FlowDirection="RightToLeft" IsEnabled="false" IsChecked="{Binding ElementName=PermissionListBox,Path=SelectedItem.UPD,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Content="تغییر داده ها (بهنگام سازی)" Margin="0,0,170,110" Height="24" VerticalAlignment="Bottom" HorizontalAlignment="Right" Cursor="Hand" Click="update_Click"/>
+                    <CheckBox x:Name="delete" FlowDirection="RightToLeft" IsEnabled="false" IsChecked="{Binding ElementName=PermissionListBox,Path=SelectedItem.DEL,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Content="حذف داده ها" Margin="0,0,374,156" Height="22" VerticalAlignment="Bottom" HorizontalAlignment="Right" Cursor="Hand" Click="delete_Click"/>
+                    <CheckBox x:Name="runn"   FlowDirection="RightToLeft" IsEnabled="false" IsChecked="{Binding ElementName=PermissionListBox,Path=SelectedItem.RUN,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Content="اجرا" Margin="0,0,170,155" Height="24" VerticalAlignment="Bottom" HorizontalAlignment="Right" Cursor="Hand" Click="runn_Click"/>
+
+                    <Button x:Name="BTN_UNDO" Content="بازگشت حالت اولیه دسترسی ها" Click="BTN_UNDO_Click" Visibility="Collapsed" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="10,0,0,98" HorizontalAlignment="Left" Width="253" Height="34" VerticalAlignment="Bottom" />
+                    <Label Content="منو ها و عملیات ها:" HorizontalAlignment="Right" Margin="0,0,6,154" VerticalAlignment="Bottom" FlowDirection="RightToLeft" Width="auto"/>
+
+                    <Border BorderThickness="1,1,1,1" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}" CornerRadius="5" Margin="10,109,0,195" HorizontalAlignment="Left" Width="253">
+                        <ListBox x:Name="UserListBox" Cursor="Hand" FlowDirection="RightToLeft" ItemsSource="{Binding ALL_USERS, IsAsync=True, UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single" d:ItemsSource="{d:SampleData ItemCount=5}" SelectionChanged="UserListBox_SelectionChanged">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="ItemCheckBox" 
+                                            IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                            VerticalAlignment="Center"
+                                            Margin="5,0,5,0"/>
+                                        <TextBlock Text="{Binding SAL_NAME}" 
+                                            Grid.Column="1" 
+                                            VerticalAlignment="Center"/>
+                                    </Grid>
+
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource MaterialDesignListBoxItem}">
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
+                    </Border>
+                    <Label Content="کاربر:" HorizontalAlignment="Left" Margin="263,14,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+                    <Button x:Name="BTN_SELECT_ALLUSER" Content="انتخاب همه کاربران" Style="{StaticResource MaterialDesignFlatButton}" FontSize="10" Margin="10,78,0,0" Click="BTN_SELECT_ALLUSER_Click" VerticalAlignment="Top" Height="28" HorizontalAlignment="Left" Width="253" />
+                    <Button x:Name="BTN_SELECT_ALLPERMIS" Content="انتخاب همه دسترسی ها" Style="{StaticResource MaterialDesignFlatButton}" FontSize="10" Margin="302,78,10,0" VerticalAlignment="Top" Height="28" Click="BTN_SELECT_ALLPERMIS_Click" />
+                    <StackPanel Margin="0,48,10,0" Orientation="Horizontal" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="403" Height="30" VerticalAlignment="Top">
+                        <RadioButton x:Name="MLT" Content="انتخاب چندگانه" GroupName="GRP1" Margin="3" Click="MLT_Click"/>
+                        <RadioButton x:Name="SS" Content="انتخاب تکی" GroupName="GRP1" IsChecked="True" Margin="10,3,3,3" Click="SS_Click"/>
+                        <Button x:Name="BTN_CLEAN_PSELECT" Content="پاکسازی دسترسی های انتخاب شده" Style="{StaticResource MaterialDesignFlatButton}" FontSize="10" Height="28" Click="BTN_CLEAN_PSELECT_Click" Width="184" />
+                    </StackPanel>
+                    <UniformGrid Margin="407,304,660,75">
+                        <CheckBox IsEnabled="True" IsChecked="{Binding SelectedItem.SEE, ElementName=PermissionListBox, UpdateSourceTrigger=PropertyChanged}" Content="SEE"/>
+                        <CheckBox IsEnabled="True" IsChecked="{Binding SelectedItem.INP, ElementName=PermissionListBox, UpdateSourceTrigger=PropertyChanged}" Content="INP"/>
+                        <CheckBox IsEnabled="True" IsChecked="{Binding SelectedItem.INP, ElementName=PermissionListBox, UpdateSourceTrigger=PropertyChanged}" Content="INP"/>
+                        <CheckBox IsEnabled="True" IsChecked="{Binding SelectedItem.DEL, ElementName=PermissionListBox, UpdateSourceTrigger=PropertyChanged}" Content="DEL"/>
+                        <CheckBox IsEnabled="True" IsChecked="{Binding SelectedItem.RUN, ElementName=PermissionListBox, UpdateSourceTrigger=PropertyChanged}" Content="RUN"/>
+                    </UniformGrid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="کلید انبار ها" IsKeyboardFocusWithinChanged="TabItem_IsKeyboardFocusWithinChanged">
+                <Grid>
+                    <DataGrid   
+                              x:Name="OPANBACCESS_SUB"
+                              d:ItemsSource="{d:SampleData ItemCount=5}"
+                              EnableColumnVirtualization="True"
+                              EnableRowVirtualization="True"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling"
+                              
+                              SelectedIndex="0"
+                              ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                              CellStyle="{StaticResource CellFocusyBorder}"
+                              HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                              VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                              ItemsSource="{Binding OPANBACCESS_DATA}"
+                              KeyboardNavigation.TabNavigation="Contained"
+                              AutoGenerateColumns="False" 
+                              FlowDirection="RightToLeft" 
+                              SelectionUnit="FullRow" 
+                              CanUserDeleteRows="False"
+                              IsEnabled="False"
+                              Margin="319,57,10,10" BorderThickness="1" IsKeyboardFocusWithinChanged="OPANBACCESS_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="OPANBACCESS_SUB_CellEditEnding" PreviewMouseLeftButtonUp="OPANBACCESS_SUB_PreviewMouseLeftButtonUp" SelectionChanged="OPANBACCESS_SUB_SelectionChanged" RowEditEnding="OPANBACCESS_SUB_RowEditEnding" PreviewKeyDown="OPANBACCESS_SUB_PreviewKeyDown" PreparingCellForEdit="OPANBACCESS_SUB_PreparingCellForEdit" BeginningEdit="OPANBACCESS_SUB_BeginningEdit" >
+
+                        <DataGrid.Style>
+                            <!--خط بندی سطر های دیتاگرید-->
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                                <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                <Setter Property="GridLinesVisibility" Value="All"/>
+                            </Style>
+                        </DataGrid.Style>
+
+                        <DataGrid.Columns>
+                            <DataGridComboBoxColumn x:Name="ANBAR_COLUMN" Width="*" Header="انبار"
+                                                    SelectedValueBinding="{Binding ANBCO,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAMES" SelectedValuePath="CODE">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                                <DataGridComboBoxColumn.ElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                    </Style>
+                                </DataGridComboBoxColumn.ElementStyle>
+                            </DataGridComboBoxColumn>
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+
+                    <Border BorderThickness="1,1,1,1" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}" CornerRadius="5" Margin="13,57,0,11" HorizontalAlignment="Left" Width="253">
+                        <ListBox x:Name="UserListBoxAnbar" SelectionMode="Single" Cursor="Hand" FlowDirection="RightToLeft" ItemsSource="{Binding SECOND_ALL_USERS, IsAsync=True, UpdateSourceTrigger=PropertyChanged}" d:ItemsSource="{d:SampleData ItemCount=5}" SelectionChanged="UserListBoxAnbar_SelectionChanged">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="ItemCheckBox" 
+                                                  IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                  VerticalAlignment="Center"
+                                                  Margin="5,0,5,0"/>
+                                        <TextBlock Text="{Binding SAL_NAME}" 
+                                                   Grid.Column="1" 
+                                                   VerticalAlignment="Center"/>
+                                    </Grid>
+
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource MaterialDesignListBoxItem}">
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
+                    </Border>
+                    <TextBox x:Name="UserSearchBox" Text="" Height="30" Margin="13,16,0,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" HorizontalAlignment="Left" Width="253" TextChanged="UserSearchBox_TextChanged" />
+                    <Label Content="کاربر:" HorizontalAlignment="Left" Margin="266,17,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+
+                    <Button x:Name="BTN_DELETE_ANBAR" Tag="hazfer" Content="حذف انبار" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="319,14,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="110" Click="BTN_DELETE_ANBAR_Click" />
+
+                    <TextBlock Text="{Binding ElementName=UserListBoxAnbar,Path=SelectedItem.SAL_NAME}" VerticalAlignment="Top" TextAlignment="Center" Margin="459,22,19,0"/>
+
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="حق امضا" x:Name="RIGHT_SIGN" IsKeyboardFocusWithinChanged="RIGHT_SIGN_IsKeyboardFocusWithinChanged" >
+                <Grid>
+                    <ScrollViewer x:Name="SV_SGINS" VerticalScrollBarVisibility="Auto" Visibility="Collapsed" Margin="335,57,0,0" IsEnabled="False">
+                        <UniformGrid Columns="2" Margin="10" x:Name="UNG_SIGN">
+                            <StackPanel>
+                                <!-- Row for "فاکتور خرید" -->
+                                <GroupBox FlowDirection="RightToLeft" Header="فاکتور خرید" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox x:Name="KFR_BAZAR"  Content="بازرگانی" Margin="1,5,0,0" Width="auto" IsChecked="False" />
+                                            <CheckBox x:Name="KFR_HESAB" Margin="1,7,1,1"  Content="حسابداری" Width="auto" IsChecked="False"  />
+                                            <CheckBox x:Name="KFR_MODIR" Margin="1,6,1,1"  Content="مدیر عامل" Width="auto" IsChecked="False" />
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="KFR_BAZARTX" Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="KFR_HESABTX" Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="KFR_MODIRTX" Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="حواله انبار فروش" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox x:Name="ANB_HAVL_FROSH"   Content="فروش" Margin="1,5,0,0" Width="auto" />
+                                            <CheckBox x:Name="ANB_HAVL_ANB" Margin="1,7,1,1"  Content="انباردار" Width="auto" />
+                                            <CheckBox x:Name="ANB_HAVL_MODIR" Margin="1,6,1,1"  Content="مدیر عامل" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="ANB_HAVL_FROSHTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="ANB_HAVL_ANBTX" Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="ANB_HAVL_MODIRTX" Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="رسید تولید" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox IsChecked="False"  x:Name="ANB_TOLID_MODIRT"    Content="مدیر تولید" Margin="1,5,0,0" Width="auto" />
+                                            <CheckBox IsChecked="False"  x:Name="ANB_TOLID_QC"  Margin="1,7,1,1"  Content="کنترل کیفیت" Width="auto" />
+                                            <CheckBox IsChecked="False"  x:Name="ANB_TOLID_ANB"  Margin="1,6,1,1"  Content="انبار" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="ANB_TOLID_MODIRTTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="ANB_TOLID_QCTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="ANB_TOLID_ANBTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="سند حسابداری" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox IsChecked="False"  x:Name="SND_TAHI"   Content="تنظیم کننده" Margin="1,5,0,0" Width="auto" />
+                                            <CheckBox IsChecked="False"  x:Name="SND_MALI"  Margin="1,7,1,1"  Content="مدیر مالی" Width="auto" />
+                                            <CheckBox IsChecked="False"  x:Name="SND_MODIR"   Margin="1,6,1,1"  Content="مدیر عامل" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="SND_TAHITX"   Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="SND_MALITX"   Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="SND_MODIRTX"   Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="برگشت خرید" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox IsChecked="False" x:Name="KFRB_BAZAR"  Margin="1,5,0,0"  Content="بازرگانی"  Width="auto" />
+                                            <CheckBox IsChecked="False" x:Name="KFRB_ANB"  Margin="1,7,1,1"  Content="انبار" Width="auto" />
+                                            <CheckBox IsChecked="False" x:Name="KFRB_HESAB"  Margin="1,6,1,1"  Content="حسابداری" Width="auto"/>
+                                            <CheckBox IsChecked="False" x:Name="KFRB_MODIR"  Margin="1,6,1,1"  Content="مدیرعامل" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="4" Margin="5,0,0,0">
+                                            <TextBox x:Name="KFRB_BAZARTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="KFRB_ANBTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="KFRB_HESABTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="KFRB_MODIRTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="رسید مستقیم" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox  IsChecked="False" x:Name="RASM_HESAB"  Margin="1,5,0,0"  Content="حسابداری"  Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="RASM_MODIR"  Margin="1,7,1,1"  Content="مدیرعامل" Width="auto" />
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="RASM_HESABTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="RASM_MODIRTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="انتقال کالا از انبار به انبار" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox  IsChecked="False" x:Name="ENTGH_AZANB"  Margin="1,5,0,0"  Content="انبار فرستنده"  Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="ENTGH_BEANB"  Margin="1,7,1,1"  Content="انبار گیرنده" Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="ENTGH_MODIR"  Margin="1,6,1,1"  Content="حسابداری" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="ENTGH_AZANBTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="ENTGH_BEANBTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="ENTGH_MODIRTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="پذیرش تعمیرگاه" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox IsChecked="False" x:Name="PAZ_PAZ"  Margin="1,5,0,0"  Content="پذیرش"  Width="auto" />
+                                            <CheckBox IsChecked="False" x:Name="PAZ_HES"  Margin="1,7,1,1"  Content="حسابداری" Width="auto" />
+                                            <CheckBox IsChecked="False" x:Name="PAZ_CEO"  Margin="1,6,1,1"  Content="مدیرعامل" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="PAZ_PAZTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="PAZ_HESTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="PAZ_CEOTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="سفارش" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox  IsChecked="False" x:Name="SGN0135"  Margin="1,5,0,0"  Content="تنظیم کننده"  Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0235"  Margin="1,7,1,1"  Content="مدیرمالی" Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0335"  Margin="1,6,1,1"  Content="مدیرعامل" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="SGN0135TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="SGN0235TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="SGN0335TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="فاکتور خرید صادرات" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox  IsChecked="False" x:Name="SGN0132"  Margin="1,5,0,0"  Content="بازرگانی"  Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0232"  Margin="1,7,1,1"  Content="حسابداری" Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0332"  Margin="1,6,1,1"  Content="مدیرعامل" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="SGN0132TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="SGN0232TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="SGN0332TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="خزانه داری" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox  IsChecked="False" x:Name="SGN0134"  Margin="1,5,0,0"  Content="تنظیم کننده"  Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0234"  Margin="1,7,1,1"  Content="مدیر مالی" Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0334"  Margin="1,6,1,1"  Content="مدیر عامل" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="SGN0134TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="SGN0234TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="SGN0334TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="درخواست مرخصی" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox  IsChecked="False" x:Name="SGN0137"  Margin="1,5,0,0"  Content="درخواست کننده"  Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0237"  Margin="1,7,1,1"  Content="مدیرواحد" Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0337"  Margin="1,6,1,1"  Content="مدیرعامل" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="SGN0137TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="SGN0237TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="SGN0337TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="اعلام خرابی" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox  IsChecked="False" x:Name="SGN0142"  Margin="1,5,0,0"  Content="اعلام کننده"  Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0242"  Margin="1,7,1,1"  Content="تعمیرات" Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0342"  Margin="1,6,1,1"  Content="مدیرعامل" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="SGN0142TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="SGN0242TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="SGN0342TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                            </StackPanel>
+
+                            <StackPanel>
+                                <GroupBox FlowDirection="RightToLeft" Header="فاکتور فروش" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox  IsChecked="False" x:Name="FFR_FROOSH"   Content="فروش" Margin="1,5,0,0" Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="FFR_HESAB"  Margin="1,7,1,1"  Content="حسابداری" Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="FFR_MODIR"  Margin="1,6,1,1"  Content="مدیر عامل" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="FFR_FROOSHTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="FFR_HESABTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="FFR_MODIRTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="رسید انبار" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox  IsChecked="False" x:Name="ANB_RASID_ANB"   Content="انبار دار" Margin="1,5,0,0" Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="ANB_RASID_QC" Margin="1,7,1,1"  Content="کنترل کیفیت" Width="auto" />
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="ANB_RASID_ANBTX"   Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="ANB_RASID_QCTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="حواله خروج مواد" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox  IsChecked="False" x:Name="ANB_KHOROG_MODIRT"    Content="مدیر تولید" Margin="1,5,0,0" Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="ANB_KHOROG_ANB"   Margin="1,7,1,1"  Content="انباردار" Width="auto" />
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="ANB_KHOROG_MODIRTTX" Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="ANB_KHOROG_ANBTX" Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="حواله خروج سایر" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox  IsChecked="False" x:Name="ANB_KHOROGS_MODIRT"  Margin="1,5,0,0"  Content="مدیر واحد"  Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="ANB_KHOROGS_ANB"  Margin="1,7,1,1"  Content="انباردار" Width="auto" />
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="ANB_KHOROGS_MODIRTTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="ANB_KHOROGS_ANBTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="برگشت فروش" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox IsChecked="False" x:Name="FFRB_FROOSH"  Margin="1,5,0,0"  Content="فروش"  Width="auto" />
+                                            <CheckBox IsChecked="False" x:Name="FFRB_ANB"  Margin="1,7,1,1"  Content="انبار" Width="auto" />
+                                            <CheckBox IsChecked="False" x:Name="FFRB_HESAB"  Margin="1,6,1,1"  Content="حسابداری" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="4" Margin="5,0,0,0">
+                                            <TextBox x:Name="FFRB_FROOSHTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="FFRB_ANBTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="FFRB_HESABTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="FFRB_MODIRTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="پیش فاکتور" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox  IsChecked="False" x:Name="FFRP_FROOSH"  Margin="1,5,0,0"  Content="فروش"  Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="FFRP_ANB"  Margin="1,7,1,1"  Content="حسابداری" Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="FFRP_HESAB"  Margin="1,6,1,1"  Content="مدیرعامل" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="FFRP_FROOSHTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="FFRP_ANBTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="FFRP_HESABTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="درخواست پرداخت" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox IsChecked="False" x:Name="PAY_MVAHED"  Margin="1,5,0,0"  Content="مدیر واحد"  Width="auto" />
+                                            <CheckBox IsChecked="False" x:Name="PAY_HESAB"  Margin="1,7,1,1"  Content="حسابداری" Width="auto" />
+                                            <CheckBox IsChecked="False" x:Name="PAY_MAMEL"  Margin="1,6,1,1"  Content="مدیرعامل" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="PAY_MVAHEDTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="PAY_HESABTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="PAY_MAMELTX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="سایر رسید انبارها" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox IsChecked="False" x:Name="SGN0124"  Margin="1,5,0,0"  Content="انبار"  Width="auto" />
+                                            <CheckBox IsChecked="False" x:Name="SGN0224"  Margin="1,7,1,1"  Content="کنترل کیفیت" Width="auto" />
+                                            <CheckBox IsChecked="False" x:Name="SGN0324"  Margin="1,6,1,1"  Content="مدیرعامل" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="SGN0124TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="SGN0224TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="SGN0324TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="سایر حواله انبار ها" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox  IsChecked="False" x:Name="SGN0126"  Margin="1,5,0,0"  Content="انبار"  Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0226"  Margin="1,7,1,1"  Content="کنترل کیفیت" Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0326"  Margin="1,6,1,1"  Content="مدیر عامل" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="SGN0126TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="SGN0226TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="SGN0326TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="فاکتور فروش صادرات" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox  IsChecked="False" x:Name="SGN0133"  Margin="1,5,0,0"  Content="فروش"  Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0233"  Margin="1,7,1,1"  Content="حسابداری" Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0333"  Margin="1,6,1,1"  Content="مدیرعامل" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="SGN0133TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="SGN0233TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="SGN0333TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="درخواست خرید" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox  IsChecked="False" x:Name="SGN0136"  Margin="1,5,0,0"  Content="درخواست کننده"  Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0236"  Margin="1,7,1,1"  Content="تایید کننده" Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0336"  Margin="1,6,1,1"  Content="مدیرعامل" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="SGN0136TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="SGN0236TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="SGN0336TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="تعریف تجهیزات PM" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox  IsChecked="False" x:Name="SGN0140"  Margin="1,5,0,0"  Content="تعمیرات"  Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0240"  Margin="1,7,1,1"  Content="حسابداری" Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0340"  Margin="1,6,1,1"  Content="مدیرعامل" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="SGN0140TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="SGN0240TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="SGN0340TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                                <GroupBox FlowDirection="RightToLeft" Header="درخواست کالا از انبار" Style="{x:Null}" Foreground="{Binding Background, ElementName=GENERAL_RANG}">
+                                    <DockPanel LastChildFill="True" Margin="3">
+                                        <StackPanel Orientation="Vertical" >
+                                            <CheckBox  IsChecked="False" x:Name="SGN0141"  Margin="1,5,0,0"  Content="درخواست کننده"  Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0241"  Margin="1,7,1,1"  Content="تایید کننده" Width="auto" />
+                                            <CheckBox  IsChecked="False" x:Name="SGN0341"  Margin="1,6,1,1"  Content="انبار" Width="auto"/>
+                                        </StackPanel>
+                                        <UniformGrid Rows="3" Margin="5,0,0,0">
+                                            <TextBox x:Name="SGN0141TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto" />
+                                            <TextBox x:Name="SGN0241TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                            <TextBox x:Name="SGN0341TX"  Style="{StaticResource FuzzyOut}" Margin="1" Padding="3" Width="auto"  />
+                                        </UniformGrid>
+                                    </DockPanel>
+                                </GroupBox>
+
+                            </StackPanel>
+                        </UniformGrid>
+                    </ScrollViewer>
+
+                    <Border BorderThickness="1,1,1,1" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}" CornerRadius="5" Margin="13,57,0,11" HorizontalAlignment="Left" Width="253">
+                        <ListBox x:Name="UserListBoxSignRight" SelectionMode="Single" Cursor="Hand" FlowDirection="RightToLeft" ItemsSource="{Binding SECOND_ALL_USERS, IsAsync=True, UpdateSourceTrigger=PropertyChanged}" d:ItemsSource="{d:SampleData ItemCount=5}" SelectionChanged="UserListBoxSignRight_SelectionChanged">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="ItemCheckBox" 
+                                          IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                          VerticalAlignment="Center"
+                                          Margin="5,0,5,0"/>
+                                        <TextBlock Text="{Binding SAL_NAME}" 
+                                           Grid.Column="1" 
+                                           VerticalAlignment="Center"/>
+                                    </Grid>
+
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource MaterialDesignListBoxItem}">
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
+                    </Border>
+                    <TextBox x:Name="UserSearchBoxSignRight" Text="" Height="30" Margin="13,16,0,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" HorizontalAlignment="Left" Width="253" TextChanged="UserSearchBoxSignRight_TextChanged" />
+                    <Label Content="کاربر:" HorizontalAlignment="Left" Margin="266,17,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+
+                    <Button x:Name="SAVE_BTN_SIGN_RIGHT" Content="ذخیره حق امضای این کاربر" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="345,17,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="178" Click="SAVE_BTN_SIGN_RIGHT_Click" />
+
+                    <TextBlock Text="{Binding ElementName=UserListBoxSignRight,Path=SelectedItem.SAL_NAME}" VerticalAlignment="Top" TextAlignment="Center" Margin="538,25,19,0"/>
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="مسدود کردن حسابها" IsKeyboardFocusWithinChanged="TabItem_IsKeyboardFocusWithinChanged_1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="317*"/>
+                        <ColumnDefinition Width="162*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+                    <Border BorderThickness="1,1,1,1" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}" CornerRadius="5" Margin="13,57,0,11" HorizontalAlignment="Left" Width="253">
+                        <ListBox x:Name="UserListBoxBlocky" SelectionMode="Single" Cursor="Hand" FlowDirection="RightToLeft" ItemsSource="{Binding SECOND_ALL_USERS, IsAsync=True, UpdateSourceTrigger=PropertyChanged}" d:ItemsSource="{d:SampleData ItemCount=5}" SelectionChanged="UserListBoxBlocky_SelectionChanged">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="ItemCheckBox" 
+                                      IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                      VerticalAlignment="Center"
+                                      Margin="5,0,5,0"/>
+                                        <TextBlock Text="{Binding SAL_NAME}" 
+                                       Grid.Column="1" 
+                                       VerticalAlignment="Center"/>
+                                    </Grid>
+
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource MaterialDesignListBoxItem}">
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
+                    </Border>
+                    <TextBox x:Name="BlockySearchBox" Text="" Height="30" Margin="13,16,0,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" HorizontalAlignment="Left" Width="253" TextChanged="BlockySearchBox_TextChanged" />
+                    <Label Content="کاربر:" HorizontalAlignment="Left" Margin="266,17,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+
+                    <Button x:Name="BTN_DELETE_BLOCKYHES" Tag="hazfer" Style="{StaticResource MaterialDesignFlatButton}" Content="حذف مسدودی حساب" BorderBrush="{x:Null}" FontSize="10" Margin="319,16,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="141" Click="BTN_DELETE_BLOCKYHES_Click" />
+
+                    <DataGrid   
+                              x:Name="BLOCKED_SUB"
+                              d:ItemsSource="{d:SampleData ItemCount=5}"
+                              EnableColumnVirtualization="True"
+                              EnableRowVirtualization="True"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling"
+                              
+                              SelectedIndex="0"
+                              ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                              CellStyle="{StaticResource CellFocusyBorder}"
+                              HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                              VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                              ItemsSource="{Binding BLOCK_HES_DATA}"
+                              KeyboardNavigation.TabNavigation="Contained"
+                              AutoGenerateColumns="False" 
+                              FlowDirection="RightToLeft" 
+                              SelectionUnit="FullRow" 
+                              CanUserDeleteRows="False"
+                              Margin="319,57,13,34" BorderThickness="1" IsKeyboardFocusWithinChanged="BLOCKED_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="BLOCKED_SUB_CellEditEnding" PreviewMouseLeftButtonUp="BLOCKED_SUB_PreviewMouseLeftButtonUp" SelectionChanged="BLOCKED_SUB_SelectionChanged" RowEditEnding="BLOCKED_SUB_RowEditEnding" PreviewKeyDown="BLOCKED_SUB_PreviewKeyDown" BeginningEdit="BLOCKED_SUB_BeginningEdit" IsEnabled="False" >
+
+                        <DataGrid.Style>
+                            <!--خط بندی سطر های دیتاگرید-->
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                                <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                <Setter Property="GridLinesVisibility" Value="All"/>
+                            </Style>
+                        </DataGrid.Style>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="نام حساب برای مسدودی" Binding="{Binding HES, UpdateSourceTrigger=LostFocus}" Width="*" >
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="31" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+
+                    <DataGrid   
+                              x:Name="UNBLOCKED_SUB"
+                              d:ItemsSource="{d:SampleData ItemCount=5}"
+                              EnableColumnVirtualization="True"
+                              EnableRowVirtualization="True"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling"
+                              
+                              SelectedIndex="0"
+                              ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                              CellStyle="{StaticResource CellFocusyBorder}"
+                              HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                              VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                              ItemsSource="{Binding BLOCKNON_HES_DATA}"
+                              KeyboardNavigation.TabNavigation="Contained"
+                              AutoGenerateColumns="False" 
+                              FlowDirection="RightToLeft" 
+                              SelectionUnit="FullRow" 
+                              CanUserDeleteRows="False"
+                              Margin="12,57,5,34" BorderThickness="1" IsKeyboardFocusWithinChanged="UNBLOCKED_SUB_IsKeyboardFocusWithinChanged"  CellEditEnding="UNBLOCKED_SUB_CellEditEnding" PreviewMouseLeftButtonUp="UNBLOCKED_SUB_PreviewMouseLeftButtonUp" SelectionChanged="UNBLOCKED_SUB_SelectionChanged" RowEditEnding="UNBLOCKED_SUB_RowEditEnding" PreviewKeyDown="UNBLOCKED_SUB_PreviewKeyDown" PreparingCellForEdit="UNBLOCKED_SUB_PreparingCellForEdit" BeginningEdit="UNBLOCKED_SUB_BeginningEdit" Grid.Column="1" IsEnabled="False" >
+
+                        <DataGrid.Style>
+                            <!--خط بندی سطر های دیتاگرید-->
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                                <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                <Setter Property="GridLinesVisibility" Value="All"/>
+                            </Style>
+                        </DataGrid.Style>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="نام حساب مجاز" Binding="{Binding HES, UpdateSourceTrigger=LostFocus}" Width="*" >
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="31" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+
+                    <Label Content="حسابهای فعال" Margin="156,19,8,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Foreground="#FF1CA22C" Grid.Column="1"/>
+                    <Label Content="مسدود شده ها" Margin="0,19,13,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Foreground="#FFB90A0A" HorizontalAlignment="Right" Width="153"/>
+                    <Button x:Name="BTN_DELETE_NONBLOCK" Style="{StaticResource MaterialDesignFlatButton}" Tag="hazfer" Content="حذف حساب مجاز" BorderBrush="{x:Null}" FontSize="10" Margin="10,16,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="141" Click="BTN_DELETE_NONBLOCK_Click" Grid.Column="1" />
+                    <Label Content="{Binding ElementName=UNBLOCKED_SUB,Path=SelectedItem.NAME_HES}" Margin="14,0,5,5"  VerticalAlignment="Bottom" FlowDirection="RightToLeft" Foreground="#FF1CA22C" Grid.Column="1" Height="27"/>
+                    <Label Content="{Binding ElementName=BLOCKED_SUB,Path=SelectedItem.NAME_HES}"   Margin="0,0,13,6" VerticalAlignment="Bottom" FlowDirection="RightToLeft" Foreground="#FFB90A0A" HorizontalAlignment="Right" Width="302" Height="25"/>
+
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="زیر مجموعه">
+                <Grid>
+                    <DataGrid 
+                              d:ItemsSource="{d:SampleData ItemCount=5}"
+                              x:Name="CHARTSAZMANI_SUB"
+                              EnableColumnVirtualization="True"
+                              EnableRowVirtualization="True"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling"
+                              SelectedIndex="0"
+                              ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                              CellStyle="{StaticResource CellFocusyBorder}"
+                              HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                              VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                              ItemsSource="{Binding CHARTSAZMANI_DATA}"
+                              KeyboardNavigation.TabNavigation="Contained"
+                              AutoGenerateColumns="False" 
+                              FlowDirection="RightToLeft" 
+                              SelectionUnit="FullRow" 
+                              CanUserDeleteRows="False"
+                              Margin="319,57,10,50" BorderThickness="1" IsKeyboardFocusWithinChanged="CHARTSAZMANI_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="CHARTSAZMANI_SUB_CellEditEnding" PreviewMouseLeftButtonUp="CHARTSAZMANI_SUB_PreviewMouseLeftButtonUp" SelectionChanged="CHARTSAZMANI_SUB_SelectionChanged" RowEditEnding="CHARTSAZMANI_SUB_RowEditEnding" PreviewKeyDown="CHARTSAZMANI_SUB_PreviewKeyDown" BeginningEdit="CHARTSAZMANI_SUB_BeginningEdit" IsEnabled="False" >
+
+                        <DataGrid.Style>
+                            <!--خط بندی سطر های دیتاگرید-->
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                                <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                <Setter Property="GridLinesVisibility" Value="All"/>
+                            </Style>
+                        </DataGrid.Style>
+
+                        <DataGrid.Columns>
+                            <DataGridComboBoxColumn x:Name="COLUMN_SUBUSER" Width="*" Header="کاربر"
+                                        SelectedValueBinding="{Binding SUBUSERCO,UpdateSourceTrigger=LostFocus}"
+                                                    DisplayMemberPath="SAL_NAME" SelectedValuePath="IDD">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                            </DataGridComboBoxColumn>
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+
+                    <Border BorderThickness="1,1,1,1" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}" CornerRadius="5" Margin="13,57,0,11" HorizontalAlignment="Left" Width="253">
+                        <ListBox x:Name="UserListBoxSuby" SelectionMode="Single" Cursor="Hand" FlowDirection="RightToLeft" ItemsSource="{Binding SECOND_ALL_USERS, IsAsync=True, UpdateSourceTrigger=PropertyChanged}" d:ItemsSource="{d:SampleData ItemCount=5}" SelectionChanged="UserListBoxSuby_SelectionChanged">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="ItemCheckBox" 
+                                      IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                      VerticalAlignment="Center"
+                                      Margin="5,0,5,0"/>
+                                        <TextBlock Text="{Binding SAL_NAME}" 
+                                       Grid.Column="1" 
+                                       VerticalAlignment="Center"/>
+                                    </Grid>
+
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource MaterialDesignListBoxItem}">
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
+                    </Border>
+                    <TextBox x:Name="UserSearchBoxSuby" Text="" Height="30" Margin="13,16,0,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" HorizontalAlignment="Left" Width="253" TextChanged="UserSearchBoxSuby_TextChanged" />
+                    <Label Content="کاربر:" HorizontalAlignment="Left" Margin="266,17,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+
+                    <Button x:Name="BTN_DELETE_Suby" Tag="hazfer" Content="حذف کاربر زیرمجموعه" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="319,14,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="150" Click="BTN_DELETE_Suby_Click" />
+
+                    <TextBlock Text="{Binding ElementName=UserListBoxSuby,Path=SelectedItem.SAL_NAME}" VerticalAlignment="Top" TextAlignment="Center" Margin="479,22,19,0"/>
+
+                    <Button x:Name="BTN1_ADDALL_SUB" Content="اضافه کردن همه کاربران برای این کاربر انتخاب شده" Click="BTN1_ADDALL_SUB_Click" Style="{StaticResource MaterialDesignFlatButton}" BorderBrush="{x:Null}" FontSize="10" Margin="319,0,10,11" Height="34" VerticalAlignment="Bottom" IsEnabled="False"/>
+
+
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="BlaclList_TabItem" Header="Black List" IsKeyboardFocusWithinChanged="BlackListIsKeboardFoucsWithin" Tag="BlackList">
+                <Grid>
+                    <DataGrid   
+                        d:ItemsSource="{d:SampleData ItemCount=2}"
+                        x:Name="BLOCK_CUSTOMER_SUB"
+                        EnableColumnVirtualization="True"
+                        EnableRowVirtualization="True"
+                        VirtualizingPanel.IsVirtualizing="True"
+                        VirtualizingPanel.VirtualizationMode="Recycling"
+                        SelectedIndex="0"
+                        ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                        CellStyle="{StaticResource CellFocusyBorder}"
+                        HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                        VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                        ItemsSource="{Binding BLOCK_CUSTOMER_DATA}"
+                        KeyboardNavigation.TabNavigation="Contained"
+                        AutoGenerateColumns="False" 
+                        FlowDirection="RightToLeft" 
+                        SelectionUnit="FullRow" 
+                        CanUserDeleteRows="False"
+                        Margin="5,5,5,60" BorderThickness="1" CellEditEnding="BLOCK_CUSTOMER_SUB_CellEditEnding" PreviewMouseLeftButtonUp="BLOCK_CUSTOMER_SUB_PreviewMouseLeftButtonUp" SelectionChanged="BLOCK_CUSTOMER_SUB_SelectionChanged" RowEditEnding="BLOCK_CUSTOMER_SUB_RowEditEnding" PreviewKeyDown="BLOCK_CUSTOMER_SUB_PreviewKeyDown" BeginningEdit="BLOCK_CUSTOMER_SUB_BeginningEdit" >
+                        <DataGrid.Style>
+                            <!--خط بندی سطر های دیتاگرید-->
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                                <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                <Setter Property="GridLinesVisibility" Value="All"/>
+                            </Style>
+                        </DataGrid.Style>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding HES}" Header="کد حساب" Width="auto" IsReadOnly="True"/>
+
+                            <DataGridTemplateColumn SortMemberPath="NAME_HES" x:Name="NAME_HES_COLUMN" Header="نام حساب" Width="auto" MinWidth="200">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding NAME_HES}" Focusable="False"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+
+                                <DataGridTemplateColumn.CellEditingTemplate>
+                                    <!-- Edit mode: show a ComboBox that searches DB on KeyUp -->
+                                    <DataTemplate>
+                                        <ComboBox x:Name="EditCombo" 
+                                                Loaded="EditCombo_Loaded" 
+                                                IsEditable="True"
+                                                IsTextSearchEnabled="False"
+                                                StaysOpenOnEdit="True"
+                                                  
+                                                SelectedValuePath="hes"
+                                                SelectedValue="{Binding HES, UpdateSourceTrigger=PropertyChanged}"
+                                                  
+                                                VerticalContentAlignment="Center"
+                                                MaxDropDownHeight="200"
+                                                  
+                                                KeyUp="HES_ComboBox_KeyUp"
+                                                SelectionChanged="EditCombo_SelectionChanged">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate >
+                                                    <StackPanel Orientation="Horizontal" >
+                                                        <TextBlock Text="{Binding NAME}" TextAlignment="Justify" Width="400" Margin="3" />
+                                                        <TextBlock Text="{Binding hes}"  TextAlignment="Justify" Width="100" Margin="3" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellEditingTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridCheckBoxColumn x:Name="ENDBLK_COLUMN" Binding="{Binding ENDBLK, UpdateSourceTrigger=LostFocus}" Header="پايان مسدود شدن" Width="auto">
+                                <DataGridCheckBoxColumn.EditingElementStyle>
+                                    <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+                                        <Setter Property="FlowDirection" Value="RightToLeft" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                                        <Setter Property="HorizontalAlignment" Value="Center" />
+                                        <EventSetter Event="Click" Handler="DCH_CheckBox_Click"/>
+                                    </Style>
+                                </DataGridCheckBoxColumn.EditingElementStyle>
+                                <DataGridCheckBoxColumn.ElementStyle>
+                                    <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+                                        <Setter Property="FlowDirection" Value="RightToLeft" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                                        <Setter Property="HorizontalAlignment" Value="Center" />
+                                        <EventSetter Event="Click" Handler="DCH_CheckBox_Click"/>
+                                    </Style>
+                                </DataGridCheckBoxColumn.ElementStyle>
+                            </DataGridCheckBoxColumn>
+
+                            <!--TEST-->
+                            <DataGridTextColumn x:Name="STBLKDT_COLUMN" Binding="{Binding STBLKDT, UpdateSourceTrigger=LostFocus, StringFormat=####/##/##}" Header="تاریخ مسدود شدن" Width="auto">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                                        <Setter Property="Foreground" Value="#FFA40000" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="10" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn x:Name="ENDBLKDT_COLUMN" Binding="{Binding ENDBLKDT, UpdateSourceTrigger=LostFocus, StringFormat=####/##/##}" Header="تاريخ باز شدن" Width="auto">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                                        <Setter Property="Foreground" Value="#FF008202" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="10" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn x:Name="COMM_COLUMN" Binding="{Binding COMM,UpdateSourceTrigger=LostFocus}" Header="توضیحات" Width="auto" MinWidth="100">
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                        <Setter Property="MaxLength" Value="200" />
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Binding="{Binding CUSER}" Header="کاربر ایجاد کننده" Width="auto" IsReadOnly="True"/>
+                            <DataGridTextColumn Binding="{Binding EUSER}" Header="کاربر رفع کننده" Width="auto" IsReadOnly="True"/>
+
+
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+
+                    <CNC:DataGridNavigationControl x:Name="navigationControl" Height="55" TargetDataGrid="{Binding ElementName=BLOCK_CUSTOMER_SUB}" VerticalAlignment="Bottom"/>
+
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="گروه کاربری" Tag="GroupUsers" >
+                <Grid>
+                    <DataGrid
+                            x:Name="USER_ENDN_SUB"
+                            d:ItemsSource="{d:SampleData ItemCount=2}"
+                            EnableColumnVirtualization="True"
+                            EnableRowVirtualization="True"
+                            VirtualizingPanel.IsVirtualizing="True"
+                            VirtualizingPanel.VirtualizationMode="Recycling"
+                            SelectedIndex="0"
+                            ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                            CellStyle="{StaticResource CellFocusyBorder}"
+                            HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                            VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                            ItemsSource="{Binding SALGROUP_DATA}"
+                            KeyboardNavigation.TabNavigation="Contained"
+                            AutoGenerateColumns="False" 
+                            FlowDirection="RightToLeft" 
+                            SelectionUnit="FullRow" 
+                            CanUserDeleteRows="False"
+                            CanUserAddRows="False"
+                            Margin="5,5,5,60" BorderThickness="1" CellEditEnding="USER_ENDN_SUB_CellEditEnding" PreviewMouseLeftButtonUp="USER_ENDN_SUB_PreviewMouseLeftButtonUp" SelectionChanged="USER_ENDN_SUB_SelectionChanged" RowEditEnding="USER_ENDN_SUB_RowEditEnding" PreviewKeyDown="USER_ENDN_SUB_PreviewKeyDown" BeginningEdit="USER_ENDN_SUB_BeginningEdit" >
+                        <DataGrid.Style>
+                            <!--خط بندی سطر های دیتاگرید-->
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                                <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                <Setter Property="GridLinesVisibility" Value="All"/>
+                            </Style>
+                        </DataGrid.Style>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding IDD}" Header="شماره" Width="auto" IsReadOnly="True"/>
+                            <DataGridTextColumn Binding="{Binding SAL_NAME}" MinWidth="150" Width="200" Header="نام کاربری" IsReadOnly="True"/>
+
+                            <DataGridComboBoxColumn x:Name="GRSAL_COLUMN" Width="auto" Header="گروه" SelectedValueBinding="{Binding GRSAL,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAME" SelectedValuePath="ID">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                                <DataGridComboBoxColumn.ElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                    </Style>
+                                </DataGridComboBoxColumn.ElementStyle>
+                            </DataGridComboBoxColumn>
+
+                            <DataGridComboBoxColumn x:Name="ENABL_COLUMN" Width="auto" Header="وضعیت" SelectedValueBinding="{Binding ENABL,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAME" SelectedValuePath="ID">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                                <DataGridComboBoxColumn.ElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                    </Style>
+                                </DataGridComboBoxColumn.ElementStyle>
+                            </DataGridComboBoxColumn>
+
+                            <DataGridTemplateColumn SortMemberPath="NAME_HES" x:Name="GR_HES_COLUMN" Header="معین معادل" Width="auto" MinWidth="200">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding NAME_HES}" Focusable="False"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+
+                                <DataGridTemplateColumn.CellEditingTemplate>
+                                    <!-- Edit mode: show a ComboBox that searches DB on KeyUp -->
+                                    <DataTemplate>
+                                        <ComboBox x:Name="HESEditCombo" 
+                                                  Loaded="HESEditCombo_Loaded" 
+                                                  IsEditable="True"
+                                                  IsTextSearchEnabled="False"
+                                                  StaysOpenOnEdit="True"
+                                                    
+                                                  SelectedValuePath="hes"
+                                                  SelectedValue="{Binding HES, UpdateSourceTrigger=PropertyChanged}"
+                                                    
+                                                  VerticalContentAlignment="Center"
+                                                  MaxDropDownHeight="200"
+                                                    
+                                                  KeyUp="HESGRP_ComboBox_KeyUp"
+                                                  SelectionChanged="HESEditCombo_SelectionChanged">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate >
+                                                    <StackPanel Orientation="Horizontal" >
+                                                        <TextBlock Text="{Binding NAME}" TextAlignment="Justify" Width="400" Margin="3" />
+                                                        <TextBlock Text="{Binding hes}"  TextAlignment="Justify" Width="100" Margin="3" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellEditingTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="امضا" IsReadOnly="True" CanUserResize="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button x:Name="Taeed_automasionBtn" IsTabStop="False" Click="SIGN_COLUMN_Click" Tag="{Binding}" 
+                                                materialDesign:ButtonAssist.CornerRadius="2"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                                                Margin="-14,-7,-14,-7" HorizontalContentAlignment="Center">
+                                            <Grid>
+                                                <!-- Sign Available Icon -->
+                                                <materialDesign:PackIcon Kind="FileSign" Width="22" Height="22" Foreground="#007ACC">
+                                                    <materialDesign:PackIcon.Style>
+                                                        <Style TargetType="materialDesign:PackIcon">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding EMZA}" Value="{x:Null}">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </materialDesign:PackIcon.Style>
+                                                </materialDesign:PackIcon>
+
+                                                <!-- No Sign Available Icon -->
+                                                <materialDesign:PackIcon Kind="ImageAdd" Width="22" Height="22" Foreground="#757575" Opacity="0.7">
+                                                    <materialDesign:PackIcon.Style>
+                                                        <Style TargetType="materialDesign:PackIcon">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding EMZA}" Value="{x:Null}">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </materialDesign:PackIcon.Style>
+                                                </materialDesign:PackIcon>
+                                            </Grid>
+
+                                            <!-- Tooltip for better UX -->
+                                            <Button.ToolTip>
+                                                <ToolTip>
+                                                    <TextBlock>
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Text" Value="امضا موجود است" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding EMZA}" Value="{x:Null}">
+                                                                        <Setter Property="Text" Value="امضا کنید" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </ToolTip>
+                                            </Button.ToolTip>
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn.CellStyle>
+                                    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                        <Setter Property="IsTabStop" Value="False" />
+                                    </Style>
+                                </DataGridTemplateColumn.CellStyle>
+                            </DataGridTemplateColumn>
+
+                            <DataGridComboBoxColumn x:Name="menup_COLUMN" Width="auto" Header="منوی پیش فرض" SelectedValueBinding="{Binding menup,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAME" SelectedValuePath="ID">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                                <DataGridComboBoxColumn.ElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                    </Style>
+                                </DataGridComboBoxColumn.ElementStyle>
+                            </DataGridComboBoxColumn>
+
+                            <DataGridComboBoxColumn x:Name="PORID_COLUMN" Width="auto" Header="پيش فرض الگوي پرداخت پورسانت" SelectedValueBinding="{Binding PORID,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="Expr1" SelectedValuePath="PORID">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                                <DataGridComboBoxColumn.ElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                    </Style>
+                                </DataGridComboBoxColumn.ElementStyle>
+                            </DataGridComboBoxColumn>
+
+                            <DataGridComboBoxColumn x:Name="erjabe_COLUMN" Width="auto" Header="ارجاع پیش فاکتور به این کاربر" SelectedValueBinding="{Binding erjabe,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="SAL_NAME" SelectedValuePath="IDD">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                                <DataGridComboBoxColumn.ElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                    </Style>
+                                </DataGridComboBoxColumn.ElementStyle>
+                            </DataGridComboBoxColumn>
+
+                            <DataGridComboBoxColumn x:Name="DEFAULT_NAHVA_COLUMN" Width="auto" Header="پیش فرض نحوه پرداخت" SelectedValueBinding="{Binding DEFAULT_NAHVA,UpdateSourceTrigger=LostFocus}"
+                                                    DisplayMemberPath = "PPAME" SelectedValuePath = "PPID">
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                                <DataGridComboBoxColumn.ElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                    </Style>
+                                </DataGridComboBoxColumn.ElementStyle>
+                            </DataGridComboBoxColumn>
+
+                            <DataGridComboBoxColumn x:Name="DEFAULT_TFSAZMAN_COLUMN" Width="auto" Header="واحد پیش‌فرض" 
+                                                    SelectedValueBinding="{Binding DEFAULT_TFSAZMAN, UpdateSourceTrigger=LostFocus}"
+                                                    DisplayMemberPath="DEPNAME" SelectedValuePath="DEPATMAN" >
+                                <DataGridComboBoxColumn.EditingElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                        <Setter Property="IsEditable" Value="True"/>
+                                        <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                    </Style>
+                                </DataGridComboBoxColumn.EditingElementStyle>
+                                <DataGridComboBoxColumn.ElementStyle>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                    </Style>
+                                </DataGridComboBoxColumn.ElementStyle>
+                            </DataGridComboBoxColumn>
+                            
+                            <DataGridComboBoxColumn x:Name="DEFAULT_SHIFT_COLUMN" Width="auto" Header="شیفت پیش‌فرض"
+                                                    SelectedValueBinding="{Binding DEFAULT_SHIFT, UpdateSourceTrigger=LostFocus}"
+                                                    DisplayMemberPath="SHIFT_ID" SelectedValuePath="SHNAME" />
+
+
+
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+
+                    <CNC:DataGridNavigationControl x:Name="GR_NAV_DATAGRID" NewButtonEnabled="False" Height="55" TargetDataGrid="{Binding ElementName=USER_ENDN_SUB}" VerticalAlignment="Bottom"/>
+
+
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+
+
+    </Grid>
+</Window>
+

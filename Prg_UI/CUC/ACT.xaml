@@ -1,0 +1,80 @@
+﻿<UserControl x:Class="Prg_UI.CUC.ACT"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Prg_UI.CUC"
+             mc:Ignorable="d" 
+             IsTabStop="False"
+             d:DesignHeight="450" d:DesignWidth="800"
+             FocusManager.FocusedElement="{Binding ElementName=TextBox1}"
+             PreviewKeyDown="UserControl_PreviewKeyDown"
+             PreviewLostKeyboardFocus="UserControl_PreviewLostKeyboardFocus">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- The main TextBox -->
+        <TextBox x:Name="TextBox1" 
+                 Style="{StaticResource FuzzyOut}"
+                 PreviewTextInput="TextBox1_PreviewTextInput"
+                 LostFocus="TextBox1_LostFocus"
+                 DataObject.Pasting="TextBox1_Pasting"
+                 TabIndex="{Binding TabIndex, RelativeSource={RelativeSource AncestorType={x:Type local:ACT}}}"
+                 Grid.Row="0"
+                 Text="{Binding Text, RelativeSource={RelativeSource AncestorType={x:Type local:ACT}}, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                 TextChanged="TextBox1_TextChanged"
+                 MinHeight="25"
+                 PreviewKeyDown="TextBox1_PreviewKeyDown"
+                 PreviewLostKeyboardFocus="TextBox1_PreviewLostKeyboardFocus"
+                 
+                 MaxLength="{Binding MaxLength, RelativeSource={RelativeSource AncestorType={x:Type local:ACT}}}"/>
+
+        <!-- A Popup containing a status Label and the search ListBox -->
+        <Popup x:Name="Pop1" 
+               AllowsTransparency="True"
+               PopupAnimation="Fade"
+               IsOpen="False"
+               Width="{Binding ActualWidth, ElementName=TextBox1}"
+               MinWidth="{Binding ActualWidth, ElementName=TextBox1}"
+               MaxWidth="300"
+               Height="auto"
+               Placement="Bottom"
+               PlacementTarget="{Binding ElementName=TextBox1}"
+               FocusManager.IsFocusScope="True"
+               Focusable="False">
+            <StackPanel x:Name="PopupContent" Focusable="False"
+                      Width="{Binding ActualWidth, ElementName=TextBox1}">
+                <Label x:Name="SearchStatusTextBlock" Focusable="False"
+                       Content="در حال جستجو..."
+                       VerticalContentAlignment="Center"
+                       HorizontalContentAlignment="Center"
+                       Height="Auto" MinHeight="25"
+                       Width="{Binding ActualWidth, ElementName=PopupContent}"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       FontSize="12"
+                       Visibility="Collapsed"/>
+                <ListBox x:Name="SEARCH_LIST"
+                         MaxHeight="200"
+                         Background="{Binding ListBoxBackground, RelativeSource={RelativeSource AncestorType={x:Type local:ACT}}}"
+                         Width="{Binding ActualWidth, ElementName=PopupContent}"
+                         DisplayMemberPath="{Binding DisplayMemberPath, RelativeSource={RelativeSource AncestorType={x:Type local:ACT}}}"
+                         SelectedValuePath="{Binding SelectedValuePath, RelativeSource={RelativeSource AncestorType={x:Type local:ACT}}}"
+                         SelectedValue="{Binding SelectedValue, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type local:ACT}}}"
+                         Visibility="Collapsed"
+                         VirtualizingStackPanel.IsVirtualizing="True"
+                         PreviewKeyDown="SEARCH_LIST_PreviewKeyDown"
+                         PreviewMouseDoubleClick="SEARCH_LIST_PreviewMouseDoubleClick">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel VirtualizationMode="Recycling" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                </ListBox>
+            </StackPanel>
+        </Popup>
+    </Grid>
+</UserControl>

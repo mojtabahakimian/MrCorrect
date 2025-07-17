@@ -1,0 +1,76 @@
+﻿<Window x:Class="Wins.WinMenus.Checkha.NAZDESANDOGH.VOSULDIALOG"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Wins.WinMenus.Checkha.NAZDESANDOGH"
+        mc:Ignorable="d"
+        
+        MaxHeight="230"
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="IRANYekanFN"
+        WindowStartupLocation="CenterScreen"
+        Title="Window4" Height="230" Width="765" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" Closing="Window_Closing">
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+    </Window.Resources>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+    <Grid x:Name="mygrid">
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label Content="اعلام وصول چک به حساب" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Button x:Name="Btn_Close" Click="Btn_Close_Click" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowMaximize" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                </Grid>
+            </Border>
+        </Border>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                                                       Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+        <!--HEADER↑-->
+
+        <Button x:Name="BTN_SAVE" Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,0,323,16" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="100" Click="BTN_SAVE_Click" />
+        <Label Content="اعلام وصول چک به حساب ذیل انجام شود؟" HorizontalAlignment="Right" Margin="0,52,29,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <ComboBox x:Name="HHMOIN" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" SelectedValuePath="hes" DisplayMemberPath="NAME" IsTextSearchEnabled="True" Margin="31,136,119,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1" PreviewLostKeyboardFocus="HHMOIN_PreviewLostKeyboardFocus">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <xctk:MaskedTextBox x:Name="DTS" Style="{StaticResource FuzzyOut}" Padding="3" Mask="0000/00/00" Height="30" Margin="0,94,120,0" VerticalAlignment="Top" BorderThickness="1" FontSize="12" HorizontalAlignment="Right" Width="88" PreviewLostKeyboardFocus="DTS_PreviewLostKeyboardFocus"/>
+        <Label Content="تاریخ وصول:" HorizontalAlignment="Right" Margin="0,94,49,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="سریال:" HorizontalAlignment="Right" Margin="0,94,215,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <CNC:NumericTextBox x:Name="serial" NumericLostFocus="serial_NumericLostFocus" DoesAcceptDouble="False"  LastValueShouldZero="False" Text="" Height="30" Margin="336,94,0,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="169" IsReadOnly="True"/>
+        <Label Content="وصول به حساب:" HorizontalAlignment="Right" Margin="0,137,28,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+
+
+
+    </Grid>
+</Window>
+
+

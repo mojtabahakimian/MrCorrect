@@ -1,0 +1,248 @@
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY.VISITORS_KOL"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Wins.WinMenus.HESABDARI.GOZARESHAT"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        mc:Ignorable="d"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="IRANYekanFN"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        Title="VISITORS_KOL" Height="450" Width="2819" Loaded="Window_Loaded">
+    
+    <Window.Resources>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+    </Window.Resources>
+    
+    <Grid>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True" Grid.RowSpan="2">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                     Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10">
+                <Grid>
+                    <Label Content="گزارش عملکرد ویزیتور" Padding="21,10,10,10" Foreground="White"/>
+                    <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowRestore" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+
+                </Grid>
+            </Border>
+        </Border>
+
+        <DataGrid x:Name="VisitorsGrid"
+          AutoGenerateColumns="False"
+          FlowDirection="RightToLeft"
+          RowDetailsVisibilityMode="Collapsed"
+          CanUserAddRows="False"
+          ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+          CellStyle="{StaticResource CellFocusyBorder}"
+          HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+          VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+          LoadingRowDetails="VisitorsGrid_LoadingRowDetails" Margin="0,39,0,0" >
+
+            <DataGrid.Style>
+                <!--خط بندی سطر های دیتاگرید-->
+                <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                    <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                    <Setter Property="GridLinesVisibility" Value="All"/>
+                </Style>
+            </DataGrid.Style>
+            
+            <!-- ستون‌های Visitor -->
+            <DataGrid.Columns>
+
+                <DataGridTemplateColumn MinWidth="100" Width="100"
+                       IsReadOnly="True"
+                       Header="">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Click="ExpandButton_Click"
+                    Width="28"
+                    Height="28"
+                    Padding="0"
+                    Background="#e3f2fd"
+                    BorderBrush="#1976d2"
+                    BorderThickness="1"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Tag="{Binding}">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border CornerRadius="5"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                Background="{TemplateBinding Background}">
+                                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <!-- فقط یک Content -->
+                                <materialDesign:PackIcon Kind="Plus"
+                                         Width="18"
+                                         Height="18"
+                                         Foreground="#1976d2"
+                                         VerticalAlignment="Center"
+                                         HorizontalAlignment="Center"/>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn Header="کد ویزیتور"    Width="150" Binding="{Binding CUST_NO}"/>
+                <DataGridTextColumn Header="ویزیتور"   Width="400" Binding="{Binding NAME}"/>
+                <DataGridTextColumn Header="تعداد فاکتور"    Width="105" Binding="{Binding tedad}"/>
+                <DataGridTextColumn Header="جمع پورسانت"   Width="150" Binding="{Binding mabpur , StringFormat=\{0:N0\}}"/>
+                <DataGridTextColumn Header="درصد"    Width="70" Binding="{Binding Darsad, StringFormat=\{0:N2\}}"/>
+                <DataGridTextColumn Header="مقدار"   Width="80"  Binding="{Binding MEGHk , StringFormat=\{0:N0\}}"/>
+                <DataGridTextColumn Header="مبلغ کل فروش"   Width="150" Binding="{Binding MABL_K , StringFormat=\{0:N0\}}"/>
+                <DataGridTextColumn Header="جمع تخفیف"    Width="130" Binding="{Binding TAKHF , StringFormat=\{0:N0\}}"/>
+                <DataGridTextColumn Header="ارزش افزوده"  Width="120" Binding="{Binding MBAA , StringFormat=\{0:N0\}}"/>
+                <DataGridTextColumn Header="مرجوعی"    Width="80" Binding="{Binding MEGH_MAR , StringFormat=\{0:N0\}}"/>
+                <DataGridTextColumn Header="مبلغ مرجوعی"   Width="120" Binding="{Binding MABMAR , StringFormat=\{0:N0\}}"/>
+                <DataGridTextColumn Header="فروش خالص"   Width="150" Binding="{Binding GHABEL , StringFormat=\{0:N0\}}"/>
+                <DataGridTextColumn Header="مبلغ با تخفیف"   Width="150" Binding="{Binding MablaghBaTakhfif, StringFormat=\{0:N0\}}"/>
+                <DataGridTextColumn Header="موبایل"    Width="170" Binding="{Binding MOBILE}"/>
+                <DataGridTextColumn Header="آدرس"    Width="400" Binding="{Binding ADDRESS}"/>
+                <DataGridTextColumn Header="تلفن"    Width="150" Binding="{Binding TEL}"/>
+                <DataGridTextColumn Header="توضیح"    Width="400" Binding="{Binding TOZIH}"/>
+
+
+            </DataGrid.Columns>
+
+            <DataGrid.RowDetailsTemplate>
+                <DataTemplate>
+                    <DataGrid x:Name="CustomersGrid"
+                ItemsSource="{Binding Customers}"
+                AutoGenerateColumns="False"
+                FlowDirection="RightToLeft"
+                CanUserAddRows="False"
+                LoadingRowDetails="CustomersGrid_LoadingRowDetails"  Margin="30,0,0,0">
+
+                        <DataGrid.Style>
+                            <!--خط بندی سطر های دیتاگرید-->
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                                <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                <Setter Property="GridLinesVisibility" Value="All"/>
+                            </Style>
+                        </DataGrid.Style>
+                        
+                        <!-- ستون‌های Customer -->
+                        <DataGrid.Columns>
+
+                            <DataGridTemplateColumn Width="100" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Width="28" Height="28"
+                            Click="ExpandButton_Click_Customers"
+                            Background="#e3f2fd"
+                            BorderBrush="#1976d2"
+                            BorderThickness="1"
+                            Tag="{Binding}">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border CornerRadius="5"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        Background="{TemplateBinding Background}">
+                                                        <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                            <materialDesign:PackIcon Kind="Plus"
+                                                 Width="18"
+                                                 Height="18"
+                                                 Foreground="#1976d2"/>
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="کد مشتری"  Width="100" Binding="{Binding CUSTOMER}"/>
+                            <DataGridTextColumn Header="نام مشتری" Width="300" Binding="{Binding CUSTNAME}"/>
+                            <DataGridTextColumn Header="تعداد فاکتور"   Width="105" Binding="{Binding TDF}"/>
+                            <DataGridTextColumn Header="جمع پورسانت"    Width="150" Binding="{Binding mabpur, StringFormat=\{0:N0\}}"/>
+                            <DataGridTextColumn Header="درصد"    Width="70" Binding="{Binding Darsad, StringFormat=\{0:N2\}}"/>
+                            <DataGridTextColumn Header="مقدار"    Width="80" Binding="{Binding MEGHk, StringFormat=\{0:N0\}}"/>
+                            <DataGridTextColumn Header="مبلغ کل فروش"    Width="150" Binding="{Binding MABL_K, StringFormat=\{0:N0\}}"/>
+                            <DataGridTextColumn Header="جمع تخفیف"    Width="130" Binding="{Binding TAKHF, StringFormat=\{0:N0\}}"/>
+                            <DataGridTextColumn Header="ارزش افزوده"    Width="120" Binding="{Binding MBAA, StringFormat=\{0:N0\}}"/>
+                            <DataGridTextColumn Header="مرجوعی"    Width="80" Binding="{Binding MEGH_MAR, StringFormat=\{0:N0\}}"/>
+                            <DataGridTextColumn Header="مبلغ مرجوعی"   Width="120" Binding="{Binding MABMAR, StringFormat=\{0:N0\}}"/>
+                            <DataGridTextColumn Header="فروش خالص"    Width="130" Binding="{Binding GHABEL, StringFormat=\{0:N0\}}"/>
+                            <DataGridTextColumn Header="موبایل"    Width="130" Binding="{Binding MOBILE}"/>
+                            <DataGridTextColumn Header="تلفن"    Width="130" Binding="{Binding TEL}"/>
+                            <DataGridTextColumn Header="آدرس"    Width="400" Binding="{Binding ADDRESS}"/>
+                            <DataGridTextColumn Header="کد ویزیتور"  Width="100" Binding="{Binding CUST_NO}"/>
+                            <DataGridTextColumn Header="نام ویزیتور"    Width="150" Binding="{Binding VISNAME}"/>
+                            <DataGridTextColumn Header="نام مسیر"    Width="300" Binding="{Binding ROUTE_NAME}"/>
+
+                        </DataGrid.Columns>
+
+                        <DataGrid.RowDetailsTemplate>
+                            <DataTemplate>
+                                <DataGrid ItemsSource="{Binding Invoices}"
+                                          AutoGenerateColumns="False" FlowDirection="RightToLeft" CanUserAddRows="False"  Margin="78,0,0,0">
+                                    
+                                    <DataGrid.Style>
+                                        <!--خط بندی سطر های دیتاگرید-->
+                                        <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                                            <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                                            <Setter Property="GridLinesVisibility" Value="All"/>
+                                        </Style>
+                                    </DataGrid.Style>
+                                    
+                                    <!-- ستون‌های Invoice -->
+                                    <DataGrid.Columns>
+
+                                        <DataGridTextColumn Header="تاریخ فاکتور" Width="100" Binding="{Binding DATE_N}"/>
+                                        <DataGridTextColumn Header="شماره فاکتور"  Width="100" Binding="{Binding NUMBER}"/>
+                                        <DataGridTextColumn Header="جمع پورسانت"    Width="150" Binding="{Binding mabpur, StringFormat=\{0:N0\}}"/>
+                                        <DataGridTextColumn Header="درصد"    Width="70" Binding="{Binding Darsad, StringFormat=\{0:N2\}}"/>
+                                        <DataGridTextColumn Header="مقدار"    Width="80" Binding="{Binding MEGHk, StringFormat=\{0:N0\}}"/>
+                                        <DataGridTextColumn Header="مبلغ کل فروش"    Width="150" Binding="{Binding MABL_K, StringFormat=\{0:N0\}}"/>
+                                        <DataGridTextColumn Header="جمع تخفیف"    Width="130" Binding="{Binding TAKHF, StringFormat=\{0:N0\}}"/>
+                                        <DataGridTextColumn Header="ارزش افزوده"    Width="120" Binding="{Binding MBAA, StringFormat=\{0:N0\}}"/>
+                                        <DataGridTextColumn Header="مرجوعی"    Width="80" Binding="{Binding MEGH_MAR, StringFormat=\{0:N0\}}"/>
+                                        <DataGridTextColumn Header="مبلغ مرجوعی"   Width="120" Binding="{Binding MABMAR, StringFormat=\{0:N0\}}"/>
+                                        <DataGridTextColumn Header="فروش خالص"    Width="130" Binding="{Binding GHABEL, StringFormat=\{0:N0\}}"/>
+                                        <DataGridTextColumn Header="موبایل"    Width="130" Binding="{Binding MOBILE}"/>
+                                        <DataGridTextColumn Header="تلفن"    Width="130" Binding="{Binding TEL}"/>
+                                        <DataGridTextColumn Header="آدرس"    Width="400" Binding="{Binding ADDRESS}"/>
+                                        <DataGridTextColumn Header="کد ویزیتور"  Width="100" Binding="{Binding CUST_NO}"/>
+                                        <DataGridTextColumn Header="نام ویزیتور"    Width="150" Binding="{Binding VISITNAME}"/>
+                                        <DataGridTextColumn Header="کد مشتری"    Width="100" Binding="{Binding CUSTOMER}"/>
+                                        <DataGridTextColumn Header="نام مشتری"   Width="150" Binding="{Binding CUSTNAME}"/>
+                                        <DataGridTextColumn Header="توضیح"   Width="150" Binding="{Binding TOZIH}"/>
+
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </DataTemplate>
+                        </DataGrid.RowDetailsTemplate>
+                    </DataGrid>
+                </DataTemplate>
+            </DataGrid.RowDetailsTemplate>
+        </DataGrid>
+
+    </Grid>
+</Window>

@@ -1,0 +1,281 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Wins.WinMenus.HESABDARI"
+
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="Wins.WinMenus.HESABDARI.DEED_SEARCH_MAIN"
+        mc:Ignorable="d"
+
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="IRANYekanFN"
+        WindowStartupLocation="CenterScreen"
+        Title="جستجو در شرح سند" Height="705" Width="1010" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+    </Window.Resources>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+    <Grid x:Name="mygrid">
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label Content="جستجو در شرح سند" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMaximize" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                </Grid>
+            </Border>
+        </Border>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                                                       Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+        <!--HEADER↑-->
+
+        <!--Start.......................................................................................-->
+        <Button x:Name="GO_RPT" Content="اجرای گزارش"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,595,400,0" Height="34" VerticalAlignment="Top" Click="GO_RPT_Click" HorizontalAlignment="Right" Width="141" TabIndex="13" />
+        <Grid Margin="0,70,40,64" HorizontalAlignment="Right" Width="500">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MinWidth="95"/>
+                <ColumnDefinition Width="Auto" MinWidth="295"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <!-- Define row height for each row as needed -->
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+            </Grid.RowDefinitions>
+
+            <!-- Repeat these three elements for each row as necessary -->
+            <ComboBox x:Name="DATE_SB" ItemsSource="{Binding KOLY_ITEMS}" FlowDirection="RightToLeft" DisplayMemberPath="NAMES" Grid.Column="0" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" SelectionChanged="DATE_SB_SelectionChanged" SelectedIndex="0">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <xctk:MaskedTextBox x:Name="DATE_S" Style="{StaticResource FuzzyOut}"  Padding="3"  Mask="0000/00/00" Grid.Row="0" Grid.Column="1" Margin="3,4,3,5" TabIndex="0" />
+            <TextBlock Grid.Column="2" Text="تاریخ سند" VerticalAlignment="Center" Margin="5,0,5,0" Height="20"/>
+
+            <ComboBox x:Name="N_SB" ItemsSource="{Binding KOLY_ITEMS}"  FlowDirection="RightToLeft" Grid.Row="1" Grid.Column="0" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" DisplayMemberPath="NAMES" SelectionChanged="N_SB_SelectionChanged" SelectedIndex="0">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <CNC:NumericTextBox x:Name="N_S" DoesAcceptDouble="False" LastValueShouldZero="False" Text="" RestoreLastValidValue="False"  FlowDirection="RightToLeft"  Grid.Row="1" Grid.Column="1" Margin="3,4,3,4" TabIndex="1" />
+            <TextBlock Grid.Row="1" Grid.Column="2" Text="شماره سند" VerticalAlignment="Center" Margin="5,0,5,0" Height="20"/>
+
+            <ComboBox x:Name="HES_KB" ItemsSource="{Binding KOLY_ITEMS}"  FlowDirection="RightToLeft" Grid.Row="2" Grid.Column="0" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" DisplayMemberPath="NAMES" SelectionChanged="HES_KB_SelectionChanged" SelectedIndex="0">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <TextBox x:Name="HES_K" Text="" Style="{StaticResource FuzzyOut}" Padding="3" Grid.Row="2" Grid.Column="1" Margin="3,5,3,4" FlowDirection="RightToLeft" TabIndex="2" />
+            <TextBlock Grid.Row="2" Grid.Column="2" Text="کل" VerticalAlignment="Center" Margin="5,0,5,0" Height="20"/>
+
+            <ComboBox x:Name="HES_MB"  ItemsSource="{Binding KOLY_ITEMS}" FlowDirection="RightToLeft"  Grid.Row="3" Grid.Column="0" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" DisplayMemberPath="NAMES" SelectionChanged="HES_MB_SelectionChanged" SelectedIndex="0">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <TextBox x:Name="HES_M" Text="" Style="{StaticResource FuzzyOut}" Padding="3" Grid.Row="3" Grid.Column="1" Margin="3,5,3,4" FlowDirection="RightToLeft" TabIndex="3" />
+            <TextBlock Grid.Row="3" Grid.Column="2" Text="معین" VerticalAlignment="Center" Margin="5,0,5,0" Height="20"/>
+
+            <ComboBox x:Name="TNUMBERB" ItemsSource="{Binding KOLY_ITEMS}"   FlowDirection="RightToLeft" Grid.Row="4" Grid.Column="0" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" DisplayMemberPath="NAMES" SelectionChanged="TNUMBERB_SelectionChanged" SelectedIndex="0">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <TextBox x:Name="TNUMBER" Text="" Style="{StaticResource FuzzyOut}" Padding="3" Grid.Row="4" Grid.Column="1" Margin="3,4,3,5" FlowDirection="RightToLeft" TabIndex="4" />
+            <TextBlock Grid.Row="4" Grid.Column="2" Text="تفصیلی" VerticalAlignment="Center" Margin="5,0,5,0" Height="20"/>
+
+            <ComboBox x:Name="SHARHB" ItemsSource="{Binding MATNY_ITEMS}"  FlowDirection="RightToLeft"  Grid.Row="5" Grid.Column="0" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" DisplayMemberPath="NAMES" SelectedIndex="0">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <TextBox x:Name="SHARH" Text="" Style="{StaticResource FuzzyOut}" Padding="3" Grid.Row="5" Grid.Column="1" Margin="3,4,3,4" FlowDirection="RightToLeft" TabIndex="5" />
+            <TextBlock Grid.Row="5" Grid.Column="2" Text="شرح" VerticalAlignment="Center" Margin="5,0,5,0" Height="22"/>
+
+            <ComboBox x:Name="BEDB"  ItemsSource="{Binding KOLY_ITEMS}"   FlowDirection="RightToLeft"  Grid.Row="6" Grid.Column="0" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" DisplayMemberPath="NAMES" SelectionChanged="BEDB_SelectionChanged" SelectedIndex="0">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <CNC:NumericTextBox x:Name="BED"  DoesAcceptDouble="False" RestoreLastValidValue="False"  LastValueShouldZero="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Grid.Row="6" Grid.Column="1" Margin="3,5,3,4" Text="" FlowDirection="RightToLeft" TabIndex="6" />
+            <TextBlock Grid.Row="6" Grid.Column="2" Text="بدهکار" VerticalAlignment="Center" Margin="5,0,5,0" Height="20"/>
+
+            <ComboBox x:Name="BESB" ItemsSource="{Binding KOLY_ITEMS}"  FlowDirection="RightToLeft" Grid.Row="7" Grid.Column="0" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" DisplayMemberPath="NAMES" SelectionChanged="BESB_SelectionChanged" SelectedIndex="0">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <CNC:NumericTextBox x:Name="BES" DoesAcceptDouble="False" RestoreLastValidValue="False"  LastValueShouldZero="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Grid.Row="7" Grid.Column="1" Margin="3,4,3,5" Text="" FlowDirection="RightToLeft" TabIndex="7" />
+            <TextBlock Grid.Row="7" Grid.Column="2" Text="بستانکار" VerticalAlignment="Center" Margin="5,0,5,0" Height="20"/>
+
+            <ComboBox x:Name="N_SERIB" ItemsSource="{Binding ADADY_ITEMS}"  FlowDirection="RightToLeft"  Grid.Row="8" Grid.Column="0" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" DisplayMemberPath="NAMES" SelectedIndex="0">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <TextBox x:Name="N_SERI" Text="" Style="{StaticResource FuzzyOut}" Padding="3" Grid.Row="8" Grid.Column="1" Margin="3,4,3,5" FlowDirection="RightToLeft" TabIndex="8" />
+            <TextBlock Grid.Row="8" Grid.Column="2" Text="شماره سری" VerticalAlignment="Center" Margin="5,0,5,0" Height="20"/>
+
+            <ComboBox x:Name="BANKB" ItemsSource="{Binding ADADY_ITEMS}" Grid.Row="9" Grid.Column="0" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" FlowDirection="RightToLeft" DisplayMemberPath="NAMES" SelectedIndex="0">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+
+            <ComboBox x:Name="BANK" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Grid.Row="9" Grid.Column="1" IsTextSearchEnabled="True" Height="30" Margin="3,0,3,0" FlowDirection="RightToLeft" TabIndex="9">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <TextBlock Grid.Row="9" Grid.Column="2" Text="بانک" VerticalAlignment="Center" Margin="5,0,5,0" Height="20"/>
+
+            <ComboBox x:Name="NUMBERB"  ItemsSource="{Binding KOLY_ITEMS}"  FlowDirection="RightToLeft" Grid.Row="10" Grid.Column="0" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" DisplayMemberPath="NAMES" SelectionChanged="NUMBERB_SelectionChanged" SelectedIndex="0">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <CNC:NumericTextBox x:Name="NUMBER" RestoreLastValidValue="False"  DoesAcceptDouble="False" LastValueShouldZero="False" Text="" Grid.Row="10" Grid.Column="1" Margin="3,5,3,4" FlowDirection="RightToLeft" TabIndex="10" />
+            <TextBlock Grid.Row="10" Grid.Column="2" Text="شماره فاکتور" VerticalAlignment="Center" Margin="5,0,5,0" Height="20"/>
+
+            <ComboBox x:Name="TAGB" ItemsSource="{Binding ADADY_ITEMS}"  FlowDirection="RightToLeft" Grid.Row="11" Grid.Column="0" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" DisplayMemberPath="NAMES" SelectedIndex="0">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <ComboBox x:Name="HTAG" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Grid.Row="11" Grid.Column="1" IsTextSearchEnabled="True" Height="30" Margin="3,0,3,0" FlowDirection="RightToLeft" TabIndex="11">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <TextBlock Grid.Row="11" Grid.Column="2" Text="نوع برگ" VerticalAlignment="Center" Margin="5,0,5,0" Height="20"/>
+
+            <ComboBox x:Name="hesB"  ItemsSource="{Binding MATNY_ITEMS}"  FlowDirection="RightToLeft" Grid.Row="12" Grid.Column="0" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" DisplayMemberPath="NAMES" SelectedIndex="0">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <TextBox x:Name="hes" Text="" Style="{StaticResource FuzzyOut}" Padding="3" Grid.Row="12" Grid.Column="1" Margin="3,4,3,4" FlowDirection="RightToLeft" TabIndex="12" />
+            <TextBlock Grid.Row="12" Grid.Column="2" Text="شرح حساب" VerticalAlignment="Center" Margin="5,0,5,0" Height="20"/>
+            <ComboBox x:Name="ANDOR" ItemsSource="{Binding TPVY}" DisplayMemberPath="NAMES" SelectedIndex="0" FlowDirection="RightToLeft" Grid.Row="13" Grid.Column="1" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" Margin="215,0,3,0" Visibility="Collapsed">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+            <TextBlock Grid.Row="13" Grid.Column="2" Text="شروط بعدی وسیله" VerticalAlignment="Center" Margin="5,0,5,0" Height="20"/>
+        </Grid>
+        <Grid Margin="0,70,547,190" HorizontalAlignment="Right" Width="280">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="39*"/>
+                <ColumnDefinition Width="17*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <!-- Define row height for each row as needed -->
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+            </Grid.RowDefinitions>
+
+            <!-- Repeat these three elements for each row as necessary -->
+            <xctk:MaskedTextBox x:Name="DATE_ST" Style="{StaticResource FuzzyOut}"  Padding="3"  Mask="0000/00/00" Grid.Row="0" Margin="3,4,4,5" Visibility="Hidden" />
+            <TextBlock x:Name="DATE_ST_LBL" Grid.Column="1" Text="تاریخ سند" Visibility="Hidden" VerticalAlignment="Center" Margin="4,0,5,0" Height="20"/>
+            <CNC:NumericTextBox x:Name="N_ST" DoesAcceptDouble="False" LastValueShouldZero="False" Text=""  FlowDirection="RightToLeft"  Grid.Row="1" Margin="3,4,4,4" Visibility="Hidden" />
+            <TextBlock x:Name="N_ST_LBL" Grid.Row="1" Grid.Column="1" Text="شماره سند"  VerticalAlignment="Center" Margin="4,0,5,0" Height="20" Visibility="Hidden"/>
+            <TextBox x:Name="HES_KT" Text="" Style="{StaticResource FuzzyOut}" Padding="3" Grid.Row="2" Margin="3,5,4,4" FlowDirection="RightToLeft" Visibility="Hidden" />
+            <TextBlock x:Name="HES_KT_LBL" Grid.Row="2" Grid.Column="1" Text="کل" VerticalAlignment="Center" Margin="4,0,5,0" Height="20" Visibility="Hidden"/>
+            <TextBox x:Name="HES_MT" Text="" Style="{StaticResource FuzzyOut}" Padding="3" Grid.Row="3" Margin="3,5,4,4" FlowDirection="RightToLeft" Visibility="Hidden" />
+            <TextBlock x:Name="HES_MT_LBL" Grid.Row="3" Grid.Column="1" Text="معین" VerticalAlignment="Center"  Margin="4,0,5,0" Height="20" Visibility="Hidden"/>
+            <TextBox x:Name="TNUMBERT" Text="" Style="{StaticResource FuzzyOut}" Padding="3" Grid.Row="4" Margin="3,4,4,5" FlowDirection="RightToLeft" Visibility="Hidden" />
+            <TextBlock x:Name="TNUMBERT_LBL" Grid.Row="4" Grid.Column="1" Text="تفصیلی" VerticalAlignment="Center" Margin="4,0,5,0" Height="20" Visibility="Hidden"/>
+            <CNC:NumericTextBox x:Name="BEDT"  DoesAcceptDouble="False" LastValueShouldZero="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Grid.Row="6" Margin="3,5,4,4" Text="" FlowDirection="RightToLeft" Visibility="Hidden" />
+            <TextBlock x:Name="BEDT_LBL" Grid.Row="6" Grid.Column="1" Text="بدهکار"  VerticalAlignment="Center" Margin="4,0,5,0" Height="20" Visibility="Hidden"/>
+            <CNC:NumericTextBox x:Name="BEST" DoesAcceptDouble="False" LastValueShouldZero="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Grid.Row="7" Margin="3,4,4,5" Text="" FlowDirection="RightToLeft" Grid.RowSpan="2" Visibility="Hidden" />
+            <TextBlock x:Name="BEST_LBL" Grid.Row="8" Grid.Column="1" Text="بستانکار" VerticalAlignment="Top" Margin="4,5,5,0" Height="20" Visibility="Hidden"/>
+            <CNC:NumericTextBox x:Name="NUMBERT" DoesAcceptDouble="False" LastValueShouldZero="False" Text="" Grid.Row="11" Margin="3,5,4,4" FlowDirection="RightToLeft" Visibility="Hidden" />
+            <TextBlock x:Name="NUMBERT_LBL" Grid.Row="11" Grid.Column="1" Text="شماره فاکتور"  VerticalAlignment="Center" Margin="4,0,5,0" Height="20" Visibility="Hidden"/>
+        </Grid>
+        <Button x:Name="YA_BTN" Content="یا"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,595,152,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Right" Width="43" Padding="16,4,16,4" Click="YA_BTN_Click" />
+        <Button x:Name="VA_BTN" Content="و"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,595,204,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Right" Width="43" Padding="16,1,16,4" Click="VA_BTN_Click" />
+        <Button x:Name="CLEAR_BTN" Content="پاکسازی و شروع مجدد"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,595,255,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Right" Width="135" Click="CLEAR_BTN_Click" />
+
+    </Grid>
+</Window>

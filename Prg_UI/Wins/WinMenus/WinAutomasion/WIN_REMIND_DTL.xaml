@@ -1,0 +1,204 @@
+﻿<Window x:Class="Wins.WinMenus.WinAutomasion.WIN_REMIND_DTL"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Wins.WinMenus.WinAutomasion"
+        mc:Ignorable="d"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        FontFamily="IRANYekanFN"
+        Background="{x:Null}" AllowsTransparency="True"
+        AllowDrop="True"
+        WindowStyle="None"
+        WindowState="Maximized"
+        Height="450" Width="930" WindowStartupLocation="CenterScreen" Loaded="Window_Loaded">
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"  VirtualizingPanel.VirtualizationMode="Recycling"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+    </Window.Resources>
+    <Grid>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="95,56,0,0"  Width="1"/>
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding ElementName=GENERAL_RANG,Path=Background}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1" d:IsHidden="False">
+            <Border x:Name="TitleDrawBar"  Style="{StaticResource BordG}" Background="{Binding ElementName=GENERAL_RANG,Path=Background}" Margin="-9,-9,-9,0" VerticalAlignment="Top" UseLayoutRounding="False" Height="38" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label Content="مشاهده یادآوری ها" Padding="21,10,10,10" Foreground="White"/>
+                    <Button x:Name="Btn_Close" Margin="0,10,13,0" BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMaximize" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" IsEnabled="True" Focusable="False" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                </Grid>
+            </Border>
+        </Border>
+
+        <DataGrid x:Name="DG_ALLMESSAGE"
+              CanUserDeleteRows="False"
+              Style="{StaticResource DATAGRIDSTYLISH}"
+              ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"   
+              HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+              VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+              ItemsSource="{Binding REMINDERS_DATA}"
+              d:ItemsSource="{d:SampleData ItemCount=2}"
+                  
+              EnableColumnVirtualization="True"
+              EnableRowVirtualization="True"
+              VirtualizingPanel.IsVirtualizing="True"
+              VirtualizingPanel.VirtualizationMode="Recycling"
+              ScrollViewer.CanContentScroll="False"
+              FrozenColumnCount="0"
+
+              SelectedIndex="0"
+              IsReadOnly="True"
+              FlowDirection="RightToLeft" AutoGenerateColumns="False" Margin="10,50,10,10">
+            <DataGrid.Columns>
+
+                <DataGridTextColumn x:Name="IDNUM" Binding="{Binding IDNUM}" Header="شماره" IsReadOnly="True" Width="80"/>
+                <DataGridTextColumn x:Name="PAYAM_COLUMN" Header="متن یادآوری" Width="*">
+                    <DataGridTextColumn.Binding>
+                        <Binding Path="PAYAM" IsAsync="True"/>
+                    </DataGridTextColumn.Binding>
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignTextBlock}">
+                            <Setter Property="TextWrapping" Value="Wrap"/>
+                            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                            <Setter Property="ToolTip" Value="{Binding PAYAM}"/>
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                
+                <DataGridTemplateColumn IsReadOnly="True" CanUserResize="False" Header="لغو">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button IsTabStop="False" Tag="{Binding}" Click="Button_Click_1"
+                                    materialDesign:ButtonAssist.CornerRadius="2"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                                    HorizontalContentAlignment="Center">
+                                <materialDesign:PackIcon Kind="CancelBold"/>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellStyle>
+                        <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                            <Setter Property="IsTabStop" Value="False" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding STATUS}" Value="3">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding STATUS}" Value="2">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGridTemplateColumn.CellStyle>
+                </DataGridTemplateColumn>
+                
+                <DataGridTextColumn   Binding="{Binding NAME}" Header="تماس گیرنده (در خصوص)" Width="auto"/>
+                <DataGridComboBoxColumn x:Name="STATUS_CMB" Width="auto"  Header=" وضعیت "
+                                        SelectedValueBinding="{Binding STATUS}" 
+                                        DisplayMemberPath="STATUS_NAME" 
+                                        SelectedValuePath="STATUS">
+                    <DataGridComboBoxColumn.ElementStyle>
+                        <Style TargetType="{x:Type ComboBox}">
+                            <Setter Property="ItemsSource" Value="{Binding Path=DataContext.STATUS_COMBO_DATA, RelativeSource={RelativeSource AncestorType=Window}}" />
+                        </Style>
+                    </DataGridComboBoxColumn.ElementStyle>
+                    <DataGridComboBoxColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type ComboBox}">
+                            <Setter Property="ItemsSource" Value="{Binding Path=DataContext.STATUS_COMBO_DATA, RelativeSource={RelativeSource AncestorType=Window}}" />
+                            <Setter Property="IsEditable" Value="True"/>
+                            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                            <Setter Property="VirtualizingStackPanel.IsVirtualizing" Value="True"/>
+                            <Setter Property="VirtualizingStackPanel.VirtualizationMode" Value="Recycling"/>
+                        </Style>
+                    </DataGridComboBoxColumn.EditingElementStyle>
+                </DataGridComboBoxColumn>
+                <DataGridComboBoxColumn  x:Name="PERSONEL_CMB" Width="auto" Header="برای"
+                    SelectedValueBinding="{Binding PERSONEL}" 
+                    DisplayMemberPath="SAL_NAME" 
+                    SelectedValuePath="USERCO">
+                    <DataGridComboBoxColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type ComboBox}">
+                            <Setter Property="IsEditable" Value="True"/>
+                            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                            <Setter Property="VirtualizingStackPanel.IsVirtualizing" Value="True"/>
+                            <Setter Property="VirtualizingStackPanel.VirtualizationMode" Value="Recycling"/>
+                        </Style>
+                    </DataGridComboBoxColumn.EditingElementStyle>
+                </DataGridComboBoxColumn>
+                <DataGridTextColumn   Binding="{Binding USERNAME}" Header="فرستنده" Width="auto"/>
+                <DataGridCheckBoxColumn Binding="{Binding SMSOK, UpdateSourceTrigger=LostFocus}" Header="پیامک هم ارسال شود" Width="auto" IsReadOnly="True">
+                    <DataGridCheckBoxColumn.ElementStyle>
+                        <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource MaterialDesignCheckBox}">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridCheckBoxColumn.ElementStyle>
+                    <DataGridCheckBoxColumn.CellStyle>
+                        <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="Focusable" Value="False"/>
+                            <Setter Property="IsHitTestVisible" Value="False"/>
+                        </Style>
+                    </DataGridCheckBoxColumn.CellStyle>
+                </DataGridCheckBoxColumn>
+
+                <DataGridTemplateColumn Header="تاریخ یادآوری" Width="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="{Binding STDATE, StringFormat=####/##/##}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding STDATE}" Value="{x:Null}">
+                                                <Setter Property="Text" Value=""/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding STDATE}" Value="">
+                                                <Setter Property="Text" Value=""/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding STDATE}" Value="0">
+                                                <Setter Property="Text" Value=""/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn x:Name="sTTIMEColumn" Header="زمان یادآوری" Width="SizeToHeader">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <DatePicker SelectedDate="{Binding STTIME, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn x:Name="CRT_Column" Header="زمان ایجاد" Width="auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <DatePicker SelectedDate="{Binding CRT, Mode=TwoWay, NotifyOnValidationError=true, ValidatesOnExceptions=true}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+            </DataGrid.Columns>
+        </DataGrid>
+
+    </Grid>
+</Window>

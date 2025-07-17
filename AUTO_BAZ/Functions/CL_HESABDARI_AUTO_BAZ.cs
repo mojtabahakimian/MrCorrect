@@ -1,0 +1,11177 @@
+﻿using Microsoft.VisualBasic;
+using Microsoft.VisualBasic.CompilerServices;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using Prg_SendInvoice.CNNMANAGER;
+using AUTO_BAZ.HelperWins;
+using Prg_Proccessy.MODELS;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
+using Microsoft.Data.SqlClient;
+using Prg_Proccessy.SQLMODELS;
+using static AUTO_BAZ.Functions.CL_LMethods;
+using Dapper;
+using System.IO;
+using System.Diagnostics;
+using System.Security.Cryptography;
+using Microsoft.IdentityModel.Tokens;
+using System.Reflection.PortableExecutable;
+using Prg_Proccessy.CNNMANAGER;
+
+namespace AUTO_BAZ.Functions
+{
+    public static class CL_HESABDARI_AUTO_BAZ
+    {
+        static CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+        #region Custom_Modelses
+        public class QUERY_MODEL6
+        {
+            public int? IDH { get; set; }
+            public double? N_SERI { get; set; }
+            public int? BANK { get; set; }
+            public long? DATE_S { get; set; }
+            public long? DATE { get; set; }
+            public int? RADIF { get; set; }
+            public int? N_MOIN { get; set; }
+            public int? N_TAF { get; set; }
+            public DateTime? CRT { get; set; }
+            public int? UID { get; set; }
+            public string? NAMES { get; set; }
+            public string? SHOBEH { get; set; }
+            public double? N_S { get; set; }
+            public double? MABL { get; set; }
+            public int? N_KOL { get; set; }
+            public int? N_MOIN_PGD { get; set; }
+            public int? N_TAF_PGD { get; set; }
+            public int? KIND { get; set; }
+            public string? HES1 { get; set; }
+        }
+        public class CHKREC_H
+        {
+            public long? DATE { get; set; }
+            public string? MOLAH { get; set; }
+            public double? N_S { get; set; }
+            public int? IDH { get; set; }
+            public DateTime? CRT { get; set; }
+            public int? UID { get; set; }
+        }
+        public class QUERY_MODEL5
+        {
+            public double? NUMBER { get; set; }
+            public long? id { get; set; }
+            public double? TAG { get; set; }
+            public int? CUST_CO { get; set; }
+            public string? TAKH_COD { get; set; }
+            public short? TAFPER { get; set; }
+            public double? MABL_K { get; set; }
+            public string? NAME { get; set; }
+            public double? N_KOL { get; set; }
+            public double? N_MOIN { get; set; }
+        }
+        public class QUERY_MODEL4
+        {
+            public double? NUMBER { get; set; }
+            public double? TAG { get; set; }
+            public double? MABL_K { get; set; }
+            public double? N_MOIN { get; set; }
+            public string? CODE { get; set; }
+            public int? CUST_KIND { get; set; }
+        }
+        public class QUERY_MODEL3
+        {
+            public double? MABL_K { get; set; }
+            public double? MEGHk { get; set; }
+            public string? CODE { get; set; }
+            public int? ANBAR { get; set; }
+            public string? NAME { get; set; }
+        }
+        public class QUERY_MODEL2
+        {
+            public int? GRD_NUM { get; set; }
+            public long? GRD_DATE { get; set; }
+            public int? GRD_ANBAR { get; set; }
+            public string? GRD_HES { get; set; }
+            public double? N_S { get; set; }
+            public string? COMMENT { get; set; }
+            public string? USER_NAME { get; set; }
+        }
+        public class QUERY_MODEL1
+        {
+            public double? JAMT { get; set; }
+            public string? CODE { get; set; }
+            public int? CUST_KIND { get; set; }
+        }
+        public class QRE_BAZ_18
+        {
+            public int? GRD_NUM { get; set; }
+            public string? CODE { get; set; }
+            public double? MOG { get; set; }
+            public double? NUM1 { get; set; }
+            public double? NUM2 { get; set; }
+            public double? NUM3 { get; set; }
+            public double? MABL { get; set; }
+            public DateTime? CRT { get; set; }
+            public int? UID { get; set; }
+            public double? EKH { get; set; }
+        }
+        public class QRE_BAZ_17
+        {
+            public double? JAMT { get; set; }
+            public string? CODE { get; set; }
+            public int? CUST_KIND { get; set; }
+        }
+        public class QRE_BAZ_16
+        {
+            public double? MABL_K { get; set; }
+            public double? MEGH_MAR { get; set; }
+            public string? CODE { get; set; }
+            public int? ANBAR { get; set; }
+            public string? NAME { get; set; }
+            public double? GHT { get; set; }
+        }
+        public class QRE_BAZ_15
+        {
+            public double? MABL_K { get; set; }
+            public double? MEGH_MAR { get; set; }
+            public string? CODE { get; set; }
+            public int? ANBAR { get; set; }
+            public string? NAME { get; set; }
+            public int? CUST_KIND { get; set; }
+            public short? TFP { get; set; }
+            public double? takh { get; set; }
+            public double? AVRAGE { get; set; }
+        }
+        public class QRE_BAZ_14
+        {
+            public double? IMBIBE_MANF { get; set; }
+            public double? IMBIBE_SAR { get; set; }
+            public string? CODE { get; set; }
+        }
+        public class QRE_BAZ_13
+        {
+            public int? FNUMB { get; set; }
+            public string? CODE { get; set; }
+            public double? MABLK { get; set; }
+            public string? NAME { get; set; }
+            public double? TAG { get; set; }
+            public double? NUMBER { get; set; }
+            public double? SumOfMEGHk { get; set; }
+            public string? COM { get; set; }
+            public double? MEGHM { get; set; }
+            public int? anbar { get; set; }
+        }
+        public class QRE_BAZ_12
+        {
+            public double? NUMBER { get; set; }
+            public double? N_KOL { get; set; }
+            public double? TAG { get; set; }
+            public int? ANBAR { get; set; }
+            public string? CODE { get; set; }
+            public double? SumOfMEGH { get; set; }
+            public double? SumOfMEGHk { get; set; }
+            public double? SumOfMEGH_MAR { get; set; }
+            public double? SumOfMABL { get; set; }
+            public double? SumOfMABL_K { get; set; }
+            public bool? FROM_A { get; set; }
+            public string? N_RASID { get; set; }
+            public double? MEGH_R { get; set; }
+            public double? RADAH { get; set; }
+            public double? SANAD_NO { get; set; }
+            public double? CUST_NO { get; set; }
+            public double? ANBARF { get; set; }
+            public int? VAHED_K { get; set; }
+            public string? NAME { get; set; }
+        }
+        public class QRE_BAZ_11
+        {
+            public string? NAME { get; set; }
+            public double? TAG { get; set; }
+            public double? NUMBER { get; set; }
+            public double? MEGHk { get; set; }
+            public double? IMBIBE_MANF { get; set; }
+            public double? IMBIBE_SAR { get; set; }
+            public string? CODE { get; set; }
+        }
+        public class QRE_BAZ_10
+        {
+            public string? CODE { get; set; }
+            public double? MABLK { get; set; }
+            public string? NAME { get; set; }
+            public double? TAG { get; set; }
+            public double? NUMBER { get; set; }
+            public double? SumOfMEGHk { get; set; }
+            public string? COM { get; set; }
+            public double? MEGHM { get; set; }
+            public int? ANBAR { get; set; }
+        }
+        public class QRE_BAZ_9
+        {
+            public double? NUMBER { get; set; }
+            public double? TAG { get; set; }
+            public int? ANBAR { get; set; }
+            public string? CODE { get; set; }
+            public double? SumOfMEGH { get; set; }
+            public double? SumOfMEGHk { get; set; }
+            public double? SumOfMEGH_MAR { get; set; }
+            public double? SumOfMABL { get; set; }
+            public double? SumOfMABL_K { get; set; }
+            public bool? FROM_A { get; set; }
+            public string? N_RASID { get; set; }
+            public double? MEGH_R { get; set; }
+            public double? RADAH { get; set; }
+            public double? SANAD_NO { get; set; }
+            public double? CUST_NO { get; set; }
+            public double? ANBARF { get; set; }
+            public int? VAHED_K { get; set; }
+            public string? NAME { get; set; }
+        }
+        public class QRE_BAZ_8
+        {
+            public string? CODE { get; set; }
+            public double? MABLK { get; set; }
+            public string? NAME { get; set; }
+            public double? TAG { get; set; }
+            public double? NUMBER { get; set; }
+            public double? SumOfMEGHk { get; set; }
+            public string? COM { get; set; }
+            public double? MEGHM { get; set; }
+            public int? ANBAR { get; set; }
+        }
+        public class QRE_BAZ_7
+        {
+            public double? NUMBER { get; set; }
+            public double? TAG { get; set; }
+            public int? ANBAR { get; set; }
+            public string? CODE { get; set; }
+            public double? SumOfMEGH { get; set; }
+            public double? SumOfMEGHk { get; set; }
+            public double? SumOfMEGH_MAR { get; set; }
+            public double? SumOfMABL { get; set; }
+            public double? SumOfMABL_K { get; set; }
+            public bool? FROM_A { get; set; }
+            public string? N_RASID { get; set; }
+            public double? MEGH_R { get; set; }
+            public double? RADAH { get; set; }
+            public double? SANAD_NO { get; set; }
+            public double? CUST_NO { get; set; }
+            public double? ANBARF { get; set; }
+            public int? VAHED_K { get; set; }
+            public string? NAME { get; set; }
+        }
+        public class QRE_BAZ_6
+        {
+            public int? FNUMB { get; set; }
+            public int? NUMBER { get; set; }
+            public int? TNUMBER { get; set; }
+            public int? N_KOL { get; set; }
+            public string? NAMES { get; set; }
+        }
+        public class QRE_BAZ_5
+        {
+            public double? SANAD_NO { get; set; }
+            public string? N_RASID { get; set; }
+            public double? MABL_K { get; set; }
+            public double? MEGHk { get; set; }
+            public string? CODE { get; set; }
+            public int? ANBAR { get; set; }
+        }
+        public class QRE_BAZ_4
+        {
+            public double? SBED { get; set; }
+            public double? SBES { get; set; }
+        }
+        public class QRE_BAZ_3
+        {
+            public double? MABL_K { get; set; }
+            public double? MEGHk { get; set; }
+            public int? ANBAR { get; set; }
+            public string? CODE { get; set; }
+            public double? SMAB { get; set; }
+        }
+        public class RST2_Data
+        {
+            //Deed_DTL
+            //Deed_HED
+            public double? FR { get; set; }
+            public double N_S { get; set; }
+            public long DATE_S { get; set; }
+            public int HES_K { get; set; }
+        }
+        public class RST_PAY
+        {
+            //Deed_DTL
+            //Deed_HED
+            public double? JCH { get; set; }
+        }
+        private class GTNMVAHED
+        {
+            public string CODE { get; set; }
+            public double? VAHED { get; set; }
+            public double? NESBAT { get; set; }
+        }
+        private class SHAHR
+        {
+            public string EN_CUST_CO { get; set; }
+            public int EN_CITY { get; set; }
+            public int EN_IYALAT { get; set; }
+            public int EN_COUNTRY { get; set; }
+        }
+        public partial class Custom_TF12
+        {
+            public float TF1 { get; set; }
+            public float TF2 { get; set; }
+        }
+        public partial class Custom_PEID
+        {
+            public int PEID { get; set; }
+        }
+        private partial class Custom_PRICEONE
+        {
+            public float PRICE1 { get; set; }
+            public int PGID { get; set; }
+            public string CODE { get; set; }
+            public int PEPID { get; set; }
+        }
+        private partial class Custom_PRICE_ELAMIE1
+        {
+            public int PEPID { get; set; }
+        }
+        public partial class Custom_PRICE_ELAMIE
+        {
+            public int PEPID { get; set; }
+        }
+        public partial class Custom2_PRICE_ELAMIE
+        {
+            public float PRICE1 { get; set; }
+            public int PGID { get; set; }
+            public int PEPID { get; set; }
+            public string CODE { get; set; }
+            public double NUMBER { get; set; }
+            public double TAG { get; set; }
+            public int ANBAR { get; set; }
+            public double MEGH { get; set; }
+            public double MEGHk { get; set; }
+            public double MABL { get; set; }
+            public double MABL_K { get; set; }
+            public Nullable<double> N_KOL { get; set; }
+            public Nullable<double> IMBAA { get; set; }
+            public Nullable<double> N_MOIN { get; set; }
+        }
+        public partial class Custom3_PRICE_ELAMIE
+        {
+            public int PEPID { get; set; }
+            public float TF1 { get; set; }
+            public float TF2 { get; set; }
+        }
+        public partial class Custom_INVO_LST
+        {
+            public string CODE { get; set; }
+        }
+        public partial class Custom_STUF_DEF
+        {
+            public string CODE { get; set; }
+            public string NAME { get; set; }
+        }
+        public partial class Custom_INVO_STUF
+        {
+            public string CODE { get; set; }
+            public Nullable<double> TKHN { get; set; }
+            public double MEGHk { get; set; }
+            public double MABL { get; set; }
+            public double MABL_K { get; set; }
+            public Nullable<double> N_KOL { get; set; }
+            public Nullable<double> N_MOIN { get; set; }
+            public Nullable<double> IMBAA { get; set; }
+            public double NUMBER { get; set; }
+            public double TAG { get; set; }
+            public Nullable<bool> CMBAA { get; set; }
+        }
+        public partial class Custom_LETSGO
+        {
+            //FORMNAME,USERCO,RUN,SEE,INP,UPD,DEL
+            public string FORMNAME { get; set; }
+            public int USERCO { get; set; }
+            public Nullable<bool> RUN { get; set; }
+            public Nullable<bool> SEE { get; set; }
+            public Nullable<bool> INP { get; set; }
+            public Nullable<bool> UPD { get; set; }
+            public Nullable<bool> DEL { get; set; }
+        }
+        public partial class Custom_StuFSK
+        {
+            public Nullable<double> MIN_M { get; set; }
+        }
+        public partial class Custom_modat
+        {
+            public int PPID { get; set; }
+            public int MODAT { get; set; }
+        }
+        public class QRE_BAZ_0
+        {
+            public double? NUMBER { get; set; }
+            public double? TAG { get; set; }
+            public int? ANBAR { get; set; }
+            public double? NUMBER1 { get; set; }
+            public long? DATE_N { get; set; }
+            public string? TAH { get; set; }
+            public double? MAS { get; set; }
+            public double? VAS { get; set; }
+            public double? N_S { get; set; }
+            public string? CUST_NO { get; set; }
+            public string? MOLAH { get; set; }
+            public double? M_NAGHD { get; set; }
+            public double? MABL_VAR { get; set; }
+            public string? MOIN_VAR { get; set; }
+            public double? MABL_HAV { get; set; }
+            public string? MOIN_HAV { get; set; }
+            public double? MABL_HAZ { get; set; }
+            public string? MOIN_HAZ { get; set; }
+            public double? TAKHFIF { get; set; }
+            public string? MOIN_KHF { get; set; }
+            public int? ANBARF { get; set; }
+            public double? FNUMCO { get; set; }
+            public int? DEPATMAN { get; set; }
+            public int? SHIFT { get; set; }
+            public int? CUST_KIND { get; set; }
+            public string? USER_NAME { get; set; }
+        }
+        public class QRE_BAZ_1
+        {
+            public double? NUMBER { get; set; }
+            public double? TAG { get; set; }
+            public string? NAME { get; set; }
+            public int? ANBAR { get; set; }
+            public string? CODE { get; set; }
+            public double? MEGH { get; set; }
+            public double? MEGHk { get; set; }
+            public double? MEGH_MAR { get; set; }
+            public double? MABL { get; set; }
+            public double? MABL_K { get; set; }
+            public double? ANBARF { get; set; }
+        }
+        public class QRE_BAZ_2
+        {
+            public double? MABL_K { get; set; }
+            public double? MEGHk { get; set; }
+            public string? CODE { get; set; }
+            public int? ANBAR { get; set; }
+            public string? COM { get; set; }
+            public string? NAM { get; set; }
+            public string? NAMES { get; set; }
+            public int? N_KOL { get; set; }
+            public int? NUMBER { get; set; }
+            public int? TNUMBER { get; set; }
+            public double? SMAB { get; set; }
+        }
+        #endregion
+
+        public static int GetNewIDD()
+        {
+            CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+
+            int NEWIDD = Convert.ToInt32(dbms.DoGetDataSQL<int?>("SELECT MAX(IDD) FROM dbo.TAXDTL").FirstOrDefault());
+            if (NEWIDD is 0 || NEWIDD < 0)
+                NEWIDD = 1;
+            else
+                NEWIDD = Convert.ToInt32(dbms.DoGetDataSQL<int?>("SELECT MAX(IDD+1) FROM dbo.TAXDTL").FirstOrDefault());
+
+            return NEWIDD;
+        }
+        public static int GetNewIDDSafe()
+        {
+            CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+            //Make Lock Table with Fake Query
+            dbms.DoExecuteSQL("UPDATE TOP(1) dbo.TAXDTL SET IDD = IDD");
+
+            int NEWIDD = Convert.ToInt32(dbms.DoGetDataSQL_Safe<int?>("SELECT MAX(IDD) FROM dbo.TAXDTL").FirstOrDefault());
+            if (NEWIDD is 0 || NEWIDD < 0)
+                NEWIDD = 1;
+            else
+                NEWIDD = Convert.ToInt32(dbms.DoGetDataSQL_Safe<int?>("SELECT MAX(IDD+1) FROM dbo.TAXDTL").FirstOrDefault());
+
+            return NEWIDD;
+        }
+        public static string GetBetweenStr(string strSource, string strStart, string strEnd)
+        {
+            if (strSource.Contains(strStart) || strSource.Contains(strEnd))
+            {
+                var nstrsorce = strSource.Replace(" ", "");
+                var nstrstart = strStart.Replace(" ", "");
+                var nstrend = strEnd.Replace(" ", "");
+                int Start, End;
+                Start = nstrsorce.IndexOf(nstrstart, 0) + nstrstart.Length;
+                End = nstrsorce.IndexOf(nstrend, Start);
+                if (End == -1)
+                {
+                    End = nstrsorce.Length;
+                }
+                return nstrsorce.Substring(Start, End - Start);
+            }
+            return "";
+        }
+
+        //______________
+
+        public static string CODESAL(string cody)
+        {
+            byte[] RawCoded = Encoding.GetEncoding(1256).GetBytes(cody);// ی 237
+
+            var Parsy = Encoding.GetEncoding(1256);
+            for (byte i = 0; i < RawCoded.Count(); i++)
+            {
+                RawCoded[i] = (byte)(RawCoded[i] - 20);
+            }
+            var result = Parsy.GetString(RawCoded);
+            cody = result;
+            return cody;
+        }
+        public static string DECODEUN(string cody)
+        {
+            byte[] RawCoded = Encoding.GetEncoding(1256).GetBytes(cody);// ی 237
+
+            var Parsy = Encoding.GetEncoding(1256);
+            for (byte i = 0; i < RawCoded.Count(); i++)
+            {
+                RawCoded[i] = (byte)(RawCoded[i] + 20);
+            }
+            var result = Parsy.GetString(RawCoded);
+            cody = result;
+            return cody;
+        }
+        public static string DECODEPS(string cody)
+        {
+            byte[] RawCoded = Encoding.GetEncoding(1256).GetBytes(cody);// ی 237
+            var Parsy = Encoding.GetEncoding(1256);
+            for (byte i = 0; i < RawCoded.Count(); i++)
+            {
+                RawCoded[i] = (byte)(RawCoded[i] + 10);
+            }
+
+            var result = Parsy.GetString(RawCoded);
+            result = result.Substring(3, result.Length - 6);
+            cody = result;
+            return cody;
+        }
+        public static double GETBSCHEK(long SAL, long mah)
+        {
+            //ADODB.Recordset RST = new ADODB.Recordset();
+            long DT1 = 0;
+            long DT2 = 0;
+            DT1 = System.Convert.ToInt64(System.Convert.ToDouble(SAL * 10000) + System.Convert.ToDouble(mah * 100));
+            DT2 = System.Convert.ToInt64(System.Convert.ToDouble(System.Convert.ToInt32(SAL * 10000) + System.Convert.ToDouble(mah * 100)) + 31);
+
+            // RST.Open("SELECT     SUM(MABL) AS JCH FROM         dbo.PAY_GETD WHERE     (N_KOL IS NULL OR    N_KOL = " + basknow.BANKHA.ToString() + ") AND (N_KOL2 IS NULL) AND (N_KOL3 IS NULL)  AND (DATE_S BETWEEN " + System.Convert.ToString(DT1) + " AND " + System.Convert.ToString(DT2) + ")");
+            // last point 6
+            var quer_RST = dbms.DoGetDataSQL<RST_PAY>("SELECT     SUM(MABL) AS JCH FROM         dbo.PAY_GETD WHERE     (N_KOL IS NULL OR    N_KOL = " + Baseknow.BANKHA.ToString() + ") AND (N_KOL2 IS NULL) AND (N_KOL3 IS NULL)  AND (DATE_S BETWEEN " + System.Convert.ToString(DT1) + " AND " + System.Convert.ToString(DT2) + ")").FirstOrDefault();
+
+            double Field_JCH = 0;
+            if (quer_RST.JCH > 0)
+            {
+                Field_JCH = Convert.ToDouble(quer_RST.JCH);
+                return Field_JCH;
+            }
+            else
+            {
+                //foreach (var item in quer_RST)
+                //{
+                //    Field_JCH = Convert.ToDouble(item.JCH);
+                //}
+                Field_JCH = 0;
+                return Field_JCH;
+            }
+        }
+        public static double GETCHEKin(long DT1, long DT2, object dt11, long dt22)
+        {
+            var rst = dbms.DoGetDataSQL<RST_PAY>("SELECT     SUM(MABL) AS JCH FROM         dbo.PAY_GETD WHERE(DATE_S BETWEEN " + System.Convert.ToString(DT1) + " AND " + System.Convert.ToString(DT2) + ") and(DATE BETWEEN " + System.Convert.ToString(dt11) + " AND " + System.Convert.ToString(dt22) + ") and(N_KOL <> 911 or N_KOL IS  NULL)").FirstOrDefault();
+            if (rst.JCH != null && rst.JCH > 0)
+            {
+                return System.Convert.ToDouble(rst.JCH);
+
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        public static Int64 GetLIDD(string MYTAB, string FLD)
+        {
+            //#Cool IF Var Isnull in query result
+            var quer_GETLIDD = dbms.DoGetDataSQL<long?>("SELECT MAX(" + FLD + ") AS IDL FROM " + MYTAB + "").First();
+            if (quer_GETLIDD == null || quer_GETLIDD == 0)
+            {
+                return 1;
+            }
+            else
+            {
+                return Convert.ToInt64(quer_GETLIDD + 1);
+            }
+        }
+        public static bool IsNumeric(string input)
+        {
+            // Step 1: Handle null, empty, or whitespace strings
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return false;
+            }
+
+            // Step 2: Trim any leading or trailing whitespace
+            input = input.Trim();
+
+            // Step 4: Try parsing the input as a double (to cover integers, decimals, and scientific notation)
+            if (double.TryParse(input, out double result))
+            {
+                // Optional: Further checks for overflow or underflow can be done here
+                if (double.IsInfinity(result) || double.IsNaN(result))
+                {
+                    return false; // Not valid if infinity or NaN
+                }
+                return true;
+            }
+
+            // Step 5: If the input cannot be parsed as a number, return false
+            return false;
+        }
+        public static object GETTAF3(string SHES, ref double? KOL, ref double? MOIN, ref double? taf, ref double? TAF2, ref double? taf3, ref double? taf4)
+        {
+            byte i1, I2, I3, I4, I5, I6, I7, I8, j, K;
+            i1 = 0;
+            I2 = 0;
+            I3 = 0;
+            I4 = 0;
+            I5 = 0;
+            I6 = 0;
+            I7 = 0;
+            I8 = 0;
+            j = 1;
+            K = 1;
+            if (Strings.Len(SHES) > 4)
+            {
+                var loopTo = (byte)Strings.Len(SHES);
+                for (j = 1; j <= loopTo; j++)
+                {
+                    if (Strings.Mid(SHES, j, 1) == "-")
+                    {
+                        switch (K)
+                        {
+                            case 1:
+                                {
+                                    i1 = j;
+                                    break;
+                                }
+
+                            case 2:
+                                {
+                                    I2 = j;
+                                    break;
+                                }
+
+                            case 3:
+                                {
+                                    I3 = (byte)(j + 1);
+                                    break;
+                                }
+
+                            case 4:
+                                {
+                                    I4 = (byte)(j + 1);
+                                    break;
+                                }
+
+                            case 5:
+                                {
+                                    I5 = (byte)(j + 1);
+                                    break;
+                                }
+
+                            case 6:
+                                {
+                                    I6 = (byte)(j + 1);
+                                    break;
+                                }
+
+                            case 7:
+                                {
+                                    I7 = (byte)(j + 1);
+                                    break;
+                                }
+
+                            case 8:
+                                {
+                                    I8 = (byte)(j + 1);
+                                    break;
+                                }
+                        }
+
+                        K = (byte)(K + 1);
+                    }
+                }
+            }
+
+            KOL = default;
+            MOIN = default;
+            taf = default;
+            TAF2 = default;
+            taf3 = default;
+            taf4 = default;
+            if (i1 == 0)
+            {
+                if (IsNumeric(SHES))
+                {
+                    KOL = Convert.ToDouble(SHES);
+                }
+                return default;
+            }
+            else
+            {
+                if (IsNumeric(Strings.Mid(SHES, 1, i1 - 1)))
+                {
+                    KOL = Convert.ToDouble(Strings.Mid(SHES, 1, i1 - 1));
+                }
+            }
+
+            if (I2 == 0)
+            {
+                if (IsNumeric(Strings.Mid(SHES, i1 + 1, Strings.Len(SHES) - i1)))
+                {
+                    MOIN = Convert.ToDouble(Strings.Mid(SHES, i1 + 1, Strings.Len(SHES) - i1));
+                }
+                return default;
+            }
+            else
+            {
+                if (IsNumeric(Strings.Mid(SHES, i1 + 1, I2 - i1 - 1)))
+                {
+                    MOIN = Convert.ToDouble(Strings.Mid(SHES, i1 + 1, I2 - i1 - 1));
+                }
+            }
+
+            if (I3 == 0)
+            {
+                if (IsNumeric(Strings.Mid(SHES, I2 + 1, Strings.Len(SHES) - I2)))
+                {
+                    taf = Convert.ToDouble(Strings.Mid(SHES, I2 + 1, Strings.Len(SHES) - I2));
+                }
+                return default;
+            }
+            else
+            {
+                if (IsNumeric(Strings.Mid(SHES, I2 + 1, I3 - I2 - 2)))
+                {
+                    taf = Convert.ToDouble(Strings.Mid(SHES, I2 + 1, I3 - I2 - 2));
+                }
+            }
+
+            if (I4 == 0)
+            {
+                if (IsNumeric(Strings.Mid(SHES, I3, Strings.Len(SHES) - I3 + 1)))
+                {
+                    TAF2 = Convert.ToDouble(Strings.Mid(SHES, I3, Strings.Len(SHES) - I3 + 1));
+                }
+
+            }
+            else
+            {
+                if (IsNumeric(Strings.Mid(SHES, I3, I4 - I3 - 1)))
+                {
+                    TAF2 = Convert.ToDouble(Strings.Mid(SHES, I3, I4 - I3 - 1));
+                }
+                if (I5 == 0)
+                {
+                    if (IsNumeric(Strings.Mid(SHES, I4, Strings.Len(SHES) - I4 + 1)))
+                    {
+                        taf3 = Convert.ToDouble(Strings.Mid(SHES, I4, Strings.Len(SHES) - I4 + 1));
+                    }
+                }
+                else
+                {
+                    if (IsNumeric(Strings.Mid(SHES, I4, I5 - I4 - 1)))
+                    {
+                        taf3 = Convert.ToDouble(Strings.Mid(SHES, I4, I5 - I4 - 1));
+                    }
+                    if (I6 == 0)
+                    {
+                        if (IsNumeric(Strings.Mid(SHES, I5, Strings.Len(SHES) - I5 + 1)))
+                        {
+                            taf4 = Convert.ToDouble(Strings.Mid(SHES, I5, Strings.Len(SHES) - I5 + 1));
+                        }
+                    }
+                    else
+                    {
+                        if (IsNumeric(Strings.Mid(SHES, I5, I6 - I5 - 1)))
+                        {
+                            taf4 = Convert.ToDouble(Strings.Mid(SHES, I5, I6 - I5 - 1));
+                        }
+                    }
+                }
+            }
+
+            return default;
+        }
+
+        public static bool BLOCKEDMK(string HES)
+        {
+            bool BLOCKEDMKRet = default;
+            double? TKOL = null, TMOIN = null, TTAF = null, TTAF2 = null, TTAF3 = null, TTAF4 = null;
+            double? HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null;
+
+            string name = Baseknow.USERCOD.ToStringNullSafe();
+
+            var rst3 = dbms.DoGetDataSQL<CHECKBLOCKCUST>("SELECT USERCO,HES FROM BLOCKNON_HES WHERE USERCO = " + Baseknow.USERCOD).ToList();
+            if (rst3.Count > 0)
+            {
+                foreach (var item in rst3)
+                {
+                    GETTAF3(rst3.Select(x => x.HES).FirstOrDefault(), ref TKOL, ref TMOIN, ref TTAF, ref TTAF2, ref TTAF3, ref TTAF4);
+                    GETTAF3(HES, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                    if (TKOL == HKOL)
+                    {
+                        if (TKOL == HKOL && ReferenceEquals(TMOIN, null))
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            if (TKOL == HKOL && TMOIN == HMOIN && ReferenceEquals(TTAF, null))
+                            {
+                                return false;
+                            }
+                            else
+                            {
+                                if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && ReferenceEquals(TTAF2, null))
+                                {
+                                    return false;
+                                }
+                                else
+                                {
+                                    if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && ReferenceEquals(TTAF3, null))
+                                    {
+                                        return false;
+                                    }
+                                    else
+                                    {
+                                        if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && TTAF3 == HTAF3 && ReferenceEquals(TTAF4, null))
+                                        {
+                                            return false;
+                                        }
+                                        else
+                                        {
+                                            if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && TTAF3 == HTAF3 && TTAF4 == HTAF4)
+                                            {
+                                                return false;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            var RST2 = dbms.DoGetDataSQL<CHECKBLOCKCUST>("SELECT USERCO,HES FROM BLOCK_HES WHERE USERCO = " + Baseknow.USERCOD).ToList();
+            if (RST2.Count > 0)
+            {
+                foreach (var item in RST2)
+                {
+                    GETTAF3(RST2.Select(x => x.HES).FirstOrDefault(), ref TKOL, ref TMOIN, ref TTAF, ref TTAF2, ref TTAF3, ref TTAF4);
+                    // TKOL = MGETKOL(rst2.Fields("HES"))
+                    // TMOIN = MGETMOIN(rst2.Fields("HES"))
+                    // TTAF = MGETTAF(rst2.Fields("HES"))
+                    GETTAF3(HES, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                    // HKOL = MGETKOL(HES)
+                    // HMOIN = MGETMOIN(HES)
+                    // HTAF = MGETTAF(HES)
+                    if (TKOL == HKOL)
+                    {
+                        if (TKOL == HKOL && ReferenceEquals(TMOIN, null))
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            if (TKOL == HKOL && TMOIN == HMOIN && ReferenceEquals(TTAF, null))
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && ReferenceEquals(TTAF2, null))
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && ReferenceEquals(TTAF3, null))
+                                    {
+                                        return true;
+                                    }
+                                    else
+                                    {
+                                        if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && TTAF3 == HTAF3 && ReferenceEquals(TTAF4, null))
+                                        {
+                                            return true;
+                                        }
+                                        else
+                                        {
+                                            if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && TTAF3 == HTAF3 && TTAF4 == HTAF4)
+                                            {
+                                                return true;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            BLOCKEDMKRet = false;
+            return BLOCKEDMKRet;
+        }
+        public static string WANTEDFORM(string frm)
+        {
+            string WANTEDFORMRet = default;
+            switch (frm ?? "")
+            {
+                // منوی تعاریف--------------------------------------------------------------
+                case "BANKS":
+                    {
+                        WANTEDFORMRet = "TCOD_BANKS";
+                        break;
+                    }
+
+                case "ANBAR":
+                    {
+                        WANTEDFORMRet = "TCOD_ANBAR";
+                        break;
+                    }
+
+                case "KALA":
+                    {
+                        WANTEDFORMRet = "STUF_DEF";
+                        break;
+                    }
+
+                case "GROUP":
+                    {
+                        WANTEDFORMRet = "TCOD_STUFGROUP";
+                        break;
+                    }
+
+                case "VAHED":
+                    {
+                        WANTEDFORMRet = "TCOD_VAHEDS";
+                        break;
+                    }
+
+                case "ANBARIN":
+                    {
+                        WANTEDFORMRet = "TCOD_ANBARINI";
+                        break;
+                    }
+
+                case "HESDEF":
+                    {
+                        WANTEDFORMRet = "TOTA_HES";
+                        break;
+                    }
+
+                case "AUTO":
+                    {
+                        WANTEDFORMRet = "AUTOMATIC";
+                        break;
+                    }
+
+                case "MOSHTARI":
+                    {
+                        WANTEDFORMRet = "FCODE_CUSTOMER";
+                        break;
+                    }
+
+                case "GHES":
+                    {
+                        WANTEDFORMRet = "TCOD_HESGROUP";
+                        break;
+                    }
+
+                case "CUST":
+                    {
+                        WANTEDFORMRet = "CUSTKIND";
+                        break;
+                    }
+
+                case "DEPART":
+                    {
+                        WANTEDFORMRet = "DEPART";
+                        break;
+                    }
+
+                case "SHIFT":
+                    {
+                        WANTEDFORMRet = "SHIFT";
+                        break;
+                    }
+
+                case "KHAD":
+                    {
+                        WANTEDFORMRet = "KHAD_DEF";
+                        break;
+                    }
+
+                case "AZAE":
+                    {
+                        WANTEDFORMRet = "AZAE";
+                        break;
+                    }
+
+                case "TMHAZ":
+                    {
+                        WANTEDFORMRet = "TMHAZ";
+                        break;
+                    }
+
+                case "MENUIT":
+                    {
+                        WANTEDFORMRet = "MENUIT";
+                        break;
+                    }
+
+                case "TAKHDEF":
+                    {
+                        WANTEDFORMRet = "TAKHDEF";
+                        break;
+                    }
+
+                case "CUSTDEF":
+                    {
+                        WANTEDFORMRet = "CUSTDEF";
+                        break;
+                    }
+
+                case "TKHESL":
+                    {
+                        WANTEDFORMRet = "TKHESL";
+                        break;
+                    }
+
+                case "AZADPAY":
+                    {
+                        WANTEDFORMRet = "AZADPAY";
+                        break;
+                    }
+
+                case "JOST1":
+                    {
+                        WANTEDFORMRet = "JOST1";
+                        break;
+                    }
+
+                case "JOST2":
+                    {
+                        WANTEDFORMRet = "JOST2";
+                        break;
+                    }
+
+                case "JOST3":
+                    {
+                        WANTEDFORMRet = "JOST3";
+                        break;
+                    }
+
+                case "GRFORMAT":
+                    {
+                        WANTEDFORMRet = "GRFORMAT";
+                        break;
+                    }
+
+                case "GSCALE":
+                    {
+                        WANTEDFORMRet = "GSCALE";
+                        break;
+                    }
+
+                case "GGRAD":
+                    {
+                        WANTEDFORMRet = "GGRAD";
+                        break;
+                    }
+
+                case "GGRSH":
+                    {
+                        WANTEDFORMRet = "GGRSH";
+                        break;
+                    }
+
+                case "okpish":
+                    {
+                        WANTEDFORMRet = "okpish";
+                        break;
+                    }
+
+                case "PRGRP":
+                    {
+                        WANTEDFORMRet = "PRGRP";
+                        break;
+                    }
+
+                case "PRPAYNO":
+                    {
+                        WANTEDFORMRet = "PRPAYNO";
+                        break;
+                    }
+
+                case "PRELMTF":
+                    {
+                        WANTEDFORMRet = "PRELMTF";
+                        break;
+                    }
+
+                case "PRELMPR":
+                    {
+                        WANTEDFORMRet = "PRELMPR";
+                        break;
+                    }
+
+                case "TEL":
+                    {
+                        WANTEDFORMRet = "TEL";
+                        break;
+                    }
+
+                case "BGLIST":
+                    {
+                        WANTEDFORMRet = "BGLIST";
+                        break;
+                    }
+
+                case "BGLISTTL":
+                    {
+                        WANTEDFORMRet = "BGLISTTL";
+                        break;
+                    }
+                // منوی حسابداری-----------------------------------------------------------
+                case "SANAD":
+                    {
+                        WANTEDFORMRet = "DEED_HEAD";
+                        break;
+                    }
+
+                case "PGETD":
+                    {
+                        WANTEDFORMRet = "PGET_HED";
+                        break;
+                    }
+
+                case "OFDP":
+                    {
+                        WANTEDFORMRet = "OPGET_HED";
+                        break;
+                    }
+
+                case "OFDPSN":
+                    {
+                        WANTEDFORMRet = "ENTEGHAL_DARYAFT_PARDAKHT";
+                        break;
+                    }
+
+                case "TAEED":
+                    {
+                        WANTEDFORMRet = "F_MENU_ASNAD";
+                        break;
+                    }
+
+                case "EFTE":
+                    {
+                        WANTEDFORMRet = "SANAD_EFTETAHIYAH";
+                        break;
+                    }
+
+                case "EKHTE":
+                    {
+                        WANTEDFORMRet = "SANAD_EKHTETAMIYAH";
+                        break;
+                    }
+
+                case "RDFTMOIN":
+                    {
+                        WANTEDFORMRet = "R_DAFTAR_MOIN";
+                        break;
+                    }
+
+                case "HTAF":
+                    {
+                        WANTEDFORMRet = "R_DAFTAR_TAFZILY";
+                        break;
+                    }
+
+                case "RDFTTFKMOIN":
+                    {
+                        WANTEDFORMRet = "F_MENU_DATE_KOL_MOIN_TAFKIK";
+                        break;
+                    }
+
+                case "DFTROOS":
+                    {
+                        WANTEDFORMRet = "DAFTAR_ROOZNAMEH";
+                        break;
+                    }
+
+                case "DFTKOL":
+                    {
+                        WANTEDFORMRet = "R_DAFTAR_KOL";
+                        break;
+                    }
+
+                case "DPDAY":
+                    {
+                        WANTEDFORMRet = "R_DP_DAYLY";
+                        break;
+                    }
+
+                case "NEWYEAR":
+                    {
+                        WANTEDFORMRet = "F_NEWYEAR";
+                        break;
+                    }
+
+                case "SELYEAR":
+                    {
+                        WANTEDFORMRet = "F_SELECTYEAR";
+                        break;
+                    }
+
+                case "DPDAYASH":
+                    {
+                        WANTEDFORMRet = "R_DP_DAYLY_ASHKHAS";
+                        break;
+                    }
+
+                case "TARAZ4":
+                    {
+                        WANTEDFORMRet = "TARAZ_4";
+                        break;
+                    }
+
+                case "RTARAZ4":
+                    {
+                        WANTEDFORMRet = "R_TARAZ_4";
+                        break;
+                    }
+
+                case "TARAZ4M":
+                    {
+                        WANTEDFORMRet = "TARAZ_4_MOIN";
+                        break;
+                    }
+
+                case "TARAZ4M2":
+                    {
+                        WANTEDFORMRet = "TARAZ4_MOIN2";
+                        break;
+                    }
+
+                case "TARAZ4T":
+                    {
+                        WANTEDFORMRet = "TARAZ_4_TAFZ";
+                        break;
+                    }
+
+                case "RTARAZ4T":
+                    {
+                        WANTEDFORMRet = "TARAZ4_TAFZIL";
+                        break;
+                    }
+
+                case "RTARAZ4T2":
+                    {
+                        WANTEDFORMRet = "TARAZ4_TAFZIL2";
+                        break;
+                    }
+
+                case "OTHER":
+                    {
+                        WANTEDFORMRet = "OTHER";
+                        break;
+                    }
+
+                case "SNDHES":
+                    {
+                        WANTEDFORMRet = "DEED_SEARCH";
+                        break;
+                    }
+
+                case "BEDBES":
+                    {
+                        WANTEDFORMRet = "BEDEHKARAN_BESTANKARAN";
+                        break;
+                    }
+
+                case "GETS":
+                    {
+                        WANTEDFORMRet = "PGET_LST_SEARCH";
+                        break;
+                    }
+
+                case "ASNDSO":
+                    {
+                        WANTEDFORMRet = "SORTASNAD";
+                        break;
+                    }
+
+                case "SUDZIAN":
+                    {
+                        WANTEDFORMRet = "SOUDVAZIAN";
+                        break;
+                    }
+
+                case "SMOGH":
+                    {
+                        WANTEDFORMRet = "F_MENU_SANAD_MOGHA";
+                        break;
+                    }
+
+                case "SMOGHFR":
+                    {
+                        WANTEDFORMRet = "F_MENU_SANAD_MOGHA";
+                        break;
+                    }
+
+                case "TKHARED":
+                    {
+                        WANTEDFORMRet = "HEAD_LST_KHAREED_SND";
+                        break;
+                    }
+
+                case "TFRSND":
+                    {
+                        WANTEDFORMRet = "HEAD_LST_FROOSH_SND";
+                        break;
+                    }
+
+                case "SNDPR":
+                    {
+                        WANTEDFORMRet = "F_MENU_ASNAD_PRINT";
+                        break;
+                    }
+
+                case "SPRIN":
+                    {
+                        WANTEDFORMRet = "F_MENU_PRINTHES";
+                        break;
+                    }
+
+                case "MOGH":
+                    {
+                        WANTEDFORMRet = "ADAMTARAZ";
+                        break;
+                    }
+
+                case "SKOL":
+                    {
+                        WANTEDFORMRet = "TOTA_HES_SHEET";
+                        break;
+                    }
+
+                case "FKHAD":
+                    {
+                        WANTEDFORMRet = "HEAD_LST_KHADAMAT";
+                        break;
+                    }
+
+                case "MOS":
+                    {
+                        WANTEDFORMRet = "HEAD_LST_MOSTAGHIM";
+                        break;
+                    }
+
+                case "MOGHA":
+                    {
+                        WANTEDFORMRet = "F_MENU_MOGHAYERAT";
+                        break;
+                    }
+
+                case "SMOGHA":
+                    {
+                        WANTEDFORMRet = "MOGHAYERAT";
+                        break;
+                    }
+
+                case "OSND":
+                    {
+                        WANTEDFORMRet = "ODEED_HEAD";
+                        break;
+                    }
+
+                case "OSNDSER":
+                    {
+                        WANTEDFORMRet = "ENTEGHAL_ASNAD_HESABDARY";
+                        break;
+                    }
+
+                case "GRFRO":
+                    {
+                        WANTEDFORMRet = "GENSANADFROOSH";
+                        break;
+                    }
+
+                case "GRKHO":
+                    {
+                        WANTEDFORMRet = "GENSANADFROOSHGRKHO";
+                        break;
+                    }
+
+                case "GRKHS":
+                    {
+                        WANTEDFORMRet = "GENSANADFROOSHGRKHS";
+                        break;
+                    }
+
+                case "GRVRO":
+                    {
+                        WANTEDFORMRet = "GENSANADFROOSHGRVRO";
+                        break;
+                    }
+
+                case "GRENT":
+                    {
+                        WANTEDFORMRet = "GENSANADFROOSHGRENT";
+                        break;
+                    }
+
+                case "GRKHA":
+                    {
+                        WANTEDFORMRet = "GENSANADFROOSHGRKHA";
+                        break;
+                    }
+
+                case "GRKHR":
+                    {
+                        WANTEDFORMRet = "GRKHR";
+                        break;
+                    }
+
+                case "GRKHZ":
+                    {
+                        WANTEDFORMRet = "GRKHZ";
+                        break;
+                    }
+
+                case "GRVDS":
+                    {
+                        WANTEDFORMRet = "GRVDS";
+                        break;
+                    }
+
+                case "GRANB":
+                    {
+                        WANTEDFORMRet = "GRANB";
+                        break;
+                    }
+
+                case "GENFRBR":
+                    {
+                        WANTEDFORMRet = "GENFRBR";
+                        break;
+                    }
+
+                case "BAZAV":
+                    {
+                        WANTEDFORMRet = "BAZ_AVRAGE";
+                        break;
+                    }
+
+                case "SKHOA":
+                    {
+                        WANTEDFORMRet = "SNADKHOLASAHAMALIAT";
+                        break;
+                    }
+
+                case "RMOIN":
+                    {
+                        WANTEDFORMRet = "R_DAFTAR_MOIN_LIST";
+                        break;
+                    }
+
+                case "TNAM":
+                    {
+                        WANTEDFORMRet = "TARAZNAMAH2";
+                        break;
+                    }
+
+                case "TNAMH":
+                    {
+                        WANTEDFORMRet = "TARAZHES";
+                        break;
+                    }
+
+                case "SERP":
+                    {
+                        WANTEDFORMRet = "DEED_SEARCH_MAIN";
+                        break;
+                    }
+
+                case "DMSGH":
+                    {
+                        WANTEDFORMRet = "DMSGH";
+                        break;
+                    }
+
+                case "SUDP":
+                    {
+                        WANTEDFORMRet = "SUDP";
+                        break;
+                    }
+
+                case "HBGHB":
+                    {
+                        WANTEDFORMRet = "HBGHB";
+                        break;
+                    }
+
+                case "PFKEY":
+                    {
+                        WANTEDFORMRet = "PFKEY";
+                        break;
+                    }
+
+                case "PFHKEY":
+                    {
+                        WANTEDFORMRet = "PFHKEY";
+                        break;
+                    }
+
+                case "MARKAZ":
+                    {
+                        WANTEDFORMRet = "MARKAZ";
+                        break;
+                    }
+
+                case "BEDBESM":
+                    {
+                        WANTEDFORMRet = "BEDBESM";
+                        break;
+                    }
+
+                case "DKOLKH":
+                    {
+                        WANTEDFORMRet = "DKOLKH";
+                        break;
+                    }
+
+                case "HESMAI":
+                    {
+                        WANTEDFORMRet = "F_MENU_KOL_MOIN_DATE_AI";
+                        break;
+                    }
+
+                case "MANABE":
+                    {
+                        WANTEDFORMRet = "MANABE";
+                        break;
+                    }
+
+                case "FACTFRMO":
+                    {
+                        WANTEDFORMRet = "FACTFRMO";
+                        break;
+                    }
+
+                case "FRSKB":
+                    {
+                        WANTEDFORMRet = "FRSKB";
+                        break;
+                    }
+
+                case "KHSKB":
+                    {
+                        WANTEDFORMRet = "KHSKB";
+                        break;
+                    }
+
+                case var @case when @case == "BEDBESM":
+                    {
+                        WANTEDFORMRet = "BEDBESM";
+                        break;
+                    }
+
+                case "FONAR":
+                    {
+                        WANTEDFORMRet = "FONAR";
+                        break;
+                    }
+
+                case "FONARP":
+                    {
+                        WANTEDFORMRet = "FONARP";
+                        break;
+                    }
+
+                case "VISIT_POR":
+                    {
+                        WANTEDFORMRet = "VISIT_POR";
+                        break;
+                    }
+
+                case "moj":
+                    {
+                        WANTEDFORMRet = "moj";
+                        break;
+                    }
+
+                case "LVBF":
+                    {
+                        WANTEDFORMRet = "LVBF";
+                        break;
+                    }
+
+                case "DRIVERH":
+                    {
+                        WANTEDFORMRet = "DRIVERH";
+                        break;
+                    }
+
+                case "KHLS":
+                    {
+                        WANTEDFORMRet = "KHLS";
+                        break;
+                    }
+
+                case "DPSEE":
+                    {
+                        WANTEDFORMRet = "DPSEE";
+                        break;
+                    }
+
+                case var case1 when case1 == "MANABE":
+                    {
+                        WANTEDFORMRet = "MANABE";
+                        break;
+                    }
+
+                case "DECD":
+                    {
+                        WANTEDFORMRet = "DECD";
+                        break;
+                    }
+
+                case "DPDEED":
+                    {
+                        WANTEDFORMRet = "DPDEED";
+                        break;
+                    }
+
+                case "PAYORD":
+                    {
+                        WANTEDFORMRet = "PAYORD";
+                        break;
+                    }
+
+                case "PAYORDL":
+                    {
+                        WANTEDFORMRet = "PAYORDL";
+                        break;
+                    }
+
+                case "SMS":
+                    {
+                        WANTEDFORMRet = "SMS";
+                        break;
+                    }
+
+                case "SUD":
+                    {
+                        WANTEDFORMRet = "SUD";
+                        break;
+                    }
+
+                case "NABZMOSH":
+                    {
+                        WANTEDFORMRet = "NABZMOSH";
+                        break;
+                    }
+
+                case "NABZKAR":
+                    {
+                        WANTEDFORMRet = "NABZKAR";
+                        break;
+                    }
+                // منوی تولید-----------------------------------------------------------
+                case "TOLID":
+                    {
+                        WANTEDFORMRet = "HEAD_MAN";
+                        break;
+                    }
+
+                case "FORMOL":
+                    {
+                        WANTEDFORMRet = "HEAD_MANF";
+                        break;
+                    }
+
+                case "HAVT":
+                    {
+                        WANTEDFORMRet = "HAVLAH_KHORUG";
+                        break;
+                    }
+
+                case "HEXIT":
+                    {
+                        WANTEDFORMRet = "HAVALAH_EXIT";
+                        break;
+                    }
+
+                case "HENTER":
+                    {
+                        WANTEDFORMRet = "HAVALAH_ENTER";
+                        break;
+                    }
+
+                case "MARM":
+                    {
+                        WANTEDFORMRet = "MASRAF_CENTER";
+                        break;
+                    }
+
+                case "HSAYER":
+                    {
+                        WANTEDFORMRet = "HAVALAH_EXIT_SAYER";
+                        break;
+                    }
+
+                case "JAZBD":
+                    {
+                        WANTEDFORMRet = "AONE_SALARY";
+                        break;
+                    }
+
+                case "KARB":
+                    {
+                        WANTEDFORMRet = "KAR_HEAD";
+                        break;
+                    }
+
+                case "AMTOL":
+                    {
+                        WANTEDFORMRet = "F_MENU_DATEAMTOL";
+                        break;
+                    }
+
+                case "AMMAS":
+                    {
+                        WANTEDFORMRet = "AMMAS";
+                        break;
+                    }
+
+                case "MOFGH":
+                    {
+                        WANTEDFORMRet = "SUDZIANGHEMAT";
+                        break;
+                    }
+
+                case "AMA2":
+                    {
+                        WANTEDFORMRet = "SANADPAYANDORAH";
+                        break;
+                    }
+                // منوی خرید فروش-----------------------------------------------------------
+                case "VISITOR":
+                    {
+                        WANTEDFORMRet = "VISITOR";
+                        break;
+                    }
+
+                case "CROSS":
+                    {
+                        WANTEDFORMRet = "GOZARESH_FROOSH_MAHSUL";
+                        break;
+                    }
+
+                case "MFACTFR":
+                    {
+                        WANTEDFORMRet = "MHEAD_LST_FROOSH";
+                        break;
+                    }
+
+                case "CFRALL":
+                    {
+                        WANTEDFORMRet = "FROOSH_COUNTALL";
+                        break;
+                    }
+
+                case "FACTFRSA":
+                    {
+                        WANTEDFORMRet = "FACTFRSA";
+                        break;
+                    }
+
+                case "FACTFR":
+                    {
+                        WANTEDFORMRet = "HEAD_LST_FROOSH";
+                        break;
+                    }
+
+                case "FACTKH":
+                    {
+                        WANTEDFORMRet = "HEAD_LST_KHAREED";
+                        break;
+                    }
+
+                case "FACTKHSA":
+                    {
+                        WANTEDFORMRet = "FACTKHSA";
+                        break;
+                    }
+
+                case "PFACTFR":
+                    {
+                        WANTEDFORMRet = "HEAD_LST_PISHFROOSH";
+                        break;
+                    }
+
+                case "FACTBFR":
+                    {
+                        WANTEDFORMRet = "HEAD_LST_FROOSH_BACK";
+                        break;
+                    }
+
+                case "FACTBKH":
+                    {
+                        WANTEDFORMRet = "HEAD_LST_KH_BACK";
+                        break;
+                    }
+
+                case "SEFARESH":
+                    {
+                        WANTEDFORMRet = "ORDR_HED";
+                        break;
+                    }
+
+                case "FROOSHDAY":
+                    {
+                        WANTEDFORMRet = "R_FROOSH_DAYLY";
+                        break;
+                    }
+
+                case "FROOSHDAY2":
+                    {
+                        WANTEDFORMRet = "R_FROOSH_DAYLY2";
+                        break;
+                    }
+
+                case "FKHAREDAY":
+                    {
+                        WANTEDFORMRet = "R_KHARED_DAYLY";
+                        break;
+                    }
+
+                case "GARDESH":
+                    {
+                        WANTEDFORMRet = "KALAS";
+                        break;
+                    }
+
+                case "STUFLIST":
+                    {
+                        WANTEDFORMRet = "STUF_DEF_LIST";
+                        break;
+                    }
+
+                case "FLIST":
+                    {
+                        WANTEDFORMRet = "LIST_INVOICE_FROOSH";
+                        break;
+                    }
+
+                case "KLIST":
+                    {
+                        WANTEDFORMRet = "LIST_INVOICE_KHARED";
+                        break;
+                    }
+
+                case "LFRAN":
+                    {
+                        WANTEDFORMRet = "LIST_FROOSH_ANBARS";
+                        break;
+                    }
+
+                case "LKHAN":
+                    {
+                        WANTEDFORMRet = "LIST_KHAREED_ANBARS";
+                        break;
+                    }
+
+                case "LPF":
+                    {
+                        WANTEDFORMRet = "LASTPRICE";
+                        break;
+                    }
+
+                case "VAZ":
+                    {
+                        WANTEDFORMRet = "R_GARDESH_KHFR_DAFTAR";
+                        break;
+                    }
+
+                case "FRROOZU":
+                    {
+                        WANTEDFORMRet = "GOZARESH_FROOSH_USER";
+                        break;
+                    }
+
+                case "LFACT":
+                    {
+                        WANTEDFORMRet = "Q_LIST_DALY";
+                        break;
+                    }
+
+                case "FGROO":
+                    {
+                        WANTEDFORMRet = "F_MENU_FROOSH";
+                        break;
+                    }
+
+                case "RAAS":
+                    {
+                        WANTEDFORMRet = "RAAS";
+                        break;
+                    }
+
+                case "OFACT":
+                    {
+                        WANTEDFORMRet = "OHEAD_LST_FROOSH";
+                        break;
+                    }
+
+                case "OFACTKH":
+                    {
+                        WANTEDFORMRet = "OHEAD_LST_KHADAMAT";
+                        break;
+                    }
+
+                case "CRREPF":
+                    {
+                        WANTEDFORMRet = "HEAD_SERCH_MAIN";
+                        break;
+                    }
+
+                case "AMFDAY":
+                    {
+                        WANTEDFORMRet = "AMFDAY";
+                        break;
+                    }
+
+                case "FPDESIGN":
+                    {
+                        WANTEDFORMRet = "FPFORMAT";
+                        break;
+                    }
+
+                case "RORD":
+                    {
+                        WANTEDFORMRet = "RORD";
+                        break;
+                    }
+
+                case "BFAC":
+                    {
+                        WANTEDFORMRet = "BFAC";
+                        break;
+                    }
+
+                case "ESLAH":
+                    {
+                        WANTEDFORMRet = "ESLAH";
+                        break;
+                    }
+
+                case "FRCUST":
+                    {
+                        WANTEDFORMRet = "FRCUST";
+                        break;
+                    }
+
+                case "TFTMLOCK":
+                    {
+                        WANTEDFORMRet = "TFTMLOCK";
+                        break;
+                    }
+
+                case "CRREPFA":
+                    {
+                        WANTEDFORMRet = "CRREPFA";
+                        break;
+                    }
+
+                case "SAVEREP":
+                    {
+                        WANTEDFORMRet = "SAVEREP";
+                        break;
+                    }
+
+                case "DARKHR":
+                    {
+                        WANTEDFORMRet = "DARKHR";
+                        break;
+                    }
+
+                case "DARKHRLIS":
+                    {
+                        WANTEDFORMRet = "DARKHRLIS";
+                        break;
+                    }
+
+                case "BRFR":
+                    {
+                        WANTEDFORMRet = "BRFR";
+                        break;
+                    }
+
+                case "BARGI":
+                    {
+                        WANTEDFORMRet = "BARGI";
+                        break;
+                    }
+
+                case "RDFTKHFRA4":
+                    {
+                        WANTEDFORMRet = "FRKMA4";
+                        break;
+                    }
+
+                case "LFKBTF":
+                    {
+                        WANTEDFORMRet = "LFKBTF";
+                        break;
+                    }
+
+                case "LISTKHG":
+                    {
+                        WANTEDFORMRet = "LISTKHG";
+                        break;
+                    }
+
+                case "LISTFRG":
+                    {
+                        WANTEDFORMRet = "LISTFRG";
+                        break;
+                    }
+
+                case "VISITORS":
+                    {
+                        WANTEDFORMRet = "VISITORS";
+                        break;
+                    }
+
+                case "CHVBV":
+                    {
+                        WANTEDFORMRet = "CHVBV";
+                        break;
+                    }
+
+                case "FRRDTL":
+                    {
+                        WANTEDFORMRet = "FRRDTL";
+                        break;
+                    }
+
+                case "USERFR":
+                    {
+                        WANTEDFORMRet = "USERFR";
+                        break;
+                    }
+
+                case "KHCUST":
+                    {
+                        WANTEDFORMRet = "KHCUST";
+                        break;
+                    }
+
+                case "SMS_VIP":
+                    {
+                        WANTEDFORMRet = "SMS_VIP";
+                        break;
+                    }
+
+                case var case2 when case2 == "VISITORS":
+                    {
+                        WANTEDFORMRet = "VISITORS";
+                        break;
+                    }
+
+                case var case3 when case3 == "BARGI":
+                    {
+                        WANTEDFORMRet = "BARGI";
+                        break;
+                    }
+
+                case var case4 when case4 == "FRRDTL":
+                    {
+                        WANTEDFORMRet = "FRRDTL";
+                        break;
+                    }
+
+                case "VISITDLV":
+                    {
+                        WANTEDFORMRet = "VISITDLV";
+                        break;
+                    }
+                // Case "FAM":        WANTEDFORM = "FAM"
+                case "VISITKAL":
+                    {
+                        WANTEDFORMRet = "VISITKAL";
+                        break;
+                    }
+
+                case "VISITKALMA":
+                    {
+                        WANTEDFORMRet = "VISITKALMA";
+                        break;
+                    }
+
+                case "VISITROUT":
+                    {
+                        WANTEDFORMRet = "VISITROUT";
+                        break;
+                    }
+
+                case "VISITGOL":
+                    {
+                        WANTEDFORMRet = "VISITGOL";
+                        break;
+                    }
+
+                case "VISITGOLMON":
+                    {
+                        WANTEDFORMRet = "VISITGOLMON";
+                        break;
+                    }
+
+                case "VISITGOLMONR":
+                    {
+                        WANTEDFORMRet = "VISITGOLMONR";
+                        break;
+                    }
+
+                case "VISITGOLG":
+                    {
+                        WANTEDFORMRet = "VISITGOLG";
+                        break;
+                    }
+
+                case "VISITGOLMONG":
+                    {
+                        WANTEDFORMRet = "VISITGOLMONG";
+                        break;
+                    }
+
+                case "VISITGOLMONGR":
+                    {
+                        WANTEDFORMRet = "VISITGOLMONGR";
+                        break;
+                    }
+
+                case var case5 when case5 == "FRCUST":
+                    {
+                        WANTEDFORMRet = "FRCUST";
+                        break;
+                    }
+
+                case var case6 when case6 == "KHCUST":
+                    {
+                        WANTEDFORMRet = "KHCUST";
+                        break;
+                    }
+
+                case var case7 when case7 == "SMS_VIP":
+                    {
+                        WANTEDFORMRet = "SMS_VIP";
+                        break;
+                    }
+
+                case "VISIT_DAY":
+                    {
+                        WANTEDFORMRet = "VISIT_DAY";
+                        break;
+                    }
+
+                case "ESLAHRF":
+                    {
+                        WANTEDFORMRet = "ESLAHRF";
+                        break;
+                    }
+
+                case "ESLAHR":
+                    {
+                        WANTEDFORMRet = "ESLAHR";
+                        break;
+                    }
+
+                case "ESLAHH":
+                    {
+                        WANTEDFORMRet = "ESLAHH";
+                        break;
+                    }
+
+                case "ESLAHV":
+                    {
+                        WANTEDFORMRet = "ESLAHV";
+                        break;
+                    }
+
+                case "ESLAHE":
+                    {
+                        WANTEDFORMRet = "ESLAHE";
+                        break;
+                    }
+
+                case "ESLAHS":
+                    {
+                        WANTEDFORMRet = "ESLAHS";
+                        break;
+                    }
+
+                case "ESLAHM":
+                    {
+                        WANTEDFORMRet = "ESLAHM";
+                        break;
+                    }
+
+                case "ESLAHA":
+                    {
+                        WANTEDFORMRet = "ESLAHA";
+                        break;
+                    }
+
+                case "ESLAHK":
+                    {
+                        WANTEDFORMRet = "ESLAHK";
+                        break;
+                    }
+
+                case var case8 when case8 == "VISIT_POR":
+                    {
+                        WANTEDFORMRet = "VISIT_POR";
+                        break;
+                    }
+
+                case "VISIT_MAS":
+                    {
+                        WANTEDFORMRet = "VISIT_MAS";
+                        break;
+                    }
+
+                case var case9 when case9 == "FONAR":
+                    {
+                        WANTEDFORMRet = "FONAR";
+                        break;
+                    }
+
+                case var case10 when case10 == "FONARP":
+                    {
+                        WANTEDFORMRet = "FONARP";
+                        break;
+                    }
+
+                case "FRBKA":
+                    {
+                        WANTEDFORMRet = "FRBKA";
+                        break;
+                    }
+
+                case "CHAPM":
+                    {
+                        WANTEDFORMRet = "CHAPM";
+                        break;
+                    }
+
+                case "LVBP":
+                    {
+                        WANTEDFORMRet = "LVBP";
+                        break;
+                    }
+
+                case "CUSTNP":
+                    {
+                        WANTEDFORMRet = "CUSTNP";
+                        break;
+                    }
+
+                case var case11 when case11 == "KHLS":
+                    {
+                        WANTEDFORMRet = "KHLS";
+                        break;
+                    }
+
+                case "CUSTEN":
+                    {
+                        WANTEDFORMRet = "CUSTEN";
+                        break;
+                    }
+
+                case var case12 when case12 == "DPSEE":
+                    {
+                        WANTEDFORMRet = "DPSEE";
+                        break;
+                    }
+
+                case "FRMOST":
+                    {
+                        WANTEDFORMRet = "FRMOST";
+                        break;
+                    }
+
+                case "TKHPISH":
+                    {
+                        WANTEDFORMRet = "TKHPISH";
+                        break;
+                    }
+
+                case "ESLAHKHAD":
+                    {
+                        WANTEDFORMRet = "ESLAHKHAD";
+                        break;
+                    }
+
+                case "FASLIBR":
+                    {
+                        WANTEDFORMRet = "FASLIBR";
+                        break;
+                    }
+
+                case "CKRALL":
+                    {
+                        WANTEDFORMRet = "CKRALL";
+                        break;
+                    }
+
+                case "RESERV":
+                    {
+                        WANTEDFORMRet = "RESERV";
+                        break;
+                    }
+
+                case "VISITONE":
+                    {
+                        WANTEDFORMRet = "VISITONE";
+                        break;
+                    }
+
+                case "FASLIKHBR":
+                    {
+                        WANTEDFORMRet = "FASLIKHBR";
+                        break;
+                    }
+
+                case "KEYTPF":
+                    {
+                        WANTEDFORMRet = "KEYTPF";
+                        break;
+                    }
+
+                case "CRMMAIN":
+                    {
+                        WANTEDFORMRet = "CRMMAIN";
+                        break;
+                    }
+                // منوی  چك---------------------------------------------------------
+                case "CHEKD":
+                    {
+                        WANTEDFORMRet = "PAY_GETD";
+                        break;
+                    }
+
+                case "CHEKP":
+                    {
+                        WANTEDFORMRet = "PAY_GETP";
+                        break;
+                    }
+
+                case "VCHD":
+                    {
+                        WANTEDFORMRet = "CHKREC_H";
+                        break;
+                    }
+
+                case "VCHP":
+                    {
+                        WANTEDFORMRet = "CHREC_HP";
+                        break;
+                    }
+
+                case "CHKDLIST":
+                    {
+                        WANTEDFORMRet = "CHKE_DLIST";
+                        break;
+                    }
+
+                case "CHKPLIST":
+                    {
+                        WANTEDFORMRet = "CHEK_PLIST";
+                        break;
+                    }
+
+                case "SERIAL":
+                    {
+                        WANTEDFORMRet = "F_MENU_SERILA";
+                        break;
+                    }
+
+                case "TCHEK":
+                    {
+                        WANTEDFORMRet = "COD_HESAB";
+                        break;
+                    }
+
+                case "FORMAT":
+                    {
+                        WANTEDFORMRet = "FORMAT";
+                        break;
+                    }
+
+                case "CHPRN":
+                    {
+                        WANTEDFORMRet = "HED_SODUR";
+                        break;
+                    }
+
+                case "PCHS":
+                    {
+                        WANTEDFORMRet = "CHEK_PLISTS";
+                        break;
+                    }
+
+                case "DCHS":
+                    {
+                        WANTEDFORMRet = "CHEK_DLISTS";
+                        break;
+                    }
+
+                case "PCHSS":
+                    {
+                        WANTEDFORMRet = "CHEK_PLISTS";
+                        break;
+                    }
+
+                case "DCHSS":
+                    {
+                        WANTEDFORMRet = "DCHSS";
+                        break;
+                    }
+
+                case "CHKM":
+                    {
+                        WANTEDFORMRet = "CHEK_MOGUD";
+                        break;
+                    }
+
+                case "CHKB":
+                    {
+                        WANTEDFORMRet = "CHEK_BARGASHTI_MAIN";
+                        break;
+                    }
+
+                case "CHKV":
+                    {
+                        WANTEDFORMRet = "CHEK_VOSUL_LES";
+                        break;
+                    }
+
+                case "CHKVA":
+                    {
+                        WANTEDFORMRet = "CHEK_VLISTALL";
+                        break;
+                    }
+
+                case "CHKP":
+                    {
+                        WANTEDFORMRet = "CHK_V_PRINT";
+                        break;
+                    }
+
+                case "FVP":
+                    {
+                        WANTEDFORMRet = "FORMAT_HESAB";
+                        break;
+                    }
+
+                case "FPV":
+                    {
+                        WANTEDFORMRet = "CHECK_PVLIST";
+                        break;
+                    }
+
+                case "MONCH":
+                    {
+                        WANTEDFORMRet = "CHEK_MON";
+                        break;
+                    }
+
+                case "BEHESAB":
+                    {
+                        WANTEDFORMRet = "CHKREC_HES";
+                        break;
+                    }
+
+                case "GBEHESAB":
+                    {
+                        WANTEDFORMRet = "CHRE_LSPH";
+                        break;
+                    }
+
+                case "RCHEKD":
+                    {
+                        WANTEDFORMRet = "F_MENU_CHEKRCHEKD";
+                        break;
+                    }
+
+                case "RCHEKP":
+                    {
+                        WANTEDFORMRet = "F_MENU_CHEKRCHEKP";
+                        break;
+                    }
+
+                case "CHAPCHEK":
+                    {
+                        WANTEDFORMRet = "CHAPCHEK";
+                        break;
+                    }
+
+                case "CHKPSS":
+                    {
+                        WANTEDFORMRet = "CHKPSS";
+                        break;
+                    }
+
+                case var case13 when case13 == "CHVBV":
+                    {
+                        WANTEDFORMRet = "CHVBV";
+                        break;
+                    }
+
+                case "CHVBVP":
+                    {
+                        WANTEDFORMRet = "CHVBVP";
+                        break;
+                    }
+
+                case "MONCHP":
+                    {
+                        WANTEDFORMRet = "MONCHP";
+                        break;
+                    }
+
+                case "CHVZ":
+                    {
+                        WANTEDFORMRet = "CHVZ";
+                        break;
+                    }
+
+                case var case14 when case14 == "RCHEKD":
+                    {
+                        WANTEDFORMRet = "F_MENU_CHEKRCHEKD";
+                        break;
+                    }
+
+                case var case15 when case15 == "RCHEKP":
+                    {
+                        WANTEDFORMRet = "F_MENU_CHEKRCHEKP";
+                        break;
+                    }
+                // منوی انبار-----------------------------------------------------------
+                case "ESWAP":
+                    {
+                        WANTEDFORMRet = "HEAD_LST_ENTEGHAL";
+                        break;
+                    }
+
+                case "MOGUKOL":
+                    {
+                        WANTEDFORMRet = "R_MOGUDI_ANBARHA";
+                        break;
+                    }
+
+                case "MOGUKOLLIST":
+                    {
+                        WANTEDFORMRet = "MOGUDI_ANBARHA_LIST";
+                        break;
+                    }
+
+                case "BAZANB":
+                    {
+                        WANTEDFORMRet = "BAZ_ANBAR";
+                        break;
+                    }
+
+                case "AKMOGO":
+                    {
+                        WANTEDFORMRet = "AK_MOGUDI_ANBAR_LIST";
+                        break;
+                    }
+
+                case "AKMOGOR":
+                    {
+                        WANTEDFORMRet = "R_AK_MOGUDI_ANBAR";
+                        break;
+                    }
+
+                case "AKMOGO2":
+                    {
+                        WANTEDFORMRet = "AK_MOGUDI_ANBAR_LIST";
+                        break;
+                    }
+
+                case "AKMOGOR2":
+                    {
+                        WANTEDFORMRet = "R_AK_MOGUDI_ANBAR";
+                        break;
+                    }
+
+                case "KARTR":
+                    {
+                        WANTEDFORMRet = "R_KA_KALA";
+                        break;
+                    }
+
+                case "KARTR2":
+                    {
+                        WANTEDFORMRet = "KARTR2";
+                        break;
+                    }
+
+                case "LSTRAZ":
+                    {
+                        WANTEDFORMRet = "TARAZ_ANBAR_KOL";
+                        break;
+                    }
+
+                case "RSTRAZ":
+                    {
+                        WANTEDFORMRet = "R_TARAZ_ANBARHA";
+                        break;
+                    }
+
+                case "LSTRAZA":
+                    {
+                        WANTEDFORMRet = "TARAZ_ANBAR_KHAS";
+                        break;
+                    }
+
+                case "RSTRAZA":
+                    {
+                        WANTEDFORMRet = "R_TARAZ_ANBAR_KHAS";
+                        break;
+                    }
+
+                case "RASID":
+                    {
+                        WANTEDFORMRet = "HEAD_LST_RASID";
+                        break;
+                    }
+
+                case "HAVL":
+                    {
+                        WANTEDFORMRet = "HEAD_LST_HAVL";
+                        break;
+                    }
+
+                case "ANGD":
+                    {
+                        WANTEDFORMRet = "ANBGRD_HEAD";
+                        break;
+                    }
+
+                case "RTARDTL":
+                    {
+                        WANTEDFORMRet = "RTARDTL";
+                        break;
+                    }
+
+                case "RBRFR":
+                    {
+                        WANTEDFORMRet = "RBRFR";
+                        break;
+                    }
+
+                case "ANBBAZ":
+                    {
+                        WANTEDFORMRet = "ANBBAZ";
+                        break;
+                    }
+
+                case "TANBGRP":
+                    {
+                        WANTEDFORMRet = "TANBGRP";
+                        break;
+                    }
+
+                case "HAG":
+                    {
+                        WANTEDFORMRet = "HAG";
+                        break;
+                    }
+
+                case "SEEENT":
+                    {
+                        WANTEDFORMRet = "SEEENT";
+                        break;
+                    }
+
+                case "SAYERHAV":
+                    {
+                        WANTEDFORMRet = "SAYERHAV";
+                        break;
+                    }
+
+                case "ANBMERG":
+                    {
+                        WANTEDFORMRet = "ANBMERG";
+                        break;
+                    }
+
+                case "TDBARG":
+                    {
+                        WANTEDFORMRet = "TDBARG";
+                        break;
+                    }
+
+                case "VBP":
+                    {
+                        WANTEDFORMRet = "VBP_CHECK";
+                        break;
+                    }
+
+                case "TICBARGILES":
+                    {
+                        WANTEDFORMRet = "TICBARGILES";
+                        break;
+                    }
+
+                case "SEARCHMO":
+                    {
+                        WANTEDFORMRet = "SEARCHMO";
+                        break;
+                    }
+
+                // منوی حقوق-----------------------------------------------------------
+                case "PERS":
+                    {
+                        WANTEDFORMRet = "PERSON";
+                        break;
+                    }
+
+                case "WORK":
+                    {
+                        WANTEDFORMRet = "WORKHEAD";
+                        break;
+                    }
+
+                case "WOKPER":
+                    {
+                        WANTEDFORMRet = "WORKING";
+                        break;
+                    }
+
+                case "LISTWOR":
+                    {
+                        WANTEDFORMRet = "list_salary";
+                        break;
+                    }
+
+                case "LISTWOR2":
+                    {
+                        WANTEDFORMRet = "list_salary2";
+                        break;
+                    }
+
+                case "LISTBIM":
+                    {
+                        WANTEDFORMRet = "R_LIST_BIMEH";
+                        break;
+                    }
+
+                case "LISTMAL":
+                    {
+                        WANTEDFORMRet = "R_LIST_maliat";
+                        break;
+                    }
+
+                case "FISH1":
+                    {
+                        WANTEDFORMRet = "FISH_HOGHUGH";
+                        break;
+                    }
+
+                case "FISH2":
+                    {
+                        WANTEDFORMRet = "FISH2";
+                        break;
+                    }
+
+                case "SALAR":
+                    {
+                        WANTEDFORMRet = "R_LIST_salary";
+                        break;
+                    }
+
+                case "DISK":
+                    {
+                        WANTEDFORMRet = "ERSAL_SANAD";
+                        break;
+                    }
+
+                case "HOKM":
+                    {
+                        WANTEDFORMRet = "PHOKM";
+                        break;
+                    }
+
+                case "MORAKH":
+                    {
+                        WANTEDFORMRet = "PMORAKH";
+                        break;
+                    }
+
+                case "GHARA":
+                    {
+                        WANTEDFORMRet = "PGHARAR";
+                        break;
+                    }
+
+                case "SAND":
+                    {
+                        WANTEDFORMRet = "SAND";
+                        break;
+                    }
+
+                case "VAM":
+                    {
+                        WANTEDFORMRet = "VAM";
+                        break;
+                    }
+
+                case "TASV":
+                    {
+                        WANTEDFORMRet = "PENDJOB";
+                        break;
+                    }
+
+                case "EP":
+                    {
+                        WANTEDFORMRet = "EYDY_PADASH";
+                        break;
+                    }
+
+                case "DISKM":
+                    {
+                        WANTEDFORMRet = "DISKM";
+                        break;
+                    }
+                // منوی برنامه ریزی-----------------------------------------------------------
+                case "PROG":
+                    {
+                        WANTEDFORMRet = "PRGHEAD";
+                        break;
+                    }
+
+                case "CH1":
+                    {
+                        WANTEDFORMRet = "CHRT_HES_KOL";
+                        break;
+                    }
+
+                case "CT1":
+                    {
+                        WANTEDFORMRet = "F_MENU_MON";
+                        break;
+                    }
+
+                case "CT2":
+                    {
+                        WANTEDFORMRet = "CAMAT";
+                        break;
+                    }
+
+                case "CT3":
+                    {
+                        WANTEDFORMRet = "CT3";
+                        break;
+                    }
+
+                case "CT4":
+                    {
+                        WANTEDFORMRet = "CT4";
+                        break;
+                    }
+
+                case "CT5":
+                    {
+                        WANTEDFORMRet = "CT4";
+                        break;
+                    }
+                // منوی هتلی-----------------------------------------------------------
+                case "MEH":
+                    {
+                        WANTEDFORMRet = "R_LIST_MEHMAN";
+                        break;
+                    }
+
+                case "HOT":
+                    {
+                        WANTEDFORMRet = "MEHMAN";
+                        break;
+                    }
+
+                case "ROM":
+                    {
+                        WANTEDFORMRet = "ROOM";
+                        break;
+                    }
+
+                case "RACK":
+                    {
+                        WANTEDFORMRet = "RACKROOM";
+                        break;
+                    }
+                // منوی سیستم-----------------------------------------------------------
+                case "ABOUT":
+                    {
+                        WANTEDFORMRet = "ABOUT";
+                        break;
+                    }
+
+                case "SYS":
+                    {
+                        WANTEDFORMRet = "SAZMAN";
+                        break;
+                    }
+
+                case "nuser":
+                    {
+                        WANTEDFORMRet = "users";
+                        break;
+                    }
+
+                case "npass":
+                    {
+                        WANTEDFORMRet = "NEWPASSWORD";
+                        break;
+                    }
+
+                case "nname":
+                    {
+                        WANTEDFORMRet = "USER_CHANGE";
+                        break;
+                    }
+
+                case "permi":
+                    {
+                        WANTEDFORMRet = "F_USER_PERMITION FORMS";
+                        break;
+                    }
+
+                case "ersal":
+                    {
+                        WANTEDFORMRet = "F_ERSAL";
+                        break;
+                    }
+
+                case "dar":
+                    {
+                        WANTEDFORMRet = "F_DARYAFT";
+                        break;
+                    }
+
+                case "KONT":
+                    {
+                        WANTEDFORMRet = "FORM11";
+                        break;
+                    }
+
+                case "DEFA":
+                    {
+                        WANTEDFORMRet = "DEFAULT";
+                        break;
+                    }
+
+                case "TR_FR":
+                    {
+                        WANTEDFORMRet = "TR_FR";
+                        break;
+                    }
+
+                case "TR_KH":
+                    {
+                        WANTEDFORMRet = "TR_KH";
+                        break;
+                    }
+
+                case "TR_KHB":
+                    {
+                        WANTEDFORMRet = "TR_KHB";
+                        break;
+                    }
+
+                case "TR_FRB":
+                    {
+                        WANTEDFORMRet = "TR_FRB";
+                        break;
+                    }
+
+                case "TR_PFRB":
+                    {
+                        WANTEDFORMRet = "TR_PFRB";
+                        break;
+                    }
+
+                case "TR_PGL":
+                    {
+                        WANTEDFORMRet = "TR_PGL";
+                        break;
+                    }
+
+                case "TR_KHAD":
+                    {
+                        WANTEDFORMRet = "TR_KHAD";
+                        break;
+                    }
+
+                case "TR_MAVA":
+                    {
+                        WANTEDFORMRet = "TR_MAVA";
+                        break;
+                    }
+
+                case "TR_SMAVA":
+                    {
+                        WANTEDFORMRet = "TR_SMAVA";
+                        break;
+                    }
+
+                case "TR_TOL":
+                    {
+                        WANTEDFORMRet = "TR_TOL";
+                        break;
+                    }
+
+                case "TR_HOT":
+                    {
+                        WANTEDFORMRet = "TR_HOT";
+                        break;
+                    }
+
+                case "TR_FRH":
+                    {
+                        WANTEDFORMRet = "TR_FRH";
+                        break;
+                    }
+
+                case "TR_KHH":
+                    {
+                        WANTEDFORMRet = "TR_KHH";
+                        break;
+                    }
+
+                case "TR_ENT":
+                    {
+                        WANTEDFORMRet = "TR_ENT";
+                        break;
+                    }
+
+                case "TR_DED":
+                    {
+                        WANTEDFORMRet = "TR_DED";
+                        break;
+                    }
+
+                case "TR_STU":
+                    {
+                        WANTEDFORMRet = "TR_STU";
+                        break;
+                    }
+
+                case "TR_SAZ":
+                    {
+                        WANTEDFORMRet = "TR_SAZ";
+                        break;
+                    }
+
+                case "TR_HOK":
+                    {
+                        WANTEDFORMRet = "TR_HOK";
+                        break;
+                    }
+
+                case "TR_MOR":
+                    {
+                        WANTEDFORMRet = "TR_MOR";
+                        break;
+                    }
+
+                case "ERSOF":
+                    {
+                        WANTEDFORMRet = "ERSOF";
+                        break;
+                    }
+
+                case "DAROF":
+                    {
+                        WANTEDFORMRet = "DAROF";
+                        break;
+                    }
+                // منوی تالار-----------------------------------------------------------
+                case "PAZ":
+                    {
+                        WANTEDFORMRet = "PAZIRESHTALAR";
+                        break;
+                    }
+
+                case "PRAK":
+                    {
+                        WANTEDFORMRet = "RACKTALAR";
+                        break;
+                    }
+
+                case "TAL":
+                    {
+                        WANTEDFORMRet = "TALARS_TARIF";
+                        break;
+                    }
+                // پذیرش تعمیرگاه-----------------------------------------------------------
+                case "PTM":
+                    {
+                        WANTEDFORMRet = "PTAM";
+                        break;
+                    }
+
+                case "PKINCO":
+                    {
+                        WANTEDFORMRet = "PKINCO";
+                        break;
+                    }
+
+                case "AMVAL":
+                    {
+                        WANTEDFORMRet = "AMVAL";
+                        break;
+                    }
+                // بودجه-----------------------------------------------------------
+                case "MMTAKH":
+                    {
+                        WANTEDFORMRet = "MMTAKH";
+                        break;
+                    }
+
+                case "ssmt":
+                    {
+                        WANTEDFORMRet = "ssmt";
+                        break;
+                    }
+
+                case "crmt":
+                    {
+                        WANTEDFORMRet = "crmt";
+                        break;
+                    }
+
+                case "TGUSER":
+                    {
+                        WANTEDFORMRet = "TGUSER";
+                        break;
+                    }
+            }
+
+            return WANTEDFORMRet;
+        }
+        public static bool LETSGO(string frm)
+        {
+            bool returnValue = false;
+            var RST = dbms.DoGetDataSQL<Custom_LETSGO>("SELECT   dbo.TFORMS.FORMNAME, dbo.SAL_CHEK.USERCO, dbo.SAL_CHEK.RUN, dbo.SAL_CHEK.SEE, dbo.SAL_CHEK.INP, dbo.SAL_CHEK.UPD, dbo.SAL_CHEK.DEL FROM  dbo.TFORMS INNER JOIN  dbo.SAL_CHEK ON dbo.TFORMS.IDH = dbo.SAL_CHEK.OBJECT INNER JOIN dbo.SALA_DTL ON dbo.SAL_CHEK.USERCO = dbo.SALA_DTL.IDD WHERE     (dbo.TFORMS.FORMNAME = '" + WANTEDFORM(frm) + "') AND (dbo.SAL_CHEK.USERCO = " + Baseknow.USERCOD + " )").FirstOrDefault();
+            if (RST != null)
+            {
+                if ((bool)RST.RUN)
+                {
+                    returnValue = true;
+                }
+                else
+                {
+                    returnValue = false;
+                }
+            }
+            else
+            {
+                returnValue = false;
+            }
+            return returnValue;
+        }
+        public static string GETKALANAME(double CODE)
+        {
+            string returnValue = "";
+            var RRST = dbms.DoGetDataSQL<Custom_STUF_DEF>("SELECT CODE,NAME FROM STUF_DEF WHERE (CODE = " + Convert.ToString(CODE) + ")").FirstOrDefault();
+            if (RRST != null)
+            {
+                if (string.IsNullOrEmpty(RRST.NAME))
+                {
+                    returnValue = " ";
+                }
+                else
+                {
+                    returnValue = RRST.NAME;
+                }
+            }
+            else
+            {
+                returnValue = " ";
+            }
+            return returnValue;
+        }
+        public static void HAVEprice(int NUMB, int TGG, long PEID)
+        {
+            //The EOF Has Removed From Down Line in Query
+            var rst2 = dbms.DoGetDataSQL<Custom_INVO_LST>("SELECT   CODE FROM INVO_LST WHERE     (dbo.INVO_LST.TAG =" + System.Convert.ToString(TGG) + ") AND (dbo.INVO_LST.NUMBER = " + System.Convert.ToString(NUMB) + ") ").ToList();
+            foreach (var item in rst2)
+            {
+                var rst = dbms.DoGetDataSQL<Custom_INVO_LST>("SELECT     dbo.STUF_DEF.CODE FROM         dbo.STUF_DEF LEFT OUTER JOIN    dbo.PRICE_ELAMIE_DTL ON dbo.STUF_DEF.PGID = dbo.PRICE_ELAMIE_DTL.PGID WHERE     (dbo.PRICE_ELAMIE_DTL.PEPID = 5) AND (dbo.STUF_DEF.CODE = N'" + item.CODE + "')").FirstOrDefault();
+                //if (ReferenceEquals(rst.CODE, null))
+                if (ReferenceEquals(rst, null))
+                {
+                    //Red :#FFFF0000   Black : #FF000000
+                    new Msgwin(true, $"کالای : {item.CODE} - {GETKALANAME(Convert.ToDouble(item.CODE))}\n  دارای گروه بندی قیمیتی نیست یا  گروه آن  در اعلامیه قیمت تعریف نشده.", "#FFFF0000").Show();
+                }
+            }
+        }
+
+        public static void HAVEprice_wpf(int NUMB, int TGG, long PEID)
+        {
+            //The EOF Has Removed From Down Line in Query
+            var rst2 = dbms.DoGetDataSQL<Custom_INVO_LST>("SELECT   CODE FROM INVO_LST_TMP_WPF WHERE     (dbo.INVO_LST_TMP_WPF.TAG =" + System.Convert.ToString(TGG) + ") AND (dbo.INVO_LST_TMP_WPF.NUMBER = " + System.Convert.ToString(NUMB) + ") ").ToList();
+            foreach (var item in rst2)
+            {
+                var rst = dbms.DoGetDataSQL<Custom_INVO_LST>("SELECT     dbo.STUF_DEF.CODE FROM         dbo.STUF_DEF LEFT OUTER JOIN    dbo.PRICE_ELAMIE_DTL ON dbo.STUF_DEF.PGID = dbo.PRICE_ELAMIE_DTL.PGID WHERE     (dbo.PRICE_ELAMIE_DTL.PEPID = 5) AND (dbo.STUF_DEF.CODE = N'" + item.CODE + "')").FirstOrDefault();
+                //if (ReferenceEquals(rst.CODE, null))
+                if (ReferenceEquals(rst, null))
+                {
+                    //Red :#FFFF0000   Black : #FF000000
+                    new Msgwin(true, $"کالای : {item.CODE} - {GETKALANAME(Convert.ToDouble(item.CODE))}\n  دارای گروه بندی قیمیتی نیست یا  گروه آن  در اعلامیه قیمت تعریف نشده.", "#FFFF0000").Show();
+                }
+            }
+        }
+        public static double Getmin(int ANBAR, string COD)
+        {
+            double returnValue = 0;
+            var RST = dbms.DoGetDataSQL<Custom_StuFSK>("SELECT     MIN_M FROM dbo.stuf_fsk WHERE     anbar  = " + System.Convert.ToString(ANBAR) + " and code = '" + COD + "'").ToList();
+            if (RST.Count > 0)
+            {
+                if (RST.Select(r => r.MIN_M).FirstOrDefault() == null || RST.Select(r => r.MIN_M).FirstOrDefault().ToString() == "")
+                {
+                    returnValue = 0;
+                }
+                else
+                {
+                    returnValue = Convert.ToDouble(RST.Select(r => r.MIN_M).FirstOrDefault());
+                }
+            }
+            else
+            {
+                returnValue = 0;
+            }
+            return returnValue;
+        }
+        public static int Getmodat(int MODAT_PPID)
+        {
+            var RST = dbms.DoGetDataSQL<Custom_modat>("SELECT PPID, MODAT FROM PRICE_PAYNO where ppid = " + System.Convert.ToString(MODAT_PPID)).ToList();
+            if (RST.Count > 0)
+            {
+                return System.Convert.ToInt32(RST.Select(x => x.MODAT).FirstOrDefault());
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        public static string Fixpi(string ST)
+        {
+            string FixpiRet = default;
+            int I;
+            int KeyA;
+            string kar;
+            var NUS = default(string);
+            if (Strings.Mid(Baseknow.OPTIONSS, 48, 1) == "5")
+            {
+                var loopTo = Strings.Len(ST);
+                for (I = 1; I <= loopTo; I++)
+                {
+                    kar = Strings.Mid(ST, I, 1);
+                    KeyA = Strings.AscW(kar);
+                    switch (KeyA)
+                    {
+                        case 1740:
+                            {
+                                KeyA = 1610;
+                                break;
+                            }
+                        case 1705:
+                            {
+                                KeyA = 1603;
+                                break;
+                            }
+                    }
+                    NUS = NUS + Strings.ChrW(KeyA);
+                }
+                FixpiRet = NUS;
+            }
+            else
+            {
+                FixpiRet = ST;
+            }
+            return FixpiRet;
+        }
+
+        public static string Fixp(string ST)
+        {
+            int i = 0;
+            int KeyA = 0;
+            string kar = "";
+            string NUS = "";
+            if (Strings.Mid(System.Convert.ToString(Baseknow.OPTIONSS), 48, 1) == "5")
+            {
+                for (i = 1; i <= ST.Length; i++)
+                {
+                    kar = ST.Substring(i - 1, 1);
+                    KeyA = Strings.AscW(kar);
+                    switch (KeyA)
+                    {
+                        case 1610:
+                        case 1609:
+                        case 1656:
+                        case 1744:
+                        case 1741:
+                            KeyA = 1740;
+                            break;
+                        case 1603:
+                        case 1706:
+                        case 1890:
+                        case 1708:
+                        case 1707:
+                            KeyA = 1705;
+                            break;
+                    }
+                    NUS = NUS + System.Convert.ToString(Strings.ChrW(KeyA));
+                }
+                return NUS;
+            }
+            else
+            {
+                return ST;
+            }
+
+        }
+        public static double GETNESBAT(string CODEF, int VAHEDF)
+        {
+            var Rst = dbms.DoGetDataSQL<double?>("SELECT     NESBAT FROM dbo.MODULE_D WHERE     (CODE = N'" + CODEF + "') AND (VAHED = " + System.Convert.ToString(VAHEDF) + ")").FirstOrDefault();
+            if (Rst == 0 || Rst is null)
+            {
+                return 1;
+            }
+            else
+            {
+                return System.Convert.ToDouble(Rst);
+            }
+        }
+        public static object GETGHeymatKala(int NUMB, int tgg, long DTT, int MODAT_PPID, int CUST_KIND, int DEPATMAN, int TICMBAA, string CODECC)
+        {
+            object GETGHeymatKalaRet = default;
+            double TFF;
+            double stf;
+            double MLBAA;
+            double IMBA;
+            if (MODAT_PPID != 0)
+            {
+                var Rst = dbms.DoGetDataSQL<Custom_PRICE_ELAMIE1>("SELECT  TOP (100) PERCENT PEPID FROM dbo.PRICE_ELAMIE WHERE (PEPDATE <= " + DTT + ") And (PEPDEPART = " + DEPATMAN + ")ORDER BY PEPID DESC").FirstOrDefault();
+                if (!ReferenceEquals(Rst, null))
+                {
+
+                    var rst2 = dbms.DoGetDataSQL<Custom_PRICEONE>("SELECT        dbo.PRICE_ELAMIE_DTL.PRICE1, dbo.PRICE_ELAMIE_DTL.PGID, dbo.STUF_DEF.CODE, dbo.PRICE_ELAMIE_DTL.PEPID FROM         dbo.PRICE_ELAMIE_DTL INNER JOIN   dbo.STUF_DEF ON dbo.PRICE_ELAMIE_DTL.PGID = dbo.STUF_DEF.PGID WHERE     (dbo.STUF_DEF.CODE = '" + CODECC + "') AND (dbo.PRICE_ELAMIE_DTL.PEPID = " + Rst.PEPID.ToString() + ")");
+                    if (!ReferenceEquals(rst2, null))
+                    {
+                        GETGHeymatKalaRet = rst2.Select(x => x.PRICE1).FirstOrDefault();
+                    }
+                    else
+                    {
+                        Msgwin msgwin = new Msgwin(false, "براي اين کالا قيمت يا گروه قيمتي تعريف نشده "); msgwin.ShowDialog();
+                        //MessageBox.Show("براي اين کالا قيمت يا گروه قيمتي تعريف نشده ", "", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
+                else
+                {
+                    // DoCmd.RunSQL ("UPDATE INVO_LST SET IMBAA  = 0 , N_KOL = 0 ,N_MOIN = 0,TKHN = 0 , MABL_K =0 , MABL = 0   WHERE  NUMBER = " & NUMB & "  AND CODE = '" & CODECC & "'  AND TAG = " & TGG)
+                    Msgwin msgwin = new Msgwin(false, "توجه براي اين واحد و اين نوع مشتري و اين نحوه پرداخت  و اين کالا اعلاميه قيمت  مشخص نشده است."); msgwin.ShowDialog();
+                    //MessageBox.Show("توجه براي اين واحد و اين نوع مشتري و اين نحوه پرداخت  و اين کالا اعلاميه قيمت  مشخص نشده است.", "", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            return GETGHeymatKalaRet;
+        }
+        public static object GETTaghfifKala1(int NUMB, int tgg, long DTT, int MODAT_PPID, int CUST_KIND, int DEPATMAN, int TICMBAA, string CODECC)
+        {
+
+            object GETTaghfifKala1Ret = default;
+            var Rst = dbms.DoGetDataSQL<Custom_PEID>("SELECT        TOP (100) PERCENT PEID FROM dbo.PRICE_ELAMIETF WHERE (PEDATE <= " + DTT + ") And (PEPDEPART = " + DEPATMAN + ") ORDER BY PEID DESC").FirstOrDefault();
+            if (!ReferenceEquals(Rst, null))
+            {
+                var rst3 = dbms.DoGetDataSQL<Custom_TF12>("SELECT        TOP (100) PERCENT TF1, TF2 FROM dbo.PRICE_ELAMIETF_DTL WHERE (PEID = " + Rst.PEID + ") And (CUSTCODE = " + CUST_KIND + ") And (PPID = " + MODAT_PPID + ")").FirstOrDefault();
+                if (!ReferenceEquals(rst3, null))
+                {
+                    GETTaghfifKala1Ret = rst3.TF1;
+                }
+                else
+                {
+                    dbms.DoExecuteSQL("UPDATE INVO_LST  SET N_KOL = 0 ,N_MOIN = 0,TKHN = 0  WHERE  NUMBER = " + NUMB + "  AND CODE = '" + CODECC + "'  AND TAG = " + Interaction.IIf(tgg == 13, 2, tgg) + "");
+                    Msgwin msgwin = new Msgwin(false, " توجه براي اين واحد و اين نوع مشتري و اين نحوه پرداخت و اين کالا اعلاميه  تخفيف مشخص نشده است."); msgwin.ShowDialog();
+                    //MessageBox.Show(" توجه براي اين واحد و اين نوع مشتري و اين نحوه پرداخت و اين کالا اعلاميه  تخفيف مشخص نشده است.", "", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            return GETTaghfifKala1Ret;
+        }
+
+        public static object GETTaghfifKala2(int NUMB, int tgg, long DTT, int MODAT_PPID, int CUST_KIND, int DEPATMAN, int TICMBAA, string CODECC)
+        {
+            object GETTaghfifKala2Ret = default;
+            var rst = dbms.DoGetDataSQL<Custom_PEID>("SELECT        TOP (100) PERCENT PEID FROM dbo.PRICE_ELAMIETF WHERE (PEDATE <= " + DTT + ") And (PEPDEPART = " + DEPATMAN + ") ORDER BY PEID DESC").ToList();
+            if (rst.Count > 0)
+            {
+                var rst3 = dbms.DoGetDataSQL<Custom_TF12>("SELECT        TOP (100) PERCENT TF1, TF2 FROM dbo.PRICE_ELAMIETF_DTL WHERE (PEID = " + rst.Select(x => x.PEID).FirstOrDefault() + ") And (CUSTCODE = " + CUST_KIND + ") And (PPID = " + MODAT_PPID + ")").ToList();
+                if (rst3.Count > 0)
+                {
+                    GETTaghfifKala2Ret = rst3.Select(r => r.TF2).FirstOrDefault();
+                }
+                else
+                {
+                    dbms.DoExecuteSQL("UPDATE INVO_LST  SET N_KOL = 0 ,N_MOIN = 0,TKHN = 0  WHERE  NUMBER = " + NUMB + "  AND CODE = '" + CODECC + "'  AND TAG = " + Interaction.IIf(tgg == 13, 2, tgg));
+                    Msgwin msgwin = new Msgwin(false, " توجه براي اين واحد و اين نوع مشتري و اين نحوه پرداخت و اين کالا اعلاميه  تخفيف مشخص نشده است."); msgwin.ShowDialog();
+                    //MessageBox.Show(" توجه براي اين واحد و اين نوع مشتري و اين نحوه پرداخت و اين کالا اعلاميه  تخفيف مشخص نشده است.", "", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+
+            return GETTaghfifKala2Ret;
+        }
+        //public long FARSIDATE(DateTime DTT)
+        //{
+        //    //long returnValue = 0;
+        //    //returnValue = System.Convert.ToInt64(@Forms["PublicVRB.BASEKNOW_PBLC"]["dt"]);
+        //    //return returnValue;
+        //}
+
+        public static bool Sendbefor(double num, int tg)
+        {
+            var RST = dbms.DoGetDataSQL<NumTG>("SELECT     num,tg FROM dbo.TASKS WHERE     num  = " + Convert.ToString(num) + " and tg = " + Convert.ToString(tg)).ToList();
+            if (RST.Count > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public static string GETTAFNAME(string HES)
+        {
+            string returnValue = "";
+            var RRST = dbms.DoGetDataSQL<string>("SELECT     NAME FROM dbo.CUST_HESAB WHERE     (hes = N'" + HES + "')").ToList();
+            if (RRST.Count > 0)
+            {
+                //if (ISNULL(RRST.Fields(0)))
+                if (ReferenceEquals(RRST.First(), null))
+                {
+                    returnValue = " ";
+                }
+                else
+                {
+                    //returnValue = Convert.ToString(RRST.Fields(0));
+                    returnValue = Convert.ToString(RRST.First());
+                }
+            }
+            else
+            {
+                returnValue = " ";
+            }
+            return returnValue;
+        }
+        public static object UCurrentUser()
+        {
+            object UCurrentUserRet = default;
+            UCurrentUserRet = Baseknow.UUSER;
+            return UCurrentUserRet;
+        }
+
+        public static int GETSIGNER(int ID, int USERCO)
+        {
+            // Get Type of Sign like SGN4
+            int GETSIGNERRet = default;
+            switch (ID)
+            {
+                case 20:
+                    {
+                        var RST = dbms.DoGetDataSQL<Signer_20>("SELECT   USERCO, FFRP_FROOSH, FFRP_ANB, FFRP_HESAB,FFRP_MODIR FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                        if (!ReferenceEquals(RST, null))
+                        {
+                            if (RST.FFRP_MODIR == true)
+                            {
+                                GETSIGNERRet = 4;
+                            }
+                            else if (RST.FFRP_HESAB == true)
+                            {
+                                GETSIGNERRet = 3;
+                            }
+                            else if (RST.FFRP_ANB == true)
+                            {
+                                GETSIGNERRet = 2;
+                            }
+                            else if (RST.FFRP_FROOSH == true)
+                            {
+                                GETSIGNERRet = 1;
+                            }
+                            else
+                            {
+                                GETSIGNERRet = 0;
+                            }
+                        }
+                        else
+                        {
+                            GETSIGNERRet = 0;
+                        }
+
+                        break;
+                    }
+
+                case 1:
+                    {
+                        var RST = dbms.DoGetDataSQL<Signer_1>("SELECT   USERCO, ANB_RASID_ANB, ANB_RASID_QC FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                        if (!ReferenceEquals(RST, null))
+                        {
+                            if (RST.ANB_RASID_QC == true)
+                            {
+                                GETSIGNERRet = 2;
+                            }
+                            else if (RST.ANB_RASID_ANB == true)
+                            {
+                                GETSIGNERRet = 1;
+                            }
+                            else if (RST.ANB_RASID_ANB == true)
+                            {
+                                GETSIGNERRet = 1;
+                            }
+                            else
+                            {
+                                GETSIGNERRet = 0;
+                            }
+                        }
+                        else
+                        {
+                            GETSIGNERRet = 0;
+                        }
+
+                        break;
+                    }
+
+                case 6:
+                    {
+                        var RST = dbms.DoGetDataSQL<Signer_6>("SELECT   USERCO, ENTGH_AZANB, ENTGH_BEANB, ENTGH_MODIR FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                        if (!ReferenceEquals(RST, null))
+                        {
+                            if (RST.ENTGH_MODIR == true)
+                            {
+                                GETSIGNERRet = 3;
+                            }
+                            else if (RST.ENTGH_BEANB == true)
+                            {
+                                GETSIGNERRet = 2;
+                            }
+                            else if (RST.ENTGH_AZANB == true)
+                            {
+                                GETSIGNERRet = 1;
+                            }
+                            else
+                            {
+                                GETSIGNERRet = 0;
+                            }
+                        }
+                        else
+                        {
+                            GETSIGNERRet = 0;
+                        }
+
+                        break;
+                    }
+
+                case 13:
+                    {
+                        var RST = dbms.DoGetDataSQL<Signer_13>("SELECT   USERCO, FFR_FROOSH, FFR_HESAB, FFR_MODIR FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                        if (!ReferenceEquals(RST, null))
+                        {
+                            if (RST.FFR_MODIR == true)
+                            {
+                                GETSIGNERRet = 3;
+                            }
+                            else if (RST.FFR_HESAB == true)
+                            {
+                                GETSIGNERRet = 2;
+                            }
+                            else if (RST.FFR_FROOSH == true)
+                            {
+                                GETSIGNERRet = 1;
+                            }
+                            else
+                            {
+                                GETSIGNERRet = 0;
+                            }
+                        }
+                        else
+                        {
+                            GETSIGNERRet = 0;
+                        }
+
+                        break;
+                    }
+
+                case 12:
+                    {
+                        var RST = dbms.DoGetDataSQL<Signer_12>("SELECT   USERCO, KFR_BAZAR, KFR_HESAB, KFR_MODIR FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                        if (!ReferenceEquals(RST, null))
+                        {
+                            if (RST.KFR_MODIR == true)
+                            {
+                                GETSIGNERRet = 3;
+                            }
+                            else if (RST.KFR_HESAB == true)
+                            {
+                                GETSIGNERRet = 2;
+                            }
+                            else if (RST.KFR_BAZAR == true)
+                            {
+                                GETSIGNERRet = 1;
+                            }
+                            else
+                            {
+                                GETSIGNERRet = 0;
+                            }
+                        }
+                        else
+                        {
+                            GETSIGNERRet = 0;
+                        }
+
+                        break;
+                    }
+
+                case 2:
+                    {
+                        var RST = dbms.DoGetDataSQL<Signer_2>("SELECT   USERCO, ANB_HAVL_FROSH, ANB_HAVL_ANB, ANB_HAVL_MODIR FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                        if (!ReferenceEquals(RST, null))
+                        {
+                            if (RST.ANB_HAVL_MODIR == true)
+                            {
+                                GETSIGNERRet = 3;
+                            }
+                            else if (RST.ANB_HAVL_ANB == true)
+                            {
+                                GETSIGNERRet = 2;
+                            }
+                            else if (RST.ANB_HAVL_FROSH == true)
+                            {
+                                GETSIGNERRet = 1;
+                            }
+                            else
+                            {
+                                GETSIGNERRet = 0;
+                            }
+                        }
+                        else
+                        {
+                            GETSIGNERRet = 0;
+                        }
+
+                        break;
+                    }
+
+                case 100:
+                    {
+                        var RST = dbms.DoGetDataSQL<Signer_100>("SELECT   USERCO, PAY_MVAHED, PAY_HESAB, PAY_MAMEL FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                        if (!ReferenceEquals(RST, null))
+                        {
+                            if (RST.PAY_MAMEL == true)
+                            {
+                                GETSIGNERRet = 3;
+                            }
+                            else if (RST.PAY_HESAB == true)
+                            {
+                                GETSIGNERRet = 2;
+                            }
+                            else if (RST.PAY_MVAHED == true)
+                            {
+                                GETSIGNERRet = 1;
+                            }
+                            else
+                            {
+                                GETSIGNERRet = 0;
+                            }
+                        }
+                        else
+                        {
+                            GETSIGNERRet = 0;
+                        }
+
+                        break;
+                    }
+            }
+            return GETSIGNERRet;
+        }
+
+        public static string GETUSERTASK(double IDNUM)
+        {
+            string res = "";
+            var RST_USERCO = dbms.DoGetDataSQL<int>("SELECT     USERCO FROM dbo.TASKS WHERE     IDNUM = " + Convert.ToString(IDNUM)).FirstOrDefault();
+            if (!ReferenceEquals(RST_USERCO, null))
+            {
+                res = Convert.ToString(RST_USERCO);
+            }
+            return res;
+        }
+
+
+        public static string UserOnChart(int USERCOD)
+        {
+            string UserOnChartRet = "";
+            var vs = "";
+            var RST = dbms.DoGetDataSQL<USERCHART_QRE>("SELECT SAL_NAME , CHARTSAZMANI.SUBUSERCO, CHARTSAZMANI.USERCO FROM CHARTSAZMANI LEFT OUTER JOIN  SALA_DTL ON CHARTSAZMANI.SUBUSERCO = SALA_DTL.IDD WHERE (((CHARTSAZMANI.USERCO)=" + USERCOD + "))").ToList();
+            if (RST.Count > 0)
+            {
+                //while (!RST.EOF)
+                foreach (var item in RST)
+                {
+                    if (RST.Select(x => x.SUBUSERCO).FirstOrDefault() == 0)
+                    {
+                        goto allu;
+                    }
+                    else if (string.IsNullOrEmpty(vs))
+                    {
+                        vs = "(USER_NAME = '" + DECODEUN(RST.Select(x => x.SAL_NAME).FirstOrDefault()) + "') ";
+                    }
+                    else
+                    {
+                        vs = vs + " or (USER_NAME = '" + DECODEUN(RST.Select(x => x.SAL_NAME).FirstOrDefault()) + "') ";
+                    }
+                    //RST.MoveNext();
+                }
+                vs = "(" + vs + ")";
+            }
+
+        allu:
+
+            UserOnChartRet = vs;
+            return UserOnChartRet;
+        }
+
+        public static bool BLOCKEDCUST(string HES)
+        {
+            var RST2_HES = dbms.DoGetDataSQL<string>("SELECT     HES FROM dbo.BLOCK_CUSTOMER  WHERE     (HES = N'" + HES + "') AND (ENDBLK = 0) ").FirstOrDefault();
+            if (!ReferenceEquals(RST2_HES, null))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static int Checketebar(string HES)
+        {
+            int ChecketebarRet = default;
+            double MAND;
+            double CHK;
+            double TOPETEB;
+            var TOPASN = default(double);
+            var ENDIS = default(bool);
+            CHK = 0d;
+            TOPETEB = 0d;
+            var RST = dbms.DoGetDataSQL<ETEBAR_AZAE>(@"SELECT HES,
+                                                                 TOPETEB,
+                                                                 TOPASN,
+                                                                 ENDIS,
+                                                                 TOPMEGH,
+                                                                 JAMZARIB,
+                                                                 EMTIAZ,
+                                                                 gradeid,
+                                                                 DTTIM FROM AZAE WHERE HES = '" + HES + "'").FirstOrDefault();
+            if (!ReferenceEquals(RST, null))
+            {
+                TOPETEB = Convert.ToDouble(RST.TOPETEB);
+                TOPASN = Convert.ToDouble(RST.TOPASN);
+                ENDIS = Convert.ToBoolean(RST.ENDIS);
+            }
+
+            if (ENDIS)
+            {
+                var RST_HES = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE HES = '" + HES + "'").FirstOrDefault();
+                if (ReferenceEquals(RST_HES, null))
+                {
+                    MAND = 0;
+                }
+                else
+                {
+                    MAND = (double)RST_HES;
+                }
+
+                if (!Convert.ToBoolean(Baseknow.SAGHF))
+                {
+                    MAND = 0d;
+                };////////////
+                var RSTOpen = dbms.DoGetDataSQL<double?>(" SELECT     SUM(MABL) AS smab FROM         dbo.PAY_GETD WHERE     (N_KOL3 IS NULL) AND (N_KOL2 IS NULL) AND (CUST_NO = N'" + HES + "') AND (N_KOL = " + Baseknow.BANKHA + " OR  N_KOL IS NULL)").FirstOrDefault();
+                if (ReferenceEquals(RSTOpen, null))
+                {
+                    CHK = 0;
+                }
+                else
+                {
+                    CHK = Convert.ToDouble(RSTOpen);
+                }
+                // 'چك صفر شد
+                if (!Convert.ToBoolean(Baseknow.SAGHF2) || !Convert.ToBoolean(TOPASN))
+                {
+                    CHK = 0;
+                }
+                var RSTCount = dbms.DoGetDataSQL<ETEBAR_AZAE>("SELECT  HES,TOPETEB,TOPASN,ENDIS,TOPMEGH,JAMZARIB,EMTIAZ,gradeid,DTTIM  FROM AZAE WHERE HES = '" + HES + "'").FirstOrDefault();
+                if (!ReferenceEquals(RSTCount, null))
+                {
+                    if (TOPETEB - MAND - CHK >= 0d)
+                    {
+                        ChecketebarRet = Conversions.ToInteger(true);
+                    }
+                    else
+                    {
+                        ChecketebarRet = Conversions.ToInteger(false);
+                        Msgwin msgwin = new Msgwin(false, "مانده حساب : " + MAND.ToString("#,###") + "  مانده اسناد : " + CHK.ToString("#,###") + "  كل اعتبار : " + TOPETEB.ToString("#,###")); msgwin.ShowDialog();
+                        //MessageBox.Show("مانده حساب : " + MAND.ToString("#,###") + "  مانده اسناد : " + CHK.ToString("#,###") + "  كل اعتبار : " + TOPETEB.ToString("#,###"));
+                    }
+                }
+                else
+                {
+                    ChecketebarRet = 2;
+                }
+            }
+            else
+            {
+                ChecketebarRet = Conversions.ToInteger(true);
+            }
+
+            return ChecketebarRet;
+        }
+
+        //public int ChekEnheSar(long num, int tgg)
+        //{
+        //    int ChekEnheSarRet = default;
+        //    double CHK;
+        //    double NOTCH;
+        //    double MABCHKR;
+        //    double MANDOLD;
+        //    double MABCHK;
+        //    bool ENDIS;
+        //    int DIFFU;
+        //    bool MATCHTO;
+        //    bool ONEONLY;
+        //    string PYT;
+        //    CR_NFANI();
+        //    rst.Open("SELECT     dbo.HEAD_LST.NUMBER, dbo.HEAD_LST.TAG, dbo.HEAD_LST.DATE_N, dbo.HEAD_LST.CUST_NO, dbo.INVO_LST.CODE, dbo.INVO_LST.MEGH,  dbo.INVO_LST.MEGHk, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K, dbo.CUST_HESAB.OSTANID, dbo.CUST_HESAB.SHAHRID,   dbo.stuf_def_nfani.N_FANI, dbo.stuf_def_nfani.col1, dbo.stuf_def_nfani.col2, dbo.stuf_def_nfani.col3, dbo.stuf_def_nfani.col4, dbo.stuf_def_nfani.col5, dbo.stuf_def_nfani.col6, dbo.stuf_def_nfani.col7, dbo.stuf_def_nfani.col8, dbo.stuf_def_nfani.col9, dbo.stuf_def_nfani.colN1, dbo.stuf_def_nfani.colN2,  dbo.stuf_def_nfani.colN3, dbo.stuf_def_nfani.colN4, dbo.stuf_def_nfani.colN5, dbo.stuf_def_nfani.colN6, dbo.stuf_def_nfani.colN7, dbo.stuf_def_nfani.colN8 , dbo.stuf_def_nfani.colN9 FROM         dbo.HEAD_LST INNER JOIN dbo.INVO_LST ON dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER AND dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG INNER JOIN  dbo.CUST_HESAB ON dbo.HEAD_LST.CUST_NO = dbo.CUST_HESAB.hes INNER JOIN" + " dbo.stuf_def_nfani ON dbo.INVO_LST.CODE = dbo.stuf_def_nfani.CODE WHERE     (dbo.HEAD_LST.TAG = 20) AND (dbo.HEAD_LST.NUMBER = " + num + ")");
+        //    if (!(rst.Count == 0 | IsNull(rst.Fields(0))))
+        //    {
+        //        if (IsNull(rst.Fields("ostanid")) | IsNull(rst.Fields("SHAHRID")))
+        //        {
+        //            if (LETSGO("moshtari") | LETSGO("custdef"))
+        //            {
+        //                // DoCmd.OpenForm "", , , "hes ='" & RST.Fields("cust_no") & "'", , acDialog
+        //                DoCmd.OpenForm("mesageform", default, default, default, default, acDialog, "اطلاعات مشتري ناقص است.استان و شهر براي اين مشتري مشخص نشده است .لطفا آن را تکميل کنيد");
+        //            }
+        //            else
+        //            {
+        //                DoCmd.OpenForm("mesageform", default, default, default, default, acDialog, "اطلاعات مشتري ناقص است.استان و شهر براي اين مشتري مشخص نشده است .لطفا آن را تکميل کنيد");
+        //            }
+        //            return ChekEnheSarRet;
+        //        }
+        //        RST2.Open("SELECT   EN_CUST_CO, EN_CITY, EN_IYALAT, EN_COUNTRY FROM dbo.ENHESAR_MOSHTARI WHERE     (EN_CUST_CO <> N'" + rst.Fields("cust_no") + "') AND (EN_CITY =" + rst.Fields("shahrid") + ") AND (EN_STDATE <= " + rst.Fields("date_n") + ") AND (EN_ENDEN >= " + rst.Fields("date_n") + " OR EN_ENDEN IS NULL)");
+        //        if (!(RST2.Count == 0 | IsNull(RST2.Fields("EN_CITY"))))   // اگر انحصارشهر هست
+        //        {
+        //            RST2.Open("SELECT dbo.ENHESAR_MOSHTARI.EN_CUST_CO, dbo.ENHESAR_MOSHTARI.EN_CITY, dbo.ENHESAR_MOSHTARI.EN_IYALAT, dbo.ENHESAR_MOSHTARI.EN_COUNTRY, dbo.ENHESAR_MOSHTARI.EN_STDATE, dbo.ENHESAR_MOSHTARI.EN_ENDEN, dbo.ENHESAR_KALA.EN_KALA_COD, dbo.ENHESAR_KALA.EN_KALA_GR, dbo.ENHESAR_KALA.EN_GRCODE1, dbo.ENHESAR_KALA.EN_GRCODE2, dbo.ENHESAR_KALA.EN_GRCODE3, dbo.ENHESAR_KALA.EN_GRCODE4, dbo.ENHESAR_KALA.EN_GRCODE5, dbo.ENHESAR_KALA.EN_GRCODE6, dbo.ENHESAR_KALA.EN_GRCODE7, dbo.ENHESAR_KALA.EN_GRCODE8, dbo.ENHESAR_KALA.EN_GRCODE9 , dbo.ENHESAR_KALA.EN_GRCODE10, dbo.ENHESAR_KALA.USERID, dbo.ENHESAR_KALA.EN_CDATE FROM  dbo.ENHESAR_MOSHTARI INNER JOIN dbo.ENHESAR_KALA ON dbo.ENHESAR_MOSHTARI.EN_CUST_CO = dbo.ENHESAR_KALA.EN_CUST_CO  WHERE     (dbo.ENHESAR_MOSHTARI.EN_CUST_CO <> N'" + rst.Fields("cust_no") + "') AND (dbo.ENHESAR_MOSHTARI.EN_CITY =" + rst.Fields("shahrid") + ") AND " + " (EN_STDATE <= " + rst.Fields("date_n") + ") AND (EN_ENDEN >= " + rst.Fields("date_n") + " OR EN_ENDEN IS NULL)");
+        //            while (!RST2.EOF)
+        //            {
+        //                if (!IsNull(RST2.Fields("EN_KALA_COD")))
+        //                {
+        //                    while (!rst.EOF)
+        //                    {
+        //                        if (rst[RST_EOF].CODE == RST2.Fields("EN_KALA_COD"))
+        //                        {
+        //                            DoCmd.OpenForm("mesageform", default, default, default, default, acDialog, "اين کالا در اين شهر انحصار است " + '\r' + "نام انحصار کننده:" + GETHESNAME(RST2.Fields("EN_CUST_CO")) + '\r' + "نام کالا:" + GETKALANAME(rst[RST_EOF].CODE));
+        //                            ChekEnheSarRet = Conversions.ToInteger(true);
+        //                        }
+        //                        rst.MoveNext();
+        //                    }
+        //                    rst.MoveFirst();
+        //                }
+        //                else
+        //                {
+        //                    while (!rst.EOF)
+        //                    {
+        //                        MATCHTO = true;  // تطبيق داردبا گروه کالا
+        //                        ONEONLY = false; // حداقل با يک گروه تطبيق دارد
+        //                        PYT = "";
+        //                        if (!IsNull(RST2.Fields("EN_GRCODE1")) & RST2.Fields("EN_GRCODE1") == -1)   // همه کالاها
+        //                        {
+        //                            PYT = " همه کالاها ";
+        //                            MATCHTO = true;
+        //                            ONEONLY = true;
+        //                        }
+        //                        else
+        //                        {
+        //                            for (int i = 1; i <= 9; i++)
+        //                            {
+        //                                if (!IsNull(RST2.Fields("EN_GRCODE" + i)))
+        //                                {
+        //                                    if (RST2.Fields("EN_GRCODE" + i) != rst.Fields("COL" + i))
+        //                                    {
+        //                                        MATCHTO = false;
+        //                                    }
+        //                                    else
+        //                                    {
+        //                                        PYT = PYT + " - " + rst.Fields("COLN" + i);
+        //                                    }
+        //                                    ONEONLY = true;
+        //                                }
+        //                            }
+        //                        }
+        //                        if (MATCHTO & ONEONLY)
+        //                        {
+        //                            DoCmd.OpenForm("mesageform", default, default, default, default, acDialog, "اين گروه کالا در اين شهر انحصار است " + '\r' + "نام انحصار کننده:" + GETHESNAME(RST2.Fields("EN_CUST_CO")) + '\r' + ":گروه کالا" + PYT);
+        //                            ChekEnheSarRet = Conversions.ToInteger(true);
+        //                        }
+        //                        rst.MoveNext();
+        //                    }
+        //                    rst.MoveFirst();
+        //                }
+        //                RST2.MoveNext();
+        //            }
+        //        }
+        //        else
+        //        {
+        //            RST2.Open("SELECT   EN_CUST_CO, EN_CITY, EN_IYALAT, EN_COUNTRY FROM dbo.ENHESAR_MOSHTARI WHERE     (EN_CUST_CO <> N'" + rst.Fields("cust_no") + "') AND (EN_IYALAT =" + rst.Fields("OSTANID") + ") AND (EN_STDATE <= " + rst.Fields("date_n") + ") AND (EN_ENDEN >= " + rst.Fields("date_n") + " OR EN_ENDEN IS NULL)");
+        //            if (!(RST2.Count == 0 | IsNull(RST2.Fields("EN_IYALAT"))))   // اگر انحصاراستان هست
+        //            {
+        //                ;
+        //                RST2.Open("SELECT dbo.ENHESAR_MOSHTARI.EN_CUST_CO, dbo.ENHESAR_MOSHTARI.EN_CITY, dbo.ENHESAR_MOSHTARI.EN_IYALAT, dbo.ENHESAR_MOSHTARI.EN_COUNTRY, dbo.ENHESAR_MOSHTARI.EN_STDATE, dbo.ENHESAR_MOSHTARI.EN_ENDEN, dbo.ENHESAR_KALA.EN_KALA_COD, dbo.ENHESAR_KALA.EN_KALA_GR, dbo.ENHESAR_KALA.EN_GRCODE1, dbo.ENHESAR_KALA.EN_GRCODE2, dbo.ENHESAR_KALA.EN_GRCODE3, dbo.ENHESAR_KALA.EN_GRCODE4, dbo.ENHESAR_KALA.EN_GRCODE5, dbo.ENHESAR_KALA.EN_GRCODE6, dbo.ENHESAR_KALA.EN_GRCODE7, dbo.ENHESAR_KALA.EN_GRCODE8, dbo.ENHESAR_KALA.EN_GRCODE9 , dbo.ENHESAR_KALA.EN_GRCODE10, dbo.ENHESAR_KALA.USERID, dbo.ENHESAR_KALA.EN_CDATE FROM  dbo.ENHESAR_MOSHTARI INNER JOIN dbo.ENHESAR_KALA ON dbo.ENHESAR_MOSHTARI.EN_CUST_CO = dbo.ENHESAR_KALA.EN_CUST_CO  WHERE     (dbo.ENHESAR_MOSHTARI.EN_CUST_CO <> N'" + rst.Fields("cust_no") + "') AND (EN_IYALAT =" + rst.Fields("OSTANID") + ") AND " + " (EN_STDATE <= " + rst.Fields("date_n") + ") AND (EN_ENDEN >= " + rst.Fields("date_n") + " OR EN_ENDEN IS NULL)");
+        //                while (!RST2.EOF)
+        //                {
+        //                    if (!IsNull(RST2.Fields("EN_KALA_COD")))
+        //                    {
+        //                        while (!rst.EOF)
+        //                        {
+        //                            if (rst[RST_EOF].CODE == RST2.Fields("EN_KALA_COD"))
+        //                            {
+        //                                DoCmd.OpenForm("mesageform", default, default, default, default, acDialog, "اين کالا در اين شهر انحصار است " + '\r' + "نام انحصار کننده:" + GETHESNAME(RST2.Fields("EN_CUST_CO")) + '\r' + "نام کالا:" + GETKALANAME(rst[RST_EOF].CODE));
+        //                                ChekEnheSarRet = Conversions.ToInteger(true);
+        //                            }
+        //                            rst.MoveNext();
+        //                        }
+        //                        rst.MoveFirst();
+        //                    }
+        //                    else
+        //                    {
+        //                        while (!rst.EOF)
+        //                        {
+        //                            MATCHTO = true;
+        //                            ONEONLY = false;
+        //                            PYT = "";
+        //                            if (!IsNull(RST2.Fields("EN_GRCODE1")) & RST2.Fields("EN_GRCODE1") == -1)   // همه کالاها
+        //                            {
+        //                                PYT = " همه کالاها ";
+        //                                MATCHTO = true;
+        //                                ONEONLY = true;
+        //                            }
+        //                            else
+        //                            {
+        //                                for (int i = 1; i <= 9; i++)
+        //                                {
+        //                                    if (!IsNull(RST2.Fields("EN_GRCODE" + i)))
+        //                                    {
+        //                                        if (RST2.Fields("EN_GRCODE" + i) != rst.Fields("COL" + i))
+        //                                        {
+        //                                            MATCHTO = false;
+        //                                        }
+        //                                        else
+        //                                        {
+        //                                            PYT = PYT + " - " + rst.Fields("COLN" + i);
+        //                                        }
+        //                                        ONEONLY = true;
+        //                                    }
+        //                                }
+        //                            }
+        //                            if (MATCHTO & ONEONLY)
+        //                            {
+        //                                DoCmd.OpenForm("mesageform", default, default, default, default, acDialog, "اين گروه کالا در اين شهر انحصار است " + '\r' + "نام انحصار کننده:" + GETHESNAME(RST2.Fields("EN_CUST_CO")) + '\r' + ":گروه کالا" + PYT);
+        //                                ChekEnheSarRet = Conversions.ToInteger(true);
+        //                            }
+        //                            rst.MoveNext();
+        //                        }
+        //                        rst.MoveFirst();
+        //                    }
+        //                    RST2.MoveNext();
+        //                }
+        //            }
+        //            else
+        //            {
+        //                ChekEnheSarRet = Conversions.ToInteger(false);
+        //            }
+        //        }
+        //    }
+
+        //    return ChekEnheSarRet;
+
+        //}
+
+
+        public static int ChecketebarMEG(string HES)
+        {
+            //بررسی اعتبار منتها 80 درصد  درست هست 20 درصد به خاطر برگشت فروش آزاد باید اصلاح بشه که درست نیست
+            int ChecketebarMEGRet = default;
+            double MAND;
+            double CHK;
+            double TOPMEGH;
+            var ENDIS = default(bool);
+            TOPMEGH = 0d;
+            var RST = dbms.DoGetDataSQL<ETEBAR_AZAE>("SELECT  HES,TOPETEB,TOPASN,ENDIS,TOPMEGH,JAMZARIB,EMTIAZ,gradeid,DTTIM  FROM AZAE WHERE HES = '" + HES + "'").FirstOrDefault();
+            if (!ReferenceEquals(RST, null))
+            {
+                TOPMEGH = Convert.ToDouble(RST.TOPMEGH);
+                ENDIS = Convert.ToBoolean(RST.ENDIS);
+            }
+
+            if (ENDIS && TOPMEGH != 0d)
+            {
+                var RST9 = dbms.DoGetDataSQL<double?>("SELECT     SUM(dbo.INVO_LST.MEGHk - dbo.INVO_LST.MEGH_MAR) AS MEGH FROM    dbo.HEAD_LST INNER JOIN  dbo.INVO_LST ON dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER AND dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG WHERE     (dbo.HEAD_LST.TAG = 2) AND (dbo.HEAD_LST.CUST_NO = N'" + HES + "')").FirstOrDefault();
+                if (ReferenceEquals(RST9, null))
+                {
+                    MAND = 0d;
+                }
+                else
+                {
+                    MAND = (double)RST9;
+                }
+
+                if (!Convert.ToBoolean(Baseknow.SAGHF))
+                {
+                    MAND = 0d;
+                }
+
+                if (TOPMEGH - MAND >= 0d)
+                {
+                    ChecketebarMEGRet = Conversions.ToInteger(true);
+                }
+                else
+                {
+                    ChecketebarMEGRet = Conversions.ToInteger(false);
+                    Msgwin msgwin = new Msgwin(false, "  كل اعتبار مقداري : " + Strings.Format((object)TOPMEGH, "#,###") + "  كل خريد مقداري : " + Strings.Format((object)MAND, "#,###")); msgwin.ShowDialog();
+                    //MessageBox.Show("  كل اعتبار مقداري : " + Strings.Format((object)TOPMEGH, "#,###") + "  كل خريد مقداري : " + Strings.Format((object)MAND, "#,###"));
+                }
+            }
+            else
+            {
+                ChecketebarMEGRet = Conversions.ToInteger(true);
+            }
+
+            return ChecketebarMEGRet;
+        }
+
+
+        /// <summary>
+        /// this.GetType().Name
+        /// </summary>
+        /// <param name="dataGrid"></param>
+        /// <param name="FORMNAME"></param>
+        public static void SETSECURITYSUB(DataGrid dataGrid, string FORMNAME)
+        {
+            var rst = dbms.DoGetDataSQL<SETSECURITYSUB_CSHARP>("SELECT TFORMS.CAPTION, TFORMS.kind, SAL_CHEK.USERCO, SAL_CHEK.RUN, SAL_CHEK.SEE, SAL_CHEK.INP, SAL_CHEK.UPD, SAL_CHEK.DEL FROM TFORMS INNER JOIN (SALA_DTL INNER JOIN SAL_CHEK ON SALA_DTL.IDD = SAL_CHEK.USERCO) ON TFORMS.IDH = SAL_CHEK.OBJECT WHERE     (TFORMS.FORMNAME = '" + WANTEDFORM(FORMNAME) + "') AND (SAL_CHEK.USERCO = " + Baseknow.USERCOD + " )").FirstOrDefault();
+            if (!(rst is null))
+            {
+                if ((bool)!rst.SEE)
+                {
+                    dataGrid.IsEnabled = false;
+                }
+                if ((bool)!rst.INP)
+                {
+                    dataGrid.CanUserAddRows = false;
+                }
+                if ((bool)!rst.UPD)
+                {
+                    dataGrid.IsReadOnly = false;
+                }
+                if ((bool)!rst.DEL)
+                {
+                    dataGrid.CanUserDeleteRows = false;
+                }
+            }
+        }
+
+        public static object SETLEVEL(int LV)
+        {
+            CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+            switch (LV)
+            {
+                case 0:
+                    {
+                        dbms.DoExecuteSQL("UPDATE    dbo.SAL_CHEK Set RUN = 0 WHERE     (OBJECT BETWEEN 40 AND 43) OR  (OBJECT = 189) OR  (OBJECT = 160) OR  (OBJECT = 12) OR (OBJECT = 161) OR (OBJECT = 167) OR (OBJECT = 184) OR (OBJECT = 181)");
+
+                        break;
+                    }
+                case 1:
+                    {
+                        dbms.DoExecuteSQL("UPDATE    dbo.SAL_CHEK Set RUN = 0 WHERE     (OBJECT BETWEEN 368 AND 381) ");
+
+                        break;
+                    }
+                case 2:
+                    {
+                        //DoCmd.Beep();
+                        break;
+                    }
+                case 3:
+                    {
+                        //DoCmd.Beep();
+                        break;
+                    }
+            }
+            return default;
+        }
+
+        public static string GetVisitHES(string HES)
+        {
+            var RST = dbms.DoGetDataSQL<string>("SELECT     dbo.Visit_route.HES AS Expr1 FROM         dbo.CUST_HESAB INNER JOIN      dbo.Visit_route ON dbo.CUST_HESAB.ROUTE_NAME = dbo.Visit_route.ROUTE_NAME WHERE     (dbo.CUST_HESAB.hes = N'" + HES + "')").FirstOrDefault();
+
+            if (ReferenceEquals(RST, null))
+            {
+                return "";
+            }
+            else
+            {
+                return System.Convert.ToString(RST);
+            }
+        }
+
+        public static double GetMHavlF(string HES)
+        {
+            double tempGetMHavlF = 0;
+            var rst = dbms.DoGetDataSQL<double?>("SELECT     SUM(dbo.INVO_LST.MABL_K - dbo.INVO_LST.N_MOIN + dbo.INVO_LST.IMBAA) AS GMAB FROM         dbo.Visit_route INNER JOIN    dbo.CUST_HESAB ON dbo.Visit_route.ROUTE_NAME = dbo.CUST_HESAB.ROUTE_NAME INNER JOIN     dbo.HEAD_LST INNER JOIN    dbo.INVO_LST ON dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER AND dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG ON    dbo.CUST_HESAB.HES = dbo.HEAD_LST.CUST_NO WHERE     (dbo.HEAD_LST.TAG = 2) AND (dbo.HEAD_LST.TAMIR = 0) AND (dbo.Visit_route.HES = N'" + HES + "')").FirstOrDefault();
+
+            if (ReferenceEquals(rst, null))
+            {
+                tempGetMHavlF = 0;
+            }
+            else
+            {
+                tempGetMHavlF = (double)rst;
+            }
+            return tempGetMHavlF;
+        }
+        public static double GetMPishfF(string HES)
+        {
+            double tempGetMPishfF = 0;
+            var rst = dbms.DoGetDataSQL<double?>("SELECT SUM(dbo.INVO_LST.MABL_K - dbo.INVO_LST.N_MOIN + dbo.INVO_LST.IMBAA) AS GMAB FROM  dbo.Visit_route INNER JOIN     dbo.CUST_HESAB ON dbo.Visit_route.ROUTE_NAME = dbo.CUST_HESAB.ROUTE_NAME INNER JOIN        dbo.HEAD_LST INNER JOIN              dbo.INVO_LST ON dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER AND dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG ON     dbo.CUST_HESAB.HES = dbo.HEAD_LST.CUST_NO WHERE     (dbo.HEAD_LST.TAG = 20) AND (dbo.HEAD_LST.TAMIR <> 2) AND (dbo.HEAD_LST.TAMIR <> 3) AND (dbo.HEAD_LST.SGN1 = 1) AND  (dbo.Visit_route.HES = N'" + HES + "')").FirstOrDefault();
+            // DEBUG.PRINT "SELECT     SUM(dbo.INVO_LST.MABL_K - dbo.INVO_LST.N_MOIN + dbo.INVO_LST.IMBAA) AS GMAB FROM         dbo.Visit_route INNER JOIN     dbo.CUST_HESAB ON dbo.Visit_route.ROUTE_NAME = dbo.CUST_HESAB.ROUTE_NAME INNER JOIN        dbo.HEAD_LST INNER JOIN              dbo.INVO_LST ON dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER AND dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG ON     dbo.CUST_HESAB.HES = dbo.HEAD_LST.CUST_NO WHERE     (dbo.HEAD_LST.TAG = 20) AND (dbo.HEAD_LST.TAMIR <> 2) AND (dbo.HEAD_LST.TAMIR <> 3) AND (dbo.HEAD_LST.SGN1 = 1) AND  (dbo.Visit_route.HES = N'" & HES & "')"
+            if (ReferenceEquals(rst, null))
+            {
+                tempGetMPishfF = 0;
+            }
+            else
+            {
+                tempGetMPishfF = (double)rst;
+            }
+            return tempGetMPishfF;
+        }
+        public static int ChecketebarSSMF(string HES, double ETB, long pnum)
+        {
+            int tempChecketebarSSMF = 0;
+            double MAND = 0;
+            double CHK = 0;
+            double TOPASN = 0;
+            bool ENDIS = false;
+            double JPTAEED = 0;
+            double JHBNSHE = 0;
+
+            CHK = 0;
+            JPTAEED = 0;
+            JHBNSHE = 0;
+            MAND = GetMhesabF(HES);
+            //جمع پيش فاکتورهاي تاييد شده کنسل نشده و حواله نشده
+            JPTAEED = GetMPishfF(HES) + JAMinpishfac(pnum);
+            //جمع حواله هاي بارگيري نشده
+            JHBNSHE = GetMHavlF(HES);
+            if (ETB - MAND - JPTAEED - JHBNSHE >= 0)
+            {
+                tempChecketebarSSMF = 1;//true
+            }
+            else
+            {
+                tempChecketebarSSMF = 0;//false
+                //DoCmd.OpenForm "mesageform", , , , , acDialog, "مانده حساب : " & Format(MAND, "#,###") & "  مانده اسناد : " & Format(CHK, "#,###") & "  كل اعتبار : " & Format(TOPETEB, "#,###")
+            }
+
+            return tempChecketebarSSMF;
+        }
+        public static int ChekBrgashti(string HES)
+        {
+            int tempChekBrgashti = 0;
+            double MAND = 0;
+            double CHK = 0;
+            double TOPETEB = 0;
+            double TOPASN = 0;
+            bool ENDIS = false;
+            var rst = dbms.DoGetDataSQL<double?>("SELECT    n_seri FROM         dbo.pay_getd WHERE     (dbo.pay_getd.vaz = 5 or dbo.pay_getd.vaz = 6) and (dbo.pay_getd.CUST_NO = '" + HES + "')").FirstOrDefault();
+            if (ReferenceEquals(rst, null))
+            {
+                tempChekBrgashti = 1;//true
+            }
+            else
+            {
+                tempChekBrgashti = 0;//false
+            }
+            return tempChekBrgashti;
+        }
+        public static int FactCountMand(string HES, double VL)
+        {
+            int FactCountMandRet = 0;
+            double MAN;
+            int CF;
+            CF = 0;
+            var rst = dbms.DoGetDataSQL<FACT_1>("SELECT     SUM(dbo.DEED_DTL.BES) AS MBES,SUM(dbo.DEED_DTL.BED) AS MBED FROM   dbo.DEED_DTL  WHERE     (dbo.DEED_DTL.HES = '" + HES + "')").FirstOrDefault();
+            if (ReferenceEquals(rst.MBES, null) || (double)rst.MBES == 0)
+            {
+                FactCountMandRet = 0;
+            }
+            else if (rst.MBES - rst.MBED >= 0)
+            {
+                FactCountMandRet = 0;
+            }
+            else
+            {
+                MAN = (double)rst.MBES;
+                dbms.DoExecuteSQL("IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_NAME = '" + "MOIN" + Baseknow.USERCOD + "')   DROP TABLE " + "MOIN" + Baseknow.USERCOD);
+                dbms.DoExecuteSQL("SELECT    N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES INTO dbo.MOIN" + Baseknow.USERCOD + " FROM         dbo.QDAFTARTAFZIL2_H(1 , 99999999, '" + HES + "') QDAFTARTAFZIL2_H ORDER BY DATE_S, BED DESC");
+
+                int II = 0;
+                var RST2 = dbms.DoGetDataSQL<FACT_2>($"SELECT BED,NO_S FROM MOIN{Baseknow.USERCOD}").ToList();
+                for (int imain = 0; imain <= RST2.Count - 1;)  ////////while (!RST2.EOF())
+                {
+                    MAN = (double)(MAN - RST2[imain].BED);
+                    if (MAN <= 0d)
+                    {
+                        for (int i = imain; i <= RST2.Count - 1;)
+                        {
+                            if (RST2[i].NO_S == 2 && RST2[i].BED > 1000)
+                            {
+                                CF = CF + 1;
+                            }
+                            i++;//RST2.MoveNext();
+                            II = i;
+                        }
+                        imain = II;
+                    }
+                    else
+                    {
+                        imain++; //RST2.MoveNext();
+                    }
+                }
+                FactCountMandRet = CF;
+            }
+
+            return FactCountMandRet;
+        }
+        public static int FactCount(string HES, double VL, ref int FC)
+        {
+            int tempFactCount = 0;
+
+            FC = FactCountMand(HES, VL);
+            if (FC > VL)
+            {
+                tempFactCount = 0;//false
+            }
+            else
+            {
+                tempFactCount = 1;//true
+            }
+            return tempFactCount;
+        }
+        public static int MandLes10(string HES, long dt, double VL, double VL2)
+        {
+            int tempMandLes10 = 0;
+            double MAND = 0;
+            double CHK = 0;
+            double TOPETEB = 0;
+            double TOPASN = 0;
+            bool ENDIS = false;
+            double JPTAEED = 0;
+            double JHBNSHE = 0;
+            CHK = 0;
+            TOPETEB = 0;
+            JPTAEED = 0;
+            JHBNSHE = 0;
+            MAND = Convert.ToDouble(GetMhesabDT(HES, Convert.ToInt64(Convert.ToInt64(dt.ToString().Substring(0, 6)) - 1 + "31")));
+            if (MAND <= VL && MAND > VL2 && MAND > 0)
+            {
+                dt = Convert.ToInt64(Convert.ToInt64(dt.ToString().Substring(0, 6)) + SimulateRight.Right("00" + VL2, 2));
+                var rst = dbms.DoGetDataSQL<double?>("SELECT     SUM(dbo.DEED_DTL.BES) AS MAND FROM         dbo.DEED_DTL INNER JOIN   dbo.DEED_HED ON dbo.DEED_DTL.N_S = dbo.DEED_HED.N_S WHERE     (dbo.DEED_HED.NO_S <> 2) AND (dbo.DEED_DTL.HES = '" + HES + "') AND (dbo.DEED_HED.DATE_S <= " + dt + ") AND (dbo.DEED_HED.DATE_S > " + Convert.ToInt64(Convert.ToInt64(dt.ToString().Substring(0, 6)) - 1) + "31" + ")").FirstOrDefault();
+                if (ReferenceEquals(rst, null))
+                {
+                    /////if (FARSIDATE(DateTime) >= dt)
+                    if (Convert.ToInt64(Tarikh.GoGetPersianDate(false)) >= dt)
+                    {
+                        tempMandLes10 = 0;//false
+                    }
+                    else
+                    {
+                        tempMandLes10 = 1;//true
+                    }
+                }
+                else
+                {
+                    if (MAND - rst <= 0)
+                    {
+                        tempMandLes10 = 1;//true
+                    }
+                    else
+                    {
+                        tempMandLes10 = 0;//false
+                    }
+                }
+            }
+            else
+            {
+                tempMandLes10 = 1;//true
+            }
+            return tempMandLes10;
+        }
+        public static double GetMhesabDT(string HES, long dt)
+        {
+            double tempGetMhesabDT = 0;
+            var rst = dbms.DoGetDataSQL<double?>("SELECT    sum(dbo.DEED_DTL.BED - dbo.DEED_DTL.BES) AS MAND FROM  dbo.DEED_DTL INNER JOIN  dbo.DEED_HED ON dbo.DEED_DTL.N_S = dbo.DEED_HED.N_S WHERE    (HES = '" + HES + "') AND (dbo.DEED_HED.DATE_S <= " + dt + ")").FirstOrDefault();
+            if (ReferenceEquals(rst, null))
+            {
+                tempGetMhesabDT = 0;
+            }
+            else
+            {
+                tempGetMhesabDT = (double)rst;
+            }
+            return tempGetMhesabDT;
+        }
+        public static int MandTop10(string HES, long dt, double VL, double VL2)
+        {
+            int tempMandTop10 = 0;
+            double MAND = 0;
+            double CHK = 0;
+            double TOPETEB = 0;
+            double TOPASN = 0;
+            bool ENDIS = false;
+            double JPTAEED = 0;
+            double JHBNSHE = 0;
+            CHK = 0;
+            TOPETEB = 0;
+            JPTAEED = 0;
+            JHBNSHE = 0;
+            //MAND = GetMhesabDT(HES, Conversions.ToDouble(Strings.Left(dt.ToString(), 6)) - 1d + "31");//From Pro VB Convertor
+            MAND = Convert.ToDouble(GetMhesabDT(HES, Convert.ToInt64(Convert.ToInt64(dt.ToString().Substring(0, 6)) - 1 + "31")));
+            if (MAND >= VL && MAND > 0)
+            {
+                //dt = Conversions.ToLong(Strings.Left(dt.ToString(), 6) + Strings.Right("00" + VL2, 2));//From Pro VB Convertor
+
+                dt = Convert.ToInt64(dt.ToString().Substring(0, 6) + SimulateRight.Right("00" + VL2, 2));
+                var rst = dbms.DoGetDataSQL<double?>("SELECT     SUM(dbo.DEED_DTL.BES) AS MAND FROM         dbo.DEED_DTL INNER JOIN  dbo.DEED_HED ON dbo.DEED_DTL.N_S = dbo.DEED_HED.N_S WHERE     (dbo.DEED_HED.NO_S <> 2) AND (dbo.DEED_DTL.HES = '" + HES + "') AND (dbo.DEED_HED.DATE_S <= " + dt + ")").FirstOrDefault();
+                if (ReferenceEquals(rst, null))
+                {
+                    tempMandTop10 = 0;//false
+                }
+                else
+                {
+                    if (MAND - rst <= 0)
+                    {
+                        tempMandTop10 = 1;//true
+                    }
+                    else
+                    {
+                        tempMandTop10 = 0;//false
+                    }
+                }
+            }
+            else
+            {
+                tempMandTop10 = 1;//true
+            }
+            return tempMandTop10;
+        }
+        //----------------------------------------------------------------------------------------
+        //	Copyright © 2003 - 2012 Tangible Software Solutions Inc.
+        //	This class can be used by anyone provided that the copyright notice remains intact.
+        //
+        //	This class simulates the behavior of the classic VB 'Right' function.
+        //----------------------------------------------------------------------------------------
+        public static class SimulateRight
+        {
+            public static string Right(string expression, int length)
+            {
+                if (string.IsNullOrEmpty(expression))
+                    return string.Empty;
+                else if (length >= expression.Length)
+                    return expression;
+                else
+                    return expression.Substring(expression.Length - length);
+            }
+        }
+        public static int ChecketebarSSM(string HES, double ETB, long pnum)
+        {
+            int tempChecketebarSSM = 0;
+            double MAND = 0;
+            double CHK = 0;
+            double TOPASN = 0;
+            bool ENDIS = false;
+            double JPTAEED = 0;
+            double JHBNSHE = 0;
+            CHK = 0;
+            JPTAEED = 0;
+            JHBNSHE = 0;
+
+            MAND = GetMhesab(HES);
+            //جمع پيش فاکتورهاي تاييد شده کنسل نشده و حواله نشده
+            JPTAEED = GetMPishf(HES) + JAMinpishfac(pnum);
+            //جمع حواله هاي بارگيري نشده
+            JHBNSHE = GetMHavl(HES);
+            if (ETB - MAND - JPTAEED - JHBNSHE >= 0)
+            {
+                tempChecketebarSSM = 1;//true
+            }
+            else
+            {
+                tempChecketebarSSM = 0;//false
+                                       //DoCmd.OpenForm "mesageform", , , , , acDialog, "مانده حساب : " & Format(MAND, "#,###") & "  مانده اسناد : " & Format(CHK, "#,###") & "  كل اعتبار : " & Format(TOPETEB, "#,###")
+            }
+            return tempChecketebarSSM;
+        }
+        public static int ChecketebarASSSM(string HES, double ETB, long pnum)
+        {
+            int tempChecketebarASSSM = 0;
+            double MAND = 0;
+            double CHK = 0;
+            double TOPETEB = 0;
+            double TOPASN = 0;
+            bool ENDIS = false;
+            double JPTAEED = 0;
+            double JHBNSHE = 0;
+            CHK = 0;
+            TOPETEB = 0;
+            JPTAEED = 0;
+            JHBNSHE = 0;
+            MAND = GetMhesab(HES);
+            //جمع پيش فاکتورهاي تاييد شده کنسل نشده و حواله نشده
+            JPTAEED = GetMPishf(HES) + JAMinpishfac(pnum);
+            //جمع حواله هاي بارگيري نشده
+            JHBNSHE = GetMHavl(HES);
+            CHK = GetMAsnad(HES);
+
+            if (ETB - MAND - JPTAEED - JHBNSHE - CHK >= 0)
+            {
+                tempChecketebarASSSM = 1;//true
+            }
+            else
+            {
+                tempChecketebarASSSM = 0;//false
+                                         //DoCmd.OpenForm "mesageform", , , , , acDialog, "مانده حساب : " & Format(MAND, "#,###") & "  مانده اسناد : " & Format(CHK, "#,###") & "  كل اعتبار : " & Format(TOPETEB, "#,###")
+            }
+
+            return tempChecketebarASSSM;
+        }
+        public static string GetGradeName(int GID)
+        {
+            string tempGetGradeName = null;
+            var rst = dbms.DoGetDataSQL<GTGRDNAME>("SELECT     GID, GNAME FROM dbo.GRADE_RANGE WHERE     (GID = " + GID + ")").FirstOrDefault();
+            if (ReferenceEquals(rst, null))
+            {
+                tempGetGradeName = 0.ToString();
+            }
+            else if (rst.GID == 0)
+            {
+                tempGetGradeName = 0.ToString();
+            }
+            else
+            {
+                tempGetGradeName = rst.GNAME;
+            }
+            return tempGetGradeName;
+        }
+        public static int GetGrade(string HES)
+        {
+            int tempGetGrade = 0;
+            var rst = dbms.DoGetDataSQL<int>("SELECT GRADEID FROM AZAE WHERE HES = '" + HES + "'").FirstOrDefault();
+            if (ReferenceEquals(rst, null) || rst == 0)
+            {
+                tempGetGrade = -1;
+            }
+            else
+            {
+                tempGetGrade = rst;
+            }
+            return tempGetGrade;
+        }
+        public static double GetMhesabF(string HES)
+        {
+            double tempGetMhesabF = 0;
+            var rst = dbms.DoGetDataSQL<double?>("SELECT     SUM(dbo.DEED_DTL.BED - dbo.DEED_DTL.BES) AS Expr1 FROM         dbo.DEED_DTL INNER JOIN  dbo.CUST_HESAB ON dbo.DEED_DTL.HES = dbo.CUST_HESAB.hes INNER JOIN dbo.Visit_route ON dbo.CUST_HESAB.ROUTE_NAME = dbo.Visit_route.ROUTE_NAME WHERE     (dbo.Visit_route.HES = N'" + HES + "')").FirstOrDefault();
+            //  ' DEBUG.PRINT "SELECT     SUM(dbo.DEED_DTL.BED - dbo.DEED_DTL.BES) AS Expr1 FROM         dbo.DEED_DTL INNER JOIN  dbo.CUST_HESAB ON dbo.DEED_DTL.HES = dbo.CUST_HESAB.hes INNER JOIN dbo.Visit_route ON dbo.CUST_HESAB.ROUTE_NAME = dbo.Visit_route.ROUTE_NAME WHERE     (dbo.Visit_route.HES = N'" & HES & "')"
+            ///////if (rst.Count == 0 || IsNull(rst.Fields[0]))
+            if (ReferenceEquals(rst, null))
+            {
+                tempGetMhesabF = 0;
+            }
+            else
+            {
+                tempGetMhesabF = (double)rst;
+            }
+            return tempGetMhesabF;
+        }
+        public static double GetMhesab(string HES)
+        {
+            double tempGetMhesab = 0;
+            //rst.Open "SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE HES = '" + HES + "'";
+            var rst = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE HES = '" + HES + "'").FirstOrDefault();
+            if (ReferenceEquals(rst, null))
+            {
+                tempGetMhesab = 0;
+            }
+            else
+            {
+                tempGetMhesab = (double)rst;
+            }
+            return tempGetMhesab;
+        }
+        public static double GetMAsnad(string HES)
+        {
+            double tempGetMAsnad = 0;
+            //rst.Open "SELECT     SUM(MABL) AS smab FROM dbo.PAY_GETD WHERE     ((N_KOL3 IS NULL) AND (N_KOL2 IS NULL) AND (CUST_NO = N'" + HES + "') AND (N_KOL = " + Forms["baseknow"]["BANKHA"] + " OR  N_KOL IS NULL)) OR  ((N_KOL3 IS NULL) AND (N_KOL2 IS NULL) AND (CUST_NO = N'" + HES + "') AND (DATE_S > " + FARSIDATE(DateTime.Now) + "))";
+            var rst = dbms.DoGetDataSQL<double?>("SELECT     SUM(MABL) AS smab FROM dbo.PAY_GETD WHERE     ((N_KOL3 IS NULL) AND (N_KOL2 IS NULL) AND (CUST_NO = N'" + HES + "') AND (N_KOL = " + Baseknow.BANKHA + " OR  N_KOL IS NULL)) OR  ((N_KOL3 IS NULL) AND (N_KOL2 IS NULL) AND (CUST_NO = N'" + HES + "') AND (DATE_S > " + Tarikh.FullCurrentDate + "))").FirstOrDefault();
+            if (ReferenceEquals(rst, null))
+            {
+                tempGetMAsnad = 0;
+            }
+            else
+            {
+                tempGetMAsnad = (double)rst;
+            }
+            return tempGetMAsnad;
+        }
+        public static double GetMHavl(string HES)
+        {
+            double tempGetMHavl = 0;
+            //rst.Open "SELECT     SUM(dbo.INVO_LST.MABL_K - dbo.INVO_LST.N_MOIN + dbo.INVO_LST.IMBAA) AS GMAB FROM         dbo.HEAD_LST INNER JOIN   dbo.INVO_LST ON dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER AND dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG WHERE       (dbo.HEAD_LST.TAG = 2) AND (dbo.HEAD_LST.TAMIR = 0) AND  (dbo.HEAD_LST.CUST_NO = '" + HES + "')";
+            var rst = dbms.DoGetDataSQL<double?>("SELECT     SUM(dbo.INVO_LST.MABL_K - dbo.INVO_LST.N_MOIN + dbo.INVO_LST.IMBAA) AS GMAB FROM         dbo.HEAD_LST INNER JOIN   dbo.INVO_LST ON dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER AND dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG WHERE       (dbo.HEAD_LST.TAG = 2) AND (dbo.HEAD_LST.TAMIR = 0) AND  (dbo.HEAD_LST.CUST_NO = '" + HES + "')").FirstOrDefault();
+            if (ReferenceEquals(rst, null))
+            {
+                tempGetMHavl = 0;
+            }
+            else
+            {
+                tempGetMHavl = (double)rst;
+            }
+            return tempGetMHavl;
+        }
+        public static double GetMPishf(string HES)
+        {
+            double tempGetMPishf = 0;
+            //rst.Open "SELECT     SUM(dbo.INVO_LST.MABL_K - dbo.INVO_LST.N_MOIN + dbo.INVO_LST.IMBAA) AS GMAB FROM         dbo.HEAD_LST INNER JOIN   dbo.INVO_LST ON dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER AND dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG WHERE      (dbo.HEAD_LST.TAG = 20) AND (dbo.HEAD_LST.TAMIR <> 2 AND dbo.HEAD_LST.TAMIR <> 3) AND  (dbo.HEAD_LST.SGN1 = 1) AND  (dbo.HEAD_LST.CUST_NO = '" + HES + "')";
+            var rst = dbms.DoGetDataSQL<double?>("SELECT     SUM(dbo.INVO_LST.MABL_K - dbo.INVO_LST.N_MOIN + dbo.INVO_LST.IMBAA) AS GMAB FROM         dbo.HEAD_LST INNER JOIN   dbo.INVO_LST ON dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER AND dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG WHERE      (dbo.HEAD_LST.TAG = 20) AND (dbo.HEAD_LST.TAMIR <> 2 AND dbo.HEAD_LST.TAMIR <> 3) AND  (dbo.HEAD_LST.SGN1 = 1) AND  (dbo.HEAD_LST.CUST_NO = '" + HES + "')").FirstOrDefault();
+            if (ReferenceEquals(rst, null))
+            {
+                tempGetMPishf = 0;
+            }
+            else
+            {
+                tempGetMPishf = (double)rst;
+            }
+            return tempGetMPishf;
+        }
+        public static double JAMinpishfac(long pnum)
+        {
+            double tempJAMinpishfac = 0;
+            //rst.Open "SELECT     SUM(dbo.INVO_LST.MABL_K) AS MAB, SUM(dbo.INVO_LST.N_MOIN) AS takh, SUM(dbo.INVO_LST.IMBAA) AS arzesh,   dbo.HEAD_LST.MABL_HAZ,   dbo.HEAD_LST.sgn1  FROM         dbo.HEAD_LST INNER JOIN    dbo.INVO_LST ON dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER AND dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG WHERE (dbo.HEAD_LST.TAG = 20) And (dbo.HEAD_LST.NUMBER = " + pnum + ") GROUP BY dbo.HEAD_LST.MABL_HAZ,dbo.HEAD_LST.sgn1";
+            var rst = dbms.DoGetDataSQL<LOGETEB_JAMinpish>("SELECT     SUM(dbo.INVO_LST.MABL_K) AS MAB, SUM(dbo.INVO_LST.N_MOIN) AS takh, SUM(dbo.INVO_LST.IMBAA) AS arzesh,   dbo.HEAD_LST.MABL_HAZ,   dbo.HEAD_LST.sgn1  FROM         dbo.HEAD_LST INNER JOIN    dbo.INVO_LST ON dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER AND dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG WHERE (dbo.HEAD_LST.TAG = 20) And (dbo.HEAD_LST.NUMBER = " + pnum + ") GROUP BY dbo.HEAD_LST.MABL_HAZ,dbo.HEAD_LST.sgn1").FirstOrDefault();
+            if (ReferenceEquals(rst, null))
+            {
+                tempJAMinpishfac = 0;
+            }
+            else
+            {
+                if (Convert.ToBoolean(rst.SGN1))
+                {
+                    tempJAMinpishfac = 0;
+                }
+                else
+                {
+                    tempJAMinpishfac = Convert.ToDouble(rst.MAB - rst.takh + rst.arzesh + rst.MABL_HAZ);
+                }
+            }
+            return tempJAMinpishfac;
+        }
+        public static void logetebar(string HES, long num, int tg, double ETB, int GRD, string PAYAM, string GSM)
+        {
+            ////rst.Open "logetebar";
+
+            dbms.DoExecuteSQL($@"INSERT INTO dbo.logetebar
+                                                  ( hes,
+                                                  grade,
+                                                  VALUE,
+                                                  GSNAME,
+                                                  SAGHFMAND,
+                                                  SAGHFASNAD,
+                                                  HAVBAR,
+                                                  PISHFOK,
+                                                  NUMBER,
+                                                  TG,
+                                                  DTTIM,
+                                                  FDT,
+                                                  PAYAM,
+                                                  USERCO )
+                                              VALUES
+                                              (N'{HES}',
+                                                  {GRD},         
+                                                  {ETB},      
+                                                  N'{GSM}',       
+                                                  {GetMhesab(HES)},      
+                                                  {GetMAsnad(HES)},      
+                                                  {GetMHavl(HES)},     
+                                                  {GetMPishf(HES) + JAMinpishfac(num)},     
+                                                  {num},      
+                                                  {tg},         
+                                                  GETDATE(), 
+                                                  {Tarikh.FullCurrentDate},     
+                                                  N'{PAYAM}',      
+                                                  {Baseknow.USERCOD}       
+                                                  )");
+            ////rst.AddNew;
+            ////rst.Fields["hes"] = HES;
+            ////rst.Fields["GSNAME"] = GSM;
+            ////rst.Fields["grade"] = GRD;
+            ////rst.Fields["VALUE"] = ETB;
+            ////rst.Fields["SAGHFMAND"] = GetMhesab(HES);
+            ////rst.Fields["SAGHFASNAD"] = GetMAsnad(HES);
+            ////rst.Fields["HAVBAR"] = GetMHavl(HES);
+            ////rst.Fields["PISHFOK"] = GetMPishf(HES) + JAMinpishfac(num);
+            ////rst.Fields["NUMBER"] = num;
+            ////rst.Fields["TG"] = tg;
+            ////rst.Fields["DTTIM"] = DateTime.Now;
+            ////rst.Fields["FDT"] = FARSIDATE(DateTime.Now);
+            ////rst.Fields["PAYAM"] = PAYAM;
+            ////rst.Fields["USERCO"] = Forms["baseknow"]["USERCOD"];
+            ////rst.update;
+        }
+        public static string GETHESNAME(string HES)
+        {
+            string tempGETHESNAME = null;
+            var RRST = dbms.DoGetDataSQL<string>("SELECT CUST_HESAB.NAME FROM CUST_HESAB WHERE (CUST_HESAB.HES='" + HES + "')").FirstOrDefault();
+            //if (RRST.Count > 0)
+            if (!ReferenceEquals(RRST, null))
+            {
+                //if (IsNull(RRST.Fields[0]))
+                //{
+                //    tempGETHESNAME = "";
+                //}
+                //else
+                //{
+                //    tempGETHESNAME = RRST.Fields[0];
+                //}
+                tempGETHESNAME = RRST;
+            }
+            else
+            {
+                tempGETHESNAME = "";
+            }
+            return tempGETHESNAME;
+        }
+        public static double GetMAsnadF(string HES)
+        {
+            double tempGetMAsnadF = 0;
+            var rst = dbms.DoGetDataSQL<double?>("SELECT     SUM(dbo.PAY_GETD.MABL) AS smab FROM         dbo.Visit_route INNER JOIN  dbo.CUST_HESAB ON dbo.Visit_route.ROUTE_NAME = dbo.CUST_HESAB.ROUTE_NAME INNER JOIN     dbo.PAY_GETD ON dbo.CUST_HESAB.hes = dbo.PAY_GETD.CUST_NO WHERE     (dbo.PAY_GETD.N_KOL3 IS NULL) AND (dbo.PAY_GETD.N_KOL2 IS NULL) AND (dbo.PAY_GETD.N_KOL = " + Baseknow.BANKHA + "  OR    dbo.PAY_GETD.N_KOL IS NULL) AND (dbo.Visit_route.HES = N'" + HES + "') OR  (dbo.PAY_GETD.N_KOL3 IS NULL) AND (dbo.PAY_GETD.N_KOL2 IS NULL) AND (dbo.PAY_GETD.DATE_S > " + Tarikh.GoGetPersianDate(false) + ") AND (dbo.Visit_route.HES = N'" + HES + "')").FirstOrDefault();
+            if (rst == 0 || ReferenceEquals(rst, null))
+            {
+                tempGetMAsnadF = 0;
+            }
+            else
+            {
+                tempGetMAsnadF = (double)rst;
+            }
+            return tempGetMAsnadF;
+        }
+        public static object GETFLDvlu(int USERID, string frm, string fld, object VLU)
+        {
+            object tempGETFLDvlu;
+
+            var rst = dbms.DoGetDataSQL<GETFLD_1>("SELECT * FROM USEROPTION WHERE USERID = " + USERID + " AND FLD ='" + fld + "' AND FRM = '" + frm + "'").FirstOrDefault();
+            if (ReferenceEquals(rst, null))
+            {
+                dbms.DoExecuteSQL("INSERT  INTO  USEROPTION (USERID,FLD,FRM,VLU) VALUES(" + USERID + ",'" + fld + "','" + frm + "'," + VLU + ")");
+                tempGETFLDvlu = VLU;
+            }
+            else
+            {
+                tempGETFLDvlu = rst.VLU;
+            }
+            return tempGETFLDvlu;
+        }
+
+        public static int GETVAHEDN(string COD, int VAH)
+        {
+            int tempGETVAHEDN = 0;
+            var rst = dbms.DoGetDataSQL<GTNMVAHED>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + COD + "' AND ((VAHEDS.VAHED)= " + VAH + ")))").FirstOrDefault();
+            if (ReferenceEquals(rst, null))
+            {
+                tempGETVAHEDN = 1;
+            }
+            else
+            {
+                tempGETVAHEDN = (int)rst.NESBAT;
+            }
+            return tempGETVAHEDN;
+        }
+        public static DateTime GetdateFromServer()
+        {
+            DateTime tempGetdateFromServer = DateTime.MinValue;
+            DateTime DTT = DateTime.MinValue;
+            var rst = dbms.DoGetDataSQL<DateTime>("select getdate()").FirstOrDefault();
+            if (!ReferenceEquals(rst, null))
+            {
+                tempGetdateFromServer = rst;
+            }
+            else
+            {
+                tempGetdateFromServer = DateTime.Now;
+            }
+            return tempGetdateFromServer;
+        }
+        public static long GTFS()
+        {
+            DateTime dt = DateTime.MinValue;
+            dt = GetdateFromServer();
+            return dt.Hour * 10000 + dt.Minute * 100 + dt.Second;
+        }
+        public static long Gettaskid(double num, int tg)
+        {
+            long GettaskidRet = default;
+
+            var rst = dbms.DoGetDataSQL<Q1>("SELECT    IDNUM,num,tg FROM dbo.TASKS WHERE     num  = " + num + " and tg = " + tg).FirstOrDefault();
+
+            if (!ReferenceEquals(rst, null))
+            {
+                GettaskidRet = (long)rst.IDNUM;
+            }
+            else
+            {
+                GettaskidRet = 0L;
+            }
+            return GettaskidRet;
+        }
+        public static string GETUSERNAME(int? US)
+        {
+            if (string.IsNullOrEmpty(US.ToStringNullSafe()))
+            {
+                return "NULL";
+            }
+            else
+            {
+                string GETUSERNAMERet = default;
+                var rst = dbms.DoGetDataSQL<string>("SELECT     SAL_NAME FROM dbo.SALA_DTL WHERE     (IDD= " + US + ")").FirstOrDefault();
+                if (!ReferenceEquals(rst, null))
+                {
+                    GETUSERNAMERet = DECODEUN(rst);
+                }
+            }
+            return "NULL";
+        }
+        /// <summary>
+        ///  new WindowInteropHelper(this).Handle
+        /// </summary>
+        /// <param name="FRM"></param>
+        /// <param name="ID"></param>
+        /// <param name="USERCO"></param>
+        /// <param name="windowHandle"></param>
+        public static void LetSigneTick(string FRM, int ID, int USERCO, IntPtr windowHandle)
+        {
+            var TheWindo = (Window)System.Windows.Interop.HwndSource.FromHwnd(windowHandle).RootVisual;
+            //var TheWindo = Application.Current.Windows.OfType<Window>().SingleOrDefault(win => win.GetType().Name.Equals(FRM));
+            object rst = null;
+            switch (ID)
+            {
+                case 20:
+                    {
+                        rst = dbms.DoGetDataSQL<Q2>("SELECT   USERCO, FFRP_FROOSH, FFRP_ANB, FFRP_HESAB,FFRP_MODIR FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                        break;
+                    }
+                case 1:
+                    {
+                        rst = dbms.DoGetDataSQL<Q3>("SELECT   USERCO, ANB_RASID_ANB, ANB_RASID_QC,0 AS F3 FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                        break;
+                    }
+                case 6:
+                    {
+                        rst = dbms.DoGetDataSQL<Q4>("SELECT   USERCO, ENTGH_AZANB, ENTGH_BEANB, ENTGH_MODIR FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                        break;
+                    }
+                case 4:
+                    {
+                        rst = dbms.DoGetDataSQL<Q5>("SELECT   USERCO, FFRB_FROOSH, FFRB_ANB, FFRB_HESAB, FFRB_MODIR FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                        if (!ReferenceEquals(rst, null))
+                        {
+                            if (rst.GetType().GetProperties()[4].GetValue(rst, null) is true)
+                            {
+                                (TheWindo.FindName("SGN4") as CheckBox).IsEnabled = true;
+                                //FRM["SGN4"].Enabled = true;
+                                //FRM["SGN4"].Locked = false;
+                            }
+                            else
+                            {
+                                (TheWindo.FindName("SGN4") as CheckBox).IsEnabled = false;
+                                //FRM["SGN4"].Enabled = false;
+                                //FRM["SGN4"].Locked = true;
+                            }
+                        }
+
+                        break;
+                    }
+
+                case 3:
+                    {
+                        rst = dbms.DoGetDataSQL<Q6>("SELECT   USERCO, KFRB_BAZAR, KFRB_ANB, KFRB_HESAB, KFRB_MODIR FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                        if (!ReferenceEquals(rst, null))
+                        {
+                            if (rst.GetType().GetProperties()[4].GetValue(rst, null) is true)
+                            {
+                                (TheWindo.FindName("SGN4") as CheckBox).IsEnabled = true;
+                                //FRM["SGN4"].Enabled = true;
+                                //FRM["SGN4"].Locked = false;
+                            }
+                            else
+                            {
+                                (TheWindo.FindName("SGN4") as CheckBox).IsEnabled = false;
+                                //FRM["SGN4"].Enabled = false;
+                                //FRM["SGN4"].Locked = true;
+                            }
+                        }
+                        break;
+                    }
+
+                case 27:
+                    {
+                        rst = dbms.DoGetDataSQL<Q7>("SELECT   USERCO, KFRB_BAZAR, KFRB_ANB, KFRB_HESAB, KFRB_MODIR FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                        if (!ReferenceEquals(rst, null))
+                        {
+                            if (rst.GetType().GetProperties()[4].GetValue(rst, null) is true)
+                            {
+                                (TheWindo.FindName("SGN4") as CheckBox).IsEnabled = true;
+                                //FRM["SGN4"].Enabled = true;
+                                //FRM["SGN4"].Locked = false;
+                            }
+                            else
+                            {
+                                (TheWindo.FindName("SGN4") as CheckBox).IsEnabled = false;
+                                //FRM["SGN4"].Enabled = false;
+                                //FRM["SGN4"].Locked = true;
+                            }
+                        }
+                        break;
+                    }
+
+                //case 13:
+                //    {
+                //        rst.Open("SELECT   USERCO, FFR_FROOSH, FFR_HESAB,FFR_MODIR FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                //        break;
+                //    }
+                //case 33: // ÕÇÏÑÇÊí '
+                //    {
+                //        rst.Open("SELECT   USERCO, SGN0133 , SGN0233,SGN0333 FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                //        break;
+                //    }
+                //case 32: // ÕÇÏÑÇÊí '
+                //    {
+                //        rst.Open("SELECT   USERCO, SGN0132 , SGN0232,SGN0332 FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                //        break;
+                //    }
+                //case 34: // ÎÒÇäå '
+                //    {
+                //        rst.Open("SELECT   USERCO, SGN0134 , SGN0234,SGN0334 FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                //        break;
+                //    }
+                //case 35: // ÎÒÇäå '
+                //    {
+                //        rst.Open("SELECT   USERCO, SGN0135 , SGN0235,SGN0335 FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                //        break;
+                //    }
+                //case 12:
+                //    {
+                //        rst.Open("SELECT   USERCO, KFR_BAZAR, KFR_HESAB, KFR_MODIR FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                //        break;
+                //    }
+                case 2:
+                    {
+                        rst = dbms.DoGetDataSQL<QRE_21>("SELECT   USERCO, ANB_HAVL_FROSH, ANB_HAVL_ANB, ANB_HAVL_MODIR FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                        break;
+                    }
+                    //case 100:
+                    //    {
+                    //        rst.Open("SELECT   USERCO, PAY_MVAHED, PAY_HESAB, PAY_MAMEL FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                    //        break;
+                    //    }
+                    //case 90:
+                    //    {
+                    //        rst.Open("SELECT   USERCO, PAZ_PAZ , PAZ_HES,PAZ_CEO FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                    //        break;
+                    //    }
+                    //case 24:
+                    //    {
+                    //        rst.Open("SELECT   USERCO, SGN0124 , SGN0224,SGN0324 FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                    //        break;
+                    //    }
+                    //case 26:
+                    //    {
+                    //        rst.Open("SELECT   USERCO, SGN0126 , SGN0226,SGN0326 FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                    //        break;
+                    //    }
+                    //case 0:
+                    //    {
+                    //        rst.Open("SELECT   USERCO, SND_TAHI,SND_MALI,SND_MODIR FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                    //        break;
+                    //    }
+            }
+            if (!ReferenceEquals(rst, null))
+            {
+                //if (rst.Fields(3) == true)
+                if (rst.GetType().GetProperties()[3].GetValue(rst, null) is true && TheWindo.GetType().Name != "HEAD_LST_RASID")
+                {
+                    (TheWindo.FindName("SGN3") as CheckBox).IsEnabled = true;
+                    //FRM["SGN3"].Enabled = true;
+                    //FRM["SGN3"].Locked = false;
+                }
+                else
+                {
+                    if (TheWindo.GetType().Name != "HEAD_LST_RASID")
+                        (TheWindo.FindName("SGN3") as CheckBox).IsEnabled = false;
+                    //(TheWindo.FindName("SGN3") as CheckBox).Visibility = Visibility.Hidden;
+                    //FRM["SGN3"].Enabled = false;
+                    //FRM["SGN3"].Locked = true;
+                }
+                if (rst.GetType().GetProperties()[2].GetValue(rst, null) is true)
+                {
+                    (TheWindo.FindName("SGN2") as CheckBox).IsEnabled = true;
+                    //FRM["SGN2"].Enabled = true;
+                    //FRM["SGN2"].Locked = false;
+                }
+                else
+                {
+                    (TheWindo.FindName("SGN2") as CheckBox).IsEnabled = false;
+                    //FRM["SGN2"].Enabled = false;
+                    //FRM["SGN2"].Locked = true;
+                }
+                if (rst.GetType().GetProperties()[1].GetValue(rst, null) is true)
+                {
+                    (TheWindo.FindName("SGN1") as CheckBox).IsEnabled = true;
+                    //FRM["SGN1"].Enabled = true;
+                    //FRM["SGN1"].Locked = false;
+                }
+                else
+                {
+                    (TheWindo.FindName("SGN1") as CheckBox).IsEnabled = false;
+                    //FRM["SGN1"].Enabled = false;
+                    //FRM["SGN1"].Locked = true;
+                }
+            }
+            else
+            {
+                (TheWindo.FindName("SGN3") as CheckBox).IsEnabled = false;
+                (TheWindo.FindName("SGN2") as CheckBox).IsEnabled = false;
+                (TheWindo.FindName("SGN1") as CheckBox).IsEnabled = false;
+                //FRM["SGN3"].Enabled = false;
+                //FRM["SGN3"].Locked = true;
+                //FRM["SGN2"].Enabled = false;
+                //FRM["SGN2"].Locked = true;
+                //FRM["SGN1"].Enabled = false;
+                //FRM["SGN1"].Locked = true;
+            }
+        }
+
+
+        public static string SHARTCRATOR(string TXT)
+        {
+            string SHARTCRATORRet = default;
+            int i, K;
+            string TXTO;
+            string shart = default, SHAT2;
+            string shart2 = "";
+            i = 1;
+            K = 1;
+            TXT = Strings.Trim(TXT);
+            while (i < Strings.Len(TXT))
+            {
+                if (Strings.Mid(TXT, i, 1) == " ")
+                {
+                    if (Strings.Len(shart) > 0)
+                    {
+                        shart = shart + " and NAME LIKE replace(replace('%" + Strings.Mid(TXT, K + 1, i - K - 1) + "%',nchar(1740),nchar(1610)),'ک', 'ك')";
+                        shart2 = shart2 + " and NAME LIKE replace(replace('%" + Strings.Mid(TXT, K + 1, i - K - 1) + "%',nchar(1610),nchar(1740)),'ك', 'ک')";
+                        K = i;
+                    }
+                    else
+                    {
+                        shart = "NAME LIKE replace(replace('%" + Strings.Mid(TXT, K, i - K) + "%',nchar(1740),nchar(1610)),'ک', 'ك')";
+                        shart2 = "NAME LIKE replace(replace('%" + Strings.Mid(TXT, K, i - K) + "%',nchar(1610),nchar(1740)),'ك', 'ک')";
+                        K = i;
+                    }
+                }
+                i = i + 1;
+            }
+            if (i != K)
+            {
+                if (Strings.Len(shart) > 0)
+                {
+                    shart = shart + " and NAME LIKE replace(replace('%" + Strings.Mid(TXT, K + 1, i - K + 1) + "%',nchar(1740),nchar(1610)),'ک', 'ك')";
+                    shart2 = shart2 + " and NAME LIKE replace(replace('%" + Strings.Mid(TXT, K + 1, i - K + 1) + "%',nchar(1610),nchar(1740)),'ك', 'ک')";
+                    K = i;
+                }
+                else
+                {
+                    shart = "NAME LIKE  replace(replace('%" + Strings.Mid(TXT, K, i - K + 1) + "%',nchar(1740),nchar(1610)),'ک', 'ك')";
+                    shart2 = "NAME LIKE replace(replace('%" + Strings.Mid(TXT, K, i - K + 1) + "%',nchar(1610),nchar(1740)),'ك', 'ک')";
+                    K = i;
+                }
+            }
+            if (Strings.Len(TXT) == 1)
+            {
+                shart = "NAME LIKE replace(replace('%" + TXT + "%',nchar(1740),nchar(1610)),'ک', 'ك')";
+                shart2 = "NAME LIKE replace(replace('%" + TXT + "%',nchar(1610),nchar(1740)),'ك', 'ک')";
+            }
+            if (Strings.Len(shart) > 1)
+            {
+                shart = "(( " + shart + ") or (" + shart2 + "))";
+            }
+            SHARTCRATORRet = shart;
+            return SHARTCRATORRet;
+        }
+
+        public static bool Frisok(string HES, bool InternalCalling = true)
+        {
+            bool FrisokRet = default;
+            int i;
+            object a = default, fs;
+            if (Strings.Mid(Baseknow.OPTIONSS, 64, 1) == "5")
+            {
+                dbms.DoExecuteSQL("IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_NAME = '" + "frsnd" + Baseknow.USERCOD + "')   DROP view " + "frsnd" + Baseknow.USERCOD);
+                dbms.DoExecuteSQL("IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_NAME = '" + "frinv" + Baseknow.USERCOD + "')   DROP view " + "frinv" + Baseknow.USERCOD);
+                dbms.DoExecuteSQL("create  view frsnd" + Baseknow.USERCOD + " as SELECT     SUM(BED - BES) AS Expr2, NUMBER FROM dbo.DEED_DTL WHERE     (TAG = 13) AND (HES = N'" + HES + "') GROUP BY NUMBER");
+                dbms.DoExecuteSQL("create  view frinv" + Baseknow.USERCOD + " as SELECT     dbo.HEAD_LST.NUMBER,dbo.JAMFACTPRS.mab - dbo.HEAD_LST.M_NAGHD - dbo.HEAD_LST.MABL_VAR - dbo.HEAD_LST.MABL_HAV + dbo.HEAD_LST.MABL_HAZ - ISNULL(dbo.jamchkfact.mabch,0) AS Expr1 FROM         dbo.HEAD_LST INNER JOIN dbo.JAMFACTPRS ON dbo.HEAD_LST.NUMBER = dbo.JAMFACTPRS.NUMBER AND dbo.HEAD_LST.TAG = dbo.JAMFACTPRS.TAG + 11 LEFT OUTER JOIN dbo.jamchkfact ON dbo.JAMFACTPRS.NUMBER = dbo.jamchkfact.NUMBER WHERE     (dbo.HEAD_LST.TAG = 13) AND (dbo.HEAD_LST.CUST_NO = N'" + HES + "') GROUP BY dbo.HEAD_LST.NUMBER,dbo.JAMFACTPRS.mab - dbo.HEAD_LST.M_NAGHD - dbo.HEAD_LST.MABL_VAR - dbo.HEAD_LST.MABL_HAV + dbo.HEAD_LST.MABL_HAZ - ISNULL(dbo.jamchkfact.mabch,0) HAVING      (dbo.JAMFACTPRS.mab - dbo.HEAD_LST.M_NAGHD - dbo.HEAD_LST.MABL_VAR - dbo.HEAD_LST.MABL_HAV + dbo.HEAD_LST.MABL_HAZ - ISNULL(dbo.jamchkfact.mabch,0) <> 0)");
+
+
+                var rst = dbms.DoGetDataSQL<Q9>("SELECT     dbo.frinv" + Baseknow.USERCOD + ".NUMBER, dbo.frsnd" + Baseknow.USERCOD + ".Expr2 FROM   dbo.frsnd" + Baseknow.USERCOD + " RIGHT OUTER JOIN  dbo.frinv" + Baseknow.USERCOD + " ON dbo.frsnd" + Baseknow.USERCOD + ".NUMBER = dbo.frinv" + Baseknow.USERCOD + ".NUMBER WHERE     (dbo.frinv" + Baseknow.USERCOD + ".Expr1 > 0) AND (dbo.frsnd" + Baseknow.USERCOD + ".Expr2 IS NULL) OR (round(dbo.frinv" + Baseknow.USERCOD + ".Expr1 - dbo.frsnd" + Baseknow.USERCOD + ".Expr2,0) <> 0)").ToList();
+                if (rst.Count > 0)
+                {
+                    string _Pathfile_ = @"C:\CORRECT\errorfr.txt";
+                    string directory = Path.GetDirectoryName(_Pathfile_);
+                    if (!Directory.Exists(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+                    using (StreamWriter writer = new StreamWriter(_Pathfile_, true))
+                    {
+                        for (i = 0; i < rst.Count; i++)
+                        {
+                            GENSANADFROOSH(rst[i].NUMBER, Convert.ToInt64(rst[i].NUMBER), InternalCalling);
+
+                            writer.WriteLine("شماره حواله: " + rst[i].NUMBER.ToStringNullSafe());
+                        }
+                    }
+
+                    FrisokRet = false;
+                }
+                else
+                {
+                    FrisokRet = true;
+                }
+                if (rst.Count > 0)
+                {
+                    FrisokRet = false;
+                }
+                else
+                {
+                    FrisokRet = true;
+                }
+            }
+            else
+            {
+                FrisokRet = true;
+            }
+            return FrisokRet;
+        }
+        private static Object LOCKER = new Object();
+        public static long Createsanad(long DATE_S, string SHARH_S, int GHATEI, int NO_S, int OKF, string USER_NAME)
+        {
+            //lock (LOCKER)
+            //{
+            long CreatesanadRet = default;
+            long max_ns;
+            Double BG;
+            object rss2 = null;
+            rss2 = dbms.DoGetDataSQL<double?>("SELECT Max(DEED_HED.BAYEG) AS MaxOfBG FROM DEED_HED").FirstOrDefault();
+            if (IsNull(rss2))
+            { BG = 100000000; }
+            else
+            { BG = (double)rss2 + 1; }
+
+            object rss = null;
+            using (IDbConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+            {
+                db.Open();
+                using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    #region SERIALZBLE_SAFE_QUERY
+                    //Fake Query for Lock Table
+                    db.Execute("UPDATE TOP(1) DEED_HED SET ANBAR = ANBAR", null, transaction);
+                    //Fake Query for Lock Table
+
+                    //rss = db.Execute("INSERT INTO DEED_HED (N_S,DATE_S,SHARH_S,GHATEI,NO_S,OKF,USER_NAME) VALUES (0,0,0,0,0,0,0)", null, transaction);
+                    rss = db.Query<double?>("SELECT Max(DEED_HED.N_S) AS MaxOfN_S FROM DEED_HED", null, transaction).FirstOrDefault();
+                    //if (IsNull(rss.Fields(0)))
+                    if (IsNull(rss))
+                    {
+                        rss = db.Execute("WAITFOR DELAY '00:00:00.500'", null, transaction);
+                        rss = db.Execute("SELECT count(DEED_HED.N_S) AS MaxOfN_S FROM DEED_HED", null, transaction);
+                        if (IsNull(rss))
+                        {
+                            if (rss is 0)
+                            {
+                                max_ns = 2L;
+                            }
+                            else
+                            {
+                                max_ns = 0L;
+                            }
+                        }
+                        else
+                        {
+                            max_ns = Convert.ToInt64(rss) + 1;
+                        }
+                    }
+                    else
+                    {
+                        max_ns = Convert.ToInt64(rss) + 1;
+                    };
+                    //Forms["BUN"].Form.Refresh();
+                    CreatesanadRet = max_ns;
+                    #endregion
+                    CreatesanadRet = max_ns;
+
+
+                    rss = db.Execute($"INSERT INTO DEED_HED (N_S,DATE_S,SHARH_S,GHATEI,NO_S,OKF,USER_NAME,CRT,uid,BAYEG) VALUES ({max_ns} ,{DATE_S},'{SHARH_S}',{GHATEI},{NO_S},{OKF},'{USER_NAME}',GETDATE(),{Baseknow.USERCOD},{BG})", null, transaction);
+                    transaction.Commit();
+                    db?.Close();
+                }
+            }
+            return CreatesanadRet;
+            //}
+            // *************************************************************
+        }
+
+
+        public static (double?, bool) GENSANADFROOSH(object fnum, long TNUM, bool InternalCalling = true)
+        {
+            double? SANAD_NUMBER = null;
+            bool IsSuccessfully = true;
+
+            double progress = 0;
+            MainWindow auto_run = null;
+            if (InternalCalling)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    //Paint
+                    auto_run = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
+                }));
+            }
+            LogWriter.WriteLog("شروع بازسازی سند فروش");
+            var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT N_S, DATE_S, SHARH_S, NO_S, ANBAR, N_FACTOR, GHATEI, USER_NAME, base, SGN1, SGN2, SGN3, SGN4, OKF FROM dbo.DEED_HED").ToList();
+            var HFRST = dbms.DoGetDataSQL<HEAD_LST_CSHARP>($"SELECT  * FROM dbo.HEAD_LST WHERE     (NUMBER BETWEEN {fnum} AND {TNUM}) AND (TAG = 13) ORDER BY NUMBER").ToList();
+
+            //Forms["GUG"]["SNUM"] = HFRST.Count;
+
+
+            //  while (!HFRST.EOF)
+            Parallel.For(0, HFRST.Count, HFRST_EOF =>
+            {
+                double? max_ns, MABL_CHK = null, JAMF, JAMCH, CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null, takh;
+                string shart;
+                double MAVAD;
+                double DAST;
+                double SAR;
+                int ii;
+                string CH;
+                double JAMP;
+                var TAMIR = default(string);
+                string PER;
+                long permab;
+                string SHSH;
+                if (InternalCalling)
+                {
+                    auto_run.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progress++;
+                        auto_run.PRGR_C1.Value = progress / ((double)HFRST.Count) * 100.0; // Update the progress bar
+                        auto_run.LBL_C1.Content = $"{progress:F2}%";
+                        auto_run.UpdateOverallProgressBar();
+                    }));
+                }
+
+                if (HFRST[HFRST_EOF]?.CUST_NO == "213-1-429") //213-1-429
+                {
+
+                }
+                //
+                if (!IsNull(HFRST[HFRST_EOF]?.CUST_NO))
+                {
+                    GETTAF3(HFRST[HFRST_EOF].CUST_NO, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+                }
+
+
+                SHSH = Convert.ToString(Interaction.IIf((bool)Baseknow.SNDKH, Strings.Left(" فاكتورهاي  فروش  " + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255), Strings.Left(" فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " خريدار: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255)));
+                if ((bool)Baseknow.SNDKH) // سند روزانه است
+                {
+                    List<QRE10> SARST = null;
+                    if (!IsNull(HFRST[HFRST_EOF].N_S)) // فاکتور سند دارد
+                    {
+                        SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 2 and n_s = " + HFRST[HFRST_EOF].N_S).ToList();
+                        if (SARST.Count > 0)  // اگرسند  فاکتورهست
+                        {
+                            if (SARST.Select(x => x.DATE_S).FirstOrDefault() == HFRST[HFRST_EOF].DATE_N) // تاريخ سند و فاکتوريکي است
+                            {
+                                max_ns = (double)HFRST[HFRST_EOF].N_S;
+                            }
+                            else
+                            {
+                            SEJ:
+                                SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 2 and DATE_S = " + HFRST[HFRST_EOF].DATE_N).ToList();
+                                if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                                {
+                                    max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
+                                }
+                                else
+                                {
+                                    max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 2, -1, HFRST[HFRST_EOF].USER_NAME);
+
+                                    HFRST[HFRST_EOF].N_S = max_ns;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // goto SEJ;
+                            SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 2 and DATE_S = " + HFRST[HFRST_EOF].DATE_N).ToList();
+                            if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                            {
+                                max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
+                            }
+                            else
+                            {
+                                max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 2, -1, HFRST[HFRST_EOF].USER_NAME);
+
+                                HFRST[HFRST_EOF].N_S = max_ns;
+                            }
+                        } // چک کن اگه نيست صادر کن
+                    }
+                    else
+                    {
+                        // goto SEJ;
+                        SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 2 and DATE_S = " + HFRST[HFRST_EOF].DATE_N).ToList();
+                        if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                        {
+                            max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
+                        }
+                        else
+                        {
+                            max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 2, -1, HFRST[HFRST_EOF].USER_NAME);
+
+                            HFRST[HFRST_EOF].N_S = max_ns;
+                        }
+                    } // چک کن اگه نيست صادر کن
+                }
+                else if (!IsNull(HFRST[HFRST_EOF]?.N_S)) // تک سندي
+                                                         // فاکتور سند دارد
+                {
+                    var SARST = dbms.DoGetDataSQL<QRE11>("SELECT    n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 2 and N_s = " + HFRST[HFRST_EOF].N_S).ToList();
+                    if (SARST.Count > 0)   // اگرسند فاکتورهست
+                    {
+                        if (SARST.Select(x => x.DATE_S).FirstOrDefault() != HFRST[HFRST_EOF].DATE_N) // تاريخ سند و فاکتوريکي است
+                        {
+                            dbms.DoExecuteSQL("UPDATE DEED_HED SET DATE_S = " + HFRST[HFRST_EOF].DATE_N + ",SHARH_S = '" + SHSH + "',GHATEI = 0,NO_S = 2,OKF=-1,USER_NAME ='" + HFRST[HFRST_EOF].USER_NAME + "' WHERE N_S =" + HFRST[HFRST_EOF].N_S);
+                        }
+                        max_ns = (double)HFRST[HFRST_EOF].N_S;
+                    }
+                    else
+                    {
+                        max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 2, -1, HFRST[HFRST_EOF].USER_NAME);
+                        HFRST[HFRST_EOF].N_S = max_ns;
+                    }
+                }
+                else
+                {
+                    max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 2, -1, HFRST[HFRST_EOF].USER_NAME);
+                    HFRST[HFRST_EOF].N_S = max_ns;
+                }
+                if (IsNull(HFRST[HFRST_EOF].N_S) || HFRST[HFRST_EOF].N_S != max_ns)
+                {
+                    HFRST[HFRST_EOF].N_S = max_ns;
+                    dbms.DoExecuteSQL($"UPDATE HEAD_LST set n_s = {max_ns} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER} AND (TAG = 13)) ");
+                }
+
+                SANAD_NUMBER = HFRST[HFRST_EOF]?.N_S;
+
+                var jst = dbms.DoGetDataSQL<double?>("SELECT Sum(INVO_LST.MABL_K) AS SumOfMABL_K FROM INVO_LST WHERE (((INVO_LST.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + " ) AND ((INVO_LST.TAG)=2))").ToList();
+                if (jst.Count > 0 & !IsNull(jst.FirstOrDefault()))
+                {
+                    JAMF = (double)jst.FirstOrDefault();
+                }
+                else
+                {
+                    JAMF = 0d;
+                };
+
+
+                var jstOpen = dbms.DoGetDataSQL<double?>("SELECT Sum(PAY_GETD.MABL) AS SumOfMABL FROM PAY_GETD WHERE (((PAY_GETD.TAG)=2) AND ((PAY_GETD.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + " ))").ToList();
+                if (jstOpen.Count > 0 & !IsNull(jstOpen.FirstOrDefault()))
+                {
+                    JAMCH = (double)jstOpen.FirstOrDefault();
+                }
+                else
+                {
+                    JAMCH = 0d;
+                };
+                dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE (((DEED_DTL.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + ") AND ((DEED_DTL.TAG)= 13))");
+                if (JAMF + HFRST[HFRST_EOF].MABL_HAZ + HFRST[HFRST_EOF].MBAA - HFRST[HFRST_EOF].TAKHFIF != 0)
+                {
+                    //  dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE (((DEED_DTL.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + ") AND ((DEED_DTL.TAG)= 13))");
+                    string CTAF2T = (CTAF2 == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
+                    string CTAF3T = (CTAF3 == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
+                    string CTAF4T = (CTAF4 == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+
+
+                    dbms.DoExecuteSQL($"INSERT INTO dbo.DEED_DTL(N_S,  HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, HES,SHARH, BED, NUMBER, TAG, RADIF ) VALUES( {max_ns},{CKOL},{CMOIN},{CTAF},{CTAF2T},{CTAF3T},{CTAF4T},N'{HFRST[HFRST_EOF].CUST_NO}',N'{Strings.Right("ف ف ش " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + HFRST[HFRST_EOF].MOLAH + Interaction.IIf(Strings.Mid(Baseknow.OPTIONSS, 55, 1) == "5", " - " + GETF_DEPART(HFRST[HFRST_EOF]?.DEPATMAN), " "), 255)}',{Math.Round((double)(JAMF + HFRST[HFRST_EOF].MABL_HAZ + HFRST[HFRST_EOF].MBAA - HFRST[HFRST_EOF].TAKHFIF))},{HFRST[HFRST_EOF].NUMBER},13,{HFRST[HFRST_EOF].NUMBER})");
+
+                }
+
+                var jst_sec = dbms.DoGetDataSQL<QRE12>("SELECT INVO_LST.MABL_K, INVO_LST.MEGHk, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME, INVO_LST.AVRAGE FROM STUF_DEF INNER JOIN INVO_LST ON (STUF_DEF.CODE = INVO_LST.CODE) AND (STUF_DEF.CODE = INVO_LST.CODE) WHERE     (dbo.INVO_LST.NUMBER = " + HFRST[HFRST_EOF].NUMBER + ") AND (dbo.INVO_LST.TAG = 2) ").ToList();
+                //while (!jst_sec.EOF())
+                for (int jst_sec_EOF = 0; jst_sec_EOF < jst_sec.Count; jst_sec_EOF++)
+                {
+                    if (Strings.Mid(Baseknow.OPTIONSS, 13, 1) == "5")
+                    {
+                        if (HFRST[HFRST_EOF].SADER == 0)
+                        {
+                            CREATHES(Baseknow.FROSH, 1, Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), jst_sec[jst_sec_EOF].NAME);
+
+                            if (jst_sec[jst_sec_EOF].MABL_K > 0)
+                            {
+
+
+                                dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{Baseknow.FROSH},{1},{jst_sec[jst_sec_EOF].CODE}
+                                        ,N'{Baseknow.FROSH + "-1-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE)}'
+                                        ,N'{Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " فروش " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,{Math.Round((double)jst_sec[jst_sec_EOF].MABL_K)},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD)}
+                                        ,13)");
+
+                            }
+                        }
+                        else if (jst_sec[jst_sec_EOF].ANBAR != 0)
+                        {
+                            CREATHES(Baseknow.FROSH, 2, Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), jst_sec[jst_sec_EOF].NAME);
+
+                            if (jst_sec[jst_sec_EOF].MABL_K > 0)
+                            {
+
+                                dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{Baseknow.FROSH},{2},{jst_sec[jst_sec_EOF].CODE}
+                                        ,N'{Baseknow.FROSH + "-1-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE)}'
+                                        ,N'{Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " فروش " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,{Math.Round((double)jst_sec[jst_sec_EOF].MABL_K)},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD)}
+                                        ,13)");
+
+                            }
+                        }
+                        else
+                        {
+
+                            CREATHES(Baseknow.DARAM, HFRST[HFRST_EOF].DEPATMAN, Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), jst_sec[jst_sec_EOF].NAME);
+
+                            dbms.DoExecuteSQL(
+                                $@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{Baseknow.DARAM},{HFRST[HFRST_EOF].DEPATMAN},{jst_sec[jst_sec_EOF].CODE}
+                                        ,N'{Baseknow.DARAM + "-" + HFRST[HFRST_EOF].DEPATMAN + "-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE)}'
+                                        ,N'{Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " فروش " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,{Math.Round((double)jst_sec[jst_sec_EOF].MABL_K)},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD)}
+                                        ,13)");
+
+
+                        }
+                    }
+                    else if (jst_sec[jst_sec_EOF].ANBAR != 0)
+                    {
+                        CREATHES(Baseknow.FROSH, Convert.ToDouble(jst_sec[jst_sec_EOF].CODE), Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), jst_sec[jst_sec_EOF].NAME);
+
+                        if (jst_sec[jst_sec_EOF].MABL_K > 0)
+                        {
+
+                            dbms.DoExecuteSQL(
+                                $@"INSERT INTO dbo.DEED_DTL(N_S,
+                                                            HES_K,
+                                                            HES_M,
+                                                            HES_T,
+                                                            hes,
+                                                            SHARH,
+                                                            BES,
+                                                            NUMBER
+                                                            ,ARZD
+                                                            ,TAG)
+                                            VALUES({max_ns}
+                                        ,{Baseknow.FROSH}
+                                        ,{jst_sec[jst_sec_EOF].CODE}
+                                        ,{jst_sec[jst_sec_EOF].CODE}
+                                        ,N'{Baseknow.FROSH + "-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE) + "-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE)}'
+                                        ,N'{Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " فروش " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,{Math.Round((double)jst_sec[jst_sec_EOF].MABL_K)}
+                                        ,{HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD)}
+                                        ,13)");
+                        }
+                    }
+                    else
+                    {
+                        CREATHES(Baseknow.DARAM, HFRST[HFRST_EOF].DEPATMAN, Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), jst_sec[jst_sec_EOF].NAME);
+
+                        dbms.DoExecuteSQL(
+                              $@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{Baseknow.DARAM},{HFRST[HFRST_EOF].DEPATMAN},{jst_sec[jst_sec_EOF].CODE}
+                                        ,N'{Baseknow.DARAM + "-" + HFRST[HFRST_EOF].DEPATMAN + "-" + jst_sec[jst_sec_EOF].CODE}'
+                                        ,N'{Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " فروش " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,{Math.Round((double)jst_sec[jst_sec_EOF].MABL_K)},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD)}
+                                        ,13)");
+
+
+                    }
+                    //jst_sec.MoveNext();
+                };
+
+                if (Baseknow.SANAT == true || IsNull(Baseknow.SANAT) || Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                {
+                    var jst_thr = dbms.DoGetDataSQL<QRE14>("SELECT     dbo.INVO_LST.MABL_K, dbo.INVO_LST.MEGHk, dbo.INVO_LST.CODE, dbo.INVO_LST.ANBAR, dbo.STUF_DEF.NAME,  dbo.INVO_LST.AVRAGE FROM  dbo.INVO_LST INNER JOIN  dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE WHERE (dbo.INVO_LST.NUMBER = " + HFRST[HFRST_EOF].NUMBER + ") And (dbo.INVO_LST.TAG = 2) And (dbo.INVO_LST.ANBAR <> 0)").ToList();
+                    //while (!jst_thr.EOF())
+                    for (int jst_thr_EOF = 0; jst_thr_EOF < jst_thr.Count; jst_thr_EOF++)
+                    {
+                        MAVAD = Math.Round((double)(GETSTANDARDPRICE_MAVAD(jst_thr[jst_thr_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk));
+
+                        try
+                        {
+                            if (HFRST[HFRST_EOF]?.DATE_N != null) // Check for null before attempting string operations/conversion
+                            {
+                                // If DATE_N is already a numeric type (e.g., int, long), a direct cast is fine.
+                                // If it's an object or string that *might* contain non-numeric data, use TryParse.
+                                if (!long.TryParse(HFRST[HFRST_EOF].DATE_N?.ToString(), out _))
+                                {
+                                    // Handle the parsing failure:
+                                    // Log the error with the problematic value for debugging.
+                                    LogWriter.WriteLog($"Error parsing DATE_N: '{HFRST[HFRST_EOF].DATE_N}' for NUMBER: {HFRST[HFRST_EOF].NUMBER}. Using default date value.");
+                                    // You might want to skip this record, use a default value (like 0), or throw a more specific exception.
+                                }
+                            }
+                        }
+                        catch { IsSuccessfully = false; }
+
+
+                        DAST = Math.Round((double)GETSTANDARDPRICE_DAST(jst_thr[jst_thr_EOF].CODE, (long)(Convert.ToInt64(HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk)));
+                        SAR = Math.Round((double)((double)GETSTANDARDPRICE_SAR(jst_thr[jst_thr_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_thr[jst_thr_EOF].MEGHk));
+                        CREATHES(Baseknow.MOGODIA, jst_thr[jst_thr_EOF].ANBAR, Convert.ToInt64(jst_thr[jst_thr_EOF].CODE), jst_thr[jst_thr_EOF].NAME);
+
+                        if (MAVAD + DAST + SAR != 0d & Strings.Mid(Baseknow.OPTIONSS, 66, 1) != "5")
+                        {
+                            dbms.DoExecuteSQL($@"INSERT INTO DEED_DTL(N_S ,HES_K ,HES_M ,HES_T ,SHARH ,hes ,BES ,ARZD ,NUMBER ,TAG)
+                            VALUES ({max_ns},
+                            {Baseknow.MOGODIA},
+                            {jst_thr[jst_thr_EOF].ANBAR},
+                            {jst_thr[jst_thr_EOF].CODE},
+                            N'{Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_thr[jst_thr_EOF].MEGHk + " خروج " + Strings.Trim(jst_thr[jst_thr_EOF].NAME), 255)}'
+                            ,N'{Baseknow.MOGODIA + "-" + jst_thr[jst_thr_EOF].ANBAR + "-" + Convert.ToInt64(jst_thr[jst_thr_EOF].CODE)}',
+                            {MAVAD + DAST + SAR},
+                            {Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD)}
+                            ,{HFRST[HFRST_EOF].NUMBER}
+                            ,{13})");
+
+                            if (Convert.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) != 1d)
+                            {
+                                CREATHES(Baseknow.GHEYMAT, Convert.ToInt64(jst_thr[jst_thr_EOF].CODE), Convert.ToInt64(jst_thr[jst_thr_EOF].CODE), jst_thr[jst_thr_EOF].NAME);
+                            }
+                            if (MAVAD > 0d)
+                            {
+                                object N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, ARZD, NUMBER, TAG = default;
+                                //SDRST.AddNew(); // قيمت تمام شده
+                                N_S = max_ns;
+                                HES_K = Baseknow.GHEYMAT;
+                                if (Convert.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                                {
+                                    HES_M = 1;
+                                    HES_T = 1;
+                                    hes = Baseknow.GHEYMAT + "-1-1";
+                                }
+                                else
+                                {
+                                    HES_M = jst_thr[jst_thr_EOF].CODE;
+                                    HES_T = jst_thr[jst_thr_EOF].CODE;
+                                    hes = Baseknow.GHEYMAT + "-" + Convert.ToDouble(jst_thr[jst_thr_EOF].CODE) + "-" + Convert.ToDouble(jst_thr[jst_thr_EOF].CODE);
+                                }
+                                SHARH = Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_thr[jst_thr_EOF].MEGHk + " فروش " + Strings.Trim(jst_thr[jst_thr_EOF].NAME), 255);
+                                BED = MAVAD;
+                                ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                                NUMBER = HFRST[HFRST_EOF].NUMBER;
+                                TAG = 13;
+
+                                //SDRST.update();
+                                dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES ({N_S}, {HES_K}, {HES_M}, {HES_T}, N'{hes}', N'{SHARH}', {BED}, {ARZD}, {NUMBER}, {TAG})");
+                            }
+                            CREATHES(Baseknow.GHEYMAT, Convert.ToDouble(jst_thr[jst_thr_EOF].CODE), 9999999, "دستمزد " + jst_thr[jst_thr_EOF].NAME);
+
+                            if (DAST != 0d)
+                            {
+                                object N_S, HES_K, HES_M, HES_T, SHARH, hes, ARZD, BED, NUMBER, TAG = default;
+
+                                //SDRST.AddNew(); // قيمت تمام شده
+                                N_S = max_ns;
+                                HES_K = Baseknow.GHEYMAT;
+                                HES_M = jst_thr[jst_thr_EOF].CODE;
+                                HES_T = 9999999;
+                                SHARH = Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_thr[jst_thr_EOF].MEGHk + " فروش " + Strings.Trim(jst_thr[jst_thr_EOF].NAME), 255);
+                                hes = Baseknow.GHEYMAT + "-" + Convert.ToDouble(jst_thr[jst_thr_EOF].CODE) + "-" + 9999999;
+                                ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                                BED = DAST;
+                                NUMBER = HFRST[HFRST_EOF].NUMBER;
+                                TAG = 13;
+                                dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES ({N_S}, {HES_K}, {HES_M}, {HES_T}, N'{hes}', N'{SHARH}', {BED}, {ARZD}, {NUMBER}, {TAG})");
+                                //SDRST.update();
+
+                            }
+                            if (SAR != 0d)
+                            {
+                                object N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, ARZD, NUMBER, TAG = default;
+
+                                //SDRST.AddNew(); // قيمت تمام شده
+                                N_S = max_ns;
+                                HES_K = Baseknow.GHEYMAT;
+                                HES_M = jst_thr[jst_thr_EOF].CODE;
+                                HES_T = 9999998;
+                                CREATHES(Baseknow.GHEYMAT, Convert.ToDouble(jst_thr[jst_thr_EOF].CODE), 9999998, "سربار " + jst_thr[jst_thr_EOF].NAME);
+                                SHARH = Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_thr[jst_thr_EOF].MEGHk + " فروش " + Strings.Trim(jst_thr[jst_thr_EOF].NAME), 255);
+                                hes = Baseknow.GHEYMAT + "-" + Convert.ToDouble(jst_thr[jst_thr_EOF].CODE) + "-" + 9999998;
+                                BED = SAR;
+                                ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                                NUMBER = HFRST[HFRST_EOF].NUMBER;
+                                TAG = 13;
+                                dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES ({N_S}, {HES_K}, {HES_M}, {HES_T},N'{hes}', N'{SHARH}', {BED}, {ARZD}, {NUMBER}, {TAG})");
+                                //SDRST.update();
+                            }
+                        }
+                        else if (jst_thr[jst_thr_EOF].AVRAGE > 0)
+                        {
+                            object N_S, HES_K, HES_M, HES_T, SHARH, hes, BES, ARZD, NUMBER, TAG, BED = default;
+
+                            //SDRST.AddNew(); // انبار محصول
+                            N_S = max_ns;
+                            HES_K = Baseknow.MOGODIA;
+                            HES_M = jst_thr[jst_thr_EOF].ANBAR;
+                            HES_T = jst_thr[jst_thr_EOF].CODE;
+                            SHARH = Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_thr[jst_thr_EOF].MEGHk + " خروج " + Strings.Trim(jst_thr[jst_thr_EOF].NAME), 255);
+                            hes = Baseknow.MOGODIA + "-" + jst_thr[jst_thr_EOF].ANBAR + "-" + Convert.ToInt64(jst_thr[jst_thr_EOF].CODE);
+                            BES = Math.Round((double)(jst_thr[jst_thr_EOF].AVRAGE * jst_thr[jst_thr_EOF].MEGHk));
+                            ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                            NUMBER = HFRST[HFRST_EOF].NUMBER;
+                            TAG = 13;
+                            // string testtrace = $"INSERT INTO DEED_DTL( N_S, HES_K, HES_M, HES_T, SHARH, hes, BES, ARZD, NUMBER, TAG) VALUES ( {N_S}, {HES_K}, {HES_M}, {HES_T}, N'{SHARH}', N'{hes}', {BES}, {ARZD}, {NUMBER}, {TAG})";
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL( N_S, HES_K, HES_M, HES_T, SHARH, hes, BES, ARZD, NUMBER, TAG) VALUES ( {N_S}, {HES_K}, {HES_M}, {HES_T}, N'{SHARH}', N'{hes}', {BES}, {ARZD}, {NUMBER}, {TAG})");
+                            //SDRST.update();
+
+
+                            //{N_S},{HES_K} ,{HES_M} ,{HES_T} ,{hes}   ,{SHARH} ,{BED}   ,{ARZD}  ,{NUMBER},{TAG}
+                            //SDRST.AddNew(); // قيمت تمام شده
+                            N_S = max_ns;
+                            HES_K = Baseknow.GHEYMAT;
+                            if (!string.IsNullOrEmpty(Baseknow.tindata))
+                            {
+                                if (Convert.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                                {
+                                    HES_M = 1;
+                                    HES_T = 1;
+                                    hes = Baseknow.GHEYMAT + "-1-1";
+                                }
+                                else
+                                {
+                                    HES_M = jst_thr[jst_thr_EOF].CODE;
+                                    HES_T = jst_thr[jst_thr_EOF].CODE;
+                                    hes = Baseknow.GHEYMAT + "-" + Convert.ToDouble(jst_thr[jst_thr_EOF].CODE) + "-" + Convert.ToDouble(jst_thr[jst_thr_EOF].CODE);
+                                }
+                            }
+                            else
+                            {
+                                HES_M = jst_thr[jst_thr_EOF].CODE;
+                                HES_T = jst_thr[jst_thr_EOF].CODE;
+                                hes = Baseknow.GHEYMAT + "-" + Convert.ToDouble(jst_thr[jst_thr_EOF].CODE) + "-" + Convert.ToDouble(jst_thr[jst_thr_EOF].CODE);
+                            }
+                            CREATHES(Baseknow.GHEYMAT, Convert.ToInt64(jst_thr[jst_thr_EOF].CODE), Convert.ToInt64(jst_thr[jst_thr_EOF].CODE), "قیمیت تمام شده " + jst_thr[jst_thr_EOF].NAME);
+
+                            SHARH = Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_thr[jst_thr_EOF].MEGHk + " فروش " + Strings.Trim(jst_thr[jst_thr_EOF].NAME), 255);
+                            BED = Math.Round((double)(jst_thr[jst_thr_EOF].AVRAGE * jst_thr[jst_thr_EOF].MEGHk));
+                            ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                            NUMBER = HFRST[HFRST_EOF].NUMBER;
+                            TAG = 13;
+                            //SDRST.update();
+
+                            //  string testtrace2 = $"INSERT INTO DEED_DTL(N_S,HES_K ,HES_M ,HES_T ,hes   ,SHARH ,BED   ,ARZD  ,NUMBER,TAG) VALUES ({N_S},{HES_K} ,{HES_M} ,{HES_T} ,N'{hes}'   ,N'{SHARH}' ,{BED}   ,{ARZD}  ,{NUMBER},{TAG})";
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K ,HES_M ,HES_T ,hes   ,SHARH ,BED   ,ARZD  ,NUMBER,TAG) VALUES ({N_S},{HES_K} ,{HES_M} ,{HES_T} ,N'{hes}'   ,N'{SHARH}' ,{BED}   ,{ARZD}  ,{NUMBER},{TAG})");
+
+                        }
+                        //jst_thr.MoveNext();
+                    }
+                };
+                if (HFRST[HFRST_EOF].MABL_HAZ != 0)
+                {
+                    if (IsNull(HFRST[HFRST_EOF]?.MOIN_HAZ))
+                    {
+                        //DoCmd.OpenForm("MESAG", default, default, default, default, acDialog, );
+                        Msgwin msgwin = new Msgwin(false, "اخطار مهم ...! حساب معين سرويس مشخص نشده است و سند صادره ناقص خواهد بود حتما حساب معين سرويس را مشخص نمائيد." + " فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER);
+                        msgwin.ShowDialog();
+                    }
+                    else
+                    {
+                        //SDRST.AddNew(); // كرايه حمل ياخدمات
+                        object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, ARZD, TAG = default;
+                        N_S = max_ns;
+                        if (!IsNull(HFRST[HFRST_EOF].MOIN_HAZ))
+                        {
+                            GETTAF3(HFRST[HFRST_EOF].MOIN_HAZ, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                        }
+
+                        HES_K = HKOL;
+                        HES_M = HMOIN;
+                        HES_T = HTAF;
+                        HES_T2 = HTAF2;
+                        HES_T3 = HTAF3;
+                        HES_T4 = HTAF4;
+                        hes = HFRST[HFRST_EOF].MOIN_HAZ;
+                        SHARH = Strings.Right("سرويس فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " - " + GETTAFNAME(HFRST[HFRST_EOF].MOIN_HAZ), 255);
+                        BES = Math.Round((double)HFRST[HFRST_EOF].MABL_HAZ);
+                        NUMBER = HFRST[HFRST_EOF].NUMBER;
+                        ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                        TAG = 13;
+
+
+                        string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                        string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                        string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M} ,{HES_T} ,{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}'  ,N'{SHARH}' ,{BES}  ,{NUMBER},{ARZD} ,{TAG})");
+
+                        //SDRST.update();
+                    }
+                }
+                if (JAMCH != 0d) // چكهاي دريافتي
+                {
+                    //CHRST.Open("PAY_GETD", CurrentProject.Connection, adOpenKeyset, adLockOptimistic);
+                    var CHRST = dbms.DoGetDataSQL<PAY_GETD>("SELECT N_SERI,BANK,DATE_S,DATE,SHOBEH,MABL,NAME_TAH,N_HESAB,N_S,N_KOL,N_MOIN,N_TAF,N_KOL2,N_MOIN2,N_TAF2,N_KOL3,N_MOIN3,N_TAF3,NUMBER,TAG,ANBAR,RADIF,CUST_NO,VAZ,LIST_NO,KIND,SANDUGH,HES1,HES2,HES3,ESTELAM FROM PAY_GETD WHERE NUMBER = " + HFRST[HFRST_EOF].NUMBER + " AND TAG = 2").ToList();
+                    //CHRST.MoveLast();
+                    //CHRST.MoveFirst();
+                    //CHRST.Filter = "NUMBER = " + HFRST[HFRST_EOF].NUMBER + " AND TAG = 2";
+                    if (CHRST.Count > 0 & !IsNull(CHRST.Select(x => x.NUMBER).FirstOrDefault()))
+                    {
+                        //while (!CHRST_EOF)
+                        for (int CHRST_EOF = 0; CHRST_EOF < CHRST.Count; CHRST_EOF++)
+                        {
+                            object N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, N_SERI, BANK, NUMBER, ARZD, TAG, HES_T2, HES_T3, HES_T4, BES = default;
+
+                            MABL_CHK = MABL_CHK + CHRST[CHRST_EOF].MABL;
+                            //SDRST.AddNew(); // اسناد دريافتني
+                            N_S = max_ns;
+                            HES_K = GETKOL(Baseknow.ADA);
+                            HES_M = GETMOIN(Baseknow.ADA);
+                            HES_T = GETTAF(Baseknow.ADA);
+                            hes = Baseknow.ADA;
+                            SHARH = Strings.Right("چك " + CHRST[CHRST_EOF].N_SERI + "بانك " + GETBANK((double)CHRST[CHRST_EOF].BANK) + " " + CHRST[CHRST_EOF].SHOBEH + " مورخ " + Strings.Format(CHRST[CHRST_EOF].DATE_S, "####/##/##"), 255);
+                            BED = CHRST[CHRST_EOF].MABL;
+                            N_SERI = CHRST[CHRST_EOF].N_SERI;
+                            BANK = CHRST[CHRST_EOF].BANK;
+                            NUMBER = HFRST[HFRST_EOF].NUMBER;
+                            ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                            TAG = 13;
+                            //SDRST.update();
+
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, N_SERI, BANK, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{hes}',N'{SHARH}',{BED},{N_SERI},{BANK},{NUMBER},{ARZD},{TAG})");
+
+
+
+                            //SDRST.AddNew(); // چكهاي دريافتي
+                            N_S = max_ns;
+                            HES_K = CKOL;
+                            HES_M = CMOIN;
+                            HES_T = CTAF;
+                            HES_T = CTAF;
+                            HES_T2 = CTAF2;
+                            HES_T3 = CTAF3;
+                            HES_T4 = CTAF4;
+                            hes = HFRST[HFRST_EOF].CUST_NO;
+                            SHARH = Strings.Right("ف.ف." + HFRST[HFRST_EOF].NUMBER1 + " - " + "چك " + CHRST[CHRST_EOF].N_SERI + "بانك " + GETBANK((double)CHRST[CHRST_EOF].BANK) + " " + CHRST[CHRST_EOF].SHOBEH + " مورخ " + Strings.Format(CHRST[CHRST_EOF].DATE_S, "####/##/##"), 255);
+                            BES = CHRST[CHRST_EOF].MABL;
+                            NUMBER = HFRST[HFRST_EOF].NUMBER;
+                            ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                            TAG = 13;
+
+                            string CTAF2T = (CTAF2 == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
+                            string CTAF3T = (CTAF3 == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
+                            string CTAF4T = (CTAF4 == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+                            dbms.DoExecuteSQL($@"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,HES_T2,HES_T3,HES_T4,hes,SHARH,BES,NUMBER,ARZD,TAG) 
+                                    VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{CTAF2T},{CTAF3T},{CTAF4T},N'{hes}',N'{SHARH}',{BES},{NUMBER},{ARZD},13 ) ");
+                            //SDRST.update();
+                            //CHRST.MoveNext();
+                        }
+                    }
+                    else
+                    {
+                    }
+                }
+                if (HFRST[HFRST_EOF].M_NAGHD != 0)
+                {
+                    object N_S, HES_K, HES_M, HES_T, hes, SHARH, NUMBER, ARZD, TAG, HES_T2, HES_T3, HES_T4, BES = default;
+                    object BED = null;
+
+                    //SDRST.AddNew(); // مبلغ نقدشخص
+                    N_S = max_ns;
+                    HES_K = CKOL;
+                    HES_M = CMOIN;
+                    HES_T = CTAF;
+                    HES_T2 = CTAF2;
+                    HES_T3 = CTAF3;
+                    HES_T4 = CTAF4;
+                    hes = HFRST[HFRST_EOF].CUST_NO;
+                    SHARH = Strings.Right("مبلغ نقد فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                    if (HFRST[HFRST_EOF].M_NAGHD > 0)
+                    {
+                        BES = HFRST[HFRST_EOF].M_NAGHD;
+                    }
+                    else
+                    {
+                        BED = Math.Abs((double)HFRST[HFRST_EOF].M_NAGHD);
+                    }
+                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                    TAG = 13;
+
+                    string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                    string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                    string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+
+                    if (!(BES is null))
+                    {
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,HES_T2 ,HES_T3 ,HES_T4 ,hes,SHARH,BES,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BES},{ARZD},{NUMBER},{TAG})");
+                    }
+                    else if (!(BED is null))
+                    {
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,HES_T2 ,HES_T3 ,HES_T4 ,hes,SHARH,BED,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BED},{ARZD},{NUMBER},{TAG})");
+                    }
+                    else
+                    {
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,HES_T2 ,HES_T3 ,HES_T4 ,hes,SHARH,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},{hes},N'{SHARH}',{ARZD},{NUMBER},{TAG})");
+                    }
+                    //SDRST.update();
+                }
+                if (HFRST[HFRST_EOF].M_NAGHD != 0)
+                {
+                    object N_S, HES_K, HES_M, HES_T, hes, SHARH, NUMBER, ARZD, TAG, BES = default;
+                    object BED = null;
+
+                    //SDRST.AddNew(); // مبلغ نقدصندوق
+                    N_S = max_ns;
+                    HES_K = Baseknow.SANDOGH;
+                    HES_M = HFRST[HFRST_EOF].DEPATMAN;
+                    HES_T = HFRST[HFRST_EOF].SHIFT;
+                    SHARH = Strings.Right("مبلغ نقد فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                    hes = Baseknow.SANDOGH + "-" + HFRST[HFRST_EOF].DEPATMAN + "-" + HFRST[HFRST_EOF].SHIFT;
+                    if (HFRST[HFRST_EOF].M_NAGHD > 0)
+                    {
+                        BED = HFRST[HFRST_EOF].M_NAGHD;
+                    }
+                    else
+                    {
+                        BES = Math.Abs((double)HFRST[HFRST_EOF].M_NAGHD);
+                    }
+                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                    TAG = 13;
+
+                    if (!(BED is null))
+                    {
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,SHARH,hes,BED,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{BED},{ARZD},{NUMBER},{TAG})");
+                    }
+                    else if (!(BES is null))
+                    {
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,SHARH,hes,BES,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{BES},{ARZD},{NUMBER},{TAG})");
+                    }
+                    else
+                    {
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M,HES_T,SHARH,hes,ARZD,NUMBER,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{ARZD},{NUMBER},{TAG})");
+                    }
+                    //SDRST.update();
+                }
+                if (Baseknow.TKHF == 1)
+                {
+                    if (HFRST[HFRST_EOF].TAKHFIF != 0)
+                    {
+                        object N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG = default;
+
+                        //SDRST.AddNew(); // تخفيف فروش
+                        N_S = max_ns;
+                        HES_K = Baseknow.TFROSH;
+                        HES_M = 1;
+                        HES_T = 1;
+                        SHARH = Strings.Right("مبلغ تخفيف فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                        hes = Baseknow.TFROSH + "-1-1";
+                        BED = HFRST[HFRST_EOF].TAKHFIF;
+                        NUMBER = HFRST[HFRST_EOF].NUMBER;
+                        ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                        TAG = 13;
+
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S,HES_K,HES_M ,HES_T ,SHARH ,hes,BED,NUMBER,ARZD,TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{BED},{NUMBER},{ARZD},{TAG})");
+                        //SDRST.update();
+                    }
+                }
+                else
+                {
+                    takh = 0d;
+                    if (Baseknow.TKHF == 2)
+                    {
+                        takh = 0d;
+                        //rst.Close();
+                        var rst6 = dbms.DoGetDataSQL<QRE16>("SELECT INVO_LST.NUMBER, INVO_LST.TAG, TAKHPERS.CUST_CO, TAKHPERS.TAKH_COD, TAKHPERS.TAFPER ,INVO_LST.MABL_K FROM INVO_LST INNER JOIN TAKHPERS ON INVO_LST.CODE = TAKHPERS.TAKH_COD WHERE (((INVO_LST.NUMBER)=" + HFRST[HFRST_EOF].NUMBER + ") AND ((INVO_LST.TAG)=2) AND ((TAKHPERS.CUST_CO)= " + HFRST[HFRST_EOF].CUST_KIND + "))").ToList();
+                        if (rst6.Count > 0)
+                        {
+                            //while (!rst6.EOF())
+                            for (int rst6_EOF = 0; rst6_EOF < rst6.Count; rst6_EOF++)
+                            {
+                                if (Math.Round((double)(rst6[rst6_EOF].MABL_K / 100 * rst6[rst6_EOF].TAFPER)) != 0)
+                                {
+                                    if (Strings.Mid(Baseknow.OPTIONSS, 13, 1) == "5")
+                                    {
+                                        CREATHES(Baseknow.TFROSH, 3, Convert.ToInt64(rst6[rst6_EOF].TAKH_COD), "تخفيف " + GETKALANAME(Convert.ToDouble(rst6[rst6_EOF].TAKH_COD)));
+                                        object N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG = default;
+
+                                        //SDRST.AddNew(); // تخفيف فروش
+                                        N_S = max_ns;
+                                        HES_K = Baseknow.TFROSH;
+                                        HES_M = 3;
+                                        HES_T = rst6[rst6_EOF].TAKH_COD;
+                                        SHARH = Strings.Right("مبلغ تخفيف فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                                        hes = Baseknow.TFROSH + "-3-" + Convert.ToInt64(rst6[rst6_EOF].TAKH_COD);
+                                        BED = Math.Round((double)(rst6[rst6_EOF].MABL_K / 100 * rst6[rst6_EOF].TAFPER));
+                                        NUMBER = HFRST[HFRST_EOF].NUMBER;
+                                        ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                                        TAG = 13;
+                                        takh = takh + Math.Round((double)(rst6[rst6_EOF].MABL_K / 100 * rst6[rst6_EOF].TAFPER));
+                                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{BED},{NUMBER},{ARZD},{TAG})");
+
+                                        //SDRST.update();
+                                    }
+                                    else
+                                    {
+                                        object N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG = default;
+
+                                        //SDRST.AddNew(); // تخفيف فروش
+                                        N_S = max_ns;
+                                        HES_K = Baseknow.TFROSH;
+                                        HES_M = HFRST[HFRST_EOF].CUST_KIND;
+                                        HES_T = rst6[rst6_EOF].TAKH_COD;
+                                        SHARH = Strings.Right("مبلغ تخفيف فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                                        hes = Baseknow.TFROSH + "-" + HFRST[HFRST_EOF].CUST_KIND + "-" + Convert.ToInt64(rst6[rst6_EOF].TAKH_COD);
+                                        BED = Math.Round((double)(rst6[rst6_EOF].MABL_K / 100 * rst6[rst6_EOF].TAFPER));
+                                        NUMBER = HFRST[HFRST_EOF].NUMBER;
+                                        ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                                        TAG = 13;
+                                        takh = takh + Math.Round((double)(rst6[rst6_EOF].MABL_K / 100 * rst6[rst6_EOF].TAFPER));
+                                        //SDRST.update();
+                                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{BED},{NUMBER},{ARZD},{TAG})");
+
+                                    }
+                                }
+                                //rst6.MoveNext();
+                            }
+                        }
+                        if (HFRST[HFRST_EOF].TAKHFIF != takh)
+                        {
+                            HFRST[HFRST_EOF].TAKHFIF = takh;
+
+                            dbms.DoExecuteSQL($"UPDATE HEAD_LST SET TAKHFIF = {takh}  WHERE (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND (TAG = 13)");
+                            //HFRST.update();
+                        }
+                    }
+                    else
+                    {
+                        var rst7 = dbms.DoGetDataSQL<QRE17>("SELECT     dbo.HEAD_LST.NUMBER, dbo.HEAD_LST.TAG, dbo.INVO_LST.MABL_K, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.CODE, dbo.HEAD_LST.CUST_KIND FROM  dbo.INVO_LST INNER JOIN  dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG WHERE     (dbo.HEAD_LST.NUMBER = " + HFRST[HFRST_EOF].NUMBER + ") AND (dbo.HEAD_LST.TAG = 2)").ToList();
+                        if (rst7.Count > 0)
+                        {
+                            takh = 0d;
+                            //while (!rst7.EOF()) //while (!rst.EOF())
+                            for (int rst7_EOF = 0; rst7_EOF < rst7.Count; rst7_EOF++)
+                            {
+                                if (rst7[rst7_EOF]?.N_MOIN == null)
+                                {
+                                    continue; //Skip this row
+                                }
+
+                                if (Math.Round((double)rst7[rst7_EOF].N_MOIN) != 0)
+                                {
+                                    if (Strings.Mid(Baseknow.OPTIONSS, 13, 1) == "5")
+                                    {
+                                        CREATHES(Baseknow.TFROSH, 3, Convert.ToInt64(rst7[rst7_EOF].CODE), "تخفيف " + GETKALANAME(Convert.ToDouble(rst7[rst7_EOF].CODE)));
+                                        object N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG = default;
+                                        //SDRST.AddNew(); // تخفيف فروش
+                                        N_S = max_ns;
+                                        HES_K = Baseknow.TFROSH;
+                                        HES_M = 3;
+                                        HES_T = rst7[rst7_EOF].CODE;
+                                        SHARH = Strings.Right("مبلغ تخفيف فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                                        hes = Baseknow.TFROSH + "-3-" + Convert.ToInt64(rst7[rst7_EOF].CODE);
+                                        BED = Math.Round((double)rst7[rst7_EOF].N_MOIN);
+                                        NUMBER = HFRST[HFRST_EOF].NUMBER;
+                                        ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                                        TAG = 13;
+                                        takh = takh + Math.Round((double)rst7[rst7_EOF].N_MOIN);
+
+                                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{BED},{NUMBER},{ARZD},{TAG})");
+                                        //SDRST.update();
+                                    }
+                                    else
+                                    {
+                                        CREATHES(Baseknow.TFROSH, HFRST[HFRST_EOF].CUST_KIND, Convert.ToInt64(rst7[rst7_EOF].CODE), "تخفيف " + rst7[rst7_EOF].CODE);
+
+
+                                        object N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG = default;
+
+                                        //SDRST.AddNew(); // تخفيف فروش
+                                        N_S = max_ns;
+                                        HES_K = Baseknow.TFROSH;
+                                        HES_M = HFRST[HFRST_EOF].CUST_KIND;
+                                        HES_T = rst7[rst7_EOF].CODE;
+                                        SHARH = Strings.Right("مبلغ تخفيف فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                                        hes = Baseknow.TFROSH + "-" + HFRST[HFRST_EOF].CUST_KIND + "-" + Convert.ToInt64(rst7[rst7_EOF].CODE);
+                                        BED = Math.Round((double)rst7[rst7_EOF].N_MOIN);
+                                        ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                                        NUMBER = HFRST[HFRST_EOF].NUMBER;
+                                        TAG = 13;
+                                        takh = takh + Math.Round((double)rst7[rst7_EOF].N_MOIN);
+                                        try
+                                        {
+                                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{SHARH}',N'{hes}',{BED},{NUMBER},{ARZD},{TAG})");
+                                        }
+                                        catch (Exception) { /*On Error Resume Next*/ }
+
+                                        //SDRST.update();
+                                    }
+                                }
+                                //rst7.MoveNext();
+                            }
+                        }
+                        if (HFRST[HFRST_EOF].TAKHFIF != takh)
+                        {
+                            HFRST[HFRST_EOF].TAKHFIF = takh;
+                            dbms.DoExecuteSQL($"UPDATE HEAD_LST SET TAKHFIF = {takh}  WHERE (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND (TAG = 13)");
+                            //HFRST.update();
+                        }
+                    }
+                }
+                if (HFRST[HFRST_EOF].MABL_HAV != 0)
+                {
+                    object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, ARZD, NUMBER, TAG = default;
+                    //SDRST.AddNew(); // مبلغ حواله شخص
+                    N_S = max_ns;
+                    HES_K = CKOL;
+                    HES_M = CMOIN;
+                    HES_T = CTAF;
+                    HES_T2 = CTAF2;
+                    HES_T3 = CTAF3;
+                    HES_T4 = CTAF4;
+                    hes = HFRST[HFRST_EOF].CUST_NO;
+                    SHARH = Strings.Right("مبلغ حواله فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                    BES = HFRST[HFRST_EOF].MABL_HAV;
+                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                    TAG = 13;
+
+                    string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                    string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                    string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+                    //{N_S},{HES_K },{HES_M },{HES_T },{HES_T2},{HES_T3},{HES_T4},{hes},{SHARH },{BES},{ARZD},{NUMBER},{TAG}
+                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, ARZD, NUMBER, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BES},{ARZD},{NUMBER},{TAG})");
+                    //SDRST.update();
+                }
+                if (HFRST[HFRST_EOF].MABL_HAV != 0)
+                {
+                    object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, ARZD, NUMBER, TAG = default;
+                    //SDRST.AddNew(); // مبلغ حواله
+                    N_S = max_ns;
+                    if (!IsNull(HFRST[HFRST_EOF].MOIN_HAV))
+                    {
+                        GETTAF3(HFRST[HFRST_EOF].MOIN_HAV, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                    }
+                    HES_K = HKOL;
+                    HES_M = HMOIN;
+                    HES_T = HTAF;
+                    HES_T2 = HTAF2;
+                    HES_T3 = HTAF3;
+                    HES_T4 = HTAF4;
+                    hes = HFRST[HFRST_EOF].MOIN_HAV;
+                    SHARH = Strings.Right("مبلغ حواله فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                    BED = HFRST[HFRST_EOF].MABL_HAV;
+                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                    TAG = 13;
+                    //{N_S},{ HES_K},{ HES_M},{ HES_T},{ HES_T2},{ HES_T3},{ HES_T4},{ hes},{ SHARH},{ BED},{ ARZD},{ NUMBER},{ TAG }
+
+                    string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                    string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                    string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+
+                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BED},{ARZD},{NUMBER},{TAG})");
+                    //SDRST.update();
+                }
+                if (HFRST[HFRST_EOF].MABL_VAR != 0)
+                {
+                    object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, ARZD, NUMBER, TAG = default;
+
+
+                    //SDRST.AddNew(); // مبلغ واريزي شخص
+                    N_S = max_ns;
+                    HES_K = CKOL;
+                    HES_M = CMOIN;
+                    HES_T = CTAF;
+                    HES_T2 = CTAF2;
+                    HES_T3 = CTAF3;
+                    HES_T4 = CTAF4;
+                    hes = HFRST[HFRST_EOF].CUST_NO;
+                    SHARH = Strings.Right("مبلغ واريزي فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                    BES = HFRST[HFRST_EOF].MABL_VAR;
+                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                    TAG = 13;
+
+                    string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                    string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                    string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+
+                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, ARZD, NUMBER, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BES},{ARZD},{NUMBER},{TAG})");
+                    //SDRST.update();
+                }
+                if (HFRST[HFRST_EOF].MABL_VAR != 0)
+                {
+                    object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, ARZD, NUMBER, TAG = default;
+
+                    //SDRST.AddNew(); // مبلغ واريزي
+                    N_S = max_ns;
+                    if (!IsNull(HFRST[HFRST_EOF].MOIN_VAR))
+                    {
+                        GETTAF3(HFRST[HFRST_EOF].MOIN_VAR, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                    }
+                    HES_K = HKOL;
+                    HES_M = HMOIN;
+                    HES_T = HTAF;
+                    HES_T2 = HTAF2;
+                    HES_T3 = HTAF3;
+                    HES_T4 = HTAF4;
+                    hes = HFRST[HFRST_EOF].MOIN_VAR;
+                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                    SHARH = Strings.Right("مبلغ واريزي فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                    BED = HFRST[HFRST_EOF].MABL_VAR;
+                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                    TAG = 13;
+
+                    string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                    string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                    string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+
+                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BED},{ARZD},{NUMBER},{TAG})");
+                    //SDRST.update();
+                }
+                if (HFRST[HFRST_EOF].MBAA != 0)
+                {
+                    object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, ARZD, NUMBER, TAG = default;
+
+                    //SDRST.AddNew(); // ماليات بر ارزش افزوده
+                    N_S = max_ns;
+                    if (!IsNull(HFRST[HFRST_EOF].HMBAA))
+                    {
+                        GETTAF3(HFRST[HFRST_EOF].HMBAA, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                    }
+                    HES_K = HKOL;
+                    HES_M = HMOIN;
+                    HES_T = HTAF;
+                    HES_T2 = HTAF2;
+                    HES_T3 = HTAF3;
+                    HES_T4 = HTAF4;
+                    hes = HFRST[HFRST_EOF].HMBAA;
+                    SHARH = Strings.Right(Baseknow.ARSESH + "% ماليات بر ارزش افزوده فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                    BES = HFRST[HFRST_EOF].MBAA;
+                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                    TAG = 13;
+                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+
+                    string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                    string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                    string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+
+                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, ARZD, NUMBER, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BES},{ARZD},{NUMBER},{TAG})");
+                    //SDRST.update();
+                }
+                JAMP = 0d;
+                if (JAMF > 0d)
+                {
+                    var PRST = dbms.DoGetDataSQL<VISITOR_DTL_1>("SELECT     dbo.VISITOR_DTL.* FROM dbo.VISITOR_DTL WHERE     (NUMBER = " + HFRST[HFRST_EOF].NUMBER + ") AND (TAG = 2) ").ToList();
+                    //while (!PRST.EOF)
+
+                    for (int PRST_EOF = 0; PRST_EOF < PRST.Count; PRST_EOF++)
+                    {
+                        object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, ARZD, NUMBER, TAG = default;
+
+                        //SDRST.AddNew(); // پورسانت
+                        N_S = max_ns;
+                        if (!IsNull(PRST[PRST_EOF].CUST_NO))
+                        {
+                            GETTAF3(PRST[PRST_EOF].CUST_NO, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                        }
+                        HES_K = HKOL;
+                        HES_M = HMOIN;
+                        HES_T = HTAF;
+                        HES_T2 = HTAF2;
+                        HES_T3 = HTAF3;
+                        HES_T4 = HTAF4;
+                        hes = PRST[PRST_EOF].CUST_NO;
+                        if (IsNull(TAMIR))
+                        {
+                            TAMIR = PRST[PRST_EOF].CUST_NO;
+                        }
+                        SHARH = Strings.Right(" فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER + " : " + HFRST[HFRST_EOF].NUMBER1 + " بابت " + PRST[PRST_EOF].DARSAD + "% مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + Interaction.IIf(IsNull(PRST[PRST_EOF].TOZIH), "", PRST[PRST_EOF].TOZIH) + "مبلغ :  " + Strings.Format(Math.Round((double)(JAMF + HFRST[HFRST_EOF].MABL_HAZ + HFRST[HFRST_EOF].MBAA - HFRST[HFRST_EOF].TAKHFIF)), "#,###") + " " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255);
+                        if (IsNull(PRST[PRST_EOF].PORID))
+                        {
+                            if ((bool)!PRST[PRST_EOF].STAT)
+                            {
+                                if (Math.Round((double)((JAMF - HFRST[HFRST_EOF].TAKHFIF + ((Convert.ToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * PRST[PRST_EOF].DARSAD / 100)) != PRST[PRST_EOF].PURSANT)
+                                {
+                                    PRST[PRST_EOF].PURSANT = Math.Round((double)((JAMF - HFRST[HFRST_EOF].TAKHFIF + ((Convert.ToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * PRST[PRST_EOF].DARSAD / 100));
+
+                                    dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET PURSANT = {PRST[PRST_EOF].PURSANT} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{PRST[PRST_EOF].CUST_NO}' AND (TAG = 2) ");
+                                    //PRST.update;
+                                }
+                            }
+
+                            else if (PRST[PRST_EOF].DARSAD != PRST[PRST_EOF].PURSANT / (JAMF - HFRST[HFRST_EOF].TAKHFIF + ((Convert.ToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * 100)
+                            {
+                                PRST[PRST_EOF].DARSAD = PRST[PRST_EOF].PURSANT / (JAMF - HFRST[HFRST_EOF].TAKHFIF + ((Convert.ToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * 100;
+                                dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET DARSAD = {PRST[PRST_EOF].DARSAD} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{PRST[PRST_EOF].CUST_NO}' AND (TAG = 2) ");
+                                //PRST.update;
+                            }
+
+                        }
+                        else
+                        {
+                            long prs;
+                            long MBK;
+                            prs = 0L;
+                            MBK = 0L;
+                            //پرداخت پورسانت بر اساس الگوی پرداخت پورسانت
+                            var rst1 = dbms.DoGetDataSQL<QRE18>("select code ,mabl_k  - n_moin as mablk from invo_lst where tag = 2 and number = " + HFRST[HFRST_EOF].NUMBER).ToList();
+                            //while (!rst1.EOF)
+                            for (int rst1_EOF = 0; rst1_EOF < rst1.Count; rst1_EOF++)
+                            {
+                                var rst2 = dbms.DoGetDataSQL<double?>("SELECT  PORSANT FROM dbo.VISITORS_PORSANT_KALA WHERE (PORID = " + PRST[PRST_EOF].PORID + ") and (code = '" + rst1[rst1_EOF].code + "')").ToList();
+                                if (rst2.Count == 1)
+                                {
+                                    prs = (long)(prs + Math.Round((double)(rst1[rst1_EOF].mablk * rst2.FirstOrDefault() / 100)));
+                                    MBK = (long)(MBK + rst1[rst1_EOF].mablk);
+                                }
+                                else
+                                {
+                                    LogWriter.WriteLog("تذكر مهم :اين كالا فاقد الگو براي اين ويزيتور است و پورسانت محاسبه نشد.درصورت لزوم براي آن تعريف كنيد و همينجا مجددا الگو را انتخاب كنيد  : " + GETKALANAME(Convert.ToDouble(rst1[rst1_EOF].code)) + " فاكتور شماره : " + HFRST[HFRST_EOF].NUMBER);
+
+                                    //Msgwin msgwin = new Msgwin(false, "تذكر مهم :اين كالا فاقد الگو براي اين ويزيتور است و پورسانت محاسبه نشد.درصورت لزوم براي آن تعريف كنيد و همينجا مجددا الگو را انتخاب كنيد  : " + GETKALANAME(Convert.ToDouble(rst1[rst1_EOF].code)) + " فاكتور شماره : " + HFRST[HFRST_EOF].NUMBER);
+                                    //msgwin.ShowDialog();
+                                }
+                                //rst1.MoveNext();
+                                //rst2.Close();
+                            }
+                            //rst1.Close();
+                            PRST[PRST_EOF].PURSANT = prs;
+                            if (MBK > 0L)
+                            {
+                                PRST[PRST_EOF].DARSAD = PRST[PRST_EOF].PURSANT / MBK * 100;
+                            }
+                            var sdsd = PRST[PRST_EOF]?.PURSANT?.ToStringNullSafe();
+                            string test111 = $"UPDATE VISITOR_DTL SET PURSANT = {prs.ToStringNullSafe()} , DARSAD = {PRST[PRST_EOF].DARSAD.ToStringNullSafe()} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER.ToStringNullSafe()}) AND CUST_NO = N'{PRST[PRST_EOF].PURSANT.ToStringNullSafe()}' AND (TAG = 2) ";
+                            dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET PURSANT = {prs} , DARSAD = {PRST[PRST_EOF].DARSAD} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{PRST[PRST_EOF].CUST_NO}' AND (TAG = 2) ");
+                            //PRST.update();
+                        }
+
+
+                        BES = PRST[PRST_EOF].PURSANT;
+                        JAMP = (double)(JAMP + PRST[PRST_EOF].PURSANT);
+                        NUMBER = HFRST[HFRST_EOF].NUMBER;
+                        TAG = 13;
+                        if (PRST[PRST_EOF].PURSANT != 0)
+                        {
+                            //SDRST.update();
+                            string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                            string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                            string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES,NUMBER,TAG) VALUES({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BES},{NUMBER},{TAG})");
+                        }
+                        //PRST.MoveNext();
+                    }
+                    if (JAMP != 0d)
+                    {
+
+                        if (IsNull(Baseknow.HPOR))
+                        {
+                            //    Msgwin msgwin = new Msgwin(false, "حساب پورسانت در حسابهاي خودگردان مشخص نشده سند تراز نمي شود لطفا حساب پورسانت را مشخص كنيد و سند اين فاكتور را با دابل كليك مجددا صادر كنيد...!");
+                            //  msgwin.ShowDialog();
+                        }
+                        else
+                        {
+                            object N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, ARZD, NUMBER, TAG = default;
+
+                            //SDRST.AddNew(); // پورسانت
+                            N_S = max_ns;
+                            HES_K = GETKOL(Baseknow.HPOR);
+                            HES_M = GETMOIN(Baseknow.HPOR);
+                            HES_T = GETTAF(Baseknow.HPOR);
+                            hes = Baseknow.HPOR;
+                            SHARH = Strings.Left("بابت درصد سهم  فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER + " : " + HFRST[HFRST_EOF].NUMBER1 + GETTAFNAME(TAMIR), 255);
+                            BED = JAMP;
+                            ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                            NUMBER = HFRST[HFRST_EOF].NUMBER;
+                            TAG = 13;
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, ARZD, NUMBER, TAG) VALUES({N_S},{HES_K},{HES_M},{HES_T},N'{hes}',N'{SHARH}',{BED},{ARZD},{NUMBER},{TAG})");
+                            //SDRST.update();
+                        }
+                    }
+                };
+
+            });
+
+            LogWriter.WriteLog("پایان بازسازی سند فروش");
+
+            return (SANAD_NUMBER, IsSuccessfully);
+        }
+        public static double GETSTANDARDPRICE_SAR(string CODE, long dt)
+        {
+            double tempGETSTANDARDPRICE_SAR = 0;
+            double fnum = 0;
+            fnum = GETLASTFR(CODE, dt);
+            if (fnum == 0)
+            {
+                var rst = dbms.DoGetDataSQL<HEAD_MANF_1>("SELECT     TOP 100 PERCENT SUM(dbo.DTL_MANF.MABLK) AS SumOfMABLK, dbo.HEAD_MANF.IMBIBE_MANF AS SumOfIMBIBE_MANF,  dbo.HEAD_MANF.IMBIBE_SAR AS SumOfIMBIBE_SAR, dbo.HEAD_MANF.FNUMB FROM dbo.HEAD_MANF INNER JOIN  dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE     (dbo.HEAD_MANF.CODE = N'" + CODE + "') GROUP BY dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR, dbo.HEAD_MANF.FNUMB ORDER BY dbo.HEAD_MANF.FNUMB").FirstOrDefault();
+                if (!(rst is null))
+                {
+                    tempGETSTANDARDPRICE_SAR = (double)rst.SumOfIMBIBE_SAR;
+                }
+                else
+                {
+                    tempGETSTANDARDPRICE_SAR = 0;
+                }
+            }
+            else
+            {
+                var rst = dbms.DoGetDataSQL<HEAD_MANF_1>("SELECT     TOP 100 PERCENT SUM(dbo.DTL_MANF.MABLK) AS SumOfMABLK, dbo.HEAD_MANF.IMBIBE_MANF AS SumOfIMBIBE_MANF,  dbo.HEAD_MANF.IMBIBE_SAR AS SumOfIMBIBE_SAR, dbo.HEAD_MANF.FNUMB FROM dbo.HEAD_MANF INNER JOIN  dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE     (dbo.HEAD_MANF.CODE = N'" + CODE + "' and dbo.HEAD_MANF.FNUMB = " + fnum + ") GROUP BY dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR, dbo.HEAD_MANF.FNUMB ").FirstOrDefault();
+                if (!(rst is null))
+                {
+                    tempGETSTANDARDPRICE_SAR = (double)rst.SumOfIMBIBE_SAR;
+                }
+                else
+                {
+                    tempGETSTANDARDPRICE_SAR = 0;
+                }
+            }
+            return tempGETSTANDARDPRICE_SAR;
+        }
+        public static double GETSTANDARDPRICE_DAST(string CODE, long dt)
+        {
+            double tempGETSTANDARDPRICE_DAST = 0;
+            double fnum = 0;
+            fnum = GETLASTFR(CODE, dt);
+            if (fnum == 0)
+            {
+                var rst = dbms.DoGetDataSQL<HEAD_MANF_1>("SELECT     TOP 100 PERCENT SUM(dbo.DTL_MANF.MABLK) AS SumOfMABLK, dbo.HEAD_MANF.IMBIBE_MANF AS SumOfIMBIBE_MANF,  dbo.HEAD_MANF.IMBIBE_SAR AS SumOfIMBIBE_SAR, dbo.HEAD_MANF.FNUMB FROM dbo.HEAD_MANF INNER JOIN  dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE     (dbo.HEAD_MANF.CODE = N'" + CODE + "') GROUP BY dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR, dbo.HEAD_MANF.FNUMB ORDER BY dbo.HEAD_MANF.FNUMB ").FirstOrDefault();
+                if (!(rst is null))
+                {
+                    tempGETSTANDARDPRICE_DAST = (double)rst.SumOfIMBIBE_MANF;
+                }
+                else
+                {
+                    tempGETSTANDARDPRICE_DAST = 0;
+                }
+            }
+            else
+            {
+                var rst5 = dbms.DoGetDataSQL<HEAD_MANF_1>("SELECT     TOP 100 PERCENT SUM(dbo.DTL_MANF.MABLK) AS SumOfMABLK, dbo.HEAD_MANF.IMBIBE_MANF AS SumOfIMBIBE_MANF,  dbo.HEAD_MANF.IMBIBE_SAR AS SumOfIMBIBE_SAR, dbo.HEAD_MANF.FNUMB FROM dbo.HEAD_MANF INNER JOIN  dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE     (dbo.HEAD_MANF.CODE = N'" + CODE + "' and dbo.HEAD_MANF.FNUMB = " + fnum + ") GROUP BY dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR, dbo.HEAD_MANF.FNUMB ").FirstOrDefault();
+                if (!(rst5 is null))
+                {
+                    tempGETSTANDARDPRICE_DAST = (double)rst5.SumOfIMBIBE_MANF;
+                }
+                else
+                {
+                    tempGETSTANDARDPRICE_DAST = 0;
+                }
+            }
+            return tempGETSTANDARDPRICE_DAST;
+        }
+        public static double GETLASTFR(string co, long dt)
+        {
+            double tempGETLASTFR = 0;
+            long FNN = 0;
+            //object rst = null;
+
+            //if (rst.GetType().GetProperties()[3].GetValue(rst, null) is true)
+            var rst = dbms.DoGetDataSQL<double?>("SELECT     TOP 100 PERCENT dbo.INVO_LST.N_KOL FROM dbo.INVO_LST INNER JOIN   dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG WHERE     (dbo.INVO_LST.TAG = 9) AND (dbo.INVO_LST.CODE = N'" + co + "') AND (dbo.HEAD_LST.DATE_N <= " + dt + ") ORDER BY dbo.INVO_LST.NUMBER DESC").FirstOrDefault();
+            if (!(rst is null))
+            {
+                if (IsNull(rst))
+                {
+                    var rst1 = dbms.DoGetDataSQL<int?>("SELECT     TOP 100 PERCENT FNUMB FROM dbo.HEAD_MANF WHERE     (CODE = N'" + co + "') ORDER BY FNUMB DESC ").FirstOrDefault();
+                    if (!(rst1 is null))
+                    {
+                        tempGETLASTFR = (double)rst1;
+                    }
+                    else
+                    {
+                        tempGETLASTFR = 0;
+                    }
+                }
+                else
+                {
+                    FNN = (long)rst;
+
+
+                    var rst2 = dbms.DoGetDataSQL<QRE15>("SELECT     TOP 100 PERCENT CODE,FNUMB FROM dbo.HEAD_MANF WHERE     (FNUMB = " + FNN + " and CODE = N'" + co + "')").FirstOrDefault();
+                    if (!(rst2 is null))
+                    {
+                        tempGETLASTFR = (double)rst2.FNUMB;
+                    }
+                    else
+                    {
+                        var rst3 = dbms.DoGetDataSQL<int?>("SELECT     TOP 100 PERCENT FNUMB FROM dbo.HEAD_MANF WHERE     (CODE = N'" + co + "') ORDER BY FNUMB DESC ").FirstOrDefault();
+                        if (!(rst3 is null))
+                        {
+                            tempGETLASTFR = (double)rst3;
+                        }
+                        else
+                        {
+                            tempGETLASTFR = 0;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var rst4 = dbms.DoGetDataSQL<int?>("SELECT     TOP 100 PERCENT FNUMB FROM dbo.HEAD_MANF WHERE     (CODE = N'" + co + "') ORDER BY FNUMB DESC ").FirstOrDefault();
+                if (!(rst4 is null))
+                {
+                    tempGETLASTFR = (double)rst4;
+                }
+                else
+                {
+                    tempGETLASTFR = 0;
+                }
+            }
+            return tempGETLASTFR;
+        }
+        public static double GETSTANDARDPRICE_MAVAD(string CODE, long dt)
+        {
+            double tempGETSTANDARDPRICE_MAVAD = 0;
+            double fnum = 0;
+            fnum = GETLASTFR(CODE, dt);
+            if (fnum == 0)
+            {
+                var rst = dbms.DoGetDataSQL<HEAD_MANF_1>("SELECT     TOP 100 PERCENT SUM(dbo.DTL_MANF.MABLK) AS SumOfMABLK, dbo.HEAD_MANF.IMBIBE_MANF AS SumOfIMBIBE_MANF,  dbo.HEAD_MANF.IMBIBE_SAR AS SumOfIMBIBE_SAR, dbo.HEAD_MANF.FNUMB FROM dbo.HEAD_MANF INNER JOIN  dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE     (dbo.HEAD_MANF.CODE = N'" + CODE + "') GROUP BY dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR, dbo.HEAD_MANF.FNUMB ORDER BY dbo.HEAD_MANF.FNUMB").ToList();
+                if (rst.Count > 0)
+                {
+                    tempGETSTANDARDPRICE_MAVAD = (double)rst.Select(x => x.SumOfMABLK).FirstOrDefault();
+                }
+                else
+                {
+                    tempGETSTANDARDPRICE_MAVAD = 0;
+                }
+            }
+            else
+            {
+                var rst = dbms.DoGetDataSQL<HEAD_MANF_1>("SELECT     TOP 100 PERCENT SUM(dbo.DTL_MANF.MABLK) AS SumOfMABLK, dbo.HEAD_MANF.IMBIBE_MANF AS SumOfIMBIBE_MANF,  dbo.HEAD_MANF.IMBIBE_SAR AS SumOfIMBIBE_SAR, dbo.HEAD_MANF.FNUMB FROM dbo.HEAD_MANF INNER JOIN  dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE     (dbo.HEAD_MANF.CODE = N'" + CODE + "' and dbo.HEAD_MANF.FNUMB = " + fnum + ") GROUP BY dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR, dbo.HEAD_MANF.FNUMB ").ToList();
+                if (rst.Count > 0)
+                {
+                    tempGETSTANDARDPRICE_MAVAD = (double)rst.Select(x => x.SumOfMABLK).FirstOrDefault();
+                }
+                else
+                {
+                    tempGETSTANDARDPRICE_MAVAD = 0;
+                }
+            }
+            return tempGETSTANDARDPRICE_MAVAD;
+        }
+        [System.Diagnostics.DebuggerStepThrough]
+        public static void CREATHES(double? KOL, double? MOIN, double? taf, string nam)
+        {
+            if (!ISHESAB(KOL, MOIN, taf))
+            {
+                var rst = dbms.DoGetDataSQL<DETA_HES_MODEL1>("SELECT * FROM DETA_HES WHERE N_KOL = " + KOL.ToString() + " AND NUMBER = " + MOIN.ToString()).ToList();
+                if (rst.Count == 0)
+                {
+
+                    string Test = $@"INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME) VALUES({KOL},{MOIN},N'{nam}')";
+
+                    dbms.DoExecuteSQL($"INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME) VALUES({KOL},{MOIN},N'{nam}')");
+                }
+
+                try
+                {
+                    string testtrace3 = nam;
+                    string testtrace33 = $"INSERT INTO dbo.TDETA_HES(N_KOL, NUMBER, TNUMBER, NAME) VALUES({KOL},{MOIN},{taf},N'{nam}')";
+                    dbms.DoExecuteSQL($"INSERT INTO dbo.TDETA_HES(N_KOL, NUMBER, TNUMBER, NAME) VALUES({KOL},{MOIN},{taf},N'{nam}')");
+                }
+                catch (Exception)
+                {
+
+                    string testtrace3334 = $"INSERT INTO dbo.TDETA_HES(N_KOL, NUMBER, TNUMBER, NAME) VALUES({KOL},{MOIN},{taf},N'{nam + " " + taf}'";
+                    dbms.DoExecuteSQL($"INSERT INTO dbo.TDETA_HES(N_KOL, NUMBER, TNUMBER, NAME) VALUES({KOL},{MOIN},{taf},N'{nam + " " + taf}')");
+                }
+            }
+        }
+        [System.Diagnostics.DebuggerStepThrough]
+        public static bool ISHESAB(double? KOL, double? MOIN, double? taf)
+        {
+            bool tempISHESAB = false;
+            var rst = dbms.DoGetDataSQL<QRE13>("SELECT N_KOL,NUMBER,TNUMBER FROM TDETA_HES WHERE N_KOL = " + KOL.ToString() + " AND NUMBER = " + MOIN.ToString() + " AND TNUMBER = " + taf).ToList();
+            if (rst.Count == 0)
+            {
+                tempISHESAB = false;
+            }
+            else
+            {
+                tempISHESAB = true;
+            }
+
+            return tempISHESAB;
+        }
+        public static string GETDEPART(long? DEPART)
+        {
+            string tempGETDEPART = null;
+            var rst = dbms.DoGetDataSQL<DEPART_CSHARP>("SELECT * FROM DEPART WHERE DEPATMAN = " + DEPART).ToList();
+            if (rst.Count > 0)
+            {
+                tempGETDEPART = rst.Select(x => x.DEPNAME).FirstOrDefault();
+            }
+
+            return tempGETDEPART;
+        }
+        public static string GETF_DEPART(long? DEPART)
+        {
+            string tempGETDEPART = null;
+
+            if (DEPART != null)
+            {
+                var rst = dbms.DoGetDataSQL<DEPART_CSHARP>("SELECT * FROM DEPART WHERE DEPATMAN = " + DEPART).FirstOrDefault();
+                if (rst != null)
+                {
+                    tempGETDEPART = rst.DEPNAME;
+                }
+            }
+
+            if (string.IsNullOrEmpty(tempGETDEPART))
+            {
+                var rst2 = dbms.DoGetDataSQL<DEPART_CSHARP>("SELECT TOP 1 * FROM dbo.DEPART WHERE DEPATMAN = (SELECT MIN(DEPATMAN) FROM DEPART)").FirstOrDefault();
+                if (rst2 != null)
+                {
+                    tempGETDEPART = rst2.DEPNAME;
+                }
+            }
+
+            return tempGETDEPART;
+        }
+        public static long GETKOL(string SHES)
+        {
+            long GETKOLRet = default;
+            byte i;
+            i = 1;
+            if (Strings.Len(SHES) < 5)
+            {
+            }
+            else
+            {
+                while (Strings.Mid(SHES, i, 1) != "-")
+                {
+                    i = (byte)(i + 1);
+                    if (i > 200)
+                    {
+                        return GETKOLRet;
+                    }
+                }
+                GETKOLRet = Conversions.ToLong(Strings.Left(SHES, i - 1));
+            }
+
+            return GETKOLRet;
+        }
+        public static long GETMOIN(string SHES)
+        {
+            long GETMOINRet = default;
+            byte i, j;
+            i = 1;
+            if (Strings.Len(SHES) < 5)
+            {
+            }
+            else
+            {
+                while (Strings.Mid(SHES, i, 1) != "-")
+                {
+                    i = (byte)(i + 1);
+                    if (i > 200)
+                    {
+                        return GETMOINRet;
+                    }
+                }
+                j = (byte)(i + 1);
+                while (Strings.Mid(SHES, j, 1) != "-" & j <= Strings.Len(SHES))
+                    j = (byte)(j + 1);
+                i = (byte)(i + 1);
+                GETMOINRet = Conversions.ToLong(Strings.Mid(SHES, i, j - i));
+            }
+
+            return GETMOINRet;
+        }
+        public static long GETTAF(string SHES)
+        {
+            long GETTAFRet = default;
+            byte i, j;
+            i = 1;
+            if (Strings.Len(SHES) < 5)
+            {
+            }
+            else
+            {
+                while (Strings.Mid(SHES, i, 1) != "-")
+                {
+                    i = (byte)(i + 1);
+                    if (i > 200)
+                    {
+                        return GETTAFRet;
+                    }
+                }
+                j = (byte)(i + 1);
+                while (Strings.Mid(SHES, j, 1) != "-")
+                    j = (byte)(j + 1);
+                i = j;
+                while (Strings.Mid(SHES, j + 1, 1) != "-" & j < Strings.Len(SHES))
+                    j = (byte)(j + 1);
+                GETTAFRet = Conversions.ToLong(Strings.Mid(SHES, i + 1, j - i));
+            }
+
+            return GETTAFRet;
+        }
+        public static string GETBANK(double BANK)
+        {
+            string GETBANKRet = default;
+            var RRST = dbms.DoGetDataSQL<string>("SELECT TCOD_BANKS.CODE, TCOD_BANKS.NAMES FROM TCOD_BANKS WHERE (((TCOD_BANKS.CODE)= " + BANK + "))").FirstOrDefault();
+            if (!(RRST is null))
+            {
+                //GETBANKRet = RRST.Fields(1);
+                GETBANKRet = RRST;
+            }
+            else
+            {
+                GETBANKRet = "";
+            }
+            return GETBANKRet;
+        }
+        private static bool IsNull(object p)
+        {
+            if (!(p is null))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        public static double? GENSANADKHAREED(object fnum, long TNUM, bool InternalCalling = true)
+        {
+            LogWriter.WriteLog("شروع بازسازی سند خرید");
+
+            MainWindow auto_run = null;
+            if (InternalCalling)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    //Paint
+                    auto_run = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
+                }));
+            }
+
+            double? _SANAD_NUMBER = null;
+            //rst.GetType().GetProperties()[4].GetValue(rst, null) 
+            //, CKOL = default, CMOIN = default, CTAF = default, CTAF2 = default, CTAF3 = default, CTAF4 = default, HKOL = default, HMOIN = default, HTAF = default, HTAF2 = default, HTAF3 = default, HTAF4 = default, takh;
+
+            var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT N_S, DATE_S, SHARH_S, NO_S, ANBAR, N_FACTOR, GHATEI, USER_NAME, base, SGN1, SGN2, SGN3, SGN4, OKF FROM dbo.DEED_HED").ToList();
+
+            var HFRST = dbms.DoGetDataSQL<HEAD_LST_CSHARP>($"SELECT     * FROM dbo.HEAD_LST WHERE     (NUMBER BETWEEN  {fnum}  AND  {TNUM}  AND (TAG = 12)) ORDER BY NUMBER").ToList();
+
+
+            double progress = 0;
+            if (InternalCalling)
+            {
+                auto_run.Dispatcher.Invoke(new Action(() =>
+                {
+                    auto_run.PRGR_C2.Value = progress; // Update the progress bar
+                    auto_run.UpdateOverallProgressBar();                                   // auto_run.LBL_C2.Content = $"{progress:F2}%";
+
+                }));
+            }
+            Parallel.For(0, HFRST.Count, HFRST_EOF =>
+            {
+                QRE10 SARST = null;
+                string SHSH;
+                double max_ns, MABL_CHK = default, JAMF, JAMCH;
+                long K;
+                if (InternalCalling)
+                {
+                    auto_run.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progress++;
+                        auto_run.PRGR_C2.Value = progress / ((double)HFRST.Count) * 100.0;// Update the progress bar
+                        auto_run.UpdateOverallProgressBar();
+                    }));
+                }
+
+                double? CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null, takh;
+                string shart;
+                double KHMAVAV;
+                double KHNIM;
+                double KHSAKHT;
+                double KHSAY;
+                double BAZAR;
+                var HS = new double[8];
+                if (!IsNull(HFRST[HFRST_EOF].CUST_NO))
+                {
+                    GETTAF3(HFRST[HFRST_EOF].CUST_NO, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+                }
+                SHSH = Conversions.ToString(Interaction.IIf((bool)Baseknow.SNDKH, Strings.Left(" فاكتورهاي  خريد  " + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255), Strings.Left(" فاكتور خريد شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " خريدار: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255)));
+                if ((bool)Baseknow.SNDKH) // سند روزانه است
+                {
+                    if (!IsNull(HFRST[HFRST_EOF].N_S)) // فاکتور سند دارد
+                    {
+                        SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 1 and n_s = " + HFRST[HFRST_EOF].N_S).FirstOrDefault();
+                        if (!(SARST is null))  // اگرسند  فاکتورهست
+                        {
+                            if (SARST.DATE_S == HFRST[HFRST_EOF].DATE_N) // تاريخ سند و فاکتوريکي است
+                            {
+                                max_ns = (double)HFRST[HFRST_EOF].N_S;
+                            }
+                            else
+                            {
+                            SEJ:
+                                //SARST = New ADODB.Recordset SARST.Open "SELECT    BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 1 and DATE_s = " & HFRST[HFRST_EOF].DATE_N;
+                                SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 1 and DATE_s = " + HFRST[HFRST_EOF].DATE_N).FirstOrDefault();
+
+                                //if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                                if (!(SARST is null))   // اگرسند به تاريخ فاکتورهست
+                                {
+                                    max_ns = (double)SARST.N_S;
+                                }
+                                else
+                                {
+                                    max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 1, -1, HFRST[HFRST_EOF].USER_NAME);
+                                    HFRST[HFRST_EOF].N_S = max_ns;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //goto SEJ;
+                            SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 1 and DATE_s = " + HFRST[HFRST_EOF].DATE_N).FirstOrDefault();
+
+                            //if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                            if (!(SARST is null))   // اگرسند به تاريخ فاکتورهست
+                            {
+                                max_ns = (double)SARST.N_S;
+                            }
+                            else
+                            {
+                                max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 1, -1, HFRST[HFRST_EOF].USER_NAME);
+                                HFRST[HFRST_EOF].N_S = max_ns;
+                            }
+                        } // چک کن اگه نيست صادر کن
+                    }
+                    else
+                    {
+                        //goto SEJ;
+                        SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 1 and DATE_S = " + HFRST[HFRST_EOF].DATE_N).FirstOrDefault();
+
+                        //if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                        if (!(SARST is null))   // اگرسند به تاريخ فاکتورهست
+                        {
+                            max_ns = (double)SARST.N_S;
+                        }
+                        else
+                        {
+                            max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 1, -1, HFRST[HFRST_EOF].USER_NAME);
+                            HFRST[HFRST_EOF].N_S = max_ns;
+                        }
+                    } // چک کن اگه نيست صادر کن
+                }
+                else if (!IsNull(HFRST[HFRST_EOF].N_S)) // تک سندي
+                                                        // فاکتور سند دارد
+                {
+                    //Set SARST = New ADODB.Recordset:
+                    SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 1 and n_s = " + HFRST[HFRST_EOF].N_S).FirstOrDefault();
+                    //SARST.Open("SELECT    n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 1 and N_s = " + HFRST[HFRST_EOF].N_S, CurrentProject.Connection, adOpenKeyset, adLockOptimistic);
+                    if (!(SARST is null))   // اگرسند فاکتورهست
+                    {
+                        if (SARST.DATE_S != HFRST[HFRST_EOF].DATE_N) // تاريخ سند و فاکتوريکي است
+                        {
+                            dbms.DoExecuteSQL("UPDATE DEED_HED SET DATE_S = " + HFRST[HFRST_EOF].DATE_N + ",SHARH_S = N'" + SHSH + "',GHATEI = 0,NO_S = 1,OKF=-1,USER_NAME = N'" + HFRST[HFRST_EOF].USER_NAME + "' WHERE N_S =" + HFRST[HFRST_EOF].N_S);
+                        }
+                        max_ns = (double)HFRST[HFRST_EOF].N_S;
+                    }
+                    else
+                    {
+                        max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 1, -1, HFRST[HFRST_EOF].USER_NAME);
+                        HFRST[HFRST_EOF].N_S = max_ns;
+                    }
+                }
+                else
+                {
+                    max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 1, -1, HFRST[HFRST_EOF].USER_NAME);
+                    HFRST[HFRST_EOF].N_S = max_ns;
+                }
+
+                //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                //Forms["GUG"].Form.Refresh();
+                //Forms["GUG"]["Text2"].Requery();
+                //Forms["GUG"].Form.Repaint();
+                if (IsNull(HFRST[HFRST_EOF].N_S) || HFRST[HFRST_EOF].N_S != max_ns)
+                {
+                    HFRST[HFRST_EOF].N_S = max_ns;
+                    dbms.DoExecuteSQL($"UPDATE HEAD_LST SET N_S = {max_ns} WHERE NUMBER = {HFRST[HFRST_EOF].NUMBER} AND TAG = 12");
+                    //HFRST.update();
+                }
+                //SumOfMABL
+                var jst_SumOfMABL = dbms.DoGetDataSQL<double?>("SELECT Sum(INVO_LST.MABL_K) AS SumOfMABL_K FROM INVO_LST WHERE (((INVO_LST.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + " ) AND ((INVO_LST.TAG)=1))").FirstOrDefault();
+                if (jst_SumOfMABL > 0 && !IsNull(jst_SumOfMABL))
+                {
+                    JAMF = Math.Round((double)jst_SumOfMABL);
+                }
+                else
+                {
+                    JAMF = 0d;
+                }
+
+                _SANAD_NUMBER = HFRST[HFRST_EOF].N_S;
+                //jst.Close();
+                // Set jst = New ADODB.Recordset
+                //double? SumOfMABL 
+                var jst_SumOfMABL2_SumOfMABL2 = dbms.DoGetDataSQL<double?>("SELECT Sum(PAY_GETP.MABL) AS SumOfMABL FROM PAY_GETP WHERE (((PAY_GETP.TAG)=1) AND ((PAY_GETP.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + " ))").FirstOrDefault();
+                if (jst_SumOfMABL2_SumOfMABL2 > 0 && !IsNull(jst_SumOfMABL2_SumOfMABL2))
+                {
+                    JAMCH = (double)jst_SumOfMABL2_SumOfMABL2;
+                }
+                else
+                {
+                    JAMCH = 0d;
+                }
+                KHMAVAV = 0d;
+                KHNIM = 0d;
+                KHSAKHT = 0d;
+                KHSAY = 0d;
+                BAZAR = 0d;
+                HS[1] = 0d;
+                HS[2] = 0d;
+                HS[3] = 0d;
+                HS[4] = 0d;
+                HS[5] = 0d;
+                HS[6] = 0d;
+                HS[7] = 0d;
+                //jst.Close();
+                //Set jst = New ADODB.Recordset
+                dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE (((DEED_DTL.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + ") AND ((DEED_DTL.TAG)= 12))");
+                var jst = dbms.DoGetDataSQL<QRE20>("SELECT INVO_LST.MABL_K, INVO_LST.MEGHk, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME, dbo.STUF_DEF.RADAH FROM STUF_DEF INNER JOIN INVO_LST ON (STUF_DEF.CODE = INVO_LST.CODE) AND (STUF_DEF.CODE = INVO_LST.CODE) WHERE (((INVO_LST.NUMBER)=" + HFRST[HFRST_EOF].NUMBER + ") AND ((INVO_LST.TAG)=1)) ").ToList();
+                ////Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                ////Forms["GUG"].Form.Refresh();
+                ////Forms["GUG"]["Text2"].Requery();
+                ////Forms["GUG"].Form.Repaint();
+                //while (!jst.EOF())
+                for (int jst_EOF = 0; jst_EOF < jst.Count; jst_EOF++)
+                {
+
+                    if (jst[jst_EOF].MABL_K != 0)
+                    {
+
+                        if (Generaly.defacc)
+                        {
+                            CREATHES(Baseknow.MOGODIA, jst[jst_EOF].ANBAR, Convert.ToInt64(jst[jst_EOF].CODE), jst[jst_EOF].NAME);
+                        }
+                        object N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD = default;
+                        //SDRST.AddNew(); // خريد
+                        //N_S = max_ns;
+                        //HES_K = Baseknow.MOGODIA;
+                        //HES_M = jst[jst_EOF].ANBAR;
+                        //HES_T = jst[jst_EOF].CODE;
+                        //hes = Baseknow.MOGODIA + "-" + jst[jst_EOF].ANBAR + "-" + jst[jst_EOF].CODE;
+                        //SHARH = Strings.Right("خريدفاكتورشماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255);
+                        //BED = Math.Round((double)jst[jst_EOF].MABL_K);
+                        //NUMBER = HFRST[HFRST_EOF].NUMBER;
+                        //TAG = 12;
+                        //ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD) " +
+                            $"VALUES({max_ns},{Baseknow.MOGODIA},{jst[jst_EOF].ANBAR},{jst[jst_EOF].CODE},N'{Baseknow.MOGODIA + "-" + jst[jst_EOF].ANBAR + "-" + jst[jst_EOF].CODE}',N'{Strings.Right("خريدفاكتورشماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255)}',{Math.Round((double)jst[jst_EOF].MABL_K)},{HFRST[HFRST_EOF].NUMBER},12,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD)})");
+                        switch (jst[jst_EOF].RADAH)
+                        {
+                            case 1:
+                                {
+                                    KHMAVAV = KHMAVAV + Math.Round((double)jst[jst_EOF].MABL_K);
+                                    break;
+                                }
+                            case 2:
+                                {
+                                    KHNIM = KHNIM + Math.Round((double)jst[jst_EOF].MABL_K);
+                                    break;
+                                }
+                            case 3:
+                                {
+                                    KHSAKHT = KHSAKHT + Math.Round((double)jst[jst_EOF].MABL_K);
+                                    break;
+                                }
+                            case 4:
+                                {
+                                    BAZAR = BAZAR + Math.Round((double)jst[jst_EOF].MABL_K);
+                                    break;
+                                }
+                            case 5:
+                                {
+                                    HS[1] = HS[1] + Math.Round((double)jst[jst_EOF].MABL_K);
+                                    break;
+                                }
+                            case 6:
+                                {
+                                    HS[2] = HS[2] + Math.Round((double)jst[jst_EOF].MABL_K);
+                                    break;
+                                }
+                            case 7:
+                                {
+                                    HS[3] = HS[3] + Math.Round((double)jst[jst_EOF].MABL_K);
+                                    break;
+                                }
+                            case 8:
+                                {
+                                    HS[4] = HS[4] + Math.Round((double)jst[jst_EOF].MABL_K);
+                                    break;
+                                }
+                            case 9:
+                                {
+                                    HS[5] = HS[5] + Math.Round((double)jst[jst_EOF].MABL_K);
+                                    break;
+                                }
+                            case 10:
+                                {
+                                    HS[6] = HS[6] + Math.Round((double)jst[jst_EOF].MABL_K);
+                                    break;
+                                }
+
+                            default:
+                                {
+                                    KHSAY = KHSAY + Math.Round((double)jst[jst_EOF].MABL_K);
+                                    break;
+                                }
+                        }
+
+
+                        //SDRST.update();
+                    }
+                    //jst.MoveNext();
+                }
+                //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                //Forms["GUG"].Form.Refresh();
+                //Forms["GUG"]["Text2"].Requery();
+                //Forms["GUG"].Form.Repaint();
+                if (HFRST[HFRST_EOF].MABL_HAZ != 0)
+                {
+                    object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD = null;
+                    //SDRST.AddNew(); // كرايه حمل يا غيره
+                    N_S = max_ns;
+                    if (!IsNull(HFRST[HFRST_EOF].MOIN_HAZ))
+                    {
+                        GETTAF3(HFRST[HFRST_EOF].MOIN_HAZ, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                    }
+                    HES_K = HKOL;
+                    HES_M = HMOIN;
+                    HES_T = HTAF;
+                    HES_T2 = HTAF2;
+                    HES_T3 = HTAF3;
+                    HES_T4 = HTAF4;
+                    hes = HFRST[HFRST_EOF].MOIN_HAZ;
+                    SHARH = Strings.Right("خدمات فاكتور خريد  شماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " - " + GETTAFNAME(HFRST[HFRST_EOF].MOIN_HAZ), 255);
+                    BED = HFRST[HFRST_EOF].MABL_HAZ;
+                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                    TAG = 12;
+                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+
+                    string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                    string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                    string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+
+
+                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BED},{NUMBER},{TAG},{ARZD})");
+                    //SDRST.update();
+                }
+                if (JAMCH != 0d) // چكهاي دريافتي
+                {
+                    var CHRST = dbms.DoGetDataSQL<PAY_GETP_1>($"SELECT N_SERI, BANK, DATE_S, DATE, SHOBEH, MABL, NAME_TAH, N_HESAB, N_S, N_KOL, N_MOIN, N_TAF, N_KOL2, N_MOIN2, N_TAF2, N_KOL3, N_MOIN3, N_TAF3, NUMBER, TAG, ANBAR, RADIF, CUST_NO, KIND, VAZ, HES1, HES2, HES3 FROM dbo.PAY_GETP WHERE NUMBER = {HFRST[HFRST_EOF].NUMBER} AND TAG = 1").ToList();
+                    //CHRST.MoveLast();
+                    //CHRST.MoveFirst();
+                    //CHRST.Filter = "NUMBER = " + HFRST[HFRST_EOF].NUMBER + " AND TAG = 1";
+
+                    //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                    //Forms["GUG"].Form.Refresh();
+                    //Forms["GUG"]["Text2"].Requery();
+                    //Forms["GUG"].Form.Repaint();
+                    if (CHRST.Count > 0 && !IsNull(CHRST.Select(X => X.NUMBER)))
+                    {
+                        //while (!CHRST.EOF)
+                        for (int CHRST_EOF = 0; CHRST_EOF < CHRST.Count; CHRST_EOF++)
+                        {
+                            object N_S, HES_K, HES_M, HES_T, hes, HES_T2, HES_T3, BED, HES_T4, SHARH, BES, N_SERI, BANK, NUMBER, TAG, ARZD = null;
+
+                            MABL_CHK = (double)(MABL_CHK + CHRST[CHRST_EOF].MABL);
+                            //SDRST.AddNew(); // اسناد پرداختني
+                            N_S = max_ns;
+                            HES_K = GETKOL(Baseknow.APA);
+                            HES_M = GETMOIN(Baseknow.APA);
+                            HES_T = GETTAF(Baseknow.APA);
+                            hes = Baseknow.APA;
+                            SHARH = Strings.Right("چك " + CHRST[CHRST_EOF].N_SERI + "بانك " + GETBANK(Convert.ToDouble(CHRST[CHRST_EOF].BANK)) + " " + CHRST[CHRST_EOF].SHOBEH + " مورخ " + Strings.Format(CHRST[CHRST_EOF].DATE_S, "####/##/##"), 255);
+                            BES = CHRST[CHRST_EOF].MABL;
+                            N_SERI = CHRST[CHRST_EOF].N_SERI;
+                            BANK = CHRST[CHRST_EOF].BANK;
+                            NUMBER = HFRST[HFRST_EOF].NUMBER;
+                            TAG = 12;
+                            ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S,HES_K,HES_M,HES_T,hes ,SHARH,BES ,N_SERI,BANK,NUMBER,TAG ,ARZD) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{hes}',N'{SHARH}',{BES},{N_SERI},{BANK},{NUMBER},{TAG},{ARZD})");
+                            //SDRST.update();
+
+
+
+                            //SDRST.AddNew(); // چكهاي پرداختي
+                            N_S = max_ns;
+                            HES_K = CKOL;
+                            HES_M = CMOIN;
+                            HES_T = CTAF;
+                            HES_T2 = CTAF2;
+                            HES_T3 = CTAF3;
+                            HES_T4 = CTAF4;
+                            hes = HFRST[HFRST_EOF].CUST_NO;
+                            SHARH = Strings.Right("ف.خ." + HFRST[HFRST_EOF].NUMBER1 + " - " + "چك " + CHRST[CHRST_EOF].N_SERI + "بانك " + GETBANK(Convert.ToDouble(CHRST[CHRST_EOF].BANK)) + " " + CHRST[CHRST_EOF].SHOBEH + " مورخ " + Strings.Format(CHRST[CHRST_EOF].DATE_S, "####/##/##"), 255);
+                            BED = CHRST[CHRST_EOF].MABL;
+                            NUMBER = HFRST[HFRST_EOF].NUMBER;
+                            TAG = 12;
+                            ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                            //SDRST.update();
+                            string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                            string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                            string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S,HES_K,HES_M,HES_T,HES_T2,HES_T3,HES_T4,hes ,SHARH,BED ,NUMBER,TAG ,ARZD) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BED},{NUMBER},{TAG},{ARZD})");
+                            //CHRST.MoveNext();
+                        }
+                    }
+                    else
+                    {
+                    }
+                    //CHRST.Close();
+                }
+                //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                //Forms["GUG"].Form.Refresh();
+                //Forms["GUG"]["Text2"].Requery();
+                //Forms["GUG"].Form.Repaint();
+                if (JAMF != 0d)
+                {
+                    //{N_S},{HES_K},{HES_M},{HES_T},{HES_T2},{HES_T3},{HES_T4},{SHARH},{hes },{BES },{NUMBER},{TAG },{ARZD},{RADIF}
+                    object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, hes, BES, NUMBER, TAG, ARZD, RADIF = null;
+
+
+
+                    //SDRST.AddNew(); // كل بستانكاري شخص بابت فاكتور
+                    N_S = max_ns;
+                    HES_K = CKOL;
+                    HES_M = CMOIN;
+                    HES_T = CTAF;
+                    HES_T2 = CTAF2;
+                    HES_T3 = CTAF3;
+                    HES_T4 = CTAF4;
+                    SHARH = Strings.Right("فاكتور خريد  شماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " " + HFRST[HFRST_EOF].MOLAH, 255);
+                    hes = HFRST[HFRST_EOF].CUST_NO;
+                    BES = JAMF + HFRST[HFRST_EOF].MBAA;
+                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                    TAG = 12;
+                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                    RADIF = HFRST[HFRST_EOF].NUMBER;
+                    //SDRST.update();
+                    string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                    string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                    string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+
+                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, hes, BES, NUMBER, TAG, ARZD, RADIF) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{SHARH}',N'{hes}',{BES},{NUMBER},{TAG},{ARZD},{RADIF})");
+
+
+
+                    if (KHMAVAV != 0d)
+                    {
+                        //{N_S},{ HES_K},{ HES_M},{ HES_T},{ hes},{ SHARH},{ BED},{ NUMBER},{ TAG},{ ARZD}
+                        // كنترل خريد '
+                        //SDRST.AddNew(); // خريد
+                        object BED = null;
+                        N_S = max_ns;
+                        HES_K = Baseknow.KHARID;
+                        HES_M = 1;
+                        HES_T = 1;
+                        hes = Baseknow.KHARID + "-1-1";
+                        SHARH = Strings.Right("خريد مواد اوليه فاكتورشماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255);
+                        BED = KHMAVAV;
+                        NUMBER = HFRST[HFRST_EOF].NUMBER;
+                        TAG = 12;
+                        ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                        //SDRST.update();
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{hes}',N'{SHARH}',{BED},{NUMBER},{TAG},{ARZD})");
+
+                    }
+                    if (KHNIM != 0d)
+                    {
+                        object BED = null;
+                        //{ N_S },{ HES_K},{ HES_M},{ HES_T},{ hes },{ SHARH},{ BED },{ NUMBER},{ TAG },{ ARZD}
+                        // كنترل خريد '
+                        //SDRST.AddNew(); // خريد
+                        N_S = max_ns;
+                        HES_K = Baseknow.KHARID;
+                        HES_M = 2;
+                        HES_T = 1;
+                        hes = Baseknow.KHARID + "-2-1";
+                        SHARH = Strings.Right("خريد نيمه ساخته فاكتورشماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255);
+                        BED = KHNIM;
+                        NUMBER = HFRST[HFRST_EOF].NUMBER;
+                        TAG = 12;
+                        ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                        //SDRST.update();
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD ) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{hes}',N'{SHARH}',{BED},{NUMBER},{TAG},{ARZD})");
+
+                    }
+                    if (KHSAKHT != 0d)
+                    {
+                        object BED = null;
+                        //{ N_S},{ HES_K},{ HES_M},{ HES_T},{ hes },{ SHARH},{ BED },{ NUMBER},{ TAG },{ ARZD}
+                        // كنترل خريد '
+                        //SDRST.AddNew(); // خريد
+                        N_S = max_ns;
+                        HES_K = Baseknow.KHARID;
+                        HES_M = 3;
+                        HES_T = 1;
+                        hes = Baseknow.KHARID + "-3-1";
+                        SHARH = Strings.Right("خريد ساخته شده فاكتورشماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255);
+                        BED = KHSAKHT;
+                        NUMBER = HFRST[HFRST_EOF].NUMBER;
+                        TAG = 12;
+                        ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                        //SDRST.update();
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD ) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{hes}',N'{SHARH}',{BED},{NUMBER},{TAG},{ARZD})");
+
+                    }
+                    if (BAZAR != 0d)
+                    {
+                        object BED = null;
+                        //{N_S },{HES_K},{HES_M},{HES_T},{hes },{SHARH},{BED },{NUMBER},{TAG },{ARZD}
+
+
+                        // كنترل خريد '
+                        //SDRST.AddNew(); // خريد
+                        N_S = max_ns;
+                        HES_K = Baseknow.KHARID;
+                        HES_M = 4;
+                        HES_T = 1;
+                        hes = Baseknow.KHARID + "-4-1";
+                        SHARH = Strings.Right("خريد بازرگاني  فاكتورشماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255);
+                        BED = BAZAR;
+                        NUMBER = HFRST[HFRST_EOF].NUMBER;
+                        TAG = 12;
+                        ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                        //SDRST.update();
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{hes}',N'{SHARH}',{BED},{NUMBER},{TAG},{ARZD})");
+
+                    }
+                    if (KHSAY != 0d)
+                    {
+                        if (Generaly.defacc)
+                        {
+                            CREATHES(Baseknow.KHARID, 11, 1, "ساير 2");
+                            // كنترل خريد '
+                        }
+                        object BED = null;
+                        //{ N_S },{ HES_K},{ HES_M},{ HES_T},{ hes },{ SHARH},{ BED },{ NUMBER},{ TAG },{ ARZD}
+
+                        //SDRST.AddNew(); // خريد
+                        N_S = max_ns;
+                        HES_K = Baseknow.KHARID;
+                        HES_M = 11;
+                        HES_T = 1;
+                        hes = Baseknow.KHARID + "-11-1";
+                        SHARH = Strings.Right("خريد ساير فاكتورشماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255);
+                        BED = KHSAY;
+                        NUMBER = HFRST[HFRST_EOF].NUMBER;
+                        TAG = 12;
+                        ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                        //SDRST.update();
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{hes}',N'{SHARH}',{BED},{NUMBER},{TAG},{ARZD})");
+
+                    }
+                    for (K = 1L; K <= 6L; K++)
+                    {
+                        if (HS[(int)K] != 0d)
+                        {
+                            // كنترل خريد '
+                            if (Generaly.defacc)
+                            {
+                                var INP1 = K + 4L;
+                                //CREATHES(System.Convert.ToInt64(@Forms["baseknow"]["KHARID"]), K + 4, 1, GETGRPKALA(K + 4));
+                                CREATHES(Baseknow.KHARID, K + 4L, 1, GETGRPKALA(Convert.ToInt32(INP1)));
+                            }
+                            //{N_S},{HES_K},{HES_M},{HES_T},{hes},{SHARH},{BED},{NUMBER},{TAG},{ARZD}
+                            object BED = null;
+
+                            //SDRST.AddNew(); // خريد
+                            N_S = max_ns;
+                            HES_K = Baseknow.KHARID;
+                            HES_M = K + 4L;
+                            HES_T = 1;
+                            hes = Baseknow.KHARID + "-" + (K + 4L) + "-1";
+                            SHARH = Strings.Right("خريد " + GETGRPKALA(Convert.ToInt32(K + 4L)) + " فاكتورشماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255);
+                            BED = HS[(int)K];
+                            HS[7] = HS[7] + HS[(int)K];
+                            NUMBER = HFRST[HFRST_EOF].NUMBER;
+                            TAG = 12;
+                            ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                            //SDRST.update();
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL ( N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{hes}',N'{SHARH}',{BED},{NUMBER},{TAG},{ARZD})");
+
+                        }
+                    }
+                    //{N_S},{HES_K},{HES_M},{HES_T},{hes},{SHARH},{BES},{NUMBER},{TAG},{ARZD}
+                    //SDRST.AddNew(); // پاياپاي خريد
+                    N_S = max_ns;
+                    HES_K = Baseknow.PKHARID;
+                    HES_M = 1;
+                    HES_T = 1;
+                    hes = Baseknow.PKHARID + "-1-1";
+                    SHARH = Strings.Right("خريدفاكتورشماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255);
+                    BES = KHSAY + KHSAKHT + KHNIM + KHMAVAV + BAZAR + HS[7];
+                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                    TAG = 12;
+                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                    //SDRST.update();
+                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG, ARZD ) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{hes}',N'{SHARH}',{BES},{NUMBER},{TAG},{ARZD})");
+
+                }
+                //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                //Forms["GUG"].Form.Refresh();
+                //Forms["GUG"]["Text2"].Requery();
+                //Forms["GUG"].Form.Repaint();
+                if (HFRST[HFRST_EOF].MABL_HAZ != 0)
+                {
+
+                    //{N_S},{HES_K},{HES_M},{HES_T}, {HES_T2}, {HES_T3}, {HES_T4},{hes},{SHARH},{BES},{NUMBER},{TAG},{ARZD}
+                    object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD = null;
+                    //SDRST.AddNew(); // كل بستانكاري شخص بابت خدمات
+                    N_S = max_ns;
+                    HES_K = CKOL;
+                    HES_M = CMOIN;
+                    HES_T = CTAF;
+                    HES_T2 = CTAF2;
+                    HES_T3 = CTAF3;
+                    HES_T4 = CTAF4;
+                    hes = HFRST[HFRST_EOF].CUST_NO;
+                    SHARH = Strings.Right("خدمات فاكتور خريد  شماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                    BES = HFRST[HFRST_EOF].MABL_HAZ;
+                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                    TAG = 12;
+                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                    //SDRST.update();
+                    string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                    string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                    string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({N_S},{HES_K},{HES_M},{HES_T}, {HES_T2T}, {HES_T3T}, {HES_T4T},N'{hes}',N'{SHARH}',{BES},{NUMBER},{TAG},{ARZD})");
+
+                }
+                //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                //Forms["GUG"].Form.Refresh();
+                //Forms["GUG"]["Text2"].Requery();
+                //Forms["GUG"].Form.Repaint();
+                if (HFRST[HFRST_EOF].M_NAGHD != 0)
+                {
+                    //{N_S},{HES_K},{HES_M},{HES_T}, {HES_T2}, {HES_T3}, {HES_T4},{hes},{SHARH},{BED},{NUMBER},{TAG},{ARZD}
+                    object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD = null;
+
+                    //SDRST.AddNew(); // مبلغ نقدشخص
+                    N_S = max_ns;
+                    HES_K = CKOL;
+                    HES_M = CMOIN;
+                    HES_T = CTAF;
+                    HES_T2 = CTAF2;
+                    HES_T3 = CTAF3;
+                    HES_T4 = CTAF4;
+                    hes = HFRST[HFRST_EOF].CUST_NO;
+                    SHARH = Strings.Right("مبلغ نقد فاكتور خريد  شماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                    BED = HFRST[HFRST_EOF].M_NAGHD;
+                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                    TAG = 12;
+                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                    //SDRST.update();
+                    string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                    string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                    string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({N_S},{HES_K},{HES_M},{HES_T}, {HES_T2T}, {HES_T3T}, {HES_T4T},N'{hes}',N'{SHARH}',{BED},{NUMBER},{TAG},{ARZD})");
+
+                }
+                //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                //Forms["GUG"].Form.Refresh();
+                //Forms["GUG"]["Text2"].Requery();
+                //Forms["GUG"].Form.Repaint();
+                // ----------------------ْحواله واريزي
+                if (HFRST[HFRST_EOF].MABL_HAV != 0)
+                {
+                    if (HFRST[HFRST_EOF].MABL_HAV != 0)
+                    {
+                        //{N_S},{HES_K},{HES_M},{HES_T}, {HES_T2}, {HES_T3}, {HES_T4},{hes},{SHARH},{BED},{NUMBER},{TAG},{ARZD}
+                        object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD = null;
+
+                        //SDRST.AddNew(); // مبلغ واريزي شخص
+                        N_S = max_ns;
+                        HES_K = CKOL;
+                        HES_M = CMOIN;
+                        HES_T = CTAF;
+                        HES_T2 = CTAF2;
+                        HES_T3 = CTAF3;
+                        HES_T4 = CTAF4;
+                        hes = HFRST[HFRST_EOF].CUST_NO;
+                        SHARH = Strings.Right("مبلغ حواله فاكتور خريد شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                        BED = HFRST[HFRST_EOF].MABL_HAV;
+                        NUMBER = HFRST[HFRST_EOF].NUMBER;
+                        TAG = 12;
+                        ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                        //SDRST.update();
+                        string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                        string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                        string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({N_S},{HES_K},{HES_M},{HES_T}, {HES_T2T}, {HES_T3T}, {HES_T4T},N'{hes}',N'{SHARH}',{BED},{NUMBER},{TAG},{ARZD})");
+
+                    }
+                    if (!IsNull(HFRST[HFRST_EOF].MOIN_HAV))
+                    {
+                        //{N_S},{HES_K},{HES_M},{HES_T}, {HES_T2}, {HES_T3}, {HES_T4},{hes},{SHARH},{BES},{NUMBER},{TAG},{ARZD}
+                        object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD = null;
+
+                        GETTAF3(HFRST[HFRST_EOF].MOIN_HAV, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                        //SDRST.AddNew(); // مبلغ حواله
+                        N_S = max_ns;
+                        HES_K = HKOL;
+                        HES_M = HMOIN;
+                        HES_T = HTAF;
+                        HES_T2 = HTAF2;
+                        HES_T3 = HTAF3;
+                        HES_T4 = HTAF4;
+                        hes = HFRST[HFRST_EOF].MOIN_HAV;
+                        SHARH = Strings.Right("مبلغ حواله فاكتور خريد شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                        BES = HFRST[HFRST_EOF].MABL_HAV;
+                        NUMBER = HFRST[HFRST_EOF].NUMBER;
+                        TAG = 12;
+                        ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                        //SDRST.update();
+
+                        string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                        string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                        string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({N_S},{HES_K},{HES_M},{HES_T}, {HES_T2T}, {HES_T3T}, {HES_T4T},N'{hes}',N'{SHARH}',{BES},{NUMBER},{TAG},{ARZD})");
+
+                    }
+                    else
+                    {
+                        //"خطا در برگه شماره :" & HFRST.Fields("NUMBER") & " نوع :" & HFRST.Fields("tag") & "حساب معين براي مبلغ حواله مشخص نشده است"
+                        LogWriter.WriteLog("خطا در برگه شماره سند خرید :" + HFRST[HFRST_EOF].NUMBER + " نوع :" + HFRST[HFRST_EOF].TAG + "حساب معين براي مبلغ حواله مشخص نشده است");
+                    }
+                }
+
+                if (HFRST[HFRST_EOF].MABL_VAR != 0)
+                {
+                    //{N_S},{HES_K},{HES_M},{HES_T}, {HES_T2}, {HES_T3}, {HES_T4},{hes},{SHARH},{BED},{NUMBER},{TAG},{ARZD}
+                    object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD = null;
+
+                    //SDRST.AddNew(); // مبلغ واريزي شخص
+                    N_S = max_ns;
+                    HES_K = CKOL;
+                    HES_M = CMOIN;
+                    HES_T = CTAF;
+                    HES_T2 = CTAF2;
+                    HES_T3 = CTAF3;
+                    HES_T4 = CTAF4;
+                    hes = HFRST[HFRST_EOF].CUST_NO;
+                    SHARH = Strings.Right("مبلغ واريزي فاكتور خريد شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                    BED = HFRST[HFRST_EOF].MABL_VAR;
+                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                    TAG = 12;
+                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                    //SDRST.update();
+                    string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                    string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                    string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD ) VALUES ({N_S},{HES_K},{HES_M},{HES_T}, {HES_T2T}, {HES_T3T}, {HES_T4T},N'{hes}',N'{SHARH}',{BED},{NUMBER},{TAG},{ARZD})");
+
+                }
+                if (HFRST[HFRST_EOF].MABL_VAR != 0)
+                {
+                    if (!IsNull(HFRST[HFRST_EOF].MOIN_VAR))
+                    {
+                        //{N_S},{HES_K},{HES_M},{HES_T}, {HES_T2}, {HES_T3}, {HES_T4},{hes},{SHARH},{BES},{NUMBER},{TAG},{ARZD}
+                        object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD = null;
+
+                        GETTAF3(HFRST[HFRST_EOF].MOIN_VAR, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                        //SDRST.AddNew(); // مبلغ واريزي
+                        N_S = max_ns;
+                        HES_K = HKOL;
+                        HES_M = HMOIN;
+                        HES_T = HTAF;
+                        HES_T2 = HTAF2;
+                        HES_T3 = HTAF3;
+                        HES_T4 = HTAF4;
+                        hes = HFRST[HFRST_EOF].MOIN_VAR;
+                        SHARH = Strings.Right("مبلغ واريزي فاكتور خريد شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                        BES = HFRST[HFRST_EOF].MABL_VAR;
+                        NUMBER = HFRST[HFRST_EOF].NUMBER;
+                        TAG = 12;
+                        ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                        //SDRST.update();
+                        string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                        string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                        string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({N_S},{HES_K},{HES_M},{HES_T}, {HES_T2T}, {HES_T3T}, {HES_T4T},N'{hes}',N'{SHARH}',{BES},{NUMBER},{TAG},{ARZD})");
+
+                    }
+                    else
+                    {
+                        LogWriter.WriteLog("خطا در برگه شمارهسند خرید  :" + HFRST[HFRST_EOF].NUMBER + " نوع :" + HFRST[HFRST_EOF].TAG + "حساب معين براي مبلغ واریزی مشخص نشده است");
+                    }
+                }
+
+                // ----------------------
+                if (HFRST[HFRST_EOF].M_NAGHD != 0)
+                {
+                    //{N_S},{HES_K},{HES_M},{HES_T},{hes},{SHARH},{BES},{NUMBER},{TAG},{ARZD}
+                    object N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG, ARZD = null;
+
+                    //SDRST.AddNew(); // مبلغ نقدصندوق
+                    N_S = max_ns;
+                    HES_K = Baseknow.SANDOGH;
+                    HES_M = HFRST[HFRST_EOF].DEPATMAN;
+                    HES_T = HFRST[HFRST_EOF].SHIFT;
+                    hes = Baseknow.SANDOGH + "-" + HFRST[HFRST_EOF].DEPATMAN + "-" + HFRST[HFRST_EOF].SHIFT;
+                    SHARH = Strings.Right("مبلغ نقد فاكتور خريد  شماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                    BES = HFRST[HFRST_EOF].M_NAGHD;
+                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                    TAG = 12;
+                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                    //SDRST.update();
+                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL ( N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG, ARZD ) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{hes}',N'{SHARH}',{BES},{NUMBER},{TAG},{ARZD})");
+
+                }
+                //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                //Forms["GUG"].Form.Refresh();
+                //Forms["GUG"]["Text2"].Requery();
+                //Forms["GUG"].Form.Repaint();
+                if (HFRST[HFRST_EOF].TAKHFIF != 0)
+                {
+                    //{N_S},{HES_K},{HES_M},{HES_T}, {HES_T2}, {HES_T3}, {HES_T4},{hes},{SHARH},{BED},{NUMBER},{TAG},{ARZD}
+                    object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD = null;
+
+                    //SDRST.AddNew(); // مبلغ تخفيف شخص
+                    N_S = max_ns;
+                    HES_K = CKOL;
+                    HES_M = CMOIN;
+                    HES_T = CTAF;
+                    HES_T2 = CTAF2;
+                    HES_T3 = CTAF3;
+                    HES_T4 = CTAF4;
+                    hes = HFRST[HFRST_EOF].CUST_NO;
+                    SHARH = Strings.Right("مبلغ تخفيف فاكتور خريد  شماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                    BED = HFRST[HFRST_EOF].TAKHFIF;
+                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                    TAG = 12;
+                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                    //SDRST.update();
+                    string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                    string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                    string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL ( N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD) VALUES ({N_S},{HES_K},{HES_M},{HES_T}, {HES_T2T}, {HES_T3T}, {HES_T4T},N'{hes}',N'{SHARH}',{BED},{NUMBER},{TAG},{ARZD})");
+
+                }
+                //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                //Forms["GUG"].Form.Refresh();
+                //Forms["GUG"]["Text2"].Requery();
+                //Forms["GUG"].Form.Repaint();
+                if (HFRST[HFRST_EOF].TAKHFIF != 0)
+                {
+                    //{N_S},{HES_K},{HES_M},{HES_T},{hes},{SHARH},{BES},{NUMBER},{TAG},{ARZD}
+                    object N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG, ARZD = null;
+
+                    //SDRST.AddNew(); // تخفيف خريد
+                    N_S = max_ns;
+                    HES_K = Baseknow.TKHARID;
+                    HES_M = 1;
+                    HES_T = 1;
+                    hes = Baseknow.TKHARID + "-1-1";
+                    SHARH = Strings.Right("مبلغ تخفيف فاكتور خريد  شماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                    BES = HFRST[HFRST_EOF].TAKHFIF;
+                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                    TAG = 12;
+                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                    //SDRST.update();
+                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BES, NUMBER, TAG, ARZD) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{hes}',N'{SHARH}',{BES},{NUMBER},{TAG},{ARZD})");
+
+                }
+                //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                //Forms["GUG"].Form.Refresh();
+                //Forms["GUG"]["Text2"].Requery();
+                //Forms["GUG"].Form.Repaint();
+                if (HFRST[HFRST_EOF].MBAA != 0)
+                {
+                    //{N_S},{HES_K},{HES_M},{HES_T}, {HES_T2}, {HES_T3}, {HES_T4},{hes},{SHARH},{BED},{NUMBER},{TAG},{ARZD}
+                    object N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD = null;
+
+                    //SDRST.AddNew(); // مالليات بر ارزش افزوده
+                    N_S = max_ns;
+                    if (!IsNull(HFRST[HFRST_EOF].HMBAA))
+                    {
+                        GETTAF3(HFRST[HFRST_EOF].HMBAA, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                    }
+                    HES_K = HKOL;
+                    HES_M = HMOIN;
+                    HES_T = HTAF;
+                    HES_T2 = HTAF2;
+                    HES_T3 = HTAF3;
+                    HES_T4 = HTAF4;
+                    hes = HFRST[HFRST_EOF].HMBAA;
+                    SHARH = Strings.Right(Baseknow.ARSESH + "% ماليات بر ارزش افزوده فاكتور خريد شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                    BED = HFRST[HFRST_EOF].MBAA;
+                    NUMBER = HFRST[HFRST_EOF].NUMBER;
+                    TAG = 12;
+                    ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                    //SDRST.update();
+                    string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                    string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                    string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+
+                    try
+                    {
+                        dbms.DoExecuteSQL($"INSERT INTO DEED_DTL ( N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BED, NUMBER, TAG, ARZD ) VALUES ({N_S},{HES_K},{HES_M},{HES_T}, {HES_T2T}, {HES_T3T}, {HES_T4T},N'{hes}',N'{SHARH}',{BED},{NUMBER},{TAG},{ARZD})");
+                    }
+                    catch (Exception)
+                    {
+                        LogWriter.WriteLog(@$"خطا در سند خرید : 
+                                              حساب : {hes}
+                                              شرح : {SHARH}
+                                              شماره : {NUMBER}
+                                              مبلغ بدهکار : {BED}
+                                              نوع : {TAG}");
+                    }
+
+                };
+
+            });
+            //DoCmd.Close(acForm, "GUG");
+            //DoCmd.Close(acForm, "GENSANADFROOSH");
+
+            LogWriter.WriteLog("پایان بازسازی سند خرید");
+
+            return _SANAD_NUMBER;
+        }
+        public static string GETGRPKALA(int CC)
+        {
+            var rst = dbms.DoGetDataSQL<string>("SELECT     NAMES  FROM dbo.TCOD_STUFGROUP WHERE     (CODE = " + System.Convert.ToString(CC) + ")").ToList();
+            if (rst.Count > 0)
+            {
+                return System.Convert.ToString(rst.FirstOrDefault());
+            }
+            return null;
+        }
+
+        public static byte MAHDAYS(int SAL, byte mah)
+        {
+            if (mah >= 1 && mah <= 6)
+            {
+                return (byte)31;
+            }
+            else if (mah >= 7 && mah <= 11)
+            {
+                return (byte)30;
+            }
+            else if (mah == ((byte)12))
+            {
+                if (Convert.ToBoolean(KABISEH(SAL)))
+                {
+                    return (byte)30;
+                }
+                else
+                {
+                    return (byte)29;
+                }
+            }
+            return 0;
+        }
+        public static byte ROOZ(long F_DATE)
+        {
+            return (byte)(F_DATE % 100);
+        }
+        public static byte mah(long F_DATE)
+        {
+            //return System.Convert.ToByte(((F_DATE % 10000) / 100));
+            return System.Convert.ToByte(((F_DATE % 10000) / 100));
+        }
+
+        public static int SAL(long F_DATE)
+        {
+            //return System.Convert.ToInt32(Int((double)F_DATE / 10000));
+            return System.Convert.ToInt32(((double)F_DATE / 10000));
+        }
+        public static byte KABISEH(dynamic ONLYSAL)
+        {
+            byte returnValue = 0;
+            returnValue = (byte)0;
+            if (ONLYSAL >= 1375)
+            {
+                if ((ONLYSAL - 1375) % 4 == 0)
+                {
+                    return (byte)1;
+                }
+            }
+            else if (ONLYSAL <= 1370)
+            {
+                if ((70 - ONLYSAL) % 4 == 0)
+                {
+                    return (byte)1;
+                }
+            }
+            return returnValue;
+        }
+
+        public static long ADDDAY(long F_DATE, long ADD)
+        {
+            long ADDDAYRet = default;
+            byte K;
+            byte m;
+            int S;
+            byte r;
+            byte DAYS;
+            r = ROOZ(F_DATE);
+            m = mah(F_DATE);
+            S = SAL(F_DATE);
+            K = KABISEH(S);
+            DAYS = MAHDAYS(S, m);
+            if (ADD > DAYS - r)
+            {
+                ADD = ADD - (DAYS - r + 1);
+                r = 1;
+                if (m < 12)
+                {
+                    m = (byte)(m + 1);
+                }
+                else
+                {
+                    m = 1;
+                    S = S + 1;
+                }
+            }
+            else
+            {
+                r = (byte)(r + ADD);
+                ADD = 0L;
+            }
+            while (ADD > 0L)
+            {
+                K = KABISEH(S);
+                DAYS = MAHDAYS(S, m);
+                switch (ADD)
+                {
+                    case var @case when @case < DAYS:
+                        {
+                            r = (byte)(r + ADD);
+                            ADD = 0L;
+                            break;
+                        }
+                    case var case1 when DAYS <= case1 && case1 <= ((K == 0) ? 365 : 366) - 1:
+                        {
+                            ADD = ADD - DAYS;
+                            if (m < 12)
+                            {
+                                m = (byte)(m + 1);
+                            }
+                            else
+                            {
+                                S = S + 1;
+                                m = 1;
+                            }
+                            break;
+                        }
+
+                    default:
+                        {
+                            S = S + 1;
+                            ADD = Conversions.ToLong(Operators.SubtractObject(ADD, Interaction.IIf(K == 0, 365, 366)));
+                            break;
+                        }
+                }
+            }
+            ADDDAYRet = S * 10000L + m * 100 + r;
+            return ADDDAYRet;
+        }
+
+        public static double LASTAVRAGE(string CODE, long ANBAR, long dt)
+        {
+            double tempLASTAVRAGE = 0;
+            tempLASTAVRAGE = 0;
+            string test = Baseknow.OPTIONSS;
+            string test2 = Baseknow.OPTIONSS.Substring(55, 1);
+
+            if (Baseknow.OPTIONSS.Substring(55, 1) != "5")
+            {
+                tempLASTAVRAGE = GETSTANDARDPRICE_KOL(CODE, dt);
+            }
+            if (tempLASTAVRAGE == 0)
+            {
+                //var RRST = dbms.DoGetDataSQL<QRE_19>("SELECT TOP 1 PERCENT ANBAR, CODE, DATE_N, avrage, TAG, NUMBER FROM         dbo.KA_KH(800101) KA_KH  WHERE     (CODE = N'" + CODE + "') AND (ANBAR = " + ANBAR + ")AND (DATE_N <= " + dt + ") AND (TAG = 0 OR  TAG = 1 OR TAG = 7 OR TAG = 9 OR TAG = 6 ) ORDER BY DATE_N DESC, NUMBER DESC").FirstOrDefault();
+                var RRST = dbms.DoGetDataSQL<QRE_19>("SELECT ANBAR, CODE, DATE_N, avrage, TAG, NUMBER FROM         dbo.KA_KH(800101) KA_KH  WHERE     (CODE = N'" + CODE + "') AND (ANBAR = " + ANBAR + ")AND (DATE_N <= " + dt + ") AND TAG IN (0, 1, 7, 9, 6) ORDER BY DATE_N DESC, NUMBER DESC").FirstOrDefault();
+                if (!(RRST is null) && !(IsNull(RRST.avrage)))
+                {
+                    tempLASTAVRAGE = (double)RRST.avrage;
+                }
+                else
+                {
+                    var RRST2 = dbms.DoGetDataSQL<QRE_20>("SELECT TOP 1 PERCENT dbo.INVO_LST.AVRAGE2, dbo.INVO_LST.CODE, dbo.INVO_LST.ANBAR, dbo.INVO_LST.NUMBER      AS MNN FROM dbo.INVO_LST INNER JOIN  dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG WHERE (dbo.HEAD_LST.DATE_N <= " + dt + ") AND (dbo.INVO_LST.CODE = '" + CODE + "') AND (dbo.INVO_LST.ANBARF = " + ANBAR + ")  ORDER BY dbo.HEAD_LST.DATE_N DESC, dbo.INVO_LST.NUMBER DESC").FirstOrDefault();
+                    if (!(RRST2 is null) && !(IsNull(RRST2.AVRAGE2)))
+                    {
+                        tempLASTAVRAGE = (double)RRST2.AVRAGE2;
+                    }
+                    else
+                    {
+                        var RRST3 = dbms.DoGetDataSQL<double?>("SELECT FI_A FROM  dbo.STUF_FSK WHERE (CODE =  '" + CODE + "') AND (ANBAR = " + ANBAR + ")").FirstOrDefault();
+                        if (!(RRST3 is null) && !(IsNull(RRST3)))
+                        {
+                            //tempLASTAVRAGE = RRST3.Fields["FI_A"];
+                            tempLASTAVRAGE = (double)RRST3;
+                        }
+                        else
+                        {
+                            tempLASTAVRAGE = 0;
+                        }
+                    }
+                }
+            }
+
+            return tempLASTAVRAGE;
+        }
+        public static double GETSTANDARDPRICE_KOL(string CODE, long dt)
+        {
+            double tempGETSTANDARDPRICE_KOL = 0;
+            double fnum = 0;
+            fnum = GETLASTFR(CODE, dt);
+            if (fnum == 0)
+            {
+                var RST = dbms.DoGetDataSQL<QRE_18>("SELECT     TOP 100 PERCENT SUM(dbo.DTL_MANF.MABLK) AS SumOfMABLK, dbo.HEAD_MANF.IMBIBE_MANF AS SumOfIMBIBE_MANF,  dbo.HEAD_MANF.IMBIBE_SAR AS SumOfIMBIBE_SAR, dbo.HEAD_MANF.FNUMB FROM dbo.HEAD_MANF INNER JOIN  dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE     (dbo.HEAD_MANF.CODE = N'" + CODE + "') GROUP BY dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR, dbo.HEAD_MANF.FNUMB ORDER BY dbo.HEAD_MANF.FNUMB").FirstOrDefault();
+                if (!(RST is null))
+                {
+                    tempGETSTANDARDPRICE_KOL = (double)(RST.SumOfMABLK + RST.SumOfIMBIBE_MANF + RST.SumOfIMBIBE_SAR);
+                }
+                else
+                {
+                    tempGETSTANDARDPRICE_KOL = 0;
+                }
+            }
+            else
+            {
+                var RST = dbms.DoGetDataSQL<QRE_18>("SELECT     TOP 100 PERCENT SUM(dbo.DTL_MANF.MABLK) AS SumOfMABLK, dbo.HEAD_MANF.IMBIBE_MANF AS SumOfIMBIBE_MANF,  dbo.HEAD_MANF.IMBIBE_SAR AS SumOfIMBIBE_SAR, dbo.HEAD_MANF.FNUMB FROM dbo.HEAD_MANF INNER JOIN  dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE     (dbo.HEAD_MANF.CODE = N'" + CODE + "' and dbo.HEAD_MANF.FNUMB = " + fnum + ") GROUP BY dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR, dbo.HEAD_MANF.FNUMB ").FirstOrDefault();
+                if (!(RST is null))
+                {
+                    tempGETSTANDARDPRICE_KOL = (double)(RST.SumOfMABLK + RST.SumOfIMBIBE_MANF + RST.SumOfIMBIBE_SAR);
+                }
+                else
+                {
+                    tempGETSTANDARDPRICE_KOL = 0;
+                }
+            }
+            return tempGETSTANDARDPRICE_KOL;
+        }
+
+
+        public static double GETSTANDARDPRICE(string code)
+        {
+            double standardPrice = 0;
+            string query = "SELECT TOP 100 PERCENT SUM(dbo.DTL_MANF.MABLK) AS SumOfMABLK, dbo.HEAD_MANF.IMBIBE_MANF AS SumOfIMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR AS SumOfIMBIBE_SAR, dbo.HEAD_MANF.FNUMB FROM dbo.HEAD_MANF INNER JOIN dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE (dbo.HEAD_MANF.CODE = N'" + code + "') GROUP BY dbo.HEAD_MANF.IMBIBE_MANF, dbo.HEAD_MANF.IMBIBE_SAR, dbo.HEAD_MANF.FNUMB ORDER BY dbo.HEAD_MANF.FNUMB";
+            var rst = dbms.DoGetDataSQL<GENERSANAD_QRE1>(query).ToList();
+
+            if (rst.Count > 0)
+            {
+                standardPrice = Convert.ToDouble(rst.FirstOrDefault().SumOfMABLK) + Convert.ToDouble(rst.FirstOrDefault().SumOfIMBIBE_SAR) +
+                    Convert.ToDouble(rst.FirstOrDefault().SumOfIMBIBE_MANF);
+            }
+            return standardPrice;
+        }
+
+        public static long GETFIRSTPRICE(string code)
+        {
+            long firstPrice = 0;
+            var rrst = dbms.DoGetDataSQL<GETFIRSTPRICE_QRE2>("SELECT TOP 1 CODE, FI_A FROM dbo.STUF_FSK WHERE code = '" + code + "' ORDER BY FI_A DESC").ToList();
+
+            if (rrst.Count > 0)
+            {
+                if (Convert.IsDBNull(rrst.FirstOrDefault().FI_A))
+                {
+                    firstPrice = 0;
+                }
+                else
+                {
+                    firstPrice = Convert.ToInt64(rrst.FirstOrDefault().FI_A);
+                }
+            }
+            return firstPrice;
+        }
+
+
+        public static long PersianDateLong(DateTime miladiDate)
+        {
+            PersianCalendar persianCalendar = new PersianCalendar();
+            int year = persianCalendar.GetYear(miladiDate);
+            int month = persianCalendar.GetMonth(miladiDate);
+            int day = persianCalendar.GetDayOfMonth(miladiDate);
+
+            // تبدیل تاریخ به یک عدد long با فرمت yyyyMMdd
+            long persianDateLong = year * 10000 + month * 100 + day;
+
+            return persianDateLong;
+        }
+        public static int GETGRPKALAco(string CC)
+        {
+            int GETGRPKALAcoRet = default;
+            var rst = dbms.DoGetDataSQL<double?>("SELECT     radah  FROM dbo.stuf_def WHERE     (CODE = '" + CC + "')").ToList();
+            if (rst.Count > 0)
+            {
+                GETGRPKALAcoRet = (int)rst.FirstOrDefault();
+            }
+            return GETGRPKALAcoRet;
+        }
+        public static double GetArzesh(string COD)
+        {
+            double GetArzeshRet = default;
+            var rst = dbms.DoGetDataSQL<double?>("SELECT VRA FROM STUF_DEF WHERE CODE  = '" + COD + "'").ToList();
+            if (rst.Count > 0)
+            {
+                GetArzeshRet = (double)rst.FirstOrDefault();
+            }
+            else
+            {
+                GetArzeshRet = (double)Baseknow.ARSESH;
+            }
+            return GetArzeshRet;
+        }
+
+        //AUTO_BAZ_FUNCTIONS ---------------------------------------------------------------------------------------------------------
+        public static (double?, bool) GENSANADKHAZ(object fnum, long TNUM, bool InternalCalling = true, IDbTransaction externalTransaction = null)
+        {
+            double? SANAD_NUMBER = null;
+            bool IsSuccessfully = true;
+
+            bool useExternal = externalTransaction != null;
+            CL_ConcurrencyManager cnnManager = null;
+
+            if (useExternal)
+            {
+                // استفاده از سازنده‌ای که اتصال externalTransaction را دریافت می‌کند
+                cnnManager = new CL_ConcurrencyManager(externalTransaction.Connection);
+                cnnManager.BeginTransaction(externalTransaction);
+            }
+            else
+            {
+                if (!useExternal)
+                {
+                    cnnManager = new CL_ConcurrencyManager(CL_CCNNMANAGER.CONNECTION_STR, true);
+                    cnnManager.BeginTransaction();  // (در نسخه فعلی این خط ممکن است کامنت باشد)
+
+                    //البته این کار نیازی نیست چون توی خط بالا بهش اعلام کردیم که بایدحالت کانکشن لحظه ای کار کنه
+                    cnnManager.SetTransctionStating(true); //برای اینکه بتونه Paralle کار کنه و خطای Multiple DataRedaer نده 
+                }
+            }
+
+            double progress = 0;
+            MainWindow auto_run = null;
+            if (InternalCalling)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    auto_run = (MainWindow)Application.Current.Windows
+                        .OfType<Window>()
+                        .FirstOrDefault(window => window.GetType().Name == "MainWindow");
+                }));
+            }
+
+            var HFRST = cnnManager.SqlQuery<PGET_HED>($"SELECT * FROM dbo.PGET_HED WHERE (ID BETWEEN {fnum} AND {TNUM}) ORDER BY ID").ToList();
+
+            LogWriter.WriteLog($"شروع باز سازي سند های خزانه از سند شماره :{fnum} تا سند شماره :{TNUM}");
+
+            //for (int EOFi = 0; EOFi < HFRST.Count; EOFi++)
+            Parallel.For(0, HFRST.Count, EOFi =>
+            {
+
+                string sharhd;
+                string SHRH;
+                double max_ns;
+
+                if (InternalCalling && auto_run != null)
+                {
+                    auto_run.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progress++;
+                        auto_run.PRGR_C3.Value = (progress / (double)HFRST.Count) * 100.0;
+                        auto_run.UpdateOverallProgressBar();
+                    }));
+                }
+
+                sharhd = "خزانه داري شماره " + HFRST[EOFi].ID + " مورخ " + Strings.Format(HFRST[EOFi].DATE, "####/##/##");
+
+                if (IsNull(HFRST[EOFi]?.N_S))
+                {
+                    max_ns = Createsanad(Convert.ToInt64(HFRST[EOFi].DATE), sharhd, 0, 5, Convert.ToByte(true), HFRST[EOFi].USER_NAME);
+                    HFRST[EOFi].N_S = max_ns;
+                    string _where_HFRST = $" WHERE (ID BETWEEN {fnum} AND {TNUM})";
+                    cnnManager.ExecuteSqlCommand($"UPDATE dbo.PGET_HED SET N_S = {HFRST[EOFi].N_S} {_where_HFRST}");
+
+                    SANAD_NUMBER = max_ns;
+                }
+                else
+                {
+                    max_ns = (double)HFRST[EOFi].N_S;
+                    SHRH = "خزانه داري شماره " + HFRST[EOFi].ID + " مورخ " + Strings.Format(HFRST[EOFi].DATE, "####/##/##");
+                    var SHRST_0 = cnnManager.SqlQuery<DEED_HED>($"SELECT * FROM DEED_HED WHERE NO_S = 5 AND N_S = {HFRST[EOFi].N_S}").ToList();
+                    string _where_HFRST = $" WHERE (ID BETWEEN {fnum} AND {TNUM})";
+                    if (SHRST_0.Count == 0)
+                    {
+                        HFRST[EOFi].N_S = Createsanad(Convert.ToInt64(HFRST[EOFi].DATE), sharhd, 0, 5, Convert.ToByte(true), HFRST[EOFi].USER_NAME);
+                        cnnManager.ExecuteSqlCommand($"UPDATE dbo.PGET_HED SET N_S = {HFRST[EOFi].N_S} {_where_HFRST}");
+
+                        SANAD_NUMBER = HFRST[EOFi].N_S;
+                    }
+                    else
+                    {
+                        SANAD_NUMBER = HFRST[EOFi].N_S;
+
+                        string _where_SHRST_0 = $" NO_S = 5 AND N_S = {HFRST[EOFi].N_S} ";
+                        var header = SHRST_0.FirstOrDefault();
+                        if (header != null)
+                        {
+                            header.DATE_S = (long)HFRST[EOFi].DATE;
+                            header.SHARH_S = SHRH;
+                            header.USER_NAME = HFRST[EOFi].USER_NAME;
+                            header.OKF = true;
+                            cnnManager.ExecuteSqlCommand(
+                                @$"UPDATE dbo.DEED_HED SET 
+                                DATE_S = {HFRST[EOFi].DATE},
+                                SHARH_S = N'{SHRH}',
+                                USER_NAME = N'{HFRST[EOFi].USER_NAME}',
+                                OKF = 1
+                              WHERE {_where_SHRST_0}");
+                        }
+                    }
+                }
+
+                if (!IsNull(HFRST[EOFi].N_S))
+                {
+                    cnnManager.ExecuteSqlCommand("DELETE FROM dbo.DEED_DTL WHERE (N_S = " + HFRST[EOFi].N_S + ")");
+                }
+
+                cnnManager.ExecuteSqlCommand(
+                    "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BED, N_SERI, BANK, N_S, HES, ARZD) " +
+                    "SELECT THES_K, THES_M, THES_T, THES_T2, THES_T3, THES_T4, SHARH, MABL, N_SERI, BANK, " + HFRST[EOFi].N_S + " AS Expr1, THES, ARZD " +
+                    "FROM dbo.PGET_LST WHERE (ID = " + HFRST[EOFi].ID + ")");
+                cnnManager.ExecuteSqlCommand(
+                    "INSERT INTO dbo.DEED_DTL (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, SHARH, BES, N_SERI, BANK, N_S, HES, ARZD) " +
+                    "SELECT FHES_K, FHES_M, FHES_T, FHES_T2, FHES_T3, FHES_T4, SHARH, MABL, N_SERI, BANK, " + HFRST[EOFi].N_S + " AS Expr1, FHES, ARZD " +
+                    "FROM dbo.PGET_LST WHERE (ID = " + HFRST[EOFi].ID + ")");
+            });
+
+            if (!useExternal && !cnnManager.OnceStartCloseQuery)
+            {
+                cnnManager.Commit();
+            }
+            //};
+
+            return (SANAD_NUMBER, IsSuccessfully);
+        }
+
+
+        public static (double?, bool) SANADENTEGHAL(long NUMBER, long NUMBER2, bool InternalCalling = true)
+        {
+            double? SANAD_NUMBER = null;
+            bool IsSuccessfully = true;
+
+            double progress = 0;
+            MainWindow auto_run = null;
+            if (InternalCalling)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    auto_run = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
+                }));
+            }
+
+            List<DEED_HED_CSHARP>? SHRST = new List<DEED_HED_CSHARP>();
+            var HEDRST = dbms.DoGetDataSQL<QRE_BAZ_0>("SELECT HEAD_LST.NUMBER, HEAD_LST.TAG, HEAD_LST.ANBAR, HEAD_LST.NUMBER1, HEAD_LST.DATE_N, HEAD_LST.TAH, HEAD_LST.MAS, HEAD_LST.VAS, HEAD_LST.N_S, HEAD_LST.CUST_NO, HEAD_LST.MOLAH, HEAD_LST.M_NAGHD, HEAD_LST.MABL_VAR, HEAD_LST.MOIN_VAR, HEAD_LST.MABL_HAV, HEAD_LST.MOIN_HAV, HEAD_LST.MABL_HAZ, HEAD_LST.MOIN_HAZ, HEAD_LST.TAKHFIF, HEAD_LST.MOIN_KHF, HEAD_LST.ANBARF, HEAD_LST.FNUMCO, HEAD_LST.DEPATMAN, HEAD_LST.SHIFT, HEAD_LST.CUST_KIND, HEAD_LST.USER_NAME FROM HEAD_LST WHERE ((HEAD_LST.NUMBER >= " + NUMBER + " AND HEAD_LST.NUMBER <=" + NUMBER2 + "  and HEAD_LST.tag = 5 ) )").ToList();
+
+            LogWriter.WriteLog("سند انتقال شروع بازسازی از سند شماره : " + NUMBER + " تا سند شماره :" + NUMBER2 + " " + DateTime.Now);
+            Parallel.For(0, HEDRST.Count, rw =>
+            {
+                string DBStr;
+                double MABL_CHK, JAMF, JAMCH;
+                double? max_ns = null;
+                string shart = "";
+                if (InternalCalling)
+                {
+                    auto_run.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progress++;
+                        auto_run.PRGR_C4.Value = progress / ((double)HEDRST.Count) * 100.0;
+                        auto_run.UpdateOverallProgressBar();
+                    }));
+                }
+
+                var arst = dbms.DoGetDataSQL<TCOD_ANBAR>("SELECT  CODE, KIND FROM dbo.TCOD_ANBAR WHERE (CODE = " + HEDRST[rw].ANBAR + ")").ToList();
+                if (arst.Count > 0)
+                {
+                    if (arst.FirstOrDefault().KIND == 1 || arst.FirstOrDefault().KIND == 2)
+                    {
+                        if (!(Baseknow.SANAT == true || IsNull(Baseknow.SANAT)))
+                        {
+                            dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE (((DEED_DTL.NUMBER)= " + HEDRST[rw].NUMBER + ") AND ((DEED_DTL.TAG)= 5))");
+
+                            goto MV;
+                        }
+                    }
+                }
+
+                if (HEDRST[rw]?.N_S == null)
+                {
+                    var SHARH_S = Strings.Left(" حواله انتقالي مواد شماره " + HEDRST[rw].NUMBER + "-" + HEDRST[rw].FNUMCO + " از انبار " + HEDRST[rw].ANBAR + " به " + HEDRST[rw].ANBARF + " مورخ " + Strings.Format(HEDRST[rw].DATE_N, "####/##/##"), 100);
+                    max_ns = Createsanad(Convert.ToInt64(HEDRST[rw].DATE_N), SHARH_S, 0, 10, Convert.ToByte(true), HEDRST[rw].USER_NAME);
+                    //آیا در اکسس این فلیتر روی منبع اصلی میماند چون باید از اینجا به بعد با دیتای فیلتر شده حرکت کند , که این در حلقه به مشکل میخورد
+                    shart = " NO_S = 10 AND N_S = " + max_ns;
+
+                    SANAD_NUMBER = max_ns;
+                }
+                else
+                {
+                    shart = " NO_S = 10 AND N_S = " + HEDRST[rw].N_S;
+
+                    SANAD_NUMBER = HEDRST[rw].N_S;
+                }
+
+                SHRST = dbms.DoGetDataSQL<DEED_HED_CSHARP>($"SELECT * FROM DEED_HED WHERE {shart} ").ToList();
+                if (SHRST.Count == 0 || SHRST is null)
+                {
+                }
+                else
+                {
+                    max_ns = (double)SHRST.FirstOrDefault().N_S;
+                    SHRST.FirstOrDefault().DATE_S = HEDRST[rw].DATE_N;
+                    SHRST.FirstOrDefault().SHARH_S = Strings.Left(" حواله انتقالي مواد شماره " + HEDRST[rw].NUMBER + "-" + HEDRST[rw].FNUMCO + " از انبار " + HEDRST[rw].ANBAR + " به " + HEDRST[rw].ANBARF + " مورخ " + Strings.Format(HEDRST[rw].DATE_N, "####/##/##"), 100);
+                    SHRST.FirstOrDefault().GHATEI = false;
+                    SHRST.FirstOrDefault().NO_S = 10;
+                    SHRST.FirstOrDefault().OKF = true;
+                    SHRST.FirstOrDefault().USER_NAME = HEDRST[rw].USER_NAME;
+                    //SHRST.update();
+
+                    dbms.DoExecuteSQL($@"UPDATE dbo.DEED_HED SET
+                                             DATE_S = {HEDRST[rw].DATE_N} ,
+                                             SHARH_S = N'{SHRST.FirstOrDefault().SHARH_S}' ,
+                                             GHATEI = 0,
+                                             NO_S = 10,
+                                             OKF = 1,
+                                             USER_NAME = N'{HEDRST[rw].USER_NAME}'
+                                             WHERE {shart} ");
+                }
+
+
+                if (IsNull(HEDRST[rw].N_S) || HEDRST[rw].N_S != max_ns)
+                {
+                    HEDRST[rw].N_S = max_ns;
+
+                }
+                dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE (((DEED_DTL.NUMBER)= " + HEDRST[rw].NUMBER + ") AND ((DEED_DTL.TAG)= 5))");
+
+                var JST = dbms.DoGetDataSQL<QRE_BAZ_1>("SELECT INVO_LST.NUMBER, INVO_LST.TAG, STUF_DEF.NAME, INVO_LST.ANBAR, INVO_LST.CODE, INVO_LST.MEGH, INVO_LST.MEGHk, INVO_LST.MEGH_MAR, INVO_LST.MABL, INVO_LST.MABL_K, INVO_LST.ANBARF FROM STUF_DEF INNER JOIN INVO_LST ON (STUF_DEF.CODE = INVO_LST.CODE) AND (STUF_DEF.CODE = INVO_LST.CODE) WHERE (((INVO_LST.NUMBER)=" + HEDRST[rw].NUMBER + ") AND ((INVO_LST.TAG)=5))").ToList();
+
+                for (int EOF = 0; EOF < JST.Count; EOF++) // while (!JST.EOF())
+                {
+
+                    if (JST[EOF].MABL_K != 0)
+                    {
+                        bool valdefacc = true;
+                        if (InternalCalling)
+                        {
+                            auto_run.Dispatcher.Invoke(new Action(() =>
+                            {
+                                valdefacc = auto_run.defacc.IsChecked is true;
+                            }));
+                        }
+
+                        if (valdefacc is true)
+                        {
+                            CREATHES(Baseknow.MOGODIA, JST[EOF].ANBAR, Convert.ToInt64(JST[EOF].CODE), JST[EOF].NAME/*(2)*/);
+                        }
+
+                        var _hes_ = Baseknow.MOGODIA + "-" + JST[EOF].ANBAR + "-" + JST[EOF].CODE;
+                        var _Sharh_ = Strings.Left("حواله انتقالي شماره " + HEDRST[rw].NUMBER + "-" + HEDRST[rw].FNUMCO + " مورخ " + Strings.Format(HEDRST[rw].DATE_N, "####/##/##") + " به مقدار" + JST[EOF].MEGHk, 255);
+
+                        dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,  HES_K, HES_M, HES_T, HES, SHARH,  BES, NUMBER, TAG)
+                                                                VALUES({max_ns},
+                                                                {Baseknow.MOGODIA},
+                                                                {JST[EOF].ANBAR},
+                                                                {JST[EOF].CODE},
+                                                                N'{_hes_}' ,
+                                                                N'{_Sharh_}',
+                                                                {Math.Round((double)JST[EOF].MABL_K)},
+                                                                {HEDRST[rw].NUMBER} ,
+                                                                {5} )");
+                        //SDRST.update();
+                    }
+                    if (JST[EOF].MABL_K != 0)
+                    {
+                        bool valdefacc = false;
+                        if (InternalCalling)
+                        {
+                            auto_run.Dispatcher.Invoke(new Action(() =>
+                            {
+                                valdefacc = auto_run.defacc.IsChecked is true;
+                            }));
+                        }
+                        if (valdefacc is true)
+                        {
+                            try
+                            {
+                                CREATHES(Baseknow.MOGODIA, JST[EOF].ANBARF, Convert.ToInt64(JST[EOF].CODE), JST[EOF].NAME/*(2)*/);
+                            }
+                            catch (Exception)
+                            {
+                                LogWriter.WriteLog("خطا در برگه شماره سند انتقال  :" + HEDRST[rw].NUMBER + " نوع :" + HEDRST[rw].TAG + "اخطار مهم ...! حساب متناظر كالا در انبار وجود ندارد  و من قادر به ايجاد آن نيستم زيرا يك حساب با همين نام ولي با كد ديگر تعريف شده است لطفا با سرپرست سيستم تماس بگيريد.");
+                            }
+                        }
+                        var hes_ = Baseknow.MOGODIA + "-" + JST[EOF].ANBARF + "-" + JST[EOF].CODE;
+                        var Sharh_ = Strings.Left("حواله انتقالي شماره " + HEDRST[rw].NUMBER + "-" + HEDRST[rw].FNUMCO + " مورخ " + Strings.Format(HEDRST[rw].DATE_N, "####/##/##") + " به مقدار" + JST[EOF].MEGHk + "  بابت " + JST[EOF].NAME, 255);
+                        dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,  HES_K, HES_M, HES_T, HES, SHARH,  BED, NUMBER, TAG)
+                                                                VALUES({max_ns},
+                                                                {Baseknow.MOGODIA},
+                                                                {JST[EOF].ANBARF},
+                                                                {JST[EOF].CODE},
+                                                                N'{hes_}' ,
+                                                                N'{Sharh_}',
+                                                                {Math.Round((double)JST[EOF].MABL_K)},
+                                                                {HEDRST[rw].NUMBER} ,
+                                                                {5} )");
+                    }
+                }
+            MV:
+                rw++; //HEDRST.MoveNext();
+            });
+            LogWriter.WriteLog($"پایان سند انتقال :{DateTime.Now}");
+            //a.WRITELINE((object)DateTime.Now);
+            //DoCmd.Close(acForm, "GUG");
+
+            return (SANAD_NUMBER, IsSuccessfully);
+        }
+        public static (double?, bool) SANADKHORUGMAVAD(long NUMBER, long NUMBER2, bool InternalCalling = true)
+        {
+            double? SANAD_NUMBER = null;
+            bool IsSuccessfully = true;
+
+
+            double progress = 0;
+            MainWindow auto_run = null;
+            if (InternalCalling)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    //Paint
+                    auto_run = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
+                }));
+            }
+
+            bool valdefacc = true;
+            if (InternalCalling)
+            {
+                auto_run.Dispatcher.Invoke(new Action(() =>
+                           {
+                               valdefacc = Convert.ToBoolean(auto_run.defacc.IsChecked);
+                           }));
+            }
+
+            var HEDRST = dbms.DoGetDataSQL<QRE_BAZ_0>("SELECT HEAD_LST.NUMBER, HEAD_LST.TAG, HEAD_LST.ANBAR, HEAD_LST.NUMBER1, HEAD_LST.DATE_N, HEAD_LST.TAH, HEAD_LST.MAS, HEAD_LST.VAS, HEAD_LST.N_S, HEAD_LST.CUST_NO, HEAD_LST.MOLAH, HEAD_LST.M_NAGHD, HEAD_LST.MABL_VAR, HEAD_LST.MOIN_VAR, HEAD_LST.MABL_HAV, HEAD_LST.MOIN_HAV, HEAD_LST.MABL_HAZ, HEAD_LST.MOIN_HAZ, HEAD_LST.TAKHFIF, HEAD_LST.MOIN_KHF, HEAD_LST.ANBARF, HEAD_LST.FNUMCO, HEAD_LST.DEPATMAN, HEAD_LST.SHIFT, HEAD_LST.CUST_KIND, HEAD_LST.USER_NAME FROM HEAD_LST WHERE ((HEAD_LST.NUMBER >= " + NUMBER + " AND HEAD_LST.NUMBER <=" + NUMBER2 + "  and HEAD_LST.tag = 10 ) )").ToList();
+            LogWriter.WriteLog("SANADKHORUGMAVAD: شروع بازسازی از برگ شماره : " + NUMBER + " تا سند شماره :" + NUMBER2 + " " + DateTime.Now);
+            Parallel.For(0, HEDRST.Count, R => // while (!HEDRST.EOF())
+            {
+                int RDD;
+                double MABL_CHK, JAMF, JAMCH;
+                double? max_ns = null;
+                string shart = "";
+                object a = default, fs;
+                List<DEED_HED> SHRST = new List<DEED_HED>();
+
+
+                if (HEDRST[R]?.N_S == null || HEDRST[R]?.N_S == 0)
+                {
+                    var SHARH_S_ = Strings.Left(" حواله خروج مواد از انبار شماره " + HEDRST[R].NUMBER + "-" + HEDRST[R].FNUMCO + " مورخ " + Strings.Format(HEDRST[R].DATE_N, "####/##/##"), 100);
+                    max_ns = Createsanad(Convert.ToInt64(HEDRST[R].DATE_N), SHARH_S_, 0, 8, Convert.ToByte(true), HEDRST[R].USER_NAME);
+                    shart = "NO_S = 8 AND N_S = " + max_ns.ToString();
+
+                    SANAD_NUMBER = max_ns;
+                }
+                else
+                {
+                    shart = "NO_S = 8 AND N_S = " + HEDRST[R].N_S.ToString();
+
+                    SANAD_NUMBER = HEDRST[R].N_S;
+                }
+
+                SHRST = dbms.DoGetDataSQL<DEED_HED>($"SELECT * FROM DEED_HED WHERE {shart} ").ToList();
+                if (SHRST.Count == 0)
+                {
+                }
+                else
+                {
+                    max_ns = SHRST.FirstOrDefault().N_S;
+                    var SHARH_S_ = Strings.Left(" حواله خروج مواد از انبار شماره " + HEDRST[R].NUMBER + "-" + HEDRST[R].FNUMCO + " مورخ " + Strings.Format(HEDRST[R].DATE_N, "####/##/##"), 100);
+                    dbms.DoExecuteSQL($@"UPDATE dbo.DEED_HED SET
+                                             DATE_S = {HEDRST[R].DATE_N} ,
+                                             SHARH_S = N'{SHARH_S_}' ,
+                                             GHATEI = 0,
+                                             NO_S = 8,
+                                             OKF = 1,
+                                             USER_NAME = N'{HEDRST[R].USER_NAME}'
+                                             WHERE {shart} ");
+                }
+                if (IsNull(HEDRST[R].N_S) || HEDRST[R].N_S != max_ns)
+                {
+                    HEDRST[R].N_S = max_ns;
+                    dbms.DoExecuteSQL("UPDATE HEAD_LST SET N_S = " + HEDRST[R].N_S + " WHERE ((HEAD_LST.NUMBER = " + NUMBER + " and HEAD_LST.tag = 10 ) )");
+                    //HEDRST.update();
+                }
+                dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE (((DEED_DTL.NUMBER)= " + HEDRST[R].NUMBER + ") AND ((DEED_DTL.TAG)= 10))");
+                if (!(bool)Baseknow.FINALS)
+                {
+                    if (HEDRST[R].NUMBER == 177)
+                    {
+                        int i = 0;
+                    }
+                    var JST = dbms.DoGetDataSQL<QRE_BAZ_2>("SELECT dbo.INVO_LST.MABL_K, dbo.INVO_LST.MEGHk, dbo.INVO_LST.CODE, dbo.INVO_LST.ANBAR, dbo.HEAD_MANF.CODE AS COM, ISNULL(dbo.HEAD_MANF.NAMES, dbo.STUF_DEF.NAME) AS NAM, dbo.HEAD_MANF.NAMES, dbo.HEAD_MANF.N_KOL, dbo.HEAD_MANF.NUMBER, dbo.HEAD_MANF.TNUMBER, dbo.DTL_MANF.SMABl AS SMAB FROM  dbo.STUF_DEF RIGHT OUTER JOIN dbo.HEAD_MANF INNER JOIN dbo.INVO_LST ON dbo.HEAD_MANF.FNUMB = dbo.INVO_LST.N_RASID ON dbo.STUF_DEF.CODE = dbo.HEAD_MANF.CODE INNER JOIN dbo.DTL_MANF ON dbo.DTL_MANF.CODE = dbo.INVO_LST.CODE AND dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB AND dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE     (dbo.INVO_LST.NUMBER = " + HEDRST[R].NUMBER + ") AND (dbo.INVO_LST.TAG = 10)").ToList();
+                    for (int EOF = 0; EOF < JST.Count; EOF++) // while (!JST.EOF())
+                    {
+                        //DoEvents();
+                        if (JST[EOF].MABL_K != 0)
+                        {
+                            var _SHARH = Strings.Left("حواله خروج شماره " + HEDRST[R].NUMBER + "-" + HEDRST[R].FNUMCO + " مورخ " + Strings.Format(HEDRST[R].DATE_N, "####/##/##") + " به مقدار" + JST[EOF].MEGHk + " جهت " + Strings.Trim(JST[EOF].NAM), 255);
+                            var _hes = Baseknow.MOGODIA + "-" + JST[EOF].ANBAR + "-" + Convert.ToDouble(JST[EOF].CODE);
+                            if (valdefacc)
+                            {
+                                CREATHES(Baseknow.MOGODIA, JST[EOF].ANBAR, Convert.ToInt64(JST[EOF].CODE), GETKALANAME(Convert.ToInt64(JST[EOF].CODE)));//JST.Fileds(4)
+                            }
+                            dbms.DoExecuteSQL(@$"INSERT INTO dbo.DEED_DTL(N_S,      HES_K,          HES_M,              HES_T,          SHARH,        hes,              BES,                                NUMBER,        TAG)
+			                                                 VALUES ({max_ns},{Baseknow.MOGODIA} ,{JST[EOF].ANBAR} ,{JST[EOF].CODE}, N'{_SHARH}', N'{_hes}',	{Math.Round((double)JST[EOF].MABL_K)},	{HEDRST[R].NUMBER},	10)");
+
+                            RDD = GETGRPKALAco(JST[EOF].CODE);
+                            if (valdefacc)
+                            {
+                                CREATHES(Baseknow.PHAZ_TOL, Convert.ToDouble(Interaction.IIf(RDD == 2 || RDD == 3, 2, 1)), Convert.ToInt64(JST[EOF].CODE), GETKALANAME(Convert.ToInt64(JST[EOF].CODE)));//JST.Fileds(4)
+                            }
+                            var _HES_M = Interaction.IIf(RDD == 2 || RDD == 3, 2, 1);
+                            var SHARH_ = Strings.Left("حواله خروج شماره " + HEDRST[R].NUMBER + "-" + HEDRST[R].FNUMCO + " مورخ " + Strings.Format(HEDRST[R].DATE_N, "####/##/##") + " به مقدار" + JST[EOF].MEGHk + " جهت " + Strings.Trim(JST[EOF].NAM), 255);
+                            var hes_ = Baseknow.PHAZ_TOL + "-" + Interaction.IIf(RDD == 2 || RDD == 3, 2, 1) + "-" + Convert.ToDouble(JST[EOF].CODE);
+                            try
+                            {
+                                dbms.DoExecuteSQL(@$"INSERT INTO dbo.DEED_DTL(N_S,              HES_K,          HES_M,      HES_T,          SHARH,       hes,               BES,                                      NUMBER,TAG)
+			                                                        VALUES ({max_ns}	,{Baseknow.PHAZ_TOL}  ,{_HES_M}	   ,{JST[EOF].CODE}, N'{SHARH_}', N'{hes_}',	{Math.Round((double)JST[EOF].MABL_K)},	{HEDRST[R].NUMBER},10)");
+                            }
+                            catch
+                            {
+                                //#Check Matter So Much
+                            }
+
+                            var HES_K = "";
+                            var HES_M = "";
+                            var HES_T = "";
+                            var hes = "";
+
+                            if (IsNull(JST[EOF].COM))
+                            {
+                                HES_K = JST[EOF].N_KOL.ToString();
+                                HES_M = JST[EOF].NUMBER.ToString();
+                                HES_T = JST[EOF].TNUMBER.ToString();
+                                hes = JST[EOF].N_KOL + "-" + JST[EOF].NUMBER + "-" + JST[EOF].TNUMBER;
+                            }
+                            else
+                            {
+                                HES_K = Baseknow.HAZ_TOL.ToString();
+                                HES_M = JST[EOF].COM;
+                                HES_T = JST[EOF].CODE;
+                                hes = Baseknow.HAZ_TOL + "-" + Convert.ToDouble(JST[EOF].COM) + "-" + Convert.ToDouble(JST[EOF].CODE);
+                            }
+                            SHARH_ = Strings.Left("حواله خروج شماره " + HEDRST[R].NUMBER + "-" + HEDRST[R].FNUMCO + " مورخ " + Strings.Format(HEDRST[R].DATE_N, "####/##/##") + " به مقدار" + JST[EOF].MEGHk + " جهت " + Strings.Trim(JST[EOF].NAM), 255);
+                            var BED_ = Math.Round((double)JST[EOF].MABL_K);
+                            if (valdefacc)
+                            {
+                                CREATHES(Convert.ToDouble(HES_K), Convert.ToDouble(HES_M), Convert.ToDouble(HES_T), GETKALANAME(Convert.ToInt64(JST[EOF].CODE)));//JST.Fileds(4)
+                            }
+
+
+                            dbms.DoExecuteSQL(@$"INSERT INTO dbo.DEED_DTL(N_S,        HES_K,        HES_M,  HES_T,  SHARH,          hes,BED,NUMBER,TAG)
+			                                                    VALUES ({max_ns}	,{HES_K}	,{HES_M}	,{HES_T}, N'{SHARH_}', N'{hes}',{BED_}, {HEDRST[R].NUMBER},	10)");
+                        }
+                        //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                        //Forms["GUG"].Form.Repaint();
+                        JAMCH = Math.Round((double)JST[EOF].MABL_K);
+                        if (JST[EOF].SMAB * JST[EOF].MEGHk != 0)
+                        {
+                            //SDRST.AddNew(); // كنترل كالاي در جريان ساخت
+                            //SDRST.FieldsN_S = max_ns;
+                            //SDRST.Fields("HES_K") = Baseknow.CONKAL;
+                            //SDRST.Fields("HES_M") = JST[EOF].COM;
+                            //SDRST.Fields("HES_T") = JST[EOF].CODE;
+                            var SHARH_ = Strings.Left("حواله خروج شماره " + HEDRST[R].NUMBER + "-" + HEDRST[R].FNUMCO + " مورخ " + Strings.Format(HEDRST[R].DATE_N, "####/##/##") + " به مقدار" + JST[EOF].MEGHk + " جهت " + Strings.Trim(JST[EOF].NAM), 255);
+                            var hes_ = Baseknow.CONKAL + "-" + Convert.ToDouble(JST[EOF].COM) + "-" + Convert.ToDouble(JST[EOF].CODE);
+                            var BED_ = Math.Round((double)(JST[EOF].SMAB * JST[EOF].MEGHk));
+                            //SDRST.FieldsNUMBER = HEDRST[R].NUMBER;
+                            //SDRST.Fields("TAG") = 10;
+                            //SDRST.update();
+                            dbms.DoExecuteSQL(@$"INSERT INTO dbo.DEED_DTL(N_S,      HES_K,            HES_M,              HES_T,              SHARH,      hes,        BED,               NUMBER,               TAG)
+			                                                    VALUES ({max_ns} ,{Baseknow.CONKAL} , {JST[EOF].COM}	,{JST[EOF].CODE}, N'{SHARH_}',   N'{hes_}',	  {BED_},	    {HEDRST[R].NUMBER},	        10)");
+                        }
+                        //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                        //Forms["GUG"].Form.Repaint();
+                        if (JAMCH - JST[EOF].SMAB * JST[EOF].MEGHk != 0)
+                        {
+                            //SDRST.AddNew(); // عملكرد
+                            //SDRST.FieldsN_S = max_ns;
+                            //SDRST.Fields("HES_K") = Baseknow.AMALKARD;
+                            //SDRST.Fields("HES_M") = JST[EOF].COM;
+                            //SDRST.Fields("HES_T") = JST[EOF].CODE;
+                            var _SHARH_ = Strings.Left("حواله خروج شماره " + HEDRST[R].NUMBER + "-" + HEDRST[R].FNUMCO + " مورخ " + Strings.Format(HEDRST[R].DATE_N, "####/##/##") + " به مقدار" + JST[EOF].MEGHk + " جهت " + Strings.Trim(JST[EOF].NAM), 255);
+                            var _hes = Baseknow.AMALKARD + "-" + Convert.ToDouble(JST[EOF].COM) + "-" + Convert.ToDouble(JST[EOF].CODE);
+
+                            string B = "";
+                            double BDBS_VAL = 0;
+
+                            if (JAMCH > JST[EOF].SMAB * JST[EOF].MEGHk)
+                            {
+                                BDBS_VAL = Math.Round((double)(JAMCH - JST[EOF].SMAB * JST[EOF].MEGHk));
+                                B = "BED";
+                            }
+                            else
+                            {
+                                BDBS_VAL = Math.Round((double)(JST[EOF].SMAB * JST[EOF].MEGHk - JAMCH));
+                                B = "BES";
+                            }
+
+                            if (valdefacc)
+                            {
+                                CREATHES(Baseknow.AMALKARD, Convert.ToDouble(JST[EOF].COM), Convert.ToInt64(JST[EOF].CODE), GETKALANAME(Convert.ToInt64(JST[EOF].CODE)));//JST.Fileds(4)
+                            }
+                            dbms.DoExecuteSQL(@$"INSERT INTO dbo.DEED_DTL(N_S,      HES_K,               HES_M,              HES_T,              SHARH,      hes,        {B},                 NUMBER,                    TAG)
+
+                                                                VALUES({max_ns} ,{Baseknow.AMALKARD} , {JST[EOF].COM}	,{JST[EOF].CODE}, N'{_SHARH_}',   N'{_hes}',	  {BDBS_VAL},	  {HEDRST[R].NUMBER},	        10)");
+                        }
+                        //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                        //Forms["GUG"].Form.Repaint();
+                        //JST.MoveNext();
+                    };
+                }
+                else
+                {
+                    var JST = dbms.DoGetDataSQL<QRE_BAZ_3>("SELECT dbo.INVO_LST.MABL_K, dbo.INVO_LST.MEGHk, dbo.INVO_LST.ANBAR, dbo.INVO_LST.CODE, MAX(dbo.DTL_MANF.SMABL) AS SMAB FROM   dbo.INVO_LST INNER JOIN  dbo.DTL_MANF ON dbo.DTL_MANF.CODE = dbo.INVO_LST.CODE WHERE (dbo.INVO_LST.NUMBER = " + HEDRST[R].NUMBER + ") And (dbo.INVO_LST.TAG = 10) GROUP BY dbo.INVO_LST.MABL_K, dbo.INVO_LST.MEGHk, dbo.INVO_LST.ANBAR, dbo.INVO_LST.CODE").ToList();
+                    for (int T = 0; T < JST.Count; T++) //while (!JST.EOF())
+                    {
+                        if (JST[T].MABL_K != 0)
+                        {
+                            var SHARH_ = Strings.Left("حواله خروج شماره " + HEDRST[R].NUMBER + "-" + HEDRST[R].FNUMCO + " مورخ " + Strings.Format(HEDRST[R].DATE_N, "####/##/##") + " به مقدار" + JST[T].MEGHk, 255);
+                            var hes = Baseknow.MOGODIA + "-" + JST[T].ANBAR + "-" + Convert.ToDouble(JST[T].CODE);
+                            var BES_ = Math.Round((double)JST[T].MABL_K);
+                            dbms.DoExecuteSQL(@$"INSERT INTO dbo.DEED_DTL(N_S       ,HES_K,             HES_M,          HES_T,          SHARH,          hes,    BES,    NUMBER,         TAG)
+			                                                    VALUES ({max_ns},   {Baseknow.MOGODIA}	,{JST[T].ANBAR}	,{JST[T].CODE}, N'{SHARH_}', N'{hes}',{BES_},{HEDRST[R].NUMBER}, 10)");
+                        }
+                        if (JST[T].MABL_K != 0)
+                        {
+                            var SHARH_ = Strings.Left("حواله خروج شماره " + HEDRST[R].NUMBER + "-" + HEDRST[R].FNUMCO + " مورخ " + Strings.Format(HEDRST[R].DATE_N, "####/##/##") + " به مقدار" + JST[T].MEGHk, 255);
+                            var hes_ = Baseknow.PHAZ_TOL + "-1-" + Convert.ToDouble(JST[T].CODE);
+                            var BES_ = Math.Round((double)JST[T].MABL_K);
+                            dbms.DoExecuteSQL(@$"INSERT INTO dbo.DEED_DTL(N_S           ,HES_K,       HES_M,          HES_T,          SHARH,      hes,     BES,     NUMBER,         TAG)
+			                                                    VALUES ({max_ns}, {Baseknow.PHAZ_TOL} , 1	,       {JST[T].CODE}, N'{SHARH_}', N'{hes_}',{BES_},{HEDRST[R].NUMBER}, 10)");
+                        }
+                        if (JST[T].MABL_K != 0)
+                        {
+                            bool valdefacc = false;
+                            auto_run.Dispatcher.Invoke(new Action(() =>
+                            {
+                                valdefacc = auto_run.defacc.IsChecked is true;
+                            }));
+                            if (valdefacc is true && !ISHESAB(Baseknow.HAZ_TOL, 99999, Convert.ToInt64(JST[T].CODE)))
+                            {
+                                CREATHES(Baseknow.HAZ_TOL, 99999, Convert.ToInt64(JST[T].CODE), GETKALANAME(Convert.ToDouble(JST[T].CODE)));
+                            }
+                            //SDRST.AddNew(); // هزينه تولييا سير هزينه هاي توليد
+                            //SDRST.FieldsN_S = max_ns;
+                            //SDRST.Fields("HES_K") = Baseknow.HAZ_TOL;
+                            //SDRST.Fields("HES_M") = 99999;
+                            //SDRST.Fields("HES_T") = JST[T].CODE;
+                            var hes_ = Baseknow.HAZ_TOL + "-99999-" + Convert.ToDouble(JST[T].CODE);
+                            var SHARH_ = Strings.Left("حواله خروج شماره " + HEDRST[R].NUMBER + "-" + HEDRST[R].FNUMCO + " مورخ " + Strings.Format(HEDRST[R].DATE_N, "####/##/##") + " به مقدار" + JST[T].MEGHk, 255);
+                            var BED_ = Math.Round((double)JST[T].MABL_K);
+                            //SDRST.FieldsNUMBER = HEDRST[R].NUMBER;
+                            //SDRST.Fields("TAG") = 10;
+                            //SDRST.update();
+                            dbms.DoExecuteSQL(@$"INSERT INTO dbo.DEED_DTL(N_S           ,HES_K,       HES_M,          HES_T,          SHARH,      hes,     BED,     NUMBER,         TAG)
+			                                                    VALUES ({max_ns}, {Baseknow.HAZ_TOL} , 99999	, {JST[T].CODE},  N'{SHARH_}', N'{hes_}',{BED_},{HEDRST[R].NUMBER}, 10)");
+                        }
+                        //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                        //Forms["GUG"].Form.Repaint();
+                        JAMCH = Math.Round((double)JST[T].MABL_K);
+                        if (JST[T].SMAB * JST[T].MEGHk != 0)
+                        {
+                            bool valdefacc = false;
+                            auto_run.Dispatcher.Invoke(new Action(() =>
+                            {
+                                valdefacc = auto_run.defacc.IsChecked is true;
+                            }));
+
+                            CREATHES(Baseknow.CONKAL, 99999, Convert.ToInt64(JST[T].CODE), GETKALANAME(Convert.ToDouble(JST[T].CODE)));
+
+
+                            var SHARH_ = Strings.Left("حواله خروج شماره " + HEDRST[R].NUMBER + "-" + HEDRST[R].FNUMCO + " مورخ " + Strings.Format(HEDRST[R].DATE_N, "####/##/##") + " به مقدار" + JST[T].MEGHk, 255);
+                            var hes_ = Baseknow.CONKAL + "-99999-" + Convert.ToDouble(JST[T].CODE);
+                            var BED_ = Math.Round((double)(JST[T].SMAB * JST[T].MEGHk));
+
+                            dbms.DoExecuteSQL(@$"INSERT INTO dbo.DEED_DTL(N_S           ,HES_K,       HES_M,          HES_T,          SHARH,      hes,     BED,     NUMBER,         TAG)
+			                                                    VALUES ({max_ns}, {Baseknow.CONKAL} , 99999	,       {JST[T].CODE}, N'{SHARH_}', N'{hes_}',{BED_},{HEDRST[R].NUMBER}, 10)");
+                        }
+                        //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                        //Forms["GUG"].Form.Repaint();
+                        if (JAMCH - JST[T].SMAB * JST[T].MEGHk != 0)
+                        {
+                            bool valdefacc = false;
+                            auto_run.Dispatcher.Invoke(new Action(() =>
+                            {
+                                valdefacc = auto_run.defacc.IsChecked is true;
+                            }));
+                            if (valdefacc is true)
+                            {
+                                //Information.Err().Clear();
+                                try
+                                {
+                                    CREATHES(Baseknow.AMALKARD, 99999, Convert.ToInt64(JST[T].CODE), GETKALANAME(Convert.ToDouble(JST[T].CODE)));
+
+                                }
+                                catch (Exception)
+                                {
+                                    LogWriter.WriteLog("خطا در برگه شماره خروج مواد :" + HEDRST[R].NUMBER + " نوع :" + HEDRST[R].TAG + "اخطار مهم ...! حساب " + Baseknow.AMALKARD + "-99999-" + JST[T].CODE + "و من قادر به ايجاد آن نيستم زيرا يك حساب با همين نام ولي با كد ديگر تعريف شده است لطفا با سرپرست سيستم تماس بگيريد.");
+                                }
+                            }
+                            //SDRST.AddNew(); // عملكرد
+                            //SDRST.FieldsN_S = max_ns;
+                            //SDRST.Fields("HES_K") = Baseknow.AMALKARD;
+                            //SDRST.Fields("HES_M") = 99999;
+                            //SDRST.Fields("HES_T") = JST[T].CODE;
+                            var hes_ = Baseknow.AMALKARD + "-99999-" + Convert.ToDouble(JST[T].CODE);
+                            var SHARH_ = Strings.Left("حواله خروج شماره " + HEDRST[R].NUMBER + "-" + HEDRST[R].FNUMCO + " مورخ " + Strings.Format(HEDRST[R].DATE_N, "####/##/##") + " به مقدار" + JST[T].MEGHk, 255);
+                            string B = "";
+                            double B_VAL = 0;
+                            if (JAMCH > JST[T].SMAB * JST[T].MEGHk)
+                            {
+                                B_VAL = Math.Round((double)(JAMCH - JST[T].SMAB * JST[T].MEGHk));
+                                B = "BED";
+                            }
+                            else
+                            {
+                                B_VAL = Math.Round((double)(JST[T].SMAB * JST[T].MEGHk - JAMCH));
+                                B = "BES";
+                            }
+                            //SDRST.FieldsNUMBER = HEDRST[R].NUMBER;
+                            //SDRST.Fields("TAG") = 10;
+                            //SDRST.update();
+                            dbms.DoExecuteSQL(@$"INSERT INTO dbo.DEED_DTL(N_S           ,HES_K,        HES_M,          HES_T,          SHARH,      hes,     {B},     NUMBER,         TAG)
+			                                                    VALUES ({max_ns}, {Baseknow.AMALKARD} , 99999	,    {JST[T].CODE}, N'{SHARH_}', N'{hes_}',{B_VAL},{HEDRST[R].NUMBER}, 10)");
+                        }
+
+                    }
+                };
+                var JST2 = dbms.DoGetDataSQL<QRE_BAZ_4>("SELECT  SUM(BED) AS SBED, SUM(BES) AS SBES FROM dbo.DEED_DTL WHERE (N_S = " + max_ns + ") ").ToList();
+                if (JST2.Count > 0)
+                {
+                    if (JST2.FirstOrDefault().SBED is null || JST2.FirstOrDefault().SBES is null)
+                    {
+                    }
+                    else
+                    {
+                        if (Math.Abs((double)(JST2.FirstOrDefault().SBED - JST2.FirstOrDefault().SBES)) <= 40 && Math.Abs((double)(JST2.FirstOrDefault().SBED - JST2.FirstOrDefault().SBES)) != 0)
+                        {
+                            bool valdefacc = true;
+                            if (InternalCalling)
+                            {
+                                auto_run.Dispatcher.Invoke(new Action(() =>
+                                {
+                                    valdefacc = auto_run.defacc.IsChecked is true;
+                                }));
+                            }
+
+                            if (valdefacc is true)
+                            {
+                                try
+                                {
+                                    CREATHES(Baseknow.AMALKARD, 99999, 99999, "كسر دهم ريال");
+                                }
+                                catch (Exception)
+                                {
+
+                                    LogWriter.WriteLog("خطا در برگه شماره خروج مواد :" + HEDRST[R].NUMBER + " نوع :" + HEDRST[R].TAG + "اخطار مهم ...! حساب " + Baseknow.AMALKARD + "-99999-99999" + "و من قادر به ايجاد آن نيستم زيرا يك حساب با همين نام ولي با كد ديگر تعريف شده است لطفا با سرپرست سيستم تماس بگيريد.");
+                                }
+                            }
+                            string B = "";
+                            double B_VAL = 0;
+                            var hes_ = Baseknow.AMALKARD + "-99999-99999";
+                            var SHARH_ = Strings.Left("حواله خروج شماره " + HEDRST[R].NUMBER + "-" + HEDRST[R].FNUMCO + " مورخ " + Strings.Format(HEDRST[R].DATE_N, "####/##/##"), 255);
+                            if (JST2.FirstOrDefault().SBED - JST2.FirstOrDefault().SBES > 0)
+                            {
+                                B_VAL = (double)(JST2.FirstOrDefault().SBED - JST2.FirstOrDefault().SBES);
+                                B = "BES";
+                            }
+                            else
+                            {
+                                B_VAL = Math.Abs((double)(JST2.FirstOrDefault().SBED - JST2.FirstOrDefault().SBES));
+                                B = "BED";
+                            }
+
+                            dbms.DoExecuteSQL(@$"INSERT INTO dbo.DEED_DTL(N_S           ,HES_K,             HES_M,          HES_T,          SHARH, hes,      {B},     NUMBER,         TAG)
+			                                                    VALUES ({max_ns}, {Baseknow.AMALKARD} , 99999	,       99999, N'{SHARH_}', N'{hes_}',{B_VAL},{HEDRST[R].NUMBER}, 10)");
+                        }
+                    }
+                };
+                if (InternalCalling)
+                {
+                    auto_run.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progress++;
+                        auto_run.PRGR_C5.Value = progress / ((double)HEDRST.Count) * 100.0;  // Update the progress bar
+                        auto_run.UpdateOverallProgressBar();
+                        //                    auto_run.LBL_C5.Content = $"{progress:F2}%";
+                    }));
+                }
+            });
+
+            return (SANAD_NUMBER, IsSuccessfully);
+        }
+
+        public static void SANADKHORUGSAYER(long NUMBER, long NUMBER2)
+        {
+            double progress = 0;
+            MainWindow auto_run = null;
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                //Paint
+                auto_run = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
+            }));
+
+            var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM DEED_HED").ToList();
+            var HEDRST = dbms.DoGetDataSQL<QRE_BAZ_0>("SELECT HEAD_LST.NUMBER, HEAD_LST.TAG, HEAD_LST.ANBAR, HEAD_LST.NUMBER1, HEAD_LST.DATE_N, HEAD_LST.TAH, HEAD_LST.MAS, HEAD_LST.VAS, HEAD_LST.N_S, HEAD_LST.CUST_NO, HEAD_LST.MOLAH, HEAD_LST.M_NAGHD, HEAD_LST.MABL_VAR, HEAD_LST.MOIN_VAR, HEAD_LST.MABL_HAV, HEAD_LST.MOIN_HAV, HEAD_LST.MABL_HAZ, HEAD_LST.MOIN_HAZ, HEAD_LST.TAKHFIF, HEAD_LST.MOIN_KHF, HEAD_LST.ANBARF, HEAD_LST.FNUMCO, HEAD_LST.DEPATMAN, HEAD_LST.SHIFT, HEAD_LST.CUST_KIND, HEAD_LST.USER_NAME FROM HEAD_LST WHERE ((HEAD_LST.NUMBER >= " + NUMBER + " AND HEAD_LST.NUMBER <=" + NUMBER2 + "  and HEAD_LST.tag = 11 ) )").ToList();
+
+
+
+            LogWriter.WriteLog("SANADKHORUGSAYER : \n شروع باز سازي از سند شماره : " + NUMBER + " تا سند شماره :" + NUMBER2 + " " + DateTime.Now);
+
+            //for (int EOF = 0; EOF < HEDRST.Count; EOF++)
+            Parallel.For(0, HEDRST.Count, EOF =>
+            {
+                string DBStr;
+                double max_ns, MABL_CHK, JAMF, JAMCH;
+                string shart;
+                double? CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null, fs, a = null;
+
+
+                auto_run.Dispatcher.Invoke(new Action(() =>
+                {
+                    progress++;
+                    auto_run.PRGR_C6.Value = progress / ((double)HEDRST.Count) * 100.0; // Update the progress bar
+                    auto_run.UpdateOverallProgressBar();
+
+                }));
+                string SHSH = "";
+                SHSH = Strings.Left(" حواله خروج ساير مواد از انبار شماره " + HEDRST[EOF].NUMBER + "-" + HEDRST[EOF].FNUMCO.ToString() + "مورخ " + Strings.Format(HEDRST[EOF].DATE_N, "####/##/##"), 100);
+                max_ns = CRSANADGEN(SHSH, 11, 12, (double)HEDRST[EOF].NUMBER, HEDRST[EOF].N_S, (long)HEDRST[EOF].DATE_N, HEDRST[EOF].USER_NAME);
+                dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE (((DEED_DTL.NUMBER)= " + HEDRST[EOF].NUMBER + ") AND ((DEED_DTL.TAG)= 11))");
+                var JST = dbms.DoGetDataSQL<QRE_BAZ_5>("SELECT     SANAD_NO, N_RASID, MABL_K, MEGHk, CODE, ANBAR FROM dbo.INVO_LST WHERE     (NUMBER = " + HEDRST[EOF].NUMBER + ") AND (TAG = 11)").ToList();
+                for (int q = 0; q < JST.Count; q++) // while (!JST.EOF())
+                {
+                    if (JST[q]?.N_RASID == null)
+                    {
+                        continue; //Skip this
+                    }
+                    //DoEvents();
+                    if (Information.IsNumeric(JST[q].N_RASID))
+                    {
+                        JAMCH = 0d;
+                        //if ((string?)JST[q].N_RASID == "81")
+                        //{
+                        //    int i = 81;
+                        //}
+                        var JSTT = dbms.DoGetDataSQL<QRE_BAZ_6>("SELECT     FNUMB, NUMBER, TNUMBER, N_KOL, NAMES FROM dbo.HEAD_MANF WHERE     (FNUMB = " + JST[q].N_RASID + ")").ToList();
+                        if ((JST[q]?.MABL_K != 0) && (JSTT.Count > 0))
+                        {
+                            if ((!IsNull(JSTT.FirstOrDefault().N_KOL)) && (!IsNull(JSTT.FirstOrDefault().NUMBER)) && (!IsNull(JSTT.FirstOrDefault().TNUMBER)))
+                            {
+                                var _hes = JSTT.FirstOrDefault().N_KOL + "-" + JSTT.FirstOrDefault().NUMBER + "-" + JSTT.FirstOrDefault().TNUMBER;
+                                var _BED = Math.Round((double)JST[q].MABL_K);
+                                var _SHARH = Strings.Left("حواله خروج ساير شماره " + HEDRST[EOF].NUMBER + "-" + HEDRST[EOF].FNUMCO + " مورخ " + Strings.Format(HEDRST[EOF].DATE_N, "####/##/##") + " به مقدار" + JST[q].MEGHk + " جهت " + Strings.Trim(JSTT.FirstOrDefault().NAMES), 255);
+                                dbms.DoExecuteSQL($@"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, hes, BED, SHARH,NUMBER,TAG)
+                                                         VALUES ({max_ns},{JSTT.FirstOrDefault().N_KOL},{JSTT.FirstOrDefault().NUMBER},{JSTT.FirstOrDefault().TNUMBER},N'{_hes}',{_BED},N'{_SHARH}',{HEDRST[EOF].NUMBER},11)");
+                                JAMCH = (double)JST[q].MABL_K;
+                                var hes_ = Baseknow.MOGODIA + "-" + JST[q].ANBAR + "-" + Convert.ToDouble(JST[q].CODE);
+                                var SHARH_ = Strings.Left("حواله خروج  ساير  مواد شماره " + HEDRST[EOF].NUMBER + "-" + HEDRST[EOF].FNUMCO + " مورخ " + Strings.Format(HEDRST[EOF].DATE_N, "####/##/##") + " به مقدار" + JST[q].MEGHk, 255);
+                                var BES_ = Math.Round((double)JST[q].MABL_K);
+                                string SANAD_NO_VAL = (JST[q].SANAD_NO is null) ? "NULL" : JST[q].SANAD_NO.ToString();
+                                dbms.DoExecuteSQL($@"INSERT INTO DEED_DTL(N_S,      HES_K,            HES_M,            HES_T,   hes,     BES,     SHARH,      NUMBER,             MHAZ_NO ,      TAG)
+                                                         VALUES ({max_ns},{Baseknow.MOGODIA},{JST[q].ANBAR},{JST[q].CODE},N'{hes_}',{BES_},N'{SHARH_}',{HEDRST[EOF].NUMBER}, {SANAD_NO_VAL} ,11)");
+                            }
+                        };
+                    }
+                    else
+                    {
+                        if (JST[q]?.N_RASID != null && !string.IsNullOrEmpty(JST[q]?.N_RASID))
+                        {
+                            GETTAF3(JST[q].N_RASID, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+
+                            if (CTAF == null)
+                            {
+
+                            }
+
+                            if (JST[q]?.MABL_K != 0 && CTAF != null) //حساب ها درست است و نال نیست
+                            {
+                                try
+                                {
+                                    var BED__ = Math.Round((double)JST[q].MABL_K);
+                                    var SHARH__ = Strings.Left("حواله خروج ساير شماره " + HEDRST[EOF].NUMBER + "-" + HEDRST[EOF].FNUMCO + " مورخ " + Strings.Format(HEDRST[EOF].DATE_N, "####/##/##") + " به مقدار" + JST[q].MEGHk + " جهت " + Strings.Trim(GETTAFNAME(JST[q].N_RASID)), 255);
+                                    string CTAF2T = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
+                                    string CTAF3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
+                                    string CTAF4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+
+                                    var query = $"SELECT COUNT(1) FROM TDETA_HES WHERE N_KOL = {CKOL} AND NUMBER = {CMOIN} AND TNUMBER = {CTAF}";
+                                    var count = dbms.DoGetDataSQL<int>(query).FirstOrDefault();
+                                    if (count > 0) //حساب معادل آن در حسابهای کل وجود دارد
+                                    {
+                                        dbms.DoExecuteSQL($@"INSERT INTO DEED_DTL(N_S, HES_K, HES_M,  HES_T, HES_T2 , HES_T3,HES_T4,        hes,           BED,      SHARH,      NUMBER,          TAG)
+                                                         VALUES ({max_ns},{CKOL},{CMOIN},{CTAF},{CTAF2T} ,{CTAF3T},{CTAF4T}, N'{JST[q].N_RASID}',{BED__},N'{SHARH__}',{HEDRST[EOF].NUMBER},11)");
+
+
+                                        JAMCH = (double)JST[q].MABL_K;
+                                        var __hes = Baseknow.MOGODIA + "-" + JST[q].ANBAR + "-" + Convert.ToDouble(JST[q].CODE);
+                                        var __SHARH = Strings.Left("حواله خروج  ساير  مواد شماره " + HEDRST[EOF].NUMBER + "-" + HEDRST[EOF].FNUMCO + " مورخ " + Strings.Format(HEDRST[EOF].DATE_N, "####/##/##") + " به مقدار" + JST[q].MEGHk, 255);
+                                        var __BES = Math.Round((double)JST[q].MABL_K);
+                                        string SANAD_NO_VAL = (JST[q].SANAD_NO is null) ? "NULL" : JST[q].SANAD_NO.ToString();
+                                        dbms.DoExecuteSQL($@"INSERT INTO DEED_DTL(N_S,      HES_K,            HES_M,            HES_T,   hes,     BES,     SHARH,      NUMBER,       MHAZ_NO      , TAG)
+                                                         VALUES ({max_ns},{Baseknow.MOGODIA},{JST[q].ANBAR},{JST[q].CODE},N'{__hes}',{__BES},N'{__SHARH}',{HEDRST[EOF].NUMBER}, {SANAD_NO_VAL} ,11)");
+                                    }
+                                    else
+                                    {
+                                        var _HESAB_ = $"{CKOL}-{CMOIN}-{CTAF}";
+                                        string[] ctafs = { CTAF2T, CTAF3T, CTAF4T };
+                                        string result = string.Join("-", ctafs.Where(s => !string.IsNullOrEmpty(s)));
+                                        LogWriter.WriteLog($"[SANADKHORUGSAYER] : (RASID : {JST[q]?.N_RASID}) => حساب : {_HESAB_}{(!string.IsNullOrEmpty(result) ? $"-{result}" : "")}  " + DateTime.Now);
+                                    }
+                                }
+                                catch (SqlException ex)
+                                {
+                                    if (ex.Number == 547)  // 547 is the error number for foreign key violations in SQL Server
+                                    {
+                                        LogWriter.WriteLog($"[SANADKHORUGSAYER]: (RASID : {JST[q]?.N_RASID}) Foreign Key violation: {ex.Message}");
+                                    }
+                                    else
+                                    {
+                                        LogWriter.WriteLog($"[SANADKHORUGSAYER]: (RASID : {JST[q]?.N_RASID}) SQL Error: {ex.Message}");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+                //};
+            });
+
+        }
+
+        private static double CRSANADGEN(String? SHSH, int TG, int NOE_S, double NUMBER, double? N_S, long DATE_N, string? USER_NAME)
+        {
+            double? max_ns;
+            if ((bool)Baseknow.SNDKH) // سند روزانه است
+            {
+                List<QRE10> SARST = null;
+                if (!IsNull(N_S)) // فاکتور سند دارد
+                {
+                    SARST = dbms.DoGetDataSQL<QRE10>($"SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = {NOE_S} and n_s = {N_S}").ToList();
+                    if (SARST.Count > 0)  // اگرسند  فاکتورهست
+                    {
+                        if (SARST.Select(x => x.DATE_S).FirstOrDefault() == DATE_N) // تاريخ سند و فاکتوريکي است
+                        {
+                            max_ns = N_S;
+                        }
+                        else
+                        {
+                        SEJ:
+                            SARST = dbms.DoGetDataSQL<QRE10>($"SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = {NOE_S} and DATE_S = {DATE_N}").ToList();
+                            if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                            {
+                                max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
+                            }
+                            else
+                            {
+                                max_ns = Createsanad(DATE_N, SHSH, 0, NOE_S, -1, USER_NAME);
+
+                                N_S = max_ns;
+                                dbms.DoExecuteSQL($"UPDATE HEAD_LST set n_s = {max_ns} WHERE     (NUMBER = {NUMBER} AND (TAG = {TG}))");
+
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // goto SEJ;
+                        SARST = dbms.DoGetDataSQL<QRE10>($"SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = {NOE_S} and DATE_S = {DATE_N}").ToList();
+                        if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                        {
+                            max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
+                        }
+                        else
+                        {
+                            max_ns = Createsanad((long)DATE_N, SHSH, 0, NOE_S, -1, USER_NAME);
+
+                            N_S = max_ns;
+                            dbms.DoExecuteSQL($"UPDATE HEAD_LST set n_s = {max_ns} WHERE     (NUMBER = {NUMBER} AND (TAG = {TG}))");
+
+                        }
+                    } // چک کن اگه نيست صادر کن
+                }
+                else
+                {
+                    // goto SEJ;
+                    SARST = dbms.DoGetDataSQL<QRE10>($"SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = {NOE_S} and DATE_S = {DATE_N}").ToList();
+                    if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                    {
+                        max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
+                    }
+                    else
+                    {
+                        max_ns = Createsanad((long)DATE_N, SHSH, 0, NOE_S, -1, USER_NAME);
+
+                        N_S = max_ns;
+                        dbms.DoExecuteSQL($"UPDATE HEAD_LST set n_s = {max_ns} WHERE     (NUMBER = {NUMBER} AND (TAG = {TG}))");
+
+                    }
+                } // چک کن اگه نيست صادر کن
+            }
+            else if (!IsNull(N_S)) // تک سندي
+                                   // فاکتور سند دارد
+            {
+                var SARST = dbms.DoGetDataSQL<QRE11>($"SELECT    n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = {NOE_S} and N_s = {N_S}").ToList();
+                if (SARST.Count > 0)   // اگرسند فاکتورهست
+                {
+                    if (SARST.Select(x => x.DATE_S).FirstOrDefault() != DATE_N) // تاريخ سند و فاکتوريکي است
+                    {
+                        dbms.DoExecuteSQL($"UPDATE DEED_HED SET DATE_S = {DATE_N},SHARH_S = '{SHSH}',GHATEI = 0,NO_S = {NOE_S},OKF=-1,USER_NAME ='{USER_NAME}' WHERE N_S ={N_S}");
+                    }
+                    max_ns = N_S;
+                }
+                else
+                {
+                    max_ns = Createsanad(DATE_N, SHSH, 0, NOE_S, -1, USER_NAME);
+                    N_S = max_ns;
+                    dbms.DoExecuteSQL($"UPDATE HEAD_LST set n_s = {max_ns} WHERE     (NUMBER = {NUMBER} AND (TAG = {TG}))");
+
+                }
+            }
+            else
+            {
+                max_ns = Createsanad(DATE_N, SHSH, 0, NOE_S, -1, USER_NAME);
+                N_S = max_ns;
+                dbms.DoExecuteSQL($"UPDATE HEAD_LST set n_s = {max_ns} WHERE     (NUMBER = {NUMBER} AND (TAG = {TG}))");
+
+            }
+            if (IsNull(N_S) || N_S != max_ns)
+            {
+                N_S = max_ns;
+                dbms.DoExecuteSQL($"UPDATE HEAD_LST set n_s = {max_ns} WHERE     (NUMBER = {NUMBER} AND (TAG = {TG}))");
+            }
+
+            return (double)max_ns;
+        }
+
+        public static (double?, bool) SANADVORUDSAKHT(long NUMBER, long NUMBER2, bool InternalCalling = true)
+        {
+            double? SANAD_NUMBER = null;
+            bool IsSuccessfully = true;
+
+            double progress = 0;
+            MainWindow auto_run = null;
+            if (InternalCalling)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    //Paint
+                    auto_run = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
+                }));
+            }
+            // On Error Resume Next
+
+            //List<DEED_HED> SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM DEED_HED").ToList();
+            List<DEED_HED> SHRST = new List<DEED_HED>();
+
+            var HEDRST = dbms.DoGetDataSQL<QRE_BAZ_0>("SELECT HEAD_LST.NUMBER, HEAD_LST.TAG, HEAD_LST.ANBAR, HEAD_LST.NUMBER1, HEAD_LST.DATE_N, HEAD_LST.TAH, HEAD_LST.MAS, HEAD_LST.VAS, HEAD_LST.N_S, HEAD_LST.CUST_NO, HEAD_LST.MOLAH, HEAD_LST.M_NAGHD, HEAD_LST.MABL_VAR, HEAD_LST.MOIN_VAR, HEAD_LST.MABL_HAV, HEAD_LST.MOIN_HAV, HEAD_LST.MABL_HAZ, HEAD_LST.MOIN_HAZ, HEAD_LST.TAKHFIF, HEAD_LST.MOIN_KHF, HEAD_LST.ANBARF, HEAD_LST.FNUMCO, HEAD_LST.DEPATMAN, HEAD_LST.SHIFT, HEAD_LST.CUST_KIND, HEAD_LST.USER_NAME FROM HEAD_LST WHERE ((HEAD_LST.NUMBER >= " + NUMBER + " AND HEAD_LST.NUMBER <=" + NUMBER2 + "  and HEAD_LST.tag = 9 ) )").ToList();
+            //Forms["GUG"]["SNUM"] = HEDRST.Count;
+
+            LogWriter.WriteLog("ورود ساخته شده تولید شروع باز سازي از سند شماره : " + NUMBER + " تا سند شماره :" + NUMBER2 + DateTime.Now);
+
+            Parallel.For(0, HEDRST.Count, ROW =>
+            {
+                double max_ns, MABL_CHK, JAMF, JAMCH;
+                string? shart = null;
+                if (InternalCalling)
+                {
+                    auto_run.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progress++; // Calculate the progress percentage
+                        auto_run.PRGR_C7.Value = progress / ((double)HEDRST.Count) * 100.0; // Update the progress bar
+                        auto_run.UpdateOverallProgressBar();
+                    }));
+                }
+
+                if (Baseknow.SANAT == true || IsNull(Baseknow.SANAT))
+                {
+                    if (HEDRST[ROW]?.N_S == null)
+                    {
+                        var _SHARH_S = Strings.Left(" برگه ورود كالا به انبار شماره " + HEDRST[ROW].NUMBER + "-" + HEDRST[ROW].FNUMCO + "مورخ " + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 100);
+                        max_ns = Createsanad(Convert.ToInt64(HEDRST[ROW].DATE_N), _SHARH_S, 0, 9, Convert.ToByte(true), HEDRST[ROW].USER_NAME);
+                        shart = "NO_S = 9 AND N_S =" + max_ns;
+                    }
+                    else
+                    {
+                        shart = "NO_S = 9 AND N_S =" + HEDRST[ROW].N_S;
+                    }
+
+                    SHRST = dbms.DoGetDataSQL<DEED_HED>($"SELECT * FROM DEED_HED WHERE {shart} ").ToList();
+                    if (SHRST.Count == 0)
+                    {
+                        var _SHARH_S = Strings.Left(" برگه ورود كالا به انبار شماره " + HEDRST[ROW].NUMBER + "-" + HEDRST[ROW].FNUMCO + "مورخ " + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 100);
+                        max_ns = Createsanad(Convert.ToInt64(HEDRST[ROW].DATE_N), _SHARH_S, 0, 9, Convert.ToByte(true), HEDRST[ROW].USER_NAME);
+                    }
+                    else
+                    {
+                        max_ns = SHRST.FirstOrDefault().N_S;
+                    }
+                    if (IsNull(HEDRST[ROW].N_S) || HEDRST[ROW].N_S != max_ns)
+                    {
+                        HEDRST[ROW].N_S = max_ns;
+                    }
+
+                    SANAD_NUMBER = max_ns;
+
+
+                    //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                    //Forms["GUG"].Form.Repaint();
+                    dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE (((DEED_DTL.NUMBER)= " + HEDRST[ROW].NUMBER + ") AND ((DEED_DTL.TAG)= 9))");
+                    var CHRST_0 = dbms.DoGetDataSQL<QRE_BAZ_9>("SELECT     dbo.INVO_LST.NUMBER, dbo.INVO_LST.TAG, dbo.INVO_LST.ANBAR, dbo.INVO_LST.CODE, SUM(dbo.INVO_LST.MEGH) AS SumOfMEGH, SUM(dbo.INVO_LST.MEGHk) AS SumOfMEGHk, SUM(dbo.INVO_LST.MEGH_MAR) AS SumOfMEGH_MAR,SUM(dbo.INVO_LST.MABL) AS SumOfMABL, SUM(dbo.INVO_LST.MABL_K) AS SumOfMABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF,dbo.INVO_LST.VAHED_K , dbo.STUF_DEF.NAME FROM dbo.STUF_DEF INNER JOIN  dbo.INVO_LST ON dbo.STUF_DEF.CODE = dbo.INVO_LST.CODE AND dbo.STUF_DEF.CODE = dbo.INVO_LST.CODE GROUP BY dbo.INVO_LST.NUMBER, dbo.INVO_LST.TAG, dbo.INVO_LST.ANBAR, dbo.INVO_LST.CODE, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K , dbo.STUF_DEF.NAME " + " HAVING (dbo.INVO_LST.NUMBER = " + HEDRST[ROW].NUMBER + ") AND (dbo.INVO_LST.TAG = 9)").ToList();
+                    //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                    //Forms["GUG"].Form.Repaint();
+                    if (Strings.Mid(Baseknow.OPTIONSS, 56, 1) != "5")
+                    {
+                        for (int EOF = 0; EOF < CHRST_0.Count; EOF++) //while (!CHRST.EOF())
+                        {
+                            //DoEvents();
+                            JAMCH = 0d;
+                            var JST0 = dbms.DoGetDataSQL<QRE_BAZ_10>("SELECT DTL_MANF.CODE, DTL_MANF.MABLK, STUF_DEF.NAME, INVO_LST.TAG, INVO_LST.NUMBER, Sum(INVO_LST.MEGHk) AS SumOfMEGHk, INVO_LST.CODE AS COM, [DTL_MANF].[MEGHk]+[PERT] AS MEGHM, INVO_LST.ANBAR  FROM STUF_DEF INNER JOIN ((INVO_LST INNER JOIN HEAD_MANF ON INVO_LST.CODE = HEAD_MANF.CODE) INNER JOIN DTL_MANF ON (HEAD_MANF.FNUMB = DTL_MANF.FNUMB) AND (HEAD_MANF.FNUMB = DTL_MANF.FNUMB)) ON STUF_DEF.CODE = DTL_MANF.CODE GROUP BY DTL_MANF.CODE, DTL_MANF.MABLK, STUF_DEF.NAME, INVO_LST.TAG, INVO_LST.NUMBER, INVO_LST.CODE, [DTL_MANF].[MEGHk]+[PERT], INVO_LST.ANBAR HAVING (((INVO_LST.TAG)=9) AND ((INVO_LST.NUMBER)=" + HEDRST[ROW].NUMBER + ") AND ((INVO_LST.CODE)='" + CHRST_0[EOF].CODE + "') AND ((INVO_LST.ANBAR)=" + CHRST_0[EOF].ANBAR + "))").ToList();
+                            for (int ii = 0; ii < JST0.Count; ii++) // while (!JST.EOF())
+                            {
+                                if (JST0[ii].MABLK * CHRST_0[EOF].SumOfMEGHk != 0)
+                                {
+                                    if (Generaly.defacc)
+                                    {
+                                        try
+                                        {
+                                            CREATHES(Baseknow.CONKAL, Convert.ToDouble(JST0[ii].COM), Convert.ToInt64(JST0[ii].CODE), GETKALANAME(Convert.ToDouble(JST0[ii].CODE)));
+                                        }
+                                        catch (Exception)
+                                        {
+                                            LogWriter.WriteLog("خطا در برگه شماره ورود ساخته شده تولید  :" + HEDRST[ROW].NUMBER + " نوع :" + HEDRST[ROW].TAG + "اخطار مهم ...! حساب متناظر كالا در كنترل كالاي در جريان ساخت وجود ندارد  و من قادر به ايجاد آن نيستم زيرا يك حساب با همين نام ولي با كد ديگر تعريف شده است لطفا با سرپرست سيستم تماس بگيريد.");
+                                        }
+                                    }
+
+                                    var _hes = Baseknow.CONKAL + "-" + Convert.ToDouble(JST0[ii].COM) + "-" + Convert.ToDouble(JST0[ii].CODE);
+                                    var _SHARH = Strings.Left("برگه ورود شماره " + HEDRST[ROW].NUMBER + "-" + HEDRST[ROW].FNUMCO + " مورخ " + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##") + " به مقدار" + JST0[ii].MEGHM * CHRST_0[EOF].SumOfMEGHk + " جهت " + Strings.Trim(CHRST_0[EOF].NAME), 255);
+                                    var _BES = Math.Round((double)(JST0[ii].MABLK * CHRST_0[EOF].SumOfMEGHk));
+                                    JAMCH = JAMCH + Math.Round((double)(JST0[ii].MABLK * CHRST_0[EOF].SumOfMEGHk));
+
+                                    dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K,             HES_M,          HES_T,     hes,      SHARH,  BES,         NUMBER,      TAG)
+                                                             VALUES ({max_ns}, {Baseknow.CONKAL}, {JST0[ii].COM},{JST0[ii].CODE},N'{_hes}',N'{_SHARH}',{_BES},{HEDRST[ROW].NUMBER} ,9)");
+
+                                }
+
+                            }
+                            var JST = dbms.DoGetDataSQL<QRE_BAZ_11>("SELECT STUF_DEF.NAME, INVO_LST.TAG, INVO_LST.NUMBER, INVO_LST.MEGHk, HEAD_MANF.IMBIBE_MANF, HEAD_MANF.IMBIBE_SAR, INVO_LST.CODE FROM STUF_DEF INNER JOIN (INVO_LST INNER JOIN HEAD_MANF ON INVO_LST.CODE = HEAD_MANF.CODE) ON STUF_DEF.CODE = INVO_LST.CODE WHERE (((INVO_LST.TAG)=9) AND ((INVO_LST.NUMBER)=" + HEDRST[ROW].NUMBER + ") AND ((INVO_LST.CODE)='" + CHRST_0[EOF].CODE + "'))").ToList();
+                            if (JST.Count > 0)
+                            {
+                                if (JST.FirstOrDefault().IMBIBE_SAR * JST.FirstOrDefault().MEGHk > 0)
+                                {
+                                    if (Generaly.defacc)
+                                    {
+                                        try
+                                        {
+                                            CREATHES(Baseknow.CONKAL, Convert.ToDouble(JST.FirstOrDefault().CODE), 99999998, "سربار");
+                                        }
+                                        catch (Exception)
+                                        {
+                                            LogWriter.WriteLog(" ورود ساخته شده تولید خطا در برگه شماره :" + HEDRST[ROW].NUMBER + " نوع :" + HEDRST[ROW].TAG + "اخطار مهم ...! حساب متناظر كالا در كنترل كالاي در جريان ساخت وجود ندارد  و من قادر به ايجاد آن نيستم زيرا يك حساب با همين نام ولي با كد ديگر تعريف شده است لطفا با سرپرست سيستم تماس بگيريد.");
+                                        }
+                                    }
+
+                                    var _SHARH = Strings.Left("برگه ورود شماره " + HEDRST[ROW].NUMBER + "-" + HEDRST[ROW].FNUMCO + " مورخ " + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##") + " به مقدار" + CHRST_0[EOF].SumOfMEGHk + " جهت " + Strings.Trim(JST.FirstOrDefault().NAME), 255);
+                                    var _hes = Baseknow.CONKAL + "-" + Convert.ToDouble(JST.FirstOrDefault().CODE) + "-99999998";
+                                    var _BES = Math.Round((double)(JST.FirstOrDefault().IMBIBE_SAR * CHRST_0[EOF].SumOfMEGHk));
+                                    JAMCH = JAMCH + Math.Round((double)(JST.FirstOrDefault().IMBIBE_SAR * CHRST_0[EOF].SumOfMEGHk));
+
+
+                                    dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K,             HES_M,               HES_T,     hes,      SHARH,   BES,         NUMBER,      TAG)
+                                                             VALUES ({max_ns}, {Baseknow.CONKAL}, {JST.FirstOrDefault().CODE},99999998,N'{_hes}',N'{_SHARH}',{_BES},{HEDRST[ROW].NUMBER} ,9)");
+
+                                }
+                                if (JST.FirstOrDefault().IMBIBE_MANF * JST.FirstOrDefault().MEGHk > 0)
+                                {
+                                    if (Generaly.defacc)
+                                    {
+                                        try
+                                        {
+                                            CREATHES(Baseknow.CONKAL, Convert.ToDouble(JST.FirstOrDefault().CODE), 99999999, "دستمزد");
+                                        }
+                                        catch (Exception)
+                                        {
+                                            LogWriter.WriteLog("ورود ساخته شده تولید خطا در برگه شماره :" + HEDRST[ROW].NUMBER + " نوع :" + HEDRST[ROW].TAG + "اخطار مهم ...! حساب متناظر كالا در كنترل كالاي در جريان ساخت وجود ندارد  و من قادر به ايجاد آن نيستم زيرا يك حساب با همين نام ولي با كد ديگر تعريف شده است لطفا با سرپرست سيستم تماس بگيريد.");
+                                        }
+                                    }
+
+                                    var _SHARH = Strings.Left("برگه ورود شماره " + HEDRST[ROW].NUMBER + "-" + HEDRST[ROW].FNUMCO + " مورخ " + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##") + " به مقدار" + CHRST_0[EOF].SumOfMEGHk + " جهت " + Strings.Trim(JST.FirstOrDefault().NAME), 255);
+                                    var _hes = Baseknow.CONKAL + "-" + Convert.ToDouble(JST.FirstOrDefault().CODE) + "-99999999";
+                                    var _BES = Math.Round((double)(JST.FirstOrDefault().IMBIBE_MANF * CHRST_0[EOF].SumOfMEGHk));
+                                    JAMCH = JAMCH + Math.Round((double)(JST.FirstOrDefault().IMBIBE_MANF * CHRST_0[EOF].SumOfMEGHk));
+
+
+                                    dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K,          HES_M,               HES_T,    SHARH,        hes,     BES,    NUMBER,            TAG)
+                                                         VALUES ({max_ns}, {Baseknow.CONKAL}, {JST.FirstOrDefault().CODE}, 99999999, N'{_SHARH}', N'{_hes}', {_BES}, {HEDRST[ROW].NUMBER}, 9)");
+
+                                }
+                            }
+                            if (JAMCH != 0d)
+                            {
+
+                                var _hes = Baseknow.MOGODIA + "-" + CHRST_0[EOF].ANBAR + "-" + Convert.ToDouble(CHRST_0[EOF].CODE);
+                                var _SHARH = Strings.Left("برگه ورود شماره " + HEDRST[ROW].NUMBER + "-" + HEDRST[ROW].FNUMCO + " مورخ " + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##") + " به مقدار" + CHRST_0[EOF].SumOfMEGHk + " جهت " + Strings.Trim(CHRST_0[EOF].NAME), 255);
+                                var _BED = Math.Round((double)(JAMCH));
+
+                                dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K,             HES_M,                    HES_T,         hes,      SHARH,     BED,         NUMBER,      TAG)
+                                                             VALUES ({max_ns}, {Baseknow.MOGODIA}, {CHRST_0[EOF].ANBAR},{CHRST_0[EOF].CODE},N'{_hes}',N'{_SHARH}',{_BED},{HEDRST[ROW].NUMBER} ,9)");
+
+                            }
+
+                        }
+                    }
+                    else
+                    {
+                        var CHRST = dbms.DoGetDataSQL<QRE_BAZ_12>("SELECT     dbo.INVO_LST.NUMBER, dbo.INVO_LST.N_KOL, dbo.INVO_LST.TAG, dbo.INVO_LST.ANBAR, dbo.INVO_LST.CODE, SUM(dbo.INVO_LST.MEGH) AS SumOfMEGH, SUM(dbo.INVO_LST.MEGHk) AS SumOfMEGHk, SUM(dbo.INVO_LST.MEGH_MAR) AS SumOfMEGH_MAR,SUM(dbo.INVO_LST.MABL) AS SumOfMABL, SUM(dbo.INVO_LST.MABL_K) AS SumOfMABL_K, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF,dbo.INVO_LST.VAHED_K , dbo.STUF_DEF.NAME FROM dbo.STUF_DEF INNER JOIN  dbo.INVO_LST ON dbo.STUF_DEF.CODE = dbo.INVO_LST.CODE AND dbo.STUF_DEF.CODE = dbo.INVO_LST.CODE GROUP BY dbo.INVO_LST.NUMBER, dbo.INVO_LST.N_KOL, dbo.INVO_LST.TAG, dbo.INVO_LST.ANBAR, dbo.INVO_LST.CODE, dbo.INVO_LST.FROM_A, dbo.INVO_LST.N_RASID, dbo.INVO_LST.MEGH_R, dbo.INVO_LST.RADAH, dbo.INVO_LST.SANAD_NO, dbo.INVO_LST.CUST_NO, dbo.INVO_LST.ANBARF, dbo.INVO_LST.VAHED_K , dbo.STUF_DEF.NAME " + " HAVING (dbo.INVO_LST.NUMBER = " + HEDRST[ROW].NUMBER + ") AND (dbo.INVO_LST.TAG = 9)").ToList();
+
+                        for (int satr = 0; satr < CHRST.Count; satr++) // while (!CHRST.EOF())
+                        {
+
+                            JAMCH = 0d;
+                            var JST_1 = dbms.DoGetDataSQL<QRE_BAZ_13>("SELECT dbo.HEAD_MANF.FNUMB,DTL_MANF.CODE, DTL_MANF.MABLK, STUF_DEF.NAME, INVO_LST.TAG, INVO_LST.NUMBER, Sum(INVO_LST.MEGHk) AS SumOfMEGHk, INVO_LST.CODE AS COM, [DTL_MANF].[MEGHk]+[PERT] AS MEGHM, INVO_LST.anbar FROM STUF_DEF INNER JOIN ((INVO_LST INNER JOIN HEAD_MANF ON INVO_LST.CODE = HEAD_MANF.CODE) INNER JOIN DTL_MANF ON (HEAD_MANF.FNUMB = DTL_MANF.FNUMB) AND (HEAD_MANF.FNUMB = DTL_MANF.FNUMB)) ON STUF_DEF.CODE = DTL_MANF.CODE GROUP BY  dbo.HEAD_MANF.FNUMB ,DTL_MANF.CODE, DTL_MANF.MABLK, STUF_DEF.NAME, INVO_LST.TAG, INVO_LST.NUMBER, INVO_LST.CODE, [DTL_MANF].[MEGHk]+[PERT], INVO_LST.anbar HAVING (((INVO_LST.TAG)=9) AND ((INVO_LST.NUMBER)=" + HEDRST[ROW].NUMBER + ") AND ((INVO_LST.CODE)='" + CHRST[satr].CODE + "') AND ((INVO_LST.anbar)=" + CHRST[satr].ANBAR + " AND  (dbo.HEAD_MANF.FNUMB = " + Interaction.IIf(IsNull(CHRST[satr].N_KOL), 0, CHRST[satr].N_KOL) + ")))").ToList();
+                            for (int O = 0; O < JST_1.Count; O++) // while (!JST.EOF())
+                            {
+                                if (JST_1[O].MABLK * CHRST[satr].SumOfMEGHk != 0)
+                                {
+                                    if (Generaly.defacc)
+                                    {
+                                        try
+                                        {
+                                            CREATHES(Baseknow.CONKAL, Convert.ToDouble(JST_1[O].COM), Convert.ToInt64(JST_1[O].CODE), CHRST[satr].NAME);
+                                        }
+                                        catch (Exception)
+                                        {
+                                            LogWriter.WriteLog("اخطار مهم ...! حساب متناظر كالا در كنترل كالاي در جريان ساخت وجود ندارد  و من قادر به ايجاد آن نيستم زيرا يك حساب با همين نام ولي با كد ديگر تعريف شده است لطفا با سرپرست سيستم تماس بگيريد ورود ساخته شده تولید  ." + Baseknow.CONKAL + "-" + JST_1[O].COM + "-" + JST_1[O].CODE);
+                                        }
+                                    }
+
+                                    var _hes = Baseknow.CONKAL + "-" + Convert.ToDouble(JST_1[O].COM) + "-" + Convert.ToDouble(JST_1[O].CODE);
+                                    var _SHARH = Strings.Left("برگه ورود شماره " + HEDRST[ROW].NUMBER + "-" + HEDRST[ROW].FNUMCO + " مورخ " + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##") + " به مقدار" + JST_1[O].MEGHM * CHRST[satr].SumOfMEGHk + " جهت " + Strings.Trim(GETKALANAME(Convert.ToDouble(CHRST[satr].CODE))) + " فرمول: " + Strings.Trim(CHRST[satr].N_KOL.ToString()), 255);
+                                    var _BES = Math.Round((double)(JST_1[O].MABLK * CHRST[satr].SumOfMEGHk));
+                                    JAMCH = JAMCH + Math.Round((double)(JST_1[O].MABLK * CHRST[satr].SumOfMEGHk));
+
+                                    dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K,         HES_M,        HES_T,         hes,      SHARH,     BES,         NUMBER,      TAG)
+                                                             VALUES ({max_ns}, {Baseknow.CONKAL}, {JST_1[O].COM},{JST_1[O].CODE},N'{_hes}',N'{_SHARH}',{_BES},{HEDRST[ROW].NUMBER} ,9)");
+                                }
+
+                            };
+
+                            //var JST = dbms.DoGetDataSQL<QRE_BAZ_14>(Operators.ConcatenateObject(Operators.ConcatenateObject("SELECT     IMBIBE_MANF, IMBIBE_SAR, CODE FROM dbo.HEAD_MANF WHERE     (FNUMB = ", Interaction.IIf(IsNull(CHRST[satr].N_KOL), 0, CHRST[satr].N_KOL)), ")"));
+                            var JST = dbms.DoGetDataSQL<QRE_BAZ_14>($"SELECT     IMBIBE_MANF, IMBIBE_SAR, CODE FROM dbo.HEAD_MANF WHERE     (FNUMB = {Interaction.IIf(IsNull(CHRST[satr].N_KOL), 0, CHRST[satr].N_KOL)})").ToList();
+                            if (JST.Count > 0)
+                            {
+                                if (JST.FirstOrDefault().IMBIBE_SAR * CHRST[satr].SumOfMEGHk > 0)
+                                {
+                                    if (Generaly.defacc)
+                                    {
+                                        try
+                                        {
+                                            CREATHES(Baseknow.CONKAL, Convert.ToDouble(CHRST[satr].CODE), 99999998, "سربار");
+                                        }
+                                        catch (Exception)
+                                        {
+                                            LogWriter.WriteLog(" ورود ساخته شده تولید اخطار مهم ...! حساب متناظر كالا در كنترل كالاي در جريان ساخت وجود ندارد  و من قادر به ايجاد آن نيستم زيرا يك حساب با همين نام ولي با كد ديگر تعريف شده است لطفا با سرپرست سيستم تماس بگيريد." + Baseknow.CONKAL + "-" + JST.FirstOrDefault().CODE + "-99999998");
+                                        }
+                                    }
+
+                                    var _SHARH = Strings.Left("برگه ورود شماره " + HEDRST[ROW].NUMBER + "-" + HEDRST[ROW].FNUMCO + " مورخ " + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##") + " به مقدار" + CHRST[satr].SumOfMEGHk + " جهت " + Strings.Trim(GETKALANAME(Convert.ToInt64(CHRST[satr].CODE))) + " فرمول: " + Strings.Trim(CHRST[satr].N_KOL.ToString()), 255);
+                                    var _hes = Baseknow.CONKAL + "-" + Convert.ToDouble(CHRST[satr].CODE) + "-99999998";
+                                    var _BES = Math.Round((double)(JST.FirstOrDefault().IMBIBE_SAR * CHRST[satr].SumOfMEGHk));
+                                    JAMCH = JAMCH + Math.Round((double)(JST.FirstOrDefault().IMBIBE_SAR * CHRST[satr].SumOfMEGHk));
+
+                                    dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K,         HES_M,        HES_T,         hes,      SHARH,     BES,         NUMBER,      TAG)
+                                                             VALUES ({max_ns}, {Baseknow.CONKAL}, {CHRST[satr].CODE},99999998,N'{_hes}',N'{_SHARH}',{_BES},{HEDRST[ROW].NUMBER} ,9)");
+                                }
+                                if (JST.FirstOrDefault().IMBIBE_MANF * CHRST[satr].SumOfMEGHk > 0)
+                                {
+
+                                    var _SHARH = Strings.Left("برگه ورود شماره " + HEDRST[ROW].NUMBER + "-" + HEDRST[ROW].FNUMCO + " مورخ " + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##") + " به مقدار" + CHRST[satr].SumOfMEGHk + " جهت " + Strings.Trim(GETKALANAME(Convert.ToInt64(CHRST[satr].CODE))) + " فرمول: " + Strings.Trim(CHRST[satr].N_KOL.ToString()), 255);
+                                    var _hes = Baseknow.CONKAL + "-" + Convert.ToDouble(CHRST[satr].CODE) + "-99999999";
+                                    var _BES = Math.Round((double)(JST.FirstOrDefault().IMBIBE_MANF * CHRST[satr].SumOfMEGHk));
+                                    JAMCH = JAMCH + Math.Round((double)(JST.FirstOrDefault().IMBIBE_MANF * CHRST[satr].SumOfMEGHk));
+
+
+                                    dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K,         HES_M,         HES_T,         hes,      SHARH,     BES,         NUMBER,      TAG)
+                                                             VALUES ({max_ns}, {Baseknow.CONKAL}, {CHRST[satr].CODE},99999999,  N'{_hes}',N'{_SHARH}', {_BES},{HEDRST[ROW].NUMBER}  ,9)");
+                                }
+                            }
+                            if (JAMCH != 0d)
+                            {
+
+                                var _hes = Baseknow.MOGODIA + "-" + CHRST[satr].ANBAR + "-" + Convert.ToDouble(CHRST[satr].CODE);
+                                var _SHARH = Strings.Left("برگه ورود شماره " + HEDRST[ROW].NUMBER + "-" + HEDRST[ROW].FNUMCO + " مورخ " + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##") + " به مقدار" + CHRST[satr].SumOfMEGHk + " جهت " + Strings.Trim(CHRST[satr].NAME) + " فرمول: " + Strings.Trim(CHRST[satr].N_KOL.ToString()), 255);
+
+                                dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K,               HES_M,               HES_T,         hes,      SHARH,       BED,         NUMBER,      TAG)
+                                                             VALUES ({max_ns}, {Baseknow.MOGODIA}, {CHRST[satr].ANBAR},{CHRST[satr].CODE},  N'{_hes}',N'{_SHARH}', {JAMCH},{HEDRST[ROW].NUMBER}  ,9)");
+                            }
+
+                        }
+                    }
+                }
+                else
+                {
+                    dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE (((DEED_DTL.NUMBER)= " + HEDRST[ROW].NUMBER + ") AND ((DEED_DTL.TAG)= 9))");
+                }
+
+            });
+
+            return (SANAD_NUMBER, IsSuccessfully);
+        }
+
+        public static void gensanadbargashfroosh(long fnum, long TNUM, bool InternalCalling = true)
+        {
+            MainWindow auto_run = null;
+            if (InternalCalling)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    auto_run = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
+                }));
+            }
+
+            long CON, i;
+            object a = default, fs;
+            double? max_ns, MABL_CHK = null, JAMF, JAMCH, CKOL = null, JAMFKH;
+            double MBL;
+            double? CMOIN = null, CTAF = null, takh;
+            string shart;
+            int ii;
+            string CH;
+            double JAMP;
+            string TAMIR;
+            string per;
+            long permab;
+            double TAKHF;
+            double? CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null, MAVAD;
+            double DAST;
+            double SAR;
+            var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM DEED_HED").ToList();
+            var HFRST = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM dbo.HEAD_LST WHERE     (NUMBER BETWEEN " + fnum + " AND " + TNUM + ") AND (TAG = 4)").ToList();
+
+            LogWriter.WriteLog("شروع باز سازي از فاکتور برشگت فروش شماره : " + fnum + " تا فاكتور شماره :" + TNUM + DateTime.Now);
+            //Parallel.For(0, HFRST.Count, ROW =>
+            for (int ROW = 0; ROW < HFRST.Count; ROW++) //while (!HFRST.EOF)
+            {
+                if (InternalCalling)
+                {
+                    auto_run.Dispatcher.Invoke(new Action(() =>
+                    {
+                        double progress = (ROW + 1) / ((double)HFRST.Count) * 100.0; // Calculate the progress percentage
+                        auto_run.PRGR_C8.Value = progress; // Update the progress bar
+                                                           // auto_run.LBL_C8.Content = $"{progress:F2}%";
+                        auto_run.UpdateOverallProgressBar();
+
+                    }));
+                }
+
+                //Forms["GUG"]["num"] = i;
+                if (!IsNull(HFRST[ROW].CUST_NO))
+                {
+                    GETTAF3(HFRST[ROW].CUST_NO, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+                }
+                string SHSH = Strings.Right("فاكتور برگشت فروش شماره " + HFRST[ROW].NUMBER + " مورخ " + Strings.Format(HFRST[ROW].DATE_N, "####/##/##"), 100);
+                if ((bool)Baseknow.SNDKH) // سند روزانه است
+                {
+                    List<QRE10> SARST = null;
+                    if (!IsNull(HFRST[ROW].N_S)) // فاکتور سند دارد
+                    {
+                        SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 4 and n_s = " + HFRST[ROW].N_S).ToList();
+                        if (SARST.Count > 0)  // اگرسند  فاکتورهست
+                        {
+                            if (SARST.Select(x => x.DATE_S).FirstOrDefault() == HFRST[ROW].DATE_N) // تاريخ سند و فاکتوريکي است
+                            {
+                                max_ns = (double)HFRST[ROW].N_S;
+                            }
+                            else
+                            {
+                            SEJ:
+                                SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 4 and DATE_S = " + HFRST[ROW].DATE_N).ToList();
+                                if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                                {
+                                    max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
+                                }
+                                else
+                                {
+                                    max_ns = Createsanad((long)HFRST[ROW].DATE_N, SHSH, 0, 4, -1, HFRST[ROW].USER_NAME);
+
+                                    HFRST[ROW].N_S = max_ns;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //goto SEJ;
+                            SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 4 and DATE_S = " + HFRST[ROW].DATE_N).ToList();
+                            if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                            {
+                                max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
+                            }
+                            else
+                            {
+                                max_ns = Createsanad((long)HFRST[ROW].DATE_N, SHSH, 0, 4, -1, HFRST[ROW].USER_NAME);
+
+                                HFRST[ROW].N_S = max_ns;
+                            }
+                        } // چک کن اگه نيست صادر کن
+                    }
+                    else
+                    {
+                        //goto SEJ;
+                        SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 4 and DATE_S = " + HFRST[ROW].DATE_N).ToList();
+                        if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                        {
+                            max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
+                        }
+                        else
+                        {
+                            max_ns = Createsanad((long)HFRST[ROW].DATE_N, SHSH, 0, 4, -1, HFRST[ROW].USER_NAME);
+
+                            HFRST[ROW].N_S = max_ns;
+                        }
+                    } // چک کن اگه نيست صادر کن
+                }
+                else if (!IsNull(HFRST[ROW].N_S)) // تک سندي
+                                                  // فاکتور سند دارد
+                {
+                    var SARST = dbms.DoGetDataSQL<QRE11>("SELECT    n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 4 and N_s = " + HFRST[ROW].N_S).ToList();
+                    if (SARST.Count > 0)   // اگرسند فاکتورهست
+                    {
+                        if (SARST.Select(x => x.DATE_S).FirstOrDefault() != HFRST[ROW].DATE_N) // تاريخ سند و فاکتوريکي است
+                        {
+                            dbms.DoExecuteSQL("UPDATE DEED_HED SET DATE_S = " + HFRST[ROW].DATE_N + ",SHARH_S = '" + SHSH + "',GHATEI = 0,NO_S = 4,OKF=-1,USER_NAME ='" + HFRST[ROW].USER_NAME + "' WHERE N_S =" + HFRST[ROW].N_S);
+                        }
+                        max_ns = (double)HFRST[ROW].N_S;
+                    }
+                    else
+                    {
+                        max_ns = Createsanad((long)HFRST[ROW].DATE_N, SHSH, 0, 4, -1, HFRST[ROW].USER_NAME);
+                        HFRST[ROW].N_S = max_ns;
+                    }
+                }
+                else
+                {
+                    max_ns = Createsanad((long)HFRST[ROW].DATE_N, SHSH, 0, 4, -1, HFRST[ROW].USER_NAME);
+                    HFRST[ROW].N_S = max_ns;
+                }
+                if (IsNull(HFRST[ROW].N_S) || HFRST[ROW].N_S != max_ns)
+                {
+                    HFRST[ROW].N_S = max_ns;
+                    dbms.DoExecuteSQL($"UPDATE HEAD_LST set n_s = {max_ns} WHERE     (NUMBER = {HFRST[ROW].NUMBER} AND (TAG = 4)) ");
+                }
+                var JST_0 = dbms.DoGetDataSQL<double?>("SELECT Sum([MEGH_MAR]*[mabl]) AS mabk  FROM dbo.INVO_LST WHERE     (NUMBER = " + HFRST[ROW].NUMBER1 + ") AND (TAG = 2) ").ToList();
+                if (JST_0.Count > 0 && !IsNull(JST_0.FirstOrDefault()))
+                {
+                    JAMF = (double)JST_0.FirstOrDefault();
+                }
+                else
+                {
+                    JAMF = 0d;
+                }
+                var JST_1 = dbms.DoGetDataSQL<double?>("SELECT Sum([MEGH_MAR]*[mabl]) AS mabk FROM dbo.INVO_LST WHERE     (NUMBER = " + HFRST[ROW].NUMBER1 + ") AND (TAG = 2) AND (ANBAR = 0)").ToList();
+                if (JST_1.Count > 0 && !IsNull(JST_1.FirstOrDefault()))
+                {
+                    JAMFKH = (double)JST_1.FirstOrDefault();
+                }
+                else
+                {
+                    JAMFKH = 0d;
+                };
+                var JST_2 = dbms.DoGetDataSQL<double?>("SELECT Sum(PAY_GETD.MABL) AS SumOfMABL FROM PAY_GETD WHERE (((PAY_GETD.TAG)=4) AND ((PAY_GETD.NUMBER)= " + HFRST[ROW].NUMBER + " ))").ToList();
+                if (JST_2.Count > 0 && !IsNull(JST_2.FirstOrDefault()))
+                {
+                    JAMCH = (double)JST_2.FirstOrDefault();
+                }
+                else
+                {
+                    JAMCH = 0d;
+                }
+                TAKHF = 0d;
+                dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE (((DEED_DTL.NUMBER)= " + HFRST[ROW].NUMBER + ") AND ((DEED_DTL.TAG)= " + 4 + "))");
+                var JST_3 = dbms.DoGetDataSQL<QRE_BAZ_15>("SELECT  dbo.INVO_LST_TAKH.MEGH_MAR * dbo.INVO_LST_TAKH.MABL AS MABL_K, dbo.INVO_LST_TAKH.MEGH_MAR, dbo.INVO_LST_TAKH.CODE, dbo.INVO_LST_TAKH.ANBAR, dbo.STUF_DEF.NAME, dbo.INVO_LST_TAKH.CUST_KIND, ISNULL(dbo.TAKHPERS.TAFPER, 0) AS TFP, ROUND(ISNULL(dbo.TAKHPERS.TAFPER, 0) * dbo.INVO_LST_TAKH.MEGH_MAR * dbo.INVO_LST_TAKH.mabl / 100, 0) As takh,dbo.INVO_LST_TAKH.AVRAGE   FROM  dbo.STUF_DEF INNER JOIN  dbo.INVO_LST_TAKH ON dbo.STUF_DEF.CODE = dbo.INVO_LST_TAKH.CODE LEFT OUTER JOIN   dbo.TAKHPERS ON dbo.INVO_LST_TAKH.CUST_KIND = dbo.TAKHPERS.CUST_CO AND    dbo.INVO_LST_TAKH.CODE = dbo.TAKHPERS.TAKH_COD WHERE     (dbo.INVO_LST_TAKH.MEGH_MAR <> 0) AND (dbo.INVO_LST_TAKH.NUMBER = " + HFRST[ROW].NUMBER1 + ") AND (dbo.INVO_LST_TAKH.TAG = 2)").ToList();
+                for (int Y = 0; Y < JST_3.Count; Y++) //while (!JST.EOF())
+                {
+                    if (Strings.Mid(Baseknow.OPTIONSS, 13, 1) == "5")
+                    {
+                        if (Generaly.defacc && !ISHESAB(Baseknow.MFROSH, 4, Convert.ToInt64(JST_3[Y].CODE)))
+                        {
+                            try
+                            {
+                                CREATHES(Baseknow.MFROSH, 4, Convert.ToInt64(JST_3[Y].CODE), JST_3[Y].NAME); //JST_3[Y].(4)
+                            }
+                            catch (Exception)
+                            {
+                            }
+                        }
+                        //SDRST.AddNew(); // فروش
+                        //SDRST.Fields("N_S") = max_ns;
+                        //SDRST.Fields("HES_K") = Baseknow.MFROSH;
+                        //SDRST.Fields("HES_M") = 4;
+                        //SDRST.Fields("HES_T") = JST_3[Y].CODE;
+                        var _hes = Baseknow.MFROSH + "-4-" + Convert.ToDouble(JST_3[Y].CODE);
+                        var _SHARH = Strings.Left("برگشت فروش  فاكتور شماره " + HFRST[ROW].NUMBER + " مورخ " + Strings.Format(HFRST[ROW].DATE_N, "####/##/##") + " به مقدار" + JST_3[Y].MEGH_MAR + " برگشت فروش " + Strings.Trim(JST_3[Y].NAME), 255);
+                        //SDRST.Fields("BED") = JST_3[Y].MABL_K;
+                        //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                        //SDRST.Fields("TAG") = 4;
+
+                        dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S,             HES_K,  HES_M,        HES_T,         hes,      SHARH,           BED,         NUMBER,         TAG)
+                                                             VALUES ({max_ns}, {Baseknow.MFROSH}, 4,    {JST_3[Y].CODE},  N'{_hes}',N'{_SHARH}',{JST_3[Y].MABL_K},{HFRST[ROW].NUMBER} ,4)");
+
+                    }
+                    else if (JST_3[Y].ANBAR != 0)
+                    {
+                        if (Generaly.defacc && !ISHESAB(Baseknow.MFROSH, Convert.ToDouble(JST_3[Y].CODE), Convert.ToInt64(JST_3[Y].CODE)))
+                        {
+                            try
+                            {
+                                CREATHES(Baseknow.MFROSH, Convert.ToDouble(JST_3[Y].CODE), Convert.ToInt64(JST_3[Y].CODE), JST_3[Y].NAME); //JST_3[Y].(4)
+                            }
+                            catch (Exception)
+                            {
+                            }
+                        }
+                        if (JST_3[Y].MABL_K > 0)
+                        {
+                            //SDRST.AddNew(); // فروش
+                            //SDRST.Fields("N_S") = max_ns;
+                            //SDRST.Fields("HES_K") = Baseknow.MFROSH;
+                            string HES_M = "";
+                            string HES_T = "";
+                            string hes = "";
+                            if (Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                            {
+                                HES_M = "1";
+                                HES_T = "1";
+                                hes = Baseknow.MFROSH + "-1-1";
+                            }
+                            else
+                            {
+                                HES_M = JST_3[Y].CODE;
+                                HES_T = JST_3[Y].CODE;
+                                hes = Baseknow.MFROSH + "-" + Convert.ToDouble(JST_3[Y].CODE) + "-" + Convert.ToDouble(JST_3[Y].CODE);
+                            }
+                            var _SHARH = Strings.Left("برگشت فروش  فاكتور شماره " + HFRST[ROW].NUMBER + " مورخ " + Strings.Format(HFRST[ROW].DATE_N, "####/##/##") + " به مقدار" + JST_3[Y].MEGH_MAR + " برگشت فروش " + Strings.Trim(JST_3[Y].NAME), 255);
+                            var _BED = JST_3[Y].MABL_K;
+                            //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                            //SDRST.Fields("TAG") = 4;
+
+                            dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S,  HES_K,           HES_M,        HES_T,         hes,      SHARH,    BED,         NUMBER,    TAG)
+                                                             VALUES ({max_ns}, {Baseknow.MFROSH}, {HES_M},     {HES_T},     N'{hes}',N'{_SHARH}',{_BED},{HFRST[ROW].NUMBER} ,4)");
+                            //SDRST.update();
+                        }
+                    }
+                    else
+                    {
+                        if (Generaly.defacc && !ISHESAB(Baseknow.DARAM, HFRST[ROW].DEPATMAN, Convert.ToInt64(JST_3[Y].CODE)))
+                        {
+                            try
+                            {
+                                CREATHES(Baseknow.DARAM, HFRST[ROW].DEPATMAN, Convert.ToInt64(JST_3[Y].CODE), JST_3[Y].NAME); //JST_3[Y].(4)
+                            }
+                            catch (Exception)
+                            {
+                            }
+                        }
+                        //SDRST.AddNew(); // در آمد
+                        //SDRST.Fields("N_S") = max_ns;
+                        //SDRST.Fields("HES_K") = Baseknow.DARAM;
+                        //SDRST.Fields("HES_M") = HFRST[ROW].DEPATMAN;
+                        //SDRST.Fields("HES_T") = JST_3[Y].CODE;
+                        var _hes = Baseknow.DARAM + "-" + HFRST[ROW].DEPATMAN + "-" + Convert.ToDouble(JST_3[Y].CODE);
+                        var _SHARH = Strings.Left("برگشت فروش  فاكتور شماره " + HFRST[ROW].NUMBER + " مورخ " + Strings.Format(HFRST[ROW].DATE_N, "####/##/##") + " به مقدار" + JST_3[Y].MEGH_MAR + " برگشت فروش " + Strings.Trim(JST_3[Y].NAME), 255);
+                        //SDRST.Fields("BEd") = JST_3[Y].MABL_K;
+                        //// jamkh = jamkh + JST_3[Y].("MABL_K")
+                        //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                        //SDRST.Fields("TAG") = 4;
+                        //SDRST.update();
+
+                        dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S,         HES_K,                  HES_M,              HES_T,          hes,      SHARH,         BED,           NUMBER,         TAG)
+                                                             VALUES ({max_ns}, {Baseknow.DARAM},    {HFRST[ROW].DEPATMAN}, {JST_3[Y].CODE},  N'{_hes}',N'{_SHARH}',{JST_3[Y].MABL_K},{HFRST[ROW].NUMBER} ,4)");
+                    }
+
+                    if (Baseknow.SANAT == true || IsNull(Baseknow.SANAT))
+                    {
+                        MAVAD = Math.Round((double)(GETSTANDARDPRICE_MAVAD(JST_3[Y].CODE, HFRST[ROW].DATE_N) * JST_3[Y].MEGH_MAR));
+                        DAST = Math.Round((double)(GETSTANDARDPRICE_DAST(JST_3[Y].CODE, HFRST[ROW].DATE_N) * JST_3[Y].MEGH_MAR));
+                        SAR = Math.Round((double)(GETSTANDARDPRICE_SAR(JST_3[Y].CODE, HFRST[ROW].DATE_N) * JST_3[Y].MEGH_MAR));
+                        if (Generaly.defacc && !ISHESAB(Baseknow.MOGODIA, JST_3[Y].ANBAR, Convert.ToInt64(JST_3[Y].CODE)))
+                        {
+                            try
+                            {
+                                CREATHES(Baseknow.MOGODIA, JST_3[Y].ANBAR, Convert.ToInt64(JST_3[Y].CODE), JST_3[Y].NAME); //JST_3[Y].(4)
+                            }
+                            catch (Exception)
+                            {
+                            }
+                        }
+                        if (MAVAD + DAST + SAR != 0d && Strings.Mid(Baseknow.OPTIONSS, 66, 1) != "5")
+                        {
+                            //SDRST.AddNew(); // انبار محصول
+                            //SDRST.Fields("N_S") = max_ns;
+                            //SDRST.Fields("HES_K") = Baseknow.MOGODIA;
+                            //SDRST.Fields("HES_M") = JST_3[Y].ANBAR;
+                            //SDRST.Fields("HES_T") = JST_3[Y].CODE;
+                            var _SHARH = Strings.Left("برگشت فروش.  فاكتور شماره  " + HFRST[ROW].NUMBER + " مورخ " + Strings.Format(HFRST[ROW].DATE_N, "####/##/##") + " به مقدار" + JST_3[Y].MEGH_MAR + " برگشت " + Strings.Trim(JST_3[Y].NAME), 255);
+                            var _hes = Baseknow.MOGODIA + "-" + JST_3[Y].ANBAR + "-" + Convert.ToDouble(JST_3[Y].CODE);
+                            var _BED = MAVAD + DAST + SAR;
+                            //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                            //SDRST.Fields("TAG") = 4;
+                            //SDRST.update();
+
+                            dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S,         HES_K,                  HES_M,      HES_T,          hes,      SHARH,      BED,           NUMBER,   TAG)
+                                                             VALUES ({max_ns}, {Baseknow.MOGODIA},    {JST_3[Y].ANBAR}, {JST_3[Y].CODE},  N'{_hes}',N'{_SHARH}',{_BED},{HFRST[ROW].NUMBER} ,4)");
+                            if (Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) != 1d)
+                            {
+                                if (Generaly.defacc && !ISHESAB(Baseknow.GHEYMAT, Convert.ToDouble(JST_3[Y].CODE), Convert.ToInt64(JST_3[Y].CODE)))
+                                {
+                                    try
+                                    {
+                                        CREATHES(Baseknow.GHEYMAT, Convert.ToDouble(JST_3[Y].CODE), Convert.ToInt64(JST_3[Y].CODE), JST_3[Y].NAME); //JST_3[Y].(4)
+                                    }
+                                    catch (Exception)
+                                    {
+                                    }
+                                }
+                            }
+                            if (MAVAD > 0d)
+                            {
+                                //SDRST.AddNew(); // قيمت تمام شده
+                                //SDRST.Fields("N_S") = max_ns;
+                                //SDRST.Fields("HES_K") = Baseknow.GHEYMAT;
+                                string HES_M = "";
+                                string HES_T = "";
+                                string hes = "";
+                                if (Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                                {
+                                    HES_M = "1";
+                                    HES_T = "1";
+                                    hes = Baseknow.GHEYMAT + "-1-1";
+                                }
+                                else
+                                {
+                                    HES_M = JST_3[Y].CODE;
+                                    HES_T = JST_3[Y].CODE;
+                                    hes = Baseknow.GHEYMAT + "-" + Convert.ToDouble(JST_3[Y].CODE) + "-" + Convert.ToDouble(JST_3[Y].CODE);
+                                }
+                                var SHARH = Strings.Left("برگشت فروش  فاكتور شماره  " + HFRST[ROW].NUMBER + " مورخ " + Strings.Format(HFRST[ROW].DATE_N, "####/##/##") + " به مقدار" + JST_3[Y].MEGH_MAR + " برگشت فروش " + Strings.Trim(JST_3[Y].NAME), 255);
+                                //SDRST.Fields("BES") = MAVAD;
+                                //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                                //SDRST.Fields("TAG") = 4;
+                                //SDRST.update();
+
+                                dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S,         HES_K,      HES_M,  HES_T,      hes,      SHARH,        BES,           NUMBER,         TAG)
+                                                             VALUES ({max_ns}, {Baseknow.GHEYMAT},    {HES_M}, {HES_T},  N'{hes}',N'{SHARH}',     {MAVAD},    {HFRST[ROW].NUMBER} ,4)");
+                            }
+                            if (DAST != 0d)
+                            {
+                                if (Generaly.defacc && !ISHESAB(Baseknow.GHEYMAT, Convert.ToDouble(JST_3[Y].CODE), 9999999))
+                                {
+                                    try
+                                    {
+                                        CREATHES(Baseknow.GHEYMAT, Convert.ToDouble(JST_3[Y].CODE), 9999999, "دستمزد " + JST_3[Y].NAME); //JST_3[Y].(4)
+                                    }
+                                    catch (Exception)
+                                    {
+                                    }
+                                }
+                                //SDRST.AddNew(); // قيمت تمام شده
+                                //SDRST.Fields("N_S") = max_ns;
+                                //SDRST.Fields("HES_K") = Baseknow.GHEYMAT;
+                                //SDRST.Fields("HES_M") = JST_3[Y].CODE;
+                                //SDRST.Fields("HES_T") = 9999999;
+                                var SHARH_ = Strings.Left("برگشت فروش  فاكتور شماره  " + HFRST[ROW].NUMBER + " مورخ " + Strings.Format(HFRST[ROW].DATE_N, "####/##/##") + " به مقدار" + JST_3[Y].MEGH_MAR + " برگشت فروش " + Strings.Trim(JST_3[Y].NAME), 255);
+                                var hes_ = Baseknow.GHEYMAT + "-" + Convert.ToDouble(JST_3[Y].CODE) + "-" + 9999999;
+                                //SDRST.Fields("BES") = DAST;
+                                //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                                //SDRST.Fields("TAG") = 4;
+                                //SDRST.update();
+
+                                dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,         HES_K,          HES_M,              HES_T,          hes,         SHARH,          BES,           NUMBER,  		 TAG)
+		                                                        VALUES ({max_ns},  			{Baseknow.GHEYMAT}, {JST_3[Y].CODE},     {9999999},      N'{hes_}',	  N'{SHARH_}',	   {DAST},		 {HFRST[ROW].NUMBER}  ,4)");
+                            }
+                            if (SAR != 0d)
+                            {
+                                if (Generaly.defacc && !ISHESAB(Baseknow.GHEYMAT, Convert.ToDouble(JST_3[Y].CODE), 9999998))
+                                {
+                                    try
+                                    {
+                                        CREATHES(Baseknow.GHEYMAT, Convert.ToDouble(JST_3[Y].CODE), 9999998, "سربار " + JST_3[Y].NAME); //JST_3[Y].(4)
+                                    }
+                                    catch (Exception)
+                                    {
+                                    }
+                                }
+                                //SDRST.AddNew(); // قيمت تمام شده
+                                //SDRST.Fields("N_S") = max_ns;
+                                //SDRST.Fields("HES_K") = Baseknow.GHEYMAT;
+                                //SDRST.Fields("HES_M") = JST_3[Y].CODE;
+                                //SDRST.Fields("HES_T") = 9999998;
+                                var SHARH__ = Strings.Left("برگشت فروش  فاكتور شماره  " + HFRST[ROW].NUMBER + " مورخ " + Strings.Format(HFRST[ROW].DATE_N, "####/##/##") + " به مقدار" + JST_3[Y].MEGH_MAR + " برگشت فروش " + Strings.Trim(JST_3[Y].NAME), 255);
+                                var hes__ = Baseknow.GHEYMAT + "-" + Convert.ToDouble(JST_3[Y].CODE) + "-" + 9999998;
+                                //SDRST.Fields("BES") = SAR;
+                                //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                                //SDRST.Fields("TAG") = 4;
+                                //SDRST.update();
+                                dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,         HES_K,          HES_M,              HES_T,          hes,         SHARH,          BES,           NUMBER,  		 TAG)
+		                                                        VALUES ({max_ns},  			{Baseknow.GHEYMAT}, {JST_3[Y].CODE},     {9999998},      N'{hes__}',    N'{SHARH__}',  {SAR},		 {HFRST[ROW].NUMBER}  ,4)");
+                            }
+                        }
+                        else if (JST_3[Y].AVRAGE > 0)
+                        {
+                            //SDRST.AddNew(); // انبار محصول
+                            //SDRST.Fields("N_S") = max_ns;
+                            //SDRST.Fields("HES_K") = Baseknow.MOGODIA;
+                            //SDRST.Fields("HES_M") = JST_3[Y].ANBAR;
+                            //SDRST.Fields("HES_T") = JST_3[Y].CODE;
+                            var SHARH_ = Strings.Left("برگشت فروش  فاكتور شماره  " + HFRST[ROW].NUMBER + " مورخ " + Strings.Format(HFRST[ROW].DATE_N, "####/##/##") + " به مقدار" + JST_3[Y].MEGH_MAR + " برگشت فروش " + Strings.Trim(JST_3[Y].NAME), 255);
+                            var hes_ = Baseknow.MOGODIA + "-" + JST_3[Y].ANBAR + "-" + Convert.ToDouble(JST_3[Y].CODE);
+                            var BED_ = Math.Round((double)(JST_3[Y].AVRAGE * JST_3[Y].MEGH_MAR));
+                            //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                            //SDRST.Fields("TAG") = 4;
+
+                            dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,         HES_K,               HES_M,                   HES_T,          hes,         SHARH,          BED,           NUMBER,  		 TAG)
+		                                                        VALUES ({max_ns},  			{Baseknow.MOGODIA}, {JST_3[Y].ANBAR},     {JST_3[Y].CODE},      N'{hes_}',    N'{SHARH_}',  {BED_},		 {HFRST[ROW].NUMBER}  ,4)");
+
+                            //SDRST.update();
+
+                            //SDRST.AddNew(); // قيمت تمام شده
+                            //SDRST.Fields("N_S") = max_ns;
+                            //SDRST.Fields("HES_K") = Baseknow.GHEYMAT;
+                            string HES_M = "";
+                            string HES_T = "";
+                            string hes = "";
+                            if (Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                            {
+                                HES_M = "1";
+                                HES_T = "1";
+                                hes = Baseknow.GHEYMAT + "-1-1";
+                            }
+                            else
+                            {
+                                HES_M = JST_3[Y].CODE;
+                                HES_T = JST_3[Y].CODE;
+                                hes = Baseknow.GHEYMAT + "-" + Convert.ToDouble(JST_3[Y].CODE) + "-" + Convert.ToDouble(JST_3[Y].CODE);
+                            }
+                            var _SHARH_ = Strings.Left("برگشت فروش  فاكتور شماره  " + HFRST[ROW].NUMBER + " مورخ " + Strings.Format(HFRST[ROW].DATE_N, "####/##/##") + " به مقدار" + JST_3[Y].MEGH_MAR + " برگشت فروش " + Strings.Trim(JST_3[Y].NAME), 255);
+                            var _BES_ = Math.Round((double)(JST_3[Y].AVRAGE * JST_3[Y].MEGH_MAR));
+                            //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                            //SDRST.Fields("TAG") = 4;
+
+                            dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,         HES_K,            HES_M,       HES_T,          hes,         SHARH,         BES,           NUMBER,  		 TAG)
+		                                                        VALUES ({max_ns},  			{Baseknow.GHEYMAT}, {HES_M},     {HES_T},      N'{hes}',    N'{_SHARH_}',  {_BES_},		 {HFRST[ROW].NUMBER}  ,4)");
+
+                            //SDRST.update();
+                        }
+                    }
+                    //JST.MoveNext();
+                    //DoEvents();
+                }
+
+                var JST = dbms.DoGetDataSQL<QRE_BAZ_16>("SELECT INVO_LST.MABL_K, INVO_LST.MEGH_MAR, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME, [SumOfMABLK]+[IMBIBE_MANF]+[IMBIBE_SAR] AS GHT FROM (INVO_LST INNER JOIN MANF_JAMK ON INVO_LST.CODE = MANF_JAMK.CODE) INNER JOIN STUF_DEF ON INVO_LST.CODE = STUF_DEF.CODE WHERE (((INVO_LST.NUMBER)=" + HFRST[ROW].NUMBER1 + ") AND ((INVO_LST.TAG)=2))").ToList();
+                if (HFRST[ROW].MABL_HAZ != 0)
+                {
+                    if (IsNull(HFRST[ROW].MOIN_HAZ))
+                    {
+                        auto_run.Dispatcher.Invoke(new Action(() =>
+                        {
+                            new Msgwin(false, "اخطار مهم ...! حساب معين سرويس مشخص نشده است و سند صادره ناقص خواهد بود حتما حساب معين سرويس را مشخص نمائيد.", "#FFF0000").ShowDialog();
+                        }));
+                    }
+                    else
+                    {
+                        //SDRST.AddNew(); // كرايه حمل يا غيره
+                        if (!IsNull(HFRST[ROW].MOIN_HAZ))
+                        {
+                            GETTAF3(HFRST[ROW].MOIN_HAZ, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                        }
+                        //SDRST.Fields("N_S") = max_ns;
+                        //SDRST.Fields("HES_K") = HKOL;
+                        //SDRST.Fields("HES_M") = HMOIN;
+                        //SDRST.Fields("HES_T") = HTAF;
+                        //SDRST.Fields("HES_T2") = HTAF2;
+                        //SDRST.Fields("HES_T3") = HTAF3;
+                        //SDRST.Fields("HES_T4") = HTAF4;
+                        var _hes_ = HFRST[ROW].MOIN_HAZ;
+                        var _SHARH_ = Strings.Right("فاكتور برگشت فروش  شماره " + HFRST[ROW].NUMBER + " - " + GETTAFNAME(HFRST[ROW].MOIN_HAZ), 255);
+                        var _BED_ = HFRST[ROW].MABL_HAZ;
+                        //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                        //SDRST.Fields("TAG") = 4;
+                        //SDRST.update();
+
+                        string HTAF2T = (Convert.ToDouble(HTAF2) == 0 || HTAF2 is null) ? "NULL" : HTAF2.ToString();
+                        string HTAF3T = (Convert.ToDouble(HTAF3) == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
+                        string HTAF4T = (Convert.ToDouble(HTAF4) == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
+
+                        dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4,                    hes,          SHARH,    BED,       NUMBER,         TAG)
+                                                 VALUES ({max_ns}, {HKOL}, {HMOIN}, {HTAF}, {HTAF2T}, {HTAF3T}, {HTAF4T},        N'{_hes_}',    N'{_SHARH_}', {_BED_}, {HFRST[ROW].NUMBER}, 4)");
+
+                        //dbms.DoExecuteSQL($@"INSERT INTO dbo.SDRST (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4,                    hes,          SHARH,    BED,       NUMBER,         TAG)
+                        //                         VALUES ({max_ns}, {HKOL}, {HMOIN}, {HTAF}, {HTAF2T}, {HTAF3T}, {HTAF4T},        N'{_hes_}',    N'{_SHARH_}', {_BED_}, {HFRST[ROW].NUMBER}, 4)");
+                    }
+                }
+
+                if (JAMCH != 0d) // چكهاي پرداختي
+                {
+                    //CHRST.Open("PAY_GETP", CurrentProject.Connection, adOpenKeyset, adLockOptimistic);
+                    var CHRST = dbms.DoGetDataSQL<PAY_GETP>("SELECT * FROM PAY_GETP WHERE NUMBER = " + HFRST[ROW].NUMBER + " AND TAG = 4").ToList();
+
+                    if (CHRST.Count > 0 && !IsNull(CHRST.FirstOrDefault().NUMBER))
+                    {
+                        for (int Q = 0; Q < CHRST.Count; Q++) // while (!CHRST.EOF)
+                        {
+                            MABL_CHK = (double)(MABL_CHK + CHRST[Q].MABL);
+                            //SDRST.AddNew(); // اسناد پرداختني
+                            //SDRST.Fields("N_S") = max_ns;
+                            //SDRST.Fields("HES_K") = GETKOL(Baseknow.APA);
+                            //SDRST.Fields("HES_M") = GETMOIN(Baseknow.APA);
+                            //SDRST.Fields("HES_T") = GETTAF(Baseknow.APA);
+                            var hes_ = Baseknow.APA;
+                            var SHARH_ = Strings.Right("چك " + CHRST[Q].N_SERI + "بانك " + GETBANK((double)CHRST[Q].BANK) + " " + CHRST[Q].SHOBEH + " مورخ " + Strings.Format(CHRST[Q].DATE_S, "####/##/##"), 255);
+                            //SDRST.Fields("BES") = CHRST[Q].MABL;
+                            //SDRST.Fields("N_SERI") = CHRST[Q].N_SERI;
+                            //SDRST.Fields("BANK") = CHRST[Q].BANK;
+                            //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                            //SDRST.Fields("TAG") = 4;
+                            dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S, HES_K,                        HES_M,                         HES_T,          hes,         SHARH,                 BES,               N_SERI,          BANK,                 NUMBER,  		   TAG)
+		                                                        VALUES ({max_ns}, {GETKOL(Baseknow.APA)}, {GETMOIN(Baseknow.APA)},     {GETTAF(Baseknow.APA)},    N'{hes_}',	N'{SHARH_}',	 {CHRST[Q].MABL},	{CHRST[Q].N_SERI}	 {CHRST[Q].BANK}       {HFRST[ROW].NUMBER}  ,4)");
+                            //SDRST.update();
+
+                            //SDRST.AddNew(); // چكهاي پرداختي
+                            //SDRST.Fields("N_S") = max_ns;
+                            //SDRST.Fields("HES_K") = CKOL;
+                            //SDRST.Fields("HES_M") = CMOIN;
+                            //SDRST.Fields("HES_T") = CTAF;
+                            //SDRST.Fields("HES_T2") = CTAF2;
+                            //SDRST.Fields("HES_T3") = CTAF3;
+                            //SDRST.Fields("HES_T4") = CTAF4;
+                            //SDRST.Fields("hes") = HFRST[ROW].CUST_NO;
+                            var _SHARH_ = Strings.Right("ف.ب.ف." + HFRST[ROW].NUMBER + " - " + "چك " + CHRST[Q].N_SERI + "بانك " + GETBANK((double)CHRST[Q].BANK) + " " + CHRST[Q].SHOBEH + " مورخ " + Strings.Format(CHRST[Q].DATE_S, "####/##/##"), 255);
+                            //SDRST.Fields("BED") = CHRST[Q].MABL;
+                            //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                            //SDRST.Fields("TAG") = 4;
+                            //SDRST.update(); //#ERROR
+
+                            string CTAF2T = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
+                            string CTAF3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
+                            string CTAF4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+
+                            dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S, HES_K,   HES_M,    HES_T, HES_T2,  HES_T3,   HES_T4,       hes,                   SHARH,                 BED,            NUMBER,  		   TAG)
+		                                                        VALUES ({max_ns},      {CKOL}, {CMOIN},  {CTAF}, {CTAF2T},{CTAF3T},{CTAF4T} N'{HFRST[ROW].CUST_NO}',	N'{SHARH_}',	 {CHRST[Q].MABL},   {HFRST[ROW].NUMBER}  ,4)");
+
+                        }
+                    }
+                    else
+                    {
+                    }
+                }
+                if (HFRST[ROW].TAKHFIF != 0)
+                {
+                    var rstopen = dbms.DoGetDataSQL<QUERY_MODEL1>("SELECT     SUM(dbo.INVO_LST.n_moin / dbo.INVO_LST.meghk * dbo.INVO_LST.MEGH_MAR) AS JAMT, dbo.INVO_LST.CODE, dbo.HEAD_LST.CUST_KIND FROM dbo.INVO_LST INNER JOIN dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG WHERE (dbo.INVO_LST.NUMBER = " + HFRST[ROW].NUMBER1 + " ) And (dbo.INVO_LST.TAG = 2) GROUP BY dbo.INVO_LST.CODE, dbo.HEAD_LST.CUST_KIND").ToList();
+                    if (rstopen.Count > 0)
+                    {
+                        TAKHF = 0d;
+                        for (int F = 0; F < rstopen.Count; F++) // while (!rstopen.EOF())
+                        {
+                            if (Math.Round((double)rstopen[F].JAMT) != 0)
+                            {
+                                if (Strings.Mid(Baseknow.OPTIONSS, 13, 1) == "5")
+                                {
+                                    if (Generaly.defacc && !ISHESAB(Baseknow.TFROSH, 3, Convert.ToInt64(rstopen[F].CODE)))
+                                    {
+                                        try
+                                        {
+                                            CREATHES(Baseknow.TFROSH, 3, Convert.ToInt64(rstopen[F].CODE), "تخفيف " + GETKALANAME(Convert.ToDouble(rstopen[F].CODE)));
+
+                                        }
+                                        catch (Exception)
+                                        {
+                                            //DoCmd.OpenForm("MESAG", default, default, default, default, acDialog, "اخطار مهم ...! حساب متناظر كالا در تخفيفات فروش وجود ندارد  و من قادر به ايجاد آن نيستم زيرا يك حساب با همين نام ولي با كد ديگر تعريف شده است لطفا با سرپرست سيستم تماس بگيريد.");
+                                        }
+                                    }
+                                    //SDRST.AddNew(); // تخفيف فروش
+                                    //SDRST.Fields("N_S") = max_ns;
+                                    //SDRST.Fields("HES_K") = Baseknow.TFROSH;
+                                    //SDRST.Fields("HES_M") = 3;
+                                    //SDRST.Fields("HES_T") = rstopen[F].CODE;
+                                    var SHARH_ = Strings.Right("مبلغ برگشت تخفيف فروش فاكتور  شماره " + HFRST[ROW].NUMBER1 + " مورخ" + Strings.Format(HFRST[ROW].DATE_N, "####/##/##"), 255);
+                                    var hes_ = Baseknow.TFROSH + "-3-" + Convert.ToDouble(rstopen[F].CODE);
+                                    var BES_ = Math.Round((double)rstopen[F].JAMT);
+                                    //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                                    //SDRST.Fields("TAG") = 4;
+                                    TAKHF = TAKHF + Math.Round((double)rstopen[F].JAMT);
+
+                                    dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,         HES_K, HES_M,           HES_T,          hes,         SHARH,         BES,           NUMBER,  		 TAG)
+		                                                        VALUES ({max_ns},  			{Baseknow.TFROSH}, 3,     {rstopen[F].CODE},     N'{hes_}', N'{SHARH_}',	  {BES_},	 {HFRST[ROW].NUMBER}  ,4)");
+                                    //SDRST.update();
+                                }
+                                else
+                                {
+                                    if (Generaly.defacc && !ISHESAB(Baseknow.TFROSH, rstopen[F].CUST_KIND, Convert.ToInt64(rstopen[F].CODE)))
+                                    {
+                                        try
+                                        {
+                                            CREATHES(Baseknow.TFROSH, rstopen[F].CUST_KIND, Convert.ToInt64(rstopen[F].CODE), "تخفيف " + GETKALANAME(Convert.ToDouble(rstopen[F].CODE)));
+                                        }
+                                        catch (Exception)
+                                        {
+                                            //DoCmd.OpenForm("MESAG", default, default, default, default, acDialog, "اخطار مهم ...! حساب متناظر تخفيفات كالا  وجود ندارد  و من قادر به ايجاد آن نيستم زيرا يك حساب با همين نام ولي با كد ديگر تعريف شده است لطفا با سرپرست سيستم تماس بگيريد.");
+                                        }
+                                    }
+                                    //SDRST.AddNew(); // تخفيف فروش
+                                    //SDRST.Fields("N_S") = max_ns;
+                                    //SDRST.Fields("HES_K") = Baseknow.TFROSH;
+                                    //SDRST.Fields("HES_M") = rstopen[F].CUST_KIND;
+                                    //SDRST.Fields("HES_T") = rstopen[F].CODE;
+                                    var _SHARH_ = Strings.Right("مبلغ برگشت تخفيف فروش فاكتور  شماره " + HFRST[ROW].NUMBER1 + " مورخ" + Strings.Format(HFRST[ROW].DATE_N, "####/##/##"), 255);
+                                    var _hes_ = Baseknow.TFROSH + "-" + rstopen[F].CUST_KIND + "-" + Convert.ToDouble(rstopen[F].CODE);
+                                    var _BES_ = Math.Round((double)rstopen[F].JAMT);
+                                    //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                                    //SDRST.Fields("TAG") = 4;
+                                    TAKHF = TAKHF + Math.Round((double)rstopen[F].JAMT);
+
+                                    dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,         HES_K,                   HES_M,           HES_T,              hes,         SHARH,          BES,           NUMBER,  	 TAG)
+		                                                        VALUES ({max_ns},  			{Baseknow.TFROSH}, {rstopen[F].CUST_KIND},     {rstopen[F].CODE},     N'{_hes_}', N'{_SHARH_}',	  {_BES_},	 {HFRST[ROW].NUMBER}  ,4)");
+                                    //SDRST.update();
+                                }
+                            }
+                            //rstopen.MoveNext();
+                        }
+                    }
+                    if (HFRST[ROW].TAKHFIF != TAKHF)
+                    {
+                        HFRST[ROW].TAKHFIF = TAKHF;
+                    }
+                }
+                if (HFRST[ROW].MBAA != 0)
+                {
+                    //SDRST.AddNew(); // مالليات بر ارزش افزوده
+                    //SDRST.Fields("N_S") = max_ns;
+                    if (!IsNull(HFRST[ROW].MBAA))
+                    {
+                        GETTAF3(HFRST[ROW].HMBAA, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                    }
+                    //SDRST.Fields("HES_K") = HKOL;
+                    //SDRST.Fields("HES_M") = HMOIN;
+                    //SDRST.Fields("HES_T") = HTAF;
+                    //SDRST.Fields("HES_T2") = HTAF2;
+                    //SDRST.Fields("HES_T3") = HTAF3;
+                    //SDRST.Fields("HES_T4") = HTAF4;
+                    var _hes_ = HFRST[ROW].HMBAA;
+                    var _SHARH_ = Strings.Right(Baseknow.ARSESH + "% ماليات بر ارزش افزوده فاكتور برگشت فروش شماره " + HFRST[ROW].NUMBER1 + " مورخ" + Strings.Format(HFRST[ROW].DATE_N, "####/##/##"), 255);
+                    //SDRST.Fields("BED") = HFRST[ROW].MBAA;
+                    //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                    //SDRST.Fields("TAG") = 4;
+
+                    string HTAF2T = (Convert.ToDouble(HTAF2) == 0 || HTAF2 is null) ? "NULL" : HTAF2.ToString();
+                    string HTAF3T = (Convert.ToDouble(HTAF3) == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
+                    string HTAF4T = (Convert.ToDouble(HTAF4) == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
+
+                    dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,    HES_K,   HES_M,   HES_T, HES_T2,  HES_T3,  HES_T4,      hes,          SHARH,     BED,                     NUMBER, TAG)
+		                                                        VALUES ({max_ns}, {HKOL}, {HMOIN}, {HTAF},{HTAF2T},{HTAF3T},{HTAF4T}, N'{_hes_}', N'{_SHARH_}', {HFRST[ROW].MBAA}, {HFRST[ROW].NUMBER} ,4)");
+                    //SDRST.update();
+                }
+                if (JAMF + HFRST[ROW].MABL_HAZ - HFRST[ROW].TAKHFIF > 0)
+                {
+                    //SDRST.AddNew(); // كل بستانكاري شخص بابت فاكتور
+                    //SDRST.Fields("N_S") = max_ns;
+                    //SDRST.Fields("HES_K") = CKOL;
+                    //SDRST.Fields("HES_M") = CMOIN;
+                    //SDRST.Fields("HES_t") = CTAF;
+                    //SDRST.Fields("HES_T2") = CTAF2;
+                    //SDRST.Fields("HES_T3") = CTAF3;
+                    //SDRST.Fields("HES_T4") = CTAF4;
+                    //SDRST.Fields("hes") = HFRST[ROW].CUST_NO;
+                    var _SHARH_ = Strings.Right("فاكتور برگشت فروش  شماره " + HFRST[ROW].NUMBER + " مورخ" + Strings.Format(HFRST[ROW].DATE_N, "####/##/##") + HFRST[ROW].MOLAH, 255);
+                    var _BES_ = JAMF + HFRST[ROW].MABL_HAZ - HFRST[ROW].TAKHFIF + HFRST[ROW].MBAA;
+                    //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                    //SDRST.Fields("TAG") = 4;
+                    //SDRST.Fields("RADIF") = HFRST[ROW].NUMBER;
+                    //SDRST.update();
+
+                    string CTAF2T = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
+                    string CTAF3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
+                    string CTAF4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+
+                    dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,    HES_K,   HES_M,   HES_T, HES_T2,  HES_T3,  HES_T4,      hes,                    SHARH,      BES,                   NUMBER, TAG,      RADIF)
+		                                                        VALUES ({max_ns}, {CKOL}, {CMOIN}, {CTAF},{CTAF2T},{CTAF3T},{CTAF4T}, N'{HFRST[ROW].CUST_NO}', N'{_SHARH_}', {_BES_}, {HFRST[ROW].NUMBER} ,4,{HFRST[ROW].NUMBER})");
+
+                }
+                // If HFRST[ROW].("MABL_HAZ") <> 0 Then
+                // SDRST.AddNew 'كل بستانكاري شخص بابت خدمات  فاكتور
+                // SDRST.Fields("N_S") = MAX_NS
+                // SDRST.Fields("HES_K") = CKOL
+                // SDRST.Fields("HES_M") = CMOIN
+                // SDRST.Fields("HES_t") = CTAF
+                // SDRST.Fields("SHARH") = Right("خدمات فاكتور برگشت فروش  شماره "  &&  HFRST[ROW].("NUMBER")  &&  " مورخ"  &&  Format(HFRST[ROW].("DATE_N"), "####/##/##"),255)
+                // SDRST.Fields("BES") = HFRST[ROW].("MABL_HAZ")
+                // SDRST.Fields("NUMBER") = HFRST[ROW].("NUMBER")
+                // SDRST.Fields("TAG") = 4
+                // SDRST.update
+                // End If
+                if (HFRST[ROW].M_NAGHD != 0)
+                {
+                    //SDRST.AddNew(); // مبلغ نقدشخص
+                    //SDRST.Fields("N_S") = max_ns;
+                    //SDRST.Fields("HES_K") = CKOL;
+                    //SDRST.Fields("HES_M") = CMOIN;
+                    //SDRST.Fields("HES_t") = CTAF;
+                    //SDRST.Fields("HES_T2") = CTAF2;
+                    //SDRST.Fields("HES_T3") = CTAF3;
+                    //SDRST.Fields("HES_T4") = CTAF4;
+                    //SDRST.Fields("hes") = HFRST[ROW].CUST_NO;
+                    var _SHARH_ = Strings.Right("مبلغ نقد فاكتور برگشت فروش  شماره " + HFRST[ROW].NUMBER + " مورخ" + Strings.Format(HFRST[ROW].DATE_N, "####/##/##"), 255);
+                    var _BED_ = HFRST[ROW].M_NAGHD;
+                    //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                    //SDRST.Fields("TAG") = 4;
+
+                    string CTAF2T = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
+                    string CTAF3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
+                    string CTAF4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+
+                    dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,    HES_K,   HES_M,   HES_T, HES_T2,  HES_T3,  HES_T4,      hes,                    SHARH,        BED,           NUMBER, TAG)
+		                                                        VALUES ({max_ns}, {CKOL}, {CMOIN}, {CTAF},{CTAF2T},{CTAF3T},{CTAF4T}, N'{HFRST[ROW].CUST_NO}', N'{_SHARH_}', {_BED_}, {HFRST[ROW].NUMBER} ,4)");
+                    //SDRST.update();
+                }
+                if (HFRST[ROW].M_NAGHD != 0)
+                {
+                    //SDRST.AddNew(); // مبلغ نقدصندوق
+                    //SDRST.Fields("N_S") = max_ns;
+                    //SDRST.Fields("HES_K") = Baseknow.SANDOGH;
+                    //SDRST.Fields("HES_M") = HFRST[ROW].DEPATMAN;
+                    //SDRST.Fields("HES_T") = HFRST[ROW].SHIFT;
+                    var _hes_ = Baseknow.SANDOGH + "-" + HFRST[ROW].DEPATMAN + "-" + HFRST[ROW].SHIFT;
+                    var _SHARH_ = Strings.Right("مبلغ نقد فاكتور برگشت فروش  شماره " + HFRST[ROW].NUMBER + " مورخ" + Strings.Format(HFRST[ROW].DATE_N, "####/##/##"), 255);
+                    //SDRST.Fields("BES") = HFRST[ROW].M_NAGHD;
+                    //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                    //SDRST.Fields("TAG") = 4;
+
+                    dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,          HES_K,              HES_M,                  HES_T,          hes,        SHARH,           BES,                   NUMBER,     TAG)
+		                                                        VALUES ({max_ns}, {Baseknow.SANDOGH}, {HFRST[ROW].DEPATMAN}, {HFRST[ROW].SHIFT}, N'{_hes_}', N'{_SHARH_}', {HFRST[ROW].M_NAGHD}, {HFRST[ROW].NUMBER} ,4)");
+                    //SDRST.update();
+                }
+                JAMP = 0d;
+                var PRST = dbms.DoGetDataSQL<VISITOR_DTL>("SELECT     dbo.VISITOR_DTL.* FROM dbo.VISITOR_DTL WHERE     (NUMBER = " + HFRST[ROW].NUMBER + ") AND (TAG = 4) ").ToList();
+                var visitorn = "";
+                for (int S = 0; S < PRST.Count; S++) //while (!PRST.EOF)
+                {
+                    visitorn = GETTAFNAME(PRST[S].CUST_NO);
+                    //SDRST.AddNew(); // پورسانت
+                    //var _N_S_ = max_ns;
+                    var _HES_K_ = GETKOL(PRST[S].CUST_NO);
+                    var _HES_M_ = GETMOIN(PRST[S].CUST_NO);
+                    var _HES_T_ = GETTAF(PRST[S].CUST_NO);
+
+                    double? PHKOL = null;
+                    double? PHMOIN = null;
+                    double? PHTAF = null;
+                    double? PHTAF2 = null;
+                    double? PHTAF3 = null;
+                    double? PHTAF4 = null;
+
+                    GETTAF3(PRST[S].CUST_NO, ref PHKOL, ref PHMOIN, ref PHTAF, ref PHTAF2, ref PHTAF3, ref PHTAF4);
+
+                    string _PHTAF2_ = (Convert.ToDouble(PHTAF2) == 0) ? "NULL" : PHTAF2.ToString();
+                    string _PHTAF3_ = (Convert.ToDouble(PHTAF3) == 0) ? "NULL" : PHTAF3.ToString();
+                    string _PHTAF4_ = (Convert.ToDouble(PHTAF4) == 0) ? "NULL" : PHTAF4.ToString();
+
+
+                    var _hes_ = PRST[S].CUST_NO;
+                    var _SHARH_ = Strings.Right(" فاكتور برگشت فروش شماره " + HFRST[ROW].NUMBER + " بابت " + PRST[S].DARSAD + "درصد سهم پورسانت " + GETTAFNAME(PRST[S].CUST_NO) + " مورخ " + Strings.Format(HFRST[ROW].DATE_N, "####/##/##") + Interaction.IIf(IsNull(PRST[S].TOZIH), "", PRST[S].TOZIH), 255);
+                    if ((bool)!PRST[S].STAT)
+                    {
+                        var _iif = Convert.ToDouble(Interaction.IIf(Conversions.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 62, 1)) == 5d, HFRST[ROW].MBAA, 0));
+                        if (Math.Round((double)((JAMF - HFRST[ROW].TAKHFIF + _iif) * PRST[S].DARSAD / 100)) != PRST[S].PURSANT)
+                        {
+                            var _exprif = Convert.ToDouble(Interaction.IIf(Conversions.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 62, 1)) == 5d, HFRST[ROW].MBAA, 0));
+                            PRST[S].PURSANT = Math.Round((double)((JAMF - HFRST[ROW].TAKHFIF + _exprif) * PRST[S].DARSAD / 100));
+
+                            string _where = " WHERE     (NUMBER = " + HFRST[ROW].NUMBER + $") AND (TAG = 4) AND CUST_NO = N'{HFRST[ROW].CUST_NO}' ";
+                            dbms.DoExecuteSQL($@"UPDATE dbo.VISITOR_DTL SET PURSANT = {PRST[S].PURSANT}  {_where} "); //#ERROR
+
+                            //PRST.update();
+                        }
+                    }
+                    else if (PRST[S].DARSAD != PRST[S].PURSANT / (JAMF - HFRST[ROW].TAKHFIF + (Convert.ToDouble(Interaction.IIf(Strings.Mid(Baseknow.OPTIONSS, 61, 1) == "5", HFRST[ROW].MBAA, 0)))) * 100)
+                    {
+                        PRST[S].DARSAD = PRST[S].PURSANT / (JAMF - HFRST[ROW].TAKHFIF + (Convert.ToDouble(Interaction.IIf(Strings.Mid(Baseknow.OPTIONSS, 61, 1) == "5", HFRST[ROW].MBAA, 0)))) * 100;
+                        string _where = " WHERE     (NUMBER = " + HFRST[ROW].NUMBER + $") AND (TAG = 4) AND CUST_NO = N'{HFRST[ROW].CUST_NO}'";
+                        dbms.DoExecuteSQL($"UPDATE  dbo.VISITOR_DTL SET DARSAD = {PRST[S].DARSAD}  {_where} ");
+                        //PRST.update();
+                    }
+
+                    //SDRST.Fields("BEd") = PRST[S].PURSANT;
+                    JAMP = (double)(JAMP + PRST[S].PURSANT);
+                    //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                    //SDRST.Fields("TAG") = 4;
+                    if (PRST[S].PURSANT != 0)
+                    {
+                        dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S,             HES_K,   HES_M,      HES_T,    HES_T2,    HES_T3,   HES_T4,        hes,        SHARH,        BED,           NUMBER,           TAG)
+		                                                        VALUES ({max_ns},    {_HES_K_}, {_HES_M_}, {_HES_T_},{_PHTAF2_},{_PHTAF3_},{_PHTAF4_}, N'{_hes_}', N'{_SHARH_}', {PRST[S].PURSANT}, {HFRST[ROW].NUMBER} ,4)");
+                        //SDRST.update();
+                    }
+                    //PRST.MoveNext();
+                }
+                if (JAMP > 0d)
+                {
+                    //SDRST.AddNew(); // پورسانت
+                    //SDRST.Fields("N_S") = max_ns;
+                    //SDRST.Fields("HES_K") = GETKOL(Baseknow.HPOR);
+                    //SDRST.Fields("HES_M") = GETMOIN(Baseknow.HPOR);
+                    //SDRST.Fields("HES_T") = GETTAF(Baseknow.HPOR);
+                    var _hes = Baseknow.HPOR;
+                    var SHARH_ = Strings.Left("بابت درصد سهم  فاكتور برگشت فروش شماره " + HFRST[ROW].NUMBER + " " + visitorn, 255);
+                    //SDRST.Fields("BES") = JAMP;
+                    //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
+                    //SDRST.Fields("TAG") = 4;
+                    //SDRST.update();
+                    dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,         HES_K,                       HES_M,              HES_T,                         hes,         SHARH,          BES,           NUMBER,  		 TAG)
+		                                                        VALUES ({max_ns}, {GETKOL(Baseknow.HPOR)}, {GETMOIN(Baseknow.HPOR)}, {GETTAF(Baseknow.HPOR)},      N'{_hes}',	  N'{SHARH_}',	   {JAMP},		 {HFRST[ROW].NUMBER}  ,4)");
+                }
+                //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
+                //Forms["GUG"].Form.Refresh();
+                //Forms["GUG"]["Text2"].Requery();
+                //Forms["GUG"].Form.Repaint();
+                //rst.Close();
+                //HFRST.MoveNext();
+                //if (i % CON == 0L)
+                //{
+                //    Forms["GUG"]["Text0"] = Forms["GUG"]["Text0"] + "n";
+                //    Forms["GUG"].Form.Refresh();
+                //    Forms["GUG"]["Text0"].Requery();
+                //    Forms["GUG"].Form.Repaint();
+                //}
+                //i = i + 1L;
+                //Forms["GUG"]["Text2"] = "";
+                //});
+            };
+            LogWriter.WriteLog("پایان فاکتور برگشت فروش" + DateTime.Now.ToString());
+            //DoCmd.Close(acForm, "GUG");
+            // DoCmd.Close acForm, "GENSANADFROOSH"
+            if (InternalCalling)
+            {
+                gensanadbargashfroosh2(fnum, TNUM);
+            }
+        }
+
+        public static void gensanadbargashfroosh2(long fnum, long TNUM, bool InternalCalling = true)
+        {
+            MainWindow auto_run = null;
+            if (InternalCalling)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    //Paint
+                    auto_run = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
+                }));
+            }
+
+            long CON, i;
+            object a = default, fs;
+            double? max_ns, MABL_CHK = 0, JAMF, JAMCH, CKOL = null, JAMFKH;
+            double MBL;
+            double? CMOIN = null, CTAF = null, takh;
+            string shart;
+            int ii;
+            string CH;
+            double JAMP;
+            string TAMIR;
+            string per;
+            long permab;
+            double TAKHF;
+            double? CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null, MAVAD;
+            double DAST;
+            double SAR;
+            double HES_M;
+            double HES_T;
+            string HES;
+            string visitorn = "";
+            var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM DEED_HED").ToList();
+            var HFRST = dbms.DoGetDataSQL<HEAD_LST>("SELECT     * FROM dbo.HEAD_LST WHERE     (NUMBER BETWEEN " + fnum + " AND " + TNUM + ") AND (TAG = 25)").ToList();
+
+            LogWriter.WriteLog("شروع باز سازي از برگشت فروش 2 شماره : " + fnum + " تا فاكتور شماره :" + TNUM + DateTime.Now);
+            //Parallel.For(0, HFRST.Count, HFRST_EOF =>
+            for (int HFRST_EOF = 0; HFRST_EOF < HFRST.Count; HFRST_EOF++) //while (!HFRST.EOF)
+            {
+                if (InternalCalling)
+                {
+                    auto_run.Dispatcher.Invoke(new Action(() =>
+                    {
+                        double progress = (HFRST_EOF + 1) / ((double)HFRST.Count) * 100.0; // Calculate the progress percentage
+                        auto_run.PRGR_C8.Value = progress; // Update the progress bar
+                                                           //                    auto_run.UpdateOverallProgressBar();
+                        auto_run.UpdateOverallProgressBar();
+                        //auto_run.LBL_C8.Content = $"{progress:F2}%";
+                    }));
+                }
+
+                if (!IsNull(HFRST[HFRST_EOF]?.CUST_NO))
+                {
+                    GETTAF3(HFRST[HFRST_EOF].CUST_NO, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+                }
+                string SHSH;
+                SHSH = Strings.Right("فاكتور برگشت فروش شماره " + HFRST[HFRST_EOF].NUMBER + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 100);
+                if ((bool)Baseknow.SNDKH) // سند روزانه است
+                {
+                    List<QRE10> SARST = null;
+                    if (!IsNull(HFRST[HFRST_EOF].N_S)) // فاکتور سند دارد
+                    {
+                        SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 4 and n_s = " + HFRST[HFRST_EOF].N_S).ToList();
+                        if (SARST.Count > 0)  // اگرسند  فاکتورهست
+                        {
+                            if (SARST.Select(x => x.DATE_S).FirstOrDefault() == HFRST[HFRST_EOF].DATE_N) // تاريخ سند و فاکتوريکي است
+                            {
+                                max_ns = (double)HFRST[HFRST_EOF].N_S;
+                            }
+                            else
+                            {
+                            SEJ:
+                                SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 4 and DATE_S = " + HFRST[HFRST_EOF].DATE_N).ToList();
+                                if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                                {
+                                    max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
+                                }
+                                else
+                                {
+                                    max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 4, -1, HFRST[HFRST_EOF].USER_NAME);
+
+                                    HFRST[HFRST_EOF].N_S = max_ns;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //goto SEJ;
+                            SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 4 and DATE_S = " + HFRST[HFRST_EOF].DATE_N).ToList();
+                            if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                            {
+                                max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
+                            }
+                            else
+                            {
+                                max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 4, -1, HFRST[HFRST_EOF].USER_NAME);
+
+                                HFRST[HFRST_EOF].N_S = max_ns;
+                            }
+                        } // چک کن اگه نيست صادر کن
+                    }
+                    else
+                    {
+                        //goto SEJ;
+                        SARST = dbms.DoGetDataSQL<QRE10>("SELECT   BASE,n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 4 and DATE_S = " + HFRST[HFRST_EOF].DATE_N).ToList();
+                        if (SARST.Count > 0)   // اگرسند به تاريخ فاکتورهست
+                        {
+                            max_ns = (double)SARST.Select(x => x.N_S).FirstOrDefault();
+                        }
+                        else
+                        {
+                            max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 4, -1, HFRST[HFRST_EOF].USER_NAME);
+
+                            HFRST[HFRST_EOF].N_S = max_ns;
+                        }
+                    } // چک کن اگه نيست صادر کن
+                }
+                else if (!IsNull(HFRST[HFRST_EOF].N_S)) // تک سندي
+                                                        // فاکتور سند دارد
+                {
+                    var SARST = dbms.DoGetDataSQL<QRE11>("SELECT    n_s,date_s,no_s FROM dbo.deed_hed WHERE     no_s  = 4 and N_s = " + HFRST[HFRST_EOF].N_S).ToList();
+                    if (SARST.Count > 0)   // اگرسند فاکتورهست
+                    {
+                        if (SARST.Select(x => x.DATE_S).FirstOrDefault() != HFRST[HFRST_EOF].DATE_N) // تاريخ سند و فاکتوريکي است
+                        {
+                            dbms.DoExecuteSQL("UPDATE DEED_HED SET DATE_S = " + HFRST[HFRST_EOF].DATE_N + ",SHARH_S = '" + SHSH + "',GHATEI = 0,NO_S = 4,OKF=-1,USER_NAME ='" + HFRST[HFRST_EOF].USER_NAME + "' WHERE N_S =" + HFRST[HFRST_EOF].N_S);
+                        }
+                        max_ns = (double)HFRST[HFRST_EOF].N_S;
+                    }
+                    else
+                    {
+                        max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 4, -1, HFRST[HFRST_EOF].USER_NAME);
+                        HFRST[HFRST_EOF].N_S = max_ns;
+                    }
+                }
+                else
+                {
+                    max_ns = Createsanad((long)HFRST[HFRST_EOF].DATE_N, SHSH, 0, 4, -1, HFRST[HFRST_EOF].USER_NAME);
+                    HFRST[HFRST_EOF].N_S = max_ns;
+                }
+                if (IsNull(HFRST[HFRST_EOF].N_S) || HFRST[HFRST_EOF].N_S != max_ns)
+                {
+                    HFRST[HFRST_EOF].N_S = max_ns;
+                    dbms.DoExecuteSQL($"UPDATE HEAD_LST set n_s = {max_ns} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER} AND (TAG = 25)) ");
+                }
+
+                var JST_0 = dbms.DoGetDataSQL<double?>("SELECT Sum(INVO_LST.MABL_K) AS SumOfMABL_K FROM INVO_LST WHERE ((INVO_LST.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + ") AND (TAG = 24) AND (ANBAR <> 0)").ToList();
+                if (JST_0.Count > 0 && !IsNull(JST_0.FirstOrDefault()))
+                {
+                    JAMF = (double)JST_0.FirstOrDefault();
+                }
+                else
+                {
+                    JAMF = 0d;
+                };
+                var JST_1 = dbms.DoGetDataSQL<double?>("SELECT Sum(INVO_LST.MABL_K) AS SumOfMABL_K FROM INVO_LST WHERE ((INVO_LST.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + ") AND (TAG = 24) AND (ANBAR = 0)").ToList();
+                if (JST_1.Count > 0 && !IsNull(JST_1.FirstOrDefault()))
+                {
+                    JAMFKH = (double)JST_1.FirstOrDefault();
+                }
+                else
+                {
+                    JAMFKH = 0d;
+                };
+                var JST_2 = dbms.DoGetDataSQL<double?>("SELECT Sum(PAY_GETP.MABL) AS SumOfMABL FROM PAY_GETP WHERE (((PAY_GETP.TAG)=24) AND ((PAY_GETP.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + " ))").ToList();
+                if (JST_2.Count > 0 && !IsNull(JST_2.FirstOrDefault()))
+                {
+                    JAMCH = (double)JST_2.FirstOrDefault();
+                }
+                else
+                {
+                    JAMCH = 0d;
+                };
+                TAKHF = 0d;
+                dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE (DEED_DTL.NUMBER = " + HFRST[HFRST_EOF].NUMBER + ") AND (DEED_DTL.TAG= 25 or DEED_DTL.TAG= 25)");
+                //JST.Open("SELECT INVO_LST.MABL_K, INVO_LST.MEGHk, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME, INVO_LST.avrage FROM STUF_DEF INNER JOIN INVO_LST ON (STUF_DEF.CODE = INVO_LST.CODE) AND (STUF_DEF.CODE = INVO_LST.CODE) WHERE (((INVO_LST.NUMBER)=" + HFRST[HFRST_EOF].NUMBER + ") AND ((INVO_LST.TAG)=24)) ", CurrentProject.Connection, adOpenKeyset, adLockOptimistic);
+                var jst_sec = dbms.DoGetDataSQL<QRE12>("SELECT INVO_LST.MABL_K, INVO_LST.MEGHk, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME, INVO_LST.AVRAGE FROM STUF_DEF INNER JOIN INVO_LST ON (STUF_DEF.CODE = INVO_LST.CODE) AND (STUF_DEF.CODE = INVO_LST.CODE) WHERE     (dbo.INVO_LST.NUMBER = " + HFRST[HFRST_EOF].NUMBER + ") AND (dbo.INVO_LST.TAG = 24) ").ToList();
+                for (int jst_sec_EOF = 0; jst_sec_EOF < jst_sec.Count; jst_sec_EOF++)
+                {
+                    if (Strings.Mid(Baseknow.OPTIONSS, 13, 1) == "5")
+                    {
+                        CREATHES(Baseknow.MFROSH, 4, Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), jst_sec[jst_sec_EOF].NAME);
+
+                        dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BED,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{Baseknow.MFROSH},{4},{jst_sec[jst_sec_EOF].CODE}
+                                        ,N'{Baseknow.MFROSH + "-4-" + jst_sec[jst_sec_EOF].CODE}'
+                                        ,N'{Strings.Left("برگشت فروش.  فاكتور شماره " + HFRST[HFRST_EOF].NUMBER + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " برگشت فروش. " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,{Math.Round((double)jst_sec[jst_sec_EOF].MABL_K)},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+                    }
+                    else if (jst_sec[jst_sec_EOF].ANBAR != 0)
+                    {
+                        CREATHES(Baseknow.MFROSH, Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), jst_sec[jst_sec_EOF].NAME);
+                        if (jst_sec[jst_sec_EOF].MABL_K > 0)
+                        {
+
+                            if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                            {
+                                HES_M = 1;
+                                HES_T = 1;
+                                HES = Baseknow.MFROSH + "-1-1";
+                            }
+                            else
+                            {
+                                HES_M = Convert.ToInt64(jst_sec[jst_sec_EOF].CODE);
+                                HES_T = Convert.ToInt64(jst_sec[jst_sec_EOF].CODE);
+                                HES = Baseknow.MFROSH + "-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE) + "-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE);
+                            }
+                            dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BED,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{Baseknow.MFROSH},{HES_M},{HES_T}
+                                        ,N'{HES}'
+                                        ,N'{Strings.Left("برگشت فروش.  فاكتور شماره " + HFRST[HFRST_EOF].NUMBER + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " برگشت فروش. " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,{Math.Round((double)jst_sec[jst_sec_EOF].MABL_K)},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+                        }
+                    }
+                    else
+                    {
+                        CREATHES(Baseknow.DARAM, HFRST[HFRST_EOF].DEPATMAN, Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), jst_sec[jst_sec_EOF].NAME);
+                        dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BED,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{Baseknow.DARAM},{HFRST[HFRST_EOF].DEPATMAN},{Convert.ToInt64(jst_sec[jst_sec_EOF].CODE)}
+                                        ,N'{Baseknow.DARAM + "-" + HFRST[HFRST_EOF].DEPATMAN + "-" + jst_sec[jst_sec_EOF].CODE}'
+                                        ,N'{Strings.Left("برگشت فروش.  فاكتور شماره " + HFRST[HFRST_EOF].NUMBER + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " برگشت فروش. " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,{Math.Round((double)jst_sec[jst_sec_EOF].MABL_K)},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+                    }
+
+                    if (Baseknow.SANAT == true || IsNull(Baseknow.SANAT) || true)
+                    {
+                        MAVAD = Math.Round((double)(GETSTANDARDPRICE_MAVAD(jst_sec[jst_sec_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_sec[jst_sec_EOF].MEGHk));
+                        DAST = Math.Round((double)(GETSTANDARDPRICE_DAST(jst_sec[jst_sec_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_sec[jst_sec_EOF].MEGHk));
+                        SAR = Math.Round((double)(GETSTANDARDPRICE_SAR(jst_sec[jst_sec_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_sec[jst_sec_EOF].MEGHk));
+                        if (Generaly.defacc)
+                        {
+                            CREATHES(Baseknow.MOGODIA, jst_sec[jst_sec_EOF].ANBAR, Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), jst_sec[jst_sec_EOF].NAME);
+                        }
+                        if (MAVAD + DAST + SAR != 0d && Strings.Mid(Baseknow.OPTIONSS, 66, 1) != "5")
+                        {
+                            dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BED,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{Baseknow.MOGODIA},{jst_sec[jst_sec_EOF].ANBAR},{Convert.ToInt64(jst_sec[jst_sec_EOF].CODE)}
+                                        ,N'{Baseknow.MOGODIA + "-" + jst_sec[jst_sec_EOF].ANBAR + "-" + jst_sec[jst_sec_EOF].CODE}'
+                                        ,N'{Strings.Left("برگشت فروش.  فاكتور شماره " + HFRST[HFRST_EOF].NUMBER + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " برگشت فروش. " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,{MAVAD + DAST + SAR},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+                            if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) != 1d)
+                            {
+                                if (Generaly.defacc)
+                                {
+                                    CREATHES(Baseknow.GHEYMAT, Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), jst_sec[jst_sec_EOF].NAME);
+                                }
+                            }
+                            if (MAVAD > 0d)
+                            {
+
+                                if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                                {
+                                    HES_M = 1;
+                                    HES_T = 1;
+                                    HES = Baseknow.GHEYMAT + "-1-1";
+                                }
+                                else
+                                {
+                                    HES_M = Convert.ToInt64(jst_sec[jst_sec_EOF].CODE);
+                                    HES_T = Convert.ToInt64(jst_sec[jst_sec_EOF].CODE);
+                                    HES = Baseknow.GHEYMAT + "-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE) + "-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE);
+                                }
+                                dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{Baseknow.GHEYMAT},{HES_M},{HES_T}
+                                        ,N'{HES}'
+                                        ,N'{Strings.Left("برگشت فروش.  فاكتور شماره " + HFRST[HFRST_EOF].NUMBER + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " برگشت فروش. " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,{MAVAD},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+                            }
+                            if (DAST != 0d)
+                            {
+                                CREATHES(Baseknow.GHEYMAT, Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), 9999999, "دستمزد " + jst_sec[jst_sec_EOF].NAME);
+                                if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                                {
+                                    HES_M = 1;
+                                    HES_T = 9999999;
+                                    HES = Baseknow.GHEYMAT + "-1-9999999";
+                                }
+                                else
+                                {
+                                    HES_M = Convert.ToInt64(jst_sec[jst_sec_EOF].CODE);
+                                    HES_T = 9999999;
+                                    HES = Baseknow.GHEYMAT + "-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE) + "-9999999";
+                                }
+                                dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{Baseknow.GHEYMAT},{HES_M},{HES_T}
+                                        ,N'{HES}'
+                                        ,N'{Strings.Left("برگشت فروش.  فاكتور شماره " + HFRST[HFRST_EOF].NUMBER + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " برگشت فروش. " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,{DAST},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+
+                            }
+                            if (SAR != 0d)
+                            {
+                                CREATHES(Baseknow.GHEYMAT, Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), 9999999, "دستمزد " + jst_sec[jst_sec_EOF].NAME);
+                                if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                                {
+                                    HES_M = 1;
+                                    HES_T = 9999998;
+                                    HES = Baseknow.GHEYMAT + "-1-9999998";
+                                }
+                                else
+                                {
+                                    HES_M = Convert.ToInt64(jst_sec[jst_sec_EOF].CODE);
+                                    HES_T = 9999998;
+                                    HES = Baseknow.GHEYMAT + "-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE) + "-9999998";
+                                }
+                                dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{Baseknow.GHEYMAT},{HES_M},{HES_T}
+                                        ,N'{HES}'
+                                        ,N'{Strings.Left("برگشت فروش.  فاكتور شماره " + HFRST[HFRST_EOF].NUMBER + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " برگشت فروش. " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,{SAR},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+                            }
+                        }
+                        else if (jst_sec[jst_sec_EOF].AVRAGE > 0)
+                        {
+                            dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BED,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{Baseknow.MOGODIA},{jst_sec[jst_sec_EOF].ANBAR},{Convert.ToInt64(jst_sec[jst_sec_EOF].CODE)}
+                                        ,N'{Baseknow.MOGODIA + "-" + jst_sec[jst_sec_EOF].ANBAR + "-" + jst_sec[jst_sec_EOF].CODE}'
+                                        ,N'{Strings.Left("برگشت فروش.  فاكتور شماره " + HFRST[HFRST_EOF].NUMBER + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " برگشت فروش. " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,{Math.Round(jst_sec[jst_sec_EOF].AVRAGE * (double)jst_sec[jst_sec_EOF].MEGHk)},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+                            if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                            {
+                                HES_M = 1;
+                                HES_T = 1;
+                                HES = Baseknow.GHEYMAT + "-1-1";
+                                CREATHES(Baseknow.GHEYMAT, 1, 1, "دستمزد " + jst_sec[jst_sec_EOF].NAME);
+                            }
+                            else
+                            {
+                                HES_M = Convert.ToInt64(jst_sec[jst_sec_EOF].CODE);
+                                HES_T = Convert.ToInt64(jst_sec[jst_sec_EOF].CODE);
+                                HES = Baseknow.GHEYMAT + "-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE) + '-' + Convert.ToInt64(jst_sec[jst_sec_EOF].CODE);
+                                CREATHES(Baseknow.GHEYMAT, HES_M, (long)HES_T, "قیمت تمام شده  " + jst_sec[jst_sec_EOF].NAME);
+                            }
+                            dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{Baseknow.GHEYMAT},{HES_M},{HES_T}
+                                        ,N'{HES}'
+                                        ,N'{Strings.Left("برگشت فروش.  فاكتور شماره " + HFRST[HFRST_EOF].NUMBER + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " برگشت فروش. " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                        ,{Math.Round(jst_sec[jst_sec_EOF].AVRAGE * (double)jst_sec[jst_sec_EOF].MEGHk)},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+                        }
+
+                    }
+                }
+                if (HFRST[HFRST_EOF].MABL_HAZ != 0)
+                {
+                    if (IsNull(HFRST[HFRST_EOF].MOIN_HAZ))
+                    {
+                    }
+                    // DoCmd.OpenForm "MESAG", , , , , acDialog, "اخطار مهم ...! حساب معين سرويس مشخص نشده است و سند صادره ناقص خواهد بود حتما حساب معين سرويس را مشخص نمائيد."
+                    else
+                    {
+                        if (!IsNull(HFRST[HFRST_EOF].MOIN_HAZ))
+                        {
+                            GETTAF3(HFRST[HFRST_EOF].MOIN_HAZ, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                        }
+                        string CTAF2T = (HTAF2 == 0 || HTAF2 is null) ? "NULL" : HTAF2.ToString();
+                        string CTAF3T = (HTAF3 == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
+                        string CTAF4T = (HTAF4 == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
+                        dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,HES_T2,HES_T3,HES_T4,hes,SHARH,BED,NUMBER,ARZD,TAG)
+                      VALUES({max_ns},{HKOL},{HMOIN},{HTAF},{CTAF2T},{CTAF3T},{CTAF4T}
+                                        ,N'{HFRST[HFRST_EOF].MOIN_HAZ}'
+                                        ,N'{Strings.Left("فاكتور برگشت فروش.  شماره" + HFRST[HFRST_EOF].NUMBER + GETTAFNAME(HFRST[HFRST_EOF].MOIN_HAZ), 255)}'
+                                        ,{HFRST[HFRST_EOF].MABL_HAZ},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+
+                    }
+                }
+                if (JAMCH != 0d) // چكهاي دريافتي
+                {
+                    var CHRST = dbms.DoGetDataSQL<PAY_GETP_1>($"SELECT N_SERI, BANK, DATE_S, DATE, SHOBEH, MABL, NAME_TAH, N_HESAB, N_S, N_KOL, N_MOIN, N_TAF, N_KOL2, N_MOIN2, N_TAF2, N_KOL3, N_MOIN3, N_TAF3, NUMBER, TAG, ANBAR, RADIF, CUST_NO, KIND, VAZ, HES1, HES2, HES3 FROM dbo.PAY_GETP WHERE NUMBER = {HFRST[HFRST_EOF].NUMBER} AND TAG = 24").ToList();
+                    if (CHRST.Count > 0 && !IsNull(CHRST.Select(X => X.NUMBER)))
+                    {
+                        //while (!CHRST.EOF)
+                        for (int CHRST_EOF = 0; CHRST_EOF < CHRST.Count; CHRST_EOF++)
+                        {
+                            object N_S, HES_K, HES_T2, HES_T3, BED, HES_T4, SHARH, BES, N_SERI, BANK, NUMBER, TAG, ARZD = null;
+
+                            MABL_CHK = (double)(MABL_CHK + CHRST[CHRST_EOF].MABL);
+                            //SDRST.AddNew(); // اسناد پرداختني
+                            N_S = max_ns;
+                            HES_K = GETKOL(Baseknow.APA);
+                            HES_M = GETMOIN(Baseknow.APA);
+                            HES_T = GETTAF(Baseknow.APA);
+                            HES = Baseknow.APA;
+                            SHARH = Strings.Right("چك " + CHRST[CHRST_EOF].N_SERI + "بانك " + GETBANK(Convert.ToDouble(CHRST[CHRST_EOF].BANK)) + " " + CHRST[CHRST_EOF].SHOBEH + " مورخ " + Strings.Format(CHRST[CHRST_EOF].DATE_S, "####/##/##"), 255);
+                            BES = CHRST[CHRST_EOF].MABL;
+                            N_SERI = CHRST[CHRST_EOF].N_SERI;
+                            BANK = CHRST[CHRST_EOF].BANK;
+                            NUMBER = HFRST[HFRST_EOF].NUMBER;
+                            TAG = 25;
+                            ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S,HES_K,HES_M,HES_T,hes ,SHARH,BES ,N_SERI,BANK,NUMBER,TAG ,ARZD) VALUES ({N_S},{HES_K},{HES_M},{HES_T},N'{HES}',N'{SHARH}',{BES},{N_SERI},{BANK},{NUMBER},{TAG},{ARZD})");
+                            N_S = max_ns;
+                            HES_K = CKOL;
+                            HES_M = (double)CMOIN;
+                            HES_T = (double)CTAF;
+                            HES_T2 = CTAF2;
+                            HES_T3 = CTAF3;
+                            HES_T4 = CTAF4;
+                            HES = HFRST[HFRST_EOF].CUST_NO;
+                            SHARH = Strings.Right("ف.ب.ف." + HFRST[HFRST_EOF].NUMBER1 + " - " + "چك " + CHRST[CHRST_EOF].N_SERI + "بانك " + GETBANK(Convert.ToDouble(CHRST[CHRST_EOF].BANK)) + " " + CHRST[CHRST_EOF].SHOBEH + " مورخ " + Strings.Format(CHRST[CHRST_EOF].DATE_S, "####/##/##"), 255);
+                            BED = CHRST[CHRST_EOF].MABL;
+                            NUMBER = HFRST[HFRST_EOF].NUMBER;
+                            TAG = 25;
+                            ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
+                            //SDRST.update();
+                            string HES_T2T = (Convert.ToDouble(HES_T2) == 0 || HES_T2 is null) ? "NULL" : HES_T2.ToString();
+                            string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
+                            string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
+
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S,HES_K,HES_M,HES_T,HES_T2,HES_T3,HES_T4,hes ,SHARH,BED ,NUMBER,TAG ,ARZD) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{HES}',N'{SHARH}',{BED},{NUMBER},{TAG},{ARZD})");
+                            //CHRST.MoveNext();
+                        }
+                    }
+                }
+                if (HFRST[HFRST_EOF].TAKHFIF != 0)
+                {
+                    var rst = dbms.DoGetDataSQL<QRE_BAZ_17>("SELECT     SUM(dbo.INVO_LST.N_KOL * dbo.INVO_LST.MABL * dbo.INVO_LST.MEGHk / 100) AS JAMT, dbo.INVO_LST.CODE, dbo.HEAD_LST.CUST_KIND FROM dbo.INVO_LST INNER JOIN dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG-1 WHERE (dbo.INVO_LST.NUMBER =" + HFRST[HFRST_EOF].NUMBER + ") And (dbo.INVO_LST.TAG = 24) GROUP BY dbo.INVO_LST.CODE, dbo.HEAD_LST.CUST_KIND").ToList();
+                    if (rst.Count > 0)
+                    {
+                        TAKHF = 0d;
+                        for (int RST_EOF = 0; RST_EOF < rst.Count; RST_EOF++)
+                        {
+                            if (Strings.Mid(Baseknow.OPTIONSS, 13, 1) == "5")
+                            {
+                                CREATHES(Baseknow.TFROSH, 3, Convert.ToInt64(rst[RST_EOF].CODE), "تخفيف " + GETKALANAME(Convert.ToInt64(rst[RST_EOF].CODE)));
+                                dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{Baseknow.TFROSH},3,{Convert.ToInt64(rst[RST_EOF].CODE)}
+                                        ,N'{Baseknow.TFROSH + "-3-" + rst[RST_EOF].CODE}'
+                                        ,N'{Strings.Left("مبلغ برگشت تخفيف فروش. فاكتور  شماره  " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255)}'
+                                        ,{Math.Round((double)rst[RST_EOF].JAMT)},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+                                TAKHF = TAKHF + Math.Round((double)rst[RST_EOF].JAMT);
+                            }
+                            else if (Math.Round((double)rst[RST_EOF].JAMT) != 0)
+                            {
+                                CREATHES(Baseknow.TFROSH, rst[RST_EOF].CUST_KIND, Convert.ToInt64(rst[RST_EOF].CODE), "تخفيف " + GETKALANAME(Convert.ToInt64(rst[RST_EOF].CODE)));
+                                dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{Baseknow.TFROSH},{rst[RST_EOF].CUST_KIND},{Convert.ToInt64(rst[RST_EOF].CODE)}
+                                        ,N'{Baseknow.TFROSH + "-" + rst[RST_EOF].CUST_KIND + "-" + rst[RST_EOF].CODE}'
+                                        ,N'{Strings.Left("مبلغ برگشت تخفيف فروش. فاكتور  شماره   " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255)}'
+                                        ,{Math.Round((double)rst[RST_EOF].JAMT)},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+                                TAKHF = TAKHF + Math.Round((double)rst[RST_EOF].JAMT);
+                            }
+                        }
+                    }
+                    if (HFRST[HFRST_EOF].TAKHFIF != TAKHF)
+                    {
+                        HFRST[HFRST_EOF].TAKHFIF = TAKHF;
+                        dbms.DoExecuteSQL($"UPDATE  dbo.HEAD_LST SET TAKHFIF = {TAKHF}  WHERE ((HEAD_LST.NUMBER = {HFRST[HFRST_EOF].NUMBER}  AND dbo.HEAD_LST.TAG = 24 ) ) ");
+
+                    }
+                }
+                if (HFRST[HFRST_EOF].MBAA != 0)
+                {
+                    // مالليات بر ارزش افزوده
+                    if (HFRST[HFRST_EOF].NUMBER == 6)
+                    {
+
+                    }
+                    if (!IsNull(HFRST[HFRST_EOF].HMBAA))
+                    {
+                        GETTAF3(HFRST[HFRST_EOF].HMBAA, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                    }
+                    string HES_T2T = (Convert.ToDouble(HTAF2) == 0 || HTAF2 is null) ? "NULL" : HTAF2.ToString();
+                    string HES_T3T = (Convert.ToDouble(HTAF3) == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
+                    string HES_T4T = (Convert.ToDouble(HTAF4) == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
+                    dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,HES_T2,HES_T3,HES_T4,hes,SHARH,BED,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{HKOL},{HMOIN},{HTAF},{HES_T2T},{HES_T3T},{HES_T4T}
+                                        ,N'{HFRST[HFRST_EOF].HMBAA}'
+                                        ,N'{Strings.Left(Baseknow.ARSESH + "% ماليات بر ارزش افزوده فاكتور برگشت فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255)}'
+                                        ,{Math.Round((double)HFRST[HFRST_EOF].MBAA)},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+                }
+                if (JAMF + HFRST[HFRST_EOF].MABL_HAZ - HFRST[HFRST_EOF].TAKHFIF + HFRST[HFRST_EOF].MBAA > 0)
+                {
+                    string HES_T2T = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
+                    string HES_T3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
+                    string HES_T4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+                    dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,HES_T2,HES_T3,HES_T4,hes,SHARH,BES,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{CKOL},{CMOIN},{CTAF},{HES_T2T},{HES_T3T},{HES_T4T}
+                                        ,N'{HFRST[HFRST_EOF].CUST_NO}'
+                                        ,N'{Strings.Left("فاكتور برگشت فروش.  شماره" + HFRST[HFRST_EOF].NUMBER + "مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + HFRST[HFRST_EOF].MOLAH, 255)}'
+                                        ,{Math.Round((double)(JAMF + HFRST[HFRST_EOF].MABL_HAZ - HFRST[HFRST_EOF].TAKHFIF + HFRST[HFRST_EOF].MBAA))},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+                }
+
+                if (HFRST[HFRST_EOF].M_NAGHD != 0)
+                {
+                    string HES_T2T = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
+                    string HES_T3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
+                    string HES_T4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+                    dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,HES_T2,HES_T3,HES_T4,hes,SHARH,BED,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{CKOL},{CMOIN},{CTAF},{HES_T2T},{HES_T3T},{HES_T4T}
+                                        ,N'{HFRST[HFRST_EOF].CUST_NO}'
+                                        ,N'{Strings.Left("مبلغ نقد فاكتور برگشت فروش.  شماره" + HFRST[HFRST_EOF].NUMBER + "مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255)}'
+                                        ,{Math.Round((double)(HFRST[HFRST_EOF].M_NAGHD))},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+                }
+                if (HFRST[HFRST_EOF].M_NAGHD != 0)
+                {
+                    dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BED,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{Baseknow.SANDOGH},{HFRST[HFRST_EOF].DEPATMAN},{HFRST[HFRST_EOF].SHIFT}
+                                        ,N'{Baseknow.SANDOGH + "-" + HFRST[HFRST_EOF].DEPATMAN + "-" + HFRST[HFRST_EOF].SHIFT}'
+                                        ,N'{Strings.Left("مبلغ نقد فاكتور برگشت فروش.  شماره" + HFRST[HFRST_EOF].NUMBER + "مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255)}'
+                                        ,{Math.Round((double)(HFRST[HFRST_EOF].M_NAGHD))},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+
+                }
+                JAMP = 0d;
+                var PRST = dbms.DoGetDataSQL<VISITOR_DTL>("SELECT     dbo.VISITOR_DTL.* FROM dbo.VISITOR_DTL WHERE     (NUMBER = " + HFRST[HFRST_EOF].NUMBER + ") AND (TAG = 24) ").ToList();
+                for (int PRST_EOF = 0; PRST_EOF < PRST.Count; PRST_EOF++)
+                {
+                    visitorn = GETTAFNAME(PRST[PRST_EOF].CUST_NO);
+                    if ((bool)!PRST[PRST_EOF].STAT)
+                    {
+                        double sumu = (double)(JAMF - HFRST[HFRST_EOF].TAKHFIF + Convert.ToDouble(Interaction.IIf(Conversions.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 62, 1)) == 5d, HFRST[HFRST_EOF].MBAA, 0)));
+                        //+ Interaction.IIf(Conversions.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 62, 1)) == 5d, HFRST[HFRST_EOF].MBAA, 0)) * PRST[PRST_EOF].DARSAD / 100;
+                        if (Math.Round((double)(sumu * PRST[PRST_EOF].DARSAD / 100)) != PRST[PRST_EOF].PURSANT)
+                        {
+                            PRST[PRST_EOF].PURSANT = Math.Round((double)(sumu * PRST[PRST_EOF].DARSAD / 100));
+                            dbms.DoExecuteSQL($"UPDATE  dbo.VISITOR_DTL SET PURSANT = {Math.Round((double)(sumu * PRST[PRST_EOF].DARSAD / 100))}  WHERE NUMBER = {HFRST[HFRST_EOF].NUMBER} AND(TAG = 24)  AND CUST_NO = N'{PRST[PRST_EOF].CUST_NO}'");
+                        }
+                    }
+                    else if (PRST[PRST_EOF].PURSANT != PRST[PRST_EOF].PURSANT / (JAMF - HFRST[HFRST_EOF].TAKHFIF + (Baseknow.OPTIONSS.Substring(62, 1) == "5" ? HFRST[HFRST_EOF].MBAA : 0)) * 100)
+                    {
+                        PRST[PRST_EOF].DARSAD = PRST[PRST_EOF].PURSANT / (JAMF - HFRST[HFRST_EOF].TAKHFIF + (Baseknow.OPTIONSS.Substring(62, 1) == "5" ? HFRST[HFRST_EOF].MBAA : 0)) * 100;
+                        dbms.DoExecuteSQL($"UPDATE  dbo.VISITOR_DTL SET DARSAD = {PRST[PRST_EOF].DARSAD}  WHERE NUMBER = {HFRST[HFRST_EOF].NUMBER} AND(TAG = 24  AND CUST_NO = N'{PRST[PRST_EOF].CUST_NO}')");
+
+                    }
+                    if (PRST[PRST_EOF].PURSANT != 0)
+                    {
+                        double? PHKOL = null;
+                        double? PHMOIN = null;
+                        double? PHTAF = null;
+                        double? PHTAF2 = null;
+                        double? PHTAF3 = null;
+                        double? PHTAF4 = null;
+                        GETTAF3(PRST[PRST_EOF].CUST_NO, ref PHKOL, ref PHMOIN, ref PHTAF, ref PHTAF2, ref PHTAF3, ref PHTAF4);
+
+                        string _PHTAF2_ = (Convert.ToDouble(PHTAF2) == 0 || PHTAF2 is null) ? "NULL" : PHTAF2.ToString();
+                        string _PHTAF3_ = (Convert.ToDouble(PHTAF3) == 0 || PHTAF3 is null) ? "NULL" : PHTAF3.ToString();
+                        string _PHTAF4_ = (Convert.ToDouble(PHTAF4) == 0 || PHTAF4 is null) ? "NULL" : PHTAF4.ToString();
+
+                        dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,    HES_T2, HES_T3,  HES_T4 ,hes,SHARH,BED,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{GETKOL(PRST[PRST_EOF].CUST_NO)},{GETMOIN(PRST[PRST_EOF].CUST_NO)},{GETTAF(PRST[PRST_EOF].CUST_NO)},{_PHTAF2_},{_PHTAF3_},{_PHTAF4_}    
+                                        ,N'{PRST[PRST_EOF].CUST_NO}'
+                                        ,N'{Strings.Left(" فاكتور برگشت فروش . شماره" + HFRST[HFRST_EOF].NUMBER + "بابت " + PRST[PRST_EOF].DARSAD + "درصد سهم پورسانت " + GETTAFNAME(PRST[PRST_EOF].CUST_NO) + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + Interaction.IIf(IsNull(PRST[PRST_EOF].TOZIH), "", PRST[PRST_EOF].TOZIH), 255)}'
+                                        ,{PRST[PRST_EOF].PURSANT},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+                        JAMP = (double)(JAMP + PRST[PRST_EOF].PURSANT);
+
+                    }
+                }
+                if (JAMP > 0d)
+                {
+                    dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
+                                            VALUES({max_ns},{GETKOL(Baseknow.HPOR)},{GETMOIN(Baseknow.HPOR)},{GETTAF(Baseknow.HPOR)}
+                                        , N'{Baseknow.HPOR}'
+                                        ,N'{Strings.Left("بابت درصد سهم  فاكتور برگشت فروش . شماره" + HFRST[HFRST_EOF].NUMBER + "" + visitorn, 255)}'
+                                        ,{JAMP},
+                                        {HFRST[HFRST_EOF].NUMBER}
+                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                        ,25)");
+
+                };
+
+                //});
+            }
+
+            LogWriter.WriteLog("پایان برگشت فروش 2" + DateTime.Now.ToString());
+
+        }
+
+        public static void SANADKHAD(long NUMBER, long NUMBER2, bool InternalCalling = true)
+        {
+            MainWindow auto_run = null;
+            if (InternalCalling)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    //Paint
+                    auto_run = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
+                }));
+            }
+            long CON, i;
+
+            double? max_ns, MABL_CHK = null, JAMF, JAMCH, CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null, takh;
+            string shart;
+            object a = default, fs;
+            var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM DEED_HED").ToList();
+            var HEDRST = dbms.DoGetDataSQL<HEAD_LST>("SELECT HEAD_LST.* FROM HEAD_LST WHERE (TAG=14) AND (NUMBER >=" + NUMBER + ") AND (NUMBER <=" + NUMBER2 + ")").ToList();
+
+            LogWriter.WriteLog("شروع باز سازي از سند فاکتور خدمات شماره : " + NUMBER + " تا سند شماره :" + NUMBER2 + DateTime.Now);
+            for (int ROW = 0; ROW < HEDRST.Count; ROW++) //while (!HEDRST.EOF)
+            {
+                if (InternalCalling)
+                {
+                    auto_run.Dispatcher.Invoke(new Action(() =>
+                    {
+                        double progress = (ROW + 1) / ((double)HEDRST.Count) * 100.0; // Calculate the progress percentage
+                        auto_run.PRGR_C9.Value = progress; // Update the progress bar
+                        auto_run.UpdateOverallProgressBar();
+                        //                    auto_run.LBL_C9.Content = $"{progress:F2}%";
+                    }));
+                }
+                //DoEvents();
+                //Forms["GUG"]["num"] = i;
+                if (!IsNull(HEDRST[ROW].CUST_NO))
+                {
+                    GETTAF3(HEDRST[ROW].CUST_NO, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+                }
+
+                if (HEDRST[ROW].N_S == null || HEDRST[ROW].N_S == 0)
+                {
+                    var SHARH_S = Strings.Right(" فاكتور خدمات شماره " + HEDRST[ROW].NUMBER + " مورخ " + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##") + " خريدار: " + GETTAFNAME(HEDRST[ROW].CUST_NO), 100);
+                    max_ns = Createsanad(Convert.ToInt64(HEDRST[ROW].DATE_N), SHARH_S, 0, 14, Convert.ToByte(true), HEDRST[ROW].USER_NAME);
+                    HEDRST[ROW].N_S = max_ns;
+                }
+                else
+                {
+                    shart = "NO_S = 14 AND N_S = " + HEDRST[ROW].N_S;
+                    SHRST = dbms.DoGetDataSQL<DEED_HED>($"SELECT * FROM DEED_HED WHERE {shart}").ToList();
+
+                    max_ns = SHRST.FirstOrDefault().N_S;
+                }
+                if (IsNull(HEDRST[ROW].N_S) || HEDRST[ROW].N_S != max_ns)
+                {
+                    HEDRST[ROW].N_S = max_ns;
+                }
+                var JST_0 = dbms.DoGetDataSQL<double?>("SELECT Sum(INVO_LST.MABL_K) AS SumOfMABL_K FROM INVO_LST WHERE (((INVO_LST.NUMBER)= " + HEDRST[ROW].NUMBER + " ) AND ((INVO_LST.TAG)=14))").ToList();
+                if (JST_0.Count > 0 && !IsNull(JST_0.FirstOrDefault()))
+                {
+                    JAMF = (double)JST_0.FirstOrDefault();
+                }
+                else
+                {
+                    JAMF = 0d;
+                };
+                var JST_1 = dbms.DoGetDataSQL<double?>("SELECT Sum(PAY_GETD.MABL) AS SumOfMABL FROM PAY_GETD WHERE (((PAY_GETD.TAG)=14) AND ((PAY_GETD.NUMBER)= " + HEDRST[ROW].NUMBER + " ))").ToList();
+                if (JST_1.Count > 0 && !IsNull(JST_1.FirstOrDefault()))
+                {
+                    JAMCH = (double)JST_1.FirstOrDefault();
+                }
+                else
+                {
+                    JAMCH = 0d;
+                }
+                // Set JST = New ADODB.Recordset
+                dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE (((DEED_DTL.NUMBER)= " + HEDRST[ROW].NUMBER + ") AND ((DEED_DTL.TAG)= 14))");
+
+                if (JAMF != 0d)
+                {
+
+                    var hes_ = HEDRST[ROW].CUST_NO;
+                    var SHARH_ = Strings.Right("فاكتور خدمات شماره " + HEDRST[ROW].NUMBER + " مورخ" + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##") + HEDRST[ROW].MOLAH, 255);
+                    var BED_ = JAMF + HEDRST[ROW].MABL_HAZ + HEDRST[ROW].MBAA;
+
+
+                    string CTAF2T = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
+                    string CTAF3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
+                    string CTAF4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+                    dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,      HES_K, HES_M,   HES_T, HES_T2   ,HES_T3, HES_T4,     hes,        SHARH,   BED, NUMBER, TAG,RADIF)
+		                                                        VALUES ({max_ns}, {CKOL}, {CMOIN}, {CTAF},{CTAF2T},{CTAF3T},{CTAF4T}, N'{hes_}', N'{SHARH_}', {BED_}, {HEDRST[ROW].NUMBER} ,14,{HEDRST[ROW].NUMBER})");
+                }
+
+                var JST = dbms.DoGetDataSQL<QUERY_MODEL3>("SELECT INVO_LST.MABL_K, INVO_LST.MEGHk, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME FROM STUF_DEF INNER JOIN INVO_LST ON (STUF_DEF.CODE = INVO_LST.CODE) AND (STUF_DEF.CODE = INVO_LST.CODE) WHERE (((INVO_LST.NUMBER)=" + HEDRST[ROW].NUMBER + ") AND ((INVO_LST.TAG)=14)); ").ToList();
+                for (int EOF = 0; EOF < JST.Count; EOF++) //while (!JST.EOF())
+                {
+                    if (Generaly.defacc)
+                    {
+                        try
+                        {
+                            CREATHES(Baseknow.DARAM, HEDRST[ROW].DEPATMAN, Convert.ToInt64(JST[EOF].CODE), JST[EOF].NAME); //JST[EOF](4)
+                        }
+                        catch (Exception)
+                        {
+                            LogWriter.WriteLog("فاکتور خدمات خطا در برگه شماره :" + HEDRST[ROW].NUMBER + " نوع :" + HEDRST[ROW].TAG + "اخطار مهم ...! حساب متناظر خدمات در درآمد وجود ندارد  و من قادر به ايجاد آن نيستم زيرا يك حساب با همين نام ولي با كد ديگر تعريف شده است لطفا با سرپرست سيستم تماس بگيريد.");
+                        }
+                    }
+
+                    var hes_ = Baseknow.DARAM + "-" + HEDRST[ROW].DEPATMAN + "-" + Convert.ToDouble(JST[EOF].CODE);
+                    var SHARH_ = Strings.Left("فاكتور خدمات شماره " + HEDRST[ROW].NUMBER + " مورخ " + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##") + " به مقدار" + JST[EOF].MEGHk + " خدمات " + Strings.Trim(JST[EOF].NAME), 255);
+                    var BES_ = JST[EOF].MABL_K;
+
+                    dbms.DoExecuteSQL($@"       INSERT INTO dbo.DEED_DTL (N_S,       HES_K,              HES_M,                  HES_T,         hes,        SHARH,    BES,          NUMBER,       TAG)
+		                                                        VALUES ({max_ns}, {Baseknow.DARAM}, {HEDRST[ROW].DEPATMAN}, {JST[EOF].CODE}, N'{hes_}', N'{SHARH_}', {BES_}, {HEDRST[ROW].NUMBER} ,14)");
+
+                }
+                if (HEDRST[ROW].MABL_HAZ != 0)
+                {
+
+                    var HES_K = GETKOL(HEDRST[ROW].MOIN_HAZ);
+                    var HES_M = GETMOIN(HEDRST[ROW].MOIN_HAZ);
+                    var HES_T = GETTAF(HEDRST[ROW].MOIN_HAZ);
+                    var hes = GETKOL(HEDRST[ROW].MOIN_HAZ) + "-" + GETMOIN(HEDRST[ROW].MOIN_HAZ) + "-" + GETTAF(HEDRST[ROW].MOIN_HAZ);
+                    var SHARH = Strings.Right("سرويس فاكتور خدمات شماره " + HEDRST[ROW].NUMBER + " - " + GETTAFNAME(HEDRST[ROW].MOIN_HAZ), 255);
+
+
+                    dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,     HES_K,   HES_M,   HES_T,     hes,       SHARH,              BES,                NUMBER,      TAG)
+		                                                        VALUES ({max_ns}, {HES_K}, {HES_M}, {HES_T}, N'{hes}', N'{SHARH}', {HEDRST[ROW].MABL_HAZ}, {HEDRST[ROW].NUMBER} ,14)");
+
+                }
+                if (JAMCH != 0d) // چكهاي دريافتي
+                {
+
+                    var Filter_ = "NUMBER = " + HEDRST[ROW].NUMBER + " AND TAG = " + 14;
+                    var CHRST = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE {Filter_}").ToList();
+                    if (CHRST.Count > 0 && !IsNull(CHRST.FirstOrDefault().NUMBER))
+                    {
+                        for (int S = 0; S < CHRST.Count; S++) //while (!CHRST.EOF)
+                        {
+                            MABL_CHK = MABL_CHK + CHRST[S].MABL;
+
+                            var SHARH_ = Strings.Right("چك " + CHRST[S].N_SERI + "بانك " + GETBANK((double)CHRST[S].BANK) + " " + CHRST[S].SHOBEH + " مورخ " + Strings.Format(CHRST[S].DATE_S, "####/##/##"), 255);
+
+
+                            dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S, HES_K,                    HES_M,                     HES_T,               hes,            SHARH,          BED,         N_SERI,               BANK   ,        NUMBER,        TAG)
+		                                                        VALUES ({max_ns}, {GETKOL(Baseknow.ADA)}, {GETMOIN(Baseknow.ADA)}, {GETTAF(Baseknow.ADA)}, N'{Baseknow.ADA}', N'{SHARH_}', {CHRST[S].MABL},{CHRST[S].N_SERI}, {CHRST[S].BANK},{HEDRST[ROW].NUMBER} ,14)");
+
+                            var _SHARH_ = Strings.Right("ف.خ." + HEDRST[ROW].NUMBER + " - " + "چك " + CHRST[S].N_SERI + "بانك " + GETBANK((double)CHRST[S].BANK) + " " + CHRST[S].SHOBEH + " مورخ " + Strings.Format(CHRST[S].DATE_S, "####/##/##"), 255);
+
+                            string CTAF2T = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
+                            string CTAF3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
+                            string CTAF4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+                            dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S, HES_K, HES_M, HES_T,HES_T2,      HES_T3,HES_T4,       hes,                        SHARH,          BES,            NUMBER,        TAG)
+		                                                        VALUES ({max_ns},    {CKOL}, {CMOIN},{CTAF},{CTAF2T}, {CTAF3T}, {CTAF4T}, N'{HEDRST[ROW].CUST_NO}', N'{_SHARH_}', {CHRST[S].MABL}, {HEDRST[ROW].NUMBER} ,14)");
+
+                        }
+                    }
+                    else
+                    {
+                    }
+                }
+
+                if (HEDRST[ROW].M_NAGHD != 0)
+                {
+
+                    var SHARH_ = Strings.Right("مبلغ نقد فاكتور خدمات شماره " + HEDRST[ROW].NUMBER + " مورخ" + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 255);
+
+
+                    string CTAF2T = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
+                    string CTAF3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
+                    string CTAF4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+                    dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,    HES_K, HES_M,    HES_T,  HES_T2,  HES_T3,  HES_T4,    hes,                        SHARH,                    BES,       NUMBER,         TAG)
+		                                                        VALUES ({max_ns},{CKOL}, {CMOIN}, {CTAF},{CTAF2T},{CTAF3T},{CTAF4T}, N'{HEDRST[ROW].CUST_NO}', N'{SHARH_}',  {HEDRST[ROW].M_NAGHD}, {HEDRST[ROW].NUMBER} ,14)");
+
+
+                    //SDRST.update();
+                }
+
+                if (HEDRST[ROW].M_NAGHD != 0)
+                {
+
+                    var hes_ = Baseknow.SANDOGH + "-" + HEDRST[ROW].DEPATMAN + "-" + HEDRST[ROW].SHIFT;
+                    var SHARH_ = Strings.Right("مبلغ نقد فاكتور خدمات شماره " + HEDRST[ROW].NUMBER + " مورخ" + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 255);
+
+
+                    dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,            HES_K,             HES_M,                 HES_T,            hes,       SHARH,             BED,                NUMBER,          TAG)
+		                                                        VALUES ({max_ns}, {Baseknow.SANDOGH}, {HEDRST[ROW].DEPATMAN}, {HEDRST[ROW].SHIFT}, N'{hes_}', N'{SHARH_}', {HEDRST[ROW].M_NAGHD}, {HEDRST[ROW].NUMBER} ,  14)");
+
+                    //SDRST.update();
+                }
+                takh = 0d;
+                if (Baseknow.TKHF == 1)
+                {
+
+                    var hes_ = Baseknow.HDARAM + "-1-1";
+                    var SHARH_ = Strings.Right("مبلغ تخفيف فاكتور خدمات شماره " + HEDRST[ROW].NUMBER + " مورخ" + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 60);
+                    dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,            HES_K,   HES_M, HES_T,     hes,       SHARH,             BED,                 NUMBER,            TAG)
+		                                                        VALUES ({max_ns}, {Baseknow.HDARAM}, 1,      1,    N'{hes_}', N'{SHARH_}', {HEDRST[ROW].TAKHFIF}, {HEDRST[ROW].NUMBER} ,  14)");
+
+                }
+                else if (Baseknow.TKHF == 3)
+                {
+                    var rst_o = dbms.DoGetDataSQL<QUERY_MODEL4>("SELECT     dbo.HEAD_LST.NUMBER, dbo.HEAD_LST.TAG, dbo.INVO_LST.MABL_K, dbo.INVO_LST.N_MOIN, dbo.INVO_LST.CODE, dbo.HEAD_LST.CUST_KIND FROM  dbo.INVO_LST INNER JOIN  dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG WHERE     (dbo.HEAD_LST.NUMBER = " + HEDRST[ROW].NUMBER + ") AND (dbo.HEAD_LST.TAG = 14)").ToList();
+                    if (rst_o.Count > 0)
+                    {
+                        takh = 0d;
+                        for (int U = 0; U < rst_o.Count; U++) //while (!rst.EOF())
+                        {
+                            if (Math.Round((double)rst_o[U].N_MOIN) != 0)
+                            {
+                                if (Generaly.defacc)
+                                {
+                                    try
+                                    {
+                                        CREATHES(Baseknow.HDARAM, HEDRST[ROW].DEPATMAN, Convert.ToInt64(rst_o[U].CODE), "تخفيف " + GETKALANAME(Convert.ToDouble(rst_o[U].CODE)));
+                                    }
+                                    catch (Exception)
+                                    {
+                                        LogWriter.WriteLog("فاکتور خدمات خطا در برگه شماره :" + HEDRST[ROW].NUMBER + " نوع :" + HEDRST[ROW].TAG + "اخطار مهم ...! حساب متناظر تخفيفات كالا  وجود ندارد  و من قادر به ايجاد آن نيستم زيرا يك حساب با همين نام ولي با كد ديگر تعريف شده است لطفا با سرپرست سيستم تماس بگيريد.");
+                                    }
+                                }
+
+                                var SHARH = Strings.Right("مبلغ تخفيف فاكتور خدمات شماره " + HEDRST[ROW].NUMBER + " مورخ" + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 255);
+                                var hes = Baseknow.HDARAM + "-" + HEDRST[ROW].DEPATMAN + "-" + Convert.ToDouble(rst_o[U].CODE);
+                                var BED_ = Math.Round((double)rst_o[U].N_MOIN);
+
+                                takh = takh + Math.Round((double)rst_o[U].N_MOIN);
+
+
+                                dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,            HES_K,             HES_M,                 HES_T,       hes,       SHARH,      BED,        NUMBER,          TAG)
+		                                                                      VALUES ({max_ns}, {Baseknow.HDARAM}, {HEDRST[ROW].DEPATMAN}, {rst_o[U].CODE}, N'{hes}', N'{SHARH}', {BED_}, {HEDRST[ROW].NUMBER} ,  14)");
+                                //SDRST.update();
+                            }
+                            //rst.MoveNext();
+                        }
+                    }
+
+                    if (HEDRST[ROW].TAKHFIF != takh)
+                    {
+                        HEDRST[ROW].TAKHFIF = (double)takh;
+                    }
+                }
+                else
+                {
+                    dbms.DoExecuteSQL("UPDATE    dbo.INVO_LST SET  N_KOL = 0, N_MOIN = 0 WHERE (NUMBER = " + HEDRST[ROW].NUMBER + " ) AND (TAG = 14)");
+                    var rst_w = dbms.DoGetDataSQL<QUERY_MODEL5>("SELECT dbo.INVO_LST.NUMBER,dbo.INVO_LST.id, dbo.INVO_LST.TAG, dbo.TAKHPERS.CUST_CO, dbo.TAKHPERS.TAKH_COD, dbo.TAKHPERS.TAFPER, dbo.INVO_LST.MABL_K, dbo.STUF_DEF.NAME,  dbo.INVO_LST.N_KOL, dbo.INVO_LST.N_MOIN   FROM  dbo.INVO_LST INNER JOIN dbo.TAKHPERS ON dbo.INVO_LST.CODE = dbo.TAKHPERS.TAKH_COD INNER JOIN  dbo.STUF_DEF ON dbo.TAKHPERS.TAKH_COD = dbo.STUF_DEF.CODE WHERE (dbo.INVO_LST.NUMBER = " + HEDRST[ROW].NUMBER + ") And (dbo.INVO_LST.TAG = 14) And (dbo.TAKHPERS.CUST_CO = " + HEDRST[ROW].CUST_KIND + ")").ToList();
+
+                    string _where = " WHERE (dbo.INVO_LST.NUMBER = " + HEDRST[ROW].NUMBER + ") And (dbo.INVO_LST.TAG = 14) And (dbo.TAKHPERS.CUST_CO = " + HEDRST[ROW].CUST_KIND + ")";
+                    if (rst_w.Count > 0)
+                    {
+                        takh = 0d;
+                        for (int Q = 0; Q < rst_w.Count; Q++) //while (!rst.EOF())
+                        {
+                            rst_w[Q].N_KOL = rst_w[Q].TAFPER;
+                            rst_w[Q].N_MOIN = Math.Round((double)(rst_w[Q].MABL_K / 100 * rst_w[Q].TAFPER));
+                            dbms.DoExecuteSQL($"UPDATE INVO_LST SET N_KOL = {rst_w[Q].N_KOL} , N_MOIN = {rst_w[Q].N_MOIN} WHERE id = {rst_w[Q].id}");
+                            //rst.update();
+
+                            if (Math.Round((double)(rst_w[Q].MABL_K / 100 * rst_w[Q].TAFPER)) != 0)
+                            {
+                                if (Generaly.defacc)
+                                {
+                                    try
+                                    {
+                                        CREATHES(Baseknow.HDARAM, HEDRST[ROW].DEPATMAN, Convert.ToInt64(rst_w[Q].TAKH_COD), "تخفيف " + rst_w[Q].NAME);
+                                    }
+                                    catch (Exception)
+                                    {
+                                        LogWriter.WriteLog("فاکتور خدمات خطا در برگه شماره :" + HEDRST[ROW].NUMBER + " نوع :" + HEDRST[ROW].TAG + "اخطار مهم ...! حساب متناظر كالا در تخفيفات درآمد وجود ندارد  و من قادر به ايجاد آن نيستم زيرا يك حساب با همين نام ولي با كد ديگر تعريف شده است لطفا با سرپرست سيستم تماس بگيريد.");
+                                    }
+                                }
+
+                                var hes_ = Baseknow.HDARAM + "-" + HEDRST[ROW].DEPATMAN + "-" + rst_w[Q].TAKH_COD; //(3)
+                                var SHARH_ = Strings.Right("مبلغ تخفيف فاكتور خدمات شماره " + HEDRST[ROW].NUMBER + " مورخ" + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 60);
+                                var _BED = Math.Round((double)(rst_w[Q].MABL_K / 100 * rst_w[Q].TAFPER));
+
+                                takh = takh + Math.Round((double)(rst_w[Q].MABL_K / 100 * rst_w[Q].TAFPER));
+
+
+
+                                dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,            HES_K,             HES_M,                 HES_T,            hes,       SHARH,     BED,         NUMBER,          TAG)
+		                                                                     VALUES ({max_ns}, {Baseknow.HDARAM}, {HEDRST[ROW].DEPATMAN}, {rst_w[Q].TAKH_COD}, N'{hes_}', N'{SHARH_}', {_BED}, {HEDRST[ROW].NUMBER} ,  14)");
+                                //SDRST.update();
+                            }
+                            //rst.MoveNext();
+                        }
+                    }
+                    if (HEDRST[ROW].TAKHFIF != takh)
+                    {
+                        HEDRST[ROW].TAKHFIF = (double)takh;
+                    }
+                }
+
+                if (HEDRST[ROW].TAKHFIF != 0)
+                {
+
+                    var SHARH_ = Strings.Right("مبلغ تخفيف فاكتور خدمات شماره " + HEDRST[ROW].NUMBER + " مورخ" + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 255);
+                    var BES = HEDRST[ROW].TAKHFIF;
+
+                    string CTAF2T = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
+                    string CTAF3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
+                    string CTAF4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+                    dbms.DoExecuteSQL($@" INSERT INTO dbo.DEED_DTL (N_S,    HES_K,   HES_M,    HES_T,  HES_T2,  HES_T3,  HES_T4,        hes,                 SHARH,      BES,               NUMBER, TAG)
+		                                               VALUES ({max_ns},   {CKOL}, {CMOIN},   {CTAF},{CTAF2T},{CTAF3T},{CTAF4T}, N'{HEDRST[ROW].CUST_NO}', N'{SHARH_}',  {BES}, {HEDRST[ROW].NUMBER},  14)");
+                }
+                if (HEDRST[ROW].MABL_HAV != 0)
+                {
+
+                    var SHARH = Strings.Right("مبلغ حواله فاكتور خدمات شماره " + HEDRST[ROW].NUMBER + " مورخ" + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 255);
+
+                    string CTAF2T = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
+                    string CTAF3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
+                    string CTAF4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+
+                    dbms.DoExecuteSQL($@" INSERT INTO dbo.DEED_DTL (N_S,    HES_K,   HES_M,    HES_T,  HES_T2,  HES_T3,  HES_T4,       hes,                  SHARH,             BES,               NUMBER,            TAG)
+		                                               VALUES ({max_ns},   {CKOL}, {CMOIN},   {CTAF},{CTAF2T},{CTAF3T},{CTAF4T}, N'{HEDRST[ROW].CUST_NO}', N'{SHARH}',  {HEDRST[ROW].MABL_HAV}, {HEDRST[ROW].NUMBER},  14)");
+
+
+                    //SDRST.update();
+                }
+
+                if (HEDRST[ROW].MABL_HAV != 0)
+                {
+
+                    var hes_ = GETKOL(HEDRST[ROW].MOIN_HAV) + "-" + GETMOIN(HEDRST[ROW].MOIN_HAV) + "-" + GETTAF(HEDRST[ROW].MOIN_HAV);
+                    var SHARH_ = Strings.Right("مبلغ حواله فاكتور خدمات شماره " + HEDRST[ROW].NUMBER + " مورخ" + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 255);
+                    var BED = HEDRST[ROW].MABL_HAV;
+                    //SDRST.Fields("NUMBER") = HEDRST[ROW].NUMBER;
+                    //SDRST.Fields("TAG") = 14;
+
+
+                    dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,            HES_K,                        HES_M,                          HES_T,                        hes,       SHARH,  BED,        NUMBER,          TAG)
+		                                                        VALUES ({max_ns}, {GETKOL(HEDRST[ROW].MOIN_HAV)}, {GETMOIN(HEDRST[ROW].MOIN_HAV)}, {GETTAF(HEDRST[ROW].MOIN_HAV)}, N'{hes_}', N'{SHARH_}', {BED}, {HEDRST[ROW].NUMBER} ,  14)");
+                    //SDRST.update();
+                }
+
+                if (HEDRST[ROW].MABL_VAR != 0)
+                {
+
+                    var SHARH = Strings.Right("مبلغ واريزي فاكتور خدمات شماره " + HEDRST[ROW].NUMBER + " مورخ" + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 255);
+
+                    string CTAF2T = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
+                    string CTAF3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
+                    string CTAF4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+
+                    dbms.DoExecuteSQL($@" INSERT INTO dbo.DEED_DTL (N_S,    HES_K,   HES_M,    HES_T,  HES_T2,  HES_T3,  HES_T4,            hes,             SHARH,           BES,                    NUMBER, TAG)
+		                                               VALUES ({max_ns},   {CKOL}, {CMOIN},   {CTAF},{CTAF2T},{CTAF3T},{CTAF4T}, N'{HEDRST[ROW].CUST_NO}', N'{SHARH}',  {HEDRST[ROW].MABL_VAR}, {HEDRST[ROW].NUMBER},  14)");
+
+
+                    //SDRST.update();
+                }
+
+                if (HEDRST[ROW].MABL_VAR != 0)
+                {
+                    //SDRST.AddNew(); // مبلغ حواله
+                    //SDRST.Fields("N_S") = max_ns;
+                    var HES_K_ = GETKOL(HEDRST[ROW].MOIN_VAR);
+                    var HES_M_ = GETMOIN(HEDRST[ROW].MOIN_VAR);
+                    var HES_T_ = GETTAF(HEDRST[ROW].MOIN_VAR);
+                    var hes_ = HEDRST[ROW].MOIN_VAR;
+                    var SHARH_ = Strings.Right("مبلغ حواله فاكتور خدمات شماره " + HEDRST[ROW].NUMBER + " مورخ" + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 255);
+                    var BED_ = HEDRST[ROW].MABL_VAR;
+                    //SDRST.Fields("NUMBER") = HEDRST[ROW].NUMBER;
+                    //SDRST.Fields("TAG") = 14;
+
+                    dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S,      HES_K,   HES_M,     HES_T,      hes,       SHARH,    BED,       NUMBER,            TAG)
+		                                                        VALUES ({max_ns}, {HES_K_}, {HES_M_}, {HES_T_}, N'{hes_}', N'{SHARH_}', {BED_}, {HEDRST[ROW].NUMBER} ,  14)");
+                    //SDRST.update();
+                }
+                if (HEDRST[ROW].MBAA != 0)
+                {
+                    //SDRST.AddNew(); // ماليات بر ارزش افزوده
+                    //SDRST.Fields("N_S") = max_ns;
+                    if (!IsNull(HEDRST[ROW].HMBAA))
+                    {
+                        GETTAF3(HEDRST[ROW].HMBAA, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                    }
+
+                    var SHARH = Strings.Right(Baseknow.ARSESH + "% ماليات بر ارزش افزوده فاكتور خدمات شماره " + HEDRST[ROW].NUMBER1 + " مورخ" + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 255);
+
+                    string HTAF2T = (Convert.ToDouble(HTAF2) == 0 || HTAF2 is null) ? "NULL" : HTAF2.ToString();
+                    string HTAF3T = (Convert.ToDouble(HTAF3) == 0 || HTAF3 is null) ? "NULL" : HTAF3.ToString();
+                    string HTAF4T = (Convert.ToDouble(HTAF4) == 0 || HTAF4 is null) ? "NULL" : HTAF4.ToString();
+
+                    dbms.DoExecuteSQL($@" INSERT INTO dbo.DEED_DTL (N_S,    HES_K,   HES_M,    HES_T,  HES_T2,  HES_T3,  HES_T4,        hes,                 SHARH,          BES,               NUMBER,     TAG)
+		                                               VALUES ({max_ns},   {HKOL}, {HMOIN},   {HTAF},{HTAF2T},{HTAF3T},{HTAF4T}, N'{HEDRST[ROW].HMBAA}', N'{SHARH}',  {HEDRST[ROW].MBAA}, {HEDRST[ROW].NUMBER},  14)");
+
+
+                    //SDRST.update();
+                }
+
+            }
+            LogWriter.WriteLog("پایان فاکتور خدمات" + DateTime.Now.ToString());
+            //DoCmd.Close(acForm, "GUG");
+
+
+        }
+
+        public static void GENSANADANBARGARD(long NUMBER, long NUMBER2, bool InternalCalling = true)
+        {
+            object a = default, fs;
+            //   var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM DEED_HED").ToList();
+            var HEDRST = dbms.DoGetDataSQL<QUERY_MODEL2>("SELECT     GRD_NUM, GRD_DATE, GRD_ANBAR, GRD_HES, N_S, COMMENT, USER_NAME FROM     dbo.ANBGRD_HEAD WHERE ((GRD_NUM >= " + NUMBER + " AND GRD_NUM <=" + NUMBER2 + " ) and NOT (N_S IS NULL))").ToList();
+            double progress = 0;
+            MainWindow auto_run = null;
+            if (InternalCalling)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    //Paint
+                    auto_run = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
+                }));
+            }
+
+            LogWriter.WriteLog("شروع باز سازي از انبار گردانی شماره : " + NUMBER + " تا فاكتور شماره :" + NUMBER2 + DateTime.Now);
+            Parallel.For(0, HEDRST.Count, HEDRST_EOF =>
+            {
+                if (InternalCalling)
+                {
+                    auto_run.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progress++;
+                        auto_run.PRGR_C10.Value = progress / ((double)HEDRST.Count) * 100.0;// Update the progress bar
+                        auto_run.UpdateOverallProgressBar();
+
+                    }));
+                }
+
+                double MABL_CHK, JAMF, JAMCH;
+                double? max_ns = null;
+                string shart;
+                bool NEWR;
+                double lastmab;
+
+                var SHSH = Strings.Left(" انبار گرداني شماره " + HEDRST[HEDRST_EOF].GRD_NUM + " از انبار " + HEDRST[HEDRST_EOF].GRD_ANBAR + " مورخ " + Strings.Format(HEDRST[HEDRST_EOF].GRD_DATE, "####/##/##"), 100);
+                if (HEDRST[HEDRST_EOF]?.N_S == null)
+                {
+                    max_ns = Createsanad((long)HEDRST[HEDRST_EOF].GRD_DATE, SHSH, 0, 17, 1, HEDRST[HEDRST_EOF].USER_NAME);
+                    shart = "NO_S = 17 AND N_S = " + max_ns;
+                }
+                else
+                {
+                    shart = "NO_S = 17 AND N_S = " + HEDRST[HEDRST_EOF].N_S;
+                }
+                var SHRST = dbms.DoGetDataSQL<DEED_HED>($"SELECT * FROM DEED_HED WHERE {shart}").ToList();
+
+                if (SHRST.Count == 0)
+                {
+                }
+                else
+                {
+                    max_ns = SHRST.FirstOrDefault().N_S;
+                    dbms.DoExecuteSQL($@"UPDATE dbo.DEED_HED SET	DATE_S = {HEDRST[HEDRST_EOF].GRD_DATE} , SHARH_S = N'{SHSH}' , GHATEI = 0 , NO_S = 17 , OKF = 1 , USER_NAME = N'{HEDRST[HEDRST_EOF].USER_NAME}'  WHERE {shart}");
+                }
+                if (IsNull(HEDRST[HEDRST_EOF].N_S) || HEDRST[HEDRST_EOF].N_S != max_ns)
+                {
+                    HEDRST[HEDRST_EOF].N_S = max_ns;
+                    dbms.DoExecuteSQL($@"UPDATE dbo.DEED_HED SET N_S = {max_ns}  WHERE {shart}");
+
+                };
+                if (!IsNull(HEDRST[HEDRST_EOF].GRD_HES))
+                {
+                    double? CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null;
+                    GETTAF3(HEDRST[HEDRST_EOF].GRD_HES, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+                }
+                dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE N_S = " + HEDRST[HEDRST_EOF].N_S);
+
+                //Main Part Start's
+                var JST = dbms.DoGetDataSQL<QRE_BAZ_18>("SELECT  dbo.ANBGRD_LST.*, MOG - NUM3 AS EKH FROM dbo.ANBGRD_LST WHERE  (MOG - NUM2 <> 0) AND (MOG - NUM1 <> 0) AND GRD_NUM = " + HEDRST[HEDRST_EOF].GRD_NUM).ToList();
+                JAMF = 0d;
+                for (int I = 0; I < JST.Count; I++) // while (!JST.EOF())
+                {
+                    if (Generaly.defacc)
+                    {
+                        CREATHES(Baseknow.MOGODIA, HEDRST[HEDRST_EOF].GRD_ANBAR, Convert.ToInt64(JST[I].CODE), JST[I].CODE);
+                    }
+                    //LogWriter.WriteLog("خطا در برگه شماره :" + HEDRST[HEDRST_EOF].GRD_NUM + "اخطار مهم ...! حساب متناظر كالا در انبار وجود ندارد  و من قادر به ايجاد آن نيستم زيرا يك حساب با همين نام ولي با كد ديگر تعريف شده است لطفا با سرپرست سيستم تماس بگيريد.");
+                    lastmab = Convert.ToDouble(JST[I].MABL);
+                    //lastmab = CL_HESABDARI_AUTO_BAZ.LASTAVRAGE(JST[I].CODE, HEDRST[HEDRST_EOF].GRD_ANBAR, HEDRST[HEDRST_EOF].GRD_DATE);
+
+                    if (Math.Round(lastmab * (double)JST[I].EKH) != 0)
+                    {
+
+                        if (JST[I].EKH > 0)
+                        {
+                            var SHARH = Strings.Left(" انبار گرداني شماره " + HEDRST[HEDRST_EOF].GRD_NUM + " از انبار " + HEDRST[HEDRST_EOF].GRD_ANBAR + " مورخ " + Strings.Format(HEDRST[HEDRST_EOF].GRD_DATE, "####/##/##") + " به مقدار" + JST[I].EKH, 255);
+
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BES)" +
+                                             $"VALUES({max_ns},{Baseknow.MOGODIA},{HEDRST[HEDRST_EOF].GRD_ANBAR},{JST[I].CODE},N'{Baseknow.MOGODIA + "-" + HEDRST[HEDRST_EOF].GRD_ANBAR + "-" + JST[I].CODE}',N'{SHARH}',{Math.Round(lastmab * (double)JST[I].EKH)})");
+
+                        }
+                        else
+                        {
+                            var SHARH = Strings.Left(" انبار گرداني شماره " + HEDRST[HEDRST_EOF].GRD_NUM + " از انبار " + HEDRST[HEDRST_EOF].GRD_ANBAR + " مورخ " + Strings.Format(HEDRST[HEDRST_EOF].GRD_DATE, "####/##/##") + " به مقدار" + JST[I].EKH * -1, 255);
+
+                            dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED) " +
+                                            $"VALUES({max_ns},{Baseknow.MOGODIA},{HEDRST[HEDRST_EOF].GRD_ANBAR},{JST[I].CODE},N'{Baseknow.MOGODIA + "-" + HEDRST[HEDRST_EOF].GRD_ANBAR + "-" + JST[I].CODE}',N'{SHARH}',{Math.Round(lastmab * (double)JST[I].EKH * -1)})");
+
+                        }
+                    }
+                    JST[I].MABL = lastmab;
+                    dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {JST[I].MABL} WHERE GRD_NUM = {HEDRST[HEDRST_EOF].GRD_NUM} AND CODE = N'{JST[I].CODE}'");
+                    JAMF = JAMF + Math.Round(lastmab * (double)JST[I].EKH);
+                }
+
+                if (JAMF != 0d)
+                {
+                    double? CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null;
+                    GETTAF3(HEDRST[HEDRST_EOF].GRD_HES, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+                    string HES_T2T = (Convert.ToDouble(CTAF2) == 0 || CTAF2 is null) ? "NULL" : CTAF2.ToString();
+                    string HES_T3T = (Convert.ToDouble(CTAF3) == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
+                    string HES_T4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
+                    var SHARH = Strings.Left("انبار گرداني شماره " + HEDRST[HEDRST_EOF].GRD_NUM + " از انبار " + HEDRST[HEDRST_EOF].GRD_ANBAR + " مورخ " + Strings.Format(HEDRST[HEDRST_EOF].GRD_DATE, "####/##/##"), 255);
+                    if (JAMF > 0d)
+                    {
+                        //SDRST.Fields("BED") = JAMF;
+                        //dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED)" +
+                        //                  $"VALUES({max_ns},{CKOL},{CMOIN},{CTAF},N'{Baseknow.MOGODIA + "-" + HEDRST[HEDRST_EOF].GRD_ANBAR + "-" + JST[I].CODE}',N'{SHARH}',{Math.Round(lastmab * (double)JST[I].EKH)})");
+                        dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S, HES_K, HES_M, HES_T , HES_T2 , HES_T3 , HES_T4 , HES , SHARH , BED)
+                                             VALUES					({max_ns},{CKOL},{CMOIN},{CTAF},{HES_T2T},{HES_T3T},{HES_T4T},N'{HEDRST[HEDRST_EOF].GRD_HES}',N'{SHARH}',{JAMF})");
+                    }
+                    else
+                    {
+                        //SDRST.Fields("BES") = JAMF * -1;
+                        dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S, HES_K, HES_M, HES_T , HES_T2 , HES_T3 , HES_T4 , HES , SHARH , BES)
+                                             VALUES					({max_ns},{CKOL},{CMOIN},{CTAF},{HES_T2T},{HES_T3T},{HES_T4T},N'{HEDRST[HEDRST_EOF].GRD_HES}',N'{SHARH}',{JAMF * -1})");
+
+                    }
+                    //SDRST.update();
+                }
+                JAMF = 0d;
+
+            });
+            LogWriter.WriteLog("پایان انبار گردانی" + DateTime.Now.ToString());
+        }
+
+        public static void GENSANADVD(object fnum, long TNUM, bool InternalCalling = true)
+        {
+            double progressu = 0;
+            MainWindow auto_run = null;
+            if (InternalCalling)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    //Paint
+                    auto_run = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
+                }));
+            }
+            var HFRST = dbms.DoGetDataSQL<CHKREC_H>($"SELECT     * FROM dbo.CHKREC_H WHERE     (IDH BETWEEN {fnum}  AND  {TNUM} )  ORDER BY IDH").ToList();
+            LogWriter.WriteLog($"شروع باز سازي از سند وصول چكهاي دريافتي شماره :  {fnum} تا سند شماره : {TNUM}" + DateTime.Now);
+            Parallel.For(0, HFRST.Count, ROW => // while (!HFRST.EOF)
+            {
+                string SHRH;
+                double? CKOLV = null, CMOINV = null, CTAFV = null, CTAF2V = null, CTAF3V = null, CTAF4V = null, CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null, CKOLD = null, CMOIND = null, CTAFD = null, CTAF2D = null, CTAF3D = null, CTAF4D = null;
+                double max_ns = 0, MABL_CHK, JAMF, JAMCH;
+                double takh;
+                string shart;
+
+                if (InternalCalling)
+                {
+                    auto_run.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progressu++;
+                        auto_run.PRGR_C11.Value = progressu / ((double)HFRST.Count) * 100.0;
+                        auto_run.UpdateOverallProgressBar();
+                    }));
+                }
+
+                if (IsNull(HFRST.FirstOrDefault().N_S))
+                {
+                    var SHARH_S = "اعلام وصول چكهاي دريافتي";
+                    var UNAME = GETUSERNAME(HFRST[ROW].UID);
+                    max_ns = Createsanad(Convert.ToInt64(HFRST[ROW].DATE), SHARH_S, 0, 6, Convert.ToByte(true), UNAME);
+                }
+                else
+                {
+                    shart = "N_S = " + HFRST[ROW].N_S + " AND  NO_S = 6 ";
+                    var SHRST = dbms.DoGetDataSQL<DEED_HED>($"SELECT * FROM DEED_HED WHERE {shart} ").ToList();
+                    if (SHRST.Count == 0)
+                    {
+                        var SHARH_S = "اعلام وصول چكهاي دريافتي";
+                        var UNAME = GETUSERNAME(HFRST[ROW].UID);
+                        max_ns = Createsanad(Convert.ToInt64(HFRST[ROW].DATE), SHARH_S, 0, 6, Convert.ToByte(true), UNAME);
+                    }
+                    else
+                    {
+                        var SHARH_S = "اعلام وصول چكهاي دريافتي";
+                        var UNAME = GETUSERNAME(HFRST[ROW].UID);
+                        dbms.DoExecuteSQL($@"UPDATE DEED_HED SET DATE_S = {HFRST[ROW].DATE} ,SHARH_S = N'{SHARH_S}' , GHATEI = 0 , NO_S = 6 , OKF = 1 , USER_NAME = N'{UNAME}' WHERE {shart} ");
+
+                    }
+                }
+                if (IsNull(HFRST[ROW].N_S))
+                {
+                    HFRST[ROW].N_S = max_ns;
+                    dbms.DoExecuteSQL($@"UPDATE CHKREC_H SET N_S = {max_ns} WHERE IDH = {HFRST[ROW].IDH}");
+
+                }
+
+                if (!IsNull(HFRST[ROW].N_S))
+                {
+                    dbms.DoExecuteSQL("DELETE FROM DEED_DTL WHERE (((DEED_DTL.N_S)= " + HFRST[ROW].N_S + " ))");
+                };
+                var rst = dbms.DoGetDataSQL<QUERY_MODEL6>(@"SELECT        dbo.CHKREC_H.IDH, dbo.CHRE_LST.N_SERI, dbo.CHRE_LST.BANK, dbo.CHRE_LST.DATE_S, dbo.CHRE_LST.DATE, dbo.CHRE_LST.RADIF, dbo.CHRE_LST.N_MOIN, dbo.CHRE_LST.N_TAF, dbo.CHRE_LST.CRT, 
+                                                        dbo.CHRE_LST.UID, dbo.TCOD_BANKS.NAMES, dbo.PAY_GETD.SHOBEH, dbo.PAY_GETD.N_S, dbo.PAY_GETD.MABL, dbo.PAY_GETD.N_KOL, dbo.PAY_GETD.N_MOIN AS N_MOIN_PGD, dbo.PAY_GETD.N_TAF AS N_TAF_PGD, 
+                                                        dbo.PAY_GETD.KIND, dbo.PAY_GETD.HES1
+                                                           FROM            dbo.CHKREC_H INNER JOIN
+                                                        dbo.CHRE_LST ON dbo.CHKREC_H.DATE = dbo.CHRE_LST.DATE INNER JOIN
+                                                        dbo.PAY_GETD ON dbo.CHRE_LST.N_SERI = dbo.PAY_GETD.N_SERI AND dbo.CHRE_LST.BANK = dbo.PAY_GETD.BANK AND dbo.CHRE_LST.DATE_S = dbo.PAY_GETD.DATE_S INNER JOIN
+                                                        dbo.TCOD_BANKS ON dbo.PAY_GETD.BANK = dbo.TCOD_BANKS.CODE WHERE     (dbo.CHKREC_H.idH = " + HFRST[ROW].IDH + ")").ToList();
+                if (!IsNull(Baseknow.ADA))
+                {
+                    GETTAF3(Baseknow.ADA, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+                }
+                if (!IsNull(Baseknow.ADV))
+                {
+                    GETTAF3(Baseknow.ADV, ref CKOLV, ref CMOINV, ref CTAFV, ref CTAF2V, ref CTAF3V, ref CTAF4V);
+                }
+                for (int A = 0; A < rst.Count; A++) // while (!rst.EOF)
+                {
+
+                    object _HES_K = null;
+                    object _HES_M = null;
+                    object _HES_T = null;
+                    object _HES_T2 = null;
+                    object _HES_T3 = null;
+                    object _HES_T4 = null;
+                    object _hes = null;
+                    if (rst[A].KIND == 1 || IsNull(rst[A].KIND))
+                    {
+                        _HES_K = CKOL;
+                        _HES_M = CMOIN;
+                        _HES_T = CTAF;
+                        _HES_T2 = CTAF2;
+                        _HES_T3 = CTAF3;
+                        _HES_T4 = CTAF4;
+                        _hes = Baseknow.ADA;
+                    }
+                    else
+                    {
+                        _HES_K = CKOLV;
+                        _HES_M = CMOINV;
+                        _HES_T = CTAFV;
+                        _HES_T2 = CTAF2V;
+                        _HES_T3 = CTAF3V;
+                        _HES_T4 = CTAF4V;
+                        _hes = Baseknow.ADV;
+                    }
+
+                    var _SHARH = Strings.Left(" چك " + rst[A].N_SERI + " بانك " + rst[A].NAMES + " " + rst[A].SHOBEH + " مورخ " + Strings.Format(rst[A].DATE_S, "####/##/##"), 255);
+
+                    string _HES_T2T = (Convert.ToDouble(_HES_T2) == 0 || _HES_T2 is null) ? "NULL" : _HES_T2.ToString();
+                    string _HES_T3T = (Convert.ToDouble(_HES_T3) == 0 || _HES_T3 is null) ? "NULL" : _HES_T3.ToString();
+                    string _HES_T4T = (Convert.ToDouble(_HES_T4) == 0 || _HES_T4 is null) ? "NULL" : _HES_T4.ToString();
+
+                    dbms.DoExecuteSQL($@" INSERT INTO dbo.DEED_DTL (N_S,            HES_K,     HES_M,    HES_T,     HES_T2,     HES_T3,   HES_T4,      hes,       SHARH,         BES,           BANK,            N_SERI)
+		                                               VALUES ({HFRST[ROW].N_S},   {_HES_K}, {_HES_M},  {_HES_T},{_HES_T2T},{_HES_T3T},{_HES_T4T}, N'{_hes}', N'{_SHARH}',  {rst[A].MABL}, {rst[A].BANK},  {rst[A].N_SERI})");
+                    //SDRST.update();
+
+                    GETTAF3(rst[A].HES1, ref CKOLD, ref CMOIND, ref CTAFD, ref CTAF2D, ref CTAF3D, ref CTAF4D);
+
+                    var SHARH_ = Strings.Left(" چك " + rst[A].N_SERI + " بانك " + rst[A].NAMES + " " + rst[A].SHOBEH + " مورخ " + Strings.Format(rst[A].DATE_S, "####/##/##"), 255);
+
+                    string HES_T2T_ = (Convert.ToDouble(CTAF2D) == 0 || CTAF2D is null) ? "NULL" : CTAF2D.ToString();
+                    string HES_T3T_ = (Convert.ToDouble(CTAF3D) == 0 || CTAF3D is null) ? "NULL" : CTAF3D.ToString();
+                    string HES_T4T_ = (Convert.ToDouble(CTAF4D) == 0 || CTAF4D is null) ? "NULL" : CTAF4D.ToString();
+
+                    dbms.DoExecuteSQL($@" INSERT INTO dbo.DEED_DTL (N_S,            HES_K,    HES_M,    HES_T,  HES_T2,      HES_T3,  HES_T4,        hes,            SHARH,         BED,           BANK,            N_SERI)
+		                                               VALUES ({HFRST[ROW].N_S},   {CKOLD}, {CMOIND},  {CTAFD},{HES_T2T_},{HES_T3T_},{HES_T4T_}, N'{rst[A].HES1}', N'{SHARH_}',  {rst[A].MABL}, {rst[A].BANK},  {rst[A].N_SERI})");
+
+                    //SDRST.update();
+                    rst[A].N_S = HFRST[ROW].N_S;
+                    //rst.update();
+                    //rst.MoveNext();
+                }
+            });
+            LogWriter.WriteLog("پایان وصول چكهاي دريافتي");
+        }
+
+
+        //AUTO_BAZ_FUNCTIONS ---------------------------------------------------------------------------------------------------------
+    }
+}
+

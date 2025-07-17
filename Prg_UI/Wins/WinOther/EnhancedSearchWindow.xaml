@@ -1,0 +1,68 @@
+﻿<Window x:Class="Wins.WinOther.EnhancedSearchWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        MaxHeight="{Binding Height, Source={x:Static SystemParameters.WorkArea}}"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="IRANYekanFN"
+        Title="Window4" Height="385" Width="551" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+    </Window.Resources>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+    <Grid x:Name="mygrid">
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
+        <Border Background="#FFFAFAFA" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}" CornerRadius="10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label Content="جستجو" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Button x:Name="Btn_Close" Click="Btn_Close_Click" Margin="0,10,13,0" BorderBrush="{x:Null}" Background="Transparent" FontSize="12" Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0" BorderBrush="{x:Null}" Background="Transparent" FontSize="12" Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowMaximize" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0" BorderBrush="{x:Null}" Background="Transparent" FontSize="12" Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                </Grid>
+            </Border>
+        </Border>
+        <Popup x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative" Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <StackPanel Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1" VerticalAlignment="Center" Background="{x:Null}"
+                             Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+        <!--HEADER↑-->
+
+        <!--Start.......................................................................................-->
+
+        <!-- Property Selector -->
+        <StackPanel Orientation="Horizontal" Margin="10,44,10,0" FlowDirection="RightToLeft" Height="57" VerticalAlignment="Top">
+            <TextBlock VerticalAlignment="Center">
+                <Run FlowDirection="RightToLeft" Language="fa-ir" Text="جستجو در بخش:"/>
+            </TextBlock>
+            <ComboBox x:Name="_propertySelector" Width="auto" MinWidth="200" Margin="5,0,0,0"/>
+            <CheckBox x:Name="CHB_MachCase" IsChecked="False" Content="تمام متن" FlowDirection="RightToLeft" Margin="8,0,0,0"/>
+            <Button Content="ریست کردن فیلتر" Click="ResetFilterButton_Click" Style="{StaticResource MaterialDesignFlatButton}" Margin="10,0,0,0" FontSize="12"/>
+        </StackPanel>
+        <!-- Search Box -->
+        <TextBox x:Name="_searchBox" Margin="10,132,10,0" TextChanged="_searchBox_TextChanged" FlowDirection="RightToLeft" Height="31" VerticalAlignment="Top"/>
+        <!-- Results DataGrid -->
+        <DataGrid x:Name="_resultsGrid" Margin="10,174,10,10" AutoGenerateColumns="False" IsReadOnly="True" FlowDirection="RightToLeft"/>
+        
+    </Grid>
+</Window>

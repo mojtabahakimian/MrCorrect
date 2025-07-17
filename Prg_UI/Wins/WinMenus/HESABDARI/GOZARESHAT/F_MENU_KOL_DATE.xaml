@@ -1,0 +1,101 @@
+﻿<Window x:Class="Wins.WinMenus.HESABDARI.GOZARESHAT.F_MENU_KOL_DATE"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Wins.WinMenus.HESABDARI.GOZARESHAT"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        mc:Ignorable="d"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="IRANYekanFN"
+        WindowStartupLocation="CenterScreen"
+        Title="F_MENU_KART" Height="263" Width="571" MinHeight="230" MinWidth="510" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" >
+    <Grid>
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True" Grid.RowSpan="2">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                     Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10">
+                <Grid>
+                    <Label Content="گزارش دفتر کل" Padding="21,10,10,10" Foreground="White"/>
+                    <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
+                        <materialDesign:PackIcon Kind="WindowRestore" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+
+                </Grid>
+            </Border>
+        </Border>
+
+
+
+        <Button x:Name="Command5" Width="81" VerticalAlignment="Top" TabIndex="6" Margin="0,207,0,0" Height="37" HorizontalAlignment="Center" FontSize="12" Foreground="#DDFFFFFF" Content="تایید" Click="Commnd5_Click"/>
+        <Label VerticalAlignment="Top" Margin="0,71,17,0" FlowDirection="RightToLeft" Content="از حساب کل :" HorizontalAlignment="Right" Width="77"/>
+        <xctk:MaskedTextBox x:Name="DT1" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="11111111" Height="26" Margin="388,147,95,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" TabIndex="4" />
+        <Label Content="از تاریخ:" FlowDirection="RightToLeft" Margin="0,144,44,0" VerticalAlignment="Top" Width="49" HorizontalAlignment="Right"/>
+        <ComboBox x:Name="HKOL"    FlowDirection="RightToLeft"
+            Style="{StaticResource FuzzyOutComboBox}"  
+            IsEditable="True"
+            IsSynchronizedWithCurrentItem="True"
+            Margin="0,71,95,0" Padding="7,0,10,0" Height="27"  TabIndex="1" VerticalAlignment="Top"  IsTabStop="True" HorizontalAlignment="Right" Width="137" PreviewLostKeyboardFocus="HKOL_PreviewLostKeyboardFocus">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <ComboBox x:Name="HHKOL"    FlowDirection="RightToLeft"
+            Style="{StaticResource FuzzyOutComboBox}"  
+            IsEditable="True"
+            IsSynchronizedWithCurrentItem="True"
+            Margin="18,71,237,0" Padding="7,0,10,0" Height="27" TabIndex="2"  VerticalAlignment="Top" IsTabStop="True" PreviewLostKeyboardFocus="HHKOL_PreviewLostKeyboardFocus" >
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <Label Width="77" VerticalAlignment="Top" Margin="0,108,18,0" FlowDirection="RightToLeft" Content="تا حساب کل :" HorizontalAlignment="Right"/>
+        <ComboBox x:Name="HKOL2"    FlowDirection="RightToLeft"
+            Style="{StaticResource FuzzyOutComboBox}"  
+            IsEditable="True"
+            IsSynchronizedWithCurrentItem="True"
+            Margin="0,108,95,0" Padding="7,0,10,0" Height="27" TabIndex="3" VerticalAlignment="Top"  IsTabStop="True"  HorizontalAlignment="Right" Width="137" PreviewLostKeyboardFocus="HKOL2_PreviewLostKeyboardFocus">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="99991230" Height="26" Margin="18,147,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Left" Width="88" TabIndex="5" />
+        <Label Content="تا تاریخ:" FlowDirection="RightToLeft" HorizontalAlignment="Left" Margin="108,144,0,0" VerticalAlignment="Top" Width="auto"/>
+        <ComboBox x:Name="HHKOL2"    FlowDirection="RightToLeft"
+            Style="{StaticResource FuzzyOutComboBox}"  
+            IsEditable="True"
+            IsSynchronizedWithCurrentItem="True"
+            Margin="18,108,237,0" Padding="7,0,10,0" Height="27" TabIndex="3" VerticalAlignment="Top"  IsTabStop="True" PreviewLostKeyboardFocus="HHKOL2_PreviewLostKeyboardFocus" >
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+
+
+
+    </Grid>
+</Window>
