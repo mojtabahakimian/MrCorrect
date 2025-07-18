@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Wins.WinMenus.WinAutomasion"
         mc:Ignorable="d"
         
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         FontFamily="IRANYekanFN"
@@ -48,15 +49,23 @@
               ItemsSource="{Binding TASK_DATA}"
               d:ItemsSource="{d:SampleData ItemCount=2}"
               SelectedIndex="0"
+                  
               IsReadOnly="True"
-              FlowDirection="RightToLeft" AutoGenerateColumns="False" EnableRowVirtualization="True" Margin="10,50,10,10">
+              EnableRowVirtualization="True"
+              EnableColumnVirtualization="True"
+              VirtualizingPanel.IsVirtualizing="True"
+              VirtualizingPanel.VirtualizationMode="Recycling"
+              VirtualizingPanel.ScrollUnit="Pixel"
+              ScrollViewer.CanContentScroll="True"
+                  
+              FlowDirection="RightToLeft" AutoGenerateColumns="False" Margin="10,50,10,55">
             <DataGrid.Columns>
 
-                <DataGridTextColumn x:Name="IDNUM" Binding="{Binding IDNUM, UpdateSourceTrigger=PropertyChanged,IsAsync=True}"   Header="شماره" IsReadOnly="True" Width="auto" />
+                <DataGridTextColumn x:Name="IDNUM" Binding="{Binding IDNUM, UpdateSourceTrigger=LostFocus,IsAsync=True}"   Header="شماره" IsReadOnly="True" Width="auto" />
                 <DataGridTextColumn x:Name="iDDColumn" Binding="{Binding IDD}" Header="ردیف" IsReadOnly="True" Width="auto"/>
 
                 <DataGridComboBoxColumn  x:Name="PERSONEL_CMB"  Width="auto"   Header=" مجری "
-                    SelectedValueBinding="{Binding PERSONEL, UpdateSourceTrigger=PropertyChanged,IsAsync=True}" 
+                    SelectedValueBinding="{Binding PERSONEL, UpdateSourceTrigger=LostFocus,IsAsync=True}" 
                     DisplayMemberPath="SAL_NAME" 
                     SelectedValuePath="USERCO">
                     <DataGridComboBoxColumn.EditingElementStyle>
@@ -70,7 +79,7 @@
                 </DataGridComboBoxColumn>
 
                 <!--<DataGridComboBoxColumn  x:Name="COMP_COD_CMB"  Width="auto"   Header="تماس گیرنده"
-                    SelectedValueBinding="{Binding COMP_COD, UpdateSourceTrigger=PropertyChanged,IsAsync=True}" 
+                    SelectedValueBinding="{Binding COMP_COD, UpdateSourceTrigger=LostFocus,IsAsync=True}" 
                     DisplayMemberPath="NAME" 
                     SelectedValuePath="hes">
                     <DataGridComboBoxColumn.EditingElementStyle>
@@ -83,15 +92,15 @@
                     </DataGridComboBoxColumn.EditingElementStyle>
                 </DataGridComboBoxColumn>-->
 
-                <DataGridTextColumn Binding="{Binding NAME, UpdateSourceTrigger=PropertyChanged,IsAsync=True}"  Header="تماس گیرنده" Width="auto" />
-                <DataGridTextColumn Binding="{Binding hes, UpdateSourceTrigger=PropertyChanged,IsAsync=True}" Visibility="Collapsed" Header="کد تماس گیرنده"  Width="auto" />
+                <DataGridTextColumn Binding="{Binding NAME, UpdateSourceTrigger=LostFocus,IsAsync=True}"  Header="تماس گیرنده" Width="auto" />
+                <DataGridTextColumn Binding="{Binding hes, UpdateSourceTrigger=LostFocus,IsAsync=True}" Visibility="Collapsed" Header="کد تماس گیرنده"  Width="auto" />
 
-                <DataGridTextColumn Binding="{Binding TASK, UpdateSourceTrigger=PropertyChanged,IsAsync=True}" Header="وظیفه" MaxWidth="400" Width="auto" />
-                <DataGridTextColumn Binding="{Binding EVENTS, UpdateSourceTrigger=PropertyChanged,IsAsync=True}" Header="رویداد" MaxWidth="400" Width="auto" />
-                <DataGridTextColumn   Binding="{Binding SUMTIME, StringFormat=##:##, UpdateSourceTrigger=PropertyChanged,IsAsync=True}" Header="ساعت کار" Width="auto" />
-                <DataGridTextColumn   Binding="{Binding USERNAME, UpdateSourceTrigger=PropertyChanged,IsAsync=True}" Header="کاربر" Width="auto" />
+                <DataGridTextColumn Binding="{Binding TASK, UpdateSourceTrigger=LostFocus,IsAsync=True}" Header="وظیفه" Width="400"  />
+                <DataGridTextColumn Binding="{Binding EVENTS, UpdateSourceTrigger=LostFocus,IsAsync=True}" Header="رویداد" Width="400" />
+                <DataGridTextColumn   Binding="{Binding SUMTIME, StringFormat=##:##, UpdateSourceTrigger=LostFocus,IsAsync=True}" Header="ساعت کار" Width="auto" />
+                <DataGridTextColumn   Binding="{Binding USERNAME, UpdateSourceTrigger=LostFocus,IsAsync=True}" Header="کاربر" Width="auto" />
 
-                <DataGridTextColumn Binding="{Binding num, UpdateSourceTrigger=PropertyChanged,IsAsync=True}" Header="شماره برگه" Width="auto" />
+                <DataGridTextColumn Binding="{Binding num, UpdateSourceTrigger=LostFocus,IsAsync=True}" Header="شماره برگه" Width="auto" />
 
 
 
@@ -112,12 +121,12 @@
                     </DataGridComboBoxColumn.ElementStyle>
                 </DataGridComboBoxColumn>
 
-                <DataGridTextColumn   Binding="{Binding ENDATE, StringFormat=####/##/##, UpdateSourceTrigger=PropertyChanged,IsAsync=True}" Header="تاریخ انجام"  Width="auto" />
-                <DataGridTextColumn   Binding="{Binding ENTIME, StringFormat=##:##, UpdateSourceTrigger=PropertyChanged,IsAsync=True}" Header="زمان انجام"  Width="auto" />
+                <DataGridTextColumn   Binding="{Binding ENDATE, StringFormat=####/##/##, UpdateSourceTrigger=LostFocus,IsAsync=True}" Header="تاریخ انجام"  Width="auto" />
+                <DataGridTextColumn   Binding="{Binding ENTIME, StringFormat=##:##, UpdateSourceTrigger=LostFocus,IsAsync=True}" Header="زمان انجام"  Width="auto" />
 
                 <DataGridTextColumn x:Name="tgColumn" Binding="{Binding tg}" Header="نوع برگه" Width="auto"/>
                 <DataGridComboBoxColumn x:Name="PERIORITY_CMB" Width="auto"  Header=" اولویت "
-                                        SelectedValueBinding="{Binding PERIORITY, UpdateSourceTrigger=PropertyChanged,IsAsync=True}" 
+                                        SelectedValueBinding="{Binding PERIORITY, UpdateSourceTrigger=LostFocus,IsAsync=True}" 
                                         DisplayMemberPath="PERIORITY_NAME" 
                                         SelectedValuePath="PERIORITY">
                     <DataGridComboBoxColumn.ElementStyle>
@@ -147,7 +156,7 @@
                     </DataGridComboBoxColumn.EditingElementStyle>
                 </DataGridComboBoxColumn>
                 <DataGridComboBoxColumn x:Name="STATUS_CMB" Width="auto"  Header=" وضعیت "
-                                        SelectedValueBinding="{Binding STATUS, UpdateSourceTrigger=PropertyChanged,IsAsync=True}" 
+                                        SelectedValueBinding="{Binding STATUS, UpdateSourceTrigger=LostFocus,IsAsync=True}" 
                                         DisplayMemberPath="STATUS_NAME" 
                                         SelectedValuePath="STATUS">
                     <DataGridComboBoxColumn.ElementStyle>
@@ -172,7 +181,7 @@
                             <TextBlock>
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="Text" Value="{Binding STDATE, StringFormat=####/##/##, UpdateSourceTrigger=PropertyChanged, IsAsync=True}"/>
+                                        <Setter Property="Text" Value="{Binding STDATE, StringFormat=####/##/##, UpdateSourceTrigger=LostFocus, IsAsync=True}"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding STDATE}" Value="{x:Null}">
                                                 <Setter Property="Text" Value=""/>
@@ -190,7 +199,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn   Binding="{Binding STTIME, StringFormat=##:##, UpdateSourceTrigger=PropertyChanged,IsAsync=True}" Header="زمان ارجاع" Width="auto" />
+                <DataGridTextColumn   Binding="{Binding STTIME, StringFormat=##:##, UpdateSourceTrigger=LostFocus,IsAsync=True}" Header="زمان ارجاع" Width="auto" />
 
                 <DataGridTemplateColumn Header="تاریخ انجام" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
@@ -198,7 +207,7 @@
                             <TextBlock>
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="Text" Value="{Binding ENDATE, StringFormat=####/##/##, UpdateSourceTrigger=PropertyChanged, IsAsync=True}"/>
+                                        <Setter Property="Text" Value="{Binding ENDATE, StringFormat=####/##/##, UpdateSourceTrigger=LostFocus, IsAsync=True}"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding ENDATE}" Value="{x:Null}">
                                                 <Setter Property="Text" Value=""/>
@@ -216,7 +225,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn   Binding="{Binding ENTIME, StringFormat=##:##, UpdateSourceTrigger=PropertyChanged,IsAsync=True}" Header="زمان انجام" Width="auto" />
+                <DataGridTextColumn   Binding="{Binding ENTIME, StringFormat=##:##, UpdateSourceTrigger=LostFocus,IsAsync=True}" Header="زمان انجام" Width="auto" />
 
 
                 <DataGridTextColumn x:Name="sEEColumn" Header="دیدن" Width="auto" Binding="{Binding SEE}">
@@ -247,7 +256,7 @@
             </DataGrid.Columns>
         </DataGrid>
 
-
+        <CNC:DataGridNavigationControl x:Name="GR_NAV_DATAGRID" NewButtonEnabled="False" Height="55" TargetDataGrid="{Binding ElementName=DG_SENT_TASKS}" VerticalAlignment="Bottom"/>
     </Grid>
 
     <WindowChrome.WindowChrome>

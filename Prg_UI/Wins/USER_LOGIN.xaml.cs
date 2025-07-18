@@ -44,7 +44,6 @@ namespace Prg_UI.Wins
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         System.Windows.Threading.DispatcherTimer MyTimer;
         bool NowIsReady = false;
-
         public bool Krbri_IsFocused { get; private set; } = false;
 
         private Window GetWindowBasedOnSection(string sectionName)
@@ -298,9 +297,9 @@ namespace Prg_UI.Wins
             //Baseknow.tindata = "0000000000000000000CORRECT";
             //CL_Generaly.IsMrCorrectLocky = true;
 
-            Baseknow.USERCOD = 108;
-            Baseknow.UUSER = "modir-mali";
-
+            //Baseknow.USERCOD = 108;
+            //Baseknow.UUSER = "modir-mali";   
+            
             //Baseknow.USERCOD = 116;
             //Baseknow.UUSER = "Mr.Salmani";
 
@@ -665,128 +664,6 @@ namespace Prg_UI.Wins
             WinConnectionChoose choosing_Connection = new WinConnectionChoose();
             choosing_Connection.ShowDialog();
         }
-
-        #region COMMENTED
-        //private async Task DeletiTemprorayUserFiles()
-        //{
-        //    await Task.Run(() =>
-        //    {
-        //        System.IO.DirectoryInfo di = new DirectoryInfo(Path.GetTempPath());
-        //        GC.Collect();
-        //        GC.WaitForPendingFinalizers();
-        //        foreach (FileInfo file in di.GetFiles())
-        //        {
-        //            try
-        //            {
-        //                file.Delete();
-        //            }
-        //            catch (Exception)
-        //            { }
-        //        }
-        //        foreach (DirectoryInfo dir in di.GetDirectories())
-        //        {
-        //            try
-        //            {
-        //                dir.Delete(true);
-        //            }
-        //            catch (Exception)
-        //            { }
-        //        }
-        //    });
-
-        //}
-        //private async Task LetsSignin()
-        //{
-        //    await Task.Run(() =>
-        //    {
-        //        Dispatcher.Invoke(() =>
-        //        {
-        //            if (Rmzo.Visibility == Visibility.Visible)
-        //            {
-        //                //Dispatcher.Invoke(new Action(() => { }), DispatcherPriority.ContextIdle); 
-        //                Dispatcher.Invoke(() =>
-        //                {
-        //                    SecoRmzo.Clear();
-        //                });
-
-        //            }
-        //            if (SecoRmzo.Visibility == Visibility.Visible)
-        //            {
-        //                Dispatcher.Invoke(() =>
-        //                {
-        //                    Rmzo.Clear();
-        //                });
-        //            }
-        //            byte incorPassEnt = 0;
-
-        //            var USRLST = dbms.DoGetDataSQL<SALA_DTL>("SELECT * FROM SALA_DTL WHERE ENABL = 0 ORDER BY SAL_NAME").ToList();
-        //            foreach (var item in USRLST)
-        //            {
-        //                item.SAL_NAME = CL_HESABDARI.DECODEUN(item.SAL_NAME.ToString()).Replace("ي", "ی").Replace("ك", "ک");
-        //                item.PSAL_NAME = CL_HESABDARI.DECODEPS(item.PSAL_NAME.ToString()).Replace("ي", "ی").Replace("ك", "ک");
-        //            }
-
-        //            var USF = USRLST.Where(x => x.SAL_NAME.Equals(Krbri.Text.Trim().Replace("ي", "ی").Replace("ك", "ک"))).FirstOrDefault();
-
-        //            if (USF != null)
-        //            {
-        //                if (!string.IsNullOrEmpty(Rmzo.Password))
-        //                {
-        //                    //Check User and Pass
-        //                    if (USF.PSAL_NAME.Equals(Rmzo.Password.Trim().Replace("ي", "ی").Replace("ك", "ک")))
-        //                    {
-        //                        PSWORD_AfterUpdate();
-
-        //                        Baseknow.UUSER = CL_HESABDARI.Fixp(Krbri.Text).ToString();
-        //                        Baseknow.USERCOD = USF.IDD;
-        //                        Baseknow.UGRP = USF.GRSAL.ToString();
-        //                        StoreInRegister();
-        //                        Close();
-        //                        new DEFAULT().ShowDialog();
-        //                    }
-        //                    else
-        //                    {
-        //                        //Pop1.IsOpen = true;
-        //                        PopNotifyShow("رمز عبور شما صحیح نیست !");
-
-        //                    }
-        //                }
-        //                else if (!string.IsNullOrEmpty(SecoRmzo.Text))
-        //                {
-        //                    //Check User and Pass
-        //                    if (USF.PSAL_NAME.Equals(SecoRmzo.Text.Trim().Replace("ي", "ی").Replace("ك", "ک")))
-        //                    {
-        //                        PSWORD_AfterUpdate();
-
-        //                        Baseknow.UUSER = CL_HESABDARI.Fixp(Krbri.Text).ToString();
-        //                        Baseknow.USERCOD = USF.IDD;
-        //                        Baseknow.UGRP = USF.GRSAL.ToString();
-        //                        //MessageBox.Show("☺ خودش آمدید ☺");
-        //                        StoreInRegister();
-        //                        DEFAULT dEFAULT = new DEFAULT();
-        //                        Close();
-        //                        dEFAULT.ShowDialog();
-        //                    }
-        //                    else
-        //                    {
-        //                        //Pop1.IsOpen = true;
-        //                        PopNotifyShow("رمز عبور شما صحیح نیست !");
-        //                    }
-        //                }
-        //            }
-        //            else
-        //            {
-        //                PopNotifyShow("نام کاربری صحیح نیست !");
-
-        //                //MessageBox.Show("نام کاربری صحیح نیست !");
-        //            }
-        //            lbloader.Visibility = Visibility.Hidden;
-        //        });
-        //    });
-
-        //}
-        #endregion
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             MyTimer?.Stop();

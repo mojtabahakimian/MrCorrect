@@ -102,22 +102,32 @@ namespace Wins.WinMenus.WinAutomasion
         {
             FILL_ALL_COMBOBOXES();
 
+            ReGetData();
+
+            GR_NAV_DATAGRID.ReGetDataAction = () => //Realod Data
+            {
+                ReGetData();
+            };
+        }
+
+        private void ReGetData()
+        {
             TASK_DATA?.Clear();
-            //var RecordSource = dbms.DoGetDataSQL<TASKS>("SELECT EVENTS.IDNUM, EVENTS.IDD, EVENTS.EVENTS, EVENTS.STDATE, EVENTS.STTIME, EVENTS.USERNAME, EVENTS.COMPANY, EVENTS.SUMTIME, EVENTS.pic, EVENTS.skid, EVENTS.num, EVENTS.tg, TASKS.GR, TASKS.PERSONEL, TASKS.TASK, TASKS.PERIORITY, TASKS.STATUS,  TASKS.STDATE AS STDATEm, TASKS.STTIME AS STTIMEm, TASKS.ENDATE, TASKS.ENTIME, TASKS.USERNAME AS USERNAMEm, TASKS.COMP_COD,TASKS.SUMTIME AS SUMTIMEm, TASKS.pic AS picm, TASKS.ss, TASKS.skid AS skidm, TASKS.num AS numm, TASKS.tg AS tgm, TASKS.CTIM, TASKS.USERCO , TASKS.SEE, TASKS.SEET FROM TASKS INNER JOIN EVENTS ON TASKS.IDNUM = EVENTS.IDNUM WHERE ( EVENTS.USERNAME = N'" + this.OpenArgs + "')  ORDER BY TASKS.IDNUM OPTION (FORCE ORDER, LOOP JOIN, HASH JOIN, ORDER GROUP)").ToList();
             var RecordSource = dbms.DoGetDataSQL<TASKS>($@"SELECT dbo.EVENTS.IDNUM, dbo.EVENTS.IDD, dbo.EVENTS.EVENTS, dbo.EVENTS.STDATE, dbo.EVENTS.STTIME, dbo.EVENTS.USERNAME, dbo.EVENTS.COMPANY, dbo.EVENTS.SUMTIME, dbo.EVENTS.pic, dbo.EVENTS.skid, dbo.EVENTS.num, dbo.EVENTS.tg, dbo.TASKS.GR,
                                                            dbo.TASKS.PERSONEL, dbo.TASKS.TASK, dbo.TASKS.PERIORITY, dbo.TASKS.STATUS, dbo.TASKS.STDATE AS STDATEm, dbo.TASKS.STTIME AS STTIMEm, dbo.TASKS.ENDATE, dbo.TASKS.ENTIME, dbo.TASKS.USERNAME AS USERNAMEm,
                                                            dbo.TASKS.COMP_COD, dbo.CUST_HESAB.NAME, dbo.TASKS.SUMTIME AS SUMTIMEm, dbo.TASKS.pic AS picm, dbo.TASKS.ss, dbo.TASKS.skid AS skidm, dbo.TASKS.num AS numm, dbo.TASKS.tg AS tgm, dbo.TASKS.CTIM, dbo.TASKS.USERCO, dbo.TASKS.SEE, dbo.TASKS.SEET
                                                            FROM dbo.TASKS
                                                                 INNER JOIN dbo.EVENTS ON dbo.TASKS.IDNUM=dbo.EVENTS.IDNUM
                                                                 LEFT OUTER JOIN dbo.CUST_HESAB ON dbo.TASKS.COMP_COD=dbo.CUST_HESAB.hes
-                                                           WHERE(dbo.EVENTS.USERNAME=N'{this.OpenArgs}')
+                                                           WHERE(dbo.EVENTS.USERNAME=N'{this.OpenArgs}' OR dbo.TASKS.USERNAME = N'{this.OpenArgs}')
                                                            ORDER BY TASKS.IDNUM
                                                            OPTION(FORCE ORDER, LOOP JOIN, HASH JOIN, ORDER GROUP)").ToList();
             foreach (var item in RecordSource)
             {
-                TASK_DATA.Add(item);
+                TASK_DATA?.Add(item);
             }
         }
+
         private void FILL_ALL_COMBOBOXES()
         {
             //کبموباکس مجری
