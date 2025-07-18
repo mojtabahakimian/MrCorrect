@@ -106,9 +106,15 @@
                   EnableRowVirtualization="True"
                   VirtualizingPanel.IsVirtualizing="True"
                   VirtualizingPanel.VirtualizationMode="Recycling"
+                  VirtualizingPanel.ScrollUnit="Pixel"
                   ScrollViewer.CanContentScroll="True"
                   FlowDirection="RightToLeft" AutoGenerateColumns="False"  Margin="10,220,3,10" BorderThickness="1"  SelectionChanged="tASKSDataGrid_SelectionChanged" PreviewMouseLeftButtonUp="tASKSDataGrid_PreviewMouseLeftButtonUp" SelectionMode="Single"  PreviewKeyDown="tASKSDataGrid_PreviewKeyDown" IsKeyboardFocusWithinChanged="tASKSDataGrid_IsKeyboardFocusWithinChanged">
-
+                
+                <DataGrid.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </DataGrid.ItemsPanel>
 
                 <DataGrid.Columns>
                     <DataGridCheckBoxColumn x:Name="COLUMN_SELECTIVE" CanUserSort="False" IsReadOnly="False" Header="انتخاب" Binding="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">

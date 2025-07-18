@@ -14,6 +14,7 @@ using Prg_UI.Wins.WinOther;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -31,6 +32,16 @@ using static Prg_Proccessy.SQLMODELS.CTABLES;
 
 namespace Prg_UI.Wins.WinMenus.WinAutomasion
 {
+    public class BulkObservableCollection<T> : ObservableCollection<T>
+    {
+        public void ReplaceAll(IEnumerable<T> items)
+        {
+            Items.Clear();
+            foreach (var item in items)
+                Items.Add(item);
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        }
+    }
     public partial class MAIN : Window
     {
         #region HeaderWindow
@@ -116,7 +127,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
         #endregion
 
         UniversControl universControl = new UniversControl();
-        public ObservableCollection<TASKS> TASK_DATA { get; set; } = new ObservableCollection<TASKS>();
+        public BulkObservableCollection<TASKS> TASK_DATA { get; set; } = new BulkObservableCollection<TASKS>();
         public ObservableCollection<CutsomPeriority_Model> PERIORITY_COMBO_DATA { get; set; } = new ObservableCollection<CutsomPeriority_Model>();
         public ObservableCollection<CutsomStatus_Model> STATUS_COMBO_DATA { get; set; } = new ObservableCollection<CutsomStatus_Model>();
         public ObservableCollection<CUST_HESAB> COMP_COD_DATA { get; set; } = new ObservableCollection<CUST_HESAB>();
@@ -694,11 +705,13 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                 await Task.Delay(100); // Small delay to allow UI to update
                 await this.Dispatcher.InvokeAsync(() =>
                 {
-                    TASK_DATA.Clear();
-                    foreach (var task in RowsTask)
-                    {
-                        TASK_DATA.Add(task);
-                    }
+                    //TASK_DATA.Clear();
+                    //foreach (var task in RowsTask)
+                    //{
+                    //    TASK_DATA.Add(task);
+                    //}
+
+                    TASK_DATA.ReplaceAll(RowsTask);
                 });
             }
             catch (Exception ex)
@@ -789,11 +802,12 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                 // Update the TASK_LST collection on the UI thread
                 await this.Dispatcher.InvokeAsync(() =>
                 {
-                    TASK_DATA.Clear();
-                    foreach (var task in RowsTask)
-                    {
-                        TASK_DATA.Add(task);
-                    }
+                    //TASK_DATA.Clear();
+                    //foreach (var task in RowsTask)
+                    //{
+                    //    TASK_DATA.Add(task);
+                    //}
+                    TASK_DATA.ReplaceAll(RowsTask);
                 });
             }
             catch (Exception ex)
