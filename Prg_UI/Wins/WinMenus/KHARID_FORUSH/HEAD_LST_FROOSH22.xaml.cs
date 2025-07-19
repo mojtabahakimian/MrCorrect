@@ -7548,8 +7548,34 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             //سند زدن
             SANAD();
 
+            try
+            {
+                List<MsgModel> ErrosMessages = new List<MsgModel>();
+
+                var msgs = CL_HESABDARI.RunCalculateVisitorPorsant(Convert.ToInt64(NUMBER.Text), hTAG);
+                foreach (var matn in msgs)
+                {
+                    var normalized = matn
+                        .Replace("(PORID)", "")
+                        .Replace("(STAT=1)", "");
+                    //universControl.PopNotifyShow(normalized, Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+                    ErrosMessages.Add(new MsgModel { MessageText_U = normalized });
+                }
+
+                if (ErrosMessages.Any())
+                {
+                    ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct()
+                        .Select(message => new MsgModel { MessageText_U = message }).ToList();
+                    new MsgListwin(false, ErrosMessages).Show();
+                }
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, $"خطا در محاسبه پورسانت: {ex.Message}").ShowDialog();
+            }
+
             //دریافت مجدد مقادیر از دیتابیس
-            ReGetdata();
+            //ReGetdata();
             VISITOR_DTL_SUB_ReGetData();
             PAY_GETD_SUB_ReGetData();
             TAKHFIF_APLAY_ReGetData();

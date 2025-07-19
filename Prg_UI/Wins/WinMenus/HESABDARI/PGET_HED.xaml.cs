@@ -5505,15 +5505,16 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         private void FocusCell(int rowIndex, string columnName)
         {
-            PGET_LST_SUB.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                if (CL_LMethods.IsValidIndex(PGET_LST_SUB, rowIndex))
-                {
-                    PGET_LST_SUB.SelectedIndex = rowIndex;
-                    PGET_LST_SUB.CurrentCell = new DataGridCellInfo(PGET_LST_SUB.Items[rowIndex], PGET_LST_SUB.Columns.First(c => c.SortMemberPath == columnName));
-                    PGET_LST_SUB.BeginEdit();
-                }
-            }), DispatcherPriority.Background);
+            //PGET_LST_SUB.Dispatcher.BeginInvoke(new Action(() =>
+            //{
+            //    if (CL_LMethods.IsValidIndex(PGET_LST_SUB, rowIndex))
+            //    {
+            //        PGET_LST_SUB.SelectedIndex = rowIndex;
+            //        PGET_LST_SUB.CurrentCell = new DataGridCellInfo(PGET_LST_SUB.Items[rowIndex], PGET_LST_SUB.Columns.First(c => c.SortMemberPath == columnName));
+            //        //PGET_LST_SUB.BeginEdit();
+                    
+            //    }
+            //}), DispatcherPriority.Background);
         }
 
         private void NEWRECORD_BTN_Click(object sender, RoutedEventArgs e)
