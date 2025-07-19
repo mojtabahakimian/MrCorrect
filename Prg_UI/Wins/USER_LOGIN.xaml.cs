@@ -33,9 +33,11 @@ using System.Windows.Threading;
 using Wins.WinMenus.ANBAR;
 using Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.KHARID_FORUSH;
+using Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
 using Wins.WinMenus.Taarif;
 using Wins.WinSetting;
 using static Functions.SMSService.SmsServiceFactory;
+using PGET_HED = Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED;
 
 namespace Prg_UI.Wins
 {
@@ -332,7 +334,7 @@ namespace Prg_UI.Wins
 
             //CL_MenuManager.OpenWinMenu(WinNameType.PGET_HED, this, default);
 
-            //new FMENU_TARAZ_4("FT4").Show(); //لیست تراز چهار ستونی کل
+            new WIN_F_MENU_KHFR("FKHAREDAY").Show(); //لیست تراز چهار ستونی کل
             //new FMENU_TARAZ_4("FT4M").Show(); //ليست تراز آزمايشي چهار ستوني معين  //TARAZ4M
             //new FMENU_TARAZ_4("FT4T").Show(); //ليست تراز آزمايشي چهارستوني تفصيلي  //TARAZ4T
 
