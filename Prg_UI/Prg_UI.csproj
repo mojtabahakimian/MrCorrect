@@ -88,6 +88,7 @@
 		<None Remove="Rpts\Factors\INVOICE_FROOSH_2_1.mrt" />
 		<None Remove="Rpts\Factors\INVOICE_FROOSH_2_MBA.mrt" />
 		<None Remove="Rpts\Factors\INVOICE_FROOSH_2_MBA_22.mrt" />
+		<None Remove="Rpts\Factors\INVOICE_FROOSH_3GRP3.mrt" />
 		<None Remove="Rpts\Factors\INVOICE_FROOSH_BRFR.mrt" />
 		<None Remove="Rpts\Factors\INVOICE_KHADAMAT.mrt" />
 		<None Remove="Rpts\Factors\INVOICE_KHADAMAT2.mrt" />
@@ -476,6 +477,7 @@
 		<EmbeddedResource Include="Rpts\Factors\INVOICE_FROOSH_2_1.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\INVOICE_FROOSH_2_MBA.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\INVOICE_FROOSH_2_MBA_22.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\INVOICE_FROOSH_3GRP3.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\INVOICE_FROOSH_BRFR.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\INVOICE_KHADAMAT.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\INVOICE_KHADAMAT2.mrt" />

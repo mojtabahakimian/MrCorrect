@@ -24,6 +24,7 @@ using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
 using static Prg_UI.Functions.CL_LMethods;
 using System.Diagnostics;
+using Stimulsoft.Report.Components;
 
 namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 {
@@ -87,6 +88,17 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
         UniversControl universControl = new UniversControl();
 
+        public class Q1
+        {
+            public string? hes { get; set; }
+        }
+
+        public class Q2
+        {
+            public string? hes { get; set; }
+            public string? NAME { get; set; }
+        }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
@@ -112,33 +124,47 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
         }
         private void FILL_ALL_COMBOBOXES()
         {
-            HMOIN.ItemsSource = new List<Custom_CUST_HESAB>();
-            HMOIN.DisplayMemberPath = "NAME";
+            HMOIN.ItemsSource = dbms.DoGetDataSQL<Q1>(
+              @"SELECT 
+        RTRIM(CAST(TDETA_HES.N_KOL AS nvarchar)) + '-' +
+        RTRIM(CAST(TDETA_HES.NUMBER AS nvarchar)) + '-' +
+        RTRIM(CAST(TDETA_HES.TNUMBER AS nvarchar)) AS hes
+    FROM TOTA_HES 
+        INNER JOIN DETA_HES ON TOTA_HES.NUMBER = DETA_HES.N_KOL
+        INNER JOIN TDETA_HES ON DETA_HES.NUMBER = TDETA_HES.NUMBER 
+                            AND DETA_HES.N_KOL = TDETA_HES.N_KOL"
+            ).ToList(); HMOIN.DisplayMemberPath = "hes";
             HMOIN.SelectedValuePath = "hes";
 
-            HHMOIN.ItemsSource = HMOIN.ItemsSource;
-            HHMOIN.DisplayMemberPath = "hes";
+            HHMOIN.ItemsSource = dbms.DoGetDataSQL<Q2>(@"SELECT RTRIM(CAST(TDETA_HES.N_KOL AS nvarchar)) + '-' + RTRIM(CAST(TDETA_HES.NUMBER AS nvarchar)) + '-' + RTRIM(CAST(TDETA_HES.TNUMBER AS nvarchar)) AS hes, TDETA_HES.NAME FROM TOTA_HES INNER JOIN DETA_HES INNER JOIN TDETA_HES ON DETA_HES.NUMBER = TDETA_HES.NUMBER AND DETA_HES.N_KOL = TDETA_HES.N_KOL ON TOTA_HES.NUMBER = DETA_HES.N_KOL").ToList();
+            HHMOIN.DisplayMemberPath = "NAME";
             HHMOIN.SelectedValuePath = "hes";
         }
         private void HMOIN_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (HMOIN.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
-            TextBox COMBO_TEX = (TextBox)HMOIN.Template.FindName("PART_EditableTextBox", HMOIN);
 
             if (HMOIN.SelectedValue is not null)
             {
-                if ((HMOIN.SelectedItem as Custom_CUST_HESAB).NAME == COMBO_TEX.Text)
-                {
-                    return;
-                }
+                HHMOIN.SelectedValue = HMOIN.SelectedValue;
             }
 
-            var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(HMOIN, dbms);
-            if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
-            {
-                universControl.PopNotifyShow($"شخص نمی تواند خالی باشد", Pop1, Pop1Text1, Pop_Border1);
-                e.Handled = true;
-            }
+            //TextBox COMBO_TEX = (TextBox)HMOIN.Template.FindName("PART_EditableTextBox", HMOIN);
+
+            //if (HMOIN.SelectedValue is not null)
+            //{
+            //    if ((HMOIN.SelectedItem as Custom_CUST_HESAB).NAME == COMBO_TEX.Text)
+            //    {
+            //        return;
+            //    }
+            //}
+
+            //var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(HMOIN, dbms);
+            //if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
+            //{
+            //    universControl.PopNotifyShow($"شخص نمی تواند خالی باشد", Pop1, Pop1Text1, Pop_Border1);
+            //    e.Handled = true;
+            //}
         }
         private void BTN_GO_Click(object sender, RoutedEventArgs e)
         {
@@ -247,7 +273,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                     //OpenForm("CHEK_PLISTS");
                     break;
 
-                case "FLIST":
+                case "FLIST": //گزارش فاکتور های فروش به اشخاص
                     int tkhf = (int)Baseknow.TKHF;
                     if (tkhf < 3)
                     {
@@ -257,7 +283,35 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                     {
                         if (kindp == 1)
                         {
-                            //OpenReport("INVOICE_FROOSH_3GRP3", $"SADER = 0 AND htag = 2 and date_n >= '{dt1}' AND date_n <= '{dt2}' and cust_no like '{mmoin}'");
+                            //OpenReport("INVOICE_FROOSH_3GRP3");
+
+                            var report = new StiReport();
+                            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.INVOICE_FROOSH_3GRP3.mrt");
+                            report.Load(pathreport);
+                            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+                            report.Dictionary.Databases.Clear();
+                            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
+
+                            report["FDATE_PARM"] = DT1.Text.ToRawTarikh();
+                            report["EDATE_PARM"] = DT2.Text.ToRawTarikh();
+                            report["CUST_PARM"] = HMOIN.SelectedValue.ToString();
+
+                            (report.GetComponentByName("Text73") as StiText).Text = $"تاریخ : {Tarikh.FullCurrentDate}";
+                            (report.GetComponentByName("F_SELL_N") as StiText).Text = Baseknow.NAME.ToString();
+                            (report.GetComponentByName("F_GLOBALNUMBER_N") as StiText).Text = Baseknow.ECODE.ToString();
+                            (report.GetComponentByName("F_CODE_N") as StiText).Text = Baseknow.MCODEM.ToString();
+                            //(report.GetComponentByName("F_OSTAN_N") as StiText).Text = Baseknow.IYALAT.ToString();
+                            //(report.GetComponentByName("F_SHAHR_N") as StiText).Text = Baseknow.CITY.ToString();
+                            //(report.GetComponentByName("F_POSTAL_N") as StiText).Text = Baseknow.PCODE.ToString();
+                            (report.GetComponentByName("F_ADDRESS_N") as StiText).Text = Baseknow.TFADDRESS.ToString();
+                            (report.GetComponentByName("F_TEL_N") as StiText).Text = Baseknow.TFTEL.ToString();
+
+                            //((StiSqlSource)report.Dictionary.DataSources["q_khreed_dayly"]).CommandTimeout = 300;
+
+                            //report.Render();
+                            //report.Show();
+
+                            new Rpts.WINRPT(report, WIN_HEADER_NAME.Content.ToStringNullSafe()).Show();
                         }
                         else
                         {
