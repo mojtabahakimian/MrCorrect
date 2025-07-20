@@ -8988,7 +8988,14 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 {
                     if (!Keyboard.IsKeyDown(Key.Escape))
                     {
-                        e.Cancel = true;
+                        DG.CellEditEnding -= PAY_GETD_SUB22_CellEditEnding;
+                        DG.RowEditEnding -= PAY_GETD_SUB22_RowEditEnding;
+
+                        //DG.CancelEdit(DataGridEditingUnit.Cell);
+                        DG.CancelEdit();
+
+                        DG.RowEditEnding += PAY_GETD_SUB22_RowEditEnding;
+                        DG.CellEditEnding += PAY_GETD_SUB22_CellEditEnding;
 
                         ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct()
                             .Select(message => new MsgModel { MessageText_U = message }).ToList();
@@ -9207,16 +9214,37 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                 DG.Dispatcher.Invoke(() =>
                 {
-                    e.Cancel = true;
+                    //e.Cancel = true;
 
-                    //DG.CellEditEnding -= PAY_GETD_SUB22_CellEditEnding;
-                    //DG.RowEditEnding -= PAY_GETD_SUB22_RowEditEnding;
+                    DG.CellEditEnding -= PAY_GETD_SUB22_CellEditEnding;
+                    DG.RowEditEnding -= PAY_GETD_SUB22_RowEditEnding;
 
-                    ////DG.CancelEdit();
+                    DG.CancelEdit();
 
-                    //DG.RowEditEnding += PAY_GETD_SUB22_RowEditEnding;
-                    //DG.CellEditEnding += PAY_GETD_SUB22_CellEditEnding;
+                    DG.RowEditEnding += PAY_GETD_SUB22_RowEditEnding;
+                    DG.CellEditEnding += PAY_GETD_SUB22_CellEditEnding;
                 });
+
+                #region MyRegion
+
+                //e.Cancel = true;
+
+                // عملیات مهم: دوباره سطر را به حالت ویرایش بازگردانید (به صورت async تا از تراکنش خارج شود)
+                //DG.Dispatcher.BeginInvoke(new Action(() =>
+                //{
+                //    DG.CellEditEnding -= PAY_GETD_SUB22_CellEditEnding;
+                //    DG.RowEditEnding -= PAY_GETD_SUB22_RowEditEnding;
+
+                //    DG.SelectedItem = FINAL_CROW_ITEM;
+                //    DG.ScrollIntoView(FINAL_CROW_ITEM);
+                //    DG.CurrentCell = new DataGridCellInfo(FINAL_CROW_ITEM, DG.Columns[0]);
+                //    DG.BeginEdit();
+
+                //    DG.RowEditEnding += PAY_GETD_SUB22_RowEditEnding;
+                //    DG.CellEditEnding += PAY_GETD_SUB22_CellEditEnding;
+
+                //}), System.Windows.Threading.DispatcherPriority.Background);
+                #endregion
 
                 return;
             }

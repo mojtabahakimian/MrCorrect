@@ -6,6 +6,7 @@ using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
+using Prg_UI.CUC;
 using Prg_UI.Functions;
 using Prg_UI.Functions.Jostejoo;
 using Prg_UI.HelperWins;
@@ -32,16 +33,6 @@ using static Prg_Proccessy.SQLMODELS.CTABLES;
 
 namespace Prg_UI.Wins.WinMenus.WinAutomasion
 {
-    public class BulkObservableCollection<T> : ObservableCollection<T>
-    {
-        public void ReplaceAll(IEnumerable<T> items)
-        {
-            Items.Clear();
-            foreach (var item in items)
-                Items.Add(item);
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-        }
-    }
     public partial class MAIN : Window
     {
         #region HeaderWindow
@@ -730,105 +721,47 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             }
         }
 
-        private async Task DoLoadKartabl_Old1(bool _IsFirstTime_ = false)
-        {
-            CanUisBeActive = false;
-
-            int gronum = Convert.ToInt32(((RadioButton)gro.Children.Cast<UIElement>().FirstOrDefault(r => r is RadioButton rb && rb.IsChecked == true))?.Tag);
-
-            string status = "1";
-            if (AnjamNashodeh.IsChecked == true)
-                status = "(dbo.TASKS.STATUS = 1) AND ";
-            if (AnjamShode.IsChecked == true)
-                status = "(dbo.TASKS.STATUS = 2) AND ";
-            if (LaghvShodeh.IsChecked == true)
-                status = "(dbo.TASKS.STATUS = 3) AND ";
-            if (Hameh.IsChecked == true)
-                status = "";
-
-            string personelValue = UNVDER_PERSONEL.SelectedValue != null ? UNVDER_PERSONEL.SelectedValue.ToString() : Baseknow.USERCOD.ToString();
-
-            string query = @$"SELECT dbo.TASKS.IDNUM, dbo.CUST_HESAB.NAME, dbo.TASKS.GR, dbo.TASKS.PERSONEL, dbo.TASKS.TASK, dbo.TASKS.PERIORITY, dbo.TASKS.STATUS, dbo.TASKS.STDATE,
-                              dbo.TASKS.STTIME, dbo.TASKS.ENDATE, dbo.TASKS.ENTIME, dbo.TASKS.USERNAME, dbo.TASKS.COMP_COD, dbo.TASKS.SUMTIME, dbo.TASKS.pic, dbo.TASKS.ss, dbo.TASKS.skid, dbo.TASKS.num,
-                              dbo.TASKS.tg, dbo.TASKS.CTIM, dbo.TASKS.USERCO, dbo.TASKS.SEE
-                              FROM dbo.TASKS
-                                   LEFT OUTER JOIN dbo.CUST_HESAB ON dbo.TASKS.COMP_COD=dbo.CUST_HESAB.hes
-                              WHERE {status} ({(gronum == 1000 ? "IDNUM > 0" : $"TASKS.skid = {gronum}")}) AND (dbo.TASKS.PERSONEL = {personelValue})  
-                              ORDER BY TASKS.IDNUM";
-
-            try
-            {
-                // Fetch data asynchronously
-                var RowsTask = await dbms.DoGetDataSQLAsync<TASKS>(query);
-
-                if (RowsTask.Any(i => string.IsNullOrEmpty(i.NAME))) //تماس گیرنده هایی که خالی هستند
-                {
-                    if (AnjamNashodeh.IsChecked == true)
-                        status = "T.STATUS = 1 AND ";
-                    if (AnjamShode.IsChecked == true)
-                        status = "T.STATUS = 2 AND ";
-                    if (LaghvShodeh.IsChecked == true)
-                        status = "T.STATUS = 3 AND ";
-                    if (Hameh.IsChecked == true)
-                        status = "";
-
-                    string skidCondition = gronum == 1000 ? "T.IDNUM > 0" : $"T.skid = {gronum}";
-
-                    query = $@"
-                              WITH ExtractedPatterns AS (
-                                  SELECT 
-                                      T.*,
-                                      dbo.ExtractAccountPattern(T.COMP_COD) AS ExtractedPattern
-                                  FROM dbo.TASKS T
-                                  WHERE {status} ({skidCondition}) AND (T.PERSONEL = {personelValue})
-                              )
-                              SELECT 
-                                  EP.IDNUM, CH.NAME, EP.GR, EP.PERSONEL, EP.TASK, EP.PERIORITY, EP.STATUS, 
-                                  EP.STDATE, EP.STTIME, EP.ENDATE, EP.ENTIME, EP.USERNAME, EP.COMP_COD, 
-                                  EP.SUMTIME, EP.pic, EP.ss, EP.skid, EP.num, EP.tg, EP.CTIM, EP.USERCO, EP.SEE,
-                                  EP.ExtractedPattern AS DebugExtractedPattern,
-                                  CASE 
-                                      WHEN CH.hes IS NULL THEN 'Unmatched'
-                                      ELSE 'Matched'
-                                  END AS MatchStatus
-                              FROM ExtractedPatterns EP
-                              LEFT OUTER JOIN dbo.CUST_HESAB CH
-                                  ON EP.ExtractedPattern = CH.hes
-                              ORDER BY EP.IDNUM";
-
-                    RowsTask = await dbms.DoGetDataSQLAsync<TASKS>(query);
-                }
-
-                // Update the TASK_LST collection on the UI thread
-                await this.Dispatcher.InvokeAsync(() =>
-                {
-                    //TASK_DATA.Clear();
-                    //foreach (var task in RowsTask)
-                    //{
-                    //    TASK_DATA.Add(task);
-                    //}
-                    TASK_DATA.ReplaceAll(RowsTask);
-                });
-            }
-            catch (Exception ex)
-            {
-                new Msgwin(false, "بروز رسانی به دلیل خطا کامل انجام نشد!").Show();
-            }
-            CanUisBeActive = true;
-
-            UpdateDataGridFocus(_IsFirstTime_);
-        }
         private void FILL_ALL_COMBOBOXES()
         {
             //کبموباکس مجری
-            //rst_personel = dbms.DoGetDataSQL<COMBOPERSONEL>($"SELECT SAL_NAME, SUBUSERCO, USERCO FROM dbo.CHARTSAZMANI LEFT OUTER JOIN SALA_DTL ON CHARTSAZMANI.SUBUSERCO=SALA_DTL.IDD WHERE CHARTSAZMANI.USERCO={Baseknow.USERCOD}").ToList();
-            List<COMBOPERSONEL> sub_rst_personel = dbms.DoGetDataSQL<COMBOPERSONEL>($"SELECT SAL_NAME, SUBUSERCO, SUBUSERCO AS [USERCO] FROM dbo.CHARTSAZMANI LEFT OUTER JOIN SALA_DTL ON CHARTSAZMANI.SUBUSERCO=SALA_DTL.IDD WHERE CHARTSAZMANI.USERCO={Baseknow.USERCOD} ").ToList();
+            //List<COMBOPERSONEL> sub_rst_personel = dbms.DoGetDataSQL<COMBOPERSONEL>($"SELECT SAL_NAME, SUBUSERCO, SUBUSERCO AS [USERCO] FROM dbo.CHARTSAZMANI LEFT OUTER JOIN SALA_DTL ON CHARTSAZMANI.SUBUSERCO=SALA_DTL.IDD WHERE CHARTSAZMANI.USERCO={Baseknow.USERCOD} ").ToList();
+            const string sqlSub = @"
+                 SELECT
+                      sd.SAL_NAME,
+                      sd.PSAL_NAME,
+                      sd.GRSAL,
+                      sd.ENABL,
+                      cs.SUBUSERCO     AS IDD,   
+                      cs.SUBUSERCO     AS USERCO 
+                 FROM dbo.CHARTSAZMANI        cs
+                 LEFT JOIN SALA_DTL           sd  ON cs.SUBUSERCO = sd.IDD
+                 LEFT JOIN USER_PERSONEL_ORDER uo  ON cs.SUBUSERCO = uo.PERSONEL_ID
+                                                  AND uo.USER_ID   = @UserId
+                 WHERE cs.USERCO  = @UserId
+                 ORDER BY
+                      CASE WHEN uo.SORT_ORDER IS NULL THEN 1 ELSE 0 END,  -- اولويات كاربر
+                      uo.SORT_ORDER,
+                      sd.SAL_NAME;";
+
+            List<COMBOPERSONEL> sub_rst_personel = dbms.DoGetDataSQL<COMBOPERSONEL>(sqlSub, new { UserId = Baseknow.USERCOD }).ToList();
             foreach (var rows in sub_rst_personel)
             {
                 rows.SAL_NAME = CL_HESABDARI.DECODEUN(rows.SAL_NAME);
             }
 
-            var rst_personel = dbms.DoGetDataSQL<COMBOPERSONEL>("SELECT SAL_NAME, GRSAL, ENABL, IDD as USERCO FROM SALA_DTL WHERE (ENABL=0)").ToList();
+            //rst_personel = dbms.DoGetDataSQL<COMBOPERSONEL>("SELECT SAL_NAME, GRSAL, ENABL, IDD as USERCO FROM SALA_DTL WHERE (ENABL=0)").ToList();
+
+            //کبموباکس مجری
+            string sql = @"
+           SELECT sd.SAL_NAME, sd.PSAL_NAME, sd.GRSAL, sd.ENABL, sd.IDD as USERCO
+           FROM SALA_DTL sd
+           LEFT JOIN USER_PERSONEL_ORDER uo 
+                ON sd.IDD = uo.PERSONEL_ID AND uo.USER_ID = @UserId
+           WHERE sd.ENABL = 0
+           ORDER BY
+                CASE WHEN uo.SORT_ORDER IS NULL THEN 1 ELSE 0 END,
+                uo.SORT_ORDER, sd.SAL_NAME";
+            List<COMBOPERSONEL>? rst_personel = dbms.DoGetDataSQL<COMBOPERSONEL>(sql, new { UserId = Baseknow.USERCOD }).ToList();
             foreach (var rows in rst_personel)
             {
                 if (!string.IsNullOrEmpty(rows?.SAL_NAME))
