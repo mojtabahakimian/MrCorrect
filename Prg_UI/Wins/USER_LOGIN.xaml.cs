@@ -302,16 +302,16 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 108;
             //Baseknow.UUSER = "modir-mali";   
 
-            Baseknow.USERCOD = 116;
-            Baseknow.UUSER = "Mr.Salmani";
+            //Baseknow.USERCOD = 116;
+            //Baseknow.UUSER = "Mr.Salmani";
 
             //Baseknow.USERCOD = 132;
             //Baseknow.UUSER = "Prima Chopan";
 
             Baseknow.mrcorrect = true;
 
-            //Baseknow.USERCOD = 78;
-            //Baseknow.UUSER = "Controller";
+            Baseknow.USERCOD = 78;
+            Baseknow.UUSER = "Controller";
 
             //Baseknow.USERCOD = 139;
             //Baseknow.UUSER = "negar sadeghi";
@@ -341,8 +341,8 @@ namespace Prg_UI.Wins
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this, 496d);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.VISITOR_DAY_HEAD, this);
 
             //new TDETA_HES_SHEET2(213, 1, 1).Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_SAZMAN, this);

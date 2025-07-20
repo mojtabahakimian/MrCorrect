@@ -970,25 +970,27 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     ErrosMessages.Add(new MsgModel { MessageText_U = $"كالا {ROW.CODE} به انبار {ROW.ANBAR} فوق تعلق ندارد." });
                 }
 
-                //بررسی صحیح بودن واحد کالا نسبت به خود کالا
-                var RSTV1 = dbms.DoGetDataSQL<VAHED_K_NESBAT_2>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + ROW.CODE + "' AND ((VAHEDS.VAHED)= " + ROW.VAHED_K + ")))").ToList();
-                if (RSTV1.Count == 0)
+                if (ROW?.VAHED_K != null)
                 {
-                    ErrosMessages.Add(new MsgModel { MessageText_U = "واحد تعريف شده ناقص ميباشد نسبت آن مشخص نگرديده است.در بخش تعريف كالا آن را اصلاح كنيد." });
-                    ROW.VAHED_K = null;
-                }
-                //واحد کالا بررسی مقدار کل باتوجه به نسبت
-                else
-                {
-                    var NesbatMegh = RSTV1.FirstOrDefault().NESBAT * ROW.MEGH;
-                    if (NesbatMegh != ROW.MEGHk)
+                    //بررسی صحیح بودن واحد کالا نسبت به خود کالا
+                    var RSTV1 = dbms.DoGetDataSQL<VAHED_K_NESBAT_2>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + ROW.CODE + "' AND ((VAHEDS.VAHED)= " + ROW.VAHED_K + ")))").ToList();
+                    if (RSTV1.Count == 0)
                     {
-                        ROW.MEGHk = NesbatMegh;
-                        ErrosMessages.Add(new MsgModel { MessageText_U = $"مقدار کل این سطر کالا با این مشخصات : کد کالا {ROW.CODE} به مقدار کل {ROW.MEGHk} با مبلغ {ROW.MABL} مغایرت داشت و من آنرا به مقدار کل {NesbatMegh} اصلاح کردم , درصورتی که مورد تایید است مجددا اینتر را بزنید تا به سطر بعدی بروید" });
+                        ErrosMessages.Add(new MsgModel { MessageText_U = "واحد تعريف شده ناقص ميباشد نسبت آن مشخص نگرديده است.در بخش تعريف كالا آن را اصلاح كنيد." });
+                        ROW.VAHED_K = null;
+                    }
+                    //واحد کالا بررسی مقدار کل باتوجه به نسبت
+                    else
+                    {
+                        var NesbatMegh = RSTV1.FirstOrDefault().NESBAT * ROW.MEGH;
+                        if (NesbatMegh != ROW.MEGHk)
+                        {
+                            ROW.MEGHk = NesbatMegh;
+                            ErrosMessages.Add(new MsgModel { MessageText_U = $"مقدار کل این سطر کالا با این مشخصات : کد کالا {ROW.CODE} به مقدار کل {ROW.MEGHk} با مبلغ {ROW.MABL} مغایرت داشت و من آنرا به مقدار کل {NesbatMegh} اصلاح کردم , درصورتی که مورد تایید است مجددا اینتر را بزنید تا به سطر بعدی بروید" });
+                        }
                     }
                 }
             }
-
 
             //مقدار كالا نمي تواند صفر باشد بر اسا تنظیمات بیشتر
             if (Strings.Mid(Baseknow.OPTIONSS, 50, 1) == "5")
@@ -1052,7 +1054,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             if (ErrosMessages.Count > 0)
             {
-                INVO_LST_SUB_CANCEL_EDIT();
+                //INVO_LST_SUB_CANCEL_EDIT();
+
                 if (_DisplayMsg_)
                 {
                     ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct()
@@ -2295,6 +2298,24 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (!BodyIsValid(ROW))
             {
                 INVO_LST_SUB_CANCEL_EDIT();
+                #region NEWWAY
+                //var DG = INVO_LST_SUB;
+                //e.Cancel = true;
+                //DG.Dispatcher.BeginInvoke(new Action(() =>
+                //{
+                //    DG.CellEditEnding -= INVO_LST_SUB_CellEditEnding;
+                //    DG.RowEditEnding -= INVO_LST_SUB_RowEditEnding;
+
+                //    DG.SelectedItem = ROW;
+                //    DG.ScrollIntoView(ROW);
+                //    DG.CurrentCell = new DataGridCellInfo(ROW, DG.Columns[2]);
+                //    DG.BeginEdit();
+
+                //    DG.RowEditEnding += INVO_LST_SUB_RowEditEnding;
+                //    DG.CellEditEnding += INVO_LST_SUB_CellEditEnding;
+
+                //}), System.Windows.Threading.DispatcherPriority.Background);
+                #endregion
                 return;
             }
 

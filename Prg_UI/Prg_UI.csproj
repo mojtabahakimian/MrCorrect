@@ -33,13 +33,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="DLLS\stimulydlls\**" />
-	  <EmbeddedResource Remove="DLLS\stimulydlls\**" />
-	  <None Remove="DLLS\stimulydlls\**" />
-	  <Page Remove="DLLS\stimulydlls\**" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<None Remove="DLLS\AxInterop.TINYLib.dll" />
 		<None Remove="DLLS\Interop.TINYLib.dll" />
 		<None Remove="DLLS\Stimulsoft.Base.dll" />
@@ -139,6 +132,7 @@
 		<None Remove="Rpts\STUF_DEF.mrt" />
 		<None Remove="Rpts\TAARIF\GRADE_REP.mrt" />
 		<None Remove="Rpts\Visitory\R_LIST_MASIR.mrt" />
+		<None Remove="Rpts\Visitory\R_LIST_VISIT_DAY.mrt" />
 		<None Remove="UiDrive\EXEFILES\Preloader.exe" />
 		<None Remove="UiDrive\FNT\IranYekanRG.TTF" />
 		<None Remove="UiDrive\IMGS\budget.jpg" />
@@ -526,6 +520,7 @@
 		<EmbeddedResource Include="Rpts\STUF_DEF.mrt" />
 		<EmbeddedResource Include="Rpts\TAARIF\GRADE_REP.mrt" />
 		<EmbeddedResource Include="Rpts\Visitory\R_LIST_MASIR.mrt" />
+		<EmbeddedResource Include="Rpts\Visitory\R_LIST_VISIT_DAY.mrt" />
 		<EmbeddedResource Include="UiDrive\EXEFILES\Preloader.exe" />
 	</ItemGroup>
 
