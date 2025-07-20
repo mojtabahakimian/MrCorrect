@@ -227,7 +227,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     //rst.update();
                     dbms.DoExecuteSQL($@"UPDATE PAY_GETD SET N_KOL2 = {rst.FirstOrDefault().N_KOL2} , N_MOIN2 = {rst.FirstOrDefault().N_MOIN2} , N_TAF2 = {rst.FirstOrDefault().N_TAF2} , HES2 = N'{rst.FirstOrDefault().HES2}' ,VAZ = {rst.FirstOrDefault().VAZ} , SANDUGH = {rst.FirstOrDefault().SANDUGH} {_where}");
                 }
-                if (rst.FirstOrDefault().KIND == 0)
+                if (rst?.FirstOrDefault()?.KIND == 0)
                 {
                     ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_K = Convert.ToInt32(CL_HESABDARI.GETKOL(Baseknow.ADV));
                     ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_M = Convert.ToInt32(CL_HESABDARI.GETMOIN(Baseknow.ADV));
@@ -241,16 +241,14 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 {
                     _KOL_ = Convert.ToDouble(KOL.Text);
                 }
-                if (_KOL_ != Baseknow.BANKHA)
+                if (_KOL_ != null && _KOL_ != Baseknow.BANKHA)
                 {
                     Msgwin msgwin = new Msgwin(false, "اين چك قبلا واگذار گرديده است.بنابراين از حساب اين شخص كسر شده و صاحب چك بدهكار مي گردد.");
                     msgwin.ShowDialog();
 
                     //DoCmd.OpenForm("mesag", default, default, default, default, acDialog, "اين چك قبلا واگذار گرديده است.بنابراين از حساب اين شخص كسر شده و صاحب چك بدهكار مي گردد.");
 
-
                     CL_HESABDARI.GETTAF3(this.HES1.SelectedValue.ToString(), ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
-
 
 
                     ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_K = (Convert.ToInt32(CKOL) == 0) ? null : (int)CKOL;
