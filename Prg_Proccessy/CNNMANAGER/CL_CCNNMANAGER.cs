@@ -295,9 +295,10 @@ namespace Prg_SendInvoice.CNNMANAGER
         {
             using (SqlConnection db = new SqlConnection(CONNECTION_STR))
             {
-                await Task.Run(() => db.Open());
                 try
                 {
+                    await db.OpenAsync();
+                    await db.ExecuteAsync("SET ARITHABORT ON");
                     var results = await db.QueryAsync<TEntity>(sql, parameters, commandTimeout: 3600);
                     return results;
                 }

@@ -1692,8 +1692,8 @@ namespace Prg_UI.Scriptses
                 }
                 catch { }
 
-				//بررسی مالکیت فاکتور و محاسبه پورسانت به صورت هوشمند
-				{
+                //بررسی مالکیت فاکتور و محاسبه پورسانت به صورت هوشمند
+                {
                     string sqlscript = @"SET ANSI_NULLS ON;
 									SET QUOTED_IDENTIFIER ON;
 									GO
@@ -2013,6 +2013,13 @@ namespace Prg_UI.Scriptses
                         }
                     }
                 }
+
+				//Super Fast Index for Automation MAIN
+                try { db.Execute($@"CREATE NONCLUSTERED INDEX IX_TASKS_Status1
+									ON dbo.TASKS (STATUS, IDNUM)          -- برای فیلتر و ORDER BY
+									INCLUDE (GR, PERSONEL, TASK, PERIORITY, STDATE, STTIME,
+									         ENDATE, ENTIME, USERNAME, COMP_COD, SUMTIME,
+									          ss, skid, num, tg, CTIM, USERCO, SEE)"); } catch { }
             }
         }
     }
