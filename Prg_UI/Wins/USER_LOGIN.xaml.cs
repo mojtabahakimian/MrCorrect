@@ -324,7 +324,7 @@ namespace Prg_UI.Wins
 
             //new WIN_VISIT_ROUTE_FORM().Show();
 
-            //new F_USER_PERMITION_FORMS().ShowDialog();
+            //new WinConnectionChoose().ShowDialog();
             //new HEAD_LST_HAVL(4306d).ShowDialog();
             //new HEAD_LST_RASID(3872d).ShowDialog();
 
@@ -333,7 +333,7 @@ namespace Prg_UI.Wins
 
             //CL_MenuManager.OpenWinMenu(WinNameType.PGET_HED, this, default);
 
-            new WIN_F_MENU_KHFR("FKHAREDAY").Show(); //لیست تراز چهار ستونی کل
+            //new VISITOR_GOL_REP_MAR().Show(); //لیست تراز چهار ستونی کل
             //new FMENU_TARAZ_4("FT4M").Show(); //ليست تراز آزمايشي چهار ستوني معين  //TARAZ4M
             //new FMENU_TARAZ_4("FT4T").Show(); //ليست تراز آزمايشي چهارستوني تفصيلي  //TARAZ4T
 
@@ -341,8 +341,13 @@ namespace Prg_UI.Wins
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
+
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this, 245d);
+
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.VISITOR_DAY_HEAD, this);
+
 
             //new TDETA_HES_SHEET2(213, 1, 1).Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_SAZMAN, this);
