@@ -111,12 +111,11 @@
                 
                   VirtualizingPanel.ScrollUnit="Pixel"
                   ScrollViewer.CanContentScroll="True"
-                
                   AutoGenerateColumns="False" 
                   FlowDirection="RightToLeft" 
                   SelectionUnit="FullRow" 
                   CanUserDeleteRows="False"
-                  Margin="4,176,4,111" BorderThickness="1" CellEditEnding="DG_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_SUB_SelectionChanged" RowEditEnding="DG_SUB_RowEditEnding" PreviewKeyDown="DG_SUB_PreviewKeyDown" PreparingCellForEdit="DG_SUB_PreparingCellForEdit" BeginningEdit="DG_SUB_BeginningEdit" >
+                  Margin="4,176,4,65" BorderThickness="1" CellEditEnding="DG_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_SUB_SelectionChanged" RowEditEnding="DG_SUB_RowEditEnding" PreviewKeyDown="DG_SUB_PreviewKeyDown" PreparingCellForEdit="DG_SUB_PreparingCellForEdit" BeginningEdit="DG_SUB_BeginningEdit" >
 
                 <DataGrid.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -135,7 +134,7 @@
                     <DataGridTemplateColumn SortMemberPath="NAME_HES" x:Name="GR_HES_COLUMN" Header="نام مشتری" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding NAME_HES}" Focusable="False"/>
+                                <TextBlock Text="{Binding NAME_HES, UpdateSourceTrigger=LostFocus}" Focusable="False"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
 
@@ -148,8 +147,7 @@
                                           IsTextSearchEnabled="False"
                                           StaysOpenOnEdit="True"
                                           SelectedValuePath="hes"
-                                          SelectedValue="{Binding COUST_NO, UpdateSourceTrigger=PropertyChanged}"
-                                          VerticalContentAlignment="Center"
+                                          SelectedValue="{Binding COUST_NO, UpdateSourceTrigger=LostFocus}"
                                           MaxDropDownHeight="200"
                                           KeyUp="HESGRP_ComboBox_KeyUp"
                                           SelectionChanged="HESEditCombo_SelectionChanged">
@@ -173,7 +171,7 @@
                                         IsReadOnly="False">
                         <!-- ظاهر تکست‌باکس وقتی در مد ادیت هست -->
                         <DataGridTextColumn.EditingElementStyle>
-                            <Style TargetType="TextBox">
+                            <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                                 <!-- خواندنی باشد -->
                                 <Setter Property="IsReadOnly" Value="True"/>
                                 <!-- اما فوکوس و انتخاب متن را همچنان مجاز بدار -->
@@ -277,7 +275,7 @@
 
         </Grid>
 
-        <CNC:RecordNavigatorControl x:Name="navigatorControl" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="459,0,0,47"/>
+        <CNC:RecordNavigatorControl x:Name="navigatorControl" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="427,0,0,18"/>
 
     </Grid>
 </Window>
