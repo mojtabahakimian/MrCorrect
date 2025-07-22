@@ -32,11 +32,13 @@ using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
 using Wins.WinOther;
 using static Interfaces.INavigator;
-using Prg_UI.CUC;
+using Microsoft.IdentityModel.Tokens;
+using System.Collections;
+using static Prg_UI.Functions.CL_LMethods;
 
 namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 {
-    public partial class WIN_VISIT_ROUTE_FORM : Window, ISearchableWindow
+    public partial class VISITOR_DAY_HEAD : Window, ISearchableWindow
     {
         #region Header Window Begin
         //Header Window Begin
@@ -79,7 +81,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         }
         //Header Window End;
         #endregion
-        public WIN_VISIT_ROUTE_FORM()
+        public VISITOR_DAY_HEAD()
         {
             InitializeComponent();
 
@@ -90,10 +92,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
         UniversControl universControl = new UniversControl();
 
-        InventoryManager IVM = new InventoryManager(); //مدیریت موجودی ایزوله
 
-        private NavigationManager<VISIT_ROUTE> _navigationManager;
-        public ObservableCollection<VISIT_ROUTE_DTL> VISIT_ROUTE_DATA { get; set; } = new ObservableCollection<VISIT_ROUTE_DTL>();
+        private NavigationManager<VISITORS_DAY> _navigationManager;
+        public ObservableCollection<VISITORS_DAY_DTL> VISIT_DAY_DATA { get; set; } = new ObservableCollection<VISITORS_DAY_DTL>();
         public ObservableCollection<CLASS_MODEL_COMBO> ClassSource { get; } = new ObservableCollection<CLASS_MODEL_COMBO>();
 
         #region LOCAL_MODEL
@@ -120,8 +121,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             }
         }
         #endregion
+
         public bool NowIsReady { get; private set; }
-        public bool DG_SUB_IsFocused { get; private set; }
 
         private bool _newrecord = false;
         public bool NewRecord
@@ -199,18 +200,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             {
                 ican = value;
 
-                ROUTE_NAME.IsReadOnly = !ican; //مسیر ویزیت
                 DG_SUB.IsReadOnly = !ican;
+                VDATE.IsReadOnly = !ican;
 
                 HES.IsEnabled = ican;
                 HES2.IsEnabled = ican;
-                District.IsEnabled = ican;
-
-                OSTANID.IsEnabled = ican;
-                if (OSTANID.SelectedValue != null)
-                {
-                    SHAHRID.IsEnabled = ican;
-                }
 
                 BTN_SAVE.IsEnabled = ican;
             }
@@ -220,6 +214,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         {
             NowIsReady = true;
         }
+
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             try
@@ -324,12 +319,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
             FILL_ALL_COMBOBOXES();
 
-            _navigationManager = new NavigationManager<VISIT_ROUTE>(
+            _navigationManager = new NavigationManager<VISITORS_DAY>(
                 dbms,
-                x => x?.ROUTE_NAME?.ToString(),
-                $"SELECT ROUTE_NAME, HES, IYALAT, CITY, District, CDATE, USERNAME, RACTIVE, RACTIVE, CRT, UID FROM Visit_route ORDER BY CRT",
-                x => $"SELECT ROUTE_NAME, HES, IYALAT, CITY, District, CDATE, USERNAME, RACTIVE, RACTIVE, CRT, UID " +
-                $"FROM Visit_route WHERE ROUTE_NAME = N'{x?.ROUTE_NAME?.ToString()}' ",
+                x => x?.HES?.ToString(),
+                $"SELECT HES, VDATE, CDATE, USERNAME, OKF, CRT, UID FROM dbo.VISITORS_DAY ORDER BY CRT",
+                x => $"SELECT HES, VDATE, CDATE, USERNAME, OKF, CRT, UID " +
+                $"FROM VISITORS_DAY WHERE HES = N'{x?.HES?.ToString()}' ",
                 default);
 
             _navigationManager.CurrentRecordChanged += OnCurrentRecordChanged;
@@ -343,11 +338,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             }
 
             CL_LMethods.SetTabIndexes(
-             ROUTE_NAME,
+             VDATE,
              HES,
-             OSTANID,
-             SHAHRID,
-             District,
              BTN_SAVE,
              DG_SUB
              );
@@ -355,12 +347,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             MakeDefaultFocuseReady();
         }
 
-        private bool OnInsertRecord(VISIT_ROUTE record)
+        private bool OnInsertRecord(VISITORS_DAY record)
         {
             try
             {
-                var itemtoadd = dbms.DoGetDataSQL<VISIT_ROUTE>($"SELECT ROUTE_NAME, HES, IYALAT, CITY, District, CDATE, USERNAME, RACTIVE, RACTIVE, CRT, UID" +
-                    $" FROM Visit_route WHERE ROUTE_NAME = N'{ROUTE_NAME.Text}'").FirstOrDefault();
+                var itemtoadd = dbms.DoGetDataSQL<VISITORS_DAY>($"SELECT HES, VDATE, CDATE, USERNAME, OKF, CRT, UID " +
+                    $" FROM VISITORS_DAY WHERE HES = N'{HES.SelectedValue}'").FirstOrDefault();
                 record = itemtoadd;
                 NewRecord = false;
                 return true;
@@ -370,7 +362,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 return false;
             }
         }
-        private void OnCurrentRecordChanged(VISIT_ROUTE HEADER_FAC)
+        private void OnCurrentRecordChanged(VISITORS_DAY HEADER_FAC)
         {
             if (_navigationManager.IsNewRecord)
             {
@@ -391,44 +383,15 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
                 Command106.IsEnabled = true;
 
-                ROUTE_NAME.Text = HEADER_FAC.ROUTE_NAME; //تاریخ فاکتور
                 USER_NAME.Text = HEADER_FAC.USERNAME.ToStringNullSafe(); //کاربر
+                VDATE.Text = HEADER_FAC.VDATE.ToString();
 
-                string thevalue = HEADER_FAC.HES;
-                var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + thevalue + "'").FirstOrDefault();
-                if (!string.IsNullOrEmpty(data?.NAME))
-                {
-                    if (HES.ItemsSource == null)
-                    {
-                        HES.ItemsSource = new List<Custom_CUST_HESAB>();
-                    }
+                HES.SelectedValue = HEADER_FAC.HES;
+                HES.Items.Refresh();
 
-                    if (!((List<Custom_CUST_HESAB>)HES.ItemsSource).Any(item => item?.hes == thevalue))
-                    {
-                        ((List<Custom_CUST_HESAB>)HES.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
-                    }
-                    HES.SelectedValue = HEADER_FAC.HES; //مشتری
-                    HES.Items.Refresh();
-                }
-                RACTIVE.IsChecked = HEADER_FAC.RACTIVE;
+                OKF.IsChecked = HEADER_FAC.OKF;
 
-                //OSTANID.SelectionChanged -= OSTANID_SelectionChanged;
-
-                // after loading ALL_OSTAN:
-                var match = ALL_OSTAN.FirstOrDefault(x => x.OSNAME?.FixPersianChars() == HEADER_FAC?.IYALAT?.FixPersianChars());
-                if (match != null)
-                    OSTANID.SelectedValue = match.OSCODE;
-
-
-                //OSTANID.SelectionChanged += OSTANID_SelectionChanged;
-
-                var matchcity = ALL_SHAHR.FirstOrDefault(x => x.CITYNAME?.FixPersianChars() == HEADER_FAC?.CITY?.FixPersianChars());
-                if (matchcity != null)
-                    SHAHRID.SelectedValue = matchcity.CITYCODE;
-
-                District.SelectedValue = HEADER_FAC.District; District.Items.Refresh();
-                District.Text = HEADER_FAC.District;
-
+                BTN_GETMASIR.IsEnabled = true;
                 ESLAH.IsEnabled = true;
 
                 Form_Current();
@@ -442,12 +405,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         public void OnSearchResultSelected(object selectedItem)
         {
             // Handle the selected item
-            if (selectedItem is VISIT_ROUTE item)
+            if (selectedItem is VISITORS_DAY item)
             {
                 if (item != null)
                 {
                     //_navigationManager.MoveReGetData(INavigator.Jahat.)
-                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.ROUTE_NAME.Equals(item.ROUTE_NAME));
+                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.HES.Equals(item.HES));
                     if (itemfound != null)
                     {
                         _navigationManager.IsNewRecord = false;
@@ -473,12 +436,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         {
             return new[]
             {
-                new SearchableProperty { DisplayName = "نام مسیر ویزیت", PropertyPath = "ROUTE_NAME", PropertyType = typeof(string) },
-                new SearchableProperty { DisplayName = "کد مشتری", PropertyPath = "HES", PropertyType = typeof(string) },
-                new SearchableProperty { DisplayName = "کاربر", PropertyPath = "USERNAME", PropertyType = typeof(string) },
-                new SearchableProperty { DisplayName = "استان", PropertyPath = "IYALAT", PropertyType = typeof(string) },
-                new SearchableProperty { DisplayName = "شهر", PropertyPath = "CITY", PropertyType = typeof(string) },
-                new SearchableProperty { DisplayName = "منطقه", PropertyPath = "District", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "ویزیتور", PropertyPath = "HES", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "تاریخ ویزیت", PropertyPath = "VDATE", PropertyType = typeof(long) },
+                new SearchableProperty { DisplayName = "نام کاربری", PropertyPath = "USERNAME", PropertyType = typeof(string) },
             };
         }
         #endregion
@@ -493,49 +453,53 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         {
             NewRecord = false;
 
-            var CURRENT_HEADER = dbms.DoGetDataSQL<VISIT_ROUTE>($"SELECT ROUTE_NAME, HES, IYALAT, CITY, District, CDATE, USERNAME, RACTIVE, RACTIVE, CRT, UID" +
-               $" FROM Visit_route WHERE ROUTE_NAME = N'{ROUTE_NAME.Text}'").FirstOrDefault();
+            var CURRENT_HEADER = dbms.DoGetDataSQL<VISITORS_DAY>($"SELECT HES, VDATE, CDATE, USERNAME, OKF, CRT, UID " +
+               $" FROM VISITORS_DAY WHERE HES = N'{HES.SelectedValue}' AND VDATE = {VDATE.Text.ToRawTarikh()}").FirstOrDefault();
             _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
         }
 
         private void FILL_ALL_COMBOBOXES()
         {
-            //کد استان
-            ALL_OSTAN = dbms.DoGetDataSQL<TCOD_OSTAN>("SELECT OSCODE, OSNAME FROM TCOD_OSTAN ORDER BY OSNAME").ToList();
-            foreach (var item in ALL_OSTAN) { item.OSNAME = item.OSNAME?.FixPersianChars(); }
-            OSTANID.ItemsSource = ALL_OSTAN;
-            //کد شهر
-            ALL_SHAHR = dbms.DoGetDataSQL<TCOD_CITY>("SELECT CITYCODE, CITYNAME FROM TCOD_CITY ORDER BY CITYNAME").ToList();
-            SHAHRID.ItemsSource = ALL_SHAHR;
-
-            //منطقه
-            District.ItemsSource = dbms.DoGetDataSQL<DistrictComboModel>("SELECT District FROM Visit_route GROUP BY District ORDER BY District").ToList();
-
             HES.ItemsSource = new List<Custom_CUST_HESAB>();
             HES.DisplayMemberPath = "NAME";
             HES.SelectedValuePath = "hes";
+            var RST_HES = dbms.DoGetDataSQL<Custom_CUST_HESAB>(@$"SELECT Visit_route.HES AS hes,
+                                                                CUST_HESAB.NAME
+                                                         FROM Visit_route
+                                                             INNER JOIN CUST_HESAB
+                                                                 ON Visit_route.HES = CUST_HESAB.hes
+                                                         GROUP BY Visit_route.HES,
+                                                                  CUST_HESAB.NAME,
+                                                                  CUST_HESAB.MOBILE").ToList();
+
+            foreach (var item in RST_HES)
+            {
+                if (!string.IsNullOrEmpty(item?.NAME))
+                {
+                    item.NAME = item.NAME.FixPersianChars();
+                }
+            }
+
+            HES.ItemsSource = RST_HES;
 
             //حساب ویزیتوری
             HES2.ItemsSource = HES.ItemsSource;
             HES2.DisplayMemberPath = "hes";
             HES2.SelectedValuePath = "hes";
 
-            //کلاس مشتری حالت اتوکامپلت
-            //CLASS_COLUMN.ItemsSource = dbms.DoGetDataSQL<CLASS_MODEL_COMBO>($"SELECT CLASS FROM Visit_route_dtl GROUP BY CLASS ORDER BY CLASS").ToList();
-
             // کلاس مشتری
             var existing = dbms.DoGetDataSQL<CLASS_MODEL_COMBO>("SELECT DISTINCT CLASS FROM Visit_route_dtl WHERE CLASS IS NOT NULL ORDER BY CLASS").ToList();
 
             ClassSource?.Clear();
             foreach (var c in existing)
-                ClassSource.Add(c);
+                ClassSource?.Add(c);
 
             CLASS_COLUMN.ItemsSource = ClassSource;
         }
         private void MakeDefaultFocuseReady()
         {
-            ROUTE_NAME.Focus();
-            ROUTE_NAME.SelectAll();
+            VDATE.Focus();
+            VDATE.SelectAll();
         }
         private void DataGridActivation()
         {
@@ -552,17 +516,15 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         {
             USER_NAME.Text = Baseknow.UUSER; // نام کاربری
             HES.SelectedIndex = -1; HES.Items.Refresh();
-            RACTIVE.IsChecked = false;
+            OKF.IsChecked = false;
             NewRecord = true;
-            ROUTE_NAME.Text = null; //مسیر ویزیت
-
-            OSTANID.SelectedItem = null;
-            District.SelectedItem = null; District.Text = null;
-            SHAHRID.SelectedItem = null;
+            HES.Text = null; //مسیر ویزیت
+            VDATE.Text = Tarikh.FullCurrentDate;
             ESLAH.IsEnabled = false;
+            BTN_GETMASIR.IsEnabled = false;
             Command106.IsEnabled = false;
 
-            VISIT_ROUTE_DATA?.Clear(); //دیتاگرید فاکتور فروش
+            VISIT_DAY_DATA?.Clear(); //دیتاگرید فاکتور فروش
             AllowEdits = true;
 
             DG_SUB.IsReadOnly = true; // Locked
@@ -589,28 +551,23 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             //}
         }
 
-        private bool IsNull(object? hTAF2)
-        {
-            string? _inputy = hTAF2?.ToStringNullSafe();
-            if (string.IsNullOrEmpty(_inputy))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
         private bool HeaderIsValid(bool _DisplayErrors = true)
         {
             List<MsgModel> ErrosMessages = new List<MsgModel>();
 
-            if (string.IsNullOrEmpty(ROUTE_NAME.Text) || string.IsNullOrWhiteSpace(ROUTE_NAME.Text)) //حساب مشتری
+            if (!Tarikh.IsValidedDate(VDATE.Text.ToRawTarikh()))
             {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "مسیر ویزیت نمیتواند خالی باشد" });
+                ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ صحیح نمی باشد" });
+            }
+            else
+            {
+                if (!Tarikh.IsSyncedDateNow(VDATE.Text, Baseknow.CTL_DT ?? false))
+                {
+                    ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ مربوط به سال جاری نیست" });
+                }
             }
 
-            if (IsNull(this.HES.SelectedValue) || this.HES.SelectedIndex < 0)
+            if (HES.SelectedValue == null || this.HES.SelectedIndex < 0)
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = " ویزیتور مشخص نشده است ....!" });
             }
@@ -619,30 +576,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 ErrosMessages.Add(new MsgModel { MessageText_U = " حساب ویزیتور مسدود گرديده است لطفا با مديريت مالي تماس بگيريد" });
             }
 
-            if (!IsNull(HES.SelectedValue))
+            if (HES.SelectedValue != null)
             {
                 if (CL_HESABDARI.ISTAF(HES.SelectedValue.ToString()))
                 {
                     ErrosMessages.Add(new MsgModel { MessageText_U = " حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!" });
                 }
-            }
-
-            if (OSTANID.SelectedValue == null)
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "اُستان نمیتواند خالی باشد" });
-            }
-            if (SHAHRID.SelectedValue == null)
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "شهر نمیتواند خالی باشد" });
-            }
-
-            if (string.IsNullOrEmpty(District.Text) || string.IsNullOrWhiteSpace(District.Text))
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "منطقه نمیتواند خالی باشد" });
-            }
-            else if (District.Text.Length > 40)
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "طول متن وارد شده برای منطقه بیش از 40 کاراکتر است !" });
             }
 
             if (ErrosMessages.Any())
@@ -658,8 +597,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
             return true;
         }
-
-        private bool BodyIsValid(VISIT_ROUTE_DTL TheRow)
+        private bool BodyIsValid(VISITORS_DAY_DTL TheRow)
         {
             var ROW = TheRow;
 
@@ -687,7 +625,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 }
             }
 
-            if (TheRow.CLASS?.Length > 40)
+            if (TheRow?.CLASS?.Length > 40)
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "تعداد کاراکتر وارد شده برای کلاس مشتری بیش از 40 کاراکتر است !" });
             }
@@ -704,11 +642,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             return true;
         }
 
-        public List<TCOD_OSTAN> ALL_OSTAN { get; private set; }
-        public List<TCOD_CITY> ALL_SHAHR { get; private set; }
         public Visual I_AM_VISIT_ROUTE { get; private set; }
-        public VISIT_ROUTE_DTL? CURRENT_ROW_ITEMS { get; private set; }
-        public VISIT_ROUTE_DTL? WAS_ROW_ITEM { get; private set; } = new VISIT_ROUTE_DTL();
+        public VISITORS_DAY_DTL? CURRENT_ROW_ITEMS { get; private set; }
+        public VISITORS_DAY_DTL? WAS_ROW_ITEM { get; private set; } = new VISITORS_DAY_DTL();
 
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e) //**********************************************************************************************
         {
@@ -738,7 +674,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             {
                 if (ex.Number == 2627)
                 {
-                    new Msgwin(false, $"این مسیر قبلا تعریف شده نمیتوان مسیر تکراری تعریف کرد").Show();
+                    new Msgwin(false, $"این ویزیت با این تاریخ قبلا تعریف شده نمیتوان مسیر تکراری تعریف کرد").Show();
                 }
                 else
                 {
@@ -752,16 +688,17 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 return;
             }
 
-            this.RACTIVE.IsChecked = true;
+            this.OKF.IsChecked = true;
 
             this.DG_SUB.IsReadOnly = false;
+            BTN_GETMASIR.IsEnabled = true;
             ESLAH.IsEnabled = true;
 
             universControl.PopNotifyShow(".اطلاعات با موفقیت ذخیره شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
 
             DataGridActivation();
 
-            if (VISIT_ROUTE_DATA.Count == 0)
+            if (VISIT_DAY_DATA.Count == 0)
             {
                 GetFocusOnDefaultCell();
             }
@@ -777,7 +714,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 SecurityAllCheck();
 
                 var dt = DateTime.Now;
-                //CL_HESABDARI.TR("VISIT_ROUTE", "(NUMBER = " + NUMBER.Text + $") AND (TAG = {FTAG})", dt, 1); //12
+                //CL_HESABDARI.TR("VISITORS_DAY", "(NUMBER = " + NUMBER.Text + $") AND (TAG = {FTAG})", dt, 1); //12
 
                 HES.IsEnabled = true; //Lock true
                 DG_SUB.IsReadOnly = false;
@@ -791,7 +728,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             var IsVisible = BTN_DELETE.Visibility == Visibility.Visible;
             if (NewRecord || DG_SUB.IsEnabled == false || !BTN_DELETE.IsEnabled || !IsVisible) { return; }
 
-            if (VISIT_ROUTE_DATA.Count > 0)
+            if (VISIT_DAY_DATA.Count > 0)
             {
                 if (DG_SUB.IsReadOnly) { return; }
 
@@ -827,14 +764,14 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
                 _ = AuditLogger.LogActionAsync(
                     actionType: "DELETE",
-                    tableName: "تعریف مسیر ویزیت",
-                    recordId: ROUTE_NAME.Text,
+                    tableName: "تعریف ویزیت روزانه",
+                    recordId: HES.SelectedValue.ToString(),
                     oldValue: "",
                     newValue: null,
                     additionalInfo: $@"{this.GetType().Name} , EXE PATH : {System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}");
 
 
-                if (VISIT_ROUTE_DATA.Count > 0 && DG_SUB.SelectedItems != null && DG_SUB.SelectedItems.Count > 0)
+                if (VISIT_DAY_DATA.Count > 0 && DG_SUB.SelectedItems != null && DG_SUB.SelectedItems.Count > 0)
                 {
                     #region SABEGHEH
                     var dt = DateTime.Now;
@@ -848,41 +785,44 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
                         if (CL_LMethods.IsNewPlaceHolder(DG_SUB, item))
                         {
+                            VISIT_DAY_DATA.Remove(item as VISITORS_DAY_DTL);
                             continue; // Skip deletion for new placeholder items
                         }
 
-                        var _id_ = item.GetType().GetProperty("IDR").GetValue(item);
+                        var _HES_ = item.GetType().GetProperty("HES").GetValue(item);
+                        var _VDATE_ = item.GetType().GetProperty("VDATE").GetValue(item);
+                        var _COUST_NO_ = item.GetType().GetProperty("COUST_NO").GetValue(item);
 
-                        if (_id_ != null)
+                        try
                         {
-                            try
-                            {
-                                dbms.DoExecuteSQL($@"DELETE FROM dbo.Visit_route_dtl WHERE IDR = {_id_}");
+                            dbms.DoExecuteSQL($@"DELETE FROM dbo.VISITORS_DAY_DTL WHERE HES = @HES AND VDATE = @VDATE AND COUST_NO = @COUST_NO",
+                                new { HES = _HES_, VDATE = Convert.ToInt64(_VDATE_), COUST_NO = _COUST_NO_ });
 
-                                IsDeletedSomething = true;
-                            }
-                            catch (SqlException ex)
-                            {
-                                if (ex.Number == 547)
-                                {
-                                    ErrosMessages.Add(new MsgModel { MessageText_U = "این آیتم دارای گردش است و نمیتوان آنرا حذف کرد" });
-                                }
-                                else
-                                {
-                                    ErrosMessages.Add(new MsgModel { MessageText_U = "خطا پایگاه داده در انجام عملیات حذف" });
-                                }
-                            }
-                            catch (Exception)
-                            {
-                                ErrosMessages.Add(new MsgModel { MessageText_U = "خطا در انجام عملیات حذف" });
-                            }
-
+                            IsDeletedSomething = true;
                         }
+                        catch (SqlException ex)
+                        {
+                            if (ex.Number == 547)
+                            {
+                                ErrosMessages.Add(new MsgModel { MessageText_U = "این آیتم دارای گردش است و نمیتوان آنرا حذف کرد" });
+                            }
+                            else
+                            {
+                                ErrosMessages.Add(new MsgModel { MessageText_U = "خطا پایگاه داده در انجام عملیات حذف" });
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            ErrosMessages.Add(new MsgModel { MessageText_U = "خطا در انجام عملیات حذف" });
+                        }
+
                     }
 
                     if (ErrosMessages.Any())
                     {
-                        IVM.ShowErrorMessages(ErrosMessages);
+                        ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct()
+                            .Select(message => new MsgModel { MessageText_U = message }).ToList();
+                        new MsgListwin(false, ErrosMessages).Show();
                     }
                     else if (IsDeletedSomething)
                     {
@@ -895,7 +835,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                     {
                         try
                         {
-                            dbms.DoExecuteSQL($@"DELETE FROM dbo.Visit_route WHERE ROUTE_NAME = N'{ROUTE_NAME.Text}' ");
+                            dbms.DoExecuteSQL($@"DELETE FROM dbo.VISITORS_DAY WHERE HES = @HES AND VDATE = @VDATE",
+                                new { HES = HES.SelectedValue, VDATE = Convert.ToInt64(VDATE.Text.ToRawTarikh()) });
 
                             //ClearFreshAll();
                             _navigationManager.DeleteCurrentRecord(); //Refresh Record Source
@@ -909,7 +850,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
                             if (ex.Number == 547)
                             {
-                                new Msgwin(false, "این مسیر ویزیت دارای اطلاعات وابسته است , ابتدا آنرا حذف کنید").ShowDialog();
+                                new Msgwin(false, "این ویزیتور دارای اطلاعات وابسته است , ابتدا آنرا حذف کنید").ShowDialog();
                                 return;
                             }
                             else
@@ -928,66 +869,51 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
         private bool DoCmdHeaderSave(bool DisplayMsg = true)
         {
-            string routeName = ROUTE_NAME.Text.Trim();
-
-            // 1. Create or Update the Master record (VISIT_ROUTE)
-            var masterRecord = new VISIT_ROUTE
+            var masterRecord = new VISITORS_DAY
             {
-                ROUTE_NAME = routeName,
-                RACTIVE = true,
                 HES = HES.SelectedValue.ToString(),
-                IYALAT = OSTANID.Text.ToString(),
-                CITY = SHAHRID.Text.ToString(),
-                District = District.Text,
+                VDATE = Convert.ToInt64(VDATE.Text.ToRawTarikh()),
                 CDATE = DateTime.Now,
+                OKF = true,
                 USERNAME = USER_NAME.Text,
             };
 
-            //var RowExisting = dbms.DoGetDataSQL<string?>($"SELECT 1 FROM VISIT_ROUTE WHERE ROUTE_NAME = N'{ROUTE_NAME.Text}' ").FirstOrDefault();
-            var RowExisting = dbms.DoGetDataSQL<string?>($"SELECT 1 FROM VISIT_ROUTE WHERE ROUTE_NAME = @ROUTE_NAME", new { ROUTE_NAME = ROUTE_NAME.Text }).FirstOrDefault();
+            var RowExisting = dbms.DoGetDataSQL<string?>($"SELECT 1 FROM VISITORS_DAY WHERE HES = @HES AND VDATE = @VDATE",
+                new
+                {
+                    HES = HES.SelectedValue,
+                    VDATE = Convert.ToInt64(VDATE.Text.ToRawTarikh())
+                }).FirstOrDefault();
 
 
             if (NewRecord && RowExisting != null)
             {
-                Msgwin msgwin0 = new Msgwin(true, $"این مسیر ویزیت به نام '{HES.Text}' از قبل وجود دارد , امکان اضافه کردن اطلاعات تکراری نیست!");
+                Msgwin msgwin0 = new Msgwin(true, $"این ویزیت به نام '{HES.Text}' در تاریخ ویزیت {VDATE.Text} از قبل وجود دارد , امکان اضافه کردن اطلاعات تکراری نیست! ");
                 _ = msgwin0.ShowDialog();
                 return false;
             }
             else
             {
-                bool MasirChanged = _navigationManager?.CurrentRecord?.HES != null && HES.SelectedValue.ToString() != _navigationManager.CurrentRecord.HES;
+                bool HesVisitorChanged = _navigationManager?.CurrentRecord?.HES != null && HES.SelectedValue.ToString() != _navigationManager.CurrentRecord.HES;
 
-                if (MasirChanged && RowExisting != null)
+                if (HesVisitorChanged && RowExisting != null)
                 {
-                    Msgwin msgwin0 = new Msgwin(true, $"این مسیر ویزیت به نام '{HES.Text}' از قبل وجود دارد , امکان ذخیره اطلاعات تکراری نیست!");
+                    Msgwin msgwin0 = new Msgwin(true, $"این ویزیت به نام '{HES.Text}' در تاریخ ویزیت {VDATE.Text} از قبل وجود دارد , امکان ذخیره اطلاعات تکراری نیست! ");
                     _ = msgwin0.ShowDialog();
                     return false;
                 }
             }
 
-
             if (RowExisting == null) //Insert
             {
-                _ = dbms.DoExecuteSQL($@"INSERT INTO VISIT_ROUTE (ROUTE_NAME, HES, IYALAT, CITY, District, CDATE, USERNAME, RACTIVE)
-                                     VALUES (@ROUTE_NAME, @HES, @IYALAT, @CITY, @District, @CDATE, @USERNAME, @RACTIVE);", masterRecord);
+                _ = dbms.DoExecuteSQL($@"INSERT INTO VISITORS_DAY (HES, CDATE, USERNAME, OKF,VDATE)
+                                     VALUES (@HES, @CDATE, @USERNAME, @OKF,@VDATE);", masterRecord);
                 RefreshAfterUpdate();
             }
             else
             {
-                Msgwin msgwin = new Msgwin(true, $"این مسیر ویزیت به نام '{ROUTE_NAME.Text}' وجود دارد , آیا از بروز کردن اطلاعات آن مطمئن هستید ؟ ");
-                if (ROUTE_NAME.Text.Trim().FixPersianChars() != _navigationManager.CurrentRecord.ROUTE_NAME.FixPersianChars())
-                {
-                    msgwin.ShowDialog();
-                }
-                if (msgwin?.DialogResult == false)
-                {
-                    _ = msgwin;
-                }
-                else
-                {
-                    _ = dbms.DoExecuteSQL($@"UPDATE VISIT_ROUTE SET RACTIVE=@RACTIVE, HES=@HES, IYALAT=@IYALAT, CITY=@CITY, District=@District, CDATE=@CDATE
-                            WHERE ROUTE_NAME = @ROUTE_NAME;", masterRecord);
-                }
+                _ = dbms.DoExecuteSQL($@"UPDATE VISITORS_DAY SET HES=@HES , VDATE = @VDATE
+                            WHERE HES = @HES AND VDATE = @VDATE", masterRecord);
             }
 
             return true;
@@ -997,24 +923,25 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         {
             if (!NewRecord)
             {
-                var QRE_LST = dbms.DoGetDataSQL<VISIT_ROUTE_DTL>(@$"
+                var QRE_LST = dbms.DoGetDataSQL<VISITORS_DAY_DTL>(@$"
                                     SELECT 
                                       C.NAME AS NAME_HES, 
-                                      D.ROUTE_NAME,
+                                      D.HES,
+                                      D.VDATE,
                                       D.COUST_NO,
                                       D.RACTIVE, 
-                                      D.IDR, 
+                                      D.TOPLACE, 
                                       D.CLASS, 
                                       D.CRT, 
                                       D.UID
                                     FROM dbo.CUST_HESAB AS C
-                                    RIGHT JOIN dbo.Visit_route_dtl AS D
+                                    RIGHT JOIN dbo.VISITORS_DAY_DTL AS D
                                       ON C.hes = D.COUST_NO
-                                    WHERE D.ROUTE_NAME = @RouteName", new { RouteName = ROUTE_NAME.Text }).ToList();
+                                    WHERE D.HES = @RouteName", new { RouteName = HES.SelectedValue }).ToList();
 
-                VISIT_ROUTE_DATA?.Clear();
+                VISIT_DAY_DATA?.Clear();
                 foreach (var item in QRE_LST)
-                    VISIT_ROUTE_DATA?.Add(item);
+                    VISIT_DAY_DATA?.Add(item);
             }
         }
 
@@ -1095,7 +1022,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             if (!(sender is ComboBox combo)) return;
 
             // The DataContext here is the underlying INVO_LST row.
-            if (!(combo.DataContext is VISIT_ROUTE_DTL currentRow)) return;
+            if (!(combo.DataContext is VISITORS_DAY_DTL currentRow)) return;
 
             // Update the row with the selected item.
             if (combo.SelectedItem is CUST_HESAB_COMBINED selectedStuf)
@@ -1112,7 +1039,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             // Delay focus setting to ensure that the control is ready.
             Dispatcher.BeginInvoke(new Action(() => combo.Focus()), DispatcherPriority.Input);
 
-            if (!(combo.DataContext is VISIT_ROUTE_DTL currentRow)) return;
+            if (!(combo.DataContext is VISITORS_DAY_DTL currentRow)) return;
 
             if (!string.IsNullOrEmpty(currentRow.COUST_NO))
             {
@@ -1156,23 +1083,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         }
         #endregion
 
-        private void OSTANID_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            //if (!NowIsReady) { return; }
-
-            if (OSTANID.SelectedValue is not null)
-            {
-                //شهرستان
-                ALL_SHAHR = dbms.DoGetDataSQL<TCOD_CITY>($"SELECT CITYCODE, CITYNAME FROM TCOD_CITY WHERE OSCODE = {OSTANID.SelectedValue} ORDER BY CITYNAME").ToList();
-                foreach (var item in ALL_SHAHR) { item.CITYNAME = item.CITYNAME?.FixPersianChars(); }
-                SHAHRID.ItemsSource = ALL_SHAHR;
-                SHAHRID.IsEnabled = true;
-            }
-            else
-            {
-                SHAHRID.IsEnabled = false;
-            }
-        }
         private void HES_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (HES.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
@@ -1186,8 +1096,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 }
             }
 
-            var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(HES, dbms);
-            if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
+            if (string.IsNullOrEmpty(HES.SelectedValue?.ToStringNullSafe()))
             {
                 universControl.PopNotifyShow($"ویزیتور نمی تواند خالی باشد", Pop1, Pop1Text1, Pop_Border1);
                 e.Handled = true;
@@ -1195,12 +1104,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
             if (HES.SelectedValue is not null)
             {
-                if (CL_HESABDARI.ISTAF(HES.SelectedValue.ToString()))
-                {
-                    Msgwin msgwin = new Msgwin(false, "حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!");
-                    msgwin.ShowDialog();
-                    HES.SelectedValue = null;
-                }
+                //if (CL_HESABDARI.ISTAF(HES.SelectedValue.ToString()))
+                //{
+                //    Msgwin msgwin = new Msgwin(false, "حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!");
+                //    msgwin.ShowDialog();
+                //    HES.SelectedValue = null;
+                //}
                 if (CL_HESABDARI.BLOCKEDCUST(HES.SelectedValue.ToString()))
                 {
                     HES.SelectedItem = null;
@@ -1214,24 +1123,23 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
         private void Command106_Click(object sender, RoutedEventArgs e)
         {
-            if (NewRecord || VISIT_ROUTE_DATA.Count == 0)
+            if (NewRecord || VISIT_DAY_DATA.Count == 0)
             {
                 return;
             }
 
             var report = new StiReport();
-            using var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Visitory.R_LIST_MASIR.mrt");
+            using var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Visitory.R_LIST_VISIT_DAY.mrt");
             report.Load(pathreport);
             ((StiSqlDatabase)(report.Dictionary.Databases["MS SQL"])).ConnectionString = CL_CCNNMANAGER.CONNECTION_STR;
 
-            report["ROUTE_PARAM1"] = ROUTE_NAME.Text;
-            report["ROUTE_PARAM2"] = ROUTE_NAME.Text.FixPersianChars();
             report["HES_PARAM"] = HES.SelectedValue;
+            report["VDATE"] = Convert.ToInt64(VDATE.Text.ToRawTarikh());
 
             (report.GetComponentByName("VISITOR_TXT") as StiText).Text = HES.Text;
             (report.GetComponentByName("DATEEMROOZ") as StiText).Text = Tarikh.FullCurrentDate;
 
-            new WINRPT(report, "مسیر ویزیت").Show();
+            new WINRPT(report, "ليست مشتريان ويزيتور در اين تاريخ").Show();
         }
 
         private void DG_SUB_CANCEL_EDIT(DataGridEditingUnit? _RC_ = null)
@@ -1240,74 +1148,23 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             {
                 DG_SUB.CellEditEnding -= DG_SUB_CellEditEnding;
                 DG_SUB.RowEditEnding -= DG_SUB_RowEditEnding;
-                if (_RC_ is null)
-                {
-                    DG_SUB.CancelEdit();
-                    //DG_SUB.CommitEdit(DataGridEditingUnit.Row, true);
-                }
-                else
-                {
-                    DG_SUB.CancelEdit((DataGridEditingUnit)_RC_);
-                    //DG_SUB.CommitEdit((DataGridEditingUnit)_RC_, true);
-                }
+                DG_SUB.CancelEdit();
                 DG_SUB.RowEditEnding += DG_SUB_RowEditEnding;
                 DG_SUB.CellEditEnding += DG_SUB_CellEditEnding;
             });
-        }
-
-        public string GetHesLevel(string HES)
-        {
-            double? KOL = null, MOIN = null, TAF = null, TAF2 = null, TAF3 = null, TAF4 = null;
-
-            // فرض بر اینکه متد GETTAF3 مقادیر را با ref برمی‌گرداند
-            CL_HESABDARI.GETTAF3(HES, ref KOL, ref MOIN, ref TAF, ref TAF2, ref TAF3, ref TAF4);
-
-            if (!string.IsNullOrEmpty(TAF4?.ToString()))
-                return "TDETA_HES4";
-            else if (!string.IsNullOrEmpty(TAF3?.ToString()))
-                return "TDETA_HES3";
-            else if (!string.IsNullOrEmpty(TAF2?.ToString()))
-                return "TDETA_HES2";
-            else if (!string.IsNullOrEmpty(TAF?.ToString()))
-                return "TDETA_HES";
-            else
-                return null;
-        }
-        private string BuildExprWhereCondition(string tableName)
-        {
-            return tableName switch
-            {
-                "TDETA_HES" => "RTRIM(CAST(N_KOL AS NVARCHAR)) + '-' + RTRIM(CAST(NUMBER AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER AS NVARCHAR)) = @COUST_NO",
-                "TDETA_HES2" => "RTRIM(CAST(N_KOL AS NVARCHAR)) + '-' + RTRIM(CAST(NUMBER AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER2 AS NVARCHAR)) = @COUST_NO",
-                "TDETA_HES3" => "RTRIM(CAST(N_KOL AS NVARCHAR)) + '-' + RTRIM(CAST(NUMBER AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER2 AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER3 AS NVARCHAR)) = @COUST_NO",
-                "TDETA_HES4" => "RTRIM(CAST(N_KOL AS NVARCHAR)) + '-' + RTRIM(CAST(NUMBER AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER2 AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER3 AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER4 AS NVARCHAR)) = @COUST_NO",
-                _ => throw new Exception("سطح حساب نامعتبر است.")
-            };
-        }
-        private string BuildExprSelect(string tableName)
-        {
-            string expr = tableName switch
-            {
-                "TDETA_HES" => "RTRIM(CAST(N_KOL AS NVARCHAR)) + '-' + RTRIM(CAST(NUMBER AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER AS NVARCHAR))",
-                "TDETA_HES2" => "RTRIM(CAST(N_KOL AS NVARCHAR)) + '-' + RTRIM(CAST(NUMBER AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER2 AS NVARCHAR))",
-                "TDETA_HES3" => "RTRIM(CAST(N_KOL AS NVARCHAR)) + '-' + RTRIM(CAST(NUMBER AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER2 AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER3 AS NVARCHAR))",
-                "TDETA_HES4" => "RTRIM(CAST(N_KOL AS NVARCHAR)) + '-' + RTRIM(CAST(NUMBER AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER2 AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER3 AS NVARCHAR)) + '-' + RTRIM(CAST(TNUMBER4 AS NVARCHAR))",
-                _ => throw new Exception("سطح حساب ناشناخته است.")
-            };
-
-            return $"SELECT {expr} AS Expr1, ROUTE_NAME FROM {tableName} WHERE {expr} = @COUST_NO";
         }
 
         private void DG_SUB_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
             if (!(e is null) && DG_SUB.SelectedItem is not null)
             {
-                if (DG_SUB.SelectedItem.ToStringNullSafe() != "{NewItemPlaceholder}")
+                if (CL_LMethods.IsNewPlaceHolder(DG_SUB, DG_SUB.SelectedItem))
                 {
-                    WAS_ROW_ITEM = ((VISIT_ROUTE_DTL)DG_SUB.SelectedItem).Clone() as VISIT_ROUTE_DTL;
+                    WAS_ROW_ITEM = ((VISITORS_DAY_DTL)DG_SUB.SelectedItem).Clone() as VISITORS_DAY_DTL;
                 }
             }
         }
+        private DataGridCellInfo? editingCellInfo;
         private void DG_SUB_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
@@ -1336,7 +1193,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 ENTERED_VALUE_ROW = TexboVal?.Text?.Trim();
             }
 
-            CURRENT_ROW_ITEMS = e.Row.Item as VISIT_ROUTE_DTL;
+            CURRENT_ROW_ITEMS = e.Row.Item as VISITORS_DAY_DTL;
             if (CURRENT_ROW_ITEMS == null)
             {
                 return;
@@ -1370,6 +1227,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             }
             #endregion
 
+            editingCellInfo = new DataGridCellInfo(e.Row.Item, e.Column);
+
             //نام مشتری
             if (e.Column.SortMemberPath == "NAME_HES" || e.Column.Header.ToString() == "نام مشتری")
             {
@@ -1387,10 +1246,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                         CURRENT_ROW_ITEMS.COUST_NO = _SelectedHesab_.hes;
                         CURRENT_ROW_ITEMS.NAME_HES = _SelectedHesab_.NAME;
 
-
-                        //COUST_NO_BeforeUpdate
-                        // تعیین سطح حساب برای اعمال فیلتر مناسب
-                        UpdatePathForOthers(CURRENT_ROW_ITEMS);
                     }
                 }
             }
@@ -1410,140 +1265,118 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             }
         }
 
-        private void UpdatePathForOthers(VISIT_ROUTE_DTL CurrentRow)
-        {
-            var routeName = ROUTE_NAME.Text;
-            string coustNo = CurrentRow.COUST_NO.ToStringNullSafe();
-            string TBH = GetHesLevel(coustNo);
-
-            if (string.IsNullOrEmpty(TBH))
-                return;
-
-            string exprSelect = BuildExprSelect(TBH);
-            var rst = dbms.DoGetDataSQL<VISIT_ROUTE_DTL>(exprSelect, new { COUST_NO = coustNo }).FirstOrDefault();
-
-            if (rst != null)
-            {
-                string currentRouteName = Convert.ToString(rst.ROUTE_NAME);
-
-                if (string.IsNullOrEmpty(currentRouteName)) //اگرمشتری به هيچ مسيری مرتبط نيست
-                {
-                    string updateSql = $"UPDATE {TBH} SET ROUTE_NAME = @ROUTE_NAME WHERE {BuildExprWhereCondition(TBH)}";
-                    dbms.DoExecuteSQL(updateSql, new { ROUTE_NAME = routeName, COUST_NO = coustNo });
-                }
-                else if (currentRouteName != routeName)
-                {
-                    //اگرمشتری به  مسيری مرتبط است
-                    string routeDtlSql = "SELECT * FROM Visit_route_dtl WHERE COUST_NO = @COUST_NO AND RACTIVE = 1";
-                    var existingDtl = dbms.DoGetDataSQL<VISIT_ROUTE_DTL>(routeDtlSql, new { COUST_NO = coustNo }).FirstOrDefault();
-
-                    if (existingDtl != null)
-                    {
-                        Msgwin msgwin = new Msgwin(true, $"این مشتری زیر مجموعه مسیر ویزیتوری : {currentRouteName} قبلا ثبت شده است. آیا مایلید در آن مسیر غیر فعال شود و به این مسیر اضافه شود؟");
-                        var result = msgwin.ShowDialog();
-                        if (result == true)
-                        {
-                            dbms.DoExecuteSQL("UPDATE Visit_route_dtl SET RACTIVE = 0 WHERE IDR = @IDR", new { IDR = existingDtl.IDR });
-
-                            string updateSql = $"UPDATE {TBH} SET ROUTE_NAME = @ROUTE_NAME WHERE {BuildExprWhereCondition(TBH)}";
-                            dbms.DoExecuteSQL(updateSql, new { ROUTE_NAME = routeName, COUST_NO = coustNo });
-                        }
-                        else
-                        {
-                            DG_SUB_CANCEL_EDIT();
-                        }
-                    }
-                    else
-                    {
-                        string updateSql = $"UPDATE {TBH} SET ROUTE_NAME = @ROUTE_NAME WHERE {BuildExprWhereCondition(TBH)}";
-                        dbms.DoExecuteSQL(updateSql, new { ROUTE_NAME = routeName, COUST_NO = coustNo });
-                    }
-                }
-            }
-        }
-
         private void DG_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
-
-            if (!HeaderIsValid())
-            {
-                return;
-            }
-
-            var ROW = e.Row.Item as VISIT_ROUTE_DTL;
-            if (e.Row.Item == null || ROW is null)
-            {
-                return;
-            }
-            
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+            if (e.EditAction != DataGridEditAction.Commit || e.Cancel) return;
+            if (e.Row.Item == null) { return; }
+            var ROW = e.Row.Item as VISITORS_DAY_DTL;
+            if (ROW is null) { return; }
+            if (ConstructorRowDetector.IsPristine(e.Row.Item)) { DG_SUB_CANCEL_EDIT(); return; } //اگر سطر «دست‌نخورده» است، بدون خطا عمل کن
+            if (!HeaderIsValid()) { return; }
 
             if (!BodyIsValid(ROW))
             {
-                DG_SUB_CANCEL_EDIT();
+                //DG_SUB_CANCEL_EDIT();
+                DG_CANCEL_CURRENT(e, ROW);
                 return;
             }
 
-            int? idd = null;
+            ROW.HES = HES.SelectedValue.ToString();
+            ROW.VDATE = Convert.ToInt64(VDATE.Text.ToRawTarikh());
+
             try
             {
-                if (ROW?.IDR is null) //INSERT
+                if (e.Row.IsNewItem)
                 {
-                    var DetailRecord = new VISIT_ROUTE_DTL
+                    // بررسی وجود رکورد با کلید جدید
+                    var duplicate = dbms.DoGetDataSQL<VISITORS_DAY_DTL>(
+                        "SELECT TOP 1 * FROM dbo.VISITORS_DAY_DTL WHERE HES = @HES AND VDATE = @VDATE AND COUST_NO = @COUST_NO",
+                        new { HES = ROW.HES, VDATE = ROW.VDATE, COUST_NO = ROW.COUST_NO }).FirstOrDefault();
+
+                    if (duplicate != null)
                     {
-                        ROUTE_NAME = ROUTE_NAME.Text,
-                        COUST_NO = ROW.COUST_NO,
-                        RACTIVE = ROW.RACTIVE,
-                        CLASS = ROW.CLASS
-                    };
-                    idd = dbms.DoGetDataSQL<int?>(@$"INSERT INTO VISIT_ROUTE_DTL(ROUTE_NAME, COUST_NO, RACTIVE, CLASS)
-                                                     OUTPUT INSERTED.IDR
-                                                     VALUES(@ROUTE_NAME, @COUST_NO, @RACTIVE, @CLASS)", DetailRecord).FirstOrDefault();
+                        DG_CANCEL_CURRENT(e, ROW);
+                        universControl.PopNotifyShow("مشتری با این مشخصات قبلاً ثبت شده است", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                        return;
+                    }
+
+                    // درج رکورد جدید
+                    dbms.DoExecuteSQL(@$"
+                        INSERT INTO VISITORS_DAY_DTL(HES, COUST_NO, VDATE, CDATE, RACTIVE, CLASS, UID)
+                        VALUES(@HES, @COUST_NO, @VDATE, @CDATE, @RACTIVE, @CLASS, @UID)",
+                        new
+                        {
+                            HES = ROW.HES,
+                            COUST_NO = ROW.COUST_NO,
+                            VDATE = ROW.VDATE,
+                            CDATE = DateTime.Now,
+                            RACTIVE = ROW.RACTIVE,
+                            CLASS = ROW.CLASS,
+                            UID = Baseknow.USERCOD
+                        });
                 }
-                else //UPDATE
+                else
                 {
-                    var DetailRecord = new VISIT_ROUTE_DTL
-                    {
-                        ROUTE_NAME = ROUTE_NAME.Text,
-                        COUST_NO = ROW.COUST_NO,
-                        RACTIVE = ROW.RACTIVE,
-                        CLASS = ROW.CLASS,
-                        IDR = ROW.IDR
-                    };
-
-                    dbms.DoExecuteSQL(@$"UPDATE dbo.VISIT_ROUTE_DTL
-                                          SET ROUTE_NAME = @ROUTE_NAME,
-                                              COUST_NO = @COUST_NO,
-                                              RACTIVE = @RACTIVE,
-                                              CLASS = @CLASS
-                                          WHERE IDR = @IDR", DetailRecord);
+                    // فقط آپدیت اگر کلید تغییر نکرده
+                    dbms.DoExecuteSQL(@$"UPDATE dbo.VISITORS_DAY_DTL
+                                        SET RACTIVE = @RACTIVE, TOPLACE = @TOPLACE, CLASS = @CLASS
+                        WHERE HES = @HES AND VDATE = @VDATE AND COUST_NO = @COUST_NO",
+                        new
+                        {
+                            HES = ROW.HES,
+                            VDATE = ROW.VDATE,
+                            COUST_NO = ROW.COUST_NO,
+                            RACTIVE = ROW.RACTIVE,
+                            TOPLACE = ROW.TOPLACE,
+                            CLASS = ROW.CLASS
+                        });
                 }
-
-                UpdatePathForOthers(ROW); //AfterUpdate
             }
             catch (SqlException ex)
             {
-                DG_SUB_CANCEL_EDIT();
+                DG_CANCEL_CURRENT(e, ROW);
 
                 if (ex.Number == 2601 || ex.Number == 2627)
                 {
                     new Msgwin(false, "نام مشتری تکراری است آنرا اصلاح کنید").ShowDialog();
                 }
-
+                else
+                {
+                    new Msgwin(false, "خطا در ذخیره سطر").ShowDialog();
+                }
                 return;
             }
             catch (Exception)
             {
                 new Msgwin(false, "خطا در انجام عملیات حذف!").ShowDialog(); return;
             }
-            if (idd != null) //So Much Important
-            {
-                ROW.IDR = idd;
-            }
 
+
+        }
+
+        private void DG_CANCEL_CURRENT(DataGridRowEditEndingEventArgs e, VISITORS_DAY_DTL? ROW)
+        {
+            e.Cancel = true;
+
+            var DG = DG_SUB;
+            DG.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                //DG.CellEditEnding -= DG_SUB_CellEditEnding;
+                //DG.RowEditEnding -= DG_SUB_RowEditEnding;
+
+                DG.SelectedItem = ROW;
+                DG.ScrollIntoView(ROW);
+                if (editingCellInfo.HasValue)
+                    DG.CurrentCell = editingCellInfo.Value;
+                else
+                    DG.CurrentCell = new DataGridCellInfo(ROW, DG.Columns[0]);
+                DG.BeginEdit();
+
+                //DG.RowEditEnding += DG_SUB_RowEditEnding;
+                //DG.CellEditEnding += DG_SUB_CellEditEnding;
+
+            }), System.Windows.Threading.DispatcherPriority.Background);
         }
 
         private void DG_SUB_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
@@ -1589,7 +1422,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 {
                     if (DG_SUB.SelectedItem.ToStringNullSafe() != "{NewItemPlaceholder}")
                     {
-                        WAS_ROW_ITEM = ((VISIT_ROUTE_DTL)DG_SUB.SelectedItem).Clone() as VISIT_ROUTE_DTL;
+                        WAS_ROW_ITEM = ((VISITORS_DAY_DTL)DG_SUB.SelectedItem).Clone() as VISITORS_DAY_DTL;
                     }
                 }
             }
@@ -1629,14 +1462,74 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
         }
 
-        private void BTN_FACTORHA_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private void RACTIVE_CheckBox_Click(object sender, RoutedEventArgs e)
         {
             DG_SUB.BeginEdit();
+        }
+
+        private void CheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            DG_SUB.BeginEdit();
+        }
+
+        private void BTN_GETMASIR_Click(object sender, RoutedEventArgs e)
+        {
+            if (HES.SelectedValue != null && !NewRecord)
+            {
+                var win = new WIN_VISITSELECT(HES.SelectedValue.ToString());
+                bool? ok = win.ShowDialog();
+                if (ok == true && win.SelectedVisit != null && !string.IsNullOrEmpty(win.SelectedVisit.ROUTE_NAME))
+                {
+                    // دادهٔ انتخابی را نمایش/استفاده کنید
+                    var MyROUTE_NAME = win.SelectedVisit.ROUTE_NAME;
+
+                    var RST = dbms.DoGetDataSQL<VISIT_ROUTE_DTL>($"SELECT COUST_NO, RACTIVE, CLASS FROM  dbo.Visit_route_dtl WHERE (RACTIVE = 1 AND ROUTE_NAME = @ROUTE_NAME", new { ROUTE_NAME = MyROUTE_NAME }).ToList();
+
+                    var existing = dbms.DoGetDataSQL<string>(
+                                    @"SELECT COUST_NO
+                                      FROM   dbo.VISITORS_DAY_DTL
+                                      WHERE  HES = @HES AND VDATE = @VDATE", new { HES = HES.SelectedValue, VDATE = Convert.ToInt64(VDATE.Text.ToRawTarikh()) }).ToHashSet();
+
+                    bool AnyDuplicat = false;
+
+                    if (RST.Any())
+                    {
+                        const string sql = @"
+                                             INSERT INTO dbo.VISITORS_DAY_DTL
+                                                    (HES,       VDATE,  COUST_NO,  CDATE, RACTIVE,   CLASS,  TOPLACE)
+                                             VALUES (@HES,      @VDATE, @COUST_NO, @CDATE, 1,        @CLASS, 0);";
+
+                        foreach (var rc in RST)
+                        {
+                            if (existing.Contains(rc?.COUST_NO))
+                            {
+                                AnyDuplicat = true;
+                                continue; // رد می‌کنیم چون تکراری است
+                            }
+
+                            dbms.DoExecuteSQL(sql, new
+                            {
+                                HES = HES.SelectedValue,      // ویزیتور جاری
+                                VDATE = Convert.ToInt64(VDATE.Text.ToRawTarikh()),        // 8-digit Persian date as BIGINT
+                                COUST_NO = rc.COUST_NO,  // حساب مشتری
+                                CDATE = DateTime.Now,        // وقت ایجاد رکورد
+                                CLASS = rc.CLASS,     // کلاس مسیر (ممکن است NULL باشد)
+                            });
+                        }
+
+                        DG_SUB_ReGetData();
+
+                        if (AnyDuplicat)
+                        {
+                            universControl.PopNotifyShowUp("لیست مشتریان از مسیر ویزیت انتخاب شده بارگذاری شد , اما یکسری مشتری از قبل اضافه شده بودند.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
+                        }
+                        else
+                        {
+                            universControl.PopNotifyShowUp("لیست مشتریان از مسیر ویزیت انتخاب شده بارگذاری شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
+                        }
+                    }
+                }
+            }
         }
     }
 }

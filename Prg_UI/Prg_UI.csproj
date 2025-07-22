@@ -17,7 +17,7 @@
 
 		<AssemblyVersion></AssemblyVersion>
 
-		<FileVersion>1.0.0.189</FileVersion>
+		<FileVersion>1.0.0.194</FileVersion>
 
 		<Title>MrCorrect</Title>
 		<AssemblyName>MrCorrect</AssemblyName>
@@ -31,13 +31,6 @@
 		<!--<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>-->
 
 	</PropertyGroup>
-
-	<ItemGroup>
-	  <Compile Remove="DLLS\stimulydlls\**" />
-	  <EmbeddedResource Remove="DLLS\stimulydlls\**" />
-	  <None Remove="DLLS\stimulydlls\**" />
-	  <Page Remove="DLLS\stimulydlls\**" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<None Remove="DLLS\AxInterop.TINYLib.dll" />
@@ -141,6 +134,7 @@
 		<None Remove="Rpts\Visitory\R_LIST_MASIR.mrt" />
 		<None Remove="Rpts\Visitory\Visit_gol_dtl_Rep.mrt" />
 		<None Remove="Rpts\Visitory\Visit_gol_dtl_REP_print_grp.mrt" />
+		<None Remove="Rpts\Visitory\R_LIST_VISIT_DAY.mrt" />
 		<None Remove="UiDrive\EXEFILES\Preloader.exe" />
 		<None Remove="UiDrive\FNT\IranYekanRG.TTF" />
 		<None Remove="UiDrive\IMGS\budget.jpg" />
@@ -530,6 +524,7 @@
 		<EmbeddedResource Include="Rpts\Visitory\R_LIST_MASIR.mrt" />
 		<EmbeddedResource Include="Rpts\Visitory\Visit_gol_dtl_Rep.mrt" />
 		<EmbeddedResource Include="Rpts\Visitory\Visit_gol_dtl_REP_print_grp.mrt" />
+		<EmbeddedResource Include="Rpts\Visitory\R_LIST_VISIT_DAY.mrt" />
 		<EmbeddedResource Include="UiDrive\EXEFILES\Preloader.exe" />
 	</ItemGroup>
 

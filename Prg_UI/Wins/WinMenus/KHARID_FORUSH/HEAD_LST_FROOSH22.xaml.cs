@@ -7548,8 +7548,34 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             //سند زدن
             SANAD();
 
+            try
+            {
+                List<MsgModel> ErrosMessages = new List<MsgModel>();
+
+                var msgs = CL_HESABDARI.RunCalculateVisitorPorsant(Convert.ToInt64(NUMBER.Text), hTAG);
+                foreach (var matn in msgs)
+                {
+                    var normalized = matn
+                        .Replace("(PORID)", "")
+                        .Replace("(STAT=1)", "");
+                    //universControl.PopNotifyShow(normalized, Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+                    ErrosMessages.Add(new MsgModel { MessageText_U = normalized });
+                }
+
+                if (ErrosMessages.Any())
+                {
+                    ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct()
+                        .Select(message => new MsgModel { MessageText_U = message }).ToList();
+                    new MsgListwin(false, ErrosMessages).Show();
+                }
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, $"خطا در محاسبه پورسانت: {ex.Message}").ShowDialog();
+            }
+
             //دریافت مجدد مقادیر از دیتابیس
-            ReGetdata();
+            //ReGetdata();
             VISITOR_DTL_SUB_ReGetData();
             PAY_GETD_SUB_ReGetData();
             TAKHFIF_APLAY_ReGetData();
@@ -8962,7 +8988,14 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 {
                     if (!Keyboard.IsKeyDown(Key.Escape))
                     {
-                        e.Cancel = true;
+                        DG.CellEditEnding -= PAY_GETD_SUB22_CellEditEnding;
+                        DG.RowEditEnding -= PAY_GETD_SUB22_RowEditEnding;
+
+                        //DG.CancelEdit(DataGridEditingUnit.Cell);
+                        DG.CancelEdit();
+
+                        DG.RowEditEnding += PAY_GETD_SUB22_RowEditEnding;
+                        DG.CellEditEnding += PAY_GETD_SUB22_CellEditEnding;
 
                         ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct()
                             .Select(message => new MsgModel { MessageText_U = message }).ToList();
@@ -9181,16 +9214,37 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                 DG.Dispatcher.Invoke(() =>
                 {
-                    e.Cancel = true;
+                    //e.Cancel = true;
 
-                    //DG.CellEditEnding -= PAY_GETD_SUB22_CellEditEnding;
-                    //DG.RowEditEnding -= PAY_GETD_SUB22_RowEditEnding;
+                    DG.CellEditEnding -= PAY_GETD_SUB22_CellEditEnding;
+                    DG.RowEditEnding -= PAY_GETD_SUB22_RowEditEnding;
 
-                    ////DG.CancelEdit();
+                    DG.CancelEdit();
 
-                    //DG.RowEditEnding += PAY_GETD_SUB22_RowEditEnding;
-                    //DG.CellEditEnding += PAY_GETD_SUB22_CellEditEnding;
+                    DG.RowEditEnding += PAY_GETD_SUB22_RowEditEnding;
+                    DG.CellEditEnding += PAY_GETD_SUB22_CellEditEnding;
                 });
+
+                #region MyRegion
+
+                //e.Cancel = true;
+
+                // عملیات مهم: دوباره سطر را به حالت ویرایش بازگردانید (به صورت async تا از تراکنش خارج شود)
+                //DG.Dispatcher.BeginInvoke(new Action(() =>
+                //{
+                //    DG.CellEditEnding -= PAY_GETD_SUB22_CellEditEnding;
+                //    DG.RowEditEnding -= PAY_GETD_SUB22_RowEditEnding;
+
+                //    DG.SelectedItem = FINAL_CROW_ITEM;
+                //    DG.ScrollIntoView(FINAL_CROW_ITEM);
+                //    DG.CurrentCell = new DataGridCellInfo(FINAL_CROW_ITEM, DG.Columns[0]);
+                //    DG.BeginEdit();
+
+                //    DG.RowEditEnding += PAY_GETD_SUB22_RowEditEnding;
+                //    DG.CellEditEnding += PAY_GETD_SUB22_CellEditEnding;
+
+                //}), System.Windows.Threading.DispatcherPriority.Background);
+                #endregion
 
                 return;
             }
