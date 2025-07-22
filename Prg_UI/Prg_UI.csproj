@@ -139,6 +139,8 @@
 		<None Remove="Rpts\STUF_DEF.mrt" />
 		<None Remove="Rpts\TAARIF\GRADE_REP.mrt" />
 		<None Remove="Rpts\Visitory\R_LIST_MASIR.mrt" />
+		<None Remove="Rpts\Visitory\Visit_gol_dtl_Rep.mrt" />
+		<None Remove="Rpts\Visitory\Visit_gol_dtl_REP_print_grp.mrt" />
 		<None Remove="UiDrive\EXEFILES\Preloader.exe" />
 		<None Remove="UiDrive\FNT\IranYekanRG.TTF" />
 		<None Remove="UiDrive\IMGS\budget.jpg" />
@@ -526,6 +528,8 @@
 		<EmbeddedResource Include="Rpts\STUF_DEF.mrt" />
 		<EmbeddedResource Include="Rpts\TAARIF\GRADE_REP.mrt" />
 		<EmbeddedResource Include="Rpts\Visitory\R_LIST_MASIR.mrt" />
+		<EmbeddedResource Include="Rpts\Visitory\Visit_gol_dtl_Rep.mrt" />
+		<EmbeddedResource Include="Rpts\Visitory\Visit_gol_dtl_REP_print_grp.mrt" />
 		<EmbeddedResource Include="UiDrive\EXEFILES\Preloader.exe" />
 	</ItemGroup>
 
