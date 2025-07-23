@@ -650,6 +650,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
             //PERSONEL.SelectedIndex = -1; PERSONEL.Items.Refresh();
             //PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
 
+            _sgn1_info.SEMAT_USER = null;
+            _sgn1_info.NAME_HESAB_USER = null;
+            _sgn2_info.SEMAT_USER = null;
+            _sgn2_info.NAME_HESAB_USER = null;
+            _sgn3_info.SEMAT_USER = null;
+            _sgn3_info.NAME_HESAB_USER = null;
 
             MOGU.Text = null; //موجودی
 
@@ -4084,6 +4090,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 {
 
                     _id_ = dbms.DoGetDataSQL<long?>($@"INSERT INTO dbo.VISITOR_DTL(NUMBER, TAG, CUST_NO, DARSAD, PURSANT, TOZIH, STAT, PORID)
+                           OUTPUT INSERTED.ID
                            VALUES({NUMBER.Text},
                            {HTAG} ,
                            N'{FINAL_CROW_ITEM.CUST_NO}' ,

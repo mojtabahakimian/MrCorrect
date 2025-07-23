@@ -1088,7 +1088,7 @@
                                 </DataGridTextColumn.EditingElementStyle>
                             </DataGridTextColumn>
 
-                            <DataGridCheckBoxColumn x:Name="sTATColumn" Binding="{Binding STAT, UpdateSourceTrigger=LostFocus}" Header="مبلغ ثابت" Width="auto">
+                            <DataGridCheckBoxColumn x:Name="sTATColumn" Binding="{Binding STAT, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Header="مبلغ ثابت" Width="auto">
                                 <DataGridCheckBoxColumn.EditingElementStyle>
                                     <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
                                         <Setter Property="FlowDirection" Value="RightToLeft" />
@@ -1109,9 +1109,6 @@
                                 </DataGridCheckBoxColumn.ElementStyle>
                             </DataGridCheckBoxColumn>
 
-
-
-
                             <DataGridComboBoxColumn x:Name="PORID_COLUMN"  MinWidth="80" Width="auto" Header="الگوی پرداخت پورسانت" 
                                                     SelectedValueBinding="{Binding PORID, UpdateSourceTrigger=LostFocus}" 
                                                     DisplayMemberPath="Expr1" SelectedValuePath="PORID">
@@ -1129,13 +1126,15 @@
                                     </Style>
                                 </DataGridComboBoxColumn.ElementStyle>
                             </DataGridComboBoxColumn>
-                            <DataGridTextColumn x:Name="tOZIHColumn" Binding="{Binding TOZIH,UpdateSourceTrigger=LostFocus}" Header="توضیح" Width="auto">
+                            <DataGridTextColumn x:Name="tOZIHColumn" Binding="{Binding TOZIH,UpdateSourceTrigger=LostFocus}" Header="توضیح" Width="*">
                                 <DataGridTextColumn.EditingElementStyle>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                                         <Setter Property="MaxLength" Value="49" />
                                     </Style>
                                 </DataGridTextColumn.EditingElementStyle>
                             </DataGridTextColumn>
+                            
+                            <DataGridTextColumn x:Name="lOGColumn" Binding="{Binding LOG,UpdateSourceTrigger=LostFocus}" Header="رخداد نگاری" Width="*" IsReadOnly="True"/>
 
                         </DataGrid.Columns>
                     </DataGrid>

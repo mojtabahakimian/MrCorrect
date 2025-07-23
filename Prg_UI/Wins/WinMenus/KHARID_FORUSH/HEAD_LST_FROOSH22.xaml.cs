@@ -712,6 +712,13 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             SGN2usid.Text = null; SGN2usid.Tag = null; SGN2.IsChecked = false;
             SGN3usid.Text = null; SGN3usid.Tag = null; SGN3.IsChecked = false;
 
+            _sgn1_info.SEMAT_USER = null;
+            _sgn1_info.NAME_HESAB_USER = null;
+            _sgn2_info.SEMAT_USER = null;
+            _sgn2_info.NAME_HESAB_USER = null;
+            _sgn3_info.SEMAT_USER = null;
+            _sgn3_info.NAME_HESAB_USER = null;
+
             PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
             PERSONEL.SelectedIndex = -1; PERSONEL.Items.Refresh();
             PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
@@ -7545,34 +7552,37 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             //}
             #endregion
 
-            //سند زدن
-            SANAD();
 
+            //محاسبه پورسانت ویزیتور
             try
             {
                 List<MsgModel> ErrosMessages = new List<MsgModel>();
 
                 var msgs = CL_HESABDARI.RunCalculateVisitorPorsant(Convert.ToInt64(NUMBER.Text), hTAG);
-                foreach (var matn in msgs)
-                {
-                    var normalized = matn
-                        .Replace("(PORID)", "")
-                        .Replace("(STAT=1)", "");
-                    //universControl.PopNotifyShow(normalized, Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
-                    ErrosMessages.Add(new MsgModel { MessageText_U = normalized });
-                }
+                //foreach (var matn in msgs)
+                //{
+                //    var normalized = matn
+                //        .Replace("(PORID)", "")
+                //        .Replace("(STAT=1)", "");
 
-                if (ErrosMessages.Any())
-                {
-                    ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct()
-                        .Select(message => new MsgModel { MessageText_U = message }).ToList();
-                    new MsgListwin(false, ErrosMessages).Show();
-                }
+                //    //universControl.PopNotifyShow(normalized, Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+                //    ErrosMessages.Add(new MsgModel { MessageText_U = normalized });
+                //}
+
+                //if (ErrosMessages.Any())
+                //{
+                //    ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct()
+                //        .Select(message => new MsgModel { MessageText_U = message }).ToList();
+                //    new MsgListwin(false, ErrosMessages).Show();
+                //}
             }
             catch (Exception ex)
             {
                 new Msgwin(false, $"خطا در محاسبه پورسانت: {ex.Message}").ShowDialog();
             }
+
+            //سند زدن
+            SANAD();
 
             //دریافت مجدد مقادیر از دیتابیس
             //ReGetdata();
@@ -9845,24 +9855,56 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 var IsThereCrossHavaleh = dbms.DoGetDataSQL<double?>($"SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {hTAG}").FirstOrDefault();
                 if (IsThereCrossHavaleh != null)
                 {
-                    dbms.DoExecuteSQL($"DELETE FROM dbo.VISITOR_DTL WHERE NUMBER = {NUMBER.Text} AND TAG = {hTAG}"); //Clearing First
+                    long? _id_ = null;
+                    try
+                    {
+                        if (FINAL_CROW_ITEM?.ID is null)
+                        {
+                            _id_ = dbms.DoGetDataSQL<long?>($@"INSERT INTO dbo.VISITOR_DTL(NUMBER, TAG, CUST_NO, DARSAD, PURSANT, TOZIH, STAT, PORID)
+                            OUTPUT INSERTED.ID
+                            VALUES({NUMBER.Text},
+                            {hTAG} ,
+                            N'{FINAL_CROW_ITEM.CUST_NO}' ,
+                            {FINAL_CROW_ITEM?.DARSAD} ,
+                            {FINAL_CROW_ITEM?.PURSANT} ,
+                            N'{FINAL_CROW_ITEM?.TOZIH}' ,
+                            {Convert.ToByte(FINAL_CROW_ITEM.STAT)},
+                            {(string.IsNullOrEmpty(FINAL_CROW_ITEM?.PORID?.ToStringNullSafe()) ? "NULL" : FINAL_CROW_ITEM?.PORID)})").FirstOrDefault();
+                        }
+                        else
+                        {
+                            dbms.DoExecuteSQL($@"UPDATE dbo.VISITOR_DTL SET 
+                                         NUMBER = {NUMBER.Text}, CUST_NO = N'{FINAL_CROW_ITEM.CUST_NO}' , DARSAD = {FINAL_CROW_ITEM?.DARSAD} ,
+                                         PURSANT = {FINAL_CROW_ITEM?.PURSANT} , TOZIH = N'{FINAL_CROW_ITEM.TOZIH}' , STAT = {Convert.ToByte(FINAL_CROW_ITEM.STAT)},
+                                         PORID = {(string.IsNullOrEmpty(FINAL_CROW_ITEM?.PORID.ToStringNullSafe()) ? "NULL" : FINAL_CROW_ITEM?.PORID)}
+                                         WHERE ID = {FINAL_CROW_ITEM?.ID}");
+                        }
+                    }
+                    catch (SqlException ex)
+                    {
+                        VISITOR_DTL_SUB.Dispatcher.InvokeAsync(() =>
+                        {
+                            VISITOR_DTL_SUB.CellEditEnding -= VISITOR_DTL_SUB_CellEditEnding;
+                            VISITOR_DTL_SUB.CancelEdit();
+                            VISITOR_DTL_SUB.CellEditEnding += VISITOR_DTL_SUB_CellEditEnding;
+                        });
 
-                    dbms.DoExecuteSQL($@"INSERT INTO dbo.VISITOR_DTL(NUMBER, TAG, CUST_NO, DARSAD, PURSANT, TOZIH, STAT, PORID)
-                           VALUES({NUMBER.Text},
-                           {hTAG} ,
-                           N'{FINAL_CROW_ITEM.CUST_NO}' ,
-                           {FINAL_CROW_ITEM?.DARSAD} ,
-                           {FINAL_CROW_ITEM?.PURSANT} ,
-                           N'{FINAL_CROW_ITEM?.TOZIH}' ,
-                           {Convert.ToByte(FINAL_CROW_ITEM.STAT)},
-                           {(string.IsNullOrEmpty(FINAL_CROW_ITEM?.PORID?.ToStringNullSafe()) ? "NULL" : FINAL_CROW_ITEM?.PORID)})");
+                        if (ex.Number == 2627)
+                        {
+                            new Msgwin(false, "سطر تکراری است آنرا اصلاح کنید").ShowDialog();
+                            return;
+                        }
+                    }
+
+                    if (_id_ != null)
+                    {
+                        FINAL_CROW_ITEM.ID = _id_;
+                    }
+
 
                     #region DARSAD_AfterUpdate
                     FINAL_CROW_ITEM.PURSANT = Math.Round((double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * Convert.ToDouble(FINAL_CROW_ITEM.DARSAD) / 100));
-                    if (FINAL_CROW_ITEM?.STAT ?? false)
-                    {
-                        FINAL_CROW_ITEM.STAT = false;
-                    }
+                
                     #endregion
 
                     #region Form_AfterUpdate
@@ -9914,13 +9956,15 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     {
                         FINAL_CROW_ITEM.DARSAD = 0;
                     }
-                    if ((bool)!FINAL_CROW_ITEM.STAT)
+
+                    if (FINAL_CROW_ITEM?.STAT is null)
                     {
-                        FINAL_CROW_ITEM.STAT = true;
+                        FINAL_CROW_ITEM.STAT = false;
                     }
 
                     double sum = SAYER_VISITOR_DATA.Sum(item => item.PURSANT ?? 0.0);
                     Text190.Text = sum.ToString();
+
                 }
                 else
                 {
@@ -9940,6 +9984,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 new Msgwin(false, "خطا در انجام عملیات").Show(); return;
             }
 
+        }
+        private void sTATColumn_CheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            VISITOR_DTL_SUB.BeginEdit();
         }
         private void VISITOR_DTL_SUB_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
@@ -12160,10 +12208,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         #endregion
 
-        private void sTATColumn_CheckBox_Click(object sender, RoutedEventArgs e)
-        {
-            VISITOR_DTL_SUB.BeginEdit();
-        }
+   
 
         private void INVO_LST_sub_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {

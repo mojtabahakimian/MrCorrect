@@ -617,91 +617,47 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
 
                 string status = "1";
                 if (AnjamNashodeh.IsChecked == true)
-                    status = "(dbo.TASKS.STATUS = 1) AND ";
+                    status = "(TSK.STATUS = 1) AND ";
                 if (AnjamShode.IsChecked == true)
-                    status = "(dbo.TASKS.STATUS = 2) AND ";
+                    status = "(TSK.STATUS = 2) AND ";
                 if (LaghvShodeh.IsChecked == true)
-                    status = "(dbo.TASKS.STATUS = 3) AND ";
+                    status = "(TSK.STATUS = 3) AND ";
                 if (Hameh.IsChecked == true)
                     status = "";
 
                 string personelValue = UNVDER_PERSONEL.SelectedValue != null ? UNVDER_PERSONEL.SelectedValue.ToString() : Baseknow.USERCOD.ToString();
 
-                string personelQueryCondition = $" AND (dbo.TASKS.PERSONEL = {personelValue} ) ";
+                string personelQueryCondition = $" AND (TSK.PERSONEL = {personelValue}) ";
                 if (personelValue == "0" || personelValue == "همه")
                 {
                     personelQueryCondition = string.Empty;
                 }
 
-                string query = @$"SELECT dbo.TASKS.IDNUM, dbo.CUST_HESAB.NAME, dbo.TASKS.GR, dbo.TASKS.PERSONEL, dbo.TASKS.TASK, dbo.TASKS.PERIORITY, dbo.TASKS.STATUS, dbo.TASKS.STDATE,
-                              dbo.TASKS.STTIME, dbo.TASKS.ENDATE, dbo.TASKS.ENTIME, dbo.TASKS.USERNAME, dbo.TASKS.COMP_COD, dbo.TASKS.SUMTIME, dbo.TASKS.pic, dbo.TASKS.ss, dbo.TASKS.skid, dbo.TASKS.num,
-                              dbo.TASKS.tg, dbo.TASKS.CTIM, dbo.TASKS.USERCO, dbo.TASKS.SEE
-                              FROM dbo.TASKS
-                                   LEFT OUTER JOIN dbo.CUST_HESAB ON dbo.TASKS.COMP_COD=dbo.CUST_HESAB.hes
-                              WHERE {status} ({(checkedTags == "1000" ? "IDNUM > 0" : $"TASKS.skid IN ({checkedTags}) ")}) {personelQueryCondition}  
-                              ORDER BY TASKS.IDNUM
-                              OPTION (QUERYTRACEON 2312)";
+                string query = @$" SELECT TSK.IDNUM, CH.NAME, TSK.GR,
+                                   TSK.PERSONEL, TSK.TASK,
+                                   TSK.PERIORITY, TSK.STATUS,
+                                   TSK.STDATE, TSK.STTIME,
+                                   TSK.ENDATE, TSK.ENTIME,
+                                   TSK.USERNAME, TSK.COMP_COD,
+                                   TSK.SUMTIME, TSK.pic,
+                                   TSK.ss, TSK.skid,
+                                   TSK.num, TSK.tg,
+                                   TSK.CTIM, TSK.USERCO, TSK.SEE
+                                FROM dbo.TASKS AS TSK WITH (INDEX(IX_TASKS_Status1))
+                                     LEFT HASH JOIN dbo.CUST_HESAB AS CH
+                                         ON CH.hes = TSK.COMP_COD
+                                WHERE {status} ({(checkedTags == "1000" ? "TSK.IDNUM > 0" : $"TSK.skid IN ({checkedTags}) ")}) {personelQueryCondition}
+                                ORDER BY TSK.IDNUM";
 
-                //            WHERE {status} ({(gronum == 1000 ? "IDNUM > 0" : $"TASKS.skid = {gronum}")}) AND (dbo.TASKS.PERSONEL = {personelValue})  
-
-                //Query Faster:
-                //OPTION(QUERYTRACEON 2312)
 
                 // Fetch data asynchronously
                 //******************************
                 var RowsTask = await dbms.DoGetDataSQLAsync<TASKS>(query);
                 //******************************
 
-                if (false) //Disabled bacuse of begin Slow
-                {
-                    if (RowsTask.Any(i => string.IsNullOrEmpty(i.NAME))) //تماس گیرنده هایی که خالی هستند
-                    {
-                        if (AnjamNashodeh.IsChecked == true)
-                            status = "T.STATUS = 1 AND ";
-                        if (AnjamShode.IsChecked == true)
-                            status = "T.STATUS = 2 AND ";
-                        if (LaghvShodeh.IsChecked == true)
-                            status = "T.STATUS = 3 AND ";
-                        if (Hameh.IsChecked == true)
-                            status = "";
-
-                        string skidCondition = checkedTags == "1000" ? "T.IDNUM > 0" : $"T.skid IN ({checkedTags})";
-
-                        query = $@"
-                              WITH ExtractedPatterns AS (
-                                  SELECT 
-                                      T.*,
-                                      dbo.ExtractAccountPattern(T.COMP_COD) AS ExtractedPattern
-                                  FROM dbo.TASKS T
-                                  WHERE {status} ({skidCondition}) AND (T.PERSONEL = {personelValue})
-                              )
-                              SELECT 
-                                  EP.IDNUM, CH.NAME, EP.GR, EP.PERSONEL, EP.TASK, EP.PERIORITY, EP.STATUS, 
-                                  EP.STDATE, EP.STTIME, EP.ENDATE, EP.ENTIME, EP.USERNAME, EP.COMP_COD, 
-                                  EP.SUMTIME, EP.pic, EP.ss, EP.skid, EP.num, EP.tg, EP.CTIM, EP.USERCO, EP.SEE,
-                                  EP.ExtractedPattern AS DebugExtractedPattern,
-                                  CASE 
-                                      WHEN CH.hes IS NULL THEN 'Unmatched'
-                                      ELSE 'Matched'
-                                  END AS MatchStatus
-                              FROM ExtractedPatterns EP
-                              LEFT OUTER JOIN dbo.CUST_HESAB CH
-                                  ON EP.ExtractedPattern = CH.hes
-                              ORDER BY EP.IDNUM";
-
-                        RowsTask = await dbms.DoGetDataSQLAsync<TASKS>(query);
-                    }
-                }
-
                 await Task.Delay(100); // Small delay to allow UI to update
                 await this.Dispatcher.InvokeAsync(() =>
                 {
-                    //TASK_DATA.Clear();
-                    //foreach (var task in RowsTask)
-                    //{
-                    //    TASK_DATA.Add(task);
-                    //}
-
                     TASK_DATA.ReplaceAll(RowsTask);
                 });
             }
@@ -715,8 +671,6 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             finally
             {
                 UpdateDataGridFocus(_IsFirstTime_);
-
-
                 CanUisBeActive = true;
             }
         }

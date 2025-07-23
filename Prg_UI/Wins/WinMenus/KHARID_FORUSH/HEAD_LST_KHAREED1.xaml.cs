@@ -4931,6 +4931,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
             SGN2usid.Text = null; SGN2usid.Tag = null; SGN2.IsChecked = false;
             SGN3usid.Text = null; SGN3usid.Tag = null; SGN3.IsChecked = false;
 
+            _sgn1_info.SEMAT_USER = null;
+            _sgn1_info.NAME_HESAB_USER = null;
+            _sgn2_info.SEMAT_USER = null;
+            _sgn2_info.NAME_HESAB_USER = null;
+            _sgn3_info.SEMAT_USER = null;
+            _sgn3_info.NAME_HESAB_USER = null;
+
             PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
             PERSONEL.SelectedIndex = -1; PERSONEL.Items.Refresh();
             PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;

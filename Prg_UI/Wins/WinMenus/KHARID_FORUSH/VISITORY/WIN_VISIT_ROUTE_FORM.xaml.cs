@@ -33,6 +33,7 @@ using Stimulsoft.Report;
 using Wins.WinOther;
 using static Interfaces.INavigator;
 using Prg_UI.CUC;
+using System.Globalization;
 
 namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 {
@@ -1073,9 +1074,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                     var parameters = new { Name = "%" + typedText + "%" };
 
                     // Offload the DB query to a background thread.
-                    results = await Task.Run(() =>
-                        dbms.DoGetDataSQL<CUST_HESAB_COMBINED>(sql, parameters).ToList()
-                    );
+                    results = await Task.Run(() => dbms.DoGetDataSQL<CUST_HESAB_COMBINED>(sql, parameters).ToList());
                 }
 
                 // If not canceled in the meantime, update the ComboBox UI.
@@ -1101,8 +1100,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             if (combo.SelectedItem is CUST_HESAB_COMBINED selectedStuf)
             {
                 // CODE is already bound via SelectedValue.
-                //currentRow.HES = selectedStuf.hes;
-                currentRow.NAME_HES = selectedStuf.NAME;
+                ////currentRow.HES = selectedStuf.hes;
+
+                //currentRow.NAME_HES = selectedStuf.NAME;
             }
         }
         private void HESEditCombo_Loaded(object sender, RoutedEventArgs e)
@@ -1298,15 +1298,29 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             return $"SELECT {expr} AS Expr1, ROUTE_NAME FROM {tableName} WHERE {expr} = @COUST_NO";
         }
 
+
+        //private readonly Dictionary<VISIT_ROUTE_DTL, (string route, string cust)> WasRowKeys = new();
         private void DG_SUB_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
-            if (!(e is null) && DG_SUB.SelectedItem is not null)
-            {
-                if (DG_SUB.SelectedItem.ToStringNullSafe() != "{NewItemPlaceholder}")
-                {
-                    WAS_ROW_ITEM = ((VISIT_ROUTE_DTL)DG_SUB.SelectedItem).Clone() as VISIT_ROUTE_DTL;
-                }
-            }
+            if (e == null || !(e.Row.Item is VISIT_ROUTE_DTL rowItem)) return;
+            if (rowItem == null) return;
+            if (Equals(e.Row.Item, CollectionView.NewItemPlaceholder)) return;
+            var view = DG_SUB.Items as IEditableCollectionView;
+            if (view.IsAddingNew) { return; }
+
+            WAS_ROW_ITEM = rowItem.Clone() as VISIT_ROUTE_DTL;
+
+            //// اگر قبلاً ذخیره نشده، اضافه کن
+            //if (!WasRowKeys.ContainsKey(rowItem))
+            //{
+            //    WasRowKeys[rowItem] = (
+            //        rowItem.ROUTE_NAME?.Trim() ?? string.Empty,
+            //        rowItem.COUST_NO?.Trim() ?? string.Empty
+            //    );
+            //}
+        }
+        private void DG_SUB_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
+        {
         }
         private void DG_SUB_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
@@ -1373,7 +1387,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             //نام مشتری
             if (e.Column.SortMemberPath == "NAME_HES" || e.Column.Header.ToString() == "نام مشتری")
             {
-                if (HES_COMBO?.SelectedValue is null || ENTERED_VALUE_ROW != CURRENT_ROW_ITEMS?.NAME_HES) //if is different then
+                var HSC = HES_COMBO?.SelectedItem as CUST_HESAB_COMBINED;
+                if (HES_COMBO?.SelectedValue is null || HSC?.NAME != ENTERED_VALUE_ROW) //if is different then
                 {
                     var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(HES_COMBO, dbms);
                     if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
@@ -1393,7 +1408,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                         UpdatePathForOthers(CURRENT_ROW_ITEMS);
                     }
                 }
+                else
+                {
+                    CURRENT_ROW_ITEMS.NAME_HES = HSC.NAME;
+                }
             }
+
 
             if (e.Column.SortMemberPath == "CLASS")
             {
@@ -1409,7 +1429,128 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 CURRENT_ROW_ITEMS.CLASS = newVal;
             }
         }
+        private void DG_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
+        {
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+            if (!HeaderIsValid()) { return; }
 
+            var ROW = e.Row.Item as VISIT_ROUTE_DTL;
+            if (e.Row.Item == null || ROW is null) { return; }
+
+            if (!BodyIsValid(ROW))
+            {
+                DG_SUB_CANCEL_EDIT();
+                return;
+            }
+
+            ROW.ROUTE_NAME = ROUTE_NAME.Text;
+
+            int? idd = null;
+            try
+            {
+                if (ROW?.IDR is null) //INSERT
+                {
+                    //SELECT TOP 1 * FROM dbo.VISIT_ROUTE_DTL WHERE ROUTE_NAME = N'' AND COUST_NO = N''
+                    // بررسی وجود رکورد با کلید جدید
+                    var duplicate = dbms.DoGetDataSQL<VISIT_ROUTE_DTL>(
+                        "SELECT TOP 1 * FROM dbo.VISIT_ROUTE_DTL WHERE ROUTE_NAME = @ROUTE_NAME AND COUST_NO = @COUST_NO",
+                        new { ROUTE_NAME = ROW.ROUTE_NAME, COUST_NO = ROW.COUST_NO }).FirstOrDefault();
+
+                    if (duplicate != null)
+                    {
+                        DG_SUB_CANCEL_EDIT();
+                        universControl.PopNotifyShow("مشتری با این مشخصات قبلاً ثبت شده است", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                        return;
+                    }
+
+                    var DetailRecord = new VISIT_ROUTE_DTL
+                    {
+                        ROUTE_NAME = ROUTE_NAME.Text,
+                        COUST_NO = ROW.COUST_NO,
+                        RACTIVE = ROW.RACTIVE,
+                        CLASS = ROW.CLASS
+                    };
+                    idd = dbms.DoGetDataSQL<int?>(@$"INSERT INTO VISIT_ROUTE_DTL(ROUTE_NAME, COUST_NO, RACTIVE, CLASS)
+                                                     OUTPUT INSERTED.IDR
+                                                     VALUES(@ROUTE_NAME, @COUST_NO, @RACTIVE, @CLASS)", DetailRecord).FirstOrDefault();
+                }
+                else //UPDATE
+                {
+                    //// مقدارهای قدیمی را بگیر
+                    //WasRowKeys.TryGetValue(ROW, out var oldKey);
+
+                    //bool keyChanged = !string.Equals(oldKey.cust, ROW.COUST_NO, StringComparison.OrdinalIgnoreCase);
+
+                    //if (keyChanged)
+                    //{
+                    //    bool duplicate =
+                    //        dbms.DoGetDataSQL<int>(@"
+                    //                    SELECT TOP 1 1
+                    //                      FROM dbo.Visit_route_dtl
+                    //                     WHERE ROUTE_NAME = @ROUTE_NAME
+                    //                       AND COUST_NO   = @COUST_NO",
+                    //              new { ROUTE_NAME = ROW.ROUTE_NAME, COUST_NO = ROW.COUST_NO })
+                    //        .Any();
+
+                    //    if (duplicate)
+                    //    {
+                    //        DG_SUB_CANCEL_EDIT();
+                    //        universControl.PopNotifyShow("این مشتری قبلاً در این مسیر ثبت شده است", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                    //        _ = WasRowKeys.Remove(ROW);
+                    //        return;
+                    //    }
+                    //}
+
+                    bool duplicateExistsInMemory = VISIT_ROUTE_DATA.Count(x => x.ROUTE_NAME == ROW.ROUTE_NAME && x.COUST_NO == ROW.COUST_NO) > 1; // اگر بیش از یکی بود یعنی تکراری
+
+                    if (duplicateExistsInMemory)
+                    {
+                        DG_SUB_CANCEL_EDIT();
+                        universControl.PopNotifyShow("این مشتری قبلاً برای این مسیر ثبت شده است", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                        return;
+                    }
+
+
+                    var DetailRecord = new VISIT_ROUTE_DTL
+                    {
+                        ROUTE_NAME = ROUTE_NAME.Text,
+                        COUST_NO = ROW.COUST_NO,
+                        RACTIVE = ROW.RACTIVE,
+                        CLASS = ROW.CLASS,
+                        IDR = ROW.IDR
+                    };
+
+                    dbms.DoExecuteSQL(@$"UPDATE dbo.VISIT_ROUTE_DTL
+                                          SET ROUTE_NAME = @ROUTE_NAME,
+                                              COUST_NO = @COUST_NO,
+                                              RACTIVE = @RACTIVE,
+                                              CLASS = @CLASS
+                                          WHERE IDR = @IDR", DetailRecord);
+                }
+
+                UpdatePathForOthers(ROW); //AfterUpdate
+            }
+            catch (SqlException ex)
+            {
+                DG_SUB_CANCEL_EDIT();
+
+                if (ex.Number == 2601 || ex.Number == 2627)
+                {
+                    new Msgwin(false, "نام مشتری تکراری است آنرا اصلاح کنید").ShowDialog();
+                }
+
+                return;
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خطا در انجام عملیات حذف!").ShowDialog(); return;
+            }
+            if (idd != null) //So Much Important
+            {
+                ROW.IDR = idd;
+            }
+
+        }
         private void UpdatePathForOthers(VISIT_ROUTE_DTL CurrentRow)
         {
             var routeName = ROUTE_NAME.Text;
@@ -1460,90 +1601,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                     }
                 }
             }
-        }
-
-        private void DG_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
-        {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
-
-            if (!HeaderIsValid())
-            {
-                return;
-            }
-
-            var ROW = e.Row.Item as VISIT_ROUTE_DTL;
-            if (e.Row.Item == null || ROW is null)
-            {
-                return;
-            }
-            
-
-            if (!BodyIsValid(ROW))
-            {
-                DG_SUB_CANCEL_EDIT();
-                return;
-            }
-
-            int? idd = null;
-            try
-            {
-                if (ROW?.IDR is null) //INSERT
-                {
-                    var DetailRecord = new VISIT_ROUTE_DTL
-                    {
-                        ROUTE_NAME = ROUTE_NAME.Text,
-                        COUST_NO = ROW.COUST_NO,
-                        RACTIVE = ROW.RACTIVE,
-                        CLASS = ROW.CLASS
-                    };
-                    idd = dbms.DoGetDataSQL<int?>(@$"INSERT INTO VISIT_ROUTE_DTL(ROUTE_NAME, COUST_NO, RACTIVE, CLASS)
-                                                     OUTPUT INSERTED.IDR
-                                                     VALUES(@ROUTE_NAME, @COUST_NO, @RACTIVE, @CLASS)", DetailRecord).FirstOrDefault();
-                }
-                else //UPDATE
-                {
-                    var DetailRecord = new VISIT_ROUTE_DTL
-                    {
-                        ROUTE_NAME = ROUTE_NAME.Text,
-                        COUST_NO = ROW.COUST_NO,
-                        RACTIVE = ROW.RACTIVE,
-                        CLASS = ROW.CLASS,
-                        IDR = ROW.IDR
-                    };
-
-                    dbms.DoExecuteSQL(@$"UPDATE dbo.VISIT_ROUTE_DTL
-                                          SET ROUTE_NAME = @ROUTE_NAME,
-                                              COUST_NO = @COUST_NO,
-                                              RACTIVE = @RACTIVE,
-                                              CLASS = @CLASS
-                                          WHERE IDR = @IDR", DetailRecord);
-                }
-
-                UpdatePathForOthers(ROW); //AfterUpdate
-            }
-            catch (SqlException ex)
-            {
-                DG_SUB_CANCEL_EDIT();
-
-                if (ex.Number == 2601 || ex.Number == 2627)
-                {
-                    new Msgwin(false, "نام مشتری تکراری است آنرا اصلاح کنید").ShowDialog();
-                }
-
-                return;
-            }
-            catch (Exception)
-            {
-                new Msgwin(false, "خطا در انجام عملیات حذف!").ShowDialog(); return;
-            }
-            if (idd != null) //So Much Important
-            {
-                ROW.IDR = idd;
-            }
-
         }
 
         private void DG_SUB_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
@@ -1624,10 +1681,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 BTN_DELETE_Click(null, null);
             }
         }
-        private void DG_SUB_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
-        {
-
-        }
 
         private void BTN_FACTORHA_Click(object sender, RoutedEventArgs e)
         {
@@ -1637,6 +1690,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         private void RACTIVE_CheckBox_Click(object sender, RoutedEventArgs e)
         {
             DG_SUB.BeginEdit();
+        }
+
+        private void DG_SUB_PreparingCellForEdit_1(object sender, DataGridPreparingCellForEditEventArgs e)
+        {
+
         }
     }
 }

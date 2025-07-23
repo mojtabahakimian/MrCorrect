@@ -5,16 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY"
         mc:Ignorable="d"
-         xmlns:CNC="clr-namespace:Prg_UI.CUC"
-      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-      xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-      Background="{x:Null}"
-      AllowsTransparency="True"
-      AllowDrop="True" WindowStyle="None"
-      FontFamily="IRANYekanFN"
-      MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
-      WindowStartupLocation="CenterScreen"
-      Title="تعيين ویزیتو روزانه" Height="690" Width="710" MinHeight="690" MinWidth="1105" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="IRANYekanFN"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        WindowStartupLocation="CenterScreen"
+        Title="تعيين ویزیتو روزانه" Height="690" Width="710" MinHeight="690" MinWidth="1105" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>

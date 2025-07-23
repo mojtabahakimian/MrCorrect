@@ -2,7 +2,7 @@
 
 namespace Prg_Proccessy.SQLMODELS
 {
-    public class VISIT_ROUTE_DTL : INotifyPropertyChanged, ICloneable
+    public class VISIT_ROUTE_DTL : INotifyPropertyChanged, ICloneable, IEditableObject
     {
         public object Clone() { return this.MemberwiseClone(); }
         public event PropertyChangedEventHandler PropertyChanged;
@@ -40,5 +40,40 @@ namespace Prg_Proccessy.SQLMODELS
         public DateTime? CRT { get => _crt; set { if (_crt == value) return; _crt = value; OnPropertyChanged("CRT"); } }
         private int? _uid;
         public int? UID { get => _uid; set { if (_uid == value) return; _uid = value; OnPropertyChanged("UID"); } }
+
+
+        private VISIT_ROUTE_DTL _backupCopy;
+        private bool _inEdit;
+
+        void IEditableObject.BeginEdit()
+        {
+            if (_inEdit) return;
+            _backupCopy = (VISIT_ROUTE_DTL)this.Clone();
+            _inEdit = true;
+        }
+
+        void IEditableObject.EndEdit()
+        {
+            // commit: just forget the backup
+            _backupCopy = null;
+            _inEdit = false;
+        }
+
+        void IEditableObject.CancelEdit()
+        {
+            if (!_inEdit) return;
+            // restore all of your properties from the backup
+            this.ROUTE_NAME = _backupCopy.ROUTE_NAME;
+            this.COUST_NO = _backupCopy.COUST_NO;
+            this.NAME_HES = _backupCopy.NAME_HES;
+            this.RACTIVE = _backupCopy.RACTIVE;
+            this.CLASS = _backupCopy.CLASS;
+            this.CRT = _backupCopy.CRT;
+            this.UID = _backupCopy.UID;
+            this.IDR = _backupCopy.IDR;
+            // …and any other fields you’ve added
+
+            _inEdit = false;
+        }
     }
 }

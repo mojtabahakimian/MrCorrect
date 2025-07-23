@@ -2499,7 +2499,7 @@ namespace Wins.WinMenus.ANBAR
         private void Command100_Click(object sender, RoutedEventArgs e)
         {
             Process Prc = ProcLoader.Start();
-            
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.ANBAR.BARGEH_ENTEGHAL.mrt");
             report.Load(pathreport);
@@ -2709,6 +2709,13 @@ namespace Wins.WinMenus.ANBAR
             sgn1usid.Text = null; sgn1usid.Tag = null; SGN1.IsChecked = false;
             sgn2usid.Text = null; sgn2usid.Tag = null; SGN2.IsChecked = false;
             sgn3usid.Text = null; sgn3usid.Tag = null; SGN3.IsChecked = false;
+
+            _sgn1_info.USER_SEMAT = null;
+            _sgn1_info.USER_HESAB_NAME = null;
+            _sgn2_info.USER_SEMAT = null;
+            _sgn2_info.USER_HESAB_NAME = null;
+            _sgn3_info.USER_SEMAT = null;
+            _sgn3_info.USER_HESAB_NAME = null;
 
             PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
             PERSONEL.SelectedIndex = -1; PERSONEL.Items.Refresh();

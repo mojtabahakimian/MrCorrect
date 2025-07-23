@@ -675,6 +675,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
             PERSONEL.SelectedIndex = -1; PERSONEL.Items.Refresh();
             PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
 
+            _sgn1_info.SEMAT_USER = null;
+            _sgn1_info.NAME_HESAB_USER = null;
+            _sgn2_info.SEMAT_USER = null;
+            _sgn2_info.NAME_HESAB_USER = null;
+            _sgn3_info.SEMAT_USER = null;
+            _sgn3_info.NAME_HESAB_USER = null;
 
             MOGU.Text = null; //موجودی
 
