@@ -1207,7 +1207,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 this.JAYO_COL.IsReadOnly = true;
             }
-        
+
         }
 
         private void INVO_LST_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -3235,6 +3235,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
             SGN2usid.Text = null; SGN2usid.Tag = null; SGN2.IsChecked = false;
             SGN3usid.Text = null; SGN3usid.Tag = null; SGN3.IsChecked = false;
 
+            _sgn1_info.SEMAT_USER = null;
+            _sgn1_info.NAME_HESAB_USER = null;
+            _sgn2_info.SEMAT_USER = null;
+            _sgn2_info.NAME_HESAB_USER = null;
+            _sgn3_info.SEMAT_USER = null;
+            _sgn3_info.NAME_HESAB_USER = null;
+
             CUST_NO.SelectionChanged -= CUST_NO_SelectionChanged;
             CUST_NO.SelectedValue = null; CUST_NO.Items.Refresh();
             CUST_NO.SelectionChanged += CUST_NO_SelectionChanged;
@@ -3294,6 +3301,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 SGN1.IsChecked = Convert.ToBoolean(HEADER.SGN1 ?? false);
                 SGN2.IsChecked = Convert.ToBoolean(HEADER.SGN2 ?? false);
                 SGN3.IsChecked = Convert.ToBoolean(HEADER.SGN3 ?? false);
+
+                SGN1usid.Tag = null; SGN2usid.Tag = null; SGN3usid.Tag = null;
 
                 if (HEADER?.sgn1usid != null)
                 {
@@ -5793,7 +5802,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         ChangeIsHappend = true;
                         universControl.PopNotifyShowUp("قیمت بروز شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
 
-                   
+
 
                         IF_NOT_IS_AZAD_Then_Lock();
                     }

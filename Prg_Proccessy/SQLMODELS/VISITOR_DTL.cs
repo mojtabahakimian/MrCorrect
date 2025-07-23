@@ -56,6 +56,10 @@ namespace Prg_Proccessy.SQLMODELS
         private int? _uid;
         public int? UID { get => _uid; set { if (_uid == value) return; _uid = value; OnPropertyChanged("UID"); } }
 
+        private string? _log;
+        public string? LOG { get => _log; set { if (_log == value) return; _log = value; OnPropertyChanged("LOG"); } }
+
+
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged(string strCaller = null)
         {

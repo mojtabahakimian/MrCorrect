@@ -6217,15 +6217,16 @@ namespace Prg_Proccessy.FUNCTIONS
                 {
                     if (RST2Fields.xtype == 99 || RST2Fields.xtype == 35 || RST2Fields.xtype == 231 || RST2Fields.xtype == 167 || RST2Fields.xtype == 175 || RST2Fields.xtype == 239)
                     {
-                        // Check if the column is NVARCHAR with a length of 8000
-                        if (RST2Fields.TYP.ToLower() == "nvarchar" && RST2Fields.length == 8000)
+                        if (RST2Fields.TYP.ToLower() == "nvarchar" || RST2Fields.TYP.ToLower() == "varchar" || RST2Fields.TYP.ToLower() == "nchar" || RST2Fields.TYP.ToLower() == "char")
                         {
-                            // Use NVARCHAR(MAX) for columns with a length of 8000
-                            FLS = FLS + "[" + RST2Fields.name + "] NVARCHAR(MAX) NULL,";
+                            if (RST2Fields.length <= 0 || RST2Fields.length >= 8000)
+                                FLS += "[" + RST2Fields.name + "] [" + RST2Fields.TYP + "](MAX) NULL,";
+                            else
+                                FLS += "[" + RST2Fields.name + "] [" + RST2Fields.TYP + "](" + RST2Fields.length + ") NULL,";
                         }
                         else
                         {
-                            FLS = FLS + "[" + RST2Fields.name + "] [" + RST2Fields.TYP + "] (" + RST2Fields.length + ") NULL,";
+                            FLS += "[" + RST2Fields.name + "] [" + RST2Fields.TYP + "] NULL,";
                         }
                     }
                     else
@@ -6251,7 +6252,8 @@ namespace Prg_Proccessy.FUNCTIONS
         {
             string FLS = GETfldlist(tbl);
             // Ensure the transaction table exists, if not create it.
-            TREXIXTCREATE(tbl);
+
+            try { TREXIXTCREATE(tbl); } catch (Exception) { }
 
             if (FLAGU == 1)
             {
@@ -10174,6 +10176,9 @@ namespace Prg_Proccessy.FUNCTIONS
                     paramVisitor.Value = DBNull.Value;
                 else
                     paramVisitor.Value = visitorId;
+
+                var paramLog = cmd.Parameters.Add("@LOG", SqlDbType.NVarChar, -1);
+                paramLog.Value = DBNull.Value;
 
                 conn.Open();
                 cmd.ExecuteNonQuery();

@@ -326,6 +326,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 CUST_NO.SelectedValue = HEADER_FAC.CUST_NO; //مشتری
                 CUST_NO.Items.Refresh();
 
+                SGN1usid.Tag = null; SGN2usid.Tag = null;
+
                 SGN1.IsChecked = Convert.ToBoolean(HEADER_FAC.SGN1 ?? false);
                 SGN2.IsChecked = Convert.ToBoolean(HEADER_FAC.SGN2 ?? false);
 
@@ -2980,6 +2982,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             SGN1usid.Text = null; SGN1usid.Tag = null; SGN1.IsChecked = false; SGN1usid.SelectedValue = null; SGN1usid.Items.Refresh();
             SGN2usid.Text = null; SGN2usid.Tag = null; SGN2.IsChecked = false; SGN2usid.SelectedValue = null; SGN2usid.Items.Refresh();
+
 
             PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
             PERSONEL.SelectedIndex = -1; PERSONEL.Items.Refresh();

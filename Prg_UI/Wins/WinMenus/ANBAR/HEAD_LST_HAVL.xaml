@@ -373,7 +373,7 @@
             </ComboBox>
         </Grid>
         <Button x:Name="BTN_INVOCES" Content="لیست حواله فروش ها" Margin="124,225,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="142" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_INVOCES_Click"/>
-        <Button x:Name="BTN_NEW" Click="BTN_NEW_Click" Content="حواله جدید" Margin="271,225,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Padding="16,2,16,4"/>
+        <Button x:Name="BTN_NEW" Click="BTN_NEW_Click" Content="حواله جدید" Visibility="Collapsed" Margin="271,225,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Padding="16,2,16,4"/>
 
         <CNC:RecordNavigatorControl x:Name = "navigatorControl" HorizontalAlignment = "Right" VerticalAlignment = "Bottom" Margin = "0,0,356,35" Grid.Row="1" />
 

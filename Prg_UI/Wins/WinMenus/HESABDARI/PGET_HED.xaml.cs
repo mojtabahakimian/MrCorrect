@@ -5652,6 +5652,13 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             MABL.Text = "0";
             OKF.IsChecked = false;
 
+            _sgn1_info.USER_SEMAT = null;
+            _sgn1_info.USER_HESAB_NAME = null;
+            _sgn2_info.USER_SEMAT = null;
+            _sgn2_info.USER_HESAB_NAME = null;
+            _sgn3_info.USER_SEMAT = null;
+            _sgn3_info.USER_HESAB_NAME = null;
+
             sgn1usid.Text = null; sgn1usid.Tag = null; SGN1.IsChecked = false;
             sgn2usid.Text = null; sgn2usid.Tag = null; SGN2.IsChecked = false;
             sgn3usid.Text = null; sgn3usid.Tag = null; SGN3.IsChecked = false;
