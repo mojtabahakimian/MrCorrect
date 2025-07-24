@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
+
 
 namespace Prg_Proccessy.SQLMODELS
 {
-    public class VISITOR_DTL : INotifyPropertyChanged
+    public class VISITOR_DTL : INotifyPropertyChanged, IEditableObject
     {
         public VISITOR_DTL()
         {
@@ -20,6 +15,44 @@ namespace Prg_Proccessy.SQLMODELS
         {
             return this.MemberwiseClone();
         }
+
+        private bool _isInEdit;
+        private VISITOR_DTL _backup;
+        public void BeginEdit()
+        {
+            if (_isInEdit) return;
+            _backup = (VISITOR_DTL)this.Clone(); // نسخهٔ پشتیبان
+            _isInEdit = true;
+        }
+        public void CancelEdit()
+        {
+            if (!_isInEdit) return;
+
+            // بازگرداندن مقادیر نسخهٔ پشتیبان
+            ID = _backup.ID;
+            NUMBER = _backup.NUMBER;
+            TAG = _backup.TAG;
+            CUST_NO = _backup.CUST_NO;
+            CUST_NO_NAME = _backup.CUST_NO_NAME;
+            DARSAD = _backup.DARSAD;
+            PURSANT = _backup.PURSANT;
+            TOZIH = _backup.TOZIH;
+            STAT = _backup.STAT;
+            PORID = _backup.PORID;
+            CRT = _backup.CRT;
+            UID = _backup.UID;
+            LOG = _backup.LOG;
+
+            _isInEdit = false;
+            _backup = null;
+        }
+        public void EndEdit()
+        {
+            if (!_isInEdit) return;
+            _isInEdit = false;
+            _backup = null;  // تغییرات تثبیت شده‌اند
+        }
+
         private long? _id;
         public long? ID { get => _id; set { if (_id == value) return; _id = value; OnPropertyChanged("ID"); } }
 

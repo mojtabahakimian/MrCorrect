@@ -1453,14 +1453,7 @@ namespace Prg_UI.Scriptses
 
 
                 #region Blazor_WebAssemblly_Safir
-
-                //ذخیره اطلاعات پیش فرض کاربران سمت سرور
-                try { db.Execute(@"CREATE TABLE [dbo].[UserState](
-								       [UserId]   INT            NOT NULL PRIMARY KEY,
-								       [StateJson] NVARCHAR(MAX) NOT NULL
-								   );"); } catch { }
-
-
+                BlazorDbScriptUpdate(db);
                 #endregion
 
 
@@ -2074,7 +2067,7 @@ namespace Prg_UI.Scriptses
                     }
                 }
 
-				//Super Fast Index for Automation MAIN
+                //Super Fast Index for Automation MAIN
                 try { db.Execute($@"CREATE NONCLUSTERED INDEX IX_TASKS_Status1
 									ON dbo.TASKS (STATUS, IDNUM)          -- برای فیلتر و ORDER BY
 									INCLUDE (GR, PERSONEL, TASK, PERIORITY, STDATE, STTIME,
@@ -2085,6 +2078,15 @@ namespace Prg_UI.Scriptses
                 try { db.Execute($@"ALTER TABLE dbo.VISITOR_DTL ADD LOG NVARCHAR(4000) NULL"); } catch { }
 
             }
+        }
+
+        private static void BlazorDbScriptUpdate(SqlConnection db)
+        {
+            //ذخیره اطلاعات پیش فرض کاربران سمت سرور
+            try { db.Execute(@"CREATE TABLE [dbo].[UserState](
+								       [UserId]   INT            NOT NULL PRIMARY KEY,
+								       [StateJson] NVARCHAR(MAX) NOT NULL
+								   );"); } catch { }
         }
     }
 }
