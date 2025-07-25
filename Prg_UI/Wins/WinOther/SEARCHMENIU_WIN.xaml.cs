@@ -294,6 +294,12 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تنظیم پیش فرض کاربران برای ارجاع", WIN_NAME = CL_MenuManager.WinNameType.UserPersonelOrderWin_PishfarzeErja });
 
 
+            //   case WinNameType.WIN_VISIT_ROUTE_FORM: //تعيين مسير وزيت براي مشتريان
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تنظیم لیست دستی توضیع", WIN_NAME = CL_MenuManager.WinNameType.WIN_TOZIE });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف ویزیت روزانه برای ویزیتور", WIN_NAME = CL_MenuManager.WinNameType.VISITOR_DAY_HEAD });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعيين مسير وزيت براي مشتريان", WIN_NAME = CL_MenuManager.WinNameType.WIN_VISIT_ROUTE_FORM });
+
+
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());
 
             // Loading user-specific access level

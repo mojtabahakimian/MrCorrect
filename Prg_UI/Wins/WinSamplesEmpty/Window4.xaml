@@ -59,7 +59,7 @@
         <Button x:Name="BTN_DELETE"  Content="حذف" Tag="hazfer" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,43,326,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Right" Width="84" Click="BTN_DELETE_Click" />
         <Label Content="کد کالا:" HorizontalAlignment="Right" Margin="0,48,10,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
         <TextBox Text="" Height="30" Margin="511,0,10,338"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible" MaxLength="48" />
-        <CNC:NumericTextBox DoesAcceptDouble="False"  LastValueShouldZero="False" Text="" Height="30" Margin="677,47,0,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="63"/>
+        <CNC:NumericTextBox DoesAcceptDouble="False" RestoreLastValidValue="False" LastValueShouldZero="False" Text="" Height="30" Margin="677,47,0,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="63"/>
         <ComboBox Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="143,82,445,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>

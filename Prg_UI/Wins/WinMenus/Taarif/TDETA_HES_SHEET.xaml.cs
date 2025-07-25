@@ -153,7 +153,8 @@ namespace Wins.WinMenus.Taarif
                 else
                 {
                     // Defer the operation until the window is fully rendered
-                    this.Dispatcher.BeginInvoke(new Action(() => {
+                    this.Dispatcher.BeginInvoke(new Action(() =>
+                    {
                         // Try again after the window is fully initialized
                         IntPtr newHandle = new WindowInteropHelper(this).Handle;
                         if (newHandle != IntPtr.Zero)
@@ -276,7 +277,7 @@ namespace Wins.WinMenus.Taarif
             //نوع مشتری
             CUST_COD_COLUMN.ItemsSource = dbms.DoGetDataSQL<CUSTKIND>("SELECT CUST_COD, CUSTKNAME FROM dbo.CUSTKIND ORDER BY CUSTKNAME").ToList();
 
-    
+
 
             //مسیر ویزیت
             ROUTE_NAME_COLUMN.ItemsSource = dbms.DoGetDataSQL<CMB1>($@"SELECT Visit_route.ROUTE_NAME, Visit_route.ROUTE_NAME+N' - '+CUST_HESAB.NAME+N' - '+CUST_HESAB.hes AS Expr1
@@ -286,7 +287,7 @@ namespace Wins.WinMenus.Taarif
 
             //کد استان
             ALL_OSTAN = dbms.DoGetDataSQL<TCOD_OSTAN>("SELECT OSCODE, OSNAME FROM TCOD_OSTAN ORDER BY OSNAME").ToList();
-            
+
             foreach (var item in ALL_OSTAN) { item.OSNAME = item.OSNAME?.FixPersianChars(); }
 
             //کد شهر
@@ -516,7 +517,7 @@ namespace Wins.WinMenus.Taarif
                     if (OSTAN != null)
                     {
                         var FILTERRED_CITY = dbms.DoGetDataSQL<TCOD_CITY>($"SELECT  CITYCODE, CITYNAME, OSCODE FROM TCOD_CITY WHERE (OSCODE ={OSTAN}) ORDER BY CITYNAME").ToList();
-                        
+
                         foreach (var item in FILTERRED_CITY) { item.CITYNAME = item.CITYNAME?.FixPersianChars(); }
 
                         DefVale = Convert.ToInt32((e.EditingElement as ComboBox).SelectedValue);
@@ -593,19 +594,20 @@ namespace Wins.WinMenus.Taarif
                     if (e.Column.SortMemberPath == "TNUMBER") //کد حساب
                     {
                         bool anyerror = false;
-                        if (string.IsNullOrEmpty(ENTERED_VALUE_ROW.ToStringNullSafe()))
+                        int parsedValue;
+                        if (string.IsNullOrEmpty(ENTERED_VALUE_ROW?.ToStringNullSafe()))
                         {
                             universControl.PopNotifyShow("کد حساب نمی تواند خالی باشد !", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                             anyerror = true;
                         }
-                        else if (Convert.ToInt32(ENTERED_VALUE_ROW) <= 0)
-                        {
-                            universControl.PopNotifyShow("کد حساب نمی تواند صفر یا منفی باشد !", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
-                            anyerror = true;
-                        }
-                        else if (!int.TryParse(ENTERED_VALUE_ROW.ToStringNullSafe(), out _))
+                        else if (!int.TryParse(ENTERED_VALUE_ROW?.ToStringNullSafe(), out parsedValue))
                         {
                             universControl.PopNotifyShow("کد وارد شده در محدوده مجاز نیست !", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                            anyerror = true;
+                        }
+                        else if (parsedValue <= 0)
+                        {
+                            universControl.PopNotifyShow("کد حساب نمی تواند صفر یا منفی باشد !", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                             anyerror = true;
                         }
                         if (anyerror)

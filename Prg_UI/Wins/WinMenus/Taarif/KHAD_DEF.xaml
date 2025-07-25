@@ -129,7 +129,7 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="9,3,14,10" FlowDirection="RightToLeft" Grid.Column="1" Grid.Row="1">
                 <StackPanel x:Name="SP_PANEL" Height="auto">
                     <Label Content="کد"/>
-                    <CNC:NumericTextBox x:Name="CODE" DoesAcceptDouble="False"  FlowDirection="LeftToRight"  Text="" Height="29" LastValueShouldZero="False" MaxLength="15" />
+                    <CNC:NumericTextBox x:Name="CODE" RestoreLastValidValue="False"  DoesAcceptDouble="False"  FlowDirection="LeftToRight"  Text="" Height="29" LastValueShouldZero="False" MaxLength="15" />
                     <Label Content="نام"/>
                     <TextBox x:Name="NAM"  Style="{StaticResource FuzzyOut}" Padding="3" Text="" Height="29" MaxLength="79" />
                     <Label Content="شماره فنی"/>

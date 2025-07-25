@@ -302,16 +302,16 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 108;
             //Baseknow.UUSER = "modir-mali";   
 
-            //Baseknow.USERCOD = 116;
-            //Baseknow.UUSER = "Mr.Salmani";
+            Baseknow.USERCOD = 116;
+            Baseknow.UUSER = "Mr.Salmani";
 
             //Baseknow.USERCOD = 132;
             //Baseknow.UUSER = "Prima Chopan";
 
             Baseknow.mrcorrect = true;
 
-            Baseknow.USERCOD = 78;
-            Baseknow.UUSER = "Controller";
+            //Baseknow.USERCOD = 78;
+            //Baseknow.UUSER = "Controller";
 
             //Baseknow.USERCOD = 139;
             //Baseknow.UUSER = "negar sadeghi";
@@ -329,7 +329,7 @@ namespace Prg_UI.Wins
             //new HEAD_LST_RASID(3872d).ShowDialog();
 
             //new HAVALAH_ENTER(356d).ShowDialog(); 
-            //new HAVALAH_EXIT().ShowDialog(); //برگه خروج
+            //new WIN_TOZIE().ShowDialog(); //برگه خروج
 
             //CL_MenuManager.OpenWinMenu(WinNameType.PGET_HED, this, default);
 
@@ -339,9 +339,10 @@ namespace Prg_UI.Wins
 
             //new WinConnectionChoose().Show();
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this, "4888,4915");
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_VISIT_ROUTE_FORM, this);
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);

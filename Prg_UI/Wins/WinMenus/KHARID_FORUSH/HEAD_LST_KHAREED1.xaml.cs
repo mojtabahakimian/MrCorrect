@@ -598,6 +598,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 SGN2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn2usid)?.SAL_NAME;
                 SGN3usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn3usid)?.SAL_NAME;
 
+                PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
+                PERSONEL.Text = null;
+                PERSONEL.SelectedValue = null; PERSONEL.Items.Refresh();
+                PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+
                 if (IsExporty)
                 {
                     if (HEADER_FAC?.ARZD != null) //نرخ ارز

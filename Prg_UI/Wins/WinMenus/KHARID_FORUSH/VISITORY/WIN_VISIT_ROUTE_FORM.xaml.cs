@@ -32,13 +32,18 @@ using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
 using Wins.WinOther;
 using static Interfaces.INavigator;
-using Prg_UI.CUC;
-using System.Globalization;
+using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY.WIN_TOZIE;
 
 namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 {
     public partial class WIN_VISIT_ROUTE_FORM : Window, ISearchableWindow
     {
+        public WIN_VISIT_ROUTE_FORM()
+        {
+            InitializeComponent();
+
+            this.DataContext = this;
+        }
         #region Header Window Begin
         //Header Window Begin
         private void Btn_Close_Click(object sender, RoutedEventArgs e)
@@ -80,12 +85,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         }
         //Header Window End;
         #endregion
-        public WIN_VISIT_ROUTE_FORM()
-        {
-            InitializeComponent();
-
-            this.DataContext = this;
-        }
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
@@ -1695,6 +1694,24 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         private void DG_SUB_PreparingCellForEdit_1(object sender, DataGridPreparingCellForEditEventArgs e)
         {
 
+        }
+
+        private void District_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (sender is ComboBox MyComboBox)
+            {
+                string thevalue = District.Text;
+                if (MyComboBox.ItemsSource == null)
+                {
+                    MyComboBox.ItemsSource = new List<DistrictComboModel>();
+                }
+                if (!((List<DistrictComboModel>)MyComboBox.ItemsSource).Any(item => item?.District == thevalue))
+                {
+                    ((List<DistrictComboModel>)MyComboBox.ItemsSource).Add(new DistrictComboModel { District = thevalue });
+                }
+                MyComboBox.SelectedValue = thevalue;
+                MyComboBox.Items.Refresh();
+            }
         }
     }
 }

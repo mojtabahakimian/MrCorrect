@@ -62,7 +62,7 @@
                 </ItemsPanelTemplate>
             </ComboBox.ItemsPanel>
         </ComboBox>
-        <CNC:NumericTextBox x:Name="FNUMB" Text="" Height="30" Margin="519,71,161,0" VerticalAlignment="Top"  Visibility="Visible" MaxLength="40" DoesAcceptDouble="False" TabIndex="0" />
+        <CNC:NumericTextBox x:Name="FNUMB" RestoreLastValidValue="False"  Text="" Height="30" Margin="519,71,161,0" VerticalAlignment="Top"  Visibility="Visible" MaxLength="40" DoesAcceptDouble="False" TabIndex="0" />
         <Label Content="حساب کل:" HorizontalAlignment="Right" Margin="0,157,95,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
         <Label Content="معین:" HorizontalAlignment="Right" Margin="0,202,117,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
         <Label Content="حساب تفضیلی:" HorizontalAlignment="Right" Margin="0,246,70,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>

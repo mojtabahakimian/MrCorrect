@@ -604,19 +604,20 @@ namespace Wins.WinMenus.Taarif
                     if (e.Column.SortMemberPath == "TNUMBER4") //کد حساب
                     {
                         bool anyerror = false;
-                        if (string.IsNullOrEmpty(ENTERED_VALUE_ROW.ToStringNullSafe()))
+                        int parsedValue;
+                        if (string.IsNullOrEmpty(ENTERED_VALUE_ROW?.ToStringNullSafe()))
                         {
                             universControl.PopNotifyShow("کد حساب نمی تواند خالی باشد !", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                             anyerror = true;
                         }
-                        else if (Convert.ToInt32(ENTERED_VALUE_ROW) <= 0)
-                        {
-                            universControl.PopNotifyShow("کد حساب نمی تواند صفر یا منفی باشد !", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
-                            anyerror = true;
-                        }
-                        else if (!int.TryParse(ENTERED_VALUE_ROW.ToStringNullSafe(), out _))
+                        else if (!int.TryParse(ENTERED_VALUE_ROW?.ToStringNullSafe(), out parsedValue))
                         {
                             universControl.PopNotifyShow("کد وارد شده در محدوده مجاز نیست !", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                            anyerror = true;
+                        }
+                        else if (parsedValue <= 0)
+                        {
+                            universControl.PopNotifyShow("کد حساب نمی تواند صفر یا منفی باشد !", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                             anyerror = true;
                         }
                         if (anyerror)

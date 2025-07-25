@@ -44,21 +44,18 @@ namespace Prg_Proccessy.SQLMODELS
 
         private VISIT_ROUTE_DTL _backupCopy;
         private bool _inEdit;
-
         void IEditableObject.BeginEdit()
         {
             if (_inEdit) return;
             _backupCopy = (VISIT_ROUTE_DTL)this.Clone();
             _inEdit = true;
         }
-
         void IEditableObject.EndEdit()
         {
             // commit: just forget the backup
             _backupCopy = null;
             _inEdit = false;
         }
-
         void IEditableObject.CancelEdit()
         {
             if (!_inEdit) return;

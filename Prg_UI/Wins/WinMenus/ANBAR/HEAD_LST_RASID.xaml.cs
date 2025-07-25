@@ -337,6 +337,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     SGN2usid.SelectedValue = rst_personel.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn2usid)?.IDD; SGN2usid.Items.Refresh();
                 }
 
+                PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
+                PERSONEL.Text = null;
+                PERSONEL.SelectedValue = null; PERSONEL.Items.Refresh();
+                PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+
                 if (HEADER_FAC?.OKF == null || HEADER_FAC?.OKF == false)
                 {
                     MakeOKFReady();

@@ -230,7 +230,7 @@
         <Button x:Name="ESLAH"  Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="111,46,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="84" Click="ESLAH_Click" IsTabStop="False"/>
         <Button x:Name="BTN_DELETE"  Content="حذف" Tag="hazfer" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="21,46,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="84" Click="BTN_DELETE_Click" IsTabStop="False"/>
         <Label Content="شماره :" HorizontalAlignment="Right" Margin="0,48,10,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
-        <CNC:NumericTextBox x:Name="GRD_NUM" DoesAcceptDouble="False"  LastValueShouldZero="False" Text="" Height="30" Margin="0,51,55,0" VerticalAlignment="Top" Visibility="Visible" HorizontalAlignment="Right" Width="79"/>
+        <CNC:NumericTextBox x:Name="GRD_NUM" DoesAcceptDouble="False" RestoreLastValidValue="False" LastValueShouldZero="False" Text="" Height="30" Margin="0,51,55,0" VerticalAlignment="Top" Visibility="Visible" HorizontalAlignment="Right" Width="79"/>
 
         <Label Content="تاریخ :" HorizontalAlignment="Right" Margin="0,48,139,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
         <xctk:MaskedTextBox x:Name="GRD_DATE" Tag="RD"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="30" Margin="0,49,180,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="91" TabIndex="1"/>
