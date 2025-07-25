@@ -5,7 +5,6 @@ using Microsoft.Win32;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
-using Prg_Proccessy.SQLMODELS;
 using System.Data;
 using static Dapper.SqlMapper;
 
@@ -211,7 +210,7 @@ namespace Prg_SendInvoice.CNNMANAGER
             using (IDbConnection db = new SqlConnection(CONNECTION_STR))
             {
                 //db.Open();
-                using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
+                using (var transaction = db.BeginTransaction(System.Data.IsolationLevel.Serializable))
                 {
                     try
                     {
@@ -234,7 +233,7 @@ namespace Prg_SendInvoice.CNNMANAGER
             using (IDbConnection db = new SqlConnection(CONNECTION_STR))
             {
                 //db.Open();
-                using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
+                using (var transaction = db.BeginTransaction(System.Data.IsolationLevel.Serializable))
                 {
                     try
                     {
@@ -294,27 +293,21 @@ namespace Prg_SendInvoice.CNNMANAGER
         }
         public async Task<IEnumerable<TEntity>> DoGetDataSQLAsync<TEntity>(string sql, object? parameters = null)
         {
-            using (IDbConnection db = new SqlConnection(CONNECTION_STR))
+            using (SqlConnection db = new SqlConnection(CONNECTION_STR))
             {
                 await Task.Run(() => db.Open());
-                using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
+                try
                 {
-                    try
-                    {
-                        var commandDefinition = new CommandDefinition(sql, parameters: parameters, commandTimeout: 300, transaction: transaction);
-                        var results = await db.QueryAsync<TEntity>(commandDefinition);
-                        transaction.Commit();
-                        return results;
-                    }
-                    catch
-                    {
-                        transaction.Rollback();
-                        throw; // Rethrow the exception to be handled by the caller
-                    }
-                    finally
-                    {
-                        db?.Close();
-                    }
+                    var results = await db.QueryAsync<TEntity>(sql, parameters, commandTimeout: 3600);
+                    return results;
+                }
+                catch
+                {
+                    throw; // Rethrow the exception to be handled by the caller
+                }
+                finally
+                {
+                    db?.Close();
                 }
             }
         }

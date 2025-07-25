@@ -10144,5 +10144,42 @@ namespace Prg_Proccessy.FUNCTIONS
             }
             return tempGETVisitorHES;
         }
+
+        /// <summary>
+        /// Executes the dbo.CalculateVisitorPorsant stored procedure and returns any SQL messages.
+        /// </summary>
+        /// <param name="number">Invoice number.</param>
+        /// <param name="tag">Invoice tag.</param>
+        /// <param name="visitorId">Optional visitor account number. If null the procedure auto detects.</param>
+        /// <returns>A list of informational messages produced by SQL Server.</returns>
+        public static List<string> RunCalculateVisitorPorsant(long number, short tag, string? visitorId = null)
+        {
+            List<string> messages = new List<string>();
+
+            using (var conn = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+            using (var cmd = new SqlCommand("dbo.CalculateVisitorPorsant", conn))
+            {
+                conn.InfoMessage += (s, e) =>
+                {
+                    if (!string.IsNullOrWhiteSpace(e.Message))
+                        messages.Add(e.Message);
+                };
+                conn.FireInfoMessageEventOnUserErrors = true;
+
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@NUMBER", number);
+                cmd.Parameters.AddWithValue("@TAG", tag);
+                var paramVisitor = cmd.Parameters.Add("@VisitorID", SqlDbType.NVarChar, 40);
+                if (string.IsNullOrWhiteSpace(visitorId))
+                    paramVisitor.Value = DBNull.Value;
+                else
+                    paramVisitor.Value = visitorId;
+
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+
+            return messages;
+        }
     }
 }

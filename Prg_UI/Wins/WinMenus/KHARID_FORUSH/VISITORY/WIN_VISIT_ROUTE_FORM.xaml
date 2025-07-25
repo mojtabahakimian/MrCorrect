@@ -21,7 +21,6 @@
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
-
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
@@ -109,11 +108,21 @@
                   VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                   ItemsSource="{Binding VISIT_ROUTE_DATA}"
                   KeyboardNavigation.TabNavigation="Contained"
+                
+                  VirtualizingPanel.ScrollUnit="Pixel"
+                  ScrollViewer.CanContentScroll="True"
+                
                   AutoGenerateColumns="False" 
                   FlowDirection="RightToLeft" 
                   SelectionUnit="FullRow" 
                   CanUserDeleteRows="False"
                   Margin="4,176,4,111" BorderThickness="1" CellEditEnding="DG_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_SUB_SelectionChanged" RowEditEnding="DG_SUB_RowEditEnding" PreviewKeyDown="DG_SUB_PreviewKeyDown" PreparingCellForEdit="DG_SUB_PreparingCellForEdit" BeginningEdit="DG_SUB_BeginningEdit" >
+
+                <DataGrid.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </DataGrid.ItemsPanel>
 
                 <DataGrid.Style>
                     <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">

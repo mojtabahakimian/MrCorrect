@@ -53,7 +53,44 @@ namespace Prg_UI.Functions
 {
     public static class CL_LMethods
     {
+        public static class ConstructorRowDetector
+        {
+            // Cache property lists per type برای کارایی و جلوگیری از Reflection مکرر
+            private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _propCache = new ConcurrentDictionary<Type, PropertyInfo[]>();
 
+            /// <summary>
+            /// Returns <c>true</c> if all public readable/writable properties
+            /// of <paramref name="instance"/> still have the same value they
+            /// had right after the default constructor ran.
+            /// </summary>
+            public static bool IsPristine<T>(T instance)
+            {
+                if (instance is null) return true;                  // امنیت در برابر NRE
+
+                var type = typeof(T);
+
+                // به‌جای نگه‌داشتن یک نمونهٔ پیش‌فرض (که ممکن است رم نشت کند)،
+                // هر بار یک نمونهٔ سبک می‌سازیم؛ در اغلب مدل‌ها سبک است.
+                var defaultInstance = Activator.CreateInstance<T>();
+
+                // گرفتن لیست پراپرتی‌ها از کش یا بازتاب یک‌باره
+                var props = _propCache.GetOrAdd(type, t =>
+                    t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                     .Where(p => p.CanRead && p.CanWrite)
+                     .ToArray());
+
+                foreach (var p in props)
+                {
+                    var current = p.GetValue(instance);
+                    var initial = p.GetValue(defaultInstance);
+
+                    if (!Equals(current, initial))
+                        return false;   // حداقل یک فیلد تغییر کرده؛ «سطر تازه» نیست
+                }
+
+                return true; // همه مثل حالت سازنده‌اند ⇒ کاربر چیزی ننوشته
+            }
+        }
         public static Theme MYTHEME { get; set; }
         /// <summary>
         /// , new WindowInteropHelper(this).Handle |_______________|

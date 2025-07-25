@@ -35,6 +35,7 @@ using Wins.WinSetting;
 using Rpts;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_UI.Wins.WinMenus.CONFIGS;
+using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
 
 namespace Functions
 {
@@ -689,7 +690,15 @@ namespace Functions
             /// <summary>
             /// پیش فرض ارجاعات کاربران
             /// </summary>
-            UserPersonelOrderWin_PishfarzeErja
+            UserPersonelOrderWin_PishfarzeErja,
+            /// <summary>
+            /// تعيين مسير وزيت براي مشتريان
+            /// </summary>
+            WIN_VISIT_ROUTE_FORM,
+            /// <summary>
+            /// تعریف ویزیت روزانه برای ویزیتور
+            /// </summary>
+            VISITOR_DAY_HEAD
         }
         #endregion
 
@@ -699,6 +708,14 @@ namespace Functions
         {
             switch (_TYPE_)
             {
+                case WinNameType.VISITOR_DAY_HEAD: //تعریف ویزیت روزانه برای ویزیتور
+                    CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_DAY_HEAD(), isModalDialog: false, allowMultipleInstances: false);
+                    break;      
+                
+                case WinNameType.WIN_VISIT_ROUTE_FORM: //تعيين مسير وزيت براي مشتريان
+                    CL_LMethods.OpenWindow(OWNERWIN, new WIN_VISIT_ROUTE_FORM(), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
                 case WinNameType.UserPersonelOrderWin_PishfarzeErja: //پیش فرض ارجاعات کاربران
                     CL_LMethods.OpenWindow(OWNERWIN, new UserPersonelOrderWin(), isModalDialog: false, allowMultipleInstances: false);
                     break;

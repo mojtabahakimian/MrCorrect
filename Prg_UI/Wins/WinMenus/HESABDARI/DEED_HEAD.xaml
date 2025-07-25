@@ -97,7 +97,7 @@
         <TextBox x:Name="Sanad_Status" IsReadOnly="True" Text="" Tag="RD" Height="25" Margin="38,56,0,0"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Left" Width="114" IsHitTestVisible="False" IsTabStop="False" Focusable="False" />
 
         <TextBox x:Name="NO_S" IsReadOnly="True" Text="" Tag="RD" Margin="38,86,0,0"  Style="{StaticResource FuzzyOut}" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Left" Width="114" Height="25" VerticalAlignment="Top" IsTabStop="False" IsHitTestVisible="False" Focusable="False" />
-        <Label x:Name="Label11_Copy3" Content="نوع سند : " Margin="154,85,0,0"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Top" HorizontalAlignment="Left" Width="50"/>
+        <Label x:Name="Label11_Copy3" Content="نوع سند : " Margin="154,85,0,0"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Top" HorizontalAlignment="Left" Width="50" Foreground="#FF36940C"/>
 
         <TextBox x:Name="USER_NAME" IsReadOnly="True" Text="" Tag="RD" Height="25" Margin="38,115,0,0"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Left" Width="114" IsTabStop="False" IsHitTestVisible="False" Focusable="False" PreviewMouseDoubleClick="USER_NAME_PreviewMouseDoubleClick" />
         <Label x:Name="Label11_Copy4" Content="کاربر : " Margin="154,115,0,0"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Top" HorizontalAlignment="Left" Width="34"/>
