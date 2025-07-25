@@ -135,6 +135,8 @@
 		<None Remove="Rpts\STUF_DEF.mrt" />
 		<None Remove="Rpts\TAARIF\GRADE_REP.mrt" />
 		<None Remove="Rpts\Visitory\R_LIST_MASIR.mrt" />
+		<None Remove="Rpts\Visitory\tozie_dasti.mrt" />
+		<None Remove="Rpts\Visitory\TOZIE_FROOSH_ANBARS_HAVALA.mrt" />
 		<None Remove="Rpts\Visitory\Visit_gol_dtl_Rep.mrt" />
 		<None Remove="Rpts\Visitory\Visit_gol_dtl_REP_print_grp.mrt" />
 		<None Remove="Rpts\Visitory\R_LIST_VISIT_DAY.mrt" />
@@ -528,6 +530,8 @@
 		<EmbeddedResource Include="Rpts\STUF_DEF.mrt" />
 		<EmbeddedResource Include="Rpts\TAARIF\GRADE_REP.mrt" />
 		<EmbeddedResource Include="Rpts\Visitory\R_LIST_MASIR.mrt" />
+		<EmbeddedResource Include="Rpts\Visitory\tozie_dasti.mrt" />
+		<EmbeddedResource Include="Rpts\Visitory\TOZIE_FROOSH_ANBARS_HAVALA.mrt" />
 		<EmbeddedResource Include="Rpts\Visitory\Visit_gol_dtl_Rep.mrt" />
 		<EmbeddedResource Include="Rpts\Visitory\Visit_gol_dtl_REP_print_grp.mrt" />
 		<EmbeddedResource Include="Rpts\Visitory\R_LIST_VISIT_DAY.mrt" />

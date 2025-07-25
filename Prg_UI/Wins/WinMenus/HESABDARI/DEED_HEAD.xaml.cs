@@ -772,6 +772,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 sgn2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER?.sgn2usid)?.SAL_NAME;
                 sgn3usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER?.sgn3usid)?.SAL_NAME;
 
+                PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
+                PERSONEL.Text = null;
+                PERSONEL.SelectedValue = null; PERSONEL.Items.Refresh();
+                PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+
                 ReGetData(); //Load DataGrid's data
 
             }

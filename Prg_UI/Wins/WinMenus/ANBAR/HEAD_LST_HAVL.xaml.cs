@@ -659,6 +659,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 SGN2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == QRE_HED?.sgn2usid)?.SAL_NAME;
                 SGN3usid.Text = rst_personel.FirstOrDefault(x => x.IDD == QRE_HED?.sgn3usid)?.SAL_NAME;
 
+                PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
+                PERSONEL.Text = null;
+                PERSONEL.SelectedValue = null; PERSONEL.Items.Refresh();
+                PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+
                 MakeOKFReady();
 
                 Summer();

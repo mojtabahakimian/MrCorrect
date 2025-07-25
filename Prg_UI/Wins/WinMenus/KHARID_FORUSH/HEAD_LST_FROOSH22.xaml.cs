@@ -1489,6 +1489,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 SGN2usid.Tag = Convert.ToInt32(HEADER_FAC?.sgn2usid);
                 SGN3usid.Tag = Convert.ToInt32(HEADER_FAC?.sgn3usid);
 
+                PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
+                PERSONEL.Text = null;
+                PERSONEL.SelectedValue = null; PERSONEL.Items.Refresh();
+                PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+
                 if (rst_personel != null)
                 {
                     SGN1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn1usid)?.SAL_NAME;

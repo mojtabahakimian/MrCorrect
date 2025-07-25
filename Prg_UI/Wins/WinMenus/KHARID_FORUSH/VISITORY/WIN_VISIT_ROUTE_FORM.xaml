@@ -257,7 +257,7 @@
             <TextBox x:Name="ROUTE_NAME"   Text="" Height="30" Margin="645,12,81,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="50" TabIndex="3" />
             <Label Content="استان:" FlowDirection="RightToLeft" Width="Auto" Height="Auto" HorizontalAlignment="Right" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="0,59,44,0" FontSize="10"/>
             <Label Content="شهر:" FlowDirection="RightToLeft" Width="Auto" Height="Auto" HorizontalAlignment="Right" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="0,59,263,0" FontSize="10"/>
-            <ComboBox x:Name="District" Style="{StaticResource FuzzyOutComboBox}" FlowDirection="RightToLeft" Padding="7,0,10,0" DisplayMemberPath="District" SelectedValuePath="District"  IsTextSearchEnabled="True" IsEditable="True" Height="28" Margin="439,58,494,0" VerticalAlignment="Top">
+            <ComboBox x:Name="District" Style="{StaticResource FuzzyOutComboBox}" FlowDirection="RightToLeft" Padding="7,0,10,0" DisplayMemberPath="District" SelectedValuePath="District"  IsTextSearchEnabled="True" PreviewLostKeyboardFocus="District_PreviewLostKeyboardFocus" IsEditable="True" Height="28" Margin="439,58,494,0" VerticalAlignment="Top">
                 <ComboBox.Resources>
                     <Style TargetType="TextBox" BasedOn="{StaticResource FuzzyOut}" >
                         <Setter Property="MaxLength" Value="40"/>

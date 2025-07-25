@@ -698,7 +698,11 @@ namespace Functions
             /// <summary>
             /// تعریف ویزیت روزانه برای ویزیتور
             /// </summary>
-            VISITOR_DAY_HEAD
+            VISITOR_DAY_HEAD,
+            /// <summary>
+            /// تنظیم لیست دستی توضیع
+            /// </summary>
+            WIN_TOZIE
         }
         #endregion
 
@@ -708,10 +712,14 @@ namespace Functions
         {
             switch (_TYPE_)
             {
+                case WinNameType.WIN_TOZIE: //تنظیم لیست دستی توضیع
+                    CL_LMethods.OpenWindow(OWNERWIN, new WIN_TOZIE(), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
                 case WinNameType.VISITOR_DAY_HEAD: //تعریف ویزیت روزانه برای ویزیتور
                     CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_DAY_HEAD(), isModalDialog: false, allowMultipleInstances: false);
-                    break;      
-                
+                    break;
+
                 case WinNameType.WIN_VISIT_ROUTE_FORM: //تعيين مسير وزيت براي مشتريان
                     CL_LMethods.OpenWindow(OWNERWIN, new WIN_VISIT_ROUTE_FORM(), isModalDialog: false, allowMultipleInstances: false);
                     break;

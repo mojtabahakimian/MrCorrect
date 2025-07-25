@@ -64,7 +64,7 @@
         <Button x:Name="ESLAH"  Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="398,165,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="80" Click="ESLAH_Click" Grid.Row="1" />
         <Button x:Name="BTN_DELETE"  Content="حذف" Tag="hazfer" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="302,165,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="90" Click="BTN_DELETE_Click" Grid.Row="1" />
         <Label Content="شماره:" HorizontalAlignment="Right" Margin="0,17,28,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto" Grid.Row="1"/>
-        <CNC:NumericTextBox x:Name="NUMBER" IsReadOnly="True" DoesAcceptDouble="False" DigitGroupOnEnter="False"  LastValueShouldZero="False" Text="" Height="30" Margin="0,16,71,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Right" Width="91" Grid.Row="1"/>
+        <CNC:NumericTextBox x:Name="NUMBER" IsReadOnly="True" DoesAcceptDouble="False" DigitGroupOnEnter="False" RestoreLastValidValue="False" LastValueShouldZero="False" Text="" Height="30" Margin="0,16,71,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Right" Width="91" Grid.Row="1"/>
 
         <DataGrid   
                 d:ItemsSource="{d:SampleData}"

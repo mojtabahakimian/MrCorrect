@@ -51,7 +51,7 @@
                 </Grid>
             </Border>
         </Border>
-        <CUC:NumericTextBox x:Name="NUMBER" Width="120" Visibility="Visible" VerticalAlignment="Top" Text="" Tag="RD" Margin="0,67,98,0" InnerTabStop="True" IsHitTestVisible="False" IsReadOnly="False" Height="27" HorizontalAlignment="Right" DoesAcceptDouble="False"/>
+        <CUC:NumericTextBox x:Name="NUMBER" Width="120" Visibility="Visible" RestoreLastValidValue="False" VerticalAlignment="Top" Text="" Tag="RD" Margin="0,67,98,0" InnerTabStop="True" IsHitTestVisible="False" IsReadOnly="False" Height="27" HorizontalAlignment="Right" DoesAcceptDouble="False"/>
         <Label Width="auto" VerticalAlignment="Top" Margin="0,69,32,0" HorizontalAlignment="Right" FontSize="10" FlowDirection="RightToLeft" Content="شماره رسید :"/>
         <Label x:Name="Label11_Copy3" Width="73" VerticalAlignment="Top" Margin="0,67,225,0" Height="25" HorizontalAlignment="Right" FontSize="10" FlowDirection="RightToLeft" Content="تاریخ سررسید : "/>
 
