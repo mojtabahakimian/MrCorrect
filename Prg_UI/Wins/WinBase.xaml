@@ -5157,7 +5157,8 @@
         </Grid>
 
         <Label x:Name="LBL_VERSION" Margin="70" VerticalContentAlignment="Bottom" VerticalAlignment="Bottom" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Foreground="#DDFFFFFF" FontSize="14" />
-        <Label x:Name="LBL_CurrentUser"  Margin="0,0,70,42" VerticalContentAlignment="Bottom" VerticalAlignment="Bottom" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Foreground="#DDFFFFFF" FontSize="14" />
+        <Label x:Name="LBL_CurrentUser"  Margin="0,0,70,44" VerticalContentAlignment="Bottom" VerticalAlignment="Bottom" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Foreground="#DDFFFFFF" FontSize="14" />
+        <Label x:Name="LBL_VahedAndShift"  Margin="0,0,70,20" VerticalContentAlignment="Bottom" VerticalAlignment="Bottom" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Foreground="#DDFFFFFF" FontSize="14" />
 
     </Grid>
 </Window>
