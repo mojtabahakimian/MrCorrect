@@ -7,6 +7,7 @@ using Prg_UI.Wins.WinMenus.ANBAR;
 using Prg_UI.Wins.WinMenus.Checkha;
 using Prg_UI.Wins.WinMenus.HESABDARI;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
+using Prg_UI.Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
 using Prg_UI.Wins.WinMenus.WinAutomasion;
 using System;
 using System.Collections.Generic;
@@ -846,6 +847,29 @@ namespace Prg_UI.Wins.WinOther
                             (Win_US as HAVALAH_ENTER).CUST_NO.SelectedValue = null;
                             (Win_US as HAVALAH_ENTER).CUST_NO.SelectedValue = thevalue;
                             (Win_US as HAVALAH_ENTER).CUST_NO.Items.Refresh(); //Just to select and display new selectedValue
+                        }
+                        break;
+                    case "F_MENU_DATE_HES":
+                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
+                        if (!(selectedVal is null))
+                        {
+                            IsSelectedItmFromResult = true;
+                            e.Handled = true;
+
+                            string hesval = $"{selectedVal.N_KOL}-{selectedVal.NUMBER}-{selectedVal.TNUMBER}";
+                            if (!string.IsNullOrEmpty(selectedVal?.tnumber2.ToStringNullSafe()) && selectedVal?.tnumber2.ToStringNullSafe() != "NULL")
+                            {
+                                hesval = selectedVal?.tnumber2.ToString();
+                                selectedVal.NAME = selectedVal.TNAME;
+                            }
+
+                            (Win_US as F_MENU_DATE_HES).HESAB_FROM_SEARCH.FULL_HES = hesval;
+
+                            (Win_US as F_MENU_DATE_HES).HESAB_FROM_SEARCH.N_KOL = selectedVal.N_KOL.ToString();
+                            (Win_US as F_MENU_DATE_HES).HESAB_FROM_SEARCH.N_MOIN = selectedVal.NUMBER.ToString();
+                            (Win_US as F_MENU_DATE_HES).HESAB_FROM_SEARCH.N_TAF = selectedVal.TNUMBER.ToString();
+
+                            (Win_US as F_MENU_DATE_HES).HESAB_FROM_SEARCH.NAME = selectedVal.NAME;
                         }
                         break;
 
