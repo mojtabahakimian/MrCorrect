@@ -4,7 +4,6 @@ using MaterialDesignThemes.Wpf;
 using Prg_UI.Functions;
 using Prg_UI.Wins.WinSetting;
 using System;
-using System.Runtime.InteropServices;
 using System.Runtime;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,25 +11,37 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using Wins.ThePages;
-using System.Windows.Interop;
-using System.Windows.Media;
 using Prg_Proccessy.Generaly;
-using Wins.WinMenus.Checkha;
 using Prg_Proccessy.FUNCTIONS;
 using System.Linq;
-using Wins.WinMenus.CONFIGS;
 using Prg_Proccessy.MODELS;
+using Prg_SendInvoice.CNNMANAGER;
 
 namespace Prg_UI.Wins
 {
     public partial class WinBase : Window
     {
+        public class VSH_MODEL
+        {
+            public string? SHNAME { get; set; }
+            public string? DEPNAME { get; set; }
+        }
         public WinBase()
         {
             InitializeComponent();
 
             LBL_VERSION.Content = CL_VERSION.MrCorrectFullVersion;
             LBL_CurrentUser.Content = CL_HESABDARI.UCurrentUser();
+
+            CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+            var VSH = dbms.DoGetDataSQL<VSH_MODEL>(@$"SELECT dbo.SHIFT.SHNAME,
+                                                          dbo.DEPART.DEPNAME
+                                                   FROM dbo.SHIFT
+                                                       CROSS JOIN dbo.DEPART
+                                                   WHERE (dbo.SHIFT.SHIFT_ID = {CL_Generaly.SHIFT_OF_USER}) AND (dbo.DEPART.DEPATMAN = {CL_Generaly.VAHED_OF_USER});").FirstOrDefault();
+
+            LBL_VahedAndShift.Content = $"واحد (دپارتمان) : {VSH?.DEPNAME} | شیفت : {VSH?.SHNAME}";
+            VSH = null; dbms = null; //Tiny Clear
 
             this.MaxHeight = CL_LMethods.GetWindowSizeLessTaskbaer();
             WindowState = WindowState.Maximized;

@@ -1,4 +1,5 @@
-﻿using Prg_Proccessy.MODELS;
+﻿using Newtonsoft.Json;
+using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using System;
 using System.Collections.Generic;
@@ -57,7 +58,21 @@ namespace Functions
             }
         }
 
-        private static AuditLogEntry CreateAuditEntry(string actionType, string tableName, string recordId, string oldValue, string newValue, string additionalInfo)
+        public static async Task LogActionAsync(string actionType, string tableName, string recordId, object oldValue = null, object newValue = null, string additionalInfo = null)
+        {
+            try
+            {
+                var entry = CreateAuditEntry(actionType, tableName, recordId, oldValue, newValue, additionalInfo);
+                await SaveAuditLogAsync(entry);
+            }
+            catch (Exception ex)
+            {
+                //// Fallback logging to file system if database logging fails
+                //await FallbackLogToFileAsync(ex, actionType, tableName, recordId);
+            }
+        }
+
+        private static AuditLogEntry CreateAuditEntry(string actionType, string tableName, string recordId, object oldValue, object newValue, string additionalInfo)
         {
             var ipAddresses = GetIPAddresses();
             var windowsVersion = GetWindowsVersion();
@@ -69,8 +84,8 @@ namespace Functions
                 ActionType = actionType,
                 TableName = tableName,
                 RecordID = recordId,
-                OldValue = oldValue,
-                NewValue = newValue,
+                OldValue = oldValue is null ? null : JsonConvert.SerializeObject(oldValue),
+                NewValue = newValue is null ? null : JsonConvert.SerializeObject(newValue),
                 IPAddress = string.Join(";", ipAddresses),
                 MachineName = Environment.MachineName,
                 ApplicationVersion = CL_VERSION.MrCorrectFullVersion,

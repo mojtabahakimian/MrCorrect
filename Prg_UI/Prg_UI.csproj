@@ -570,6 +570,7 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 			<Private>True</Private>
+			<Isolated>true</Isolated>
 		</Reference>
 
 		<Reference Include="Microsoft.CodeAnalysis">

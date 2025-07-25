@@ -302,16 +302,16 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 108;
             //Baseknow.UUSER = "modir-mali";   
 
-            Baseknow.USERCOD = 116;
-            Baseknow.UUSER = "Mr.Salmani";
+            //Baseknow.USERCOD = 116;
+            //Baseknow.UUSER = "Mr.Salmani";
 
             //Baseknow.USERCOD = 132;
             //Baseknow.UUSER = "Prima Chopan";
 
             Baseknow.mrcorrect = true;
 
-            //Baseknow.USERCOD = 78;
-            //Baseknow.UUSER = "Controller";
+            Baseknow.USERCOD = 78;
+            Baseknow.UUSER = "Controller";
 
             //Baseknow.USERCOD = 139;
             //Baseknow.UUSER = "negar sadeghi";
@@ -322,7 +322,7 @@ namespace Prg_UI.Wins
 
             //new UserPersonelOrderWin().Show();
 
-            //new WIN_VISIT_ROUTE_FORM().Show();
+            //new WinBase().Show();
 
             //new WinConnectionChoose().ShowDialog();
             //new HEAD_LST_HAVL(4306d).ShowDialog();
@@ -340,9 +340,9 @@ namespace Prg_UI.Wins
             //new WinConnectionChoose().Show();
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this , 2021d);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_VISIT_ROUTE_FORM, this);
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
@@ -358,7 +358,7 @@ namespace Prg_UI.Wins
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FCODE_CUSTOMER, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ANBAR_F_AK_MOGUDI_ANBAR_LIST, this);
 
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
 
             //new WinEVENTS(37729).ShowDialog();
 #endif

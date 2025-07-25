@@ -4034,6 +4034,17 @@ namespace Wins.WinSetting
                 return;
             }
 
+
+            var OldRow = ((SALGROUP_MODEL)SALGROUP_WAS_ROW_ITEM).Clone() as SALGROUP_MODEL; OldRow.EMZA = null;
+            var NewRow = ((SALGROUP_MODEL)ROW).Clone() as SALGROUP_MODEL; NewRow.EMZA = null;
+            _ = AuditLogger.LogActionAsync(
+                              actionType: "SaveRow",
+                              tableName: "تعیین سطح دسترسی : گروه کاربری",
+                              recordId: ROW?.SAL_NAME,
+                              oldValue: OldRow,
+                              newValue: NewRow,
+                              additionalInfo: $@"{this.GetType().Name} , EXE PATH : {System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}");
+
             try
             {
                 if (ROW?.IDD is not null) //Update
