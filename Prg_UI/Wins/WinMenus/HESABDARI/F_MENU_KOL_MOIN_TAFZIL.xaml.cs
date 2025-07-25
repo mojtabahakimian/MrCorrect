@@ -278,19 +278,59 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                     //DoCmd.OpenReport("R_DAFTAR_TAFZILY_2_2", acViewPreview);
                 }
-                //DoCmd.OpenForm(this.Name, default, default, default, default, acHidden);
-                //DoCmd.OpenForm(this.Name, default, default, default, default, acHidden);
             }
-            //if (this.OpenArgs == "VAZ")
-            //{
-            //    DoCmd.OpenReport("R_GARDESH_KHFR_DAFTAR", acViewPreview);
-            //    DoCmd.OpenForm(this.Name, default, default, default, default, acHidden);
-            //}
-            //if (this.OpenArgs == "FRKMA4")
-            //{
-            //    DoCmd.OpenReport("R_GARDESH_KHFR_DAFTAR_A4", acViewPreview);
-            //    DoCmd.OpenForm(this.Name, default, default, default, default, acHidden);
-            //}
+            if (OPEN_ARG == "VAZ")
+            {
+                //DoCmd.OpenReport("R_GARDESH_KHFR_DAFTAR", acViewPreview);
+
+                var report = new StiReport();
+                var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.R_GARSESH_KHFR_DAFTAR.mrt");
+                report.Load(pathreport);
+                string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+                report.Dictionary.Databases.Clear();
+                report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
+
+                report["FDATE_PARM"] = DT1.Text.ToRawTarikh().ToString();
+                report["EDATE_PARM"] = DT2.Text.ToRawTarikh().ToString();
+                report["CUST_PARM"] = Combo34.SelectedValue.ToString();
+
+                string dt1 = $"از تاریخ : {DT1.Text}";
+                string dt2 = $"تا تاریخ : {DT2.Text}";
+
+                (report.GetComponentByName("SAL_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
+                (report.GetComponentByName("DT1_N") as StiText).Text = dt1;
+                (report.GetComponentByName("DT2_N") as StiText).Text = dt2;
+
+                //report.Render();
+                //report.Show();
+
+                new WINRPT(report, "صورت وضعیت معاملات اشخاص").Show();
+            }
+            if (OPEN_ARG == "FRKMA4")
+            {
+                //DoCmd.OpenReport("R_GARDESH_KHFR_DAFTAR_A4", acViewPreview);
+
+
+                var report = new StiReport();
+                var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.R_GARDESH_KHFR_DAFTAR_A4.mrt");
+                report.Load(pathreport);
+                string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+                report.Dictionary.Databases.Clear();
+                report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
+
+                report["FDATE_PARM"] = DT1.Text.ToRawTarikh().ToString();
+                report["EDATE_PARM"] = DT2.Text.ToRawTarikh().ToString();
+                report["CUST_PARM"] = Combo34.SelectedValue.ToString();
+
+                string dt1 = $"از تاریخ : {DT1.Text}";
+                string dt2 = $"تا تاریخ : {DT2.Text}";
+                string dt3 = $"تاریخ : {Tarikh.FullCurrentDate.ToString()}";
+
+                (report.GetComponentByName("SAL_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
+                (report.GetComponentByName("DT1_N") as StiText).Text = dt1;
+                (report.GetComponentByName("DT2_N") as StiText).Text = dt2;
+                (report.GetComponentByName("DT2_N") as StiText).Text = dt3;
+            }
 
             if (OPEN_ARG != "TAF")  //if (this.OpenArgs == "RMOIN")
             {
