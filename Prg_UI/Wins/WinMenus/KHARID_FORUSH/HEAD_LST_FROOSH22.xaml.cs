@@ -10361,354 +10361,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 }
                 else
                 {
-                    #region Reportprocess
-
-                    var report = new StiReport();
-                    var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.INVOICE_FROOSH_22.mrt");
-                    report.Load(pathreport);
-
-                    string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
-                    report.Dictionary.Databases.Clear();
-                    report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
-
-                    report["NUMBER_PARAM"] = NUMBER1.Text;
-                    ((StiSqlSource)report.Dictionary.DataSources["FACTOR_DATA"]).CommandTimeout = 300;
-
-                    #region GroupFooter3_Format
-                    if (Baseknow.TFSAZMAN != "2")
-                    {
-                        (report.GetComponentByName("MANDAH") as StiText).Enabled = true;
-                        (report.GetComponentByName("MANDG") as StiText).Enabled = true;
-                    }
-                    else
-                    {
-                        (report.GetComponentByName("MANDAH") as StiText).Enabled = false;
-                        (report.GetComponentByName("MANDG") as StiText).Enabled = false;
-                    }
-                    if (Baseknow.TFSAZMAN != "2")
-                    {
-                        var rst_0 = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(this.CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(this.CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(this.CUST_NO.SelectedValue.ToString()) + ")").ToList();
-                        if (rst_0.Count == 0)
-                        {
-                            (report.GetComponentByName("MANDAH") as StiText).Text = "0";
-                        }
-                        else
-                        {
-                            var _mandah = Interaction.IIf(rst_0.FirstOrDefault() > 0, Strings.Format(rst_0.FirstOrDefault(), "##,# ريال بدهكار"), Strings.Format(rst_0.FirstOrDefault() * -1, "##,# ريال بستانكار"));
-                            (report.GetComponentByName("MANDAH") as StiText).Text = _mandah.ToString();
-                        }
-                    }
-                    //Showemza(this, "FFR_FROOSHTX", "FFR_HESABTX", "FFR_MODIRTX");
-                    #endregion
-
-                    #region PageHeader_Format
-                    string FRF;
-                    long MABFR;
-                    string STRFR;
-                    //if (Strings.Left(this.Printer.DeviceName, 5) == "Epson")
-                    //{
-                    //    this.Printer.PrintQuality = acPRPQLow;
-                    //    this.Printer.PaperSize = acPRPSLetter;
-                    //}
-                    //if (this.OpenArgs == 2)
-                    //{
-                    //    FRF = "head_lst_froosh22";
-                    //}
-                    //// Me.MANDAH.CAPTION = "كل مانده حساب : " & [Forms]![HEAD_LST_FROOSH22]![MANDAH]
-                    //else
-                    //{
-                    //    FRF = "HEAD_LST_FROOSH2";
-                    //}
-                    int i;
-                    string CH;
-                    double JAMP;
-                    string TAMIR;
-                    string per;
-                    long permab;
-                    var rst = dbms.DoGetDataSQL<RPT_MODEL1>("SELECT HEAD_LST.NUMBER, HEAD_LST.TAG AS htag, HEAD_LST.molah FROM HEAD_LST WHERE (((HEAD_LST.NUMBER)= " + NUMBER.Text + " ) AND  ((HEAD_LST.TAG)=13))").ToList();
-                    if (rst.Count > 0)
-                    {
-                        if (Strings.Left(rst.FirstOrDefault().MOLAH, 1) == "~" | Strings.Left(rst.FirstOrDefault().MOLAH, 1) == ".")
-                        {
-                            i = 2;
-                            TAMIR = "";
-                            CH = Strings.Mid(rst.FirstOrDefault().MOLAH, 2, 1);
-                            // while (IsNumeric(CH) || CH == "-" && i <= rst.Fields["MOLAH"].Value.Length)  
-                            while (Information.IsNumeric(CH) || CH == "-" & i <= rst.FirstOrDefault().MOLAH.Length)
-                            {
-                                i = i + 1;
-                                TAMIR = TAMIR + CH;
-                                CH = Strings.Mid(rst.FirstOrDefault().MOLAH, i, 1);
-                            }
-                            if (Information.IsNumeric(TAMIR))
-                            {
-                                TAMIR = Baseknow.BEDEHKAR + "-1-" + TAMIR;
-                            };
-                            if (Strings.Mid(Baseknow.OPTIONSS, 26, 1) == "5")
-                            {
-                                var rst1 = dbms.DoGetDataSQL<TDETA_HES>("SELECT * FROM TDETA_HES WHERE N_KOL = " + CL_HESABDARI.GETKOL(TAMIR) + " and NUMBER = " + CL_HESABDARI.GETMOIN(TAMIR) + " and tNUMBER = " + CL_HESABDARI.GETTAF(TAMIR)).ToList();
-                                if (rst.Count > 0)
-                                {
-                                    (report.GetComponentByName("lvisit") as StiText).Text = "ويزيتور: " + rst1.FirstOrDefault().NAME;
-                                    (report.GetComponentByName("Ltvis") as StiText).Text = "تلفن ويزيتور: " + rst1.FirstOrDefault().TEL;
-                                }
-                            }
-                        }
-                        else if (Strings.Mid(Baseknow.OPTIONSS, 26, 1) == "5")
-                        {
-                            var rst2 = dbms.DoGetDataSQL<VISITOR_DTL>("SELECT * FROM VISITOR_DTL WHERE TAG = 2 AND NUMBER = " + NUMBER.Text).ToList();
-                            if (rst2.Count > 0)
-                            {
-                                var RST2 = dbms.DoGetDataSQL<TDETA_HES>("SELECT * FROM TDETA_HES WHERE N_KOL = " + CL_HESABDARI.GETKOL(rst2.FirstOrDefault().CUST_NO) + " AND NUMBER = " + CL_HESABDARI.GETMOIN(rst2.FirstOrDefault().CUST_NO) + " AND tNUMBER = " + CL_HESABDARI.GETTAF(rst2.FirstOrDefault().CUST_NO)).ToList();
-                                if (RST2.Count > 0)
-                                {
-                                    (report.GetComponentByName("lvisit") as StiText).Text = "ويزيتور: " + RST2.FirstOrDefault().NAME;
-                                    (report.GetComponentByName("Ltvis") as StiText).Text = "تلفن ويزيتور: " + RST2.FirstOrDefault().TEL;
-                                }
-                            }
-                        }
-                    }
-                    if (this.MAS.Text == "0")
-                    {
-                        (report.GetComponentByName("MAS") as StiText).Enabled = false;
-                    }
-                    #endregion
-
-                    #region Report_Open
-                    FRF = null;
-                    MABFR = 0;
-                    STRFR = null;
-                    //if (Strings.Left(this.Printer.DeviceName, 5) == "Epson")
-                    //{
-                    //    this.Printer.PrintQuality = acPRPQLow;
-                    //    this.Printer.PaperSize = acPRPSLetter;
-                    //}
-                    //if (this.OpenArgs == 2)
-                    //{
-                    //    FRF = "head_lst_froosh22";
-                    //}
-                    // Me.MANDAH.CAPTION = "كل مانده حساب : " & [Forms]![HEAD_LST_FROOSH22]![MANDAH]
-                    //else
-                    //{
-                    //    FRF = "HEAD_LST_FROOSH2";
-                    //}
-                    double JCHK = default, jamf, HAZ, NAGHD, VAR, HAV, taf, MBA;
-                    double GB;
-                    var rst_3 = dbms.DoGetDataSQL<RPT_MODEL2>("SELECT     dbo.PAY_GETD.N_SERI, dbo.TCOD_BANKS.NAMES, dbo.PAY_GETD.SHOBEH, dbo.PAY_GETD.DATE, dbo.PAY_GETD.DATE_S , dbo.PAY_GETD.MABL, dbo.PAY_GETD.NUMBER, dbo.PAY_GETD.TAG FROM         dbo.TCOD_BANKS INNER JOIN dbo.PAY_GETD ON dbo.TCOD_BANKS.CODE = dbo.PAY_GETD.BANK WHERE (dbo.PAY_GETD.NUMBER = " + NUMBER.Text + ") AND (dbo.PAY_GETD.N_KOL IS NULL OR N_KOL <> 911) AND (dbo.PAY_GETD.TAG = " + hTAG + ")").ToList(); //Forms(FRF)["Dtag"]
-                    if (rst_3.Count > 0)
-                    {
-                        JCHK = 0d;
-                        (report.GetComponentByName("COMM") as StiText).Text = "چكهاي دريافت شده " + rst_3.Count + " فقره جمعاًبه مبلغ :" + Strings.Format(Convert.ToInt64(NCHK.Text), "### ريال") + "  ";
-
-                        for (int o = 0; o < rst_3.Count; o++) //while (!rst_3.EOF())
-                        {
-                            (report.GetComponentByName("COMM") as StiText).Text = (report.GetComponentByName("COMM") as StiText).Text + "ـ سريال:" + rst_3[o].N_SERI + " بانك:" + rst_3[o].NAMES + " شعبه:" + Strings.Trim(rst_3[o].SHOBEH);
-                            JCHK = (double)(JCHK + rst_3[o].MABL);
-                            //rst_3.MoveNext();
-                        }
-                    }
-                    else
-                    {
-                        (report.GetComponentByName("COMM") as StiText).Enabled = false;
-                        (report.GetComponentByName("SHARAYET") as StiText).Enabled = true;
-                    }
-                    jamf = 0d;
-                    HAZ = 0d;
-                    NAGHD = 0d;
-                    VAR = 0d;
-                    HAV = 0d;
-                    taf = 0d;
-                    MBA = 0d;
-                    var JST0 = dbms.DoGetDataSQL<double?>("SELECT Sum(INVO_LST.MABL_K) AS SumOfMABL_K FROM INVO_LST WHERE (((INVO_LST.NUMBER)= " + NUMBER.Text + " ) AND ((INVO_LST.TAG)=2))").ToList();
-                    if (JST0.Count > 0 && !IsNull(JST0.FirstOrDefault()))
-                    {
-                        jamf = (double)JST0.FirstOrDefault();
-                    }
-                    var JST = dbms.DoGetDataSQL<RPT_MODEL3>("SELECT HEAD_LST.NUMBER, HEAD_LST.TAG AS htag, HEAD_LST.ANBAR, HEAD_LST.NUMBER1, HEAD_LST.DATE_N, HEAD_LST.TAH, HEAD_LST.MAS, HEAD_LST.VAS, HEAD_LST.N_S, HEAD_LST.CUST_NO, HEAD_LST.MOLAH, HEAD_LST.M_NAGHD, HEAD_LST.MABL_VAR, HEAD_LST.MOIN_VAR, HEAD_LST.MABL_HAV, HEAD_LST.MOIN_HAV, HEAD_LST.MABL_HAZ, HEAD_LST.MOIN_HAZ, HEAD_LST.TAKHFIF, HEAD_LST.MOIN_KHF, HEAD_LST.ANBARF, HEAD_LST.FNUMCO, HEAD_LST.MBAA FROM HEAD_LST WHERE (((HEAD_LST.NUMBER)= " + NUMBER.Text + " ) AND  ((HEAD_LST.TAG)=13))").ToList();
-                    if (JST.Count > 0 && !IsNull(JST.FirstOrDefault().NUMBER))
-                    {
-                        HAZ = (double)JST.FirstOrDefault().MABL_HAZ;
-                        VAR = (double)JST.FirstOrDefault().MABL_VAR;
-                        HAV = (double)JST.FirstOrDefault().MABL_HAV;
-                        NAGHD = (double)JST.FirstOrDefault().M_NAGHD;
-                        taf = (double)JST.FirstOrDefault().TAKHFIF;
-                        MBA = (double)JST.FirstOrDefault().MBAA;
-                    }
-
-                    (report.GetComponentByName("JF") as StiText).Text = Strings.Format(jamf, "#,##0;#,##0-");
-                    (report.GetComponentByName("HKH") as StiText).Text = Strings.Format(HAZ, "#,##0;#,##0-");
-                    (report.GetComponentByName("MBAA") as StiText).Text = Strings.Format(MBA, "#,##0;#,##0-");
-                    if (JST.FirstOrDefault().VAS == 1 || IsNull(JST.FirstOrDefault().VAS))
-                    {
-                        (report.GetComponentByName("GABEL") as StiText).Text = Strings.Format(jamf + HAZ + MBA - taf, "#,##0;-#,##0");
-                        GB = jamf + HAZ + MBA - taf;
-                    }
-                    else
-                    {
-                        (report.GetComponentByName("GABEL") as StiText).Text = Strings.Format(jamf - HAZ + MBA - taf, "#,##0;-#,##0");
-                        GB = jamf - HAZ + MBA - taf;
-                    }
-                    if (taf == 0d)
-                    {
-                        (report.GetComponentByName("Label180") as StiText).Enabled = false;
-                        (report.GetComponentByName("TF") as StiText).Enabled = false;
-                    }
-                    else
-                    {
-                        (report.GetComponentByName("TF") as StiText).Text = Strings.Format(taf, "#,##0;-#,##0");
-                        if (Conversion.Val(Strings.Format(taf / jamf * 100d, "##,##0.0")) != Conversion.Val(Strings.Format(taf / jamf * 100d, "#,###")))
-                        {
-                            (report.GetComponentByName("Label180") as StiText).Text = Strings.Format(taf / jamf * 100d, "##,##0.0") + " % تخفيف:";
-                        }
-                        else
-                        {
-                            (report.GetComponentByName("Label180") as StiText).Text = Strings.Format(taf / jamf * 100d, "#,###") + " % تخفيف:";
-                        }
-                    }
-                    (report.GetComponentByName("JPAY") as StiText).Text = Strings.Format(NAGHD + VAR + HAV + JCHK, "#,##0;-#,##0");
-                    if (JST.FirstOrDefault().VAS == 1 || IsNull(JST.FirstOrDefault().VAS))
-                    {
-                        (report.GetComponentByName("MAN") as StiText).Text = Strings.Format(jamf + MBA + HAZ - (NAGHD + VAR + HAV + JCHK + taf), "#,##0;-#,##0");
-
-                        //(report.GetComponentByName("HR") as StiText).Text = ALPHANUM[jamf + MBA + HAZ - taf] + " " + "ريال";
-                        report.Dictionary.Variables.Add("MABL_TO_WORD", Convert.ToInt64(jamf + MBA + HAZ - taf));
-                    }
-                    else
-                    {
-                        (report.GetComponentByName("MAN") as StiText).Text = Strings.Format(jamf + MBA - HAZ - (NAGHD + VAR + HAV + JCHK + taf), "#,##0;-#,##0");
-                        //this.HR.CAPTION = ALPHANUM[jamf + MBA - HAZ - taf] + " " + "ريال";
-                        report.Dictionary.Variables.Add("MABL_TO_WORD", Convert.ToInt64(jamf + MBA - HAZ - taf));
-                    }
-                    double MANN, mm;
-                    var rst_00 = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(CUST_NO.SelectedValue.ToString()) + ")").ToList();
-                    if (rst_00.Count == 0)
-                    {
-                        (report.GetComponentByName("MANDG") as StiText).Text = "0";
-                        //this.MANDG.CAPTION = " مانده قبلي: " + 0;
-                    }
-                    else
-                    {
-                        mm = (double)rst_00.FirstOrDefault();
-                        if (JST.FirstOrDefault().VAS == 1 || IsNull(JST.FirstOrDefault().VAS))
-                        {
-                            (report.GetComponentByName("MANDG") as StiText).Text = Interaction.IIf(mm - (jamf + HAZ + MBA - (NAGHD + VAR + HAV + JCHK + taf)) > 0d, Strings.Format(mm - (jamf + HAZ + MBA - (NAGHD + VAR + HAV + JCHK + taf)), "##,# ريال بدهكار"), Strings.Format((mm - (jamf + HAZ + MBA - (NAGHD + VAR + HAV + JCHK + taf))) * -1, "##,# ريال بستانكار")).ToString();
-                        }
-                        else
-                        {
-                            (report.GetComponentByName("MANDG") as StiText).Text = Interaction.IIf(mm - (jamf - HAZ + MBA - (NAGHD + VAR + HAV + JCHK + taf)) > 0d, Strings.Format(mm - (jamf - HAZ + MBA - (NAGHD + VAR + HAV + JCHK + taf)), "##,# ريال بدهكار"), Strings.Format((mm - (jamf - HAZ + MBA - (NAGHD + VAR + HAV + JCHK + taf))) * -1, "##,# ريال بستانكار")).ToString();
-                        }
-                    }
-                    if (Baseknow.TFCODE_E != "" & !IsNull(Baseknow.TFCODE_E))
-                    {
-                        (report.GetComponentByName("Label179") as StiText).Text = Baseknow.TFCODE_E;
-                    }
-                    (report.GetComponentByName("Label224") as StiText).Text = Baseknow.ARSESH + "%ماليات و عوارض:";
-                    if (Baseknow.TFSAZMAN == "2")
-                    {
-                        (report.GetComponentByName("MANDAH") as StiText).Enabled = false;
-                        (report.GetComponentByName("MANDG") as StiText).Enabled = false;
-                    }
-                    if (Strings.Mid(Baseknow.OPTIONSS, 2, 1) == "5")
-                    {
-                        (report.GetComponentByName("Label197") as StiText).Enabled = false;
-                    }
-                    if (Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5")
-                    {
-                        var rst_01 = dbms.DoGetDataSQL<RPT_MODEL4>("SELECT     TOP 3 dbo.HEAD_LST.NUMBER, dbo.HEAD_LST.TAG, SUM(dbo.INVO_LST.MABL_K) AS Expr1, dbo.HEAD_LST.CUST_NO, dbo.HEAD_LST.TAKHFIF,dbo.HEAD_LST.MBAA , dbo.HEAD_LST.MABL_HAZ, dbo.HEAD_LST.VAS, dbo.HEAD_LST.DATE_N FROM         dbo.HEAD_LST INNER JOIN  dbo.INVO_LST ON dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER AND dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG GROUP BY dbo.HEAD_LST.NUMBER, dbo.HEAD_LST.CUST_NO, dbo.HEAD_LST.TAKHFIF, dbo.HEAD_LST.MBAA, dbo.HEAD_LST.MABL_HAZ, dbo.HEAD_LST.VAS, dbo.HEAD_LST.TAG , dbo.HEAD_LST.DATE_N HAVING      (dbo.HEAD_LST.TAG =13)  AND (dbo.HEAD_LST.NUMBER <> " + NUMBER.Text + ") AND (dbo.HEAD_LST.CUST_NO = N'" + CUST_NO.SelectedValue + "')ORDER BY dbo.HEAD_LST.DATE_N DESC").ToList();
-                        if (rst_01.Count > 0)
-                        {
-                            for (int t = 0; t < rst_01.Count; t++) //while (!rst_01.EOF)
-                            {
-                                MABFR = Convert.ToInt64(Interaction.IIf(rst_01[t].VAS == 1 || IsNull(rst_01[t].VAS), rst_01[t].Expr1 + rst_01[t].MABL_HAZ + rst_01[t].MBAA - rst_01[t].TAKHFIF, rst_01[t].Expr1 - rst_01[t].MABL_HAZ + rst_01[t].MBAA - rst_01[t].TAKHFIF));
-                                STRFR = STRFR + Strings.Format(rst_01[t].DATE_N, "####/##/##") + " شماره فاكتور:   " + rst_01[t].NUMBER + "  مبلغ قابل پرداخت  فاكتور:   " + Strings.Format(MABFR, "#,##0;-#,##0") + '\r';
-                                //rst_01.MoveNext();
-                            }
-                            (report.GetComponentByName("FACTORS") as StiText).Text = "=\"" + STRFR + "\"";
-                            //this.FACTORS.ControlSource = "=\"" + STRFR + "\"";
-                        }
-                    }
-
-                    if (Strings.Mid(Baseknow.OPTIONSS, 42, 1) == "5" && false)
-                    {
-                        STRFR = "";
-                        var rst_02 = dbms.DoGetDataSQL<DARSAD_TAKHFIF>("SELECT  *  FROM  DARSAD_TAKHFIF ORDER BY RDF").ToList();
-                        if (rst_02.Count > 0)
-                        {
-                            for (int w = 0; w < rst_02.Count; w++) //while (!rst_02[w].EOF)
-                            {
-                                STRFR = STRFR + rst_02[w].ONVAN + "  " + rst_02[w].DARSAD + "  درصد تخفيف :   " + Strings.Format(Math.Round((double)(GB * rst_02[w].DARSAD / 100)), "#,##0;-#,##0") + "  قابل پرداخت :  " + Strings.Format(GB - Math.Round((double)(GB * rst_02[w].DARSAD / 100)), "#,##0;-#,##0") + '\r';
-                                //rst_02[w]..MoveNext();
-                            }
-                            (report.GetComponentByName("PAYMENTS") as StiText).Text = "=\"" + STRFR + "\"";
-                        }
-                    }
-                    if (Strings.Mid(Baseknow.OPTIONSS, 18, 1) == "5")
-                    {
-                        var rst03 = dbms.DoGetDataSQL<double?>("SELECT     SUM(dbo.STUF_DEF.VAZN * dbo.INVO_LST.MEGHk) AS Weight FROM   dbo.INVO_LST INNER JOIN   dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE WHERE     (dbo.INVO_LST.TAG = 2) AND (dbo.INVO_LST.NUMBER = " + NUMBER.Text + ")").ToList();
-                        if (rst03.Count > 0)
-                        {
-                            if (!IsNull(rst03.FirstOrDefault()))
-                            {
-                                (report.GetComponentByName("VAZN") as StiText).Text = "وزن كل به كيلو : " + Math.Round((double)rst03.FirstOrDefault());
-                            }
-                        }
-                    }
-                    if (Strings.Mid(Baseknow.OPTIONSS, 26, 1) == "5")
-                    {
-                        //(report.GetComponentByName("MOLAH1") as StiText).Text
-                        //this.MOLAH1.ControlSource = "MOLAH";
-                    }
-                    if (Strings.Mid(Baseknow.OPTIONSS, 47, 1) != "5")
-                    {
-                        (report.GetComponentByName("TKHN") as StiText).Enabled = false;
-                        (report.GetComponentByName("Line219") as StiHorizontalLinePrimitive).Enabled = false;
-                        //this.N_KOL.Height = 0.716d * 560d;
-                    }
-                    else
-                    {
-                        (report.GetComponentByName("Label180") as StiText).Text = " تخفيف:";
-                    }
-                    #endregion
-
-
-                    //امضا ها
-                    //پیش فرض امضا ها مخفی است
-                    if ((bool)SGN1.IsChecked)
-                    {
-                        (report.GetComponentByName("FIMG") as StiImage).Enabled = true;
-
-                        (report.GetComponentByName("FS") as StiText).Text = SGN1_INFO.SEMAT_USER;
-                        (report.GetComponentByName("FU") as StiText).Text = SGN1_INFO.NAME_HESAB_USER;
-                    }
-                    if ((bool)SGN2.IsChecked)
-                    {
-                        (report.GetComponentByName("HIMG") as StiImage).Enabled = true;
-
-                        (report.GetComponentByName("HS") as StiText).Text = SGN2_INFO.SEMAT_USER;
-                        (report.GetComponentByName("HU") as StiText).Text = SGN2_INFO.NAME_HESAB_USER;
-                    }
-                    if ((bool)SGN3.IsChecked)
-                    {
-                        (report.GetComponentByName("MIMG") as StiImage).Enabled = true;
-
-                        (report.GetComponentByName("MS") as StiText).Text = SGN3_INFO.SEMAT_USER;
-                        (report.GetComponentByName("MU") as StiText).Text = SGN3_INFO.NAME_HESAB_USER;
-                    }
-
-                    (report.GetComponentByName("Text90") as StiText).Text = Baseknow.WIDTH_D; // نام شرکت
-                    (report.GetComponentByName("Text39") as StiText).Text = Baseknow.NAME; // نام فروشنده
-                    (report.GetComponentByName("Text4") as StiText).Text = Baseknow.TFADDRESS; // آدرس فروشنده
-                    (report.GetComponentByName("Text48") as StiText).Text = Baseknow.TFTEL; // تلفن فروشنده
-                    (report.GetComponentByName("USERNAME") as StiText).Text = Baseknow.UUSER;
-
-
-
-                    ////report.Compile();
-                    //report.Render();
-                    //report.ShowWithWpf();
-
-                    new WINRPT(report, LABEL_HEADER.Content.ToStringNullSafe()).Show();
-                    #endregion
+                    ReportProccess();
                 }
 
                 if (!(bool)OKF.IsChecked)
@@ -10735,6 +10388,327 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 //Me["moadian"].IsEnabled = false;
                 ESLAH.IsEnabled = true;
             }
+        }
+
+        private void ReportProccess()
+        {
+            #region Reportprocess
+
+            var report = new StiReport();
+            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.INVOICE_FROOSH_22.mrt");
+            report.Load(pathreport);
+
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            report.Dictionary.Databases.Clear();
+            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
+
+            report["NUMBER_PARAM"] = NUMBER1.Text;
+            ((StiSqlSource)report.Dictionary.DataSources["FACTOR_DATA"]).CommandTimeout = 300;
+
+            #region GroupFooter3_Format
+            //SELECT TOP 1 TFSAZMAN FROM dbo.SAZMAN
+            if (Baseknow.TFSAZMAN != "2")
+            {
+                (report.GetComponentByName("MANDAH") as StiText).Enabled = true;
+                (report.GetComponentByName("MANDG") as StiText).Enabled = true;
+
+                //EXEC dbo.GETKOL => SELECT CUST_NO FROM HEAD_LST WHERE TAG = 13 AND NUMBER = 5338 --Current Invoice NUMBER
+                var rst_0 = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(this.CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(this.CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(this.CUST_NO.SelectedValue.ToString()) + ")").FirstOrDefault();
+                if (rst_0 == null)
+                {
+                    (report.GetComponentByName("MANDAH") as StiText).Text = "0";
+                }
+                else
+                {
+                    var _mandah = Interaction.IIf(rst_0 > 0, Strings.Format(rst_0, "##,# ريال بدهكار"), Strings.Format(rst_0 * -1, "##,# ريال بستانكار"));
+                    (report.GetComponentByName("MANDAH") as StiText).Text = _mandah.ToString();
+                }
+            }
+            else
+            {
+                (report.GetComponentByName("MANDAH") as StiText).Enabled = false;
+                (report.GetComponentByName("MANDG") as StiText).Enabled = false;
+            }
+            #endregion
+
+            #region PageHeader_Format
+            string FRF;
+            long MABFR;
+            string STRFR;
+            int i;
+            string CH;
+            double JAMP;
+            string TAMIR;
+            string per;
+            long permab;
+            //Current Invoice NUMBER
+            var rst = dbms.DoGetDataSQL<RPT_MODEL1>("SELECT HEAD_LST.NUMBER, HEAD_LST.TAG AS HTAG, HEAD_LST.MOLAH FROM HEAD_LST WHERE (((HEAD_LST.NUMBER)= " + NUMBER.Text + " ) AND  ((HEAD_LST.TAG)=13))").FirstOrDefault();
+            if (rst != null)
+            {
+                if (Strings.Left(rst.MOLAH, 1) == "~" | Strings.Left(rst.MOLAH, 1) == ".")
+                {
+                    i = 2;
+                    TAMIR = "";
+                    CH = Strings.Mid(rst.MOLAH, 2, 1);
+                    while (Information.IsNumeric(CH) || CH == "-" & i <= rst.MOLAH.Length)
+                    {
+                        i = i + 1;
+                        TAMIR = TAMIR + CH;
+                        CH = Strings.Mid(rst.MOLAH, i, 1);
+                    }
+                    if (Information.IsNumeric(TAMIR))
+                    {
+                        TAMIR = Baseknow.BEDEHKAR + "-1-" + TAMIR;
+                    };
+                    if (Strings.Mid(Baseknow.OPTIONSS, 26, 1) == "5")
+                    {
+                        //EXEC dbo.GETKOL ,EXEC dbo.GETMOIN ,EXEC dbo.GETTAF
+                        var rst1 = dbms.DoGetDataSQL<TDETA_HES>("SELECT * FROM TDETA_HES WHERE N_KOL = " + CL_HESABDARI.GETKOL(TAMIR) + " and NUMBER = " + CL_HESABDARI.GETMOIN(TAMIR) + " and tNUMBER = " + CL_HESABDARI.GETTAF(TAMIR)).FirstOrDefault();
+                        if (rst1 != null)
+                        {
+                            (report.GetComponentByName("lvisit") as StiText).Text = "ويزيتور: " + rst1.NAME;
+                            (report.GetComponentByName("Ltvis") as StiText).Text = "تلفن ويزيتور: " + rst1.TEL;
+                        }
+                    }
+                }
+                else if (Strings.Mid(Baseknow.OPTIONSS, 26, 1) == "5")
+                {
+                    var rst2 = dbms.DoGetDataSQL<VISITOR_DTL>("SELECT * FROM VISITOR_DTL WHERE TAG = 2 AND NUMBER = " + NUMBER.Text).FirstOrDefault();
+                    if (rst2 != null)
+                    {
+                        var RST2 = dbms.DoGetDataSQL<TDETA_HES>("SELECT * FROM TDETA_HES WHERE N_KOL = " + CL_HESABDARI.GETKOL(rst2.CUST_NO) + " AND NUMBER = " + CL_HESABDARI.GETMOIN(rst2.CUST_NO) + " AND tNUMBER = " + CL_HESABDARI.GETTAF(rst2.CUST_NO)).FirstOrDefault();
+                        if (RST2 != null)
+                        {
+                            (report.GetComponentByName("lvisit") as StiText).Text = "ويزيتور: " + RST2.NAME;
+                            (report.GetComponentByName("Ltvis") as StiText).Text = "تلفن ويزيتور: " + RST2.TEL;
+                        }
+                    }
+                }
+            }
+            if (this.MAS.Text == "0")
+            {
+                (report.GetComponentByName("MAS") as StiText).Enabled = false;
+            }
+            #endregion
+
+            //Report_Open
+            FRF = null;
+            MABFR = 0;
+            STRFR = null;
+            double JCHK = default, jamf, HAZ, NAGHD, VAR, HAV, taf, MBA;
+            double GB;
+
+            /// <summary>
+            /// تگ  حواله 2 | HEAD_LST | INVO_LST | PAY_GETD | VISITOR_DTL
+            /// </summary>
+            //public byte hTAG { get; set; } = 2;
+
+            var rst_3 = dbms.DoGetDataSQL<RPT_MODEL2>("SELECT dbo.PAY_GETD.N_SERI, dbo.TCOD_BANKS.NAMES, dbo.PAY_GETD.SHOBEH, dbo.PAY_GETD.DATE, dbo.PAY_GETD.DATE_S , dbo.PAY_GETD.MABL, dbo.PAY_GETD.NUMBER, dbo.PAY_GETD.TAG FROM dbo.TCOD_BANKS INNER JOIN dbo.PAY_GETD ON dbo.TCOD_BANKS.CODE = dbo.PAY_GETD.BANK WHERE (dbo.PAY_GETD.NUMBER = " + NUMBER.Text + ") AND (dbo.PAY_GETD.N_KOL IS NULL OR N_KOL <> 911) AND (dbo.PAY_GETD.TAG = " + hTAG + ")").ToList();
+            if (rst_3.Count > 0)
+            {
+                JCHK = 0d;
+
+                //NCHK.Text => SUM of MABL of SELECT * FROM PAY_GETD WHERE NUMBER --Currnet NUMBER e.g. 5357
+                (report.GetComponentByName("COMM") as StiText).Text = "چكهاي دريافت شده " + rst_3.Count + " فقره جمعاًبه مبلغ :" + Strings.Format(Convert.ToInt64(NCHK.Text), "### ريال") + "  ";
+
+                for (int o = 0; o < rst_3.Count; o++)
+                {
+                    (report.GetComponentByName("COMM") as StiText).Text = (report.GetComponentByName("COMM") as StiText).Text + "ـ سريال:" + rst_3[o].N_SERI + " بانك:" + rst_3[o].NAMES + " شعبه:" + Strings.Trim(rst_3[o].SHOBEH);
+                    JCHK = (double)(JCHK + rst_3[o].MABL);
+                }
+            }
+            else
+            {
+                (report.GetComponentByName("COMM") as StiText).Enabled = false;
+                (report.GetComponentByName("SHARAYET") as StiText).Enabled = true;
+            }
+            jamf = 0d;
+            HAZ = 0d;
+            NAGHD = 0d;
+            VAR = 0d;
+            HAV = 0d;
+            taf = 0d;
+            MBA = 0d;
+            double? JST0 = dbms.DoGetDataSQL<double?>("SELECT Sum(INVO_LST.MABL_K) AS SumOfMABL_K FROM INVO_LST WHERE (((INVO_LST.NUMBER)= " + NUMBER.Text + " ) AND ((INVO_LST.TAG)=2))").FirstOrDefault();
+            if (JST0 > 0 && !IsNull(JST0))
+            {
+                jamf = (double)JST0;
+            }
+            var JST = dbms.DoGetDataSQL<RPT_MODEL3>("SELECT HEAD_LST.NUMBER, HEAD_LST.TAG AS htag, HEAD_LST.ANBAR, HEAD_LST.NUMBER1, HEAD_LST.DATE_N, HEAD_LST.TAH, HEAD_LST.MAS, HEAD_LST.VAS, HEAD_LST.N_S, HEAD_LST.CUST_NO, HEAD_LST.MOLAH, HEAD_LST.M_NAGHD, HEAD_LST.MABL_VAR, HEAD_LST.MOIN_VAR, HEAD_LST.MABL_HAV, HEAD_LST.MOIN_HAV, HEAD_LST.MABL_HAZ, HEAD_LST.MOIN_HAZ, HEAD_LST.TAKHFIF, HEAD_LST.MOIN_KHF, HEAD_LST.ANBARF, HEAD_LST.FNUMCO, HEAD_LST.MBAA FROM HEAD_LST WHERE (((HEAD_LST.NUMBER)= " + NUMBER.Text + " ) AND  ((HEAD_LST.TAG)=13))").FirstOrDefault();
+            if (JST != null && !IsNull(JST?.NUMBER))
+            {
+                HAZ = (double)JST.MABL_HAZ;
+                VAR = (double)JST.MABL_VAR;
+                HAV = (double)JST.MABL_HAV;
+                NAGHD = (double)JST.M_NAGHD;
+                taf = (double)JST.TAKHFIF;
+                MBA = (double)JST.MBAA;
+            }
+
+            (report.GetComponentByName("JF") as StiText).Text = Strings.Format(jamf, "#,##0;#,##0-");
+            (report.GetComponentByName("HKH") as StiText).Text = Strings.Format(HAZ, "#,##0;#,##0-");
+            (report.GetComponentByName("MBAA") as StiText).Text = Strings.Format(MBA, "#,##0;#,##0-");
+            if (JST?.VAS == 1 || IsNull(JST?.VAS))
+            {
+                (report.GetComponentByName("GABEL") as StiText).Text = Strings.Format(jamf + HAZ + MBA - taf, "#,##0;-#,##0");
+                GB = jamf + HAZ + MBA - taf;
+            }
+            else
+            {
+                (report.GetComponentByName("GABEL") as StiText).Text = Strings.Format(jamf - HAZ + MBA - taf, "#,##0;-#,##0");
+                GB = jamf - HAZ + MBA - taf;
+            }
+            if (taf == 0d)
+            {
+                (report.GetComponentByName("Label180") as StiText).Enabled = false;
+                (report.GetComponentByName("TF") as StiText).Enabled = false;
+            }
+            else
+            {
+                (report.GetComponentByName("TF") as StiText).Text = Strings.Format(taf, "#,##0;-#,##0");
+                if (Conversion.Val(Strings.Format(taf / jamf * 100d, "##,##0.0")) != Conversion.Val(Strings.Format(taf / jamf * 100d, "#,###")))
+                {
+                    (report.GetComponentByName("Label180") as StiText).Text = Strings.Format(taf / jamf * 100d, "##,##0.0") + " % تخفيف:";
+                }
+                else
+                {
+                    (report.GetComponentByName("Label180") as StiText).Text = Strings.Format(taf / jamf * 100d, "#,###") + " % تخفيف:";
+                }
+            }
+            (report.GetComponentByName("JPAY") as StiText).Text = Strings.Format(NAGHD + VAR + HAV + JCHK, "#,##0;-#,##0");
+            if (JST?.VAS == 1 || IsNull(JST?.VAS))
+            {
+                (report.GetComponentByName("MAN") as StiText).Text = Strings.Format(jamf + MBA + HAZ - (NAGHD + VAR + HAV + JCHK + taf), "#,##0;-#,##0");
+
+                report.Dictionary.Variables.Add("MABL_TO_WORD", Convert.ToInt64(jamf + MBA + HAZ - taf));
+            }
+            else
+            {
+                (report.GetComponentByName("MAN") as StiText).Text = Strings.Format(jamf + MBA - HAZ - (NAGHD + VAR + HAV + JCHK + taf), "#,##0;-#,##0");
+                report.Dictionary.Variables.Add("MABL_TO_WORD", Convert.ToInt64(jamf + MBA - HAZ - taf));
+            }
+            double MANN, mm;
+            var rst_00 = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(CUST_NO.SelectedValue.ToString()) + ")").ToList();
+            if (rst_00.Count == 0)
+            {
+                (report.GetComponentByName("MANDG") as StiText).Text = "0";
+            }
+            else
+            {
+                mm = (double)rst_00.FirstOrDefault();
+                if (JST?.VAS == 1 || IsNull(JST?.VAS))
+                {
+                    (report.GetComponentByName("MANDG") as StiText).Text = Interaction.IIf(mm - (jamf + HAZ + MBA - (NAGHD + VAR + HAV + JCHK + taf)) > 0d, Strings.Format(mm - (jamf + HAZ + MBA - (NAGHD + VAR + HAV + JCHK + taf)), "##,# ريال بدهكار"), Strings.Format((mm - (jamf + HAZ + MBA - (NAGHD + VAR + HAV + JCHK + taf))) * -1, "##,# ريال بستانكار")).ToString();
+                }
+                else
+                {
+                    (report.GetComponentByName("MANDG") as StiText).Text = Interaction.IIf(mm - (jamf - HAZ + MBA - (NAGHD + VAR + HAV + JCHK + taf)) > 0d, Strings.Format(mm - (jamf - HAZ + MBA - (NAGHD + VAR + HAV + JCHK + taf)), "##,# ريال بدهكار"), Strings.Format((mm - (jamf - HAZ + MBA - (NAGHD + VAR + HAV + JCHK + taf))) * -1, "##,# ريال بستانكار")).ToString();
+                }
+            }
+            if (Baseknow.TFCODE_E != "" & !IsNull(Baseknow.TFCODE_E))
+            {
+                (report.GetComponentByName("Label179") as StiText).Text = Baseknow.TFCODE_E;
+            }
+            (report.GetComponentByName("Label224") as StiText).Text = "%ماليات و عوارض:";
+            if (Baseknow.TFSAZMAN == "2")
+            {
+                (report.GetComponentByName("MANDAH") as StiText).Enabled = false;
+                (report.GetComponentByName("MANDG") as StiText).Enabled = false;
+            }
+            if (Strings.Mid(Baseknow.OPTIONSS, 2, 1) == "5")
+            {
+                (report.GetComponentByName("Label197") as StiText).Enabled = false;
+            }
+            if (Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5")
+            {
+                var rst_01 = dbms.DoGetDataSQL<RPT_MODEL4>("SELECT TOP 3 dbo.HEAD_LST.NUMBER, dbo.HEAD_LST.TAG, SUM(dbo.INVO_LST.MABL_K) AS Expr1, dbo.HEAD_LST.CUST_NO, dbo.HEAD_LST.TAKHFIF,dbo.HEAD_LST.MBAA , dbo.HEAD_LST.MABL_HAZ, dbo.HEAD_LST.VAS, dbo.HEAD_LST.DATE_N FROM         dbo.HEAD_LST INNER JOIN  dbo.INVO_LST ON dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER AND dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG GROUP BY dbo.HEAD_LST.NUMBER, dbo.HEAD_LST.CUST_NO, dbo.HEAD_LST.TAKHFIF, dbo.HEAD_LST.MBAA, dbo.HEAD_LST.MABL_HAZ, dbo.HEAD_LST.VAS, dbo.HEAD_LST.TAG , dbo.HEAD_LST.DATE_N HAVING      (dbo.HEAD_LST.TAG =13)  AND (dbo.HEAD_LST.NUMBER <> " + NUMBER.Text + ") AND (dbo.HEAD_LST.CUST_NO = N'" + CUST_NO.SelectedValue + "')ORDER BY dbo.HEAD_LST.DATE_N DESC").ToList();
+                if (rst_01.Count > 0)
+                {
+                    for (int t = 0; t < rst_01.Count; t++) //while (!rst_01.EOF)
+                    {
+                        MABFR = Convert.ToInt64(Interaction.IIf(rst_01[t].VAS == 1 || IsNull(rst_01[t].VAS), rst_01[t].Expr1 + rst_01[t].MABL_HAZ + rst_01[t].MBAA - rst_01[t].TAKHFIF, rst_01[t].Expr1 - rst_01[t].MABL_HAZ + rst_01[t].MBAA - rst_01[t].TAKHFIF));
+                        STRFR = STRFR + Strings.Format(rst_01[t].DATE_N, "####/##/##") + " شماره فاكتور:   " + rst_01[t].NUMBER + "  مبلغ قابل پرداخت  فاكتور:   " + Strings.Format(MABFR, "#,##0;-#,##0") + '\r';
+                    }
+                    (report.GetComponentByName("FACTORS") as StiText).Text = "=\"" + STRFR + "\"";
+                }
+            }
+
+            //SELECT OPTIONSS FROM dbo.SAZMAN
+            if (Strings.Mid(Baseknow.OPTIONSS, 42, 1) == "5" && false)
+            {
+                STRFR = "";
+                var rst_02 = dbms.DoGetDataSQL<DARSAD_TAKHFIF>("SELECT  *  FROM  DARSAD_TAKHFIF ORDER BY RDF").ToList();
+                if (rst_02.Count > 0)
+                {
+                    for (int w = 0; w < rst_02.Count; w++)
+                    {
+                        STRFR = STRFR + rst_02[w].ONVAN + "  " + rst_02[w].DARSAD + "  درصد تخفيف :   " + Strings.Format(Math.Round((double)(GB * rst_02[w].DARSAD / 100)), "#,##0;-#,##0") + "  قابل پرداخت :  " + Strings.Format(GB - Math.Round((double)(GB * rst_02[w].DARSAD / 100)), "#,##0;-#,##0") + '\r';
+                    }
+                    (report.GetComponentByName("PAYMENTS") as StiText).Text = "=\"" + STRFR + "\"";
+                }
+            }
+            if (Strings.Mid(Baseknow.OPTIONSS, 18, 1) == "5")
+            {
+                var rst03 = dbms.DoGetDataSQL<double?>("SELECT SUM(dbo.STUF_DEF.VAZN * dbo.INVO_LST.MEGHk) AS Weight FROM   dbo.INVO_LST INNER JOIN   dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE WHERE     (dbo.INVO_LST.TAG = 2) AND (dbo.INVO_LST.NUMBER = " + NUMBER.Text + ")").ToList();
+                if (rst03.Count > 0)
+                {
+                    if (!IsNull(rst03.FirstOrDefault()))
+                    {
+                        (report.GetComponentByName("VAZN") as StiText).Text = "وزن كل به كيلو : " + Math.Round((double)rst03.FirstOrDefault());
+                    }
+                }
+            }
+            if (Strings.Mid(Baseknow.OPTIONSS, 26, 1) == "5")
+            {
+            }
+            if (Strings.Mid(Baseknow.OPTIONSS, 47, 1) != "5")
+            {
+                (report.GetComponentByName("TKHN") as StiText).Enabled = false;
+                (report.GetComponentByName("Line219") as StiHorizontalLinePrimitive).Enabled = false;
+            }
+            else
+            {
+                (report.GetComponentByName("Label180") as StiText).Text = " تخفيف:";
+            }
+
+            //SELECT SGN1,SGN2,SGN3 FROM HEAD_LST WHERE TAG = 13 AND NUMBER = --Current NUMBER --اطلاعات فاکتور فروش
+            //امضا ها
+            //پیش فرض امضا ها مخفی است
+            if ((bool)SGN1.IsChecked) //SELECT SGN1,SGN2,SGN3 FROM HEAD_LST WHERE TAG = 13 AND NUMBER = --Current NUMBER --اطلاعات فاکتور فروش
+            {
+                //SGN1
+                (report.GetComponentByName("FIMG") as StiImage).Enabled = true;
+                (report.GetComponentByName("FS") as StiText).Text = SGN1_INFO.SEMAT_USER; //SELECT dbo.Getusersemat((SELECT SGN1usid FROM dbo.HEAD_LST WHERE TAG = 13 AND NUMBER = 5357),'FFR_FROOSHTX')
+                (report.GetComponentByName("FU") as StiText).Text = SGN1_INFO.NAME_HESAB_USER; //SELECT dbo.GETHESNAME(dbo.GETUSERHES((SELECT SGN1usid FROM dbo.HEAD_LST WHERE TAG = 13 AND NUMBER = 5357)))
+            }
+            if ((bool)SGN2.IsChecked)
+            {
+                //SGN2
+                (report.GetComponentByName("HIMG") as StiImage).Enabled = true;
+
+                (report.GetComponentByName("HS") as StiText).Text = SGN2_INFO.SEMAT_USER; //SELECT dbo.Getusersemat((SELECT SGN2usid FROM dbo.HEAD_LST WHERE TAG = 13 AND NUMBER = 5357),'FFR_HESABTX')
+                (report.GetComponentByName("HU") as StiText).Text = SGN2_INFO.NAME_HESAB_USER; //SELECT dbo.GETHESNAME(dbo.GETUSERHES((SELECT SGN2usid FROM dbo.HEAD_LST WHERE TAG = 13 AND NUMBER = 5357)))
+            }
+            if ((bool)SGN3.IsChecked)
+            {
+                //SGN3
+                (report.GetComponentByName("MIMG") as StiImage).Enabled = true;
+
+                (report.GetComponentByName("MS") as StiText).Text = SGN3_INFO.SEMAT_USER; //SELECT dbo.Getusersemat((SELECT SGN3usid FROM dbo.HEAD_LST WHERE TAG = 13 AND NUMBER = 5357),'FFR_MODIRTX')
+                (report.GetComponentByName("MU") as StiText).Text = SGN3_INFO.NAME_HESAB_USER; //SELECT dbo.GETHESNAME(dbo.GETUSERHES((SELECT SGN3usid FROM dbo.HEAD_LST WHERE TAG = 13 AND NUMBER = 5357)))
+            }
+
+            //SELECT WIDTH_D,NAME,TFADDRESS,TFTEL FROM SAZMAN
+            (report.GetComponentByName("Text90") as StiText).Text = Baseknow.WIDTH_D; // نام شرکت
+            (report.GetComponentByName("Text39") as StiText).Text = Baseknow.NAME; // نام فروشنده
+            (report.GetComponentByName("Text4") as StiText).Text = Baseknow.TFADDRESS; // آدرس فروشنده
+            (report.GetComponentByName("Text48") as StiText).Text = Baseknow.TFTEL; // تلفن فروشنده
+
+            //SELECT USER_NAME FROM dbo.HEAD_LST WHERE TAG = 13 AND NUMBER = 5338 
+            (report.GetComponentByName("USERNAME") as StiText).Text = Baseknow.UUSER;
+
+            new WINRPT(report, LABEL_HEADER.Content.ToStringNullSafe()).Show();
+            #endregion
         }
 
         private void Command120_Click(object sender, RoutedEventArgs e)
@@ -12435,5 +12409,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 }
             }
         }
+
+  
     }
 }

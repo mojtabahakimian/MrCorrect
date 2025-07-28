@@ -57,9 +57,9 @@
 
         <Grid Margin="5,40,5,5">
             <Label Content="شماره برگه:" Margin="0,14,5,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="54" Height="26" VerticalAlignment="Top"/>
-            <TextBox x:Name="USER_NAME" IsReadOnly="True" Text="نام کاربر" Height="30" Margin="495,57,267,0"   Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" IsTabStop="False" />
+            <TextBox x:Name="USER_NAME" IsReadOnly="True" Text="نام کاربر" Height="30" Margin="605,57,267,0"   Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" IsTabStop="False" />
             <Label Content="کاربر:" Margin="0,58,237,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="30" Height="28" VerticalAlignment="Top"/>
-            <Button x:Name="ESLAH" Content="اصلاح برگه" Margin="110,105,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="118" Foreground="#DDFFFFFF" FontWeight="Bold" Click="ESLAH_Click"/>
+            <Button x:Name="ESLAH" Content="اصلاح برگه" Margin="110,105,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="105" Foreground="#DDFFFFFF" FontWeight="Bold" Click="ESLAH_Click"/>
 
             <ComboBox x:Name="TDRIVER" FlowDirection="RightToLeft" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" DisplayMemberPath="TDRIVER" SelectedValuePath="TDRIVER" IsTextSearchEnabled="True" PreviewLostKeyboardFocus="TDRIVER_PreviewLostKeyboardFocus" IsEditable="True" Height="30" Margin="382,12,376,0" VerticalAlignment="Top">
                 <ComboBox.ItemsPanel>
@@ -115,8 +115,8 @@
                 </DataGrid.Style>
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="شماره فاکتور" Binding="{Binding NUMBER}" MinWidth="100" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="تاریخ فاکتور"  Binding="{Binding DATE_N, StringFormat=####/##/##}" IsReadOnly="True" MinWidth="65"/>
+                    <DataGridTextColumn Header="شماره حواله" Binding="{Binding NUMBER}" MinWidth="100" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="تاریخ حواله"  Binding="{Binding DATE_N, StringFormat=####/##/##}" IsReadOnly="True" MinWidth="65"/>
                     <DataGridTextColumn Header="کد مشتری" Binding="{Binding CUST_NO}"  MinWidth="120" IsReadOnly="False">
                         <!-- ظاهر تکست‌باکس وقتی در مد ادیت هست -->
                         <DataGridTextColumn.EditingElementStyle>
@@ -166,8 +166,9 @@
             <Label Content="مامور توضیع:" FlowDirection="RightToLeft" Width="Auto" Height="Auto" HorizontalAlignment="Right" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="0,14,713,0" FontSize="10"/>
             <Label Content="مشتریان زیرمجموعه:" FlowDirection="RightToLeft" Width="Auto" Height="Auto" HorizontalAlignment="Right" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="0,149,2,0" FontSize="10"/>
             <Label Content="تاریخ برگه:" Margin="0,14,186,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="52" Height="26" VerticalAlignment="Top"/>
-            <Button x:Name="Command106_Copy" Content="چاپ حواله" Margin="110,55,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="118" Foreground="#DDFFFFFF" FontWeight="Bold" Click="Command106_Copy_Click"/>
-            <Button x:Name="BTN_HAVLAH_KALA" Content="دریافت لیست فاکتور ها برای حواله" Margin="235,54,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Width="255" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_HAVLAH_KALA_Click"/>
+            <Button x:Name="Command106_Copy" Content="چاپ حواله" Margin="110,55,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="105" Foreground="#DDFFFFFF" FontWeight="Bold" Click="Command106_Copy_Click"/>
+            <Button x:Name="BTN_HAVLAH_KALA" Content="دریافت لیست فاکتور ها برای حواله" Margin="350,56,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="245" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_HAVLAH_KALA_Click"/>
+            <Button x:Name="BTN_FACTOS" Content="چاپ فاکتور ها" Margin="222,56,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="120" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_FACTOS_Click"/>
         </Grid>
 
         <CNC:RecordNavigatorControl x:Name="navigatorControl" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="427,0,0,18"/>

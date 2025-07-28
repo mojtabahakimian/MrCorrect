@@ -30,6 +30,9 @@ using Wins.WinOther;
 using static Interfaces.INavigator;
 using Dapper;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
+using Stimulsoft.Data.Expressions.NCalc;
+using Microsoft.VisualBasic;
+using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
 
 namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 {
@@ -1251,6 +1254,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
         private void Command106_Copy_Click(object sender, RoutedEventArgs e)
         {
+            if (NewRecord || TOZIE_SUB_DATA.Count == 0)
+            {
+                return;
+            }
+
             var report = new StiReport();
             using var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Visitory.TOZIE_FROOSH_ANBARS_HAVALA.mrt");
             report.Load(pathreport);
@@ -1263,6 +1271,63 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             //(report.GetComponentByName("DATEEMROOZ") as StiText).Text = Tarikh.FullCurrentDate;
 
             new WINRPT(report, "حواله از لیست توضیع").Show();
+        }
+
+        private void BTN_FACTOS_Click(object sender, RoutedEventArgs e)
+        {
+            if (NewRecord || TOZIE_SUB_DATA.Count == 0) { return; }
+
+            List<double?> NUMBERS = TOZIE_SUB_DATA.Select(x => x.NUMBER).ToList();
+
+            string NumberListLine = string.Join(",", NUMBERS);
+
+            var report = new StiReport();
+            using var pathreport = Assembly.GetEntryAssembly()?.GetManifestResourceStream("Prg_UI.Rpts.Visitory.TOZIE_FACTORS.mrt");
+            report.Load(pathreport);
+            ((StiSqlDatabase)(report.Dictionary.Databases["MS SQL"])).ConnectionString = CL_CCNNMANAGER.CONNECTION_STR;
+
+            if (Baseknow.TFSAZMAN != "2")
+            {
+                (report.GetComponentByName("MANDAH") as StiText).Enabled = true; //کل مانده حساب
+                (report.GetComponentByName("MANDG") as StiText).Enabled = true;
+            }
+            else
+            {
+                (report.GetComponentByName("MANDAH") as StiText).Enabled = false; //کل مانده حساب
+                (report.GetComponentByName("MANDG") as StiText).Enabled = false; //مانده حساب قبلی
+            }
+
+            if (Baseknow.TFCODE_E != "" & !IsNull(Baseknow.TFCODE_E)) //SELECT TFCODE_E,ARSESH FROM SAZMAN
+            {
+                //فیلد خدمات
+                (report.GetComponentByName("Label179") as StiText).Text = Baseknow.TFCODE_E;
+            }
+
+            if (Baseknow.TFSAZMAN == "2")
+            {
+                (report.GetComponentByName("MANDAH") as StiText).Enabled = false;
+                (report.GetComponentByName("MANDG") as StiText).Enabled = false;
+            }
+            if (Strings.Mid(Baseknow.OPTIONSS, 2, 1) == "5")
+            {
+                (report.GetComponentByName("Label197") as StiText).Enabled = false;
+            }
+
+            if (Strings.Mid(Baseknow.OPTIONSS, 47, 1) != "5")
+            {
+                (report.GetComponentByName("TKHN") as StiText).Enabled = false;
+                (report.GetComponentByName("Line219") as StiHorizontalLinePrimitive).Enabled = false;
+            }
+            else
+            {
+                (report.GetComponentByName("Label180") as StiText).Text = " تخفيف:";
+            }
+
+            (report.GetComponentByName("USERNAME") as StiText).Text = Baseknow.UUSER;
+
+            report.Dictionary.Variables.Add("NUMBERS_PARAM", NumberListLine);
+
+            new WINRPT(report, "فاکتور های فروش از لیست توضیع").Show();
         }
     }
 }

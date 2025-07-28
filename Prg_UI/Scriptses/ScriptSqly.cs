@@ -1459,10 +1459,7 @@ namespace Prg_UI.Scriptses
 
                 try
                 {
-                    db.Execute(@"SET ANSI_NULLS ON
-								GO
-								SET QUOTED_IDENTIFIER ON
-								GO
+                    db.Execute(@"
 								CREATE  PROCEDURE [dbo].[sp_ManageInvoiceRewards]
 								@InvoiceNumber bigint,
 								@InvoiceTag bigint,
@@ -1687,9 +1684,7 @@ namespace Prg_UI.Scriptses
 
                 //بررسی مالکیت فاکتور و محاسبه پورسانت به صورت هوشمند
                 {
-                    string sqlscript = @"SET ANSI_NULLS ON;
-									SET QUOTED_IDENTIFIER ON;
-									GO
+                    string sqlscript = @"
 									CREATE FUNCTION dbo.Fixp
 									(
 									    @st NVARCHAR(MAX)       -- رشتهٔ اصلی
