@@ -18,6 +18,7 @@ using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
 using System.Reflection;
 using Stimulsoft.Report.Components;
+using Prg_UI.Wins.WinMenus.Checkha;
 
 namespace Wins.WinMenus.Checkha
 {
@@ -123,8 +124,22 @@ namespace Wins.WinMenus.Checkha
             }
         }
 
+        public static bool IsNull(object p)
+        {
+            if (!(p is null))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
         public bool NowIsReady { get; private set; }
         public object OpenArgs { get; set; }
+
+        public string _sql_query { get; set; }
 
         private void Window_ContentRendered(object sender, EventArgs e)
         {
@@ -158,6 +173,11 @@ namespace Wins.WinMenus.Checkha
                 DT1.Text = $"{Baseknow.YEA}0101"; // Assuming BASEKNOW.YEA provides the year
             }
 
+            if (string.IsNullOrEmpty(HHMOIN.Text))
+            {
+                HHMOIN.Text = null;
+            }
+
             // Validate inputs
             if (string.IsNullOrEmpty(DT1.Text.ToRawTarikh()) || string.IsNullOrEmpty(DT2.Text.ToRawTarikh()))
             {
@@ -178,9 +198,12 @@ namespace Wins.WinMenus.Checkha
                 case "pchss": //چک های پرداختی سررسید شده
                     //OpenForm("CHEK_PLISTS", 2, 800602);
                     break;
-                //case "dchss":
-                //    OpenForm("CHEK_DLISTS", 2, 800502);
-                //    break;
+
+                case "dchss":
+                    _sql_query = $"SELECT * FROM (SELECT     PAY_GETD.N_SERI, PAY_GETD.BANK, PAY_GETD.DATE_S, PAY_GETD.DATE, PAY_GETD.SHOBEH, PAY_GETD.MABL, PAY_GETD.NAME_TAH,  PAY_GETD.N_HESAB, PAY_GETD.N_S, TCOD_BANKS.NAMES, PAY_GETD.RADIF, PAY_GETD.N_KOL, PAY_GETD.N_MOIN, PAY_GETD.N_KOL2, PAY_GETD.N_MOIN2, PAY_GETD.N_KOL3, PAY_GETD.N_MOIN3, PAY_GETD.N_TAF, PAY_GETD.N_TAF2, PAY_GETD.N_TAF3, TDETA_HES.NAME FROM TCOD_BANKS INNER JOIN  PAY_GETD ON TCOD_BANKS.CODE = PAY_GETD.BANK LEFT OUTER JOIN TDETA_HES ON PAY_GETD.N_KOL = TDETA_HES.N_KOL AND PAY_GETD.N_MOIN = TDETA_HES.NUMBER AND   PAY_GETD.N_TAF = TDETA_HES.TNUMBER WHERE     (PAY_GETD.N_KOL = 112 OR  PAY_GETD.N_KOL IS NULL) AND (PAY_GETD.N_KOL2 IS NULL) AND (PAY_GETD.N_KOL3 IS NULL) AND  DATE_S >= {DT1.Text.ToRawTarikh()} AND DATE_S <= {DT2.Text.ToRawTarikh()}  AND (NAME_TAH LIKE '%{(HHMOIN.Text is null ? "%" : HHMOIN.Text)}%' or NAME_TAH  is null)) AS DRVD_TBL WHERE (DATE_S >= 14040101 AND DATE_S <= 14040504  AND (NAME_TAH LIKE '%%%' or NAME_TAH  is null)) ";
+                    new CHEK_DLISTS(_sql_query).Show();
+                    break;
+
                 case "rchekd":
                     
                     var report = new StiReport();
