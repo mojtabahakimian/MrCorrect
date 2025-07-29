@@ -152,9 +152,13 @@ namespace Prg_UI.CUC
         public string Text
         {
             get => UnformatText((string)GetValue(TextProperty));
-            ////set => SetValue(TextProperty, value);
             set
             {
+                if (value is null)
+                {
+                    value = LastValidValue is not null ? LastValidValue.ToString() : "0";
+                }
+
                 if (!string.IsNullOrEmpty(value))
                 {
                     if (!double.TryParse(value, out double parsedValue))
@@ -517,7 +521,7 @@ namespace Prg_UI.CUC
                     }
                     else if (LastValueShouldZero is null) // = Null
                     {
-                        Text = null;
+                        Text = string.Empty;
                     }
                 }
 

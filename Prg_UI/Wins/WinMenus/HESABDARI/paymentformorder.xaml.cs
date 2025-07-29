@@ -128,7 +128,8 @@ namespace Wins.WinMenus.HESABDARI
                 else
                 {
                     // Defer the operation until the window is fully rendered
-                    this.Dispatcher.BeginInvoke(new Action(() => {
+                    this.Dispatcher.BeginInvoke(new Action(() =>
+                    {
                         // Try again after the window is fully initialized
                         IntPtr newHandle = new WindowInteropHelper(this).Handle;
                         if (newHandle != IntPtr.Zero)
@@ -895,6 +896,85 @@ namespace Wins.WinMenus.HESABDARI
             PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
 
             ReGetMasterData();
+        }
+
+        private void BTN_INFO_RECIVER_Click(object sender, RoutedEventArgs e)
+        {
+            if (CUST_NO.SelectedValue != null)
+            {
+                //string custNo = CUST_NO.SelectedValue.ToString();
+                //var customer = dbms.DoGetDataSQL<CUST_HESAB>($"SELECT * FROM CUST_HESAB WHERE HES = '{custNo}'").FirstOrDefault();
+                //if (customer != null)
+                //{
+                //    string info = "";
+                //    if (!string.IsNullOrEmpty(customer.hes)) info += $"حساب: {customer.hes}\n";
+                //    if (!string.IsNullOrEmpty(customer.NAME)) info += $"نام حساب: {customer.NAME}\n";
+                //    if (!string.IsNullOrEmpty(customer.MCODEM)) info += $"کدملی: {customer.MCODEM}\n";
+                //    if (!string.IsNullOrEmpty(customer.ADDRESS)) info += $"آدرس: {customer.ADDRESS}\n";
+                //    if (!string.IsNullOrEmpty(customer.TEL)) info += $"تلفن: {customer.TEL}\n";
+                //    if (!string.IsNullOrEmpty(customer.ECODE)) info += $"کد اقتصادی: {customer.ECODE}\n";
+                //    if (!string.IsNullOrEmpty(customer.PCODE)) info += $"کد پستی: {customer.PCODE}\n";
+                //    if (!string.IsNullOrEmpty(customer.IYALAT)) info += $"استان: {customer.IYALAT}\n";
+                //    if (!string.IsNullOrEmpty(customer.CITY)) info += $"شهر: {customer.CITY}\n";
+                //    if (!string.IsNullOrEmpty(customer.TOZIH)) info += $"توضیح: {customer.TOZIH}\n";
+                //    if (!string.IsNullOrEmpty(customer.MOBILE)) info += $"موبایل: {customer.MOBILE}\n";
+                //    if (customer.OSTANID != 0) info += $"کد استان: {customer.OSTANID}\n";
+                //    if (customer.SHAHRID != 0) info += $"کد شهر: {customer.SHAHRID}\n";
+
+                //    new Msgwin(false, info).ShowDialog();
+                //}
+
+                string hesValue = CUST_NO.SelectedValue.ToString();
+                var info = dbms.DoGetDataSQL<CUST_HESAB>($"SELECT * FROM dbo.CUST_HESAB WHERE hes = N'{hesValue}'").FirstOrDefault();
+                if (info != null)
+                {
+                    var sb = new System.Text.StringBuilder();
+
+                    void Add(string label, string? value)
+                    {
+                        if (!string.IsNullOrWhiteSpace(value))
+                            sb.AppendLine($"{label} : {value}");
+                    }
+                    void AddNum(string label, int? value)
+                    {
+                        if (value.HasValue)
+                            sb.AppendLine($"{label}: {value}");
+                    }
+                    void AddNumD(string label, double? value)
+                    {
+                        if (value.HasValue)
+                            sb.AppendLine($"{label}: {value}");
+                    }
+
+                    Add("نام:\n", info?.NAME);
+                    Add("کد حساب", info?.hes);
+                    Add("کد ملی", info?.MCODEM);
+                    Add("آدرس", info?.ADDRESS);
+                    Add("تلفن", info?.TEL);
+                    Add("موبایل", info?.MOBILE);
+                    Add("کد اقتصادی", info?.ECODE);
+                    Add("کد پستی", info?.PCODE);
+                    Add("استان", info?.IYALAT);
+                    Add("شهر", info?.CITY);
+                    Add("توضیح", info?.TOZIH);
+                    Add("مسیر", info?.ROUTE_NAME);
+                    AddNum("کد استان", info?.OSTANID);
+                    AddNum("کد شهر", info?.SHAHRID);
+
+                    string message = sb.ToString();
+                    if (string.IsNullOrWhiteSpace(message))
+                    {
+                        message = "اطلاعاتی برای نمایش وجود ندارد.";
+                    }
+
+                    new Msgwin(false, message, "", true).ShowDialog();
+                }
+                else
+                {
+                    universControl.PopNotifyShowUp($"اطلاعاتی برای این حساب یافت نشد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                }
+            }
+
         }
     }
 }

@@ -4422,7 +4422,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         if (WAS_ROW_ITEM.CODE/*.TAG*/ == "")
                         {
                         }
-                        else if (CURRENT_ROW_ITEMS.CODE != WAS_ROW_ITEM.CODE/*.TAG*/)
+                        else if (!string.IsNullOrEmpty(WAS_ROW_ITEM.CODE) && CURRENT_ROW_ITEMS.CODE != WAS_ROW_ITEM.CODE/*.TAG*/)
                         {
                             var RSTD0 = dbms.DoGetDataSQL<STUF_STK_CSHARP>("SELECT * FROM STUF_STK WHERE CODE = '" + WAS_ROW_ITEM.CODE/*.TAG*/ + "' AND ANBAR = " + CURRENT_ROW_ITEMS.ANBAR).ToList();
                             string _where = " WHERE CODE = '" + WAS_ROW_ITEM.CODE/*.TAG*/ + "' AND ANBAR = " + CURRENT_ROW_ITEMS.ANBAR;
@@ -6528,24 +6528,21 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             MasterSummerAndMandeh();
         }
 
-        private bool RowValuesCheck(INVO_LST_FACTOR22? ROW)
+        private bool RowValuesCheck(INVO_LST_FACTOR22? CurrentRow)
         {
             List<MsgModel> ErrosMessages = new List<MsgModel>();
 
-            if (WAS_ROW_ITEM?.CODE != null && ROW?.CODE != WAS_ROW_ITEM?.CODE) //اگر کالار وعوض کرده کرده ولی انبارش مطابق اون نیست
+            if (!string.IsNullOrEmpty(WAS_ROW_ITEM?.CODE) && CurrentRow?.CODE != WAS_ROW_ITEM?.CODE) //اگر کالار وعوض کرده کرده ولی انبارش مطابق اون نیست
             {
-                var RSTD0 = dbms.DoGetDataSQL<STUF_STK_CSHARP>("SELECT TOP 1 ANBAR FROM STUF_STK WHERE CODE = '" + WAS_ROW_ITEM.CODE + "' AND ANBAR = " + ROW.ANBAR).FirstOrDefault();
+                var RSTD0 = dbms.DoGetDataSQL<STUF_STK_CSHARP>("SELECT TOP 1 ANBAR FROM STUF_STK WHERE CODE = '" + WAS_ROW_ITEM.CODE + "' AND ANBAR = " + CurrentRow.ANBAR).FirstOrDefault();
                 if (RSTD0 == null)
                 {
                     ErrosMessages.Add(new MsgModel { MessageText_U = "اطلاعات در مورد اين كالا مغايرت دارد." });
-
-                    Msgwin msgwin = new Msgwin(false, "اطلاعات در مورد اين كالا مغايرت دارد.");
-                    msgwin.ShowDialog();
-                    ROW.CODE = WAS_ROW_ITEM.CODE;
+                    CurrentRow.CODE = WAS_ROW_ITEM.CODE;
                 }
                 else
                 {
-                    RSTD0.MOGODI = RSTD0.MOGODI + WAS_ROW_ITEM.MEGHk - ROW.MEGH_MAR;
+                    RSTD0.MOGODI = RSTD0.MOGODI + WAS_ROW_ITEM.MEGHk - CurrentRow.MEGH_MAR;
                     WAS_ROW_ITEM.MEGHk = 0;
                 }
             }
@@ -6553,18 +6550,18 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             LETSANAD = true;
 
             //چک کردن واحد کالا
-            VAHED_K_NESBAT_2 RSTV1 = dbms.DoGetDataSQL<VAHED_K_NESBAT_2>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + ROW.CODE + "' AND ((VAHEDS.VAHED)= " + ROW.VAHED_K + ")))").FirstOrDefault();
+            VAHED_K_NESBAT_2 RSTV1 = dbms.DoGetDataSQL<VAHED_K_NESBAT_2>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + CurrentRow.CODE + "' AND ((VAHEDS.VAHED)= " + CurrentRow.VAHED_K + ")))").FirstOrDefault();
             if (RSTV1?.CODE == null)
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "واحد تعريف شده ناقص ميباشد نسبت آن مشخص نگرديده است.در بخش تعريف كالا آن را اصلاح كنيد" });
-                ROW.VAHED_K = null;
+                CurrentRow.VAHED_K = null;
             }
             else
             {
-                ROW.MEGHk = ROW.MEGH * RSTV1?.NESBAT;
-                if (ROW.MABL > 0)
+                CurrentRow.MEGHk = CurrentRow.MEGH * RSTV1?.NESBAT;
+                if (CurrentRow.MABL > 0)
                 {
-                    ROW.MABL_K = Math.Round((double)(ROW.MABL * ROW.MEGHk));
+                    CurrentRow.MABL_K = Math.Round((double)(CurrentRow.MABL * CurrentRow.MEGHk));
                 }
             }
 
@@ -6637,10 +6634,18 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         {
             if (NowIsReady && !(e is null) && INVO_LST_sub.SelectedItem is not null)
             {
-                if (INVO_LST_sub.SelectedItem.ToString() != "{NewItemPlaceholder}")
+                if (e == null || !(e.Row.Item is INVO_LST_FACTOR22 rowItem)) return;
+                if (rowItem == null) return;
+                if (Equals(e.Row.Item, CollectionView.NewItemPlaceholder)) return;
+                var view = INVO_LST_sub.Items as IEditableCollectionView;
+                if (view.IsAddingNew) { return; }
+
+                if (CL_LMethods.IsNewPlaceHolder(INVO_LST_sub,INVO_LST_sub.SelectedItem))
                 {
-                    WAS_ROW_ITEM = ((INVO_LST_FACTOR22)INVO_LST_sub.SelectedItem).Clone() as INVO_LST_FACTOR22;
+                    return;
                 }
+
+                WAS_ROW_ITEM = ((INVO_LST_FACTOR22)INVO_LST_sub.SelectedItem).Clone() as INVO_LST_FACTOR22;
             }
         }
 

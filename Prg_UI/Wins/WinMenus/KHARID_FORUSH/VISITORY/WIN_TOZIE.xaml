@@ -61,14 +61,14 @@
             <Label Content="کاربر:" Margin="0,58,237,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="30" Height="28" VerticalAlignment="Top"/>
             <Button x:Name="ESLAH" Content="اصلاح برگه" Margin="110,105,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="105" Foreground="#DDFFFFFF" FontWeight="Bold" Click="ESLAH_Click"/>
 
-            <ComboBox x:Name="TDRIVER" FlowDirection="RightToLeft" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" DisplayMemberPath="TDRIVER" SelectedValuePath="TDRIVER" IsTextSearchEnabled="True" PreviewLostKeyboardFocus="TDRIVER_PreviewLostKeyboardFocus" IsEditable="True" Height="30" Margin="382,12,376,0" VerticalAlignment="Top">
+            <ComboBox x:Name="TDRIVER" FlowDirection="RightToLeft" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" DisplayMemberPath="TDRIVER" SelectedValuePath="TDRIVER" IsTextSearchEnabled="True" PreviewLostKeyboardFocus="TDRIVER_PreviewLostKeyboardFocus" IsEditable="True" Height="30" Margin="0,12,376,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="337">
                 <ComboBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                     </ItemsPanelTemplate>
                 </ComboBox.ItemsPanel>
             </ComboBox>
-            <ComboBox x:Name="TCITY" Style="{StaticResource FuzzyOutComboBox}" FlowDirection="RightToLeft" Padding="7,0,10,0" DisplayMemberPath="TCITY" SelectedValuePath="TCITY"  IsTextSearchEnabled="True" PreviewLostKeyboardFocus="TCITY_PreviewLostKeyboardFocus" IsEditable="True" Height="28" Margin="858,58,61,0" VerticalAlignment="Top">
+            <ComboBox x:Name="TCITY" Style="{StaticResource FuzzyOutComboBox}" FlowDirection="RightToLeft" Padding="7,0,10,0" DisplayMemberPath="TCITY" SelectedValuePath="TCITY"  IsTextSearchEnabled="True" PreviewLostKeyboardFocus="TCITY_PreviewLostKeyboardFocus" IsEditable="True" Height="28" Margin="0,58,61,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="176">
                 <ComboBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>

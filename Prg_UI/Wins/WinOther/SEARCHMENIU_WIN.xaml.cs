@@ -15,6 +15,7 @@ using Functions;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Functions.CL_MenuManager;
 using Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
+using Prg_UI.Wins.WinMenus.BARNAME_RIZI;
 
 namespace Wins.WinOther
 {
@@ -298,6 +299,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تنظیم لیست دستی توضیع", WIN_NAME = CL_MenuManager.WinNameType.WIN_TOZIE });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف ویزیت روزانه برای ویزیتور", WIN_NAME = CL_MenuManager.WinNameType.VISITOR_DAY_HEAD });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعيين مسير وزيت براي مشتريان", WIN_NAME = CL_MenuManager.WinNameType.WIN_VISIT_ROUTE_FORM });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "نمودار فروش کلی", WIN_NAME = CL_MenuManager.WinNameType.AMAR_FROOSH_KOL });
 
 
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());
