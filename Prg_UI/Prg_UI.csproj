@@ -63,6 +63,7 @@
 		<None Remove="Rpts\ANBAR\R_TARAZ_ANBARHA.mrt" />
 		<None Remove="Rpts\ANBAR\R_TARAZ_ANBARHA_KHAS.mrt" />
 		<None Remove="Rpts\ANBAR\R_TARAZ_ANBARHA_KHAS_GRP.mrt" />
+		<None Remove="Rpts\ANBAR\TODAYBARGIRI.mrt" />
 		<None Remove="Rpts\BUGETRP.mrt" />
 		<None Remove="Rpts\BUGETRP_tahlil.mrt" />
 		<None Remove="Rpts\Checkha\CHAPCHEK.mrt" />
@@ -462,6 +463,7 @@
 		<EmbeddedResource Include="Rpts\ANBAR\R_TARAZ_ANBARHA.mrt" />
 		<EmbeddedResource Include="Rpts\ANBAR\R_TARAZ_ANBARHA_KHAS.mrt" />
 		<EmbeddedResource Include="Rpts\ANBAR\R_TARAZ_ANBARHA_KHAS_GRP.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\TODAYBARGIRI.mrt" />
 		<EmbeddedResource Include="Rpts\BUGETRP.mrt" />
 		<EmbeddedResource Include="Rpts\BUGETRP_tahlil.mrt" />
 		<EmbeddedResource Include="Rpts\Checkha\CHAPCHEK.mrt" />
