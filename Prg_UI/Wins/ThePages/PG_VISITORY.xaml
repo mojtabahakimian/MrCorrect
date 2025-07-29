@@ -6,9 +6,8 @@
       xmlns:local="clr-namespace:Wins.ThePages"
       mc:Ignorable="d" 
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-      FontFamily="IRANYekanFN"
-      d:DesignHeight="1200" d:DesignWidth="800"
-      Title="">
+      FontFamily="IRANYekanFN" d:DesignWidth="800"
+      Title="" Height="1219">
     <Page.Resources>
         <Storyboard x:Key="OnMouseCome">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)">
@@ -144,7 +143,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_1">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorReturnKalaByMonth.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -153,7 +152,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_2">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorKalaAmalkardByMonth.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -162,7 +161,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_3">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorsListByFactor.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -171,7 +170,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_4">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorSellListByFactor.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -180,7 +179,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_5">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/KalaListPrint.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -220,8 +219,9 @@
                         <Label Content="تعریف پورسانت برای ویزیتور ها" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
+
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_6">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorAmalkard.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -230,7 +230,16 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_9">
+                            <Image.Source>
+                                <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorAmalkard.png" CacheOption="OnLoad"/>
+                            </Image.Source>
+                        </Image>
+                        <TextBlock Text="مشاهده عملکرد (اهداف) ویزیتور به تفکیک ماه بر اساس گروه  " TextWrapping="WrapWithOverflow" Foreground="#DDFFFFFF" Height="27"/>
+                    </WrapPanel>
+
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_7">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorAmalkardReturnByMonth.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -248,7 +257,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_8">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/GroupVisitorAmalkardByMonthReturn.png" CacheOption="OnLoad"/>
                             </Image.Source>

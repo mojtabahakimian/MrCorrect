@@ -702,7 +702,47 @@ namespace Functions
             /// <summary>
             /// تنظیم لیست دستی توضیع
             /// </summary>
-            WIN_TOZIE
+            WIN_TOZIE,
+            /// <summary>
+            /// گزارش عملکرد ویزیتور ها
+            /// </summary>
+            F_MENU_DATE_VISIT_VISITDLV,
+            /// <summary>
+            /// گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در ماه فروش)
+            /// </summary>
+            F_MENU_DATE_VISIT_VISITKAL,
+            /// <summary>
+            /// گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در تاریخ برگشت)
+            /// </summary>
+            F_MENU_DATE_VISIT_VISITKALMA,
+            /// <summary>
+            /// لیست ویزیتور ها و پورسانت به تفکیک فاکتور
+            /// </summary>
+            flist_porsant_factors,
+            /// <summary>
+            /// لیست فروش ویزیتور به تفکیک فاکتور
+            /// </summary>
+            F_MENU_DATE_VISIT_VISITONE,
+            /// <summary>
+            /// چاپ لیست کالا ها جهت ویزیت
+            /// </summary>
+            F_MENU_AJNAS,
+            /// <summary>
+            /// مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه
+            /// </summary>
+            VISITOR_GOL_REP,
+            /// <summary>
+            /// مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه
+            /// </summary>
+            VISITOR_GOL_GRP_REP,
+            /// <summary>
+            /// مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه (در تاریخ برگشت)
+            /// </summary>
+            VISITOR_GOL_GRP_REP_MAR,
+            /// <summary>
+            /// مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه (در تاریخ برگشت)
+            /// </summary>
+            VISITOR_GOL_REP_MAR
         }
         #endregion
 
@@ -1385,6 +1425,46 @@ namespace Functions
 
                 case WinNameType.WIN_MOADIAN_SINGLE: //ارسال به مودیان در پنجره جدا
                     CL_LMethods.OpenWindow(OWNERWIN, new WIN_MOADIAN_SINGLE(Convert.ToDouble(_PARAMETERS_.FirstOrDefault())), default, false);
+                    break;
+
+                case WinNameType.F_MENU_DATE_VISIT_VISITDLV: //گزارش عملکرد ویزیتور ها
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_DATE_visit("VISITDLV"), default, false);
+                    break;
+
+                case WinNameType.F_MENU_DATE_VISIT_VISITKAL: //گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در ماه فروش)
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_DATE_visit("VISITKAL"), default, false);
+                    break;
+
+                case WinNameType.F_MENU_DATE_VISIT_VISITKALMA: //گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در تاریخ برگشت)
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_DATE_visit("VISITKALMA"), default, false);
+                    break;            
+                    
+                case WinNameType.flist_porsant_factors: //لیست ویزیتور ها و پورسانت به تفکیک فاکتور
+                    CL_LMethods.OpenWindow(OWNERWIN, new flist_porsant_factors(""), default, false);
+                    break;   
+                    
+                case WinNameType.F_MENU_DATE_VISIT_VISITONE: //لیست فروش ویزیتور به تفکیک فاکتور
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_DATE_visit("VISITONE"), default, false);
+                    break;  
+                    
+                case WinNameType.F_MENU_AJNAS: //چاپ لیست کالا ها جهت ویزیت
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_AJNAS(), default, false);
+                    break;   
+                    
+                case WinNameType.VISITOR_GOL_REP: //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه
+                    CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_GOL_REP(), default, false);
+                    break; 
+                    
+                case WinNameType.VISITOR_GOL_GRP_REP: //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه
+                    CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_GOL_GRP_REP(), default, false);
+                    break;     
+                    
+                case WinNameType.VISITOR_GOL_GRP_REP_MAR: //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه (در تاریخ برگشت)
+                    CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_GOL_GRP_REP_MAR(), default, false);
+                    break;             
+                    
+                case WinNameType.VISITOR_GOL_REP_MAR: //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه (در تاریخ برگشت)
+                    CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_GOL_REP_MAR(), default, false);
                     break;
 
 
