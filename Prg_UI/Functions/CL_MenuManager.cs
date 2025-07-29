@@ -317,7 +317,7 @@ namespace Functions
             /// </summary>
             FACTORS_LST,
             /// <summary>
-            /// فاکتور برگشت فروش (آزاد) رسید شده
+            /// فاکتور برگشت فروش (آزاد) رسید شده TAG = 25
             /// </summary>
             HEAD_LST_BRFR,
             /// <summary>

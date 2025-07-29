@@ -1,5 +1,4 @@
-﻿
-using Dapper;
+﻿using Dapper;
 using Functions;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
@@ -37,10 +36,13 @@ using Prg_UI.Wins.WinMenus.HESABDARI;
 using System.ComponentModel;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
 using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
+using Microsoft.IdentityModel.Tokens;
+using Wins.WinOther;
+using static Interfaces.INavigator;
 
 namespace Wins.WinMenus.KHARID_FORUSH
 {
-    public partial class HEAD_LST_BRFR : Window
+    public partial class HEAD_LST_BRFR : Window, ISearchableWindow
     {
         #region Header Window Begin
         //Header Window Begin
@@ -154,6 +156,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
         UniversControl universControl = new UniversControl();
 
         InventoryManager IVM = new InventoryManager(); //مدیریت موجودی ایزوله
+
+
+        private NavigationManager<HEAD_LST> _navigationManager;
+
         public ObservableCollection<INVO_LST_FACTOR22> INVO_LST_FACTOR22_DATA { get; set; } = new ObservableCollection<INVO_LST_FACTOR22>();
         public ObservableCollection<PAY_GETP_MODEL> PAY_GETP_SUB_DATA { get; set; } = new ObservableCollection<PAY_GETP_MODEL>();
         public ObservableCollection<VISITOR_DTL> SAYER_VISITOR_DATA { get; set; } = new ObservableCollection<VISITOR_DTL>();
@@ -356,9 +362,21 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 MOLAH.IsEnabled = ican;// ملاحظات سربرگ
                 SHIFT.IsEnabled = ican;// شیفت
                 //فاکتور END
-                Page58.IsEnabled = ican;// تب پشت فاکتور
+                //Page58.IsEnabled = ican;// تب پشت فاکتور
+
+                CMB_MOIN_HAZ.IsEnabled = ican; //معین خدمت
+                CMB_HMBAA.IsEnabled = ican;
+                M_NAGHD.IsReadOnly = !ican; //مبلغ نقد
+                HMBAA.IsReadOnly = !ican; //مبلغ نقد
+                TAKHFIF.IsReadOnly = !ican; //مبلغ تخفیف
+                TAKHFIF_PERCENT.IsReadOnly = !ican; //درصد تخفیف
+                MABL_HAZ.IsReadOnly = !ican; //خدمات
+                MOIN_HAZ.IsReadOnly = !ican; //معین خدمت
+                PAY_GETP_SUB.IsReadOnly = !ican; //چک ها
+                VISITOR_DTL_SUB.IsReadOnly = !ican; //چک ها
 
                 BTN_SAVE.IsEnabled = ican;
+
             }
         }
 
@@ -384,33 +402,34 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             FILL_ALL_COMBOBOXES();
 
-            if (!string.IsNullOrEmpty(NUMBER.Text.ToStringNullSafe()))
+            string WhereCondition = FTAG > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {FTAG}) " : "  ";
+            WhereCondition = CL_LMethods.GetRestrictedSqlQuery(FTAG, WhereCondition);
+
+            _navigationManager = new NavigationManager<HEAD_LST>(
+                dbms,
+                x => x.NUMBER.ToString(), // property selector (used to find a record by its CODE)
+                $"SELECT * FROM HEAD_LST {WhereCondition} ORDER BY NUMBER", //All Record of The Table
+                x => $"SELECT * FROM HEAD_LST WHERE NUMBER = {x?.NUMBER} AND TAG = {FTAG}", //On Change for One Record
+                Convert.ToDouble(NUMBER.Text)
+                );
+
+            if (!string.IsNullOrEmpty(NUMBER1_TAG?.ToStringNullSafe()) && _navigationManager.NUMBER_TO_OPEN != null) //Had a paramter passed
             {
-                if (Convert.ToDouble(NUMBER.Text) > 0)
-                {
-                    ReGetDataMaster(false);
-
-
-                    ReGetDataAll();
-
-                    Summer();
-
-                    GetBalancePerson();
-
-                    TAKHFIF_MABL_PRICE();
-
-                    ActivateChaps();
-
-
-                    AllowEdits = false;
-                    BTN_SAVE.IsEnabled = false;
-                    INVO_LST_SUB.IsEnabled = false;
-                    BTN_DELETE.IsEnabled = false;
-                    Page155.IsEnabled = false;
-                }
+                //یعنی این شماره رو پیدا نکرده که اون رو ریست کنه
+                new Msgwin(false, $"شما به این شماره {_navigationManager.NUMBER_TO_OPEN} دسترسی ندارید ").Show();
+                try { this?.Close(); } catch { }
+                return;
             }
 
-            Form_Current();
+            // Hook up the OnInsertRecord event
+            _navigationManager.CurrentRecordChanged += OnCurrentRecordChanged;
+            _navigationManager.OnInsertRecord += OnInsertRecord;
+
+            // Link the navigation manager to the universal control
+            navigatorControl.NavigationManager = _navigationManager;
+
+            // Now raise the initialization events to update the UI
+            _navigationManager.RaiseInitializationEvents();
 
             NUMBER.Focus();
         }
@@ -490,7 +509,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 //this.AllowDeletions = true;
                 //this.AllowEdits = true;
-                //INVO_LST_SUB.IsEnabled = true;
+                //INVO_LST_SUB.IsReadOnly = false;
                 //Page58.IsEnabled = true;
                 //lsanad.Foreground = Brushes.Yellow;
                 //MABNA.Text = null;
@@ -506,7 +525,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         ghat = true;
                         this.AllowDeletions = false;
                         this.AllowEdits = false;
-                        INVO_LST_SUB.IsEnabled = false;
+                        INVO_LST_SUB.IsReadOnly = true;
                         Page58.IsEnabled = false;
                         Page155.IsEnabled = false;
                         //lsanad.Foreground = Brushes.Red;
@@ -516,7 +535,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         ghat = false;
                         this.AllowDeletions = true;
                         this.AllowEdits = true;
-                        INVO_LST_SUB.IsEnabled = true;
+                        INVO_LST_SUB.IsReadOnly = false;
                         Page58.IsEnabled = true;
                         Page155.IsEnabled = true;
                         //lsanad.Foreground = Brushes.Yellow;
@@ -556,21 +575,21 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 Page58.IsEnabled = false;
                 Page155.IsEnabled = false;
-                INVO_LST_SUB.IsEnabled = false;
+                INVO_LST_SUB.IsReadOnly = true;
             }
             else
             {
                 if (!ghat)
                 {
-                    INVO_LST_SUB.IsEnabled = true;
+                    INVO_LST_SUB.IsReadOnly = false;
                     Page58.IsEnabled = true;
                     Page155.IsEnabled = true;
                 }
                 else
                 {
-                    Page58.IsEnabled = false;
-                    Page155.IsEnabled = false;
-                    INVO_LST_SUB.IsEnabled = false;
+                    //Page58.IsEnabled = false;
+                    //Page155.IsEnabled = false;
+                    INVO_LST_SUB.IsReadOnly = true;
                 }
             }
 
@@ -600,9 +619,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 this.AllowDeletions = false;
                 this.AllowEdits = false;
-                INVO_LST_SUB.IsEnabled = false;
-                Page58.IsEnabled = false;
-                Page155.IsEnabled = false;
+                INVO_LST_SUB.IsReadOnly = true;
+                //Page58.IsEnabled = false;
+                //Page155.IsEnabled = false;
                 ESLAH.IsEnabled = true;
 
                 NUMBER1.IsEnabled = false;
@@ -620,6 +639,77 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
         }
+
+        private void OnCurrentRecordChanged(HEAD_LST HEADER_FAC)
+        {
+            if (_navigationManager.IsNewRecord)
+            {
+                ClearFreshNew(); //Form_Current(); //should be in this ClearFreshAll(); method too at the end
+            }
+            else if (HEADER_FAC == null)
+            {
+                if (_navigationManager.NUMBER_TO_OPEN != null)
+                {
+                    new Msgwin(false, "چنین شماره ای وجود ندارد").ShowDialog();
+                    return;
+                }
+            }
+            else
+            {
+                if (HEADER_FAC is null)
+                {
+                    new Msgwin(false, "این فاکتور خالی است").Show();
+                    return;
+                }
+                NUMBER.Text = HEADER_FAC.NUMBER.ToString();
+
+                if (!string.IsNullOrEmpty(NUMBER.Text.ToStringNullSafe()))
+                {
+                    if (Convert.ToDouble(NUMBER.Text) > 0)
+                    {
+                        ReGetDataMaster(false);
+
+                        ReGetDataAll();
+
+                        Summer();
+
+                        GetBalancePerson();
+
+                        TAKHFIF_MABL_PRICE();
+
+                        ActivateChaps();
+
+                        AllowEdits = false;
+                        BTN_SAVE.IsEnabled = false;
+                        INVO_LST_SUB.IsReadOnly = true;
+                        BTN_DELETE.IsEnabled = false;
+                    }
+                }
+                //NewRecord = false; //Currrent Record is not new              
+
+                Form_Current();
+            }
+        }
+        private bool OnInsertRecord(HEAD_LST record)
+        {
+            try
+            {
+                var itemtoadd = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 * FROM HEAD_LST  WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG}").FirstOrDefault();
+                record = itemtoadd;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+        private void RefreshAfterUpdate()
+        {
+            var CURRENT_HEADER = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG}").FirstOrDefault();
+            _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
+        }
+
         public void ClearFreshNew()
         {
             NUMBER1.SelectedIndex = -1; NUMBER1.Items.Refresh(); //شماره فاکتور
@@ -689,8 +779,64 @@ namespace Wins.WinMenus.KHARID_FORUSH
             PAY_GETP_SUB_DATA?.Clear(); //چک
             SAYER_VISITOR_DATA?.Clear();
 
-            Form_Current();
+            GetDefaultFocus();
         }
+
+
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            // Handle the selected item
+            if (selectedItem is HEAD_LST item)
+            {
+                if (item != null)
+                {
+                    //_navigationManager.MoveReGetData(INavigator.Jahat.)
+                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.NUMBER.Equals(Convert.ToDouble(item.NUMBER)));
+                    if (itemfound != null)
+                    {
+                        _navigationManager.IsNewRecord = false;
+
+                        // 1) Find its index in the master list
+                        int idx = _navigationManager.RecordsData.IndexOf(itemfound);
+                        if (idx < 0)
+                        {
+                            // not found (perhaps filtered out?), bail out
+                            new Msgwin(false, "یافت نشد: مورد انتخاب شده در لیست اصلی وجود ندارد").Show();
+                            return;
+                        }
+
+                        // 2) Tell the navigation manager to move to that position
+                        _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+                        //OnCurrentRecordChanged(itemfound);
+                    }
+                }
+            }
+        }
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+                new SearchableProperty { DisplayName = "شماره (سایر) رسید انبار", PropertyPath = "NUMBER1", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "شماره فاکتور برگشت فروش", PropertyPath = "NUMBER", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "تاریخ", PropertyPath = "DATE_N", PropertyType = typeof(long) },
+                new SearchableProperty { DisplayName = "کد مشتری", PropertyPath = "CUST_NO", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "کاربر", PropertyPath = "USER_NAME", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "ملاحظات", PropertyPath = "MOLAH", PropertyType = typeof(string) },
+                // Add other searchable properties
+            };
+        }
+        #endregion
+
+
+
+        private void GetDefaultFocus()
+        {
+            NUMBER.Focus();
+            NUMBER.SelectAll();
+        }
+
         private void ReGetDataMaster(bool IsNumberSelectedNow)
         {
             //DATE_N_AfterUpdate
@@ -730,6 +876,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                 //NUMBER.Text = HEADER.NUMBER.ToStringNullSafe();
 
+                //نوع مشتری
+                CUST_KIND.SelectedValue = HEADER?.CUST_KIND; CUST_KIND.Items.Refresh();
 
                 DEPATMAN.SelectedValue = HEADER.DEPATMAN; DEPATMAN.Items.Refresh(); //واحد
 
@@ -744,6 +892,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 SGN1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER?.sgn1usid)?.SAL_NAME;
                 SGN2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER?.sgn2usid)?.SAL_NAME;
                 SGN3usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER?.sgn3usid)?.SAL_NAME;
+
+
+                PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
+                PERSONEL.Text = null;
+                PERSONEL.SelectedValue = null; PERSONEL.Items.Refresh();
+                PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+
 
                 OKF.IsChecked = HEADER.OKF; //تایید فاکتور
                 MOLAH.Text = HEADER.MOLAH; //ملاحظات
@@ -776,8 +931,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
                 }
                 CUST_NO.SelectedValue = HEADER_HAV.CUST_NO; CUST_NO.Items.Refresh();
-                //نوع مشتری
-                CUST_KIND.SelectedValue = HEADER_HAV.CUST_KIND; CUST_KIND.Items.Refresh();
+
 
                 if (HEADER_HAV?.FNUMCO != null) //شماره داخلی
                 {
@@ -794,11 +948,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             if (string.IsNullOrEmpty(NUMBER1.Text) || NUMBER1.Text == "0")
             {
-                INVO_LST_SUB.IsEnabled = false;
+                INVO_LST_SUB.IsReadOnly = true;
             }
             else
             {
-                INVO_LST_SUB.IsEnabled = true;
+                INVO_LST_SUB.IsReadOnly = false;
             }
 
             SecurityAllCheck();
@@ -2449,6 +2603,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                             transaction.Commit();
                             db?.Close();
+
+                            RefreshAfterUpdate();
                         }
                     }
                 }
@@ -2497,7 +2653,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             this.OKF.IsChecked = true;
 
             this.INVO_LST_SUB.IsReadOnly = false;
-            this.INVO_LST_SUB.IsEnabled = true;
+            this.INVO_LST_SUB.IsReadOnly = false;
             this.Page58.IsEnabled = true;
 
 
@@ -2603,14 +2759,14 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                         this.AllowDeletions = true;
                         this.AllowEdits = true;
-                        this.INVO_LST_SUB.IsEnabled = true;
+                        this.INVO_LST_SUB.IsReadOnly = false;
                         this.Page58.IsEnabled = true;
                         this.Page155.IsEnabled = true;
                         NUMBER1.IsEnabled = true;
 
                         if ((bool)SGN1.IsChecked || (bool)SGN2.IsChecked || (bool)SGN3.IsChecked)
                         {
-                            this.INVO_LST_SUB.IsEnabled = false; //.Locked = true;
+                            this.INVO_LST_SUB.IsReadOnly = true; //.Locked = true;
                             this.PAY_GETP_SUB.IsEnabled = false;
                             this.VISITOR_DTL_SUB.IsEnabled = false;
                             this.DATE_N.IsReadOnly = true;
@@ -2619,7 +2775,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         }
                         else
                         {
-                            this.INVO_LST_SUB.IsEnabled = true;
+                            this.INVO_LST_SUB.IsReadOnly = false;
                             this.PAY_GETP_SUB.IsEnabled = true;
                             this.VISITOR_DTL_SUB.IsEnabled = true;
                             this.MOLAH.IsReadOnly = false;
@@ -2682,7 +2838,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                         SANAD();
 
-                        ClearFreshNew();
+                        _navigationManager.DeleteCurrentRecord(); //Refresh Record Source
                     }
                     catch (SqlException ex)
                     {
@@ -2715,6 +2871,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             //{
             //    this.RecordSource = "SELECT TOP 100 PERCENT NUMBER, TAG AS htag, 24 AS Dtag, ANBAR, NUMBER1, DATE_N, TAH, MAS, VAS, N_S, CUST_NO, MOLAH, M_NAGHD, MABL_VAR, MOIN_VAR, MABL_HAV, MOIN_HAV, MABL_HAZ, MOIN_HAZ, TAKHFIF, MOIN_KHF, ANBARF, FNUMCO, USER_NAME, TICMBAA, MBAA, HMBAA, DEPATMAN, SHIFT, CUST_KIND, OKF, SADER,UID FROM HEAD_LST WHERE (TAG = 25) and (USER_NAME = '" + UCurrentUser() + "') ORDER BY NUMBER";
             //}
+            //SELECT * FROM dbo.HEAD_LST WHERE NUMBER = 954 AND TAG = 25 --فاکتور برگشت فروش رسید شده : آزاد Normal Only Header because Detail load FROM dbo.INVO_LST WHERE NUMBER = 954 AND TAG = 24
             new FACTORS_LST(FTAG).Show();
             if (NewRecord)
             {
@@ -2895,9 +3052,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 AllowEdits = false;
                 AllowDeletions = false;
 
-                Page58.IsEnabled = false;
-                Page155.IsEnabled = false;
-                INVO_LST_SUB.IsEnabled = false;
+                INVO_LST_SUB.IsReadOnly = true;
             }
             else
             {
@@ -4786,6 +4941,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
         private void TICMBAA_Click(object sender, RoutedEventArgs e)
         {
+            BTN_SAVE_Click(null, null);
             if (!isSavedSuccess)
             {
                 return;

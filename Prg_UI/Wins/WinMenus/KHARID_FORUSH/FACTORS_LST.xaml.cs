@@ -18,8 +18,6 @@ using Prg_UI.UiTools;
 using System.Text;
 using Syncfusion.Data;
 using Prg_UI.HelperWins;
-using System.Diagnostics;
-using Syncfusion.Windows.Controls.RichTextBoxAdv;
 
 namespace Wins.WinMenus.KHARID_FORUSH
 {
@@ -92,15 +90,16 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             //Process Prc = ProcLoader.Start();
 
-
             FACTOR_DATA?.Clear();
 
             string WhereCondition = TAGCODE > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {TAGCODE}) " : "  ";
 
-            if (TAGCODE == 2 || TAGCODE == 13 || TAGCODE == 20) //حواله , فاکتور , پیش فاکتور
-            {
-                WhereCondition = CL_LMethods.GetRestrictedSqlQuery(TAGCODE, WhereCondition);
-            }
+            //if (TAGCODE == 2 || TAGCODE == 13 || TAGCODE == 20) //حواله , فاکتور , پیش فاکتور
+            //{
+            //    WhereCondition = CL_LMethods.GetRestrictedSqlQuery(TAGCODE, WhereCondition);
+            //}
+
+            WhereCondition = CL_LMethods.GetRestrictedSqlQuery(TAGCODE, WhereCondition);
 
             var MasterHead = dbms.DoGetDataSQL<HEAD_LST_SRC>(@$" SELECT dbo.HEAD_LST.NUMBER1, dbo.HEAD_LST.TAH, dbo.HEAD_LST.NUMBER, dbo.HEAD_LST.DATE_N, dbo.HEAD_LST.MAS, dbo.HEAD_LST.N_S, dbo.HEAD_LST.CUST_NO, dbo.CUST_HESAB.NAME, dbo.HEAD_LST.MOLAH, 
                                                                      dbo.HEAD_LST.M_NAGHD, dbo.HEAD_LST.MABL_VAR, dbo.HEAD_LST.MOIN_VAR, dbo.HEAD_LST.MABL_HAV, dbo.HEAD_LST.MOIN_HAV, dbo.HEAD_LST.MABL_HAZ, dbo.HEAD_LST.MOIN_HAZ, dbo.HEAD_LST.TAKHFIF, 
@@ -170,10 +169,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
             switch (TAGCODE) //عنوان پنجره
             {
                 case 27:
-                    WINTILENAME.Content = "فاکتور برگشت خرید آزاد";
+                    WINTILENAME.Content = "فاکتور های برگشت خرید آزاد";
                     break;
 
                 case 26: WINTILENAME.Content = "سایر حواله انبار ها"; break;
+
+                case 25: WINTILENAME.Content = "فاکتور های برگشت فروش آزاد رسید شده"; break;
                 case 24: WINTILENAME.Content = "سایر رسید انبار ها"; break;
 
                 case 23:
@@ -280,6 +281,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         if (currentRow?.NUMBER != null)
                         {
                             //OpenWindow(typeof(HEAD_LST_KH_BACK), (double)currentRow.NUMBER, "یک پنجره فاکتور برگشت خرید عادی از قبل باز شده ابتدا آنرا ببندید.");
+                            //SELECT* FROM dbo.HEAD_LST WHERE NUMBER = 2 AND TAG = 3--فاکتور برگشت خرید عادی Normal Only Header because Detail load FROM dbo.INVO_LST WHERE NUMBER = 2073 AND TAG = 1
                             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK, this, (double)currentRow.NUMBER);
                         }
                         break;
@@ -288,6 +290,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         if (currentRow?.NUMBER != null)
                         {
                             //OpenWindow(typeof(HEAD_LST_FROOSH_BACK2), (double)currentRow.NUMBER, "یک پنجره فاکتور برگشت فروش عادی از قبل باز شده ابتدا آنرا ببندید.");
+                            //SELECT * FROM dbo.HEAD_LST WHERE NUMBER = 254  AND TAG = 4 --فاکتور برگشت فروش استاندارد عادی Normal Only Header because Detail load FROM dbo.INVO_LST WHERE NUMBER = 5361 AND TAG = 2
                             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_BACK2, this, (double)currentRow.NUMBER);
                         }
                         break;
@@ -296,6 +299,20 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         if (currentRow?.NUMBER != null)
                         {
                             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_ENTEGHAL_WIN, this, (double)currentRow.NUMBER);
+                        }
+                        break;
+
+                    case 9: //برگه ورود
+                        if (currentRow?.NUMBER != null)
+                        {
+                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALAH_ENTER, this, (double)currentRow.NUMBER);
+                        }
+                        break;
+
+                    case 10: //برگه خروج مواد اولیه
+                        if (currentRow?.NUMBER != null)
+                        {
+                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALAH_EXIT, this, (double)currentRow.NUMBER);
                         }
                         break;
 
@@ -352,27 +369,29 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         }
                         break;
 
+                    case 25: //فاکتور برگشت فروش آزاد رسید شده
+                        if (currentRow?.NUMBER != null)
+                        {
+                            //SELECT * FROM dbo.HEAD_LST WHERE NUMBER = 954 AND TAG = 25 --فاکتور برگشت فروش رسید شده : آزاد Normal Only Header because Detail load FROM dbo.INVO_LST WHERE NUMBER = 954 AND TAG = 24
+                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_BRFR, this, (double)currentRow.NUMBER);
+                        }
+                        break;
+
                     case 26: //سایر حواله انبار ها
                         if (currentRow?.NUMBER != null)
                         {
                             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAV_OTHER_WIN, this, (double)currentRow.NUMBER);
                         }
-                        break;
-
-
-                    case 10: //برگه خروج مواد اولیه
+                        break;   
+                    
+                    case 27: //فاکتور برگشت خرید آزاد
                         if (currentRow?.NUMBER != null)
                         {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALAH_EXIT, this, (double)currentRow.NUMBER);
+                            //SELECT * FROM dbo.HEAD_LST WHERE NUMBER = 3 AND TAG = 27   --فاکتور برگشت خرید آزاد Normal Only Header because Detail load FROM dbo.INVO_LST WHERE NUMBER = 3 AND TAG = 26
+                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK_AZAD, this, (double)currentRow.NUMBER);
                         }
                         break;
 
-                    case 9: //برگه ورود
-                        if (currentRow?.NUMBER != null)
-                        {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALAH_ENTER, this, (double)currentRow.NUMBER);
-                        }
-                        break;
                 }
             }
         }

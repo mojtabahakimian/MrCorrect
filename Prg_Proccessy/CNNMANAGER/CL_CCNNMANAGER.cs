@@ -300,6 +300,7 @@ namespace Prg_SendInvoice.CNNMANAGER
                     await db.OpenAsync();
                     await db.ExecuteAsync("SET ARITHABORT ON");
                     var results = await db.QueryAsync<TEntity>(sql, parameters, commandTimeout: 3600);
+                    //await db.ExecuteAsync("SET ARITHABORT OFF");
                     return results;
                 }
                 catch

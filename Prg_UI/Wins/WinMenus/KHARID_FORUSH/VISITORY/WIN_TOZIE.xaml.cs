@@ -1289,7 +1289,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             if (Baseknow.TFSAZMAN != "2")
             {
                 (report.GetComponentByName("MANDAH") as StiText).Enabled = true; //کل مانده حساب
-                (report.GetComponentByName("MANDG") as StiText).Enabled = true;
+                //(report.GetComponentByName("MANDG") as StiText).Enabled = true;
             }
             else
             {
