@@ -20,6 +20,7 @@ using System.Windows.Input;
 using Rpts;
 using static Prg_UI.Functions.CL_LMethods;
 using System.Diagnostics;
+using static Stimulsoft.Base.StiDbType;
 
 namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 {
@@ -95,8 +96,11 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                     DT1.Visibility = Visibility.Collapsed;
                     break;
                 case "TDBARG":
-                    DT1.Visibility = Visibility.Collapsed;
-                    DT2.Text = Tarikh.FullCurrentDate;
+                    DT1.Visibility = Visibility.Hidden;
+                    DT1.IsEnabled = false;
+
+                    DT2.Text = Tarikh.FullCurrentDate.ToString();
+                    DT2.Focus();
                     break;
                 case "FRCUST":
                     LABEL_WIN_HEADER.Content = "گزارش ارزش افزوده فروش - گزارش فصلی";
@@ -172,60 +176,11 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                     case "DPDAY":
                         if (string.IsNullOrEmpty(DT1.Text) && string.IsNullOrEmpty(DT2.Text))
                         {
-                            _sqlquery_ = $"SELECT FKNAME, FMNAME, FTNAME, NAMES, SHARH, MABL, nonames, TKNAME, TMNAME, TTNAME, DT, KK FROM dbo.PGET_HED_REP";
-
-                            
-                            var report = new StiReport();
-                            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.R_DP_DAYLY.mrt");
-                            report.Load(pathreport);
-                            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
-                            report.Dictionary.Databases.Clear();
-                            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
-
-                            report["FDATE_PARM"] = DT1.Text.ToRawTarikh().ToString();
-                            report["EDATE_PARM"] = DT2.Text.ToRawTarikh().ToString();
-                            report.Dictionary.Variables.Add("Q_PARM", _sqlquery_);
-
-                            dt1 = $"از تاریخ {DT1.Text}";
-                            dt2 = $"تا تاریخ {DT2.Text}";
-
-
-                            (report.GetComponentByName("SAL_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
-                            (report.GetComponentByName("DT1_N") as StiText).Text = dt1;
-                            (report.GetComponentByName("DT2_N") as StiText).Text = dt2;
-                            (report.GetComponentByName("DT3_N") as StiText).Text = Tarikh.FullCurrentDate.ToString();
-
-                            //report.Render();
-                            //report.Show();
-
-                            new WINRPT(report, LABEL_WIN_HEADER.Content.ToStringNullSafe()).Show();
+                            Open_Report2();
                         }
                         else
                         {
-                            _sqlquery_ = $"SELECT FKNAME, FMNAME, FTNAME, NAMES, SHARH, MABL, nonames, TKNAME, TMNAME, TTNAME, DT, KK FROM dbo.PGET_HED_REP WHERE (DT >= {DT1.Text.ToRawTarikh()} And DT <= {DT2.Text.ToRawTarikh()})";
-
-                            
-                            var report = new StiReport();
-                            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.R_DP_DAYLY.mrt");
-                            report.Load(pathreport);
-                            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
-                            report.Dictionary.Databases.Clear();
-                            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
-
-                            report["FDATE_PARM"] = DT1.Text.ToRawTarikh().ToString();
-                            report["EDATE_PARM"] = DT2.Text.ToRawTarikh().ToString();
-                            report.Dictionary.Variables.Add("Q_PARM", _sqlquery_);
-
-                            (report.GetComponentByName("SAL_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
-                            (report.GetComponentByName("DT1_N") as StiText).Text = DT1.Text.ToString();
-                            (report.GetComponentByName("DT2_N") as StiText).Text = DT2.Text.ToString();
-                            (report.GetComponentByName("DT3_N") as StiText).Text = Tarikh.FullCurrentDate.ToString();
-
-                            //report.Render();
-
-                            //report.Show();
-
-                            new WINRPT(report, LABEL_WIN_HEADER.Content.ToStringNullSafe()).Show();
+                            Open_Report3();
                         }
                         break;
 
@@ -316,6 +271,8 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
                     case "TDBARG":
                         //OpenReport("TODAYBARGIRI");
+
+                        Open_Report4();
                         break;
 
                     default:
@@ -458,6 +415,109 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             //report.Show();
 
             new WINRPT(report, LABEL_WIN_HEADER.Content.ToStringNullSafe()).Show();
+        }
+
+
+        public void Open_Report2()
+        {
+            _sqlquery_ = $"SELECT FKNAME, FMNAME, FTNAME, NAMES, SHARH, MABL, nonames, TKNAME, TMNAME, TTNAME, DT, KK FROM dbo.PGET_HED_REP";
+
+
+            var report = new StiReport();
+            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.R_DP_DAYLY.mrt");
+            report.Load(pathreport);
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            report.Dictionary.Databases.Clear();
+            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
+
+            report["FDATE_PARM"] = DT1.Text.ToRawTarikh().ToString();
+            report["EDATE_PARM"] = DT2.Text.ToRawTarikh().ToString();
+            report.Dictionary.Variables.Add("Q_PARM", _sqlquery_);
+
+            var dt1 = $"از تاریخ {DT1.Text}";
+            var dt2 = $"تا تاریخ {DT2.Text}";
+
+
+            (report.GetComponentByName("SAL_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
+            (report.GetComponentByName("DT1_N") as StiText).Text = dt1;
+            (report.GetComponentByName("DT2_N") as StiText).Text = dt2;
+            (report.GetComponentByName("DT3_N") as StiText).Text = Tarikh.FullCurrentDate.ToString();
+
+            //report.Render();
+            //report.Show();
+
+            new WINRPT(report, LABEL_WIN_HEADER.Content.ToStringNullSafe()).Show();
+        }
+
+        public void Open_Report3()
+        {
+            _sqlquery_ = $"SELECT FKNAME, FMNAME, FTNAME, NAMES, SHARH, MABL, nonames, TKNAME, TMNAME, TTNAME, DT, KK FROM dbo.PGET_HED_REP WHERE (DT >= {DT1.Text.ToRawTarikh()} And DT <= {DT2.Text.ToRawTarikh()})";
+
+
+            var report = new StiReport();
+            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.R_DP_DAYLY.mrt");
+            report.Load(pathreport);
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            report.Dictionary.Databases.Clear();
+            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
+
+            report["FDATE_PARM"] = DT1.Text.ToRawTarikh().ToString();
+            report["EDATE_PARM"] = DT2.Text.ToRawTarikh().ToString();
+            report.Dictionary.Variables.Add("Q_PARM", _sqlquery_);
+
+            (report.GetComponentByName("SAL_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
+            (report.GetComponentByName("DT1_N") as StiText).Text = DT1.Text.ToString();
+            (report.GetComponentByName("DT2_N") as StiText).Text = DT2.Text.ToString();
+            (report.GetComponentByName("DT3_N") as StiText).Text = Tarikh.FullCurrentDate.ToString();
+
+            //report.Render();
+
+            //report.Show();
+
+            new WINRPT(report, LABEL_WIN_HEADER.Content.ToStringNullSafe()).Show();
+        }
+
+        public void Open_Report4()
+        {
+            _sqlquery_ = $"SELECT STUF_DEF.CODE, STUF_DEF.NAME, TCOD_VAHEDS.NAMES, SUM(INVO_LST.MEGH) AS smegh, SUM(INVO_LST.MEGHk) AS smeghk, INVO_LST.ANBAR, stuf_def_nfani.col9 FROM HEAD_LST INNER JOIN head_lst_log ON HEAD_LST.NUMBER = head_lst_log.NUMBER AND HEAD_LST.TAG = head_lst_log.TAGG INNER JOIN INVO_LST ON HEAD_LST.NUMBER = INVO_LST.NUMBER AND HEAD_LST.TAG = INVO_LST.TAG INNER JOIN TCOD_VAHEDS ON INVO_LST.VAHED_K = TCOD_VAHEDS.CODE INNER JOIN STUF_DEF ON INVO_LST.CODE = STUF_DEF.CODE LEFT OUTER JOIN stuf_def_nfani ON STUF_DEF.CODE = stuf_def_nfani.CODE WHERE (HEAD_LST.TAG <> 20) GROUP BY STUF_DEF.CODE, STUF_DEF.NAME, TCOD_VAHEDS.NAMES, INVO_LST.ANBAR, stuf_def_nfani.col9 HAVING (MAX(head_lst_log.UDATEF) = {DT2.Text.ToRawTarikh()})";
+
+
+            var report = new StiReport();
+            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.TODAYBARGIRI.mrt");
+            report.Load(pathreport);
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            report.Dictionary.Databases.Clear();
+            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
+
+            report.Dictionary.Variables.Add("Q_PARM", _sqlquery_);
+
+            (report.GetComponentByName("DATE_N") as StiText).Text = Tarikh.FullCurrentDate;
+            (report.GetComponentByName("USER_N") as StiText).Text = Baseknow.UUSER.ToString();
+
+            (report.GetComponentByName("TNAME") as StiText).Text = Baseknow.WIDTH_D.ToString();
+
+            //report["DATE_S"] = DT2.Text.ToString();
+            //report["DATE_F"] = DT2.Text.ToString();
+            //report["ANBAR_F"] = ANBAR.Text.ToString();
+
+            //report["AZDATE"] = Baseknow.YEA + "0101";
+            //report["ANBAR"] = ANBAR.SelectedValue.ToString();
+
+            //string TaTarikh = "99999999";
+            //if (!string.IsNullOrEmpty(DT2.Text.ToRawTarikh().ToStringNullSafe())) { TaTarikh = DT2.Text.ToRawTarikh(); }
+            //report["TADATE"] = TaTarikh;
+
+            //report["KALACODE"] = KALA.SelectedValue.ToString();
+            //((StiSqlSource)report.Dictionary.DataSources["KART_KALA"]).CommandTimeout = 300;
+
+            //Report_Open:
+            //(report.GetComponentByName("Table1_Cell17") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(2, ".", (int)Baseknow.DIG, ",", 3, true, false, ""); //MEG
+            //(report.GetComponentByName("Table1_Cell14") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(2, ".", (int)Baseknow.DIG, ",", 3, true, false, ""); //MEGK
+
+            //report.Render();
+            //report.Show();
+
+            new WINRPT(report, "شمارش روزانه").Show();
         }
     }
 }
