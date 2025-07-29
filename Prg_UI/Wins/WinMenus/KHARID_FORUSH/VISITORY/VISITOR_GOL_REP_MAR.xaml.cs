@@ -671,6 +671,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
         private void ReGetData()
         {
+            if (HES.SelectedValue is null)
+            {
+                return;
+            }
             string year = Baseknow.YEA.ToString(); // باید مقدار سال جاری رو از جای درست بگیری (مثلاً TextBox یا منبع دیتا)
             string dt1 = year + _selectedMonth.ToString("D2") + "01";
             string dt2 = year + _selectedMonth.ToString("D2") + "31";
