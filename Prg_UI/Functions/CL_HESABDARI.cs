@@ -8516,16 +8516,16 @@ namespace Prg_Proccessy.FUNCTIONS
         public static string GETUSERHES(int US)
         {
             string GETUSERHESRet = default;
-            var rst = dbms.DoGetDataSQL<string>("SELECT     hes FROM dbo.SALA_DTL WHERE     idd = " + US).ToList();
-            if (rst.Count > 0)
+            var rst = dbms.DoGetDataSQL<string>("SELECT hes FROM dbo.SALA_DTL WHERE idd = " + US).FirstOrDefault();
+            if (rst != null)
             {
-                if (IsNull(rst.FirstOrDefault()))
+                if (IsNull(rst))
                 {
                     GETUSERHESRet = "";
                 }
                 else
                 {
-                    GETUSERHESRet = rst.FirstOrDefault();
+                    GETUSERHESRet = rst;
                 }
             }
             return GETUSERHESRet;

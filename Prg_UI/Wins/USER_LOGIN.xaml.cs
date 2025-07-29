@@ -329,7 +329,7 @@ namespace Prg_UI.Wins
             //new HEAD_LST_RASID(3872d).ShowDialog();
 
             //new HAVALAH_ENTER(356d).ShowDialog(); 
-            //new WIN_TOZIE().ShowDialog(); //برگه خروج
+            new WIN_TOZIE().ShowDialog(); //برگه خروج
 
             //CL_MenuManager.OpenWinMenu(WinNameType.PGET_HED, this, default);
 
@@ -358,7 +358,7 @@ namespace Prg_UI.Wins
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FCODE_CUSTOMER, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ANBAR_F_AK_MOGUDI_ANBAR_LIST, this);
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
 
             //new WinEVENTS(37729).ShowDialog();
 #endif
