@@ -2052,91 +2052,8 @@ namespace Prg_Proccessy.SQLMODELS
         /// <summary>
         /// برای دیتاگرید فاکتور فروش مستقیم شماره 22
         /// </summary>
-        public class INVO_LST_FACTOR22: INotifyPropertyChanged, ICloneable
+        public class INVO_LST_FACTOR22: INotifyPropertyChanged, ICloneable, IEditableObject
         {
-            //, IEqualityComparer<INVO_LST_FACTOR22>
-            //var comparer = new INVO_LST_FACTOR22Comparer();
-
-            //var onlyInList1 = list1.Except(list2, comparer).ToList();
-            //var onlyInList2 = list2.Except(list1, comparer).ToList();
-            //var commonItems = list1.Intersect(list2, comparer).ToList();
-            //foreach (var item1 in list1)
-            //{
-            //    var item2 = list2.Find(x => x.id == item1.id);
-            //    if (item2 != null)
-            //    {
-            //        if (item1.MEGH != item2.MEGH)
-            //        {
-            //            Console.WriteLine($"MEGH value is different for id={item1.id}. List1: {item1.MEGH}, List2: {item2.MEGH}");
-            //        }
-            //        // Add more if conditions here to compare other properties...
-            //    }
-            //}
-            //public bool Equals(INVO_LST_FACTOR22 x, INVO_LST_FACTOR22 y)
-            //{
-            //    // Define the criteria for equality for the INVO_LST_FACTOR22 objects
-            //    return x.NUMBER == y.NUMBER && x.TAG == y.TAG && x.id == y.id /* other fields */;
-            //}
-            //public int GetHashCode(INVO_LST_FACTOR22 obj)
-            //{
-            //    // Define the hash code for the INVO_LST_FACTOR22 objects
-            //    return obj.NUMBER.GetHashCode() ^ obj.TAG.GetHashCode() ^ obj.id.GetHashCode() /* ^ other fields */;
-            //}
-
-            #region BING4
-            //public void CompareLists(List<INVO_LST_FACTOR22> list1, List<INVO_LST_FACTOR22> list2)
-            //{
-            //    // Find differences between lists
-            //    var differences = list1.Join(list2,
-            //        item1 => item1.id,
-            //        item2 => item2.id,
-            //        (item1, item2) => new { Item1 = item1, Item2 = item2 })
-            //        .Where(pair => !AreEqual(pair.Item1, pair.Item2))
-            //        .Select(pair => new
-            //        {
-            //            Id = pair.Item1.id,
-            //            DifferentProperties = GetDifferentProperties(pair.Item1, pair.Item2)
-            //        })
-            //        .ToList();
-
-            //    // Display the differences
-            //    foreach (var difference in differences)
-            //    {
-            //        Console.WriteLine($"Difference found in ID: {difference.Id}");
-            //        foreach (var property in difference.DifferentProperties)
-            //        {
-            //            Console.WriteLine($"- Property: {property.Key}, List1 Value: {property.Value.Item1}, List2 Value: {property.Value.Item2}");
-            //        }
-            //    }
-            //}
-
-            //private bool AreEqual(INVO_LST_FACTOR22 obj1, INVO_LST_FACTOR22 obj2)
-            //{
-            //    // Implement logic to compare all properties of INVO_LST_FACTOR22 objects
-            //    return obj1.NUMBER == obj2.NUMBER && obj1.TAG == obj2.TAG && obj1.id == obj2.id/* Add more comparisons for other properties */;
-            //}
-
-            //private Dictionary<string, Tuple<object, object>> GetDifferentProperties(INVO_LST_FACTOR22 obj1, INVO_LST_FACTOR22 obj2)
-            //{
-            //    // Get differences between properties of two objects
-            //    var properties = typeof(INVO_LST_FACTOR22).GetProperties().ToDictionary(p => p.Name);
-            //    var differentProperties = new Dictionary<string, Tuple<object, object>>();
-
-            //    foreach (var property in properties)
-            //    {
-            //        var value1 = property.Value.GetValue(obj1);
-            //        var value2 = property.Value.GetValue(obj2);
-
-            //        if (!value1.Equals(value2))
-            //        {
-            //            differentProperties.Add(property.Key, new Tuple<object, object>(value1, value2));
-            //        }
-            //    }
-
-            //    return differentProperties;
-            //}
-            #endregion
-
             public object Clone()
             {
                 return this.MemberwiseClone();
@@ -2165,6 +2082,66 @@ namespace Prg_Proccessy.SQLMODELS
                 //JAYO = 0;
                 FROM_A = false;
             }
+
+            private INVO_LST_FACTOR22 _backupCopy;
+            private bool _inEdit = false;
+            public void BeginEdit()
+            {
+                if (_inEdit) return;
+                _backupCopy = (INVO_LST_FACTOR22)this.Clone();
+                _inEdit = true;
+            }
+            public void EndEdit()
+            {
+                _backupCopy = null;
+                _inEdit = false;
+            }
+            public void CancelEdit()
+            {
+                if (!_inEdit || _backupCopy == null) return;
+
+                NUMBER = _backupCopy.NUMBER;
+                TAG = _backupCopy.TAG;
+                ANBAR = _backupCopy.ANBAR;
+                RADIF = _backupCopy.RADIF;
+                CODE = _backupCopy.CODE;
+                NAME_CODE = _backupCopy.NAME_CODE;
+                MEGH = _backupCopy.MEGH;
+                MEGHk = _backupCopy.MEGHk;
+                MEGH_MAR = _backupCopy.MEGH_MAR;
+                MANDAH = _backupCopy.MANDAH;
+                MABL = _backupCopy.MABL;
+                MABL_K = _backupCopy.MABL_K;
+                MABMAR = _backupCopy.MABMAR;
+                FROM_A = _backupCopy.FROM_A;
+                N_RASID = _backupCopy.N_RASID;
+                MEGH_R = _backupCopy.MEGH_R;
+                RADAH = _backupCopy.RADAH;
+                SANAD_NO = _backupCopy.SANAD_NO;
+                CUST_NO = _backupCopy.CUST_NO;
+                ANBARF = _backupCopy.ANBARF;
+                VAHED_K = _backupCopy.VAHED_K;
+                NAME_VAHED_K = _backupCopy.NAME_VAHED_K;
+                N_KOL = _backupCopy.N_KOL;
+                N_MOIN = _backupCopy.N_MOIN;
+                N_TAF = _backupCopy.N_TAF;
+                AVRAGE = _backupCopy.AVRAGE;
+                id = _backupCopy.id;
+                AVRAGE2 = _backupCopy.AVRAGE2;
+                IMBAA = _backupCopy.IMBAA;
+                TOTALARZ = _backupCopy.TOTALARZ;
+                VISITOR = _backupCopy.VISITOR;
+                TKHN = _backupCopy.TKHN;
+                JAY = _backupCopy.JAY;
+                JAYO = _backupCopy.JAYO;
+                CRT = _backupCopy.CRT;
+                UID = _backupCopy.UID;
+                CODEO = _backupCopy.CODEO;
+
+                _inEdit = false;
+            }
+
+
             private double? _number;
             public double? NUMBER { get => _number; set { if (_number == value) return; _number = value; OnPropertyChanged("NUMBER"); } }
 
@@ -2272,7 +2249,6 @@ namespace Prg_Proccessy.SQLMODELS
 
             private int? _uid;
             public int? UID { get => _uid; set { if (_uid == value) return; _uid = value; OnPropertyChanged("UID"); } }
-
 
             #region CUSTOM_UnBOUND_FIELDS
             private string _codeo;

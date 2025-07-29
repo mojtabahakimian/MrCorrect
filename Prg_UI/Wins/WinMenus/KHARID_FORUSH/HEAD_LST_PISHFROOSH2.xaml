@@ -115,6 +115,25 @@
                 </DataGridComboBoxColumn>
 
                 <DataGridTextColumn  x:Name="CODE_COLUMN" Binding="{Binding CODE,UpdateSourceTrigger=LostFocus}" Header="کد کالا" Width="auto" MinWidth="50" IsReadOnly="True"  Visibility="Hidden" />
+
+                <DataGridTextColumn Header="کد کالا" Width="80" MinWidth="80" Binding="{Binding CODE}" IsReadOnly="True">
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                            <Setter Property="Focusable" Value="False"/>
+                            <Setter Property="KeyboardNavigation.IsTabStop" Value="False"/>
+                            <Setter Property="IsTabStop"  Value="False"/>
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+
+                <!--<DataGridTemplateColumn x:Name="CODE_COLUMN2" Header="کد کالا" Width="80" MinWidth="80" IsReadOnly="True" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding CODE}" Focusable="False" IsHitTestVisible="False"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>-->
+
                 <DataGridTextColumn x:Name="NAME_CODE_COLUMN" Binding="{Binding NAME_CODE,UpdateSourceTrigger=LostFocus}"  Header="نام کالا"   Visibility="Visible"  Width="auto"   MinWidth="180">
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
