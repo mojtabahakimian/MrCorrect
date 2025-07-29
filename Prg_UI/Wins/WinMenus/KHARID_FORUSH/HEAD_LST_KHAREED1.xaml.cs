@@ -3239,7 +3239,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             JF.Text = JJKOL.Text; //جمع کل فاکتور برای فسمت روی فاکتور
             Text117.Text = SUM_OF_MEGH_K.ToString(); //جمع مقادیر :
 
-            NCHK.Text = PAY_GETP_SUB_DATA.Sum(x => x.MABL)?.ToString(); //جمع مبالغ چکهای پرداختی
+            NCHK.Text = (PAY_GETP_SUB_DATA.Sum(x => x.MABL) ?? 0).ToString(); //جمع مبالغ چکهای پرداختی
 
             //مبلغ قابل پرداخت: //= [JF] + [HKH] - [NTKHFIF] + [MBAA]
             var rghabel = Convert.ToInt64(JF.Text) + Convert.ToInt64(HKH.Text) - Convert.ToInt64(NTKHFIF.Text) + Convert.ToInt64(MBAA.Text);
@@ -3612,7 +3612,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     {
                         PAY_GETP_SUB_DATA.Add(item);
                     }
-                    NCHK.Text = PAY_GETP_SUB_DATA.Sum(x => x.MABL)?.ToString(); //جمع مبالغ چکهای پرداختی
+                    NCHK.Text = (PAY_GETP_SUB_DATA?.Sum(x => x.MABL) ?? 0).ToString(); //جمع مبالغ چکهای پرداختی
                 }
             }
         }

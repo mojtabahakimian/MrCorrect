@@ -36,6 +36,7 @@ using Rpts;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_UI.Wins.WinMenus.CONFIGS;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
+using Prg_UI.Wins.WinMenus.BARNAME_RIZI;
 
 namespace Functions
 {
@@ -742,7 +743,11 @@ namespace Functions
             /// <summary>
             /// مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه (در تاریخ برگشت)
             /// </summary>
-            VISITOR_GOL_REP_MAR
+            VISITOR_GOL_REP_MAR,
+            /// <summary>
+            /// نمودار فروش کلی
+            /// </summary>
+            AMAR_FROOSH_KOL
         }
         #endregion
 
@@ -752,6 +757,8 @@ namespace Functions
         {
             switch (_TYPE_)
             {
+                case WinNameType.AMAR_FROOSH_KOL: /* نمودار فروش کلی */ CL_LMethods.OpenWindow(OWNERWIN, new AMAR_FROOSH_KOL(), isModalDialog: false, allowMultipleInstances: false); break;
+
                 case WinNameType.WIN_TOZIE: //تنظیم لیست دستی توضیع
                     CL_LMethods.OpenWindow(OWNERWIN, new WIN_TOZIE(), isModalDialog: false, allowMultipleInstances: false);
                     break;
@@ -1437,32 +1444,32 @@ namespace Functions
 
                 case WinNameType.F_MENU_DATE_VISIT_VISITKALMA: //گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در تاریخ برگشت)
                     CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_DATE_visit("VISITKALMA"), default, false);
-                    break;            
-                    
+                    break;
+
                 case WinNameType.flist_porsant_factors: //لیست ویزیتور ها و پورسانت به تفکیک فاکتور
                     CL_LMethods.OpenWindow(OWNERWIN, new flist_porsant_factors(""), default, false);
-                    break;   
-                    
+                    break;
+
                 case WinNameType.F_MENU_DATE_VISIT_VISITONE: //لیست فروش ویزیتور به تفکیک فاکتور
                     CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_DATE_visit("VISITONE"), default, false);
-                    break;  
-                    
+                    break;
+
                 case WinNameType.F_MENU_AJNAS: //چاپ لیست کالا ها جهت ویزیت
                     CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_AJNAS(), default, false);
-                    break;   
-                    
+                    break;
+
                 case WinNameType.VISITOR_GOL_REP: //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه
                     CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_GOL_REP(), default, false);
-                    break; 
-                    
+                    break;
+
                 case WinNameType.VISITOR_GOL_GRP_REP: //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه
                     CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_GOL_GRP_REP(), default, false);
-                    break;     
-                    
+                    break;
+
                 case WinNameType.VISITOR_GOL_GRP_REP_MAR: //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه (در تاریخ برگشت)
                     CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_GOL_GRP_REP_MAR(), default, false);
-                    break;             
-                    
+                    break;
+
                 case WinNameType.VISITOR_GOL_REP_MAR: //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه (در تاریخ برگشت)
                     CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_GOL_REP_MAR(), default, false);
                     break;
