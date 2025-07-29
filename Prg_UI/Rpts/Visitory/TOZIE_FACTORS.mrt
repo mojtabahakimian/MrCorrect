@@ -14,7 +14,7 @@
     <DataSources isList="true" count="2">
       <FACTOR_DATA Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>FACTOR_DATA</Alias>
-        <Columns isList="true" count="108">
+        <Columns isList="true" count="113">
           <value>ORIGINAL,NUMBER1,NUMBER1,NUMBER1,System.Double,e16a0d518151450194bb89afb633c3e3</value>
           <value>ORIGINAL,NUMBER,NUMBER,NUMBER,System.Double,bb14064ebd3249f2a2f534f15fb005fc</value>
           <value>ORIGINAL,DATE_N,DATE_N,DATE_N,System.Int64,_x0039_d342b58d03049d4a3aeb60b85268181</value>
@@ -123,6 +123,11 @@
           <value>Signatory2_Name,System.String</value>
           <value>Signatory3_Role,System.String</value>
           <value>Signatory3_Name,System.String</value>
+          <value>InvoiceNumber,System.Double</value>
+          <value>ItemCode,System.String</value>
+          <value>ItemWeight,System.Double</value>
+          <value>ItemQuantity,System.Double</value>
+          <value>CalculatedTotalWeight,System.Double</value>
         </Columns>
         <CommandTimeout>30</CommandTimeout>
         <Dictionary isRef="1" />
@@ -131,120 +136,480 @@
         <NameInSource>MS SQL</NameInSource>
         <Parameters isList="true" count="0" />
         <SqlCommand>-- CTE (Common Table Expression) برای محاسبات اولیه
-WITH InvoiceCalculations AS (
-SELECT
-	NUMBER,
+-- CTE برای محاسبات اولیه فاکتور
+WITH InvoiceCalculations
+AS (SELECT NUMBER,
 	TAG,
 	SUM(ISNULL(MABL_K, 0)) AS InvoiceSubTotal,
 	SUM(ISNULL(sd.VAZN, 0) * ISNULL(i.MEGHk, 0)) AS TotalWeight
 	FROM dbo.INVO_LST i
-    INNER JOIN dbo.STUF_DEF sd ON i.CODE = sd.CODE
-    WHERE TAG = 2 -- بر اساس کوئری شما برای جمع سطرها، فاکتورهای فروش تگ 2 دارند
-    GROUP BY NUMBER, TAG
-)
+        INNER JOIN dbo.STUF_DEF sd
+            ON i.CODE = sd.CODE
+    WHERE TAG = 2
+    GROUP BY NUMBER,
+             TAG)
 
 -- SELECT اصلی که تمام اطلاعات را برای گزارش استخراج می‌کند
-SELECT 
-	h.NUMBER1, h.NUMBER, h.DATE_N, i.NUMBER AS INUMBER, h.HTAG, i.ANBAR, i.RADIF, i.CODE, i.MEGH, i.MEGHk, i.MABL, i.MABL_K, sd.NAME, ta.NAMES, tv.NAMES AS VNAMES, h.TAH, h.MOLAH, ck.CUSTKNAME, d.DEPNAME, s.SHNAME, ch.NAME AS HESAB, ch.ADDRESS, ch.TEL, ISNULL(sd.NAME, N' ') + N' ' + ISNULL(i.MANDAH, N' ') AS KALA, h.CUST_NO, i.N_KOL, i.N_MOIN, h.FNUMCO, ch.ECODE, ch.PCODE, ch.IYALAT, ch.MCODEM, ch.CITY, i.MABL_K - i.N_MOIN AS mabkbt, i.IMBAA, i.MABL_K - i.N_MOIN + i.IMBAA AS mabkn, ch.CODE_E, h.TAKHFIF, h.MBAA, sd.N_FANI, h.SADER, h.ANBARF AS ANBARFF, odt.REQUEST_NO, odt.BARNAMEH, odt.DRIVER, odt.DRIVER_MOB, odt.CAMIUN_NUM, odt.MAGHSAD, odt.CAM_KHALY, odt.CAM_POOR, odt.TOZIH, odt.CAMIUN, ods.CODE AS CODEG, ods.CAM_KHALY AS CAM_KHALYG, ods.CAM_POOR AS CAM_POORG, ods.MEGHk AS MEGHkG, ods.TOZIH AS TOZIHG, ods.VAZNH, sd_1.NAME AS NAMEG, h.SHARAYET, d.DEPART, i.TKHN, h.MAS, h.HTAG AS TAG, sdtl.EMZA AS EMZA1, sdtl_1.EMZA AS EMZA2, sdtl_2.EMZA AS EMZA3, h.SGN1usid, h.sgn2usid, h.sgn3usid, hlst.SGN1, hlst.SGN2, hlst.SGN3, hlst.SGN4,
-    
-	-- محاسبه کل مانده حساب مشتری
-	(SELECT SUM(ISNULL(MAN.BED, 0) - ISNULL(MAN.BES, 0)) FROM dbo.DEED_DTL AS MAN WHERE MAN.HES = h.CUST_NO) AS TotalAccountBalance,
-    
-    -- استخراج اطلاعات ویزیتور بر اساس تنظیمات
-    CASE WHEN SUBSTRING(saz.OPTIONSS, 26, 1) = '5' THEN 'ويزيتور: ' + ISNULL(visitor_hesab.NAME, '') ELSE NULL END AS VisitorLabel,
-    CASE WHEN SUBSTRING(saz.OPTIONSS, 26, 1) = '5' THEN 'تلفن ويزيتور: ' + ISNULL(visitor_hesab.TEL, '') ELSE NULL END AS VisitorTelLabel,
-    
-    -- تجمیع اطلاعات چک‌ها یا نمایش شرایط فاکتور
-    ISNULL(CheckDetails.CheckDescription, h.SHARAYET) AS DescriptionText,
+SELECT h.NUMBER1,
+	h.NUMBER,
+	h.DATE_N,
+	i.NUMBER AS INUMBER,
+	h.HTAG,
+	i.ANBAR,
+	i.RADIF,
+	i.CODE,
+	i.MEGH,
+	i.MEGHk,
+	i.MABL,
+	i.MABL_K,
+	sd.NAME,
+	ta.NAMES,
+	tv.NAMES AS VNAMES,
+	h.TAH,
+	h.MOLAH,
+	ck.CUSTKNAME,
+	d.DEPNAME,
+	s.SHNAME,
+	ch.NAME AS HESAB,
+	ch.ADDRESS,
+	ch.TEL,
+	ISNULL(sd.NAME, N' ') + N' ' + ISNULL(i.MANDAH, N' ') AS KALA,
+	h.CUST_NO,
+	i.N_KOL,
+	i.N_MOIN,
+	h.FNUMCO,
+	ch.ECODE,
+	ch.PCODE,
+	ch.IYALAT,
+	ch.MCODEM,
+	ch.CITY,
+	i.MABL_K - i.N_MOIN AS mabkbt,
+	i.IMBAA,
+	i.MABL_K - i.N_MOIN + i.IMBAA AS mabkn,
+	ch.CODE_E,
+	h.TAKHFIF,
+	h.MBAA,
+	sd.N_FANI,
+	h.SADER,
+	h.ANBARF AS ANBARFF,
+	odt.REQUEST_NO,
+	odt.BARNAMEH,
+	odt.DRIVER,
+	odt.DRIVER_MOB,
+	odt.CAMIUN_NUM,
+	odt.MAGHSAD,
+	odt.CAM_KHALY,
+	odt.CAM_POOR,
+	odt.TOZIH,
+	odt.CAMIUN,
+	ods.CODE AS CODEG,
+	ods.CAM_KHALY AS CAM_KHALYG,
+	ods.CAM_POOR AS CAM_POORG,
+	ods.MEGHk AS MEGHkG,
+	ods.TOZIH AS TOZIHG,
+	ods.VAZNH,
+	sd_1.NAME AS NAMEG,
+	h.SHARAYET,
+	d.DEPART,
+	i.TKHN,
+	h.MAS,
+	h.HTAG AS TAG,
+	sdtl.EMZA AS EMZA1,
+	sdtl_1.EMZA AS EMZA2,
+	sdtl_2.EMZA AS EMZA3,
+	h.SGN1usid,
+	h.sgn2usid,
+	h.sgn3usid,
+	hlst.SGN1,
+	hlst.SGN2,
+	hlst.SGN3,
+	hlst.SGN4,
+	h.NUMBER AS InvoiceNumber,
+	sd.CODE AS ItemCode,
+	sd.VAZN AS ItemWeight,
+	i.MEGHk AS ItemQuantity,
+	calcs.TotalWeight AS CalculatedTotalWeight,
+	CASE
+           WHEN ISNULL(calcs.TotalWeight, 0) &gt; 0 THEN
+               N'وزن كل به كيلو : ' + CAST(ROUND(calcs.TotalWeight, 0) AS NVARCHAR(50))
+           ELSE
+               N'وزن محاسبه نشد'
+       END AS TotalWeightText,
+       -- محاسبه کل مانده حساب مشتری
+       (
+SELECT SUM(ISNULL(MAN.BED, 0) - ISNULL(MAN.BES, 0))
+	FROM dbo.DEED_DTL AS MAN
+	WHERE MAN.HES = h.CUST_NO
+       ) AS TotalAccountBalance,
 
-    ---------------------------------------------------------------------------------
-    -- ستون‌های محاسباتی نهایی معادل منطق کد #C
-    ---------------------------------------------------------------------------------
-    
-    ISNULL(calcs.InvoiceSubTotal, 0) AS SumOfLines,
-    ISNULL(h.TAKHFIF, 0) AS DiscountAmount,
-    ISNULL(h.MABL_HAZ, 0) AS ServicesAmount,
-    ISNULL(h.MBAA, 0) AS TaxAmount,
-    (CASE WHEN ISNULL(h.TAKHFIF, 0) &gt; 0 AND ISNULL(calcs.InvoiceSubTotal, 0) &gt; 0 THEN CAST(CAST(h.TAKHFIF * 100.0 / calcs.InvoiceSubTotal AS DECIMAL(10, 2)) AS NVARCHAR(20)) + N' % تخفيف:' ELSE N'تخفيف:' END) AS DiscountLabel,
-    (CASE WHEN ISNULL(h.VAS, 1) = 1 THEN ISNULL(calcs.InvoiceSubTotal, 0) + ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) ELSE ISNULL(calcs.InvoiceSubTotal, 0) - ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) END) AS PayableAmount,
-    (ISNULL(h.M_NAGHD, 0) + ISNULL(h.MABL_VAR, 0) + ISNULL(h.MABL_HAV, 0) + ISNULL(CheckDetails.TotalCheckAmount, 0)) AS TotalPaidAmount,
-    ((CASE WHEN ISNULL(h.VAS, 1) = 1 THEN ISNULL(calcs.InvoiceSubTotal, 0) + ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) ELSE ISNULL(calcs.InvoiceSubTotal, 0) - ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) END) - (ISNULL(h.M_NAGHD, 0) + ISNULL(h.MABL_VAR, 0) + ISNULL(h.MABL_HAV, 0) + ISNULL(CheckDetails.TotalCheckAmount, 0))) AS InvoiceBalance,
-    (CASE WHEN ISNULL(h.VAS, 1) = 1 THEN ISNULL(calcs.InvoiceSubTotal, 0) + ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) ELSE ISNULL(calcs.InvoiceSubTotal, 0) - ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) END) AS AmountToWords,
-CASE WHEN (SELECT SUM(ISNULL(MAN.BED, 0) - ISNULL(MAN.BES, 0)) FROM dbo.DEED_DTL AS MAN WHERE MAN.HES = h.CUST_NO) IS NULL THEN '0' ELSE CASE WHEN ((SELECT SUM(ISNULL(MAN.BED, 0) - ISNULL(MAN.BES, 0)) FROM dbo.DEED_DTL AS MAN WHERE MAN.HES = h.CUST_NO) - (CASE WHEN ISNULL(h.VAS, 1) = 1 THEN ISNULL(calcs.InvoiceSubTotal, 0) + ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) ELSE ISNULL(calcs.InvoiceSubTotal, 0) - ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) END)) &gt;= 0 THEN REPLACE(CONVERT(VARCHAR, CAST(ABS((SELECT SUM(ISNULL(MAN.BED, 0) - ISNULL(MAN.BES, 0)) FROM dbo.DEED_DTL AS MAN WHERE MAN.HES = h.CUST_NO) - (CASE WHEN ISNULL(h.VAS, 1) = 1 THEN ISNULL(calcs.InvoiceSubTotal, 0) + ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) ELSE ISNULL(calcs.InvoiceSubTotal, 0) - ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) END)) AS MONEY), 1), '.00', '') + N' ريال بدهكار' ELSE REPLACE(CONVERT(VARCHAR, CAST(ABS((SELECT SUM(ISNULL(MAN.BED, 0) - ISNULL(MAN.BES, 0)) FROM dbo.DEED_DTL AS MAN WHERE MAN.HES = h.CUST_NO) - (CASE WHEN ISNULL(h.VAS, 1) = 1 THEN ISNULL(calcs.InvoiceSubTotal, 0) + ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) ELSE ISNULL(calcs.InvoiceSubTotal, 0) - ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) END)) AS MONEY), 1), '.00', '') + N' ريال بستانكار' END END AS PreviousBalanceText,
-    saz.TFCODE_E AS ServicesLabelText,
-    CAST(saz.ARSESH AS NVARCHAR(10)) + N'% ماليات و عوارض:' AS TaxLabelText,
-    CASE WHEN SUBSTRING(saz.OPTIONSS, 17, 1) = '5' THEN PreviousInvoices.FormattedString ELSE NULL END AS PreviousInvoicesText,
-    CASE WHEN SUBSTRING(saz.OPTIONSS, 42, 1) = '5' THEN PaymentScenarios.FormattedString ELSE NULL END AS PaymentsText,
-    CASE WHEN SUBSTRING(saz.OPTIONSS, 18, 1) = '5' AND ISNULL(calcs.TotalWeight, 0) &gt; 0 THEN N'وزن كل به كيلو : ' + CAST(ROUND(calcs.TotalWeight, 0) AS NVARCHAR(50)) ELSE NULL END AS TotalWeightText,
+       -- استخراج اطلاعات ویزیتور بر اساس تنظیمات
+       CASE
+           WHEN SUBSTRING(saz.OPTIONSS, 26, 1) = '5' THEN
+               'ويزيتور: ' + ISNULL(visitor_hesab.NAME, '')
+           ELSE
+               NULL
+       END AS VisitorLabel,
+       CASE
+           WHEN SUBSTRING(saz.OPTIONSS, 26, 1) = '5' THEN
+               'تلفن ويزيتور: ' + ISNULL(visitor_hesab.TEL, '')
+           ELSE
+               NULL
+       END AS VisitorTelLabel,
 
-    ---------------------------------------------------------------------------------
-    -- بخش جدید: اضافه کردن اطلاعات امضا کنندگان
-    ---------------------------------------------------------------------------------
-    CASE WHEN hlst.SGN1 = 1 THEN dbo.Getusersemat(h.SGN1usid, 'FFR_FROOSHTX') ELSE NULL END AS Signatory1_Role,
-    CASE WHEN hlst.SGN1 = 1 THEN dbo.GETHESNAME(dbo.GETUSERHES(h.SGN1usid)) ELSE NULL END AS Signatory1_Name,
-    CASE WHEN hlst.SGN2 = 1 THEN dbo.Getusersemat(h.sgn2usid, 'FFR_HESABTX') ELSE NULL END AS Signatory2_Role,
-    CASE WHEN hlst.SGN2 = 1 THEN dbo.GETHESNAME(dbo.GETUSERHES(h.sgn2usid)) ELSE NULL END AS Signatory2_Name,
-    CASE WHEN hlst.SGN3 = 1 THEN dbo.Getusersemat(h.sgn3usid, 'FFR_MODIRTX') ELSE NULL END AS Signatory3_Role,
-    CASE WHEN hlst.SGN3 = 1 THEN dbo.GETHESNAME(dbo.GETUSERHES(h.sgn3usid)) ELSE NULL END AS Signatory3_Name
+       -- تجمیع اطلاعات چک‌ها یا نمایش شرایط فاکتور
+       ISNULL(CheckDetails.CheckDescription, h.SHARAYET) AS DescriptionText,
 
+       ---------------------------------------------------------------------------------
+       -- ستون‌های محاسباتی نهایی معادل منطق کد #C
+       ---------------------------------------------------------------------------------
+
+       ISNULL(calcs.InvoiceSubTotal, 0) AS SumOfLines,
+       ISNULL(h.TAKHFIF, 0) AS DiscountAmount,
+       ISNULL(h.MABL_HAZ, 0) AS ServicesAmount,
+       ISNULL(h.MBAA, 0) AS TaxAmount,
+       (CASE
+            WHEN ISNULL(h.TAKHFIF, 0) &gt; 0
+                 AND ISNULL(calcs.InvoiceSubTotal, 0) &gt; 0 THEN
+                CAST(CAST(h.TAKHFIF * 100.0 / calcs.InvoiceSubTotal AS DECIMAL(10, 2)) AS NVARCHAR(20)) + N' % تخفيف:'
+            ELSE
+                N'تخفيف:'
+        END
+       ) AS DiscountLabel,
+       (CASE
+            WHEN ISNULL(h.VAS, 1) = 1 THEN
+                ISNULL(calcs.InvoiceSubTotal, 0) + ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0)
+            ELSE
+                ISNULL(calcs.InvoiceSubTotal, 0) - ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0)
+        END
+       ) AS PayableAmount,
+       (ISNULL(h.M_NAGHD, 0) + ISNULL(h.MABL_VAR, 0) + ISNULL(h.MABL_HAV, 0) + ISNULL(CheckDetails.TotalCheckAmount, 0)) AS TotalPaidAmount,
+       ((CASE
+             WHEN ISNULL(h.VAS, 1) = 1 THEN
+                 ISNULL(calcs.InvoiceSubTotal, 0) + ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0)
+             ELSE
+                 ISNULL(calcs.InvoiceSubTotal, 0) - ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0)
+         END
+        )
+        - (ISNULL(h.M_NAGHD, 0) + ISNULL(h.MABL_VAR, 0) + ISNULL(h.MABL_HAV, 0)
+           + ISNULL(CheckDetails.TotalCheckAmount, 0)
+          )
+       ) AS InvoiceBalance,
+       (CASE
+            WHEN ISNULL(h.VAS, 1) = 1 THEN
+                ISNULL(calcs.InvoiceSubTotal, 0) + ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0)
+            ELSE
+                ISNULL(calcs.InvoiceSubTotal, 0) - ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0)
+        END
+       ) AS AmountToWords,
+
+       -- نمایش مانده حساب قبلی (به‌روزرسانی شده)
+       CASE
+           WHEN
+           (
+SELECT SUM(BED - BES)
+	FROM dbo.DEED_DTL
+	WHERE HES = h.CUST_NO
+	AND N_S &lt;&gt; h.N_S
+           ) IS NULL THEN
+               '0'
+           ELSE
+               CASE
+                   WHEN
+                   (
+SELECT SUM(BED - BES)
+	FROM dbo.DEED_DTL
+	WHERE HES = h.CUST_NO
+	AND N_S &lt; h.N_S
+                   ) &gt;= 0 THEN
+                       REPLACE(CONVERT(   VARCHAR,
+                                          CAST(
+                                          (
+SELECT SUM(BED - BES)
+	FROM dbo.DEED_DTL
+	WHERE HES = h.CUST_NO
+	AND N_S &lt;&gt; h.N_S
+                                          ) AS MONEY),
+                                          1
+                                      ),
+                               '.00',
+                               ''
+                              ) + N' ريال بدهكار'
+                   ELSE
+                       REPLACE(CONVERT(VARCHAR,
+                                       CAST(ABS(
+                                            (
+SELECT SUM(BED - BES)
+	FROM dbo.DEED_DTL
+	WHERE HES = h.CUST_NO
+	AND N_S &lt;&gt; h.N_S
+                                            )
+                                               ) AS MONEY),
+                                       1
+                                      ),
+                               '.00',
+                               ''
+                              ) + N' ريال بستانكار'
+               END
+       END AS PreviousBalanceText,
+       saz.TFCODE_E AS ServicesLabelText,
+       CAST(saz.ARSESH AS NVARCHAR(10)) + N'% ماليات و عوارض:' AS TaxLabelText,
+       CASE
+           WHEN SUBSTRING(saz.OPTIONSS, 17, 1) = '5' THEN
+               PreviousInvoices.FormattedString
+           ELSE
+               NULL
+       END AS PreviousInvoicesText,
+       CASE
+           WHEN SUBSTRING(saz.OPTIONSS, 42, 1) = '5' THEN
+               PaymentScenarios.FormattedString
+           ELSE
+               NULL
+       END AS PaymentsText,
+       CASE
+           WHEN SUBSTRING(saz.OPTIONSS, 18, 1) = '5'
+                AND ISNULL(calcs.TotalWeight, 0) &gt; 0 THEN
+               N'وزن كل به كيلو : ' + CAST(ROUND(calcs.TotalWeight, 0) AS NVARCHAR(50))
+           ELSE
+               NULL
+       END AS TotalWeightText,
+
+       ---------------------------------------------------------------------------------
+       -- بخش جدید: اضافه کردن اطلاعات امضا کنندگان
+       ---------------------------------------------------------------------------------
+       CASE
+           WHEN hlst.SGN1 = 1 THEN
+               dbo.Getusersemat(h.SGN1usid, 'FFR_FROOSHTX')
+           ELSE
+               NULL
+       END AS Signatory1_Role,
+       CASE
+           WHEN hlst.SGN1 = 1 THEN
+               dbo.GETHESNAME(dbo.GETUSERHES(h.SGN1usid))
+           ELSE
+               NULL
+       END AS Signatory1_Name,
+       CASE
+           WHEN hlst.SGN2 = 1 THEN
+               dbo.Getusersemat(h.sgn2usid, 'FFR_HESABTX')
+           ELSE
+               NULL
+       END AS Signatory2_Role,
+       CASE
+           WHEN hlst.SGN2 = 1 THEN
+               dbo.GETHESNAME(dbo.GETUSERHES(h.sgn2usid))
+           ELSE
+               NULL
+       END AS Signatory2_Name,
+       CASE
+           WHEN hlst.SGN3 = 1 THEN
+               dbo.Getusersemat(h.sgn3usid, 'FFR_MODIRTX')
+           ELSE
+               NULL
+       END AS Signatory3_Role,
+       CASE
+           WHEN hlst.SGN3 = 1 THEN
+               dbo.GETHESNAME(dbo.GETUSERHES(h.sgn3usid))
+           ELSE
+               NULL
+       END AS Signatory3_Name
 FROM dbo.STUF_DEF AS sd
-RIGHT OUTER JOIN dbo.SHIFT AS s
-    RIGHT OUTER JOIN dbo.DEPART AS d
-        RIGHT OUTER JOIN dbo.HEAD_LST AS hlst
-            INNER JOIN dbo.INVO_LST AS i
-                INNER JOIN dbo.TCOD_ANBAR AS ta ON i.ANBAR = ta.CODE
-                INNER JOIN HEAD_BACK_ANBAR AS h ON i.NUMBER = h.NUMBER AND i.TAG = h.HTAG
-            ON hlst.NUMBER = h.NUMBER AND hlst.TAG = h.TAG
-        ON d.DEPATMAN = h.DEPATMAN
-        LEFT OUTER JOIN dbo.CUSTKIND AS ck ON h.CUST_KIND = ck.CUST_COD
-    ON s.SHIFT_ID = h.SHIFT
-LEFT OUTER JOIN dbo.OTHER_DTL AS odt ON h.NUMBER = odt.NUMBER AND h.HTAG = odt.TAG
-LEFT OUTER JOIN dbo.SALA_DTL AS sdtl_2 ON h.sgn3usid = sdtl_2.IDD
-LEFT OUTER JOIN dbo.SALA_DTL AS sdtl_1 ON h.sgn2usid = sdtl_1.IDD
-LEFT OUTER JOIN dbo.SALA_DTL AS sdtl ON h.SGN1usid = sdtl.IDD
-LEFT OUTER JOIN dbo.STUF_DEF AS sd_1
-    INNER JOIN dbo.OTHER_DTL_SUB AS ods ON sd_1.CODE = ods.CODE
-ON i.CODE = ods.CODE AND i.NUMBER = ods.NUMBER AND i.TAG = ods.TAGG
-LEFT OUTER JOIN CUST_HESAB AS ch ON h.CUST_NO = ch.hes
-LEFT OUTER JOIN dbo.TCOD_VAHEDS AS tv ON i.VAHED_K = tv.CODE
-ON sd.CODE = i.CODE
-LEFT JOIN dbo.VISITOR_DTL AS vdtl ON h.NUMBER = vdtl.NUMBER AND vdtl.TAG = 2
-LEFT JOIN dbo.CUST_HESAB AS visitor_hesab ON vdtl.CUST_NO = visitor_hesab.hes
-CROSS JOIN dbo.SAZMAN AS saz
-LEFT JOIN InvoiceCalculations AS calcs ON h.NUMBER = calcs.NUMBER AND h.HTAG = calcs.TAG
-OUTER APPLY (
-SELECT
-	'چكهاي دريافت شده ' + CAST(COUNT(*) AS NVARCHAR(10)) + ' فقره جمعاًبه مبلغ :' + REPLACE(CONVERT(VARCHAR, CAST(SUM(p.MABL) AS MONEY), 1), '.00', '') + ' ريال ' + STUFF(( SELECT 'ـ سريال:' + ISNULL(CAST(CAST(p2.N_SERI AS BIGINT) AS NVARCHAR(50)), '') + ' بانك:' + ISNULL(b.NAMES, '') + ' شعبه:' + LTRIM(RTRIM(ISNULL(p2.SHOBEH, ''))) FROM dbo.PAY_GETD p2 INNER JOIN dbo.TCOD_BANKS b ON p2.BANK = b.CODE WHERE p2.NUMBER = h.NUMBER AND p2.TAG = h.HTAG AND (p2.N_KOL IS NULL OR p2.N_KOL &lt;&gt; 911) FOR XML PATH('')), 1, 0, '') AS CheckDescription,
-        SUM(p.MABL) AS TotalCheckAmount
+    RIGHT OUTER JOIN dbo.SHIFT AS s
+        RIGHT OUTER JOIN dbo.DEPART AS d
+            RIGHT OUTER JOIN dbo.HEAD_LST AS hlst
+                INNER JOIN dbo.INVO_LST AS i
+                    INNER JOIN dbo.TCOD_ANBAR AS ta
+                        ON i.ANBAR = ta.CODE
+                    INNER JOIN HEAD_BACK_ANBAR AS h
+                        ON i.NUMBER = h.NUMBER
+                           AND i.TAG = h.HTAG
+                    ON hlst.NUMBER = h.NUMBER
+                       AND hlst.TAG = h.TAG
+                ON d.DEPATMAN = h.DEPATMAN
+            LEFT OUTER JOIN dbo.CUSTKIND AS ck
+                ON h.CUST_KIND = ck.CUST_COD
+            ON s.SHIFT_ID = h.SHIFT
+        LEFT OUTER JOIN dbo.OTHER_DTL AS odt
+            ON h.NUMBER = odt.NUMBER
+               AND h.HTAG = odt.TAG
+        LEFT OUTER JOIN dbo.SALA_DTL AS sdtl_2
+            ON h.sgn3usid = sdtl_2.IDD
+        LEFT OUTER JOIN dbo.SALA_DTL AS sdtl_1
+            ON h.sgn2usid = sdtl_1.IDD
+        LEFT OUTER JOIN dbo.SALA_DTL AS sdtl
+            ON h.SGN1usid = sdtl.IDD
+        LEFT OUTER JOIN dbo.STUF_DEF AS sd_1
+            INNER JOIN dbo.OTHER_DTL_SUB AS ods
+                ON sd_1.CODE = ods.CODE
+            ON i.CODE = ods.CODE
+               AND i.NUMBER = ods.NUMBER
+               AND i.TAG = ods.TAGG
+        LEFT OUTER JOIN CUST_HESAB AS ch
+            ON h.CUST_NO = ch.hes
+        LEFT OUTER JOIN dbo.TCOD_VAHEDS AS tv
+            ON i.VAHED_K = tv.CODE
+        ON sd.CODE = i.CODE
+    LEFT JOIN dbo.VISITOR_DTL AS vdtl
+        ON h.NUMBER = vdtl.NUMBER
+           AND vdtl.TAG = 2
+    LEFT JOIN dbo.CUST_HESAB AS visitor_hesab
+        ON vdtl.CUST_NO = visitor_hesab.hes
+    CROSS JOIN dbo.SAZMAN AS saz
+    LEFT JOIN InvoiceCalculations AS calcs
+        ON h.NUMBER = calcs.NUMBER
+           AND h.HTAG = calcs.TAG
+    OUTER APPLY
+(
+SELECT 'چكهاي دريافت شده ' + CAST(COUNT(*) AS NVARCHAR(10)) + ' فقره جمعاًبه مبلغ :'
+           + REPLACE(CONVERT(VARCHAR, CAST(SUM(p.MABL) AS MONEY), 1), '.00', '') + ' ريال '
+           + STUFF(
+             (
+SELECT 'ـ سريال:' + ISNULL(CAST(CAST(p2.N_SERI AS BIGINT) AS NVARCHAR(50)), '') + ' بانك:'
+                        + ISNULL(b.NAMES, '') + ' شعبه:' + LTRIM(RTRIM(ISNULL(p2.SHOBEH, '')))
+                 FROM dbo.PAY_GETD p2
+                     INNER JOIN dbo.TCOD_BANKS b
+                         ON p2.BANK = b.CODE
+                 WHERE p2.NUMBER = h.NUMBER
+                       AND p2.TAG = h.HTAG
+                       AND
+                       (
+                           p2.N_KOL IS NULL
+                           OR p2.N_KOL &lt;&gt; 911
+                       )
+                 FOR XML PATH('')
+             ),
+             1,
+             0,
+             ''
+                  ) AS CheckDescription,
+           SUM(p.MABL) AS TotalCheckAmount
     FROM dbo.PAY_GETD p
-    WHERE p.NUMBER = h.NUMBER AND p.TAG = h.HTAG AND (p.N_KOL IS NULL OR p.N_KOL &lt;&gt; 911)
+    WHERE p.NUMBER = h.NUMBER
+          AND p.TAG = h.HTAG
+          AND
+          (
+              p.N_KOL IS NULL
+              OR p.N_KOL &lt;&gt; 911
+          )
 ) AS CheckDetails
-OUTER APPLY (
-SELECT
-	STUFF((
+    OUTER APPLY
+(
+SELECT STUFF(
+	(
 	SELECT TOP 3
-                SUBSTRING(CAST(h_prev.DATE_N AS VARCHAR(8)), 1, 4) + '/' + SUBSTRING(CAST(h_prev.DATE_N AS VARCHAR(8)), 5, 2) + '/' + SUBSTRING(CAST(h_prev.DATE_N AS VARCHAR(8)), 7, 2) + N' شماره فاكتور: ' + CAST(CAST(h_prev.NUMBER AS BIGINT) AS VARCHAR(20)) + N'  مبلغ قابل پرداخت  فاكتور: ' + REPLACE(CONVERT(VARCHAR, CAST((CASE WHEN ISNULL(h_prev.VAS, 1) = 1 THEN ISNULL(prev_totals.Expr1, 0) + ISNULL(h_prev.MABL_HAZ, 0) + ISNULL(h_prev.MBAA, 0) - ISNULL(h_prev.TAKHFIF, 0) ELSE ISNULL(prev_totals.Expr1, 0) - ISNULL(h_prev.MABL_HAZ, 0) + ISNULL(h_prev.MBAA, 0) - ISNULL(h_prev.TAKHFIF, 0) END) AS MONEY), 1), '.00', '') + CHAR(13) + CHAR(10)
-            FROM dbo.HEAD_LST AS h_prev
-INNER JOIN (SELECT NUMBER, TAG, SUM(MABL_K) AS Expr1 FROM dbo.INVO_LST GROUP BY NUMBER, TAG) AS prev_totals ON h_prev.NUMBER = prev_totals.NUMBER AND h_prev.TAG = prev_totals.TAG
-            WHERE h_prev.CUST_NO = h.CUST_NO AND h_prev.TAG = 13 AND h_prev.NUMBER &lt;&gt; h.NUMBER
-            ORDER BY h_prev.DATE_N DESC
-            FOR XML PATH('')
-        ), 1, 0, '') AS FormattedString
+                      SUBSTRING(CAST(h_prev.DATE_N AS VARCHAR(8)), 1, 4) + '/'
+                      + SUBSTRING(CAST(h_prev.DATE_N AS VARCHAR(8)), 5, 2) + '/'
+                      + SUBSTRING(CAST(h_prev.DATE_N AS VARCHAR(8)), 7, 2) + N' شماره فاكتور: '
+                      + CAST(CAST(h_prev.NUMBER AS BIGINT) AS VARCHAR(20)) + N'  مبلغ قابل پرداخت  فاكتور: '
+                      + REPLACE(
+                                   CONVERT(
+                                              VARCHAR,
+                                              CAST((CASE
+                                                        WHEN ISNULL(h_prev.VAS, 1) = 1 THEN
+                                                            ISNULL(prev_totals.Expr1, 0) + ISNULL(h_prev.MABL_HAZ, 0)
+                                                            + ISNULL(h_prev.MBAA, 0) - ISNULL(h_prev.TAKHFIF, 0)
+                                                        ELSE
+                                                            ISNULL(prev_totals.Expr1, 0) - ISNULL(h_prev.MABL_HAZ, 0)
+                                                            + ISNULL(h_prev.MBAA, 0) - ISNULL(h_prev.TAKHFIF, 0)
+                                                    END
+                                                   ) AS MONEY),
+                                              1
+                                          ),
+                                   '.00',
+                                   ''
+                               ) + CHAR(13) + CHAR(10)
+               FROM dbo.HEAD_LST AS h_prev
+                   INNER JOIN
+                   (
+SELECT NUMBER,
+	TAG,
+	SUM(MABL_K) AS Expr1
+	FROM dbo.INVO_LST
+	GROUP BY NUMBER,
+                                TAG
+                   ) AS prev_totals
+                       ON h_prev.NUMBER = prev_totals.NUMBER
+                          AND h_prev.TAG = prev_totals.TAG
+               WHERE h_prev.CUST_NO = h.CUST_NO
+                     AND h_prev.TAG = 13
+                     AND h_prev.NUMBER &lt;&gt; h.NUMBER
+               ORDER BY h_prev.DATE_N DESC
+               FOR XML PATH('')
+           ),
+           1,
+           0,
+           ''
+                ) AS FormattedString
 ) AS PreviousInvoices
-OUTER APPLY (
-SELECT
-	STUFF((
-	SELECT 
-                dt.ONVAN + N' ' + CAST(dt.DARSAD AS NVARCHAR(10)) + N' درصد تخفيف : ' +
-                REPLACE(CONVERT(VARCHAR, CAST(ROUND(((CASE WHEN ISNULL(h.VAS, 1) = 1 THEN ISNULL(calcs.InvoiceSubTotal, 0) + ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) ELSE ISNULL(calcs.InvoiceSubTotal, 0) - ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) END) * dt.DARSAD / 100), 0) AS MONEY), 1), '.00', '') +
-                N'  قابل پرداخت : ' +
-                REPLACE(CONVERT(VARCHAR, CAST(((CASE WHEN ISNULL(h.VAS, 1) = 1 THEN ISNULL(calcs.InvoiceSubTotal, 0) + ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) ELSE ISNULL(calcs.InvoiceSubTotal, 0) - ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) END) - ROUND(((CASE WHEN ISNULL(h.VAS, 1) = 1 THEN ISNULL(calcs.InvoiceSubTotal, 0) + ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) ELSE ISNULL(calcs.InvoiceSubTotal, 0) - ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0) END) * dt.DARSAD / 100), 0)) AS MONEY), 1), '.00', '') + CHAR(13) + CHAR(10)
-            FROM dbo.DARSAD_TAKHFIF dt
-            ORDER BY dt.RDF
-            FOR XML PATH('')
-        ), 1, 0, '') AS FormattedString
+    OUTER APPLY
+(
+SELECT STUFF(
+	(
+	SELECT dt.ONVAN + N' ' + CAST(dt.DARSAD AS NVARCHAR(10)) + N' درصد تخفيف : '
+                      + REPLACE(
+                                   CONVERT(
+                                              VARCHAR,
+                                              CAST(ROUND(
+                                                            ((CASE
+                                                                  WHEN ISNULL(h.VAS, 1) = 1 THEN
+                                                                      ISNULL(calcs.InvoiceSubTotal, 0)
+                                                                      + ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0)
+                                                                      - ISNULL(h.TAKHFIF, 0)
+                                                                  ELSE
+                                                                      ISNULL(calcs.InvoiceSubTotal, 0)
+                                                                      - ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0)
+                                                                      - ISNULL(h.TAKHFIF, 0)
+                                                              END
+                                                             ) * dt.DARSAD / 100
+                                                            ),
+                                                            0
+                                                        ) AS MONEY),
+                                              1
+                                          ),
+                                   '.00',
+                                   ''
+                               ) + N'  قابل پرداخت : '
+                      + REPLACE(
+                                   CONVERT(
+                                              VARCHAR,
+                                              CAST(((CASE
+                                                         WHEN ISNULL(h.VAS, 1) = 1 THEN
+                                                             ISNULL(calcs.InvoiceSubTotal, 0) + ISNULL(h.MABL_HAZ, 0)
+                                                             + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0)
+                                                         ELSE
+                                                             ISNULL(calcs.InvoiceSubTotal, 0) - ISNULL(h.MABL_HAZ, 0)
+                                                             + ISNULL(h.MBAA, 0) - ISNULL(h.TAKHFIF, 0)
+                                                     END
+                                                    )
+                                                    - ROUND(
+                                                               ((CASE
+                                                                     WHEN ISNULL(h.VAS, 1) = 1 THEN
+                                                                         ISNULL(calcs.InvoiceSubTotal, 0)
+                                                                         + ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0)
+                                                                         - ISNULL(h.TAKHFIF, 0)
+                                                                     ELSE
+                                                                         ISNULL(calcs.InvoiceSubTotal, 0)
+                                                                         - ISNULL(h.MABL_HAZ, 0) + ISNULL(h.MBAA, 0)
+                                                                         - ISNULL(h.TAKHFIF, 0)
+                                                                 END
+                                                                ) * dt.DARSAD / 100
+                                                               ),
+                                                               0
+                                                           )
+                                                   ) AS MONEY),
+                                              1
+                                          ),
+                                   '.00',
+                                   ''
+                               ) + CHAR(13) + CHAR(10)
+               FROM dbo.DARSAD_TAKHFIF dt
+               ORDER BY dt.RDF
+               FOR XML PATH('')
+           ),
+           1,
+           0,
+           ''
+                ) AS FormattedString
 ) AS PaymentScenarios
-
 WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
       </FACTOR_DATA>
       <SAZMAN_MINI Ref="4" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
@@ -1209,7 +1574,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
         <GroupFooterBand1 Ref="73" type="GroupFooterBand" isKey="true">
           <Brush>Transparent</Brush>
           <ClientRectangle>0,11.2,19,9.8</ClientRectangle>
-          <Components isList="true" count="43">
+          <Components isList="true" count="42">
             <Text26 Ref="74" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>17.6,0,1.4,0.6</ClientRectangle>
@@ -1338,7 +1703,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
             </SHARAYET>
             <Text35 Ref="82" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>16.8,3.6,2.2,0.6</ClientRectangle>
+              <ClientRectangle>16.6,4.2,2.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
@@ -1351,23 +1716,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </Text35>
-            <Text36 Ref="83" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>10.2,4.2,2.4,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Enabled>False</Enabled>
-              <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,9</Font>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text36</Name>
-              <Page isRef="6" />
-              <Parent isRef="73" />
-              <Text>مانده حساب قبلی:</Text>
-              <TextBrush>Black</TextBrush>
-              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
-              <Type>Expression</Type>
-            </Text36>
-            <Label180 Ref="84" type="Text" isKey="true">
+            <Label180 Ref="83" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>3,0.6,2.8,0.6</ClientRectangle>
@@ -1383,7 +1732,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </Label180>
-            <Label179 Ref="85" type="Text" isKey="true">
+            <Label179 Ref="84" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>3,1.2,2.8,0.6</ClientRectangle>
@@ -1399,7 +1748,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </Label179>
-            <Label224 Ref="86" type="Text" isKey="true">
+            <Label224 Ref="85" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>3,1.8,2.8,0.6</ClientRectangle>
@@ -1415,7 +1764,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </Label224>
-            <Text41 Ref="87" type="Text" isKey="true">
+            <Text41 Ref="86" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>3,2.4,2.8,0.6</ClientRectangle>
@@ -1431,7 +1780,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </Text41>
-            <Text42 Ref="88" type="Text" isKey="true">
+            <Text42 Ref="87" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>3,3,2.8,0.6</ClientRectangle>
@@ -1447,7 +1796,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </Text42>
-            <Text43 Ref="89" type="Text" isKey="true">
+            <Text43 Ref="88" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>3,3.6,2.8,0.6</ClientRectangle>
@@ -1463,7 +1812,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </Text43>
-            <Text44 Ref="90" type="Text" isKey="true">
+            <Text44 Ref="89" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>5,4.2,0.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1478,7 +1827,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </Text44>
-            <Text45 Ref="91" type="Text" isKey="true">
+            <Text45 Ref="90" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>1.2,4.2,1,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1493,7 +1842,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </Text45>
-            <Text206 Ref="92" type="Text" isKey="true">
+            <Text206 Ref="91" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0,4.2,1.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1508,7 +1857,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </Text206>
-            <USERNAME Ref="93" type="Text" isKey="true">
+            <USERNAME Ref="92" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>2.2,4.2,2.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1522,9 +1871,9 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </USERNAME>
-            <MANDAH Ref="94" type="Text" isKey="true">
+            <MANDAH Ref="93" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>6.6,3.6,10.2,0.6</ClientRectangle>
+              <ClientRectangle>6,4.2,10.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
@@ -1537,22 +1886,24 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </MANDAH>
-            <MANDG Ref="95" type="Text" isKey="true">
+            <MANDG Ref="94" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>6.6,4.2,3.6,0.6</ClientRectangle>
+              <ClientRectangle>11.2,3.4,7.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Enabled>False</Enabled>
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
+              <HorAlignment>Right</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>MANDG</Name>
               <Page isRef="6" />
               <Parent isRef="73" />
+              <Text> مانده حساب قبلی: {FACTOR_DATA.PreviousBalanceText}</Text>
               <TextBrush>Black</TextBrush>
-              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
             </MANDG>
-            <COMM Ref="96" type="Text" isKey="true">
+            <COMM Ref="95" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <CanBreak>True</CanBreak>
               <CanGrow>True</CanGrow>
@@ -1570,7 +1921,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,WordWrap=True,A=0</TextOptions>
               <Type>Expression</Type>
             </COMM>
-            <JF Ref="97" type="Text" isKey="true">
+            <JF Ref="96" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,0,3,0.6</ClientRectangle>
@@ -1583,7 +1934,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Parent isRef="73" />
               <Text>{FACTOR_DATA.SumOfLines}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="98" type="NumberFormat" isKey="true">
+              <TextFormat Ref="97" type="NumberFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
                 <GroupSeparator>,</GroupSeparator>
                 <NegativePattern>3</NegativePattern>
@@ -1592,7 +1943,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </JF>
-            <TF Ref="99" type="Text" isKey="true">
+            <TF Ref="98" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,0.6,3,0.6</ClientRectangle>
@@ -1605,7 +1956,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Parent isRef="73" />
               <Text>{FACTOR_DATA.DiscountAmount}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="100" type="NumberFormat" isKey="true">
+              <TextFormat Ref="99" type="NumberFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
                 <GroupSeparator>,</GroupSeparator>
                 <NegativePattern>3</NegativePattern>
@@ -1614,7 +1965,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </TF>
-            <HKH Ref="101" type="Text" isKey="true">
+            <HKH Ref="100" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,1.2,3,0.6</ClientRectangle>
@@ -1627,7 +1978,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Parent isRef="73" />
               <Text>{FACTOR_DATA.ServicesAmount}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="102" type="NumberFormat" isKey="true">
+              <TextFormat Ref="101" type="NumberFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
                 <GroupSeparator>,</GroupSeparator>
                 <NegativePattern>3</NegativePattern>
@@ -1636,7 +1987,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </HKH>
-            <MBAA Ref="103" type="Text" isKey="true">
+            <MBAA Ref="102" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,1.8,3,0.6</ClientRectangle>
@@ -1649,7 +2000,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Parent isRef="73" />
               <Text>{FACTOR_DATA.TaxAmount}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="104" type="NumberFormat" isKey="true">
+              <TextFormat Ref="103" type="NumberFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
                 <GroupSeparator>,</GroupSeparator>
                 <NegativePattern>3</NegativePattern>
@@ -1658,7 +2009,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </MBAA>
-            <GABEL Ref="105" type="Text" isKey="true">
+            <GABEL Ref="104" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,2.4,3,0.6</ClientRectangle>
@@ -1671,7 +2022,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Parent isRef="73" />
               <Text>{FACTOR_DATA.PayableAmount}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="106" type="NumberFormat" isKey="true">
+              <TextFormat Ref="105" type="NumberFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
                 <GroupSeparator>,</GroupSeparator>
                 <NegativePattern>3</NegativePattern>
@@ -1680,7 +2031,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </GABEL>
-            <JPAY Ref="107" type="Text" isKey="true">
+            <JPAY Ref="106" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,3,3,0.6</ClientRectangle>
@@ -1693,7 +2044,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Parent isRef="73" />
               <Text>{FACTOR_DATA.TotalPaidAmount}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="108" type="NumberFormat" isKey="true">
+              <TextFormat Ref="107" type="NumberFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
                 <GroupSeparator>,</GroupSeparator>
                 <NegativePattern>3</NegativePattern>
@@ -1702,7 +2053,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </JPAY>
-            <MAN Ref="109" type="Text" isKey="true">
+            <MAN Ref="108" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,3.6,3,0.6</ClientRectangle>
@@ -1715,7 +2066,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Parent isRef="73" />
               <Text>{FACTOR_DATA.InvoiceBalance}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="110" type="NumberFormat" isKey="true">
+              <TextFormat Ref="109" type="NumberFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
                 <GroupSeparator>,</GroupSeparator>
                 <NegativePattern>3</NegativePattern>
@@ -1724,9 +2075,9 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </MAN>
-            <Label197 Ref="111" type="Text" isKey="true">
+            <Label197 Ref="110" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>12.6,4.2,6.4,0.6</ClientRectangle>
+              <ClientRectangle>12.6,5.8,6.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1741,7 +2092,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Type>Expression</Type>
               <VertAlignment>Bottom</VertAlignment>
             </Label197>
-            <FACTORS Ref="112" type="Text" isKey="true">
+            <FACTORS Ref="111" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>10,5.2,9,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1756,7 +2107,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </FACTORS>
-            <PAYMENTS Ref="113" type="Text" isKey="true">
+            <PAYMENTS Ref="112" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0,5.2,9,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1771,9 +2122,9 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </PAYMENTS>
-            <VAZN Ref="114" type="Text" isKey="true">
+            <VAZN Ref="113" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.2,5.8,6.4,0.6</ClientRectangle>
+              <ClientRectangle>6.2,3.4,4.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Enabled>False</Enabled>
               <Expressions isList="true" count="0" />
@@ -1782,12 +2133,13 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Name>VAZN</Name>
               <Page isRef="6" />
               <Parent isRef="73" />
+              <Text>{FACTOR_DATA.TotalWeightText}</Text>
               <TextBrush>[0:0:0]</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </VAZN>
-            <FIMG Ref="115" type="Image" isKey="true">
+            <FIMG Ref="114" type="Image" isKey="true">
               <AspectRatio>True</AspectRatio>
               <Brush>Transparent</Brush>
               <CanShrink>True</CanShrink>
@@ -1806,7 +2158,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Parent isRef="73" />
               <Stretch>True</Stretch>
             </FIMG>
-            <HIMG Ref="116" type="Image" isKey="true">
+            <HIMG Ref="115" type="Image" isKey="true">
               <AspectRatio>True</AspectRatio>
               <Brush>Transparent</Brush>
               <CanShrink>True</CanShrink>
@@ -1825,7 +2177,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Parent isRef="73" />
               <Stretch>True</Stretch>
             </HIMG>
-            <MIMG Ref="117" type="Image" isKey="true">
+            <MIMG Ref="116" type="Image" isKey="true">
               <AspectRatio>True</AspectRatio>
               <Brush>Transparent</Brush>
               <CanShrink>True</CanShrink>
@@ -1844,7 +2196,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Parent isRef="73" />
               <Stretch>True</Stretch>
             </MIMG>
-            <FU Ref="118" type="Text" isKey="true">
+            <FU Ref="117" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
               <ClientRectangle>16.8,9,2.2,0.6</ClientRectangle>
@@ -1864,7 +2216,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </FU>
-            <MU Ref="119" type="Text" isKey="true">
+            <MU Ref="118" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
               <ClientRectangle>4.2,9,2.2,0.6</ClientRectangle>
@@ -1884,7 +2236,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </MU>
-            <FS Ref="120" type="Text" isKey="true">
+            <FS Ref="119" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
               <ClientRectangle>16.8,8.4,2.2,0.6</ClientRectangle>
@@ -1904,7 +2256,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </FS>
-            <HU Ref="121" type="Text" isKey="true">
+            <HU Ref="120" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
               <ClientRectangle>10.6,9,2.2,0.6</ClientRectangle>
@@ -1924,7 +2276,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </HU>
-            <HS Ref="122" type="Text" isKey="true">
+            <HS Ref="121" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
               <ClientRectangle>10.6,8.4,2.2,0.6</ClientRectangle>
@@ -1944,7 +2296,7 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </HS>
-            <MS Ref="123" type="Text" isKey="true">
+            <MS Ref="122" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
               <ClientRectangle>4.2,8.4,2.2,0.6</ClientRectangle>
@@ -1993,10 +2345,10 @@ WHERE hlst.NUMBER IN ({NUMBERS_PARAM}) AND h.HTAG = 2;</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>7/28/2025 1:42:47 PM</ReportChanged>
+  <ReportChanged>7/29/2025 7:52:29 AM</ReportChanged>
   <ReportCreated>9/5/2021 1:38:11 PM</ReportCreated>
-  <ReportFile>C:\Users\Administrator\Desktop\INVOICE_FROOSH_22______________.mrt</ReportFile>
-  <ReportGuid>dd4b87247fe84e07a434a79232a98a9b</ReportGuid>
+  <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\Visitory\TOZIE_FACTORS.mrt</ReportFile>
+  <ReportGuid>9d523fd421ac4fef9e0e9fb4234d1409</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

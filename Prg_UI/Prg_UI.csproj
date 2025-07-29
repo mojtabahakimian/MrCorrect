@@ -138,6 +138,7 @@
 		<None Remove="Rpts\Visitory\R_LIST_MASIR.mrt" />
 		<None Remove="Rpts\Visitory\tozie_dasti.mrt" />
 		<None Remove="Rpts\Visitory\TOZIE_FACTORS.mrt" />
+		<None Remove="Rpts\Visitory\TOZIE_FACTORS.rar" />
 		<None Remove="Rpts\Visitory\TOZIE_FROOSH_ANBARS_HAVALA.mrt" />
 		<None Remove="Rpts\Visitory\Visit_gol_dtl_Rep.mrt" />
 		<None Remove="Rpts\Visitory\Visit_gol_dtl_REP_print_grp.mrt" />
