@@ -42,6 +42,7 @@ namespace Prg_Proccessy.FUNCTIONS
     public static class CL_HESABDARI
     {
         static CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+        private static readonly Random _rnd = new Random();
         #region Custom_Modelses
         public class PriceDtl
         {
@@ -2689,6 +2690,7 @@ namespace Prg_Proccessy.FUNCTIONS
                         WANTEDFORMRet = "users";
                         break;
                     }
+                case "NEWPASSWORD":
                 case "npass":
                     {
                         WANTEDFORMRet = "NEWPASSWORD";
@@ -10185,6 +10187,36 @@ namespace Prg_Proccessy.FUNCTIONS
             }
 
             return messages;
+        }
+
+        public static string CODEPAL(string ps)
+        {
+            if (string.IsNullOrEmpty(ps))
+                return string.Empty;
+
+            StringBuilder nps = new StringBuilder();
+            for (int i = 0; i < ps.Length; i++)
+            {
+                // کاراکتر مورد نظر را تبدیل و سپس 10 واحد کم می‌کند
+                nps.Append((char)(ps[i] - 10));
+            }
+
+            // مثل Randomize و Rnd در VBA
+            string res = "p" +
+                         GetRandomChar() +
+                         GetRandomChar() +
+                         nps +
+                         GetRandomChar() +
+                         GetRandomChar() +
+                         "z";
+
+            return res;
+        }
+
+        private static char GetRandomChar()
+        {
+            // تولید عدد رندم بین 0 تا 99 و تبدیل به کاراکتر
+            return (char)_rnd.Next(0, 100);
         }
     }
 }
