@@ -6,7 +6,7 @@
     <Databases isList="true" count="1">
       <MS_x0020_SQL Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>MS SQL</Alias>
-        <ConnectionStringEncrypted>9Fxlz01KQ835CE29+wCiY9HS+8JIcZOka0zt/eHkYuvf1qEL2Ap6TUVGnFjDSbF/hFb7iEVd8k1oXP3M6ti3e9FatQnJS9Ooak09ZOSg62fXeMECXkEBdXJafZhimOpe</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9Fz3oe9K88hFYYSB5Byof9Fukc1WX3ukRVu5CGNxL2Lf2LVIxgPD+X999dxpTOFn9MTZCc1Rw4FpTaEYTRjhXulU94rFUaPIa0S5zGdY616AWg==</ConnectionStringEncrypted>
         <Key>e8ff559faa134d2fa7af40cf6d83d737</Key>
         <Name>MS SQL</Name>
       </MS_x0020_SQL>
@@ -29,21 +29,17 @@
         <Key>f6be6b54fbdf4b528266796057a801d6</Key>
         <Name>DataSource1</Name>
         <NameInSource>MS SQL</NameInSource>
-        <Parameters isList="true" count="3">
-          <value>DT1_PARM,,6,10</value>
-          <value>DT2_PARM,,6,10</value>
-          <value>DRIVER_PARM,,18,30</value>
-        </Parameters>
-        <SqlCommand>SELECT DATE_N, CAMIUN, DRIVER, KALA, SMEGH, SMEGHK, vahed, smabk
-	FROM dbo.DRIVER_HAVALAH(@DT1_PARM,@DT2_PARM,'@DRIVER_PARM')</SqlCommand>
+        <Parameters isList="true" count="0" />
+        <SqlCommand>{Q_PARM}</SqlCommand>
       </DataSource1>
     </DataSources>
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Resources isList="true" count="0" />
-    <Variables isList="true" count="2">
+    <Variables isList="true" count="3">
       <value>,Variable1,Variable1,FOR_PASS_TSQL_TEXT,System.String,,False,False,False,False,,,True</value>
       <value>,MABL_TO_WORD,MABL_TO_WORD,MABL_TO_WORD,System.Int64,,False,False,False,False</value>
+      <value>,Q_PARM,Q_PARM,,System.String,,False,False,False,False,,,True</value>
     </Variables>
   </Dictionary>
   <EngineVersion>EngineV2</EngineVersion>
@@ -113,7 +109,7 @@
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text2>
-            <DDATE Ref="10" type="Text" isKey="true">
+            <DATE_N Ref="10" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>4,0.6,2.8,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -121,13 +117,13 @@
               <Font>IRANYekanFN,10</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
-              <Name>DDATE</Name>
+              <Name>DATE_N</Name>
               <Page isRef="5" />
               <Parent isRef="6" />
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
-            </DDATE>
+            </DATE_N>
             <Text9 Ref="11" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>2.6,0.6,1,0.6</ClientRectangle>
@@ -207,7 +203,7 @@
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text35>
-            <Text36 Ref="16" type="Text" isKey="true">
+            <TNAME Ref="16" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>10.6,0.8,5.6,1</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -215,13 +211,13 @@
               <Font>IRANYekanFN,16,Bold</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
-              <Name>Text36</Name>
+              <Name>TNAME</Name>
               <Page isRef="5" />
               <Parent isRef="6" />
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
-            </Text36>
+            </TNAME>
             <Text37 Ref="17" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>24.2,0.4,0.2,0.6</ClientRectangle>
@@ -727,10 +723,10 @@
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>10/12/2024 8:52:02 PM</ReportChanged>
+  <ReportChanged>7/29/2025 2:30:30 PM</ReportChanged>
   <ReportCreated>9/5/2021 1:38:11 PM</ReportCreated>
   <ReportFile>C:\prg\Made Reports\All\LIST_FROOSH_ANBARS_BAR.mrt</ReportFile>
-  <ReportGuid>88c46d3b78064c688f84bfd7ca7508aa</ReportGuid>
+  <ReportGuid>ec74ed402fe5415eac0070f4d6c120f5</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>
