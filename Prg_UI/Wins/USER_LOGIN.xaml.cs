@@ -322,7 +322,7 @@ namespace Prg_UI.Wins
 
             //new UserPersonelOrderWin().Show();
 
-            //new WinBase().Show();
+            new WinBase().Show();
 
             //new WinConnectionChoose().ShowDialog();
             //new HEAD_LST_HAVL(4306d).ShowDialog();
