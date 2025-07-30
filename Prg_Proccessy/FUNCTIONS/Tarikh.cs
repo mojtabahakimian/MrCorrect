@@ -81,6 +81,36 @@ namespace Prg_Proccessy.FUNCTIONS
             }
             set { _fullcurrentdate = value; }
         }
+
+        /// <summary>
+        /// تاریخ اولین روز ماه جاری به صورت رشته ای "yyyy/MM/dd"
+        /// </summary>
+        public static string FirstDayOfCurrentMonth
+        {
+            get
+            {
+                var now = DateTime.Now;
+                int year = persianCalendar.GetYear(now);
+                int month = persianCalendar.GetMonth(now);
+                return string.Format(CultureInfo.InvariantCulture, "{0:0000}/{1:00}/01", year, month);
+            }
+        }
+
+        /// <summary>
+        /// تاریخ آخرین روز ماه جاری به صورت رشته ای "yyyy/MM/dd"
+        /// </summary>
+        public static string LastDayOfCurrentMonth
+        {
+            get
+            {
+                var now = DateTime.Now;
+                int year = persianCalendar.GetYear(now);
+                int month = persianCalendar.GetMonth(now);
+                int lastDay = persianCalendar.GetDaysInMonth(year, month);
+                return string.Format(CultureInfo.InvariantCulture, "{0:0000}/{1:00}/{2:00}", year, month, lastDay);
+            }
+        }
+
         private static string _slashy;
         public static string SlashyFullDate
         {

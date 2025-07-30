@@ -174,19 +174,11 @@
                 </syncfusion:GridTextColumn>
 
                 <syncfusion:GridTextColumn HeaderText="فروش خالص" MappingName="GHABEL" Width="230">
-                    
+
                     <syncfusion:GridTextColumn.DisplayBinding>
                         <Binding Path="GHABEL" StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
 
-                    
-                    <syncfusion:GridTextColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding GHABEL}"   Background="MediumVioletRed"/>
-                        </DataTemplate>
-                    </syncfusion:GridTextColumn.CellTemplate>
-
-                    
                 </syncfusion:GridTextColumn>
 
                 <syncfusion:GridTextColumn HeaderText="مبلغ کل فروش" MappingName="MABL_K" Width="230">

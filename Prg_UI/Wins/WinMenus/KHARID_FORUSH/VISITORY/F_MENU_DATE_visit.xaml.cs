@@ -129,6 +129,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 CUST_NO2.IsEnabled = false;
             }
 
+            DT1.Text = Tarikh.FirstDayOfCurrentMonth;
+            DT2.Text = Tarikh.LastDayOfCurrentMonth;
             DT1.Focus();
         }
 
