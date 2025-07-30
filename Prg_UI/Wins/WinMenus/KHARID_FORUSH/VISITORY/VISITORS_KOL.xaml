@@ -215,7 +215,7 @@
                                     <!-- ستون‌های Invoice -->
                                     <DataGrid.Columns>
 
-                                        <DataGridTextColumn Header="تاریخ فاکتور" Width="100" Binding="{Binding DATE_N}"/>
+                                        <DataGridTextColumn Header="تاریخ فاکتور" Width="100" Binding="{Binding DATE_N , StringFormat=####/##/##}"/>
                                         <DataGridTextColumn Header="شماره فاکتور"  Width="100" Binding="{Binding NUMBER}"/>
                                         <DataGridTextColumn Header="جمع پورسانت"    Width="150" Binding="{Binding mabpur, StringFormat=\{0:N0\}}"/>
                                         <DataGridTextColumn Header="درصد"    Width="70" Binding="{Binding Darsad, StringFormat=\{0:N2\}}"/>
