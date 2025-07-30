@@ -2567,7 +2567,7 @@
 
                             <Expander Foreground="{DynamicResource MaterialDesignBody}" FlowDirection="RightToLeft" Header="ویزیتوری" Background="{x:Null}" BorderBrush="{x:Null}">
                                 <StackPanel>
-                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                                    <Button Click="Button_Click_76" Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                         <Grid Width="189">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="10*"/>
@@ -2584,7 +2584,7 @@
                                         </Grid>
                                     </Button>
 
-                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                                    <Button Click="Button_Click_77"  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                         <Grid Width="189">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="10*"/>
@@ -2601,7 +2601,7 @@
                                         </Grid>
                                     </Button>
 
-                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                                    <Button Click="Button_Click_78"  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                         <Grid Width="189">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="10*"/>
@@ -2618,7 +2618,7 @@
                                         </Grid>
                                     </Button>
 
-                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                                    <Button Click="Button_Click_79"  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                         <Grid Width="189">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="10*"/>
@@ -2635,7 +2635,7 @@
                                         </Grid>
                                     </Button>
 
-                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                                    <Button Click="Button_Click_80"  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                         <Grid Width="189">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="10*"/>
@@ -2652,7 +2652,7 @@
                                         </Grid>
                                     </Button>
 
-                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                                    <Button Click="Button_Click_81"  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                         <Grid Width="189">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="10*"/>
@@ -2737,7 +2737,7 @@
                                         </Grid>
                                     </Button>
 
-                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                                    <Button Click="Button_Click_82" Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                         <Grid Width="189">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="10*"/>
@@ -2754,7 +2754,7 @@
                                         </Grid>
                                     </Button>
 
-                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                                    <Button Click="Button_Click_83" Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                         <Grid Width="189">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="10*"/>
@@ -2771,7 +2771,7 @@
                                         </Grid>
                                     </Button>
 
-                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                                    <Button Click="Button_Click_84" Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                         <Grid Width="189">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="10*"/>
@@ -2805,7 +2805,7 @@
                                         </Grid>
                                     </Button>
 
-                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                                    <Button Click="Button_Click_85"  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                         <Grid Width="189">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="10*"/>

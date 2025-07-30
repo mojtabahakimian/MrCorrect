@@ -1471,33 +1471,6 @@ namespace Functions
                 case WinNameType.VISITOR_GOL_GRP_REP_MAR: //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه (در تاریخ برگشت)
                     CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_GOL_GRP_REP_MAR(), default, false);
                     break;
-
-
-                    break;            
-                    
-                case WinNameType.flist_porsant_factors: //لیست ویزیتور ها و پورسانت به تفکیک فاکتور
-                    CL_LMethods.OpenWindow(OWNERWIN, new flist_porsant_factors(""), default, false);
-                    break;   
-                    
-                case WinNameType.F_MENU_DATE_VISIT_VISITONE: //لیست فروش ویزیتور به تفکیک فاکتور
-                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_DATE_visit("VISITONE"), default, false);
-                    break;  
-                    
-                case WinNameType.F_MENU_AJNAS: //چاپ لیست کالا ها جهت ویزیت
-                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_AJNAS(), default, false);
-                    break;   
-                    
-                case WinNameType.VISITOR_GOL_REP: //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه
-                    CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_GOL_REP(), default, false);
-                    break; 
-                    
-                case WinNameType.VISITOR_GOL_GRP_REP: //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه
-                    CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_GOL_GRP_REP(), default, false);
-                    break;     
-                    
-                case WinNameType.VISITOR_GOL_GRP_REP_MAR: //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه (در تاریخ برگشت)
-                    CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_GOL_GRP_REP_MAR(), default, false);
-                    break;             
                     
                 case WinNameType.VISITOR_GOL_REP_MAR: //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه (در تاریخ برگشت)
                     CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_GOL_REP_MAR(), default, false);
