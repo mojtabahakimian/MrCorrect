@@ -1,4 +1,6 @@
-﻿namespace System
+﻿using System.Linq;
+
+namespace System
 {
     public static class StringExtensions
     {
@@ -28,26 +30,47 @@
             if (string.IsNullOrEmpty(input))
                 return input;
 
-            // List of zero-width / invisible characters to remove:
+            // لیست کامل کاراکترهای نامرئی و کنترلی (قابل افزایش)
             char[] invisibleChars = new char[]
             {
-            '\u200B', // Zero-width space
-            '\u200C', // Zero-width non-joiner
-            '\u200D', // Zero-width joiner
-            '\uFEFF'  // Zero-width no-break space (BOM)
+                '\u200B', // Zero-width space
+                '\u200C', // Zero-width non-joiner
+                '\u200D', // Zero-width joiner
+                '\u200E', // Left-to-right mark (LRM)
+                '\u200F', // Right-to-left mark (RLM)
+                '\u202A', // LRE
+                '\u202B', // RLE
+                '\u202C', // PDF
+                '\u202D', // LRO
+                '\u202E', // RLO
+                '\u2060', // Word Joiner
+                '\uFEFF', // BOM
             };
 
-            // Remove each of those characters:
+            // حذف کاراکترهای بالا:
             foreach (char c in invisibleChars)
             {
                 input = input.Replace(c.ToString(), string.Empty);
             }
 
-            // Trim normal whitespace at start/end:
+            // جایگزینی کاراکترهای فاصله نامتعارف با فاصله عادی:
+            input = input
+                .Replace('\t', ' ')
+                .Replace('\n', ' ')
+                .Replace('\r', ' ')
+                .Replace('\f', ' ')
+                .Replace('\v', ' ');
+
+            // حذف هر کاراکتر کنترلی باقی‌مانده:
+            input = new string(input.Where(ch => !char.IsControl(ch)).ToArray());
+
+            // حذف فاصله‌های اضافه ابتدا و انتها:
             input = input.Trim();
 
             return input;
         }
+
+
         public static string FixPersianChars(this string str)
         {
             if (!string.IsNullOrEmpty(str) && !string.IsNullOrWhiteSpace(str))
@@ -60,6 +83,13 @@
                 .Replace("ك", "ک")
                 .Replace("ي", "ی")
                 .Replace("ھ", "ه")
+
+                .Replace('\u064A', 'ی') // Arabic Yeh
+                .Replace('\u0643', 'ک') // Arabic Kaf
+                .Replace('\u06C0', 'ه') // Heh with Yeh Above
+                .Replace('\u200C', ' ') // ZWNJ to space (یا حذفش کن)
+
+
 
                 .Replace('۰', '0')
                 .Replace('۱', '1')
@@ -92,6 +122,11 @@
                .Replace('۹', '9');
         }
 
+        public static string NormalizeSpaces(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+            return System.Text.RegularExpressions.Regex.Replace(text, @"\s+", " ").Trim();
+        }
 
         public static string LatinNumbersToFarsiNumbers(this string value)
         {

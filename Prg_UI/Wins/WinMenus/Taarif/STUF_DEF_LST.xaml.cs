@@ -76,7 +76,9 @@ namespace Wins.WinMenus.Taarif
 
             FILL_ALL_COMBOBOXES();
             RLOADDATA();
-            CODE.Focus();
+
+            NAM.Focus();
+            NAM.SelectAll();
         }
         private void FILL_ALL_COMBOBOXES()
         {
@@ -160,7 +162,7 @@ namespace Wins.WinMenus.Taarif
             string _CODE_Input = CODE.Text?.Trim().RemoveInvisibleChars().FixPersianChars();
 
             // NAME: Trim, Remove Invisibles, ToLower, Fix Chars
-            string _NAM_Input = NAM.Text?.Trim().RemoveInvisibleChars().ToLowerInvariant().FixPersianChars();
+            string _NAM_Input = StringExtensions.NormalizeSpaces(NAM.Text?.Trim().RemoveInvisibleChars().ToLowerInvariant().FixPersianChars());
 
             // N_FANI: Trim, Remove Invisibles (Consider ToLower/FixChars if needed)
             string _N_FANI_Input = N_FANI.Text?.Trim().RemoveInvisibleChars();
@@ -217,18 +219,15 @@ namespace Wins.WinMenus.Taarif
                           .RemoveInvisibleChars() // Clean data
                           .FixPersianChars() // Normalize data
                           .Contains(_CODE_Input, StringComparison.OrdinalIgnoreCase)); // Case-insensitive exact match
-            }
+            }    
 
-            // NAME Filter (Contains - Apply full cleaning to data)
             if (!string.IsNullOrEmpty(_NAM_Input))
             {
                 LINQ_SEARCH = LINQ_SEARCH.Where(x =>
-                    x.NAME != null &&
-                    x.NAME.Trim() // Trim data
-                          .RemoveInvisibleChars() // Clean data
-                          .ToLowerInvariant() // Lowercase data
-                          .FixPersianChars() // Normalize data
-                          .Contains(_NAM_Input)); // Compare with cleaned input
+                    !string.IsNullOrEmpty(x.NAME) &&
+                    StringExtensions.NormalizeSpaces(x.NAME.Trim().RemoveInvisibleChars().ToLowerInvariant().FixPersianChars())
+                    .Contains(_NAM_Input)
+                );
             }
 
             // N_FANI Filter (Contains - Apply relevant cleaning)
