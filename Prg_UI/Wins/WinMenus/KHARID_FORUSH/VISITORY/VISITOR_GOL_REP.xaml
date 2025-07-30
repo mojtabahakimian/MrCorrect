@@ -17,6 +17,7 @@
         AllowDrop="True" WindowStyle="None"
         FontFamily="IRANYekanFN"
         WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         Title="VISITOR_GOL_REP" Height="450" Width="1686" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">
