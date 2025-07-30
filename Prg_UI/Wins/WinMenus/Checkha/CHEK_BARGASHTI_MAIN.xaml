@@ -1,9 +1,9 @@
-﻿<Window x:Class="Wins.WinMenus.Checkha.CHEK_VOSUL_LES"
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.Checkha.CHEK_BARGASHTI_MAIN"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Wins.WinMenus.Checkha"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.Checkha"
         mc:Ignorable="d"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -17,10 +17,9 @@
         AllowDrop="True" WindowStyle="None"
         FontFamily="IRANYekanFN"
         WindowStartupLocation="CenterScreen"
-        WindowState="Maximized"
+        WindowState="Maximized" d:Width="4000"
         Height="600" Width="1024" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
-
         <ItemsPanelTemplate x:Key="VSP">
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
@@ -90,7 +89,7 @@
         <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
             <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
                 <Grid>
-                    <Label Content="لیست چکهای دریافتی نزد بانک" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Label Content="لیست چکهای برگشتی (دریافتی)   " Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0" HorizontalContentAlignment="Right" FlowDirection="RightToLeft"/>
                     <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
                         <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
                     </Button>
@@ -130,87 +129,47 @@
                 Style="{StaticResource KDG}"
                 HeaderStyle="{StaticResource KDGHeader}"
                 AllowEditing="True"
-                
                 PreviewMouseRightButtonDown="SFDATAGRID_SUB_PreviewMouseRightButtonDown"
                 CurrentCellActivated="SFDATAGRID_SUB_CurrentCellActivated"
                 PreviewKeyDown="SFDATAGRID_SUB_PreviewKeyDown"
                 Margin="10,50,10,46" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SFDATAGRID_SUB_SelectionChanged"  CurrentCellEndEdit="SFDATAGRID_SUB_CurrentCellEndEdit" CurrentCellValidating="SFDATAGRID_SUB_CurrentCellValidating" >
-
             <syncfusion:SfDataGrid.Columns>
-
                 <syncfusion:GridTextColumn MappingName="N_SERI" HeaderText="شماره سریال" MinimumWidth="90" IsReadOnly="True" />
                 <syncfusion:GridTextColumn HeaderText="تاریخ سررسید" MappingName="DATE_S" IsReadOnly="True" >
                     <syncfusion:GridTextColumn.DisplayBinding>
                         <Binding Path="DATE_S" StringFormat="####/##/##" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
-
                 <syncfusion:GridTextColumn HeaderText="تاریخ دریافت" MappingName="DATE" IsReadOnly="True" >
                     <syncfusion:GridTextColumn.DisplayBinding>
                         <Binding Path="DATE" StringFormat="####/##/##" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
-                <syncfusion:GridTextColumn MappingName="SHOBEH" HeaderText="نام شعبه" IsReadOnly="True" />
 
+                <syncfusion:GridTextColumn HeaderText="تاریخ برگشت" MappingName="DT" IsReadOnly="True" >
+                    <syncfusion:GridTextColumn.DisplayBinding>
+                        <Binding Path="DT" StringFormat="####/##/##" />
+                    </syncfusion:GridTextColumn.DisplayBinding>
+                </syncfusion:GridTextColumn>
+                <syncfusion:GridComboBoxColumn x:Name="BANK_COLUMN" HeaderText="نام بانک" MappingName="BANK" SelectedValuePath="CODE" DisplayMemberPath="NAMES" IsReadOnly="True"  />
+
+                <syncfusion:GridTextColumn MappingName="SHOBEH" HeaderText="نام شعبه" IsReadOnly="True" />
                 <syncfusion:GridTextColumn HeaderText="مبلغ" MappingName="MABL" IsReadOnly="True" >
                     <syncfusion:GridTextColumn.DisplayBinding>
                         <Binding Path="MABL" StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
                 <syncfusion:GridTextColumn MappingName="NAME_TAH" HeaderText="نام پرداخت کننده*" IsReadOnly="True" MinimumWidth="350" />
-
                 <syncfusion:GridTextColumn MappingName="N_HESAB" HeaderText="شماره حساب" IsReadOnly="True"  />
+                
                 <syncfusion:GridTextColumn MappingName="N_S" HeaderText="شماره سند" IsReadOnly="True" />
-                <syncfusion:GridComboBoxColumn x:Name="BANK_COLUMN" HeaderText="نام بانک" MappingName="BANK" SelectedValuePath="CODE" DisplayMemberPath="NAMES" IsReadOnly="True"  />
                 <syncfusion:GridTextColumn MappingName="RADIF" HeaderText="شماره" MinimumWidth="90" IsReadOnly="True" />
-                <syncfusion:GridTextColumn MappingName="N_KOL" HeaderText="به حساب کل" IsReadOnly="True"  />
-                <syncfusion:GridTextColumn MappingName="N_MOIN" HeaderText="به حساب معین"  IsReadOnly="True" />
-                <syncfusion:GridTextColumn MappingName="N_TAF" HeaderText="به حساب تفضیلی"  IsReadOnly="True" />
-                <syncfusion:GridTextColumn MappingName="NAME" HeaderText="نام حساب" IsReadOnly="True" MinimumWidth="350"/>
-
-                <syncfusion:GridTextColumn MappingName="N_KOL2" HeaderText="برگشت به حساب کل" MinimumWidth="180"  IsReadOnly="True" />
-                <syncfusion:GridTextColumn MappingName="N_MOIN2" HeaderText="برگشت به حساب معین" MinimumWidth="180"  IsReadOnly="True"  />
-                <syncfusion:GridTextColumn MappingName="N_TAF2" HeaderText="برگشت به حساب تفضیلی" MinimumWidth="180"  IsReadOnly="True"  />
-
-                <syncfusion:GridTextColumn MappingName="N_KOL3" HeaderText="وصول به حساب کل" MinimumWidth="180" IsReadOnly="True"  />
-                <syncfusion:GridTextColumn MappingName="N_MOIN3" HeaderText="وصول به حساب معین" MinimumWidth="180"  IsReadOnly="True" />
-                <syncfusion:GridTextColumn MappingName="N_TAF3" HeaderText="وصول به حساب تفضیلی" MinimumWidth="180" IsReadOnly="True"  />
-
-                
-                
-                
-                <syncfusion:GridTextColumn MappingName="modat" HeaderText="مدت" MinimumWidth="90" IsReadOnly="True" />
-
-
-                <syncfusion:GridTextColumn MappingName="CUST_NO" HeaderText="کد مشتری" IsReadOnly="True"  />
-
-                <!--<syncfusion:GridComboBoxColumn x:Name="VAZ_COLUMN" HeaderText="وضعیت چک" AllowEditing="False" IsReadOnly="True" MappingName="VAZ" SelectedValuePath="ID" DisplayMemberPath="NAME" />-->
-
-                <syncfusion:GridTextColumn MappingName="SANDUGH" HeaderText="کد صندوق" IsReadOnly="True"  />
-                <!--<syncfusion:GridComboBoxColumn x:Name="SANDUGH_COLUMN" MappingName="SANDUGH" HeaderText="صندوق" SelectedValuePath="TNUMBER" DisplayMemberPath="NAME" IsReadOnly="True"  />-->
-          
-                <syncfusion:GridComboBoxColumn HeaderText="نوع" MappingName="KIND" IsReadOnly="True"  >
-                    <syncfusion:GridComboBoxColumn.ItemsSource>
-                        <x:Array Type="{x:Type sys:String}">
-                            <sys:String>1;تجاري</sys:String>
-                            <sys:String>0;غير تجاري</sys:String>
-                        </x:Array>
-                    </syncfusion:GridComboBoxColumn.ItemsSource>
-                    <syncfusion:GridComboBoxColumn.DisplayMemberPath>
-                        <Binding Path="Value" />
-                    </syncfusion:GridComboBoxColumn.DisplayMemberPath>
-                    <syncfusion:GridComboBoxColumn.SelectedValuePath>
-                        <Binding Path="Key" />
-                    </syncfusion:GridComboBoxColumn.SelectedValuePath>
-                </syncfusion:GridComboBoxColumn>
                 <!--<syncfusion:GridTextColumn MappingName="SAYADI" HeaderText="شماره صیادی"  IsReadOnly="True" />-->
-
             </syncfusion:SfDataGrid.Columns>
 
         </syncfusion:SfDataGrid>
         <Label Content="تعداد رکورد ها:" Margin="0,0,16,14" FlowDirection="RightToLeft" Width="84" HorizontalAlignment="Right" Height="27" VerticalAlignment="Bottom"/>
         <Label x:Name="ROWCOUNT_LABEL" Content="{Binding ElementName=SFDATAGRID_SUB,Path=View.Records.Count}" Margin="0,0,100,14" FlowDirection="RightToLeft" Width="230" HorizontalAlignment="Right" Height="27" VerticalAlignment="Bottom"/>
-
 
     </Grid>
 </Window>

@@ -15,7 +15,7 @@
         AllowDrop="True" WindowStyle="None"
         WindowStartupLocation="CenterScreen" 
         FontFamily="IRANYekanFN"
-        Title="PGET_HED_LIST" Height="578" Width="988" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+        Title="PGET_HED_LIST" Height="785" Width="1095" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
     </Window.Resources>
@@ -109,7 +109,7 @@
         <Label Width="auto" VerticalAlignment="Top" Margin="0,121,12,0" HorizontalAlignment="Right" FlowDirection="RightToLeft" Content="گروه کالا:"/>
         <Label Width="auto" VerticalAlignment="Top" Margin="0,194,9,0" HorizontalAlignment="Right" FlowDirection="RightToLeft" Content="شناسه کالا در سامانه مودیان:"/>
         <CUC:NumericTextBox x:Name="CODE" DoesAcceptDouble="False"  LastValueShouldZero="False" Text="" Height="30" Margin="0,48,69,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Right" Width="119" MaxLength="10"/>
-        <TextBox x:Name="NAM" Text="" Height="30" Margin="288,48,359,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="80" />
+        <TextBox x:Name="NAM" Text="" Height="30" Margin="288,48,359,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="80" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" />
         <TextBox x:Name="N_FANI" Text="" Height="30" Margin="20,48,0,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="30" Width="200" HorizontalAlignment="Left" />
         <TextBox x:Name="Barcode" Text="" Height="30" Margin="0,84,370,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="100" HorizontalAlignment="Right" Width="180" />
         <ComboBox x:Name="VAHED" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="179,84,592,0" DisplayMemberPath="NAMES" SelectedValuePath="VAHED" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" >
@@ -127,7 +127,7 @@
             </ComboBox.ItemsPanel>
         </ComboBox>
         <TextBox x:Name="sstid" Text="" Height="30" Margin="0,195,165,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="13" HorizontalAlignment="Right" Width="209" />
-        <CheckBox x:Name="CMBAA"  Content="مشمول مالیات ب.ا.ا" HorizontalAlignment="Left" Margin="685,54,0,0" VerticalAlignment="Top" Width="110" FontSize="10" />
+        <CheckBox x:Name="CMBAA"  Content="مشمول مالیات ب.ا.ا" HorizontalAlignment="Right" Margin="0,54,193,0" VerticalAlignment="Top" Width="110" FontSize="10" />
         <TextBox x:Name="TOZIH" Text="" Height="30" Margin="0,85,69,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="40" HorizontalAlignment="Right" Width="257" />
         <Label Content="توضیح:" HorizontalAlignment="Right" Margin="0,84,21,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
         <CUC:NumericTextBox x:Name="N_SEF" DoesAcceptDouble="False" ThreeTwoZero="True" DigitGroupOnEnter="True" IsDigitGroupActive="True" LastValueShouldZero="False" Text="" Height="30" Margin="0,159,220,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Right" Width="109" MaxLength="15"/>

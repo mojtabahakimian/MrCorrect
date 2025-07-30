@@ -1,5 +1,5 @@
 ﻿<Window x:Class="Prg_UI.Wins.WinMenus.Checkha.CHEK_DLISTS"
-       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -104,7 +104,7 @@
         <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
             <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
                 <Grid>
-                    <Label x:Name="WINTILENAME" Content="عملکرد ویزیتور ها" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Label x:Name="WINTILENAME" Content="لیست چکهای دریافتی سررسید شده" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
                     <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
                         <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
                     </Button>
@@ -185,7 +185,6 @@
                 <syncfusion:GridComboBoxColumn x:Name="SANDUGH_COLUMN" HeaderText="موقعیت چک*" MappingName="MENUIT" SelectedValuePath="CODE" DisplayMemberPath="NAMES" Width="180"/>
                 
                 <syncfusion:GridTextColumn HeaderText="شماره صیادی" MappingName="SAYADI" Width="130"/>
-                <syncfusion:GridTextColumn HeaderText="استعلام (توضیحات) برای ثبت دابل کلیک کنید" MappingName="ESTELAM" Width="310"/>
                 <syncfusion:GridTextColumn HeaderText="به حساب کل" MappingName="N_KOL" Width="130"/>
                 <syncfusion:GridTextColumn HeaderText="به حساب معین" MappingName="N_MOIN" Width="130"/>
                 <syncfusion:GridTextColumn HeaderText="به حساب تفضیلی" MappingName="N_TAF" Width="140"/>

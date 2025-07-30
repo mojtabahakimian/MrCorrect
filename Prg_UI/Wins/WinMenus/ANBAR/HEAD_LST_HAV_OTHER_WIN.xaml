@@ -164,6 +164,15 @@
                 </DataGridComboBoxColumn>
                 <DataGridTextColumn 	x:Name="RADIF_COLUMN" 	      Binding="{Binding RADIF, UpdateSourceTrigger=LostFocus}"            Header="RADIF"               Width="auto" MinWidth="50"  Visibility="Hidden" />
                 <DataGridTextColumn 	x:Name="CODEh_COLUMN"         Binding="{Binding CODE, UpdateSourceTrigger=LostFocus}"            Header="کد کالا"               Width="auto" MinWidth="50" IsReadOnly="True"  Visibility="Hidden" />
+                <DataGridTextColumn Header="کد کالا" Width="80" MinWidth="80" Binding="{Binding CODE}" IsReadOnly="True">
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                            <Setter Property="Focusable" Value="False"/>
+                            <Setter Property="KeyboardNavigation.IsTabStop" Value="False"/>
+                            <Setter Property="IsTabStop"  Value="False"/>
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
                 <DataGridTextColumn 	x:Name="NAME_CODE_COLUMN"	  Binding="{Binding NAME_CODE, UpdateSourceTrigger=LostFocus}"        Header="کالا"           Width="500" MinWidth="450" >
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}"/>

@@ -205,7 +205,7 @@ namespace Wins.WinMenus.Checkha
                     break;
 
                 case "rchekd":
-                    
+
                     var report = new StiReport();
                     var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Checkha.CHEK_DLISTS.mrt");
                     report.Load(pathreport);
@@ -233,9 +233,8 @@ namespace Wins.WinMenus.Checkha
                 //case "chkm":
                 //    OpenForm("CHEK_MOGUD", 2, 8009);
                 //    break;
-                //case "chkb":
-                //    OpenForm("CHEK_BARGASHTI_MAIN", 2, 8008);
-                //    break;
+                case "chkb": new CHEK_BARGASHTI_MAIN(DT1.Text.ToRawTarikh(), DT2.Text.ToRawTarikh()).Show(); break;
+
                 case "chkv":
                     new CHEK_VOSUL_LES(DT1.Text.ToRawTarikh(), DT2.Text.ToRawTarikh()).Show();
                     break;

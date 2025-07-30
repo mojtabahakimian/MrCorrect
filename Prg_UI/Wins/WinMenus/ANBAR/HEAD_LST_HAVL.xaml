@@ -193,7 +193,15 @@
                             </Style>
                         </DataGridComboBoxColumn.ElementStyle>
                     </DataGridComboBoxColumn>
-
+                    <DataGridTextColumn Header="کد کالا" Width="80" MinWidth="80" Binding="{Binding CODE}" IsReadOnly="True">
+                        <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                <Setter Property="Focusable" Value="False"/>
+                                <Setter Property="KeyboardNavigation.IsTabStop" Value="False"/>
+                                <Setter Property="IsTabStop"  Value="False"/>
+                            </Style>
+                        </DataGridTextColumn.CellStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="نام کالا" x:Name="NAME_COL" Binding="{Binding NAME_CODE, UpdateSourceTrigger=LostFocus}" Visibility="Visible"  Width="auto"   MinWidth="180">
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">

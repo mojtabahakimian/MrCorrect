@@ -748,7 +748,16 @@ namespace Functions
             /// <summary>
             /// نمودار فروش کلی
             /// </summary>
-            AMAR_FROOSH_KOL
+            AMAR_FROOSH_KOL,
+
+            /// <summary>
+            /// لیست چکهای دریافتی سررسید شده
+            /// </summary>
+            F_MENU_CHEK_DCHSS,
+            /// <summary>
+            /// لیست چکهای برگشتی دریافتی
+            /// </summary>
+            F_MENU_CHEK_CHKB
         }
         #endregion
 
@@ -758,6 +767,10 @@ namespace Functions
         {
             switch (_TYPE_)
             {
+                case WinNameType.F_MENU_CHEK_CHKB: /* لیست چکهای برگشتی دریافتی */ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_CHEK("chkb", "لیست چکهای برگشتی دریافتی"), isModalDialog: false, allowMultipleInstances: false); break;
+
+                case WinNameType.F_MENU_CHEK_DCHSS: /* لیست چکهای دریافتی سررسید شده */ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_CHEK("dchss", "لیست چکهای دریافتی سررسید شده"), isModalDialog: false, allowMultipleInstances: false); break;
+
                 case WinNameType.AMAR_FROOSH_KOL: /* نمودار فروش کلی */ CL_LMethods.OpenWindow(OWNERWIN, new AMAR_FROOSH_KOL(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_TOZIE: //تنظیم لیست دستی توضیع
