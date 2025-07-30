@@ -1033,5 +1033,55 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.R_TARAZ_ANBARHA, this); //گزارش تراز موجودی کل انبار ها
         }
+
+        private void Button_Click_76(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_VISIT_VISITDLV, this); //گزارش عملکرد ویزیتور ها
+        }
+
+        private void Button_Click_77(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_VISIT_VISITKAL, this); //گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در ماه فروش)
+        }
+
+        private void Button_Click_78(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_VISIT_VISITKAL, this); //گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در تاریخ برگشت)
+        }
+
+        private void Button_Click_79(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.flist_porsant_factors, this); //گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در تاریخ برگشت)
+        }
+
+        private void Button_Click_80(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_VISIT_VISITONE, this); //لیست فروش ویزیتور به تفکیک فاکتور
+        }
+
+        private void Button_Click_81(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_AJNAS, this); //چاپ لیست کالا ها جهت ویزیت
+        }
+
+        private void Button_Click_82(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.VISITOR_GOL_REP, this); //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه
+        }
+
+        private void Button_Click_83(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.VISITOR_GOL_GRP_REP, this); //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه
+        }
+
+        private void Button_Click_84(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.VISITOR_GOL_GRP_REP_MAR, this); //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه (در تاریخ برگشت)
+        }
+
+        private void Button_Click_85(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.VISITOR_GOL_REP_MAR, this); //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه (در تاریخ برگشت)
+        }
     }
 }
