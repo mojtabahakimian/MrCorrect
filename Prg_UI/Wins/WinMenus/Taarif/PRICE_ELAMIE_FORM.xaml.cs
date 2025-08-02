@@ -226,6 +226,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         private bool ican;
         private List<COMBOPERSONEL> rst_personel;
 
+        public byte TAG { get; } = 30;
         public bool AllowEdits
         {
             get { return ican; }
@@ -734,9 +735,9 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 ErrosMessages.Add(new MsgModel { MessageText_U = "گروهی قیمتی نیمتواند خالی باشد" });
             }
 
-            if (TheRow.CLASS?.Length > 40)
+            if (TheRow?.PRICE1 < 0)
             {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "تعداد کاراکتر وارد شده برای کلاس مشتری بیش از 40 کاراکتر است !" });
+                ErrosMessages.Add(new MsgModel { MessageText_U = "مبلغ صحیح وارد نشده" });
             }
 
             if (ErrosMessages.Count > 0)
@@ -1052,18 +1053,13 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             }
 
             var report = new StiReport();
-            using var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Visitory.R_LIST_MASIR.mrt");
+            using var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.DASHBOARD.ELAMIEY_DEF.mrt");
             report.Load(pathreport);
             ((StiSqlDatabase)(report.Dictionary.Databases["MS SQL"])).ConnectionString = CL_CCNNMANAGER.CONNECTION_STR;
 
-            report["ROUTE_PARAM1"] = ROUTE_NAME.Text;
-            report["ROUTE_PARAM2"] = ROUTE_NAME.Text.FixPersianChars();
-            report["HES_PARAM"] = HES.SelectedValue;
+            report["NUMBER_PARAM"] = PEPID.Text;
 
-            (report.GetComponentByName("VISITOR_TXT") as StiText).Text = HES.Text;
-            (report.GetComponentByName("DATEEMROOZ") as StiText).Text = Tarikh.FullCurrentDate;
-
-            new WINRPT(report, "مسیر ویزیت").Show();
+            new WINRPT(report, "اعلامیه قیمت").Show();
         }
 
         private void DG_SUB_CANCEL_EDIT(DataGridEditingUnit? _RC_ = null)
@@ -1390,58 +1386,61 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
         }
 
-        private void RACTIVE_CheckBox_Click(object sender, RoutedEventArgs e)
-        {
-            DG_SUB.BeginEdit();
-        }
-
-        private void DG_SUB_PreparingCellForEdit_1(object sender, DataGridPreparingCellForEditEventArgs e)
-        {
-
-        }
         private void SGN1_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(PEPID.Text) || PEPID.Text == "0")
             {
-                var SGN_WAS = Convert.ToBoolean(SGN1.IsChecked ?? false);
-                SGN1.IsChecked = !SGN_WAS;
+                var wasChecked = SGN1.IsChecked ?? false;
+                SGN1.IsChecked = !wasChecked;
                 return;
             }
 
-            double mid;
-            string SHARH;
-            double td;
-            mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(PEPID.Text), 20);
-            if (mid > 0d)
-            {
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), " :امضا شد1 ", " :امضا برداشته شد1:") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + PEPID.Text + ",20 )");
-                dbms.DoExecuteSQL("UPDATE TASKS SET PERSONEL = " + CL_HESABDARI.GETUSERTASK(mid) + ",STATUS = 1 WHERE IDNUM = " + mid);
-            }
-            else
-            {
-                td = Tarikh.GET_OADATE_DAO();
-                SHARH = "'پيش فاکتور  شماره: " + PEPID.Text + " مورخ " + Strings.Format(Convert.ToInt32(PEPDATE.Text.ToRawTarikh()), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToString()) + "','" + this.CUST_NO.SelectedValue + "'";
-                dbms.DoExecuteSQL("insert into tasks(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO)  values (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.UCurrentUser() + "'," + SHARH + "," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.PEPID.Text + ",20, GETDATE() ," + Baseknow.USERCOD + " )");
-                mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(PEPID.Text), 20);
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), " : امضا شد1 ", " :امضا برداشته شد1 ") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.PEPID.Text + ",20 )");
-            }
+            //double mid;
+            //string sharh;
+            //double td;
+            //var TAG = 30;
 
-            SGN1usid.Tag = Baseknow.USERCOD;
-            SGN1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == Baseknow.USERCOD).SAL_NAME;
+            //mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(PEPID.Text), TAG);
+            //if (mid > 0d)
+            //{
+            //    dbms.DoExecuteSQL(
+            //        $"INSERT INTO events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG) " +
+            //        $"VALUES ({mid},'{CL_HESABDARI.UCurrentUser()}'," +
+            //        $"'{CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD))}" +
+            //        $"{(SGN1.IsChecked == true ? " :امضا شد1 " : " :امضا برداشته شد1:")}'," +
+            //        $"{Tarikh.FullCurrentDate}," +
+            //        $"{(DateTime.Now.Hour * 100 + DateTime.Now.Minute)},{TAG},{PEPID.Text},{TAG})");
+            //    dbms.DoExecuteSQL(
+            //        $"UPDATE TASKS SET PERSONEL = {CL_HESABDARI.GETUSERTASK(mid)}, STATUS = 1 WHERE IDNUM = {mid}");
+            //}
+            //else
+            //{
+            //    td = Tarikh.GET_OADATE_DAO();
+            //    sharh = $"'اعلامیه قیمت شماره: {PEPID.Text} مورخ " +
+            //            $"{Strings.Format(Convert.ToInt32(PEPDATE.Text.ToRawTarikh()), "####/##/##")}', '0'";
+            //    dbms.DoExecuteSQL(
+            //        $"INSERT INTO TASKS(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO) " +
+            //        $"VALUES ({Baseknow.USERCOD},'{CL_HESABDARI.UCurrentUser()}',{sharh}," +
+            //        $"{Tarikh.FullCurrentDate},{(DateTime.Now.Hour * 100 + DateTime.Now.Minute)}," +
+            //        $"{TAG},{PEPID.Text},{TAG},GETDATE(),{Baseknow.USERCOD})");
+            //    mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(PEPID.Text), TAG);
+            //    dbms.DoExecuteSQL(
+            //        $"INSERT INTO EVENTS(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG) " +
+            //        $"VALUES ({mid},'{CL_HESABDARI.UCurrentUser()}'," +
+            //        $"'{CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD))}" +
+            //        $"{(SGN1.IsChecked == true ? " : امضا شد1 " : " :امضا برداشته شد1 ")}'," +
+            //        $"{Tarikh.FullCurrentDate},{(DateTime.Now.Hour * 100 + DateTime.Now.Minute)}," +
+            //        $"{TAG},{PEPID.Text},{TAG})");
+            //}
+            //Meidnum = mid;
 
-            if ((bool)SGN1.IsChecked)
-            {
-                dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN1usid={SGN1usid.Tag ?? "NULL"}, SGN1 = {Convert.ToByte((bool)SGN1.IsChecked)} WHERE TAG = 20 AND NUMBER = {PEPID.Text}");
-            }
-            else
-            {
-                dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN1usid={SGN1usid.Tag ?? "NULL"}, SGN1 = {Convert.ToByte((bool)SGN1.IsChecked)} WHERE TAG = 20 AND NUMBER = {PEPID.Text}");
-            }
+            ////SGN1usid.Tag = Baseknow.USERCOD;
+            ////SGN1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == Baseknow.USERCOD)?.SAL_NAME;
+
+            dbms.DoExecuteSQL($"UPDATE dbo.PRICE_ELAMIE SET SGN1={Convert.ToByte(SGN1.IsChecked ?? false)} WHERE PEPID={PEPID.Text}");
 
             Form_Current();
-            this.PERSONEL.Visibility = Visibility.Visible;
-            Meidnum = mid;
-
+            PERSONEL.Visibility = Visibility.Visible;
         }
         private void SGN2_Click(object sender, RoutedEventArgs e)
         {
@@ -1452,39 +1451,9 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 return;
             }
 
-            double mid;
-            string SHARH;
-            double td;
-            mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(PEPID.Text), 20);
-            if (mid > 0d)
-            {
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), " :امضا شد2 ", " :امضا برداشته شد2:") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + PEPID.Text + ",20 )");
-                dbms.DoExecuteSQL("UPDATE TASKS SET PERSONEL = " + CL_HESABDARI.GETUSERTASK(mid) + ",STATUS = 1 WHERE IDNUM = " + mid);
-            }
-            else
-            {
-                td = Tarikh.GET_OADATE_DAO();
-                SHARH = "'پيش فاکتور  شماره: " + PEPID.Text + " مورخ " + Strings.Format(Convert.ToInt32(PEPDATE.Text.ToRawTarikh()), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToString()) + "','" + this.CUST_NO.SelectedValue + "'";
-                dbms.DoExecuteSQL("insert into tasks(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO)  values (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.UCurrentUser() + "'," + SHARH + "," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.PEPID.Text + ",20, GETDATE() ," + Baseknow.USERCOD + " )");
-                mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(PEPID.Text), 20);
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), " : امضا شد2 ", " :امضا برداشته شد2 ") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.PEPID.Text + ",20 )");
-            }
-
-            SGN2usid.Tag = Baseknow.USERCOD;
-            SGN2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == Baseknow.USERCOD).SAL_NAME;
-
-            if ((bool)SGN2.IsChecked)
-            {
-                dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN2usid={SGN2usid.Tag ?? "NULL"},  SGN2 = {Convert.ToByte((bool)SGN2.IsChecked)} WHERE TAG = 20 AND NUMBER = {PEPID.Text}");
-            }
-            else
-            {
-                dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN2usid={SGN2usid.Tag ?? "NULL"},  SGN2 = {Convert.ToByte((bool)SGN2.IsChecked)} WHERE TAG = 20 AND NUMBER = {PEPID.Text}");
-            }
-
+            dbms.DoExecuteSQL($"UPDATE dbo.PRICE_ELAMIE SET SGN2={Convert.ToByte(SGN2.IsChecked ?? false)} WHERE PEPID={PEPID.Text}");
             Form_Current();
-            this.PERSONEL.Visibility = Visibility.Visible;
-            Meidnum = mid; // If Not Me.OKF Then Me.OKF = True
+            PERSONEL.Visibility = Visibility.Visible;
         }
         private void SGN3_Click(object sender, RoutedEventArgs e)
         {
@@ -1495,48 +1464,19 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 return;
             }
 
-            double mid;
-            string SHARH;
-            double td;
-            mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(PEPID.Text), 20);
-            if (mid > 0d)
-            {
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), " :امضا شد3 ", " :امضا برداشته شد3:") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + PEPID.Text + ",20 )");
-                dbms.DoExecuteSQL("UPDATE TASKS SET PERSONEL = " + CL_HESABDARI.GETUSERTASK(mid) + ",STATUS = 1 WHERE IDNUM = " + mid);
-            }
-            else
-            {
-                td = Tarikh.GET_OADATE_DAO();
-                SHARH = "'پيش فاکتور  شماره: " + PEPID.Text + " مورخ " + Strings.Format(Convert.ToInt32(PEPDATE.Text.ToRawTarikh()), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToString()) + "','" + this.CUST_NO.SelectedValue + "'";
-                dbms.DoExecuteSQL("insert into tasks(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO)  values (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.UCurrentUser() + "'," + SHARH + "," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.PEPID.Text + ",20, GETDATE() ," + Baseknow.USERCOD + " )");
-                mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(PEPID.Text), 20);
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), " : امضا شد3 ", " :امضا برداشته شد3 ") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.PEPID.Text + ",20 )");
-            }
-
-            SGN3usid.Tag = Baseknow.USERCOD;
-            SGN3usid.Text = rst_personel.FirstOrDefault(x => x.IDD == Baseknow.USERCOD).SAL_NAME;
-
-            if ((bool)SGN3.IsChecked)
-            {
-                dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN3usid={SGN3usid.Tag ?? "NULL"},  SGN3 = {Convert.ToByte((bool)SGN3.IsChecked)} WHERE TAG = 20 AND NUMBER = {PEPID.Text}");
-            }
-            else
-            {
-                dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN3usid={SGN3usid.Tag ?? "NULL"},  SGN3 = {Convert.ToByte((bool)SGN3.IsChecked)} WHERE TAG = 20 AND NUMBER = {PEPID.Text}");
-            }
-
+            dbms.DoExecuteSQL($"UPDATE dbo.PRICE_ELAMIE SET SGN3={Convert.ToByte(SGN3.IsChecked ?? false)} WHERE PEPID={PEPID.Text}");
             Form_Current();
-            this.PERSONEL.Visibility = Visibility.Visible;
-            Meidnum = mid; // If Not Me.OKF Then Me.OKF = True
+            PERSONEL.Visibility = Visibility.Visible;
         }
         private void PERSONEL_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             //After Update
             if (PERSONEL.SelectedItem != null && !NewRecord && PEPID.Text != "0")
             {
-                //dbms.DoExecuteSQL($"UPDATE TASKS SET PERSONEL = {PERSONEL.SelectedValue} WHERE IDNUM = {Meidnum}");
-                ;?;
-                Meidnum = CL_HESABDARI.PERSONELUpdate(20, Convert.ToDouble(PEPID.Text), Convert.ToInt32(PERSONEL.SelectedValue), "'پيش فاکتور  شماره: " + PEPID.Text + " مورخ " + Strings.Format(Convert.ToInt64(PEPDATE.Text.ToRawTarikh()), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(CUST_NO.SelectedValue.ToStringNullSafe()) + "','" + CUST_NO.SelectedValue + "'");
+                Meidnum = CL_HESABDARI.PERSONELUpdate(TAG, Convert.ToDouble(PEPID.Text),
+                    Convert.ToInt32(PERSONEL.SelectedValue), "'اعلامیه قیمت  شماره: " + PEPID.Text
+                    + " مورخ " + Strings.Format(Convert.ToInt64(PEPDATE.Text.ToRawTarikh()), "####/##/##") +
+                    "  به نام: " + PEPNAME.Text + "'");
 
                 universControl.PopNotifyShow($".ارجاع داده شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
             }
@@ -1552,7 +1492,6 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 universControl.PopNotifyShow($".هنوز ذخیره را انجام نداده اید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
             }
         }
-
         private void PEPDEPART_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 

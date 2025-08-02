@@ -175,7 +175,7 @@
         <TextBox x:Name="SGN1usid"   Style="{StaticResource FuzzyOut}" Padding="3"  Margin="0,0,105,103" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="202" IsReadOnly="True" Visibility="Collapsed"/>
         <TextBox x:Name="SGN2usid"   Style="{StaticResource FuzzyOut}" Padding="3"  Margin="0,0,105,70" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="202" IsReadOnly="True" Visibility="Collapsed"/>
         <TextBox x:Name="SGN3usid"   Style="{StaticResource FuzzyOut}" Padding="3"  Margin="0,0,105,37" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft"  HorizontalAlignment="Right" Width="202" IsReadOnly="True" Visibility="Collapsed"/>
-        <ComboBox x:Name="PERSONEL" Tag="RD"
+        <ComboBox x:Name="PERSONEL" Tag="RD"  Visibility="Collapsed"
             Style="{StaticResource FuzzyOutComboBox}" Padding="7,0,10,0" IsTextSearchEnabled="True" Margin="0,0,431,100" VerticalAlignment="Bottom" Height="30" FlowDirection="RightToLeft"   IsEditable="True" HorizontalAlignment="Right" Width="311" SelectionChanged="PERSONEL_SelectionChanged">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -183,7 +183,7 @@
                 </ItemsPanelTemplate>
             </ComboBox.ItemsPanel>
         </ComboBox>
-        <Label Content="ارجاع به:" HorizontalAlignment="Right" Margin="0,0,375,101" VerticalAlignment="Bottom" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="ارجاع به:" Visibility="Collapsed" HorizontalAlignment="Right" Margin="0,0,378,101" VerticalAlignment="Bottom" FlowDirection="RightToLeft" Width="auto"/>
 
     </Grid>
 </Window>

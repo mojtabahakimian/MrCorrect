@@ -395,8 +395,15 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 //Command113.IsEnabled = can; //تبدیل به فاکتور
                 BTN_SAVE.IsEnabled = can;
                 //Command118.IsEnabled = can;
-                DEPATMAN.IsEnabled = can;
 
+                if (!CL_HESABDARI.LETSGO("DEFA"))
+                {
+                    this.DEPATMAN.IsEnabled = false;
+                }
+                else
+                {
+                    DEPATMAN.IsEnabled = can;
+                }
 
                 if (CL_Generaly.IsGHAYM_7)
                 {

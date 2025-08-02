@@ -69,6 +69,7 @@
 		<None Remove="Rpts\Checkha\CHAPCHEK.mrt" />
 		<None Remove="Rpts\Checkha\CHEK_DLISTS.mrt" />
 		<None Remove="Rpts\Checkha\ELVSL_ADA.mrt" />
+		<None Remove="Rpts\DASHBOARD\ELAMIEY_DEF.mrt" />
 		<None Remove="Rpts\Factors\HAVLAH_BRDIRECT.mrt" />
 		<None Remove="Rpts\Factors\HAVLAH_ENTER.mrt" />
 		<None Remove="Rpts\Factors\HAVLAH_ENTER_BACK.mrt" />
@@ -469,6 +470,7 @@
 		<EmbeddedResource Include="Rpts\Checkha\CHAPCHEK.mrt" />
 		<EmbeddedResource Include="Rpts\Checkha\CHEK_DLISTS.mrt" />
 		<EmbeddedResource Include="Rpts\Checkha\ELVSL_ADA.mrt" />
+		<EmbeddedResource Include="Rpts\DASHBOARD\ELAMIEY_DEF.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\HAVLAH_BRDIRECT.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\HAVLAH_ENTER.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\HAVLAH_ENTER_BACK.mrt" />

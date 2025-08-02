@@ -332,13 +332,13 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         private void _SaveExit_Click(object sender, RoutedEventArgs e)
         {
             List<MsgModel> ErrosMessages = new List<MsgModel>();
-            TextBox LIST_NO_TEX = (TextBox)LIST_NO.Template.FindName("PART_EditableTextBox", LIST_NO);
-            if (string.IsNullOrEmpty(LIST_NO_TEX.Text) || !int.TryParse(LIST_NO_TEX.Text, out _))
+            TextBox listNoText = LIST_NO.Template?.FindName("PART_EditableTextBox", LIST_NO) as TextBox;
+            if (string.IsNullOrEmpty(listNoText?.Text) || !int.TryParse(listNoText.Text, out _))
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "کد شعبه صحیح نیست" });
             }
-            TextBox NAME_TAH_TEX = (TextBox)NAME_TAH.Template.FindName("PART_EditableTextBox", NAME_TAH);
-            if (string.IsNullOrEmpty(NAME_TAH_TEX.Text))
+            TextBox nameTahText = NAME_TAH.Template?.FindName("PART_EditableTextBox", NAME_TAH) as TextBox;
+            if (string.IsNullOrEmpty(nameTahText?.Text))
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "نام پرداخت کننده نمی تواند خالی باشد" });
             }
@@ -346,7 +346,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "شماره سريال ، نام بانك و تاريخ سررسيد  نمي تواند خالي باشد!" });
             }
-            if (NAME_TAH.Text.Length > 190)
+            if (NAME_TAH.Text?.Length > 190)
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "نام پرداخت کنند باید مختصر و کوتاه باشد" });
             }

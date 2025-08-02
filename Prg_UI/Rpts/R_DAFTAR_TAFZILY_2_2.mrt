@@ -14,7 +14,7 @@
     <DataSources isList="true" count="1">
       <DataSource1 Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>DataSource1</Alias>
-        <Columns isList="true" count="10">
+        <Columns isList="true" count="21">
           <value>ORIGINAL,HES_K,HES_K,HES_K,System.Int32,_x0036_d5d82e4f3724f11aaa82e1cb423e01f</value>
           <value>ORIGINAL,HES_M,HES_M,HES_M,System.Int32,_x0032_47e2eed66924ca3a4f7a0d131ef3251</value>
           <value>ORIGINAL,TAFZILN,TAFZILN,TAFZILN,System.String,d2737844edb24e1ab24a67270f4c08fe</value>
@@ -25,30 +25,42 @@
           <value>ORIGINAL,N_S,N_S,N_S,System.Double,_x0030_9f0f5c2df75409c8bf0e500b2875d91</value>
           <value>ORIGINAL,DATE_S,DATE_S,DATE_S,System.Int64,aebe34501ec049059199faccac74cf78</value>
           <value>ORIGINAL,MAND,MAND,MAND,System.Double,b35f57ccb64c402fa64010278de0a3fe</value>
+          <value>HES_T,System.Int32</value>
+          <value>HES_T2,System.Int32</value>
+          <value>TASH,System.String</value>
+          <value>ORIGINAL,hes,hes1,hes1,System.String</value>
+          <value>NO_S,System.Double</value>
+          <value>N_SERI,System.Double</value>
+          <value>BANK,System.Int32</value>
+          <value>NUMBER,System.Double</value>
+          <value>TAG,System.Double</value>
+          <value>ARZD,System.Double</value>
+          <value>base,System.Int32</value>
         </Columns>
         <CommandTimeout>30</CommandTimeout>
         <Dictionary isRef="1" />
         <Key>41e13297a89541a98dc92e94d66c77bb</Key>
         <Name>DataSource1</Name>
         <NameInSource>MS SQL</NameInSource>
-        <Parameters isList="true" count="3">
+        <Parameters isList="true" count="4">
           <value>DT1,,12,30</value>
           <value>DT2,,12,30</value>
           <value>HESAB,,12,30</value>
+          <value>SORT_TYPE,SORTY,18,50</value>
         </Parameters>
-        <SqlCommand>SELECT HES_K, HES_M, TAFZILN, HES, SHARH, BED, BES, N_S, DATE_S, MAND
-	FROM dbo.QDAFTARTAFZIL2_H(@DT1 , @DT2 , @HESAB );</SqlCommand>
+        <SqlCommand>EXEC dbo.usp_TafzilLedger @DT1, @DT2, @HESAB , @SORT_TYPE</SqlCommand>
       </DataSource1>
     </DataSources>
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Resources isList="true" count="0" />
-    <Variables isList="true" count="5">
+    <Variables isList="true" count="6">
       <value>,PreviousJam,PreviousJam,,System.Decimal,_x0030_,False,False,False,False,,_x0032_eebfcb3e87e4e5f97a99d0a58fd6a56</value>
       <value>,PreviousBES,PreviousBES,,System.Decimal,_x0030_,False,False,False,False,,_x0033_778a478589c4438bed99e8084c0a584</value>
       <value>,SBES,SBES,,System.Decimal,Sum_x0028_DataSource1.BES_x0029_,False,True,False,False,,_x0035_0e907149ca14ea699ce44afed8d8450</value>
       <value>,SBED,SBED,,System.Decimal,Sum_x0028_DataSource1.BED_x0029_,False,True,False,False,,cd1362bff0e046ac9199369253dcf08b</value>
       <value>,Variable1,Variable1,FOR_PASS_TSQL_TEXT,System.String,,False,False,False,False,,ce6806322f53438ba792d4450055ebcb,True</value>
+      <value>,SORTY,SORTY,SORTY,System.String,,False,False,False,False,,ca9edd34ba254b9db493c595ac02d048,True</value>
     </Variables>
   </Dictionary>
   <EngineVersion>EngineV2</EngineVersion>
@@ -64,7 +76,7 @@
     <Page2 Ref="5" type="Page" isKey="true">
       <Border>None;Black;2;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
-      <Components isList="true" count="23">
+      <Components isList="true" count="22">
         <PageHeaderBand2 Ref="6" type="PageHeaderBand" isKey="true">
           <BeforePrintEvent>PreviousJam = PreviousJam + cSum(DataBand2,DataSource1.BED);
 PreviousBES = PreviousBES + cSum(DataBand2,DataSource1.BES);</BeforePrintEvent>
@@ -261,6 +273,7 @@ PreviousBES = PreviousBES + cSum(DataBand2,DataSource1.BES);</BeforePrintEvent>
               <Brush>Transparent</Brush>
               <ClientRectangle>8.8,1.6,10.2,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
+              <Enabled>False</Enabled>
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
               <Margins>0,0,0,0</Margins>
@@ -364,6 +377,7 @@ PreviousBES = PreviousBES + cSum(DataBand2,DataSource1.BES);</BeforePrintEvent>
               <Brush>Transparent</Brush>
               <ClientRectangle>0,1.6,2.6,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
+              <Enabled>False</Enabled>
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
               <HorAlignment>Right</HorAlignment>
@@ -386,6 +400,7 @@ PreviousBES = PreviousBES + cSum(DataBand2,DataSource1.BES);</BeforePrintEvent>
               <Brush>Transparent</Brush>
               <ClientRectangle>3.2,1.6,2.8,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
+              <Enabled>False</Enabled>
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
               <HorAlignment>Right</HorAlignment>
@@ -494,6 +509,7 @@ PreviousBES = PreviousBES + cSum(DataBand2,DataSource1.BES);</BeforePrintEvent>
               <Brush>Transparent</Brush>
               <ClientRectangle>2.6,1.6,0.6,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
+              <Enabled>False</Enabled>
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
               <HorAlignment>Center</HorAlignment>
@@ -511,6 +527,7 @@ PreviousBES = PreviousBES + cSum(DataBand2,DataSource1.BES);</BeforePrintEvent>
               <Brush>Transparent</Brush>
               <ClientRectangle>6,1.6,2.8,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
+              <Enabled>False</Enabled>
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
               <HorAlignment>Right</HorAlignment>
@@ -680,24 +697,13 @@ PreviousBES = PreviousBES + cSum(DataBand2,DataSource1.BES);</BeforePrintEvent>
           <Page isRef="5" />
           <Parent isRef="5" />
         </ColumnHeaderBand1>
-        <GroupHeaderBand1 Ref="53" type="GroupHeaderBand" isKey="true">
-          <Brush>Transparent</Brush>
-          <ClientRectangle>0,7.6,19,0</ClientRectangle>
-          <Components isList="true" count="0" />
-          <Condition>{DataSource1.HES_K}</Condition>
-          <Conditions isList="true" count="0" />
-          <Expressions isList="true" count="0" />
-          <Name>GroupHeaderBand1</Name>
-          <Page isRef="5" />
-          <Parent isRef="5" />
-        </GroupHeaderBand1>
-        <DataBand2 Ref="54" type="DataBand" isKey="true">
+        <DataBand2 Ref="53" type="DataBand" isKey="true">
           <Border>All;Black;1;Solid;False;4;Black</Border>
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
-          <ClientRectangle>0,8.4,19,0.8</ClientRectangle>
+          <ClientRectangle>0,7.6,19,0.8</ClientRectangle>
           <Components isList="true" count="19">
-            <Text1 Ref="55" type="Text" isKey="true">
+            <Text1 Ref="54" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <CanBreak>True</CanBreak>
               <ClientRectangle>17.8,0,1.2,0.8</ClientRectangle>
@@ -708,14 +714,14 @@ PreviousBES = PreviousBES + cSum(DataBand2,DataSource1.BES);</BeforePrintEvent>
               <Margins>0,0,0,0</Margins>
               <Name>Text1</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
+              <Parent isRef="53" />
               <Text>{DataSource1.N_S}</Text>
               <TextBrush>Black</TextBrush>
               <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text1>
-            <Text8 Ref="56" type="Text" isKey="true">
+            <Text8 Ref="55" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <CanBreak>True</CanBreak>
               <ClientRectangle>16.4,0,1.4,0.8</ClientRectangle>
@@ -726,19 +732,19 @@ PreviousBES = PreviousBES + cSum(DataBand2,DataSource1.BES);</BeforePrintEvent>
               <Margins>0,0,0,0</Margins>
               <Name>Text8</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
+              <Parent isRef="53" />
               <ShrinkFontToFit>True</ShrinkFontToFit>
               <ShrinkFontToFitMinimumSize>7</ShrinkFontToFitMinimumSize>
               <Text>{DataSource1.DATE_S}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="57" type="CustomFormat" isKey="true">
+              <TextFormat Ref="56" type="CustomFormat" isKey="true">
                 <StringFormat>####/##/##</StringFormat>
               </TextFormat>
               <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text8>
-            <Text2 Ref="58" type="Text" isKey="true">
+            <Text2 Ref="57" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <CanBreak>True</CanBreak>
               <CanGrow>True</CanGrow>
@@ -750,14 +756,14 @@ PreviousBES = PreviousBES + cSum(DataBand2,DataSource1.BES);</BeforePrintEvent>
               <Margins>1,1,1,1</Margins>
               <Name>Text2</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
+              <Parent isRef="53" />
               <Text>{DataSource1.SHARH}</Text>
               <TextBrush>Black</TextBrush>
               <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text2>
-            <Text7 Ref="59" type="Text" isKey="true">
+            <Text7 Ref="58" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <CanBreak>True</CanBreak>
               <ClientRectangle>6,0,2.8,0.8</ClientRectangle>
@@ -768,10 +774,10 @@ PreviousBES = PreviousBES + cSum(DataBand2,DataSource1.BES);</BeforePrintEvent>
               <Margins>0,0,0,0</Margins>
               <Name>Text7</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
+              <Parent isRef="53" />
               <Text>{DataSource1.BED}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="60" type="NumberFormat" isKey="true">
+              <TextFormat Ref="59" type="NumberFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
                 <GroupSeparator>,</GroupSeparator>
                 <NegativePattern>1</NegativePattern>
@@ -781,7 +787,7 @@ PreviousBES = PreviousBES + cSum(DataBand2,DataSource1.BES);</BeforePrintEvent>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text7>
-            <Text11 Ref="61" type="Text" isKey="true">
+            <Text11 Ref="60" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <CanBreak>True</CanBreak>
               <ClientRectangle>3.2,0,2.8,0.8</ClientRectangle>
@@ -792,10 +798,10 @@ PreviousBES = PreviousBES + cSum(DataBand2,DataSource1.BES);</BeforePrintEvent>
               <Margins>0,0,0,0</Margins>
               <Name>Text11</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
+              <Parent isRef="53" />
               <Text>{DataSource1.BES}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="62" type="NumberFormat" isKey="true">
+              <TextFormat Ref="61" type="NumberFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
                 <GroupSeparator>,</GroupSeparator>
                 <NegativePattern>1</NegativePattern>
@@ -805,7 +811,7 @@ PreviousBES = PreviousBES + cSum(DataBand2,DataSource1.BES);</BeforePrintEvent>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text11>
-            <Text29 Ref="63" type="Text" isKey="true">
+            <Text29 Ref="62" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <CanBreak>True</CanBreak>
               <ClientRectangle>0,0,2.6,0.8</ClientRectangle>
@@ -816,10 +822,10 @@ PreviousBES = PreviousBES + cSum(DataBand2,DataSource1.BES);</BeforePrintEvent>
               <Margins>0,0,0,0</Margins>
               <Name>Text29</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
-              <Text>{Abs(SumRunning(DataBand2,DataSource1.MAND))}</Text>
+              <Parent isRef="53" />
+              <Text>{DataSource1.MAND}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="64" type="NumberFormat" isKey="true">
+              <TextFormat Ref="63" type="NumberFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
                 <GroupSeparator>,</GroupSeparator>
                 <NegativePattern>1</NegativePattern>
@@ -829,7 +835,7 @@ PreviousBES = PreviousBES + cSum(DataBand2,DataSource1.BES);</BeforePrintEvent>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text29>
-            <Text30 Ref="65" type="Text" isKey="true">
+            <Text30 Ref="64" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <CanBreak>True</CanBreak>
               <ClientRectangle>2.6,0,0.6,0.8</ClientRectangle>
@@ -840,121 +846,119 @@ PreviousBES = PreviousBES + cSum(DataBand2,DataSource1.BES);</BeforePrintEvent>
               <Margins>0,0,0,0</Margins>
               <Name>Text30</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
-              <Text>{Switch(SumRunning(DataBand2,DataSource1.MAND) == 0, "--", 
-SumRunning(DataBand2,DataSource1.MAND) &gt; 0, "بد", 
-SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
+              <Parent isRef="53" />
+              <Text>{DataSource1.TASH}</Text>
               <TextBrush>Black</TextBrush>
               <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text30>
-            <StartPointPrimitive7 Ref="66" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive7 Ref="65" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>16.4,0,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>StartPointPrimitive7</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
+              <Parent isRef="53" />
               <ReferenceToGuid>0ceeb071d68e48a8866bee0e709be3a1</ReferenceToGuid>
             </StartPointPrimitive7>
-            <EndPointPrimitive7 Ref="67" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive7 Ref="66" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>16.4,0.8,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>EndPointPrimitive7</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
+              <Parent isRef="53" />
               <ReferenceToGuid>0ceeb071d68e48a8866bee0e709be3a1</ReferenceToGuid>
             </EndPointPrimitive7>
-            <StartPointPrimitive2 Ref="68" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive2 Ref="67" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>2.6,0,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>StartPointPrimitive2</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
+              <Parent isRef="53" />
               <ReferenceToGuid>6a44aac646fc4d3c8db686bd23a84ac4</ReferenceToGuid>
             </StartPointPrimitive2>
-            <EndPointPrimitive1 Ref="69" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive1 Ref="68" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>2.6,0.8,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>EndPointPrimitive1</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
+              <Parent isRef="53" />
               <ReferenceToGuid>6a44aac646fc4d3c8db686bd23a84ac4</ReferenceToGuid>
             </EndPointPrimitive1>
-            <StartPointPrimitive3 Ref="70" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive3 Ref="69" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>3.2,0,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>StartPointPrimitive3</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
+              <Parent isRef="53" />
               <ReferenceToGuid>a487f1fac985477c8a7f242fff1e6e42</ReferenceToGuid>
             </StartPointPrimitive3>
-            <EndPointPrimitive2 Ref="71" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive2 Ref="70" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>3.2,0.8,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>EndPointPrimitive2</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
+              <Parent isRef="53" />
               <ReferenceToGuid>a487f1fac985477c8a7f242fff1e6e42</ReferenceToGuid>
             </EndPointPrimitive2>
-            <StartPointPrimitive4 Ref="72" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive4 Ref="71" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>6,0,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>StartPointPrimitive4</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
+              <Parent isRef="53" />
               <ReferenceToGuid>c5e505e158c048a498d19c383cc196bd</ReferenceToGuid>
             </StartPointPrimitive4>
-            <EndPointPrimitive3 Ref="73" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive3 Ref="72" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>6,0.8,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>EndPointPrimitive3</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
+              <Parent isRef="53" />
               <ReferenceToGuid>c5e505e158c048a498d19c383cc196bd</ReferenceToGuid>
             </EndPointPrimitive3>
-            <StartPointPrimitive6 Ref="74" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive6 Ref="73" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>8.8,0,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>StartPointPrimitive6</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
+              <Parent isRef="53" />
               <ReferenceToGuid>e1b531ea6e9d4a88914a172775bb40a8</ReferenceToGuid>
             </StartPointPrimitive6>
-            <EndPointPrimitive6 Ref="75" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive6 Ref="74" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>8.8,0.8,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>EndPointPrimitive6</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
+              <Parent isRef="53" />
               <ReferenceToGuid>e1b531ea6e9d4a88914a172775bb40a8</ReferenceToGuid>
             </EndPointPrimitive6>
-            <StartPointPrimitive10 Ref="76" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive10 Ref="75" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>17.8,0,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>StartPointPrimitive10</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
+              <Parent isRef="53" />
               <ReferenceToGuid>bac8e9411df647649076b4a3b7569753</ReferenceToGuid>
             </StartPointPrimitive10>
-            <EndPointPrimitive8 Ref="77" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive8 Ref="76" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>17.8,0.8,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>EndPointPrimitive8</Name>
               <Page isRef="5" />
-              <Parent isRef="54" />
+              <Parent isRef="53" />
               <ReferenceToGuid>bac8e9411df647649076b4a3b7569753</ReferenceToGuid>
             </EndPointPrimitive8>
           </Components>
@@ -966,24 +970,13 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Name>DataBand2</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <Sort isList="true" count="10">
-            <value>ASC</value>
-            <value>{DataSource1.HES_K}</value>
-            <value>ASC</value>
-            <value>{DataSource1.N_S}</value>
-            <value>DESC</value>
-            <value>{DataSource1.BED}</value>
-            <value>DESC</value>
-            <value>{DataSource1.BES}</value>
-            <value>ASC</value>
-            <value>DATE_S</value>
-          </Sort>
+          <Sort isList="true" count="0" />
         </DataBand2>
-        <FooterBand1 Ref="78" type="FooterBand" isKey="true">
+        <FooterBand1 Ref="77" type="FooterBand" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,10,19,0.8</ClientRectangle>
+          <ClientRectangle>0,9.2,19,0.8</ClientRectangle>
           <Components isList="true" count="11">
-            <Text3 Ref="79" type="Text" isKey="true">
+            <Text3 Ref="78" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>[255:255:255]</Brush>
               <ClientRectangle>0,0,2.6,0.8</ClientRectangle>
@@ -994,10 +987,10 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text3</Name>
               <Page isRef="5" />
-              <Parent isRef="78" />
+              <Parent isRef="77" />
               <Text>{Abs(SumRunning(DataBand2,DataSource1.BED) - SumRunning(DataBand2,DataSource1.BES))}</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="80" type="NumberFormat" isKey="true">
+              <TextFormat Ref="79" type="NumberFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
                 <GroupSeparator>,</GroupSeparator>
                 <NegativePattern>1</NegativePattern>
@@ -1006,7 +999,7 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text3>
-            <Text12 Ref="81" type="Text" isKey="true">
+            <Text12 Ref="80" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>[255:255:255]</Brush>
               <ClientRectangle>8.8,0,10.2,0.8</ClientRectangle>
@@ -1016,13 +1009,13 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text12</Name>
               <Page isRef="5" />
-              <Parent isRef="78" />
+              <Parent isRef="77" />
               <Text>{IIF(TotalPageCount&gt; 1 &amp;&amp; PageNumber &lt; TotalPageCount,": جمع نقل به صفحه بعد",": جمع")}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text12>
-            <Text13 Ref="82" type="Text" isKey="true">
+            <Text13 Ref="81" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>[255:255:255]</Brush>
               <ClientRectangle>3.2,0,2.8,0.8</ClientRectangle>
@@ -1033,10 +1026,10 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text13</Name>
               <Page isRef="5" />
-              <Parent isRef="78" />
+              <Parent isRef="77" />
               <Text>{ IIF( IsLastPage, Sum(DataBand2,DataSource1.BES),     SumRunning(DataBand2,DataSource1.BES) ) }</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="83" type="NumberFormat" isKey="true">
+              <TextFormat Ref="82" type="NumberFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
                 <GroupSeparator>,</GroupSeparator>
                 <NegativePattern>1</NegativePattern>
@@ -1045,7 +1038,7 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text13>
-            <Text38 Ref="84" type="Text" isKey="true">
+            <Text38 Ref="83" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>[255:255:255]</Brush>
               <ClientRectangle>6,0,2.8,0.8</ClientRectangle>
@@ -1056,10 +1049,10 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text38</Name>
               <Page isRef="5" />
-              <Parent isRef="78" />
+              <Parent isRef="77" />
               <Text>{ IIF( IsLastPage, Sum(DataBand2,DataSource1.BED),     SumRunning(DataBand2,DataSource1.BED) ) }</Text>
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="85" type="NumberFormat" isKey="true">
+              <TextFormat Ref="84" type="NumberFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
                 <GroupSeparator>,</GroupSeparator>
                 <NegativePattern>1</NegativePattern>
@@ -1068,7 +1061,7 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text38>
-            <Text39 Ref="86" type="Text" isKey="true">
+            <Text39 Ref="85" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <ClientRectangle>2.6,0,0.6,0.8</ClientRectangle>
@@ -1079,66 +1072,66 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
               <Margins>0,0,0,0</Margins>
               <Name>Text39</Name>
               <Page isRef="5" />
-              <Parent isRef="78" />
-              <Text>{Switch(SumRunning(DataBand2,DataSource1.MAND) == 0, "--", 
-SumRunning(DataBand2,DataSource1.MAND) &gt; 0, "بد", 
-SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
+              <Parent isRef="77" />
+              <Text>{Switch(SumRunning(DataBand2,DataSource1.BED) - SumRunning(DataBand2,DataSource1.BES) == 0, "--", 
+SumRunning(DataBand2,DataSource1.BED) - SumRunning(DataBand2,DataSource1.BES) &gt; 0, "بد", 
+SumRunning(DataBand2,DataSource1.BED) - SumRunning(DataBand2,DataSource1.BES) &lt; 0, "بس")}</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text39>
-            <EndPointPrimitive4 Ref="87" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive4 Ref="86" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>0,0.8,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>EndPointPrimitive4</Name>
               <Page isRef="5" />
-              <Parent isRef="78" />
+              <Parent isRef="77" />
               <ReferenceToGuid>33e65f8aee18423a8d7046fb291b0eaf</ReferenceToGuid>
             </EndPointPrimitive4>
-            <EndPointPrimitive11 Ref="88" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive11 Ref="87" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>19,0.8,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>EndPointPrimitive11</Name>
               <Page isRef="5" />
-              <Parent isRef="78" />
+              <Parent isRef="77" />
               <ReferenceToGuid>468ab2fbdf5642b8848b1aad4c2aa6df</ReferenceToGuid>
             </EndPointPrimitive11>
-            <StartPointPrimitive19 Ref="89" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive19 Ref="88" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>17.8,0,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>StartPointPrimitive19</Name>
               <Page isRef="5" />
-              <Parent isRef="78" />
+              <Parent isRef="77" />
               <ReferenceToGuid>4181b1c2f9854a94b85212402e3e98dd</ReferenceToGuid>
             </StartPointPrimitive19>
-            <EndPointPrimitive23 Ref="90" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive23 Ref="89" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>17.8,0.8,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>EndPointPrimitive23</Name>
               <Page isRef="5" />
-              <Parent isRef="78" />
+              <Parent isRef="77" />
               <ReferenceToGuid>4181b1c2f9854a94b85212402e3e98dd</ReferenceToGuid>
             </EndPointPrimitive23>
-            <StartPointPrimitive20 Ref="91" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive20 Ref="90" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>16.4,0,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>StartPointPrimitive20</Name>
               <Page isRef="5" />
-              <Parent isRef="78" />
+              <Parent isRef="77" />
               <ReferenceToGuid>d5a6e0919c5b4f43a16880660359cb60</ReferenceToGuid>
             </StartPointPrimitive20>
-            <EndPointPrimitive24 Ref="92" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive24 Ref="91" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>16.4,0.8,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Name>EndPointPrimitive24</Name>
               <Page isRef="5" />
-              <Parent isRef="78" />
+              <Parent isRef="77" />
               <ReferenceToGuid>d5a6e0919c5b4f43a16880660359cb60</ReferenceToGuid>
             </EndPointPrimitive24>
           </Components>
@@ -1149,7 +1142,7 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Parent isRef="5" />
           <PrintOnAllPages>True</PrintOnAllPages>
         </FooterBand1>
-        <EndPointPrimitive20 Ref="93" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+        <EndPointPrimitive20 Ref="92" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
           <ClientRectangle>751.63,9.94,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -1158,7 +1151,7 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Parent isRef="5" />
           <ReferenceToGuid>d7393348461645669ef41341c021e70b</ReferenceToGuid>
         </EndPointPrimitive20>
-        <EndPointPrimitive9 Ref="94" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+        <EndPointPrimitive9 Ref="93" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
           <ClientRectangle>14.4,19.4,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -1167,11 +1160,11 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Parent isRef="5" />
           <ReferenceToGuid>53aef3c7d2914568b6886d69d38d48b4</ReferenceToGuid>
         </EndPointPrimitive9>
-        <VerticalLinePrimitive6 Ref="95" type="VerticalLinePrimitive" isKey="true">
-          <ClientRectangle>16.4,8.4,0.0254,0.8</ClientRectangle>
+        <VerticalLinePrimitive6 Ref="94" type="VerticalLinePrimitive" isKey="true">
+          <ClientRectangle>16.4,7.6,0.0254,0.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="96" type="Cap" isKey="true">
+          <EndCap Ref="95" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1179,15 +1172,15 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Name>VerticalLinePrimitive6</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="97" type="Cap" isKey="true">
+          <StartCap Ref="96" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive6>
-        <VerticalLinePrimitive1 Ref="98" type="VerticalLinePrimitive" isKey="true">
-          <ClientRectangle>0,4.4,0.0254,6.4</ClientRectangle>
+        <VerticalLinePrimitive1 Ref="97" type="VerticalLinePrimitive" isKey="true">
+          <ClientRectangle>0,4.4,0.0254,5.6</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="99" type="Cap" isKey="true">
+          <EndCap Ref="98" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1195,15 +1188,15 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Name>VerticalLinePrimitive1</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="100" type="Cap" isKey="true">
+          <StartCap Ref="99" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive1>
-        <VerticalLinePrimitive7 Ref="101" type="VerticalLinePrimitive" isKey="true">
-          <ClientRectangle>19,4.6,0.0254,6.2</ClientRectangle>
+        <VerticalLinePrimitive7 Ref="100" type="VerticalLinePrimitive" isKey="true">
+          <ClientRectangle>19,4.6,0.0254,5.4</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="102" type="Cap" isKey="true">
+          <EndCap Ref="101" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1211,15 +1204,15 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Name>VerticalLinePrimitive7</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="103" type="Cap" isKey="true">
+          <StartCap Ref="102" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive7>
-        <VerticalLinePrimitive2 Ref="104" type="VerticalLinePrimitive" isKey="true">
-          <ClientRectangle>2.6,8.4,0.0254,0.8</ClientRectangle>
+        <VerticalLinePrimitive2 Ref="103" type="VerticalLinePrimitive" isKey="true">
+          <ClientRectangle>2.6,7.6,0.0254,0.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="105" type="Cap" isKey="true">
+          <EndCap Ref="104" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1227,15 +1220,15 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Name>VerticalLinePrimitive2</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="106" type="Cap" isKey="true">
+          <StartCap Ref="105" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive2>
-        <VerticalLinePrimitive3 Ref="107" type="VerticalLinePrimitive" isKey="true">
-          <ClientRectangle>3.2,8.4,0.0254,0.8</ClientRectangle>
+        <VerticalLinePrimitive3 Ref="106" type="VerticalLinePrimitive" isKey="true">
+          <ClientRectangle>3.2,7.6,0.0254,0.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="108" type="Cap" isKey="true">
+          <EndCap Ref="107" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1243,15 +1236,15 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Name>VerticalLinePrimitive3</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="109" type="Cap" isKey="true">
+          <StartCap Ref="108" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive3>
-        <VerticalLinePrimitive4 Ref="110" type="VerticalLinePrimitive" isKey="true">
-          <ClientRectangle>6,8.4,0.0254,0.8</ClientRectangle>
+        <VerticalLinePrimitive4 Ref="109" type="VerticalLinePrimitive" isKey="true">
+          <ClientRectangle>6,7.6,0.0254,0.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="111" type="Cap" isKey="true">
+          <EndCap Ref="110" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1259,15 +1252,15 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Name>VerticalLinePrimitive4</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="112" type="Cap" isKey="true">
+          <StartCap Ref="111" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive4>
-        <VerticalLinePrimitive5 Ref="113" type="VerticalLinePrimitive" isKey="true">
-          <ClientRectangle>8.8,8.4,0.0254,0.8</ClientRectangle>
+        <VerticalLinePrimitive5 Ref="112" type="VerticalLinePrimitive" isKey="true">
+          <ClientRectangle>8.8,7.6,0.0254,0.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="114" type="Cap" isKey="true">
+          <EndCap Ref="113" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1275,15 +1268,15 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Name>VerticalLinePrimitive5</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="115" type="Cap" isKey="true">
+          <StartCap Ref="114" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive5>
-        <VerticalLinePrimitive8 Ref="116" type="VerticalLinePrimitive" isKey="true">
-          <ClientRectangle>17.8,8.4,0.0254,0.8</ClientRectangle>
+        <VerticalLinePrimitive8 Ref="115" type="VerticalLinePrimitive" isKey="true">
+          <ClientRectangle>17.8,7.6,0.0254,0.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="117" type="Cap" isKey="true">
+          <EndCap Ref="116" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1291,15 +1284,15 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Name>VerticalLinePrimitive8</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="118" type="Cap" isKey="true">
+          <StartCap Ref="117" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive8>
-        <VerticalLinePrimitive10 Ref="119" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive10 Ref="118" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>8.8,6,0.0254,0.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="120" type="Cap" isKey="true">
+          <EndCap Ref="119" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1307,15 +1300,15 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Name>VerticalLinePrimitive10</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="121" type="Cap" isKey="true">
+          <StartCap Ref="120" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive10>
-        <VerticalLinePrimitive11 Ref="122" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive11 Ref="121" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>16.4,6,0.0254,0.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="123" type="Cap" isKey="true">
+          <EndCap Ref="122" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1323,15 +1316,15 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Name>VerticalLinePrimitive11</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="124" type="Cap" isKey="true">
+          <StartCap Ref="123" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive11>
-        <VerticalLinePrimitive12 Ref="125" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive12 Ref="124" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>17.8,6,0.0254,0.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="126" type="Cap" isKey="true">
+          <EndCap Ref="125" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1339,15 +1332,15 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Name>VerticalLinePrimitive12</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="127" type="Cap" isKey="true">
+          <StartCap Ref="126" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive12>
-        <VerticalLinePrimitive13 Ref="128" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive13 Ref="127" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>6,6,0.0254,0.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="129" type="Cap" isKey="true">
+          <EndCap Ref="128" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1355,15 +1348,15 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Name>VerticalLinePrimitive13</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="130" type="Cap" isKey="true">
+          <StartCap Ref="129" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive13>
-        <VerticalLinePrimitive14 Ref="131" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive14 Ref="130" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>3.2,6,0.0254,0.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="132" type="Cap" isKey="true">
+          <EndCap Ref="131" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1371,15 +1364,15 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Name>VerticalLinePrimitive14</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="133" type="Cap" isKey="true">
+          <StartCap Ref="132" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive14>
-        <VerticalLinePrimitive15 Ref="134" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive15 Ref="133" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>2.6,6,0.0254,0.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="135" type="Cap" isKey="true">
+          <EndCap Ref="134" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1387,15 +1380,15 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Name>VerticalLinePrimitive15</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="136" type="Cap" isKey="true">
+          <StartCap Ref="135" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive15>
-        <VerticalLinePrimitive17 Ref="137" type="VerticalLinePrimitive" isKey="true">
-          <ClientRectangle>17.8,10,0.0254,0.8</ClientRectangle>
+        <VerticalLinePrimitive17 Ref="136" type="VerticalLinePrimitive" isKey="true">
+          <ClientRectangle>17.8,9.2,0.0254,0.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="138" type="Cap" isKey="true">
+          <EndCap Ref="137" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1403,15 +1396,15 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Name>VerticalLinePrimitive17</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="139" type="Cap" isKey="true">
+          <StartCap Ref="138" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive17>
-        <VerticalLinePrimitive18 Ref="140" type="VerticalLinePrimitive" isKey="true">
-          <ClientRectangle>16.4,10,0.0254,0.8</ClientRectangle>
+        <VerticalLinePrimitive18 Ref="139" type="VerticalLinePrimitive" isKey="true">
+          <ClientRectangle>16.4,9.2,0.0254,0.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="141" type="Cap" isKey="true">
+          <EndCap Ref="140" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1419,7 +1412,7 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
           <Name>VerticalLinePrimitive18</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="142" type="Cap" isKey="true">
+          <StartCap Ref="141" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive18>
@@ -1445,10 +1438,10 @@ SumRunning(DataBand2,DataSource1.MAND) &lt; 0, "بس")}</Text>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>7/4/2025 3:46:49 AM</ReportChanged>
+  <ReportChanged>8/3/2025 12:09:03 AM</ReportChanged>
   <ReportCreated>9/5/2021 1:38:11 PM</ReportCreated>
-  <ReportFile>E:\prg\Blazor WebAssembly\Safir\Server\Rpts\R_DAFTAR_TAFZILY_2_2.mrt</ReportFile>
-  <ReportGuid>f6a49c44cda248468b721996ff419c14</ReportGuid>
+  <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\R_DAFTAR_TAFZILY_2_2.mrt</ReportFile>
+  <ReportGuid>c09993d673cc47bbbf6b4b0e0de59756</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>
