@@ -322,14 +322,15 @@ namespace Prg_UI.Wins
 
             //new UserPersonelOrderWin().Show();
 
-            new WinBase().Show();
+            //new WinBase().Show();
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL_TAF, this);
 
             //new WinConnectionChoose().ShowDialog();
             //new HEAD_LST_HAVL(4306d).ShowDialog();
             //new HEAD_LST_RASID(3872d).ShowDialog();
 
             //new HAVALAH_ENTER(356d).ShowDialog(); 
-            new WIN_TOZIE().ShowDialog(); //برگه خروج
+            //new WIN_TOZIE().ShowDialog(); //برگه خروج
 
             //CL_MenuManager.OpenWinMenu(WinNameType.PGET_HED, this, default);
 
@@ -341,7 +342,7 @@ namespace Prg_UI.Wins
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this , 2021d);
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_VISIT_ROUTE_FORM, this);
 

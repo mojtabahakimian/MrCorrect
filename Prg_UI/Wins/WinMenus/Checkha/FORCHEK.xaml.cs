@@ -203,6 +203,10 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void N_SERI_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (!IsVisible)
+            {
+                return;
+            }
             if (N_SERI.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
             #region After_Update
 
