@@ -303,6 +303,16 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست چکهای دریافتی سررسید شده", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_DCHSS });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست چکهای برگشتی (دریافتی)", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_CHKB });
 
+            //گزارشات ویزیتوری
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در ماه فروش)", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_DATE_VISIT_VISITDLV });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در تاریخ برگشت)", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_DATE_VISIT_VISITKALMA });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست ویزیتور ها و پورسانت به تفکیک فاکتور", WIN_NAME = CL_MenuManager.WinNameType.flist_porsant_factors });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست فروش ویزیتور به تفکیک فاکتور", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_DATE_VISIT_VISITONE });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "چاپ لیست کالا ها جهت ویزیت", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_AJNAS });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه", WIN_NAME = CL_MenuManager.WinNameType.VISITOR_GOL_REP });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه", WIN_NAME = CL_MenuManager.WinNameType.VISITOR_GOL_GRP_REP });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه (در تاریخ برگشت)", WIN_NAME = CL_MenuManager.WinNameType.VISITOR_GOL_GRP_REP_MAR });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه (در تاریخ برگشت)", WIN_NAME = CL_MenuManager.WinNameType.VISITOR_GOL_REP_MAR });
 
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());
 
