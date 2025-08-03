@@ -31,6 +31,7 @@ using Syncfusion.Data;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using System.Diagnostics;
 using System.Windows.Controls;
+using Prg_Proccessy.Generaly;
 
 namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 {
@@ -95,10 +96,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
+
         UniversControl universControl = new UniversControl();
         public ObservableCollection<FLP> FLIST_PORSANT_DATA { get; set; } = new ObservableCollection<FLP>();
         public bool NowIsReady { get; private set; }
-        public string Condition { get; private set; } = null;
+        public string Condition { get; private set; } = "";
         public DataTemplate CheckedTemplate { get; set; }
         public DataTemplate UncheckedTemplate { get; set; }
         public class FLP
@@ -174,6 +176,19 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             FILL_ALL_COMBOBOXES();
 
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
+
+            if ( CL_HESABDARI.LETSGO("DEPEMAL"))
+            {
+                if (Condition == "")
+                {
+                    Condition = " WHERE (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
+                }
+                else
+                {
+                    Condition = Condition + " AND  (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
+                }
+
+            }
 
             FLIST_PORSANT_DATA?.Clear();
 

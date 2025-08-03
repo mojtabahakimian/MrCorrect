@@ -32,6 +32,7 @@ using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
 using System.Reflection;
+using Prg_Proccessy.Generaly;
 
 namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 {
@@ -141,6 +142,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         public bool NowIsReady { get; private set; }
         public string _sql_query { get; set; }
         public string Real_Month { get; set; }
+        public string Condition { get; private set; } = "";
 
         private int _selectedMonth = 1;
         public int SelectedMonth
@@ -238,6 +240,19 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
             FILL_ALL_COMBOBOXES();
+
+            if (CL_HESABDARI.LETSGO("DEPEMAL"))
+            {
+                if (Condition == "")
+                {
+                    Condition = " AND (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
+                }
+                else
+                {
+                    Condition = Condition + " AND  (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
+                }
+
+            }
 
             Form_Open();
         }
@@ -693,7 +708,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             INNER JOIN dbo.visitgol_dtl ON dbo.STUF_DEF.CODE = dbo.visitgol_dtl.CODE 
             LEFT OUTER JOIN dbo.VISITOR_DTL_KALA_marA({dt1}, {dt2}, N'{hes}') VISITOR_DTL_KALA_marA
                 ON dbo.visitgol_dtl.CODE = VISITOR_DTL_KALA_marA.CODE AND dbo.visitgol_dtl.HES = VISITOR_DTL_KALA_marA.CUST_NO
-            WHERE (dbo.visitgol_dtl.MAH = {_selectedMonth}) AND (dbo.visitgol_dtl.HES = N'{hes}')
+            WHERE (dbo.visitgol_dtl.MAH = {_selectedMonth}) AND (dbo.visitgol_dtl.HES = N'{hes}') {Condition}
             ORDER BY dbo.STUF_DEF.NAME
             ";
 

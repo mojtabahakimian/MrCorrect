@@ -1,4 +1,6 @@
 ﻿using MaterialDesignThemes.Wpf;
+using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.Generaly;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.UiTools;
 using Syncfusion.ProjIO;
@@ -79,6 +81,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             DataContext = this;
         }
 
+        public string Condition { get; private set; } = "";
         public string DT1 { get; private set; }
         public string DT2 { get; private set; }
         public string CUST_NO { get; private set; }
@@ -207,8 +210,20 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            if (CL_HESABDARI.LETSGO("DEPEMAL"))
+            {
+                if (Condition == "")
+                {
+                    Condition = " WHERE (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
+                }
+                else
+                {
+                    Condition = Condition + " AND  (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
+                }
+
+            }
             // پارامترهای تاریخ و فیلتر را از UI بگیرید
-            var visitors = dbms.DoGetDataSQL<Visitor>("SELECT * FROM dbo.VISITORS_KOL(@start, @end, @filter)", new { start = DT1, end = DT2, filter = CUST_NO }).ToList();
+            var visitors = dbms.DoGetDataSQL<Visitor>("SELECT * FROM dbo.VISITORS_KOL(@start, @end, @filter)@condition", new { start = DT1, end = DT2, filter = CUST_NO , condition = Condition }).ToList();
             this.VisitorsGrid.ItemsSource = visitors;
         }
 

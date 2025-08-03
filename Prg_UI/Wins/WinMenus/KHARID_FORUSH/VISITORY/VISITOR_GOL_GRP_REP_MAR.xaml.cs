@@ -32,6 +32,7 @@ using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
 using System.Reflection;
+using Prg_Proccessy.Generaly;
 
 namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 {
@@ -140,6 +141,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
         public bool NowIsReady { get; private set; }
         public string _sql_query { get; set; }
+        public string Condition { get; private set; } = "";
         public string Real_Month { get; set; }
 
         private int FG_BYTE => (Option58.IsChecked == true) ? 1 : 0;
@@ -239,6 +241,19 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
             FILL_ALL_COMBOBOXES();
+
+            if (CL_HESABDARI.LETSGO("DEPEMAL"))
+            {
+                if (Condition == "")
+                {
+                    Condition = " AND (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
+                }
+                else
+                {
+                    Condition = Condition + " AND  (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
+                }
+
+            }
 
             Form_Open();
         }
@@ -707,7 +722,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 INNER JOIN dbo.CUST_HESAB c ON d.HES = c.hes
                 LEFT JOIN dbo.VISITOR_DTL_KALA_MARA({dt1}, {dt2}, N'{hes}') v
                     ON d.CODE = v.CODE AND d.HES = v.CUST_NO
-                WHERE d.MAH = {_selectedMonth} AND d.HES = N'{hes}'
+                WHERE d.MAH = {_selectedMonth} AND d.HES = N'{hes}' {Condition}
                 GROUP BY d.HES, d.MAH, m.NAMES, c.NAME, m.CODE
                 ORDER BY m.NAMES
                 ";
@@ -733,7 +748,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 INNER JOIN dbo.CUST_HESAB c ON d.HES = c.hes
                 LEFT JOIN dbo.VISITOR_DTL_KALA_MARA({dt1}, {dt2}, N'{hes}') v
                     ON d.CODE = v.CODE AND d.HES = v.CUST_NO
-                WHERE d.MAH = {_selectedMonth} AND d.HES = N'{hes}'
+                WHERE d.MAH = {_selectedMonth} AND d.HES = N'{hes}' {Condition}
                 GROUP BY d.HES, d.MAH, g.NAMES, c.NAME, g.CODE
                 ORDER BY g.NAMES"
                 ;
