@@ -8524,15 +8524,23 @@ namespace AUTO_BAZ.Functions
             return (SANAD_NUMBER, IsSuccessfully);
         }
 
-        public static void SANADKHORUGSAYER(long NUMBER, long NUMBER2)
+        public static (double?, bool) SANADKHORUGSAYER(long NUMBER, long NUMBER2, bool InternalCalling = true)
         {
             double progress = 0;
             MainWindow auto_run = null;
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+
+
+            double? SANAD_NUMBER = null;
+            bool IsSuccessfully = true;
+
+            if (InternalCalling)
             {
-                //Paint
-                auto_run = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
-            }));
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    //Paint
+                    auto_run = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
+                }));
+            }
 
             var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM DEED_HED").ToList();
             var HEDRST = dbms.DoGetDataSQL<QRE_BAZ_0>("SELECT HEAD_LST.NUMBER, HEAD_LST.TAG, HEAD_LST.ANBAR, HEAD_LST.NUMBER1, HEAD_LST.DATE_N, HEAD_LST.TAH, HEAD_LST.MAS, HEAD_LST.VAS, HEAD_LST.N_S, HEAD_LST.CUST_NO, HEAD_LST.MOLAH, HEAD_LST.M_NAGHD, HEAD_LST.MABL_VAR, HEAD_LST.MOIN_VAR, HEAD_LST.MABL_HAV, HEAD_LST.MOIN_HAV, HEAD_LST.MABL_HAZ, HEAD_LST.MOIN_HAZ, HEAD_LST.TAKHFIF, HEAD_LST.MOIN_KHF, HEAD_LST.ANBARF, HEAD_LST.FNUMCO, HEAD_LST.DEPATMAN, HEAD_LST.SHIFT, HEAD_LST.CUST_KIND, HEAD_LST.USER_NAME FROM HEAD_LST WHERE ((HEAD_LST.NUMBER >= " + NUMBER + " AND HEAD_LST.NUMBER <=" + NUMBER2 + "  and HEAD_LST.tag = 11 ) )").ToList();
@@ -8549,14 +8557,16 @@ namespace AUTO_BAZ.Functions
                 string shart;
                 double? CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null, fs, a = null;
 
-
-                auto_run.Dispatcher.Invoke(new Action(() =>
+                if (InternalCalling)
                 {
-                    progress++;
-                    auto_run.PRGR_C6.Value = progress / ((double)HEDRST.Count) * 100.0; // Update the progress bar
-                    auto_run.UpdateOverallProgressBar();
+                    auto_run.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progress++;
+                        auto_run.PRGR_C6.Value = progress / ((double)HEDRST.Count) * 100.0; // Update the progress bar
+                        auto_run.UpdateOverallProgressBar();
 
-                }));
+                    }));
+                }
                 string SHSH = "";
                 SHSH = Strings.Left(" حواله خروج ساير مواد از انبار شماره " + HEDRST[EOF].NUMBER + "-" + HEDRST[EOF].FNUMCO.ToString() + "مورخ " + Strings.Format(HEDRST[EOF].DATE_N, "####/##/##"), 100);
                 max_ns = CRSANADGEN(SHSH, 11, 12, (double)HEDRST[EOF].NUMBER, HEDRST[EOF].N_S, (long)HEDRST[EOF].DATE_N, HEDRST[EOF].USER_NAME);
@@ -8643,6 +8653,8 @@ namespace AUTO_BAZ.Functions
                                 }
                                 catch (SqlException ex)
                                 {
+                                    IsSuccessfully = false;
+
                                     if (ex.Number == 547)  // 547 is the error number for foreign key violations in SQL Server
                                     {
                                         LogWriter.WriteLog($"[SANADKHORUGSAYER]: (RASID : {JST[q]?.N_RASID}) Foreign Key violation: {ex.Message}");
@@ -8656,9 +8668,12 @@ namespace AUTO_BAZ.Functions
                         }
                     }
                 };
+
+                SANAD_NUMBER = max_ns;
+
                 //};
             });
-
+            return (SANAD_NUMBER, IsSuccessfully);
         }
 
         private static double CRSANADGEN(String? SHSH, int TG, int NOE_S, double NUMBER, double? N_S, long DATE_N, string? USER_NAME)
