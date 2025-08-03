@@ -516,6 +516,15 @@ namespace AUTO_BAZ.Functions
             return "";
         }
 
+        /// <summary>
+        /// Safely convert a string value to double. If conversion fails, returns 0.
+        /// </summary>
+        /// <param name="value">String to convert.</param>
+        /// <returns>Parsed double or 0 when parsing is not possible.</returns>
+        private static double SafeToDouble(string? value)
+        {
+            return double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result) ? result : 0d;
+        }
         //______________
 
         public static string CODESAL(string cody)
@@ -5485,7 +5494,8 @@ namespace AUTO_BAZ.Functions
                     //jst_sec.MoveNext();
                 };
 
-                if (Baseknow.SANAT == true || IsNull(Baseknow.SANAT) || Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                //if (Baseknow.SANAT == true || IsNull(Baseknow.SANAT) || Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                if (Baseknow.SANAT == true || IsNull(Baseknow.SANAT) || Baseknow.tindata == null || SafeToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
                 {
                     var jst_thr = dbms.DoGetDataSQL<QRE14>("SELECT     dbo.INVO_LST.MABL_K, dbo.INVO_LST.MEGHk, dbo.INVO_LST.CODE, dbo.INVO_LST.ANBAR, dbo.STUF_DEF.NAME,  dbo.INVO_LST.AVRAGE FROM  dbo.INVO_LST INNER JOIN  dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE WHERE (dbo.INVO_LST.NUMBER = " + HFRST[HFRST_EOF].NUMBER + ") And (dbo.INVO_LST.TAG = 2) And (dbo.INVO_LST.ANBAR <> 0)").ToList();
                     //while (!jst_thr.EOF())
@@ -9259,7 +9269,7 @@ namespace AUTO_BAZ.Functions
                             string HES_M = "";
                             string HES_T = "";
                             string hes = "";
-                            if (Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                            if (SafeToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
                             {
                                 HES_M = "1";
                                 HES_T = "1";
@@ -9362,7 +9372,7 @@ namespace AUTO_BAZ.Functions
                                 string HES_M = "";
                                 string HES_T = "";
                                 string hes = "";
-                                if (Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                                if (SafeToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
                                 {
                                     HES_M = "1";
                                     HES_T = "1";
@@ -9461,7 +9471,7 @@ namespace AUTO_BAZ.Functions
                             string HES_M = "";
                             string HES_T = "";
                             string hes = "";
-                            if (Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                            if (SafeToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
                             {
                                 HES_M = "1";
                                 HES_T = "1";
@@ -9800,7 +9810,7 @@ namespace AUTO_BAZ.Functions
                     var _SHARH_ = Strings.Right(" فاكتور برگشت فروش شماره " + HFRST[ROW].NUMBER + " بابت " + PRST[S].DARSAD + "درصد سهم پورسانت " + GETTAFNAME(PRST[S].CUST_NO) + " مورخ " + Strings.Format(HFRST[ROW].DATE_N, "####/##/##") + Interaction.IIf(IsNull(PRST[S].TOZIH), "", PRST[S].TOZIH), 255);
                     if ((bool)!PRST[S].STAT)
                     {
-                        var _iif = Convert.ToDouble(Interaction.IIf(Conversions.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 62, 1)) == 5d, HFRST[ROW].MBAA, 0));
+                        var _iif = Convert.ToDouble(Interaction.IIf(SafeToDouble(Strings.Mid(Baseknow.OPTIONSS, 62, 1)) == 5d, HFRST[ROW].MBAA, 0));
                         if (Math.Round((double)((JAMF - HFRST[ROW].TAKHFIF + _iif) * PRST[S].DARSAD / 100)) != PRST[S].PURSANT)
                         {
                             var _exprif = Convert.ToDouble(Interaction.IIf(Conversions.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 62, 1)) == 5d, HFRST[ROW].MBAA, 0));
@@ -9906,6 +9916,18 @@ namespace AUTO_BAZ.Functions
             double HES_T;
             string HES;
             string visitorn = "";
+
+            double? tindataFlag = null;
+            if (!string.IsNullOrEmpty(Baseknow.tindata))
+            {
+                var tindataChar = Strings.Mid(Baseknow.tindata, 9, 1);
+                if (double.TryParse(tindataChar, out var parsedFlag))
+                {
+                    tindataFlag = parsedFlag;
+                }
+            }
+
+
             var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM DEED_HED").ToList();
             var HFRST = dbms.DoGetDataSQL<HEAD_LST>("SELECT     * FROM dbo.HEAD_LST WHERE     (NUMBER BETWEEN " + fnum + " AND " + TNUM + ") AND (TAG = 25)").ToList();
 
@@ -10053,6 +10075,13 @@ namespace AUTO_BAZ.Functions
                 var jst_sec = dbms.DoGetDataSQL<QRE12>("SELECT INVO_LST.MABL_K, INVO_LST.MEGHk, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME, INVO_LST.AVRAGE FROM STUF_DEF INNER JOIN INVO_LST ON (STUF_DEF.CODE = INVO_LST.CODE) AND (STUF_DEF.CODE = INVO_LST.CODE) WHERE     (dbo.INVO_LST.NUMBER = " + HFRST[HFRST_EOF].NUMBER + ") AND (dbo.INVO_LST.TAG = 24) ").ToList();
                 for (int jst_sec_EOF = 0; jst_sec_EOF < jst_sec.Count; jst_sec_EOF++)
                 {
+                    long codeAsLong;
+                    if (!long.TryParse(jst_sec[jst_sec_EOF].CODE, out codeAsLong))
+                    {
+                        LogWriter.WriteLog($"Invalid non-numeric product code '{jst_sec[jst_sec_EOF].CODE}' found in sales return invoice number {HFRST[HFRST_EOF].NUMBER}. Skipping this line item.");
+                        continue;
+                    }
+
                     if (Strings.Mid(Baseknow.OPTIONSS, 13, 1) == "5")
                     {
                         CREATHES(Baseknow.MFROSH, 4, Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), jst_sec[jst_sec_EOF].NAME);
@@ -10072,7 +10101,8 @@ namespace AUTO_BAZ.Functions
                         if (jst_sec[jst_sec_EOF].MABL_K > 0)
                         {
 
-                            if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                            //if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                            if (tindataFlag is null || tindataFlag == 1d)
                             {
                                 HES_M = 1;
                                 HES_T = 1;
@@ -10126,7 +10156,8 @@ namespace AUTO_BAZ.Functions
                                         {HFRST[HFRST_EOF].NUMBER}
                                         ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
                                         ,25)");
-                            if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) != 1d)
+                            //if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) != 1d)
+                            if (tindataFlag is null || tindataFlag != 1d)
                             {
                                 if (Generaly.defacc)
                                 {
@@ -10136,7 +10167,8 @@ namespace AUTO_BAZ.Functions
                             if (MAVAD > 0d)
                             {
 
-                                if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                                //if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                                if (tindataFlag is null || tindataFlag == 1d)
                                 {
                                     HES_M = 1;
                                     HES_T = 1;
@@ -10160,7 +10192,7 @@ namespace AUTO_BAZ.Functions
                             if (DAST != 0d)
                             {
                                 CREATHES(Baseknow.GHEYMAT, Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), 9999999, "دستمزد " + jst_sec[jst_sec_EOF].NAME);
-                                if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                                if (tindataFlag is null || tindataFlag == 1d)
                                 {
                                     HES_M = 1;
                                     HES_T = 9999999;
@@ -10185,7 +10217,7 @@ namespace AUTO_BAZ.Functions
                             if (SAR != 0d)
                             {
                                 CREATHES(Baseknow.GHEYMAT, Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), 9999999, "دستمزد " + jst_sec[jst_sec_EOF].NAME);
-                                if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                                if (tindataFlag is null || tindataFlag == 1d)
                                 {
                                     HES_M = 1;
                                     HES_T = 9999998;
@@ -10217,7 +10249,7 @@ namespace AUTO_BAZ.Functions
                                         {HFRST[HFRST_EOF].NUMBER}
                                         ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
                                         ,25)");
-                            if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                            if (tindataFlag is null || tindataFlag == 1d)
                             {
                                 HES_M = 1;
                                 HES_T = 1;
