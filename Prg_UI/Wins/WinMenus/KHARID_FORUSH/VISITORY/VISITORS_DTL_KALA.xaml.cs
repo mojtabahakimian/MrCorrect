@@ -30,6 +30,7 @@ using Prg_Proccessy.MODELS;
 using Syncfusion.Data;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using System.Diagnostics;
+using Prg_Proccessy.Generaly;
 
 namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 {
@@ -94,6 +95,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         public ObservableCollection<VDK> VISITORS_DTL_KALA_DATA { get; set; } = new ObservableCollection<VDK>();
         public bool NowIsReady { get; private set; }
         public string SQL_DATA { get; private set; }
+        public string Condition { get; private set; } = "";
         public class VDK
         {
             public int? CODE { get; set; }
@@ -128,7 +130,21 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            MENUIT_COLUMN.ItemsSource = dbms.DoGetDataSQL<MIG>("SELECT CODE, NAMES FROM TCODE_MENUITEM").ToList();
+
+            if (CL_HESABDARI.LETSGO("DEPEMAL"))
+            {
+                if (Condition == "")
+                {
+                    Condition = " WHERE (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
+                }
+                else
+                {
+                    Condition = Condition + " AND  (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
+                }
+
+            }
+
+            MENUIT_COLUMN.ItemsSource = dbms.DoGetDataSQL<MIG>("SELECT CODE, NAMES FROM TCODE_MENUITEM @condition",new {condition = Condition}).ToList();
 
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 

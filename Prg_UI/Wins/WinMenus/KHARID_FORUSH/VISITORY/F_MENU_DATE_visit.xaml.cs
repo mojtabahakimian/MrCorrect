@@ -103,6 +103,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
         public Visual I_AM_DATE_VISIT { get; set; }
 
+        public string Condition { get; private set; } = "";
+
         public class Q1
         {
             public string CUST_NO { get; set; }
