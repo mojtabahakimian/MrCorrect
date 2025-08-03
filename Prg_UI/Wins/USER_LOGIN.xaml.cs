@@ -323,7 +323,7 @@ namespace Prg_UI.Wins
             //new UserPersonelOrderWin().Show();
 
             //new WinBase().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL_TAF, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_BRFR, this, 829d);
 
             //new WinConnectionChoose().ShowDialog();
             //new HEAD_LST_HAVL(4306d).ShowDialog();

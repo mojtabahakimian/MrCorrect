@@ -3160,7 +3160,15 @@ namespace Wins.WinMenus.KHARID_FORUSH
         private void SANAD()
         {
             //throw new Exception();
-            AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.gensanadbargashfroosh2(Convert.ToInt64(NUMBER.Text), Convert.ToInt64(NUMBER.Text), false);
+            try
+            {
+                AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.gensanadbargashfroosh2(Convert.ToInt64(NUMBER.Text), Convert.ToInt64(NUMBER.Text), false);
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خطا در انجام عملیات صدور سند , مجددا تلاش کنید").Show();
+                return;
+            }
 
             Summer();
 
