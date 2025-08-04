@@ -306,12 +306,14 @@ namespace Prg_UI.Wins
             //Baseknow.UUSER = "Mr.Salmani";
 
             //Baseknow.USERCOD = 132;
-            //Baseknow.UUSER = "Prima Chopan";
+            //Baseknow.UUSER = "Prima Chopan";    
+
 
             Baseknow.mrcorrect = true;
 
-            Baseknow.USERCOD = 78;
-            Baseknow.UUSER = "Controller";
+            //Baseknow.USERCOD = 167; Baseknow.UUSER = "Mr nikonahad";
+
+            Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
 
             //Baseknow.USERCOD = 139;
             //Baseknow.UUSER = "negar sadeghi";
@@ -320,10 +322,11 @@ namespace Prg_UI.Wins
             CL_Generaly.VAHED_OF_USER = 1; //1 WAS
             Baseknow.UGRP = "1";
 
-            //new UserPersonelOrderWin().Show();
+            //new WinConnectionChoose().Show();
 
             //new WinBase().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_BRFR, this, 829d);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN_LIMITED, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
 
             //new WinConnectionChoose().ShowDialog();
             //new HEAD_LST_HAVL(4306d).ShowDialog();

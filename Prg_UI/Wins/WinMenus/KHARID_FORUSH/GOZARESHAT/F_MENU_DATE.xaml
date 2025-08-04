@@ -5,16 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Wins.WinMenus.KHARID_FORUSH.GOZARESHAT"
         
+        mc:Ignorable="d"
         xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="Wins.WinMenus.KHARID_FORUSH.GOZARESHAT.F_MENU_DATE"
-        mc:Ignorable="d"
-        
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
         FontFamily="IRANYekanFN"
-        ShowInTaskbar="False"
         WindowStartupLocation="CenterScreen"
         Title="" Height="185" Width="380" MinHeight="185" MinWidth="315" MaxWidth="380" MaxHeight="185" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
@@ -53,12 +51,22 @@
                 </Border>
             </StackPanel>
         </Popup>
-        <xctk:MaskedTextBox x:Name="DT1" Text="10000101" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="27" Margin="0,59,156,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" PreviewGotKeyboardFocus="DT1_PreviewGotKeyboardFocus"/>
-        <Label Content="از تاریخ:" HorizontalAlignment="Left" Margin="224,58,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
-        <Label Content="تا تاریخ:" HorizontalAlignment="Left" Margin="224,98,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
-        <xctk:MaskedTextBox x:Name="DT2" Text="99991230" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="27" Margin="0,98,156,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" PreviewGotKeyboardFocus="DT2_PreviewGotKeyboardFocus"/>
-        <Button x:Name="BTN_GO" Content="تایید" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="136,0,156,18" Click="BTN_GO_Click" Height="34" VerticalAlignment="Bottom" />
         <!--HEADER↑-->
+
+        <StackPanel Margin="129,60,111,15" FlowDirection="RightToLeft">
+            <StackPanel Orientation="Horizontal" Visibility="{Binding Visibility, ElementName=DT1,UpdateSourceTrigger=PropertyChanged}">
+                <Label Content="از تاریخ:" Visibility="{Binding Visibility, ElementName=DT1,UpdateSourceTrigger=PropertyChanged}"/>
+                <xctk:MaskedTextBox x:Name="DT1" Text="10000101" Visibility="Visible" Style="{StaticResource FuzzyOut}" Padding="3" Mask="0000/00/00" Height="27" BorderThickness="1" FontSize="12" Width="88" PreviewGotKeyboardFocus="DT1_PreviewGotKeyboardFocus"/>
+            </StackPanel>
+            <Label/>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="تا تاریخ:" HorizontalAlignment="Left" Width="auto"/>
+                <xctk:MaskedTextBox x:Name="DT2" Text="99991230" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="27"   BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" PreviewGotKeyboardFocus="DT2_PreviewGotKeyboardFocus"/>
+            </StackPanel>
+            <Label/>
+            <Button x:Name="BTN_GO" Content="تایید" BorderBrush="{x:Null}" FontSize="12" HorizontalAlignment="Right" Foreground="#DDFFFFFF" Click="BTN_GO_Click" Height="34" Width="95" Padding="16,2,16,4"/>
+        </StackPanel>
+
 
 
     </Grid>

@@ -1,13 +1,10 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Prg_Proccessy.FUNCTIONS;
-using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
-using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
-using Stimulsoft.Base;
 using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
@@ -20,7 +17,10 @@ using System.Windows.Input;
 using Rpts;
 using static Prg_UI.Functions.CL_LMethods;
 using System.Diagnostics;
-using static Stimulsoft.Base.StiDbType;
+using Wins.WinMenus.HESABDARI.GOZARESHAT;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
+using System.Windows.Controls;
 
 namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 {
@@ -94,6 +94,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                     break;
                 case "BEDBESM":
                     DT1.Visibility = Visibility.Collapsed;
+                    LABEL_WIN_HEADER.Content = "لیست بدهکاران و بستانکاران محدود شده";
                     break;
                 case "TDBARG":
                     DT1.Visibility = Visibility.Hidden;
@@ -290,16 +291,86 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
         private void ProcessBEDBESM()
         {
             var userCod = Baseknow.USERCOD.ToString();
-            var blockHesRecords = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCK_HES WHERE USERCO = {userCod}");
-            var blockNonHesRecords = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCKNON_HES WHERE USERCO = {userCod}");
+            //var blockHesRecords = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCK_HES WHERE USERCO = {userCod}");
+            //var blockNonHesRecords = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCKNON_HES WHERE USERCO = {userCod}");
 
-            string sh = BuildShString(blockHesRecords, blockNonHesRecords);
+            //string sh = BuildShString(blockHesRecords, blockNonHesRecords);
+            //string sqlQuery = BuildSqlQuery(sh, userCod);
+            dbms.DoExecuteSQL($"IF OBJECT_ID('dbo.BEDBESMAH{userCod}', 'U') IS NOT NULL   DROP TABLE dbo.BEDBESMAH{userCod}");
 
-            string sqlQuery = BuildSqlQuery(sh, userCod);
-            dbms.DoExecuteSQL(sqlQuery);
+            //dbms.DoExecuteSQL(sqlQuery, new { DT2 = Convert.ToInt64(DT2.Text.ToRawTarikh()) });
 
-            //OpenForm("BEDBESKOL");
-            //OpenForm("F_MENU_DATE", Visibility.Hidden);
+            CreateTempTableData();
+            new TARAZ_4("0", DT2.Text.ToRawTarikh(), true).Show();
+        }
+
+        private void CreateTempTableData()
+        {
+            int userCod = int.Parse(Baseknow.USERCOD.ToString());
+            string dateVal = DT2.Text.ToRawTarikh();
+
+            string shCondition = "";
+
+            var rst2 = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCK_HES WHERE USERCO = {userCod}").ToList();
+            if (rst2.Count > 0)
+            {
+                string hes = rst2[0].HES;
+                shCondition = CL_HESABDARI.ISHESAB3(hes)
+                    ? $"HES NOT LIKE '{hes}'"
+                    : $"HES NOT LIKE '{hes}-%'";
+
+                for (int i = 1; i < rst2.Count; i++)
+                {
+                    hes = rst2[i].HES;
+                    shCondition += CL_HESABDARI.ISHESAB3(hes)
+                        ? $" AND HES NOT LIKE '{hes}'"
+                        : $" AND HES NOT LIKE '{hes}-%'";
+                }
+            }
+
+            var rst3 = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCKNON_HES WHERE USERCO = {userCod}").ToList();
+            if (rst3.Count > 0)
+            {
+                string nonCondition = "";
+                foreach (var row in rst3)
+                {
+                    string hes = row.HES;
+                    nonCondition += nonCondition == ""
+                        ? (CL_HESABDARI.ISHESAB3(hes) ? $"HES LIKE '{hes}'" : $"HES LIKE '{hes}-%'")
+                        : (CL_HESABDARI.ISHESAB3(hes) ? $" OR HES LIKE '{hes}'" : $" OR HES LIKE '{hes}-%'");
+                }
+                if (!string.IsNullOrEmpty(shCondition))
+                {
+                    shCondition = $"({shCondition}) OR ({nonCondition})";
+                }
+                else
+                {
+                    shCondition = $"({nonCondition})";
+                }
+            }
+
+            string tableName = $"BEDBESMAH{userCod}";
+            dbms.DoExecuteSQL($"IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{tableName}') DROP TABLE {tableName}");
+
+            string sqlCommon = $@"
+                                  SELECT   Q.TAFZIL, Q.HES_K, Q.HES_M, Q.SumOfBED, Q.SumOfBES, Q.BEDBES, Q.NAME, Q.MOIN,
+                                           dbo.UIIF(Q.BEDBES, '>', 0, Q.BEDBES, 0) AS BEDM,
+                                           dbo.UIIF(Q.BEDBES, '<', 0, Q.BEDBES * -1, 0) AS BESM,
+                                           Q.HES_T, Q.ADDRESS, Q.TEL, Q.CODE_E, Q.TOZIH, Q.HES, Q.ECODE, Q.CUST_COD, Q.ROUTE_NAME,
+                                           dbo.Visit_route.HES AS VCOD, dbo.CUST_HESAB.NAME AS VNAME,
+                                           Q.HES_T2, Q.HES_T3, Q.HES_T4, CUST_HESAB_1.NAME AS tafname
+                                  INTO     {tableName}
+                                  FROM     dbo.CUST_HESAB CUST_HESAB_1
+                                  INNER JOIN dbo.Q_BEDEHBESTANHA_SUB({dateVal}) Q ON CUST_HESAB_1.hes = Q.HES
+                                  LEFT OUTER JOIN dbo.CUST_HESAB
+                                      INNER JOIN dbo.Visit_route ON dbo.CUST_HESAB.hes = dbo.Visit_route.HES
+                                      ON Q.ROUTE_NAME = dbo.Visit_route.ROUTE_NAME";
+
+            string finalSql = !string.IsNullOrWhiteSpace(shCondition)
+                ? sqlCommon + $"\nWHERE {shCondition.Replace("HES", "Q.HES")}" // bind to the correct alias
+                : sqlCommon;
+
+            dbms.DoExecuteSQL(finalSql);
         }
 
         private string BuildShString(IEnumerable<dynamic> blockHesRecords, IEnumerable<dynamic> blockNonHesRecords)
@@ -393,7 +464,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
         public void Open_Report()
         {
-            
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.DAFTAR_ROOZNAMEH.mrt");
             report.Load(pathreport);

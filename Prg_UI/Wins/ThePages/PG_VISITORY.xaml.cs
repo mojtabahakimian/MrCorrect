@@ -69,5 +69,20 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.VISITOR_GOL_GRP_REP, null /*DEFAULT OWNER MAIN*/);
         }
+
+        private void Image_PreviewMouseDown_10(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_TOZIE, default); //تنظیم لیست دستی توضیع
+        }
+
+        private void Image_PreviewMouseDown_11(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.VISITOR_DAY_HEAD, default); //تعریف ویزیت روزانه برای ویزیتور
+        }
+
+        private void Image_PreviewMouseDown_12(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_VISIT_ROUTE_FORM, default); //تعيين مسير ویزيت براي مشتريان
+        }
     }
 }

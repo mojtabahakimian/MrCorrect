@@ -5,14 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Wins.WinMenus.HESABDARI"
         mc:Ignorable="d"
-        
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         xmlns:sfusion="clr-namespace:Syncfusion.UI.Xaml.Grid;assembly=Syncfusion.SfGrid.WPF"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="IRANYekanFN" d:Width="2000"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         Title="" Height="450" Width="800" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
@@ -92,7 +92,7 @@
         </Popup>
         <!--HEADER↑-->
 
-        <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" ContextMenu="{StaticResource DataGridContextMenu}"
+        <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" ContextMenu="{StaticResource DataGridContextMenu}" 
             ItemsSource="{Binding FACTOR_DATA}" 
             AutoGenerateColumns="False"     
             EnableDataVirtualization="True"
@@ -110,10 +110,10 @@
             Style="{StaticResource KDG}"
             HeaderStyle="{StaticResource KDGHeader}"
             CurrentCellActivated="SYNCFUSION_DG_CurrentCellActivated"
-            Margin="10,49,10,10" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged">
+            Margin="10,49,10,50" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged">
 
             <syncfusion:SfDataGrid.Columns>
-                
+
                 <syncfusion:GridTemplateColumn IsReadOnly="True" AllowResizing="False" ColumnSizer="Auto">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -139,12 +139,11 @@
                     </syncfusion:GridTemplateColumn.CellStyle>
                 </syncfusion:GridTemplateColumn>
 
-                <syncfusion:GridTextColumn HeaderText="کد کل" MappingName="HES_K" />
-                <syncfusion:GridTextColumn HeaderText="کد معین" MappingName="HES_M" />
-                <syncfusion:GridTextColumn HeaderText="کد تفضیلی" MappingName="HES_T" />
-                <syncfusion:GridTextColumn HeaderText="حساب" MappingName="HES" />
-                <syncfusion:GridTextColumn HeaderText="حساب تفضیلی" MappingName="TAFZIL" />
-                <syncfusion:GridTextColumn HeaderText="نام تفضیلی" MappingName="tafname" />
+                <syncfusion:GridTextColumn HeaderText="کد کل" MappingName="HES_K" Width="100"/>
+                <syncfusion:GridTextColumn HeaderText="کد معین" MappingName="HES_M" Width="110" />
+                <syncfusion:GridTextColumn HeaderText="کد تفضیلی" MappingName="HES_T" Width="120"/>
+                <syncfusion:GridTextColumn HeaderText="کد حساب" MappingName="HES" Width="130"/>
+                <syncfusion:GridTextColumn HeaderText="نام تفضیلی" MappingName="tafname" Width="250" />
 
                 <syncfusion:GridTextColumn HeaderText="جمع بدهکار" MappingName="SumOfBED">
                     <syncfusion:GridTextColumn.DisplayBinding>
@@ -154,24 +153,26 @@
 
                 <syncfusion:GridTextColumn HeaderText="جمع بستانکار" MappingName="SumOfBES">
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="SumOfBES"  StringFormat="{}{0:#,0}" /> 
+                        <Binding Path="SumOfBES"  StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 
                 <syncfusion:GridTextColumn HeaderText="مانده بدهکار" MappingName="BEDM">
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="BEDM"  StringFormat="{}{0:#,0}" /> 
+                        <Binding Path="BEDM"  StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 
                 <syncfusion:GridTextColumn HeaderText="مانده بستانکار" MappingName="BESM">
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="BESM"  StringFormat="{}{0:#,0}" /> 
+                        <Binding Path="BESM"  StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 
                 <syncfusion:GridTextColumn HeaderText="نام حساب کل" MappingName="NAME" />
                 <syncfusion:GridTextColumn HeaderText="نام حساب معین" MappingName="MOIN" />
+                <syncfusion:GridTextColumn HeaderText="حساب تفضیلی" MappingName="TAFZIL" />
+
                 <syncfusion:GridTextColumn HeaderText="توضیحات" MappingName="TOZIH" />
                 <syncfusion:GridTextColumn HeaderText="آدرس" MappingName="ADDRESS" />
                 <syncfusion:GridTextColumn HeaderText="تلفن" MappingName="TEL" />
@@ -194,6 +195,8 @@
             </syncfusion:SfDataGrid.Columns>
 
         </syncfusion:SfDataGrid>
+        <Label Content="تعداد رکورد ها:" Margin="0,0,11,10" FlowDirection="RightToLeft" Width="84" HorizontalAlignment="Right" Height="27" VerticalAlignment="Bottom"/>
+        <TextBlock x:Name="ROWCOUNT_TEXTBLK" Text=""  Margin="0,0,95,10"  FlowDirection="RightToLeft" Width="230" HorizontalAlignment="Right" Height="23" VerticalAlignment="Bottom"/>
 
     </Grid>
 </Window>

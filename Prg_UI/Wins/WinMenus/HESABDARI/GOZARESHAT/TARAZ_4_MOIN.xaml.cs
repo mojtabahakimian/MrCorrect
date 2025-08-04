@@ -23,6 +23,7 @@ using Prg_Proccessy.FUNCTIONS;
 using System.Windows.Interop;
 using Prg_Proccessy.SQLMODELS;
 using System.Collections.Generic;
+using Prg_Proccessy.MODELS;
 
 namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 {
@@ -73,7 +74,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         //Header Window End;
         #endregion
 
-        public TARAZ_4_MOIN(string _DT1_, string _DT2_, string _KOL_)
+        public TARAZ_4_MOIN(string _DT1_, string _DT2_, string _KOL_, bool _BEDEHBESTANMOIN_ = false)
         {
             InitializeComponent();
 
@@ -82,6 +83,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             DT1 = _DT1_;
             DT2 = _DT2_;
             KOL = _KOL_;
+            BEDEHBESTANMOIN = _BEDEHBESTANMOIN_;
         }
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
@@ -93,6 +95,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         public bool NowIsReady { get; private set; }
         public double? NUMBER_TO_OPEN { get; set; }
         public bool ChangeIsHappend { get; private set; }
+        public bool BEDEHBESTANMOIN { get; } = false;
 
         private bool _bl;
         public bool AllowDeletions
@@ -146,9 +149,14 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         {
             //Process Prc = ProcLoader.Start();
 
-            CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
+            string callername = this.GetType().Name;
+            if (BEDEHBESTANMOIN)
+            {
+                LABEL_HEADER.Content = "ليست محدود شده حسابهاي معين";
+                callername = this.GetType().Name + LABEL_HEADER.Content.ToString();
+            }
 
-            TARAZ_DATA?.Clear();
+            CL_HESABDARI.AMALIYAT_USER(callername);
 
             //EXEC dbo.TARAZ_4 '10000101', '99991230', '0', '929292929'
             //EXEC dbo.TARAZ4_MOIN 14030101, 14040111, 0, 929292929, 111;
@@ -164,7 +172,16 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                 KOL = KOL
             };
 
-            List<TARAZ4_MOIN_MODEL> MasterHead = dbms.DoGetStoreProcedureSQL<TARAZ4_MOIN_MODEL>("dbo.TARAZ4_MOIN", parameters).ToList();
+            TARAZ_DATA?.Clear();
+            List<TARAZ4_MOIN_MODEL> MasterHead = new List<TARAZ4_MOIN_MODEL>();
+            if (BEDEHBESTANMOIN)
+            {
+                MasterHead = dbms.DoGetDataSQL<TARAZ4_MOIN_MODEL>($"SELECT HES_K AS N_KOL, SUM(SumOfBED) AS SumOfBED, SUM(SumOfBES) AS SumOfBES,  dbo.UIIF(SUM(BEDBES), '>', 0, SUM(BEDBES), 0) AS BED, dbo.UIIF(SUM(BEDBES), '>', 0, 0, SUM(BEDBES) * - 1) AS BES, HES_M AS NUMBER, MOIN FROM BEDBESMAH{Baseknow.USERCOD} INNER JOIN   dbo.TOTA_HES ON HES_K = dbo.TOTA_HES.NUMBER WHERE (HES_K = {KOL}) GROUP BY HES_K, HES_M, MOIN ORDER BY HES_K, HES_M").ToList();
+            }
+            else
+            {
+                MasterHead = dbms.DoGetStoreProcedureSQL<TARAZ4_MOIN_MODEL>("dbo.TARAZ4_MOIN", parameters).ToList();
+            }
 
             foreach (var item in MasterHead)
             {
@@ -174,7 +191,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                 item.bed = Math.Truncate(item.bed ?? 0);
                 item.bes = Math.Truncate(item.bes ?? 0);
 
-                TARAZ_DATA.Add(item);
+                TARAZ_DATA?.Add(item);
             }
 
             GenerateAutomaticSummary(SYNCFUSION_DG);
@@ -616,7 +633,18 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
             if (CurrentRow != null && CurrentRow?.NUMBER != null)
             {
-                new TARAZ_TAF_DIRECT(DT1, DT2, CurrentRow?.N_KOL.ToString(), CurrentRow?.NUMBER.ToString()).Show();
+                if (BEDEHBESTANMOIN)
+                {
+                    BEDEHKARAN_BESTANKARAN BedBesha = new BEDEHKARAN_BESTANKARAN();
+                    BedBesha.IsCTRLF9 = true;
+                    BedBesha.KOL_PASSED = (int)(CurrentRow?.N_KOL);
+                    BedBesha.MOIN_PASSED = (int)(CurrentRow?.NUMBER);
+                    BedBesha.Show();
+                }
+                else
+                {
+                    new TARAZ_TAF_DIRECT(DT1, DT2, CurrentRow?.N_KOL.ToString(), CurrentRow?.NUMBER.ToString()).Show();
+                }
             }
         }
     }

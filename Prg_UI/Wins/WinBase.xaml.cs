@@ -16,6 +16,7 @@ using Prg_Proccessy.FUNCTIONS;
 using System.Linq;
 using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
+using static Wins.WinOther.SEARCHMENIU_WIN;
 
 namespace Prg_UI.Wins
 {
@@ -1082,6 +1083,21 @@ namespace Prg_UI.Wins
         private void Button_Click_85(object sender, RoutedEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.VISITOR_GOL_REP_MAR, this); //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه (در تاریخ برگشت)
+        }
+
+        private void Button_Click_86(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_TOZIE, this); //تنظیم لیست دستی توضیع
+        }
+
+        private void Button_Click_87(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.VISITOR_DAY_HEAD, this); //تعریف ویزیت روزانه برای ویزیتور
+        }
+
+        private void Button_Click_88(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_VISIT_ROUTE_FORM, this); //تعيين مسير وزيت براي مشتريان
         }
     }
 }

@@ -1416,8 +1416,8 @@ namespace Functions
                     break;
 
                 case WinNameType.BEDEHKARAN_BESTANKARAN_LIMITED: //لیست کل بدهکاران و بستانکاران محدود شده
-                    BEDEHKARAN_BESTANKARAN bEDEHKARAN_BESTANKARAN = new BEDEHKARAN_BESTANKARAN(); bEDEHKARAN_BESTANKARAN.IsCTRLF9 = true;
-                    CL_LMethods.OpenWindow(OWNERWIN, bEDEHKARAN_BESTANKARAN, false, false);
+                    //BEDEHKARAN_BESTANKARAN bEDEHKARAN_BESTANKARAN = new BEDEHKARAN_BESTANKARAN(); bEDEHKARAN_BESTANKARAN.IsCTRLF9 = true;
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_DATE("BEDBESM"), false, false);
                     break;
 
                 case WinNameType.F_MENU_ANBAR_FRKH_GRP:  //گزارش حواله انبار گروهی
