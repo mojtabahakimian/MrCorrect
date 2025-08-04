@@ -173,6 +173,7 @@ namespace Prg_Proccessy.MODELS
         public static string PERSONEL { get; private set; }
         public static int? STTOL { get; set; }
         public static bool? ECONM { get; set; }
+        public static int? STKHS { get; private set; }
         #endregion
         public static void GetInitTheApp()
         {
@@ -439,6 +440,7 @@ namespace Prg_Proccessy.MODELS
 
                     if (item.STTOL != null) STTOL = item.STTOL;
                     if (item.ECONM != null) ECONM = item.ECONM;
+                    if (item.STKHS != null) STKHS = item.STKHS;
 
 
 

@@ -38,6 +38,8 @@ using System.Windows.Threading;
 using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
 using System.Windows.Data;
 using System.ComponentModel;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using Prg_Proccessy.Generaly;
 
 namespace Prg_UI.Wins.WinMenus.SANATI
 {
@@ -129,6 +131,40 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             public double? MABLK { get; set; }
         }
 
+        public class STUFSTK
+        {
+            public string CODE { get; set; }
+            public int ANBAR { get; set; }
+            public double? MOGODI { get; set; }
+            public double? MOGODI_A { get; set; }
+        }
+
+        public class STUFDEF
+        {
+            public string CODE { get; set; }
+            public int? VAHED { get; set; }
+        }
+
+        public class LastAvrageResult
+        {
+            public double AVRAGE { get; set; }
+        }
+
+        public class DP_MODEL
+        {
+            public int? DEPATMAN { get; set; }
+            public string? DEPNAME { get; set; }
+        }
+        public class MX_MODEL
+        {
+            public double? MaxOfNUMBER { get; set; }
+        }
+
+        public class SN_MODEL
+        {
+            public double? MHAZ_NO { get; set; }
+            public string? MHAZNAME { get; set; }
+        }
         public class N_RASID_MODEL
         {
             public int? FNUMB { get; set; }
@@ -161,7 +197,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
         /// <summary>
         /// TAG = 10
         /// </summary>
-        public byte FTAG { get; } = 10;
+        public byte HTAG { get; } = 11;
 
         public bool NowIsReady { get; private set; }
         public bool INVO_LST_SUB_IsFocused { get; private set; }
@@ -291,6 +327,19 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 }
             }
         }
+        private bool IsNull(object? hTAF2)
+        {
+            string? _inputy = hTAF2?.ToStringNullSafe();
+            if (string.IsNullOrEmpty(_inputy))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
 
         private bool ican;
         public bool AllowEdits
@@ -326,7 +375,11 @@ namespace Prg_UI.Wins.WinMenus.SANATI
         public Visual I_AM_VK_SAKHTEH { get; private set; }
         public List<N_RASID_MODEL> N_RASID_ALL { get; private set; }
 
+        private string BEFOREDATEN;
+        private List<COMBOPERSONEL> rst_personel;
+
         private NavigationManager<HEAD_LST> _navigationManager;
+
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
@@ -345,14 +398,14 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             FILL_ALL_COMBOBOXES();
 
 
-            string WhereCondition = $" WHERE (dbo.HEAD_LST.TAG = {FTAG}) ";
-            WhereCondition = CL_LMethods.GetRestrictedSqlQuery(Convert.ToByte(FTAG), WhereCondition);
+            string WhereCondition = $" WHERE (dbo.HEAD_LST.TAG = {HTAG}) ";
+            WhereCondition = CL_LMethods.GetRestrictedSqlQuery(Convert.ToByte(HTAG), WhereCondition);
 
             _navigationManager = new NavigationManager<HEAD_LST>(
                 dbms,
                 x => x.NUMBER.ToString(), // property selector (used to find a record by its CODE)
                 $"SELECT * FROM HEAD_LST {WhereCondition} ORDER BY NUMBER", //All Record of The Table
-            x => $"SELECT * FROM HEAD_LST WHERE NUMBER = {x?.NUMBER} AND TAG = {FTAG}", //On Change for One Record
+            x => $"SELECT * FROM HEAD_LST WHERE NUMBER = {x?.NUMBER} AND TAG = {HTAG}", //On Change for One Record
             Convert.ToDouble(NUMBER.Text)
             );
 
@@ -389,7 +442,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
         {
             try
             {
-                var itemtoadd = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 * FROM HEAD_LST  WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG}").FirstOrDefault();
+                var itemtoadd = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 * FROM HEAD_LST  WHERE NUMBER = {NUMBER.Text} AND TAG = {HTAG}").FirstOrDefault();
                 record = itemtoadd;
 
                 return true;
@@ -439,6 +492,9 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 CUST_NO.SelectedValue = HEADER_FAC.CUST_NO; //مشتری
                 CUST_NO.Items.Refresh();
 
+                DEPATMAN.SelectedValue = HEADER_FAC.DEPATMAN; //واحد
+                DEPATMAN.Items.Refresh();
+
 
                 OKF.IsChecked = HEADER_FAC.OKF; //تایید فاکتور
                 MOLAH.Text = HEADER_FAC.MOLAH; //ملاحظات
@@ -474,7 +530,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
         {
             NewRecord = false;
 
-            var CURRENT_HEADER = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG}").FirstOrDefault();
+            var CURRENT_HEADER = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {HTAG}").FirstOrDefault();
             _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
         }
 
@@ -608,6 +664,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             var ARST = dbms.DoGetDataSQL<Custom_TCODANBAR>(RowSource_ANBAR).ToList();
             ANBAR_COLUMN.ItemsSource = ARST;
         }
+
         private void FILL_ALL_COMBOBOXES()
         {
             CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
@@ -618,6 +675,11 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             CUST_NO2.ItemsSource = CUST_NO.ItemsSource;
             CUST_NO2.DisplayMemberPath = "hes";
             CUST_NO2.SelectedValuePath = "hes";
+
+            //دپارتمان
+            DEPATMAN.ItemsSource = dbms.DoGetDataSQL<DP_MODEL>("SELECT DEPART.DEPATMAN, DEPART.DEPNAME FROM DEPART ORDER BY DEPART.DEPNAME;").ToList();
+            DEPATMAN.DisplayMemberPath = "DEPNAME";
+            DEPATMAN.SelectedValuePath = "DEPATMAN";
 
             //انبار کالا
             ANBAR_LOADITEM();
@@ -633,7 +695,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             N_RASID_COLUMN.ItemsSource = N_RASID_ALL;
 
             //مرکز هزینه
-            var RST_SANAD_NO = dbms.DoGetDataSQL<TCOD_MARKAZHAZ>(@"SELECT MHAZ_NO, MHAZNAME FROM TCOD_MARKAZHAZ").ToList();
+            var RST_SANAD_NO = dbms.DoGetDataSQL<SN_MODEL>(@"SELECT MHAZ_NO, MHAZNAME FROM TCOD_MARKAZHAZ").ToList();
             SANAD_NO_COLUMN.ItemsSource = RST_SANAD_NO;
 
             //کبموباکس مجری
@@ -659,18 +721,6 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
         }
 
-        private bool IsNull(object? hTAF2)
-        {
-            string? _inputy = hTAF2?.ToStringNullSafe();
-            if (string.IsNullOrEmpty(_inputy))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
         private bool HeaderIsValid(bool _DisplayErrors = true)
         {
             List<MsgModel> ErrosMessages = new List<MsgModel>();
@@ -702,6 +752,10 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             if (CUST_NO.SelectedValue is null) //حساب مشتری
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "مسئول شیفت نمیتواند خالی باشد." });
+            }
+            if (DEPATMAN.SelectedValue is null) //حساب مشتری
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "واحد نمیتواند خالی باشد." });
             }
 
             if (!string.IsNullOrEmpty(DATE_N.Text?.ToRawTarikh()))
@@ -832,6 +886,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
 
         public bool ItwasNewFirstTime { get; set; } = false;
+
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e) //**********************************************************************************************
         {
             if (!BTN_SAVE.IsEnabled) { return; }
@@ -862,10 +917,10 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                         db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
                         //Fake Query for Lock Table
 
-                        var rst_11 = db.Query<double?>($"SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)={FTAG}))", null, transaction).FirstOrDefault();
+                        var rst_11 = db.Query<double?>($"SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)={HTAG}))", null, transaction).FirstOrDefault();
                         if (rst_11 == 0 || ReferenceEquals(rst_11, null))
                         {
-                            NUMBER.Text = Baseknow.STTOL.ToString(); //STTO ?
+                            NUMBER.Text = Baseknow.STKHS.ToString(); //STTO ?
                             NUMBER.UpdateLayout();
                         }
                         else
@@ -875,7 +930,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                         }
 
                         db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER,         NUMBER1,           TAG,     DATE_N,  MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF)
-                                               VALUES ({NUMBER.Text}, NULL    ,{FTAG},        0,    0,   0,       0,        0,        0,        0,    0   )", null, transaction);
+                                               VALUES ({NUMBER.Text}, NULL    ,{HTAG},        0,    0,   0,       0,        0,        0,        0,    0   )", null, transaction);
 
                         transaction.Commit();
                         db?.Close();
@@ -920,9 +975,14 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 SecurityAllCheck();
 
                 var dt = DateTime.Now;
-                CL_HESABDARI.TR("HEAD_LST", "(NUMBER = " + NUMBER.Text + $") AND (TAG = {FTAG})", dt, 1); //12
-                CL_HESABDARI.TR("INVO_LST", "(NUMBER = " + NUMBER.Text + $") AND (TAG = {FTAG})", dt, 1); //1
+                CL_HESABDARI.TR("HEAD_LST", "(NUMBER = " + NUMBER.Text + $") AND (TAG = {HTAG})", dt, 1); //12
+                CL_HESABDARI.TR("INVO_LST", "(NUMBER = " + NUMBER.Text + $") AND (TAG = {HTAG})", dt, 2); //1
 
+                INVO_LST_SUB.IsReadOnly = false;
+                this.AllowEdits = true;
+                this.AllowDeletions = true;
+
+                SGN_MANAGER();
                 var _SGN1_ = Convert.ToBoolean(SGN1.IsChecked ?? false);
                 var _SGN2_ = Convert.ToBoolean(SGN2.IsChecked ?? false);
                 var _SGN3_ = Convert.ToBoolean(SGN3.IsChecked ?? false);
@@ -933,13 +993,23 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                     INVO_LST_SUB.IsReadOnly = true;
                     this.AllowEdits = false;
                     this.AllowDeletions = false;
+
+                    DATE_N.IsReadOnly = true;
+                    MOLAH.IsReadOnly = true;
+                    CUST_NO.IsReadOnly = true;
                 }
                 else
                 {
                     INVO_LST_SUB.IsReadOnly = false;
                     this.AllowEdits = true;
                     this.AllowDeletions = true;
+
+                    DATE_N.IsReadOnly = false;
+                    MOLAH.IsReadOnly = false;
+                    CUST_NO.IsReadOnly = false;
                 }
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, "HSAYER", new WindowInteropHelper(this).Handle, this.GetType().Name);
+
             }
         }
         private void BTN_DELETE_Click(object sender, RoutedEventArgs e)
@@ -957,7 +1027,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                     actionType: "DELETE",
                     tableName: "برگه ورود کالای ساخته شده",
                     recordId: NUMBER.Text,
-                    oldValue: $"TAG = {FTAG}",
+                    oldValue: $"TAG = {HTAG}",
                     newValue: null,
                     additionalInfo: $@"{this.GetType().Name} , EXE PATH : {System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}");
 
@@ -965,8 +1035,8 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 {
                     #region SABEGHEH
                     var dt = DateTime.Now;
-                    CL_HESABDARI.TR("HEAD_LST", "(NUMBER = " + this.NUMBER.Text + $") AND (TAG = {FTAG})", dt, 1); //12
-                    CL_HESABDARI.TR("INVO_LST", "(NUMBER = " + this.NUMBER.Text + $") AND (TAG = {FTAG})", dt, 1); //1
+                    CL_HESABDARI.TR("HEAD_LST", "(NUMBER = " + this.NUMBER.Text + $") AND (TAG = {HTAG})", dt, 1); //12
+                    CL_HESABDARI.TR("INVO_LST", "(NUMBER = " + this.NUMBER.Text + $") AND (TAG = {HTAG})", dt, 1); //1
                     #endregion
 
 
@@ -1026,7 +1096,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                     {
                         try
                         {
-                            dbms.DoExecuteSQL($@"DELETE FROM dbo.HEAD_LST WHERE NUMBER = {NUMBER.Text} AND NUMBER = {NUMBER.Text} AND TAG = {FTAG}");
+                            dbms.DoExecuteSQL($@"DELETE FROM dbo.HEAD_LST WHERE NUMBER = {NUMBER.Text} AND NUMBER = {NUMBER.Text} AND TAG = {HTAG}");
 
                             SANAD();
 
@@ -1058,10 +1128,11 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 }
             }
         }
+
         private void GetBalanceInfo()
         {
             //کادر سبز و سند و مانده حساب
-            var SANAD_NUMBER = dbms.DoGetDataSQL<string?>($"SELECT TOP (1) N_S FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG}").FirstOrDefault();
+            var SANAD_NUMBER = dbms.DoGetDataSQL<string?>($"SELECT TOP (1) N_S FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {HTAG}").FirstOrDefault();
             if (SANAD_NUMBER != null)
             {
                 N_S.Text = SANAD_NUMBER?.ToString();
@@ -1080,12 +1151,12 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
             _qre = $@"UPDATE dbo.HEAD_LST
                     SET NUMBER = {NUMBER.Text}, DATE_N = {DATE_N.Text.ToRawTarikh()},
-                    N_S = {_n_s},
+                    N_S = {_n_s}, DEPATMAN = {DEPATMAN.SelectedValue},
                     CUST_NO = N'{CUST_NO.SelectedValue}', MOLAH = N'{MOLAH.Text}',
                     FNUMCO = {(string.IsNullOrEmpty(FNUMCO.Text) ? "0" : FNUMCO.Text)},
                     OKF = {Convert.ToByte(OKF.IsChecked)},
                     USER_NAME = N'{USER_NAME.Text}'
-                    WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG} ";
+                    WHERE NUMBER = {NUMBER.Text} AND TAG = {HTAG} ";
 
             _ = dbms.DoExecuteSQL(_qre);
 
@@ -1114,7 +1185,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
                 var parameters = new Dictionary<string, object>
                         {
-                            { "@tag", FTAG },
+                            { "@tag", HTAG },
                             { "@number", double.Parse(NUMBER.Text) }
                         };
 
@@ -1132,7 +1203,6 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 INVO_LST_FACTOR22_DATA?.Clear();
             }
         }
-
         private void INVO_LST_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e == null || INVO_LST_SUB == null || INVO_LST_SUB.CurrentCell == null)
@@ -1184,7 +1254,6 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 }
             }
         }
-
         private void INVO_LST_SUB_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (NowIsReady && INVO_LST_SUB.SelectedItem != null)
@@ -1201,7 +1270,6 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 }
             }
         }
-
         private void INVO_LST_SUB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (NowIsReady && !(e is null))
@@ -1297,12 +1365,12 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 }
                 if (e.Column.SortMemberPath == "N_RASID")
                 {
-                    if ((bool)!Baseknow.FINALS)
+                    if (Baseknow.OPTIONSS.Length < 30 || Baseknow.OPTIONSS[29].ToString() != "5")
                     {
                         var _COMBOBOX_ = e.EditingElement as ComboBox;
                         if (_COMBOBOX_ == null) return;
 
-                        var filteredN_KOL = dbms.DoGetDataSQL<N_RASID_MODEL>(@"SELECT HEAD_MANF.FNUMB, STUF_DEF.NAME + ' ' + isnull(HEAD_MANF.tozih,' ') as nam, HEAD_MANF.FNUMB, DTL_MANF.CODE FROM (HEAD_MANF INNER JOIN DTL_MANF ON HEAD_MANF.FNUMB = DTL_MANF.FNUMB) INNER JOIN STUF_DEF ON HEAD_MANF.CODE = STUF_DEF.CODE WHERE ((Not (STUF_DEF.NAME) Is Null) AND ((DTL_MANF.CODE)='" + CurrentRow.CODE + "'))").ToList();
+                        var filteredN_KOL = dbms.DoGetDataSQL<N_RASID_MODEL>(@"SELECT  dbo.HEAD_MANF.FNUMB, ISNULL(dbo.HEAD_MANF.NAMES, dbo.STUF_DEF.NAME) AS NAM, dbo.HEAD_MANF.FNUMB AS Expr1,  dbo.DTL_MANF.CODE FROM         dbo.STUF_DEF RIGHT OUTER JOIN dbo.HEAD_MANF ON dbo.STUF_DEF.CODE = dbo.HEAD_MANF.CODE LEFT OUTER JOIN dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE     (dbo.DTL_MANF.CODE IS NULL)").ToList();
 
                         // تنظیم آیتم‌های کمبوباکس
                         _COMBOBOX_.ItemsSource = filteredN_KOL;
@@ -1421,6 +1489,27 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             }
             #endregion
 
+            //مبلغ میانگین
+            #region MABL
+            if (e.Column.SortMemberPath == "MABL")
+            {
+                #region On_Exit
+                if (CURRENT_ITEMS_ROW.MABL == 0)
+                {
+                    if (CURRENT_ITEMS_ROW.MEGHk == 0)
+                    {
+                        CURRENT_ITEMS_ROW.MABL_K = 0;
+                    }
+                    else
+                    {
+                        CURRENT_ITEMS_ROW.MABL = CURRENT_ITEMS_ROW.MABL_K / CURRENT_ITEMS_ROW.MEGHk;
+                        //MABL_K.TabStop = false;
+                    }
+                }
+                #endregion
+            }
+            #endregion
+
             //کالا
             #region CODE
             if (e.Column.SortMemberPath == "NAME_CODE")
@@ -1531,6 +1620,49 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                         //    CURRENT_ITEMS_ROW.MABL_K = Math.Round((double)(CURRENT_ITEMS_ROW.MABL * CURRENT_ITEMS_ROW.MEGHk));
                         //}
 
+                    }
+                    #endregion
+
+                    #region CODE_After_Update
+                    try
+                    {
+                        // Refresh/Reload ComboBox یا Datasource واحد
+                        VAHED_K_AfterUpdate();
+
+                        // استعلام از STUF_STK
+                        var stufStkList = dbms.DoGetDataSQL<STUFSTK>(
+                            "SELECT * FROM STUF_STK WHERE CODE = @code AND ANBAR = @anbar",
+                            new { code = CURRENT_ITEMS_ROW.CODE, anbar = CURRENT_ITEMS_ROW.ANBAR }
+                        ).ToList();
+
+                        if (stufStkList.Count == 0)
+                        {
+                            MOGU.Text = null;
+                        }
+                        else
+                        {
+                            MOGU.Text = Convert.ToString(stufStkList.FirstOrDefault().MOGODI + stufStkList.FirstOrDefault().MOGODI_A);
+                        }
+
+                        // استعلام واحد از STUF_DEF
+                        var stufDef = dbms.DoGetDataSQL<STUFDEF>(
+                            "SELECT VAHED FROM STUF_DEF WHERE CODE = @code",
+                            new { code = CURRENT_ITEMS_ROW.CODE }
+                        ).FirstOrDefault();
+                        if (stufDef != null)
+                        {
+                            CURRENT_ITEMS_ROW.VAHED_K = stufDef.VAHED;
+                        }
+
+                        // مقداردهی Avrage و سایر موارد
+                        double avrage = GetLastAvrage(CURRENT_ITEMS_ROW.CODE, Convert.ToInt32(CURRENT_ITEMS_ROW.ANBAR), Convert.ToInt64(DATE_N.Text.ToRawTarikh()));
+                        CURRENT_ITEMS_ROW.AVRAGE = Convert.ToDouble(avrage.ToString("N2"));
+                        CURRENT_ITEMS_ROW.MABL = CURRENT_ITEMS_ROW.AVRAGE;
+                        CURRENT_ITEMS_ROW.MABL = Convert.ToDouble((avrage * Convert.ToDouble(CURRENT_ITEMS_ROW.MEGHk)).ToString("N2"));
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log/Handle error
                     }
                     #endregion
                 }
@@ -1671,6 +1803,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             #region N_RASID
             if (e.Column.SortMemberPath == "N_RASID")
             {
+                #region After_Update
                 if (!Convert.ToBoolean(Baseknow.FINALS))
                 {
                     if (string.IsNullOrEmpty(ENTERED_VALUE_ROW?.ToStringNullSafe()) && CURRENT_ITEMS_ROW?.CODE != null)
@@ -1681,6 +1814,36 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                         return;
                     }
                 }
+                #endregion
+
+                #region On_Exit
+                if (!IsNull(CURRENT_ITEMS_ROW.CODE))
+                {
+                    if (IsNull(CURRENT_ITEMS_ROW.N_RASID))
+                    {
+                        new Msgwin(false, "محل مصرف حتما بايد مشخص گردد...!").ShowDialog();
+                        Baseknow.Text44 = false;
+                        Msgwin msgwin = new Msgwin(true, "آيا مايليد اين سطر حذف گردد؟");
+                        msgwin.Show();
+                        if (msgwin.DialogResult == true)
+                        {
+                            if (Baseknow.Text44)
+                            {
+                                Baseknow.Text44 = false;
+                                BTN_DELETE_Click(null, null);
+                            }
+                        }
+                    }
+                    else if (Strings.Mid(Baseknow.OPTIONSS, 30, 1) == "5")
+                    {
+                        if (CL_HESABDARI.ISTAF(CURRENT_ITEMS_ROW.N_RASID))
+                        {
+                            new Msgwin(false, "حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!").ShowDialog();
+
+                        }
+                    }
+                }
+                #endregion
             }
             #endregion
 
@@ -1725,7 +1888,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 _qre = $@"INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH,FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
                               OUTPUT INSERTED.id
                               VALUES({NUMBER.Text},
-                              {FTAG} ,
+                              {HTAG} ,
                               {TheRow.ANBAR}   ,
                               NULL,
                               N'{TheRow.CODE}' ,
@@ -1760,7 +1923,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 {
                     TheRow.id = queryOutputs.FirstOrDefault(); // Update the list with the new ID
                                                                //اصلاح شماره ردیف
-                    IVM.TM.ExecuteSqlCommandCtc($"UPDATE dbo.INVO_LST SET RADIF = (SELECT ISNULL(MAX(RADIF) + 1, 1) AS NewRADIF FROM dbo.INVO_LST WHERE NUMBER={NUMBER.Text} AND TAG={FTAG}) FROM dbo.INVO_LST WHERE id = {TheRow.id}");
+                    IVM.TM.ExecuteSqlCommandCtc($"UPDATE dbo.INVO_LST SET RADIF = (SELECT ISNULL(MAX(RADIF) + 1, 1) AS NewRADIF FROM dbo.INVO_LST WHERE NUMBER={NUMBER.Text} AND TAG={HTAG}) FROM dbo.INVO_LST WHERE id = {TheRow.id}");
                 }
             }
             else //UPDATE
@@ -1841,6 +2004,53 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             }
 
         }
+        private void INVO_LST_SUB_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if ((bool)e.NewValue == false)
+            {
+                INVO_LST_SUB_IsFocused = false;
+            }
+            else
+            {
+                INVO_LST_SUB_IsFocused = true;
+            }
+        }
+        private void INVO_LST_SUB_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            DataGrid dataGrid = sender as DataGrid;
+            if (dataGrid == null) return;
+
+            if (dataGrid.SelectedItems.Count > 0)
+            {
+                return;
+            }
+
+            // Find the row under the mouse
+            DependencyObject dep = (DependencyObject)e.OriginalSource;
+            while (dep != null && !(dep is DataGridRow))
+            {
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+
+            DataGridRow row = dep as DataGridRow;
+            if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
+            {
+                // Select the row under the mouse
+                dataGrid.SelectedItem = row.Item;
+
+                // Show the context menu
+                dataGrid.ContextMenu.IsOpen = true;
+
+                // Mark the event as handled to prevent the default context menu behavior
+                e.Handled = true;
+            }
+            else
+            {
+                // No valid row, don't show context menu
+                e.Handled = true;
+            }
+        }
+
         void VAHED_K_AfterUpdate()
         {
             if (CURRENT_ITEMS_ROW?.VAHED_K is null) { return; }
@@ -1969,7 +2179,6 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             CURRENT_ITEMS_ROW.MABL_K = CURRENT_ITEMS_ROW.MABL * CURRENT_ITEMS_ROW.MEGHk;
 
         }
-
         private void UPDATE_LAST_AVRAGE()
         {
             if (CURRENT_ITEMS_ROW?.ANBAR != null && CURRENT_ITEMS_ROW?.CODE != null)
@@ -1980,6 +2189,27 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 CURRENT_ITEMS_ROW.MABL_K = Math.Round((double)(CURRENT_ITEMS_ROW.MABL * CURRENT_ITEMS_ROW.MEGHk));
             }
         }
+        private void SANAD()
+        {
+            try
+            {
+                var (SanadNumber, IsSuccessy) = AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGSAYER(Convert.ToInt64(NUMBER.Text), Convert.ToInt64(NUMBER.Text), false);
+
+                if (SanadNumber != null)
+                {
+                    N_S.Text = SanadNumber.ToString();
+                }
+
+                DoCmdHeaderSave();
+
+                GetBalanceInfo();
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خطا در انجام عملیات صدور سند").Show();
+            }
+        }
+
 
         private void CUST_NO_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
@@ -2026,30 +2256,6 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 }
             }
         }
-        private void SANAD()
-        {
-            try
-            {
-                var (SanadNumber, IsSuccessy) = AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGSAYER(Convert.ToInt64(NUMBER.Text), Convert.ToInt64(NUMBER.Text), false);
-
-                if (SanadNumber != null)
-                {
-                    N_S.Text = SanadNumber.ToString();
-                }
-
-                DoCmdHeaderSave();
-
-                GetBalanceInfo();
-            }
-            catch (Exception)
-            {
-                new Msgwin(false, "خطا در انجام عملیات صدور سند").Show();
-            }
-        }
-
-        private string BEFOREDATEN;
-        private List<COMBOPERSONEL> rst_personel;
-
         private void DATE_N_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (!NewRecord)
@@ -2070,6 +2276,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
         {
             BEFOREDATEN = DATE_N.Text.ToRawTarikh();
         }
+
         private void BTN_NEW_FACTOR_Click(object sender, RoutedEventArgs e)
         {
             if (!ChangeIsHappend)
@@ -2094,6 +2301,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             USER_NAME.Text = Baseknow.UUSER; // نام کاربری
 
             CUST_NO.SelectedIndex = -1; CUST_NO.Items.Refresh();
+            DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER; DEPATMAN.Items.Refresh();
             MOLAH.Text = null;
 
             FNUMCO.Text = "0"; //شماره داخلی
@@ -2136,16 +2344,16 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             this.lsanad.Foreground = new SolidColorBrush(Colors.White);
 
             if (INVO_LST_FACTOR22_DATA.Count > 0)
-                this.Command106.IsEnabled = true;
+                this.Command103.IsEnabled = true;
             else
-                this.Command106.IsEnabled = false;
+                this.Command103.IsEnabled = false;
 
             if (Convert.ToBoolean(Baseknow.SIGN))
             {
                 if (Convert.ToBoolean(SGN2.IsChecked ?? false))
-                    this.Command106.IsEnabled = true;
+                    this.Command103.IsEnabled = true;
                 else
-                    this.Command106.IsEnabled = false;
+                    this.Command103.IsEnabled = false;
             }
 
 
@@ -2214,19 +2422,54 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
         }
 
-        private void SGN_MANAGER()
+        private void Form_Open()
         {
-            if (Convert.ToDouble(NUMBER.Text) > 0)
+            //System.Windows.Forms["BASEKNOW"]["hhwin"] = this.hWnd;
+            if (!CL_HESABDARI.LETSGO("ESLAHS"))
             {
-                CL_HESABDARI.LetSigneTick(this.GetType().Name, 39, Convert.ToInt32(Baseknow.USERCOD), new WindowInteropHelper(this).Handle);
+                this.ESLAH.Visibility = Visibility.Hidden;
             }
             else
             {
-                this.SGN1.IsEnabled = false;
-                this.SGN2.IsEnabled = false;
-                this.SGN3.IsEnabled = false;
+                this.ESLAH.Visibility = Visibility.Visible;
             }
+
+            //if ((bool)Baseknow.SIGN)
+            //{
+            //    this.SGN1.Visibility = Visibility.Visible;
+            //    this.SGN2.Visibility = Visibility.Visible;
+            //    this.SGN3.Visibility = Visibility.Visible;
+            //    this.SGN1usid.Visibility = Visibility.Visible;
+            //    this.SGN2usid.Visibility = Visibility.Visible;
+            //    this.SGN3usid.Visibility = Visibility.Visible;
+            //    this.PERSONEL.Visibility = Visibility.Visible;
+            //    this.PERSONEL.RowSource = GetUserList;
+            //    this.SGN1usid.RowSource = GetUserList;
+            //    this.sgn2usid.RowSource = GetUserList;
+            //    this.sgn3usid.RowSource = GetUserList;
+            //}
+
+            //this.HAVALAH_EXIT_SAYER_SUB.Form.CODE.ColumnWidth = 5610;
+            //this.HAVALAH_EXIT_SAYER_SUB.Form.N_RASID.ColumnWidth = 4245;
+            //this.HAVALAH_EXIT_SAYER_SUB.Height = 6825;
+            //if (Strings.Mid(Baseknow.OPTIONSS, 44, 1) == "5")
+            //{
+            //    if (this.WindowWidth > 15480)
+            //    {
+            //        this.Width = this.WindowWidth - this.WindowWidth * 0.02d;
+            //        object shw;
+            //        shw = this.HAVALAH_EXIT_SAYER_SUB.Width;
+            //        this.HAVALAH_EXIT_SAYER_SUB.Left = 50;
+            //        this.HAVALAH_EXIT_SAYER_SUB.Width = this.Width - 20;
+            //        this.HAVALAH_EXIT_SAYER_SUB.Form.CODE.ColumnWidth = 5610 + (this.HAVALAH_EXIT_SAYER_SUB.Width - shw) / 2;
+            //        this.HAVALAH_EXIT_SAYER_SUB.Height = this.Detail.Height - 1500;
+            //        this.Repaint();
+            //        DoCmd.Minimize();
+            //        DoCmd.Maximize();
+            //    }
+            //}
         }
+
 
         //کارت انبار این کالا
         private void MenuItem_Click_1(object sender, RoutedEventArgs e)
@@ -2246,21 +2489,10 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             }
         }
 
-        private void INVO_LST_SUB_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if ((bool)e.NewValue == false)
-            {
-                INVO_LST_SUB_IsFocused = false;
-            }
-            else
-            {
-                INVO_LST_SUB_IsFocused = true;
-            }
-        }
 
         private void BTN_FACTORHA_Click(object sender, RoutedEventArgs e)
         {
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FACTORS_LST, this, FTAG);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FACTORS_LST, this, HTAG);
 
             if (NewRecord)
             {
@@ -2268,69 +2500,20 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             }
         }
 
-        private void Command106_Click(object sender, RoutedEventArgs e)
+        #region EMZA
+        private void SGN_MANAGER()
         {
-            if (NewRecord || INVO_LST_FACTOR22_DATA.Count == 0)
+            if (Convert.ToDouble(NUMBER.Text) > 0)
             {
-                return;
+                CL_HESABDARI.LetSigneTick(this.GetType().Name, 39, Convert.ToInt32(Baseknow.USERCOD), new WindowInteropHelper(this).Handle);
             }
-
-            var report = new StiReport();
-            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.SANATI.HAVLAH_EXIT.mrt");
-            report.Load(pathreport);
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
-            report.Dictionary.Databases.Clear();
-            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
-            ((StiSqlSource)report.Dictionary.DataSources["DataSource1"]).CommandTimeout = 300;
-
-            report["NUMBER_PARAM"] = NUMBER.Text;
-            (report.GetComponentByName("CUST_NO_NAME") as StiText).Text = (CUST_NO.SelectedItem as Custom_CUST_HESAB).NAME;
-            (report.GetComponentByName("COMPANY_NAME") as StiText).Text = Baseknow.WIDTH_D; //نام شرکت
-
-
-            if ((bool)SGN1.IsChecked)
+            else
             {
-                (report.GetComponentByName("FIMG") as StiImage).Enabled = true;
-
-                (report.GetComponentByName("FS") as StiText).Text = SGN1_INFO.SEMAT_USER;
-                (report.GetComponentByName("FU") as StiText).Text = SGN1_INFO.NAME_HESAB_USER;
+                this.SGN1.IsEnabled = false;
+                this.SGN2.IsEnabled = false;
+                this.SGN3.IsEnabled = false;
             }
-            if ((bool)SGN2.IsChecked)
-            {
-                (report.GetComponentByName("HIMG") as StiImage).Enabled = true;
-
-                (report.GetComponentByName("HS") as StiText).Text = SGN2_INFO.SEMAT_USER;
-                (report.GetComponentByName("HU") as StiText).Text = SGN2_INFO.NAME_HESAB_USER;
-            }
-            if ((bool)SGN3.IsChecked)
-            {
-                (report.GetComponentByName("MIMG") as StiImage).Enabled = true;
-
-                (report.GetComponentByName("MS") as StiText).Text = SGN3_INFO.SEMAT_USER;
-                (report.GetComponentByName("MU") as StiText).Text = SGN3_INFO.NAME_HESAB_USER;
-            }
-
-            new WINRPT(report, LABEL_HEADER.Content.ToString()).Show();
-
-            if ((bool)Baseknow.LOCKFAP)
-            {
-                OKF.IsChecked = true;
-            }
-
-            if (OKF.IsChecked == true)
-            {
-                this.AllowDeletions = false;
-                this.AllowEdits = false;
-
-                this.INVO_LST_SUB.IsReadOnly = true;
-
-                this.ESLAH.IsEnabled = true;
-            }
-
-            DoCmdHeaderSave();
-
         }
-
         private void PERSONEL_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (PERSONEL.SelectedItem != null && !NewRecord && NUMBER.Text != "0")
@@ -2362,7 +2545,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 return;
             }
 
-            if (CL_HESABDARI.MOGUDI(Convert.ToInt64(NUMBER.Text), FTAG) || SGN_WAS)
+            if (CL_HESABDARI.MOGUDI(Convert.ToInt64(NUMBER.Text), HTAG) || SGN_WAS)
             {
                 double mid;
                 string SHARH;
@@ -2391,11 +2574,11 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
                 if ((bool)SGN1.IsChecked)
                 {
-                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN1usid={SGN1usid.Tag ?? "NULL"}, SGN1 = {Convert.ToByte((bool)SGN1.IsChecked)} WHERE TAG = {FTAG} AND NUMBER = {NUMBER.Text}");
+                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN1usid={SGN1usid.Tag ?? "NULL"}, SGN1 = {Convert.ToByte((bool)SGN1.IsChecked)} WHERE TAG = {HTAG} AND NUMBER = {NUMBER.Text}");
                 }
                 else
                 {
-                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN1usid={SGN1usid.Tag ?? "NULL"}, SGN1 = {Convert.ToByte((bool)SGN1.IsChecked)} WHERE TAG = {FTAG} AND NUMBER = {NUMBER.Text}");
+                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN1usid={SGN1usid.Tag ?? "NULL"}, SGN1 = {Convert.ToByte((bool)SGN1.IsChecked)} WHERE TAG = {HTAG} AND NUMBER = {NUMBER.Text}");
                 }
 
                 this.PERSONEL.Visibility = Visibility.Visible;
@@ -2418,7 +2601,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 return;
             }
 
-            if (CL_HESABDARI.MOGUDI(Convert.ToInt64(NUMBER.Text), FTAG) || SGN_WAS)
+            if (CL_HESABDARI.MOGUDI(Convert.ToInt64(NUMBER.Text), HTAG) || SGN_WAS)
             {
                 double mid;
                 string SHARH;
@@ -2447,11 +2630,11 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
                 if ((bool)SGN2.IsChecked)
                 {
-                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN2usid={SGN2usid.Tag ?? "NULL"}, SGN2 = {Convert.ToByte((bool)SGN2.IsChecked)} WHERE TAG = {FTAG} AND NUMBER = {NUMBER.Text}");
+                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN2usid={SGN2usid.Tag ?? "NULL"}, SGN2 = {Convert.ToByte((bool)SGN2.IsChecked)} WHERE TAG = {HTAG} AND NUMBER = {NUMBER.Text}");
                 }
                 else
                 {
-                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN2usid={SGN2usid.Tag ?? "NULL"}, SGN2 = {Convert.ToByte((bool)SGN2.IsChecked)} WHERE TAG = {FTAG} AND NUMBER = {NUMBER.Text}");
+                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN2usid={SGN2usid.Tag ?? "NULL"}, SGN2 = {Convert.ToByte((bool)SGN2.IsChecked)} WHERE TAG = {HTAG} AND NUMBER = {NUMBER.Text}");
                 }
 
                 this.PERSONEL.Visibility = Visibility.Visible;
@@ -2468,7 +2651,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             var SGN_WAS = Convert.ToBoolean(SGN3.IsChecked ?? false);
 
 
-            if (CL_HESABDARI.MOGUDI(Convert.ToInt64(NUMBER.Text), FTAG) || SGN_WAS)
+            if (CL_HESABDARI.MOGUDI(Convert.ToInt64(NUMBER.Text), HTAG) || SGN_WAS)
             {
                 double mid;
                 string SHARH;
@@ -2497,11 +2680,11 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
                 if ((bool)SGN3.IsChecked)
                 {
-                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN3usid={SGN3usid.Tag ?? "NULL"}, SGN3 = {Convert.ToByte((bool)SGN3.IsChecked)} WHERE TAG = {FTAG} AND NUMBER = {NUMBER.Text}");
+                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN3usid={SGN3usid.Tag ?? "NULL"}, SGN3 = {Convert.ToByte((bool)SGN3.IsChecked)} WHERE TAG = {HTAG} AND NUMBER = {NUMBER.Text}");
                 }
                 else
                 {
-                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN3usid={SGN3usid.Tag ?? "NULL"}, SGN3 = {Convert.ToByte((bool)SGN3.IsChecked)} WHERE TAG = {FTAG} AND NUMBER = {NUMBER.Text}");
+                    dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN3usid={SGN3usid.Tag ?? "NULL"}, SGN3 = {Convert.ToByte((bool)SGN3.IsChecked)} WHERE TAG = {HTAG} AND NUMBER = {NUMBER.Text}");
                 }
 
                 this.PERSONEL.Visibility = Visibility.Visible;
@@ -2513,42 +2696,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 SGN3.IsChecked = !SGN_WAS;
             }
         }
-
-        private void INVO_LST_SUB_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            DataGrid dataGrid = sender as DataGrid;
-            if (dataGrid == null) return;
-
-            if (dataGrid.SelectedItems.Count > 0)
-            {
-                return;
-            }
-
-            // Find the row under the mouse
-            DependencyObject dep = (DependencyObject)e.OriginalSource;
-            while (dep != null && !(dep is DataGridRow))
-            {
-                dep = VisualTreeHelper.GetParent(dep);
-            }
-
-            DataGridRow row = dep as DataGridRow;
-            if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
-            {
-                // Select the row under the mouse
-                dataGrid.SelectedItem = row.Item;
-
-                // Show the context menu
-                dataGrid.ContextMenu.IsOpen = true;
-
-                // Mark the event as handled to prevent the default context menu behavior
-                e.Handled = true;
-            }
-            else
-            {
-                // No valid row, don't show context menu
-                e.Handled = true;
-            }
-        }
+        #endregion
 
         private void N_S_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
@@ -2558,5 +2706,37 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 CL_MenuManager.MenuBaseOnKindOpen(this, dbms, 0, Convert.ToDouble(N_S.Text), false);
             }
         }
+
+        private void Command103_Click(object sender, RoutedEventArgs e)
+        {
+            if (CL_HESABDARI.MOGUDI(Convert.ToInt64(NUMBER.Text), 11))
+            {
+                //DoCmd.OpenReport("HAVALAH_EXIT", acPreview, "", "NUMBER =" + this.NUMBER + " AND TAG =" + this.HTAG);
+            }
+
+            if ((bool)Baseknow.LOCKFAP)
+            {
+                this.OKF.IsChecked = true;
+            }
+
+            if (this.OKF.IsChecked == true)
+            {
+                this.AllowDeletions = false;
+                this.AllowEdits = false;
+                this.INVO_LST_SUB.IsEnabled = false;
+                this.ESLAH.IsEnabled = true;
+            }
+        }
+
+        private double GetLastAvrage(string code, int anbar, long date_n)
+        {
+            // فرض: تابع lastavrage به صورت SQL Function در دیتابیس هست و قابل کوئری‌گیری است
+            var result = dbms.DoGetDataSQL<double>(
+                "SELECT dbo.lastavrage(@code, @anbar, @dt) AS AVRAGE",
+                new { code = code, anbar = anbar, dt = date_n }
+            ).FirstOrDefault();
+            return result;
+        }
+
     }
 }
