@@ -24,6 +24,25 @@
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
 
+        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="IRANYekanFN">
+            <MenuItem Header="کپـــی | Copy" Click="COPY_CLICK" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="ContentCopy" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="انتقال کپی | Paste" Click="PASTE_CLICK" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="ContentPaste" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Header="خروجی اکسل" Click="EXPORTEXCEL_BTN" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="FileExcelOutline" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
+
         <Style TargetType="{x:Type TabControl}" BasedOn="{StaticResource MaterialDesignTabControl}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -175,9 +194,9 @@
                     <Button x:Name="BTN_SELECT_ALLUSER" Content="انتخاب همه کاربران" Style="{StaticResource MaterialDesignFlatButton}" FontSize="10" Margin="10,78,0,0" Click="BTN_SELECT_ALLUSER_Click" VerticalAlignment="Top" Height="28" HorizontalAlignment="Left" Width="253" />
                     <Button x:Name="BTN_SELECT_ALLPERMIS" Content="انتخاب همه دسترسی ها" Style="{StaticResource MaterialDesignFlatButton}" FontSize="10" Margin="302,78,10,0" VerticalAlignment="Top" Height="28" Click="BTN_SELECT_ALLPERMIS_Click" />
                     <StackPanel Margin="0,48,10,0" Orientation="Horizontal" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="403" Height="30" VerticalAlignment="Top">
+                        <Button x:Name="BTN_CLEAN_PSELECT" Content="پاکسازی دسترسی های انتخاب شده" Style="{StaticResource MaterialDesignFlatButton}" FontSize="10" Height="28" Click="BTN_CLEAN_PSELECT_Click" Width="184" />
                         <RadioButton x:Name="MLT" Content="انتخاب چندگانه" GroupName="GRP1" Margin="3" Click="MLT_Click"/>
                         <RadioButton x:Name="SS" Content="انتخاب تکی" GroupName="GRP1" IsChecked="True" Margin="10,3,3,3" Click="SS_Click"/>
-                        <Button x:Name="BTN_CLEAN_PSELECT" Content="پاکسازی دسترسی های انتخاب شده" Style="{StaticResource MaterialDesignFlatButton}" FontSize="10" Height="28" Click="BTN_CLEAN_PSELECT_Click" Width="184" />
                     </StackPanel>
                     <UniformGrid Margin="407,304,660,75">
                         <CheckBox IsEnabled="True" IsChecked="{Binding SelectedItem.SEE, ElementName=PermissionListBox, UpdateSourceTrigger=PropertyChanged}" Content="SEE"/>
@@ -197,7 +216,7 @@
                               EnableRowVirtualization="True"
                               VirtualizingPanel.IsVirtualizing="True"
                               VirtualizingPanel.VirtualizationMode="Recycling"
-                              
+                              ContextMenu="{StaticResource ContextUtilityMenu1}" ContextMenuOpening="OPANBACCESS_SUB_ContextMenuOpening" MouseRightButtonUp="OPANBACCESS_SUB_MouseRightButtonUp"
                               SelectedIndex="0"
                               ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
                               CellStyle="{StaticResource CellFocusyBorder}"
@@ -762,7 +781,7 @@
                               EnableRowVirtualization="True"
                               VirtualizingPanel.IsVirtualizing="True"
                               VirtualizingPanel.VirtualizationMode="Recycling"
-                              
+                              ContextMenu="{StaticResource ContextUtilityMenu1}"
                               SelectedIndex="0"
                               ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
                               CellStyle="{StaticResource CellFocusyBorder}"
@@ -773,7 +792,7 @@
                               AutoGenerateColumns="False" 
                               FlowDirection="RightToLeft" 
                               SelectionUnit="FullRow" 
-                              CanUserDeleteRows="False"
+                              CanUserDeleteRows="False" MouseRightButtonUp="BLOCKED_SUB_MouseRightButtonUp"
                               Margin="319,57,13,34" BorderThickness="1" IsKeyboardFocusWithinChanged="BLOCKED_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="BLOCKED_SUB_CellEditEnding" PreviewMouseLeftButtonUp="BLOCKED_SUB_PreviewMouseLeftButtonUp" SelectionChanged="BLOCKED_SUB_SelectionChanged" RowEditEnding="BLOCKED_SUB_RowEditEnding" PreviewKeyDown="BLOCKED_SUB_PreviewKeyDown" BeginningEdit="BLOCKED_SUB_BeginningEdit" IsEnabled="False" >
 
                         <DataGrid.Style>
@@ -803,7 +822,7 @@
                               EnableRowVirtualization="True"
                               VirtualizingPanel.IsVirtualizing="True"
                               VirtualizingPanel.VirtualizationMode="Recycling"
-                              
+                              ContextMenu="{StaticResource ContextUtilityMenu1}"
                               SelectedIndex="0"
                               ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
                               CellStyle="{StaticResource CellFocusyBorder}"
@@ -814,7 +833,7 @@
                               AutoGenerateColumns="False" 
                               FlowDirection="RightToLeft" 
                               SelectionUnit="FullRow" 
-                              CanUserDeleteRows="False"
+                              CanUserDeleteRows="False" MouseRightButtonUp="UNBLOCKED_SUB_MouseRightButtonUp"
                               Margin="12,57,5,34" BorderThickness="1" IsKeyboardFocusWithinChanged="UNBLOCKED_SUB_IsKeyboardFocusWithinChanged"  CellEditEnding="UNBLOCKED_SUB_CellEditEnding" PreviewMouseLeftButtonUp="UNBLOCKED_SUB_PreviewMouseLeftButtonUp" SelectionChanged="UNBLOCKED_SUB_SelectionChanged" RowEditEnding="UNBLOCKED_SUB_RowEditEnding" PreviewKeyDown="UNBLOCKED_SUB_PreviewKeyDown" PreparingCellForEdit="UNBLOCKED_SUB_PreparingCellForEdit" BeginningEdit="UNBLOCKED_SUB_BeginningEdit" Grid.Column="1" IsEnabled="False" >
 
                         <DataGrid.Style>
@@ -861,11 +880,12 @@
                               HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                               VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                               ItemsSource="{Binding CHARTSAZMANI_DATA}"
+                              ContextMenu="{StaticResource ContextUtilityMenu1}"
                               KeyboardNavigation.TabNavigation="Contained"
                               AutoGenerateColumns="False" 
                               FlowDirection="RightToLeft" 
                               SelectionUnit="FullRow" 
-                              CanUserDeleteRows="False"
+                              CanUserDeleteRows="False" MouseRightButtonUp="CHARTSAZMANI_SUB_MouseRightButtonUp"
                               Margin="319,57,10,50" BorderThickness="1" IsKeyboardFocusWithinChanged="CHARTSAZMANI_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="CHARTSAZMANI_SUB_CellEditEnding" PreviewMouseLeftButtonUp="CHARTSAZMANI_SUB_PreviewMouseLeftButtonUp" SelectionChanged="CHARTSAZMANI_SUB_SelectionChanged" RowEditEnding="CHARTSAZMANI_SUB_RowEditEnding" PreviewKeyDown="CHARTSAZMANI_SUB_PreviewKeyDown" BeginningEdit="CHARTSAZMANI_SUB_BeginningEdit" IsEnabled="False" >
 
                         <DataGrid.Style>

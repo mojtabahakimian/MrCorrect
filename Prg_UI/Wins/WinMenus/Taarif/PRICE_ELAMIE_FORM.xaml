@@ -14,7 +14,7 @@
         FontFamily="IRANYekanFN"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         WindowStartupLocation="CenterScreen"
-        Title="تعيين مسير وزيت براي مشتريان" Height="690" Width="710" MinHeight="690" MinWidth="1105" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+        Title="تعيين مسير وزيت براي مشتريان" Height="690" Width="1140" MinHeight="690" MinWidth="1105" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -96,6 +96,7 @@
                 </DataGrid.Style>
 
                 <DataGrid.Columns>
+                    
                     <DataGridComboBoxColumn x:Name="PGID_COLUMN"  Width="*" Header="گروه قیمتی" Visibility="Visible"
                                             SelectedValueBinding="{Binding PGID, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="PGNAME" SelectedValuePath="PGID">
                         <DataGridComboBoxColumn.EditingElementStyle>
@@ -118,10 +119,10 @@
                         </DataGridComboBoxColumn.CellStyle>
                     </DataGridComboBoxColumn>
 
-                    <DataGridTextColumn Header="کد گروه قیمتی" Binding="{Binding PGID}" Width="120" IsReadOnly="False">
+                    <DataGridTextColumn Header="کد گروه قیمتی" Binding="{Binding PGID, UpdateSourceTrigger=PropertyChanged}" Width="120">
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
-                                <Setter Property="IsReadOnly" Value="True"/>
+                                <Setter Property="IsReadOnly" Value="False"/>
                                 <Setter Property="Focusable" Value="True"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
@@ -136,12 +137,13 @@
                     </DataGridTextColumn>
 
                     <DataGridTextColumn Header="نام کاربر" Binding="{Binding USERNAME}" Width="Auto" MinWidth="120" IsReadOnly="False">
-                        <DataGridTextColumn.EditingElementStyle>
-                            <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
-                                <Setter Property="IsReadOnly" Value="True"/>
-                                <Setter Property="Focusable" Value="True"/>
+                        <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                <Setter Property="Focusable" Value="False"/>
+                                <Setter Property="KeyboardNavigation.IsTabStop" Value="False"/>
+                                <Setter Property="IsTabStop"  Value="False"/>
                             </Style>
-                        </DataGridTextColumn.EditingElementStyle>
+                        </DataGridTextColumn.CellStyle>
                     </DataGridTextColumn>
                 </DataGrid.Columns>
 
@@ -168,9 +170,9 @@
 
         </Grid>
 
-        <CNC:RecordNavigatorControl x:Name="navigatorControl" VerticalAlignment="Bottom" Margin="417,0,370,22"/>
+        <CNC:RecordNavigatorControl x:Name="navigatorControl" VerticalAlignment="Bottom" Margin="417,0,0,22" HorizontalAlignment="Left" Width="353"/>
         <CheckBox x:Name="SGN1" IsChecked="False" Content="فروش"  Margin="0,0,41,106" HorizontalAlignment="Right" Width="62" VerticalAlignment="Bottom" Tag="RD"  Click="SGN1_Click" />
-        <CheckBox x:Name="SGN2" IsChecked="False" Content="حسابداری"  Margin="0,0,25,76" HorizontalAlignment="Right" Width="78" VerticalAlignment="Bottom" Tag="RD" Click="SGN2_Click" />
+        <CheckBox x:Name="SGN2" IsChecked="False" Content="حسابداری"  Margin="0,0,25,75" HorizontalAlignment="Right" Width="78" VerticalAlignment="Bottom" Tag="RD" Click="SGN2_Click" />
         <CheckBox x:Name="SGN3" IsChecked="False" Content="مدیر عامل"  Margin="0,0,29,42" HorizontalAlignment="Right" Width="74" VerticalAlignment="Bottom" Tag="RD"  Click="SGN3_Click" />
         <TextBox x:Name="SGN1usid"   Style="{StaticResource FuzzyOut}" Padding="3"  Margin="0,0,105,103" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="202" IsReadOnly="True" Visibility="Collapsed"/>
         <TextBox x:Name="SGN2usid"   Style="{StaticResource FuzzyOut}" Padding="3"  Margin="0,0,105,70" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="202" IsReadOnly="True" Visibility="Collapsed"/>

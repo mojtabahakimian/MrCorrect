@@ -5,6 +5,7 @@ using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.UiTools;
+using Prg_UI.Wins.WinMenus.HESABDARI;
 using Syncfusion.Data.Extensions;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
@@ -77,6 +78,9 @@ namespace Wins.WinMenus.HESABDARI
         public bool NowIsReady { get; private set; }
         public byte TAGCODE { get; private set; }
 
+        public int KOL_PASSED { get; set; }
+        public int MOIN_PASSED { get; set; }
+
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
@@ -91,8 +95,10 @@ namespace Wins.WinMenus.HESABDARI
             if (IsCTRLF9)
             {
                 WINTILENAME.Content = "لیست بدهکاران و بستانکاران محدود شده";
-                var ServerFilter = "HES_K = " + Baseknow.BESTANKAR + " OR HES_K = " + Baseknow.BEDEHKAR;
-                MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>(@$"SELECT * FROM Q_BEDEHBESTANH_MAIN WHERE {ServerFilter} OPTION (FORCE ORDER, QUERYTRACEON 2312)").ToList();
+                //var ServerFilter = "HES_K = " + Baseknow.BESTANKAR + " OR HES_K = " + Baseknow.BEDEHKAR;
+                //MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>(@$"SELECT * FROM Q_BEDEHBESTANH_MAIN WHERE {ServerFilter} OPTION (FORCE ORDER, QUERYTRACEON 2312)").ToList();
+
+                MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>("SELECT BEDBESMAH" + Baseknow.USERCOD + ".*  FROM BEDBESMAH" + Baseknow.USERCOD + " WHERE (HES_K = " + KOL_PASSED + ") And (HES_M = " + MOIN_PASSED + ")  ORDER BY HES_K, HES_M, HES_T").ToList();
             }
             else
             {
@@ -105,6 +111,14 @@ namespace Wins.WinMenus.HESABDARI
             }
 
             Prg_UI.Functions.CL_LMethods.ProcLoader.Stop(Prc);
+
+            if (SYNCFUSION_DG != null)
+            {
+                SYNCFUSION_DG.FilterChanged += View_FilterChanged;
+                SYNCFUSION_DG.Loaded += (s, e) => UpdateRowCountLabel();
+
+                UpdateRowCountLabel();
+            }
             //SYNCFUSION_DG.ColumnSizer = GridLengthUnitType.Auto;
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -119,6 +133,22 @@ namespace Wins.WinMenus.HESABDARI
         }
 
         #region SYNFUSION_DATA_GRID
+        private void View_FilterChanged(object sender, GridFilterEventArgs e)
+        {
+            UpdateRowCountLabel();
+        }
+        private void UpdateRowCountLabel()
+        {
+            // Defensive checks
+            if (ROWCOUNT_TEXTBLK == null) return;
+            if (SYNCFUSION_DG?.View == null) return;
+
+            // Safely retrieve the record count
+            var recordCount = SYNCFUSION_DG.View.Records?.Count ?? 0;
+
+            // Set the label content
+            ROWCOUNT_TEXTBLK.Text = recordCount.ToString();
+        }
 
         private readonly FilterService<Q_BEDEHBESTANH_MAIN> filterService = new FilterService<Q_BEDEHBESTANH_MAIN>();
         public ObservableCollection<string> ActiveFilters { get; set; } = new ObservableCollection<string>();
@@ -242,7 +272,16 @@ namespace Wins.WinMenus.HESABDARI
                 }
             }
         }
-
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button { Tag: Q_BEDEHBESTANH_MAIN row })
+            {
+                if (row != null && row?.HES != null)
+                {
+                    new F_MENU_KOL_MOIN_TAFZIL(row?.HES.ToString());
+                }
+            }
+        }
     }
 
 }

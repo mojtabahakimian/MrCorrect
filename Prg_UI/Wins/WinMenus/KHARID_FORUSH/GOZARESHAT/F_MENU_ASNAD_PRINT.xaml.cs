@@ -135,28 +135,26 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
         private void BTN_GO_Click(object sender, RoutedEventArgs e)
         {
-            if (IsNull(this.SNDNUM1.SelectedValue) && IsNull(this.SNDNUM2.SelectedValue))
+            int AZ_START = 0;
+            int TA_END = 929292929;
+
+            if (SNDNUM1.SelectedValue != null)
             {
-                this.SNDNUM1.SelectedValue = 0;
-                this.SNDNUM2.SelectedValue = 929292929;
+                AZ_START = (int)SNDNUM1.SelectedValue;
             }
-            if (IsNull(this.SNDNUM1.SelectedValue) && !IsNull(this.SNDNUM2.SelectedValue))
+            if (SNDNUM2.SelectedValue != null)
             {
-                this.SNDNUM1.SelectedValue = 0;
-            }
-            if (!IsNull(this.SNDNUM1.SelectedValue) && IsNull(this.SNDNUM2.SelectedValue))
-            {
-                this.SNDNUM2.SelectedValue = 929292929;
+                TA_END = (int)SNDNUM2.SelectedValue;
             }
 
             Process Prc = ProcLoader.Start();
 
             dbms.DoExecuteSQL("DELETE FROM dbo.DEAD_DTL_PRINT");
-            dbms.DoExecuteSQL("INSERT INTO dbo.DEAD_DTL_PRINT (DATE_S, SHARH_S, N_S, HES, TNUMBER, NUMBER, HNAME, N_KOL, BED, BES, SHARH, kk, BASE, RADIF, GR, TNAME, MNAME, KNAME,UNAME) SELECT     DATE_S, SHARH_S, N_S, HES, TNUMBER, NUMBER, HNAME, N_KOL, BED, BES, SHARH, kk, BASE, RADIF, GR, TNAME, MNAME, KNAME,'" + CL_HESABDARI.UCurrentUser() + "' AS Expr1 FROM dbo.DEAD_WITH_GRP WHERE     (N_S BETWEEN " + this.SNDNUM1.SelectedValue + " AND " + this.SNDNUM2.SelectedValue + ")");
-            dbms.DoExecuteSQL("INSERT INTO dbo.DEAD_DTL_PRINT (DATE_S, SHARH_S, N_S, HES, TNUMBER, NUMBER, HNAME, N_KOL, BED, BES, SHARH, kk, BASE, RADIF, GR, TNAME, MNAME, KNAME,UNAME) SELECT     DATE_S, SHARH_S, N_S, HES, TNUMBER, NUMBER, HNAME, N_KOL, BED, BES, SHARH, kk, BASE, RADIF, GR, TNAME, MNAME, KNAME,'" + CL_HESABDARI.UCurrentUser() + "' AS Expr1 FROM dbo.DEAD_WITH_GRP1 WHERE    (N_S BETWEEN " + this.SNDNUM1.SelectedValue + " AND " + this.SNDNUM2.SelectedValue + ")");
+            dbms.DoExecuteSQL("INSERT INTO dbo.DEAD_DTL_PRINT (DATE_S, SHARH_S, N_S, HES, TNUMBER, NUMBER, HNAME, N_KOL, BED, BES, SHARH, kk, BASE, RADIF, GR, TNAME, MNAME, KNAME,UNAME) SELECT     DATE_S, SHARH_S, N_S, HES, TNUMBER, NUMBER, HNAME, N_KOL, BED, BES, SHARH, kk, BASE, RADIF, GR, TNAME, MNAME, KNAME,'" + CL_HESABDARI.UCurrentUser() + "' AS Expr1 FROM dbo.DEAD_WITH_GRP WHERE     (N_S BETWEEN " + AZ_START + " AND " + TA_END + ")");
+            dbms.DoExecuteSQL("INSERT INTO dbo.DEAD_DTL_PRINT (DATE_S, SHARH_S, N_S, HES, TNUMBER, NUMBER, HNAME, N_KOL, BED, BES, SHARH, kk, BASE, RADIF, GR, TNAME, MNAME, KNAME,UNAME) SELECT     DATE_S, SHARH_S, N_S, HES, TNUMBER, NUMBER, HNAME, N_KOL, BED, BES, SHARH, kk, BASE, RADIF, GR, TNAME, MNAME, KNAME,'" + CL_HESABDARI.UCurrentUser() + "' AS Expr1 FROM dbo.DEAD_WITH_GRP1 WHERE    (N_S BETWEEN " + AZ_START + " AND " + TA_END + ")");
 
             #region Report_Opening
-            
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.R_SANAD_PRINT_GRP.mrt");
             report.Load(pathreport);

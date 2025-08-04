@@ -1,12 +1,10 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Prg_Proccessy.FUNCTIONS;
-using Prg_Proccessy.Generaly;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
-using Stimulsoft.Base;
 using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
@@ -31,7 +29,9 @@ using Functions;
 using System.Threading.Tasks;
 using System.Threading;
 using Wins.WinOther;
-using Microsoft.VisualBasic.ApplicationServices;
+using System.ComponentModel;
+using System.Windows.Data;
+using static Functions.DataGridClipboardManager;
 
 namespace Wins.WinSetting
 {
@@ -128,7 +128,7 @@ namespace Wins.WinSetting
 
         public ObservableCollection<OPANBACCESS> OPANBACCESS_DATA { get; set; } = new ObservableCollection<OPANBACCESS>(); //کلید انبار ها
 
-        public ObservableCollection<BLOCK_CUSTOMER> BLOCK_CUSTOMER_DATA { get; set; } = new ObservableCollection<BLOCK_CUSTOMER>(); //کلید انبار ها
+        public ObservableCollection<BLOCK_CUSTOMER> BLOCK_CUSTOMER_DATA { get; set; } = new ObservableCollection<BLOCK_CUSTOMER>();
 
         public ObservableCollection<SALGROUP_MODEL> SALGROUP_DATA { get; set; } = new ObservableCollection<SALGROUP_MODEL>(); // گروه کاربری
 
@@ -420,7 +420,7 @@ namespace Wins.WinSetting
             DEFAULT_SHIFT_COLUMN.ItemsSource = dbms.DoGetDataSQL<SHIFT>("SELECT SHIFT_ID,SHNAME FROM SHIFT ORDER BY SHIFT.SHNAME").ToList();
             DEFAULT_SHIFT_COLUMN.SelectedValuePath = "SHIFT_ID";
             DEFAULT_SHIFT_COLUMN.DisplayMemberPath = "SHNAME";
-       
+
         }
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e)
         {
@@ -1335,6 +1335,7 @@ namespace Wins.WinSetting
         public OPANBACCESS? OPANBACCESS_WAS_ROW_ITEM { get; private set; }
         public bool RIGHT_SIGN_IsFocused { get; private set; }
 
+        public bool OPANBACCESS_IsSaveSuccess { get; set; } = false;
 
         private void OPANBACCESS_SUB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -1370,25 +1371,31 @@ namespace Wins.WinSetting
                 OPANBACCESS_DATA?.Add(item);
             }
         }
-        private bool OPANBACCESS_HeaderIsValid(bool _DisplayErrors = true)
-        {
-            List<MsgModel> ErrosMessages = new List<MsgModel>();
-
-            if (ErrosMessages.Any())
-            {
-                if (_DisplayErrors)
-                {
-                    ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct().Select(message => new MsgModel { MessageText_U = message }).ToList();
-                    new MsgListwin(false, ErrosMessages).ShowDialog();
-                }
-
-                return false;
-            }
-
-            return true;
-        }
         private void OPANBACCESS_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            var isEditing = ((IEditableCollectionView)OPANBACCESS_SUB.Items).IsEditingItem;
+            var isNewEmpty = ((IEditableCollectionView)OPANBACCESS_SUB.Items).IsAddingNew;
+
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.C) //Copy
+            {
+                if (!isEditing && OPANBACCESS_SUB.IsEnabled)
+                {
+                    e.Handled = true;
+
+                    DataGridClipboardManager.CopySelectedItems<OPANBACCESS>(OPANBACCESS_SUB);
+                }
+            }
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.V) //Paste
+            {
+                if (!isEditing && !isNewEmpty && !OPANBACCESS_SUB.IsReadOnly && OPANBACCESS_SUB.IsEnabled)
+                {
+                    e.Handled = true;
+                    IsPastingRows = true;
+                    DataGridClipboardManager.PasteItems<OPANBACCESS>(OPANBACCESS_SUB, ValidateDataGridRow, AddItemToDataSource);
+                    IsPastingRows = false;
+                }
+            }
+
             string CURRENT_COLUMN_NAME = "";
             if (OPANBACCESS_SUB.CurrentCell.Column is not null)
             {
@@ -1417,6 +1424,8 @@ namespace Wins.WinSetting
             // Unsubscribe from event handlers to prevent re-entry during cancellation
             OPANBACCESS_SUB.CellEditEnding -= OPANBACCESS_SUB_CellEditEnding;
             OPANBACCESS_SUB.RowEditEnding -= OPANBACCESS_SUB_RowEditEnding;
+
+            OPANBACCESS_IsSaveSuccess = false;
 
             // Perform the cancellation based on the editing unit type
             switch (editingUnit)
@@ -1557,6 +1566,8 @@ namespace Wins.WinSetting
             int? USERCO = null;
             try
             {
+                OPANBACCESS_IsSaveSuccess = false;
+
                 if (ROW?.USERCO == null) //INSERT
                 {
                     var USERY = UserListBoxAnbar.SelectedItem as SALA_DTL;
@@ -1571,6 +1582,8 @@ namespace Wins.WinSetting
                 {
                     dbms.DoExecuteSQL($@"UPDATE dbo.OPANBACCESS SET USERCO = {ROW?.USERCO}, ANBCO = {ROW?.ANBCO} WHERE USERCO = {ROW?.USERCO} AND ANBCO = {OPANBACCESS_WAS_ROW_ITEM.ANBCO}");
                 }
+
+                OPANBACCESS_IsSaveSuccess = true;
             }
             catch (SqlException ex)
             {
@@ -2027,6 +2040,29 @@ namespace Wins.WinSetting
         }
         private void BLOCKED_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            var isEditing = ((IEditableCollectionView)BLOCKED_SUB.Items).IsEditingItem;
+            var isNewEmpty = ((IEditableCollectionView)BLOCKED_SUB.Items).IsAddingNew;
+
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.C) //Copy
+            {
+                if (!isEditing && BLOCKED_SUB.IsEnabled)
+                {
+                    e.Handled = true;
+
+                    DataGridClipboardManager.CopySelectedItems<BLOCK_HES>(BLOCKED_SUB);
+                }
+            }
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.V) //Paste
+            {
+                if (!isEditing && !isNewEmpty && !BLOCKED_SUB.IsReadOnly && BLOCKED_SUB.IsEnabled)
+                {
+                    e.Handled = true;
+                    IsPastingRows = true;
+                    DataGridClipboardManager.PasteItems<BLOCK_HES>(BLOCKED_SUB, ValidateDataGridRow, AddItemToDataSource);
+                    IsPastingRows = false;
+                }
+            }
+
             string CURRENT_COLUMN_NAME = "";
             if (BLOCKED_SUB.CurrentCell.Column is not null)
             {
@@ -2048,6 +2084,7 @@ namespace Wins.WinSetting
                 }
             }
         }
+        public bool BLOCKED_IsSaveSuccess { get; set; } = false;
         private void BLOCKED_SUB_CANCEL_EDIT(DataGridEditingUnit? editingUnit = null, EventArgs eventArgs = null, bool prevent_rowendedittingfire = true)
         {
             if (eventArgs != null && false) //This lead a serioes problem (new row will gone !)
@@ -2066,6 +2103,7 @@ namespace Wins.WinSetting
             BLOCKED_SUB.CellEditEnding -= BLOCKED_SUB_CellEditEnding;
             BLOCKED_SUB.RowEditEnding -= BLOCKED_SUB_RowEditEnding;
 
+            BLOCKED_IsSaveSuccess = false;
             // Perform the cancellation based on the editing unit type
             switch (editingUnit)
             {
@@ -2190,6 +2228,8 @@ namespace Wins.WinSetting
             int? USERCO = null;
             try
             {
+                BLOCKED_IsSaveSuccess = false;
+
                 var USERY = UserListBoxBlocky.SelectedItem as SALA_DTL;
 
                 if (ROW?.USERCO == null) //INSERT
@@ -2205,6 +2245,8 @@ namespace Wins.WinSetting
                 {
                     dbms.DoExecuteSQL($@"UPDATE dbo.BLOCK_HES SET HES = N'{ROW.HES}' WHERE USERCO = {USERY.IDD} AND HES = N'{BLOCK_HES_WAS_ROW_ITEM.HES}'");
                 }
+
+                BLOCKED_IsSaveSuccess = true;
             }
             catch (SqlException ex)
             {
@@ -2357,6 +2399,29 @@ namespace Wins.WinSetting
         }
         private void UNBLOCKED_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            var isEditing = ((IEditableCollectionView)UNBLOCKED_SUB.Items).IsEditingItem;
+            var isNewEmpty = ((IEditableCollectionView)UNBLOCKED_SUB.Items).IsAddingNew;
+
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.C) //Copy
+            {
+                if (!isEditing && UNBLOCKED_SUB.IsEnabled)
+                {
+                    e.Handled = true;
+
+                    DataGridClipboardManager.CopySelectedItems<BLOCKNON_HES>(UNBLOCKED_SUB);
+                }
+            }
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.V) //Paste
+            {
+                if (!isEditing && !isNewEmpty && !UNBLOCKED_SUB.IsReadOnly && UNBLOCKED_SUB.IsEnabled)
+                {
+                    e.Handled = true;
+                    IsPastingRows = true;
+                    DataGridClipboardManager.PasteItems<BLOCKNON_HES>(UNBLOCKED_SUB, ValidateDataGridRow, AddItemToDataSource);
+                    IsPastingRows = false;
+                }
+            }
+
             string CURRENT_COLUMN_NAME = "";
             if (UNBLOCKED_SUB.CurrentCell.Column is not null)
             {
@@ -2368,6 +2433,7 @@ namespace Wins.WinSetting
                 BTN_DELETE_NONBLOCK_Click(null, null);
             }
         }
+        public bool UNBLOCKED_IsSaveSuccess { get; set; } = false;
         private void UNBLOCKED_SUB_CANCEL_EDIT(DataGridEditingUnit? editingUnit = null, EventArgs eventArgs = null, bool prevent_rowendedittingfire = true)
         {
             if (eventArgs != null && false) //This lead a serioes problem (new row will gone !)
@@ -2386,6 +2452,7 @@ namespace Wins.WinSetting
             UNBLOCKED_SUB.CellEditEnding -= UNBLOCKED_SUB_CellEditEnding;
             UNBLOCKED_SUB.RowEditEnding -= UNBLOCKED_SUB_RowEditEnding;
 
+            UNBLOCKED_IsSaveSuccess = false;
             // Perform the cancellation based on the editing unit type
             switch (editingUnit)
             {
@@ -2527,6 +2594,8 @@ namespace Wins.WinSetting
             int? USERCO = null;
             try
             {
+                UNBLOCKED_IsSaveSuccess = false;
+
                 var USERY = UserListBoxBlocky.SelectedItem as SALA_DTL;
 
                 if (ROW?.USERCO == null) //INSERT
@@ -2541,6 +2610,8 @@ namespace Wins.WinSetting
                 {
                     dbms.DoExecuteSQL($@"UPDATE dbo.BLOCKNON_HES SET HES = N'{ROW.HES}' WHERE USERCO = {USERY.IDD} AND HES = N'{BLOCKNON_HES_WAS_ROW_ITEM.HES}'");
                 }
+
+                UNBLOCKED_IsSaveSuccess = true;
             }
             catch (SqlException ex)
             {
@@ -2810,12 +2881,37 @@ namespace Wins.WinSetting
         }
         private void CHARTSAZMANI_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            var isEditing = ((IEditableCollectionView)CHARTSAZMANI_SUB.Items).IsEditingItem;
+            var isNewEmpty = ((IEditableCollectionView)CHARTSAZMANI_SUB.Items).IsAddingNew;
+
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.C) //Copy
+            {
+                if (!isEditing && CHARTSAZMANI_SUB.IsEnabled)
+                {
+                    e.Handled = true;
+
+                    DataGridClipboardManager.CopySelectedItems<CHARTSAZMANI>(CHARTSAZMANI_SUB);
+                }
+            }
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.V) //Paste
+            {
+                if (!isEditing && !isNewEmpty && !CHARTSAZMANI_SUB.IsReadOnly && CHARTSAZMANI_SUB.IsEnabled)
+                {
+                    e.Handled = true;
+                    IsPastingRows = true;
+                    DataGridClipboardManager.PasteItems<CHARTSAZMANI>(CHARTSAZMANI_SUB, ValidateDataGridRow, AddItemToDataSource);
+                    IsPastingRows = false;
+                }
+            }
+
             if (e.Key == Key.Delete)
             {
                 e.Handled = true;
                 BTN_DELETE_Suby_Click(null, null);
             }
         }
+
+        public bool CHARTSAZMANI_IsSaveSuccess { get; set; } = false;
         private void CHARTSAZMANI_SUB_CANCEL_EDIT(DataGridEditingUnit? editingUnit = null, EventArgs eventArgs = null, bool prevent_rowendedittingfire = true)
         {
             if (eventArgs != null && false) //This lead a serioes problem (new row will gone !)
@@ -2834,6 +2930,7 @@ namespace Wins.WinSetting
             CHARTSAZMANI_SUB.CellEditEnding -= CHARTSAZMANI_SUB_CellEditEnding;
             CHARTSAZMANI_SUB.RowEditEnding -= CHARTSAZMANI_SUB_RowEditEnding;
 
+            CHARTSAZMANI_IsSaveSuccess = false;
             // Perform the cancellation based on the editing unit type
             switch (editingUnit)
             {
@@ -2955,6 +3052,8 @@ namespace Wins.WinSetting
             var USERY = UserListBoxSuby.SelectedItem as SALA_DTL;
             try
             {
+                CHARTSAZMANI_IsSaveSuccess = false;
+
                 if (ROW?.RDF == null) //INSERT
                 {
                     //OUTPUT INSERTED.RDF
@@ -2968,6 +3067,8 @@ namespace Wins.WinSetting
                 {
                     dbms.DoExecuteSQL($@"UPDATE dbo.CHARTSAZMANI SET SUBUSERCO = {ROW.SUBUSERCO} WHERE USERCO = {USERY.IDD} AND RDF = {ROW.RDF}");
                 }
+
+                CHARTSAZMANI_IsSaveSuccess = true;
             }
             catch (SqlException ex)
             {
@@ -3771,6 +3872,8 @@ namespace Wins.WinSetting
             }
         }
 
+        public bool IsPastingRows { get; private set; }
+
         private void USER_ENDN_SUB_CANCEL_EDIT(DataGridEditingUnit? editingUnit = null, EventArgs eventArgs = null, bool prevent_rowendedittingfire = true)
         {
             if (eventArgs != null && false) //This lead a serioes problem (new row will gone !)
@@ -4286,8 +4389,445 @@ namespace Wins.WinSetting
 
 
 
+
         #endregion
 
+        private void BLOCKED_SUB_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            DataGrid dataGrid = sender as DataGrid;
 
+            if (dataGrid == null) return;
+
+            try
+            {
+                // Find the row under the mouse
+                DependencyObject dep = (DependencyObject)e.OriginalSource;
+                while (dep != null && !(dep is DataGridRow))
+                {
+                    dep = VisualTreeHelper.GetParent(dep);
+                }
+
+                DataGridRow row = dep as DataGridRow;
+                if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
+                {
+                    // Select the row under the mouse
+                    dataGrid.SelectedItem = row.Item;
+
+                    // Show the context menu
+                    dataGrid.ContextMenu.IsOpen = true;
+
+                    // Mark the event as handled to prevent the default context menu behavior
+                    e.Handled = true;
+                }
+                else
+                {
+                    // No valid row, don't show context menu
+                    var isEditing = ((IEditableCollectionView)dataGrid.Items).IsEditingItem;
+                    dataGrid.ContextMenu.IsOpen = true;
+                    e.Handled = true;
+                }
+            }
+            catch (Exception)
+            {
+                e.Handled = true;
+            }
+        }
+        private void UNBLOCKED_SUB_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            DataGrid dataGrid = sender as DataGrid;
+
+            if (dataGrid == null) return;
+
+            try
+            {
+                // Find the row under the mouse
+                DependencyObject dep = (DependencyObject)e.OriginalSource;
+                while (dep != null && !(dep is DataGridRow))
+                {
+                    dep = VisualTreeHelper.GetParent(dep);
+                }
+
+                DataGridRow row = dep as DataGridRow;
+                if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
+                {
+                    // Select the row under the mouse
+                    dataGrid.SelectedItem = row.Item;
+
+                    // Show the context menu
+                    dataGrid.ContextMenu.IsOpen = true;
+
+                    // Mark the event as handled to prevent the default context menu behavior
+                    e.Handled = true;
+                }
+                else
+                {
+                    // No valid row, don't show context menu
+                    var isEditing = ((IEditableCollectionView)dataGrid.Items).IsEditingItem;
+                    dataGrid.ContextMenu.IsOpen = true;
+                    e.Handled = true;
+                }
+            }
+            catch (Exception)
+            {
+                e.Handled = true;
+            }
+        }
+        private void CHARTSAZMANI_SUB_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            DataGrid dataGrid = sender as DataGrid;
+
+            if (dataGrid == null) return;
+
+            try
+            {
+                // Find the row under the mouse
+                DependencyObject dep = (DependencyObject)e.OriginalSource;
+                while (dep != null && !(dep is DataGridRow))
+                {
+                    dep = VisualTreeHelper.GetParent(dep);
+                }
+
+                DataGridRow row = dep as DataGridRow;
+                if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
+                {
+                    // Select the row under the mouse
+                    dataGrid.SelectedItem = row.Item;
+
+                    // Show the context menu
+                    dataGrid.ContextMenu.IsOpen = true;
+
+                    // Mark the event as handled to prevent the default context menu behavior
+                    e.Handled = true;
+                }
+                else
+                {
+                    // No valid row, don't show context menu
+                    var isEditing = ((IEditableCollectionView)dataGrid.Items).IsEditingItem;
+                    dataGrid.ContextMenu.IsOpen = true;
+                    e.Handled = true;
+                }
+            }
+            catch (Exception)
+            {
+                e.Handled = true;
+            }
+        }
+
+        //کلید انبار
+        private void OPANBACCESS_SUB_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+
+        }
+        private void OPANBACCESS_SUB_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            DataGrid dataGrid = sender as DataGrid;
+
+            if (dataGrid == null) return;
+
+            try
+            {
+                // Find the row under the mouse
+                DependencyObject dep = (DependencyObject)e.OriginalSource;
+                while (dep != null && !(dep is DataGridRow))
+                {
+                    dep = VisualTreeHelper.GetParent(dep);
+                }
+
+                DataGridRow row = dep as DataGridRow;
+                if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
+                {
+                    // Select the row under the mouse
+                    dataGrid.SelectedItem = row.Item;
+
+                    // Show the context menu
+                    dataGrid.ContextMenu.IsOpen = true;
+
+                    // Mark the event as handled to prevent the default context menu behavior
+                    e.Handled = true;
+                }
+                else
+                {
+                    // No valid row, don't show context menu
+                    var isEditing = ((IEditableCollectionView)dataGrid.Items).IsEditingItem;
+                    dataGrid.ContextMenu.IsOpen = true;
+                    e.Handled = true;
+                }
+            }
+            catch (Exception)
+            {
+                e.Handled = true;
+            }
+        }
+
+        private async void EXPORTEXCEL_BTN(object sender, RoutedEventArgs e)
+        {
+            DataGrid? DG_SUB = null;
+
+            if (OPANBACCESS_SUB.IsKeyboardFocusWithin) //کلید انبار
+            {
+                DG_SUB = OPANBACCESS_SUB;
+                if (OPANBACCESS_SUB.Items.Count == 0)
+                {
+                    return;
+                }
+            }
+            else if (BLOCKED_SUB.IsKeyboardFocusWithin) //مسدودی حساب
+            {
+                DG_SUB = BLOCKED_SUB;
+                if (BLOCKED_SUB.Items.Count == 0)
+                {
+                    return;
+                }
+            }
+            else if (UNBLOCKED_SUB.IsKeyboardFocusWithin) //مجاز بودن حساب
+            {
+                DG_SUB = UNBLOCKED_SUB;
+                if (UNBLOCKED_SUB.Items.Count == 0)
+                {
+                    return;
+                }
+            }
+            else if (CHARTSAZMANI_SUB.IsKeyboardFocusWithin) //زیر مجموعه
+            {
+                DG_SUB = CHARTSAZMANI_SUB;
+                if (CHARTSAZMANI_SUB.Items.Count == 0)
+                {
+                    return;
+                }
+            }
+
+
+            if (DG_SUB == null) { return; }
+            try
+            {
+                await UniversalExcelExporter.ExportToExcelAsync(DG_SUB, "DGExportedExcel");
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
+            }
+        }
+
+        private void COPY_CLICK(object sender, RoutedEventArgs e)
+        {
+            DataGrid? DG_SUB = null;
+            if (OPANBACCESS_SUB.IsKeyboardFocusWithin) //کلید انبار
+            {
+                DG_SUB = OPANBACCESS_SUB;
+            }
+            else if (BLOCKED_SUB.IsKeyboardFocusWithin) //مسدودی حساب
+            {
+                DG_SUB = BLOCKED_SUB;
+            }
+            else if (UNBLOCKED_SUB.IsKeyboardFocusWithin) //مجاز بودن حساب
+            {
+                DG_SUB = UNBLOCKED_SUB;
+            }
+            else if (CHARTSAZMANI_SUB.IsKeyboardFocusWithin) //زیر مجموعه
+            {
+                DG_SUB = CHARTSAZMANI_SUB;
+            }
+
+            var isEditing = ((IEditableCollectionView)DG_SUB.Items).IsEditingItem;
+
+            if (!isEditing)
+            {
+                e.Handled = true;
+                if (OPANBACCESS_SUB.IsKeyboardFocusWithin) //کلید انبار
+                {
+                    DataGridClipboardManager.CopySelectedItems<OPANBACCESS>(DG_SUB);
+                }
+                else if (BLOCKED_SUB.IsKeyboardFocusWithin) //مسدودی حساب
+                {
+                    DataGridClipboardManager.CopySelectedItems<BLOCK_HES>(DG_SUB);
+                }
+                else if (UNBLOCKED_SUB.IsKeyboardFocusWithin) //مجاز بودن حساب
+                {
+                    DataGridClipboardManager.CopySelectedItems<BLOCKNON_HES>(DG_SUB);
+                }
+                else if (CHARTSAZMANI_SUB.IsKeyboardFocusWithin) //زیر مجموعه
+                {
+                    DataGridClipboardManager.CopySelectedItems<CHARTSAZMANI>(DG_SUB);
+                }
+            }
+            else
+            {
+                var editingElement = CL_LMethods.FindChild<TextBox>(DG_SUB);
+                if (editingElement != null)
+                {
+                    if (!string.IsNullOrEmpty(editingElement.SelectedText))
+                    {
+                        Clipboard.SetText(editingElement.SelectedText);
+                    }
+                }
+            }
+        }
+        private void PASTE_CLICK(object sender, RoutedEventArgs e)
+        {
+            DataGrid? DG_SUB = null;
+            if (OPANBACCESS_SUB.IsKeyboardFocusWithin) //کلید انبار
+            {
+                DG_SUB = OPANBACCESS_SUB;
+            }
+            else if (BLOCKED_SUB.IsKeyboardFocusWithin) //مسدودی حساب
+            {
+                DG_SUB = BLOCKED_SUB;
+            }
+            else if (UNBLOCKED_SUB.IsKeyboardFocusWithin) //مجاز بودن حساب
+            {
+                DG_SUB = UNBLOCKED_SUB;
+            }
+            else if (CHARTSAZMANI_SUB.IsKeyboardFocusWithin) //زیر مجموعه
+            {
+                DG_SUB = CHARTSAZMANI_SUB;
+            }
+
+            if (DG_SUB.SelectedItem != null || DG_SUB.SelectedItems.Count > 0)
+            {
+                var isEditing = ((IEditableCollectionView)DG_SUB.Items).IsEditingItem;
+                if (!isEditing && !DG_SUB.IsReadOnly && DG_SUB.IsEnabled)
+                {
+                    e.Handled = true;
+
+                    IsPastingRows = true;
+
+                    if (OPANBACCESS_SUB.IsKeyboardFocusWithin) //کلید انبار
+                    {
+                        DataGridClipboardManager.PasteItems<OPANBACCESS>(DG_SUB, ValidateDataGridRow, AddItemToDataSource);
+                    }
+                    else if (BLOCKED_SUB.IsKeyboardFocusWithin) //مسدودی حساب
+                    {
+                        DataGridClipboardManager.PasteItems<BLOCK_HES>(DG_SUB, ValidateDataGridRow, AddItemToDataSource);
+                    }
+                    else if (UNBLOCKED_SUB.IsKeyboardFocusWithin) //مجاز بودن حساب
+                    {
+                        DataGridClipboardManager.PasteItems<BLOCKNON_HES>(DG_SUB, ValidateDataGridRow, AddItemToDataSource);
+                    }
+                    else if (CHARTSAZMANI_SUB.IsKeyboardFocusWithin) //زیر مجموعه
+                    {
+                        DataGridClipboardManager.PasteItems<CHARTSAZMANI>(DG_SUB, ValidateDataGridRow, AddItemToDataSource);
+                    }
+
+                    IsPastingRows = false;
+
+                    DG_SUB.CommitEdit();
+                }
+                else
+                {
+                    //System.Windows.Forms.SendKeys.SendWait("^v");
+                    if (ApplicationCommands.Paste.CanExecute(null, Keyboard.FocusedElement as IInputElement))
+                    {
+                        ApplicationCommands.Paste.Execute(null, Keyboard.FocusedElement as IInputElement);
+                    }
+                }
+            }
+            else
+            {
+                universControl.PopNotifyShowUp("عمل انتقال کپی را باید با راست کلیک روی یک سطر خالی انجام بدید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
+            }
+        }
+
+        private void ValidateDataGridRow(DataGridRowEditEndingEventArgs args, PasteValidationResult validationResult)
+        {
+            validationResult.IsRowValid = true; // Default to true
+
+            if (args.Row.Item is OPANBACCESS item) //کلید انبار
+            {
+                item.RDF = null; //Reset id to be sure the new data will insert not update the same row existing before
+                item.UID = null;
+                item.USERCO = null;
+                if (BodyIsValid(item))
+                {
+                    OPANBACCESS_SUB_RowEditEnding(OPANBACCESS_SUB, args);
+                    validationResult.IsRowValid = OPANBACCESS_IsSaveSuccess;
+                }
+                else
+                {
+                    args.Cancel = true;
+                    validationResult.IsRowValid = false;
+                }
+            }
+            else if (args.Row.Item is BLOCK_HES BLC) //مسدودی حساب
+            {
+                BLC.UID = null;
+                BLC.USERCO = null;
+                if (BlockyBodyIsValid(BLC))
+                {
+                    BLOCKED_SUB_RowEditEnding(BLOCKED_SUB, args);
+                    validationResult.IsRowValid = BLOCKED_IsSaveSuccess;
+                }
+                else
+                {
+                    args.Cancel = true;
+                    validationResult.IsRowValid = false;
+                }
+            }
+            else if (args.Row.Item is BLOCKNON_HES NONBLC) //مجاز بودن حساب
+            {
+                NONBLC.UID = null;
+                NONBLC.USERCO = null;
+                if (UNBLOCKED_BodyIsValid(NONBLC))
+                {
+                    UNBLOCKED_SUB_RowEditEnding(UNBLOCKED_SUB, args);
+                    validationResult.IsRowValid = UNBLOCKED_IsSaveSuccess;
+                }
+                else
+                {
+                    args.Cancel = true;
+                    validationResult.IsRowValid = false;
+                }
+            }
+            else if (args.Row.Item is CHARTSAZMANI CHARTITEM) //زیر مجموعه
+            {
+                CHARTITEM.RDF = null;
+                CHARTITEM.UID = null;
+                if (CHARTSAZMANI_BodyIsValid(CHARTITEM))
+                {
+                    CHARTSAZMANI_SUB_RowEditEnding(CHARTSAZMANI_SUB, args);
+                    validationResult.IsRowValid = CHARTSAZMANI_IsSaveSuccess;
+                }
+                else
+                {
+                    args.Cancel = true;
+                    validationResult.IsRowValid = false;
+                }
+            }
+            else
+            {
+                args.Cancel = true;
+                validationResult.IsRowValid = false;
+            }
+        }
+        private void AddItemToDataSource(object inputitem)
+        {
+            if (inputitem is OPANBACCESS item) //کلید انبار
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    OPANBACCESS_DATA.Add(item);
+                });
+            }
+            else if (inputitem is BLOCK_HES item1) //مسدودی حساب
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    BLOCK_HES_DATA.Add(item1);
+                });
+            }
+            else if (inputitem is BLOCKNON_HES item2) //مجاز بودن حساب
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    BLOCKNON_HES_DATA.Add(item2);
+                });
+            }
+            else if (inputitem is CHARTSAZMANI item3) //زیر مجموعه کاربران
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    CHARTSAZMANI_DATA.Add(item3);
+                });
+            }
+        }
     }
 }

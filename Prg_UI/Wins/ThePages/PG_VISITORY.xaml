@@ -188,7 +188,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_12" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitWayForCustomers.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -197,7 +197,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_11" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/DailyVistForVisitor.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -266,7 +266,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_10" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/HandList.png" CacheOption="OnLoad"/>
                             </Image.Source>
