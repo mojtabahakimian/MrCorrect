@@ -138,7 +138,30 @@
                         </Style>
                     </syncfusion:GridTemplateColumn.CellStyle>
                 </syncfusion:GridTemplateColumn>
-
+                <syncfusion:GridTemplateColumn IsReadOnly="True" AllowResizing="False" Width="60">
+                    <syncfusion:GridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button 
+                                IsTabStop="False"
+                                Click="Button_Click_1"
+                                Tag="{Binding}"
+                                materialDesign:ButtonAssist.CornerRadius="1"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                VerticalContentAlignment="Center"
+                                HorizontalContentAlignment="Center">
+                                <materialDesign:PackIcon Kind="InvoiceListOutline"/>
+                            </Button>
+                        </DataTemplate>
+                    </syncfusion:GridTemplateColumn.CellTemplate>
+                    <syncfusion:GridTemplateColumn.CellStyle>
+                        <Style TargetType="sfusion:GridCell">
+                            <Setter Property="IsTabStop" Value="False"/>
+                            <Setter Property="Focusable" Value="False"/>
+                        </Style>
+                    </syncfusion:GridTemplateColumn.CellStyle>
+                </syncfusion:GridTemplateColumn>
                 <syncfusion:GridTextColumn HeaderText="کد کل" MappingName="HES_K" Width="100"/>
                 <syncfusion:GridTextColumn HeaderText="کد معین" MappingName="HES_M" Width="110" />
                 <syncfusion:GridTextColumn HeaderText="کد تفضیلی" MappingName="HES_T" Width="120"/>

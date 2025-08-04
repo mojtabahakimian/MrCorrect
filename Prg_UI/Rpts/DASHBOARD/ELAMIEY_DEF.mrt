@@ -492,10 +492,20 @@ WHERE (dbo.PRICE_ELAMIE.PEPID = @NUMBER_PARAM);</SqlCommand>
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
               <Text>{DataSource1.PRICE1}</Text>
               <TextBrush>Black</TextBrush>
+              <TextFormat Ref="33" type="CurrencyFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <DecimalSeparator>/</DecimalSeparator>
+                <GroupSeparator>,</GroupSeparator>
+                <NegativePattern>6</NegativePattern>
+                <PositivePattern>1</PositivePattern>
+                <Symbol>ريال</Symbol>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Table1_Cell5>
-            <Table1_Cell6 Ref="33" type="TableCell" isKey="true">
+            <Table1_Cell6 Ref="34" type="TableCell" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>White</Brush>
               <ClientRectangle>6.4,0.8,3.2,0.8</ClientRectangle>
@@ -516,7 +526,7 @@ WHERE (dbo.PRICE_ELAMIE.PEPID = @NUMBER_PARAM);</SqlCommand>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Table1_Cell6>
-            <Table1_Cell7 Ref="34" type="TableCell" isKey="true">
+            <Table1_Cell7 Ref="35" type="TableCell" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>White</Brush>
               <CanBreak>True</CanBreak>
@@ -540,7 +550,7 @@ WHERE (dbo.PRICE_ELAMIE.PEPID = @NUMBER_PARAM);</SqlCommand>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Table1_Cell7>
-            <Table1_Cell8 Ref="35" type="TableCell" isKey="true">
+            <Table1_Cell8 Ref="36" type="TableCell" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
               <Brush>White</Brush>
               <ClientRectangle>17.8,0.8,1.2,0.8</ClientRectangle>
@@ -575,11 +585,11 @@ WHERE (dbo.PRICE_ELAMIE.PEPID = @NUMBER_PARAM);</SqlCommand>
           <RowCount>2</RowCount>
           <Sort isList="true" count="0" />
         </Table1>
-        <FooterBand1 Ref="36" type="FooterBand" isKey="true">
+        <FooterBand1 Ref="37" type="FooterBand" isKey="true">
           <Brush>Transparent</Brush>
           <ClientRectangle>0,6.4,19,1.2</ClientRectangle>
           <Components isList="true" count="4">
-            <Text44 Ref="37" type="Text" isKey="true">
+            <Text44 Ref="38" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>5.8,0.6,0.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -588,13 +598,13 @@ WHERE (dbo.PRICE_ELAMIE.PEPID = @NUMBER_PARAM);</SqlCommand>
               <Margins>0,0,0,0</Margins>
               <Name>Text44</Name>
               <Page isRef="4" />
-              <Parent isRef="36" />
+              <Parent isRef="37" />
               <Text>کاربر:</Text>
               <TextBrush>[192:0:0]</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </Text44>
-            <Text45 Ref="38" type="Text" isKey="true">
+            <Text45 Ref="39" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>1.2,0.6,1,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -603,13 +613,13 @@ WHERE (dbo.PRICE_ELAMIE.PEPID = @NUMBER_PARAM);</SqlCommand>
               <Margins>0,0,0,0</Margins>
               <Name>Text45</Name>
               <Page isRef="4" />
-              <Parent isRef="36" />
+              <Parent isRef="37" />
               <Text>ساعت:</Text>
               <TextBrush>[192:0:0]</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </Text45>
-            <Text206 Ref="39" type="Text" isKey="true">
+            <Text206 Ref="40" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0,0.6,1.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -618,13 +628,13 @@ WHERE (dbo.PRICE_ELAMIE.PEPID = @NUMBER_PARAM);</SqlCommand>
               <Margins>0,0,0,0</Margins>
               <Name>Text206</Name>
               <Page isRef="4" />
-              <Parent isRef="36" />
+              <Parent isRef="37" />
               <Text>{Time.ToString("HH:mm")}</Text>
               <TextBrush>[0:0:0]</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </Text206>
-            <USERNAME Ref="40" type="Text" isKey="true">
+            <USERNAME Ref="41" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>2.2,0.6,3.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -633,7 +643,7 @@ WHERE (dbo.PRICE_ELAMIE.PEPID = @NUMBER_PARAM);</SqlCommand>
               <Margins>0,0,0,0</Margins>
               <Name>USERNAME</Name>
               <Page isRef="4" />
-              <Parent isRef="36" />
+              <Parent isRef="37" />
               <TextBrush>[0:0:0]</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
@@ -667,10 +677,10 @@ WHERE (dbo.PRICE_ELAMIE.PEPID = @NUMBER_PARAM);</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>7/31/2025 2:55:31 PM</ReportChanged>
+  <ReportChanged>8/4/2025 8:43:11 PM</ReportChanged>
   <ReportCreated>1/29/2024 9:06:45 AM</ReportCreated>
-  <ReportFile>C:\Users\Administrator\Desktop\GRADE_REP.mrt</ReportFile>
-  <ReportGuid>e3630cdac25647909fc5aa897c99efb6</ReportGuid>
+  <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\DASHBOARD\ELAMIEY_DEF.mrt</ReportFile>
+  <ReportGuid>91c0f47b56cc4473ab776894d15c845c</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

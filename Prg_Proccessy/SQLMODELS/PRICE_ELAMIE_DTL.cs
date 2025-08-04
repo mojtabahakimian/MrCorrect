@@ -9,6 +9,11 @@ namespace Prg_Proccessy.SQLMODELS
         private void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
+        public PRICE_ELAMIE_DTL()
+        {
+            PRICE1 = 0;
+        }
+
         // فیلدهای اصلی جدول
         private int _perid;
         public int PERID

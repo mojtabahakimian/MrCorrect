@@ -5,6 +5,7 @@ using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.UiTools;
+using Prg_UI.Wins.WinMenus.HESABDARI;
 using Syncfusion.Data.Extensions;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
@@ -271,7 +272,16 @@ namespace Wins.WinMenus.HESABDARI
                 }
             }
         }
-
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button { Tag: Q_BEDEHBESTANH_MAIN row })
+            {
+                if (row != null && row?.HES != null)
+                {
+                    new F_MENU_KOL_MOIN_TAFZIL(row?.HES.ToString());
+                }
+            }
+        }
     }
 
 }

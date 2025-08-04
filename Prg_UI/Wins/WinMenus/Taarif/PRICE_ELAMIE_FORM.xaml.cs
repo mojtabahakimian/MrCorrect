@@ -39,6 +39,7 @@ using static Syncfusion.XlsIO.Parser.Biff_Records.Charts.ChartAlrunsRecord;
 using DocumentFormat.OpenXml.Drawing;
 using Microsoft.VisualBasic;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
+using Syncfusion.CompoundFile.XlsIO.Native;
 
 namespace Prg_UI.Wins.WinMenus.Taarif
 {
@@ -425,6 +426,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 NewRecord = false; //Currrent Record is not new
                 Command106.IsEnabled = true;
 
+                PEPID.Text = HEADER_FAC.PEPID.ToString();
                 PEPNAME.Text = HEADER_FAC?.PEPNAME; //نام عنوان
                 PEPDATE.Text = HEADER_FAC?.PEPDATE?.ToString(); //تاریخ از اعمال
                 PEPDEPART.SelectedValue = HEADER_FAC?.PEPDEPART; //دپارتمان(واحد)
@@ -615,6 +617,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             NewRecord = true;
 
             PEPID.Text = null;
+            PEPNAME.Text = null;
             USERNAME.Text = Baseknow.UUSER;
             PEPDATE.Text = Tarikh.FullCurrentDate;
             PEPDEPART.SelectionChanged -= PEPDEPART_SelectionChanged;
@@ -730,7 +733,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             }
 
             List<MsgModel> ErrosMessages = new List<MsgModel>();
-            if (TheRow?.PGID == null)
+            if (TheRow?.PGID == null || TheRow?.PGID < 0)
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "گروهی قیمتی نیمتواند خالی باشد" });
             }
@@ -787,7 +790,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             {
                 if (ex.Number == 2627)
                 {
-                    new Msgwin(false, $"این مسیر قبلا تعریف شده نمیتوان مسیر تکراری تعریف کرد").Show();
+                    new Msgwin(false, $"این عنوان قبلا تعریف شده نمیتوان عنوان تکراری تعریف کرد").Show();
                 }
                 else
                 {
@@ -818,6 +821,14 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         private void ESLAH_Click(object sender, RoutedEventArgs e)
         {
             if (!ESLAH.IsEnabled) { return; }
+
+            if ((SGN1.IsChecked ?? false) || (SGN2.IsChecked ?? false) || (SGN3.IsChecked ?? false))
+            {
+                if (!(sender is null))
+                {
+                    Msgwin msgwin = new Msgwin(false, "اول امضا را بردارید ..."); msgwin.ShowDialog(); return;
+                }
+            }
 
             if (!NewRecord && !string.IsNullOrEmpty(PEPID.Text))
             {
@@ -894,6 +905,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
                         if (CL_LMethods.IsNewPlaceHolder(DG_SUB, item))
                         {
+                            PRICE_ELAMIE_DTL_DATA.Remove((PRICE_ELAMIE_DTL)item);
                             continue; // Skip deletion for new placeholder items
                         }
 
@@ -1038,7 +1050,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         {
             if (!NewRecord)
             {
-                var QRE_LST = dbms.DoGetDataSQL<PRICE_ELAMIE_DTL>(@$"SELECT * FROM dbo.PRICE_ELAMIE_DTL WHERE PEPID = @PEPID", new { PEPID = PEPID.Text }).ToList();
+                var QRE_LST = dbms.DoGetDataSQL<PRICE_ELAMIE_DTL>(@$"SELECT * FROM dbo.PRICE_ELAMIE_DTL WHERE PEPID = @PEPID ORDER BY CRT", new { PEPID = PEPID.Text }).ToList();
 
                 PRICE_ELAMIE_DTL_DATA?.Clear();
                 foreach (var item in QRE_LST)
@@ -1058,7 +1070,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             ((StiSqlDatabase)(report.Dictionary.Databases["MS SQL"])).ConnectionString = CL_CCNNMANAGER.CONNECTION_STR;
 
             report["NUMBER_PARAM"] = PEPID.Text;
-
+            (report.GetComponentByName("USERNAME") as StiText).Text = Baseknow.UUSER;
             new WINRPT(report, "اعلامیه قیمت").Show();
         }
 
@@ -1204,11 +1216,12 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             }
 
             ROW.PEPID = Convert.ToInt32(PEPID.Text); //PeP
+            ROW.USERNAME = Baseknow.UUSER; //PeP
 
             int? idd = null;
             try
             {
-                if (ROW?.PERID is null) //INSERT
+                if (ROW?.PERID is null || ROW?.PERID == 0) //INSERT
                 {
                     // بررسی وجود رکورد با کلید جدید
                     var duplicatePGID = dbms.DoGetDataSQL<PRICE_ELAMIE_DTL>(
@@ -1250,7 +1263,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                     if (duplicateExistsInMemory)
                     {
                         DG_SUB_CANCEL_EDIT();
-                        universControl.PopNotifyShow("این گروه قیمتی قبلاً برای این مسیر ثبت شده است", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                        universControl.PopNotifyShow("این گروه قیمتی قبلاً اضافه شده است", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                         return;
                     }
 
@@ -1262,8 +1275,6 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                         PGID = ROW.PGID,
                         PRICE1 = ROW.PRICE1,
                         USERNAME = ROW.USERNAME,
-                        TR_DATE = DateTime.Now,
-                        UID = Baseknow.USERCOD
                     };
 
                     string updateSql = @"

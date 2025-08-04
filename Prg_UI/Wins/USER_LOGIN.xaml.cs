@@ -17,6 +17,7 @@ using Prg_UI.Wins.WinMenus.HESABDARI;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
+using Prg_UI.Wins.WinMenus.Taarif;
 using Prg_UI.Wins.WinMenus.WinAutomasion;
 using Prg_UI.Wins.WinMenus.WinDEFAULT;
 using Prg_UI.Wins.WinSetting;
@@ -32,6 +33,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Wins.WinMenus.ANBAR;
 using Wins.WinMenus.HESABDARI;
+using Wins.WinMenus.HESABDARI.GOZARESHAT;
 using Wins.WinMenus.KHARID_FORUSH;
 using Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
 using Wins.WinMenus.Taarif;
@@ -322,10 +324,10 @@ namespace Prg_UI.Wins
             CL_Generaly.VAHED_OF_USER = 1; //1 WAS
             Baseknow.UGRP = "1";
 
-            //new WinConnectionChoose().Show();
+            new F_MENU_ASNAD_PRINT().Show();
 
-            //new WinBase().Show();
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN_LIMITED, this);
+            //new PRICE_ELAMIE_FORM().Show();
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
 
             //new WinConnectionChoose().ShowDialog();
