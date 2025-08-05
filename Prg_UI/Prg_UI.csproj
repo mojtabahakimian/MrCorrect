@@ -131,6 +131,7 @@
 		<None Remove="Rpts\SALARY\MORAKHASI.mrt" />
 		<None Remove="Rpts\SANAD_Reports\R_SANAD_PRINT.mrt" />
 		<None Remove="Rpts\SANAD_Reports\R_SANAD_PRINT_B.mrt" />
+		<None Remove="Rpts\SANATI\HAVALE_EXIT_SAYER.mrt" />
 		<None Remove="Rpts\SANATI\HAVLAH_ENTER.mrt" />
 		<None Remove="Rpts\SANATI\HAVLAH_EXIT.mrt" />
 		<None Remove="Rpts\SETPERMIS\userobjectpermision.mrt" />
@@ -530,6 +531,7 @@
 		<EmbeddedResource Include="Rpts\SALARY\MORAKHASI.mrt" />
 		<EmbeddedResource Include="Rpts\SANAD_Reports\R_SANAD_PRINT.mrt" />
 		<EmbeddedResource Include="Rpts\SANAD_Reports\R_SANAD_PRINT_B.mrt" />
+		<EmbeddedResource Include="Rpts\SANATI\HAVALE_EXIT_SAYER.mrt" />
 		<EmbeddedResource Include="Rpts\SANATI\HAVLAH_ENTER.mrt" />
 		<EmbeddedResource Include="Rpts\SANATI\HAVLAH_EXIT.mrt" />
 		<EmbeddedResource Include="Rpts\SETPERMIS\userobjectpermision.mrt" />

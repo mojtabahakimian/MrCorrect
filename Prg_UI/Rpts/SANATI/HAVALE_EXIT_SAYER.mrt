@@ -1,0 +1,997 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<StiSerializer version="1.02" type="Net" application="StiReport">
+  <Dictionary Ref="1" type="Dictionary" isKey="true">
+    <BusinessObjects isList="true" count="0" />
+    <Databases isList="true" count="1">
+      <MS_x0020_SQL Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
+        <Alias>MS SQL</Alias>
+        <ConnectionStringEncrypted>9Fz3oe9K88hFYYSB5Byof9Fukc1WX3ukRVu5CGNxL2Lf2LVIxgPD+X999dxpTOFn9MTZCc1Rw4FpTaEYTRjhXulU94rFUaPIa0S5zGdY616AWg==</ConnectionStringEncrypted>
+        <Key>c5116a4778954801998c27bf0af47929</Key>
+        <Name>MS SQL</Name>
+      </MS_x0020_SQL>
+    </Databases>
+    <DataSources isList="true" count="1">
+      <DataSource1 Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
+        <Alias>DataSource1</Alias>
+        <Columns isList="true" count="60">
+          <value>ORIGINAL,NUMBER,NUMBER,NUMBER,System.Double,_x0034_503d77188af46219c1050e09b2f9ae4</value>
+          <value>ORIGINAL,TAG,TAG,TAG,System.Double,_x0034_b30887dd0994f3a842a59943acfdfe4</value>
+          <value>ORIGINAL,DATE_N,DATE_N,DATE_N,System.Int64,f999a7e5eb2641d4bf4ee7d8ac8d0f71</value>
+          <value>ORIGINAL,CUST_NO,CUST_NO,CUST_NO,System.String,_x0037_54cae11ecfc4686975c97ca3ac59204</value>
+          <value>ORIGINAL,NUMBER1,NUMBER1,NUMBER1,System.Double,c468cd24796447daa2a338d762f31a12</value>
+          <value>ORIGINAL,ANBAR,ANBAR,ANBAR,System.Int32,_x0034_81238e595b34dd082d8d0261f41bc24</value>
+          <value>ORIGINAL,TAH,TAH,TAH,System.String,_x0034_c711b880ed744c1a5697852c3441827</value>
+          <value>ORIGINAL,MAS,MAS,MAS,System.Double,c3b34226087b430199f0af7155ab8b48</value>
+          <value>ORIGINAL,VAS,VAS,VAS,System.Double,bdd6428bff504ff1b3e279fc5664afe8</value>
+          <value>ORIGINAL,N_S,N_S,N_S,System.Double,_x0030_26e845eae1646ffb9467ba55862ccab</value>
+          <value>ORIGINAL,MOLAH,MOLAH,MOLAH,System.String,_x0035_80d2b3b98b7408bbc3f3a0a7e4df848</value>
+          <value>ORIGINAL,M_NAGHD,M_NAGHD,M_NAGHD,System.Double,bfab14bf1d3a4268b1ca3111c5180c18</value>
+          <value>ORIGINAL,MABL_VAR,MABL_VAR,MABL_VAR,System.Double,_x0034_5df43f18eb148ed996334cb7e034e2e</value>
+          <value>ORIGINAL,MOIN_VAR,MOIN_VAR,MOIN_VAR,System.String,a663faf5463d4916b2f5542b917e7e79</value>
+          <value>ORIGINAL,MABL_HAV,MABL_HAV,MABL_HAV,System.Double,_x0031_67ae9d4aa1f42f3a8e4f74ee649e909</value>
+          <value>ORIGINAL,MOIN_HAV,MOIN_HAV,MOIN_HAV,System.String,fe52f099d14c428cb70b27651b9cde1d</value>
+          <value>ORIGINAL,MABL_HAZ,MABL_HAZ,MABL_HAZ,System.Double,a7ea1d0294964cab8659c9d3eae6177f</value>
+          <value>ORIGINAL,MOIN_HAZ,MOIN_HAZ,MOIN_HAZ,System.String,_x0036_f31e04ed7614dd7b070b2e7982540d3</value>
+          <value>ORIGINAL,TAKHFIF,TAKHFIF,TAKHFIF,System.Double,_x0036_2069656adf143aca415abd1a90cfe8d</value>
+          <value>ORIGINAL,MOIN_KHF,MOIN_KHF,MOIN_KHF,System.String,ded60e2536d148338d20a973519dd083</value>
+          <value>ORIGINAL,ANBARF,ANBARF,ANBARF,System.Int32,_x0036_3a79ee6b0e6436da7cd80f40265ed92</value>
+          <value>ORIGINAL,FNUMCO,FNUMCO,FNUMCO,System.Double,_x0032_24fbc466a704db0a4c4696313fb2cea</value>
+          <value>ORIGINAL,INUMBER,INUMBER,INUMBER,System.Double,_x0038_f9ada065008451e9bada228499e92fc</value>
+          <value>ORIGINAL,ITAG,ITAG,ITAG,System.Double,f4f7abd83fb0431e8bc74a743d3b3e67</value>
+          <value>ORIGINAL,IANBAR,IANBAR,IANBAR,System.Int32,_x0038_0131819ce0d460787a4faaa0aeeebf3</value>
+          <value>ORIGINAL,RADIF,RADIF,RADIF,System.Double,fda133eb804d42e899ec58c94f598389</value>
+          <value>ORIGINAL,CODE,CODE,CODE,System.String,_x0030_957dcb0391f44b4b7eef7d91997e28e</value>
+          <value>ORIGINAL,MEGH,MEGH,MEGH,System.Double,_x0030_331d2fe72574c54a1a9a12e8a4969a1</value>
+          <value>ORIGINAL,MEGHk,MEGHk,MEGHk,System.Double,_x0034_3b88ac1d7b0438d970cd9d43b804f01</value>
+          <value>ORIGINAL,MEGH_MAR,MEGH_MAR,MEGH_MAR,System.Double,_x0033_15539c0cc1245bda64f1b015ee88944</value>
+          <value>ORIGINAL,MANDAH,MANDAH,MANDAH,System.String,_x0030_4eb5c1d20254d149deb0cf65f103d3d</value>
+          <value>ORIGINAL,MABL,MABL,MABL,System.Double,fc15b66a2ab747849b6b3087a1554cbc</value>
+          <value>ORIGINAL,MABL_K,MABL_K,MABL_K,System.Double,f1fe7c3b944c4430a922ae248249e0fd</value>
+          <value>ORIGINAL,FROM_A,FROM_A,FROM_A,System.Boolean,b1324ae3148b414d973267e93834ab3f</value>
+          <value>ORIGINAL,N_RASID,N_RASID,N_RASID,System.String,_x0035_2f8e44f44f34293a5a4e2fa83d50819</value>
+          <value>ORIGINAL,MEGH_R,MEGH_R,MEGH_R,System.Double,_x0034_d4adc4298d64796a305035bacfdfc2d</value>
+          <value>ORIGINAL,RADAH,RADAH,RADAH,System.Double,_x0039_8d4d4a5e95a4ab899052a2d348136eb</value>
+          <value>ORIGINAL,SANAD_NO,SANAD_NO,SANAD_NO,System.Double,_x0034_a09373fbc8d456fb61277c523c9422f</value>
+          <value>ORIGINAL,ICUST_NO,ICUST_NO,ICUST_NO,System.Double,_x0039_0af2ca3d6a9475c8e0083bfaa25cb84</value>
+          <value>ORIGINAL,IANBARF,IANBARF,IANBARF,System.Double,_x0030_7e3b649824044688ae776d5ba0598ad</value>
+          <value>ORIGINAL,VAHED_K,VAHED_K,VAHED_K,System.Int32,da5af9d574dc4640bf9aca061115dd3f</value>
+          <value>ORIGINAL,hes,hes,hes,System.String,ac2476a02e1a4ac4b0b87fdc266c6084</value>
+          <value>ORIGINAL,NAME,NAME,NAME,System.String,_x0038_e9d4d7fb1db403689a5997b9813eba8</value>
+          <value>ORIGINAL,NAMES,NAMES,NAMES,System.String,c1ab4f8999474ff9809b76cfdefa2ffa</value>
+          <value>ORIGINAL,SNAME,SNAME,SNAME,System.String,_x0030_1c20a0f624b464fad3cfdce42bfd082</value>
+          <value>ORIGINAL,Barcode,Barcode,Barcode,System.String,_x0037_8e6f57ffda04c6287f71e390a3e530e</value>
+          <value>ORIGINAL,VNAMES,VNAMES,VNAMES,System.String,e7bf42b1f642473e8efe8f1e94477cbd</value>
+          <value>ORIGINAL,KALA,KALA,KALA,System.String,f6582f2ac5b54ddc9b6890e7934706bb</value>
+          <value>ORIGINAL,N_FANI,N_FANI,N_FANI,System.String,_x0031_4619f5c65314ca18a8b3a28522e80d9</value>
+          <value>ORIGINAL,EMZA1,EMZA1,EMZA1,System.Byte[],_x0034_70c60e9eba0426cb390f5284f02636e</value>
+          <value>ORIGINAL,EMZA2,EMZA2,EMZA2,System.Byte[],a3ddeb98c6a147b88459ccc797a0a1ef</value>
+          <value>ORIGINAL,EMZA3,EMZA3,EMZA3,System.Byte[],_x0035_f064728883d403f9ab5821627f2050c</value>
+          <value>ORIGINAL,SGN1,SGN1,SGN1,System.Boolean,_x0033_a9f8329286547dc9fc754de225e4ebb</value>
+          <value>ORIGINAL,SGN2,SGN2,SGN2,System.Boolean,_x0031_0e844dfffbe432487f04ebe77772418</value>
+          <value>ORIGINAL,SGN3,SGN3,SGN3,System.Boolean,_x0038_7b2ef9aaa744be89e74a179756b5991</value>
+          <value>ORIGINAL,SGN4,SGN4,SGN4,System.Boolean,_x0038_a7cab4a9f10477f810ea94c87c8260f</value>
+          <value>ORIGINAL,SGN1usid,SGN1usid,SGN1usid,System.Int32,_x0032_f4ef3dbe38b4255af7615cd21778655</value>
+          <value>ORIGINAL,sgn2usid,sgn2usid,sgn2usid,System.Int32,a0eb914768bc459893b2493b647607d0</value>
+          <value>ORIGINAL,sgn3usid,sgn3usid,sgn3usid,System.Int32,_x0032_ba73816df30410fb6d92d1ec2434734</value>
+          <value>NAM,System.String</value>
+        </Columns>
+        <CommandTimeout>30</CommandTimeout>
+        <Dictionary isRef="1" />
+        <Key>772d732311e544b08680bf9d80ff9739</Key>
+        <Name>DataSource1</Name>
+        <NameInSource>MS SQL</NameInSource>
+        <Parameters isList="true" count="2">
+          <value>NUMBER_PARM,,6,20</value>
+          <value>TAG_PARM,,6,20</value>
+        </Parameters>
+        <SqlCommand>SELECT 
+	QSL_HAVALEH_EXIT.*,
+    NAM.NAM
+FROM 
+    dbo.QSL_HAVALEH_EXIT
+LEFT JOIN
+    (
+SELECT
+	dbo.HEAD_MANF.FNUMB, 
+	ISNULL(dbo.HEAD_MANF.NAMES, dbo.STUF_DEF.NAME) AS NAM
+	FROM
+	dbo.STUF_DEF 
+	RIGHT OUTER JOIN 
+            dbo.HEAD_MANF ON dbo.STUF_DEF.CODE = dbo.HEAD_MANF.CODE 
+        LEFT OUTER JOIN 
+            dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB 
+        WHERE
+            dbo.DTL_MANF.CODE IS NULL
+    ) AS NAM
+ON QSL_HAVALEH_EXIT.N_RASID = NAM.FNUMB
+WHERE 
+    QSL_HAVALEH_EXIT.NUMBER = @NUMBER_PARM
+    AND QSL_HAVALEH_EXIT.TAG = @TAG_PARM</SqlCommand>
+      </DataSource1>
+    </DataSources>
+    <Relations isList="true" count="0" />
+    <Report isRef="0" />
+    <Resources isList="true" count="0" />
+    <Variables isList="true" count="0" />
+  </Dictionary>
+  <EngineVersion>EngineV2</EngineVersion>
+  <GlobalizationStrings isList="true" count="0" />
+  <Key>e8fc294d66f247a1b9b0793fcd577f5e</Key>
+  <MetaTags isList="true" count="0" />
+  <Pages isList="true" count="1">
+    <Page1 Ref="4" type="Page" isKey="true">
+      <Border>None;Black;2;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <Components isList="true" count="4">
+        <PageHeaderBand1 Ref="5" type="PageHeaderBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0,0.2,7.72,2.3</ClientRectangle>
+          <Components isList="true" count="14">
+            <Text1 Ref="6" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>3.2,0.1,1.4,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,12</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text1</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>حواله خروج از انبار</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text1>
+            <TNAME_N Ref="7" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>2.7,0.5,2.4,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,12</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>TNAME_N</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </TNAME_N>
+            <Text2 Ref="8" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>6.7,0.5,0.9,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,11</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text2</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>: شماره حواله</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text2>
+            <Text3 Ref="9" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>5.8,0.5,0.9,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,11</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text3</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>{DataSource1.NUMBER}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text3>
+            <DATE_N Ref="10" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.2,0.1,1.8,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,11</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>DATE_N</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>تاریخ : 1404/01/02</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </DATE_N>
+            <Text4 Ref="11" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>1.1,0.5,0.9,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,11</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text4</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>: شماره داخلی</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text4>
+            <Text5 Ref="12" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.2,0.5,0.9,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,11</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text5</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>{DataSource1.FNUMCO}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text5>
+            <Text6 Ref="13" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>6.7,1.2,1,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,11</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text6</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>: مسئول شیفت</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text6>
+            <Text7 Ref="14" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>2.6,1.2,4.1,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,11</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text7</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>{DataSource1.NAME}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text7>
+            <Text8 Ref="15" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>1.6,1.2,0.4,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,11</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text8</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>: کد</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text8>
+            <Text9 Ref="16" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,1.2,1.6,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,11</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text9</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>{DataSource1.hes}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text9>
+            <Text10 Ref="17" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>6.9,1.8,0.8,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,11</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text10</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>: ملاحظات</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text10>
+            <Text11 Ref="18" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,1.8,6.9,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,11</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text11</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>{DataSource1.MOLAH}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text11>
+            <HorizontalLinePrimitive1 Ref="19" type="HorizontalLinePrimitive" isKey="true">
+              <ClientRectangle>0,1,7.7,0.01</ClientRectangle>
+              <Color>Black</Color>
+              <Conditions isList="true" count="0" />
+              <EndCap Ref="20" type="Cap" isKey="true">
+                <Color>Black</Color>
+              </EndCap>
+              <Expressions isList="true" count="0" />
+              <Name>HorizontalLinePrimitive1</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Size>3</Size>
+              <StartCap Ref="21" type="Cap" isKey="true">
+                <Color>Black</Color>
+              </StartCap>
+            </HorizontalLinePrimitive1>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Name>PageHeaderBand1</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+        </PageHeaderBand1>
+        <HeaderDataSource1 Ref="22" type="HeaderBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0,2.9,7.72,0.3</ClientRectangle>
+          <Components isList="true" count="8">
+            <HeaderDataSource1_KALA Ref="23" type="Text" isKey="true">
+              <Border>AdvBlack;3;Solid;Black;3;Solid;Black;1;Solid;Black;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>3.5,0,2,0.3</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,10,Bold</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>HeaderDataSource1_KALA</Name>
+              <Page isRef="4" />
+              <Parent isRef="22" />
+              <Text>KALA</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <VertAlignment>Center</VertAlignment>
+            </HeaderDataSource1_KALA>
+            <HeaderDataSource1_Barcode Ref="24" type="Text" isKey="true">
+              <Border>AdvBlack;3;Solid;Black;3;Solid;Black;1;Solid;Black;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>5.5,0,1.3,0.3</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,10,Bold</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>HeaderDataSource1_Barcode</Name>
+              <Page isRef="4" />
+              <Parent isRef="22" />
+              <Text>بارکد / شماره فنی</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </HeaderDataSource1_Barcode>
+            <HeaderDataSource1_ANBAR Ref="25" type="Text" isKey="true">
+              <Border>AdvBlack;3;Solid;Black;3;Solid;Black;1;Solid;Black;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>6.8,0,0.5,0.3</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,10,Bold</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>HeaderDataSource1_ANBAR</Name>
+              <Page isRef="4" />
+              <Parent isRef="22" />
+              <Text>انبار</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </HeaderDataSource1_ANBAR>
+            <Text12 Ref="26" type="Text" isKey="true">
+              <Border>AdvBlack;3;Solid;Black;3;Solid;Black;1;Solid;Black;3;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>7.3,0,0.4,0.3</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,10,Bold</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text12</Name>
+              <Page isRef="4" />
+              <Parent isRef="22" />
+              <Text>ردیف</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text12>
+            <HeaderDataSource1_MEGH Ref="27" type="Text" isKey="true">
+              <Border>AdvBlack;3;Solid;Black;3;Solid;Black;1;Solid;Black;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>2.8,0,0.7,0.3</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,10,Bold</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>HeaderDataSource1_MEGH</Name>
+              <Page isRef="4" />
+              <Parent isRef="22" />
+              <Text>مقدار</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </HeaderDataSource1_MEGH>
+            <HeaderDataSource1_VAHED_K Ref="28" type="Text" isKey="true">
+              <Border>AdvBlack;3;Solid;Black;3;Solid;Black;1;Solid;Black;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>2,0,0.8,0.3</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,10,Bold</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>HeaderDataSource1_VAHED_K</Name>
+              <Page isRef="4" />
+              <Parent isRef="22" />
+              <Text>واحد کالا</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </HeaderDataSource1_VAHED_K>
+            <HeaderDataSource1_MEGHk Ref="29" type="Text" isKey="true">
+              <Border>AdvBlack;3;Solid;Black;3;Solid;Black;1;Solid;Black;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>1.2,0,0.8,0.3</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,10,Bold</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>HeaderDataSource1_MEGHk</Name>
+              <Page isRef="4" />
+              <Parent isRef="22" />
+              <Text>مقدار کل</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </HeaderDataSource1_MEGHk>
+            <HeaderDataSource1_N_RASID Ref="30" type="Text" isKey="true">
+              <Border>AdvBlack;3;Solid;Black;3;Solid;Black;3;Solid;Black;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,0,1.2,0.3</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,10,Bold</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>HeaderDataSource1_N_RASID</Name>
+              <Page isRef="4" />
+              <Parent isRef="22" />
+              <Text>محل مصرف</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </HeaderDataSource1_N_RASID>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Name>HeaderDataSource1</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+        </HeaderDataSource1>
+        <DataDataSource1 Ref="31" type="DataBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <BusinessObjectGuid isNull="true" />
+          <ClientRectangle>0,3.6,7.72,0.3</ClientRectangle>
+          <Components isList="true" count="8">
+            <DataDataSource1_KALA Ref="32" type="Text" isKey="true">
+              <Border>All;Black;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <CanGrow>True</CanGrow>
+              <ClientRectangle>3.5,0,2,0.3</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>DataDataSource1_KALA</Name>
+              <Page isRef="4" />
+              <Parent isRef="31" />
+              <Text>{DataSource1.KALA}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <VertAlignment>Center</VertAlignment>
+            </DataDataSource1_KALA>
+            <DataDataSource1_Barcode Ref="33" type="Text" isKey="true">
+              <Border>All;Black;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <CanGrow>True</CanGrow>
+              <ClientRectangle>5.5,0,1.3,0.3</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>DataDataSource1_Barcode</Name>
+              <Page isRef="4" />
+              <Parent isRef="31" />
+              <Text>{DataSource1.Barcode}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <VertAlignment>Center</VertAlignment>
+            </DataDataSource1_Barcode>
+            <DataDataSource1_ANBAR Ref="34" type="Text" isKey="true">
+              <Border>All;Black;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <CanGrow>True</CanGrow>
+              <ClientRectangle>6.8,0,0.5,0.3</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>DataDataSource1_ANBAR</Name>
+              <Page isRef="4" />
+              <Parent isRef="31" />
+              <Text>{DataSource1.IANBAR}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </DataDataSource1_ANBAR>
+            <Text13 Ref="35" type="Text" isKey="true">
+              <Border>AdvBlack;1;Solid;Black;1;Solid;Black;1;Solid;Black;3;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <CanGrow>True</CanGrow>
+              <ClientRectangle>7.3,0,0.4,0.3</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text13</Name>
+              <Page isRef="4" />
+              <Parent isRef="31" />
+              <Text>{Line}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <Type>SystemVariables</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text13>
+            <DataDataSource1_MEGH Ref="36" type="Text" isKey="true">
+              <Border>All;Black;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <CanGrow>True</CanGrow>
+              <ClientRectangle>2.8,0,0.7,0.3</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>DataDataSource1_MEGH</Name>
+              <Page isRef="4" />
+              <Parent isRef="31" />
+              <Text>{DataSource1.MEGH}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <VertAlignment>Center</VertAlignment>
+            </DataDataSource1_MEGH>
+            <DataDataSource1_VAHED_K Ref="37" type="Text" isKey="true">
+              <Border>All;Black;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <CanGrow>True</CanGrow>
+              <ClientRectangle>2,0,0.8,0.3</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>DataDataSource1_VAHED_K</Name>
+              <Page isRef="4" />
+              <Parent isRef="31" />
+              <Text>{DataSource1.VNAMES}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </DataDataSource1_VAHED_K>
+            <DataDataSource1_MEGHk Ref="38" type="Text" isKey="true">
+              <Border>All;Black;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <CanGrow>True</CanGrow>
+              <ClientRectangle>1.2,0,0.8,0.3</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>DataDataSource1_MEGHk</Name>
+              <Page isRef="4" />
+              <Parent isRef="31" />
+              <Text>{DataSource1.MEGHk}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <VertAlignment>Center</VertAlignment>
+            </DataDataSource1_MEGHk>
+            <DataDataSource1_N_RASID Ref="39" type="Text" isKey="true">
+              <Border>AdvBlack;1;Solid;Black;1;Solid;Black;3;Solid;Black;1;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <CanBreak>True</CanBreak>
+              <CanGrow>True</CanGrow>
+              <CanShrink>True</CanShrink>
+              <ClientRectangle>0,0,1.2,0.3</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <GrowToHeight>True</GrowToHeight>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>DataDataSource1_N_RASID</Name>
+              <Page isRef="4" />
+              <Parent isRef="31" />
+              <ShrinkFontToFit>True</ShrinkFontToFit>
+              <Text>{DataSource1.NAM}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </DataDataSource1_N_RASID>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <DataSourceName>DataSource1</DataSourceName>
+          <Expressions isList="true" count="0" />
+          <Filters isList="true" count="0" />
+          <Name>DataDataSource1</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Sort isList="true" count="0" />
+        </DataDataSource1>
+        <FooterBand1 Ref="40" type="FooterBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0,4.3,7.72,2.6</ClientRectangle>
+          <Components isList="true" count="15">
+            <Text14 Ref="41" type="Text" isKey="true">
+              <Border>AdvBlack;3;Solid;Black;1;None;Black;3;None;Black;1;None;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <CanGrow>True</CanGrow>
+              <ClientRectangle>0,0,7.7,0.1</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text14</Name>
+              <Page isRef="4" />
+              <Parent isRef="40" />
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text14>
+            <EMZA3 Ref="42" type="Image" isKey="true">
+              <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <CanBreak>True</CanBreak>
+              <CanShrink>True</CanShrink>
+              <ClientRectangle>0.2,1.1,1,1</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <DataColumn>DataSource1.EMZA3</DataColumn>
+              <Expressions isList="true" count="0" />
+              <HorAlignment>Center</HorAlignment>
+              <IconColor>68, 114, 196</IconColor>
+              <Margins>0,0,0,0</Margins>
+              <Name>EMZA3</Name>
+              <Page isRef="4" />
+              <Parent isRef="40" />
+              <VertAlignment>Center</VertAlignment>
+            </EMZA3>
+            <nemz3 Ref="43" type="Text" isKey="true">
+              <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>1.2,1.1,1.3,0.2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>nemz3</Name>
+              <Page isRef="4" />
+              <Parent isRef="40" />
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </nemz3>
+            <semat3 Ref="44" type="Text" isKey="true">
+              <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>1.4,1.4,1.1,0.2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>semat3</Name>
+              <Page isRef="4" />
+              <Parent isRef="40" />
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </semat3>
+            <EMZA2 Ref="45" type="Image" isKey="true">
+              <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <CanBreak>True</CanBreak>
+              <CanGrow>True</CanGrow>
+              <CanShrink>True</CanShrink>
+              <ClientRectangle>2.8,1.1,1,1</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <DataColumn>DataSource1.EMZA2</DataColumn>
+              <Expressions isList="true" count="0" />
+              <HorAlignment>Center</HorAlignment>
+              <IconColor>68, 114, 196</IconColor>
+              <Margins>0,0,0,0</Margins>
+              <Name>EMZA2</Name>
+              <Page isRef="4" />
+              <Parent isRef="40" />
+              <VertAlignment>Center</VertAlignment>
+            </EMZA2>
+            <nemz2 Ref="46" type="Text" isKey="true">
+              <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>3.8,1.1,1.3,0.2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>nemz2</Name>
+              <Page isRef="4" />
+              <Parent isRef="40" />
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </nemz2>
+            <semat2 Ref="47" type="Text" isKey="true">
+              <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>4,1.4,1.1,0.2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>semat2</Name>
+              <Page isRef="4" />
+              <Parent isRef="40" />
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </semat2>
+            <EMZA1 Ref="48" type="Image" isKey="true">
+              <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <CanBreak>True</CanBreak>
+              <CanShrink>True</CanShrink>
+              <ClientRectangle>5.2,1.1,1,1</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <DataColumn>DataSource1.EMZA1</DataColumn>
+              <Expressions isList="true" count="0" />
+              <HorAlignment>Center</HorAlignment>
+              <IconColor>68, 114, 196</IconColor>
+              <Margins>0,0,0,0</Margins>
+              <Name>EMZA1</Name>
+              <Page isRef="4" />
+              <Parent isRef="40" />
+              <VertAlignment>Center</VertAlignment>
+            </EMZA1>
+            <nemz Ref="49" type="Text" isKey="true">
+              <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>6.3,1.1,1.3,0.2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>nemz</Name>
+              <Page isRef="4" />
+              <Parent isRef="40" />
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </nemz>
+            <semat Ref="50" type="Text" isKey="true">
+              <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>6.4,1.4,1.1,0.2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>semat</Name>
+              <Page isRef="4" />
+              <Parent isRef="40" />
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </semat>
+            <Text15 Ref="51" type="Text" isKey="true">
+              <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>3.4,0.2,1.8,0.2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text15</Name>
+              <Page isRef="4" />
+              <Parent isRef="40" />
+              <Text>: نام و نام خانوادگی تحویل گیرنده</Text>
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text15>
+            <Text16 Ref="52" type="Text" isKey="true">
+              <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>3,0.5,0.5,0.2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text16</Name>
+              <Page isRef="4" />
+              <Parent isRef="40" />
+              <Text>امضاء</Text>
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text16>
+            <Text17 Ref="53" type="Text" isKey="true">
+              <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.8,0.2,1.8,0.2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text17</Name>
+              <Page isRef="4" />
+              <Parent isRef="40" />
+              <Text>: نام و نام خانوادگی انبار دار</Text>
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text17>
+            <Text18 Ref="54" type="Text" isKey="true">
+              <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.4,0.5,0.5,0.2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text18</Name>
+              <Page isRef="4" />
+              <Parent isRef="40" />
+              <Text>امضاء</Text>
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text18>
+            <Text19 Ref="55" type="Text" isKey="true">
+              <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>6.6,0.2,0.7,0.2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text19</Name>
+              <Page isRef="4" />
+              <Parent isRef="40" />
+              <Text>امضاء مجاز</Text>
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text19>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <Expressions isList="true" count="0" />
+          <Name>FooterBand1</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+        </FooterBand1>
+      </Components>
+      <Conditions isList="true" count="0" />
+      <Expressions isList="true" count="0" />
+      <Guid>ef516a8bbd1b4ba8a6c4ba30251cb6ce</Guid>
+      <Margins>0.39,0.39,0.39,0.39</Margins>
+      <Name>Page1</Name>
+      <PageHeight>11</PageHeight>
+      <PageWidth>8.5</PageWidth>
+      <PaperSize>Letter</PaperSize>
+      <Report isRef="0" />
+    </Page1>
+  </Pages>
+  <ReferencedAssemblies isList="true" count="8">
+    <value>System.Dll</value>
+    <value>System.Drawing.Dll</value>
+    <value>System.Windows.Forms.Dll</value>
+    <value>System.Data.Dll</value>
+    <value>System.Xml.Dll</value>
+    <value>Stimulsoft.Controls.Dll</value>
+    <value>Stimulsoft.Base.Dll</value>
+    <value>Stimulsoft.Report.Dll</value>
+  </ReferencedAssemblies>
+  <ReportAlias>Report</ReportAlias>
+  <ReportChanged>8/5/2025 7:56:36 PM</ReportChanged>
+  <ReportCreated>8/5/2025 12:06:59 AM</ReportCreated>
+  <ReportFile>C:\prg\Made Reports\HAVALE_EXIT.mrt</ReportFile>
+  <ReportGuid>7685bea3344c4961a1c2232b66fb5ff6</ReportGuid>
+  <ReportName>Report</ReportName>
+  <ReportUnit>Inches</ReportUnit>
+  <ReportVersion>2023.1.1.0</ReportVersion>
+  <Script>using System;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Data;
+using Stimulsoft.Controls;
+using Stimulsoft.Base.Drawing;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Dialogs;
+using Stimulsoft.Report.Components;
+
+namespace Reports
+{
+    public class Report : Stimulsoft.Report.StiReport
+    {
+        public Report()        {
+            this.InitializeComponent();
+        }
+
+        #region StiReport Designer generated code - do not modify
+		#endregion StiReport Designer generated code - do not modify
+    }
+}
+</Script>
+  <ScriptLanguage>CSharp</ScriptLanguage>
+  <Styles isList="true" count="0" />
+</StiSerializer>
