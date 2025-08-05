@@ -1368,7 +1368,7 @@
                                 </Grid>
                             </Button>
 
-                            <Button Margin="1" Style="{StaticResource MaterialDesignFlatButton}" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                            <Button Margin="1" Click="Button_Click_89" Style="{StaticResource MaterialDesignFlatButton}" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                 <Grid Width="189">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="10*"/>

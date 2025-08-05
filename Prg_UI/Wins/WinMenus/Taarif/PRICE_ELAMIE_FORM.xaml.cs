@@ -40,6 +40,7 @@ using DocumentFormat.OpenXml.Drawing;
 using Microsoft.VisualBasic;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 using Syncfusion.CompoundFile.XlsIO.Native;
+using static Prg_UI.Functions.CL_LMethods;
 
 namespace Prg_UI.Wins.WinMenus.Taarif
 {
@@ -261,7 +262,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                         if (DG.CurrentColumn != null)
                         {
                             int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                            bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                            bool isLastColumn = currentColumnIndex == DG.Columns.Count - 2;
                             bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
 
                             if (isLastColumn)
@@ -731,14 +732,14 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 universControl.PopNotifyShow("داده های وارد شده مربوط به سطر ها درست نیست", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                 return false;
             }
-
+         
             List<MsgModel> ErrosMessages = new List<MsgModel>();
-            if (TheRow?.PGID == null || TheRow?.PGID < 0)
+            if (TheRow?.PGID == null || TheRow?.PGID <= 0)
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "گروهی قیمتی نیمتواند خالی باشد" });
             }
 
-            if (TheRow?.PRICE1 < 0)
+            if (TheRow?.PRICE1 == null || TheRow?.PRICE1 < 0)
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "مبلغ صحیح وارد نشده" });
             }
@@ -1025,6 +1026,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                                     VALUES 
                                         (@PEPID, @PEPNAME, @PEPDATE, @PEPDEPART, @TR_DATE, @SGN1, @SGN2, @SGN3, @USERNAME)";
                 _ = dbms.DoExecuteSQL(insertSql, masterRecord);
+                PEPID.Text = _PEPID_.ToString();
                 RefreshAfterUpdate();
             }
             else
@@ -1209,6 +1211,8 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             var ROW = e.Row.Item as PRICE_ELAMIE_DTL;
             if (e.Row.Item == null || ROW is null) { return; }
 
+            if (ConstructorRowDetector.IsPristine(ROW)) { DG_SUB_CANCEL_EDIT(); return; } //اگر سطر «دست‌نخورده» است، بدون خطا عمل کن
+
             if (!BodyIsValid(ROW))
             {
                 DG_SUB_CANCEL_EDIT();
@@ -1240,7 +1244,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                     var DetailRecord = new PRICE_ELAMIE_DTL
                     {
                         PEPID = ROW.PEPID,
-                        PERID = ROW.PERID, // PeR
+                        PERID = NewPerID, // PeR
                         PGID = ROW.PGID,
                         PRICE1 = ROW.PRICE1,
                         USERNAME = ROW.USERNAME,
@@ -1367,6 +1371,48 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         }
         private void DG_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            string CURRENT_COLUMN_NAME = "";
+            if (DG_SUB.CurrentCell.Column is not null)
+            {
+                CURRENT_COLUMN_NAME = DG_SUB.CurrentCell.Column?.SortMemberPath;
+            }
+            else
+            {
+                return;
+            }
+
+            string ColumnTarget = "";
+            if (e.Key == Key.Add)
+            {
+                if (CURRENT_COLUMN_NAME.Contains("PRICE1", StringComparison.OrdinalIgnoreCase))
+                {
+                    e.Handled = true;
+                    var text = "000";
+                    var target = Keyboard.FocusedElement;
+                    var routedEvent = TextCompositionManager.TextInputEvent;
+
+                    target.RaiseEvent(
+                        new TextCompositionEventArgs(InputManager.Current.PrimaryKeyboardDevice,
+                        new TextComposition(InputManager.Current, target, text))
+                        { RoutedEvent = routedEvent });
+                }
+            }
+            if (e.Key == Key.Subtract)
+            {
+                if (CURRENT_COLUMN_NAME.Contains("PRICE1", StringComparison.OrdinalIgnoreCase))
+                {
+                    e.Handled = true;
+                    var text = "00";
+                    var target = Keyboard.FocusedElement;
+                    var routedEvent = TextCompositionManager.TextInputEvent;
+
+                    target.RaiseEvent(
+                        new TextCompositionEventArgs(InputManager.Current.PrimaryKeyboardDevice,
+                        new TextComposition(InputManager.Current, target, text))
+                        { RoutedEvent = routedEvent });
+                }
+            }
+
             if (e.Key == Key.Delete && BTN_DELETE.IsEnabled)
             {
                 try

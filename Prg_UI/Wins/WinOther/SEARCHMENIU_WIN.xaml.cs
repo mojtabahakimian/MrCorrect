@@ -295,13 +295,14 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تنظیم پیش فرض کاربران برای ارجاع", WIN_NAME = CL_MenuManager.WinNameType.UserPersonelOrderWin_PishfarzeErja });
 
 
-            //   case WinNameType.WIN_VISIT_ROUTE_FORM: //تعيين مسير وزيت براي مشتريان
+            // case WinNameType.WIN_VISIT_ROUTE_FORM: //تعيين مسير وزيت براي مشتريان
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تنظیم لیست دستی توضیع", WIN_NAME = CL_MenuManager.WinNameType.WIN_TOZIE });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف ویزیت روزانه برای ویزیتور", WIN_NAME = CL_MenuManager.WinNameType.VISITOR_DAY_HEAD });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعيين مسير وزيت براي مشتريان", WIN_NAME = CL_MenuManager.WinNameType.WIN_VISIT_ROUTE_FORM });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "نمودار فروش کلی", WIN_NAME = CL_MenuManager.WinNameType.AMAR_FROOSH_KOL });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست چکهای دریافتی سررسید شده", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_DCHSS });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست چکهای برگشتی (دریافتی)", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_CHKB });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف اعلامیه قیمت", WIN_NAME = CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT });
 
 
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());

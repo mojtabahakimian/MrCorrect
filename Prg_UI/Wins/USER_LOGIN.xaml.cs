@@ -324,10 +324,9 @@ namespace Prg_UI.Wins
             CL_Generaly.VAHED_OF_USER = 1; //1 WAS
             Baseknow.UGRP = "1";
 
-            new F_MENU_ASNAD_PRINT().Show();
 
             //new PRICE_ELAMIE_FORM().Show();
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
 
             //new WinConnectionChoose().ShowDialog();

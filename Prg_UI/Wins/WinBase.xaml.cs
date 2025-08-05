@@ -1099,5 +1099,10 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_VISIT_ROUTE_FORM, this); //تعيين مسير وزيت براي مشتريان
         }
+
+        private void Button_Click_89(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT, this); //تعریف اعلامیه قیمت
+        }
     }
 }
