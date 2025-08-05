@@ -35,5 +35,10 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.GRADE_FORMAT_WIN, null);
         }
+
+        private void Image_PreviewMouseDown_2(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT, null);
+        }
     }
 }

@@ -35,18 +35,12 @@ using Prg_Proccessy.SQLMODELS;
 using Prg_UI.Wins.WinOther;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
-using System.Threading;
-using Prg_UI.Wins;
-using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using Functions;
 using System.Windows.Data;
-using Syncfusion.XlsIO.FormatParser.FormatTokens;
-using Prg_UI.UiTools;
 using Prg_UI.Functions.Jostejoo;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 
 namespace Prg_UI.Functions
