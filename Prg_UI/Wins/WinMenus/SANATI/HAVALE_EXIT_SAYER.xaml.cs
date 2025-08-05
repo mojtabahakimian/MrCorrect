@@ -40,6 +40,7 @@ using System.Windows.Data;
 using System.ComponentModel;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using Prg_Proccessy.Generaly;
+using static Prg_UI.Functions.CL_LMethods;
 
 namespace Prg_UI.Wins.WinMenus.SANATI
 {
@@ -162,7 +163,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
         public class SN_MODEL
         {
-            public double? MHAZ_NO { get; set; }
+            public int? MHAZ_NO { get; set; }
             public string? MHAZNAME { get; set; }
         }
         public class N_RASID_MODEL
@@ -688,15 +689,11 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             VAHED_K_COLUMN.ItemsSource = dbms.DoGetDataSQL<Custom_VAHEDK>("SELECT CODE AS VAHED,NAMES FROM dbo.TCOD_VAHEDS").ToList();
 
             //محل مصرف
-            N_RASID_ALL = dbms.DoGetDataSQL<N_RASID_MODEL>(@"SELECT dbo.HEAD_MANF.FNUMB, STUF_DEF.NAME+' '+ISNULL(HEAD_MANF.TOZIH, ' ') AS nam, dbo.HEAD_MANF.FNUMB AS Expr1
-                                                          FROM dbo.STUF_DEF
-                                                               INNER JOIN dbo.HEAD_MANF ON dbo.STUF_DEF.CODE=dbo.HEAD_MANF.CODE
-                                                          WHERE(NOT(dbo.STUF_DEF.NAME IS NULL))").ToList();
+            N_RASID_ALL = dbms.DoGetDataSQL<N_RASID_MODEL>(@"SELECT  dbo.HEAD_MANF.FNUMB, ISNULL(dbo.HEAD_MANF.NAMES, dbo.STUF_DEF.NAME) AS NAM, dbo.HEAD_MANF.FNUMB AS Expr1,  dbo.DTL_MANF.CODE FROM         dbo.STUF_DEF RIGHT OUTER JOIN dbo.HEAD_MANF ON dbo.STUF_DEF.CODE = dbo.HEAD_MANF.CODE LEFT OUTER JOIN dbo.DTL_MANF ON dbo.HEAD_MANF.FNUMB = dbo.DTL_MANF.FNUMB WHERE     (dbo.DTL_MANF.CODE IS NULL)").ToList();
             N_RASID_COLUMN.ItemsSource = N_RASID_ALL;
 
             //مرکز هزینه
-            var RST_SANAD_NO = dbms.DoGetDataSQL<SN_MODEL>(@"SELECT MHAZ_NO, MHAZNAME FROM TCOD_MARKAZHAZ").ToList();
-            SANAD_NO_COLUMN.ItemsSource = RST_SANAD_NO;
+            SANAD_NO_COLUMN.ItemsSource = dbms.DoGetDataSQL<SN_MODEL>(@"SELECT MHAZ_NO, MHAZNAME FROM TCOD_MARKAZHAZ").ToList();
 
             //کبموباکس مجری
             string sql = @"
@@ -1151,7 +1148,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
             _qre = $@"UPDATE dbo.HEAD_LST
                     SET NUMBER = {NUMBER.Text}, DATE_N = {DATE_N.Text.ToRawTarikh()},
-                    N_S = {_n_s}, DEPATMAN = {DEPATMAN.SelectedValue},
+                    N_S = {_n_s}, DEPATMAN = {(DEPATMAN.SelectedValue is null ? "NULL" : DEPATMAN.SelectedValue)},
                     CUST_NO = N'{CUST_NO.SelectedValue}', MOLAH = N'{MOLAH.Text}',
                     FNUMCO = {(string.IsNullOrEmpty(FNUMCO.Text) ? "0" : FNUMCO.Text)},
                     OKF = {Convert.ToByte(OKF.IsChecked)},
@@ -2506,6 +2503,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             if (Convert.ToDouble(NUMBER.Text) > 0)
             {
                 CL_HESABDARI.LetSigneTick(this.GetType().Name, 39, Convert.ToInt32(Baseknow.USERCOD), new WindowInteropHelper(this).Handle);
+                Command103.IsEnabled = true;
             }
             else
             {
@@ -2575,6 +2573,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 if ((bool)SGN1.IsChecked)
                 {
                     dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET SGN1usid={SGN1usid.Tag ?? "NULL"}, SGN1 = {Convert.ToByte((bool)SGN1.IsChecked)} WHERE TAG = {HTAG} AND NUMBER = {NUMBER.Text}");
+
                 }
                 else
                 {
@@ -2711,20 +2710,100 @@ namespace Prg_UI.Wins.WinMenus.SANATI
         {
             if (CL_HESABDARI.MOGUDI(Convert.ToInt64(NUMBER.Text), 11))
             {
-                //DoCmd.OpenReport("HAVALAH_EXIT", acPreview, "", "NUMBER =" + this.NUMBER + " AND TAG =" + this.HTAG);
-            }
+                Process Prc = ProcLoader.Start();
 
-            if ((bool)Baseknow.LOCKFAP)
-            {
-                this.OKF.IsChecked = true;
-            }
+                var report = new StiReport();
+                var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.SANATI.HAVALE_EXIT_SAYER.mrt");
+                report.Load(pathreport);
 
-            if (this.OKF.IsChecked == true)
-            {
-                this.AllowDeletions = false;
-                this.AllowEdits = false;
-                this.INVO_LST_SUB.IsEnabled = false;
-                this.ESLAH.IsEnabled = true;
+                report.Dictionary.Databases.Clear();
+                report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", CL_CCNNMANAGER.CONNECTION_STR));
+                //Parameters
+
+                #region EMZA
+                if (SGN1.IsChecked == true)
+                {
+                    //var SAL_NAME = ((TextBox)sgn1usid.Template.FindName("PART_EditableTextBox", sgn1usid)).Text;
+                    var SAL_NAME = SGN1usid.Text;
+
+                    (report.GetComponentByName("nemz") as StiText).Enabled = true;
+                    (report.GetComponentByName("semat") as StiText).Enabled = true;
+
+
+
+                    (report.GetComponentByName("nemz") as StiText).Text = SGN1_INFO.NAME_HESAB_USER;
+                    (report.GetComponentByName("semat") as StiText).Text = SGN1_INFO.SEMAT_USER;
+                }
+                else
+                {
+                    (report.GetComponentByName("nemz") as StiText).Enabled = false;
+                    (report.GetComponentByName("semat") as StiText).Enabled = false;
+                }
+
+                if (SGN2.IsChecked == true)
+                {
+                    var SAL_NAME = SGN2usid.Text;
+
+                    (report.GetComponentByName("nemz2") as StiText).Enabled = true;
+                    (report.GetComponentByName("semat2") as StiText).Enabled = true;
+
+                    (report.GetComponentByName("nemz2") as StiText).Text = SGN2_INFO.NAME_HESAB_USER;
+                    (report.GetComponentByName("semat2") as StiText).Text = SGN2_INFO.SEMAT_USER;
+                }
+                else
+                {
+                    (report.GetComponentByName("nemz2") as StiText).Enabled = false;
+                    (report.GetComponentByName("semat2") as StiText).Enabled = false;
+                }
+
+                if (SGN3.IsChecked == true)
+                {
+                    var SAL_NAME = SGN3usid.Text;
+
+                    (report.GetComponentByName("nemz3") as StiText).Enabled = true;
+                    (report.GetComponentByName("semat3") as StiText).Enabled = true;
+
+                    (report.GetComponentByName("nemz3") as StiText).Text = SGN3_INFO.NAME_HESAB_USER;
+                    (report.GetComponentByName("semat3") as StiText).Text = SGN3_INFO.SEMAT_USER;
+                }
+                else
+                {
+                    (report.GetComponentByName("nemz3") as StiText).Enabled = false;
+                    (report.GetComponentByName("semat3") as StiText).Enabled = false;
+                }
+                #endregion
+
+                //var Saman_Name = dbms.DoGetDataSQL<string>("SELECT NAME FROM SAZMAN").FirstOrDefault();
+                (report.GetComponentByName("TNAME_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
+                (report.GetComponentByName("DATE_N") as StiText).Text = $"تاریخ : {DATE_N.Text}";
+
+
+                report["NUMBER_PARM"] = NUMBER.Text.ToString();
+                report["TAG_PARM"] = HTAG;
+
+                //report.Render(false);
+
+                //report.Render();
+                ProcLoader.Stop(Prc);
+
+                //report.Show();
+
+                new WINRPT(report, "حواله خروج از انبار").Show();
+
+                if ((bool)Baseknow.LOCKFAP)
+                {
+                    this.OKF.IsChecked = true;
+                }
+
+                if (this.OKF.IsChecked == true)
+                {
+                    this.AllowDeletions = false;
+                    this.AllowEdits = false;
+                    this.INVO_LST_SUB.IsEnabled = false;
+                    this.ESLAH.IsEnabled = true;
+                }
+
+                DoCmdHeaderSave();
             }
         }
 
