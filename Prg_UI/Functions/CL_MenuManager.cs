@@ -37,6 +37,7 @@ using Prg_Proccessy.FUNCTIONS;
 using Prg_UI.Wins.WinMenus.CONFIGS;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
 using Prg_UI.Wins.WinMenus.BARNAME_RIZI;
+using Prg_UI.Wins.WinMenus.SANATI;
 
 namespace Functions
 {
@@ -748,7 +749,11 @@ namespace Functions
             /// <summary>
             /// نمودار فروش کلی
             /// </summary>
-            AMAR_FROOSH_KOL
+            AMAR_FROOSH_KOL,
+            /// <summary>
+            /// صدور برگه خروج سایر مواد از انبار
+            /// </summary>
+            HAVALE_EXIT_SAYER
         }
         #endregion
 
@@ -1474,6 +1479,10 @@ namespace Functions
                     
                 case WinNameType.VISITOR_GOL_REP_MAR: //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه (در تاریخ برگشت)
                     CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_GOL_REP_MAR(), default, false);
+                    break;   
+                    
+                case WinNameType.HAVALE_EXIT_SAYER: //صدور برگه خروج سایر مواد از انبار
+                    CL_LMethods.OpenWindow(OWNERWIN, new HAVALE_EXIT_SAYER(), default, false);
                     break;
 
 

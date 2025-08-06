@@ -311,6 +311,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه", WIN_NAME = CL_MenuManager.WinNameType.VISITOR_GOL_GRP_REP });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه (در تاریخ برگشت)", WIN_NAME = CL_MenuManager.WinNameType.VISITOR_GOL_GRP_REP_MAR });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه (در تاریخ برگشت)", WIN_NAME = CL_MenuManager.WinNameType.VISITOR_GOL_REP_MAR });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "صدور برگه خروج سایر مواد از انبار", WIN_NAME = CL_MenuManager.WinNameType.HAVALE_EXIT_SAYER });
 
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());
 
