@@ -1602,18 +1602,26 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         NPAR.Text = "0";
                 }
 
+                long SafeParse(string? text)
+                {
+                    if (string.IsNullOrWhiteSpace(text))
+                        return 0;
+
+                    var digits = new string(text.Where(char.IsDigit).ToArray());
+                    return long.TryParse(digits, out var value) ? value : 0;
+                }
 
                 //مبلغ قابل پرداخت: //= [JF] + [HKH] - [NTKHFIF] + [MBAA]
-                var rghabel = Convert.ToInt64(JF.Text) + Convert.ToInt64(HKH.Text) - Convert.ToInt64(NTKHFIF.Text) + Convert.ToInt64(MBAA.Text);
+                var rghabel = SafeParse(JF.Text) + SafeParse(HKH.Text) - SafeParse(NTKHFIF.Text) + SafeParse(MBAA.Text);
                 GHABEL.Text = rghabel.ToString();
 
                 //جمع مبالغ پرداختی
                 //=[M_NAGHD]+[MABL_VAR]+[MABL_HAV]+[NCHK]
-                var RMP = Convert.ToInt64(M_NAGHD.Text) + Convert.ToInt64(MABL_VAR.Text) + Convert.ToInt64(MABL_HAV.Text) + Convert.ToInt64(NCHK.Text);
+                var RMP = SafeParse(M_NAGHD.Text) + SafeParse(MABL_VAR.Text) + SafeParse(MABL_HAV.Text) + SafeParse(NCHK.Text);
                 NPAR.Text = RMP.ToString();
 
                 //=[GHABEL]-[NPAR]
-                MAN.Text = Convert.ToString(Convert.ToInt64(GHABEL.Text) - Convert.ToInt64(NPAR.Text)); //مانده
+                MAN.Text = (SafeParse(GHABEL.Text) - SafeParse(NPAR.Text)).ToString(); //مانده
                 MN.Text = MAN.Text; // مانده روی فاکتور
 
                 //کادر سبز و سند و مانده حساب

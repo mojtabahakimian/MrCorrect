@@ -258,7 +258,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     report["DT1"] = DT1.Text.ToRawTarikh();
                     report["DT2"] = DT2.Text.ToRawTarikh();
                     report["HESAB"] = Combo34.SelectedValue.ToString();
-
+                    
                     (report.GetComponentByName("KARBAR") as StiText).Text = Baseknow.UUSER;
                     (report.GetComponentByName("COMPANY_NAME") as StiText).Text = Baseknow.NAME;
 
@@ -266,6 +266,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                     (report.GetComponentByName("AZ_DT") as StiText).Text = $"از تاریخ : {DT1.Text}";
                     (report.GetComponentByName("TA_DT") as StiText).Text = $"تا تاریخ : {DT2.Text}";
+
+                    var SortPass = SORTT?.Replace("ORDER BY", null);
+                    report.Dictionary.Variables.Add("SORTY", SortPass);
 
                     //report.Render();
                     ProcLoader.Stop(Prc);

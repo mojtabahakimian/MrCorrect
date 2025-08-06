@@ -455,7 +455,7 @@
             </StackPanel>
         </Popup>
         <Rectangle x:Name="HaleCover" MouseDown="HaleCover_MouseDown" Visibility="Collapsed" Panel.ZIndex="1" Fill="#E51B1B1C" PreviewMouseLeftButtonUp="HaleCover_PreviewMouseLeftButtonUp"/>
-        <Grid x:Name="MainSliderPanel" Background="{DynamicResource MaterialDesign.Brush.Background}" Panel.ZIndex="2" Margin="0,1,-278,18" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Right" Width="273">
+        <Grid x:Name="MainSliderPanel" Background="{DynamicResource MaterialDesign.Brush.Background}" Panel.ZIndex="2" Margin="0,1,-278,18" d:Margin="0,1,-278,-3000" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Right" Width="273">
             <!--<Grid.Background>
                 <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
                     <GradientStop Color="#FFF1F1F1" Offset="0"/>
@@ -1368,7 +1368,7 @@
                                 </Grid>
                             </Button>
 
-                            <Button Margin="1" Style="{StaticResource MaterialDesignFlatButton}" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                            <Button Margin="1" Click="Button_Click_89" Style="{StaticResource MaterialDesignFlatButton}" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                 <Grid Width="189">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="10*"/>
@@ -2669,7 +2669,7 @@
                                         </Grid>
                                     </Button>
 
-                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Click="Button_Click_88" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                         <Grid Width="189">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="10*"/>
@@ -2686,7 +2686,7 @@
                                         </Grid>
                                     </Button>
 
-                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Click="Button_Click_87" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                         <Grid Width="189">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="10*"/>
@@ -2822,7 +2822,7 @@
                                         </Grid>
                                     </Button>
 
-                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Click="Button_Click_86" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                         <Grid Width="189">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="10*"/>

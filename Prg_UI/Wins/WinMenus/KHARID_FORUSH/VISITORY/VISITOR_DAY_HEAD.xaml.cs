@@ -1272,7 +1272,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             if (e.Row.Item == null) { return; }
             var ROW = e.Row.Item as VISITORS_DAY_DTL;
             if (ROW is null) { return; }
-            if (ConstructorRowDetector.IsPristine(e.Row.Item)) { DG_SUB_CANCEL_EDIT(); return; } //اگر سطر «دست‌نخورده» است، بدون خطا عمل کن
+            if (ConstructorRowDetector.IsPristine(ROW)) { DG_SUB_CANCEL_EDIT(); return; } //اگر سطر «دست‌نخورده» است، بدون خطا عمل کن
             if (!HeaderIsValid()) { return; }
 
             if (!BodyIsValid(ROW))

@@ -1461,7 +1461,7 @@ namespace Prg_UI.Scriptses
                 #endregion
 
 
-             
+
                 //بررسی مالکیت فاکتور و محاسبه پورسانت به صورت هوشمند
                 {
                     string sqlscript = @"
@@ -1890,8 +1890,8 @@ namespace Prg_UI.Scriptses
 									
 									    RETURN ISNULL(@ret, N'')
 									END"); } catch { }
-                
-				try { db.Execute($@"CREATE FUNCTION dbo.GETUSERHES
+
+                try { db.Execute($@"CREATE FUNCTION dbo.GETUSERHES
 									(
 									    @US INT
 									)
@@ -1901,9 +1901,9 @@ namespace Prg_UI.Scriptses
 									    DECLARE @hes NVARCHAR(50)
 									    SELECT @hes = hes FROM dbo.SALA_DTL WHERE idd = @US
 									    RETURN ISNULL(@hes, '')
-									END"); } catch { }		
-				
-				try { db.Execute($@"CREATE FUNCTION dbo.GETHESNAME
+									END"); } catch { }
+
+                try { db.Execute($@"CREATE FUNCTION dbo.GETHESNAME
 									(
 									    @HES NVARCHAR(50)
 									)
@@ -1935,6 +1935,132 @@ namespace Prg_UI.Scriptses
 									    RETURN
 									END
 									"); } catch { }
+
+                //Ctrl + F8
+                try { db.Execute($@"CREATE PROC [dbo].[usp_TafzilLedger]
+									    @FromDate INT,
+									    @ToDate INT,
+									    @TafzilCode NVARCHAR(50),
+									    @SortExpr NVARCHAR(400) = N'DATE_S, BED DESC'
+									AS
+									BEGIN
+									    SET ARITHABORT ON;
+									    SET NOCOUNT ON;
+									    DECLARE @WhiteList TABLE
+									    (
+									        Col sysname PRIMARY KEY
+									    );
+									    INSERT @WhiteList
+									    (
+									        Col
+									    )
+									    VALUES
+									    ('N_S'),
+									    ('DATE_S'),
+									    ('base'),
+									    ('HES_K'),
+									    ('HES_M'),
+									    ('HES_T'),
+									    ('HES_T2'),
+									    ('TAFZILN'),
+									    ('SHARH'),
+									    ('BED'),
+									    ('BES'),
+									    ('MAND'),
+									    ('NO_S'),
+									    ('N_SERI'),
+									    ('BANK'),
+									    ('NUMBER'),
+									    ('TAG'),
+									    ('ARZD'),
+									    ('id'),
+									    ('HES');
+									    DECLARE @ExprUpper NVARCHAR(4000);
+									    DECLARE @ExprNoDir NVARCHAR(4000);
+									    DECLARE @Xml XML;
+									    SET @ExprUpper = UPPER(@SortExpr);
+									    SET @ExprNoDir = REPLACE(REPLACE(@ExprUpper, ' DESC', ''), ' ASC', '');
+									    SET @Xml = CAST('<r>' + REPLACE(@ExprNoDir, ',', '</r><r>') + '</r>' AS XML);
+									    DECLARE @Tokens TABLE
+									    (
+									        token sysname
+									    );
+									    INSERT @Tokens
+									    (
+									        token
+									    )
+									    SELECT LTRIM(RTRIM(N.value('.', 'nvarchar(100)')))
+									    FROM @Xml.nodes('/r') AS T(N);
+									    IF EXISTS
+									    (
+									        SELECT 1
+									        FROM @Tokens t
+									        WHERE NOT EXISTS
+									        (
+									            SELECT 1
+									            FROM @WhiteList w
+									            WHERE w.Col = t.token
+									        )
+									    )
+									    BEGIN
+									        RAISERROR(N'يک يا چند نام ستون غيرمجاز در SortExpr وجود دارد.', 16, 1);
+									        RETURN;
+									    END;
+									    DECLARE @sql NVARCHAR(MAX)
+									        = N';WITH CTE AS(SELECT N_S,DATE_S,HES_K,HES_M,HES_T,HES_T2,TAFZILN,SHARH,BED,BES,NO_S,N_SERI,BANK,[NUMBER],TAG,ARZD,base,id,DiffAmt=BED-BES FROM dbo.QDAFTARTAFZIL2_H(@FromDate,@ToDate,@TafzilCode)),Ordered AS(SELECT *,rn=ROW_NUMBER() OVER(ORDER BY '
+									          + @SortExpr
+									          + N', id) FROM CTE) SELECT o.N_S,o.DATE_S,o.HES_K,o.HES_M,o.HES_T,o.HES_T2,o.TAFZILN,o.SHARH,o.BED,o.BES,ABS(c.SumAmt) AS MAND,CASE WHEN c.SumAmt>0 THEN N''بد'' WHEN c.SumAmt=0 THEN N''--'' ELSE N''بس'' END AS TASH,@TafzilCode AS hes,o.NO_S,o.N_SERI,o.BANK,o.[NUMBER],o.TAG,o.ARZD,o.base FROM Ordered o CROSS APPLY (SELECT SumAmt=SUM(i.DiffAmt) FROM Ordered i WHERE i.rn<=o.rn) c ORDER BY '
+									          + @SortExpr + N', id;';
+									    EXEC sp_executesql @sql,
+									                       N'@FromDate int,@ToDate int,@TafzilCode nvarchar(50)',
+									                       @FromDate,
+									                       @ToDate,
+									                       @TafzilCode;
+									END"); } catch { }
+
+                //SELECT * FROM dbo.VISITOR_DTL_KALA(0, 99991230, N'%')WHERE DEPATMAN = 20;
+                try { db.Execute($@"ALTER FUNCTION dbo.VISITOR_DTL_KALA
+									(
+									    @dt1 bigint,
+									    @dt2 bigint,
+									    @visitor nvarchar(40)
+									)
+									RETURNS TABLE
+									AS
+									RETURN
+									(
+									    SELECT TOP (100) PERCENT
+									           il.CODE,
+									           SUM(il.MEGHk)                 AS MEGHk,
+									           SUM(il.MABL_K)               AS MABL_K,
+									           SUM(il.IMBAA)                AS IMBAA,
+									           SUM(il.N_MOIN)               AS N_MOIN,
+									           sd.NAME                      AS kala,
+									           ch.NAME                      AS VISITOR,
+									           vd.CUST_NO,
+									           SUM(il.MEGH_MAR)             AS MEGH_MAR,
+									           SUM(il.MEGH_MAR * il.MABL)   AS MABMAR,
+									           SUM(il.MABL_K - il.MEGH_MAR * il.MABL + il.IMBAA - il.N_MOIN) AS GHABEL,
+									           ch.ADDRESS,
+									           ch.TEL,
+									           ch.TOZIH,
+									           ch.MOBILE,
+									           sd.MENUIT,
+									           hl.DEPATMAN                  -- ⭐️ ستون جدید
+									    FROM   dbo.HEAD_LST        AS hl
+									           INNER JOIN dbo.INVO_LST   AS il ON hl.NUMBER = il.NUMBER AND hl.TAG = il.TAG
+									           INNER JOIN dbo.VISITOR_DTL AS vd ON hl.NUMBER = vd.NUMBER AND hl.TAG = vd.TAG
+									           INNER JOIN dbo.STUF_DEF    AS sd ON il.CODE   = sd.CODE
+									           INNER JOIN dbo.TCOD_VAHEDS AS tv ON il.VAHED_K = tv.CODE
+									           INNER JOIN dbo.CUST_HESAB  AS ch ON vd.CUST_NO = ch.hes
+									    WHERE  hl.DATE_N BETWEEN @dt1 AND @dt2
+									      AND  hl.TAG = 2
+									    GROUP BY
+									           il.CODE, sd.NAME, ch.NAME, vd.CUST_NO,
+									           ch.ADDRESS, ch.TEL, ch.TOZIH, ch.MOBILE,
+									           sd.MENUIT, hl.DEPATMAN       -- ⭐️ در GROUP BY هم اضافه شود
+									    HAVING vd.CUST_NO LIKE @visitor
+									)"); } catch { }
 
             }
         }

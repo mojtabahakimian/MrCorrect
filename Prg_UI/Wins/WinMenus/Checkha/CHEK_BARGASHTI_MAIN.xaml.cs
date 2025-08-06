@@ -1,11 +1,10 @@
-﻿using MaterialDesignThemes.Wpf;
-using Prg_SendInvoice.CNNMANAGER;
+﻿using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using static Prg_UI.Functions.CL_LMethods;
 using Functions;
+using Prg_Proccessy.SQLMODELS;
 using Syncfusion.Data.Extensions;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
@@ -13,24 +12,23 @@ using System;
 using System.Collections.ObjectModel;
 using Syncfusion.UI.Xaml.BulletGraph;
 using System.Windows.Controls;
-using Prg_UI.UiTools;
-using System.Text;
-using Syncfusion.Data;
-using Prg_UI.HelperWins;
-using System.Diagnostics;
-using System.Windows.Media;
 using Prg_Proccessy.FUNCTIONS;
 using System.Windows.Interop;
-using Prg_Proccessy.SQLMODELS;
+using Prg_UI.UiTools;
+using System.Text;
+using Prg_UI.HelperWins;
+using Syncfusion.Data;
 using System.Collections.Generic;
+using System.Windows.Media;
+using MaterialDesignThemes.Wpf;
 using Prg_Proccessy.MODELS;
 
-namespace Wins.WinMenus.HESABDARI.GOZARESHAT
+namespace Prg_UI.Wins.WinMenus.Checkha
 {
     /// <summary>
-    /// Interaction logic for TARAZ_4_MOIN.xaml
+    /// Interaction logic for CHEK_BARGASHTI_MAIN.xaml
     /// </summary>
-    public partial class TARAZ_4_MOIN : Window
+    public partial class CHEK_BARGASHTI_MAIN : Window
     {
         #region Header Window Begin
         //Header Window Begin
@@ -73,29 +71,31 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         }
         //Header Window End;
         #endregion
-
-        public TARAZ_4_MOIN(string _DT1_, string _DT2_, string _KOL_, bool _BEDEHBESTANMOIN_ = false)
+        public CHEK_BARGASHTI_MAIN(string _dt1_, string _dt2_)
         {
             InitializeComponent();
 
             this.DataContext = this;
 
-            DT1 = _DT1_;
-            DT2 = _DT2_;
-            KOL = _KOL_;
-            BEDEHBESTANMOIN = _BEDEHBESTANMOIN_;
+            DT1_PASSED = _dt1_;
+            DT2_PASSED = _dt2_;
         }
+        public ObservableCollection<CHEK_BARGASHTI_MODEL> SFDATAGRID_DATA { get; set; } = new ObservableCollection<CHEK_BARGASHTI_MODEL>();
+        public ObservableCollection<COMBOYMODEL> VAZ_DATA { get; set; } = new ObservableCollection<COMBOYMODEL>
+        {
+            new COMBOYMODEL { ID = 1, NAME = "نزد صندوق" },
+            new COMBOYMODEL { ID = 2, NAME = "نزد بانك" },
+            new COMBOYMODEL { ID = 3, NAME = "وصول شده" },
+            new COMBOYMODEL { ID = 4, NAME = "واگذار شده" },
+            new COMBOYMODEL { ID = 5, NAME = "برگشت شده" },
+            new COMBOYMODEL { ID = 6, NAME = "مسترد شده" },
+            new COMBOYMODEL { ID = 7, NAME = "حذف شده" }
+        };
+
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
-
         UniversControl universControl = new UniversControl();
-        //universControl.PopNotifyShowUp("اطلاعات با موفقیت ذخیره شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
 
-        public ObservableCollection<TARAZ4_MOIN_MODEL> TARAZ_DATA { get; set; } = new ObservableCollection<TARAZ4_MOIN_MODEL>();
-
-        public bool NowIsReady { get; private set; }
-        public double? NUMBER_TO_OPEN { get; set; }
-        public bool ChangeIsHappend { get; private set; }
-        public bool BEDEHBESTANMOIN { get; } = false;
+        public bool ChangeIsHappend { get; private set; } = false;
 
         private bool _bl;
         public bool AllowDeletions
@@ -137,105 +137,137 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             {
                 ican = value;
 
-                //TextBox.IsReadOnly = !ican;
-                //ComboBox.IsEnabled = ican;
+                //DETAIL_VOSUL_SUB.IsReadOnly = !ican;
             }
         }
+
+        public bool NowIsReady { get; private set; }
+
+        public string DT1_PASSED { get; set; } = "10000101";
+        public string DT2_PASSED { get; set; } = "99991230";
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
         }
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            //Process Prc = ProcLoader.Start();
-
-            string callername = this.GetType().Name;
-            if (BEDEHBESTANMOIN)
+            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
             {
-                LABEL_HEADER.Content = "ليست محدود شده حسابهاي معين";
-                callername = this.GetType().Name + LABEL_HEADER.Content.ToString();
-            }
+                e.Handled = true;
 
-            CL_HESABDARI.AMALIYAT_USER(callername);
-
-            //EXEC dbo.TARAZ_4 '10000101', '99991230', '0', '929292929'
-            //EXEC dbo.TARAZ4_MOIN 14030101, 14040111, 0, 929292929, 111;
-
-            double SNDNUM1 = 0; // Assuming these are float values.
-            double SNDNUM2 = 929292929;
-            var parameters = new
-            {
-                Forms___FMENU_TARAZ_4___DT1 = Convert.ToInt64(DT1),
-                Forms___FMENU_TARAZ_4___DT2 = Convert.ToInt64(DT2),
-                Forms___FMENU_TARAZ_4___SNDNUM1 = SNDNUM1,
-                Forms___FMENU_TARAZ_4___SNDNUM2 = SNDNUM2,
-                KOL = KOL
-            };
-
-            TARAZ_DATA?.Clear();
-            List<TARAZ4_MOIN_MODEL> MasterHead = new List<TARAZ4_MOIN_MODEL>();
-            if (BEDEHBESTANMOIN)
-            {
-                MasterHead = dbms.DoGetDataSQL<TARAZ4_MOIN_MODEL>($"SELECT HES_K AS N_KOL, SUM(SumOfBED) AS SumOfBED, SUM(SumOfBES) AS SumOfBES,  dbo.UIIF(SUM(BEDBES), '>', 0, SUM(BEDBES), 0) AS BED, dbo.UIIF(SUM(BEDBES), '>', 0, 0, SUM(BEDBES) * - 1) AS BES, HES_M AS NUMBER, MOIN FROM BEDBESMAH{Baseknow.USERCOD} INNER JOIN   dbo.TOTA_HES ON HES_K = dbo.TOTA_HES.NUMBER WHERE (HES_K = {KOL}) GROUP BY HES_K, HES_M, MOIN ORDER BY HES_K, HES_M").ToList();
+                CL_LMethods.SendKey_US(Key.Tab);
             }
             else
             {
-                MasterHead = dbms.DoGetStoreProcedureSQL<TARAZ4_MOIN_MODEL>("dbo.TARAZ4_MOIN", parameters).ToList();
             }
+        }
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
-            foreach (var item in MasterHead)
+            //CL_HESABDARI.SETSECURITY(this.GetType().Name, "VCHD", new WindowInteropHelper(this).Handle, this.GetType().Name);
+            //if (!this.IsLoaded)
+            //{
+            //    this.Close();
+            //    return;
+            //}
+
+            I_AM_CHEK_VOSUL_LES = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
+
+            FILL_ALL_COMBOBOX();
+
+            ReGetData();
+
+            GenerateAutomaticSummary(SFDATAGRID_SUB);
+
+            CL_LMethods.FocusLastSfDataGridRow(SFDATAGRID_SUB);
+        }
+
+        private void FILL_ALL_COMBOBOX()
+        {
+            //بانکها
+
+            //MappingName="BANK" SelectedValuePath="CODE" DisplayMemberPath="NAMES"
+            BANK_COLUMN.ItemsSource = dbms.DoGetDataSQL<TCOD_BANKS>($"SELECT * FROM dbo.TCOD_BANKS").ToList();
+
+            //VAZ_COLUMN.ItemsSource = dbms.DoGetDataSQL<COMBOYMODEL>($"SELECT * FROM dbo.COMBOYMODEL").ToList();
+
+            //وضعیت چک
+            // MappingName="VAZ" SelectedValuePath="ID" DisplayMemberPath="NAME" 
+            //var RST_VAZ = new List<COMBOYMODEL>
+            //{
+            //    new COMBOYMODEL { ID = 1, NAME = "نزد صندوق" },
+            //    new COMBOYMODEL { ID = 2, NAME = "نزد بانك" },
+            //    new COMBOYMODEL { ID = 3, NAME = "وصول شده" },
+            //    new COMBOYMODEL { ID = 4, NAME = "واگذار شده" },
+            //    new COMBOYMODEL { ID = 5, NAME = "برگشت شده" },
+            //    new COMBOYMODEL { ID = 6, NAME = "مسترد شده" },
+            //    new COMBOYMODEL { ID = 7, NAME = "حذف شده" }
+            //};
+
+            //VAZ_COLUMN.ItemsSource = RST_VAZ;
+
+            //MappingName="VAZ" SelectedValuePath="TNUMBER" DisplayMemberPath="NAME" 
+            //VAZ_COLUMN.ItemsSource = dbms.DoGetDataSQL<TDETA_HES>($"SELECT TNUMBER, NAME FROM TDETA_HES WHERE (N_KOL = {CL_HESABDARI.GETKOL(Baseknow.ADA)}) AND (NUMBER = {CL_HESABDARI.GETMOIN(Baseknow.ADA)})").ToList();
+
+            ////موقعیت چک
+            //var SANDUGH_RST = dbms.DoGetDataSQL<TDETA_HES>($"SELECT * FROM TDETA_HES WHERE(N_KOL = {CL_HESABDARI.GETKOL(Baseknow.ADA)}) AND(NUMBER = 1)").ToList();
+            //SANDUGH_COLUMN.ItemsSource = SANDUGH_RST;
+        }
+
+        private void ReGetData()
+        {
+            SFDATAGRID_DATA?.Clear();
+            var RST = dbms.DoGetDataSQL<CHEK_BARGASHTI_MODEL>($"SELECT * FROM dbo.CHEK_BARGASHTI  WHERE (DATE_S >= " + DT1_PASSED + " AND DATE_S <= " + DT2_PASSED + " ) ORDER BY DATE_S").ToList();
+
+            foreach (var item in RST)
             {
-                //Fix:
-                item.SumOfBES = Math.Truncate(item.SumOfBES ?? 0);
-                item.SumOfBED = Math.Truncate(item.SumOfBED ?? 0);
-                item.bed = Math.Truncate(item.bed ?? 0);
-                item.bes = Math.Truncate(item.bes ?? 0);
-
-                TARAZ_DATA?.Add(item);
+                SFDATAGRID_DATA.Add(item);
             }
 
-            GenerateAutomaticSummary(SYNCFUSION_DG);
-
-            //ProcLoader.Stop(Prc);
+            ROWCOUNT_LABEL.Content = SFDATAGRID_DATA.Count;
         }
 
         #region _SfDataGrid_
-        private readonly FilterService<TARAZ4_MOIN_MODEL> filterService = new FilterService<TARAZ4_MOIN_MODEL>();
+        private readonly FilterService<CHEK_BARGASHTI_MODEL> filterService = new FilterService<CHEK_BARGASHTI_MODEL>();
         public ObservableCollection<string> ActiveFilters { get; set; } = new ObservableCollection<string>();
-        public string DT1 { get; }
-        public string DT2 { get; }
-        public string KOL { get; }
 
         private string? CurrentCellValue = null;
         private RowColumnIndex CurrentCellIndex;
-        private void SYNCFUSION_DG_CurrentCellActivated(object sender, Syncfusion.UI.Xaml.Grid.CurrentCellActivatedEventArgs e) // Event handler for when a cell is activated in the data grid
+        private int CurrentColumnIndex;
+        private void SFDATAGRID_SUB_CurrentCellActivated(object sender, Syncfusion.UI.Xaml.Grid.CurrentCellActivatedEventArgs e)
         {
             UpdateCurrentCellValue(e.CurrentRowColumnIndex);
         }
-        private void SYNCFUSION_DG_SelectionChanged(object sender, GridSelectionChangedEventArgs e) // Event handler for when the selection changes in the data grid
+        private void SFDATAGRID_SUB_SelectionChanged(object sender, GridSelectionChangedEventArgs e)
         {
             //// Get the selected row and column index
-            //var currentCell = SYNCFUSION_DG.SelectionController.CurrentCellManager.CurrentCell;
-            //if (currentCell != null)
-            //{
-            //    var rowColumnIndex = new RowColumnIndex(currentCell.RowIndex, currentCell.ColumnIndex);
-            //    UpdateCurrentCellValue(rowColumnIndex);
-            //}
+            var currentCell = SFDATAGRID_SUB.SelectionController.CurrentCellManager.CurrentCell;
+            if (currentCell != null)
+            {
+                var rowColumnIndex = new RowColumnIndex(currentCell.RowIndex, currentCell.ColumnIndex);
+                UpdateCurrentCellValue(rowColumnIndex);
+            }
+
         }
-        private void UpdateCurrentCellValue(RowColumnIndex rowColumnIndex) // Method to update the current cell value
+        private void UpdateCurrentCellValue(RowColumnIndex rowColumnIndex)
         {
             CurrentCellIndex = rowColumnIndex; // Update current cell index
             CurrentCellValue = null; // Reset current cell value
 
             int rowIndex = rowColumnIndex.RowIndex;
-            int columnIndex = this.SYNCFUSION_DG.ResolveToGridVisibleColumnIndex(rowColumnIndex.ColumnIndex);
+            int columnIndex = this.SFDATAGRID_SUB.ResolveToGridVisibleColumnIndex(rowColumnIndex.ColumnIndex);
             if (columnIndex < 0) return;
 
-            var mappingName = this.SYNCFUSION_DG.Columns[columnIndex].MappingName;
-            var recordIndex = this.SYNCFUSION_DG.ResolveToRecordIndex(rowIndex);
+            CurrentColumnIndex = columnIndex;
+
+            var mappingName = this.SFDATAGRID_SUB.Columns[columnIndex].MappingName;
+            var recordIndex = this.SFDATAGRID_SUB.ResolveToRecordIndex(rowIndex);
             if (recordIndex < 0) return;
 
-            var record = this.SYNCFUSION_DG.View.Records.GetItemAt(recordIndex);
+            var record = this.SFDATAGRID_SUB.View.Records.GetItemAt(recordIndex);
             CurrentCellValue = record?.GetType()?.GetProperty(mappingName)?.GetValue(record)?.ToString();
         }
         private void FilterBySelection_Click(object sender, RoutedEventArgs e)
@@ -263,6 +295,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                     ApplyCumulativeFilter();
                 }
             }
+
         }
         private void FilterExcludingSelection_Click(object sender, RoutedEventArgs e)
         {
@@ -294,8 +327,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                 }
             }
         }
-
-        private void RemoveFilterSort_Click(object sender, RoutedEventArgs e) // Event handler to remove all filters and sorting
+        private void RemoveFilterSort_Click(object sender, RoutedEventArgs e)
         {
             // Clear all filters in the filter service
             filterService.ClearFilters();
@@ -304,57 +336,51 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             // Apply the cumulative filter to the data grid
             ApplyCumulativeFilter();
         }
-        private (string ColumnName, object FilterValue) GetSelectedCellDetails() // Method to get the details of the selected cell
+        private (string ColumnName, object FilterValue) GetSelectedCellDetails()
         {
             // Check if there is a current cell selected in the data grid
-            if (SYNCFUSION_DG.SelectionController.CurrentCellManager.CurrentCell != null)
+            if (SFDATAGRID_SUB.SelectionController.CurrentCellManager.CurrentCell != null)
             {
-                var columnName = SYNCFUSION_DG.SelectionController.CurrentCellManager.CurrentCell.GridColumn.MappingName; // Get the name of the column
-                                                                                                                          // Return the column name and the current cell value
-                return (columnName, CurrentCellValue);
+                var columnName = SFDATAGRID_SUB.SelectionController.CurrentCellManager.CurrentCell.GridColumn.MappingName; // Get the name of the column
+                                                                                                                           // Return the column name and the current cell value
+                                                                                                                           //if (CurrentCellValue == null)
+                                                                                                                           //{
+                                                                                                                           //    return (columnName, SelectedSfDgTextCell);
+                                                                                                                           //}
+                                                                                                                           //else
+                {
+                    return (columnName, CurrentCellValue);
+                }
             }
             return (null, null); // If no cell is selected, return null values
         }
-        private void ApplyCumulativeFilter() // Method to apply all cumulative filters to the data grid
+        private void ApplyCumulativeFilter()
         {
             // Set the filter for the data grid view using the filter service
-            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as TARAZ4_MOIN_MODEL);
+            SFDATAGRID_SUB.View.Filter = item => filterService.ApplyFilter(item as CHEK_BARGASHTI_MODEL);
             // Refresh the filter to update the view
-            SYNCFUSION_DG.View.RefreshFilter();
-        }
-        private void SYNCFUSION_DG_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (!string.IsNullOrEmpty(GetSelectedText()))
-            {
-                var element = e.OriginalSource as FrameworkElement;
-                if (element != null)
-                {
-                    element.ContextMenu = this.Resources["DataGridContextMenu"] as ContextMenu;
-                }
-            }
+            SFDATAGRID_SUB.View.RefreshFilter();
         }
 
-
-        private T FindChildElement<T>(DependencyObject parent) where T : DependencyObject
+        private void SFDATAGRID_SUB_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            var element = e.OriginalSource as FrameworkElement;
+            if (element != null)
             {
-                var child = VisualTreeHelper.GetChild(parent, i);
-                if (child is T typedChild)
-                {
-                    return typedChild;
-                }
-                var result = FindChildElement<T>(child);
-                if (result != null)
-                {
-                    return result;
-                }
+                element.ContextMenu = this.Resources["DataGridContextMenu"] as ContextMenu;
             }
-            return null;
+        }
+        private void SFDATAGRID_SUB_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var element = e.OriginalSource as FrameworkElement;
+            if (element != null)
+            {
+                element.ContextMenu = this.Resources["DataGridContextMenu"] as ContextMenu;
+            }
         }
         private string GetSelectedText()
         {
-            var dataGrid = SYNCFUSION_DG;
+            var dataGrid = SFDATAGRID_SUB;
             var currentCell = dataGrid.SelectionController.CurrentCellManager.CurrentCell;
 
             if (currentCell != null && currentCell.IsEditing)
@@ -363,21 +389,12 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                 var editingElement = dataGrid.FindElementOfType<TextBox>();
                 if (editingElement != null)
                 {
-                    if (!string.IsNullOrEmpty(editingElement.SelectedText))
-                    {
-                        return editingElement.SelectedText; // Return the selected text
-                    }
+                    return editingElement.SelectedText; // Return the selected text
                 }
-
-                var editingElement2 = FindChildElement<TextBox>(dataGrid);
-                if (editingElement2 != null)
-                {
-                    return editingElement2.SelectedText;
-                }
-
             }
             return string.Empty;
         }
+
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
             CopySelectedRowsToClipboard();
@@ -390,14 +407,14 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                 if (!string.IsNullOrEmpty(_SelectedTextCell_))
                 {
                     Clipboard.SetText(_SelectedTextCell_);
-                    universControl.PopNotifyShowUp("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
+                    universControl.PopNotifyShow("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                     return;
                 }
             }
             catch { return; }
 
             // Check if there are selected rows
-            if (SYNCFUSION_DG.SelectedItems == null || !SYNCFUSION_DG.SelectedItems.Any())
+            if (SFDATAGRID_SUB.SelectedItems == null || !SFDATAGRID_SUB.SelectedItems.Any())
             {
                 universControl.PopNotifyShow("چیزی برای کپی انتخاب نشده !", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                 return;
@@ -408,7 +425,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             try
             {
                 // Add headers
-                foreach (var column in SYNCFUSION_DG.Columns)
+                foreach (var column in SFDATAGRID_SUB.Columns)
                 {
                     if (!column.IsHidden) // Include only columns that are not hidden
                         sb.Append(column.HeaderText + "\t");
@@ -416,9 +433,9 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                 sb.AppendLine();
 
                 // Add selected rows
-                foreach (var item in SYNCFUSION_DG.SelectedItems)
+                foreach (var item in SFDATAGRID_SUB.SelectedItems)
                 {
-                    foreach (var column in SYNCFUSION_DG.Columns)
+                    foreach (var column in SFDATAGRID_SUB.Columns)
                     {
                         if (!column.IsHidden) // Include only columns that are not hidden
                         {
@@ -431,16 +448,16 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
                 // Copy to clipboard
                 Clipboard.SetText(sb.ToString());
-                universControl.PopNotifyShow($"{SYNCFUSION_DG.SelectedItems.Count} تعداد رکورد در حافظه کپی شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+                universControl.PopNotifyShow($"{SFDATAGRID_SUB.SelectedItems.Count} تعداد رکورد در حافظه کپی شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
             }
             catch { }
 
         }
-        private void SYNCFUSION_DG_PreviewKeyDown(object sender, KeyEventArgs e)
+        private void SFDATAGRID_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.L)
+            if ((Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.L) || (Keyboard.IsKeyDown(Key.RightCtrl) && e.Key == Key.L))
             {
-                CalculateSumForCurrentColumn(SYNCFUSION_DG);
+                CalculateSumForCurrentColumn(SFDATAGRID_SUB);
                 e.Handled = true; // Mark event as handled
             }
         }
@@ -506,7 +523,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         {
             if (_ClearAnySummaryBefore_)
             {
-                SYNCFUSION_DG.TableSummaryRows.Clear();
+                SFDATAGRID_SUB.TableSummaryRows.Clear();
             }
             else
             {
@@ -523,18 +540,17 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
             var summaryColumns = new ObservableCollection<ISummaryColumn>();
 
-            var dataType = typeof(TARAZ4_MOIN_MODEL);
+            var dataType = typeof(CHEK_BARGASHTI_MODEL);
 
-            //foreach (var column in SYNCFUSION_DG.Columns)
+            //foreach (var column in SFDATAGRID_SUB.Columns)
             foreach (var column in _DG_.Columns.OfType<GridTextColumn>())
             {
-                var propertyInfo = typeof(TARAZ4_MOIN_MODEL).GetProperty(column.MappingName);
-                if (propertyInfo == null)
-                    continue;
-
-
-                if (column.MappingName == "SumOfBED" || column.MappingName == "SumOfBES" || column.MappingName == "bed" || column.MappingName == "bes")
+                if (column.MappingName == "MABL")
                 {
+                    var propertyInfo = typeof(CHEK_BARGASHTI_MODEL).GetProperty(column.MappingName);
+                    if (propertyInfo == null)
+                        continue;
+
                     if (IsNumericType(propertyInfo.PropertyType))
                     {
                         var summaryColumn = new GridSummaryColumn
@@ -553,7 +569,6 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             summaryRow.SummaryColumns = summaryColumns;
 
             _DG_.TableSummaryRows.Add(summaryRow);
-
 
         }
         private bool IsNumericType(Type type)
@@ -595,57 +610,25 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         {
             try
             {
-                await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "ExportedExcel");
+                await UniversalExcelExporter.ExportToExcelAsync(SFDATAGRID_SUB, "ExportedExcel");
             }
             catch (Exception)
             {
                 new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
             }
         }
-
         #endregion
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+
+        private void SFDATAGRID_SUB_CurrentCellEndEdit(object sender, CurrentCellEndEditEventArgs e)
         {
-            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
-            {
-                e.Handled = true;
 
-                CL_LMethods.SendKey_US(Key.Tab);
-            }
+        }
+        private void SFDATAGRID_SUB_CurrentCellValidating(object sender, CurrentCellValidatingEventArgs e)
+        {
 
-            if (e.Key is Key.Enter || e.Key is Key.Tab ||
-                e.Key is Key.LeftShift ||
-                e.Key is Key.CapsLock ||
-                e.Key is Key.Right ||
-                e.Key is Key.LeftAlt ||
-                e.Key is Key.RightAlt)
-            { /* Not Changed */ }
-            else
-            {
-                //Change Happend
-                ChangeIsHappend = true;
-            }
         }
 
-        private void BTN_OPEN_SUB_Click(object sender, RoutedEventArgs e)
-        {
-            var CurrentRow = SYNCFUSION_DG.SelectedItem as TARAZ4_MOIN_MODEL;
-
-            if (CurrentRow != null && CurrentRow?.NUMBER != null)
-            {
-                if (BEDEHBESTANMOIN)
-                {
-                    BEDEHKARAN_BESTANKARAN BedBesha = new BEDEHKARAN_BESTANKARAN();
-                    BedBesha.IsCTRLF9 = true;
-                    BedBesha.KOL_PASSED = (int)(CurrentRow?.N_KOL);
-                    BedBesha.MOIN_PASSED = (int)(CurrentRow?.NUMBER);
-                    BedBesha.Show();
-                }
-                else
-                {
-                    new TARAZ_TAF_DIRECT(DT1, DT2, CurrentRow?.N_KOL.ToString(), CurrentRow?.NUMBER.ToString()).Show();
-                }
-            }
-        }
+        public Visual I_AM_CHEK_VOSUL_LES { get; private set; }
+        public string? OpenArgs { get; }
     }
 }

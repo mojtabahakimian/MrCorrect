@@ -23,6 +23,7 @@ using Prg_Proccessy.FUNCTIONS;
 using System.Windows.Interop;
 using Prg_Proccessy.SQLMODELS;
 using System.Collections.Generic;
+using Prg_Proccessy.MODELS;
 
 namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 {
@@ -70,7 +71,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         //Header Window End;
         #endregion
 
-        public TARAZ_4(string _DT1_, string _DT2_)
+        public TARAZ_4(string _DT1_, string _DT2_, bool _BEDBESKOL_ = false)
         {
             InitializeComponent();
 
@@ -78,6 +79,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
             DT1 = _DT1_;
             DT2 = _DT2_;
+            BEDBESKOL = _BEDBESKOL_;
         }
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
@@ -90,6 +92,8 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         public bool NowIsReady { get; private set; }
         public double? NUMBER_TO_OPEN { get; set; }
         public bool ChangeIsHappend { get; private set; }
+
+        public bool BEDBESKOL { get; set; } = false;
 
         private bool _bl;
         public bool AllowDeletions
@@ -143,9 +147,13 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         {
             Process Prc = ProcLoader.Start();
 
-            CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
-
-            TARAZ_DATA?.Clear();
+            string callername = (this.GetType().Name);
+            if (BEDBESKOL)
+            {
+                LABEL_HEADER.Content = "ليست حسابهای كل محدود شده";
+                callername = (this.GetType().Name + LABEL_HEADER.Content.ToString());
+            }
+            CL_HESABDARI.AMALIYAT_USER(callername);
 
             double SNDNUM1 = 0; // Assuming these are float values.
             double SNDNUM2 = 929292929;
@@ -156,8 +164,18 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                 Forms___FMENU_TARAZ_4___SNDNUM1 = SNDNUM1,
                 Forms___FMENU_TARAZ_4___SNDNUM2 = SNDNUM2
             };
-            //EXEC dbo.TARAZ_4 '10000101', '99991230', '0', '929292929'
-            List<TARAZ_4_MODEL> MasterHead = dbms.DoGetStoreProcedureSQL<TARAZ_4_MODEL>("dbo.TARAZ_4", parameters).ToList();
+
+            TARAZ_DATA?.Clear();
+            List<TARAZ_4_MODEL> MasterHead = new List<TARAZ_4_MODEL>(); //EXEC dbo.TARAZ_4 '10000101', '99991230', '0', '929292929'
+            if (BEDBESKOL) //ليست حسابهاي كل محدود شده
+            {
+                MasterHead = dbms.DoGetDataSQL<TARAZ_4_MODEL>("SELECT  HES_K AS NUMBER , SUM(SumOfBED) AS SumOfBED, SUM(SumOfBES) AS SumOfBES, dbo.TOTA_HES.NAME, dbo.UIIF(SUM(BEDBES), '>', 0, SUM(BEDBES), 0) AS BED,dbo.UIIF(SUM(BEDBES), '>', 0, 0, SUM(BEDBES) * - 1) AS BES FROM dbo.BEDBESMAH" + Baseknow.USERCOD + " INNER JOIN dbo.TOTA_HES ON HES_K = dbo.TOTA_HES.NUMBER GROUP BY HES_K, dbo.TOTA_HES.NAME ORDER BY HES_K").ToList();
+            }
+            else
+            {
+                MasterHead = dbms.DoGetStoreProcedureSQL<TARAZ_4_MODEL>("dbo.TARAZ_4", parameters).ToList(); //EXEC dbo.TARAZ_4 '10000101', '99991230', '0', '929292929'
+            }
+
             foreach (var item in MasterHead)
             {
                 //Fix:
@@ -166,7 +184,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                 item.bed = Math.Truncate(item.bed ?? 0);
                 item.bes = Math.Truncate(item.bes ?? 0);
 
-                TARAZ_DATA.Add(item);
+                TARAZ_DATA?.Add(item);
             }
 
             GenerateAutomaticSummary(SYNCFUSION_DG);
@@ -606,7 +624,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
             if (CurrentRow != null && CurrentRow?.NUMBER != null)
             {
-                new TARAZ_4_MOIN(DT1,DT2, CurrentRow?.NUMBER.ToString()).Show();
+                new TARAZ_4_MOIN(DT1, DT2, CurrentRow?.NUMBER.ToString(), BEDBESKOL).Show();
             }
         }
     }

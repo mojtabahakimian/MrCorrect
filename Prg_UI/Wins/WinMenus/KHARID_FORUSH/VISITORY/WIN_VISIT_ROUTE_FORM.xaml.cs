@@ -949,7 +949,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
             if (NewRecord && RowExisting != null)
             {
-                Msgwin msgwin0 = new Msgwin(true, $"این مسیر ویزیت به نام '{HES.Text}' از قبل وجود دارد , امکان اضافه کردن اطلاعات تکراری نیست!");
+                Msgwin msgwin0 = new Msgwin(false, $"این مسیر ویزیت به نام '{HES.Text}' از قبل وجود دارد , امکان اضافه کردن اطلاعات تکراری نیست!");
                 _ = msgwin0.ShowDialog();
                 return false;
             }
@@ -1542,7 +1542,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             }
             catch (Exception)
             {
-                new Msgwin(false, "خطا در انجام عملیات حذف!").ShowDialog(); return;
+                new Msgwin(false, "خطا در انجام عملیات ذخیره!").ShowDialog(); return;
             }
             if (idd != null) //So Much Important
             {

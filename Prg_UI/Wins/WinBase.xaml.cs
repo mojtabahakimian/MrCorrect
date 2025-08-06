@@ -16,6 +16,7 @@ using Prg_Proccessy.FUNCTIONS;
 using System.Linq;
 using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
+using static Wins.WinOther.SEARCHMENIU_WIN;
 
 namespace Prg_UI.Wins
 {
@@ -40,7 +41,7 @@ namespace Prg_UI.Wins
                                                        CROSS JOIN dbo.DEPART
                                                    WHERE (dbo.SHIFT.SHIFT_ID = {CL_Generaly.SHIFT_OF_USER}) AND (dbo.DEPART.DEPATMAN = {CL_Generaly.VAHED_OF_USER});").FirstOrDefault();
 
-            LBL_VahedAndShift.Content = $"واحد (دپارتمان) : {VSH?.DEPNAME} | شیفت : {VSH?.SHNAME}";
+            LBL_VahedAndShift.Content = $"واحد : {VSH?.DEPNAME?.FixPersianChars()} | شیفت : {VSH?.SHNAME?.FixPersianChars()}";
             VSH = null; dbms = null; //Tiny Clear
 
             this.MaxHeight = CL_LMethods.GetWindowSizeLessTaskbaer();
@@ -1082,6 +1083,26 @@ namespace Prg_UI.Wins
         private void Button_Click_85(object sender, RoutedEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.VISITOR_GOL_REP_MAR, this); //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه (در تاریخ برگشت)
+        }
+
+        private void Button_Click_86(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_TOZIE, this); //تنظیم لیست دستی توضیع
+        }
+
+        private void Button_Click_87(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.VISITOR_DAY_HEAD, this); //تعریف ویزیت روزانه برای ویزیتور
+        }
+
+        private void Button_Click_88(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_VISIT_ROUTE_FORM, this); //تعيين مسير وزيت براي مشتريان
+        }
+
+        private void Button_Click_89(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT, this); //تعریف اعلامیه قیمت
         }
     }
 }

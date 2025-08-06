@@ -154,11 +154,6 @@ namespace Prg_UI.CUC
             get => UnformatText((string)GetValue(TextProperty));
             set
             {
-                if (value is null)
-                {
-                    value = LastValidValue is not null ? LastValidValue.ToString() : "0";
-                }
-
                 if (!string.IsNullOrEmpty(value))
                 {
                     if (!double.TryParse(value, out double parsedValue))
@@ -170,7 +165,6 @@ namespace Prg_UI.CUC
                         value = LastValidValue?.ToString(CultureInfo.InvariantCulture);
                     }
                 }
-
 
                 // Check if the new value exceeds MaxLength
                 if (value != null && MaxLength > 0 && value.Length > MaxLength)

@@ -1,7 +1,6 @@
 ﻿using Functions;
 using MaterialDesignThemes.Wpf;
 using Prg_Proccessy.FUNCTIONS;
-using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
@@ -13,23 +12,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using Wins.WinMenus.ANBAR;
 using static Prg_UI.Functions.CL_LMethods;
 using Syncfusion.Data.Extensions;
 using Syncfusion.UI.Xaml.BulletGraph;
-using Prg_Proccessy.MODELS;
 using Syncfusion.Data;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
-using System.Diagnostics;
 
 namespace Prg_UI.Wins.WinMenus.Checkha
 {

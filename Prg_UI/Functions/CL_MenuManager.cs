@@ -37,7 +37,11 @@ using Prg_Proccessy.FUNCTIONS;
 using Prg_UI.Wins.WinMenus.CONFIGS;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
 using Prg_UI.Wins.WinMenus.BARNAME_RIZI;
+
 using Prg_UI.Wins.WinMenus.SANATI;
+
+using Prg_UI.Wins.WinMenus.Taarif;
+
 
 namespace Functions
 {
@@ -754,6 +758,18 @@ namespace Functions
             /// صدور برگه خروج سایر مواد از انبار
             /// </summary>
             HAVALE_EXIT_SAYER
+            /// <summary>
+            /// لیست چکهای دریافتی سررسید شده
+            /// </summary>
+            F_MENU_CHEK_DCHSS,
+            /// <summary>
+            /// لیست چکهای برگشتی دریافتی
+            /// </summary>
+            F_MENU_CHEK_CHKB,
+            /// <summary>
+            /// تعریف اعلامیه قیمت
+            /// </summary>
+            PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT
         }
         #endregion
 
@@ -763,6 +779,14 @@ namespace Functions
         {
             switch (_TYPE_)
             {
+                //Mojtaba{
+                case WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT: /* تعریف اعلامیه قیمت */ CL_LMethods.OpenWindow(OWNERWIN, new PRICE_ELAMIE_FORM(), isModalDialog: false, allowMultipleInstances: false); break;
+                //Mojtaba}
+
+                case WinNameType.F_MENU_CHEK_CHKB: /* لیست چکهای برگشتی دریافتی */ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_CHEK("chkb", "لیست چکهای برگشتی دریافتی"), isModalDialog: false, allowMultipleInstances: false); break;
+
+                case WinNameType.F_MENU_CHEK_DCHSS: /* لیست چکهای دریافتی سررسید شده */ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_CHEK("dchss", "لیست چکهای دریافتی سررسید شده"), isModalDialog: false, allowMultipleInstances: false); break;
+
                 case WinNameType.AMAR_FROOSH_KOL: /* نمودار فروش کلی */ CL_LMethods.OpenWindow(OWNERWIN, new AMAR_FROOSH_KOL(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_TOZIE: //تنظیم لیست دستی توضیع
@@ -1408,8 +1432,8 @@ namespace Functions
                     break;
 
                 case WinNameType.BEDEHKARAN_BESTANKARAN_LIMITED: //لیست کل بدهکاران و بستانکاران محدود شده
-                    BEDEHKARAN_BESTANKARAN bEDEHKARAN_BESTANKARAN = new BEDEHKARAN_BESTANKARAN(); bEDEHKARAN_BESTANKARAN.IsCTRLF9 = true;
-                    CL_LMethods.OpenWindow(OWNERWIN, bEDEHKARAN_BESTANKARAN, false, false);
+                    //BEDEHKARAN_BESTANKARAN bEDEHKARAN_BESTANKARAN = new BEDEHKARAN_BESTANKARAN(); bEDEHKARAN_BESTANKARAN.IsCTRLF9 = true;
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_DATE("BEDBESM"), false, false);
                     break;
 
                 case WinNameType.F_MENU_ANBAR_FRKH_GRP:  //گزارش حواله انبار گروهی
@@ -1476,7 +1500,7 @@ namespace Functions
                 case WinNameType.VISITOR_GOL_GRP_REP_MAR: //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه (در تاریخ برگشت)
                     CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_GOL_GRP_REP_MAR(), default, false);
                     break;
-                    
+
                 case WinNameType.VISITOR_GOL_REP_MAR: //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه (در تاریخ برگشت)
                     CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_GOL_REP_MAR(), default, false);
                     break;   
