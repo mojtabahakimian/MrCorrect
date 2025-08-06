@@ -6238,7 +6238,22 @@ namespace Prg_Proccessy.FUNCTIONS
                     //RST2.MoveNext();
                     //Wend;
                 }
-                FLS = FLS + "[UP_DATE] [bigint] NOT NULL,[UP_TIME] [float] NOT NULL,[UP_USER_NAME] [nvarchar](40) NULL, [PC_NAME] [nvarchar](50) NULL, [IPADD] [nvarchar](50) NULL,[TRIDD] [int] IDENTITY(1,1) NOT NULL, PRIMARY KEY CLUSTERED([TRIDD] ASC) ON [PRIMARY]) ON [PRIMARY]";
+                //FLS = FLS + "[UP_DATE] [bigint] NOT NULL,[UP_TIME] [float] NOT NULL,[UP_USER_NAME] [nvarchar](40) NULL, [PC_NAME] [nvarchar](50) NULL, [IPADD] [nvarchar](50) NULL,[TRIDD] [int] IDENTITY(1,1) NOT NULL, PRIMARY KEY CLUSTERED([TRIDD] ASC) ON [PRIMARY]) ON [PRIMARY]";//
+
+                // Gather existing column names to avoid adding duplicates
+                var columnNames = RST2.Select(r => r.name.ToUpperInvariant()).ToHashSet();
+                if (!columnNames.Contains("UP_DATE"))
+                    FLS += "[UP_DATE] [bigint] NOT NULL,";
+                if (!columnNames.Contains("UP_TIME"))
+                    FLS += "[UP_TIME] [float] NOT NULL,";
+                if (!columnNames.Contains("UP_USER_NAME"))
+                    FLS += "[UP_USER_NAME] [nvarchar](40) NULL,";
+                if (!columnNames.Contains("PC_NAME"))
+                    FLS += "[PC_NAME] [nvarchar](50) NULL,";
+                if (!columnNames.Contains("IPADD"))
+                    FLS += "[IPADD] [nvarchar](50) NULL,";
+                FLS += "[TRIDD] [int] IDENTITY(1,1) NOT NULL, PRIMARY KEY CLUSTERED([TRIDD] ASC) ON [PRIMARY]) ON [PRIMARY]";
+
                 dbms.DoExecuteSQL(FLS);
                 //DoCmd.RunSQL FLS;
             }
