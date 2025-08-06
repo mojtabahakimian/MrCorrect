@@ -757,7 +757,7 @@ namespace Functions
             /// <summary>
             /// صدور برگه خروج سایر مواد از انبار
             /// </summary>
-            HAVALE_EXIT_SAYER
+            HAVALE_EXIT_SAYER,
             /// <summary>
             /// لیست چکهای دریافتی سررسید شده
             /// </summary>
