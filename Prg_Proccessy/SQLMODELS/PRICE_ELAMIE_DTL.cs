@@ -73,27 +73,25 @@ namespace Prg_Proccessy.SQLMODELS
 
         // --------------------------
         // ICloneable + IEditableObject برای Undo/Cancel
-        private PRICE_ELAMIE_DTL _backupCopy;
-        private bool _inEdit;
 
         public object Clone()
         {
             return this.MemberwiseClone();
         }
 
+        private PRICE_ELAMIE_DTL _backupCopy;
+        private bool _inEdit;
         void IEditableObject.BeginEdit()
         {
             if (_inEdit) return;
             _backupCopy = (PRICE_ELAMIE_DTL)this.Clone();
             _inEdit = true;
         }
-
         void IEditableObject.EndEdit()
         {
             _backupCopy = null;
             _inEdit = false;
         }
-
         void IEditableObject.CancelEdit()
         {
             if (!_inEdit || _backupCopy == null) return;

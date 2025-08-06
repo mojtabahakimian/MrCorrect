@@ -317,17 +317,19 @@ namespace Prg_UI.Wins
 
             Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
 
-            //Baseknow.USERCOD = 139;
-            //Baseknow.UUSER = "negar sadeghi";
+            //Baseknow.USERCOD = 139; Baseknow.UUSER = "negar sadeghi";
 
             CL_Generaly.SHIFT_OF_USER = 1;
-            CL_Generaly.VAHED_OF_USER = 1; //1 WAS
+            CL_Generaly.VAHED_OF_USER = 1;
             Baseknow.UGRP = "1";
 
 
-            //new PRICE_ELAMIE_FORM().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT, this);
+            //new PRICE_ELAMIETF_FORM().Show();
+
+
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
 
             //new WinConnectionChoose().ShowDialog();
             //new HEAD_LST_HAVL(4306d).ShowDialog();
