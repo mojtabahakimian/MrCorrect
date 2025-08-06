@@ -178,6 +178,12 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
                     MANBAR = "%";
                 }
             }
+            if (this.DT2.Text.ToRawTarikh().Length < 8)
+            {
+                Msgwin msgwin = new Msgwin(false, "تاریخ صحیح نیست!");
+                msgwin.ShowDialog();
+                return;
+            }
             if (IsNull(this.ANBAR.SelectedValue) && this.OpenArgs != "TANBGRP")
             {
                 Msgwin msgwin = new Msgwin(false, "پارامترها کافی نیست!");
