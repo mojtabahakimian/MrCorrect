@@ -2761,8 +2761,10 @@ namespace Prg_UI.Functions
             {
                 try
                 {
+                    string AnbarCondition = string.IsNullOrEmpty(ANBAR) ? "" : $" AND (dbo.STUF_FSK.ANBAR = {ANBAR}) ";
+
                     //اگر عدد وارد کرده برم سرغ کد کالا
-                    var FoundKala = dbms.DoGetDataSQL<INVO_LST_FACTOR22>($"SELECT TOP (1) dbo.STUF_FSK.CODE, dbo.STUF_DEF.NAME AS NAME_CODE FROM dbo.STUF_DEF INNER JOIN dbo.STUF_FSK ON dbo.STUF_DEF.CODE = dbo.STUF_FSK.CODE WHERE (dbo.STUF_DEF.CODE = N'{KALA_TEXT}') AND (dbo.STUF_FSK.ANBAR = {ANBAR})").FirstOrDefault();
+                    var FoundKala = dbms.DoGetDataSQL<INVO_LST_FACTOR22>($"SELECT TOP (1) dbo.STUF_FSK.CODE, dbo.STUF_DEF.NAME AS NAME_CODE FROM dbo.STUF_DEF INNER JOIN dbo.STUF_FSK ON dbo.STUF_DEF.CODE = dbo.STUF_FSK.CODE WHERE (dbo.STUF_DEF.CODE = N'{KALA_TEXT}') {AnbarCondition} ").FirstOrDefault();
                     if (!ReferenceEquals(FoundKala, null))
                     {
                         return FoundKala;
@@ -2770,7 +2772,7 @@ namespace Prg_UI.Functions
                     else
                     {
                         //شماره فنی
-                        var rstfani = dbms.DoGetDataSQL<INVO_LST_FACTOR22>($"SELECT TOP (1) dbo.STUF_FSK.CODE, dbo.STUF_DEF.NAME NAME_CODE FROM dbo.STUF_DEF INNER JOIN dbo.STUF_FSK ON dbo.STUF_DEF.CODE = dbo.STUF_FSK.CODE WHERE  dbo.STUF_DEF.CODE = N''+(SELECT TOP 1 CODE FROM STUF_DEF WHERE dbo.STUF_DEF.CODE = N'' +(SELECT TOP 1 CODE FROM STUF_DEF WHERE N_FANI = N'{KALA_TEXT}')+'') AND dbo.STUF_FSK.ANBAR = {ANBAR}").FirstOrDefault();
+                        var rstfani = dbms.DoGetDataSQL<INVO_LST_FACTOR22>($"SELECT TOP (1) dbo.STUF_FSK.CODE, dbo.STUF_DEF.NAME NAME_CODE FROM dbo.STUF_DEF INNER JOIN dbo.STUF_FSK ON dbo.STUF_DEF.CODE = dbo.STUF_FSK.CODE WHERE  dbo.STUF_DEF.CODE = N''+(SELECT TOP 1 CODE FROM STUF_DEF WHERE dbo.STUF_DEF.CODE = N'' +(SELECT TOP 1 CODE FROM STUF_DEF WHERE N_FANI = N'{KALA_TEXT}')+'') {AnbarCondition}").FirstOrDefault();
                         if (rstfani != null)
                         {
                             return rstfani;
