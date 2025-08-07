@@ -184,7 +184,7 @@
                 </DataGrid.Columns>
                 <DataGrid.RowDetailsTemplate>
                     <DataTemplate>
-                        <DataGrid x:Name="SUB_EXPTF"
+                        <DataGrid x:Name="SUB_EXPTF" IsReadOnly="{Binding Path=IsReadOnly,ElementName=DG_SUB,UpdateSourceTrigger=PropertyChanged}"
                                   ItemsSource="{Binding SUB_DETAIL_EXP}" 
                                   HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                                   VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
@@ -203,29 +203,61 @@
                             </DataGrid.ColumnHeaderStyle>
 
                             <DataGrid.Columns>
-                                <!--<DataGridComboBoxColumn x:Name="CODE_COLUMN"  Width="250" Header="کالای مشمول تخفیف استثنا" Visibility="Visible"
-                                                        SelectedValueBinding="{Binding CODE, UpdateSourceTrigger=LostFocus}" DisplayMemberPath="PPAME" SelectedValuePath="PPID">
-                                    <DataGridComboBoxColumn.EditingElementStyle>
-                                        <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
-                                            <Setter Property="IsEditable" Value="True"/>
-                                            <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
-                                            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
-                                            <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
-                                            <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
-                                        </Style>
-                                    </DataGridComboBoxColumn.EditingElementStyle>
-                                    <DataGridComboBoxColumn.ElementStyle>
-                                        <Style TargetType="{x:Type ComboBox}">
-                                        </Style>
-                                    </DataGridComboBoxColumn.ElementStyle>
-                                </DataGridComboBoxColumn>-->
 
-                                <DataGridComboBoxColumn Header="کالای مشمول تخفیف استثنا" Width="auto" MinWidth="100" SelectedValueBinding="{Binding CODE, UpdateSourceTrigger=PropertyChanged}"
+                                <DataGridTemplateColumn Header="کالای مشمول تخفیف استثنا" Width="350" Visibility="Visible">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Text, ElementName=THECMB, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
+                                                <ComboBox x:Name="THECMB"
+                                                          ItemsSource="{Binding DataContext.CODE_ROWSOURCE, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                          DisplayMemberPath="NAME" SelectedValuePath="CODE"
+                                                          Visibility="Collapsed"
+                                                          IsEditable="True"
+                                                          Width="auto"
+                                                          SelectedValue="{Binding CODE, UpdateSourceTrigger=PropertyChanged}">
+                                                    <ComboBox.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                                        </ItemsPanelTemplate>
+                                                    </ComboBox.ItemsPanel>
+                                                </ComboBox>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{Binding DataContext.CODE_ROWSOURCE, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                      DisplayMemberPath="NAME" SelectedValuePath="CODE"
+                                                      IsEditable="True"
+                                                      Width="auto"
+                                                      SelectedValue="{Binding CODE, UpdateSourceTrigger=PropertyChanged}">
+                                                <ComboBox.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                                    </ItemsPanelTemplate>
+                                                </ComboBox.ItemsPanel>
+                                            </ComboBox>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTextColumn Header="کد کالا" Width="80" MinWidth="80" Binding="{Binding CODE,UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True">
+                                    <DataGridTextColumn.CellStyle>
+                                        <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                            <Setter Property="Focusable" Value="False"/>
+                                            <Setter Property="KeyboardNavigation.IsTabStop" Value="False"/>
+                                            <Setter Property="IsTabStop"  Value="False"/>
+                                        </Style>
+                                    </DataGridTextColumn.CellStyle>
+                                </DataGridTextColumn>
+
+                                <!--<DataGridComboBoxColumn Header="کالای مشمول تخفیف استثنا" Width="auto" MinWidth="100" SelectedValueBinding="{Binding CODE, UpdateSourceTrigger=PropertyChanged}"
                                                         DisplayMemberPath="NAME"
                                                         SelectedValuePath="CODE">
                                     <DataGridComboBoxColumn.ElementStyle>
-                                        <Style TargetType="ComboBox" >
-                                            <Setter Property="IsEditable" Value="True" />
+                                        <Style TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                            <Setter Property="IsEditable" Value="False" />
                                             <Setter Property="ItemsSource" Value="{Binding DataContext.CODE_ROWSOURCE, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
                                             <Setter Property="ItemsPanel" Value="{StaticResource VSP}" />
                                             <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True" />
@@ -241,7 +273,7 @@
                                             <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling" />
                                         </Style>
                                     </DataGridComboBoxColumn.EditingElementStyle>
-                                </DataGridComboBoxColumn>
+                                </DataGridComboBoxColumn>-->
 
                                 <DataGridTextColumn x:Name="EXCEPTION_TF1_COL" Header="تخفیف اول" Binding="{Binding EXCEPTION_TF1, UpdateSourceTrigger=LostFocus, StringFormat={}{0:N2}}" Width="120">
                                     <DataGridTextColumn.EditingElementStyle>

@@ -324,12 +324,12 @@ namespace Prg_UI.Wins
             Baseknow.UGRP = "1";
 
 
-            //new PRICE_ELAMIETF_FORM().Show();
+            new PRICE_ELAMIETF_FORM().Show();
 
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
 
             //new WinConnectionChoose().ShowDialog();
             //new HEAD_LST_HAVL(4306d).ShowDialog();

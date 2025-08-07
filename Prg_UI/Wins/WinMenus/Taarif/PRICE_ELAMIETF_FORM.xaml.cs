@@ -34,6 +34,7 @@ using Prg_Proccessy.Generaly;
 using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
 using Microsoft.VisualBasic;
 using static Prg_UI.Functions.CL_LMethods;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 namespace Prg_UI.Wins.WinMenus.Taarif
 {
@@ -359,6 +360,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
             FILL_ALL_COMBOBOXES();
 
+            //--PEID is Primary Key --Header Master
             _navigationManager = new NavigationManager<PRICE_ELAMIETF>(
                 dbms,
                 x => x?.PEID?.ToString(),
@@ -741,6 +743,12 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         private void DBXPANDER_Click(object sender, RoutedEventArgs e)
         {
             e.Handled = true; // Get the button that was clicked
+
+            //if (!DG_SUB.IsEnabled || DG_SUB.IsReadOnly)
+            //{
+            //    return;
+            //}
+
             var button = (Button)sender; // Find the clicked row
             DataGridRow dataGridRow = CL_LMethods.FindParent<DataGridRow>((DependencyObject)button); //var dataGridRow = (DataGridRow)GRADE_CUST_TAB_SUB.ItemContainerGenerator.ContainerFromItem(button.DataContext);
             if (dataGridRow != null)
@@ -1101,13 +1109,16 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             if (!NewRecord)
             {
                 //1. Get Parent Rows
+                //--PEID is Parent Key(Foreign)And PETID is Primary Key -- Detail
                 var MasterHead = dbms.DoGetDataSQL<PRICE_ELAMIETF_DTL_MODEL>(@$"SELECT * FROM dbo.PRICE_ELAMIETF_DTL WHERE PEID = @PEID ORDER BY CRT", new { PEID = PEID.Text }).ToList();
 
                 //2. Get Each's Child For each master record, load detail records
                 foreach (var row in MasterHead)
                 {
-                    var detailData = dbms.DoGetDataSQL<PRICE_ELAMIETF_EXCEPTION>("SELECT PEID, CUSTCODE, PPID, TF1, TF2, PETID, TR_DATE, USERNAME, CRT, UID FROM dbo.PRICE_ELAMIETF_DTL " +
-                        "WHERE PEID=@PEID AND CUSTCODE=@CUSTCODE AND PPID=@PPID", new { PEID = row.PEID, CUSTCODE = row.CUSTCODE, PPID = row.PPID });
+                    //--PETID is Parent Key(Foreign)
+                    //SELECT * FROM dbo.PRICE_ELAMIETF_EXCEPTION WHERE PETID = 44-- + Sub Detail
+                    var detailData = dbms.DoGetDataSQL<PRICE_ELAMIETF_EXCEPTION>("SELECT EXCEPTION_ID, PETID, CODE, EXCEPTION_TF1, EXCEPTION_TF2, TR_DATE, USERNAME, CRT, UID FROM dbo.PRICE_ELAMIETF_EXCEPTION " +
+                        "WHERE PETID=@PETID", new { PETID = row.PETID });
 
                     if (detailData != null)
                     {
@@ -1753,40 +1764,86 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 return;
             }
 
-            #region GET_VALUE_FOR_DATAGRID_PROPERTIES
-            DataGridRow row1 = e.Row;
-            var CURRENT_ROW_INDEX = ((DataGrid)sender).ItemContainerGenerator.IndexFromContainer(row1);
-            var CURRENT_ITMES_ROW = e.Row.Item as PRICE_ELAMIETF_EXCEPTION;
-            string ENTERED_VALUE_ROW = "";
+            #region REFILL_CURRENTS
+            ComboBox Comboval = null; TextBox TexboVal = null; CheckBox? CheckVal = null;
             if (!(e.EditingElement is null) && e.EditingElement is TextBox)
             {
-                ENTERED_VALUE_ROW = ((TextBox)e.EditingElement).Text;
-            }
-            if (!(e.EditingElement is null) && e.EditingElement is TextBlock)
-            {
-                ENTERED_VALUE_ROW = ((TextBlock)e.EditingElement).Text;
+                TexboVal = (TextBox)e.EditingElement;
             }
             if (!(e.EditingElement is null))
             {
-                var Comboval = e.EditingElement as ComboBox;
-                if (!ReferenceEquals(Comboval, null))
+                Comboval = e.EditingElement as ComboBox;
+            }
+            if (!ReferenceEquals(Comboval, null))
+            {
+                ENTERED_VALUE_ROW = Comboval?.SelectedValue.ToStringNullSafe();
+            }
+            else if (!ReferenceEquals(TexboVal, null))
+            {
+                ENTERED_VALUE_ROW = TexboVal?.Text?.Trim();
+            }
+
+            var CurrentItemRow = e.Row.Item as PRICE_ELAMIETF_EXCEPTION;
+            if (CurrentItemRow == null)
+            {
+                return;
+            }
+
+            if (!(e.EditingElement is null))
+            {
+                CheckVal = e.EditingElement as CheckBox;
+            }
+
+            if (!ReferenceEquals(Comboval, null))
+                ENTERED_VALUE_ROW = Comboval.SelectedValue.ToStringNullSafe();
+            else if (!ReferenceEquals(CheckVal, null))
+                ENTERED_VALUE_ROW = CheckVal.IsChecked.ToStringNullSafe();
+            else if (!ReferenceEquals(TexboVal, null))
+                ENTERED_VALUE_ROW = TexboVal.Text.Trim();
+
+            ComboBox Kala_Combo = null;
+            if (e.EditingElement is ContentPresenter contentPresenter)
+            {
+                Kala_Combo = contentPresenter.ContentTemplate.FindName("EditCombo", contentPresenter) as ComboBox;
+
+                if (Kala_Combo == null)
                 {
-                    ENTERED_VALUE_ROW = (string)Comboval.SelectedValue;
+                    Kala_Combo = DataGridHelper.FindVisualChild<ComboBox>(contentPresenter);
                 }
-                else
+                if (Kala_Combo != null)
                 {
-                    var comboBox = CL_LMethods.FindParent<ComboBox>(e.EditingElement);
-                    if (comboBox is not null)
-                    {
-                        ENTERED_VALUE_ROW = (comboBox.SelectedValue).ToStringNullSafe();
-                    }
+                    ENTERED_VALUE_ROW = Kala_Combo.Text;
                 }
             }
             #endregion
 
-            if (e.Column.Header.ToString() == "ارزش")
+            if (e.Row.DataContext is STUF_TINY ASDASD)
             {
+
             }
+            //نام مشتری
+            if (e.Column.SortMemberPath == "CODE" || e.Column.Header.ToString() == "کالای مشمول تخفیف استثنا")
+            {
+                var HSC = Kala_Combo?.SelectedItem as STUF_TINY;
+                if (Kala_Combo?.SelectedValue is null || HSC?.NAME != ENTERED_VALUE_ROW) //if is different then
+                {
+                    var _SelectedKala_ = CL_LMethods.GetKalaBySearch(dbms, default, ENTERED_VALUE_ROW);
+
+                    if (string.IsNullOrEmpty(_SelectedKala_?.CODE))
+                    {
+                        SUB_EXPTF_CANCEL_EDIT(sender);
+                        universControl.PopNotifyShowUp($"کالا نمیتواند خالی باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                    }
+                    else
+                    {
+                        CurrentItemRow.CODE = _SelectedKala_.CODE;
+                    }
+                }
+                else
+                {
+                    //CurrentItemRow.NAME_HES = HSC.NAME;
+                }
+            }        
         }
         private void SUB_EXPTF_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
