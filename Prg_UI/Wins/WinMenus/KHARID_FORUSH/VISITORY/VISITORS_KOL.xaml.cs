@@ -69,7 +69,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         //Header Window End;
         #endregion
 
-        public VISITORS_KOL(string dT1, string dT2, string cUST_NO)
+        public VISITORS_KOL(string dT1, string dT2, string cUST_NO, string cONDITION)
         {
             InitializeComponent();
 
@@ -77,6 +77,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             DT2 = dT2;
 
             CUST_NO = cUST_NO;
+            Condition = cONDITION;
 
             DataContext = this;
         }
@@ -124,9 +125,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
         public class Customer : INotifyPropertyChanged
         {
-            public string CUST_NO { get; set; }         
-            public string CUSTNAME { get; set; }        
-            public string CUSTOMER { get; set; }        
+            public string CUST_NO { get; set; }
+            public string CUSTNAME { get; set; }
+            public string CUSTOMER { get; set; }
             public double? mabpur { get; set; }
             public double? MABL_K { get; set; }
             public double? MEGHk { get; set; }
@@ -135,14 +136,14 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             public double? MBAA { get; set; }
             public double? MABMAR { get; set; }
             public double? GHABEL { get; set; }
-            public string? VISNAME { get; set; }           
-            public string? TOZIH { get; set; }             
-            public string? ADDRESS { get; set; }           
-            public string? TEL { get; set; }               
-            public int? TDF { get; set; }                  
-            public string? MOBILE { get; set; }            
-            public string? ROUTE_NAME { get; set; }        
-            public int? OSTANID { get; set; }              
+            public string? VISNAME { get; set; }
+            public string? TOZIH { get; set; }
+            public string? ADDRESS { get; set; }
+            public string? TEL { get; set; }
+            public int? TDF { get; set; }
+            public string? MOBILE { get; set; }
+            public string? ROUTE_NAME { get; set; }
+            public int? OSTANID { get; set; }
             public int? SHAHRID { get; set; }
             public double Darsad => (GHABEL ?? 0) != 0 ? ((mabpur ?? 0) / (GHABEL ?? 0) * 100.0) : 0;
             public double MablaghBaTakhfif => (GHABEL ?? 0) - (MBAA ?? 0);
@@ -174,12 +175,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             public double? MBAA { get; set; }
             public double? MABMAR { get; set; }
             public double? GHABEL { get; set; }
-            public string? VISNAME { get; set; }       
-            public string? TOZIH { get; set; }         
-            public string? CUSTNAME { get; set; }      
-            public string? ADDRESS { get; set; }       
-            public string? TEL { get; set; }           
-            public string? CUSTOMER { get; set; }      
+            public string? VISNAME { get; set; }
+            public string? TOZIH { get; set; }
+            public string? CUSTNAME { get; set; }
+            public string? ADDRESS { get; set; }
+            public string? TEL { get; set; }
+            public string? CUSTOMER { get; set; }
             public string? MOBILE { get; set; }
             public double Darsad => (GHABEL ?? 0) != 0 ? ((mabpur ?? 0) / (GHABEL ?? 0) * 100.0) : 0;
             public double MablaghBaTakhfif => (GHABEL ?? 0) - (MBAA ?? 0);
@@ -210,21 +211,17 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            if (CL_HESABDARI.LETSGO("DEPEMAL"))
-            {
-                if (Condition == "")
-                {
-                    Condition = " WHERE (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
-                }
-                else
-                {
-                    Condition = Condition + " AND  (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
-                }
-
-            }
             // پارامترهای تاریخ و فیلتر را از UI بگیرید
-            var visitors = dbms.DoGetDataSQL<Visitor>("SELECT * FROM dbo.VISITORS_KOL(@start, @end, @filter)@condition", new { start = DT1, end = DT2, filter = CUST_NO , condition = Condition }).ToList();
-            this.VisitorsGrid.ItemsSource = visitors;
+            if (String.IsNullOrEmpty(Condition))
+            {
+                var visitors = dbms.DoGetDataSQL<Visitor>("SELECT * FROM dbo.VISITORS_KOL(@start, @end, @filter)", new { start = DT1, end = DT2, filter = CUST_NO}).ToList();
+                this.VisitorsGrid.ItemsSource = visitors;
+            }
+            else
+            {
+                var visitors = dbms.DoGetDataSQL<Visitor>("SELECT * FROM dbo.VISITORS_KOL(@start, @end, @filter)@condition", new { start = DT1, end = DT2, filter = CUST_NO, condition = Condition }).ToList();
+                this.VisitorsGrid.ItemsSource = visitors;
+            }
         }
 
         private void VisitorsGrid_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)

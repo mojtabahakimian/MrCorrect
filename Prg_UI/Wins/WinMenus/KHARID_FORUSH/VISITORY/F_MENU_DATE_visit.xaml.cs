@@ -1,5 +1,6 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
@@ -123,6 +124,19 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
             FILL_ALL_COMBOBOXES();
 
+            if (CL_HESABDARI.LETSGO("DEPEMAL"))
+            {
+                if (Condition == "")
+                {
+                    Condition = " WHERE (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
+                }
+                else
+                {
+                    Condition = Condition + " AND  (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
+                }
+
+            }
+
             if (OpenArgs == "VISITONE")
             {
                 CUST_NO2.SelectedValue = CL_HESABDARI.GETUSERCO(Convert.ToInt32(Baseknow.USERCOD));
@@ -214,17 +228,17 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 switch (OpenArgs)
                 {
                     case "VISITDLV":
-                        new VISITORS_KOL(DT1.Text.ToRawTarikh(),DT2.Text.ToRawTarikh(),Convert.ToString(CUST_NO.SelectedValue is null ? "%" : CUST_NO.SelectedValue)).Show();
+                        new VISITORS_KOL(DT1.Text.ToRawTarikh(),DT2.Text.ToRawTarikh(),Convert.ToString(CUST_NO.SelectedValue is null ? "%" : CUST_NO.SelectedValue),Condition.ToString()).Show();
                         break;
 
                     case "VISITKAL":
 
-                        string sql = $"SELECT * FROM VISITOR_DTL_KALA({DT1.Text.ToRawTarikh()},{DT2.Text.ToRawTarikh()},N'{Convert.ToString(CUST_NO.SelectedValue is null ? "%" : CUST_NO.SelectedValue)}')";
+                        string sql = $"SELECT * FROM VISITOR_DTL_KALA({DT1.Text.ToRawTarikh()},{DT2.Text.ToRawTarikh()},N'{Convert.ToString(CUST_NO.SelectedValue is null ? "%" : CUST_NO.SelectedValue)}') {Condition}";
                         new VISITORS_DTL_KALA(sql).Show();
                         break;
 
                     case "VISITKALMA":
-                         sql = $"SELECT * FROM VISITOR_DTL_KALA_mara({DT1.Text.ToRawTarikh()},{DT2.Text.ToRawTarikh()},N'{Convert.ToString(CUST_NO.SelectedValue is null ? "%" : CUST_NO.SelectedValue)}')";
+                         sql = $"SELECT * FROM VISITOR_DTL_KALA_mara({DT1.Text.ToRawTarikh()},{DT2.Text.ToRawTarikh()},N'{Convert.ToString(CUST_NO.SelectedValue is null ? "%" : CUST_NO.SelectedValue)}') {Condition}";
 
                         new VISITOR_DTL_KALA_mara(sql).Show();
                         break;
