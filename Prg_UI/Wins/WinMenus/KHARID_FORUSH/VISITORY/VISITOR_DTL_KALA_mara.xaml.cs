@@ -95,7 +95,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         public ObservableCollection<VDKM> VISITOR_DTL_KALA_mara_DATA { get; set; } = new ObservableCollection<VDKM>();
         public bool NowIsReady { get; private set; }
         public string SQL_DATA { get; private set; }
-        public string Condition { get; private set; } = "";
         public class VDKM
         {
             public int? CODE { get; set; }
@@ -130,18 +129,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            if (CL_HESABDARI.LETSGO("DEPEMAL"))
-            {
-                if (Condition == "")
-                {
-                    Condition = " WHERE (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
-                }
-                else
-                {
-                    Condition = Condition + " AND  (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
-                }
-
-            }
 
             MENUIT_COLUMN.ItemsSource = dbms.DoGetDataSQL<MIG>("SELECT CODE, NAMES FROM TCODE_MENUITEM").ToList();
 
@@ -149,7 +136,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
             VISITOR_DTL_KALA_mara_DATA?.Clear();
 
-            var MasterHead = dbms.DoGetDataSQL<VDKM>(@$"{SQL_DATA} { Condition}").ToList();
+            var MasterHead = dbms.DoGetDataSQL<VDKM>(@$"{SQL_DATA}").ToList();
 
             foreach (var item in MasterHead)
             {

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AddNewRowText" xml:space="preserve"><value>برای افزودن سطر جدید اینجا کلیک کنید</value></data>
+  <data name="AdvancedFiltersButtonText" xml:space="preserve"><value>فیلترهای پیشرفته</value></data>
+  <data name="After" xml:space="preserve"><value>بعد از</value></data>
+  <data name="AfterOrEqual" xml:space="preserve"><value>بعد یا مساوی</value></data>
+  <data name="AND" xml:space="preserve"><value>و</value></data>
+  <data name="Before" xml:space="preserve"><value>قبل از</value></data>
+  <data name="BeforeOrEqual" xml:space="preserve"><value>قبل یا مساوی</value></data>
+  <data name="BeginsWith" xml:space="preserve"><value>شروع شود با</value></data>
+  <data name="Blanks" xml:space="preserve"><value>(خالی‌ها)</value></data>
+  <data name="Bottom" xml:space="preserve"><value>پایین:</value></data>
+  <data name="Cancel" xml:space="preserve"><value>انصراف</value></data>
+  <data name="ClearFilter" xml:space="preserve"><value>حذف فیلتر</value></data>
+  <data name="Close" xml:space="preserve"><value>بستن</value></data>
+  <data name="ColumnChooserTitle" xml:space="preserve"><value>انتخابگر ستون</value></data>
+  <data name="ColumnChooserWaterMark" xml:space="preserve"><value>(ستونی موجود نیست)</value></data>
+  <data name="Contains" xml:space="preserve"><value>شامل</value></data>
+  <data name="CustomMargin" xml:space="preserve"><value>حاشیه سفارشی</value></data>
+  <data name="CustomMargins" xml:space="preserve"><value>حاشیه‌های سفارشی</value></data>
+  <data name="CustomPageSizes" xml:space="preserve"><value>اندازه‌های صفحهٔ سفارشی</value></data>
+  <data name="CustomSize" xml:space="preserve"><value>اندازهٔ سفارشی</value></data>
+  <data name="DateFilters" xml:space="preserve"><value>فیلترهای تاریخ</value></data>
+  <data name="Done" xml:space="preserve"><value>انجام شد</value></data>
+  <data name="Empty" xml:space="preserve"><value>خالی</value></data>
+  <data name="EndsWith" xml:space="preserve"><value>پایان یابد با</value></data>
+  <data name="EnterValidFilterValue" xml:space="preserve"><value>مقدار معتبر برای فیلتر وارد کنید</value></data>
+  <data name="Equalss" xml:space="preserve"><value>مساوی</value></data>
+  <data name="FitAllColumnsOnOnePage" xml:space="preserve"><value>جا دادن همهٔ ستون‌ها در یک صفحه</value></data>
+  <data name="FitAllRowsOnOnePage" xml:space="preserve"><value>جا دادن همهٔ سطرها در یک صفحه</value></data>
+  <data name="FitGridOnOnePage" xml:space="preserve"><value>جا دادن کل جدول در یک صفحه</value></data>
+  <data name="GreaterThan" xml:space="preserve"><value>بزرگ‌تر از</value></data>
+  <data name="GreaterThanorEqual" xml:space="preserve"><value>بزرگ‌تر یا مساوی</value></data>
+  <data name="GroupDropAreaText" xml:space="preserve"><value>برای گروه‌بندی، عنوان ستون را به اینجا بکشید</value></data>
+  <data name="Height" xml:space="preserve"><value>ارتفاع:</value></data>
+  <data name="LandScapeOrientation" xml:space="preserve"><value>افقی (Landscape)</value></data>
+  <data name="Left" xml:space="preserve"><value>چپ:</value></data>
+  <data name="LessThan" xml:space="preserve"><value>کوچک‌تر از</value></data>
+  <data name="LessThanorEqual" xml:space="preserve"><value>کوچک‌تر یا مساوی</value></data>
+  <data name="MatchCaseToolTip" xml:space="preserve"><value>حساس به بزرگی/کوچکی حروف</value></data>
+  <data name="Moderate" xml:space="preserve"><value>متوسط</value></data>
+  <data name="Narrow" xml:space="preserve"><value>باریک</value></data>
+  <data name="NoItems" xml:space="preserve"><value>هیچ موردی نیست</value></data>
+  <data name="NoMatches" xml:space="preserve"><value>موردی یافت نشد</value></data>
+  <data name="Normal" xml:space="preserve"><value>عادی</value></data>
+  <data name="NoScaling" xml:space="preserve"><value>بدون مقیاس</value></data>
+  <data name="NotContains" xml:space="preserve"><value>شامل نباشد</value></data>
+  <data name="NotEmpty" xml:space="preserve"><value>خالی نباشد</value></data>
+  <data name="NotEquals" xml:space="preserve"><value>نامساوی</value></data>
+  <data name="NotNull" xml:space="preserve"><value>نال نباشد</value></data>
+  <data name="Null" xml:space="preserve"><value>نال</value></data>
+  <data name="NumberFilters" xml:space="preserve"><value>فیلترهای عددی</value></data>
+  <data name="OK" xml:space="preserve"><value>تأیید</value></data>
+  <data name="OR" xml:space="preserve"><value>یا</value></data>
+  <data name="PortraitOrientation" xml:space="preserve"><value>عمودی (Portrait)</value></data>
+  <data name="Print" xml:space="preserve"><value>چاپ</value></data>
+  <data name="PrintPreview" xml:space="preserve"><value>پیش‌نمایش چاپ</value></data>
+  <data name="QuickPrint" xml:space="preserve"><value>چاپ سریع</value></data>
+  <data name="Right" xml:space="preserve"><value>راست:</value></data>
+  <data name="RowErrorMessage" xml:space="preserve"><value>سطر حاوی خطا</value></data>
+  <data name="Search" xml:space="preserve"><value>جستجو</value></data>
+  <data name="SelectAll" xml:space="preserve"><value>(انتخاب همه)</value></data>
+  <data name="SelectDateToolTip" xml:space="preserve"><value>انتخاب تاریخ</value></data>
+  <data name="ShowRowsWhere" xml:space="preserve"><value>نمایش سطرهایی که:</value></data>
+  <data name="SortDateAscending" xml:space="preserve"><value>مرتب‌سازی از قدیمی به جدید</value></data>
+  <data name="SortDateDescending" xml:space="preserve"><value>مرتب‌سازی از جدید به قدیمی</value></data>
+  <data name="SortNumberAscending" xml:space="preserve"><value>مرتب‌سازی از کوچک به بزرگ</value></data>
+  <data name="SortNumberDescending" xml:space="preserve"><value>مرتب‌سازی از بزرگ به کوچک</value></data>
+  <data name="SortStringAscending" xml:space="preserve"><value>مرتب‌سازی از الف تا ی</value></data>
+  <data name="SortStringDescending" xml:space="preserve"><value>مرتب‌سازی از ی تا الف</value></data>
+  <data name="TextFilters" xml:space="preserve"><value>فیلترهای متنی</value></data>
+  <data name="Top" xml:space="preserve"><value>بالا:</value></data>
+  <data name="Wide" xml:space="preserve"><value>عریض</value></data>
+  <data name="Width" xml:space="preserve"><value>عرض:</value></data>
+  <data name="CantDropHere" xml:space="preserve"><value>امکان رها کردن در اینجا نیست</value></data>
+  <data name="DraggingRowsCount" xml:space="preserve"><value>تعداد سطرهای در حال کشیدن:</value></data>
+  <data name="DropAbove" xml:space="preserve"><value>رها کردن در بالا</value></data>
+  <data name="DropAsChild" xml:space="preserve"><value>رها کردن به‌عنوان فرزند</value></data>
+  <data name="DropBelow" xml:space="preserve"><value>رها کردن در پایین</value></data>
+  <data name="DropStatus" xml:space="preserve"><value>وضعیت رهاسازی:</value></data>
+  <data name="NotBeginsWith" xml:space="preserve"><value>شروع نشود با</value></data>
+  <data name="NotEndsWith" xml:space="preserve"><value>پایان نیابد با</value></data>
+</root>
