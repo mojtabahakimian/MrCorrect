@@ -828,6 +828,10 @@ namespace Wins.WinMenus.ANBAR
 
             #region Not_In_List
             TextBox CUTSNO_TEX = (TextBox)CUST_NO.Template.FindName("PART_EditableTextBox", CUST_NO);
+            if (CUTSNO_TEX is null)
+            {
+                return;
+            }
             if (CUTSNO_TEX.Text is null || CUTSNO_TEX.Text == "")
             {
                 Msgwin msgwin = new Msgwin(false, "مشتری نباید خالی باشد");

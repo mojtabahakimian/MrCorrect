@@ -2,12 +2,8 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Windows;
-using System.Windows.Media.Imaging;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Linq;
-using System.Diagnostics;
 using System.Windows.Forms;
 using Prg_Proccessy.MODELS;
 
@@ -48,8 +44,9 @@ namespace Functions
                             }
 
                             // Save with compression
-                            var encoderParameters = new EncoderParameters(1);
-                            encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, 85L);
+                            using var encoderParameters = new EncoderParameters(1);
+                            using var qualityParameter = new EncoderParameter(Encoder.Quality, 85L);
+                            encoderParameters.Param[0] = qualityParameter;
                             var codec = GetEncoderInfo("image/jpeg");
 
                             bitmap.Save(fullPath, codec, encoderParameters);
@@ -100,8 +97,9 @@ namespace Functions
                                 }
 
                                 // Save with compression
-                                var encoderParameters = new EncoderParameters(1);
-                                encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, 85L);
+                                using var encoderParameters = new EncoderParameters(1);
+                                using var qualityParameter = new EncoderParameter(Encoder.Quality, 85L);
+                                encoderParameters.Param[0] = qualityParameter;
                                 var codec = GetEncoderInfo("image/jpeg");
 
                                 bitmap.Save(fullPath, codec, encoderParameters);
@@ -113,7 +111,7 @@ namespace Functions
                     }
                 });
 
-                return null;
+                return fullPath;
             }
             catch
             {

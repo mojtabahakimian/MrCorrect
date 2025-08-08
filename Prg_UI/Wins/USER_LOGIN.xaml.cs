@@ -12,9 +12,7 @@ using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.Scriptses;
 using Prg_UI.Wins.WinMenus.ANBAR;
-using Prg_UI.Wins.WinMenus.CONFIGS;
 using Prg_UI.Wins.WinMenus.HESABDARI;
-using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
 using Prg_UI.Wins.WinMenus.Taarif;
@@ -26,6 +24,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -33,13 +32,10 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Wins.WinMenus.ANBAR;
 using Wins.WinMenus.HESABDARI;
-using Wins.WinMenus.HESABDARI.GOZARESHAT;
 using Wins.WinMenus.KHARID_FORUSH;
-using Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
 using Wins.WinMenus.Taarif;
 using Wins.WinSetting;
 using static Functions.SMSService.SmsServiceFactory;
-using PGET_HED = Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED;
 
 namespace Prg_UI.Wins
 {
@@ -128,6 +124,48 @@ namespace Prg_UI.Wins
             ThemeExtensions.SetBaseTheme(theme, isDarkMode ? BaseTheme.Dark : BaseTheme.Light);
             theme.SetPrimaryColor((Color)ColorConverter.ConvertFromString(primaryColor));
             paletteHelper.SetTheme(theme);
+        }
+        private static void IncreaseMemoryDesktopHeapExhaustion()
+        {
+            try
+            {
+                if (CL_LMethods.IsCurrentAdministrator())
+                {
+
+                    const string regPath = @"SYSTEM\CurrentControlSet\Control\Session Manager\SubSystems";
+                    const string valueName = "Windows";
+                    const string desiredSharedSection = "SharedSection=1024,20480,1024";
+
+                    using (RegistryKey key = Microsoft.Win32.Registry.LocalMachine?.OpenSubKey(regPath, true))
+                    {
+                        if (key != null)
+                        {
+                            string winValue = key.GetValue(valueName)?.ToString();
+                            if (!string.IsNullOrEmpty(winValue))
+                            {
+                                // مقدار SharedSection فعلی را پیدا کن
+                                var rx = new Regex(@"SharedSection=\d+,\d+,\d+");
+                                var match = rx.Match(winValue);
+                                if (match.Success)
+                                {
+                                    if (match.Value != desiredSharedSection)
+                                    {
+                                        // جایگزینی مقدار
+                                        string newWinValue = rx.Replace(winValue, desiredSharedSection);
+                                        key.SetValue(valueName, newWinValue, RegistryValueKind.String);
+                                    }
+                                }
+                                else
+                                {
+                                    // اگر نبود، اضافه کن
+                                    key.SetValue(valueName, winValue + " " + desiredSharedSection, RegistryValueKind.String);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
         }
         public USER_LOGIN()
         {
@@ -237,6 +275,8 @@ namespace Prg_UI.Wins
 
             WasUser();
 
+            IncreaseMemoryDesktopHeapExhaustion();
+
             var RST = dbms.DoGetDataSQL<SAZMAN>($"SELECT SMS_USERNAME,SMS_PASSWORD ,SMS_LIBKEY , SMS_TSMSHOST , DSMS , PRMFR , SMSACT , SMS_OWNER , SMSTYPE FROM dbo.SAZMAN").FirstOrDefault();
             if (RST != null)
             {
@@ -324,10 +364,23 @@ namespace Prg_UI.Wins
             Baseknow.UGRP = "1";
 
 
-            new PRICE_ELAMIETF_FORM().Show();
+            //new PRICE_ELAMIETF_FORM().Show();
+
+            //فاکتور برگشت فروش (آزاد) رسید شده TAG = 25
+            new HEAD_LST_BRFR().Show();
+
+            ////فاکتور برگشت خرید آزاد
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK_AZAD, this);
+
+            ////فاکتور برگشت فروش - عادی
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_BACK2, this);
+
+            ////فاکتور برگشت خرید - عادی
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK, this);
 
 
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT, this);
+
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
 
@@ -374,7 +427,6 @@ namespace Prg_UI.Wins
             //CL_PRC_LOADER.HidePreloader();
 
         }
-
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             UIElement uie = e.OriginalSource as UIElement;

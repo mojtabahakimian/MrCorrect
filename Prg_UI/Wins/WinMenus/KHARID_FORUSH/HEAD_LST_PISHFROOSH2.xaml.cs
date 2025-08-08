@@ -2753,15 +2753,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 if (!CL_HESABDARI.BLOCKEDMK(CUST_NO.SelectedValue.ToString()))
                 {
-                    var _rst_ = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(CUST_NO.SelectedValue.ToString()) + ")").FirstOrDefault();
-                    if (_rst_ is null) // if (rst.Count == 0)
-                        MANDAH.Text = "0";
-                    else
+                    if (CUST_NO.SelectedValue != null)
                     {
-                        if (_rst_ > 0)
-                            MANDAH.Text = Strings.Format(_rst_, "#,### ريال بدهكار");
-                        else
-                            MANDAH.Text = Strings.Format((_rst_ * -1), "#,### ريال بستانكار");
+                        MANDAH.Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
                     }
                 }
             }
@@ -3621,7 +3615,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             if (CUST_NO.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
             TextBox CUTSNO_TEX = (TextBox)CUST_NO.Template.FindName("PART_EditableTextBox", CUST_NO);
-
+            if (CUTSNO_TEX is null)
+            {
+                return;
+            }
             if (CUST_NO.SelectedValue is not null)
             {
                 if ((CUST_NO.SelectedItem as Custom_CUST_HESAB).NAME == CUTSNO_TEX.Text)

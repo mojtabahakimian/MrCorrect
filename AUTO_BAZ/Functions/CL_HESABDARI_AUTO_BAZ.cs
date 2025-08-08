@@ -9366,7 +9366,7 @@ namespace AUTO_BAZ.Functions
 
                             dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL (N_S,         HES_K,                  HES_M,      HES_T,          hes,      SHARH,      BED,           NUMBER,   TAG)
                                                              VALUES ({max_ns}, {Baseknow.MOGODIA},    {JST_3[Y].ANBAR}, {JST_3[Y].CODE},  N'{_hes}',N'{_SHARH}',{_BED},{HFRST[ROW].NUMBER} ,4)");
-                            if (Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) != 1d)
+                            if (SafeToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) != 1d)
                             {
                                 if (Generaly.defacc && !ISHESAB(Baseknow.GHEYMAT, Convert.ToDouble(JST_3[Y].CODE), Convert.ToInt64(JST_3[Y].CODE)))
                                 {
@@ -9828,7 +9828,7 @@ namespace AUTO_BAZ.Functions
                         var _iif = Convert.ToDouble(Interaction.IIf(SafeToDouble(Strings.Mid(Baseknow.OPTIONSS, 62, 1)) == 5d, HFRST[ROW].MBAA, 0));
                         if (Math.Round((double)((JAMF - HFRST[ROW].TAKHFIF + _iif) * PRST[S].DARSAD / 100)) != PRST[S].PURSANT)
                         {
-                            var _exprif = Convert.ToDouble(Interaction.IIf(Conversions.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 62, 1)) == 5d, HFRST[ROW].MBAA, 0));
+                            var _exprif = Convert.ToDouble(Interaction.IIf(SafeToDouble(Strings.Mid(Baseknow.OPTIONSS, 62, 1)) == 5d, HFRST[ROW].MBAA, 0));
                             PRST[S].PURSANT = Math.Round((double)((JAMF - HFRST[ROW].TAKHFIF + _exprif) * PRST[S].DARSAD / 100));
 
                             string _where = " WHERE     (NUMBER = " + HFRST[ROW].NUMBER + $") AND (TAG = 4) AND CUST_NO = N'{HFRST[ROW].CUST_NO}' ";
@@ -10479,7 +10479,7 @@ namespace AUTO_BAZ.Functions
                     visitorn = GETTAFNAME(PRST[PRST_EOF].CUST_NO);
                     if ((bool)!PRST[PRST_EOF].STAT)
                     {
-                        double sumu = (double)(JAMF - HFRST[HFRST_EOF].TAKHFIF + Convert.ToDouble(Interaction.IIf(Conversions.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 62, 1)) == 5d, HFRST[HFRST_EOF].MBAA, 0)));
+                        double sumu = (double)(JAMF - HFRST[HFRST_EOF].TAKHFIF + Convert.ToDouble(Interaction.IIf(SafeToDouble(Strings.Mid(Baseknow.OPTIONSS, 62, 1)) == 5d, HFRST[HFRST_EOF].MBAA, 0)));
                         //+ Interaction.IIf(Conversions.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 62, 1)) == 5d, HFRST[HFRST_EOF].MBAA, 0)) * PRST[PRST_EOF].DARSAD / 100;
                         if (Math.Round((double)(sumu * PRST[PRST_EOF].DARSAD / 100)) != PRST[PRST_EOF].PURSANT)
                         {

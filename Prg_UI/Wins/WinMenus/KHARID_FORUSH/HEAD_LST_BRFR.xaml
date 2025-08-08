@@ -62,7 +62,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <TextBox x:Name="NUMBER"  Text="0" Height="28" Margin="0,13,135,0" IsReadOnly="True"   Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="90" Tag="RD" IsTabStop="False" />
+                    <TextBox x:Name="NUMBER" Text="0" Height="28" Margin="0,13,135,0" IsReadOnly="True"   Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="90" Tag="RD" IsTabStop="False" />
                     <xctk:MaskedTextBox x:Name="DATE_N" TabIndex="0"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="28" Margin="0,13,581,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"   HorizontalAlignment="Right" Width="88" PreviewLostKeyboardFocus="DATE_N_PreviewLostKeyboardFocus" PreviewGotKeyboardFocus="DATE_N_PreviewGotKeyboardFocus" />
                     <Label Content="شماره فاکتور برگشت فروش:" Margin="0,13,10,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="125" Height="28" VerticalAlignment="Top"/>
                     <TextBox x:Name="USER_NAME" IsReadOnly="True" Text="نام کاربر" Height="28" Margin="588,422,329,0"   Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" IsTabStop="False" />

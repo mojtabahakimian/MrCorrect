@@ -338,6 +338,10 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             if (CUST_NO != null)
             {
                 TextBox CUTSNO_TEX = (TextBox)CUST_NO.Template.FindName("PART_EditableTextBox", CUST_NO);
+                if (CUTSNO_TEX is null)
+                {
+                    return;
+                }
                 if (CUTSNO_TEX != null && CUST_NO.SelectedValue is not null)
                 {
                     if ((CUST_NO.SelectedItem as CUST_HESAB)?.NAME == CUTSNO_TEX.Text)
@@ -369,7 +373,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 else
                 {
                     var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT    hes FROM dbo.CUST_HESAB WHERE     (hes = N'" + CUTSNO_TEX.Text + "')").FirstOrDefault();
-                    if (!string.IsNullOrEmpty(data.hes))
+                    if (data is not null && !string.IsNullOrEmpty(data.hes))
                     {
                         CUST_NO.SelectedValue = data.hes;
                     }

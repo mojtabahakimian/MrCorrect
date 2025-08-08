@@ -13,6 +13,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="UCC\**" />
+    <EmbeddedResource Remove="UCC\**" />
+    <None Remove="UCC\**" />
+    <Page Remove="UCC\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Assets\IranYekanRG.TTF" />
   </ItemGroup>
 
@@ -55,10 +62,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="UCC\" />
   </ItemGroup>
 
   <ItemGroup>

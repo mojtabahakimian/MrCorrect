@@ -1763,6 +1763,12 @@ namespace Wins.WinMenus.ANBAR
             if (CUST_NO.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
 
             TextBox CUTSNO_TEX = (TextBox)CUST_NO.Template.FindName("PART_EditableTextBox", CUST_NO);
+
+            if (CUTSNO_TEX is null)
+            {
+                return;
+            }
+
             if (CUST_NO.SelectedIndex == -1)
             {
                 if (CUTSNO_TEX.Text == "+" || CUTSNO_TEX.Text == "++")
@@ -1830,7 +1836,7 @@ namespace Wins.WinMenus.ANBAR
                         CUST_NO.SelectedValue = null;
                     }
                 }
-                if (CL_HESABDARI.BLOCKEDCUST(CUST_NO2.SelectedValue.ToString()))
+                if (CL_HESABDARI.BLOCKEDCUST(CUST_NO.SelectedValue?.ToStringNullSafe()))
                 {
                     CUST_NO.SelectedItem = null;
                     universControl.PopNotifyShow(" حساب مسدود گرديده است لطفا با مديريت مالي تماس بگيريد", Pop1, Pop1Text1, Pop_Border1);
