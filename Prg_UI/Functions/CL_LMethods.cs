@@ -42,6 +42,7 @@ using Functions;
 using System.Windows.Data;
 using Prg_UI.Functions.Jostejoo;
 using System.Windows.Media.Effects;
+using System.Security.Principal;
 
 namespace Prg_UI.Functions
 {
@@ -85,6 +86,8 @@ namespace Prg_UI.Functions
                 return true; // همه مثل حالت سازنده‌اند ⇒ کاربر چیزی ننوشته
             }
         }
+
+      
         public static Theme MYTHEME { get; set; }
         /// <summary>
         /// , new WindowInteropHelper(this).Handle |_______________|
@@ -2417,13 +2420,14 @@ namespace Prg_UI.Functions
 
             return null;
         }
-        private static bool IsRunningAsAdmin()
+        public static bool IsCurrentAdministrator()
         {
-            var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
-            var principal = new System.Security.Principal.WindowsPrincipal(identity);
-            return principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
+            using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
+            {
+                WindowsPrincipal principal = new WindowsPrincipal(identity);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
         }
-
         #region ArabicPersianStringComparer
         private const string ArabicYeh = "\u064A";
         private const string PersianYeh = "\u06CC";

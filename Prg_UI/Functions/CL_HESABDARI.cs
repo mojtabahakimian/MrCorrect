@@ -9037,21 +9037,43 @@ namespace Prg_Proccessy.FUNCTIONS
 
             return GetusersematRet;
         }
-
         public static string GETMANDAH(string HES)
         {
-            string GETMANDAHRet = default;
+            string GETMANDAHRet = "0";
             double MMAND = 0;
-            var rst = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES = '" + HES + "')").ToList();
-            if (rst.Count == 0)
+
+            if (dbms == null || string.IsNullOrWhiteSpace(HES)) return "0";
+
+            try
             {
-                GETMANDAHRet = 0.ToString();
+                var sql = "SELECT SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE (HES = @hes)";
+                var result = dbms.DoGetDataSQL<double?>(sql, new { hes = HES })?.FirstOrDefault();
+
+                double mand = 0;
+                if (result != null)
+                {
+                    mand = result ?? 0;
+                }
+
+                MMAND = mand;
+
+                if (mand != 0)
+                {
+                    if (mand > 0)
+                    {
+                        GETMANDAHRet = $"{mand:#,##0} ريال بدهكار";
+                    }
+                    else
+                    {
+                        GETMANDAHRet = $"{Math.Abs(mand):#,##0} ريال بستانكار";
+                    }
+                }
             }
-            else
+            catch
             {
-                MMAND = (double)rst.FirstOrDefault();
-                GETMANDAHRet = Convert.ToString(Interaction.IIf(rst.FirstOrDefault() > 0, Strings.Format(rst.FirstOrDefault(), "#,### ريال بدهكار"), Strings.Format(rst.FirstOrDefault() * -1, "#,### ريال بستانكار")));
+                GETMANDAHRet = "0";
             }
+
             return GETMANDAHRet;
         }
 

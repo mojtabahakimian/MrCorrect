@@ -343,7 +343,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                 //فاکتور
                 DATE_N.IsReadOnly = !ican;// تاریخ
-                NUMBER.IsReadOnly = !ican;// شماره حواله
+                ////NUMBER.IsReadOnly = !ican;// شماره حواله
                 CUST_KIND.IsReadOnly = !ican;// نوع مشتری
                 CUST_NO.IsReadOnly = !ican;// نام مشتری
                 CUST_NO2.IsReadOnly = !ican;// فقط کد مشتری
@@ -355,7 +355,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 TICMBAA.IsEnabled = ican;
 
                 DATE_N.IsEnabled = ican;// تاریخ
-                NUMBER.IsEnabled = ican;// شماره حواله
+                NUMBER1.IsEnabled = ican;// شماره حواله
                 CUST_KIND.IsEnabled = ican;// نوع مشتری
                 CUST_NO.IsEnabled = ican;// نام مشتری
                 CUST_NO2.IsEnabled = ican;// فقط کد مشتری
@@ -556,9 +556,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                     if (manResult.HasValue)
                     {
-                        MANDAH.Text = manResult.Value > 0
-                            ? string.Format("{0:##,# ريال بدهكار}", manResult.Value)
-                            : string.Format("{0:##,# ريال بستانكار}", -manResult.Value);
+                        //MANDAH.Text = manResult.Value > 0 ? string.Format("{0:##,# ريال بدهكار}", manResult.Value) : string.Format("{0:##,# ريال بستانكار}", -manResult.Value);
+
+                        if (CUST_NO.SelectedValue != null)
+                        {
+                            MANDAH.Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
+                        }
                     }
                     else
                     {
@@ -779,6 +782,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             PAY_GETP_SUB_DATA?.Clear(); //چک
             SAYER_VISITOR_DATA?.Clear();
 
+            AllowEdits = true;
+
             GetDefaultFocus();
         }
 
@@ -833,8 +838,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
         private void GetDefaultFocus()
         {
-            NUMBER.Focus();
-            NUMBER.SelectAll();
+            NUMBER1.Focus();
         }
 
         private void ReGetDataMaster(bool IsNumberSelectedNow)
@@ -844,7 +848,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 var HEADER = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER = " + NUMBER.Text + $" AND TAG = {FTAG}").FirstOrDefault();
 
-                if (!((List<QRE_LST_BARGASHT>)NUMBER1.ItemsSource).Any(item => item?.NUMBER == HEADER.NUMBER))
+                if (!((List<QRE_LST_BARGASHT>)NUMBER1.ItemsSource).Any(item => item?.NUMBER == HEADER?.NUMBER))
                 {
                     ((List<QRE_LST_BARGASHT>)NUMBER1.ItemsSource).Add(new QRE_LST_BARGASHT { NUMBER = HEADER.NUMBER });
                 }
@@ -1215,7 +1219,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                 INVO_LST_FACTOR22_DATA?.Clear();
                 foreach (var item in QRE_LST)
-                    INVO_LST_FACTOR22_DATA.Add(item);
+                    INVO_LST_FACTOR22_DATA?.Add(item);
 
             }
         }
@@ -2687,16 +2691,22 @@ namespace Wins.WinMenus.KHARID_FORUSH
             var SANAD_NUMBER = dbms.DoGetDataSQL<string>($"SELECT TOP (1) N_S FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG}").FirstOrDefault();
             if (SANAD_NUMBER != null)
             {
-                var _rst_ = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(CUST_NO.SelectedValue.ToString()) + ")").FirstOrDefault();
-                if (_rst_ is null) // if (rst.Count == 0)
-                    MANDAH.Text = "0";
-                else
+                //var _rst_ = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(CUST_NO.SelectedValue.ToString()) + ")").FirstOrDefault();
+                //if (_rst_ is null) // if (rst.Count == 0)
+                //    MANDAH.Text = "0";
+                //else
+                //{
+                //    if (_rst_ > 0)
+                //        MANDAH.Text = Strings.Format(_rst_, "#,### ريال بدهكار");
+                //    else
+                //        MANDAH.Text = Strings.Format((_rst_ * -1), "#,### ريال بستانكار");
+                //}
+
+                if (CUST_NO.SelectedValue != null)
                 {
-                    if (_rst_ > 0)
-                        MANDAH.Text = Strings.Format(_rst_, "#,### ريال بدهكار");
-                    else
-                        MANDAH.Text = Strings.Format((_rst_ * -1), "#,### ريال بستانكار");
+                    MANDAH.Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
                 }
+
                 N_S.Text = SANAD_NUMBER?.ToString();
                 MABNA.Text = dbms.DoGetDataSQL<string?>($"SELECT TOP (1) BASE FROM dbo.DEED_HED WHERE NO_S = 4 AND N_S = {SANAD_NUMBER}").FirstOrDefault();
             }
@@ -4888,6 +4898,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (NUMBER1.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
             if (NUMBER1.SelectedValue == null)
             {
+                e.Handled = true;
                 universControl.PopNotifyShow("چنین شماره حواله انباری وجود ندارد!", Pop1, Pop1Text1, Pop_Border1);
                 return;
             }

@@ -1412,7 +1412,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             {
                 if (CUST_NO.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
                 TextBox CUTSNO_TEX = (TextBox)CUST_NO.Template.FindName("PART_EditableTextBox", CUST_NO);
-
+                if (CUTSNO_TEX is null)
+                {
+                    return;
+                }
                 if (CUST_NO.SelectedValue is not null)
                 {
                     if ((CUST_NO.SelectedItem as Custom_CUST_HESAB).NAME == CUTSNO_TEX.Text)

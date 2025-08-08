@@ -1625,17 +1625,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 MN.Text = MAN.Text; // مانده روی فاکتور
 
                 //کادر سبز و سند و مانده حساب
-                var rst = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(CUST_NO.SelectedValue.ToString()) + ")").FirstOrDefault();
-                if (rst is null) // if (rst.Count == 0)
+                if (CUST_NO.SelectedValue != null)
                 {
-                    MANDAH.Text = "0";
-                }
-                else
-                {
-                    if (rst > 0)
-                        MANDAH.Text = Strings.Format(rst, "#,### ريال بدهكار");
-                    else
-                        MANDAH.Text = Strings.Format((rst * -1), "#,### ريال بستانكار");
+                    MANDAH.Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
                 }
 
                 if (HEADER_FAC.N_S != null)
@@ -2142,14 +2134,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     {
                         if (!CL_HESABDARI.BLOCKEDMK(CUST_NO.SelectedValue.ToString()))
                         {
-                            var rst = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(this.CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(this.CUST_NO.SelectedValue.ToString()) + ")").FirstOrDefault();
-                            if (rst is null)
+                            if (CUST_NO.SelectedValue != null)
                             {
-                                this.MANDAH.Text = "0";
-                            }
-                            else
-                            {
-                                this.MANDAH.Text = (string)Interaction.IIf(rst > 0, Strings.Format(rst, "##,# ريال بدهكار"), Strings.Format(rst * -1, "##,# ريال بستانكار"));
+                                MANDAH.Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
                             }
                         }
                     }
@@ -2689,7 +2676,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         {
             if (CUST_NO.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
             TextBox CUTSNO_TEX = (TextBox)CUST_NO.Template.FindName("PART_EditableTextBox", CUST_NO);
-
+            if (CUTSNO_TEX is null)
+            {
+                return;
+            }
             if (CUST_NO.SelectedValue is not null)
             {
                 if ((CUST_NO.SelectedItem as Custom_CUST_HESAB).NAME == CUTSNO_TEX.Text)
@@ -6648,7 +6638,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 var view = INVO_LST_sub.Items as IEditableCollectionView;
                 if (view.IsAddingNew) { return; }
 
-                if (CL_LMethods.IsNewPlaceHolder(INVO_LST_sub,INVO_LST_sub.SelectedItem))
+                if (CL_LMethods.IsNewPlaceHolder(INVO_LST_sub, INVO_LST_sub.SelectedItem))
                 {
                     return;
                 }
@@ -7708,7 +7698,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void MasterSummerAndMandeh()
         {
-            NCHK.Text = PAY_GETD_SUB22_DATA.Sum(x => x.MABL).ToString();
+            if (string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text == "0") { return; }
+
+            NCHK.Text = PAY_GETD_SUB22_DATA?.Sum(x => x?.MABL ?? 0).ToString();
 
             JJKOL.Text = SUM_OF_MABL_K.ToString(); //SMABLK //جمع فاکتور :
             HKH.Text = MABL_HAZ.Text; // هزینه خدمات
@@ -7736,17 +7728,24 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             //    //takh.Text = Math.Round(Convert.ToDouble(takh.Text), 2).ToString();
             //}
 
+
             var SANAD_NUMBER = dbms.DoGetDataSQL<string>($"SELECT TOP (1) N_S FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {fTAG}").FirstOrDefault();
-            var _rst_ = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(CUST_NO.SelectedValue.ToString()) + ")").FirstOrDefault();
-            if (_rst_ is null) // if (rst.Count == 0)
-                MANDAH.Text = "0";
-            else
+
+            if (CUST_NO.SelectedValue != null)
             {
-                if (_rst_ > 0)
-                    MANDAH.Text = Strings.Format(_rst_, "#,### ريال بدهكار");
-                else
-                    MANDAH.Text = Strings.Format((_rst_ * -1), "#,### ريال بستانكار");
+                MANDAH.Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
             }
+
+            //var _rst_ = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(CUST_NO.SelectedValue.ToString()) + ")").FirstOrDefault();
+            //if (_rst_ is null) // if (rst.Count == 0)
+            //    MANDAH.Text = "0";
+            //else
+            //{
+            //    if (_rst_ > 0)
+            //        MANDAH.Text = Strings.Format(_rst_, "#,### ريال بدهكار");
+            //    else
+            //        MANDAH.Text = Strings.Format((_rst_ * -1), "#,### ريال بستانكار");
+            //}
             N_S.Text = SANAD_NUMBER?.ToString();
             if (SANAD_NUMBER != null)
             {
@@ -8312,14 +8311,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             //{
             //    SANAD();
             //}
-            var rst = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(this.CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(this.CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(this.CUST_NO.SelectedValue.ToString()) + ")").ToList();
-            if (rst.Count == 0)
+            if (CUST_NO.SelectedValue != null)
             {
-                this.MANDAH.Text = "0";
-            }
-            else
-            {
-                this.MANDAH.Text = (string)Interaction.IIf(rst.FirstOrDefault() > 0, Strings.Format(rst.FirstOrDefault(), "#,### ريال بدهكار"), Strings.Format(rst.FirstOrDefault() * -1, "#,### ريال بستانكار"));
+                MANDAH.Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
             }
         }
         private void MOIN_HAV_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -12423,6 +12417,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
         }
 
-  
+
     }
 }

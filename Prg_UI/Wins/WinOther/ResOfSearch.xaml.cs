@@ -132,6 +132,17 @@ namespace Prg_UI.Wins.WinOther
             }
         }
 
+        private static List<Custom_CUST_HESAB> EnsureItemsSourceList(ComboBox comboBox)
+        {
+            if (comboBox.ItemsSource is List<Custom_CUST_HESAB> list)
+            {
+                return list;
+            }
+
+            list = new List<Custom_CUST_HESAB>();
+            comboBox.ItemsSource = list;
+            return list;
+        }
         private void ResDGR1_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && ResDGR1.Items.Count > 0 && ResDGR1.SelectedItem != null)
@@ -164,14 +175,10 @@ namespace Prg_UI.Wins.WinOther
                             }
 
                             //Safety
-                            if ((List<Custom_CUST_HESAB>)(Win_US as HEAD_LST_PISHFROOSH2).CUST_NO.ItemsSource == null)
+                            var custNoItems = EnsureItemsSourceList((Win_US as HEAD_LST_PISHFROOSH2).CUST_NO);
+                            if (!custNoItems.Any(item => item?.hes == thevalue))
                             {
-                                (Win_US as HEAD_LST_PISHFROOSH2).CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
-                            }
-
-                            if (!((List<Custom_CUST_HESAB>)(Win_US as HEAD_LST_PISHFROOSH2).CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
-                            {
-                                ((List<Custom_CUST_HESAB>)(Win_US as HEAD_LST_PISHFROOSH2).CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
+                                custNoItems.Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
                             }
 
                             (Win_US as HEAD_LST_PISHFROOSH2).CUST_NO.SelectedValue = null;
@@ -257,9 +264,10 @@ namespace Prg_UI.Wins.WinOther
                                 selectedVal.NAME = selectedVal.TNAME;
                             }
 
-                            if (!((List<Custom_CUST_HESAB>)(Win_US as HEAD_LST_HAVL).CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                            var custNoItems = EnsureItemsSourceList((Win_US as HEAD_LST_HAVL).CUST_NO);
+                            if (!custNoItems.Any(item => item?.hes == thevalue))
                             {
-                                ((List<Custom_CUST_HESAB>)(Win_US as HEAD_LST_HAVL).CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
+                                custNoItems.Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
                             }
 
                             (Win_US as HEAD_LST_HAVL).CUST_NO.SelectedValue = null;
@@ -281,9 +289,10 @@ namespace Prg_UI.Wins.WinOther
                                 selectedVal.NAME = selectedVal.TNAME;
                             }
 
-                            if (!((List<Custom_CUST_HESAB>)(Win_US as HEAD_LST_RASID).CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                            var custNoItems = EnsureItemsSourceList((Win_US as HEAD_LST_RASID).CUST_NO);
+                            if (!custNoItems.Any(item => item?.hes == thevalue))
                             {
-                                ((List<Custom_CUST_HESAB>)(Win_US as HEAD_LST_RASID).CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
+                                custNoItems.Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
                             }
 
                             (Win_US as HEAD_LST_RASID).CUST_NO.SelectedValue = null;
@@ -305,9 +314,10 @@ namespace Prg_UI.Wins.WinOther
                                 selectedVal.NAME = selectedVal.TNAME;
                             }
 
-                            if (!((List<Custom_CUST_HESAB>)(Win_US as HEAD_LST_FROOSH22).CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                            var custNoItems = EnsureItemsSourceList((Win_US as HEAD_LST_FROOSH22).CUST_NO);
+                            if (!custNoItems.Any(item => item?.hes == thevalue))
                             {
-                                ((List<Custom_CUST_HESAB>)(Win_US as HEAD_LST_FROOSH22).CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
+                                custNoItems.Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
                             }
 
                             (Win_US as HEAD_LST_FROOSH22).CUST_NO.SelectedValue = null;
@@ -478,9 +488,10 @@ namespace Prg_UI.Wins.WinOther
                                 selectedVal.NAME = selectedVal.TNAME;
                             }
 
-                            if (!((List<Custom_CUST_HESAB>)(Win_US as paymentformorder).CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                            var custNoItems = EnsureItemsSourceList((Win_US as paymentformorder).CUST_NO);
+                            if (!custNoItems.Any(item => item?.hes == thevalue))
                             {
-                                ((List<Custom_CUST_HESAB>)(Win_US as paymentformorder).CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
+                                custNoItems.Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
                             }
 
                             (Win_US as paymentformorder).CUST_NO.SelectedValue = null;
@@ -502,9 +513,10 @@ namespace Prg_UI.Wins.WinOther
                                 selectedVal.NAME = selectedVal.TNAME;
                             }
 
-                            if (!((List<Custom_CUST_HESAB>)(Win_US as paymentformorder).ORDERER.ItemsSource).Any(item => item?.hes == thevalue))
+                            var ordererItems = EnsureItemsSourceList((Win_US as paymentformorder).ORDERER);
+                            if (!ordererItems.Any(item => item?.hes == thevalue))
                             {
-                                ((List<Custom_CUST_HESAB>)(Win_US as paymentformorder).ORDERER.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
+                                ordererItems.Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
                             }
 
                             (Win_US as paymentformorder).ORDERER.SelectedValue = null;
@@ -526,9 +538,10 @@ namespace Prg_UI.Wins.WinOther
                                 selectedVal.NAME = selectedVal.TNAME;
                             }
 
-                            if (!((List<Custom_CUST_HESAB>)(Win_US as HEAD_LST_KHAREED1).CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                            var custNoItems = EnsureItemsSourceList((Win_US as HEAD_LST_KHAREED1).CUST_NO);
+                            if (!custNoItems.Any(item => item?.hes == thevalue))
                             {
-                                ((List<Custom_CUST_HESAB>)(Win_US as HEAD_LST_KHAREED1).CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
+                                custNoItems.Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
                             }
 
                             (Win_US as HEAD_LST_KHAREED1).CUST_NO.SelectedValue = null;
@@ -551,9 +564,10 @@ namespace Prg_UI.Wins.WinOther
                                 selectedVal.NAME = selectedVal.TNAME;
                             }
 
-                            if (!((List<Custom_CUST_HESAB>)(Win_US as HEAD_LST_KHADAMAT).CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                            var custNoItems = EnsureItemsSourceList((Win_US as HEAD_LST_KHADAMAT).CUST_NO);
+                            if (!custNoItems.Any(item => item?.hes == thevalue))
                             {
-                                ((List<Custom_CUST_HESAB>)(Win_US as HEAD_LST_KHADAMAT).CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
+                                custNoItems.Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
                             }
 
                             (Win_US as HEAD_LST_KHADAMAT).CUST_NO.SelectedValue = null;
@@ -576,9 +590,10 @@ namespace Prg_UI.Wins.WinOther
                                 selectedVal.NAME = selectedVal.TNAME;
                             }
 
-                            if (!((List<Custom_CUST_HESAB>)(Win_US as HEAD_LST_KH_BACK_AZAD).CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                            var custNoItems = EnsureItemsSourceList((Win_US as HEAD_LST_KH_BACK_AZAD).CUST_NO);
+                            if (!custNoItems.Any(item => item?.hes == thevalue))
                             {
-                                ((List<Custom_CUST_HESAB>)(Win_US as HEAD_LST_KH_BACK_AZAD).CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
+                                custNoItems.Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
                             }
 
                             (Win_US as HEAD_LST_KH_BACK_AZAD).CUST_NO.SelectedValue = null;
@@ -673,9 +688,10 @@ namespace Prg_UI.Wins.WinOther
                                 selectedVal.NAME = selectedVal.TNAME;
                             }
 
-                            if (!((List<Custom_CUST_HESAB>)(Win_US as HEAD_LST_KH_BACK_AZAD).CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                            var custNoItems = EnsureItemsSourceList((Win_US as HEAD_LST_KH_BACK_AZAD).CUST_NO);
+                            if (!custNoItems.Any(item => item?.hes == thevalue))
                             {
-                                ((List<Custom_CUST_HESAB>)(Win_US as HEAD_LST_KH_BACK_AZAD).CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
+                                custNoItems.Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
                             }
 
                             (Win_US as WIN_F_MENU_KHFR).HMOIN.SelectedValue = null;
@@ -839,9 +855,10 @@ namespace Prg_UI.Wins.WinOther
                                 selectedVal.NAME = selectedVal.TNAME;
                             }
 
-                            if (!((List<Custom_CUST_HESAB>)(Win_US as HAVALAH_ENTER).CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                            var custNoItems = EnsureItemsSourceList((Win_US as HAVALAH_ENTER).CUST_NO);
+                            if (!custNoItems.Any(item => item?.hes == thevalue))
                             {
-                                ((List<Custom_CUST_HESAB>)(Win_US as HAVALAH_ENTER).CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
+                                custNoItems.Add(new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME });
                             }
 
                             (Win_US as HAVALAH_ENTER).CUST_NO.SelectedValue = null;
