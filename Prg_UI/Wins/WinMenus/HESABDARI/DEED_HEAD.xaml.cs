@@ -2060,7 +2060,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 UIElement uie = e.OriginalSource as UIElement;
                 if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
                 {
-                    if (((FrameworkElement)uie).Parent is DataGridCell || uie is DataGridCell) //Is Foucs really inside the DataGrid
+                    if (uie is DataGridCell || (uie as FrameworkElement)?.Parent is DataGridCell)
                     {
                         if (Child14.CurrentColumn is not null)
                         {

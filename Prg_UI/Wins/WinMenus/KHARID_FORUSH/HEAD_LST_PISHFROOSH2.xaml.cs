@@ -453,9 +453,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             FILL_ALL_COMBOBOXES();
 
+            OnOpenHEADLSTPISHFOROOSH2();
+
             ReGetMasterData();
 
-            OnOpenHEADLSTPISHFOROOSH2();
             Form_Open_SUB();
 
             CL_LMethods.SetTabIndexes(
@@ -532,46 +533,51 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     {
                         e.Handled = true;
 
-                        if (INVO_LST_SUB_IsFocused)
+                        try
                         {
-                            if (DG.CurrentColumn != null)
+                            if (INVO_LST_SUB_IsFocused)
                             {
-                                int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                                bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
-                                bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
-                                if (isLastColumn)
+                                if (DG.CurrentColumn != null)
                                 {
-                                    // If it's the last column, move focus to the first cell of next row
-                                    if (isLastRow)
+                                    int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                                    bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                                    bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+                                    if (isLastColumn)
                                     {
-                                        // Add focus to new row if needed
-                                        DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
-
-                                        DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[INVO_LST_SUB_DEF_INDEX_COL]);
-
-                                        Dispatcher.BeginInvoke(new Action(() =>
+                                        // If it's the last column, move focus to the first cell of next row
+                                        if (isLastRow)
                                         {
-                                            DG.BeginEdit();
-                                        }), DispatcherPriority.Background);
+                                            // Add focus to new row if needed
+                                            DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
 
-                                        //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
-                                        var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
-                                        if (focusedWindow != null)
-                                        {
+                                            DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[INVO_LST_SUB_DEF_INDEX_COL]);
+
                                             Dispatcher.BeginInvoke(new Action(() =>
                                             {
-                                                focusedWindow.Activate();
-                                                focusedWindow.Focus();
+                                                DG.BeginEdit();
                                             }), DispatcherPriority.Background);
-                                        }
 
-                                        return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                            //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
+                                            var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                                            if (focusedWindow != null)
+                                            {
+                                                Dispatcher.BeginInvoke(new Action(() =>
+                                                {
+                                                    focusedWindow.Activate();
+                                                    focusedWindow.Focus();
+                                                }), DispatcherPriority.Background);
+                                            }
+
+                                            return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        CL_LMethods.SendKey_US(Key.Tab);
+                            CL_LMethods.SendKey_US(Key.Tab);
+                        }
+                        catch { /*ignore*/ }
+
                     }
                 }
                 else
@@ -2832,13 +2838,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                 if (CL_HESABDARI.LETSGO("elamghe"))
                 {
-                    this.PEPID.IsEnabled = false; //Locked = true;
-                    this.PEID.IsEnabled = false; //Locked = true;
+                    this.PEPID.IsEnabled = true; //Locked = true;
+                    this.PEID.IsEnabled = true; //Locked = true;
                 }
                 else
                 {
-                    this.PEPID.IsEnabled = true; //Locked = false;
-                    this.PEID.IsEnabled = true; //Locked = false;
+                    this.PEPID.IsEnabled = false; //Locked = false;
+                    this.PEID.IsEnabled = false; //Locked = false;
                 }
             }
         }

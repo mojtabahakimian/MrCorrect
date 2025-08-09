@@ -2175,47 +2175,52 @@ namespace Wins.WinMenus.ANBAR
             DataGrid DG = INVO_LST_ENTEGHAL_SUB;
             UIElement uie = e.OriginalSource as UIElement;
 
-            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            try
             {
-                if (IsDataGridCellFocused)
+                if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
                 {
-                    if (DG.CurrentColumn != null)
+                    if (IsDataGridCellFocused)
                     {
-                        int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                        //bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
-                        //bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
-                        if (DG.CurrentColumn is not null)
+                        if (DG.CurrentColumn != null)
                         {
-                            // If it's the last column, move focus to the first cell of next row
-                            if (DG.SelectedIndex == DG.Items.Count - 2 && DG.CurrentColumn.SortMemberPath == "MANDAH")
+                            int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                            //bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                            //bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+                            if (DG.CurrentColumn is not null)
                             {
-                                // Add focus to new row if needed
-                                DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
-
-                                DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[DEFAULTCOL_INDEX_COL]);
-
-                                Dispatcher.BeginInvoke(new Action(() =>
+                                // If it's the last column, move focus to the first cell of next row
+                                if (DG.SelectedIndex == DG.Items.Count - 2 && DG.CurrentColumn.SortMemberPath == "MANDAH")
                                 {
-                                    DG.BeginEdit();
-                                }), DispatcherPriority.Background);
+                                    // Add focus to new row if needed
+                                    DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
 
-                                return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[DEFAULTCOL_INDEX_COL]);
+
+                                    Dispatcher.BeginInvoke(new Action(() =>
+                                    {
+                                        DG.BeginEdit();
+                                    }), DispatcherPriority.Background);
+
+                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                }
                             }
                         }
                     }
-                }
 
-                if (SAVE_BTN.IsFocused)
-                {
-                    //Enter Key Continue
-                }
-                else
-                {
-                    e.Handled = true;
-                    CL_LMethods.SendKey_US(Key.Tab);
-                }
+                    if (SAVE_BTN.IsFocused)
+                    {
+                        //Enter Key Continue
+                    }
+                    else
+                    {
+                        e.Handled = true;
+                        CL_LMethods.SendKey_US(Key.Tab);
+                    }
 
+                }
             }
+            catch { /*ignore*/ }
+
             if (e.Key is Key.Delete && Keyboard.Modifiers == ModifierKeys.None)
             {
                 if (IsDataGridCellFocused)

@@ -172,17 +172,6 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                 UIElement uie = e.OriginalSource as UIElement;
                 if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
                 {
-                    if (((FrameworkElement)uie)?.Parent is DataGridCell || uie is DataGridCell || ((FrameworkElement)uie)?.Name is "PERSONEL") //Is Foucs really inside the DataGrid
-                    {
-                        /////////در این روش کلید تب عمل میکند و حالت فوکوس روی حالت در حال ادیت هست
-                        //if (tASKSDataGrid.SelectedIndex == tASKSDataGrid.Items.Count - 2 && tASKSDataGrid.CurrentColumn.DisplayIndex == 12)
-                        //{
-                        //    tASKSDataGrid.SelectedIndex = tASKSDataGrid.Items.Count - 1;
-                        //    tASKSDataGrid.CurrentCell = new DataGridCellInfo(tASKSDataGrid.SelectedItem, tASKSDataGrid.Columns[2]);
-                        //    //INVO_LST_sub.BeginEdit();
-                        //}
-                    }
-
                     e.Handled = true;
 
                     if (DG_TASKS_IsFocused)

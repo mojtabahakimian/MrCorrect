@@ -9,7 +9,6 @@ namespace Prg_Proccessy.SQLMODELS
         {
             STAT = false;
             DARSAD = 0;
-
         }
         public object Clone()
         {

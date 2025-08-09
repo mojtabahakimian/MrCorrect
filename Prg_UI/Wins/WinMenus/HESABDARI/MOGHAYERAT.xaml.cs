@@ -153,7 +153,8 @@ namespace Wins.WinMenus.HESABDARI
                 else
                 {
                     // Defer the operation until the window is fully rendered
-                    this.Dispatcher.BeginInvoke(new Action(() => {
+                    this.Dispatcher.BeginInvoke(new Action(() =>
+                    {
                         // Try again after the window is fully initialized
                         IntPtr newHandle = new WindowInteropHelper(this).Handle;
                         if (newHandle != IntPtr.Zero)
@@ -227,41 +228,44 @@ namespace Wins.WinMenus.HESABDARI
         {
             DataGrid DG = MOGH_DG;
             UIElement uie = e.OriginalSource as UIElement;
-
-            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            try
             {
-                e.Handled = true;
-
-                if (MOGH_DG_IsFocused)
+                if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
                 {
-                    if (DG.CurrentColumn != null)
+                    e.Handled = true;
+
+                    if (MOGH_DG_IsFocused)
                     {
-                        int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                        bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
-                        bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
-                        if (isLastColumn)
+                        if (DG.CurrentColumn != null)
                         {
-                            // If it's the last column, move focus to the first cell of next row
-                            if (isLastRow)
+                            int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                            bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                            bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+                            if (isLastColumn)
                             {
-                                // Add focus to new row if needed
-                                DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
-
-                                DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[MOGH_DG_DEF_INDEX_COL]);
-
-                                Dispatcher.BeginInvoke(new Action(() =>
+                                // If it's the last column, move focus to the first cell of next row
+                                if (isLastRow)
                                 {
-                                    DG.BeginEdit();
-                                }), DispatcherPriority.Background);
+                                    // Add focus to new row if needed
+                                    DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
 
-                                return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[MOGH_DG_DEF_INDEX_COL]);
+
+                                    Dispatcher.BeginInvoke(new Action(() =>
+                                    {
+                                        DG.BeginEdit();
+                                    }), DispatcherPriority.Background);
+
+                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                }
                             }
                         }
                     }
-                }
 
-                CL_LMethods.SendKey_US(Key.Tab);
+                    CL_LMethods.SendKey_US(Key.Tab);
+                }
             }
+            catch { /*ignore*/ }
 
             if (e.Key is Key.Enter || e.Key is Key.Tab ||
                 e.Key is Key.LeftShift ||
@@ -572,7 +576,7 @@ namespace Wins.WinMenus.HESABDARI
 
             Summing();
 
-            CL_LMethods.FocusCellReadyToEdit(MOGH_DG,"TICK", MOGH_DG.SelectedIndex,false);
+            CL_LMethods.FocusCellReadyToEdit(MOGH_DG, "TICK", MOGH_DG.SelectedIndex, false);
         }
 
         private bool HeaderIsValid(bool _DisplayErrors = true)
@@ -809,7 +813,7 @@ namespace Wins.WinMenus.HESABDARI
 
             universControl.PopNotifyShow($"اطلاعات ذخیره شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
         }
-   
+
         private void CHATP_BTN_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(MONUM.Text) || MONUM.Text == "0")
@@ -817,7 +821,7 @@ namespace Wins.WinMenus.HESABDARI
                 return;
             }
 
-            
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.HESABDARI.MOGHAYERAT.mrt");
             report.Load(pathreport);
@@ -894,6 +898,6 @@ namespace Wins.WinMenus.HESABDARI
 
             Summing();
         }
-    
+
     }
 }

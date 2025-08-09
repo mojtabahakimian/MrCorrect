@@ -1301,7 +1301,7 @@
 
         <!--EndOfHeader ↑-->
 
-        <CNC:RecordNavigatorControl x:Name = "navigatorControl" HorizontalAlignment = "Right" VerticalAlignment = "Bottom" Margin = "0,0,367,7" />
+        <CNC:RecordNavigatorControl x:Name = "navigatorControl" VerticalAlignment = "Bottom" Margin = "395,0,367,7" />
 
 
     </Grid>

@@ -379,52 +379,56 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             //ManageColumnsTabindex(sender, e, "NUMBER", NUMBER_COLUMN_TabStop);
 
-            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            try
             {
-                e.Handled = true;
-
-                if (INVO_LST_RASID_SUB.IsKeyboardFocusWithin)
+                if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
                 {
-                    if (DG.CurrentColumn != null)
+                    e.Handled = true;
+
+                    if (INVO_LST_RASID_SUB.IsKeyboardFocusWithin)
                     {
-                        int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                        bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
-                        bool isLastRow = DG.SelectedIndex >= 0 && DG.SelectedIndex == DG.Items.Count - 2;  //Last Row that is new Empty
-                        if (isLastColumn)
+                        if (DG.CurrentColumn != null)
                         {
-                            // If it's the last column, move focus to the first cell of next row
-                            if (isLastRow)
+                            int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                            bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                            bool isLastRow = DG.SelectedIndex >= 0 && DG.SelectedIndex == DG.Items.Count - 2;  //Last Row that is new Empty
+                            if (isLastColumn)
                             {
-                                if (DG.SelectedIndex < DG.Items.Count - 1) // Ensure there is a valid next row
+                                // If it's the last column, move focus to the first cell of next row
+                                if (isLastRow)
                                 {
-                                    // Add focus to new row if needed
-                                    DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
-
-                                    if (DG.SelectedItem != null)
+                                    if (DG.SelectedIndex < DG.Items.Count - 1) // Ensure there is a valid next row
                                     {
-                                        DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[INVO_LST_SUB_DEF_INDEX_COL]);
-                                    }
-                                }
-                                //Dispatcher.BeginInvoke(new Action(() =>
-                                //{
-                                //    DG.BeginEdit();
-                                //}), DispatcherPriority.Background);
+                                        // Add focus to new row if needed
+                                        DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
 
-                                return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                        if (DG.SelectedItem != null)
+                                        {
+                                            DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[INVO_LST_SUB_DEF_INDEX_COL]);
+                                        }
+                                    }
+                                    //Dispatcher.BeginInvoke(new Action(() =>
+                                    //{
+                                    //    DG.BeginEdit();
+                                    //}), DispatcherPriority.Background);
+
+                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                }
                             }
                         }
                     }
-                }
-                else
-                {
-                    if (BUTTON_SAVE_RASID.IsFocused)
+                    else
                     {
-                        BUTTON_SAVE_RASID_Click(null, null);
-                        return;
+                        if (BUTTON_SAVE_RASID.IsFocused)
+                        {
+                            BUTTON_SAVE_RASID_Click(null, null);
+                            return;
+                        }
                     }
+                    CL_LMethods.SendKey_US(Key.Tab);
                 }
-                CL_LMethods.SendKey_US(Key.Tab);
             }
+            catch { /*ignore*/ }
 
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && e.Key == Key.G) //Just another method
             {
@@ -1226,7 +1230,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 {
 
                 }
-         
+
 
             }
         }
