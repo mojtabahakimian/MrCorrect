@@ -1336,6 +1336,19 @@ namespace Wins.WinMenus.Taarif
 
             if (ROUTE_NAME.SelectedValue != null)
             {
+                var routeName = ROUTE_NAME.SelectedValue.ToString();
+                if (!string.IsNullOrEmpty(routeName) && !string.IsNullOrWhiteSpace(routeName))
+                {
+                    var routeExists = dbms.DoGetDataSQL<int>($"SELECT COUNT(1) FROM dbo.Visit_route WHERE ROUTE_NAME = N'{routeName}'").FirstOrDefault();
+                    if (routeExists == 0)
+                    {
+                        // The route doesn't exist, so create it to prevent FK violation.
+                        //dbms.DoExecuteSQL($"INSERT INTO dbo.Visit_route (ROUTE_NAME) VALUES (N'{routeName}')");
+                        new Msgwin(false, "مسیر ویزیت وارد شده در سیستم موجود نیست").ShowDialog();
+                        return;
+                    }
+                }
+
                 var RST2 = dbms.DoGetDataSQL<VISITOUR_SQL2>("SELECT  DBO.VISIT_ROUTE_DTL.* FROM VISIT_ROUTE_DTL WHERE COUST_NO = '" + HESH + "'").ToList();
                 var rst = dbms.DoGetDataSQL<VISITOUR_SQL2>("SELECT  DBO.VISIT_ROUTE_DTL.* FROM VISIT_ROUTE_DTL WHERE COUST_NO = '" + HESH + "' and ROUTE_NAME = '" + ROUTE_NAME.SelectedValue + "'").ToList();
                 if (RST2.Count > 0)

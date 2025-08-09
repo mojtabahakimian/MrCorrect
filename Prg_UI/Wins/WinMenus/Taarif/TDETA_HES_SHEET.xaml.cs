@@ -642,6 +642,14 @@ namespace Wins.WinMenus.Taarif
                                 return;
                             }
 
+                            var routeExists = dbms.DoGetDataSQL<int?>($"SELECT COUNT(1) FROM dbo.Visit_route WHERE ROUTE_NAME = N'{ENTERED_VALUE_ROW}'").FirstOrDefault();
+                            if (routeExists == null || routeExists == 0)
+                            {
+                                new Msgwin(false, "مسیر ویزیت وارد شده در سیستم موجود نیست").ShowDialog();
+                                TDETA_HES_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                                return;
+                            }
+
                             //ROUTE_NAME_BeforeUpdate
                             var RST2 = dbms.DoGetDataSQL<VISIT_ROUTE_DTL>("SELECT * FROM VISIT_ROUTE_DTL WHERE COUST_NO = '" + N_KOL + "-" + NUMBER + "-" + CURRENT_ROW_ITEMS.TNUMBER + "'").ToList();
                             var RST = dbms.DoGetDataSQL<VISIT_ROUTE_DTL>("SELECT * FROM VISIT_ROUTE_DTL where COUST_NO = '" + N_KOL + "-" + NUMBER + "-" + CURRENT_ROW_ITEMS.TNUMBER + "' AND ROUTE_NAME = '" + ENTERED_VALUE_ROW /*ROUTE_NAME*/ + "'").ToList();

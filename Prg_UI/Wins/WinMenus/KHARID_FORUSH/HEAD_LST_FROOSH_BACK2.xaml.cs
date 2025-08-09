@@ -2611,6 +2611,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                             transaction.Commit();
                             db?.Close();
+
+                            RefreshAfterUpdate();
                         }
                     }
                 }

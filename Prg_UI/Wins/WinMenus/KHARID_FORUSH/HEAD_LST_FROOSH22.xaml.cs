@@ -3091,6 +3091,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 return;
             }
 
+            string tarikhRaw = DATE_N.Text.ToRawTarikh();
+            if (!long.TryParse(tarikhRaw, out long tarikhValue))
+            {
+                universControl.PopNotifyShow(
+                    "تاریخ نمی‌تواند خالی باشد",
+                    Pop1, Pop1Text1, Pop_Border1
+                );
+                return;
+            }
+
             // ۳. گرفتن PEID آخرین اطلاعیه (براساس تاریخ فاکتور و دپارتمان)
             string tarikh = DATE_N.Text.ToRawTarikh();
             int departId = Convert.ToInt32(DEPATMAN.SelectedValue);

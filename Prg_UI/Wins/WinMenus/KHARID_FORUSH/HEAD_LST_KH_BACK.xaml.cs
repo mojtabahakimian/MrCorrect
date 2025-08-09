@@ -12,9 +12,7 @@ using Prg_UI.Functions;
 using Prg_UI.Functions.Jostejoo;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
-using Prg_UI.Wins.WinMenus.ANBAR;
 using Prg_UI.Wins.WinOther;
-using Stimulsoft.Base;
 using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
@@ -33,16 +31,15 @@ using System.Windows.Media;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
 using System.ComponentModel;
-using Stimulsoft.Data.Extensions;
 using Syncfusion.Data.Extensions;
-using System.IO;
-using System.Windows.Media.Imaging;
 using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
 using Rpts;
+using Wins.WinOther;
+using static Interfaces.INavigator;
 
 namespace Wins.WinMenus.KHARID_FORUSH
 {
-    public partial class HEAD_LST_KH_BACK : Window
+    public partial class HEAD_LST_KH_BACK : Window, ISearchableWindow
     {
         #region Header Window Begin
         //Header Window Begin
@@ -159,6 +156,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             if (number_to_open != null)
             {
+                OpenArgs = number_to_open.ToString();
                 NUMBER.Text = number_to_open.ToString(); //شماره رسید
                 NUMBER.UpdateLayout();
             }
@@ -171,6 +169,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
         InventoryManager IVM = new InventoryManager(); //مدیریت موجودی ایزوله
         public ObservableCollection<INVO_LST_FACTOR22> INVO_LST_FACTOR22_DATA { get; set; } = new ObservableCollection<INVO_LST_FACTOR22>();
         public ObservableCollection<PAY_GETD_SUB22_MODEL> PAY_GETD_SUB22_DATA { get; set; } = new ObservableCollection<PAY_GETD_SUB22_MODEL>();
+
+        private NavigationManager<HEAD_LST> _navigationManager;
 
         /// <summary>
         /// 3
@@ -379,7 +379,25 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 MOLAH.IsEnabled = ican;// ملاحظات سربرگ
                 SHIFT.IsEnabled = ican;// شیفت
                 //فاکتور END
-                Page58.IsEnabled = ican;// تب پشت فاکتور
+                //Page58.IsEnabled = ican;// تب پشت فاکتور
+
+                //پشت فاکتور
+                MABL_VAR.IsReadOnly = !ican; //مبلغ واریزی
+                MOIN_VAR.IsReadOnly = !ican; //معین واریزی
+                MABL_HAV.IsReadOnly = !ican; //مبلغ حواله
+                MOIN_HAV.IsReadOnly = !ican; //معین حواله
+                TAKHFIF.IsReadOnly = !ican; //مبلغ تخفیف
+                TAKHFIF_PERCENT.IsReadOnly = !ican; //درصد تخفیف
+                MABL_HAZ.IsReadOnly = !ican; //مبلغ خدمات
+                MOIN_HAZ.IsReadOnly = !ican; //مبلغ خدمات
+                MBAA.IsReadOnly = !ican; //مالیات
+                HMBAA.IsReadOnly = !ican; //معین مالیات
+
+                CMB_MOIN_VAR.IsEnabled = ican; //معین واریزی کمبوباکس
+                CMB_MOIN_HAV.IsEnabled = ican; //معین حواله کمبوباکس
+                CMB_MOIN_HAZ.IsEnabled = ican; //معین خدمات
+                CMB_HMBAA.IsEnabled = ican; //معین خدمات
+
 
                 BTN_SAVE.IsEnabled = ican;
             }
@@ -389,7 +407,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
         public double? NUMBER1_TAG { get; private set; } = null;
         public int ANBARDefaultValue { get; private set; }
         public Visual I_AM_BARGASHT_KH { get; private set; }
-
 
         private void Window_ContentRendered(object sender, EventArgs e)
         {
@@ -408,31 +425,35 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             FILL_ALL_COMBOBOXES();
 
-            if (!string.IsNullOrEmpty(NUMBER.Text.ToStringNullSafe()))
+
+            string WhereCondition = FTAG > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {FTAG}) " : "  ";
+            WhereCondition = CL_LMethods.GetRestrictedSqlQuery(FTAG, WhereCondition);
+
+            _navigationManager = new NavigationManager<HEAD_LST>(
+                dbms,
+                x => x.NUMBER.ToString(), // property selector (used to find a record by its CODE)
+                $"SELECT * FROM HEAD_LST {WhereCondition} ORDER BY NUMBER", //All Record of The Table
+                x => $"SELECT * FROM HEAD_LST WHERE NUMBER = {x?.NUMBER} AND TAG = {FTAG}", //On Change for One Record
+                Convert.ToDouble(NUMBER.Text)
+                );
+
+            if (!string.IsNullOrEmpty(OpenArgs) && _navigationManager.NUMBER_TO_OPEN != null) //Had a paramter passed
             {
-                if (Convert.ToDouble(NUMBER.Text) > 0)
-                {
-                    ReGetDataMaster(false);
-
-
-                    ReGetDataAll();
-
-                    Summer();
-
-                    GetBalancePerson();
-
-                    TAKHFIF_MABL_PRICE();
-
-                    ActivateChaps();
-
-
-                    AllowEdits = false;
-                    BTN_SAVE.IsEnabled = false;
-                    INVO_LST_SUB.IsEnabled = false;
-                    BTN_DELETE.IsEnabled = false;
-                }
+                //یعنی این شماره رو پیدا نکرده که اون رو ریست کنه
+                new Msgwin(false, $"شما به شماره {_navigationManager.NUMBER_TO_OPEN} دسترسی ندارید ").Show();
+                try { this?.Close(); } catch { }
+                return;
             }
-            Form_Current();
+
+            // Hook up the OnInsertRecord event
+            _navigationManager.CurrentRecordChanged += OnCurrentRecordChanged;
+            _navigationManager.OnInsertRecord += OnInsertRecord;
+
+            // Link the navigation manager to the universal control
+            navigatorControl.NavigationManager = _navigationManager;
+
+            // Now raise the initialization events to update the UI
+            _navigationManager.RaiseInitializationEvents();
 
             NUMBER.Focus();
         }
@@ -512,7 +533,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 //this.AllowDeletions = true;
                 //this.AllowEdits = true;
-                //INVO_LST_SUB.IsEnabled = true;
+                //INVO_LST_SUB.IsReadOnly = false;
                 //Page58.IsEnabled = true;
                 //lsanad.Foreground = Brushes.Yellow;
                 //MABNA.Text = null;
@@ -528,8 +549,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         ghat = true;
                         this.AllowDeletions = false;
                         this.AllowEdits = false;
-                        INVO_LST_SUB.IsEnabled = false;
-                        Page58.IsEnabled = false;
+                        INVO_LST_SUB.IsReadOnly = true;
+                        //Page58.IsEnabled = false;
                         //lsanad.Foreground = Brushes.Red;
                     }
                     else
@@ -537,8 +558,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         ghat = false;
                         this.AllowDeletions = true;
                         this.AllowEdits = true;
-                        INVO_LST_SUB.IsEnabled = true;
-                        Page58.IsEnabled = true;
+                        INVO_LST_SUB.IsReadOnly = false;
+                        //Page58.IsEnabled = true;
                         //lsanad.Foreground = Brushes.Yellow;
                     }
                 }
@@ -575,20 +596,20 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             if (NewRecord)
             {
-                Page58.IsEnabled = false;
-                INVO_LST_SUB.IsEnabled = false;
+                //Page58.IsEnabled = false;
+                INVO_LST_SUB.IsReadOnly = true;
             }
             else
             {
                 if (!ghat)
                 {
-                    INVO_LST_SUB.IsEnabled = true;
-                    Page58.IsEnabled = true;
+                    INVO_LST_SUB.IsReadOnly = false;
+                    //Page58.IsEnabled = true;
                 }
                 else
                 {
-                    Page58.IsEnabled = false;
-                    INVO_LST_SUB.IsEnabled = false;
+                    //Page58.IsEnabled = false;
+                    INVO_LST_SUB.IsReadOnly = true;
                 }
             }
 
@@ -599,8 +620,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 this.AllowDeletions = false;
                 this.AllowEdits = false;
-                INVO_LST_SUB.IsEnabled = false;
-                Page58.IsEnabled = false;
+                INVO_LST_SUB.IsReadOnly = true;
+                //Page58.IsEnabled = false;
                 ESLAH.IsEnabled = true;
             }
 
@@ -616,6 +637,119 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
         }
+
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            // Handle the selected item
+            if (selectedItem is HEAD_LST item)
+            {
+                if (item != null)
+                {
+                    //_navigationManager.MoveReGetData(INavigator.Jahat.)
+                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.NUMBER.Equals(Convert.ToDouble(item.NUMBER)));
+                    if (itemfound != null)
+                    {
+                        _navigationManager.IsNewRecord = false;
+
+                        // 1) Find its index in the master list
+                        int idx = _navigationManager.RecordsData.IndexOf(itemfound);
+                        if (idx < 0)
+                        {
+                            // not found (perhaps filtered out?), bail out
+                            new Msgwin(false, "یافت نشد: مورد انتخاب شده در لیست اصلی وجود ندارد").Show();
+                            return;
+                        }
+
+                        // 2) Tell the navigation manager to move to that position
+                        _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+                        //OnCurrentRecordChanged(itemfound);
+                    }
+                }
+            }
+        }
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+           new SearchableProperty { DisplayName = "شماره فاکتور برگشت خرید", PropertyPath = "NUMBER1", PropertyType = typeof(double) },
+           new SearchableProperty { DisplayName = "شماره رسید", PropertyPath = "NUMBER", PropertyType = typeof(double) },
+           new SearchableProperty { DisplayName = "تاریخ", PropertyPath = "DATE_N", PropertyType = typeof(long) },
+           new SearchableProperty { DisplayName = "کد مشتری", PropertyPath = "CUST_NO", PropertyType = typeof(string) },
+           new SearchableProperty { DisplayName = "کاربر", PropertyPath = "USER_NAME", PropertyType = typeof(string) },
+           new SearchableProperty { DisplayName = "ملاحظات", PropertyPath = "MOLAH", PropertyType = typeof(string) },
+           // Add other searchable properties
+       };
+        }
+        #endregion
+
+        private void OnCurrentRecordChanged(HEAD_LST HEADER_FAC)
+        {
+            if (_navigationManager.IsNewRecord)
+            {
+                ClearFreshNew(); //Form_Current(); //should be in this ClearFreshAll(); method too at the end
+            }
+            else if (HEADER_FAC == null)
+            {
+                if (_navigationManager.NUMBER_TO_OPEN != null)
+                {
+                    new Msgwin(false, "چنین شماره ای وجود ندارد").ShowDialog();
+                    return;
+                }
+            }
+            else
+            {
+                if (HEADER_FAC is null)
+                {
+                    new Msgwin(false, "این فاکتور خالی است").Show();
+                    return;
+                }
+                //NewRecord = false; //Currrent Record is not new
+
+                NUMBER.Text = HEADER_FAC.NUMBER.ToString();
+
+                ReGetDataMaster(false);
+
+                ReGetDataAll();
+
+                Summer();
+
+                GetBalancePerson();
+
+                TAKHFIF_MABL_PRICE();
+
+                ActivateChaps();
+
+
+                AllowEdits = false;
+                BTN_SAVE.IsEnabled = false;
+                INVO_LST_SUB.IsReadOnly = true;
+                BTN_DELETE.IsEnabled = false;
+
+                Form_Current();
+            }
+        }
+        private bool OnInsertRecord(HEAD_LST record)
+        {
+            try
+            {
+                var itemtoadd = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 * FROM HEAD_LST  WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG}").FirstOrDefault();
+                record = itemtoadd;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+        private void RefreshAfterUpdate()
+        {
+            var CURRENT_HEADER = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG}").FirstOrDefault();
+            _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
+        }
+
         public void ClearFreshNew()
         {
             NUMBER1.SelectedIndex = -1; NUMBER1.Items.Refresh(); //شماره فاکتور
@@ -631,9 +765,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             CUST_NO.SelectedIndex = -1; CUST_NO.Items.Refresh();
 
-
             DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER; DEPATMAN.Items.Refresh(); //واحد
-
 
             CUST_KIND.SelectedIndex = 0; CUST_KIND.Items.Refresh(); //نوع مشتری 
 
@@ -647,6 +779,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             PERSONEL.SelectedIndex = -1; PERSONEL.Items.Refresh();
             PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
 
+            MOLAH.Text = null;
+
             _sgn1_info.SEMAT_USER = null;
             _sgn1_info.NAME_HESAB_USER = null;
             _sgn2_info.SEMAT_USER = null;
@@ -658,6 +792,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             TEDADM.Text = "0"; //جمع مقادیر
             JJKOL.Text = "0"; //جمع فاکتور
+            FNUMCO.Text = "0";
 
             MANDAH.Text = null;
             N_S.Text = "0"; //ثبت در سند
@@ -688,6 +823,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             GetResids();
 
             Form_Current();
+
+            AllowEdits = true;
         }
         private void ReGetDataMaster(bool IsNumberSelectedNow)
         {
@@ -713,12 +850,15 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 DATE_N.Text = HEADER.DATE_N.ToStringNullSafe(); //تاریخ فاکتور
                 USER_NAME.Text = HEADER.USER_NAME.ToStringNullSafe(); //کاربر
                 DEPATMAN.SelectedValue = HEADER.DEPATMAN; DEPATMAN.Items.Refresh(); //واحد
-                
+
                 TAKHFIF_PERCENT.Text = "0"; //Reset درصد تخفیف برای جلوگیری از تداخل و محاسبه اشتباه
 
                 //مستقیما از فاکتور خرید
                 var _FNUMCO_ = dbms.DoGetDataSQL<double?>($"SELECT FNUMCO FROM dbo.HEAD_LST WHERE NUMBER1 = {NUMBER1.SelectedValue} AND TAG = 12").FirstOrDefault();
-                FNUMCO.Text = _FNUMCO_.ToStringNullSafe();
+                if (_FNUMCO_ > 0)
+                {
+                    FNUMCO.Text = _FNUMCO_.ToStringNullSafe();
+                }
 
                 SGN1.IsChecked = Convert.ToBoolean(HEADER.SGN1);
                 SGN2.IsChecked = Convert.ToBoolean(HEADER.SGN2);
@@ -795,11 +935,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             if (string.IsNullOrEmpty(NUMBER1.Text) || NUMBER1.Text == "0")
             {
-                INVO_LST_SUB.IsEnabled = false;
+                INVO_LST_SUB.IsReadOnly = true;
             }
             else
             {
-                INVO_LST_SUB.IsEnabled = true;
+                INVO_LST_SUB.IsReadOnly = false;
             }
 
             SecurityAllCheck();
@@ -2358,6 +2498,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                             transaction.Commit();
                             db?.Close();
+
+                            RefreshAfterUpdate();
                         }
                     }
                 }
@@ -2407,7 +2549,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             this.OKF.IsChecked = true;
 
             this.INVO_LST_SUB.IsReadOnly = false;
-            this.INVO_LST_SUB.IsEnabled = true;
+            this.INVO_LST_SUB.IsReadOnly = false;
             this.Page58.IsEnabled = true;
 
 
@@ -2456,7 +2598,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             _qre = $@"UPDATE dbo.HEAD_LST
                     SET NUMBER = {NUMBER.Text}, NUMBER1 = {NUMBER1.SelectedValue}, DATE_N = {DATE_N.Text.ToRawTarikh()}, 
                     N_S = {_n_s}, CUST_NO = N'{CUST_NO.SelectedValue}', MOLAH = N'{MOLAH.Text}',
-                    FNUMCO = {FNUMCO.Text}, 
+                    FNUMCO = {(string.IsNullOrEmpty(FNUMCO.Text) ? "0" : FNUMCO.Text)}, 
                     MABL_VAR = {MABL_VAR.Text},
                     MOIN_VAR = N'{CMB_MOIN_VAR.SelectedValue}',
                     MABL_HAV = {MABL_HAV.Text},
@@ -2506,12 +2648,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                         this.AllowDeletions = true;
                         this.AllowEdits = true;
-                        this.INVO_LST_SUB.IsEnabled = true;
+                        this.INVO_LST_SUB.IsReadOnly = false;
                         this.Page58.IsEnabled = true;
 
                         if ((bool)SGN1.IsChecked || (bool)SGN2.IsChecked || (bool)SGN3.IsChecked)
                         {
-                            this.INVO_LST_SUB.IsEnabled = false; //.Locked = true;
+                            this.INVO_LST_SUB.IsReadOnly = true; //.Locked = true;
                             this.PAY_GETD_SUB22.IsEnabled = false;
                             this.DATE_N.IsReadOnly = true;
                             this.MOLAH.IsReadOnly = true;
@@ -2520,7 +2662,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         }
                         else
                         {
-                            this.INVO_LST_SUB.IsEnabled = true;
+                            this.INVO_LST_SUB.IsReadOnly = false;
                             this.PAY_GETD_SUB22.IsEnabled = true;
                             this.MOLAH.IsReadOnly = false;
                             this.DATE_N.IsReadOnly = false;
@@ -2573,11 +2715,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 {
                     try
                     {
-                        dbms.DoExecuteSQL($@"DELETE FROM dbo.HEAD_LST WHERE NUMBER = {NUMBER.Text} AND NUMBER1 = {NUMBER1.Text} AND TAG = {FTAG}");
-
                         SANAD();
 
-                        ClearFreshNew();
+                        dbms.DoExecuteSQL($@"DELETE FROM dbo.HEAD_LST WHERE NUMBER = {NUMBER.Text} AND NUMBER1 = {NUMBER1.Text} AND TAG = {FTAG}");
+
+                        _navigationManager.DeleteCurrentRecord(); //Refresh Record Source //ClearFreshNew();
                     }
                     catch (SqlException ex)
                     {
@@ -2635,6 +2777,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             ////=[GHABEL]-[NPAR]
             MAN.Text = Convert.ToString(Convert.ToInt64(GHABEL.Text) - Convert.ToInt64(NPAR.Text)); //مانده
+
+            GetBalancePerson();
         }
 
         private void PERSONEL_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -2701,7 +2845,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             // آبديت سربرگ
             dbms.DoExecuteSQL("UPDATE HEAD_LST SET SGN1usid= " + Baseknow.USERCOD + ",SGN1 =" + Interaction.IIf(this.SGN1.IsChecked == true, 1, 0) + $"  WHERE  TAG = {FTAG} AND NUMBER = " + this.NUMBER.Text);
 
-            WinSignActivator();
+            Form_Current(); //WinSignActivator();
         }
         private void SGN2_Click(object sender, RoutedEventArgs e)
         {
@@ -2737,7 +2881,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             dbms.DoExecuteSQL("UPDATE HEAD_LST SET SGN2usid= " + Baseknow.USERCOD + ",SGN2 =" + Interaction.IIf(this.SGN2.IsChecked == true, 1, 0) + $"  WHERE  TAG = {FTAG} AND NUMBER = " + this.NUMBER.Text);
 
-            WinSignActivator();
+            Form_Current(); //WinSignActivator();
         }
         private void SGN3_Click(object sender, RoutedEventArgs e)
         {
@@ -2774,7 +2918,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             // آبديت سربرگ
             dbms.DoExecuteSQL("UPDATE HEAD_LST SET SGN3usid= " + Baseknow.USERCOD + ",SGN3 =" + Interaction.IIf(this.SGN3.IsChecked == true, 1, 0) + $"  WHERE  TAG = {FTAG} AND NUMBER = " + this.NUMBER.Text);
 
-            WinSignActivator();
+            Form_Current(); //WinSignActivator();
         }
         private void WinSignActivator()
         {
@@ -2783,8 +2927,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 AllowEdits = false;
                 AllowDeletions = false;
 
-                Page58.IsEnabled = false;
-                INVO_LST_SUB.IsEnabled = false;
+                //Page58.IsEnabled = false;
+                INVO_LST_SUB.IsReadOnly = true;
             }
             else
             {
@@ -2812,11 +2956,16 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             List<DEED_HED> SHRST = null;
             var HEDRST = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE (TAG={FTAG}) AND (NUMBER >=" + NUMBER.Text + ") AND (NUMBER <=" + NUMBER.Text + ")").FirstOrDefault();
+            if (HEDRST == null)
+            {
+                return;
+            }
+
             if (!IsNull(CUST_NO.SelectedValue))
             {
                 CL_HESABDARI.GETTAF3(CUST_NO.SelectedValue.ToStringNullSafe(), ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
             }
-            if (HEDRST.N_S == null || HEDRST.N_S == 0)
+            if (HEDRST?.N_S == null || HEDRST?.N_S == 0)
             {
                 var SHARH_S = Strings.Right(" فاكتور برگشت خرید شماره " + NUMBER.Text + " مورخ " + Strings.Format(DATE_N.Text.ToRawTarikh(), "####/##/##") + " فروشنده: " + CL_HESABDARI.GETTAFNAME(CUST_NO.SelectedValue.ToStringNullSafe()), 100);
                 max_ns = CL_HESABDARI.Createsanad(Convert.ToInt64(HEDRST.DATE_N), SHARH_S, 0, FTAG, Convert.ToByte(true), HEDRST.USER_NAME);
@@ -2833,7 +2982,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 HEDRST.N_S = max_ns;
             }
-
             //if (SHRST.RecordCount == 0 || Information.Err() != 0)
             //{
             //    Information.Err().Clear();
@@ -3494,8 +3642,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
 
 
-
-
         private void Command100_Click(object sender, RoutedEventArgs e)
         {
             if (ChangeIsHappend) //تغیری اتفاق افتاده برو اول ذخیره کن
@@ -3750,10 +3896,32 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
 
-            if (SUM_OF_MEGH_MAR > 0)
+            //if (SUM_OF_MEGH_MAR > 0)
+            //{
+            //    new Msgwin(false, "اطلاعات سطرهاي فاكتور در ستون تعداد مرجوعي براي اعمال تغييرات صفر نمي باشد").ShowDialog();
+            //    return;
+            //}
+
+            string title = "شماره رسید انبار";
+            if (NewRecord)
             {
-                new Msgwin(false, "اطلاعات سطرهاي فاكتور در ستون تعداد مرجوعي براي اعمال تغييرات صفر نمي باشد").ShowDialog();
-                return;
+                var selected = NUMBER1.SelectedValue;
+                bool alreadyUsed = dbms.DoGetDataSQL<int>($"SELECT COUNT(*) FROM HEAD_LST WHERE TAG = {FTAG} AND NUMBER = {selected}").First() > 0;
+                if (alreadyUsed)
+                {
+                    new Msgwin(false, $"نمیتوانید {title} که قبلا ثبت کرده ای استفاده کنید").ShowDialog();
+                    NUMBER1.SelectedValue = NUMBER1_TAG; NUMBER1.Items.Refresh();
+                    return;
+                }
+            }
+            else
+            {
+                if (Convert.ToDouble(NUMBER1.SelectedValue) != NUMBER1_TAG)
+                {
+                    new Msgwin(false, $"نمیتوانید {title} ی که قبلا ثبت کرده اید را تغییر دهید , تنها میتوانید این فاکتور را حذف نمایید , انتخاب{title} تنها در فاکتور جدید ممکن است").ShowDialog();
+                    NUMBER1.SelectedValue = NUMBER1_TAG; NUMBER1.Items.Refresh();
+                    return;
+                }
             }
 
             #region NUMBER1_BeforeUpdate
@@ -3784,18 +3952,19 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 BargashtExistBefore = true;
             }
 
-            if (NUMBER1_TAG > 0 && _NUMBER_ != NUMBER1_TAG)
-            {
-                Msgwin msgwin = new Msgwin(true, "آیا از تغییر شماره حواله انبار مطمئن هستید"); msgwin.ShowDialog();
-                if (msgwin.DialogResult == false) //NO
-                {
-                    NUMBER1.SelectedValue = NUMBER1_TAG; NUMBER1.Items.Refresh(); return;
-                }
-            }
+            //if (NUMBER1_TAG > 0 && _NUMBER_ != NUMBER1_TAG)
+            //{
+            //    Msgwin msgwin = new Msgwin(true, "آیا از تغییر شماره حواله انبار مطمئن هستید"); msgwin.ShowDialog();
+            //    if (msgwin.DialogResult == false) //NO
+            //    {
+            //        NUMBER1.SelectedValue = NUMBER1_TAG; NUMBER1.Items.Refresh(); return;
+            //    }
+            //}
 
             if ((SumOfMEGH_MAR > 0 || BargashtExistBefore) && NewRecord)
             {
-                new Msgwin(false, "اين فاكتور داراي اطلاعات مي باشديا اينكه قبلا مرجوعي آن ثبت شده. براي حذف فاكتور بايد كليه رديفهاي ستونهاي تعداد مرجوعي صفر باشد").ShowDialog();
+                new Msgwin(false, $"{title}ی که انتخاب کرده اید قبلا مرجوعی آن ثبت شده است").ShowDialog();
+                //new Msgwin(false, "اين فاكتور داراي اطلاعات مي باشديا اينكه قبلا مرجوعي آن ثبت شده. براي حذف فاكتور بايد كليه رديفهاي ستونهاي تعداد مرجوعي صفر باشد").ShowDialog();
                 NUMBER1.SelectedValue = NUMBER1_TAG; NUMBER1.Items.Refresh();
                 return;
             }
@@ -3811,7 +3980,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 ReGetDataMaster(true);
                 ReGetDataAll();
 
-                BTN_SAVE_Click(null, null);
+                //BTN_SAVE_Click(null, null);
             }
 
 
@@ -3922,6 +4091,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
         }
         public PAY_GETD_SUB22_MODEL? PAY_GETD_WAS_ROW_ITEM { get; set; }
+        public string? OpenArgs { get; }
+
         public void PAY_GETD_SUB_ReGetData()
         {
             if (!string.IsNullOrEmpty(NUMBER.Text) && NUMBER.Text != "0") //Did Saved
