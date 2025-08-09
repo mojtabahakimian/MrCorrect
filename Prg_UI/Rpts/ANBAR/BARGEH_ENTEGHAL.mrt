@@ -549,8 +549,9 @@
               <Name>Text17</Name>
               <Page isRef="5" />
               <Parent isRef="28" />
-              <Text>{HEAD_ENTEGHAL.MEGH_R}</Text>
+              <Text>{HEAD_ENTEGHAL.MEGHk}</Text>
               <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text17>
           </Components>
@@ -936,10 +937,10 @@
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>5/25/2025 5:42:17 PM</ReportChanged>
+  <ReportChanged>8/9/2025 8:52:56 AM</ReportChanged>
   <ReportCreated>9/5/2021 1:38:11 PM</ReportCreated>
-  <ReportFile>E:\prg\MrCorrect403\Prg_UI\Rpts\ANBAR\BARGEH_ENTEGHAL.mrt</ReportFile>
-  <ReportGuid>81160cf238164c1e8e9cbb62ceeecb09</ReportGuid>
+  <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\ANBAR\BARGEH_ENTEGHAL.mrt</ReportFile>
+  <ReportGuid>acd50d14a0524bcb9555c9ce44037725</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>
