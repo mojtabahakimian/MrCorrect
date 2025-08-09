@@ -243,28 +243,29 @@ namespace Prg_UI.HelperWins
         {
             e.Handled = true;
 
-            UIElement uie = e.OriginalSource as UIElement;
+            UIElement? uie = e.OriginalSource as UIElement;
             if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
             {
-                //if (((FrameworkElement)uie).Parent is DataGridCell || uie is DataGridCell) //Is Foucs really inside the DataGrid
-                //{ }
-
-                if (Btn_yes.IsFocused)
+                try
                 {
-                    Btn_yes_Click(null, null);
+                    if (Btn_yes.IsFocused)
+                    {
+                        Btn_yes_Click(null, null);
+                    }
+                    else if (Btn_SeeOK.IsFocused)
+                    {
+                        Btn_SeeOK_Click(null, null);
+                    }
+                    else if (Btn_no.IsFocused)
+                    {
+                        Btn_no_Click(null, null);
+                    }
+                    else
+                    {
+                        CL_LMethods.SendKey_US(Key.Tab);
+                    }
                 }
-                else if (Btn_SeeOK.IsFocused)
-                {
-                    Btn_SeeOK_Click(null, null);
-                }
-                else if (Btn_no.IsFocused)
-                {
-                    Btn_no_Click(null, null);
-                }
-                else
-                {
-                    CL_LMethods.SendKey_US(Key.Tab);
-                }
+                catch { }
             }
         }
 
@@ -280,7 +281,6 @@ namespace Prg_UI.HelperWins
 
         private void Window_ContentRendered(object sender, EventArgs e)
         {
-
         }
     }
 

@@ -113,9 +113,8 @@ namespace Prg_UI
                             userMessage = "بعضی از موجودیت های پایگاه داده وجود ندارد , با پشتیبانی در ارتباط باشید";
                             break;
 
-                        default: // Other SQL exceptions
-                            userMessage = "ارتباط با پایگاه داده دچار مشکل شده است";
-                            break;
+
+                        default: userMessage = "ارتباط با پایگاه داده دچار مشکل شده است"; break;
                     }
 
                     // Show the message to the user
@@ -242,7 +241,7 @@ namespace Prg_UI
                     logBuilder.AppendLine($"  Windows Count:        {Application.Current.Windows.Count}");
                     //logBuilder.AppendLine($"  GDI Handles:          {gdiCount}");
                     //logBuilder.AppendLine($"  USER Handles:         {userCount}");
-                    logBuilder.AppendLine(subDivider);                 
+                    logBuilder.AppendLine(subDivider);
 
                     // Thread and Culture Information
                     logBuilder.AppendLine("THREAD & CULTURE INFORMATION");

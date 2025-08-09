@@ -1346,7 +1346,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                     }
                                     else
                                     {
-                                        universControl.PopNotifyShow("نوع مشتري در تعريف مشتري مشخص نشده است.", Pop1, Pop1Text1, Pop_Border1);
+                                        if (CUST_KIND.SelectedValue is null)
+                                        {
+                                            universControl.PopNotifyShow("نوع مشتري در تعريف مشتري مشخص نشده است.", Pop1, Pop1Text1, Pop_Border1);
+                                        }
                                     }
                                 }
                             }

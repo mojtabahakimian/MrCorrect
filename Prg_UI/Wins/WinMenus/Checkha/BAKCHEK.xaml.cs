@@ -144,7 +144,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
             THE_WIN_2 = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
-            #region ON_Open
+            //ON_Open
             List<PAY_GETD> rst = null;
             if (!string.IsNullOrEmpty(ServerFilter))
             {
@@ -153,7 +153,6 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
             if (rst?.Count == 0 || rst?.Count == null)
             {
-                //this.N_SERI.Locked = false;
                 this.N_SERI.IsReadOnly = false;
                 this.SANDUGH.SelectedIndex = 0;
                 this.SANDUGH.Refreshy();
@@ -180,10 +179,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
 
             }
-            //rst.Close();
-            //this.SANDUGH.RowSource = "SELECT TNUMBER, NAME FROM TDETA_HES WHERE (N_KOL = " + GETKOL(Forms["BASEKNOW"]["ADA"]) + ") AND (NUMBER = " + GETMOIN(Forms["BASEKNOW"]["ADA"]) + ")";
             Fill_ComboBoxes();
-            #endregion
             N_SERI.Focus();
         }
 
@@ -202,7 +198,6 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
             else
             {
-                //var rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh()).ToList();
                 var query = "SELECT * FROM PAY_GETD WHERE N_SERI = @N_SERI AND BANK = @BANK AND DATE_S = @DATE_S";
                 var parameters = new { N_SERI = this.N_SERI.SelectedValue, BANK = this.BANK.SelectedValue, DATE_S = this.DATE_S.Text.ToRawTarikh() };
                 var rst = dbms.DoGetDataSQL<PAY_GETD>(query, parameters).ToList();
@@ -213,18 +208,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 if (rst.Count > 0)
                 {
                     rst.FirstOrDefault().N_KOL2 = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_K;
-                    //rst.Fields("N_KOL2") = Forms["PGET_HED"]["PGET_LST_SUB"].Form["THES_K"];
                     rst.FirstOrDefault().N_MOIN2 = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_M;
-                    //rst.Fields("N_MOIN2") = Forms["PGET_HED"]["PGET_LST_SUB"].Form["THES_M"];
                     rst.FirstOrDefault().N_TAF2 = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_T;
-                    //rst.Fields("N_TAF2") = Forms["PGET_HED"]["PGET_LST_SUB"].Form["THES_T"];
                     rst.FirstOrDefault().HES2 = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES;
-                    //rst.Fields("HES2") = Forms["PGET_HED"]["PGET_LST_SUB"].Form["THES"];
                     rst.FirstOrDefault().VAZ = Convert.ToDouble(this.VAZ.SelectedValue);
-                    //rst.Fields("VAZ") = this.VAZ;
                     rst.FirstOrDefault().SANDUGH = Convert.ToInt32(this.SANDUGH.SelectedValue);
-                    //rst.Fields("SANDUGH") = this.SANDUGH;
-                    //rst.update();
                     dbms.DoExecuteSQL($@"UPDATE PAY_GETD SET N_KOL2 = {rst.FirstOrDefault().N_KOL2} , N_MOIN2 = {rst.FirstOrDefault().N_MOIN2} , N_TAF2 = {rst.FirstOrDefault().N_TAF2} , HES2 = N'{rst.FirstOrDefault().HES2}' ,VAZ = {rst.FirstOrDefault().VAZ} , SANDUGH = {rst.FirstOrDefault().SANDUGH} {_where}");
                 }
                 if (rst?.FirstOrDefault()?.KIND == 0)
@@ -234,7 +222,6 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T = Convert.ToInt32(CL_HESABDARI.GETTAF(Baseknow.ADV));
                     ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES = Baseknow.ADV;
                 }
-                //rst.Close();
 
                 double? _KOL_ = null;
                 if (!string.IsNullOrEmpty(KOL.Text) && CL_LMethods.IsNumeric(KOL.Text))
@@ -244,12 +231,9 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 if (_KOL_ != null && _KOL_ != Baseknow.BANKHA)
                 {
                     Msgwin msgwin = new Msgwin(false, "اين چك قبلا واگذار گرديده است.بنابراين از حساب اين شخص كسر شده و صاحب چك بدهكار مي گردد.");
-                    msgwin.ShowDialog();
-
-                    //DoCmd.OpenForm("mesag", default, default, default, default, acDialog, "اين چك قبلا واگذار گرديده است.بنابراين از حساب اين شخص كسر شده و صاحب چك بدهكار مي گردد.");
+                    msgwin.Show();
 
                     CL_HESABDARI.GETTAF3(this.HES1.SelectedValue.ToString(), ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
-
 
                     ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_K = (Convert.ToInt32(CKOL) == 0) ? null : (int)CKOL;
                     ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_M = (Convert.ToInt32(CMOIN) == 0) ? null : (int)CMOIN;
@@ -332,8 +316,6 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
             if (N_SERI.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
             #region After_Update
-            //DoCmd.OpenForm "BACK_CHK_SERCH", acFormDS, , "N_SERI = " & Me.N_SERI, , acDialog, 1+
-
             if (N_SERI.SelectedValue is not null)
             {
                 BACK_CHK_SERCH bACK_CHK_SERCH = new BACK_CHK_SERCH($"N_SERI = {N_SERI.SelectedValue} ", THE_WIN_2);
@@ -342,17 +324,15 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             else
             {
                 Msgwin msgwin = new Msgwin(false, "چکی با این شماره سریال وجود ندارد ، لطفا از صحت شماره سریال چک اطمینان حاصل فرمایید");
-                msgwin.ShowDialog();
+                msgwin.Show();
             }
             #endregion
         }
 
         private void _Exit_Click(object sender, RoutedEventArgs e)
         {
-            #region Click
             can = true;
             this.Close();
-            #endregion
         }
 
         private void _SaveExit_Click(object sender, RoutedEventArgs e)
@@ -369,7 +349,6 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 new MsgListwin(false, ErrosMessages).ShowDialog();
                 return;
             }
-
 
             (THE_WIN as PGET_HED).CmdSaveRecord((THE_WIN as PGET_HED).CURRENT_ITMES_ROW);
             if (!IsNull(N_SERI.SelectedValue))
@@ -394,15 +373,14 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             {
                 return;
             }
-            #region Click
+
+            //Click
             DateTime dt;
             dt = DateTime.Now;
             CL_HESABDARI.TR("PAY_GETD", "N_SERI = " + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh(), dt, 1);
             can = false;
             if (!IsNull(this.N_SERI.SelectedValue) && !IsNull(this.BANK.SelectedValue))
             {
-                //DoCmd.Close(acForm, this.NAME, acSaveYes);
-
                 var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
 
                 dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD
@@ -410,7 +388,6 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                  WHERE N_SERI = {SE_N_SERI} AND BANK = {SE_BANK} AND DATE_S = {SE_DATE_S}
                  ");
             }
-            #endregion
 
             (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();
 
