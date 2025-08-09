@@ -129,28 +129,32 @@ namespace Wins.WinMenus.Taarif
 
                 if (DETA_HES_IsFocused)
                 {
-                    if (DG.CurrentColumn != null)
+                    try
                     {
-                        int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                        bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
-                        bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
-                        if (isLastColumn)
+                        if (DG.CurrentColumn != null)
                         {
-                            if (isLastRow)
+                            int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                            bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                            bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+                            if (isLastColumn)
                             {
-                                DG.SelectedIndex++;
-
-                                DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[NAME_CODE_INDEX_COL]);
-
-                                Dispatcher.BeginInvoke(new Action(() =>
+                                if (isLastRow)
                                 {
-                                    DG.BeginEdit();
-                                }), DispatcherPriority.Background);
+                                    DG.SelectedIndex++;
 
-                                return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[NAME_CODE_INDEX_COL]);
+
+                                    Dispatcher.BeginInvoke(new Action(() =>
+                                    {
+                                        DG.BeginEdit();
+                                    }), DispatcherPriority.Background);
+
+                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                }
                             }
                         }
                     }
+                    catch { /*ignore*/ }
                 }
 
                 CL_LMethods.SendKey_US(Key.Tab);

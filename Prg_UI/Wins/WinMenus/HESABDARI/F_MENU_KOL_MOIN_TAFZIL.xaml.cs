@@ -43,7 +43,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         public string AZ_DT_PARAM { get; set; } = "0";
         public string TA_DT_PARAM { get; set; } = "9999999999";
-        public F_MENU_KOL_MOIN_TAFZIL(object open_arg = null, string _AZ_TARIKH_ = "0" , string _TA_TARIKH_ = "999999999999")
+        public F_MENU_KOL_MOIN_TAFZIL(object open_arg = null, string _AZ_TARIKH_ = "0", string _TA_TARIKH_ = "999999999999")
         {
             InitializeComponent();
 
@@ -111,7 +111,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             double? KOL = null, MOIN = null, taf = null, TAF2 = null, taf3 = null, taf4 = null;
             if (!string.IsNullOrEmpty(this.Combo34.SelectedValue.ToStringNullSafe()))
             {
-                var test = AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.GETTAF3(this.Combo34.SelectedValue.ToString(), ref KOL, ref MOIN, ref taf, ref TAF2, ref taf3, ref taf4);
+                _ = CL_HESABDARI.GETTAF3(this.Combo34.SelectedValue.ToString(), ref KOL, ref MOIN, ref taf, ref TAF2, ref taf3, ref taf4);
                 this.HKOL = KOL;
                 this.HMOIN = MOIN;
                 this.HTAF = taf;
@@ -192,7 +192,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 }
                 return;
             }
-           
+
             try
             {
                 if (!AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.Frisok(Combo34.SelectedValue.ToString(), false))
@@ -267,7 +267,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     report["DT1"] = DT1.Text.ToRawTarikh();
                     report["DT2"] = DT2.Text.ToRawTarikh();
                     report["HESAB"] = Combo34.SelectedValue.ToString();
-                    
+
                     (report.GetComponentByName("KARBAR") as StiText).Text = Baseknow.UUSER;
                     (report.GetComponentByName("COMPANY_NAME") as StiText).Text = Baseknow.NAME;
 
@@ -346,6 +346,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             if (OPEN_ARG != "TAF")  //if (this.OpenArgs == "RMOIN")
             {
+                var F_AZ = DT1.Text.ToRawTarikh();
+                var F_TA = DT2.Text.ToRawTarikh();
+                if (this.IsVisible && !string.IsNullOrEmpty(F_AZ) && !string.IsNullOrEmpty(F_TA))
+                {
+                    AZ_DT_PARAM = F_AZ;
+                    TA_DT_PARAM = F_TA;
+                }
+
                 if (true)
                 {
                     dbms.DoExecuteSQL("IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_NAME = '" + "MOIN" + Baseknow.USERCOD + "')   DROP TABLE " + "MOIN" + Baseknow.USERCOD);

@@ -148,37 +148,41 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             {
                 e.Handled = true;
 
-                if (uie is DataGridCell || eVENTSDataGrid_IsFocused)
+                try
                 {
-                    if (DG.CurrentColumn != null)
+                    if (uie is DataGridCell || eVENTSDataGrid_IsFocused)
                     {
-                        int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                        //bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
-                        int? thatcolumnindex = eVENTSDataGrid.Columns.FirstOrDefault(c => c.SortMemberPath is not null && c.SortMemberPath == "skid")?.DisplayIndex;
-                        if (thatcolumnindex > -1)
+                        if (DG.CurrentColumn != null)
                         {
-                            bool isThatColumn = currentColumnIndex == thatcolumnindex;
-                            bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
-                            if (isThatColumn)
+                            int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                            //bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                            int? thatcolumnindex = eVENTSDataGrid.Columns.FirstOrDefault(c => c.SortMemberPath is not null && c.SortMemberPath == "skid")?.DisplayIndex;
+                            if (thatcolumnindex > -1)
                             {
-                                if (isLastRow)
+                                bool isThatColumn = currentColumnIndex == thatcolumnindex;
+                                bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+                                if (isThatColumn)
                                 {
-                                    DG.SelectedIndex++;
-
-                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[NAME_CODE_INDEX_COL]);
-
-                                    Dispatcher.BeginInvoke(new Action(() =>
+                                    if (isLastRow)
                                     {
-                                        DG.BeginEdit();
-                                    }), DispatcherPriority.Background);
+                                        DG.SelectedIndex++;
 
-                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                        DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[NAME_CODE_INDEX_COL]);
+
+                                        Dispatcher.BeginInvoke(new Action(() =>
+                                        {
+                                            DG.BeginEdit();
+                                        }), DispatcherPriority.Background);
+
+                                        return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                    }
                                 }
                             }
+
                         }
-                      
                     }
                 }
+                catch { /*ignore*/ }
 
                 CL_LMethods.SendKey_US(Key.Tab);
             }

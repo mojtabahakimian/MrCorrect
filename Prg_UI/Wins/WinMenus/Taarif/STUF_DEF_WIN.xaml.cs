@@ -413,69 +413,74 @@ namespace Wins.WinMenus.Taarif
             DataGrid DG = STUF_FSK_sub;
             UIElement uie = e.OriginalSource as UIElement;
 
-            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            try
             {
-                e.Handled = true;
-
-                if (STUF_FSK_sub_IsFocusedIn)
+                if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
                 {
-                    if (DG.CurrentColumn != null)
+                    e.Handled = true;
+
+                    if (STUF_FSK_sub_IsFocusedIn)
                     {
-                        int DefaultColumnIndex = CL_LMethods.GetLastColumn(STUF_FSK_sub).DisplayIndex;
-                        int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                        bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
-                        bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
-                        if (isLastColumn)
+                        if (DG.CurrentColumn != null)
                         {
-                            // If it's the last column, move focus to the first cell of next row
-                            if (isLastRow)
+                            int DefaultColumnIndex = CL_LMethods.GetLastColumn(STUF_FSK_sub).DisplayIndex;
+                            int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                            bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                            bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+                            if (isLastColumn)
                             {
-                                // Add focus to new row if needed
-                                DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
-
-                                DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[NAME_CODE_INDEX_COL]);
-
-                                Dispatcher.BeginInvoke(new Action(() =>
+                                // If it's the last column, move focus to the first cell of next row
+                                if (isLastRow)
                                 {
-                                    DG.BeginEdit();
-                                }), DispatcherPriority.Background);
+                                    // Add focus to new row if needed
+                                    DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
 
-                                return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[NAME_CODE_INDEX_COL]);
+
+                                    Dispatcher.BeginInvoke(new Action(() =>
+                                    {
+                                        DG.BeginEdit();
+                                    }), DispatcherPriority.Background);
+
+                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                }
                             }
                         }
                     }
-                }
-                else if (INVOICE_REWARDS_SUB.IsKeyboardFocusWithin)
-                {
-                    if (INVOICE_REWARDS_SUB.CurrentColumn != null)
+                    else if (INVOICE_REWARDS_SUB.IsKeyboardFocusWithin)
                     {
-                        int DefaultColumnIndex = CL_LMethods.GetLastColumn(INVOICE_REWARDS_SUB).DisplayIndex;
-                        int currentColumnIndex = INVOICE_REWARDS_SUB.CurrentColumn.DisplayIndex;
-                        bool isLastColumn = currentColumnIndex == INVOICE_REWARDS_SUB.Columns.Count - 1;
-                        bool isLastRow = INVOICE_REWARDS_SUB.SelectedIndex == INVOICE_REWARDS_SUB.Items.Count - 2; //Last Row that is new Empty
-                        if (isLastColumn)
+                        if (INVOICE_REWARDS_SUB.CurrentColumn != null)
                         {
-                            // If it's the last column, move focus to the first cell of next row
-                            if (isLastRow)
+                            int DefaultColumnIndex = CL_LMethods.GetLastColumn(INVOICE_REWARDS_SUB).DisplayIndex;
+                            int currentColumnIndex = INVOICE_REWARDS_SUB.CurrentColumn.DisplayIndex;
+                            bool isLastColumn = currentColumnIndex == INVOICE_REWARDS_SUB.Columns.Count - 1;
+                            bool isLastRow = INVOICE_REWARDS_SUB.SelectedIndex == INVOICE_REWARDS_SUB.Items.Count - 2; //Last Row that is new Empty
+                            if (isLastColumn)
                             {
-                                // Add focus to new row if needed
-                                INVOICE_REWARDS_SUB.SelectedIndex++; // INVOICE_REWARDS_SUB.SelectedIndex = INVOICE_REWARDS_SUB.Items.Count - 1;
-
-                                INVOICE_REWARDS_SUB.CurrentCell = new DataGridCellInfo(INVOICE_REWARDS_SUB.SelectedItem, INVOICE_REWARDS_SUB.Columns[QT_IDEX_COL]);
-
-                                Dispatcher.BeginInvoke(new Action(() =>
+                                // If it's the last column, move focus to the first cell of next row
+                                if (isLastRow)
                                 {
-                                    INVOICE_REWARDS_SUB.BeginEdit();
-                                }), DispatcherPriority.Background);
+                                    // Add focus to new row if needed
+                                    INVOICE_REWARDS_SUB.SelectedIndex++; // INVOICE_REWARDS_SUB.SelectedIndex = INVOICE_REWARDS_SUB.Items.Count - 1;
 
-                                return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                    INVOICE_REWARDS_SUB.CurrentCell = new DataGridCellInfo(INVOICE_REWARDS_SUB.SelectedItem, INVOICE_REWARDS_SUB.Columns[QT_IDEX_COL]);
+
+                                    Dispatcher.BeginInvoke(new Action(() =>
+                                    {
+                                        INVOICE_REWARDS_SUB.BeginEdit();
+                                    }), DispatcherPriority.Background);
+
+                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                }
                             }
                         }
                     }
-                }
 
-                CL_LMethods.SendKey_US(Key.Tab);
+                    CL_LMethods.SendKey_US(Key.Tab);
+                }
             }
+            catch { /*ignore*/ }
+
 
             if (e.Key is Key.Enter || e.Key is Key.Tab ||
                 e.Key is Key.LeftShift ||

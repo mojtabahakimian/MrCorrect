@@ -775,13 +775,21 @@ namespace Prg_UI.Functions
 
         public static DataGridColumn GetLastColumn(DataGrid dataGrid)
         {
+            if (dataGrid is null)
+            {
+                return null;
+            }
+
             for (int i = dataGrid.Columns.Count - 1; i >= 0; i--)
             {
                 DataGridColumn column = dataGrid.Columns[i];
-                if (column.Visibility == System.Windows.Visibility.Visible && !column.IsReadOnly)
+                if (column != null)
                 {
-                    // This column is visible and focusable, return it
-                    return column;
+                    if (column.Visibility == System.Windows.Visibility.Visible && !column.IsReadOnly)
+                    {
+                        // This column is visible and focusable, return it
+                        return column;
+                    }
                 }
             }
             // If no focusable columns were found, return null

@@ -183,30 +183,6 @@ namespace Prg_UI
                     logBuilder.AppendLine(divider);
                     logBuilder.AppendLine($"MrCorrect Full Version: {CL_VERSION.MrCorrectFullVersion}");
                     logBuilder.AppendLine(divider);
-
-                    // Application Information
-                    logBuilder.AppendLine("APPLICATION INFORMATION");
-                    logBuilder.AppendLine($"  Username:             {Baseknow.UUSER}");
-                    logBuilder.AppendLine($"  Active Window:        {Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive)?.GetType().Name}");
-                    logBuilder.AppendLine($"  Title of Active Win:  {Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive)?.Title}");
-                    logBuilder.AppendLine($"  Focused Control:      {Keyboard.FocusedElement}");
-                    try { logBuilder.AppendLine($"  Focused Control Name: {Keyboard.FocusedElement.GetType()?.Name}"); } catch { }
-                    logBuilder.AppendLine($"  Machine:              {Environment.MachineName}");
-                    logBuilder.AppendLine($"  OSVersion:            {Environment.OSVersion}");
-                    logBuilder.AppendLine($"  Working Set Memory:   {Environment.WorkingSet / 1024 / 1024} MB");
-                    logBuilder.AppendLine($"  Private Memory:       {process.PrivateMemorySize64 / (1024 * 1024)} MB");
-                    logBuilder.AppendLine($"  Current User:         {Environment.UserName}");
-                    logBuilder.AppendLine($"  App Startup Path:     {AppDomain.CurrentDomain.BaseDirectory}");
-                    logBuilder.AppendLine($"  App Domain:           {AppDomain.CurrentDomain.FriendlyName}");
-                    logBuilder.AppendLine($"  Dot NET Version:      {Environment.Version}");
-                    logBuilder.AppendLine($"  TickCount64:          {TimeSpan.FromMilliseconds(Environment.TickCount64)}");
-                    logBuilder.AppendLine($"  App Started At:       {AppStartTime.ToString("yyyy-MM-dd HH:mm:ss")}");
-                    logBuilder.AppendLine($"  Processor Count:      {Environment.ProcessorCount}");
-                    logBuilder.AppendLine($"  Windows Count:        {Application.Current.Windows.Count}");
-                    //logBuilder.AppendLine($"  GDI Handles:          {gdiCount}");
-                    //logBuilder.AppendLine($"  USER Handles:         {userCount}");
-                    logBuilder.AppendLine(subDivider);
-
                     // Exception Details
                     logBuilder.AppendLine("EXCEPTION DETAILS");
                     logBuilder.AppendLine($"  Type:                 {ex.GetType().FullName}");
@@ -231,7 +207,6 @@ namespace Prg_UI
                         }
                         logBuilder.AppendLine(subDivider);
                     }
-
                     // Error Context (if available)
                     if (!string.IsNullOrEmpty(context))
                     {
@@ -239,7 +214,6 @@ namespace Prg_UI
                         logBuilder.AppendLine($"  {context}");
                         logBuilder.AppendLine(subDivider);
                     }
-
                     // Additional Details
                     logBuilder.AppendLine("ADDITIONAL DETAILS");
                     logBuilder.AppendLine($"  Method Source:        {MethodBase.GetCurrentMethod()?.Name}");
@@ -247,6 +221,28 @@ namespace Prg_UI
                     logBuilder.AppendLine($"  Connection String:    {CL_CCNNMANAGER.CONNECTION_STR}");
                     logBuilder.AppendLine(divider);
                     logBuilder.AppendLine();  // Blank line for spacing
+                    // Application Information
+                    logBuilder.AppendLine("APPLICATION INFORMATION");
+                    logBuilder.AppendLine($"  Username:             {Baseknow.UUSER}");
+                    logBuilder.AppendLine($"  Active Window:        {Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive)?.GetType().Name}");
+                    logBuilder.AppendLine($"  Title of Active Win:  {Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive)?.Title}");
+                    logBuilder.AppendLine($"  Focused Control:      {Keyboard.FocusedElement}");
+                    try { logBuilder.AppendLine($"  Focused Control Name: {Keyboard.FocusedElement.GetType()?.Name}"); } catch { }
+                    logBuilder.AppendLine($"  Machine:              {Environment.MachineName}");
+                    logBuilder.AppendLine($"  OSVersion:            {Environment.OSVersion}");
+                    logBuilder.AppendLine($"  Working Set Memory:   {Environment.WorkingSet / 1024 / 1024} MB");
+                    logBuilder.AppendLine($"  Private Memory:       {process.PrivateMemorySize64 / (1024 * 1024)} MB");
+                    logBuilder.AppendLine($"  Current User:         {Environment.UserName}");
+                    logBuilder.AppendLine($"  App Startup Path:     {AppDomain.CurrentDomain.BaseDirectory}");
+                    logBuilder.AppendLine($"  App Domain:           {AppDomain.CurrentDomain.FriendlyName}");
+                    logBuilder.AppendLine($"  Dot NET Version:      {Environment.Version}");
+                    logBuilder.AppendLine($"  TickCount64:          {TimeSpan.FromMilliseconds(Environment.TickCount64)}");
+                    logBuilder.AppendLine($"  App Started At:       {AppStartTime.ToString("yyyy-MM-dd HH:mm:ss")}");
+                    logBuilder.AppendLine($"  Processor Count:      {Environment.ProcessorCount}");
+                    logBuilder.AppendLine($"  Windows Count:        {Application.Current.Windows.Count}");
+                    //logBuilder.AppendLine($"  GDI Handles:          {gdiCount}");
+                    //logBuilder.AppendLine($"  USER Handles:         {userCount}");
+                    logBuilder.AppendLine(subDivider);                 
 
                     // Thread and Culture Information
                     logBuilder.AppendLine("THREAD & CULTURE INFORMATION");

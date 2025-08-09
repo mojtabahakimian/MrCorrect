@@ -738,41 +738,46 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 e.Handled = true;
 
-                if (INVO_LST_SUB_IsFocused)
+                try
                 {
-                    if (DG.CurrentColumn != null)
+
+                    if (INVO_LST_SUB_IsFocused)
                     {
-                        int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                        bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
-                        bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
-
-                        if (isLastColumn)
+                        if (DG.CurrentColumn != null)
                         {
-                            // If it's the last column, move focus to the first cell of next row
-                            if (isLastRow)
+                            int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                            bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                            bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+
+                            if (isLastColumn)
                             {
-                                // Add focus to new row if needed
-                                DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
+                                // If it's the last column, move focus to the first cell of next row
+                                if (isLastRow)
+                                {
+                                    // Add focus to new row if needed
+                                    DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
 
-                                DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[INVO_LST_SUB_DEF_INDEX_COL]);
+                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[INVO_LST_SUB_DEF_INDEX_COL]);
 
-                                //Dispatcher.BeginInvoke(new Action(() =>
-                                //{
-                                //    DG.BeginEdit();
-                                //}), DispatcherPriority.Background);
+                                    //Dispatcher.BeginInvoke(new Action(() =>
+                                    //{
+                                    //    DG.BeginEdit();
+                                    //}), DispatcherPriority.Background);
 
-                                return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                }
                             }
                         }
                     }
-                }
-                else if (BTN_SAVE.IsFocused)
-                {
-                    BTN_SAVE.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                    return;
-                }
+                    else if (BTN_SAVE.IsFocused)
+                    {
+                        BTN_SAVE.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                        return;
+                    }
 
-                CL_LMethods.SendKey_US(Key.Tab);
+                    CL_LMethods.SendKey_US(Key.Tab);
+                }
+                catch { /*ignore*/ }
             }
             else
             {

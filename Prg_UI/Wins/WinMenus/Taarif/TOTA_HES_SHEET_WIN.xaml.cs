@@ -174,34 +174,38 @@ namespace Wins.WinMenus.Taarif
             {
                 e.Handled = true;
 
-                if (uie is DataGridCell || TOTA_HES_SUB_IsFocused)
+                try
                 {
-                    if (DG.CurrentColumn != null)
+                    if (uie is DataGridCell || TOTA_HES_SUB_IsFocused)
                     {
-                        int DefaultColumnIndex = CL_LMethods.GetLastColumn(TOTA_HES_SUB).DisplayIndex;
-                        int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                        bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
-                        bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
-                        if (isLastColumn)
+                        if (DG.CurrentColumn != null)
                         {
-                            // If it's the last column, move focus to the first cell of next row
-                            if (isLastRow)
+                            int DefaultColumnIndex = CL_LMethods.GetLastColumn(TOTA_HES_SUB).DisplayIndex;
+                            int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                            bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                            bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+                            if (isLastColumn)
                             {
-                                // Add focus to new row if needed
-                                DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
-
-                                DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[NAME_CODE_INDEX_COL]);
-
-                                Dispatcher.BeginInvoke(new Action(() =>
+                                // If it's the last column, move focus to the first cell of next row
+                                if (isLastRow)
                                 {
-                                    DG.BeginEdit();
-                                }), DispatcherPriority.Background);
+                                    // Add focus to new row if needed
+                                    DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
 
-                                return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[NAME_CODE_INDEX_COL]);
+
+                                    Dispatcher.BeginInvoke(new Action(() =>
+                                    {
+                                        DG.BeginEdit();
+                                    }), DispatcherPriority.Background);
+
+                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                }
                             }
                         }
                     }
                 }
+                catch { /*ignore*/ }
 
                 CL_LMethods.SendKey_US(Key.Tab);
             }

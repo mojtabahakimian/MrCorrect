@@ -1212,97 +1212,90 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         #endregion
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            DataGrid dg = INVO_LST_sub;
-            UIElement uie = e.OriginalSource as UIElement;
+            DataGrid DG = INVO_LST_sub;
 
-            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            try
             {
-                if (SHARAYET.IsFocused || SHARAYET.IsKeyboardFocusWithin)
+                if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
                 {
-                    //continue out
-                }
-                else
-                {
-                    e.Handled = true;
-                    if (((FrameworkElement)uie).Parent is DataGridCell || uie is DataGridCell) //Is Foucs really inside the DataGrid
+                    if (SHARAYET.IsFocused || SHARAYET.IsKeyboardFocusWithin)
                     {
-                        if (INVO_LST_sub.IsKeyboardFocusWithin)
-                        {
-                            ///////در این روش کلید تب عمل میکند و حالت فوکوس روی حالت در حال ادیت هست
-                            if (INVO_LST_sub.SelectedIndex == INVO_LST_sub.Items.Count - 2 && INVO_LST_sub.CurrentColumn.DisplayIndex == CL_LMethods.GetLastColumn(INVO_LST_sub).DisplayIndex)
-                            {
-                                INVO_LST_sub.SelectedIndex = INVO_LST_sub.Items.Count - 1;
-                                INVO_LST_sub.CurrentCell = new DataGridCellInfo(INVO_LST_sub.SelectedItem, INVO_LST_sub.Columns[NAME_CODE_INDEX_COL]);
-                                INVO_LST_sub.BeginEdit();
-
-                                //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
-                                var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
-                                if (focusedWindow != null)
-                                {
-                                    focusedWindow.Activate();
-                                    focusedWindow.Focus();
-                                }
-
-                                return;
-                            }
-                        }
-                        else if (PAY_GETD_SUB22.IsKeyboardFocusWithin)
-                        {
-                            ///////در این روش کلید تب عمل میکند و حالت فوکوس روی حالت در حال ادیت هست
-                            if (PAY_GETD_SUB22.SelectedIndex == PAY_GETD_SUB22.Items.Count - 2 && PAY_GETD_SUB22.CurrentColumn.DisplayIndex == CL_LMethods.GetLastColumn(PAY_GETD_SUB22).DisplayIndex)
-                            {
-                                PAY_GETD_SUB22.SelectedIndex = PAY_GETD_SUB22.Items.Count - 1;
-                                PAY_GETD_SUB22.CurrentCell = new DataGridCellInfo(PAY_GETD_SUB22.SelectedItem, PAY_GETD_SUB22.Columns[1]);
-                                PAY_GETD_SUB22.BeginEdit();
-
-                                //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
-                                var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
-                                if (focusedWindow != null)
-                                {
-                                    focusedWindow.Activate();
-                                    focusedWindow.Focus();
-                                }
-
-                                return;
-                            }
-                        }
-                        else if (VISITOR_DTL_SUB.IsKeyboardFocusWithin)
-                        {
-                            ///////در این روش کلید تب عمل میکند و حالت فوکوس روی حالت در حال ادیت هست
-                            if (VISITOR_DTL_SUB.SelectedIndex == VISITOR_DTL_SUB.Items.Count - 2 && VISITOR_DTL_SUB.CurrentColumn.DisplayIndex == CL_LMethods.GetLastColumn(VISITOR_DTL_SUB).DisplayIndex)
-                            {
-                                VISITOR_DTL_SUB.SelectedIndex = VISITOR_DTL_SUB.Items.Count - 1;
-                                VISITOR_DTL_SUB.CurrentCell = new DataGridCellInfo(VISITOR_DTL_SUB.SelectedItem, VISITOR_DTL_SUB.Columns[0]);
-                                VISITOR_DTL_SUB.BeginEdit();
-
-                                //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
-                                var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
-                                if (focusedWindow != null)
-                                {
-                                    focusedWindow.Activate();
-                                    focusedWindow.Focus();
-                                }
-
-                                return;
-                            }
-                        }
+                        //continue out
                     }
-                    CL_LMethods.SendKey_US(Key.Tab);
+                    else
+                    {
+                        e.Handled = true;
+                        if (DG != null) //Is Foucs really inside the DataGrid
+                        {
+                            if (INVO_LST_sub.IsKeyboardFocusWithin)
+                            {
+                                ///////در این روش کلید تب عمل میکند و حالت فوکوس روی حالت در حال ادیت هست
+                                //if (INVO_LST_sub.SelectedIndex == INVO_LST_sub.Items.Count - 2 && lastColumn != null && INVO_LST_sub.CurrentColumn.DisplayIndex == lastColumn.DisplayIndex)
+
+                                if (INVO_LST_sub.SelectedIndex == INVO_LST_sub.Items.Count - 2 && INVO_LST_sub.CurrentColumn?.DisplayIndex == CL_LMethods.GetLastColumn(INVO_LST_sub).DisplayIndex)
+                                {
+                                    INVO_LST_sub.SelectedIndex = INVO_LST_sub.Items.Count - 1;
+                                    INVO_LST_sub.CurrentCell = new DataGridCellInfo(INVO_LST_sub.SelectedItem, INVO_LST_sub.Columns[NAME_CODE_INDEX_COL]);
+                                    INVO_LST_sub.BeginEdit();
+
+                                    //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
+                                    var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                                    if (focusedWindow != null)
+                                    {
+                                        focusedWindow.Activate();
+                                        focusedWindow.Focus();
+                                    }
+
+                                    return;
+                                }
+                            }
+                            else if (PAY_GETD_SUB22.IsKeyboardFocusWithin)
+                            {
+                                ///////در این روش کلید تب عمل میکند و حالت فوکوس روی حالت در حال ادیت هست
+                                if (PAY_GETD_SUB22.SelectedIndex == PAY_GETD_SUB22.Items.Count - 2 && PAY_GETD_SUB22.CurrentColumn?.DisplayIndex == CL_LMethods.GetLastColumn(PAY_GETD_SUB22).DisplayIndex)
+                                {
+                                    PAY_GETD_SUB22.SelectedIndex = PAY_GETD_SUB22.Items.Count - 1;
+                                    PAY_GETD_SUB22.CurrentCell = new DataGridCellInfo(PAY_GETD_SUB22.SelectedItem, PAY_GETD_SUB22.Columns[1]);
+                                    PAY_GETD_SUB22.BeginEdit();
+
+                                    //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
+                                    var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                                    if (focusedWindow != null)
+                                    {
+                                        focusedWindow.Activate();
+                                        focusedWindow.Focus();
+                                    }
+
+                                    return;
+                                }
+                            }
+                            else if (VISITOR_DTL_SUB.IsKeyboardFocusWithin)
+                            {
+                                ///////در این روش کلید تب عمل میکند و حالت فوکوس روی حالت در حال ادیت هست
+                                if (VISITOR_DTL_SUB.SelectedIndex == VISITOR_DTL_SUB.Items.Count - 2 && VISITOR_DTL_SUB.CurrentColumn?.DisplayIndex == CL_LMethods.GetLastColumn(VISITOR_DTL_SUB).DisplayIndex)
+                                {
+                                    VISITOR_DTL_SUB.SelectedIndex = VISITOR_DTL_SUB.Items.Count - 1;
+                                    VISITOR_DTL_SUB.CurrentCell = new DataGridCellInfo(VISITOR_DTL_SUB.SelectedItem, VISITOR_DTL_SUB.Columns[0]);
+                                    VISITOR_DTL_SUB.BeginEdit();
+
+                                    //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
+                                    var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                                    if (focusedWindow != null)
+                                    {
+                                        focusedWindow.Activate();
+                                        focusedWindow.Focus();
+                                    }
+
+                                    return;
+                                }
+                            }
+                        }
+                        CL_LMethods.SendKey_US(Key.Tab);
+                    }
                 }
             }
+            catch { /*ignore*/ }
 
-            if (e.Key is Key.Enter || e.Key is Key.Tab ||
-                e.Key is Key.LeftShift ||
-                e.Key is Key.CapsLock ||
-                e.Key is Key.Right ||
-                e.Key is Key.LeftAlt ||
-                e.Key is Key.RightAlt)
-            { /* Not Changed */ }
-            else
-            {
-                //Change Happend
-                ChangeIsHappend = true;
-            }
 
             if (!INVO_LST_sub.IsKeyboardFocusWithin && !INVO_LST_sub.IsFocused) //Only On Form F7 Pressed Not DataGrid
             {
@@ -1356,6 +1349,19 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 //    e.Handled = true;
                 //    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
                 //}
+            }
+
+            if (e.Key is Key.Enter || e.Key is Key.Tab ||
+              e.Key is Key.LeftShift ||
+              e.Key is Key.CapsLock ||
+              e.Key is Key.Right ||
+              e.Key is Key.LeftAlt ||
+              e.Key is Key.RightAlt)
+            { /* Not Changed */ }
+            else
+            {
+                //Change Happend
+                ChangeIsHappend = true;
             }
         }
 
@@ -9843,7 +9849,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = $"این حساب '{FINAL_CROW_ITEM.CUST_NO}' قبلاً ثبت شده است. لطفاً مقدار دیگری وارد کنید." });
 
-                DG.Dispatcher.InvokeAsync(() =>
+                DG.Dispatcher.Invoke(() =>
                 {
                     DG.CellEditEnding -= VISITOR_DTL_SUB_CellEditEnding;
                     DG.RowEditEnding -= VISITOR_DTL_SUB_RowEditEnding;
@@ -9869,7 +9875,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     .Select(message => new MsgModel { MessageText_U = message }).ToList();
                 new MsgListwin(false, ErrosMessages).ShowDialog();
 
-                DG.Dispatcher.InvokeAsync(() =>
+                DG.Dispatcher.Invoke(() =>
                 {
                     DG.CellEditEnding -= VISITOR_DTL_SUB_CellEditEnding;
                     DG.RowEditEnding -= VISITOR_DTL_SUB_RowEditEnding;
@@ -9913,7 +9919,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     }
                     catch (SqlException ex)
                     {
-                        VISITOR_DTL_SUB.Dispatcher.InvokeAsync(() =>
+                        VISITOR_DTL_SUB.Dispatcher.Invoke(() =>
                         {
                             VISITOR_DTL_SUB.CellEditEnding -= VISITOR_DTL_SUB_CellEditEnding;
                             VISITOR_DTL_SUB.CancelEdit();
@@ -11542,20 +11548,20 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         {
             if (VISITOR_DTL_SUB.IsKeyboardFocusWithin) { return; }
 
-            IEditableCollectionView itemsView = VISITOR_DTL_SUB.Items as IEditableCollectionView;
-            if (itemsView.IsAddingNew || itemsView.IsEditingItem)
-            {
-                // Retrieve the new item/edited item
-                //object NewRecordFresh = itemsView.IsAddingNew ? itemsView.CurrentAddItem : itemsView.CurrentEditItem;
-                if (itemsView.IsAddingNew)
-                {
-                    itemsView.CommitNew();
-                }
-                else if (itemsView.IsEditingItem)
-                {
-                    itemsView.CommitEdit();
-                }
-            }
+            //IEditableCollectionView itemsView = VISITOR_DTL_SUB.Items as IEditableCollectionView;
+            //if (itemsView.IsAddingNew || itemsView.IsEditingItem)
+            //{
+            //    // Retrieve the new item/edited item
+            //    //object NewRecordFresh = itemsView.IsAddingNew ? itemsView.CurrentAddItem : itemsView.CurrentEditItem;
+            //    if (itemsView.IsAddingNew)
+            //    {
+            //        itemsView.CancelNew();
+            //    }
+            //    else if (itemsView.IsEditingItem)
+            //    {
+            //        itemsView.CancelEdit();
+            //    }
+            //}
         }
 
         private void MODAT_PPID_LostFocus(object sender, RoutedEventArgs e)

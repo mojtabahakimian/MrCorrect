@@ -122,9 +122,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             //SYNCFUSION_DG.ColumnSizer = GridLengthUnitType.Auto;
 
-
-            CL_LMethods.FocusLastSfDataGridRow(SYNCFUSION_DG);
-
             //var lastRowIndex = SYNCFUSION_DG.GetLastRowIndex();
             //if (lastRowIndex >= 0)
             //{
@@ -142,6 +139,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
 
             GenerateAutomaticSummary(SYNCFUSION_DG);
+
+            CL_LMethods.FocusLastSfDataGridRow(SYNCFUSION_DG);
 
             ProcLoader.Stop(Prc);
         }

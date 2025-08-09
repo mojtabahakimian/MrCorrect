@@ -161,25 +161,32 @@ namespace Wins.WinMenus.Taarif
             DataGrid dg = TAKHPERS_SUB;
             UIElement uie = e.OriginalSource as UIElement;
 
-            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            try
             {
-                e.Handled = true;
-                if (((FrameworkElement)uie).Parent is DataGridCell || uie is DataGridCell) //Is Foucs really inside the DataGrid
+                if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
                 {
-                    if (TAKHPERS_SUB_IsFocusedIn)
+                    e.Handled = true;
+
+                    if (uie is DataGridCell || (uie as FrameworkElement)?.Parent is DataGridCell)
                     {
-                        ///////در این روش کلید تب عمل میکند و حالت فوکوس روی حالت در حال ادیت هست
-                        if (TAKHPERS_SUB.SelectedIndex == TAKHPERS_SUB.Items.Count - 2 && TAKHPERS_SUB.CurrentColumn.DisplayIndex == CL_LMethods.GetLastColumn(TAKHPERS_SUB).DisplayIndex)
+                        if (TAKHPERS_SUB_IsFocusedIn)
                         {
-                            TAKHPERS_SUB.SelectedIndex = TAKHPERS_SUB.Items.Count - 1;
-                            TAKHPERS_SUB.CurrentCell = new DataGridCellInfo(TAKHPERS_SUB.SelectedItem, TAKHPERS_SUB.Columns[NAME_CODE_INDEX_COL]);
-                            TAKHPERS_SUB.BeginEdit();
-                            return;
+                            ///////در این روش کلید تب عمل میکند و حالت فوکوس روی حالت در حال ادیت هست
+                            if (TAKHPERS_SUB.SelectedIndex == TAKHPERS_SUB.Items.Count - 2 && TAKHPERS_SUB.CurrentColumn.DisplayIndex == CL_LMethods.GetLastColumn(TAKHPERS_SUB).DisplayIndex)
+                            {
+                                TAKHPERS_SUB.SelectedIndex = TAKHPERS_SUB.Items.Count - 1;
+                                TAKHPERS_SUB.CurrentCell = new DataGridCellInfo(TAKHPERS_SUB.SelectedItem, TAKHPERS_SUB.Columns[NAME_CODE_INDEX_COL]);
+                                TAKHPERS_SUB.BeginEdit();
+                                return;
+                            }
                         }
                     }
+                    CL_LMethods.SendKey_US(Key.Tab);
                 }
-                CL_LMethods.SendKey_US(Key.Tab);
             }
+            catch { /*ignore*/ }
+
+
 
             if (e.Key is Key.Enter || e.Key is Key.Tab ||
                 e.Key is Key.LeftShift ||
@@ -694,7 +701,7 @@ namespace Wins.WinMenus.Taarif
             }
         }
 
-      
+
 
         KHAD_MODEL NewRecordFresh;
         private void MoveReGetData(Jahat jahat, int? custom_postiion = null)

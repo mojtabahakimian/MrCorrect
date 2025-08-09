@@ -229,53 +229,59 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 {
                     e.Handled = true;
 
-                    if (DG_SUB.IsKeyboardFocusWithin)
+                    try
                     {
-                        if (DG.CurrentColumn != null)
+                        if (DG_SUB.IsKeyboardFocusWithin)
                         {
-                            int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                            bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
-                            bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
-
-                            if (isLastColumn)
+                            if (DG.CurrentColumn != null)
                             {
-                                // If it's the last column, move focus to the first cell of next row
-                                if (isLastRow)
+                                int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                                bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                                bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+
+                                if (isLastColumn)
                                 {
-                                    // Add focus to new row if needed
-                                    DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
-
-                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[DG_SUB_DEF_INDEX_COL]);
-
-                                    Dispatcher.BeginInvoke(new Action(() =>
+                                    // If it's the last column, move focus to the first cell of next row
+                                    if (isLastRow)
                                     {
-                                        DG.BeginEdit();
-                                    }), DispatcherPriority.Background);
+                                        // Add focus to new row if needed
+                                        DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
 
-                                    //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
-                                    var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
-                                    if (focusedWindow != null)
-                                    {
+                                        DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[DG_SUB_DEF_INDEX_COL]);
+
                                         Dispatcher.BeginInvoke(new Action(() =>
                                         {
-                                            focusedWindow.Activate();
-                                            focusedWindow.Focus();
+                                            DG.BeginEdit();
                                         }), DispatcherPriority.Background);
-                                    }
 
-                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                        //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
+                                        var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                                        if (focusedWindow != null)
+                                        {
+                                            Dispatcher.BeginInvoke(new Action(() =>
+                                            {
+                                                focusedWindow.Activate();
+                                                focusedWindow.Focus();
+                                            }), DispatcherPriority.Background);
+                                        }
+
+                                        return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                    }
                                 }
                             }
                         }
-                    }
-                    else if (BTN_SAVE.IsFocused)
-                    {
-                        BTN_SAVE.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                        return;
-                    }
+                        else if (BTN_SAVE.IsFocused)
+                        {
+                            BTN_SAVE.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                            return;
+                        }
 
-                    CL_LMethods.SendKey_US(Key.Tab);
+                        CL_LMethods.SendKey_US(Key.Tab);
+                    }
+                    catch { /*ignore*/ }
+
                 }
+
                 else
                 {
                     if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && (e.Key == Key.S || e.SystemKey == Key.S))

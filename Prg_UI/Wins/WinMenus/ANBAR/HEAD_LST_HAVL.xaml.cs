@@ -466,67 +466,70 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             DataGrid dg = INVO_LST_HAVL_SUB;
             UIElement uie = e.OriginalSource as UIElement;
 
-
-            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            try
             {
-                if (((FrameworkElement)uie).Parent is DataGridCell || uie is DataGridCell) //Is Foucs really inside the DataGrid
+                if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
                 {
-                    ///////در این روش کلید تب عمل میکند و حالت فوکوس روی حالت در حال ادیت هست
-                    if (INVO_LST_HAVL_SUB.SelectedIndex == INVO_LST_HAVL_SUB.Items.Count - 2 && INVO_LST_HAVL_SUB.CurrentColumn.DisplayIndex == 8)
+                    if (uie is DataGridCell || (uie as FrameworkElement)?.Parent is DataGridCell)
                     {
-                        //DataGridRow row = (DataGridRow)INVO_LST_HAVL_SUB.ItemContainerGenerator.ContainerFromIndex(INVO_LST_HAVL_SUB.Items.Count - 1);
-                        //if (row is null)
-                        //{
-                        //    INVO_LST_HAVL_SUB.UpdateLayout();
-                        //    INVO_LST_HAVL_SUB.ScrollIntoView(INVO_LST_HAVL_SUB.Items[INVO_LST_HAVL_SUB.Items.Count - 1]);
-                        //    row = (DataGridRow)INVO_LST_HAVL_SUB.ItemContainerGenerator.ContainerFromIndex(INVO_LST_HAVL_SUB.Items.Count - 1);
-                        //}
-
-                        INVO_LST_HAVL_SUB.SelectedIndex = INVO_LST_HAVL_SUB.Items.Count - 1;
-                        INVO_LST_HAVL_SUB.CurrentCell = new DataGridCellInfo(INVO_LST_HAVL_SUB.SelectedItem, INVO_LST_HAVL_SUB.Columns[0]);
-
-                        //INVO_LST_HAVL_SUB.BeginEdit();
-                    }
-                }
-                e.Handled = true;
-                CL_LMethods.SendKey_US(Key.Tab);
-            }
-            else
-            {
-                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && e.Key == Key.G) //Just another method
-                {
-                    e.Handled = true; //Mark the event as handled to prevent further processing
-
-                    if (Convert.ToDouble(NUMBER.Text) > 0 /*&& DATE_N.IsEnabled*/)
-                    {
-                        Msgwin msgwin = new Msgwin(true, "آیا از باز کردن پنجره سایر اطلاعات مطمئن هستید؟"); msgwin.ShowDialog();
-                        if (msgwin.DialogResult is true)
+                        ///////در این روش کلید تب عمل میکند و حالت فوکوس روی حالت در حال ادیت هست
+                        if (INVO_LST_HAVL_SUB.SelectedIndex == INVO_LST_HAVL_SUB.Items.Count - 2 && INVO_LST_HAVL_SUB.CurrentColumn.DisplayIndex == 8)
                         {
-                            DateTime dt = dt = DateTime.Now;
-                            CL_HESABDARI.TR("HEAD_LST", "(NUMBER = " + NUMBER.Text + ") AND (TAG = 2)", dt, 1);
-                            CL_HESABDARI.TR("INVO_LST", "(NUMBER = " + NUMBER.Text + ") AND (TAG = 2)", dt, 1);
+                            //DataGridRow row = (DataGridRow)INVO_LST_HAVL_SUB.ItemContainerGenerator.ContainerFromIndex(INVO_LST_HAVL_SUB.Items.Count - 1);
+                            //if (row is null)
+                            //{
+                            //    INVO_LST_HAVL_SUB.UpdateLayout();
+                            //    INVO_LST_HAVL_SUB.ScrollIntoView(INVO_LST_HAVL_SUB.Items[INVO_LST_HAVL_SUB.Items.Count - 1]);
+                            //    row = (DataGridRow)INVO_LST_HAVL_SUB.ItemContainerGenerator.ContainerFromIndex(INVO_LST_HAVL_SUB.Items.Count - 1);
+                            //}
 
-                            //BUTTON_SAVE_HAVALE_Click(null, null);
+                            INVO_LST_HAVL_SUB.SelectedIndex = INVO_LST_HAVL_SUB.Items.Count - 1;
+                            INVO_LST_HAVL_SUB.CurrentCell = new DataGridCellInfo(INVO_LST_HAVL_SUB.SelectedItem, INVO_LST_HAVL_SUB.Columns[0]);
 
-                            if (AllisWell)
+                            //INVO_LST_HAVL_SUB.BeginEdit();
+                        }
+                    }
+                    e.Handled = true;
+                    CL_LMethods.SendKey_US(Key.Tab);
+                }
+                else
+                {
+                    if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && e.Key == Key.G) //Just another method
+                    {
+                        e.Handled = true; //Mark the event as handled to prevent further processing
+
+                        if (Convert.ToDouble(NUMBER.Text) > 0 /*&& DATE_N.IsEnabled*/)
+                        {
+                            Msgwin msgwin = new Msgwin(true, "آیا از باز کردن پنجره سایر اطلاعات مطمئن هستید؟"); msgwin.ShowDialog();
+                            if (msgwin.DialogResult is true)
                             {
-                                OTHER_DTL win = new OTHER_DTL(2, CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle));
-                                win.NUMBER = Convert.ToInt64(NUMBER.Text);
-                                win.Show();
+                                DateTime dt = dt = DateTime.Now;
+                                CL_HESABDARI.TR("HEAD_LST", "(NUMBER = " + NUMBER.Text + ") AND (TAG = 2)", dt, 1);
+                                CL_HESABDARI.TR("INVO_LST", "(NUMBER = " + NUMBER.Text + ") AND (TAG = 2)", dt, 1);
+
+                                //BUTTON_SAVE_HAVALE_Click(null, null);
+
+                                if (AllisWell)
+                                {
+                                    OTHER_DTL win = new OTHER_DTL(2, CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle));
+                                    win.NUMBER = Convert.ToInt64(NUMBER.Text);
+                                    win.Show();
+                                }
                             }
                         }
                     }
-                }
 
-                if (e.Key is Key.Delete && Keyboard.Modifiers == ModifierKeys.None)
-                {
-                    if (IsDataGrid_SUB_IsFocused)
+                    if (e.Key is Key.Delete && Keyboard.Modifiers == ModifierKeys.None)
                     {
-                        //DELETE_HAVALE_Click(null, null);
+                        if (IsDataGrid_SUB_IsFocused)
+                        {
+                            //DELETE_HAVALE_Click(null, null);
+                        }
                     }
-                }
 
+                }
             }
+            catch { /*ignore*/ }
 
             ///////در این روش تابع فوکوس توسط سی شارپ اجرا میشود منتها از لحاظ ظاهری در صورت لود مجدد دیتاگرید فوکوس به کار خود ادامه میدهد اما در ظاهر برنامه فوکوس مثلا بالای سطر اول مانده 
             ///////در این حالت فوکوس روی ادیت شده نـــیست 

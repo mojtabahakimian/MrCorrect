@@ -648,26 +648,32 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         {
             DataGrid dg = DGR_HEADLST_HAVL_2;
             UIElement uie = e.OriginalSource as UIElement;
-            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+
+            try
             {
-                if (((FrameworkElement)uie).Parent is DataGridCell || uie is DataGridCell) //Is Foucs really inside the DataGrid
+                if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
                 {
-                    if (!(DGR_HEADLST_HAVL_2.SelectedItem is null))
+                    if (uie is DataGridCell || (uie as FrameworkElement)?.Parent is DataGridCell) //Is Foucs really inside the DataGrid
                     {
-                        //Process Prc = Process.Start("C:\\correct\\prc\\prc.exe", "1354");
-                        Process Prc = ProcLoader.Start();
-                        var HAVALEROW = (HAVALEHA_MODEL)DGR_HEADLST_HAVL_2.SelectedItem;
-                        HEAD_LST_HAVL hEAD_LST_HAVL = new HEAD_LST_HAVL((double)HAVALEROW.NUMBER);
-                        Close();
-                        hEAD_LST_HAVL.Show();
-                        //ProcLoader.Stop(Prc);
-                        ProcLoader.Stop(Prc);
-                        return;
+                        if (!(DGR_HEADLST_HAVL_2.SelectedItem is null))
+                        {
+                            //Process Prc = Process.Start("C:\\correct\\prc\\prc.exe", "1354");
+                            Process Prc = ProcLoader.Start();
+                            var HAVALEROW = (HAVALEHA_MODEL)DGR_HEADLST_HAVL_2.SelectedItem;
+                            HEAD_LST_HAVL hEAD_LST_HAVL = new HEAD_LST_HAVL((double)HAVALEROW.NUMBER);
+                            Close();
+                            hEAD_LST_HAVL.Show();
+                            //ProcLoader.Stop(Prc);
+                            ProcLoader.Stop(Prc);
+                            return;
+                        }
                     }
+                    e.Handled = true;
+                    CL_LMethods.SendKey_US(Key.Tab);
                 }
-                e.Handled = true;
-                CL_LMethods.SendKey_US(Key.Tab);
             }
+            catch { /*ignore*/ }
+
         }
 
         private void NUMBER_SR_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)

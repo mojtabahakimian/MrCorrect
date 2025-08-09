@@ -207,22 +207,26 @@ namespace Wins.WinSetting
                 {
                     if (false /*OPANBACCESS_SUB.CurrentColumn != null*/)
                     {
-                        int currentColumnIndex = OPANBACCESS_SUB.CurrentColumn.DisplayIndex;
-                        bool isLastColumn = currentColumnIndex == OPANBACCESS_SUB.Columns.Count - 1;
-                        bool isLastRow = OPANBACCESS_SUB.SelectedIndex == OPANBACCESS_SUB.Items.Count - 2; //Last Row that is new Empty
-                        if (isLastColumn)
+                        try
                         {
-                            if (isLastRow)
+                            int currentColumnIndex = OPANBACCESS_SUB.CurrentColumn.DisplayIndex;
+                            bool isLastColumn = currentColumnIndex == OPANBACCESS_SUB.Columns.Count - 1;
+                            bool isLastRow = OPANBACCESS_SUB.SelectedIndex == OPANBACCESS_SUB.Items.Count - 2; //Last Row that is new Empty
+                            if (isLastColumn)
                             {
-                                OPANBACCESS_SUB.SelectedIndex++;
-                                OPANBACCESS_SUB.CurrentCell = new DataGridCellInfo(OPANBACCESS_SUB.SelectedItem, OPANBACCESS_SUB.Columns[OPANBACCESS_SUB_DEF_INDEX_COL]);
-                                Dispatcher.BeginInvoke(new Action(() =>
+                                if (isLastRow)
                                 {
-                                    //OPANBACCESS_SUB.BeginEdit();
-                                }), DispatcherPriority.Background);
-                                return;
+                                    OPANBACCESS_SUB.SelectedIndex++;
+                                    OPANBACCESS_SUB.CurrentCell = new DataGridCellInfo(OPANBACCESS_SUB.SelectedItem, OPANBACCESS_SUB.Columns[OPANBACCESS_SUB_DEF_INDEX_COL]);
+                                    Dispatcher.BeginInvoke(new Action(() =>
+                                    {
+                                        //OPANBACCESS_SUB.BeginEdit();
+                                    }), DispatcherPriority.Background);
+                                    return;
+                                }
                             }
                         }
+                        catch { /*ignore*/ }
                     }
 
                     return;

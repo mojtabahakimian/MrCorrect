@@ -252,42 +252,47 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
                     if (DG_SUB.IsKeyboardFocusWithin)
                     {
-                        if (DG.CurrentColumn != null)
+                        try
                         {
-                            int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                            bool isLastColumn = currentColumnIndex == DG.Columns.Count - 2;
-                            bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
-
-                            if (isLastColumn)
+                            if (DG.CurrentColumn != null)
                             {
-                                // If it's the last column, move focus to the first cell of next row
-                                if (isLastRow)
+                                int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                                bool isLastColumn = currentColumnIndex == DG.Columns.Count - 2;
+                                bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+
+                                if (isLastColumn)
                                 {
-                                    // Add focus to new row if needed
-                                    DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
-
-                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[DG_SUB_DEF_INDEX_COL]);
-
-                                    Dispatcher.BeginInvoke(new Action(() =>
+                                    // If it's the last column, move focus to the first cell of next row
+                                    if (isLastRow)
                                     {
-                                        DG.BeginEdit();
-                                    }), DispatcherPriority.Background);
+                                        // Add focus to new row if needed
+                                        DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
 
-                                    //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
-                                    var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
-                                    if (focusedWindow != null)
-                                    {
+                                        DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[DG_SUB_DEF_INDEX_COL]);
+
                                         Dispatcher.BeginInvoke(new Action(() =>
                                         {
-                                            focusedWindow.Activate();
-                                            focusedWindow.Focus();
+                                            DG.BeginEdit();
                                         }), DispatcherPriority.Background);
-                                    }
 
-                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                        //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
+                                        var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                                        if (focusedWindow != null)
+                                        {
+                                            Dispatcher.BeginInvoke(new Action(() =>
+                                            {
+                                                focusedWindow.Activate();
+                                                focusedWindow.Focus();
+                                            }), DispatcherPriority.Background);
+                                        }
+
+                                        return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                    }
                                 }
                             }
                         }
+                        catch { /*ignore*/ }
+
                     }
                     else if (BTN_SAVE.IsFocused)
                     {
@@ -725,7 +730,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 universControl.PopNotifyShow("داده های وارد شده مربوط به سطر ها درست نیست", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                 return false;
             }
-         
+
             List<MsgModel> ErrosMessages = new List<MsgModel>();
             if (TheRow?.PGID == null || TheRow?.PGID <= 0)
             {
