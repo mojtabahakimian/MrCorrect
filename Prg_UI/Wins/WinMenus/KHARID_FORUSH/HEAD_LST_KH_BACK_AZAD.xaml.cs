@@ -694,7 +694,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             //پشت فاکتور
             M_NAGHD.Text = "0"; //مبلغ نقد
-
+            TAKHFIF_PERCENT.Text = "0"; //Reset درصد تخفیف برای جلوگیری از تداخل و محاسبه اشتباه
             TAKHFIF.Text = "0"; //مبلغ تخفیف
             MABL_HAZ.Text = "0"; //مبلغ خدمات
             MOIN_HAZ.Text = null; //معین خدمات
@@ -764,7 +764,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 OKF.IsChecked = HEADER.OKF; //تایید فاکتور
                 MOLAH.Text = HEADER.MOLAH; //ملاحظات
                 SHIFT.SelectedValue = HEADER.SHIFT; //شیفت
-
+                TAKHFIF_PERCENT.Text = "0"; //Reset درصد تخفیف برای جلوگیری از تداخل و محاسبه اشتباه
 
                 TAKHFIF.Text = HEADER.TAKHFIF.ToStringNullSafe(); //مبلغ تخفیف
 

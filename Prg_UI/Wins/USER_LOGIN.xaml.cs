@@ -366,8 +366,12 @@ namespace Prg_UI.Wins
 
             //new PRICE_ELAMIETF_FORM().Show();
 
-            //فاکتور برگشت فروش (آزاد) رسید شده TAG = 25
-            new HEAD_LST_BRFR().Show();
+           
+            //new HEAD_LST_BRFR().Show(); //فاکتور برگشت فروش (آزاد) رسید شده TAG = 25
+
+            //new HEAD_LST_FROOSH_BACK2().Show(); //فاکتور برگشت فروش - عادی TAG = 4
+            
+            //new HEAD_LST_FROOSH_BACK2().Show(); //فاکتور برگشت فروش - عادی TAG = 4
 
             ////فاکتور برگشت خرید آزاد
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK_AZAD, this);
@@ -379,8 +383,7 @@ namespace Prg_UI.Wins
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK, this);
 
 
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN_LIMITED, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
 

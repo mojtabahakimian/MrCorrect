@@ -665,6 +665,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             //پشت فاکتور
             M_NAGHD.Text = "0"; //مبلغ نقد
+            TAKHFIF_PERCENT.Text = "0"; //Reset درصد تخفیف برای جلوگیری از تداخل و محاسبه اشتباه
 
             TAKHFIF.Text = "0"; //مبلغ تخفیف
             MABL_HAZ.Text = "0"; //مبلغ خدمات
@@ -712,6 +713,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 DATE_N.Text = HEADER.DATE_N.ToStringNullSafe(); //تاریخ فاکتور
                 USER_NAME.Text = HEADER.USER_NAME.ToStringNullSafe(); //کاربر
                 DEPATMAN.SelectedValue = HEADER.DEPATMAN; DEPATMAN.Items.Refresh(); //واحد
+                
+                TAKHFIF_PERCENT.Text = "0"; //Reset درصد تخفیف برای جلوگیری از تداخل و محاسبه اشتباه
 
                 //مستقیما از فاکتور خرید
                 var _FNUMCO_ = dbms.DoGetDataSQL<double?>($"SELECT FNUMCO FROM dbo.HEAD_LST WHERE NUMBER1 = {NUMBER1.SelectedValue} AND TAG = 12").FirstOrDefault();

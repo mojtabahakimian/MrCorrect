@@ -5219,10 +5219,8 @@ namespace AUTO_BAZ.Functions
             var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT N_S, DATE_S, SHARH_S, NO_S, ANBAR, N_FACTOR, GHATEI, USER_NAME, base, SGN1, SGN2, SGN3, SGN4, OKF FROM dbo.DEED_HED").ToList();
             var HFRST = dbms.DoGetDataSQL<HEAD_LST_CSHARP>($"SELECT  * FROM dbo.HEAD_LST WHERE     (NUMBER BETWEEN {fnum} AND {TNUM}) AND (TAG = 13) ORDER BY NUMBER").ToList();
 
-            //Forms["GUG"]["SNUM"] = HFRST.Count;
 
-
-            //  while (!HFRST.EOF)
+            //for (int HFRST_EOF = 0; HFRST_EOF < HFRST.Count; HFRST_EOF++)
             Parallel.For(0, HFRST.Count, HFRST_EOF =>
             {
                 double? max_ns, MABL_CHK = null, JAMF, JAMCH, CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null, takh;
@@ -6142,9 +6140,17 @@ namespace AUTO_BAZ.Functions
 
                     //SDRST.AddNew(); // ماليات بر ارزش افزوده
                     N_S = max_ns;
-                    if (!IsNull(HFRST[HFRST_EOF].HMBAA))
+                    SHARH = Strings.Right(Baseknow.ARSESH + "% ماليات بر ارزش افزوده فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
+                    if (!IsNull(HFRST[HFRST_EOF].HMBAA) && !string.IsNullOrWhiteSpace(HFRST[HFRST_EOF].HMBAA))
                     {
                         GETTAF3(HFRST[HFRST_EOF].HMBAA, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                        hes = HFRST[HFRST_EOF].HMBAA;
+                    }
+                    else //اگر حساب مالیات نداره از پیش فرض حساب مالیات در تعریف حساب های خودگردان بگیر
+                    {
+                        LogWriter.WriteLog($@"#WARNING  در بازسازی سند فروش : برای شماره فاکتور (حواله) {HFRST[HFRST_EOF].NUMBER1} به شرح {SHARH} حساب مالیات آن وجود نداشت , بنابر این با حساب پیش فرض مالیات در حسابهای خودگردان سند زدم ");
+                        GETTAF3(Baseknow.HESMBAA, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                        hes = Baseknow.HESMBAA;
                     }
                     HES_K = HKOL;
                     HES_M = HMOIN;
@@ -6152,8 +6158,6 @@ namespace AUTO_BAZ.Functions
                     HES_T2 = HTAF2;
                     HES_T3 = HTAF3;
                     HES_T4 = HTAF4;
-                    hes = HFRST[HFRST_EOF].HMBAA;
-                    SHARH = Strings.Right(Baseknow.ARSESH + "% ماليات بر ارزش افزوده فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
                     BES = HFRST[HFRST_EOF].MBAA;
                     NUMBER = HFRST[HFRST_EOF].NUMBER;
                     TAG = 13;
@@ -6163,7 +6167,8 @@ namespace AUTO_BAZ.Functions
                     string HES_T3T = (Convert.ToDouble(HES_T3) == 0 || HES_T3 is null) ? "NULL" : HES_T3.ToString();
                     string HES_T4T = (Convert.ToDouble(HES_T4) == 0 || HES_T4 is null) ? "NULL" : HES_T4.ToString();
 
-                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, ARZD, NUMBER, TAG) VALUES ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BES},{ARZD},{NUMBER},{TAG})");
+                    dbms.DoExecuteSQL($"INSERT INTO DEED_DTL(N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, hes, SHARH, BES, ARZD, NUMBER, TAG) VALUES" +
+                        $" ({N_S},{HES_K},{HES_M},{HES_T},{HES_T2T},{HES_T3T},{HES_T4T},N'{hes}',N'{SHARH}',{BES},{ARZD},{NUMBER},{TAG})");
                     //SDRST.update();
                 }
                 JAMP = 0d;
@@ -6300,6 +6305,7 @@ namespace AUTO_BAZ.Functions
                 };
 
             });
+            //}
 
             LogWriter.WriteLog("پایان بازسازی سند فروش");
 

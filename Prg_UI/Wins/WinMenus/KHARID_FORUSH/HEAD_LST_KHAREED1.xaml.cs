@@ -569,6 +569,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 DEPATMAN.SelectedValue = HEADER_FAC.DEPATMAN; DEPATMAN.Items.Refresh(); //واحد
                 CUST_KIND.SelectedValue = HEADER_FAC.CUST_KIND; CUST_KIND.Items.Refresh(); //نوع مشتری
 
+                TAKHFIF_PERCENT.Text = "0"; //Reset درصد تخفیف برای جلوگیری از تداخل و محاسبه اشتباه
+
                 FNUMCO.Text = string.IsNullOrEmpty(HEADER_FAC?.FNUMCO.ToStringNullSafe()) ? "0" : HEADER_FAC?.FNUMCO.ToStringNullSafe(); //شماره داخلی
 
                 string thevalue = HEADER_FAC.CUST_NO;

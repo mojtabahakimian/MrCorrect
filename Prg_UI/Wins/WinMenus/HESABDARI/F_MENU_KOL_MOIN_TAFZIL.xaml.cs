@@ -41,13 +41,21 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         public bool NowReady { get; private set; }
         public Visual I_AM_F_MENU_KOL_MOIN_TAFZIL { get; set; }
 
-        public F_MENU_KOL_MOIN_TAFZIL(object open_arg = null)
+        public string AZ_DT_PARAM { get; set; } = "0";
+        public string TA_DT_PARAM { get; set; } = "9999999999";
+        public F_MENU_KOL_MOIN_TAFZIL(object open_arg = null, string _AZ_TARIKH_ = "0" , string _TA_TARIKH_ = "999999999999")
         {
             InitializeComponent();
 
             if (!(open_arg is null))
             {
                 OPEN_ARG = open_arg;
+
+                if (!string.IsNullOrEmpty(_AZ_TARIKH_) && !string.IsNullOrEmpty(_TA_TARIKH_))
+                {
+                    AZ_DT_PARAM = _AZ_TARIKH_;
+                    TA_DT_PARAM = _TA_TARIKH_;
+                }
 
                 if (open_arg == "TAF")
                 {
@@ -56,6 +64,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 else
                 {
                     this.Hide();
+
                     DT2.Text = Tarikh.FullCurrentDate;
 
                     Combo34.ItemsSource = new List<Custom_CUST_HESAB>();
@@ -341,7 +350,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 {
                     dbms.DoExecuteSQL("IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_NAME = '" + "MOIN" + Baseknow.USERCOD + "')   DROP TABLE " + "MOIN" + Baseknow.USERCOD);
                     //string QRE = "SELECT    N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES INTO dbo.MOIN" + Baseknow.USERCOD + " FROM         dbo.QDAFTARTAFZIL2_H(" + this.DT1.Text.ToRawTarikh() + " , " + this.DT2.Text.ToRawTarikh() + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT;
-                    string QRE = "SELECT TOP(2000000000000)   N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES, N'بد' AS TSH INTO dbo.MOIN" + Baseknow.USERCOD + "  FROM         dbo.QDAFTARTAFZIL2_H(" + this.DT1.Text.ToRawTarikh() + " , " + this.DT2.Text.ToRawTarikh() + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT;
+                    string QRE = "SELECT TOP(2000000000000)   N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES, N'بد' AS TSH INTO dbo.MOIN" + Baseknow.USERCOD + "  FROM   " +
+                        "      dbo.QDAFTARTAFZIL2_H(" + AZ_DT_PARAM + " , " + TA_DT_PARAM + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT;
                     dbms.DoExecuteSQL(QRE);
                     MAN = 0d;
                     var rst = dbms.DoGetDataSQL<MOIN_CUSTOM>($"SELECT * FROM MOIN{Baseknow.USERCOD}").ToList();
