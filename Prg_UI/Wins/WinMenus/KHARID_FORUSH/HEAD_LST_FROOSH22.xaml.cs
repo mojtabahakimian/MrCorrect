@@ -747,7 +747,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             MOIN_VAR.Text = null; //معین واریزی
             MABL_HAV.Text = "0"; //مبلغ حواله
             MOIN_HAV.Text = null; //معین حواله
-
             TAKHFIF.Text = "0"; //مبلغ تخفیف
             MABL_HAZ.Text = "0"; //مبلغ خدمات
             MOIN_HAZ.Text = null; //معین خدمات
@@ -787,6 +786,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             Form_Current();
 
             AllowEdits = true;
+
+            GetDefaultFocus();
         }
 
         UniversControl universControl = new UniversControl();
@@ -11782,6 +11783,20 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 bool isNewInvoice = NewRecord || NUMBER.SelectedValue == null || NUMBER.Tag == null;
 
+                string title = "شماره حواله انبار";
+                if (NewRecord)
+                {
+                    var selected = NUMBER.SelectedValue;
+                    bool alreadyUsed = dbms.DoGetDataSQL<int>($"SELECT COUNT(*) FROM HEAD_LST WHERE TAG = {fTAG} AND NUMBER = {selected}").First() > 0;
+                    if (alreadyUsed)
+                    {
+                        new Msgwin(false, $"نمیتوانید {title} که قبلا ثبت کرده ای استفاده کنید").ShowDialog();
+                        NUMBER.SelectedValue = NUMBER.Tag; NUMBER.Items.Refresh();
+                        return;
+                    }
+                }
+
+
                 //اکر در فاکتور از قبل ثبت شده شماره رسید را تغییر داده بود
                 if (NUMBER.Tag != null && NUMBER.SelectedValue != NUMBER.Tag)
                 {
@@ -11794,6 +11809,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                     BUTTON_SAVE_HAVALE.IsEnabled = true;
                 }
+
             }
 
         }

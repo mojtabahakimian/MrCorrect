@@ -57,7 +57,7 @@
         <!--HEADER↑-->
 
         <!--Start.......................................................................................-->
-        <TabControl Margin="10,46,10,10" Style="{x:Null}">
+        <TabControl Margin="10,46,10,60">
             <TabItem Header="فاکتور" x:Name="Page57">
                 <Grid x:Name="FACTOR_GRID">
                     <Grid.RowDefinitions>
@@ -66,11 +66,11 @@
 
 
                     <TextBox x:Name="NUMBER"  Text="0" Height="28" Margin="0,6,136,0"   Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="90" Tag="RD" IsTabStop="False" IsReadOnly="True" />
-                    <xctk:MaskedTextBox x:Name="DATE_N" TabIndex="0"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="28" Margin="0,6,581,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" PreviewLostKeyboardFocus="DATE_N_PreviewLostKeyboardFocus" PreviewGotKeyboardFocus="DATE_N_PreviewGotKeyboardFocus" />
+                    <xctk:MaskedTextBox x:Name="DATE_N" TabIndex="0"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="28" Margin="0,6,587,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" PreviewLostKeyboardFocus="DATE_N_PreviewLostKeyboardFocus" PreviewGotKeyboardFocus="DATE_N_PreviewGotKeyboardFocus" />
                     <Label Content="شماره فاکتور برگشت خرید:" Margin="0,6,10,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="125" Height="28" VerticalAlignment="Top"/>
-                    <TextBox x:Name="USER_NAME" IsReadOnly="True" Text="نام کاربر" Height="28" Margin="588,472,329,0"   Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" IsTabStop="False" />
+                    <TextBox x:Name="USER_NAME" IsReadOnly="True" Text="نام کاربر" Height="28" Margin="588,431,329,0"   Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" IsTabStop="False" />
                     <Label Content="تاریخ:" Margin="0,6,546,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="34" Height="28" VerticalAlignment="Top"/>
-                    <Label Content="کاربر:" Margin="0,472,297,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="30" Height="28" VerticalAlignment="Top"/>
+                    <Label Content="کاربر:" Margin="0,431,297,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="30" Height="28" VerticalAlignment="Top"/>
                     <Label Content="شماره رسید انبار:" Margin="0,8,235,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="78" Height="24" VerticalAlignment="Top"/>
                     <Label Content="مشتری:" Margin="0,77,11,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="46" Height="25" VerticalAlignment="Top"/>
                     <Label Content="ملاحظات :" Margin="0,112,6,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="50" Height="25" VerticalAlignment="Top"/>
@@ -123,7 +123,8 @@
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
-                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                                <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
                                 <Setter Property="GridLinesVisibility" Value="All"/>
                             </Style>
                         </DataGrid.Style>
@@ -348,7 +349,7 @@
                     <Button x:Name="BTN_FACTORHA" Content="لیست فاکتور ها" Margin="123,150,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="118" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_FACTORHA_Click"/>
                     <Button x:Name="Command106" Content="چاپ رسید انبار" Margin="102,8,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="101" Foreground="#DDFFFFFF" FontWeight="Bold" Click="Command106_Click" IsEnabled="False"/>
                     <Label Content="شماره فاكتور فروشنده:" Margin="519,113,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="102" Height="28" VerticalAlignment="Top"/>
-                    <CNC:NumericTextBox Text="0" DoesAcceptDouble="False" x:Name="FNUMCO" Height="28" Margin="410,0,0,438"    VerticalAlignment="Bottom"  Visibility="Visible"  HorizontalAlignment="Left" Width="106"  />
+                    <CNC:NumericTextBox Text="0" DoesAcceptDouble="False" x:Name="FNUMCO" Height="28" Margin="410,0,0,396"    VerticalAlignment="Bottom"  Visibility="Visible"  HorizontalAlignment="Left" Width="106"  />
 
                     <Button x:Name="BTN_NEW_FACTOR" Content="فاکتور جدید" Margin="252,150,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_NEW_FACTOR_Click" Padding="16,2,16,4"/>
 
@@ -404,7 +405,8 @@
                         Margin="5,315,4,62" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" CellEditEnding="PAY_GETD_SUB22_CellEditEnding" PreviewKeyDown="PAY_GETD_SUB22_PreviewKeyDown" RowEditEnding="PAY_GETD_SUB22_RowEditEnding" PreparingCellForEdit="PAY_GETD_SUB22_PreparingCellForEdit" BeginningEdit="PAY_GETD_SUB22_BeginningEdit">
 
                         <DataGrid.Style>
-                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                                <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding Text, ElementName=NUMBER1}" Value="{x:Null}">
                                         <Setter Property="IsEnabled" Value="False"/>
@@ -697,5 +699,6 @@
             </TabItem>
         </TabControl>
 
+        <CNC:RecordNavigatorControl x:Name = "navigatorControl" HorizontalAlignment = "Right" VerticalAlignment = "Bottom" Margin = "0,0,356,10" />
     </Grid>
 </Window>

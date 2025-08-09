@@ -184,7 +184,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             get
             {
-                _sum_of_mabl_k = (double)INVO_LST_FACTOR22_DATA.Sum(r => r.MABL_K);
+                _sum_of_mabl_k = (double)INVO_LST_FACTOR22_DATA.Sum(r => r.MABL_K ?? 0);
                 if (_sum_of_mabl_k == 0) _sum_of_mabl_k = 0;
                 return _sum_of_mabl_k;
             }
@@ -726,12 +726,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
             USER_NAME.Text = Baseknow.UUSER; // نام کاربری
 
             CUST_NO.SelectedIndex = -1; CUST_NO.Items.Refresh();
-
+            MOLAH.Text = null;
+            FNUMCO.Text = null;
 
             DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER; DEPATMAN.Items.Refresh(); //واحد
 
-
             CUST_KIND.SelectedIndex = 0; CUST_KIND.Items.Refresh(); //نوع مشتری 
+            MAS.Text = "0"; //
 
             OKF.IsChecked = false; //تایید فاکتور
 
@@ -753,6 +754,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             MOGU.Text = null; //موجودی
 
             TEDADM.Text = "0"; //جمع مقادیر
+            TAKHFIF_PERCENT.Text = "0"; //درصد تخفیف
             JJKOL.Text = "0"; //جمع فاکتور
 
             MANDAH.Text = null;
@@ -2872,7 +2874,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         new Msgwin(false, "خطا در انجام عملیات حذف!").ShowDialog(); return;
                     }
                 }
-
             }
         }
         private void BTN_FACTORHA_Click(object sender, RoutedEventArgs e)
@@ -2891,13 +2892,17 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
         private void Summer()
         {
-
             JJKOL.Text = SUM_OF_MABL_K.ToString(); //SMABLK //جمع فاکتور : Sum(MABMAR)
             HKH.Text = MABL_HAZ.Text; // هزینه خدمات
             NTKHFIF.Text = TAKHFIF.Text; //تخفیفات
             JF.Text = JJKOL.Text; //جمع کل فاکتور برای فسمت روی فاکتور
 
             TEDADM.Text = SUM_OF_MEGH_K.ToString(); //جمع مقادیر مرجوعی :
+
+            if (SUM_OF_MABL_K == 0)
+            {
+                TAKHFIF_PERCENT.Text = "0";
+            }
 
             NCHK.Text = PAY_GETP_SUB_DATA.Sum(x => x.MABL)?.ToString(); //جمع مبالغ چکهای پرداختی
 
@@ -2913,6 +2918,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             ////=[GHABEL]-[NPAR]
             MAN.Text = Convert.ToString(Convert.ToInt64(GHABEL.Text) - Convert.ToInt64(NPAR.Text)); //مانده
+
+            GetBalancePerson();
         }
 
         private void PERSONEL_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -3182,7 +3189,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             Summer();
 
-            GetBalancePerson();
+
         }
 
         #region POSHTE_FACTOR
@@ -4896,18 +4903,35 @@ namespace Wins.WinMenus.KHARID_FORUSH
         private void NUMBER1_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (NUMBER1.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
+
             if (NUMBER1.SelectedValue == null)
             {
                 e.Handled = true;
-                universControl.PopNotifyShow("چنین شماره حواله انباری وجود ندارد!", Pop1, Pop1Text1, Pop_Border1);
+                universControl.PopNotifyShow("چنین شماره وجود ندارد!", Pop1, Pop1Text1, Pop_Border1);
                 return;
             }
 
-            //if (SUM_OF_MEGH_MAR > 0)
-            //{
-            //    new Msgwin(false, "اطلاعات سطرهاي فاكتور در ستون تعداد مرجوعي براي اعمال تغييرات صفر نمي باشد").ShowDialog();
-            //    return;
-            //}
+            string title = "سایر رسید انبار";
+            if (NewRecord)
+            {
+                var selected = NUMBER1.SelectedValue;
+                bool alreadyUsed = dbms.DoGetDataSQL<int>($"SELECT COUNT(*) FROM HEAD_LST WHERE TAG = {FTAG} AND NUMBER = {selected}").First() > 0;
+                if (alreadyUsed)
+                {
+                    new Msgwin(false, $"نمیتوانید {title} که قبلا ثبت کرده ای استفاده کنید").ShowDialog();
+                    NUMBER1.SelectedValue = NUMBER1_TAG; NUMBER1.Items.Refresh();
+                    return;
+                }
+            }
+            else
+            {
+                if (Convert.ToDouble(NUMBER1.SelectedValue) != NUMBER1_TAG)
+                {
+                    new Msgwin(false, $"نمیتوانید {title} ی که قبلا ثبت کرده اید را تغییر دهید , تنها میتوانید این فاکتور را حذف نمایید , انتخاب سایر رسید انبار تنها در فاکتور جدید ممکن است").ShowDialog();
+                    NUMBER1.SelectedValue = NUMBER1_TAG; NUMBER1.Items.Refresh();
+                    return;
+                }
+            }
 
             double? SumOfMEGH_MAR = null;
             bool BargashtExistBefore = false;
@@ -4946,7 +4970,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 ReGetDataMaster(true);
                 ReGetDataAll();
 
-                BTN_SAVE_Click(null, null);
+                //BTN_SAVE_Click(null, null);
             }
 
 

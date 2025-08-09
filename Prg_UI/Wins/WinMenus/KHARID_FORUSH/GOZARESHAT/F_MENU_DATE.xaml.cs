@@ -123,6 +123,20 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                     break;
             }
 
+
+            if (DT1.Visibility == Visibility.Visible)
+            {
+                DT1.Focus();
+                DT1.SelectAll();
+                DT1.Text = Baseknow.YEA + "01" + "01";
+            }
+            else
+            {
+                DT2.Focus();
+                DT2.SelectAll();
+                DT2.Text = Tarikh.LastDayOfCurrentMonth;
+            }
+
         }
         private void BTN_GO_Click(object sender, RoutedEventArgs e)
         {

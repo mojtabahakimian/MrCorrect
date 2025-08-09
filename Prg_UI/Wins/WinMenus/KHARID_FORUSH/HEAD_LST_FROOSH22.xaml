@@ -16,7 +16,7 @@
         FontFamily="IRANYekanFN"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
-        Title=""  Height="795" Width="1080" MinHeight="795" MinWidth="1020" Loaded="Window_Loaded" Closing="Window_Closing" Activated="Window_Activated" PreviewKeyDown="Window_PreviewKeyDown">
+        Title=""  Height="825" Width="1080" MinHeight="795" MinWidth="1020" Loaded="Window_Loaded" Closing="Window_Closing" Activated="Window_Activated" PreviewKeyDown="Window_PreviewKeyDown">
 
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">
@@ -112,7 +112,7 @@
         </Popup>
 
         <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
-        <TabControl Margin="10,46,10,10" Style="{x:Null}">
+        <TabControl Margin="10,46,10,50">
             <TabItem Header="فاکتور" x:Name="Page57">
                 <Grid x:Name="FACTOR_GRID">
                     <Grid.RowDefinitions>
@@ -671,7 +671,6 @@
                     </Grid>
                     <Button x:Name="BTN_NEW_FACTOR" Content="فاکتور جدید" Margin="6,160,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_NEW_FACTOR_Click" Padding="16,2,16,4" Visibility="Hidden"/>
 
-                    <CNC:RecordNavigatorControl x:Name = "navigatorControl" HorizontalAlignment = "Right" VerticalAlignment = "Bottom" Margin = "0,0,354,0" Grid.Row="1" />
 
                 </Grid>
             </TabItem>
@@ -1142,7 +1141,7 @@
                                     </Style>
                                 </DataGridTextColumn.EditingElementStyle>
                             </DataGridTextColumn>
-                            
+
                             <DataGridTextColumn x:Name="lOGColumn" Binding="{Binding LOG,UpdateSourceTrigger=LostFocus}" Header="رخداد نگاری" Width="*" IsReadOnly="True"/>
 
                         </DataGrid.Columns>
@@ -1231,8 +1230,8 @@
                     <TextBox x:Name="ft"   Text="0" Height="28" Margin="0,261,200,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="300" HorizontalAlignment="Right" AutomationProperties.HelpText="0" />
                     <Label Content="شماره گذرنامه خریدار:" Margin="0,295,100,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="26" VerticalAlignment="Top"/>
                     <TextBox x:Name="bpn"   Text="0" Height="28" Margin="0,294,200,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="300" HorizontalAlignment="Right" />
-                    <Label Content="شماره پروانه گمرکی:" Margin="0,0,107,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="26" VerticalAlignment="Center"/>
-                    <TextBox x:Name="scln"   Text="0" Height="28" Margin="0,0,200,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Center" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="300" HorizontalAlignment="Right" />
+                    <Label Content="شماره پروانه گمرکی:" Margin="856,328,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top"/>
+                    <TextBox x:Name="scln"   Text="0" Height="28" Margin="554,328,0,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="300" HorizontalAlignment="Left" />
                     <Label Content="کد گمرک محل اظهار فروشنده:" Margin="0,361,66,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="26" VerticalAlignment="Top"/>
                     <TextBox x:Name="scc"   Text="0" Height="28" Margin="0,360,200,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="300" HorizontalAlignment="Right" />
                     <Label Content="شماره کوتاژ اظهارنامه گمرکی:" Margin="0,394,71,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="26" VerticalAlignment="Top"/>
@@ -1301,6 +1300,9 @@
         </Border>-->
 
         <!--EndOfHeader ↑-->
+
+        <CNC:RecordNavigatorControl x:Name = "navigatorControl" HorizontalAlignment = "Right" VerticalAlignment = "Bottom" Margin = "0,0,367,7" />
+
 
     </Grid>
 </Window>

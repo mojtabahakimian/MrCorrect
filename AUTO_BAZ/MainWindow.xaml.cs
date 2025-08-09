@@ -723,6 +723,10 @@ namespace AUTO_BAZ
 
                     StillMethodIsWorking = false;
 
+                    var taskInfo = string.Join(", ", tasks.Select(t => $"Id:{t.Id},Status:{t.Status}"));
+                    LogWriter.WriteLog($"Operation canceled in LetsGoBtn_Click (iteration {r + 1} of {repeatCount}). Tasks: {taskInfo}");
+                    ExpectionLogWriter.WriteLog(ecx, "OperationCanceledException in LetsGoBtn_Click");
+
                     Console.WriteLine("Operation was canceled.");
                 }
                 catch (Exception ex)
@@ -731,6 +735,12 @@ namespace AUTO_BAZ
 
                     LST_DATA5.Add("به خاطر خطا لغو شد. :" + Conversions.ToString(DateTime.Now));
                     Btn_DoCancel.Content = "لغو";
+
+                    var taskInfo = string.Join(", ", tasks.Select(t => $"Id:{t.Id},Status:{t.Status}"));
+                    var errorSections = string.Join(" | ", ERTRACKLIST.Select(x => x.SectionName));
+                    LogWriter.WriteLog($"Exception in LetsGoBtn_Click (iteration {r + 1} of {repeatCount}). AnyErrorHappend={AnyErrorHappend}. Tasks: {taskInfo}. ErrorSections: {errorSections}");
+                    ExpectionLogWriter.WriteLog(ex, "Exception in LetsGoBtn_Click");
+
                     Console.WriteLine(ex.ToString());
                 }
             }

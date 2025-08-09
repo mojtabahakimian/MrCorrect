@@ -381,7 +381,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     }
                     CUST_NO.SelectedValue = HEADER_FAC.CUST_NO; //مشتری
                     CUST_NO.Items.Refresh();
-
+                    TAKHFIF_PERCENT.Text = "0"; //Reset درصد تخفیف برای جلوگیری از تداخل و محاسبه اشتباه
 
                     OKF.IsChecked = HEADER_FAC.OKF; //تایید فاکتور
                     TICMBAA.IsChecked = HEADER_FAC.TICMBAA; //تایید فاکتور
@@ -991,7 +991,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             MANDAH.Text = null;
             N_S.Text = "0"; //ثبت در سند
-
+            TAKHFIF_PERCENT.Text = "0"; //Reset درصد تخفیف برای جلوگیری از تداخل و محاسبه اشتباه
             //پشت فاکتور
 
             M_NAGHD.Text = "0"; //مبلغ نقد
