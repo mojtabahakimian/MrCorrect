@@ -23,6 +23,7 @@ using Prg_Proccessy.MODELS;
 using Prg_Proccessy.FUNCTIONS;
 using Rpts;
 using Prg_UI.Functions;
+using Prg_Proccessy.Generaly;
 
 namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 {
@@ -84,7 +85,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
         public string OpenArgs { get; set; } = "VISITDLV";
         public string _sql_query { get; set; }
-
+        public string Condition { get; private set; } = "";
         private static bool IsNull(object p)
         {
             if (!(p is null))
@@ -103,7 +104,18 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            if (CL_HESABDARI.LETSGO("DEPEMAL"))
+            {
+                if (Condition == "")
+                {
+                    Condition = " AND (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
+                }
+                else
+                {
+                    Condition = Condition + " AND  (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
+                }
 
+            }
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -130,7 +142,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             }
             else
             {
-                _sql_query = $"SELECT NAM, MABL_F, MANDAH, Expr1 FROM (SELECT STUF_DEF.NAME + ' - ' + STUF_DEF.CODE AS NAM, STUF_DEF.MABL_F, 1 AS Expr1, STUF_DEF.B_SEF, MOGUDI_KOL_ANBARHA.MANDAH FROM STUF_DEF INNER JOIN MOGUDI_KOL_ANBARHA ON STUF_DEF.CODE = MOGUDI_KOL_ANBARHA.CODE) AS DRVD_TBL WHERE (MANDah > 0 )";
+                _sql_query = $"SELECT NAM, MABL_F, MANDAH, Expr1 FROM (SELECT STUF_DEF.NAME + ' - ' + STUF_DEF.CODE AS NAM, STUF_DEF.MABL_F, 1 AS Expr1, STUF_DEF.B_SEF, MOGUDI_KOL_ANBARHA.MANDAH, HEAD_LST.DEPATMAN FROM STUF_DEF INNER JOIN MOGUDI_KOL_ANBARHA ON STUF_DEF.CODE = MOGUDI_KOL_ANBARHA.CODE INNER JOIN INVO_LST ON STUF_DEF.CODE = INVO_LST.CODE INNER JOIN HEAD_LST ON INVO_LST.NUMBER = HEAD_LST.NUMBER AND INVO_LST.TAG = HEAD_LST.TAG) AS DRVD_TBL WHERE MANDAH > 0 {Condition}";
 
             }
 
