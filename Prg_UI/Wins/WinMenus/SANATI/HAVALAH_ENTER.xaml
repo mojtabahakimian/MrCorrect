@@ -12,7 +12,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         WindowStartupLocation="CenterScreen"
         Title="" Height="690" Width="710" MinHeight="690" MinWidth="1105" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
@@ -22,7 +22,7 @@
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
 
-        <ContextMenu x:Key="ContextUtilityMenu2" IsEnabled="{Binding ElementName=INVO_LST_SUB,Path=IsEnabled}" FontSize="12" FontFamily="IRANYekanFN">
+        <ContextMenu x:Key="ContextUtilityMenu2" IsEnabled="{Binding ElementName=INVO_LST_SUB,Path=IsEnabled}" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
             <MenuItem Header="کارت انبار این کالا"  Click="MenuItem_Click_1">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="Warehouse" />

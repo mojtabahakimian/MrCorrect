@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:Wins.ThePages"
       mc:Ignorable="d" 
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-      FontFamily="IRANYekanFN"
+      FontFamily="{StaticResource IRANYEKAN}"
       d:DesignHeight="900" d:DesignWidth="1000">
     <Page.Resources>
         <Storyboard x:Key="OnMouseCome">

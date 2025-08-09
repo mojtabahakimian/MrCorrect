@@ -8,7 +8,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         Title="Window4" Height="385" Width="551" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded">
 
     <Window.Resources>

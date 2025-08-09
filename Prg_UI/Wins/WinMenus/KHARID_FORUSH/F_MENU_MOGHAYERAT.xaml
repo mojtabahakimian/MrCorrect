@@ -13,7 +13,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         Title="صورت مغایرت" Height="215" Width="530" MinHeight="215" MinWidth="530" MaxHeight="215" MaxWidth="530" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>

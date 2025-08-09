@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY"
         mc:Ignorable="d"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         xmlns:sfusion="clr-namespace:Syncfusion.UI.Xaml.Grid;assembly=Syncfusion.SfGrid.WPF" 
@@ -40,7 +40,7 @@
             <Setter Property="Height" Value="Auto"/>
         </Style>
 
-        <ContextMenu x:Key="DataGridContextMenu" FontFamily="IRANYekanFN">
+        <ContextMenu x:Key="DataGridContextMenu" FontFamily="{StaticResource IRANYEKAN}">
             <MenuItem Header="پالودن با این بخش" Click="FilterBySelection_Click">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="Filter"  FontSize="14" />

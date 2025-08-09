@@ -9,7 +9,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         Title="سابقه فروش" Height="450" Width="800">
     <Window.Resources>

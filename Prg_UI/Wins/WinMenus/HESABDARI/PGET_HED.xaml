@@ -15,7 +15,7 @@
         AllowDrop="True" WindowStyle="None"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         Title="" Height="845" Width="1360" Loaded="Window_Loaded" Closing="Window_Closing" ContentRendered="Window_ContentRendered" PreviewKeyDown="Window_PreviewKeyDown">
 
@@ -34,7 +34,7 @@
             </StackPanel>
         </DataTemplate>
 
-        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="IRANYekanFN">
+        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
             <MenuItem Header="صورت حساب" x:Name="F8_CUSTOMER" Click="F8_CUSTOMER_Click">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="FileDocument"/>

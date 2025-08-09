@@ -12,7 +12,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         WindowStartupLocation="CenterScreen"
         Title="تعيين مسير وزيت براي مشتريان" Height="690" Width="710" MinHeight="690" MinWidth="1105" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">

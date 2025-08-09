@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.WinDEFAULT"
         mc:Ignorable="d"
         Background="{x:Null}" AllowsTransparency="True"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         AllowDrop="True"
         WindowStyle="None"
         Title="DEFAULT" Height="200" Width="620" MinHeight="200" MinWidth="455" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" ContentRendered="Window_ContentRendered">

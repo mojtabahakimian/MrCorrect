@@ -13,7 +13,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
@@ -468,7 +468,7 @@
         <!--FilterStylePopup } -->
 
 
-        <ContextMenu x:Key="DataGridContextMenu" FontFamily="IRANYekanFN">
+        <ContextMenu x:Key="DataGridContextMenu" FontFamily="{StaticResource IRANYEKAN}">
             <MenuItem Header="پالودن با این بخش" Click="FilterBySelection_Click">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="Filter"  FontSize="14" />

@@ -8,7 +8,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Background="{x:Null}"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
         Title="حواله ها" Height="450" Width="840" Closed="Window_Closed" WindowState="Maximized" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen"  Activated="Window_Activated" PreviewKeyDown="Window_PreviewKeyDown">

@@ -13,7 +13,7 @@
         AllowsTransparency="True"
         MaxHeight="{Binding Height, Source={x:Static SystemParameters.WorkArea}}"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         Title="HEAD_LST_RASID_OTHER_WIN" Height="64" MinHeight="657" Width="1281" MinWidth="1214" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered" PreviewKeyDown="Window_PreviewKeyDown">

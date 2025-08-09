@@ -13,7 +13,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         Title="جستجو در شرح سند" Height="705" Width="1010" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>

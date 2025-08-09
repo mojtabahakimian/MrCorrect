@@ -12,7 +12,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN" d:Width="2000"
+        FontFamily="{StaticResource IRANYEKAN}" d:Width="2000"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         Title="" Height="450" Width="800" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
@@ -51,7 +51,7 @@
             <Setter Property="BorderBrush" Value="{Binding BorderBrush, ElementName=GENERAL_RANG}" />
         </Style>
         <!-- Context Menu defined in XAML -->
-        <ContextMenu x:Key="DataGridContextMenu" FontFamily="IRANYekanFN">
+        <ContextMenu x:Key="DataGridContextMenu" FontFamily="{StaticResource IRANYEKAN}">
             <!--Filter By Selection-->
             <MenuItem Header="پالودن با این بخش" Click="FilterBySelection_Click" />
             <!--Filter Excluding Selection-->

@@ -10,7 +10,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         Title="ETG_LIST_WIN" Height="450" Width="1146" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
@@ -52,7 +52,7 @@
 
 
         <!-- Context Menu defined in XAML -->
-        <ContextMenu x:Key="DataGridContextMenu" FontFamily="IRANYekanFN">
+        <ContextMenu x:Key="DataGridContextMenu" FontFamily="{StaticResource IRANYEKAN}">
             <!--Filter By Selection-->
             <MenuItem Header="پالودن با این بخش" Click="FilterBySelection_Click" />
             <!--Filter Excluding Selection-->

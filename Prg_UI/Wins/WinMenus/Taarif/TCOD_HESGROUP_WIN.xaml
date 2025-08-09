@@ -9,13 +9,13 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         Title="Window3" Height="450" Width="800" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered">
     <Window.Resources>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
 
-        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="IRANYekanFN" ContextMenuOpening="ContextMenu_ContextMenuOpening">
+        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="{StaticResource IRANYEKAN}" ContextMenuOpening="ContextMenu_ContextMenuOpening">
             <MenuItem Header="سرفصل کل" x:Name="CODE_Dbl" Click="CODE_Dbl_Click">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="Accounts" />

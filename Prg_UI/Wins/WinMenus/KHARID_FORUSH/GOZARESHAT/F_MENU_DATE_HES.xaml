@@ -10,7 +10,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterScreen"
         Title="F_MENU_DATE_HES" Height="346" Width="828" MinHeight="215" MinWidth="400" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">

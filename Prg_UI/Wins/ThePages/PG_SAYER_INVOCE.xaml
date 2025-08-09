@@ -7,7 +7,7 @@
       mc:Ignorable="d" 
       
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-      FontFamily="IRANYekanFN"
+      FontFamily="{StaticResource IRANYEKAN}"
       d:DesignHeight="450" d:DesignWidth="800">
     <Page.Resources>
         <Storyboard x:Key="OnMouseCome">

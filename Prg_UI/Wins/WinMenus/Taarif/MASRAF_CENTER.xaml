@@ -11,7 +11,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         Title="" Height="400" Width="780" MinHeight="400" MinWidth="780" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>

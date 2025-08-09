@@ -9,7 +9,7 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Background="{x:Null}" AllowsTransparency="True"
         AllowDrop="True"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         Height="528" Width="1033" WindowStyle="None" MinWidth="1033" MinHeight="528" Margin="0" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" ContentRendered="Window_ContentRendered">
     <Window.Resources>
         <ControlTemplate TargetType="{x:Type Button}" x:Key="ButtonTemplateRed">
@@ -246,7 +246,7 @@
             </Border>
         </Border>
         <Button x:Name="Command4" Content="مرحله بعد" Margin="596,417,307,71"   Width="130" Height="40" Click="Command4_Click"  RenderTransformOrigin="0.5,0.5" TabIndex="2" BorderBrush="{x:Null}" Foreground="#DDFFFFFF" FontSize="12"/>
-        <TextBlock Margin="445,207,58,0"  TextWrapping="Wrap" LineHeight="22" TextAlignment="Center" Style="{StaticResource TxBLOCK}" FontFamily="IRANYekanFN" Padding="0" FlowDirection="RightToLeft"  Height="25" VerticalAlignment="Top" Text="ماه و سال بودجه مورد نظر را انتخاب کنید. " FontSize="14"/>
+        <TextBlock Margin="445,207,58,0"  TextWrapping="Wrap" LineHeight="22" TextAlignment="Center" Style="{StaticResource TxBLOCK}" FontFamily="{StaticResource IRANYEKAN}" Padding="0" FlowDirection="RightToLeft"  Height="25" VerticalAlignment="Top" Text="ماه و سال بودجه مورد نظر را انتخاب کنید. " FontSize="14"/>
 
         <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Top" PlacementTarget="{Binding ElementName=Command4}" StaysOpen="False"  VerticalOffset="-4">
             <StackPanel>

@@ -9,7 +9,7 @@
         Background="{x:Null}" AllowsTransparency="True"
         AllowDrop="True"
         
-        Height="528" Width="1033" WindowStyle="None" MinWidth="1033" MinHeight="528" Margin="0" WindowStartupLocation="CenterOwner" ContentRendered="Window_ContentRendered" FontFamily="IRANYekanFN">
+        Height="528" Width="1033" WindowStyle="None" MinWidth="1033" MinHeight="528" Margin="0" WindowStartupLocation="CenterOwner" ContentRendered="Window_ContentRendered" FontFamily="{StaticResource IRANYEKAN}">
     <Window.Resources>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
         <ControlTemplate TargetType="{x:Type Button}" x:Key="ButtonTemplateRed">

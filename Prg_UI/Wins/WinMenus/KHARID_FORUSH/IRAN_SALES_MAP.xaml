@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Wins.WinMenus.KHARID_FORUSH"
         mc:Ignorable="d"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         xmlns:cc="clr-namespace:ZoomerControl;assembly=ZoomerControl"
    
         Title="گزارش فروش روی نقشه ایران" WindowState="Maximized" WindowStartupLocation="CenterScreen" Height="450" Width="800" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered">

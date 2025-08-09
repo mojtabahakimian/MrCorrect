@@ -12,7 +12,7 @@
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
         WindowStartupLocation="CenterScreen" 
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         Title="PGET_HED_LIST" Height="578" Width="988" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Grid>
         <Border  Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5"  Grid.ColumnSpan="5" BorderThickness="1">

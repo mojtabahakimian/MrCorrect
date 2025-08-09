@@ -13,7 +13,7 @@
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         Title=""  Height="825" Width="1080" MinHeight="795" MinWidth="1020" Loaded="Window_Loaded" Closing="Window_Closing" Activated="Window_Activated" PreviewKeyDown="Window_PreviewKeyDown">
@@ -24,7 +24,7 @@
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
 
-        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="IRANYekanFN">
+        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
             <MenuItem Header="صورت حساب این مشتری" x:Name="F8_CUSTOMER" Click="F8_CUSTOMER_Click">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="FileDocument" />
@@ -43,7 +43,7 @@
             </MenuItem>
         </ContextMenu>
 
-        <ContextMenu x:Key="ContextUtilityMenu2" IsEnabled="{Binding ElementName=INVO_LST_sub,Path=IsEnabled}" FontSize="12" FontFamily="IRANYekanFN">
+        <ContextMenu x:Key="ContextUtilityMenu2" IsEnabled="{Binding ElementName=INVO_LST_sub,Path=IsEnabled}" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
             <MenuItem Header="مرتب سازی مجدد سطر (کالا) های فاکتور و ذخیره"  Click="MenuItem_Click">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="Sort" />

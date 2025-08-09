@@ -13,14 +13,14 @@
         AllowsTransparency="True"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         Title="" Height="680" Width="1280" MinHeight="680" MinWidth="1280" Loaded="Window_Loaded" Closing="Window_Closing" PreviewKeyDown="Window_PreviewKeyDown" ContentRendered="Window_ContentRendered">
     <Window.Resources>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
 
-        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="IRANYekanFN">
+        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
             <MenuItem Header="صورت حساب" x:Name="F8_CUSTOMER" Click="F8_CUSTOMER_Click">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="FileDocument"/>

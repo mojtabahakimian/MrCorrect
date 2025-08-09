@@ -8,7 +8,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
    	    Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"

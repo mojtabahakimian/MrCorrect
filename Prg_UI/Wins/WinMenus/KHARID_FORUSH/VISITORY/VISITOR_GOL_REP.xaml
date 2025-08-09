@@ -15,7 +15,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         Title="VISITOR_GOL_REP" Height="450" Width="1686" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
@@ -50,7 +50,7 @@
             <Setter Property="BorderBrush" Value="{Binding BorderBrush, ElementName=GENERAL_RANG}" />
         </Style>
 
-        <ContextMenu x:Key="DataGridContextMenu" FontFamily="IRANYekanFN">
+        <ContextMenu x:Key="DataGridContextMenu" FontFamily="{StaticResource IRANYEKAN}">
             <MenuItem Header="پالودن با این بخش" Click="FilterBySelection_Click">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="Filter"  FontSize="14" />

@@ -10,7 +10,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         Title="تعریف مشتری" MinHeight="600" MinWidth="550" Height="558" Width="556"  PreviewTextInput="Window_PreviewTextInput"  ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" Closing="Window_Closing">
     <Window.Resources>
