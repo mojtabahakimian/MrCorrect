@@ -129,7 +129,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         {
             HKOL.ItemsSource = dbms.DoGetDataSQL<Q1>("SELECT TOTA_HES.NUMBER FROM TOTA_HES ORDER BY TOTA_HES.NUMBER;").ToList();
             HKOL.DisplayMemberPath = "NUMBER";
-            HKOL.SelectedValuePath = "NUMBER";            
+            HKOL.SelectedValuePath = "NUMBER";
 
             HHKOL.ItemsSource = dbms.DoGetDataSQL<Q2>("SELECT TOTA_HES.NUMBER, TOTA_HES.NAME FROM TOTA_HES ORDER BY TOTA_HES.NAME;").ToList();
             HHKOL.DisplayMemberPath = "NAME";
@@ -210,6 +210,19 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                     return;
                 }
             }
+            else
+            {
+                if (IsNull(this.DT2.Text.ToRawTarikh()))
+                {
+                    universControl.PopNotifyShow("تا تاریخ را وارد کنید", Pop1, Pop1Text1, Pop_Border1);
+                }
+
+                if (IsNull(this.HKOL.SelectedValue) || IsNull(this.HKOL2.SelectedValue))
+                {
+                    universControl.PopNotifyShow("پارامتر ها کافی نیست!", Pop1, Pop1Text1, Pop_Border1);
+                    return;
+                }
+            }
             switch (this.OpenArgs)
             {
                 case "2":
@@ -234,7 +247,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
         private void OpenReport()
         {
-            
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.R_DAFTAR_KOL.mrt");
             report.Load(pathreport);
@@ -247,8 +260,11 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             report["KOL_PARM"] = HKOL.SelectedValue.ToString();
             report["KOL_2_PARM"] = HKOL2.SelectedValue.ToString();
 
-            (report.GetComponentByName("SAL_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
-
+            var salN = report.GetComponentByName("SAL_N") as StiText;
+            if (salN != null)
+            {
+                salN.Text = Baseknow.WIDTH_D.ToString();
+            }
             //report["DATE_S"] = DT2.Text.ToString();
             //report["DATE_F"] = DT2.Text.ToString();
             //report["ANBAR_F"] = ANBAR.Text.ToString();
@@ -269,7 +285,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
             //report.Render();
             //report.Show();
-           
+
             new Rpts.WINRPT(report, "گزارش دفتر کل").Show();
         }
     }

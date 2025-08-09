@@ -553,6 +553,10 @@ namespace Wins.WinMenus.ANBAR
 
         private void ANBAR_BeforeUpdate()
         {
+            if (ANBAR.SelectedValue is null)
+            {
+                return;
+            }
             if (NUMBER.Text == "" || NUMBER.Text is null)
             {
                 return;
@@ -1451,7 +1455,20 @@ namespace Wins.WinMenus.ANBAR
                 double min;
                 double MAND;
                 double MAND2;
-                var rst = dbms.DoGetDataSQL<STUF_STK>($"SELECT * FROM STUF_STK WHERE CODE = {CURRENT_ITMES_ROW.CODE} AND ANBAR = {ANBAR.SelectedValue}").ToList();
+
+                if (string.IsNullOrWhiteSpace(CURRENT_ITMES_ROW?.CODE) || ANBAR.SelectedValue is null)
+                {
+                    MOGU.Text = null;
+                    return;
+                }
+
+                var rst = new List<STUF_STK>();
+                if (!string.IsNullOrWhiteSpace(CURRENT_ITMES_ROW?.CODE) && ANBAR.SelectedValue != null)
+                {
+                    rst = dbms.DoGetDataSQL<STUF_STK>(
+                        "SELECT * FROM STUF_STK WHERE CODE = @code AND ANBAR = @anbar",
+                        new { code = CURRENT_ITMES_ROW.CODE, anbar = ANBAR.SelectedValue })?.ToList() ?? new List<STUF_STK>();
+                }
 
                 if (rst.Count == 0)
                 {
@@ -1522,7 +1539,7 @@ namespace Wins.WinMenus.ANBAR
                     if (rstm.Count == 0)
                     {
                         Msgwin msgwin = new Msgwin(false, "كالا به انبار فوق تعلق ندارد.");
-                        msgwin.ShowDialog();
+                        msgwin.Show();
                     }
                     else if ((bool)Baseknow.RMOG && !IsNull(Baseknow.RMOG))
                     {
@@ -1613,7 +1630,7 @@ namespace Wins.WinMenus.ANBAR
                 if (rst.Count == 0)
                 {
                     Msgwin msgwin = new Msgwin(false, "واحد تعريف شده ناقص ميباشد نسبت آن مشخص نگرديده است.در بخش تعريف كالا آن را اصلاح كنيد.");
-                    msgwin.ShowDialog();
+                    msgwin.Show();
                 }
                 else
                 {
@@ -1629,11 +1646,17 @@ namespace Wins.WinMenus.ANBAR
                     }
                 }
 
+                if (string.IsNullOrWhiteSpace(CURRENT_ITMES_ROW.CODE))
+                {
+                    INVO_LST_ENTEGHAL_SUB_CANCEL_EDIT();
+                    return;
+                }
+
                 var rst2 = dbms.DoGetDataSQL<STUF_STK>($"SELECT * FROM STUF_STK WHERE CODE = {CURRENT_ITMES_ROW.CODE} AND ANBAR = {ANBAR.SelectedValue}").ToList();
                 if (rst2.Count == 0)
                 {
                     Msgwin msgwin = new Msgwin(false, "كالا به انبار فوق تعلق ندارد.");
-                    msgwin.ShowDialog();
+                    msgwin.Show();
                 }
                 else if ((bool)Baseknow.RMOG && !IsNull(Baseknow.RMOG))
                 {
@@ -1831,20 +1854,29 @@ namespace Wins.WinMenus.ANBAR
 
         private void DataGrid_Before_Update()
         {
+            if (string.IsNullOrWhiteSpace(CURRENT_ITMES_ROW?.CODE) || ANBAR.SelectedValue is null)
+            {
+                return;
+            }
+
             var rst = dbms.DoGetDataSQL<STUF_STK>($"SELECT * FROM STUF_STK WHERE CODE = {CURRENT_ITMES_ROW.CODE} AND ANBAR = {ANBAR.SelectedValue}").ToList();
             if (rst.Count == 0)
             {
                 Msgwin msgwin = new Msgwin(false, "كالا به انبار فوق تعلق ندارد.");
-                msgwin.ShowDialog();
+                msgwin.Show();
                 INVO_LST_ENTEGHAL_SUB_CANCEL_EDIT();
             }
         }
 
         private void DataGrid_After_Update()
         {
-
             double min;
             string ST;
+
+            if (string.IsNullOrWhiteSpace(CURRENT_ITMES_ROW?.CODE) || ANBAR.SelectedValue is null)
+            {
+                return;
+            }
 
             if (USER_NAME.Text != CL_HESABDARI.UCurrentUser().ToString())
             {
@@ -1860,10 +1892,10 @@ namespace Wins.WinMenus.ANBAR
                 if (rst.Count == 0)
                 {
                     Msgwin msgwin = new Msgwin(false, "اطلاعات در مورد اين كالا مغايرت دارد.");
-                    msgwin.ShowDialog();
+                    msgwin.Show();
                     CURRENT_ITMES_ROW.CODE = WAS_ROW_ITEM.CODE;
                 }
-                else
+                else if (!string.IsNullOrWhiteSpace(WAS_ROW_ITEM.CODE) && ANBAR.SelectedValue is not null)
                 {
 
                     rst.FirstOrDefault().MOGODI = Convert.ToDouble(rst.FirstOrDefault().MOGODI + WAS_ROW_ITEM.MEGHk - CURRENT_ITMES_ROW.MEGH_MAR);
@@ -1875,11 +1907,12 @@ namespace Wins.WinMenus.ANBAR
             }
             min = CL_HESABDARI.Getmin(Convert.ToInt32(this.ANBAR.SelectedValue), CURRENT_ITMES_ROW.CODE);
 
+
             var rst_second = dbms.DoGetDataSQL<STUF_STK>($"SELECT * FROM STUF_STK WHERE CODE = {CURRENT_ITMES_ROW.CODE} AND ANBAR = {ANBAR.SelectedValue}").ToList();
             if (rst_second.Count == 0)
             {
                 Msgwin msgwin = new Msgwin(false, "كالا به انبار فوق تعلق ندارد.");
-                msgwin.ShowDialog();
+                msgwin.Show();
             }
             else if (!((bool)Baseknow.RMOG && !IsNull(Baseknow.RMOG)))
             {

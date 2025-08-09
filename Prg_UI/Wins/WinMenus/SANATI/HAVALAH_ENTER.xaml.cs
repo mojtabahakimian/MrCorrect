@@ -33,12 +33,13 @@ using Stimulsoft.Report;
 using Stimulsoft.Report.Components;
 using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
 using System.Windows.Data;
-using static Functions.InventoryManager;
 using System.Threading.Tasks;
+using Wins.WinOther;
+using static Interfaces.INavigator;
 
 namespace Wins.WinMenus.SANATI
 {
-    public partial class HAVALAH_ENTER : Window
+    public partial class HAVALAH_ENTER : Window, ISearchableWindow
     {
         #region Header Window Begin
         //Header Window Begin
@@ -271,6 +272,51 @@ namespace Wins.WinMenus.SANATI
         public double Meidnum { get; private set; }
         public Visual I_AM_VK_SAKHTEH { get; private set; }
         public List<FSAKHT_COMBO> N_KOL_ALL { get; private set; }
+
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            // Handle the selected item
+            if (selectedItem is HEAD_LST item)
+            {
+                if (item != null)
+                {
+                    //_navigationManager.MoveReGetData(INavigator.Jahat.)
+                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.NUMBER.Equals(Convert.ToDouble(item.NUMBER)));
+                    if (itemfound != null)
+                    {
+                        _navigationManager.IsNewRecord = false;
+
+                        // 1) Find its index in the master list
+                        int idx = _navigationManager.RecordsData.IndexOf(itemfound);
+                        if (idx < 0)
+                        {
+                            // not found (perhaps filtered out?), bail out
+                            new Msgwin(false, "یافت نشد: مورد انتخاب شده در لیست اصلی وجود ندارد").Show();
+                            return;
+                        }
+
+                        // 2) Tell the navigation manager to move to that position
+                        _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+                        //OnCurrentRecordChanged(itemfound);
+                    }
+                }
+            }
+        }
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+                new SearchableProperty { DisplayName = "شماره برگه", PropertyPath = "NUMBER", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "تاریخ", PropertyPath = "DATE_N", PropertyType = typeof(long) },
+                new SearchableProperty { DisplayName = "کد مسئول شیفت", PropertyPath = "CUST_NO", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "کاربر", PropertyPath = "USER_NAME", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "ملاحظات", PropertyPath = "MOLAH", PropertyType = typeof(string) },
+                // Add other searchable properties
+            };
+        }
+        #endregion
 
         private void Window_ContentRendered(object sender, EventArgs e)
         {
@@ -2438,7 +2484,12 @@ namespace Wins.WinMenus.SANATI
 
         private void BTN_FACTORHA_Click(object sender, RoutedEventArgs e)
         {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FACTORS_LST, this, FTAG);
 
+            if (NewRecord)
+            {
+                this.Close();
+            }
         }
 
         //چاپ فاکتور
