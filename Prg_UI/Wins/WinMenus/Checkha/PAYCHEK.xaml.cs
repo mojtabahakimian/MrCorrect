@@ -238,6 +238,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void BANK_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (BANK.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
 
             #region NUM_TO_BANK
@@ -504,6 +506,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void HES1_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (HES1.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
             #region Before_Update
             if (!IsNull(this.HES1.SelectedValue))
@@ -534,6 +538,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void DATE_S_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             string date_n_val = DATE_S.Text.ToRawTarikh();
             if (!string.IsNullOrEmpty(date_n_val))
             {
@@ -554,6 +560,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void SHOBEH_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             var shobetext = (TextBox)SHOBEH.Template.FindName("PART_EditableTextBox", SHOBEH);
             if (string.IsNullOrEmpty(shobetext.Text))
             {
@@ -610,6 +618,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void SAYADI_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (SAYADI.Text.Length < 16 && SAYADI.Text != "0")
             {
                 Msgwin msgwin = new Msgwin(false, "شماره صیادی نباید کمتر از 16 رقم باشد.");
@@ -620,6 +630,13 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         private void _SaveExit_PreviewKeyDown(object sender, KeyEventArgs e)
         {
 
+        }
+
+
+        bool isClosing = false;
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            isClosing = true;
         }
     }
 }

@@ -236,6 +236,8 @@ namespace Wins.WinMenus.Checkha
 
         private void BANK_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (BANK.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
             #region BANK_After_Update
             if (!IsNull(N_SERI.Text) & !IsNull(BANK.SelectedValue))
@@ -307,6 +309,8 @@ namespace Wins.WinMenus.Checkha
 
         private void MABL_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             return;
             //if (MABL.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
             #region Before_Update
@@ -337,6 +341,8 @@ namespace Wins.WinMenus.Checkha
 
         private void HES_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (HES.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
             #region Before_Update
             if (!IsNull(this.HES))
@@ -376,6 +382,8 @@ namespace Wins.WinMenus.Checkha
 
         private void DATE_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             string date_n_val = DATE.Text.ToRawTarikh();
             if (!string.IsNullOrEmpty(date_n_val))
             {
@@ -625,6 +633,8 @@ namespace Wins.WinMenus.Checkha
 
         private void DATE_S_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             string date_n_val = DATE_S.Text.ToRawTarikh();
             if (!string.IsNullOrEmpty(date_n_val))
             {
@@ -639,6 +649,8 @@ namespace Wins.WinMenus.Checkha
 
         private void SHOBEH_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (SHOBEH.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
 
             var shobetext = (TextBox)SHOBEH.Template.FindName("PART_EditableTextBox", SHOBEH);
@@ -654,6 +666,8 @@ namespace Wins.WinMenus.Checkha
 
         private void LIST_NO_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (LIST_NO.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
 
             var listnotext = (TextBox)LIST_NO.Template.FindName("PART_EditableTextBox", LIST_NO);
@@ -684,15 +698,19 @@ namespace Wins.WinMenus.Checkha
 
         private void SAYADI_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (SAYADI.Text.Length < 16 && SAYADI.Text != "0")
             {
                 Msgwin msgwin = new Msgwin(false, "شماره صیادی نباید کمتر از 16 رقم باشد.");
-                msgwin.ShowDialog();
+                msgwin.Show();
             }
         }
 
         private void CUST_NO_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (CUST_NO.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
 
             CUST_NO_2.SelectedValue = CUST_NO.SelectedValue;
@@ -700,9 +718,17 @@ namespace Wins.WinMenus.Checkha
 
         private void CUST_NO_2_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (CUST_NO_2.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
 
             CUST_NO.SelectedValue = CUST_NO_2.SelectedValue;
+        }
+
+        bool isClosing = false;
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            isClosing = true;
         }
     }
 }

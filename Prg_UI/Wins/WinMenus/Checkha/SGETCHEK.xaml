@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Wins.WinMenus.Checkha"
         mc:Ignorable="d"
-                xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         FontFamily="{StaticResource IRANYEKAN}"
@@ -13,7 +13,7 @@
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
         WindowStartupLocation="CenterScreen"
-        Title="SGETCHEK" Height="602" Width="610" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered" PreviewKeyDown="Window_PreviewKeyDown">
+        Title="SGETCHEK" Height="602" Width="610" Closing="Window_Closing" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered" PreviewKeyDown="Window_PreviewKeyDown">
 
     <Grid x:Name="mygrid">
         <Border  Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1" Margin="2,0,3,0">

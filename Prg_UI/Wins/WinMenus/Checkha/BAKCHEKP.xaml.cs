@@ -167,8 +167,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             VAZ.DisplayMemberPath = "Name";
         }
 
+        bool isClosing = false;
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            isClosing = true;
+
             //ON_Close
             if (can)
             {
@@ -220,10 +223,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void N_SERI_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (!IsVisible)
-            {
-                return;
-            }
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (N_SERI.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
             //After_Update
 
@@ -304,6 +305,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void BANK_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (BANK.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
             //After_Update
             var rst = dbms.DoGetDataSQL<PAY_GETP>("SELECT  *  FROM PAY_GETP WHERE N_SERI=" + this.N_SERI.Text + " AND BANK = " + this.BANK.SelectedValue).ToList();
@@ -334,6 +337,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void DATE_S_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (DATE_S.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)

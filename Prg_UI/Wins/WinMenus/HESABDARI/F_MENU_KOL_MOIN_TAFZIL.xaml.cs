@@ -521,7 +521,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             TextBox TexBo = (TextBox)Combo36.Template.FindName("PART_EditableTextBox", Combo36);
             if (TexBo.Text == "+" || TexBo.Text == "++")
             {
-                ComboSearch CMBSearch = new ComboSearch("F_MENU_KOL_MOIN_TAFZIL");//Search Plusy Form Specialy for Customers
+                ComboSearch CMBSearch = new ComboSearch("F_MENU_KOL_MOIN_TAFZIL", I_AM_F_MENU_KOL_MOIN_TAFZIL);//Search Plusy Form Specialy for Customers
                 CMBSearch.ShowDialog();
                 return;
             }

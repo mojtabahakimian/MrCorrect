@@ -134,6 +134,12 @@ namespace Prg_UI.Wins.WinOther
 
         private static List<Custom_CUST_HESAB> EnsureItemsSourceList(ComboBox comboBox)
         {
+            if (comboBox == null)
+            {
+                // Caller passed an unexpected null combo box.
+                return new List<Custom_CUST_HESAB>();
+            }
+
             if (comboBox.ItemsSource is List<Custom_CUST_HESAB> list)
             {
                 return list;
@@ -162,7 +168,7 @@ namespace Prg_UI.Wins.WinOther
                     case "HEAD_LST_PISHFROOSH2":
 
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -170,7 +176,7 @@ namespace Prg_UI.Wins.WinOther
                             string thevalue = $"{selectedVal.N_KOL}-{selectedVal.NUMBER}-{selectedVal.TNUMBER}";
                             if (!string.IsNullOrEmpty(selectedVal?.tnumber2.ToStringNullSafe()) && selectedVal?.tnumber2.ToStringNullSafe() != "NULL")
                             {
-                                thevalue = selectedVal?.tnumber2.ToString();
+                                thevalue = selectedVal?.tnumber2?.ToString();
                                 selectedVal.NAME = selectedVal.TNAME;
                             }
 
@@ -188,7 +194,7 @@ namespace Prg_UI.Wins.WinOther
                         break;
                     case "F_MENU_KOL_MOIN_TAFZIL":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -244,7 +250,7 @@ namespace Prg_UI.Wins.WinOther
                             };
 
                             //(Win_US as MAIN).COMP_COD_DATA.Add(_nh_);
-                            MAIN.MAIN_INST.COMP_COD_DATA.Add(_nh_);
+                            MAIN.MAIN_INST?.COMP_COD_DATA?.Add(_nh_);
                             MAIN.MAIN_INST.COMP_COD.SelectedValue = hesvla;
                             MAIN.MAIN_INST.COMP_COD.SelectedValue = selectedVal.NAME;
                             MAIN.MAIN_INST.COMP_COD.SelectedIndex = 0;
@@ -252,7 +258,7 @@ namespace Prg_UI.Wins.WinOther
                         break;
                     case "HEAD_LST_HAVL":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -277,7 +283,7 @@ namespace Prg_UI.Wins.WinOther
                         break;
                     case "HEAD_LST_RASID":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -302,7 +308,7 @@ namespace Prg_UI.Wins.WinOther
                         break;
                     case "HEAD_LST_FROOSH22":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -327,7 +333,7 @@ namespace Prg_UI.Wins.WinOther
                         break;
                     case "POSHTE_FACTOR": //پشت فاکتور
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -350,7 +356,7 @@ namespace Prg_UI.Wins.WinOther
                         break;
                     case "CREATE_CHEKDP":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -373,7 +379,7 @@ namespace Prg_UI.Wins.WinOther
                         break;
                     case "CREATE_CHEKPDP":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -396,7 +402,7 @@ namespace Prg_UI.Wins.WinOther
                         break;
                     case "PGET_HED":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -426,7 +432,7 @@ namespace Prg_UI.Wins.WinOther
                         break;
                     case "DEED_HEAD":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -456,7 +462,7 @@ namespace Prg_UI.Wins.WinOther
                         break;
                     case "AZAE":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -476,7 +482,7 @@ namespace Prg_UI.Wins.WinOther
 
                     case "paymentformorder_CUST_NO":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -501,7 +507,7 @@ namespace Prg_UI.Wins.WinOther
                         break;
                     case "paymentformorder_ORDERER":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -526,7 +532,7 @@ namespace Prg_UI.Wins.WinOther
                         break;
                     case "HEAD_LST_KHAREED1":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -552,7 +558,7 @@ namespace Prg_UI.Wins.WinOther
 
                     case "HEAD_LST_KHADAMAT":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -578,7 +584,7 @@ namespace Prg_UI.Wins.WinOther
 
                     case "HEAD_LST_KH_BACK_AZAD":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -589,7 +595,6 @@ namespace Prg_UI.Wins.WinOther
                                 thevalue = selectedVal?.tnumber2.ToString();
                                 selectedVal.NAME = selectedVal.TNAME;
                             }
-
                             var custNoItems = EnsureItemsSourceList((Win_US as HEAD_LST_KH_BACK_AZAD).CUST_NO);
                             if (!custNoItems.Any(item => item?.hes == thevalue))
                             {
@@ -604,7 +609,7 @@ namespace Prg_UI.Wins.WinOther
 
                     case "POSHTE_FACTOR_AZADF": //پشت فاکتور
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -628,7 +633,7 @@ namespace Prg_UI.Wins.WinOther
 
                     case "WIN_MESSAGEPANEL":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -652,7 +657,7 @@ namespace Prg_UI.Wins.WinOther
 
                     case "MESSAGEPANEL_CUSTOMER":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -676,7 +681,7 @@ namespace Prg_UI.Wins.WinOther
 
                     case "WIN_F_MENU_KHFR":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -701,7 +706,7 @@ namespace Prg_UI.Wins.WinOther
                         break;
                     case "HEAD_LST_HAV_OTHER_WIN":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -726,7 +731,7 @@ namespace Prg_UI.Wins.WinOther
                     case "F_USER_PERMITION_FORMS_BLOCKED_SUB":
                     case "F_USER_PERMITION_FORMS_UNBLOCKED_SUB":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -751,7 +756,7 @@ namespace Prg_UI.Wins.WinOther
 
                     case "VOSULDIALOG":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -774,7 +779,7 @@ namespace Prg_UI.Wins.WinOther
 
                     case "VOSULDIALOG2":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -797,7 +802,7 @@ namespace Prg_UI.Wins.WinOther
 
                     case "BEHESABDIALOG":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -820,7 +825,7 @@ namespace Prg_UI.Wins.WinOther
 
                     case "ZASESABBEESAB":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -843,7 +848,7 @@ namespace Prg_UI.Wins.WinOther
 
                     case "HAVALAH_ENTER":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;
@@ -868,7 +873,7 @@ namespace Prg_UI.Wins.WinOther
                         break;
                     case "F_MENU_DATE_HES":
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
-                        if (!(selectedVal is null))
+                        if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
                             e.Handled = true;

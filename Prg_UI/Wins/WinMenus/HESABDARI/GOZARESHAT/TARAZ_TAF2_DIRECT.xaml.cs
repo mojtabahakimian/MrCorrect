@@ -24,6 +24,7 @@ using System.Windows.Interop;
 using Prg_Proccessy.SQLMODELS;
 using System.Collections.Generic;
 using static Stimulsoft.Base.StiDbType;
+using Prg_UI.Wins.WinMenus.HESABDARI;
 
 namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 {
@@ -70,7 +71,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         }
         //Header Window End;
         #endregion
-        public TARAZ_TAF2_DIRECT(string _DT1_, string _DT2_, string _KOL_, string _MOIN_ , string _TAF_)
+        public TARAZ_TAF2_DIRECT(string _DT1_, string _DT2_, string _KOL_, string _MOIN_, string _TAF_)
         {
             InitializeComponent();
 
@@ -623,7 +624,21 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                   CurrentRow?.N_KOL.ToString(),
                   CurrentRow?.NUMBER.ToString(), CurrentRow?.TNUMBER.ToString(), CurrentRow.HES_T2.ToString()).Show();
             }
+        }
 
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button { Tag: TARAZ4_TAFZ2_DIRECT_MODEL row })
+            {
+                if (row != null)
+                {
+                    if (row?.N_KOL != null && row?.NUMBER != null && row?.TNUMBER != null && row?.HES_T2 != null)
+                    {
+                        string HES = row.N_KOL + "-" + row.NUMBER + "-" + row.TNUMBER + "-" + row.HES_T2; //کل معین تفضیلی تفضیلی 2
+                        new F_MENU_KOL_MOIN_TAFZIL(HES);
+                    }
+                }
+            }
         }
     }
 }

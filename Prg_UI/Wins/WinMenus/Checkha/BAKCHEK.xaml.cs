@@ -183,8 +183,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             N_SERI.Focus();
         }
 
+        bool isClosing = false;
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            isClosing = true;
+
             #region ON_Close
             double? CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL, HMOIN, HTAF, HTAF2, HTAF3, HTAF4, KHMAVAV;
             double KHNIM;
@@ -310,10 +313,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void N_SERI_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (!IsVisible)
-            {
-                return;
-            }
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (N_SERI.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
             #region After_Update
             if (N_SERI.SelectedValue is not null)
@@ -396,6 +397,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None && !(_SaveExit.IsFocused))
             {
                 e.Handled = true;
