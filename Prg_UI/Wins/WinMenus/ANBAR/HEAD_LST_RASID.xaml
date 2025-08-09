@@ -305,7 +305,7 @@
             </ComboBox.ItemsPanel>
         </ComboBox>
         <Label Content="ارجاع به :" Margin="0,0,294,82"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="48" Height="28" VerticalAlignment="Bottom"/>
-        <ComboBox x:Name="PERSONEL" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,0,344,82" Height="28" FlowDirection="RightToLeft"  IsEnabled="False" IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="230" SelectionChanged="PERSONEL_SelectionChanged" VerticalAlignment="Bottom">
+        <ComboBox x:Name="PERSONEL" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,0,344,82" Height="28" FlowDirection="RightToLeft" IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="230" SelectionChanged="PERSONEL_SelectionChanged" VerticalAlignment="Bottom">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>

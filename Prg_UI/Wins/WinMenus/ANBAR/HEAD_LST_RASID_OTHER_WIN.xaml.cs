@@ -326,7 +326,7 @@ namespace Wins.WinMenus.ANBAR
         }
 
 
-        public FULL_HESAB HESAB_FROM_SEARCH { get; set; }
+        public FULL_HESAB HESAB_FROM_SEARCH { get; set; } = new();
         private bool PERSONEL_First_Open = true;
         private bool chek;
 
@@ -1787,16 +1787,16 @@ namespace Wins.WinMenus.ANBAR
                     }
                     HESAB_FROM_SEARCH.DoClear();
                 }
-                else
+                else if (!string.IsNullOrEmpty(CUTSNO_TEX?.Text))
                 {
                     var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT    hes FROM dbo.CUST_HESAB WHERE     (hes = N'" + CUTSNO_TEX.Text + "')").FirstOrDefault();
-                    if (!string.IsNullOrEmpty(data.hes))
+                    if (data != null && !string.IsNullOrEmpty(data.hes))
                     {
                         CUST_NO.SelectedValue = data.hes;
                     }
                     else
                     {
-                        new Msgwin(false, "حسابی انتخاب نشده!").ShowDialog();
+                        new Msgwin(false, "حساب معتبر نیست!").Show();
                         return;
                     }
                 }
