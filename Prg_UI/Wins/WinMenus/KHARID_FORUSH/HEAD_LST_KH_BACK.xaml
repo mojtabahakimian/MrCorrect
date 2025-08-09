@@ -99,7 +99,7 @@
 
                     <TextBox x:Name="MOLAH"   Text="" Height="28" Margin="626,112,59,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" TabIndex="3" />
                     <Button x:Name="ESLAH" Content="اصلاح فاکتور" Margin="206,8,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="92" Foreground="#DDFFFFFF" FontWeight="Bold" Click="ESLAH_Click"/>
-                    <CheckBox x:Name="OKF" IsChecked="False"  Content="تایید فاکتور" HorizontalAlignment="Left" Margin="553,10,0,0" VerticalAlignment="Top" Width="80" FontSize="10" IsHitTestVisible="False" Focusable="False"/>
+                    <CheckBox x:Name="OKF" IsChecked="False"  Content="تایید فاکتور" HorizontalAlignment="Left" Margin="556,9,0,0" VerticalAlignment="Top" Width="80" FontSize="10" IsHitTestVisible="False" Focusable="False"/>
 
                     <DataGrid   
                         x:Name="INVO_LST_SUB"
@@ -325,7 +325,7 @@
 
                     <!--<CNC:NumericTextBox DoesAcceptDouble="False" x:Name="NUMBER"  Text="0" Height="27" Margin="265,9,0,0"  VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Left" Width="110" NumericLostFocus="NUMBER_NumericLostFocus" IsReadOnly="True" PreviewMouseDoubleClick="NUMBER_PreviewMouseDoubleClick" />-->
 
-                    <ComboBox x:Name="NUMBER1"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" DisplayMemberPath="NUMBER" SelectedValuePath="NUMBER" IsTextSearchEnabled="True" Margin="0,6,316,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="110" PreviewLostKeyboardFocus="NUMBER1_PreviewLostKeyboardFocus" IsTabStop="True">
+                    <ComboBox x:Name="NUMBER1" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" DisplayMemberPath="NUMBER" SelectedValuePath="NUMBER" IsTextSearchEnabled="True" Margin="0,6,316,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="110" PreviewLostKeyboardFocus="NUMBER1_PreviewLostKeyboardFocus" IsTabStop="True">
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -351,12 +351,12 @@
                     <Label Content="شماره فاكتور فروشنده:" Margin="519,113,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="102" Height="28" VerticalAlignment="Top"/>
                     <CNC:NumericTextBox Text="0" DoesAcceptDouble="False" x:Name="FNUMCO" Height="28" Margin="410,0,0,396"    VerticalAlignment="Bottom"  Visibility="Visible"  HorizontalAlignment="Left" Width="106"  />
 
-                    <Button x:Name="BTN_NEW_FACTOR" Content="فاکتور جدید" Margin="252,150,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_NEW_FACTOR_Click" Padding="16,2,16,4"/>
+                    <Button x:Name="BTN_NEW_FACTOR" Visibility="Collapsed" Content="فاکتور جدید" Margin="252,150,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_NEW_FACTOR_Click" Padding="16,2,16,4"/>
 
                 </Grid>
             </TabItem>
             <TabItem Header="پشت فاکتور" x:Name="Page58">
-                <TabItem.Style>
+                <!--<TabItem.Style>
                     <Style TargetType="TabItem" BasedOn="{StaticResource MaterialDesignTabItem}">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Text, ElementName=NUMBER1}" Value="{x:Null}">
@@ -368,9 +368,9 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </TabItem.Style>
+                </TabItem.Style>-->
                 <Grid x:Name="POSSHTEFACTOR_GRID">
-                    <Grid.Style>
+                    <!--<Grid.Style>
                         <Style TargetType="Grid">
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding Text, ElementName=NUMBER1}" Value="{x:Null}">
@@ -382,11 +382,11 @@
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </Grid.Style>
-                    <Label Content="مبلغ تخفیف :" Margin="0,161,34,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
+                    </Grid.Style>-->
+                    <Label Content="مبلغ تخفیف :" Margin="0,142,34,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
 
 
-                    <DataGrid x:Name="PAY_GETD_SUB22"
+                    <DataGrid x:Name="PAY_GETD_SUB22" IsReadOnly="{Binding ElementName=INVO_LST_SUB,Path=IsReadOnly,UpdateSourceTrigger=PropertyChanged}"
                         EnableColumnVirtualization="True"
                         EnableRowVirtualization="True"
                         VirtualizingPanel.IsVirtualizing="True"
@@ -402,7 +402,7 @@
                         KeyboardNavigation.TabNavigation="Contained"
                         SelectedIndex="0"
                         LostFocus="PAY_GETD_SUB22_LostFocus"
-                        Margin="5,315,4,62" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" CellEditEnding="PAY_GETD_SUB22_CellEditEnding" PreviewKeyDown="PAY_GETD_SUB22_PreviewKeyDown" RowEditEnding="PAY_GETD_SUB22_RowEditEnding" PreparingCellForEdit="PAY_GETD_SUB22_PreparingCellForEdit" BeginningEdit="PAY_GETD_SUB22_BeginningEdit">
+                        Margin="5,281,4,53" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" CellEditEnding="PAY_GETD_SUB22_CellEditEnding" PreviewKeyDown="PAY_GETD_SUB22_PreviewKeyDown" RowEditEnding="PAY_GETD_SUB22_RowEditEnding" PreparingCellForEdit="PAY_GETD_SUB22_PreparingCellForEdit" BeginningEdit="PAY_GETD_SUB22_BeginningEdit">
 
                         <DataGrid.Style>
                             <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
@@ -597,31 +597,31 @@
                             </DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
-                    <Label Content="مبلغ واریزی :" Margin="0,97,37,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                    <Label Content="مبلغ حواله :" Margin="0,129,42,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                    <Label Content="خدمات :" Margin="0,192,56,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                    <Label Content="مالیات و عوارض :" Margin="0,224,19,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                    <Label Content="معین واریزی :" Margin="0,95,249,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                    <Label Content="معین حواله :" Margin="0,127,254,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                    <Label Content="معین خدمات :" Margin="0,190,246,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                    <Label Content="معین مالیات :" Margin="0,222,248,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                    <Label Content="جمع کل فاکتور :" Margin="160,65,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
-                    <Label Content="هزینه خدمات :" Margin="160,97,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
-                    <Label Content="تخفیفات :" Margin="160,127,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
-                    <Label Content="مبلغ قابل پرداخت :" Margin="160,157,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
-                    <Label Content="جمع مبالغ پرداختی :" Margin="160,187,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
-                    <Label Content="مانده :" Margin="160,217,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
+                    <Label Content="مبلغ واریزی :" Margin="0,78,37,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
+                    <Label Content="مبلغ حواله :" Margin="0,110,42,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
+                    <Label Content="خدمات :" Margin="0,173,56,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
+                    <Label Content="مالیات و عوارض :" Margin="0,205,19,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
+                    <Label Content="معین واریزی :" Margin="0,76,249,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
+                    <Label Content="معین حواله :" Margin="0,108,254,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
+                    <Label Content="معین خدمات :" Margin="0,171,246,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
+                    <Label Content="معین مالیات :" Margin="0,203,248,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
+                    <Label Content="جمع کل فاکتور :" Margin="160,46,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
+                    <Label Content="هزینه خدمات :" Margin="160,78,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
+                    <Label Content="تخفیفات :" Margin="160,108,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
+                    <Label Content="مبلغ قابل پرداخت :" Margin="160,138,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
+                    <Label Content="جمع مبالغ پرداختی :" Margin="160,168,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
+                    <Label Content="مانده :" Margin="160,198,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
                     <Label Content="شماره فاکتور :" Margin="0,10,19,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
                     <Label Content="تاریخ فاکتور :" Margin="0,10,179,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
                     <Label Content="مشتری :" Margin="0,10,324,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
                     <Label Content="جمع مبلغ چکها :" Margin="0,0,362,17"  FlowDirection="RightToLeft" FontSize="10" Width="76" Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
-                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="MABL_VAR"   Text="0" Height="27" Margin="0,97,104,0"    VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123" TabIndex="100" MaxLength="16" NumericLostFocus="MABL_VAR_NumericLostFocus"  >
+                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="MABL_VAR"   Text="0" Height="27" Margin="0,78,104,0"    VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123" TabIndex="100" MaxLength="16" NumericLostFocus="MABL_VAR_NumericLostFocus"  >
                         <CNC:NumericTextBox.Background>
                             <ImageBrush/>
                         </CNC:NumericTextBox.Background>
                     </CNC:NumericTextBox>
-                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="MABL_HAV"   Text="0" Height="27" Margin="0,128,104,0"   VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Right" Width="123"  NumericLostFocus="MABL_HAV_NumericLostFocus" TabIndex="102" MaxLength="16" />
-                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="TAKHFIF" Text="{Binding ElementName=TAKHFIF2,Path=Text,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" CustomUpdateSourceTrigger="PropertyChanged"  Height="27" Margin="0,160,104,0"     VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123" NumericLostFocus="TAKHFIF_NumericLostFocus" MaxLength="16" IsEnabled="True" >
+                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="MABL_HAV"   Text="0" Height="27" Margin="0,109,104,0"   VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Right" Width="123"  NumericLostFocus="MABL_HAV_NumericLostFocus" TabIndex="102" MaxLength="16" />
+                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="TAKHFIF" Text="{Binding ElementName=TAKHFIF2,Path=Text,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" CustomUpdateSourceTrigger="PropertyChanged"  Height="27" Margin="0,141,104,0"     VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123" NumericLostFocus="TAKHFIF_NumericLostFocus" MaxLength="16" IsEnabled="True" >
                         <CNC:NumericTextBox.Style>
                             <Style TargetType="CNC:NumericTextBox">
                                 <Setter Property="IsEnabled" Value="False" />
@@ -634,12 +634,12 @@
                         </CNC:NumericTextBox.Style>
                     </CNC:NumericTextBox>
 
-                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="MABL_HAZ"   Text="0" Height="27" Margin="0,192,104,0"    VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Right" Width="123"  NumericLostFocus="MABL_HAZ_NumericLostFocus" MaxLength="16" IsHitTestVisible="False" />
-                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True"  x:Name="MBAA" IsReadOnly="True"   Text="0" Height="27" Margin="0,224,104,0"     VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  />
-                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" TextBoxStyle="{StaticResource MaterialDesignTextBox}"  IsDigitGroupActive="True"  x:Name="JF" IsReadOnly="True"   Text="0" Height="27" Margin="10,63,0,0"  VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Left" Width="145"  BorderBrush="{x:Null}" />
-                    <TextBox x:Name="MOIN_VAR" Height="27" Margin="0,95,319,0" Text="{Binding ElementName=MOIN_VAR2,Path=Text,UpdateSourceTrigger=LostFocus,Mode=TwoWay}"   Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  Padding="3" />
+                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="MABL_HAZ"   Text="0" Height="27" Margin="0,173,104,0"    VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Right" Width="123"  NumericLostFocus="MABL_HAZ_NumericLostFocus" MaxLength="16" />
+                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True"  x:Name="MBAA" IsReadOnly="True"   Text="0" Height="27" Margin="0,205,104,0"     VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  />
+                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" TextBoxStyle="{StaticResource MaterialDesignTextBox}"  IsDigitGroupActive="True"  x:Name="JF" IsReadOnly="True"   Text="0" Height="27" Margin="10,44,0,0"  VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Left" Width="145"  BorderBrush="{x:Null}" />
+                    <TextBox x:Name="MOIN_VAR" Height="27" Margin="0,76,319,0" Text="{Binding ElementName=MOIN_VAR2,Path=Text,UpdateSourceTrigger=LostFocus,Mode=TwoWay}"   Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  Padding="3" />
 
-                    <ComboBox x:Name="CMB_MOIN_VAR" SelectedValue="{Binding ElementName=MOIN_VAR,Path=Text}" DisplayMemberPath="NAME" SelectedValuePath="hes"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="292,95,447,0" VerticalAlignment="Top" Height="27" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" TabIndex="101" >
+                    <ComboBox x:Name="CMB_MOIN_VAR" SelectedValue="{Binding ElementName=MOIN_VAR,Path=Text}" DisplayMemberPath="NAME" SelectedValuePath="hes"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="292,76,447,0" VerticalAlignment="Top" Height="27" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" TabIndex="101" >
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -647,17 +647,17 @@
                         </ComboBox.ItemsPanel>
                     </ComboBox>
 
-                    <TextBox x:Name="MOIN_HAV" Height="27" Margin="0,127,319,0" Text="{Binding ElementName=MOIN_HAV2,Path=Text,UpdateSourceTrigger=LostFocus,Mode=TwoWay}"  Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  Padding="3" PreviewLostKeyboardFocus="MOIN_HAV_PreviewLostKeyboardFocus"/>
-                    <TextBox x:Name="MOIN_HAZ" Height="27" Margin="0,190,319,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  Padding="3" PreviewLostKeyboardFocus="MOIN_HAZ_PreviewLostKeyboardFocus" IsHitTestVisible="False" />
-                    <TextBox x:Name="HMBAA" IsReadOnly="True" Height="27" Margin="0,222,319,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  Padding="3" Tag="RD" Focusable="False" />
+                    <TextBox x:Name="MOIN_HAV" Height="27" Margin="0,108,319,0" Text="{Binding ElementName=MOIN_HAV2,Path=Text,UpdateSourceTrigger=LostFocus,Mode=TwoWay}"  Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  Padding="3" PreviewLostKeyboardFocus="MOIN_HAV_PreviewLostKeyboardFocus"/>
+                    <TextBox x:Name="MOIN_HAZ" Height="27" Margin="0,171,319,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  Padding="3" PreviewLostKeyboardFocus="MOIN_HAZ_PreviewLostKeyboardFocus" />
+                    <TextBox x:Name="HMBAA" IsReadOnly="True" Height="27" Margin="0,203,319,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  Padding="3" Tag="RD" Focusable="False" />
                     <Label Content="{Binding Text, ElementName=NUMBER1}" Margin="0,10,91,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="52" Height="25" VerticalAlignment="Top"/>
                     <Label Content="{Binding Text, ElementName=DATE_N}" Margin="0,10,249,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="59" Height="25" VerticalAlignment="Top"/>
                     <Label Content="{Binding Text, ElementName=CUST_NO}" Margin="0,10,367,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="345" Height="25" VerticalAlignment="Top"/>
-                    <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" TextBoxStyle="{StaticResource MaterialDesignTextBox}" DigitGroupOnEnter="True"   x:Name="HKH" IsReadOnly="True"   Text="0" Height="27" Margin="10,95,0,0"     VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Left" Width="145"  BorderBrush="{x:Null}" />
-                    <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" TextBoxStyle="{StaticResource MaterialDesignTextBox}" DigitGroupOnEnter="True"   x:Name="NTKHFIF" IsReadOnly="True"   Text="0" Height="27" Margin="10,125,0,0"     VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Left" Width="145"   BorderBrush="{x:Null}" />
-                    <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" TextBoxStyle="{StaticResource MaterialDesignTextBox}" DigitGroupOnEnter="True"   x:Name="GHABEL" IsReadOnly="True"   Text="0" Height="27" Margin="10,155,0,0"    VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Left" Width="145"  BorderBrush="{x:Null}" />
-                    <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" TextBoxStyle="{StaticResource MaterialDesignTextBox}"  DigitGroupOnEnter="True"  x:Name="NPAR" IsReadOnly="True"   Text="0" Height="27" Margin="10,186,0,0"   VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Left" Width="145"  BorderBrush="{x:Null}" />
-                    <CNC:NumericTextBox DoesAcceptDouble="False" TextBoxStyle="{StaticResource MaterialDesignTextBox}" IsDigitGroupActive="True" DigitGroupOnEnter="True"   x:Name="MAN" IsReadOnly="True"   Text="0" Height="27" Margin="10,216,0,0"     VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Left" Width="145"  BorderBrush="{x:Null}" />
+                    <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" TextBoxStyle="{StaticResource MaterialDesignTextBox}" DigitGroupOnEnter="True"   x:Name="HKH" IsReadOnly="True"   Text="0" Height="27" Margin="10,76,0,0"     VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Left" Width="145"  BorderBrush="{x:Null}" />
+                    <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" TextBoxStyle="{StaticResource MaterialDesignTextBox}" DigitGroupOnEnter="True"   x:Name="NTKHFIF" IsReadOnly="True"   Text="0" Height="27" Margin="10,106,0,0"     VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Left" Width="145"   BorderBrush="{x:Null}" />
+                    <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" TextBoxStyle="{StaticResource MaterialDesignTextBox}" DigitGroupOnEnter="True"   x:Name="GHABEL" IsReadOnly="True"   Text="0" Height="27" Margin="10,136,0,0"    VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Left" Width="145"  BorderBrush="{x:Null}" />
+                    <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" TextBoxStyle="{StaticResource MaterialDesignTextBox}"  DigitGroupOnEnter="True"  x:Name="NPAR" IsReadOnly="True"   Text="0" Height="27" Margin="10,167,0,0"   VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Left" Width="145"  BorderBrush="{x:Null}" />
+                    <CNC:NumericTextBox DoesAcceptDouble="False" TextBoxStyle="{StaticResource MaterialDesignTextBox}" IsDigitGroupActive="True" DigitGroupOnEnter="True"   x:Name="MAN" IsReadOnly="True"   Text="0" Height="27" Margin="10,197,0,0"     VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Left" Width="145"  BorderBrush="{x:Null}" />
                     <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" Tag="RD" x:Name="NCHK" IsReadOnly="True"   Text="0" Height="27" Margin="0,0,443,15"    VerticalAlignment="Bottom"  Visibility="Visible"  BorderBrush="{x:Null}" HorizontalAlignment="Right" Width="164" />
                     <GroupBox Header="خدمات" FlowDirection="RightToLeft" Style="{x:Null}" HorizontalAlignment="Left" Height="51" Margin="360,36,0,0" VerticalAlignment="Top" Width="315" Padding="0,-4,0,0" Visibility="Hidden">
                         <UniformGrid>
@@ -666,23 +666,23 @@
                         </UniformGrid>
 
                     </GroupBox>
-                    <Button x:Name="BUTTON_SAVE_POSHT" Click="BTN_SAVE_Click"  Content="ذخیره"  Style="{StaticResource GerdC}"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Foreground="#DDFFFFFF" Height="35" Margin="0,275,4,0" Width="100" VerticalAlignment="Top" HorizontalAlignment="Right"/>
-                    <Button x:Name="DELETE_CHKPOSHT"  Content="حذف سطر"  Style="{StaticResource GerdC}"  Tag="hazfer"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5" FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" Margin="10,275,0,0" Click="DELETE_CHKPOSHT_Click" />
-                    <ComboBox x:Name="CMB_MOIN_HAV"  SelectedValue="{Binding ElementName=MOIN_HAV,Path=Text}"  DisplayMemberPath="NAME" SelectedValuePath="hes"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="292,127,447,0" VerticalAlignment="Top" Height="27" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" TabIndex="103" >
+                    <Button x:Name="BUTTON_SAVE_POSHT" Click="BTN_SAVE_Click"  Content="ذخیره"  Style="{StaticResource GerdC}"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Foreground="#DDFFFFFF" Height="35" Margin="0,239,4,0" Width="100" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+                    <Button x:Name="DELETE_CHKPOSHT" IsEnabled="{Binding ElementName=BTN_DELETE,Path=IsEnabled,UpdateSourceTrigger=PropertyChanged}"  Content="حذف سطر"  Style="{StaticResource GerdC}"  Tag="hazfer"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5" FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" Margin="9,239,0,0" Click="DELETE_CHKPOSHT_Click" />
+                    <ComboBox x:Name="CMB_MOIN_HAV"  SelectedValue="{Binding ElementName=MOIN_HAV,Path=Text}"  DisplayMemberPath="NAME" SelectedValuePath="hes"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="292,108,447,0" VerticalAlignment="Top" Height="27" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" TabIndex="103" >
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                             </ItemsPanelTemplate>
                         </ComboBox.ItemsPanel>
                     </ComboBox>
-                    <ComboBox x:Name="CMB_MOIN_HAZ"   SelectedValue="{Binding ElementName=MOIN_HAZ,Path=Text}"  DisplayMemberPath="NAME" SelectedValuePath="hes"   Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="292,190,447,0" VerticalAlignment="Top" Height="27" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" >
+                    <ComboBox x:Name="CMB_MOIN_HAZ"   SelectedValue="{Binding ElementName=MOIN_HAZ,Path=Text}"  DisplayMemberPath="NAME" SelectedValuePath="hes"   Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="292,171,447,0" VerticalAlignment="Top" Height="27" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" >
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                             </ItemsPanelTemplate>
                         </ComboBox.ItemsPanel>
                     </ComboBox>
-                    <ComboBox x:Name="CMB_HMBAA" SelectedValue="{Binding ElementName=HMBAA,Path=Text}" DisplayMemberPath="NAME" SelectedValuePath="hes"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="292,222,447,0" VerticalAlignment="Top" Height="27" FlowDirection="RightToLeft"  Background="{x:Null}" BorderThickness="1" IsReadOnly="True" Tag="RD" Focusable="False" IsHitTestVisible="False" >
+                    <ComboBox x:Name="CMB_HMBAA" SelectedValue="{Binding ElementName=HMBAA,Path=Text}" DisplayMemberPath="NAME" SelectedValuePath="hes"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="292,203,447,0" VerticalAlignment="Top" Height="27" FlowDirection="RightToLeft"  Background="{x:Null}" BorderThickness="1" IsReadOnly="True" Tag="RD" Focusable="False" IsHitTestVisible="False" >
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -690,8 +690,8 @@
                         </ComboBox.ItemsPanel>
                     </ComboBox>
 
-                    <Label Content="درصد تخفیف:" Margin="0,160,251,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="26" VerticalAlignment="Top"/>
-                    <CNC:NumericTextBox DoesAcceptDouble="True" x:Name="TAKHFIF_PERCENT" Text="0" IsPercentageMode="True" MaxLength="6" CustomUpdateSourceTrigger="PropertyChanged"  Height="28" Margin="0,159,319,0"     VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="43" NumericLostFocus="TAKHFIF_PERCENT_NumericLostFocus" />
+                    <Label Content="درصد تخفیف:" Margin="0,141,251,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="26" VerticalAlignment="Top"/>
+                    <CNC:NumericTextBox DoesAcceptDouble="True" x:Name="TAKHFIF_PERCENT" Text="0" IsPercentageMode="True" MaxLength="6" CustomUpdateSourceTrigger="PropertyChanged"  Height="28" Margin="0,140,319,0"     VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="43" NumericLostFocus="TAKHFIF_PERCENT_NumericLostFocus" />
                     <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" x:Name="M_NAGHD"   Text="0" Height="27" Margin="0,65,104,0"    VerticalAlignment="Top"   Visibility="Hidden"  HorizontalAlignment="Right" Width="123" MaxLength="16" />
                     <Label Content="مبلغ نقد :" Margin="0,67,50,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top" Visibility="Hidden"/>
 
