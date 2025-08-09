@@ -115,7 +115,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 else
                 {
                     // Defer the operation until the window is fully rendered
-                    this.Dispatcher.BeginInvoke(new Action(() => {
+                    this.Dispatcher.BeginInvoke(new Action(() =>
+                    {
                         // Try again after the window is fully initialized
                         IntPtr newHandle = new WindowInteropHelper(this).Handle;
                         if (newHandle != IntPtr.Zero)
@@ -140,6 +141,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
         public bool NowIsReady { get; private set; }
         public string _sql_query { get; set; }
+        public string sql { get; set; }
         public string Condition { get; private set; } = "";
         public string Real_Month { get; set; }
 
@@ -376,12 +378,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             if (VGR_GRID.SelectionController.CurrentCellManager.CurrentCell != null)
             {
                 var columnName = VGR_GRID.SelectionController.CurrentCellManager.CurrentCell.GridColumn.MappingName; // Get the name of the column
-                                                                                                                        // Return the column name and the current cell value
-                                                                                                                        //if (CurrentCellValue == null)
-                                                                                                                        //{
-                                                                                                                        //    return (columnName, SelectedSfDgTextCell);
-                                                                                                                        //}
-                                                                                                                        //else
+                                                                                                                     // Return the column name and the current cell value
+                                                                                                                     //if (CurrentCellValue == null)
+                                                                                                                     //{
+                                                                                                                     //    return (columnName, SelectedSfDgTextCell);
+                                                                                                                     //}
+                                                                                                                     //else
                 {
                     return (columnName, CurrentCellValue);
                 }
@@ -695,38 +697,74 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             string hes = HES.SelectedValue.ToString(); // یا مقدار جاری ویزیتور
 
             // همان کوئری که در VBA داشتی، اما با جایگزینی پارامترها:
-            string sql = $@"
-            SELECT TOP 100 PERCENT 
-                dbo.visitgol_dtl.CODE, VISITOR_DTL_KALA.CUST_NO, dbo.visitgol_dtl.HES, dbo.visitgol_dtl.MAH, dbo.STUF_DEF.NAME AS kala,
-                ISNULL(VISITOR_DTL_KALA.MABL_K, 0) AS MABL_K, ISNULL(VISITOR_DTL_KALA.MABMAR, 0) AS MABMAR, ISNULL(VISITOR_DTL_KALA.MEGH_MAR,0) AS MEGH_MAR,
-                ISNULL(VISITOR_DTL_KALA.MEGHk, 0) AS MEGHk, VISITOR_DTL_KALA.VISITOR, dbo.visitgol_dtl.MEGHk AS MEGHkGOL,
-                ISNULL(dbo.visitgol_dtl.MEGHk - VISITOR_DTL_KALA.MEGHk, 0) AS MANDMEGH,
-                ISNULL(VISITOR_DTL_KALA.MEGHk / dbo.UIIF(dbo.visitgol_dtl.MEGHk, N'=', 0, 1, dbo.visitgol_dtl.MEGHk) * 100, 0) AS DARSADFR,
-                0 AS DAYMAND
-            FROM dbo.STUF_DEF 
-            INNER JOIN dbo.visitgol_dtl ON dbo.STUF_DEF.CODE = dbo.visitgol_dtl.CODE 
-            LEFT OUTER JOIN dbo.VISITOR_DTL_KALA(@DT1, @DT2, @HES) VISITOR_DTL_KALA
-                ON dbo.visitgol_dtl.CODE = VISITOR_DTL_KALA.CODE AND dbo.visitgol_dtl.HES = VISITOR_DTL_KALA.CUST_NO
-            WHERE (dbo.visitgol_dtl.MAH = @MAH) AND (dbo.visitgol_dtl.HES = @HES) @condtion
-            ORDER BY dbo.STUF_DEF.NAME
-        ";
+            if (string.IsNullOrEmpty(Condition))
+            {
+                       sql = $@"
+                  SELECT TOP 100 PERCENT 
+                      dbo.visitgol_dtl.CODE, VISITOR_DTL_KALA.CUST_NO, dbo.visitgol_dtl.HES, dbo.visitgol_dtl.MAH, dbo.STUF_DEF.NAME AS kala,
+                      ISNULL(VISITOR_DTL_KALA.MABL_K, 0) AS MABL_K, ISNULL(VISITOR_DTL_KALA.MABMAR, 0) AS MABMAR, ISNULL(VISITOR_DTL_KALA.MEGH_MAR,0) AS MEGH_MAR,
+                      ISNULL(VISITOR_DTL_KALA.MEGHk, 0) AS MEGHk, VISITOR_DTL_KALA.VISITOR, dbo.visitgol_dtl.MEGHk AS MEGHkGOL,
+                      ISNULL(dbo.visitgol_dtl.MEGHk - VISITOR_DTL_KALA.MEGHk, 0) AS MANDMEGH,
+                      ISNULL(VISITOR_DTL_KALA.MEGHk / dbo.UIIF(dbo.visitgol_dtl.MEGHk, N'=', 0, 1, dbo.visitgol_dtl.MEGHk) * 100, 0) AS DARSADFR,
+                      0 AS DAYMAND
+                  FROM dbo.STUF_DEF 
+                  INNER JOIN dbo.visitgol_dtl ON dbo.STUF_DEF.CODE = dbo.visitgol_dtl.CODE 
+                  LEFT OUTER JOIN dbo.VISITOR_DTL_KALA(@DT1, @DT2, @HES) VISITOR_DTL_KALA
+                      ON dbo.visitgol_dtl.CODE = VISITOR_DTL_KALA.CODE AND dbo.visitgol_dtl.HES = VISITOR_DTL_KALA.CUST_NO
+                  WHERE (dbo.visitgol_dtl.MAH = @MAH) AND (dbo.visitgol_dtl.HES = @HES)
+                  ORDER BY dbo.STUF_DEF.NAME
+              ";
 
-            _sql_query = $@"
-            SELECT TOP 100 PERCENT 
-                dbo.visitgol_dtl.CODE, VISITOR_DTL_KALA.CUST_NO, dbo.visitgol_dtl.HES, dbo.visitgol_dtl.MAH, dbo.STUF_DEF.NAME AS kala,
-                ISNULL(VISITOR_DTL_KALA.MABL_K, 0) AS MABL_K, ISNULL(VISITOR_DTL_KALA.MABMAR, 0) AS MABMAR, ISNULL(VISITOR_DTL_KALA.MEGH_MAR,0) AS MEGH_MAR,
-                ISNULL(VISITOR_DTL_KALA.MEGHk, 0) AS MEGHk, VISITOR_DTL_KALA.VISITOR, dbo.visitgol_dtl.MEGHk AS MEGHkGOL,
-                ISNULL(dbo.visitgol_dtl.MEGHk - VISITOR_DTL_KALA.MEGHk, 0) AS MANDMEGH,
-                ISNULL(VISITOR_DTL_KALA.MEGHk / dbo.UIIF(dbo.visitgol_dtl.MEGHk, N'=', 0, 1, dbo.visitgol_dtl.MEGHk) * 100, 0) AS DARSADFR,
-                0 AS DAYMAND
-            FROM dbo.STUF_DEF 
-            INNER JOIN dbo.visitgol_dtl ON dbo.STUF_DEF.CODE = dbo.visitgol_dtl.CODE 
-            LEFT OUTER JOIN dbo.VISITOR_DTL_KALA({dt1}, {dt2}, N'{hes}') VISITOR_DTL_KALA
-                ON dbo.visitgol_dtl.CODE = VISITOR_DTL_KALA.CODE AND dbo.visitgol_dtl.HES = VISITOR_DTL_KALA.CUST_NO
-            WHERE (dbo.visitgol_dtl.MAH = {_selectedMonth}) AND (dbo.visitgol_dtl.HES = N'{hes}')
-            ORDER BY dbo.STUF_DEF.NAME";
+                      _sql_query = $@"
+                  SELECT TOP 100 PERCENT 
+                      dbo.visitgol_dtl.CODE, VISITOR_DTL_KALA.CUST_NO, dbo.visitgol_dtl.HES, dbo.visitgol_dtl.MAH, dbo.STUF_DEF.NAME AS kala,
+                      ISNULL(VISITOR_DTL_KALA.MABL_K, 0) AS MABL_K, ISNULL(VISITOR_DTL_KALA.MABMAR, 0) AS MABMAR, ISNULL(VISITOR_DTL_KALA.MEGH_MAR,0) AS MEGH_MAR,
+                      ISNULL(VISITOR_DTL_KALA.MEGHk, 0) AS MEGHk, VISITOR_DTL_KALA.VISITOR, dbo.visitgol_dtl.MEGHk AS MEGHkGOL,
+                      ISNULL(dbo.visitgol_dtl.MEGHk - VISITOR_DTL_KALA.MEGHk, 0) AS MANDMEGH,
+                      ISNULL(VISITOR_DTL_KALA.MEGHk / dbo.UIIF(dbo.visitgol_dtl.MEGHk, N'=', 0, 1, dbo.visitgol_dtl.MEGHk) * 100, 0) AS DARSADFR,
+                      0 AS DAYMAND
+                  FROM dbo.STUF_DEF 
+                  INNER JOIN dbo.visitgol_dtl ON dbo.STUF_DEF.CODE = dbo.visitgol_dtl.CODE 
+                  LEFT OUTER JOIN dbo.VISITOR_DTL_KALA({dt1}, {dt2}, N'{hes}') VISITOR_DTL_KALA
+                      ON dbo.visitgol_dtl.CODE = VISITOR_DTL_KALA.CODE AND dbo.visitgol_dtl.HES = VISITOR_DTL_KALA.CUST_NO
+                  WHERE (dbo.visitgol_dtl.MAH = {_selectedMonth}) AND (dbo.visitgol_dtl.HES = N'{hes}')
+                  ORDER BY dbo.STUF_DEF.NAME";
+            }
+            else
+            {
+                        sql = $@"
+                   SELECT TOP 100 PERCENT 
+                       dbo.visitgol_dtl.CODE, VISITOR_DTL_KALA.CUST_NO, dbo.visitgol_dtl.HES, dbo.visitgol_dtl.MAH, dbo.STUF_DEF.NAME AS kala,
+                       ISNULL(VISITOR_DTL_KALA.MABL_K, 0) AS MABL_K, ISNULL(VISITOR_DTL_KALA.MABMAR, 0) AS MABMAR, ISNULL(VISITOR_DTL_KALA.MEGH_MAR,0) AS MEGH_MAR,
+                       ISNULL(VISITOR_DTL_KALA.MEGHk, 0) AS MEGHk, VISITOR_DTL_KALA.VISITOR, dbo.visitgol_dtl.MEGHk AS MEGHkGOL,
+                       ISNULL(dbo.visitgol_dtl.MEGHk - VISITOR_DTL_KALA.MEGHk, 0) AS MANDMEGH,
+                       ISNULL(VISITOR_DTL_KALA.MEGHk / dbo.UIIF(dbo.visitgol_dtl.MEGHk, N'=', 0, 1, dbo.visitgol_dtl.MEGHk) * 100, 0) AS DARSADFR,
+                       0 AS DAYMAND
+                   FROM dbo.STUF_DEF 
+                   INNER JOIN dbo.visitgol_dtl ON dbo.STUF_DEF.CODE = dbo.visitgol_dtl.CODE 
+                   LEFT OUTER JOIN dbo.VISITOR_DTL_KALA(@DT1, @DT2, @HES) VISITOR_DTL_KALA
+                       ON dbo.visitgol_dtl.CODE = VISITOR_DTL_KALA.CODE AND dbo.visitgol_dtl.HES = VISITOR_DTL_KALA.CUST_NO
+                   WHERE (dbo.visitgol_dtl.MAH = @MAH) AND (dbo.visitgol_dtl.HES = @HES) @condtion
+                   ORDER BY dbo.STUF_DEF.NAME
+               ";
 
-            var parameters = new { DT1 = dt1, DT2 = dt2, HES = hes, MAH = _selectedMonth , condition = Condition };
+                       _sql_query = $@"
+                   SELECT TOP 100 PERCENT 
+                       dbo.visitgol_dtl.CODE, VISITOR_DTL_KALA.CUST_NO, dbo.visitgol_dtl.HES, dbo.visitgol_dtl.MAH, dbo.STUF_DEF.NAME AS kala,
+                       ISNULL(VISITOR_DTL_KALA.MABL_K, 0) AS MABL_K, ISNULL(VISITOR_DTL_KALA.MABMAR, 0) AS MABMAR, ISNULL(VISITOR_DTL_KALA.MEGH_MAR,0) AS MEGH_MAR,
+                       ISNULL(VISITOR_DTL_KALA.MEGHk, 0) AS MEGHk, VISITOR_DTL_KALA.VISITOR, dbo.visitgol_dtl.MEGHk AS MEGHkGOL,
+                       ISNULL(dbo.visitgol_dtl.MEGHk - VISITOR_DTL_KALA.MEGHk, 0) AS MANDMEGH,
+                       ISNULL(VISITOR_DTL_KALA.MEGHk / dbo.UIIF(dbo.visitgol_dtl.MEGHk, N'=', 0, 1, dbo.visitgol_dtl.MEGHk) * 100, 0) AS DARSADFR,
+                       0 AS DAYMAND
+                   FROM dbo.STUF_DEF 
+                   INNER JOIN dbo.visitgol_dtl ON dbo.STUF_DEF.CODE = dbo.visitgol_dtl.CODE 
+                   LEFT OUTER JOIN dbo.VISITOR_DTL_KALA({dt1}, {dt2}, N'{hes}') VISITOR_DTL_KALA
+                       ON dbo.visitgol_dtl.CODE = VISITOR_DTL_KALA.CODE AND dbo.visitgol_dtl.HES = VISITOR_DTL_KALA.CUST_NO
+                   WHERE (dbo.visitgol_dtl.MAH = {_selectedMonth}) AND (dbo.visitgol_dtl.HES = N'{hes}') {Condition}
+                   ORDER BY dbo.STUF_DEF.NAME";
+            }
+
+            var parameters = new { DT1 = dt1, DT2 = dt2, HES = hes, MAH = _selectedMonth};
             var data = dbms.DoGetDataSQL<SQ1>(sql, parameters).ToList();
             // حالا دیتا را به گرید یا لیست متصل کن
             VGR_GRID.ItemsSource = data;
