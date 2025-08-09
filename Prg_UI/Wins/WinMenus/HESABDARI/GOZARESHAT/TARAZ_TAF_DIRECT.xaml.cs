@@ -24,6 +24,7 @@ using System.Windows.Interop;
 using Prg_Proccessy.SQLMODELS;
 using System.Collections.Generic;
 using static Stimulsoft.Base.StiDbType;
+using Prg_UI.Wins.WinMenus.HESABDARI;
 
 namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 {
@@ -618,6 +619,21 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             if (CurrentRow != null && CurrentRow?.NUMBER != null && CurrentRow?.TNUMBER != null)
             {
                 new TARAZ_TAF2_DIRECT(DT1, DT2, CurrentRow?.N_KOL.ToString(), CurrentRow?.NUMBER.ToString(), CurrentRow?.TNUMBER.ToString()).Show();
+            }
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button { Tag: TARAZ4_TAFZ_DIRECT_MODEL row })
+            {
+                if (row != null)
+                {
+                    if (row.N_KOL != null && row.NUMBER != null && row.TNUMBER != null)
+                    {
+                        string HES = row.N_KOL + "-" + row.NUMBER + "-" + row.TNUMBER; //کل معین تفضیلی
+                        new F_MENU_KOL_MOIN_TAFZIL(HES);
+                    }
+                }
             }
         }
     }

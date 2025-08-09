@@ -147,8 +147,6 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 _SaveExit
                 );
 
-            N_SERI.IsEditable = false;
-
             Fill_ComboBoxes();
 
             //ON_Open
@@ -193,17 +191,15 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             N_SERI.Focus();
         }
 
+        bool isClosing = false;
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-
+            isClosing = true;
         }
-
         private void N_SERI_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (!IsVisible)
-            {
-                return;
-            }
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (N_SERI.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
             //After_Update
 
@@ -219,11 +215,13 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 FOR_CHK_SERCH fOR_CHK_SERCH = new FOR_CHK_SERCH("1", "N_SERI = " + N_SERI.SelectedValue.ToStringNullSafe(), I_AM_FORCHECK);
                 fOR_CHK_SERCH.ShowDialog();
             }
-   
+
         }
 
         private void BANK_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (BANK.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
 
             if (DATE_S.Text.ToRawTarikh() is null && (MABL.Text == "0" || MABL == null))
@@ -272,6 +270,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void DATE_S_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             var rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh()).ToList();
             if (rst.Count == 0)
             {
@@ -370,6 +370,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void DATE_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             string date_n_val = DATE_S.Text.ToRawTarikh();
             if (!string.IsNullOrEmpty(date_n_val))
             {
@@ -384,6 +386,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (!IsVisible || !IsLoaded || isClosing) { return; }
+
             if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None && !(_SaveExit.IsFocused))
             {
                 e.Handled = true;

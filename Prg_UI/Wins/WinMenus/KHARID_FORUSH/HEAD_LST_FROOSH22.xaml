@@ -129,7 +129,7 @@
                     <Label Content="شماره حواله :" Margin="375,13,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="65" Height="25" VerticalAlignment="Top"/>
                     <Label Content="مشتری :" Margin="0,79,26,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="43" Height="25" VerticalAlignment="Top"/>
                     <Label Content="ملاحظات :" Margin="0,114,19,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="50" Height="25" VerticalAlignment="Top"/>
-                    <Label Content="واحد :" Margin="917,45,34,0"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Top"/>
+                    <Label Content="واحد :" Margin="0,45,34,0"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right" Width="36"/>
 
                     <CNC:NumericTextBox DoesAcceptDouble="False"  x:Name="MAS" Text="0" Height="26" Margin="444,9,0,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="63"  />
                     <ComboBox x:Name="DEPATMAN"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="595,43,74,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" PreviewLostKeyboardFocus="DEPATMAN_PreviewLostKeyboardFocus">

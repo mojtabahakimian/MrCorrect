@@ -10,7 +10,7 @@
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
         WindowStartupLocation="CenterScreen" 
-        Title="Window1" Height="455" Width="610" Loaded="Window_Loaded" Closing="Window_Closing" PreviewKeyDown="Window_PreviewKeyDown">
+        Height="455" Width="610" Loaded="Window_Loaded" Closing="Window_Closing" PreviewKeyDown="Window_PreviewKeyDown">
     <Grid x:Name="mygrid" Margin="-1,0,1,0" DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
         <Border  Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1" Margin="3,0,2,0">
             <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="28.579" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
@@ -46,7 +46,7 @@
             </ComboBox.ItemsPanel>
         </ComboBox>
         <Label x:Name="Label3" Content=": بانک" HorizontalAlignment="Left" Margin="487,119,0,0" VerticalAlignment="Top" Width="auto"/>
-        <ComboBox x:Name="N_SERI" TabIndex="1" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="362,86,130,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" LostFocus="N_SERI_LostFocus" IsTabStop="True">
+        <ComboBox x:Name="N_SERI" TabIndex="1" IsEditable="True" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="362,86,130,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" LostFocus="N_SERI_LostFocus" IsTabStop="True">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>

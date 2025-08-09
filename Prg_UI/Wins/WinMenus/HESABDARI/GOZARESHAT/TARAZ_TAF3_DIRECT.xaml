@@ -160,6 +160,31 @@
                     </syncfusion:GridTemplateColumn.CellTemplate>
                 </syncfusion:GridTemplateColumn>
 
+                <syncfusion:GridTemplateColumn IsReadOnly="True" AllowResizing="False" Width="60">
+                    <syncfusion:GridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button 
+                                IsTabStop="False"
+                                Click="Button_Click_1"
+                                Tag="{Binding}"
+                                materialDesign:ButtonAssist.CornerRadius="1"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                VerticalContentAlignment="Center"
+                                HorizontalContentAlignment="Center">
+                                <materialDesign:PackIcon Kind="InvoiceListOutline"/>
+                            </Button>
+                        </DataTemplate>
+                    </syncfusion:GridTemplateColumn.CellTemplate>
+                    <syncfusion:GridTemplateColumn.CellStyle>
+                        <Style TargetType="sfusion:GridCell">
+                            <Setter Property="IsTabStop" Value="False"/>
+                            <Setter Property="Focusable" Value="False"/>
+                        </Style>
+                    </syncfusion:GridTemplateColumn.CellStyle>
+                </syncfusion:GridTemplateColumn>
+
                 <syncfusion:GridTextColumn  HeaderText="کل" MappingName="N_KOL" Width="110" />
                 <syncfusion:GridTextColumn  HeaderText="معین" MappingName="NUMBER" Width="120" />
                 <syncfusion:GridTextColumn  HeaderText="تفضیلی" MappingName="TNUMBER" Width="120" />
