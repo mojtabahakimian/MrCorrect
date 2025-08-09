@@ -11,7 +11,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         Title="پارامترها" Height="270" Width="460" MinWidth="460" MinHeight="270" WindowStartupLocation="CenterScreen" WindowState="Normal" MaxWidth="460" MaxHeight="270"  Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" Closing="Window_Closing">
 
     <Window.Resources>

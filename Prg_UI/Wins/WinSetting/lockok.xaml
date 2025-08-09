@@ -11,7 +11,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         Title="قفل سخت افزاری" Height="230" Width="500" Loaded="Window_Loaded">
     <Window.Resources>

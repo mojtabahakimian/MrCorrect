@@ -14,7 +14,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         Title="AMAR_FROOSH_KOL" Height="587" Width="962" Loaded="Window_Loaded">
     
@@ -109,14 +109,14 @@
             <!-- محور X -->
             <syncfusion:SfChart.PrimaryAxis>
                 <syncfusion:CategoryAxis Header="ماه" 
-                                         FontFamily="IRANYekanFN"
+                                         FontFamily="{StaticResource IRANYEKAN}"
                                          FontSize="14"
                                          />
             </syncfusion:SfChart.PrimaryAxis>
             <!-- محور Y -->
             <syncfusion:SfChart.SecondaryAxis>
                 <syncfusion:NumericalAxis Header="مقدار فروش"
-                                          FontFamily="IRANYekanFN"
+                                          FontFamily="{StaticResource IRANYEKAN}"
                                           FontSize="13"
                                           LabelFormat="#,##0"
                                           />

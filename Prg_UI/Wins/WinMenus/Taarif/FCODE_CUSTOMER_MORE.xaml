@@ -11,13 +11,13 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         Title="Window3" Height="635" Width="785"  MinHeight="595" MinWidth="785" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
 
-        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FlowDirection="LeftToRight" FontFamily="IRANYekanFN" ContextMenuOpening="ContextMenu_ContextMenuOpening">
+        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FlowDirection="LeftToRight" FontFamily="{StaticResource IRANYEKAN}" ContextMenuOpening="ContextMenu_ContextMenuOpening">
             <MenuItem Header="اصلاح عکس این سطر" x:Name="EditCurrentRowIMG" Click="EditCurrentRowIMG_Click">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="ImageEdit" />

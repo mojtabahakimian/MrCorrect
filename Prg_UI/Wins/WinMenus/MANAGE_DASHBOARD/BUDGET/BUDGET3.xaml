@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET"
         mc:Ignorable="d"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Background="{x:Null}" AllowsTransparency="True"
         AllowDrop="True"

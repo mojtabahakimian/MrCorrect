@@ -14,7 +14,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         d:Width="5000"
         Title="تعیین سطح دسترسی" Height="600" Width="978" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
@@ -24,7 +24,7 @@
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
 
-        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="IRANYekanFN">
+        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
             <MenuItem Header="کپـــی | Copy" Click="COPY_CLICK" >
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="ContentCopy" FontSize="14" />

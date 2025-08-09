@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Background="{x:Null}"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
         Title="" Height="105" Width="460"  WindowStartupLocation="CenterScreen"  KeyDown="Window_KeyDown">

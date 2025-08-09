@@ -15,7 +15,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
         Height="450" Width="944" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
@@ -49,7 +49,7 @@
 
 
         <!-- Context Menu defined in XAML -->
-        <ContextMenu x:Key="DataGridContextMenu" FontFamily="IRANYekanFN">
+        <ContextMenu x:Key="DataGridContextMenu" FontFamily="{StaticResource IRANYEKAN}">
             <MenuItem Header="پالودن با این بخش" Click="FilterBySelection_Click">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="Filter"  FontSize="14" />

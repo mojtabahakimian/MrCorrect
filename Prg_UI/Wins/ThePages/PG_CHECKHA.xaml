@@ -7,7 +7,7 @@
       mc:Ignorable="d" 
       
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-      FontFamily="IRANYekanFN"
+      FontFamily="{StaticResource IRANYEKAN}"
       d:DesignHeight="900" d:DesignWidth="1000"
       Title="PG_HESABDARI_SUB">
     <Page.Resources>

@@ -12,7 +12,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         Title="F_MENU_KART" Height="230" Width="505" MinHeight="230" MinWidth="505" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" >
     <Grid>

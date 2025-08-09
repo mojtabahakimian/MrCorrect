@@ -13,7 +13,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         Title="HEAD_LST_HAV_OTHER_WIN" Height="64" MinHeight="657" Width="1252" MinWidth="1214" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" ContentRendered="Window_ContentRendered">

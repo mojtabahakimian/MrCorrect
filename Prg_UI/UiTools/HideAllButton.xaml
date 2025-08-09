@@ -12,7 +12,7 @@
         Background="Transparent" 
         ShowInTaskbar="False" 
         Topmost = "True"
-        FontFamily="IRANYekanFN">
+        FontFamily="{StaticResource IRANYEKAN}">
     <Grid>
         <Border Background="#FF333333" CornerRadius="10">
             <Button x:Name="CloseAllButton" 

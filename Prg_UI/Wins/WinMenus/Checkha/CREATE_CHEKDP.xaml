@@ -7,7 +7,7 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:CUC="clr-namespace:Prg_UI.CUC" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="Prg_UI.Wins.WinMenus.Checkha.CREATE_CHEKDP"
         mc:Ignorable="d"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"

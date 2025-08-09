@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         Background="{x:Null}" AllowsTransparency="True"
         AllowDrop="True"
         Height="528" Width="1033" WindowStyle="None" MinWidth="1033" MinHeight="528" Margin="0" WindowStartupLocation="CenterOwner" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered">

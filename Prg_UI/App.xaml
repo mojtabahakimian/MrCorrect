@@ -32,7 +32,7 @@
   
                 <ResourceDictionary Source="pack://application:,,,/Syncfusion.SfGrid.WPF;component/Themes/Generic.xaml" />
             </ResourceDictionary.MergedDictionaries>
-
+            <FontFamily x:Key="IRANYEKAN">pack://application:,,,/UiDrive/FNT/#IRANYekanFN</FontFamily>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

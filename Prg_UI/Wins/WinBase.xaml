@@ -13,7 +13,7 @@
         AllowDrop="True" WindowStyle="None"
         WindowStartupLocation="CenterScreen"
         Topmost="False"
-        Title="مستر کارکت" Height="768" Width="1024" FontFamily="IRANYekanFN" Loaded="Window_Loaded" Closed="Window_Closed_1" PreviewKeyDown="Window_PreviewKeyDown_1" ContentRendered="Window_ContentRendered">
+        Title="مستر کارکت" Height="768" Width="1024" FontFamily="{StaticResource IRANYEKAN}" Loaded="Window_Loaded" Closed="Window_Closed_1" PreviewKeyDown="Window_PreviewKeyDown_1" ContentRendered="Window_ContentRendered">
 
     <Window.Resources>
 

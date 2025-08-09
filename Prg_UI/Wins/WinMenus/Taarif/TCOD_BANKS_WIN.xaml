@@ -10,7 +10,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         Title="Window3" Height="450" Width="800" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered">
     <Window.Resources>

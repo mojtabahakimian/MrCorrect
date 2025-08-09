@@ -10,7 +10,7 @@
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
         WindowStartupLocation="CenterScreen" 
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         
         Title="WIN_ATBZ_LOADER" Height="500" Width="985" Loaded="Window_Loaded">
     <Window.Resources>

@@ -11,7 +11,7 @@
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         xmlns:sfusion="clr-namespace:Syncfusion.UI.Xaml.Grid;assembly=Syncfusion.SfGrid.WPF"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
@@ -46,7 +46,7 @@
         </Style>
 
         <!-- Context Menu defined in XAML -->
-        <ContextMenu x:Key="DataGridContextMenu" FontFamily="IRANYekanFN">
+        <ContextMenu x:Key="DataGridContextMenu" FontFamily="{StaticResource IRANYEKAN}">
             <MenuItem Header="پالودن با این بخش" Click="FilterBySelection_Click">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="Filter"  FontSize="14" />
@@ -77,7 +77,7 @@
             </MenuItem>
         </ContextMenu>
 
-        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="IRANYekanFN">
+        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
             <MenuItem Header="صورت حساب" x:Name="F8_CUSTOMER" Click="F8_CUSTOMER_Click">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="FileDocument"/>

@@ -14,7 +14,7 @@
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
         WindowStartupLocation="CenterScreen" 
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         Title="PGET_HED_LIST" Height="785" Width="1095" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>

@@ -10,7 +10,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        FontFamily="IRANYekanFN"
+        FontFamily="{StaticResource IRANYEKAN}"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterScreen"
         Title="" Height="250" Width="587" MinHeight="215" MinWidth="400" Loaded="Window_Loaded">
