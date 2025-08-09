@@ -99,7 +99,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
-            #region ON_Open
+            //ON_Open
             List<PAY_GETP> rst = null;
             if (!string.IsNullOrEmpty(ServerFilter))
             {
@@ -146,10 +146,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 this.DATE_S.SelectedValuePath = "DATE_S";
                 this.DATE_S.DisplayMemberPath = "DATE_S";
                 this.DATE_S.SelectedIndex = 0;
-
-
             }
-            #endregion
             N_SERI.Focus();
         }
 
@@ -159,7 +156,6 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             N_SERI.SelectedValuePath = "N_SERI";
             N_SERI.DisplayMemberPath = "N_SERI";
 
-            // Create a list of ComboBoxItem for your ComboBox
             List<ComboBoxItem> comboBoxItems = new List<ComboBoxItem>
             {
                 new ComboBoxItem { Id = 1, Name = "نزد شخص" },
@@ -173,7 +169,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            #region ON_Close
+            //ON_Close
             if (can)
             {
 
@@ -195,29 +191,19 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                                                 N_MOIN2 = {rst.FirstOrDefault().N_MOIN2},
                                                 N_TAF2 =   {rst.FirstOrDefault().N_TAF2} ,
                                                 VAZ = {rst.FirstOrDefault().VAZ} {_where} ");
-                    //rst.update();
                 }
                 if (rst.FirstOrDefault().KIND == 0)
                 {
                     ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_K = Convert.ToInt32(CL_HESABDARI.GETKOL(Baseknow.APV));
-                    //Forms["PGET_HED"]["PGET_LST_SUB"].Form["THES_K"] = GETKOL(Forms["BASEKNOW"]["APV"]);
                     ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_M = Convert.ToInt32(CL_HESABDARI.GETMOIN(Baseknow.APV));
-                    //Forms["PGET_HED"]["PGET_LST_SUB"].Form["THES_M"] = GETMOIN(Forms["BASEKNOW"]["APV"]);
                     ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_T = Convert.ToInt32(CL_HESABDARI.GETTAF(Baseknow.APV));
-                    //Forms["PGET_HED"]["PGET_LST_SUB"].Form["THES_T"] = GETTAF(Forms["BASEKNOW"]["APV"]);
                     ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES = Baseknow.APV;
-                    //Forms["PGET_HED"]["PGET_LST_SUB"].Form["THES"] = Forms["BASEKNOW"]["APV"];
                 }
                 ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).MABL = Convert.ToDouble(this.MABL.Text);
-                //Forms["PGET_HED"]["PGET_LST_SUB"].Form["MABL"] = this.MABL;
                 ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).N_SERI = Convert.ToDouble(this.N_SERI.Text);
-                //Forms["PGET_HED"]["PGET_LST_SUB"].Form["N_SERI"] = this.N_SERI;
                 ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).BANK = Convert.ToInt32(this.BANK.SelectedValue);
-                //Forms["PGET_HED"]["PGET_LST_SUB"].Form["BANK"] = this.BANK;
                 ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).SHARH = Strings.Right(" برگشت چك پرداختي " + N_SERI.SelectedValue + "بانك" + CL_HESABDARI.GETBANK(Convert.ToDouble(BANK.SelectedValue)) + " " + SHOBEH.Text + " مورخ " + Strings.Format(Convert.ToDouble(DATE_S.Text.ToRawTarikh()), "####/##/##"), 255);
-                //Forms["PGET_HED"]["PGET_LST_SUB"].Form["SHARH"] = Strings.Right(" برگشت چك پرداختي " + N_SERI + "بانك" + CL_HESABDARI.GETBANK(Convert.ToDouble(BANK.SelectedValue)) + " " + SHOBEH + " مورخ " + Strings.Format(DATE_S, "####/##/##"), 255);
             }
-            #endregion
         }
 
         private static bool IsNull(object p)
@@ -239,7 +225,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 return;
             }
             if (N_SERI.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
-            #region After_Update
+            //After_Update
 
             TextBox SERIAL_TEX = (TextBox)N_SERI.Template.FindName("PART_EditableTextBox", N_SERI);
             if (string.IsNullOrEmpty(SERIAL_TEX.Text))
@@ -269,26 +255,22 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 this.MOIN.Text = rst.FirstOrDefault().N_MOIN.ToString();
                 this.TAF.Text = rst.FirstOrDefault().N_TAF.ToString();
                 this.VAZ.SelectedValue = rst.FirstOrDefault().VAZ;
-                //this.BANK.SelectedValue = rst.FirstOrDefault().BANK;
                 this.BANK.ItemsSource = dbms.DoGetDataSQL<TCOD_BANKS>("SELECT TCOD_BANKS.CODE, TCOD_BANKS.NAMES FROM TCOD_BANKS INNER JOIN PAY_GETP ON TCOD_BANKS.CODE = PAY_GETP.BANK WHERE (PAY_GETP.N_SERI = " + this.N_SERI.SelectedValue + ") ORDER BY TCOD_BANKS.NAMES").ToList();
                 this.BANK.SelectedValuePath = "CODE";
                 this.BANK.DisplayMemberPath = "NAMES";
                 this.BANK.SelectedIndex = 0;
-                //this.BANK.Requery();
                 this.DATE_S.ItemsSource = dbms.DoGetDataSQL<PAY_GETP>("SELECT DATE_S, BANK,N_SERI  FROM PAY_GETP WHERE (N_SERI = " + this.N_SERI.SelectedValue + ") AND (BANK = " + this.BANK.SelectedValue + ")").ToList();
                 this.DATE_S.SelectedValuePath = "DATE_S";
                 this.DATE_S.DisplayMemberPath = "DATE_S";
                 this.DATE_S.SelectedIndex = 0;
             }
-            //rst.Close();
-            #endregion
         }
 
         private void _SaveExit_Click(object sender, RoutedEventArgs e)
         {
             (THE_WIN as PGET_HED).CmdSaveRecord((THE_WIN as PGET_HED).CURRENT_ITMES_ROW);
 
-            #region Click
+            //Click
 
             N_SERI_ON = N_SERI.Text;
             BANK_ON = BANK.SelectedValue.ToString();
@@ -301,8 +283,6 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             can = false;
             if (!IsNull(this.N_SERI.Text) && !IsNull(this.BANK.SelectedValue))
             {
-                //DoCmd.Close(acForm, this.NAME, acSaveYes);
-
                 var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
 
                 dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD
@@ -313,7 +293,6 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
             (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();
             this.Close();
-            #endregion
         }
 
         private void _Exit_Click(object sender, RoutedEventArgs e)
@@ -326,7 +305,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         private void BANK_LostFocus(object sender, RoutedEventArgs e)
         {
             if (BANK.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
-            #region After_Update
+            //After_Update
             var rst = dbms.DoGetDataSQL<PAY_GETP>("SELECT  *  FROM PAY_GETP WHERE N_SERI=" + this.N_SERI.Text + " AND BANK = " + this.BANK.SelectedValue).ToList();
             if (rst.Count == 0)
             {
@@ -346,46 +325,17 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 this.MOIN.Text = rst.FirstOrDefault().N_MOIN.ToString();
                 this.TAF.Text = rst.FirstOrDefault().N_TAF.ToString();
                 this.VAZ.SelectedValue = rst.FirstOrDefault().VAZ;
-                //this.DATE_S.RowSource = "SELECT    DATE_S , BANK,N_SERI  FROM PAY_GETP WHERE     (N_SERI = " + this.N_SERI + ") AND (BANK = " + this.BANK + ")";
-                //this.DATE_S.Requery();
 
                 DATE_S.ItemsSource = "SELECT    DATE_S , BANK,N_SERI  FROM PAY_GETP WHERE (N_SERI = " + this.N_SERI.Text + ") AND (BANK = " + this.BANK.SelectedValue + ")";
                 DATE_S.SelectedValuePath = "DATE_S";
                 DATE_S.DisplayMemberPath = "DATE_S";
             }
-            //rst.Close();
-            #endregion
         }
 
         private void DATE_S_LostFocus(object sender, RoutedEventArgs e)
         {
-
             if (DATE_S.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
-            #region After_Update
-            //var rst = dbms.DoGetDataSQL<PAY_GETP>("SELECT * FROM PAY_GETP WHERE N_SERI = " + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.SelectedValue).ToList();
-            //if (rst.Count == 0)
-            //{
-            //}
-            //else
-            //{
-            //    this.N_SERI.Text = rst.FirstOrDefault().N_SERI.ToString();
-            //    this.BANK.SelectedValue = rst.FirstOrDefault().BANK;
-            //    this.DATE_S.SelectedValue = rst.FirstOrDefault().DATE_S;
-            //    this.RADIF.Text = rst.FirstOrDefault().RADIF.ToString();
-            //    this.SHOBEH.Text = rst.FirstOrDefault().SHOBEH;
-            //    this.DATE.Text = rst.FirstOrDefault().DATE.ToString();
-            //    this.NAME_TAH.Text = rst.FirstOrDefault().NAME_TAH;
-            //    this.N_HESAB.Text = rst.FirstOrDefault().N_HESAB;
-            //    this.MABL.Text = rst.FirstOrDefault().MABL.ToString();
-            //    this.KOL.Text = rst.FirstOrDefault().N_KOL.ToString();
-            //    this.MOIN.Text = rst.FirstOrDefault().N_MOIN.ToString();
-            //    this.TAF.Text = rst.FirstOrDefault().N_TAF.ToString();
-            //    this.VAZ.SelectedValue = rst.FirstOrDefault().VAZ;
-            //}
-            //rst.Close();
-            #endregion
         }
-
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None && !(_SaveExit.IsFocused))

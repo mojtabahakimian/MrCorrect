@@ -879,7 +879,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         private bool ConfirmExitWithoutSaving()
         {
             Msgwin msgwin = new Msgwin(true, "آیتم جدید را ذخیره نکرده اید , آیا از خروج از این آیتم اطمینان دارید ؟");
-            msgwin.ShowDialog();
+            msgwin.Show();
             return msgwin.DialogResult == true;
         }
         public void RefreshAfterInsert()
@@ -1545,7 +1545,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 else
                 {
                     Msgwin msgwin = new Msgwin(true, "با تغيير نوع برگه شماره جديد به آن اختصاص مي يابد آيا اين عمل را تائيد مي نمائيد؟");
-                    msgwin.ShowDialog();
+                    msgwin.Show();
 
                     if (msgwin.DialogResult is true)
                     {
@@ -1596,7 +1596,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 if ((bool)SGN1.IsChecked || (bool)SGN2.IsChecked || (bool)SGN3.IsChecked)
                 {
                     Msgwin msgwin = new Msgwin(false, " اول امضاء را برداريد ...");
-                    msgwin.ShowDialog();
+                    msgwin.Show();
                     //SGN1.IsEnabled = true;
                     //SGN2.IsEnabled = true;
                     //SGN3.IsEnabled = true;
@@ -1655,7 +1655,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             Meidnum = CL_HESABDARI.PERSONELUpdate(34, Convert.ToDouble(ID.Text), Convert.ToInt32(PERSONEL.Text), "'خزانه داري   شماره: " + ID.Text + " مورخ " + Strings.Format(DATE.Text, "####/##/##") + "  به نام: " + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + "','" + CL_HESABDARI.GETUSERHES(Convert.ToInt32(Baseknow.USERCOD)) + "'");
 
             Msgwin msgwin = new Msgwin(false, "ارجاع داده شد.");
-            msgwin.ShowDialog();
+            msgwin.Show();
         }
 
         private void DATE_BeforeUpdate()
@@ -2257,7 +2257,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 if ((WAS_ROW_ITEM.NAHVA/*OldValue*/ == 4 || WAS_ROW_ITEM.NAHVA/*OldValue*/ == 5 || CURRENT_ITMES_ROW.NAHVA == 4 || CURRENT_ITMES_ROW.NAHVA == 5) && !this.NewRecord)
                 {
                     Msgwin msgwin = new Msgwin(false, "واگذاري يا برگشتي را نمي توانيد اصلاح كنيد بايد سطر آن را بطور كامل حذف كرده و سطر جديد اضافه كنيد.");
-                    msgwin.ShowDialog();
+                    msgwin.Show();
                     //DoCmd.OpenForm("MESAGEFORM", default, default, default, default, acDialog, "واگذاري يا برگشتي را نمي توانيد اصلاح كنيد بايد سطر آن را بطور كامل حذف كرده و سطر جديد اضافه كنيد.");
                     //CANCEL = Conversions.ToInteger(true);`
                     PGET_HED_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
@@ -2359,7 +2359,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         if ((WAS_ROW_ITEM.NAHVA == 4 || WAS_ROW_ITEM.NAHVA == 5 || CURRENT_ITMES_ROW.NAHVA == 4 || CURRENT_ITMES_ROW.NAHVA == 5) && CURRENT_ITMES_ROW.IDH > 0)
                         {
                             Msgwin msgwin = new Msgwin(false, "واگذاري يا برگشتي را نمي توانيد اصلاح كنيد بايد سطر آن را بطور كامل حذف كرده و سطر جديد اضافه كنيد.");
-                            msgwin.ShowDialog();
+                            msgwin.Show();
                             CANCEL = true;
                         }
                     }
@@ -2370,7 +2370,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     if (CURRENT_ITMES_ROW.NO_AM == 1)
                     {
                         Msgwin msgwin = new Msgwin(false, "مقدار وارد شده مجاز نيست...");
-                        msgwin.ShowDialog();
+                        msgwin.Show();
                     }
 
                     NO_AM_AfterUpdate(row_index);
@@ -2393,7 +2393,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 if ((CURRENT_ITMES_ROW.NAHVA == 4 || CURRENT_ITMES_ROW.NAHVA == 5 || WAS_ROW_ITEM.NAHVA == 4 || WAS_ROW_ITEM.NAHVA == 5) && CURRENT_ITMES_ROW.IDH > 0)
                 {
                     Msgwin msgwin = new Msgwin(false, "واگذاري يا برگشتي را نمي توانيد اصلاح كنيد بايد سطر آن را بطور كامل حذف كرده و سطر جديد اضافه كنيد.");
-                    msgwin.ShowDialog();
+                    msgwin.Show();
                     // DoCmd.OpenForm("MESAGEFORM", default, default, default, default, acDialog, "واگذاري يا برگشتي را نمي توانيد اصلاح كنيد بايد سطر آن را بطور كامل حذف كرده و سطر جديد اضافه كنيد.");
                     CANCEL = true;
                 }
@@ -2521,7 +2521,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                                 case 4:
                                     {
                                         Msgwin msgwin = new Msgwin(false, "مقدار وارده مجاز نيست");
-                                        msgwin.ShowDialog();
+                                        msgwin.Show();
                                         // DoCmd.OpenForm("mesag", default, default, default, default, acDialog, "مقدار وارده مجاز نيست");
                                         CURRENT_ITMES_ROW.NAHVA = null;
                                         break;
@@ -3105,265 +3105,232 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 if (string.IsNullOrEmpty(TheHesab))
                 {
                     universControl.PopNotifyShow($"حساب متناظر برای قسمت \"به حساب\" , وارد شده {CURRENT_ITMES_ROW.THES} , در سیستم وجود ندارد !", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B", 4);
-                    //CL_LMethods.FocusCellReadyToEdit(PGET_LST_SUB, "MABL", CURRENT_ROW_INDEX);
                     return;
                 }
 
                 CURRENT_ITMES_ROW.MABL = Convert.ToDouble(ENTERED_VALUE_ROW);
 
-                #region MABL_OnExit
-                //#Check Matter
-                //نمیدونیم این ایز لودد یعنی چی
-                if (true/*!IsLoaded("SHARH_LIST")*/)
+                switch (CURRENT_ITMES_ROW.NO_AM)
                 {
-                    switch (CURRENT_ITMES_ROW.NO_AM)
-                    {
-                        case 1:
+                    case 1:
+                        {
+                            switch (CURRENT_ITMES_ROW.NAHVA) // دريافت
                             {
-                                switch (CURRENT_ITMES_ROW.NAHVA) // دريافت
-                                {
-                                    case 1:
+                                case 1:
+                                    {
+                                        if (CURRENT_ITMES_ROW.MABL == 0 || IsNull(CURRENT_ITMES_ROW.MABL))
                                         {
-                                            if (CURRENT_ITMES_ROW.MABL == 0 || IsNull(CURRENT_ITMES_ROW.MABL))
-                                            {
-                                                Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                                                msgwin.ShowDialog();
-                                                //DoCmd.OpenForm("MESAGEFORM", default, default, default, default, acDialog, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                                                CANCEL = true;
-                                            }
-
-                                            break;
+                                            Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
+                                            msgwin.Show();
                                         }
-                                    case 2:
+                                        break;
+                                    }
+                                case 2:
+                                    {
+                                        if (CURRENT_ITMES_ROW.MABL == 0 || IsNull(CURRENT_ITMES_ROW.MABL))
                                         {
-                                            if (CURRENT_ITMES_ROW.MABL == 0 || IsNull(CURRENT_ITMES_ROW.MABL))
-                                            {
-                                                Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                                                msgwin.ShowDialog();
-                                                //DoCmd.OpenForm("MESAGEFORM", default, default, default, default, acDialog, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                                                CANCEL = true;
-                                            }
-                                            else
-                                            {
-                                                if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
-                                                {
-                                                    CURRENT_ITMES_ROW.N_SERI = 0;
-                                                    CURRENT_ITMES_ROW.BANK = 0;
-                                                }
-                                                if (CURRENT_ITMES_ROW?.ID is null || CURRENT_ITMES_ROW?.ID <= 1)
-                                                {
-                                                    if (Exit_Request())
-                                                    {
-                                                        PGET_HED_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                                                        return;
-                                                    }
-                                                }
-                                                GETCHEK gETCHEK = new GETCHEK(I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX);
-                                                gETCHEK.ShowDialog();
-                                                //DoCmd.OpenForm("GETCHEK", acNormal, default, "N_SERI = " + this.N_SERI + " AND BANK = " + this.BANK + " AND MABL = " + this.mabl, default, acDialog);
-                                                if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
-                                                {
-                                                    CURRENT_ITMES_ROW.N_SERI = null;
-                                                    CURRENT_ITMES_ROW.BANK = null;
-                                                }
-                                            }
-
-                                            break;
+                                            Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
+                                            msgwin.Show();
                                         }
-                                    case 6:
-                                        {
-                                            if (CURRENT_ITMES_ROW.MABL == 0 || IsNull(CURRENT_ITMES_ROW.MABL))
-                                            {
-                                                Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                                                //DoCmd.OpenForm("MESAGEFORM", default, default, default, default, acDialog, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                                                CANCEL = true;
-                                            }
-                                            else
-                                            {
-                                                if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
-                                                {
-                                                    CURRENT_ITMES_ROW.N_SERI = 0;
-                                                    CURRENT_ITMES_ROW.BANK = 0;
-                                                }
-                                                GETCHEK gETCHEK = new GETCHEK(I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX);
-                                                gETCHEK.ShowDialog();
-
-                                                if (CURRENT_CELL_ROW != null)
-                                                {
-                                                    CURRENT_CELL_ROW.Focus();
-                                                }
-                                                //DoCmd.OpenForm("GETCHEK", acNormal, default, "N_SERI = " + this.N_SERI + " AND BANK = " + this.BANK + " AND MABL = " + this.mabl, default, acDialog);
-                                                if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
-                                                {
-                                                    CURRENT_ITMES_ROW.N_SERI = null;
-                                                    CURRENT_ITMES_ROW.BANK = null;
-                                                }
-                                            }
-
-                                            break;
-                                        }
-                                    case 5:
+                                        else
                                         {
                                             if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
                                             {
                                                 CURRENT_ITMES_ROW.N_SERI = 0;
                                                 CURRENT_ITMES_ROW.BANK = 0;
                                             }
-                                            if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0 || IsNull(CURRENT_ITMES_ROW.N_SERI))
+                                            if (CURRENT_ITMES_ROW?.ID is null || CURRENT_ITMES_ROW?.ID <= 1)
+                                            {
+                                                if (Exit_Request())
+                                                {
+                                                    PGET_HED_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                                                    return;
+                                                }
+                                            }
+                                            GETCHEK gETCHEK = new GETCHEK(I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX);
+                                            gETCHEK.ShowDialog();
+                                            if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
                                             {
                                                 CURRENT_ITMES_ROW.N_SERI = null;
                                                 CURRENT_ITMES_ROW.BANK = null;
-                                                //DoCmd.RunCommand(acCmdDeleteRecord);
                                             }
-
-                                            break;
                                         }
 
-                                    default:
+                                        break;
+                                    }
+                                case 6:
+                                    {
+                                        if (CURRENT_ITMES_ROW.MABL == 0 || IsNull(CURRENT_ITMES_ROW.MABL))
                                         {
-                                            if (CURRENT_ITMES_ROW.MABL == 0 || IsNull(CURRENT_ITMES_ROW.MABL))
-                                            {
-                                                Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                                                msgwin.ShowDialog();
-                                                CANCEL = true;
-                                            }
-                                            break;
+                                            Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
+                                            msgwin.Show();
                                         }
-                                }
-                                break;
+                                        else
+                                        {
+                                            if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
+                                            {
+                                                CURRENT_ITMES_ROW.N_SERI = 0;
+                                                CURRENT_ITMES_ROW.BANK = 0;
+                                            }
+                                            GETCHEK gETCHEK = new GETCHEK(I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX);
+                                            gETCHEK.ShowDialog();
+
+                                            if (CURRENT_CELL_ROW != null)
+                                            {
+                                                CURRENT_CELL_ROW.Focus();
+                                            }
+                                            if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
+                                            {
+                                                CURRENT_ITMES_ROW.N_SERI = null;
+                                                CURRENT_ITMES_ROW.BANK = null;
+                                            }
+                                        }
+                                        break;
+                                    }
+                                case 5:
+                                    {
+                                        if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
+                                        {
+                                            CURRENT_ITMES_ROW.N_SERI = 0;
+                                            CURRENT_ITMES_ROW.BANK = 0;
+                                        }
+                                        if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0 || IsNull(CURRENT_ITMES_ROW.N_SERI))
+                                        {
+                                            CURRENT_ITMES_ROW.N_SERI = null;
+                                            CURRENT_ITMES_ROW.BANK = null;
+                                        }
+
+                                        break;
+                                    }
+
+                                default:
+                                    {
+                                        if (CURRENT_ITMES_ROW.MABL == 0 || IsNull(CURRENT_ITMES_ROW.MABL))
+                                        {
+                                            Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
+                                            msgwin.Show();
+                                        }
+                                        break;
+                                    }
                             }
-                        case 2:
+                            break;
+                        }
+                    case 2:
+                        {
+                            switch (CURRENT_ITMES_ROW.NAHVA) // پرداخت
                             {
-                                switch (CURRENT_ITMES_ROW.NAHVA) // پرداخت
-                                {
-                                    case 1:
+                                case 1:
+                                    {
+                                        if (CURRENT_ITMES_ROW.MABL == 0 || IsNull(CURRENT_ITMES_ROW.MABL))
                                         {
-                                            if (CURRENT_ITMES_ROW.MABL == 0 || IsNull(CURRENT_ITMES_ROW.MABL))
-                                            {
-                                                Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                                                msgwin.ShowDialog();
-                                                //DoCmd.OpenForm("MESAGEFORM", default, default, default, default, acDialog, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                                                CANCEL = true;
-                                            }
-                                            break;
+                                            Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
+                                            msgwin.Show();
                                         }
-                                    case 2:
+                                        break;
+                                    }
+                                case 2:
+                                    {
+                                        if (CURRENT_ITMES_ROW.MABL == 0 || IsNull(CURRENT_ITMES_ROW.MABL))
                                         {
-                                            if (CURRENT_ITMES_ROW.MABL == 0 || IsNull(CURRENT_ITMES_ROW.MABL))
-                                            {
-                                                Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                                                msgwin.ShowDialog();
-                                                //DoCmd.OpenForm("MESAGEFORM", default, default, default, default, acDialog, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                                                CANCEL = true;
-                                            }
-                                            else
-                                            {
-                                                if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
-                                                {
-                                                    CURRENT_ITMES_ROW.N_SERI = 0;
-                                                    CURRENT_ITMES_ROW.BANK = 0;
-                                                }
-                                                var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
-                                                PAYCHEK pAYCHEK = new PAYCHEK(_serverfilter, I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX);
-                                                pAYCHEK.ShowDialog();
-                                                //ERROR
-                                                //DoCmd.OpenForm("PAYCHEK", acNormal, default, "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL, default, acDialog);
-                                                if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
-                                                {
-                                                    CURRENT_ITMES_ROW.N_SERI = null;
-                                                    CURRENT_ITMES_ROW.BANK = null;
-                                                }
-                                            }
-                                            break;
+                                            Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
+                                            msgwin.Show();
                                         }
-                                    case 6:
-                                        {
-                                            if (CURRENT_ITMES_ROW.MABL == 0 || IsNull(CURRENT_ITMES_ROW.MABL))
-                                            {
-                                                Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                                                msgwin.ShowDialog();
-                                                //DoCmd.OpenForm("MESAGEFORM", default, default, default, default, acDialog, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                                                CANCEL = true;
-                                            }
-                                            else
-                                            {
-                                                if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
-                                                {
-                                                    CURRENT_ITMES_ROW.N_SERI = 0;
-                                                    CURRENT_ITMES_ROW.BANK = 0;
-                                                }
-                                                var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
-                                                PAYCHEK pAYCHEK = new PAYCHEK(_serverfilter, I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX);
-                                                //DoCmd.OpenForm("PAYCHEK", acNormal, default, "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL, default, acDialog);
-                                                if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
-                                                {
-                                                    CURRENT_ITMES_ROW.N_SERI = null;
-                                                    CURRENT_ITMES_ROW.BANK = null;
-                                                }
-                                            }
-                                            break;
-                                        }
-                                    case 4:
+                                        else
                                         {
                                             if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
                                             {
                                                 CURRENT_ITMES_ROW.N_SERI = 0;
                                                 CURRENT_ITMES_ROW.BANK = 0;
-                                            }
-                                            if (Convert.ToString(CURRENT_ITMES_ROW.N_SERI) == "" || Convert.ToString(CURRENT_ITMES_ROW.BANK) == "" || Convert.ToString(CURRENT_ITMES_ROW.MABL) == "")
-                                            {
-                                                CURRENT_ITMES_ROW.N_SERI = null;
-                                                CURRENT_ITMES_ROW.BANK = null;
-                                                CURRENT_ITMES_ROW.MABL = null;
                                             }
                                             var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
-                                            FORCHEK fORCHEK4 = new FORCHEK(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX);
-                                            fORCHEK4.ShowDialog();
-                                            //DoCmd.OpenForm("FORCHEK", acNormal, default, "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL, default, acDialog);
-                                            if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0 || IsNull(CURRENT_ITMES_ROW.N_SERI))
+                                            PAYCHEK pAYCHEK = new PAYCHEK(_serverfilter, I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX);
+                                            pAYCHEK.ShowDialog();
+                                            if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
                                             {
                                                 CURRENT_ITMES_ROW.N_SERI = null;
                                                 CURRENT_ITMES_ROW.BANK = null;
-                                                //DoCmd.RunCommand(acCmdDeleteRecord);
-
                                             }
-                                            break;
                                         }
-                                    case 5:
+                                        break;
+                                    }
+                                case 6:
+                                    {
+                                        if (CURRENT_ITMES_ROW.MABL == 0 || IsNull(CURRENT_ITMES_ROW.MABL))
+                                        {
+                                            Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
+                                            msgwin.Show();
+                                            CANCEL = true;
+                                        }
+                                        else
                                         {
                                             if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
                                             {
                                                 CURRENT_ITMES_ROW.N_SERI = 0;
                                                 CURRENT_ITMES_ROW.BANK = 0;
                                             }
-                                            if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0 || IsNull(CURRENT_ITMES_ROW.N_SERI))
+                                            var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
+                                            PAYCHEK pAYCHEK = new PAYCHEK(_serverfilter, I_AM_KHAZANEH, CURRENT_ITMES_ROW.MABL.ToString(), CURRENT_ROW_INDEX);
+                                            if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
                                             {
                                                 CURRENT_ITMES_ROW.N_SERI = null;
                                                 CURRENT_ITMES_ROW.BANK = null;
-                                                //DoCmd.RunCommand(acCmdDeleteRecord);
-                                                PGET_HED_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
                                             }
-                                            break;
                                         }
-
-                                    default:
+                                        break;
+                                    }
+                                case 4:
+                                    {
+                                        if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
                                         {
-                                            if (CURRENT_ITMES_ROW.MABL == 0 || IsNull(CURRENT_ITMES_ROW.MABL))
-                                            {
-                                                Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                                                msgwin.ShowDialog();
-                                                //DoCmd.OpenForm("MESAGEFORM", default, default, default, default, acDialog, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                                                CANCEL = true;
-                                            }
-                                            break;
+                                            CURRENT_ITMES_ROW.N_SERI = 0;
+                                            CURRENT_ITMES_ROW.BANK = 0;
                                         }
-                                }
-                                break;
+                                        if (Convert.ToString(CURRENT_ITMES_ROW.N_SERI) == "" || Convert.ToString(CURRENT_ITMES_ROW.BANK) == "" || Convert.ToString(CURRENT_ITMES_ROW.MABL) == "")
+                                        {
+                                            CURRENT_ITMES_ROW.N_SERI = null;
+                                            CURRENT_ITMES_ROW.BANK = null;
+                                            CURRENT_ITMES_ROW.MABL = null;
+                                        }
+                                        var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
+                                        FORCHEK fORCHEK4 = new FORCHEK(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX);
+                                        fORCHEK4.ShowDialog();
+                                        if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0 || IsNull(CURRENT_ITMES_ROW.N_SERI))
+                                        {
+                                            CURRENT_ITMES_ROW.N_SERI = null;
+                                            CURRENT_ITMES_ROW.BANK = null;
+
+                                        }
+                                        break;
+                                    }
+                                case 5:
+                                    {
+                                        if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
+                                        {
+                                            CURRENT_ITMES_ROW.N_SERI = 0;
+                                            CURRENT_ITMES_ROW.BANK = 0;
+                                        }
+                                        if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0 || IsNull(CURRENT_ITMES_ROW.N_SERI))
+                                        {
+                                            CURRENT_ITMES_ROW.N_SERI = null;
+                                            CURRENT_ITMES_ROW.BANK = null;
+                                            PGET_HED_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                                        }
+                                        break;
+                                    }
+
+                                default:
+                                    {
+                                        if (CURRENT_ITMES_ROW.MABL == 0 || IsNull(CURRENT_ITMES_ROW.MABL))
+                                        {
+                                            Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
+                                            msgwin.Show();
+                                        }
+                                        break;
+                                    }
                             }
-                    }
+                            break;
+                        }
                 }
-                #endregion
-                //CmdSaveRecord(CURRENT_ITMES_ROW);
             }
 
             //شرح
@@ -3379,31 +3346,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         {
             IsSaveSuccess = false;
 
-            if (e.Row.Item == null)
-            {
-                return;
-            }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
-            #region ESC_New
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-
-                //DateTime currentTime = DateTime.Now;
-                //TimeSpan timeSinceLastKeyPress = currentTime - lastEscapeKeyPressTime;
-
-                //if (timeSinceLastKeyPress > TimeSpan.FromMilliseconds(500))
-                //{
-                //    // Clear the content of the row
-                //    // ...
-
-                //    lastEscapeKeyPressTime = DateTime.MinValue;
-                //    return;
-                //}
-
-                //lastEscapeKeyPressTime = currentTime;
-            }
-            #endregion
+            if (e.Row.Item == null) { return; }
 
             //Form_BeforeUpdate
             PGET_LST? THE_ROW_ITEM = (e.Row.Item as PGET_LST);
@@ -3440,7 +3385,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 if (THE_ROW_ITEM.MABL == 0)
                 {
                     Msgwin msgwin = new Msgwin(false, "مبلغ نمي تواند داراي مقدار خالي باشد");
-                    msgwin.ShowDialog();
+                    msgwin.Show();
 
                     CANCEL = true;
                     return;
@@ -4251,7 +4196,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                             case 4:
                                 {
                                     Msgwin msgwin = new Msgwin(false, "مقدار وارده مجاز نيست");
-                                    msgwin.ShowDialog();
+                                    msgwin.Show();
                                     //DoCmd.OpenForm("mesag", default, default, default, default, acDialog, "مقدار وارده مجاز نيست");
                                     //this.NAHVA = Null;
                                     break;
@@ -4535,7 +4480,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     additionalInfo: $@"{this.GetType().Name} , EXE PATH : {System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}");
 
             Msgwin msgwin = new Msgwin(true, "آیا از حذف اطمینان دارید؟");
-            msgwin.ShowDialog();
+            msgwin.Show();
 
             if (KHAZANEH_DATA?.Count == 0)
             {
@@ -5517,7 +5462,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             //        PGET_LST_SUB.SelectedIndex = rowIndex;
             //        PGET_LST_SUB.CurrentCell = new DataGridCellInfo(PGET_LST_SUB.Items[rowIndex], PGET_LST_SUB.Columns.First(c => c.SortMemberPath == columnName));
             //        //PGET_LST_SUB.BeginEdit();
-                    
+
             //    }
             //}), DispatcherPriority.Background);
         }
@@ -5718,7 +5663,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             if (ChangeIsHappend)
             {
                 var MSGCAP = new MSGCAPTIONMODEL() { YES_CAPTION = "برگرد", NO_CAPTION = "خارج شو" };
-                Msgwin msgwin = new Msgwin(true, "اطلاعات را ذخیره نکرده اید آیا مایل به بازگشت هستید ؟", default, default, MSGCAP); msgwin.ShowDialog();
+                Msgwin msgwin = new Msgwin(true, "اطلاعات را ذخیره نکرده اید آیا مایل به بازگشت هستید ؟", default, default, MSGCAP); msgwin.Show();
                 if (msgwin.DialogResult is true)
                 {
                     e.Cancel = true;

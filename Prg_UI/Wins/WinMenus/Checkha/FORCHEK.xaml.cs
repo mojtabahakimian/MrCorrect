@@ -121,7 +121,6 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             BANK.SelectedValuePath = "BANK";
             BANK.DisplayMemberPath = "NAMES";
 
-            //SANDUGH.ItemsSource = dbms.DoGetDataSQL<Query1T>("SELECT TNUMBER, NAME FROM TDETA_HES WHERE (N_KOL = " + CL_HESABDARI.GETKOL(Baseknow.ADA) + ") AND (NUMBER = " + CL_HESABDARI.GETMOIN(Baseknow.ADA) + ")");
             SANDUGH.ItemsSource = dbms.DoGetDataSQL<Query1T>("SELECT TNUMBER, NAME FROM TDETA_HES WHERE (N_KOL = 113) AND (NUMBER = 1)");
             SANDUGH.SelectedValuePath = "TNUMBER";
             SANDUGH.DisplayMemberPath = "NAME";
@@ -187,11 +186,9 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 this.NAME_TAH.Text = rst.FirstOrDefault().NAME_TAH;
                 this.N_HESAB.Text = rst.FirstOrDefault().N_HESAB;
                 this.MABL.Text = rst.FirstOrDefault().MABL.ToString();
-                //this.BANK.Requery();
                 this.BANK.SelectedValue = rst.FirstOrDefault().BANK;
                 this.N_SERI.IsReadOnly = true;
             }
-            //rst.Close();
 
             N_SERI.Focus();
         }
@@ -208,30 +205,14 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 return;
             }
             if (N_SERI.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
-            #region After_Update
+            //After_Update
 
             if (N_SERI.SelectedValue == null)
             {
                 e.Handled = true;
-                new Msgwin(false, "شماره سریال نمیتواند خالی باشد").ShowDialog();
+                new Msgwin(false, "شماره سریال نمیتواند خالی باشد").Show();
                 return;
             }
-
-            //TextBox SERIAL_TEX = (TextBox)N_SERI.Template.FindName("PART_EditableTextBox", N_SERI);
-            //if (string.IsNullOrEmpty(SERIAL_TEX.Text))
-            //{
-            //    SERIAL_TEX.Text = N_SERI.SelectedValue.ToStringNullSafe();
-            //}
-            //if (string.IsNullOrEmpty(SERIAL_TEX.Text))
-            //{
-            //    return;
-            //}
-
-            //if (!CL_LMethods.IsNumeric(SERIAL_TEX.Text))
-            //{
-            //    new Msgwin(false, "شماره سریال فقط میتواند عدد باشد").ShowDialog();
-            //    return;
-            //}
 
             if (N_SERI.SelectedValue?.ToString() != N_SERI.Text.Trim())
             {
@@ -239,7 +220,6 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 fOR_CHK_SERCH.ShowDialog();
             }
    
-            #endregion
         }
 
         private void BANK_LostFocus(object sender, RoutedEventArgs e)
@@ -252,7 +232,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
             if (BANK.SelectedValue == null)
             {
-                new Msgwin(false, "بانک نمیتواند خالی باشد").ShowDialog();
+                new Msgwin(false, "بانک نمیتواند خالی باشد").Show();
                 return;
             }
             if (N_SERI.SelectedValue == null)
@@ -260,19 +240,17 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 return;
             }
 
-            #region NotInList
+            //NotInList
             var NewData = ((TextBox)BANK.Template.FindName("PART_EditableTextBox", BANK)).Text; //متن کمبوباکس رو به طور واقعی میگیریم
             if (int.TryParse(NewData.ToString(), out _)) //if is Number آیا عدد هست متن وارد شده
             {
                 var _itm = BANK.ItemsSource as List<Query2T>; // برای راحتی و سادگی کد آیتم های کموبباکس رو بریز داخل یه لیست
-                // Use LINQ to find the item that matches the search value
                 var _SelectVal = _itm?.FirstOrDefault(item => item.BANK.Equals(NewData)).BANK; // با لینک چک کن که آیا کدی با این کد وارد شده وجود دارد ؟
 
                 BANK.SelectedValue = _SelectVal; //بذارش توی کمبوباکس
             }
-            #endregion
 
-            #region After_Update
+            //After_Update
             var rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue).ToList();
             if (rst.Count == 0)
             {
@@ -290,14 +268,10 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 this.MABL.Text = rst.FirstOrDefault().MABL.ToString();
                 this.SANDUGH.SelectedValue = rst.FirstOrDefault().SANDUGH;
             }
-            //rst.Close();
-            #endregion
         }
 
         private void DATE_S_LostFocus(object sender, RoutedEventArgs e)
         {
-
-            #region After_Update
             var rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh()).ToList();
             if (rst.Count == 0)
             {
@@ -315,18 +289,15 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 this.MABL.Text = rst.FirstOrDefault().MABL.ToString();
                 this.SANDUGH.SelectedValue = rst.FirstOrDefault().SANDUGH;
             }
-            //rst.Close();
-            #endregion
         }
 
         private void _SaveExit_Click(object sender, RoutedEventArgs e)
         {
-            #region Click
             can = false;
             if (IsNull(this.N_SERI.SelectedValue) || IsNull(this.BANK.SelectedValue))
             {
                 Msgwin msgwin = new Msgwin(false, "اطلاعات وارد نشده است و قابل ذخيره شدن نيست");
-                msgwin.ShowDialog();
+                msgwin.Show();
                 return;
             }
 
@@ -341,14 +312,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             SE_MABL = MABL.Text;
             SE_BANK = BANK.SelectedValue.ToString();
 
-
             var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
 
             dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD
                 SET N_SERI = {SE_N_SERI} , DATE_S = {SE_DATE_S} , SANDUGH = {SE_SANDUGH} , SHOBEH = N'{SE_SHOBEH}' , DATE = {SE_DATE} , NAME_TAH = N'{SE_NAME_TAH}' , N_HESAB = N'{SE_N_HESAB}' , MABL = {SE_MABL} , BANK = {SE_BANK}
                 WHERE N_SERI = {SE_N_SERI} AND DATE_S = {SE_DATE_S} AND SANDUGH = {SE_SANDUGH} AND SHOBEH = N'{SE_SHOBEH}' AND DATE = {SE_DATE} AND NAME_TAH = N'{_NAME_TAH_}' AND N_HESAB = N'{SE_N_HESAB}' AND MABL = {SE_MABL} AND BANK = {SE_BANK}");
-
-            #endregion
 
             if (can)
             {
@@ -365,7 +333,6 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     rst.FirstOrDefault().HES1 = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES;
                     rst.FirstOrDefault().VAZ = 4;
                     rst.FirstOrDefault().SANDUGH = Convert.ToInt32(this.SANDUGH.SelectedValue);
-                    //rst.update();
 
                     string _WHERE_ = " WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh();
                     dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD SET N_MOIN = {rst.FirstOrDefault().N_MOIN}, VAZ = {rst.FirstOrDefault().VAZ}, SANDUGH = {rst.FirstOrDefault().SANDUGH} , N_KOL = {rst.FirstOrDefault().N_KOL} , N_TAF = {rst.FirstOrDefault().N_TAF} , HES1 = N'{rst.FirstOrDefault().HES1}' {_WHERE_}");

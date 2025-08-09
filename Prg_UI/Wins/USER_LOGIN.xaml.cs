@@ -355,9 +355,9 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 139; Baseknow.UUSER = "negar sadeghi";
             //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
 
-            Baseknow.USERCOD = 132; Baseknow.UUSER = "Prima Chopan";    
+            //Baseknow.USERCOD = 132; Baseknow.UUSER = "Prima Chopan";    
 
-            //Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
+            Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
 
             CL_Generaly.SHIFT_OF_USER = 1;
             CL_Generaly.VAHED_OF_USER = 1;
@@ -365,7 +365,7 @@ namespace Prg_UI.Wins
 
 
             //new PRICE_ELAMIETF_FORM().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this);
 
 
             //new HEAD_LST_BRFR().Show(); //فاکتور برگشت فروش (آزاد) رسید شده TAG = 25

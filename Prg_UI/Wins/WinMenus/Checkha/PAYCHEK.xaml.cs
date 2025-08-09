@@ -131,7 +131,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
             DATE.Text = (THE_WIN as PGET_HED).DATE.Text.ToRawTarikh();
 
-            if (KhazanehRow.N_SERI is not null && KhazanehRow.BANK is not null && KhazanehRow.MABL is not null)
+            if (KhazanehRow?.N_SERI is not null && KhazanehRow.BANK is not null && KhazanehRow.MABL is not null)
             {
                 var CheckExistData = dbms.DoGetDataSQL<PAY_GETP>($"SELECT * FROM PAY_GETP WHERE N_SERI = {KhazanehRow.N_SERI} AND BANK = {KhazanehRow.BANK} AND MABL = {KhazanehRow.MABL}").ToList();
                 if (CheckExistData.Count > 0)
@@ -399,7 +399,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
             (THE_WIN as PGET_HED).CmdSaveRecord((THE_WIN as PGET_HED).CURRENT_ITMES_ROW);
 
-            #region Click
+            //Click
             can = false;
             try
             {
@@ -436,18 +436,13 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     {
                         this.NAME_TAH.SelectedValue = " ";
                     }
-                    //DoCmd.Close(acForm, this.NAME, acSaveYes);
                 }
-                //return;
             }
             catch
             {
-
-                //errdetector(Information.Err());
             }
-            #endregion
 
-            #region Before_Update
+            //Before_Update
             if (can)
             {
                 CANCEL = true;
@@ -471,11 +466,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     this.KIND.SelectedValue = 0;
                 }
                 ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).N_SERI = Convert.ToDouble(this.N_SERI.Text);
-                //Forms["PGET_HED"]["PGET_LST_SUB"].Form["N_SERI"] = this.N_SERI.Text;
                 ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).BANK = Convert.ToInt32(this.BANK.SelectedValue);
-                //Forms["PGET_HED"]["PGET_LST_SUB"].Form["BANK"] = this.BANK.SelectedValue;
                 ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).SHARH = Strings.Left("چك " + N_SERI.Text + "بانك " + CL_HESABDARI.GETBANK(Convert.ToDouble(this.BANK.SelectedValue)) + " " + SHOBEH.SelectedValue + " مورخ " + Strings.Format(Convert.ToInt32(DATE_S.Text.ToRawTarikh()), "####/##/##") + "-" + NAME_TAH.Text, 255);
-                //Forms["PGET_HED"]["PGET_LST_SUB"].Form["SHARH"] = Strings.Left("چك " + N_SERI + "بانك " + GETBANK(BANK) + " " + SHOBEH + " مورخ " + Microsoft.SqlServer.Server.Format(DATE_S, "####/##/##") + "-" + NAME_TAH, 255);
 
                 var KhazanehRow = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST);
                 var CheckExistData = dbms.DoGetDataSQL<PAY_GETP>($"SELECT * FROM PAY_GETP WHERE N_SERI = {KhazanehRow.N_SERI} AND BANK = {KhazanehRow.BANK} AND DATE_S = {DATE_S.Text.ToRawTarikh()}").ToList();
@@ -492,24 +484,22 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 else
                 {
                     dbms.DoExecuteSQL($@"INSERT INTO dbo.PAY_GETP       (N_SERI,                BANK,                     DATE_S,                     DATE,                   SHOBEH,       MABL,          NAME_TAH,          N_HESAB, N_S,  N_KOL,  N_MOIN,  N_TAF, N_KOL2, N_MOIN2, N_TAF2, N_KOL3, N_MOIN3, N_TAF3, NUMBER, TAG, ANBAR, RADIF, CUST_NO,                KIND, VAZ,                   HES1, HES2, HES3, SAYADI)
-				                                           VALUES({N_SERI.Text},{BANK.SelectedValue},{DATE_S.Text.ToRawTarikh()},{DATE.Text.ToRawTarikh()},N'{_SHOBEH_}',{MABL.Text},N'{NAME_TAH.Text}',N'{_NAME_TAH_}',NULL,{N_KOL},{N_MOIN},{N_TAF},   NULL,    NULL,   NULL,   NULL,    NULL,   NULL,   NULL,NULL,  NULL,  NULL,       0,{KIND.SelectedValue},NULL,N'{HES1.SelectedValue}', NULL, NULL, N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}')");
+				                                           VALUES({N_SERI.Text},{BANK.SelectedValue},{DATE_S.Text.ToRawTarikh()},{DATE.Text.ToRawTarikh()},N'{_SHOBEH_}',{MABL.Text},N'{_NAME_TAH_}',N'{N_HESAB.Text}',NULL,{N_KOL},{N_MOIN},{N_TAF},   NULL,    NULL,   NULL,   NULL,    NULL,   NULL,   NULL,NULL,  NULL,  NULL,       0,{KIND.SelectedValue},NULL,N'{HES1.SelectedValue}', NULL, NULL, N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}')");
                 }
+
 
                 (THE_WIN as PGET_HED).CmdSaveRecord(((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST));
                 (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();
 
                 this.Close();
             }
-            #endregion
         }
 
         private void _Exit_Click(object sender, RoutedEventArgs e)
         {
-            #region Click
             can = true;
             (THE_WIN as PGET_HED).PAYCHEK_EXIT_BTN = true;
             this.Close();
-            #endregion
         }
 
         private void HES1_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -521,14 +511,13 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 if (CL_HESABDARI.ISTAF(this.HES1.SelectedValue.ToString()))
                 {
                     Msgwin msgwin = new Msgwin(false, "حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!");
-                    msgwin.ShowDialog();
-                    //DoCmd.OpenForm("MESAGEFORM", acNormal, default, default, acFormReadOnly, acDialog, "ÍÓÇÈ ãæÑÏ äÙÑ ÏÇÑÇí ÊÝÖíáí ãíÈÇÔÏ ÈÇíÏ ÊÝÖíáí Âä ÑÇ ÇäÊÎÇÈ ßäíÏ!");
+                    msgwin.Show();
                     CANCEL = true;
                 }
             }
             #endregion
 
-            #region After_Update
+            //After_Update
             if (!IsNull(this.HES1.SelectedValue))
             {
                 this.N_KOL = Convert.ToString(CL_HESABDARI.GETKOL(this.HES1.SelectedValue.ToString()));
@@ -541,7 +530,6 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 this.N_MOIN = null;
                 this.N_TAF = null;
             }
-            #endregion
         }
 
         private void DATE_S_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -625,7 +613,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             if (SAYADI.Text.Length < 16 && SAYADI.Text != "0")
             {
                 Msgwin msgwin = new Msgwin(false, "شماره صیادی نباید کمتر از 16 رقم باشد.");
-                msgwin.ShowDialog();
+                msgwin.Show();
             }
         }
 

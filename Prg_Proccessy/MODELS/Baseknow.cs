@@ -35,7 +35,7 @@ namespace Prg_Proccessy.MODELS
         public static short? GHAYM { get; set; }
         public static byte? ARSESH { get; set; }
         public static short? YEA { get; set; }
-        public static bool? CTL_DT { get; set; }
+        public static bool? CTL_DT { get; set; } = true;
         public static bool? mrcorrect { get; set; } = false;
         public static int? TKHF { get; set; }
         public static string OPTIONSS { get; set; }
