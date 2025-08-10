@@ -237,7 +237,7 @@
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn x:Name="IMBAA_COL" IsReadOnly="True" Header="مالیات ب.ا.ا" Binding="{Binding IMBAA,UpdateSourceTrigger=LostFocus}"  Width="auto"   MinWidth="120"/>
+                <DataGridTextColumn x:Name="IMBAA_COL" IsReadOnly="True" Header="مالیات ب.ا.ا" Binding="{Binding IMBAA,UpdateSourceTrigger=LostFocus, StringFormat=\{0:N0\}}"  Width="auto"   MinWidth="120"/>
                 <DataGridTextColumn x:Name="MANDAH_COL" Header="ملاحظات" Binding="{Binding MANDAH,UpdateSourceTrigger=LostFocus}" MinWidth="150" Width="*">
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">

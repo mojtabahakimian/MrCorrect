@@ -43,7 +43,7 @@ using Wins.WinOther;
 
 namespace Prg_UI.Wins.WinMenus.HESABDARI
 {
-    public partial class DEED_HEAD : Window , ISearchableWindow
+    public partial class DEED_HEAD : Window, ISearchableWindow
     {
         public double N_S_NUMBER { get; set; } = -1;
         public DEED_HEAD(double? _n_s_ = null)
@@ -317,7 +317,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
-            
+
             I_AM_SANAD = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
 
             CL_HESABDARI.SETSECURITY(this.GetType().Name, "SANAD", new WindowInteropHelper(this).Handle, this.GetType().Name);
@@ -1668,7 +1668,30 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             DG_ON_CURRENT();
 
-            CmdSaveRecord(e.Row.Item as DEED_DTL);
+
+            try
+            {
+                CmdSaveRecord(e.Row.Item as DEED_DTL);
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Number == 2627 || ex.Number == 2601) // 2627 & 2601 : duplicate key
+                {
+                    universControl.PopNotifyShowUp("این سطر تکراری است و نمی‌توان آن را ثبت کرد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                }
+                else if (ex.Number == 547)   // 547 : foreign key constraint violation
+                {
+                    universControl.PopNotifyShowUp("ابتدا سربرگ مربوطه را ذخیره کنید، سپس جزئیات را ثبت نمایید.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                }
+                else
+                {
+                    universControl.PopNotifyShowUp("خطا در انجام عملیات ثبت سطر ! اطلاعات ذخیره نشده است.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
 
             IsSaveSuccess = true;
 
@@ -2120,7 +2143,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 }
             }
 
-   
+
 
 
             if (e.Key is Key.Delete && Keyboard.Modifiers == ModifierKeys.None)
@@ -2401,7 +2424,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     //Report Loading
                     Process Prc = ProcLoader.Start();
 
-                    
+
 
                     var report = new StiReport();
 
@@ -2505,7 +2528,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     //Report Loading
                     Process Prc = ProcLoader.Start();
 
-                    
+
 
                     var report = new StiReport();
 
@@ -2849,7 +2872,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     }
                 }
                 catch (Exception) { }
-           
+
             }
         }
         private void Child14_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)

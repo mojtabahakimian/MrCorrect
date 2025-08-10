@@ -3251,7 +3251,7 @@ namespace AUTO_BAZ.Functions
                 if (ReferenceEquals(rst, null))
                 {
                     //Red :#FFFF0000   Black : #FF000000
-                    new Msgwin(true, $"کالای : {item.CODE} - {GETKALANAME(Convert.ToDouble(item.CODE))}\n  دارای گروه بندی قیمیتی نیست یا  گروه آن  در اعلامیه قیمت تعریف نشده.", "#FFFF0000").Show();
+                    new Msgwin(false, $"کالای : {item.CODE} - {GETKALANAME(Convert.ToDouble(item.CODE))}\n  دارای گروه بندی قیمیتی نیست یا  گروه آن  در اعلامیه قیمت تعریف نشده.", "#FFFF0000").Show();
                 }
             }
         }
@@ -3267,7 +3267,7 @@ namespace AUTO_BAZ.Functions
                 if (ReferenceEquals(rst, null))
                 {
                     //Red :#FFFF0000   Black : #FF000000
-                    new Msgwin(true, $"کالای : {item.CODE} - {GETKALANAME(Convert.ToDouble(item.CODE))}\n  دارای گروه بندی قیمیتی نیست یا  گروه آن  در اعلامیه قیمت تعریف نشده.", "#FFFF0000").Show();
+                    new Msgwin(false, $"کالای : {item.CODE} - {GETKALANAME(Convert.ToDouble(item.CODE))}\n  دارای گروه بندی قیمیتی نیست یا  گروه آن  در اعلامیه قیمت تعریف نشده.", "#FFFF0000").Show();
                 }
             }
         }
