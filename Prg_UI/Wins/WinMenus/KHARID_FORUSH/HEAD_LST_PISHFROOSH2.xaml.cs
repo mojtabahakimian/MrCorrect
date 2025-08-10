@@ -3656,7 +3656,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                             ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = _data_hes, NAME = _data_name });
                         }
                         CUST_NO.Items.Refresh();
-                        CUST_NO.SelectedValue = null;
+                        CUST_NO.SelectedValue = _data_hes;
                         this.CUST_NO2.SelectedValue = _data_hes;
                     }
                     else
@@ -4202,13 +4202,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             BTN_SAVE_Click(null, null);
 
-            if (!isSavedSuccess)
-            {
-                return;
-            }
+            if (!isSavedSuccess) { return; }
 
             double SMBAA = 0;
-            if ((bool)TICMBAA.IsChecked)
+            if (TICMBAA.IsChecked ?? false)
             {
                 var rst = dbms.DoGetDataSQL<INVO_LST>("SELECT NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, id, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO FROM INVO_LST WHERE NUMBER = " + NUMBER.Text + $" AND TAG = {TAG}").ToList();
                 string where = " WHERE NUMBER = " + NUMBER.Text + $" AND TAG = {TAG}";
@@ -4217,9 +4214,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     var rst2 = dbms.DoGetDataSQL<Custom4_INVO>("SELECT CMBAA ,code FROM STUF_DEF where code = '" + item.CODE + "'").FirstOrDefault();
                     if (rst2 != null)
                     {
-                        if ((bool)rst2.CMBAA)
+                        if (rst2.CMBAA ?? false)
                         {
-                            dbms.DoExecuteSQL($"UPDATE INVO_LST SET IMBAA = {Math.Round((double)((item.MABL_K - item.N_MOIN) * Convert.ToDouble(CL_HESABDARI.GetArzesh(item.CODE)) / 100))}  {where} ");
+                            dbms.DoExecuteSQL($"UPDATE INVO_LST SET IMBAA = {Math.Round((double)((item.MABL_K - item.N_MOIN) * Convert.ToDouble(CL_HESABDARI.GetArzesh(item.CODE)) / 100))} " +
+                                $" {where} AND CODE = N'{rst2.CODE}' ");
                             SMBAA = SMBAA + Math.Round((double)((item.MABL_K - item.N_MOIN) * Convert.ToDouble(CL_HESABDARI.GetArzesh(item.CODE)) / 100));
                         }
                         else

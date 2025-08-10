@@ -879,7 +879,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         private bool ConfirmExitWithoutSaving()
         {
             Msgwin msgwin = new Msgwin(true, "آیتم جدید را ذخیره نکرده اید , آیا از خروج از این آیتم اطمینان دارید ؟");
-            msgwin.Show();
+            msgwin.ShowDialog();
             return msgwin.DialogResult == true;
         }
         public void RefreshAfterInsert()
@@ -1545,7 +1545,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 else
                 {
                     Msgwin msgwin = new Msgwin(true, "با تغيير نوع برگه شماره جديد به آن اختصاص مي يابد آيا اين عمل را تائيد مي نمائيد؟");
-                    msgwin.Show();
+                    msgwin.ShowDialog();
 
                     if (msgwin.DialogResult is true)
                     {
@@ -1664,7 +1664,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             if (!this.NewRecord && Baseknow.WAR == 1)
             {
                 Msgwin msgwin = new Msgwin(true, "تغيرات داده شده ثبت شود؟ در صورتيكه مايليد تغييرات ثبت نشود بعداز بستن اين پنجره كليد  اسكيپ را فشار دهيد.");
-                msgwin.Show();
+                msgwin.ShowDialog();
                 //Forms["BASEKNOW"]["Text44"] = false;
                 //DoCmd.OpenForm("MSGDIALOG", default, default, default, default, acDialog, "تغيرات داده شده ثبت شود؟ در صورتيكه مايليد تغييرات ثبت نشود بعداز بستن اين پنجره كليد  اسكيپ را فشار دهيد.");
                 if (!msgwin.DialogResult is true)
@@ -3949,7 +3949,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                                          VALUES(
                                          {final_lst.ID} ,
                                          {DATE.Text.ToRawTarikh()} ,
-                                         (SELECT MAX(RADIF+1) FROM dbo.PGET_LST WHERE ID = {final_lst.ID}),
+                                         (ISNULL((SELECT MAX(RADIF) FROM dbo.PGET_LST WHERE ID = {final_lst.ID}), 0) + 1),
                                          {final_lst.NO_AM}   ,
                                          {final_lst.NAHVA} ,
                                          {final_lst.FHES_K}   ,
@@ -4005,22 +4005,26 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
             catch (SqlException ex)
             {
-                if (ex.Number == 547 || ex.Number == 2627)
+                if (ex.Number == 2627 || ex.Number == 2601) // 2627 & 2601 : duplicate key
                 {
-                    new Msgwin(false, "این سطر تکراری است و نمیتواند آن را ثبت کرد").ShowDialog();
+                    new Msgwin(false, "این سطر تکراری است و نمی‌توان آن را ثبت کرد").ShowDialog();
+                    return false;
+                }
+                else if (ex.Number == 547)   // 547 : foreign key constraint violation
+                {
+                    new Msgwin(false, "ابتدا سربرگ مربوطه را ذخیره کنید، سپس جزئیات را ثبت نمایید.").ShowDialog();
                     return false;
                 }
                 else
                 {
-                    new Msgwin(false, "خطا در انجام عملیات ثبت چک ! , اطلاعات ذخیره نشده است !").ShowDialog();
+                    new Msgwin(false, "خطا در انجام عملیات ثبت سطر ! اطلاعات ذخیره نشده است.").ShowDialog();
+                    return false;
                 }
             }
             catch (Exception)
             {
                 throw;
             }
-
-
 
             #endregion
             this.MABL.Text = SUM_OF_MABL.ToString();
@@ -4480,7 +4484,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     additionalInfo: $@"{this.GetType().Name} , EXE PATH : {System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}");
 
             Msgwin msgwin = new Msgwin(true, "آیا از حذف اطمینان دارید؟");
-            msgwin.Show();
+            msgwin.ShowDialog();
 
             if (KHAZANEH_DATA?.Count == 0)
             {
@@ -5663,7 +5667,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             if (ChangeIsHappend)
             {
                 var MSGCAP = new MSGCAPTIONMODEL() { YES_CAPTION = "برگرد", NO_CAPTION = "خارج شو" };
-                Msgwin msgwin = new Msgwin(true, "اطلاعات را ذخیره نکرده اید آیا مایل به بازگشت هستید ؟", default, default, MSGCAP); msgwin.Show();
+                Msgwin msgwin = new Msgwin(true, "اطلاعات را ذخیره نکرده اید آیا مایل به بازگشت هستید ؟", default, default, MSGCAP); msgwin.ShowDialog();
                 if (msgwin.DialogResult is true)
                 {
                     e.Cancel = true;

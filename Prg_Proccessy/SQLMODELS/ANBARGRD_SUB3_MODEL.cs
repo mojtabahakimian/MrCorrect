@@ -26,8 +26,8 @@ namespace Prg_Proccessy.SQLMODELS
         public string? CODE { get => _code; set { if (_code == value) return; _code = value; OnPropertyChanged("CODE"); } }
         private string? _nam;
         public string? nam { get => _nam; set { if (_nam == value) return; _nam = value; OnPropertyChanged("nam"); } }
-        private double? _mog;
-        public double? MOG { get => _mog; set { if (_mog == value) return; _mog = value; OnPropertyChanged("MOG"); } }
+        private decimal? _mog;
+        public decimal? MOG { get => _mog; set { if (_mog == value) return; _mog = value; OnPropertyChanged("MOG"); } }
         private double? _num1;
         public double? NUM1 { get => _num1; set { if (_num1 == value) return; _num1 = value; OnPropertyChanged("NUM1"); } }
         private double? _num2;

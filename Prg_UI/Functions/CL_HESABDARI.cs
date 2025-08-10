@@ -5378,9 +5378,24 @@ namespace Prg_Proccessy.FUNCTIONS
             }
             else
             {
-                (TheWindo.FindName("SGN3") as CheckBox).IsEnabled = false;
-                (TheWindo.FindName("SGN2") as CheckBox).IsEnabled = false;
-                (TheWindo.FindName("SGN1") as CheckBox).IsEnabled = false;
+
+                var sgn1 = TheWindo.FindName("SGN1") as CheckBox;
+                if (sgn1 != null)
+                {
+                    sgn1.IsEnabled = false;
+                }
+
+                var sgn2 = TheWindo.FindName("SGN2") as CheckBox;
+                if (sgn2 != null)
+                {
+                    sgn2.IsEnabled = false;
+                }
+
+                var sgn3 = TheWindo.FindName("SGN3") as CheckBox;
+                if (sgn3 != null)
+                {
+                    sgn3.IsEnabled = false;
+                }
                 //FRM["SGN3"].Enabled = false;
                 //FRM["SGN3"].Locked = true;
                 //FRM["SGN2"].Enabled = false;
@@ -6252,7 +6267,10 @@ namespace Prg_Proccessy.FUNCTIONS
                     FLS += "[PC_NAME] [nvarchar](50) NULL,";
                 if (!columnNames.Contains("IPADD"))
                     FLS += "[IPADD] [nvarchar](50) NULL,";
-                FLS += "[TRIDD] [int] IDENTITY(1,1) NOT NULL, PRIMARY KEY CLUSTERED([TRIDD] ASC) ON [PRIMARY]) ON [PRIMARY]";
+                bool hasTRIDD = columnNames.Contains("TRIDD");
+                if (!hasTRIDD)
+                    FLS += "[TRIDD] [int] IDENTITY(1,1) NOT NULL, ";
+                FLS += "PRIMARY KEY CLUSTERED([TRIDD] ASC) ON [PRIMARY]) ON [PRIMARY]";
 
                 dbms.DoExecuteSQL(FLS);
                 //DoCmd.RunSQL FLS;

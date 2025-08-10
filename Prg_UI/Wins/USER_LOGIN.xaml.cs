@@ -347,8 +347,6 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 116;
             //Baseknow.UUSER = "Mr.Salmani";
 
-
-
             Baseknow.mrcorrect = true;
 
             //Baseknow.USERCOD = 167; Baseknow.UUSER = "Mr nikonahad";
@@ -363,10 +361,8 @@ namespace Prg_UI.Wins
             CL_Generaly.VAHED_OF_USER = 1;
             Baseknow.UGRP = "1";
 
-
             //new PRICE_ELAMIETF_FORM().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID_OTHER_WIN, this);
-
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAV_OTHER_WIN, this);
 
             //new HEAD_LST_BRFR().Show(); //فاکتور برگشت فروش (آزاد) رسید شده TAG = 25
 
