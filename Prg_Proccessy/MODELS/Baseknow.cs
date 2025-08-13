@@ -174,6 +174,16 @@ namespace Prg_Proccessy.MODELS
         public static int? STTOL { get; set; }
         public static bool? ECONM { get; set; }
         public static int? STKHS { get; private set; }
+
+        public static string? IT1 { get; private set; }
+        public static string? IT2 { get; private set; }
+        public static string? IT3 { get; private set; }
+        public static string? IT4 { get; private set; }
+        public static string? IT5 { get; private set; }
+        public static string? IT6 { get; private set; }
+        public static string? IT7 { get; private set; }
+        public static string? IT8 { get; private set; }
+        public static string? IT9 { get; private set; }
         #endregion
         public static void GetInitTheApp()
         {
@@ -441,6 +451,16 @@ namespace Prg_Proccessy.MODELS
                     if (item.STTOL != null) STTOL = item.STTOL;
                     if (item.ECONM != null) ECONM = item.ECONM;
                     if (item.STKHS != null) STKHS = item.STKHS;
+
+                    if (item.IT1 != null) IT1 = item.IT1;
+                    if (item.IT2 != null) IT2 = item.IT2;
+                    if (item.IT3 != null) IT3 = item.IT3;
+                    if (item.IT4 != null) IT4 = item.IT4;
+                    if (item.IT5 != null) IT5 = item.IT5;
+                    if (item.IT6 != null) IT6 = item.IT6;
+                    if (item.IT7 != null) IT7 = item.IT7;
+                    if (item.IT8 != null) IT8 = item.IT8;
+                    if (item.IT9 != null) IT9 = item.IT9;
 
 
 
