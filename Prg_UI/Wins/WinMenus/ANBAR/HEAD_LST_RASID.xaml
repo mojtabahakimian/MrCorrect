@@ -55,11 +55,11 @@
         <Label Content="شماره رسید :" Margin="0,61,27,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="28" VerticalAlignment="Top"/>
         <TextBox x:Name="NUMBER"  Text="0" Height="28" Margin="0,61,92,0" IsReadOnly="True" Tag="RD"  Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="100" IsTabStop="False"/>
         <Label Content=" تاریخ رسید :" Margin="0,61,219,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="62" Height="28" VerticalAlignment="Top"/>
-        <xctk:MaskedTextBox x:Name="DATE_N" Tag="RD"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="28" Margin="0,61,285,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="100" PreviewLostKeyboardFocus="DATE_N_PreviewLostKeyboardFocus" TabIndex="1"/>
+        <xctk:MaskedTextBox x:Name="DATE_N" Tag="RD"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="28" Margin="0,61,285,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="100" PreviewLostKeyboardFocus="DATE_N_PreviewLostKeyboardFocus"/>
         <Label Content="کاربر :" Margin="0,61,432,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="32" Height="28" VerticalAlignment="Top"/>
-        <TextBox x:Name="USER_NAME" IsReadOnly="True" Tag="RD"  Text="نام کاربر" Height="28" Margin="433,61,467,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" TabIndex="2" IsTabStop="False"/>
+        <TextBox x:Name="USER_NAME" IsReadOnly="True" Tag="RD"  Text="نام کاربر" Height="28" Margin="433,61,467,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" IsTabStop="False"/>
         <Label x:Name="LBL_DARKHAST" Content="شماره درخواست :" Margin="344,61,0,0"  FlowDirection="RightToLeft" FontSize="10" Height="28" VerticalAlignment="Top" HorizontalAlignment="Left" Width="84"/>
-        <ComboBox x:Name="NUMBER1" Text="0" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="243,61,0,0" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="100" PreviewLostKeyboardFocus="NUMBER1_PreviewLostKeyboardFocus" PreviewKeyDown="NUMBER1_PreviewKeyDown" PreviewTextInput="NUMBER1_PreviewTextInput" TabIndex="3" VerticalAlignment="Top" SelectionChanged="NUMBER1_SelectionChanged">
+        <ComboBox x:Name="NUMBER1" Text="0" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="243,61,0,0" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="100" PreviewLostKeyboardFocus="NUMBER1_PreviewLostKeyboardFocus" PreviewKeyDown="NUMBER1_PreviewKeyDown" PreviewTextInput="NUMBER1_PreviewTextInput" VerticalAlignment="Top" SelectionChanged="NUMBER1_SelectionChanged">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -67,7 +67,7 @@
             </ComboBox.ItemsPanel>
         </ComboBox>
         <Label Content="نوع خرید :" Margin="168,61,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="50" Height="28" VerticalAlignment="Top"/>
-        <ComboBox x:Name="SADER" SelectedValuePath="ID" DisplayMemberPath="NAME" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="20,61,0,0" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="145" TabIndex="4" VerticalAlignment="Top">
+        <ComboBox x:Name="SADER" SelectedValuePath="ID" DisplayMemberPath="NAME" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="20,61,0,0" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="145" VerticalAlignment="Top">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -75,7 +75,7 @@
             </ComboBox.ItemsPanel>
         </ComboBox>
         <Label Content="تحویل گیرنده :" Margin="0,112,19,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="28" VerticalAlignment="Top"/>
-        <ComboBox x:Name="TAH" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="False" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" Width="290" Margin="0,112,92,0" HorizontalAlignment="Right" TabIndex="5" VerticalAlignment="Top">
+        <ComboBox x:Name="TAH" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="False" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" Width="290" Margin="0,112,92,0" HorizontalAlignment="Right" VerticalAlignment="Top">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -83,7 +83,7 @@
             </ComboBox.ItemsPanel>
         </ComboBox>
         <Label Content="تحویل دهنده :" Margin="0,112,393,0"  FlowDirection="RightToLeft" FontSize="10" Height="28" VerticalAlignment="Top" HorizontalAlignment="Right" Width="71"/>
-        <ComboBox x:Name="MOLAH" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="False" Margin="243,112,467,0" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" TabIndex="6" VerticalAlignment="Top">
+        <ComboBox x:Name="MOLAH" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="False" Margin="243,112,467,0" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" VerticalAlignment="Top">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -91,16 +91,16 @@
             </ComboBox.ItemsPanel>
         </ComboBox>
         <Label Content="شماره داخلی :" Margin="168,112,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="64" Height="28" VerticalAlignment="Top"/>
-        <TextBox x:Name="FNUMCO" Tag="RD"  Text="0" Height="28" Margin="20,112,0,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Left" Width="145"  Padding="3" PreviewKeyDown="FNUMCO_PreviewKeyDown" PreviewLostKeyboardFocus="FNUMCO_PreviewLostKeyboardFocus" PreviewTextInput="FNUMCO_PreviewTextInput" TabIndex="7" />
+        <TextBox x:Name="FNUMCO" Tag="RD"  Text="0" Height="28" Margin="20,112,0,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Left" Width="145"  Padding="3" PreviewKeyDown="FNUMCO_PreviewKeyDown" PreviewLostKeyboardFocus="FNUMCO_PreviewLostKeyboardFocus" PreviewTextInput="FNUMCO_PreviewTextInput" />
         <Label Content="فروشنده :" Margin="0,158,40,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="28" VerticalAlignment="Top"/>
-        <ComboBox x:Name="CUST_NO" Tag="RD" Padding="7,0,10,0" IsSynchronizedWithCurrentItem="True" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="438,160,91,0" VerticalAlignment="Top" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" Height="28" PreviewLostKeyboardFocus="CUST_NO_PreviewLostKeyboardFocus" TabIndex="8">
+        <ComboBox x:Name="CUST_NO" Tag="RD" Padding="7,0,10,0" IsSynchronizedWithCurrentItem="True" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="438,160,91,0" VerticalAlignment="Top" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" Height="28" PreviewLostKeyboardFocus="CUST_NO_PreviewLostKeyboardFocus">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                 </ItemsPanelTemplate>
             </ComboBox.ItemsPanel>
         </ComboBox>
-        <ComboBox x:Name="CUST_NO2" IsSynchronizedWithCurrentItem="True" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="247,160,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" Height="28" HorizontalAlignment="Left" Width="181" TabIndex="9" IsTabStop="False">
+        <ComboBox x:Name="CUST_NO2" IsSynchronizedWithCurrentItem="True" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="247,160,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" Height="28" HorizontalAlignment="Left" Width="181" IsTabStop="False">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -108,20 +108,16 @@
             </ComboBox.ItemsPanel>
         </ComboBox>
         <CheckBox x:Name="OKF" Content="تایید رسید" IsChecked="False" HorizontalAlignment="Left" Margin="20,160,0,0" Width="90" Height="28" IsHitTestVisible="False" Focusable="False" VerticalAlignment="Top"/>
-        <Button x:Name="ESLAH"      Content="اصلاح برگه"       Margin="0,211,126,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Click="ESLAH_Click" TabIndex="11" IsEnabled="False"/>
-        <Button x:Name="Command113" Content="قبض باسکول"     Margin="132,211,0,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Click="Command113_Click" TabIndex="12" IsEnabled="False"/>
-        <Button x:Name="Command106" Content="چاپ رسید انبار" Margin="132,156,0,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Click="Command106_Click" TabIndex="13" IsEnabled="False"/>
-        <StackPanel x:Name="STACKPANEL_SAVE_RASID"  Margin="0,211,12,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100">
-            <StackPanel.Style>
-                <Style TargetType="{x:Type StackPanel}" >
+        <Button x:Name="ESLAH"      Content="اصلاح برگه"       Margin="0,211,126,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Click="ESLAH_Click" IsEnabled="False"/>
+        <Button x:Name="Command113" Content="قبض باسکول"     Margin="132,211,0,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Click="Command113_Click" IsEnabled="False"/>
+        <Button x:Name="Command106" Content="چاپ رسید انبار" Margin="132,156,0,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Click="Command106_Click" IsEnabled="False"/>
+        <Button x:Name="BUTTON_SAVE_RASID"  Click="BUTTON_SAVE_RASID_Click" Margin="0,211,12,0"  Content="ذخیره" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="36" VerticalAlignment="Top" HorizontalAlignment="Right" Width="106"/>
+
+        <Button x:Name="DELETE_RASID" Content="حذف" Click="DELETE_RASID_Click" Tag="hazfer"  Margin="15,211,0,0"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Width="106">
+            <!--<Button.Style>
+                <Style TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignFlatButton}">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding SelectedItem, ElementName=CUST_NO, UpdateSourceTrigger=PropertyChanged}" Value="{x:Null}">
-                            <Setter Property="IsEnabled" Value="False"/>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding Text, ElementName=TAH, UpdateSourceTrigger=PropertyChanged}" Value="{x:Null}">
-                            <Setter Property="IsEnabled" Value="False"/>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding Text, ElementName=MOLAH, UpdateSourceTrigger=PropertyChanged}" Value="{x:Null}">
                             <Setter Property="IsEnabled" Value="False"/>
                         </DataTrigger>
                         <DataTrigger Binding="{Binding IsChecked, ElementName=TAMIR, UpdateSourceTrigger=PropertyChanged}" Value="True">
@@ -129,30 +125,9 @@
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
-            </StackPanel.Style>
-            <Button x:Name="BUTTON_SAVE_RASID"  Click="BUTTON_SAVE_RASID_Click"  Content="ذخیره" BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Foreground="#DDFFFFFF" Height="36" d:IsLocked="True" TabIndex="10"/>
-        </StackPanel>
-        <StackPanel x:Name="STACKPANEL_DELETE_HAVALE"  Margin="19,211,0,0" Width="100" HorizontalAlignment="Left" VerticalAlignment="Top">
-            <StackPanel.Style>
-                <Style TargetType="{x:Type StackPanel}" >
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding SelectedItem, ElementName=CUST_NO, UpdateSourceTrigger=PropertyChanged}" Value="{x:Null}">
-                            <Setter Property="IsEnabled" Value="False"/>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding Text, ElementName=TAH, UpdateSourceTrigger=PropertyChanged}" Value="{x:Null}">
-                            <Setter Property="IsEnabled" Value="False"/>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding Text, ElementName=MOLAH, UpdateSourceTrigger=PropertyChanged}" Value="{x:Null}">
-                            <Setter Property="IsEnabled" Value="False"/>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding IsChecked, ElementName=TAMIR, UpdateSourceTrigger=PropertyChanged}" Value="True">
-                            <Setter Property="IsEnabled" Value="False"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </StackPanel.Style>
-            <Button x:Name="DELETE_RASID" Content="حذف" Click="DELETE_RASID_Click"    Tag="hazfer"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5" FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" d:IsLocked="True" TabIndex="14"/>
-        </StackPanel>
+            </Button.Style>-->
+        </Button>
+
         <DataGrid   
                 x:Name="INVO_LST_RASID_SUB"
                 EnableColumnVirtualization="True"
@@ -168,7 +143,7 @@
             
                 Tag="RD"
                 ItemsSource="{Binding INVO_DATA_RASID_KHARID}"
-                CellEditEnding="INVO_LST_RASID_SUB_CellEditEnding" PreparingCellForEdit="INVO_LST_RASID_SUB_PreparingCellForEdit" SelectionChanged="INVO_LST_RASID_SUB_SelectionChanged" PreviewMouseLeftButtonDown="INVO_LST_RASID_SUB_PreviewMouseLeftButtonDown" GotFocus="INVO_LST_RASID_SUB_GotFocus" RowEditEnding="INVO_LST_RASID_SUB_RowEditEnding" BeginningEdit="INVO_LST_RASID_SUB_BeginningEdit" MouseDoubleClick="INVO_LST_RASID_SUB_MouseDoubleClick" PreviewKeyDown="INVO_LST_RASID_SUB_PreviewKeyDown" TabIndex="10"
+                CellEditEnding="INVO_LST_RASID_SUB_CellEditEnding" PreparingCellForEdit="INVO_LST_RASID_SUB_PreparingCellForEdit" SelectionChanged="INVO_LST_RASID_SUB_SelectionChanged" PreviewMouseLeftButtonDown="INVO_LST_RASID_SUB_PreviewMouseLeftButtonDown" GotFocus="INVO_LST_RASID_SUB_GotFocus" RowEditEnding="INVO_LST_RASID_SUB_RowEditEnding" BeginningEdit="INVO_LST_RASID_SUB_BeginningEdit" MouseDoubleClick="INVO_LST_RASID_SUB_MouseDoubleClick" PreviewKeyDown="INVO_LST_RASID_SUB_PreviewKeyDown"
             
                 KeyboardNavigation.TabNavigation="Contained"
                 AutoGenerateColumns="False" 
@@ -178,7 +153,8 @@
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->
-                <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                    <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
                     <Setter Property="GridLinesVisibility" Value="All"/>
                 </Style>
             </DataGrid.Style>
@@ -187,7 +163,7 @@
                 <DataGridTextColumn Header="ردیف" x:Name="RADIF_COL"  Binding="{Binding RADIF}"  Width="auto"   MinWidth="40" Visibility="Hidden"/>
                 <DataGridTextColumn Header="آیدی" x:Name="id_COL"  Binding="{Binding id}"  Width="auto"   MinWidth="40" Visibility="Hidden"/>
 
-                <DataGridComboBoxColumn x:Name="ANBAR_COLUMN" MinWidth="80" Width="auto" Header=" انبار " SelectedValueBinding="{Binding ANBAR,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAMES" SelectedValuePath="CODE">
+                <DataGridComboBoxColumn x:Name="ANBAR_COLUMN" MinWidth="120" Width="auto" Header=" انبار " SelectedValueBinding="{Binding ANBAR,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAMES" SelectedValuePath="CODE">
                     <DataGridComboBoxColumn.EditingElementStyle>
                         <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
                             <Setter Property="IsEditable" Value="True"/>
@@ -324,7 +300,7 @@
                 </ItemsPanelTemplate>
             </ComboBox.ItemsPanel>
         </ComboBox>
-        <Button x:Name="BTN_INVOCES" Content="لیست رسید خرید ها" Margin="248,212,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="142" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_INVOCES_Click"/>
+        <Button x:Name="BTN_INVOCES" Content="لیست رسید خرید ها" Margin="248,212,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="142" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_INVOCES_Click"/>
 
         <Button x:Name="BTN_NEW_FACTOR" Visibility="Collapsed" Content="رسید جدید" Margin="400,212,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_NEW_FACTOR_Click" Padding="16,2,16,4"/>
 

@@ -70,13 +70,13 @@
 
 
             <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,65,242,98"  Width="1" Tag="RD"/>
-            <xctk:MaskedTextBox x:Name="DATE_N"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="27" Margin="29,8,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" PreviewGotKeyboardFocus="DATE_N_PreviewGotKeyboardFocus" PreviewLostKeyboardFocus="DATE_N_PreviewLostKeyboardFocus" TabIndex="1" Grid.Column="2" HorizontalAlignment="Left" Width="85" />
-            <TextBox x:Name="NUMBER" Height="27" Margin="155,9,79,0" IsReadOnly="True" Tag="RD"  Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" TabIndex="0" Grid.Column="2" Text="0" />
+            <xctk:MaskedTextBox x:Name="DATE_N"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="27" Margin="29,8,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" PreviewGotKeyboardFocus="DATE_N_PreviewGotKeyboardFocus" PreviewLostKeyboardFocus="DATE_N_PreviewLostKeyboardFocus" Grid.Column="2" HorizontalAlignment="Left" Width="85" />
+            <TextBox x:Name="NUMBER" Height="27" Margin="155,9,79,0" IsReadOnly="True" Tag="RD"  Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" Grid.Column="2" Text="0" />
             <Label Content="شماره حواله:" Margin="0,9,12,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="65" Height="27" VerticalAlignment="Top" Grid.Column="2"/>
             <TextBox x:Name="USER_NAME" IsReadOnly="True" Tag="RD"  Text="نام کاربر" Height="27" Margin="152,9,5,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" Grid.Column="1" />
             <Label Content="تاریخ:" Margin="116,8,0,0"  FlowDirection="RightToLeft" FontSize="10" Height="27" VerticalAlignment="Top" Grid.Column="2" HorizontalAlignment="Left" Width="34"/>
             <Label Content="کاربر:" Margin="0,8,0,0"  FlowDirection="RightToLeft" FontSize="10" Height="27" VerticalAlignment="Top" Grid.Column="2" HorizontalAlignment="Left" Width="30"/>
-            <ComboBox x:Name="TAH" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="False" Margin="7,44,79,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" TabIndex="5" Grid.Column="2" >
+            <ComboBox x:Name="TAH" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="False" Margin="7,44,79,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" Grid.Column="2" >
                 <ComboBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -92,15 +92,15 @@
             <Label Content="ملاحظات:" Margin="0,110,24,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="47" Height="25" VerticalAlignment="Top" Grid.Column="2"/>
             <Label Content="شماره برگه:" Margin="356,46,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="54" Height="26" VerticalAlignment="Top"/>
             <Label Content="واحد:" Margin="194,46,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="32" Height="25" VerticalAlignment="Top"/>
-            <ComboBox x:Name="MOLAH" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="False" Margin="7,44,48,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" TabIndex="6" Grid.Column="1">
+            <ComboBox x:Name="MOLAH" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="False" Margin="7,44,48,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" Grid.Column="1">
                 <ComboBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                     </ItemsPanelTemplate>
                 </ComboBox.ItemsPanel>
             </ComboBox>
-            <CNC:NumericTextBox DoesAcceptDouble="False" RestoreLastValidValue="False" LastValueShouldZero="False" x:Name="FNUMCO" IsReadOnly="False" Text="" Height="27" Margin="7,9,0,0"   VerticalAlignment="Top"  Visibility="Visible" NumericLostFocus="FNUMCO_NumericLostFocus" TabIndex="2" HorizontalAlignment="Left" Width="78" Grid.Column="1" />
-            <ComboBox x:Name="MAS"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="206,8,0,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="145" TabIndex="3">
+            <CNC:NumericTextBox DoesAcceptDouble="False" RestoreLastValidValue="False" LastValueShouldZero="False" x:Name="FNUMCO" IsReadOnly="False" Text="" Height="27" Margin="7,9,0,0"   VerticalAlignment="Top"  Visibility="Visible" NumericLostFocus="FNUMCO_NumericLostFocus" HorizontalAlignment="Left" Width="78" Grid.Column="1" />
+            <ComboBox x:Name="MAS"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="206,8,0,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="145">
                 <ComboBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -108,7 +108,7 @@
                 </ComboBox.ItemsPanel>
 
             </ComboBox>
-            <ComboBox x:Name="SADER"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" SelectedValuePath="ID" DisplayMemberPath="NAME" IsTextSearchEnabled="True" Margin="15,9,0,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="124" PreviewLostKeyboardFocus="SADER_PreviewLostKeyboardFocus" TabIndex="4">
+            <ComboBox x:Name="SADER"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" SelectedValuePath="ID" DisplayMemberPath="NAME" IsTextSearchEnabled="True" Margin="15,9,0,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="124" PreviewLostKeyboardFocus="SADER_PreviewLostKeyboardFocus" >
                 <ComboBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -123,7 +123,7 @@
                     </ItemsPanelTemplate>
                 </ComboBox.ItemsPanel>
             </ComboBox>
-            <ComboBox x:Name="CUST_NO" Padding="7,0,10,0"  IsSynchronizedWithCurrentItem="True" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="163,79,79,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" PreviewLostKeyboardFocus="CUST_NO_PreviewLostKeyboardFocus" TabIndex="7" Grid.ColumnSpan="2" Grid.Column="1">
+            <ComboBox x:Name="CUST_NO" Padding="7,0,10,0"  IsSynchronizedWithCurrentItem="True" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="163,79,79,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" PreviewLostKeyboardFocus="CUST_NO_PreviewLostKeyboardFocus" Grid.ColumnSpan="2" Grid.Column="1">
                 <ComboBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -139,7 +139,7 @@
                 </ComboBox.ItemsPanel>
             </ComboBox>
 
-            <TextBox x:Name="SHARAYET"  Text="" Height="50" Margin="7,114,79,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="200" GotFocus="SHARAYET_GotFocus" TabIndex="8" Grid.ColumnSpan="2" Grid.Column="1" />
+            <TextBox x:Name="SHARAYET"  Text="" Height="50" Margin="7,114,79,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="200" GotFocus="SHARAYET_GotFocus"  Grid.ColumnSpan="2" Grid.Column="1" />
 
 
 
@@ -167,18 +167,22 @@
 					VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                     KeyboardNavigation.TabNavigation="Contained"
                     CanUserAddRows="True"
+                    IsReadOnly="True"
                     ItemsSource="{Binding HAVALEH_INVO_DATA}"
                     IsKeyboardFocusWithinChanged="INVO_LST_HAVL_SUB_IsKeyboardFocusWithinChanged"
-                    Margin="10,230,10,132" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"  SelectedIndex="0" BorderThickness="1" AddingNewItem="INVO_LST_HAVL_SUB_AddingNewItem" PreviewMouseLeftButtonUp="INVO_LST_HAVL_SUB_PreviewMouseLeftButtonUp" PreparingCellForEdit="INVO_LST_HAVL_SUB_PreparingCellForEdit" CellEditEnding="INVO_LST_HAVL_SUB_CellEditEnding" SelectionChanged="INVO_LST_HAVL_SUB_SelectionChanged" PreviewKeyDown="INVO_LST_HAVL_SUB_PreviewKeyDown" GotFocus="INVO_LST_HAVL_SUB_GotFocus" RowEditEnding="INVO_LST_HAVL_SUB_RowEditEnding" TabIndex="9" Grid.ColumnSpan="3" BeginningEdit="INVO_LST_HAVL_SUB_BeginningEdit" CanUserDeleteRows="False">
+                    Margin="10,230,10,132" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"  SelectedIndex="0" BorderThickness="1" AddingNewItem="INVO_LST_HAVL_SUB_AddingNewItem" PreviewMouseLeftButtonUp="INVO_LST_HAVL_SUB_PreviewMouseLeftButtonUp" PreparingCellForEdit="INVO_LST_HAVL_SUB_PreparingCellForEdit" CellEditEnding="INVO_LST_HAVL_SUB_CellEditEnding" SelectionChanged="INVO_LST_HAVL_SUB_SelectionChanged" PreviewKeyDown="INVO_LST_HAVL_SUB_PreviewKeyDown" GotFocus="INVO_LST_HAVL_SUB_GotFocus" RowEditEnding="INVO_LST_HAVL_SUB_RowEditEnding" Grid.ColumnSpan="3" BeginningEdit="INVO_LST_HAVL_SUB_BeginningEdit" CanUserDeleteRows="False">
                 <DataGrid.Style>
-                    <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource DATAGRIDSTYLISH}">
+                    <!--خط بندی سطر های دیتاگرید-->
+                    <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                        <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                        <Setter Property="GridLinesVisibility" Value="All"/>
                     </Style>
                 </DataGrid.Style>
                 <DataGrid.Columns >
                     <DataGridTextColumn Header="ردیف" x:Name="RADIF_COL"  Binding="{Binding RADIF, UpdateSourceTrigger=PropertyChanged}"  Width="auto"   MinWidth="40" Visibility="Hidden"/>
                     <DataGridTextColumn Header="آیدی" x:Name="id_COL"  Binding="{Binding id, UpdateSourceTrigger=PropertyChanged}"  Width="auto"   MinWidth="40" Visibility="Hidden"/>
 
-                    <DataGridComboBoxColumn x:Name="ANBAR_COL" MinWidth="80" Width="auto" Header=" انبار " SelectedValueBinding="{Binding ANBAR, UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAMES" SelectedValuePath="CODE">
+                    <DataGridComboBoxColumn x:Name="ANBAR_COL" MinWidth="150" Width="auto" Header=" انبار " SelectedValueBinding="{Binding ANBAR, UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAMES" SelectedValuePath="CODE">
                         <DataGridComboBoxColumn.EditingElementStyle>
                             <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
                                 <Setter Property="IsEditable" Value="True"/>
@@ -344,27 +348,7 @@
 
             <Button x:Name="DELETE_HAVALE" Click="DELETE_HAVALE_Click"  Content="حذف"  Margin="12,185,0,0"  Tag="hazfer"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5" FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" IsEnabled="False"/>
 
-            <StackPanel x:Name="STACKPANEL_SAVE_HAVALE" d:IsEnabled="True" Margin="0,185,11,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100" Grid.Column="2">
-                <StackPanel.Style>
-                    <Style TargetType="{x:Type StackPanel}" >
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding SelectedItem, ElementName=CUST_NO, UpdateSourceTrigger=PropertyChanged}" Value="{x:Null}">
-                                <Setter Property="IsEnabled" Value="False"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Text, ElementName=TAH, UpdateSourceTrigger=PropertyChanged}" Value="{x:Null}">
-                                <Setter Property="IsEnabled" Value="False"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Text, ElementName=MOLAH, UpdateSourceTrigger=PropertyChanged}" Value="{x:Null}">
-                                <Setter Property="IsEnabled" Value="False"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsChecked, ElementName=TAMIR, UpdateSourceTrigger=PropertyChanged}" Value="True">
-                                <Setter Property="IsEnabled" Value="False"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </StackPanel.Style>
-                <Button x:Name="BUTTON_SAVE_HAVALE"  Click="BUTTON_SAVE_HAVALE_Click" Content="ذخیره" BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Foreground="#DDFFFFFF" Height="36" d:IsLocked="True"/>
-            </StackPanel>
+            <Button x:Name="BUTTON_SAVE_HAVALE"  Margin="180,185,15,0"   Click="BUTTON_SAVE_HAVALE_Click" Content="ذخیره" BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Foreground="#DDFFFFFF" Height="36" Grid.Column="2" VerticalAlignment="Top"/>
 
             <Label Content="نحوه پرداخت:" Margin="38,-97,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="65" Height="26" VerticalAlignment="Top" Visibility="Collapsed" Grid.Column="1"/>
 

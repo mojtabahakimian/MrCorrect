@@ -234,7 +234,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 if (_KOL_ != null && _KOL_ != Baseknow.BANKHA)
                 {
                     Msgwin msgwin = new Msgwin(false, "اين چك قبلا واگذار گرديده است.بنابراين از حساب اين شخص كسر شده و صاحب چك بدهكار مي گردد.");
-                    msgwin.Show();
+                    msgwin.ShowDialog();
 
                     CL_HESABDARI.GETTAF3(this.HES1.SelectedValue.ToString(), ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
 
@@ -325,7 +325,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             else
             {
                 Msgwin msgwin = new Msgwin(false, "چکی با این شماره سریال وجود ندارد ، لطفا از صحت شماره سریال چک اطمینان حاصل فرمایید");
-                msgwin.Show();
+                msgwin.ShowDialog();
             }
             #endregion
         }

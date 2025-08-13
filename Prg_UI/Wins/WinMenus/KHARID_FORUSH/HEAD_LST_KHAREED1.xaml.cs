@@ -40,6 +40,7 @@ using Microsoft.IdentityModel.Tokens;
 using ImageMagick;
 using System.Windows.Data;
 using Rpts;
+using static Prg_UI.Functions.CL_LMethods;
 
 namespace Wins.WinMenus.KHARID_FORUSH
 {
@@ -130,7 +131,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         #endregion
 
         private NavigationManager<HEAD_LST> _navigationManager;
-        public HEAD_LST_KHAREED1(double? number_to_open = null, bool _IsDirectFactor_ = true, bool _IsExporty_ = false)
+        public HEAD_LST_KHAREED1(double? number_to_open = null, bool _IsDirectFactor_ = true, bool _IsExporty_ = false, bool _isAutomasion_ = false)
         {
             InitializeComponent();
 
@@ -140,13 +141,14 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 NUMBER.Text = number_to_open.ToString(); //شماره رسید
                 NUMBER.UpdateLayout();
+                IsOpenedFromAutomation = _isAutomasion_;
             }
 
             IsDirectFactor = _IsDirectFactor_;
 
             IsExporty = _IsExporty_;
         }
-
+        public bool IsOpenedFromAutomation { get; } = false;
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
         UniversControl universControl = new UniversControl();
@@ -439,6 +441,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
+            ChangeIsHappend = false;
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -456,6 +459,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             string WhereCondition = FTAG > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {FTAG}) " : "  ";
             WhereCondition = CL_LMethods.GetRestrictedSqlQuery(FTAG, WhereCondition);
+
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG} ";
+            }
 
             _navigationManager = new NavigationManager<HEAD_LST>(
                 dbms,
@@ -676,9 +684,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                 TAKHFIF_MABL_PRICE();
 
-                ActivateChaps();
-
                 Form_Current();
+
+                ActivateChaps();
             }
         }
         private bool OnInsertRecord(HEAD_LST record)
@@ -1068,33 +1076,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             bool ghat = false;
 
-            if (INVO_LST_SUB.Items.Count > 0)
-            {
-                Command100.IsEnabled = true;
-                Command106.IsEnabled = true;
-                Command108.IsEnabled = true;
-            }
-            else
-            {
-                Command100.IsEnabled = false;
-                Command106.IsEnabled = false;
-                Command108.IsEnabled = false;
-            }
-
             if (Baseknow.SIGN ?? false)
             {
-                if (SGN2.IsChecked == true)
-                {
-                    Command100.IsEnabled = true;
-                    Command106.IsEnabled = true;
-                    Command108.IsEnabled = true;
-                }
-                else
-                {
-                    Command100.IsEnabled = false;
-                    Command106.IsEnabled = false;
-                    Command108.IsEnabled = false;
-                }
+                ActivateChaps();
             }
 
             if (string.IsNullOrEmpty(N_S.Text))
@@ -1290,6 +1274,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                 LABEL_HEADER.Content = "فاکتور خرید صادراتی";
             }
+
 
         }
 
@@ -2094,11 +2079,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             var TheRow = e.Row.Item as INVO_LST_FACTOR22;
 
-            if (CL_LMethods.IsNewRowUnmodified(TheRow))
-            {
-                INVO_LST_SUB_CANCEL_EDIT();
-                return;   // The row is unmodified
-            }
+            if (ConstructorRowDetector.IsPristine(TheRow)) { INVO_LST_SUB_CANCEL_EDIT(); return; }
 
             if (!BodyIsValid(TheRow))
             {
@@ -3316,7 +3297,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void ActivateChaps()
         {
-            if ((bool)SGN1.IsChecked || (bool)SGN2.IsChecked || (bool)SGN3.IsChecked)
+            if (SGN2.IsChecked ?? false)
             {
                 this.Command100.IsEnabled = true;
                 this.Command106.IsEnabled = true;

@@ -46,17 +46,18 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
     public partial class DEED_HEAD : Window, ISearchableWindow
     {
         public double N_S_NUMBER { get; set; } = -1;
-        public DEED_HEAD(double? _n_s_ = null)
+        public DEED_HEAD(double? _n_s_ = null, bool _isAutomasion_ = false)
         {
             if (_n_s_ != null && _n_s_ > 0)
             {
                 N_S_NUMBER = (double)_n_s_;
+                IsOpenedFromAutomation = _isAutomasion_;
             }
             InitializeComponent();
             this.Owner = PublicVRB.WINBASE;//#OWNER
             this.DataContext = this;
         }
-
+        public bool IsOpenedFromAutomation { get; } = false;
         #region Header Window Begin
         //Header Window Begin
         private void Btn_Close_Click(object sender, RoutedEventArgs e)
@@ -608,7 +609,13 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         private void ReGetMasterData()
         {
-            var MasterHead = dbms.DoGetDataSQL<DEED_HED>($"SELECT N_S, DATE_S, SHARH_S, NO_S, GHATEI, USER_NAME, base, SGN1, SGN2, SGN3, SGN4, OKF, sgn1usid, sgn2usid, sgn3usid, BAYEG FROM dbo.DEED_HED ORDER BY N_S").ToList();
+            string WhereCondition = "";
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                WhereCondition = $" WHERE N_S = {N_S_NUMBER} ";
+            }
+
+            var MasterHead = dbms.DoGetDataSQL<DEED_HED>($"SELECT N_S, DATE_S, SHARH_S, NO_S, GHATEI, USER_NAME, base, SGN1, SGN2, SGN3, SGN4, OKF, sgn1usid, sgn2usid, sgn3usid, BAYEG FROM dbo.DEED_HED {WhereCondition} ORDER BY N_S").ToList();
             RecordsData.Source = MasterHead;
 
             if (N_S_NUMBER > 0) //Opened by number (N_S)
@@ -2275,6 +2282,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
+            ChangeIsHappend = false;
         }
 
         private void Child14_SelectionChanged(object sender, SelectionChangedEventArgs e)

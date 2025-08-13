@@ -53,11 +53,11 @@
 
         <DataGrid   
             x:Name="TCOD_MAP_SUB"
-            EnableColumnVirtualization="True"
             EnableRowVirtualization="True"
             VirtualizingPanel.IsVirtualizing="True"
             VirtualizingPanel.VirtualizationMode="Recycling"
-            ScrollViewer.CanContentScroll="False"
+            VirtualizingPanel.ScrollUnit="Pixel"
+            ScrollViewer.CanContentScroll="True"
             SelectedIndex="0"
             ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
             CellStyle="{StaticResource CellFocusyBorder}"
@@ -67,9 +67,16 @@
             KeyboardNavigation.TabNavigation="Contained"
             Margin="7,90,8,10" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" BeginningEdit="TCOD_MAP_SUB_BeginningEdit" CellEditEnding="TCOD_MAP_SUB_CellEditEnding" RowEditEnding="TCOD_MAP_SUB_RowEditEnding" PreviewKeyDown="TCOD_MAP_SUB_PreviewKeyDown">
 
+            <DataGrid.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </DataGrid.ItemsPanel>
+
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->
-                <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                    <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
                     <Setter Property="GridLinesVisibility" Value="Horizontal"/>
                 </Style>
             </DataGrid.Style>

@@ -36,6 +36,7 @@ using System.Windows.Data;
 using System.Threading.Tasks;
 using Wins.WinOther;
 using static Interfaces.INavigator;
+using static Prg_UI.Functions.CL_LMethods;
 
 namespace Wins.WinMenus.SANATI
 {
@@ -82,7 +83,7 @@ namespace Wins.WinMenus.SANATI
         }
         //Header Window End;
         #endregion
-        public HAVALAH_ENTER(double? number_to_open = null)
+        public HAVALAH_ENTER(double? number_to_open = null, bool _isAutomasion_ = false)
         {
             InitializeComponent();
 
@@ -92,9 +93,10 @@ namespace Wins.WinMenus.SANATI
             {
                 NUMBER.Text = number_to_open.ToString();
                 NUMBER.UpdateLayout();
+                IsOpenedFromAutomation = _isAutomasion_;
             }
         }
-
+        public bool IsOpenedFromAutomation { get; } = false;
         #region LOCALMODEL
 
         public class DeedHedData
@@ -367,6 +369,11 @@ namespace Wins.WinMenus.SANATI
 
             string WhereCondition = $" WHERE (dbo.HEAD_LST.TAG = {FTAG}) ";
             WhereCondition = CL_LMethods.GetRestrictedSqlQuery(Convert.ToByte(FTAG), WhereCondition);
+            
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG} ";
+            }
 
             _navigationManager = new NavigationManager<HEAD_LST>(
                 dbms,
@@ -1721,11 +1728,7 @@ namespace Wins.WinMenus.SANATI
             }
 
             var TheRow = e.Row.Item as INVO_LST_FACTOR22;
-            if (CL_LMethods.IsNewRowUnmodified(TheRow))
-            {
-                INVO_LST_SUB_CANCEL_EDIT();
-                return;   // The row is unmodified
-            }
+            if (ConstructorRowDetector.IsPristine(TheRow)) { INVO_LST_SUB_CANCEL_EDIT(); return; }
 
             if (!BodyIsValid(TheRow))
             {

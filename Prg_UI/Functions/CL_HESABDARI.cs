@@ -5346,7 +5346,16 @@ namespace Prg_Proccessy.FUNCTIONS
                 else
                 {
                     if (TheWindo.GetType().Name != "HEAD_LST_RASID")
-                        (TheWindo.FindName("SGN3") as CheckBox).IsEnabled = false;
+                    {
+                        var sgn3 = TheWindo.FindName("SGN3") as CheckBox;
+                        if (sgn3 != null)
+                        {
+                            sgn3.IsEnabled = false;
+                        }
+                    }
+
+                  
+
                     //(TheWindo.FindName("SGN3") as CheckBox).Visibility = Visibility.Hidden;
                     //FRM["SGN3"].Enabled = false;
                     //FRM["SGN3"].Locked = true;

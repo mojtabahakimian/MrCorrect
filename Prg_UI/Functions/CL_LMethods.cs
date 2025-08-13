@@ -2806,40 +2806,6 @@ namespace Prg_UI.Functions
         }
         #endregion
 
-        #region MyRegion
-        public static bool IsNewRowUnmodified(INVO_LST_FACTOR22 row)
-        {
-            if (row == null)
-            {
-                return true;
-            }
-
-            return row?.NUMBER == null &&
-                   row?.TAG == null &&
-                   row?.RADIF == null &&
-                   string.IsNullOrEmpty(row?.CODE) &&
-                   string.IsNullOrEmpty(row?.NAME_CODE) &&
-                   row?.MEGH == 0 &&
-                   row?.MEGHk == 0 &&
-                   row?.MEGH_MAR == 0 &&
-                   row?.MEGH_R == 0 &&
-                   row?.MABL == 0 &&
-                   row?.MABL_K == 0 &&
-                   row?.IMBAA == 0 &&
-                   row?.N_KOL == 0 &&
-                   row?.N_MOIN == 0 &&
-                   row?.TKHN == 0 &&
-                   row?.AVRAGE == 0 &&
-                   row?.AVRAGE2 == 0 &&
-                   row?.SANAD_NO == 0 &&
-                   row?.ANBARF == 0 &&
-                   row?.N_TAF == 0 &&
-                   row?.TOTALARZ == 0 &&
-                   row?.JAY == 0 &&
-                   row?.FROM_A == false;
-        }
-        #endregion
-
         public static bool ValidateImageFile(string filePath, out string errorMessage, double maxSizeInMB = 10)
         {
             errorMessage = string.Empty;

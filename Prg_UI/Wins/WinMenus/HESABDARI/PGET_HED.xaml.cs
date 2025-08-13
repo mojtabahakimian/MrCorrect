@@ -338,7 +338,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
         }
 
-        public PGET_HED(double? nUMBER_TO_OPEN = null)
+        public PGET_HED(double? nUMBER_TO_OPEN = null, bool _isAutomasion_ = false)
         {
             InitializeComponent();
 
@@ -346,9 +346,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             if (nUMBER_TO_OPEN != null && nUMBER_TO_OPEN > 0)
             {
                 NUMBER_TO_OPEN = Convert.ToDouble(nUMBER_TO_OPEN);
+                IsOpenedFromAutomation = _isAutomasion_;
             }
             this.Owner = PublicVRB.WINBASE;//#OWNER
         }
+        public bool IsOpenedFromAutomation { get; } = false;
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
@@ -648,6 +650,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         private void ReGetMasterData()
         {
             string whereClause = GetRestrictedSqlQueryForPGET_HED();
+
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                whereClause = $" WHERE ID = {NUMBER_TO_OPEN} ";
+            }
 
             var query = $@"
                         SELECT ID, DATE, MOLAH, N_S, DEPATMAN, SHIFT, CUST_KIND, USER_NAME, KIND, IDK, OKF, RPLICA,
@@ -1905,6 +1912,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
+            ChangeIsHappend = false;
         }
 
 

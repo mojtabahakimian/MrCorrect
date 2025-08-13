@@ -137,7 +137,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         #endregion
 
-        public HEAD_LST_BRFR(double? number_to_open = null)
+        public HEAD_LST_BRFR(double? number_to_open = null, bool _isAutomasion_ = false)
         {
             InitializeComponent();
 
@@ -147,10 +147,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 NUMBER.Text = number_to_open.ToString(); //شماره رسید
                 NUMBER.UpdateLayout();
+                IsOpenedFromAutomation = _isAutomasion_;
             }
 
         }
-
+        public bool IsOpenedFromAutomation { get; } = false;
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
         UniversControl universControl = new UniversControl();
@@ -388,6 +389,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
+            ChangeIsHappend = false;
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -405,6 +407,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
             string WhereCondition = FTAG > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {FTAG}) " : "  ";
             WhereCondition = CL_LMethods.GetRestrictedSqlQuery(FTAG, WhereCondition);
 
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG} ";
+            }
+
             _navigationManager = new NavigationManager<HEAD_LST>(
                 dbms,
                 x => x.NUMBER.ToString(), // property selector (used to find a record by its CODE)
@@ -413,7 +420,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 Convert.ToDouble(NUMBER.Text)
                 );
 
-            if (!string.IsNullOrEmpty(NUMBER1_TAG?.ToStringNullSafe()) && _navigationManager.NUMBER_TO_OPEN != null) //Had a paramter passed
+            if (!IsOpenedFromAutomation && !string.IsNullOrEmpty(NUMBER1_TAG?.ToStringNullSafe()) && _navigationManager.NUMBER_TO_OPEN != null) //Had a paramter passed
             {
                 //یعنی این شماره رو پیدا نکرده که اون رو ریست کنه
                 new Msgwin(false, $"شما به این شماره {_navigationManager.NUMBER_TO_OPEN} دسترسی ندارید ").Show();

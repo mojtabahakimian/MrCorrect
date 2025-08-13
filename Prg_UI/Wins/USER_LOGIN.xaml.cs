@@ -344,8 +344,6 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 108;
             //Baseknow.UUSER = "modir-mali";   
 
-            //Baseknow.USERCOD = 116;
-            //Baseknow.UUSER = "Mr.Salmani";
 
             Baseknow.mrcorrect = true;
 
@@ -355,6 +353,7 @@ namespace Prg_UI.Wins
 
             //Baseknow.USERCOD = 132; Baseknow.UUSER = "Prima Chopan";    
 
+            //Baseknow.USERCOD = 116; Baseknow.UUSER = "Mr.Salmani";
             Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
 
             CL_Generaly.SHIFT_OF_USER = 1;
@@ -362,7 +361,7 @@ namespace Prg_UI.Wins
             Baseknow.UGRP = "1";
 
             //new PRICE_ELAMIETF_FORM().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAV_OTHER_WIN, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID_OTHER_WIN, this);
 
             //new HEAD_LST_BRFR().Show(); //فاکتور برگشت فروش (آزاد) رسید شده TAG = 25
 
@@ -384,7 +383,7 @@ namespace Prg_UI.Wins
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN_LIMITED, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
 
             //new WinConnectionChoose().ShowDialog();
             //new HEAD_LST_HAVL(4306d).ShowDialog();

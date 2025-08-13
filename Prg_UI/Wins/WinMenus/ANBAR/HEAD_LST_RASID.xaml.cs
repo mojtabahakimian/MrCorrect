@@ -34,10 +34,14 @@ using Functions;
 using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
 using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
 using Rpts;
+using Wins.WinOther;
+using static Interfaces.INavigator;
+using System.ComponentModel;
+using System.Windows.Threading;
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
 {
-    public partial class HEAD_LST_RASID : Window
+    public partial class HEAD_LST_RASID : Window, ISearchableWindow
     {
         #region Header Window Begin
         //Header Window Begin
@@ -80,7 +84,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         }
         //Header Window End;
         #endregion
-        public HEAD_LST_RASID(double? _NumberToOpen_ = null)
+        public HEAD_LST_RASID(double? _NumberToOpen_ = null, bool _isAutomasion_ = false)
         {
             InitializeComponent();
             this.DataContext = this;
@@ -88,9 +92,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             if (_NumberToOpen_ != null)
             {
                 NUMBER.Text = Convert.ToString(_NumberToOpen_);
+                IsOpenedFromAutomation = _isAutomasion_;
             }
 
         }
+        public bool IsOpenedFromAutomation { get; } = false;
         private NavigationManager<HEAD_LST> _navigationManager;
         public ObservableCollection<INVO_LST_FACTOR22> INVO_DATA_RASID_KHARID { get; set; } = new ObservableCollection<INVO_LST_FACTOR22>();
 
@@ -154,6 +160,54 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
         }
 
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            // Handle the selected item
+            if (selectedItem is HEAD_LST item)
+            {
+                if (item != null)
+                {
+                    //_navigationManager.MoveReGetData(INavigator.Jahat.)
+                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.NUMBER.Equals(Convert.ToDouble(item.NUMBER)));
+                    if (itemfound != null)
+                    {
+                        _navigationManager.IsNewRecord = false;
+
+                        // 1) Find its index in the master list
+                        int idx = _navigationManager.RecordsData.IndexOf(itemfound);
+                        if (idx < 0)
+                        {
+                            // not found (perhaps filtered out?), bail out
+                            new Msgwin(false, "یافت نشد: مورد انتخاب شده در لیست اصلی وجود ندارد").Show();
+                            return;
+                        }
+
+                        // 2) Tell the navigation manager to move to that position
+                        _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+                        //OnCurrentRecordChanged(itemfound);
+                    }
+                }
+            }
+        }
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+                new SearchableProperty { DisplayName = "شماره رسید", PropertyPath = "NUMBER", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "تاریخ", PropertyPath = "DATE_N", PropertyType = typeof(long) },
+                new SearchableProperty { DisplayName = "تحویل گیرنده", PropertyPath = "TAH", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "تحویل دهنده", PropertyPath = "MOLAH", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "کد مشتری", PropertyPath = "CUST_NO", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "کاربر", PropertyPath = "USER_NAME", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "ملاحظات", PropertyPath = "MOLAH", PropertyType = typeof(string) },
+                // Add other searchable properties
+            };
+        }
+
+        #endregion
+
         public bool IsDataGrid_SUB_IsFocused { get; private set; }
 
         private int datagridname_tbox_def_index_col;
@@ -199,6 +253,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             string WhereCondition = $" WHERE (dbo.HEAD_LST.TAG = {HTAG}) ";
             WhereCondition = CL_LMethods.GetRestrictedSqlQuery(Convert.ToByte(HTAG), WhereCondition);
 
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = {HTAG} ";
+            }
+
             _navigationManager = new NavigationManager<HEAD_LST>(
                 dbms,
                 x => x.NUMBER.ToString(), // property selector (used to find a record by its CODE)
@@ -217,9 +276,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             // Now raise the initialization events to update the UI
             _navigationManager.RaiseInitializationEvents();
 
-
-
-
             if (Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5") //فقط بر اسا شماره درخواست باشه
             {
                 NUMBER1.Visibility = Visibility.Visible;
@@ -232,17 +288,17 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
 
             Form_Open();
-
-            if ((bool)Baseknow.UPDDATE)
-            {
-                DATE_N.IsReadOnly = false;
-            }
-            else
-            {
-                DATE_N.IsReadOnly = true;
-            }
-
             Form_Current();
+
+            CL_LMethods.SetTabIndexes(
+                DATE_N,
+                NUMBER1,
+                TAH,
+                MOLAH,
+                CUST_NO,
+                BUTTON_SAVE_RASID,
+                INVO_LST_RASID_SUB
+                );
 
             GetDefaultFocus();
         }
@@ -372,6 +428,189 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
         }
 
+        private bool HeaderIsValid(bool _DisplayErrors = true)
+        {
+            List<MsgModel> ErrosMessages = new List<MsgModel>();
+
+            string date_n_val = DATE_N.Text.ToRawTarikh();
+            if (!string.IsNullOrEmpty(date_n_val))
+            {
+                if (!Tarikh.IsValidedDate(date_n_val))
+                {
+                    DATE_N.Text = null;
+                    ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار تاریخ صحیح نیست" });
+                }
+                else
+                {
+                    if (!Tarikh.IsSyncedDateNow(date_n_val, (bool)Baseknow.CTL_DT))
+                    {
+                        DATE_N.Text = null;
+                        ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ مربوط به سال جاری نیست" });
+                    }
+                }
+            }
+            else
+            {
+                DATE_N.Text = null;
+                ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ نمی تواند خالی باشد" });
+            }
+
+            if (CUST_NO.SelectedValue is null) //حساب مشتری
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "نام مشتری نمیتواند خالی باشد." });
+            }
+
+            if (Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5" && IsNull(this.NUMBER1.Text))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = " شماره درخواست وارد نشده است ....!" });
+            }
+
+            if (IsNull(this.CUST_NO.SelectedValue) || this.CUST_NO.SelectedIndex < 0)
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = " مشتري مشخص نشده است ....!" });
+            }
+            else if (CL_HESABDARI.BLOCKEDCUST(this.CUST_NO2.SelectedValue.ToString()))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = " حساب مشتري مسدود گرديده است لطفا با مديريت مالي تماس بگيريد" });
+            }
+
+            if (!IsNull(CUST_NO.SelectedValue))
+            {
+                if (CL_HESABDARI.ISTAF(CUST_NO.SelectedValue.ToString()))
+                {
+                    ErrosMessages.Add(new MsgModel { MessageText_U = " حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!" });
+                }
+            }
+
+            if (Convert.ToBoolean(Baseknow.SAGHF) || Convert.ToBoolean(Baseknow.SAGHF2))
+            {
+                if (Convert.ToBoolean(CL_HESABDARI.Checketebar(CUST_NO.SelectedValue.ToStringNullSafe())) == false || Convert.ToBoolean(CL_HESABDARI.ChecketebarMEG(CUST_NO.SelectedValue.ToStringNullSafe())) == false)
+                {
+                    ErrosMessages.Add(new MsgModel { MessageText_U = "اعتبار اين مشتري تمام شده است و نمي تواند خريد نمايد...!" });
+                }
+            }
+
+            if (ErrosMessages.Any())
+            {
+                if (_DisplayErrors)
+                {
+                    ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct().Select(message => new MsgModel { MessageText_U = message }).ToList();
+                    new MsgListwin(false, ErrosMessages).ShowDialog();
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+        private bool BodyIsValid(INVO_LST_FACTOR22 TheRow)
+        {
+            var errors = (from object i in INVO_LST_RASID_SUB.ItemsSource
+                          let c = INVO_LST_RASID_SUB.ItemContainerGenerator.ContainerFromItem(i)
+                          where c != null && Validation.GetHasError(c)
+                          select c).Any();
+            if (errors)
+            {
+                universControl.PopNotifyShow("داده های وارد شده مربوط به سطر ها درست نیست", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return false;
+            }
+
+            List<MsgModel> ErrosMessages = new List<MsgModel>();
+
+            // Validate ANBAR
+            if (!int.TryParse(TheRow.ANBAR?.ToStringNullSafe(), out int _))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "انبار صحیح انتخاب نشده" });
+            }
+            // Validate CODE
+            if (string.IsNullOrEmpty(TheRow.CODE) || TheRow.CODE.Length > 15)
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "کالا صحیح وارد نشده" });
+            }
+            if (string.IsNullOrEmpty(TheRow.NAME_CODE))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "نام کالا صحیح وارد نشده" });
+            }
+            // Validate MEGH
+            if (!double.TryParse(TheRow.MEGH?.ToStringNullSafe(), out double _))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار کالا صحیح وارد نشده" });
+            }
+            // Validate MEGHk
+            if (!double.TryParse(TheRow.MEGHk?.ToStringNullSafe(), out double _))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار کل کالا صحیح وارد نشده" });
+            }
+
+            // Validate MANDAH
+            if (TheRow.MANDAH?.Length > 50)
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "ملاحظات سطر کالا صحیح وارد نشده یا مجاز نیست" });
+            }
+            // Validate VAHED_K
+            if (!int.TryParse(TheRow.VAHED_K?.ToStringNullSafe(), out int _))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "واحد کالا صحیح وارد نشده" });
+            }
+
+            //انبار خالی نباشد
+            if (TheRow?.ANBAR is null)
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = $"اطلاعات ناقص است انبار و كالا نمي تواند داراي مقدار خالي باشد {TheRow.ANBAR}." });
+            }
+            //بررسی تعلق انبار و کالا به هم
+            else if (IsNull(TheRow.CODE))
+            { }
+            else
+            {
+                var RST_STUF_STK = dbms.DoGetDataSQL<STUF_STK_CSHARP>("SELECT * FROM STUF_STK WHERE CODE = '" + TheRow.CODE + "' AND ANBAR = " + TheRow.ANBAR).ToList();
+                if (RST_STUF_STK.Count == 0)
+                {
+                    ErrosMessages.Add(new MsgModel { MessageText_U = $"كالا {TheRow.CODE} به انبار {TheRow.ANBAR} فوق تعلق ندارد." });
+                }
+            }
+
+            //بررسی صحیح بودن واحد کالا نسبت به خود کالا
+            var RSTV1 = dbms.DoGetDataSQL<VAHED_K_NESBAT_2>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + TheRow.CODE + "' AND ((VAHEDS.VAHED)= " + TheRow.VAHED_K + ")))").ToList();
+            if (RSTV1.Count == 0)
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "واحد تعريف شده ناقص ميباشد نسبت آن مشخص نگرديده است.در بخش تعريف كالا آن را اصلاح كنيد." });
+
+                TheRow.VAHED_K = null;
+            }
+            //واحد کالا بررسی مقدار کل باتوجه به نسبت
+            else
+            {
+                var NesbatMegh = RSTV1.FirstOrDefault().NESBAT * TheRow.MEGH;
+                if (NesbatMegh != TheRow.MEGHk)
+                {
+
+                    TheRow.MEGHk = NesbatMegh;
+                    ErrosMessages.Add(new MsgModel { MessageText_U = $"مقدار کل این سطر کالا با این مشخصات : کد کالا {TheRow.CODE} به مقدار کل {TheRow.MEGHk} مغایرت داشت و من آنرا به مقدار کل {NesbatMegh} اصلاح کردم , درصورتی که مورد تایید است جهت ذخیره آن مجددا دکمه ذخیره را بزنید" });
+                }
+            }
+
+            //مقدار كالا نمي تواند صفر باشد بر اسا تنظیمات بیشتر
+            if (Strings.Mid(Baseknow.OPTIONSS, 50, 1) == "5")
+            {
+                if (TheRow.MEGH == 0)
+                {
+                    ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار كالا نمي تواند صفر باشد." });
+                }
+            }
+
+            if (ErrosMessages.Count > 0)
+            {
+                ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct()
+                    .Select(message => new MsgModel { MessageText_U = message }).ToList();
+                new MsgListwin(false, ErrosMessages).ShowDialog();
+
+                return false;
+            }
+
+            return true;
+        }
+
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             DataGrid DG = INVO_LST_RASID_SUB;
@@ -451,6 +690,16 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 }
             }
 
+            if (!INVO_LST_RASID_SUB.IsKeyboardFocusWithin && !INVO_LST_RASID_SUB.IsFocused) //Only On Form F7 Pressed Not DataGrid
+            {
+                if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+                    var searchWindow = new EnhancedSearchWindow(this);
+                    searchWindow.Owner = this;
+                    searchWindow.ShowDialog();
+                }
+            }
 
             if (e.Key is Key.Enter || e.Key is Key.Tab ||
                          e.Key is Key.LeftShift ||
@@ -907,47 +1156,104 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         }
         private void INVO_LST_RASID_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (e.EditAction == DataGridEditAction.Cancel || (Keyboard.IsKeyDown(Key.Escape) && Keyboard.Modifiers == ModifierKeys.Control))
-            {
-                return;
-            }
-
-            if (e.Row.Item == null)
-            {
-                return;
-            }
-
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+            if (e.Row.Item == null) { return; }
             var REND_ROW = e.Row.Item as INVO_LST_FACTOR22;
-            var AllisWell = true;
-            if (REND_ROW is null)
+            if (ConstructorRowDetector.IsPristine(REND_ROW)) { INVO_LST_RASID_SUB_CANCEL_EDIT(); return; }
+
+            if (!BodyIsValid(REND_ROW))
             {
-                universControl.PopNotifyShow(".بعضی از مقادیر سطر رسید خرید خالی یا غیر مجاز است", Pop1, Pop1Text1, Pop_Border1);
-                AllisWell = false;
+                return;
             }
-            else if (
-                          string.IsNullOrEmpty(REND_ROW.ANBAR.ToStringNullSafe()) ||
-                          string.IsNullOrEmpty(REND_ROW.CODE.ToStringNullSafe()) ||
-                          string.IsNullOrEmpty(REND_ROW.NAME_CODE.ToStringNullSafe()) ||
-                          string.IsNullOrEmpty(REND_ROW.VAHED_K.ToStringNullSafe()) ||
-                          string.IsNullOrEmpty(REND_ROW.MEGH.ToStringNullSafe()) ||
-                          string.IsNullOrEmpty(REND_ROW.MEGHk.ToStringNullSafe()) ||
-                          REND_ROW.MEGH is 0 ||
-                          REND_ROW.MEGHk is 0 ||
-                          string.IsNullOrEmpty(REND_ROW.MEGHk.ToStringNullSafe())
-                      )
+
+            IVM.StartTransaction(); //--------------------------------------------------------------------------------------------------------
+            bool CurrentRowisNew = true;
+            List<MsgModel> ErrosMessages = new List<MsgModel>();
+            if (!(REND_ROW is null))
             {
-                universControl.PopNotifyShow(".بعضی از مقادیر سطر رسید خرید خالی یا غیر مجاز است", Pop1, Pop1Text1, Pop_Border1);
-                AllisWell = false;
+                if (REND_ROW.ANBAR != 0 && REND_ROW.VAHED_K != null && REND_ROW.NAME_CODE != null && REND_ROW.MEGH != 0 && REND_ROW.MEGHk != 0)
+                {
+                    string QRE_UPD_INVO;
+                    if ((REND_ROW.id is null) || (REND_ROW.id is 0))
+                    {
+                        QRE_UPD_INVO = $@"INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, RADIF, CODE,MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
+                                                OUTPUT INSERTED.id
+                                                VALUES({NUMBER.Text},1,{REND_ROW.ANBAR},NULL,N'{REND_ROW.CODE}',{REND_ROW.MEGH},{REND_ROW.MEGHk},{REND_ROW.MEGH_MAR},N'{REND_ROW.MANDAH}',{REND_ROW.MABL},{REND_ROW.MABL_K},{Convert.ToByte(REND_ROW.FROM_A)},N'{REND_ROW.N_RASID}',
+                                                {REND_ROW.MEGH_R},{REND_ROW.SANAD_NO},NULL,{REND_ROW.ANBARF},{REND_ROW.VAHED_K},{REND_ROW.N_KOL},{REND_ROW.N_MOIN},{REND_ROW.N_TAF},{REND_ROW.AVRAGE},{REND_ROW.AVRAGE2},{REND_ROW.IMBAA},{REND_ROW.TOTALARZ},N'{REND_ROW.VISITOR}',{REND_ROW.TKHN},
+                                                {REND_ROW.JAY ?? 0},{(REND_ROW.JAYO ?? 0)})";
+                    }
+                    else
+                    {
+                        CurrentRowisNew = false;
+                        QRE_UPD_INVO = $@"UPDATE dbo.INVO_LST
+                                               SET ANBAR={REND_ROW.ANBAR},
+                                                   CODE=N'{REND_ROW.CODE}',	
+                                                   MEGH={REND_ROW.MEGH},
+                                                   MEGHk={REND_ROW.MEGHk},
+                                                   MEGH_MAR={REND_ROW.MEGH_MAR},
+                                                   MANDAH=N'{REND_ROW.MANDAH}',
+                                                   MABL={REND_ROW.MABL},
+                                                   MABL_K={REND_ROW.MABL_K},
+                                                   FROM_A={Convert.ToByte(REND_ROW.FROM_A)},
+                                                   N_RASID=N'{REND_ROW.N_RASID}',
+                                                   MEGH_R={REND_ROW.MEGH_R},
+                                                   SANAD_NO={REND_ROW.SANAD_NO},
+                                                   ANBARF={REND_ROW.ANBARF},
+                                                   VAHED_K={REND_ROW.VAHED_K},
+                                                   N_KOL={REND_ROW.N_KOL},
+                                                   N_MOIN={REND_ROW.N_MOIN},
+                                                   N_TAF={REND_ROW.N_TAF},
+                                                   AVRAGE={REND_ROW.AVRAGE},
+                                                   AVRAGE2={REND_ROW.AVRAGE2},
+                                                   IMBAA={REND_ROW.IMBAA},
+                                                   TOTALARZ={REND_ROW.TOTALARZ},
+                                                   VISITOR=N'{REND_ROW.VISITOR}',
+                                                   TKHN={REND_ROW.TKHN},
+                                                   JAY={REND_ROW.JAY ?? 0},
+                                                   JAYO={REND_ROW.JAYO ?? 0}	
+                                                WHERE id = {REND_ROW.id} AND TAG = 1";
+                    }
+
+                    //بررسی موجودی در صورت داشتن موجودی اعمال تغییرات
+                    var items = new List<object> { REND_ROW };
+                    var (errorMessages, _, _, queryOutputs) =
+                        IVM.CheckInventoryAndExecuteQuery<int?>(items, QRE_UPD_INVO, null, false); //dbms.DoExecuteSQL(QRE_UPD_INVO);
+
+                    if (queryOutputs.Any())
+                    {
+                        REND_ROW.id = queryOutputs.FirstOrDefault();
+                    }
+                    ErrosMessages.AddRange(errorMessages);
+                }
+                else
+                {
+                    universControl.PopNotifyShow(".مقادیر سطرها را بصورت صحیح وارد کنید", Pop1, Pop1Text1, Pop_Border1);
+                }
             }
-            if (AllisWell)
+
+            if (ErrosMessages.Any())
             {
-                /////DGR_SUB_INVOLST.CommitEdit();
+                IsSaveSuccess = false;
+
+                if (CurrentRowisNew)
+                {
+                    REND_ROW.id = null; //Bring Back to null (New State because of Rollback Transaction)
+                }
+                IVM.RollbackTransaction();
+                INVO_LST_RASID_SUB_CANCEL_EDIT();
+                IVM.ShowErrorMessages(ErrosMessages);
+                return;
             }
             else
             {
-                INVO_LST_RASID_SUB_CANCEL_EDIT();
-                return;
+                IVM.CommitTransaction();
             }
+            //--------------------------------------------------------------------------------------------------------
+
+            Summer();
+            PARAMS_COLUMN.Visibility = Visibility.Visible;
+
         }
         private void INVO_LST_RASID_SUB_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
@@ -962,10 +1268,87 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
+            ChangeIsHappend = false;
         }
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if (Convert.ToInt32(string.IsNullOrEmpty(NUMBER.Text) ? 0 : NUMBER.Text) > 0)
+            try
+            {
+                DataGrid DG = INVO_LST_RASID_SUB;
+                UIElement uie = e.OriginalSource as UIElement;
+
+                if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    if (BUTTON_SAVE_RASID.IsFocused)
+                    {
+                        BUTTON_SAVE_RASID_Click(null, null);
+                        return;
+                    }
+                    else
+                    {
+                        e.Handled = true;
+
+                        try
+                        {
+                            if (INVO_LST_RASID_SUB.IsKeyboardFocusWithin)
+                            {
+                                if (DG.CurrentColumn != null)
+                                {
+                                    int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                                    bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                                    bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+                                    if (isLastColumn)
+                                    {
+                                        // If it's the last column, move focus to the first cell of next row
+                                        if (isLastRow)
+                                        {
+                                            // Add focus to new row if needed
+                                            DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
+
+                                            DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[INVO_LST_SUB_DEF_INDEX_COL]);
+
+                                            Dispatcher.BeginInvoke(new Action(() =>
+                                            {
+                                                DG.BeginEdit();
+                                            }), DispatcherPriority.Background);
+
+                                            //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
+                                            var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                                            if (focusedWindow != null)
+                                            {
+                                                Dispatcher.BeginInvoke(new Action(() =>
+                                                {
+                                                    focusedWindow.Activate();
+                                                    focusedWindow.Focus();
+                                                }), DispatcherPriority.Background);
+                                            }
+
+                                            return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                        }
+                                    }
+                                }
+                            }
+
+                            CL_LMethods.SendKey_US(Key.Tab);
+                        }
+                        catch { /*ignore*/ }
+
+                    }
+                }
+                if (!INVO_LST_RASID_SUB.IsKeyboardFocusWithin && !INVO_LST_RASID_SUB.IsFocused) //Only On Form F7 Pressed Not DataGrid
+                {
+                    if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                    {
+                        e.Handled = true;
+                        var searchWindow = new EnhancedSearchWindow(this);
+                        searchWindow.Owner = this;
+                        searchWindow.ShowDialog();
+                    }
+                }
+            }
+            catch { }
+
+            if (!_navigationManager.IsNewRecord && Convert.ToInt32(string.IsNullOrEmpty(NUMBER.Text) ? 0 : NUMBER.Text) > 0)
             {
                 if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && e.Key == Key.G)
                 {
@@ -995,8 +1378,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         }
         void UnLockedForm()
         {
-            NUMBER.IsReadOnly = false;
-            DATE_N.IsReadOnly = false;
+            if (Baseknow.UPDDATE ?? false)
+            {
+                DATE_N.IsReadOnly = false;
+            }
+
             USER_NAME.IsReadOnly = false;
             FNUMCO.IsReadOnly = false;
             NUMBER1.IsEnabled = true;
@@ -1007,7 +1393,12 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             CUST_NO2.IsEnabled = true;
             OKF.IsEnabled = true;
             BUTTON_SAVE_RASID.IsEnabled = true;
-            DELETE_RASID.IsEnabled = true;
+
+            if (!_navigationManager.IsNewRecord)
+            {
+                DELETE_RASID.IsEnabled = true;
+            }
+
             INVO_LST_RASID_SUB.IsReadOnly = false;
         }
         void Summer()
@@ -1639,7 +2030,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                         CL_LMethods.AllowDeletions(GetType().Name, true, new WindowInteropHelper(this).Handle);
 
                         AllowEdits = true; //CL_LMethods.AllowEdits(mygrid, true);
-                        INVO_LST_RASID_SUB.IsEnabled = true;
+                        INVO_LST_RASID_SUB.IsReadOnly = false;
 
                         BUTTON_SAVE_RASID.IsEnabled = true;
                         DELETE_RASID.IsEnabled = true;
@@ -1655,7 +2046,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                             INVO_LST_RASID_SUB.CanUserAddRows = true;
                             //INVO_LST_RASID_SUB.CanUserDeleteRows = true;
                         }
-                        this.INVO_LST_RASID_SUB.IsEnabled = true;
                         this.INVO_LST_RASID_SUB.IsReadOnly = false;
                         // If UCurrentUser() <> "َAdminister" And UCurrentUser() <> Me.USER_NAME And Left(UCurrentUser(), 10) <> ChrW(1605) && ChrW(1583) && ChrW(1740) && ChrW(1585) && ChrW(1587) && ChrW(1740) && ChrW(1587) && ChrW(1578) && ChrW(1605) Then
                         // Me.USER_NAME = UCurrentUser()
@@ -1676,7 +2066,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
                         CL_LMethods.AllowDeletions(this.GetType().Name, true, new WindowInteropHelper(this).Handle);
                         AllowEdits = true; // CL_LMethods.AllowEdits(mygrid, true);
-                        this.INVO_LST_RASID_SUB.IsEnabled = true;
+                        this.INVO_LST_RASID_SUB.IsReadOnly = false;
 
                         BUTTON_SAVE_RASID.IsEnabled = true;
                         DELETE_RASID.IsEnabled = true;
@@ -1691,7 +2081,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                             INVO_LST_RASID_SUB.CanUserAddRows = true;
                             //INVO_LST_RASID_SUB.CanUserDeleteRows = true;
                         }
-                        INVO_LST_RASID_SUB.IsEnabled = true;
                         INVO_LST_RASID_SUB.IsReadOnly = false;
                         // If UCurrentUser() <> "َAdminister" And UCurrentUser() <> Me.USER_NAME And Left(UCurrentUser(), 10) <> ChrW(1605) && ChrW(1583) && ChrW(1740) && ChrW(1585) && ChrW(1587) && ChrW(1740) && ChrW(1587) && ChrW(1578) && ChrW(1605) Then
                         // Me.USER_NAME = UCurrentUser()
@@ -1914,7 +2303,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             if (INVO_DATA_RASID_KHARID.Count > 0)
             {
                 this.INVO_LST_RASID_SUB.IsReadOnly = false;
-                this.INVO_LST_RASID_SUB.IsEnabled = true;
 
                 AllowEdits = true;
                 CL_LMethods.AllowDeletions(this.GetType().Name, true, new WindowInteropHelper(this).Handle);
@@ -1943,7 +2331,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                         INVO_LST_RASID_SUB.CanUserAddRows = true;
                     }
                     INVO_LST_RASID_SUB.IsReadOnly = false;
-                    INVO_LST_RASID_SUB.IsEnabled = true;
                 }
                 else
                 {
@@ -1971,13 +2358,13 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 this.INVO_LST_RASID_SUB.IsReadOnly = true;
                 this.ESLAH.IsEnabled = true;
             }
-            else
-            {
-                CL_LMethods.AllowDeletions(this.GetType().Name, true, new WindowInteropHelper(this).Handle);
-                AllowEdits = true;
-                this.INVO_LST_RASID_SUB.IsReadOnly = false;
-                this.ESLAH.IsEnabled = false;
-            }
+            //else
+            //{
+            //    CL_LMethods.AllowDeletions(this.GetType().Name, true, new WindowInteropHelper(this).Handle);
+            //    AllowEdits = true;
+            //    this.INVO_LST_RASID_SUB.IsReadOnly = false;
+            //    this.ESLAH.IsEnabled = false;
+            //}
             if (Convert.ToDouble(this.NUMBER.Text) > 0)
             {
                 CL_HESABDARI.LetSigneTick(this.GetType().Name, 1, Convert.ToInt32(Baseknow.USERCOD), new WindowInteropHelper(this).Handle);
@@ -2259,8 +2646,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
         }
 
-
-
         private void MEGH_BeforeUpdate_Sub()
         {
             double MEGHCH;
@@ -2336,82 +2721,41 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         {
             IsSaveSuccess = true;
 
-            bool AllisWell = true;
-            string number1 = ((TextBox)NUMBER1.Template.FindName("PART_EditableTextBox", NUMBER1)).Text;
-            string tah = ((TextBox)TAH.Template.FindName("PART_EditableTextBox", TAH)).Text;
-            string molah = ((TextBox)MOLAH.Template.FindName("PART_EditableTextBox", MOLAH)).Text;
-
-            if (Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5" && IsNull(this.NUMBER1.Text))
-            {
-                new Msgwin(false, " شماره درخواست وارد نشده است ....!").ShowDialog();
-                AllisWell = false;
-            }
-            #region Validatoring_Header
-            if (!Tarikh.IsValidedDate(DATE_N.Text.ToRawTarikh()))
-            {
-                new Msgwin(false, "تاریخ صحیح نمیباشد").ShowDialog();
-                AllisWell = false;
-            }
-            if (TAH.Text is null)
-            {
-                new Msgwin(false, "تحویل گیرنده انتخاب نشده است").ShowDialog();
-                AllisWell = false;
-            }
-            if (MOLAH.Text is null)
-            {
-                new Msgwin(false, "تحویل دهنده انتخاب نشده است").ShowDialog();
-                AllisWell = false;
-            }
-            if (CUST_NO.SelectedIndex == -1)
-            {
-                new Msgwin(false, "فروشنده انتخاب نشده است").ShowDialog();
-                AllisWell = false;
-            }
-            if (CUST_NO2.SelectedIndex == -1)
-            {
-                new Msgwin(false, "حساب فروشنده انتخاب نشده است").ShowDialog();
-                AllisWell = false;
-            }
-            if (CL_HESABDARI.BLOCKEDCUST(CUST_NO2.SelectedValue.ToStringNullSafe()))
-            {
-                new Msgwin(false, " حساب فروشنده مسدود گرديده است لطفا با مديريت مالي تماس بگيريد").ShowDialog();
-                AllisWell = false;
-            }
-            if (string.IsNullOrEmpty(tah))
-            {
-                new Msgwin(false, "فیلد تحویل دهنده نمیتواند خالی باشد").ShowDialog();
-                AllisWell = false;
-            }
-            if (string.IsNullOrEmpty(molah))
-            {
-                new Msgwin(false, "فیلد تحویل دهنده نمیتواند خالی باشد").ShowDialog();
-                AllisWell = false;
-            }
-            if (CURRENT_ITMES_ROW != null)
-            {
-                if (CURRENT_ITMES_ROW.ANBAR == null || CURRENT_ITMES_ROW.MEGHk == null || CURRENT_ITMES_ROW.VAHED_K == null)
-                {
-                    new Msgwin(false, "لطفا سطر های رسید انبار را صحیح وارد کنید").ShowDialog();
-                    AllisWell = false;
-                }
-            }
-            #endregion
-
-            if (AllisWell != true)
+            if (!HeaderIsValid())
             {
                 IsSaveSuccess = false;
                 return;
             }
-            long MBK, CMABL = default;
-            double nesba;
-            var takh = default(double);
-            var min = default(double);
 
-            #region Header_Saving
-            if (AllisWell)
+            if (!DoCmdSaveHeader()) //Header Save
             {
-                //Frist New Fresh Insert Add   
-                if (string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text.Equals("0"))
+                IsSaveSuccess = false;
+                return;
+            }
+
+            ChangeIsHappend = false;
+            Form_AfterUpdate();
+            Form_AfterUpdate_Sub();
+
+            universControl.PopNotifyShow(".مقادیر ذخیره شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+
+            INVO_LST_RASID_SUB.IsReadOnly = false;
+            if (INVO_DATA_RASID_KHARID.Count == 0)
+            {
+                GetFocusOnDefaultCell();
+            }
+
+            IsSaveSuccess = true;
+        }
+
+        private bool DoCmdSaveHeader()
+        {
+            try
+            {
+                string tah = ((TextBox)TAH.Template.FindName("PART_EditableTextBox", TAH)).Text;
+                string molah = ((TextBox)MOLAH.Template.FindName("PART_EditableTextBox", MOLAH)).Text;
+
+                if (_navigationManager.IsNewRecord) //Frist New Fresh Insert Add   
                 {
                     double num = 0;
                     using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
@@ -2488,8 +2832,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                         }
                     }
                 }
-                //Update Edit
-                else
+                else //Update Edit
                 {
                     var QRE = $@"UPDATE dbo.HEAD_LST SET DATE_N={DATE_N.Text.ToRawTarikh()}, 
                                         FNUMCO={(string.IsNullOrEmpty(FNUMCO.Text) ? "NULL" : FNUMCO.Text)},SADER={(SADER.SelectedValue == null ? "NULL" : SADER.SelectedValue)}, 
@@ -2500,211 +2843,15 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     dbms.DoExecuteSQL(QRE);
                 }
             }
-            #endregion
-
-            #region ValidationDetial
-            List<MsgModel> VErrosMessages = new List<MsgModel>();
-
-            foreach (var TheRow in INVO_DATA_RASID_KHARID)
+            catch (Exception)
             {
-                //انبار خالی نباشد
-                if (TheRow?.ANBAR is null)
-                {
-                    VErrosMessages.Add(new MsgModel { MessageText_U = $"اطلاعات ناقص است انبار و كالا نمي تواند داراي مقدار خالي باشد {TheRow.ANBAR}." });
-                }
-                //بررسی تعلق انبار و کالا به هم
-                else if (IsNull(TheRow.CODE))
-                { }
-                else
-                {
-                    var RST_STUF_STK = dbms.DoGetDataSQL<STUF_STK_CSHARP>("SELECT * FROM STUF_STK WHERE CODE = '" + TheRow.CODE + "' AND ANBAR = " + TheRow.ANBAR).ToList();
-                    if (RST_STUF_STK.Count == 0)
-                    {
-                        VErrosMessages.Add(new MsgModel { MessageText_U = $"كالا {TheRow.CODE} به انبار {TheRow.ANBAR} فوق تعلق ندارد." });
-                    }
-                }
-
-                //بررسی صحیح بودن واحد کالا نسبت به خود کالا
-                var RSTV1 = dbms.DoGetDataSQL<VAHED_K_NESBAT_2>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + TheRow.CODE + "' AND ((VAHEDS.VAHED)= " + TheRow.VAHED_K + ")))").ToList();
-                if (RSTV1.Count == 0)
-                {
-                    VErrosMessages.Add(new MsgModel { MessageText_U = "واحد تعريف شده ناقص ميباشد نسبت آن مشخص نگرديده است.در بخش تعريف كالا آن را اصلاح كنيد." });
-
-                    TheRow.VAHED_K = null;
-                }
-                //واحد کالا بررسی مقدار کل باتوجه به نسبت
-                else
-                {
-                    var NesbatMegh = RSTV1.FirstOrDefault().NESBAT * TheRow.MEGH;
-                    if (NesbatMegh != TheRow.MEGHk)
-                    {
-
-                        TheRow.MEGHk = NesbatMegh;
-                        VErrosMessages.Add(new MsgModel { MessageText_U = $"مقدار کل این سطر کالا با این مشخصات : کد کالا {TheRow.CODE} به مقدار کل {TheRow.MEGHk} مغایرت داشت و من آنرا به مقدار کل {NesbatMegh} اصلاح کردم , درصورتی که مورد تایید است جهت ذخیره آن مجددا دکمه ذخیره را بزنید" });
-                    }
-                }
-
-                //مقدار كالا نمي تواند صفر باشد بر اسا تنظیمات بیشتر
-                if (Strings.Mid(Baseknow.OPTIONSS, 50, 1) == "5")
-                {
-                    if (TheRow.MEGH == 0)
-                    {
-                        VErrosMessages.Add(new MsgModel { MessageText_U = "مقدار كالا نمي تواند صفر باشد." });
-                    }
-                }
+                new Msgwin(false, "خطا در انجام عملیات ذخیره سربرگ").Show();
+                return false;
             }
 
-            if (VErrosMessages.Any())
-            {
-                IsSaveSuccess = false;
-                IVM.ShowErrorMessages(VErrosMessages);
-                return;
-            }
-            #endregion
-
-            #region Saving_Detail
-            if (AllisWell)
-            {
-                var MasterTopErrorMessages = new List<MsgModel>();
-
-                foreach (var item in INVO_DATA_RASID_KHARID)
-                {
-                    IVM.StartTransaction(); //--------------------------------------------------------------------------------------------------------
-
-                    bool CurrentRowisNew = true;
-                    List<MsgModel> ErrosMessages = new List<MsgModel>();
-                    string QRE_UPD_INVO = "";
-
-                    var UPD_TIM = (item as INVO_LST_FACTOR22);
-
-                    if (!(UPD_TIM is null))
-                    {
-                        if (UPD_TIM.ANBAR != 0 && UPD_TIM.VAHED_K != null && UPD_TIM.NAME_CODE != null && UPD_TIM.MEGH != 0 && UPD_TIM.MEGHk != 0)
-                        {
-                            if ((UPD_TIM.id is null) || (UPD_TIM.id is 0))
-                            {
-                                QRE_UPD_INVO = $@"INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, RADIF, CODE,MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
-                                                VALUES({NUMBER.Text},1,{UPD_TIM.ANBAR},NULL,N'{UPD_TIM.CODE}',{UPD_TIM.MEGH},{UPD_TIM.MEGHk},{UPD_TIM.MEGH_MAR},N'{UPD_TIM.MANDAH}',{UPD_TIM.MABL},{UPD_TIM.MABL_K},{Convert.ToByte(UPD_TIM.FROM_A)},N'{UPD_TIM.N_RASID}',
-                                                {UPD_TIM.MEGH_R},{UPD_TIM.SANAD_NO},NULL,{UPD_TIM.ANBARF},{UPD_TIM.VAHED_K},{UPD_TIM.N_KOL},{UPD_TIM.N_MOIN},{UPD_TIM.N_TAF},{UPD_TIM.AVRAGE},{UPD_TIM.AVRAGE2},{UPD_TIM.IMBAA},{UPD_TIM.TOTALARZ},N'{UPD_TIM.VISITOR}',{UPD_TIM.TKHN},
-                                                {UPD_TIM.JAY ?? 0},{(UPD_TIM.JAYO ?? 0)})";
-                            }
-                            else
-                            {
-                                CurrentRowisNew = false;
-
-                                QRE_UPD_INVO = $@"UPDATE dbo.INVO_LST
-                                               SET ANBAR={UPD_TIM.ANBAR},
-                                                   CODE=N'{UPD_TIM.CODE}',	
-                                                   MEGH={UPD_TIM.MEGH},
-                                                   MEGHk={UPD_TIM.MEGHk},
-                                                   MEGH_MAR={UPD_TIM.MEGH_MAR},
-                                                   MANDAH=N'{UPD_TIM.MANDAH}',
-                                                   MABL={UPD_TIM.MABL},
-                                                   MABL_K={UPD_TIM.MABL_K},
-                                                   FROM_A={Convert.ToByte(UPD_TIM.FROM_A)},
-                                                   N_RASID=N'{UPD_TIM.N_RASID}',
-                                                   MEGH_R={UPD_TIM.MEGH_R},
-                                                   SANAD_NO={UPD_TIM.SANAD_NO},
-                                                   ANBARF={UPD_TIM.ANBARF},
-                                                   VAHED_K={UPD_TIM.VAHED_K},
-                                                   N_KOL={UPD_TIM.N_KOL},
-                                                   N_MOIN={UPD_TIM.N_MOIN},
-                                                   N_TAF={UPD_TIM.N_TAF},
-                                                   AVRAGE={UPD_TIM.AVRAGE},
-                                                   AVRAGE2={UPD_TIM.AVRAGE2},
-                                                   IMBAA={UPD_TIM.IMBAA},
-                                                   TOTALARZ={UPD_TIM.TOTALARZ},
-                                                   VISITOR=N'{UPD_TIM.VISITOR}',
-                                                   TKHN={UPD_TIM.TKHN},
-                                                   JAY={UPD_TIM.JAY ?? 0},
-                                                   JAYO={UPD_TIM.JAYO ?? 0}	
-                                                WHERE id = {UPD_TIM.id} AND TAG = 1";
-                            }
-
-
-                            //بررسی موجودی در صورت داشتن موجودی اعمال تغییرات
-                            var items = new List<object> { item };
-                            var (errorMessages, _, _, queryOutputs) =
-                                IVM.CheckInventoryAndExecuteQuery<int?>(items, QRE_UPD_INVO, null, false); //dbms.DoExecuteSQL(QRE_UPD_INVO);
-
-                            //if (queryOutputs.Any())
-                            //{
-                            //    ;?;
-                            //    item.id = queryOutputs.FirstOrDefault();
-                            //}
-
-                            ErrosMessages.AddRange(errorMessages);
-
-                        }
-                        else
-                        {
-                            universControl.PopNotifyShow(".مقادیر سطرها را بصورت صحیح وارد کنید", Pop1, Pop1Text1, Pop_Border1);
-                        }
-                    }
-
-                    if (ErrosMessages.Any())
-                    {
-                        if (CurrentRowisNew)
-                        {
-                            item.id = null; //Bring Back to null (New State because of Rollback Transaction)
-                        }
-
-                        IVM.RollbackTransaction();
-                    }
-                    else
-                    {
-                        IVM.CommitTransaction();
-                    }
-
-                    MasterTopErrorMessages.AddRange(ErrosMessages);
-                }
-
-                if (MasterTopErrorMessages.Any())
-                {
-                    IsSaveSuccess = false;
-                    IVM.ShowErrorMessages(MasterTopErrorMessages);
-                    IVM.RollbackTransaction();
-                    return;
-                }
-
-                ReGetdata();
-                universControl.PopNotifyShow(".مقادیر ذخیره شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
-                Summer();
-                PARAMS_COLUMN.Visibility = Visibility.Visible;
-                ESLAH.IsEnabled = true;
-                Command106.IsEnabled = true;
-                Command113.IsEnabled = true;
-            }
-            else
-            {
-                IsSaveSuccess = false;
-                Msgwin msgwin = new Msgwin(false, "بعداز رفع اشکال دوباره تلاش کنید "); msgwin.ShowDialog();
-                return;
-            }
-            #endregion
-
-            #region Finally
-            //Finaliy
-            if (AllisWell)
-            {
-                //HAVL_AfterUpdate();
-                //HAVL_OnOpen();
-                //HAVL_OnCurrent_HAVL();
-                ChangeIsHappend = false;
-                Form_AfterUpdate();
-                Form_AfterUpdate_Sub();
-                ReGetdata();
-            }
-            #endregion
-
-
-            if (INVO_DATA_RASID_KHARID.Count == 0)
-            {
-                GetFocusOnDefaultCell();
-            }
-
-            IsSaveSuccess = true;
+            return true;
         }
+
         private void GetFocusOnDefaultCell()
         {
             var DG = INVO_LST_RASID_SUB;
@@ -2814,6 +2961,12 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 return;
             }
 
+            var editableCollectionView = INVO_LST_RASID_SUB.Items as IEditableCollectionView;
+            if (editableCollectionView != null && editableCollectionView.IsEditingItem && editableCollectionView.CanCancelEdit)
+            {
+                try { editableCollectionView.CancelEdit(); } catch { }
+            }
+
             if (INVO_LST_RASID_SUB.Items.Count > 0 && INVO_LST_RASID_SUB.SelectedItem != null)
             {
                 if (INVO_LST_RASID_SUB.SelectedItems is null) return;
@@ -2834,6 +2987,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                         oldValue: "TAG = 1",
                         newValue: null,
                         additionalInfo: $@"{this.GetType().Name} , EXE PATH : {System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}");
+
 
                 foreach (var selecteditem in INVO_LST_RASID_SUB.SelectedItems.OfType<INVO_LST_FACTOR22>().ToList())
                 {
@@ -2882,7 +3036,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
                 ReGetdata();
                 Summer();
-
             }
             else
             {
@@ -2917,7 +3070,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     }
                 }
             }
-
         }
         private void NUMBER1_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -2995,7 +3147,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             SGN1usid.Text = null; SGN1usid.Tag = null; SGN1.IsChecked = false; SGN1usid.SelectedValue = null; SGN1usid.Items.Refresh();
             SGN2usid.Text = null; SGN2usid.Tag = null; SGN2.IsChecked = false; SGN2usid.SelectedValue = null; SGN2usid.Items.Refresh();
 
-
             PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
             PERSONEL.SelectedIndex = -1; PERSONEL.Items.Refresh();
             PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
@@ -3007,6 +3158,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             Form_Current();
 
             AllowEdits = true;
+
+            INVO_LST_RASID_SUB.IsReadOnly = true;
 
             GetDefaultFocus();
         }
@@ -3025,7 +3178,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 }
             }
         }
-
 
     }
 }

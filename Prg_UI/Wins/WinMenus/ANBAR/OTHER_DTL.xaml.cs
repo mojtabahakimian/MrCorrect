@@ -707,6 +707,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         }
         private void Save_Click(object sender, RoutedEventArgs e)
         {
+            SaveAllSuccess();
+        }
+
+        private bool SaveAllSuccess()
+        {
             try
             {
                 if (IsSavedHeader_OTHER_DTL() && OTHER_DTL_SUB_SUB?.ItemsSource != null) //Succeed Saved Header
@@ -718,9 +723,13 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
             catch (Exception ex)
             {
+                return false;
                 new Msgwin(false, "خطایی وجود دارد و امکان ذخیره نیست").ShowDialog();
             }
+
+            return true;
         }
+
         private void DRIVER_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             DRIVER_AfterUpdate();
@@ -740,6 +749,21 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         }
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            if (!SaveAllSuccess())
+            {
+                Msgwin msgwin = new Msgwin(true, "آیتم های وارد شده صحیح نیست و ذخیره نشده آیا از بستن پنجره مطمئن هستید ؟");
+                msgwin.ShowDialog();
+
+                if (msgwin.DialogResult != true)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
+        }
+        private void REQUEST_NO_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            SpaceRemvo(sender, e);
         }
         private void OTHER_DTL_SUB_SUB_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
@@ -761,10 +785,53 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     dgv.MEGHk = G_CAM_POOR - G_CAM_KALY;
             }
         }
-        private void REQUEST_NO_PreviewKeyDown(object sender, KeyEventArgs e)
+        private void OTHER_DTL_SUB_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            SpaceRemvo(sender, e);
+            if (e.Key == Key.Delete)
+                e.Handled = true;
         }
+        private void OTHER_DTL_SUB_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
+        {
+            if (e.Row.Item == null)
+            {
+                return;
+            }
+
+            var REND_ROW = e.Row.Item as OTHER_DTL_SUB_MONITOR;
+            var AllisWell = true;
+            if (REND_ROW is null)
+            {
+                universControl.PopNotifyShow(".بعضی از مقادیر سطر خالی یا غیر مجاز است", Pop1, Pop1Text1, Pop_Border1);
+                AllisWell = false;
+            }
+            else if (
+                          string.IsNullOrEmpty(REND_ROW.CODE.ToStringNullSafe()) ||
+                          string.IsNullOrEmpty(REND_ROW.NAME_CODE.ToStringNullSafe()) ||
+                          string.IsNullOrEmpty(REND_ROW.CAM_KHALY.ToStringNullSafe()) ||
+                          string.IsNullOrEmpty(REND_ROW.CAM_POOR.ToStringNullSafe()) ||
+                          string.IsNullOrEmpty(REND_ROW.VAZNH.ToStringNullSafe()) ||
+                          string.IsNullOrEmpty(REND_ROW.MEGHk.ToStringNullSafe())
+                      //||
+                      //REND_ROW.CAM_KHALY is 0 ||
+                      //REND_ROW.CAM_POOR is 0 ||
+                      //REND_ROW.VAZNH is 0 ||
+                      //REND_ROW.MEGHk is 0
+                      )
+            {
+                universControl.PopNotifyShow(".بعضی از مقادیر سطر خالی یا غیر مجاز است", Pop1, Pop1Text1, Pop_Border1);
+                AllisWell = false;
+            }
+            if (AllisWell)
+            {
+                /////DGR_SUB_INVOLST.CommitEdit();
+            }
+            else
+            {
+                e.Cancel = true;
+                return;
+            }
+        }
+
         private void REQUEST_NO_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (string.IsNullOrEmpty(REQUEST_NO.Text)) { REQUEST_NO.Text = "0"; }
@@ -821,55 +888,17 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         {
             //AccepterOnlyNumber(CAM_POOR.Text, e);
         }
-        private void OTHER_DTL_SUB_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Delete)
-                e.Handled = true;
-        }
-        private void OTHER_DTL_SUB_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
-        {
-            if (e.Row.Item == null)
-            {
-                return;
-            }
 
-            var REND_ROW = e.Row.Item as OTHER_DTL_SUB_MONITOR;
-            var AllisWell = true;
-            if (REND_ROW is null)
-            {
-                universControl.PopNotifyShow(".بعضی از مقادیر سطر خالی یا غیر مجاز است", Pop1, Pop1Text1, Pop_Border1);
-                AllisWell = false;
-            }
-            else if (
-                          string.IsNullOrEmpty(REND_ROW.CODE.ToStringNullSafe()) ||
-                          string.IsNullOrEmpty(REND_ROW.NAME_CODE.ToStringNullSafe()) ||
-                          string.IsNullOrEmpty(REND_ROW.CAM_KHALY.ToStringNullSafe()) ||
-                          string.IsNullOrEmpty(REND_ROW.CAM_POOR.ToStringNullSafe()) ||
-                          string.IsNullOrEmpty(REND_ROW.VAZNH.ToStringNullSafe()) ||
-                          string.IsNullOrEmpty(REND_ROW.MEGHk.ToStringNullSafe()) ||
-                          REND_ROW.CAM_KHALY is 0 ||
-                          REND_ROW.CAM_POOR is 0 ||
-                          REND_ROW.VAZNH is 0 ||
-                          REND_ROW.MEGHk is 0
-                      )
-            {
-                universControl.PopNotifyShow(".بعضی از مقادیر سطر خالی یا غیر مجاز است", Pop1, Pop1Text1, Pop_Border1);
-                AllisWell = false;
-            }
-            if (AllisWell)
-            {
-                /////DGR_SUB_INVOLST.CommitEdit();
-            }
-            else
-            {
-                e.Cancel = true;
-                return;
-            }
-        }
 
         private void Command26_Click(object sender, RoutedEventArgs e)
         {
             //DoCmd.RunCommand(acCmdSaveRecord);
+            if (OTHER_DTL_DATA.Count > 0)
+            {
+                universControl.PopNotifyShowUp("از قبل داده وجود دارد , آنرا حذف یا اصلاح کنید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
+                return;
+            }
+
             Save_Click(null, null);
 
             if (!(string.IsNullOrEmpty((DRIVER.Template.FindName("PART_EditableTextBox", DRIVER) as TextBox).Text) && string.IsNullOrEmpty((CAMIUN.Template.FindName("PART_EditableTextBox", CAMIUN) as TextBox).Text)))
