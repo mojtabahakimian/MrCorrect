@@ -1863,12 +1863,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
 
             var TheRow = e.Row.Item as INVO_LST_FACTOR22;
-
-            if (CL_LMethods.IsNewRowUnmodified(TheRow))
-            {
-                INVO_LST_SUB_CANCEL_EDIT();
-                return;   // The row is unmodified
-            }
+            if (ConstructorRowDetector.IsPristine(TheRow)) { INVO_LST_SUB_CANCEL_EDIT(); return; }
 
             if (!BodyIsValid(TheRow))
             {

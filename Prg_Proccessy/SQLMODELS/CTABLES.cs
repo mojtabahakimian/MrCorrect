@@ -120,9 +120,9 @@ namespace Prg_Proccessy.SQLMODELS
                 get => _isSelected;
                 set { _isSelected = value; OnPropertyChanged("IsSelected"); }
             }
-       
+
         }
-   
+
         public class HEAD_LST_LOG1
         {
             public DateTime? UP_DATE { get; set; }
@@ -1428,7 +1428,7 @@ namespace Prg_Proccessy.SQLMODELS
         {
             public int? MPCODE { get; set; }
             public string MPNAME { get; set; }
-        }   
+        }
         public class TheMAGHSAD1_1
         {
             public int? CITYCODE { get; set; }
@@ -1440,8 +1440,12 @@ namespace Prg_Proccessy.SQLMODELS
             public double? TAG { get; set; }
             public double? tamir { get; set; }
         }
-        public class OTHER_DTL_SUB_MONITOR : INotifyPropertyChanged
+        public class OTHER_DTL_SUB_MONITOR : INotifyPropertyChanged, ICloneable , IEditableObject
         {
+            public object Clone()
+            {
+                return this.MemberwiseClone();
+            }
             public OTHER_DTL_SUB_MONITOR()
             {
                 NUMBER = 0;
@@ -1466,7 +1470,6 @@ namespace Prg_Proccessy.SQLMODELS
             private double? _vaznh;
             private double? _radif;
 
-
             public double? NUMBER { get => _number; set { if (_number == value) return; _number = value; OnPropertyChanged("NUMBER"); } }
             public double? TAGG { get => _tagg; set { if (_tagg == value) return; _tagg = value; OnPropertyChanged("TAGG"); } }
             public string CODE { get => _code; set { if (_code == value) return; _code = value; OnPropertyChanged("CODE"); } }
@@ -1478,7 +1481,36 @@ namespace Prg_Proccessy.SQLMODELS
             public double? VAZNH { get => _vaznh; set { if (_vaznh == value) return; _vaznh = value; OnPropertyChanged("VAZNH"); } }
             public double? RADIF { get => _radif; set { if (_radif == value) return; _radif = value; OnPropertyChanged("RADIF"); } }
 
+            private OTHER_DTL_SUB_MONITOR _backupCopy;
+            private bool _inEdit = false;
+            public void BeginEdit()
+            {
+                if (_inEdit) return;
+                _backupCopy = (OTHER_DTL_SUB_MONITOR)this.Clone();
+                _inEdit = true;
+            }
+            public void EndEdit()
+            {
+                _backupCopy = null;
+                _inEdit = false;
+            }
+            public void CancelEdit()
+            {
+                if (!_inEdit || _backupCopy == null) return;
 
+                NUMBER = _backupCopy.NUMBER;
+                TAGG = _backupCopy.TAGG;
+                CODE = _backupCopy.CODE;
+                NAME_CODE = _backupCopy.NAME_CODE;
+                CAM_KHALY = _backupCopy.CAM_KHALY;
+                CAM_POOR = _backupCopy.CAM_POOR;
+                MEGHk = _backupCopy.MEGHk;
+                TOZIH = _backupCopy.TOZIH;
+                VAZNH = _backupCopy.VAZNH;
+                RADIF = _backupCopy.RADIF;
+
+                _inEdit = false;
+            }
 
             public event PropertyChangedEventHandler PropertyChanged;
             protected virtual void OnPropertyChanged(string propertyName = "")
@@ -2052,7 +2084,7 @@ namespace Prg_Proccessy.SQLMODELS
         /// <summary>
         /// برای دیتاگرید فاکتور فروش مستقیم شماره 22
         /// </summary>
-        public class INVO_LST_FACTOR22: INotifyPropertyChanged, ICloneable, IEditableObject
+        public class INVO_LST_FACTOR22 : INotifyPropertyChanged, ICloneable, IEditableObject
         {
             public object Clone()
             {

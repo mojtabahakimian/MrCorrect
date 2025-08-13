@@ -46,7 +46,7 @@ namespace Wins.WinMenus.ANBAR
     /// </summary>
     public partial class HEAD_LST_HAV_OTHER_WIN : Window, ISearchableWindow
     {
-        public HEAD_LST_HAV_OTHER_WIN(double? _NUMBER_ = null)
+        public HEAD_LST_HAV_OTHER_WIN(double? _NUMBER_ = null, bool _isAutomasion_ = false)
         {
 
             InitializeComponent();
@@ -57,9 +57,10 @@ namespace Wins.WinMenus.ANBAR
             {
                 NUMBER.Text = _NUMBER_.ToStringNullSafe();
                 OpenArgs = _NUMBER_.ToStringNullSafe();
+                IsOpenedFromAutomation = _isAutomasion_;
             }
         }
-
+        public bool IsOpenedFromAutomation { get; } = false;
         #region Header Window Begin
         //Header Window Begin
         private void Btn_Close_Click(object sender, RoutedEventArgs e)
@@ -738,6 +739,11 @@ namespace Wins.WinMenus.ANBAR
             string WhereCondition = TAG > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {TAG}) " : "  ";
             WhereCondition = CL_LMethods.GetRestrictedSqlQuery(TAG, WhereCondition);
 
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = {TAG} ";
+            }
+
             _navigationManager = new NavigationManager<HEAD_LST>(
                 dbms,
                 x => x.NUMBER.ToString(), // property selector (used to find a record by its CODE)
@@ -746,7 +752,7 @@ namespace Wins.WinMenus.ANBAR
                 Convert.ToDouble(NUMBER.Text)
                 );
 
-            if (!string.IsNullOrEmpty(OpenArgs) && _navigationManager.NUMBER_TO_OPEN != null) //Had a paramter passed
+            if (!IsOpenedFromAutomation && !string.IsNullOrEmpty(OpenArgs) && _navigationManager.NUMBER_TO_OPEN != null) //Had a paramter passed
             {
                 //یعنی این شماره رو پیدا نکرده که اون رو ریست کنه
                 new Msgwin(false, $"شما به این شماره حواله سایر دسترسی ندارید{_navigationManager.NUMBER_TO_OPEN} دسترسی ندارید ").Show();
@@ -963,6 +969,16 @@ namespace Wins.WinMenus.ANBAR
 
         private void CUST_NO_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
+            //if (CUTSNO_TEX.Text == "+" || CUTSNO_TEX.Text == "++")
+            //{
+            //    ComboSearch CMBSearch = new ComboSearch("HEAD_LST_HAV_OTHER_WIN", I_AM_INVO_RASID);//Search Plusy Form Specialy for Customers
+            //    CMBSearch.ShowDialog();
+            //    if (CUST_NO.SelectedValue is null)
+            //    {
+            //        return;
+            //    }
+            //}
+
             if (CUST_NO.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
             TextBox CUTSNO_TEX = (TextBox)CUST_NO.Template.FindName("PART_EditableTextBox", CUST_NO);
             if (CUTSNO_TEX is null)
@@ -971,70 +987,17 @@ namespace Wins.WinMenus.ANBAR
             }
             if (CUST_NO.SelectedValue is not null)
             {
-                if ((CUST_NO.SelectedItem as Custom_CUST_HESAB).NAME == CUTSNO_TEX.Text)
+                if ((CUST_NO.SelectedItem as Custom_CUST_HESAB)?.NAME == CUTSNO_TEX.Text)
                 {
                     return;
                 }
             }
 
-            if (CUTSNO_TEX.Text == "+" || CUTSNO_TEX.Text == "++")
+            var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(CUST_NO, dbms);
+            if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
             {
-                ComboSearch CMBSearch = new ComboSearch("HEAD_LST_HAV_OTHER_WIN", I_AM_INVO_RASID);//Search Plusy Form Specialy for Customers
-                CMBSearch.ShowDialog();
-                if (CUST_NO.SelectedValue is null)
-                {
-                    return;
-                }
-            }
-            else if (Information.IsNumeric(CUTSNO_TEX.Text))
-            {
-                try
-                {
-                    var rst = dbms.DoGetDataSQL<SQL1_FACTOR>("SELECT N_KOL , NUMBER,TNUMBER FROM TDETA_HES WHERE N_KOL = " + Baseknow.BEDEHKAR + " and NUMBER = 1 and tNUMBER = " + CUTSNO_TEX.Text).ToList();
-                    if (rst.Count == 1)
-                    {
-                        var _data_hes = rst.FirstOrDefault()?.n_kol + "-" + rst.FirstOrDefault()?.NUMBER + "-" + rst.FirstOrDefault()?.tNUMBER;
-                        var _data_name = dbms.DoGetDataSQL<string>($"SELECT TOP 1 NAME FROM CUST_HESAB WHERE hes = N'{_data_hes}'").FirstOrDefault();
-                        if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == _data_hes))
-                        {
-                            ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = _data_hes, NAME = _data_name });
-                        }
-                        CUST_NO.Items.Refresh();
-                        CUST_NO.SelectedValue = null;
-                        this.CUST_NO2.SelectedValue = _data_hes;
-                        //CUST_NO_AfterUpdate();
-                    }
-                    else
-                    {
-                        CUST_NO.SelectedValue = null;
-                        CUST_NO.Text = null;
-                        CUST_NO.Items.Refresh();
-                        return;
-                    }
-                }
-                catch (Exception) { }
-            }
-            else
-            {
-                var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + CUTSNO_TEX.Text + "'").FirstOrDefault();
-                if (data is not null && !string.IsNullOrEmpty(data.hes))
-                {
-                    string thevalue = data.hes;
-                    if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
-                    {
-                        ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
-                    }
-                    CUST_NO.SelectedValue = null;
-                    CUST_NO.SelectedValue = thevalue;
-                    CUST_NO.Items.Refresh();
-                }
-                else
-                {
-                    CUST_NO.SelectedValue = null;
-                    CUST_NO.Text = null;
-                    CUST_NO.Items.Refresh();
-                    return;
-                }
+                universControl.PopNotifyShow($"مشتری نمی تواند خالی باشد", Pop1, Pop1Text1, Pop_Border1);
+                e.Handled = true;
             }
 
             if (CUST_NO.SelectedValue is not null)
@@ -1054,7 +1017,7 @@ namespace Wins.WinMenus.ANBAR
                         CUST_NO.SelectedValue = null;
                     }
                 }
-                if (CL_HESABDARI.BLOCKEDCUST(CUST_NO2.SelectedValue.ToString()))
+                if (CL_HESABDARI.BLOCKEDCUST(CUST_NO.SelectedValue.ToString()))
                 {
                     CUST_NO.SelectedItem = null;
                     universControl.PopNotifyShow(" حساب مسدود گرديده است لطفا با مديريت مالي تماس بگيريد", Pop1, Pop1Text1, Pop_Border1);
@@ -1067,41 +1030,6 @@ namespace Wins.WinMenus.ANBAR
         private void CUST_NO2_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (CUST_NO2.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
-
-            #region After_Update
-            if (CUST_NO2.Text is null || CUST_NO2.SelectedValue == null)
-            {
-                return;
-            }
-
-            //this.CUST_NO.ItemsSource = this.CUST_NO2.ItemsSource;
-            //this.CUST_NO.SelectedValuePath = "hes";
-            //this.CUST_NO.DisplayMemberPath = "nam";
-            #endregion
-
-            #region On_Exit
-            if (!IsNull(this.CUST_NO2.SelectedValue))
-            {
-                if (CL_HESABDARI.ISTAF(this.CUST_NO2.SelectedValue.ToString()))
-                {
-                    Msgwin msgwin = new Msgwin(false, "حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!");
-                    msgwin.ShowDialog();
-                    return;
-                }
-            }
-            if (!IsNull(this.CUST_NO2.SelectedValue))
-            {
-                if ((bool)Baseknow.SAGHF || (bool)Baseknow.SAGHF2)
-                {
-                    if (Convert.ToBoolean(CL_HESABDARI.Checketebar(this.CUST_NO2.SelectedValue.ToString())) == false)
-                    {
-                        Msgwin msgwin = new Msgwin(false, "اعتبار اين مشتري تمام شده است و نمي تواند خريد نمايد...!");
-                        CUST_NO2.SelectedValue = null;
-                        //this.Undo();
-                    }
-                }
-            }
-            #endregion
         }
 
         private void ESLAH_Click(object sender, RoutedEventArgs e)
@@ -2315,7 +2243,7 @@ namespace Wins.WinMenus.ANBAR
             INVO_LST_HAV_SUB_OTHER.CurrentCell = new DataGridCellInfo(INVO_LST_HAV_SUB_OTHER.SelectedItem, INVO_LST_HAV_SUB_OTHER.Columns[col_index]);
 
 
-            if (number != null)
+            if (number != null && INVO_HAV_OTHER_DATA.Count == 0)
             {
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
@@ -2329,7 +2257,7 @@ namespace Wins.WinMenus.ANBAR
         {
             string _qre = null;
             var MasterTopErrorMessages = new List<MsgModel>();
-
+            bool CurrentRowisNew = true;
             IVM.StartTransaction(); // Start the transaction again if is disposed before ****************************************************************
 
             List<MsgModel> ErrosMessages = new List<MsgModel>();
@@ -2337,6 +2265,7 @@ namespace Wins.WinMenus.ANBAR
             if (TheRow.id is null || TheRow.id <= 0) //INSERT
             {
                 _qre = $@"INSERT INTO INVO_LST (       NUMBER, TAG,         ANBAR,                                           RADIF,             CODE,         MEGH,         MEGHk,                                              MEGH_MAR,                                          MABL,                                            MABL_K,                         FROM_A,                                            MEGH_R,         VAHED_K,                                           N_KOL,                                            N_MOIN,                                            AVRAGE,                                             AVRAGE2,                                           IMBAA,                                              TOTALARZ,                                          TKHN,                                      JAY) 
+                          OUTPUT INSERTED.id
 			                                                       VALUES ({NUMBER.Text},  26,{TheRow.ANBAR},{(TheRow.RADIF is null ? "NULL" : TheRow.RADIF)}, N'{TheRow.CODE}',{TheRow.MEGH},{TheRow.MEGHk},{(TheRow.MEGH_MAR is null ? "NULL" : TheRow.MEGH_MAR)},{(TheRow.MABL is null ? "NULL" : TheRow.MABL)},{(TheRow.MABL_K is null ? "NULL" : TheRow.MABL_K)},{Convert.ToByte(TheRow.FROM_A)},{(TheRow.MEGH_R is null ? "NULL" : TheRow.MEGH_R)},{TheRow.VAHED_K},{(TheRow.N_KOL is null ? "NULL" : TheRow.N_KOL)},{(TheRow.N_MOIN is null ? "NULL" : TheRow.N_MOIN)},{(TheRow.AVRAGE is null ? "NULL" : TheRow.AVRAGE)},{(TheRow.AVRAGE2 is null ? "NULL" : TheRow.AVRAGE2)},{(TheRow.IMBAA is null ? "NULL" : TheRow.IMBAA)},{(TheRow.TOTALARZ is null ? "NULL" : TheRow.TOTALARZ)},{(TheRow.TKHN is null ? "NULL" : TheRow.TKHN)},{(TheRow.JAY is null ? "0" : TheRow.JAY)})";
 
                 var (errorMsgs, _, _, queryOutputs) = IVM.CheckInventoryAndExecuteQuery<long>(new List<object> { TheRow }, _qre, null, false);
@@ -2351,6 +2280,8 @@ namespace Wins.WinMenus.ANBAR
             }
             else //UPDATE
             {
+                CurrentRowisNew = false;
+
                 _qre = $@"UPDATE INVO_LST 
                                             SET 
                                                 ANBAR = {TheRow.ANBAR},
@@ -2414,6 +2345,10 @@ namespace Wins.WinMenus.ANBAR
 
             if (ErrosMessages.Any())
             {
+                if (CurrentRowisNew)
+                {
+                    TheRow.id = null; //Bring Back to null (New State because of Rollback Transaction)
+                }
                 IVM.RollbackTransaction(); //Undo
             }
             else

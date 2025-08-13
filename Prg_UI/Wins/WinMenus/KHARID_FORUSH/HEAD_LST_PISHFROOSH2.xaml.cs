@@ -179,7 +179,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         #endregion
 
-        public HEAD_LST_PISHFROOSH2(double? number_to_open = null)
+        public HEAD_LST_PISHFROOSH2(double? number_to_open = null, bool _isAutomasion_ = false)
         {
             InitializeComponent();
 
@@ -188,6 +188,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (number_to_open != null)
             {
                 NUMBER_TO_OPEN = (double)number_to_open;
+                IsOpenedFromAutomation = _isAutomasion_;
             }
 
             if (CL_Generaly.IsGHAYM_7)
@@ -213,7 +214,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 okpish.Visibility = Visibility.Hidden; estelam.Visibility = Visibility.Hidden;
             }
         }
-
+        public bool IsOpenedFromAutomation { get; } = false;
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
         UniversControl universControl = new UniversControl();
@@ -302,6 +303,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
         InventoryManager IVM = new InventoryManager();
         //TransactionManagement TM;
+
 
         private bool _bl;
         public bool AllowDeletions
@@ -436,6 +438,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
+            ChangeIsHappend = false;
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -2302,11 +2305,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 return;
             }
 
-            if (CL_LMethods.IsNewRowUnmodified(ROW))
-            {
-                INVO_LST_SUB_CANCEL_EDIT();
-                return;   // The row is unmodified
-            }
+            if (ConstructorRowDetector.IsPristine(ROW)) { INVO_LST_SUB_CANCEL_EDIT(); return; }
+
 
             if (!BodyIsValid(ROW))
             {
@@ -3071,7 +3071,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             const string REPLACEMENT_VALUE = "dbo.HEAD_LST.";
 
-            var InvoiceWheres = CL_LMethods.GetRestrictedSqlQuery(20).Replace(REPLACEMENT_VALUE, null);
+            string InvoiceWheres = CL_LMethods.GetRestrictedSqlQuery(20).Replace(REPLACEMENT_VALUE, null);
+
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                InvoiceWheres = $" WHERE NUMBER = {NUMBER_TO_OPEN} AND TAG = 20 ";
+            }
 
             var MasterHead = dbms.DoGetDataSQL<pish_view>($"SELECT * FROM dbo.pish_view {InvoiceWheres} ORDER BY NUMBER").ToList();
             RecordsData.Source = MasterHead;

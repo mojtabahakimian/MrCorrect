@@ -147,7 +147,8 @@
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
-                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                                <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
                                 <Setter Property="GridLinesVisibility" Value="All"/>
                             </Style>
                         </DataGrid.Style>
@@ -461,7 +462,8 @@
                               Margin="5,315,4,47" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" CellEditEnding="PAY_GETP_SUB_CellEditEnding" PreviewKeyDown="PAY_GETP_SUB_PreviewKeyDown" RowEditEnding="PAY_GETP_SUB_RowEditEnding" PreparingCellForEdit="PAY_GETP_SUB_PreparingCellForEdit" BeginningEdit="PAY_GETP_SUB_BeginningEdit">
 
                         <DataGrid.Style>
-                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                                <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding Text, ElementName=NUMBER1}" Value="{x:Null}">
                                         <Setter Property="IsEnabled" Value="False"/>

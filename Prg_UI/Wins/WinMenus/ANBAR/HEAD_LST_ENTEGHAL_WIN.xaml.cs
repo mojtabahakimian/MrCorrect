@@ -40,7 +40,7 @@ namespace Wins.WinMenus.ANBAR
 {
     public partial class HEAD_LST_ENTEGHAL_WIN : Window
     {
-        public HEAD_LST_ENTEGHAL_WIN(double? _NUMBER_ = null)
+        public HEAD_LST_ENTEGHAL_WIN(double? _NUMBER_ = null, bool _isAutomasion_ = false)
         {
             InitializeComponent();
             this.DataContext = this;
@@ -50,9 +50,10 @@ namespace Wins.WinMenus.ANBAR
             {
                 NUMBER.Text = _NUMBER_.ToString();
                 OpenArgs = _NUMBER_.ToString();
+                IsOpenedFromAutomation = _isAutomasion_;
             }
         }
-
+        public bool IsOpenedFromAutomation { get; } = false;
         #region Header Window Begin
         //Header Window Begin
         private void Btn_Close_Click(object sender, RoutedEventArgs e)
@@ -412,6 +413,11 @@ namespace Wins.WinMenus.ANBAR
             string WhereCondition = TAG > 0 ? $" WHERE (dbo.HEAD_LST.TAG = 5) " : "  ";
             WhereCondition = CL_LMethods.GetRestrictedSqlQuery(TAG, WhereCondition);
 
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = 5 ";
+            }
+
             _navigationManager = new NavigationManager<HEAD_LST>(
                 dbms,
                 x => x.NUMBER.ToString(), // property selector (used to find a record by its CODE)
@@ -420,7 +426,7 @@ namespace Wins.WinMenus.ANBAR
                 Convert.ToDouble(NUMBER.Text)
                 );
 
-            if (!string.IsNullOrEmpty(OpenArgs?.ToStringNullSafe()) && _navigationManager.NUMBER_TO_OPEN != null) //Had a paramter passed
+            if (!IsOpenedFromAutomation && !string.IsNullOrEmpty(OpenArgs?.ToStringNullSafe()) && _navigationManager.NUMBER_TO_OPEN != null) //Had a paramter passed
             {
                 //یعنی این شماره رو پیدا نکرده که اون رو ریست کنه
                 new Msgwin(false, $"شما به این شماره {_navigationManager.NUMBER_TO_OPEN} دسترسی ندارید ").Show();

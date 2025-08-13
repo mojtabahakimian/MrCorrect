@@ -32,15 +32,17 @@ using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
 using System.Diagnostics;
 using Functions;
 using Microsoft.Data.SqlClient;
+using Wins.WinOther;
+using static Interfaces.INavigator;
 
 namespace Wins.WinMenus.ANBAR
 {
     /// <summary>
     /// Interaction logic for HEAD_LST_RASID_OTHER_WIN.xaml
     /// </summary>
-    public partial class HEAD_LST_RASID_OTHER_WIN : Window
+    public partial class HEAD_LST_RASID_OTHER_WIN : Window, ISearchableWindow
     {
-        public HEAD_LST_RASID_OTHER_WIN(double? _NUMBER_ = null)
+        public HEAD_LST_RASID_OTHER_WIN(double? _NUMBER_ = null, bool _isAutomasion_ = false)
         {
             InitializeComponent();
 
@@ -49,10 +51,11 @@ namespace Wins.WinMenus.ANBAR
             if (_NUMBER_ is not null)
             {
                 NUMBER.Text = _NUMBER_.ToStringNullSafe();
+                OpenArgs = _NUMBER_.ToStringNullSafe();
+                IsOpenedFromAutomation = _isAutomasion_;
             }
         }
-
-
+        public bool IsOpenedFromAutomation { get; } = false;
         #region Header Window Begin
         //Header Window Begin
         private void Btn_Close_Click(object sender, RoutedEventArgs e)
@@ -95,6 +98,7 @@ namespace Wins.WinMenus.ANBAR
         //Header Window End;
         #endregion
 
+        private NavigationManager<HEAD_LST> _navigationManager;
         public ObservableCollection<INVO_LST_FACTOR22> INVO_RASIDA_DATA { get; set; } = new ObservableCollection<INVO_LST_FACTOR22>();
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
@@ -145,13 +149,13 @@ namespace Wins.WinMenus.ANBAR
             set
             {
                 _ican = value;
-                if (_ican is true) // Is Enable and ReadOnly = False
+                if (_ican) // Is Enable and ReadOnly = False
                 {
-                    ALL_ITEMS_DISABLE();
+                    ALL_ITEMS_ENABLE();
                 }
                 else
                 {
-                    ALL_ITEMS_ENABLE();
+                    ALL_ITEMS_DISABLE();
                 }
             }
         }
@@ -211,14 +215,12 @@ namespace Wins.WinMenus.ANBAR
             public string NAMES { get; set; }
             public string CODE { get; set; }
         }
-
         public class HLQ
         {
             public string? hes { get; set; }
             public string? nam { get; set; }
             public string? Expr1 { get; set; }
         }
-
         private bool _newrecord = false;
         public bool NewRecord
         {
@@ -262,19 +264,14 @@ namespace Wins.WinMenus.ANBAR
         {
             public string? hes { get; set; }
         }
-
-
-
         public class HLQ3
         {
             public string? TAH { get; set; }
         }
-
         public class HLQ4
         {
             public string? MOLAH { get; set; }
         }
-
         public class HLQ5
         {
             public string? hes { get; set; }
@@ -327,6 +324,8 @@ namespace Wins.WinMenus.ANBAR
 
 
         public FULL_HESAB HESAB_FROM_SEARCH { get; set; } = new();
+        public string OpenArgs { get; }
+
         private bool PERSONEL_First_Open = true;
         private bool chek;
 
@@ -343,73 +342,63 @@ namespace Wins.WinMenus.ANBAR
                 return;
             }
 
-            INVO_LST_RASIDA_SUB.IsEnabled = false;
+            INVO_LST_RASIDA_SUB.IsReadOnly = true;
 
 
             Fill_ComboBoxes();
 
-            Form_Load();
-
             USER_NAME.Text = CL_HESABDARI.UCurrentUser().ToString();
-
 
             #region LOADING...
 
-            if (!string.IsNullOrEmpty(NUMBER.Text) && NUMBER.Text != "0")
+            string WhereCondition = TAG > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {TAG}) " : "  ";
+            WhereCondition = CL_LMethods.GetRestrictedSqlQuery(TAG, WhereCondition);
+
+
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
             {
-                var HEADER_FAC = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE TAG = 24 AND NUMBER = {NUMBER.Text}").FirstOrDefault();
-
-                DATE_N.Text = HEADER_FAC.DATE_N.ToStringNullSafe();
-                FNUMCO.Text = HEADER_FAC.FNUMCO.ToStringNullSafe();
-                hTAG.SelectedValue = HEADER_FAC.TAG.ToStringNullSafe();
-
-                TAH.SelectedValue = HEADER_FAC.TAH.ToStringNullSafe();
-                MOLAH.SelectedValue = HEADER_FAC.MOLAH.ToStringNullSafe();
-
-                CUST_NO.SelectedValue = HEADER_FAC.CUST_NO.ToStringNullSafe();
-                CUST_NO2.SelectedValue = HEADER_FAC.CUST_NO.ToStringNullSafe();
-
-                SGN1.IsChecked = Convert.ToBoolean(HEADER_FAC.SGN1);
-                SGN2.IsChecked = Convert.ToBoolean(HEADER_FAC.SGN2);
-
-                SGN1.Tag = Convert.ToInt32(HEADER_FAC.sgn1usid);
-                SGN2.Tag = Convert.ToInt32(HEADER_FAC.sgn2usid);
-
-                if (HEADER_FAC?.sgn1usid is not null)
-                {
-                    sgn1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn1usid)?.SAL_NAME;
-                }
-
-                if (HEADER_FAC?.sgn2usid is not null)
-                {
-                    sgn2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn2usid)?.SAL_NAME;
-                }
-
-                OKF.IsChecked = HEADER_FAC.OKF; //تایید فاکتور
-                ReGetData();
+                WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = {TAG} ";
             }
 
+            _navigationManager = new NavigationManager<HEAD_LST>(
+                dbms,
+                x => x.NUMBER.ToString(), // property selector (used to find a record by its CODE)
+                $"SELECT * FROM HEAD_LST {WhereCondition} ORDER BY NUMBER", //All Record of The Table
+                x => $"SELECT * FROM HEAD_LST WHERE NUMBER = {x?.NUMBER} AND TAG = {TAG}", //On Change for One Record
+                Convert.ToDouble(NUMBER.Text)
+                );
+
+            if (!IsOpenedFromAutomation && !string.IsNullOrEmpty(OpenArgs) && _navigationManager.NUMBER_TO_OPEN != null) //Had a paramter passed
+            {
+                //یعنی این شماره رو پیدا نکرده که اون رو ریست کنه
+                new Msgwin(false, $"به این شماره برگه {_navigationManager.NUMBER_TO_OPEN} دسترسی ندارید ").Show();
+                try { this?.Close(); } catch { }
+                return;
+            }
+
+            // Hook up the OnInsertRecord event
+            _navigationManager.CurrentRecordChanged += OnCurrentRecordChanged;
+            _navigationManager.OnInsertRecord += OnInsertRecord;
+
+            // Link the navigation manager to the universal control
+            navigatorControl.NavigationManager = _navigationManager;
+
+            // Now raise the initialization events to update the UI
+            _navigationManager.RaiseInitializationEvents();
 
             #endregion
 
-
-            if (Convert.ToDouble(NUMBER.Text) > 0)
-            {
-                ALL_ITEMS_DISABLE();
-                Command106.IsEnabled = true;
-            }
-            else
-            {
-                Command106.IsEnabled = false;
-            }
-
             DATA_GRID_After_Update();
 
-            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
-            {
-                DATE_N.Focus();
-            }));
-
+            CL_LMethods.SetTabIndexes(
+                DATE_N,
+                FNUMCO,
+                TAH,
+                MOLAH,
+                CUST_NO,
+                SAVE_BTN,
+                INVO_LST_RASIDA_SUB
+                );
         }
         private void Form_Current()
         {
@@ -434,9 +423,9 @@ namespace Wins.WinMenus.ANBAR
                     this.Command106.IsEnabled = false;
                 }
             }
-            if (this.NewRecord)
+            if (_navigationManager.IsNewRecord)
             {
-                INVO_LST_RASIDA_SUB.IsEnabled = false;
+                INVO_LST_RASIDA_SUB.IsReadOnly = true;
                 //AllowAdditions = true;
                 AllowDeletions = true;
                 AllowEdits = true;
@@ -450,13 +439,13 @@ namespace Wins.WinMenus.ANBAR
                     AllowDeletions = true;
                     AllowEdits = true;
                     //["INVO_LST_RASIDA_SUB"].Form.AllowAdditions = true;
-                    INVO_LST_RASIDA_SUB.IsEnabled = true;
+                    INVO_LST_RASIDA_SUB.IsReadOnly = false;
                     //["INVO_LST_RASIDA_SUB"].Form.Refresh();
                 }
                 else
                 {
-                    this.INVO_LST_RASIDA_SUB.IsEnabled = true;
-                    this.AllowDeletions = false;
+                    //this.INVO_LST_RASIDA_SUB.IsReadOnly = false;
+                    //this.AllowDeletions = false;
                     //this["INVO_LST_RASIDA_SUB"].Form.AllowAdditions = false;
                     //this["INVO_LST_RASIDA_SUB"].Form.Refresh();
                 }
@@ -487,16 +476,16 @@ namespace Wins.WinMenus.ANBAR
                         this.SGN2.IsEnabled = false;
                     }
                 }
-                this.NUMBER.IsEnabled = true;
-                this.DATE_N.IsEnabled = true;
-                this.FNUMCO.IsEnabled = true;
-                this.MOLAH.IsEnabled = true;
-                this.TAH.IsEnabled = true;
+                //this.NUMBER.IsEnabled = true;
+                //this.DATE_N.IsEnabled = true;
+                //this.FNUMCO.IsEnabled = true;
+                //this.MOLAH.IsEnabled = true;
+                //this.TAH.IsEnabled = true;
                 if ((bool)SGN2.IsChecked)
                 {
                     this.SGN1.IsEnabled = false;
                     this.AllowDeletions = false;
-                    this.INVO_LST_RASIDA_SUB.IsEnabled = false;
+                    this.INVO_LST_RASIDA_SUB.IsReadOnly = true;
                     //this.INVO_LST_RASIDA_SUB.Form.AllowDeletions = false;
                     this.NUMBER.IsEnabled = false;
                     this.DATE_N.IsEnabled = false;
@@ -505,13 +494,11 @@ namespace Wins.WinMenus.ANBAR
                     this.TAH.IsEnabled = false;
                 }
             }
-            Information.Err().Clear();
-
             if ((bool)OKF.IsChecked)
             {
                 this.AllowDeletions = false;
                 this.AllowEdits = false;
-                this.INVO_LST_RASIDA_SUB.IsEnabled = false;
+                this.INVO_LST_RASIDA_SUB.IsReadOnly = true;
                 this.ESLAH.IsEnabled = true;
             }
             if (Convert.ToInt32(this.NUMBER.Text) > 0)
@@ -523,6 +510,131 @@ namespace Wins.WinMenus.ANBAR
                 this.SGN1.IsEnabled = false;
                 this.SGN2.IsEnabled = false;
             }
+        }
+
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            // Handle the selected item
+            if (selectedItem is HEAD_LST item)
+            {
+                if (item != null)
+                {
+                    //_navigationManager.MoveReGetData(INavigator.Jahat.)
+                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.NUMBER.Equals(Convert.ToDouble(item.NUMBER)));
+                    if (itemfound != null)
+                    {
+                        _navigationManager.IsNewRecord = false;
+
+                        // 1) Find its index in the master list
+                        int idx = _navigationManager.RecordsData.IndexOf(itemfound);
+                        if (idx < 0)
+                        {
+                            // not found (perhaps filtered out?), bail out
+                            new Msgwin(false, "یافت نشد: مورد انتخاب شده در لیست اصلی وجود ندارد").Show();
+                            return;
+                        }
+
+                        // 2) Tell the navigation manager to move to that position
+                        _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+                        //OnCurrentRecordChanged(itemfound);
+                    }
+                }
+            }
+        }
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+                new SearchableProperty { DisplayName = "شماره فاکتور", PropertyPath = "NUMBER", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "تاریخ", PropertyPath = "DATE_N", PropertyType = typeof(long) },
+                new SearchableProperty { DisplayName = "تحویل گیرنده", PropertyPath = "TAH", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "تحویل دهنده", PropertyPath = "MOLAH", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "کد مشتری", PropertyPath = "CUST_NO", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "کاربر", PropertyPath = "USER_NAME", PropertyType = typeof(string) },
+                // Add other searchable properties
+            };
+        }
+
+        #endregion
+        private void OnCurrentRecordChanged(HEAD_LST HEADER_FAC)
+        {
+            if (_navigationManager.IsNewRecord)
+            {
+                ClearFreshAll(); //Form_Current(); //should be in this ClearFreshAll(); method too at the end
+            }
+            else if (HEADER_FAC == null)
+            {
+                if (_navigationManager.NUMBER_TO_OPEN != null)
+                {
+                    new Msgwin(false, "چنین شماره ای وجود ندارد").ShowDialog();
+                    return;
+                }
+            }
+            else
+            {
+                if (HEADER_FAC is null)
+                {
+                    new Msgwin(false, "این فاکتور خالی است").Show();
+                    return;
+                }
+                //NewRecord = false; //Currrent Record is not new
+                NUMBER.Text = HEADER_FAC.NUMBER.ToString();
+
+                DATE_N.Text = HEADER_FAC.DATE_N.ToStringNullSafe();
+                FNUMCO.Text = HEADER_FAC.FNUMCO.ToStringNullSafe();
+                hTAG.SelectedValue = HEADER_FAC.TAG.ToStringNullSafe();
+
+                TAH.SelectedValue = HEADER_FAC.TAH.ToStringNullSafe();
+                MOLAH.SelectedValue = HEADER_FAC.MOLAH.ToStringNullSafe();
+
+                CUST_NO.SelectedValue = HEADER_FAC.CUST_NO.ToStringNullSafe();
+                CUST_NO2.SelectedValue = HEADER_FAC.CUST_NO.ToStringNullSafe();
+
+                SGN1.IsChecked = Convert.ToBoolean(HEADER_FAC.SGN1);
+                SGN2.IsChecked = Convert.ToBoolean(HEADER_FAC.SGN2);
+
+                SGN1.Tag = Convert.ToInt32(HEADER_FAC.sgn1usid);
+                SGN2.Tag = Convert.ToInt32(HEADER_FAC.sgn2usid);
+
+                if (HEADER_FAC?.sgn1usid is not null)
+                {
+                    sgn1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn1usid)?.SAL_NAME;
+                }
+
+                if (HEADER_FAC?.sgn2usid is not null)
+                {
+                    sgn2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn2usid)?.SAL_NAME;
+                }
+
+                OKF.IsChecked = HEADER_FAC.OKF; //تایید فاکتور
+                ReGetData();
+
+                Form_Current();
+
+                AllowEdits = false;
+                Command106.IsEnabled = true;
+            }
+        }
+        private bool OnInsertRecord(HEAD_LST record)
+        {
+            try
+            {
+                var itemtoadd = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 * FROM HEAD_LST  WHERE NUMBER = {NUMBER.Text} AND TAG = {TAG}").FirstOrDefault();
+                record = itemtoadd;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+        private void RefreshAfterUpdate()
+        {
+            var CURRENT_HEADER = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {TAG}").FirstOrDefault();
+            _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
         }
 
         //نیازی نیست
@@ -608,7 +720,12 @@ namespace Wins.WinMenus.ANBAR
             Command106.IsEnabled = true;
             SAVE_BTN.IsEnabled = true;
             DELETE_BTN.IsEnabled = true;
-            this.INVO_LST_RASIDA_SUB.IsEnabled = true;
+
+            if (!_navigationManager.IsNewRecord)
+            {
+                INVO_LST_RASIDA_SUB.IsReadOnly = false;
+            }
+
         }
 
         private void ALL_ITEMS_DISABLE()
@@ -632,7 +749,7 @@ namespace Wins.WinMenus.ANBAR
             SAVE_BTN.IsEnabled = false;
             DELETE_BTN.IsEnabled = false;
             Command106.IsEnabled = false;
-            this.INVO_LST_RASIDA_SUB.IsEnabled = false;
+            this.INVO_LST_RASIDA_SUB.IsReadOnly = true;
         }
 
         public bool DATE_VALIDATION()
@@ -692,11 +809,10 @@ namespace Wins.WinMenus.ANBAR
             PERSONEL.DisplayMemberPath = "SAL_NAME";
             PERSONEL.SelectedValuePath = "IDD";
 
-            CUST_NO.ItemsSource = dbms.DoGetDataSQL<HLQ>("SELECT hes, NAME AS nam, hes AS Expr1 FROM CUST_HESAB").ToList();
-            CUST_NO.DisplayMemberPath = "nam";
+            CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
+            CUST_NO.DisplayMemberPath = "NAME";
             CUST_NO.SelectedValuePath = "hes";
-
-            CUST_NO2.ItemsSource = dbms.DoGetDataSQL<HLQ2>("SELECT hes FROM CUST_HESAB").ToList();
+            CUST_NO2.ItemsSource = CUST_NO.ItemsSource;
             CUST_NO2.DisplayMemberPath = "hes";
             CUST_NO2.SelectedValuePath = "hes";
 
@@ -766,19 +882,19 @@ namespace Wins.WinMenus.ANBAR
                 return;
             }
 
-            if (TAH.SelectedValue is null)
-            {
-                Msgwin msgwin = new Msgwin(false, "تحویل گیرنده نمی تواند خالی باشد");
-                msgwin.ShowDialog();
-                return;
-            }
+            //if (TAH.SelectedValue is null)
+            //{
+            //    Msgwin msgwin = new Msgwin(false, "تحویل گیرنده نمی تواند خالی باشد");
+            //    msgwin.ShowDialog();
+            //    return;
+            //}
 
-            if (MOLAH.SelectedValue is null)
-            {
-                Msgwin msgwin = new Msgwin(false, "تحویل دهنده نمی تواند خالی باشد");
-                msgwin.ShowDialog();
-                return;
-            }
+            //if (MOLAH.SelectedValue is null)
+            //{
+            //    Msgwin msgwin = new Msgwin(false, "تحویل دهنده نمی تواند خالی باشد");
+            //    msgwin.ShowDialog();
+            //    return;
+            //}
 
             if (hTAG.SelectedValue is null)
             {
@@ -808,6 +924,8 @@ namespace Wins.WinMenus.ANBAR
                 //INSERT
                 dbms.DoExecuteSQL($@"INSERT INTO HEAD_LST (   NUMBER,    TAG,                     DATE_N,MAS,VAS,                     CUST_NO, M_NAGHD,MABL_VAR,MABL_HAV,MABL_HAZ,TAKHFIF,DEPATMAN,SHIFT,CUST_KIND,          USER_NAME,                               SGN1,                               SGN2,MBAA,TICMBAA,TKHF,                              OKF,SADER,ARZD,ARZKIND,JAY ,                 TAH ,                 MOLAH) 
                                                    VALUES ({NUMBER.Text}, 24,{DATE_N.Text.ToRawTarikh()},  0,  0,  N'{CUST_NO.SelectedValue}',       0,       0,       0,       0,      0,       1,    1,     NULL,N'{USER_NAME.Text}',   {Convert.ToByte(SGN1.IsChecked)},   {Convert.ToByte(SGN2.IsChecked)},   0,      0,   1,  {Convert.ToByte(OKF.IsChecked)},    0,   1,      1,  0 , N'{TAH.SelectedValue}' , N'{MOLAH.SelectedValue}')");
+
+                RefreshAfterUpdate();
             }
             else
             {
@@ -848,7 +966,7 @@ namespace Wins.WinMenus.ANBAR
                 SGN2.IsEnabled = true;
             }
 
-            INVO_LST_RASIDA_SUB.IsEnabled = true;
+            INVO_LST_RASIDA_SUB.IsReadOnly = false;
             INVO_LST_RASIDA_SUB.IsReadOnly = false;
 
             DATA_GRID_On_Open();
@@ -860,11 +978,13 @@ namespace Wins.WinMenus.ANBAR
 
             if (number != null)
             {
-                Dispatcher.BeginInvoke(new Action(() =>
+                if (INVO_RASIDA_DATA.Count == 0)
                 {
-                    INVO_LST_RASIDA_SUB.BeginEdit();
+                    var DG = INVO_LST_RASIDA_SUB;
 
-                }), DispatcherPriority.Background);
+                    var DEFINDX = (DG.SelectedIndex < 0) ? 0 : DG.SelectedIndex;
+                    CL_LMethods.FocusCellReadyToEdit(DG, "ANBAR", DEFINDX, true);
+                }
             }
         }
 
@@ -1761,62 +1881,24 @@ namespace Wins.WinMenus.ANBAR
         private void CUST_NO_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (CUST_NO.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
-
             TextBox CUTSNO_TEX = (TextBox)CUST_NO.Template.FindName("PART_EditableTextBox", CUST_NO);
-
             if (CUTSNO_TEX is null)
             {
                 return;
             }
-
-            if (CUST_NO.SelectedIndex == -1)
+            if (CUST_NO.SelectedValue is not null)
             {
-                if (CUTSNO_TEX.Text == "+" || CUTSNO_TEX.Text == "++")
+                if ((CUST_NO.SelectedItem as Custom_CUST_HESAB)?.NAME == CUTSNO_TEX.Text)
                 {
-                    ComboSearch CMBSearch = new ComboSearch("CREATE_CHEKDP", I_AM_INVO_RASID);//Search Plusy Form Specialy for Customers
-                    CMBSearch.ShowDialog();
-
-                    if (!string.IsNullOrEmpty(HESAB_FROM_SEARCH.FULL_HES))
-                    {
-                        CUST_NO.SelectedValue = HESAB_FROM_SEARCH.FULL_HES;
-                    }
-                    else
-                    {
-                        new Msgwin(false, "حسابی انتخاب نشده!").ShowDialog();
-                        return;
-                    }
-                    HESAB_FROM_SEARCH.DoClear();
-                }
-                else if (!string.IsNullOrEmpty(CUTSNO_TEX?.Text))
-                {
-                    var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT    hes FROM dbo.CUST_HESAB WHERE     (hes = N'" + CUTSNO_TEX.Text + "')").FirstOrDefault();
-                    if (data != null && !string.IsNullOrEmpty(data.hes))
-                    {
-                        CUST_NO.SelectedValue = data.hes;
-                    }
-                    else
-                    {
-                        new Msgwin(false, "حساب معتبر نیست!").Show();
-                        return;
-                    }
+                    return;
                 }
             }
 
-            if (CUST_NO.SelectedValue is not null)
+            var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(CUST_NO, dbms);
+            if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
             {
-                if (Convert.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 19, 1)) == 5d)
-                {
-                    var rst = dbms.DoGetDataSQL<HLQ5>("SELECT hes, CUST_COD FROM dbo.CUST_HESAB WHERE (hes = N'" + this.CUST_NO.SelectedValue + "')").ToList();
-                    if (rst.Count > 0)
-                    {
-                        //this.CUST_NO2.ItemsSource = this.CUST_NO.SelectedValue;
-                        this.CUST_NO2.SelectedValuePath = "hes";
-                        this.CUST_NO2.DisplayMemberPath = "hes";
-                        this.CUST_NO2.SelectedValue = CUST_NO.SelectedValue;
-
-                        this.CUST_KIND = rst.FirstOrDefault().CUST_COD;
-                    }
-                }
+                universControl.PopNotifyShow($"مشتری نمی تواند خالی باشد", Pop1, Pop1Text1, Pop_Border1);
+                e.Handled = true;
             }
 
             if (CUST_NO.SelectedValue is not null)
@@ -1836,7 +1918,7 @@ namespace Wins.WinMenus.ANBAR
                         CUST_NO.SelectedValue = null;
                     }
                 }
-                if (CL_HESABDARI.BLOCKEDCUST(CUST_NO.SelectedValue?.ToStringNullSafe()))
+                if (CL_HESABDARI.BLOCKEDCUST(CUST_NO.SelectedValue.ToString()))
                 {
                     CUST_NO.SelectedItem = null;
                     universControl.PopNotifyShow(" حساب مسدود گرديده است لطفا با مديريت مالي تماس بگيريد", Pop1, Pop1Text1, Pop_Border1);
@@ -1873,7 +1955,7 @@ namespace Wins.WinMenus.ANBAR
                 //this.AllowAdditions = true;
                 this.AllowDeletions = true;
                 this.AllowEdits = true;
-                this.INVO_LST_RASIDA_SUB.IsEnabled = false;
+                this.INVO_LST_RASIDA_SUB.IsReadOnly = true;
                 if ((bool)SGN1.IsChecked || (bool)SGN2.IsChecked)
                 {
                     this.AllowEdits = false;
@@ -1892,7 +1974,7 @@ namespace Wins.WinMenus.ANBAR
                 {
                     this.AllowEdits = true;
                     ALL_ITEMS_ENABLE();
-                    this.INVO_LST_RASIDA_SUB.IsEnabled = true;
+                    this.INVO_LST_RASIDA_SUB.IsReadOnly = false;
                 }
                 //this["INVO_LST_RASIDA_SUB"].Form.Refresh();
             }
@@ -2020,7 +2102,7 @@ namespace Wins.WinMenus.ANBAR
 
             if (DELETE_BTN.IsEnabled)
             {
-                if (INVO_LST_RASIDA_SUB.Items.Count > 0)
+                if (INVO_RASIDA_DATA.Count > 0)
                 {
                     if (!(INVO_LST_RASIDA_SUB.SelectedItems is null))
                     {
@@ -2093,6 +2175,41 @@ namespace Wins.WinMenus.ANBAR
                         }
                     }
                 }
+                else
+                {
+                    if (!string.IsNullOrEmpty(NUMBER.Text) && NUMBER.Text != "0")
+                    {
+                        try
+                        {
+                            dbms.DoExecuteSQL($@"DELETE FROM dbo.HEAD_LST WHERE NUMBER = {NUMBER.Text} AND NUMBER = {NUMBER.Text} AND TAG = {TAG}");
+
+                            SANAD();
+
+                            _navigationManager.DeleteCurrentRecord(); //Refresh Record Source
+                        }
+                        catch (SqlException ex)
+                        {
+                            if (e != null)
+                            {
+                                e.Handled = true;
+                            }
+
+                            if (ex.Number == 547)
+                            {
+                                new Msgwin(false, "این برگه دارای اطلاعات وابسته است , ابتدا آنرا حذف کنید").ShowDialog();
+                                return;
+                            }
+                            else
+                            {
+                                new Msgwin(false, "حذف به دلیل خطا در بروز پایگاه داده انجام نشد!").ShowDialog(); return;
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            new Msgwin(false, "خطا در انجام عملیات حذف!").ShowDialog(); return;
+                        }
+                    }
+                }
             }
         }
 
@@ -2100,7 +2217,7 @@ namespace Wins.WinMenus.ANBAR
         {
             string _qre = null;
             var MasterTopErrorMessages = new List<MsgModel>();
-
+            bool CurrentRowisNew = true;
             IVM.StartTransaction(); // Start the transaction again if is disposed before ****************************************************************
 
             List<MsgModel> ErrosMessages = new List<MsgModel>();
@@ -2108,6 +2225,7 @@ namespace Wins.WinMenus.ANBAR
             if (TheRow.id is null || TheRow.id <= 0) //INSERT
             {
                 _qre = $@"INSERT INTO INVO_LST (       NUMBER, TAG,         ANBAR,                                           RADIF,             CODE,         MEGH,         MEGHk,                                              MEGH_MAR,                                          MABL,                                            MABL_K,                         FROM_A,                                            MEGH_R,         VAHED_K,                                           N_KOL,                                            N_MOIN,                                            AVRAGE,                                             AVRAGE2,                                           IMBAA,                                              TOTALARZ,                                          TKHN,                                      JAY) 
+                          OUTPUT INSERTED.id
 			                                                       VALUES ({NUMBER.Text},  24,{TheRow.ANBAR},{(TheRow.RADIF is null ? "NULL" : TheRow.RADIF)}, N'{TheRow.CODE}',{TheRow.MEGH},{TheRow.MEGHk},{(TheRow.MEGH_MAR is null ? "NULL" : TheRow.MEGH_MAR)},{(TheRow.MABL is null ? "NULL" : TheRow.MABL)},{(TheRow.MABL_K is null ? "NULL" : TheRow.MABL_K)},{Convert.ToByte(TheRow.FROM_A)},{(TheRow.MEGH_R is null ? "NULL" : TheRow.MEGH_R)},{TheRow.VAHED_K},{(TheRow.N_KOL is null ? "NULL" : TheRow.N_KOL)},{(TheRow.N_MOIN is null ? "NULL" : TheRow.N_MOIN)},{(TheRow.AVRAGE is null ? "NULL" : TheRow.AVRAGE)},{(TheRow.AVRAGE2 is null ? "NULL" : TheRow.AVRAGE2)},{(TheRow.IMBAA is null ? "NULL" : TheRow.IMBAA)},{(TheRow.TOTALARZ is null ? "NULL" : TheRow.TOTALARZ)},{(TheRow.TKHN is null ? "NULL" : TheRow.TKHN)},{(TheRow.JAY is null ? "0" : TheRow.JAY)})";
 
                 var (errorMsgs, _, _, queryOutputs) = IVM.CheckInventoryAndExecuteQuery<long>(new List<object> { TheRow }, _qre, null, false);
@@ -2122,6 +2240,7 @@ namespace Wins.WinMenus.ANBAR
             }
             else //UPDATE
             {
+                CurrentRowisNew = false;
                 _qre = $@"UPDATE INVO_LST 
                                             SET 
                                                 ANBAR = {TheRow.ANBAR},
@@ -2195,25 +2314,22 @@ namespace Wins.WinMenus.ANBAR
 
             if (ErrosMessages.Any())
             {
+                if (CurrentRowisNew)
+                {
+                    TheRow.id = null; //Bring Back to null (New State because of Rollback Transaction)
+                }
                 IVM.RollbackTransaction(); //Undo
-            }
-            else
-            {
-                IVM.CommitTransaction(); // Commit Apply Save
-            }
-            MasterTopErrorMessages.AddRange(ErrosMessages);
 
-            SANAD();
-
-            if (MasterTopErrorMessages.Any())
-            {
                 INVO_LST_RASIDA_SUB_CANCEL_EDIT();
                 IVM.ShowErrorMessages(MasterTopErrorMessages);
                 return false;
             }
+            else
+            {
+                IVM.CommitTransaction(); // Commit Apply Save
+                SANAD();
+            }
 
-            //Undo
-            ReGetData();
             return true;
         }
 
@@ -2267,6 +2383,17 @@ namespace Wins.WinMenus.ANBAR
             }
             catch { /*ignore*/ }
 
+            if (!INVO_LST_RASIDA_SUB.IsKeyboardFocusWithin && !INVO_LST_RASIDA_SUB.IsFocused) //Only On Form F7 Pressed Not DataGrid
+            {
+                if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+                    var searchWindow = new EnhancedSearchWindow(this);
+                    searchWindow.Owner = this;
+                    searchWindow.ShowDialog();
+                }
+            }
+
             if (e.Key is Key.Delete && Keyboard.Modifiers == ModifierKeys.None)
             {
                 if (INVO_LST_RASIDA_SUB_IsFocused)
@@ -2298,6 +2425,53 @@ namespace Wins.WinMenus.ANBAR
             //report.Show();
 
             new Rpts.WINRPT(report, "سایر رسید انبار ها").Show();
+        }
+
+        private void ClearFreshAll()
+        {
+            NUMBER.Text = "0";
+
+            FNUMCO.Text = "0";
+
+            DATE_N.Text = Tarikh.FullCurrentDate;
+
+            USER_NAME.Text = Baseknow.UUSER;
+
+            hTAG.SelectedIndex = 0; hTAG.Items.Refresh(); //نوع رسید
+
+            CUST_NO.SelectedValue = null; CUST_NO.Items.Refresh(); //نام مشتری
+            CUST_NO.Text = null;
+            CUST_NO2.SelectedValue = null; CUST_NO2.Items.Refresh(); //نام مشتری
+
+            TAH.Text = null; //تحویل گیرنده
+            MOLAH.Text = null; //تحویل دهنده
+
+            OKF.IsChecked = false;
+
+            sgn1usid.Text = null; sgn1usid.Tag = null; SGN1.IsChecked = false;
+            sgn2usid.Text = null; sgn2usid.Tag = null; SGN2.IsChecked = false;
+
+            PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
+            PERSONEL.SelectedIndex = -1; PERSONEL.Items.Refresh();
+            PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+
+            MOGU.Text = null;
+            Text59.Text = "0";
+            INVO_RASIDA_DATA?.Clear();
+
+            Command106.IsEnabled = false;
+
+            AllowEdits = true;
+
+            INVO_LST_RASIDA_SUB.IsReadOnly = true;
+
+            GetDefaultFocus();
+        }
+
+        private void GetDefaultFocus()
+        {
+            DATE_N.Focus();
+            DATE_N.SelectAll();
         }
     }
 }

@@ -588,7 +588,7 @@ namespace Wins.WinMenus.Checkha
             if (SAYADI.Text.Length < 16 && SAYADI.Text != "0")
             {
                 Msgwin msgwin = new Msgwin(false, "شماره صیادی نباید کمتر از 16 رقم باشد.");
-                msgwin.Show();
+                msgwin.ShowDialog();
             }
         }
 

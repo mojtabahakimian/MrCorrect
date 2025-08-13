@@ -515,7 +515,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 if (CL_HESABDARI.ISTAF(this.HES1.SelectedValue.ToString()))
                 {
                     Msgwin msgwin = new Msgwin(false, "حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!");
-                    msgwin.Show();
+                    msgwin.ShowDialog();
                     CANCEL = true;
                 }
             }
@@ -623,7 +623,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             if (SAYADI.Text.Length < 16 && SAYADI.Text != "0")
             {
                 Msgwin msgwin = new Msgwin(false, "شماره صیادی نباید کمتر از 16 رقم باشد.");
-                msgwin.Show();
+                msgwin.ShowDialog();
             }
         }
 

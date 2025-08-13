@@ -25,9 +25,6 @@ using Wins.WinMenus.SALARY;
 using Wins.WinMenus.Taarif;
 using Wins.WinMenus.CONFIGS;
 using Wins.WinMenus.SANATI;
-using Prg_Proccessy.Generaly;
-using static Functions.InventoryManager;
-using Stimulsoft.Base;
 using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
 using System.Reflection;
@@ -37,11 +34,9 @@ using Prg_Proccessy.FUNCTIONS;
 using Prg_UI.Wins.WinMenus.CONFIGS;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
 using Prg_UI.Wins.WinMenus.BARNAME_RIZI;
-
 using Prg_UI.Wins.WinMenus.SANATI;
-
 using Prg_UI.Wins.WinMenus.Taarif;
-
+using System.Threading;
 
 namespace Functions
 {
@@ -773,6 +768,12 @@ namespace Functions
         }
         #endregion
 
+        private static int _isFlagSet = 0; // 0 = false, 1 = true
+        public static bool IsOpenedFromAutomation
+        {
+            get => Interlocked.CompareExchange(ref _isFlagSet, 0, 0) == 1;
+            set => Interlocked.Exchange(ref _isFlagSet, value ? 1 : 0);
+        }
 
         //, bool _IsModalDialog_ = false, bool _AlloMultipleInstances_ = true)
         public static void OpenWinMenu(WinNameType _TYPE_, Window? OWNERWIN, params object[] _PARAMETERS_)
@@ -906,11 +907,20 @@ namespace Functions
                     break;
 
                 case WinNameType.HAVALAH_EXIT: //برگه خروج مواد اولیه جهت تولید
-                    CL_LMethods.OpenWindow(OWNERWIN, new HAVALAH_EXIT((double?)_PARAMETERS_.FirstOrDefault()));
+                    CL_LMethods.OpenWindow(OWNERWIN, new HAVALAH_EXIT(
+                                _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                                _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])
+                                )
+                                );
+
                     break;
 
                 case WinNameType.HAVALAH_ENTER: //برگه ورود کالای ساخته شده
-                    CL_LMethods.OpenWindow(OWNERWIN, new HAVALAH_ENTER((double?)_PARAMETERS_.FirstOrDefault()));
+                    CL_LMethods.OpenWindow(OWNERWIN, new HAVALAH_ENTER(
+                                _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                                _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])
+                                )
+                                );
                     break;
 
                 case WinNameType.WIN_SAZMAN: //سازمان
@@ -1152,28 +1162,38 @@ namespace Functions
                     }
                     break;
 
-                case WinNameType.HAVALE_LIST: //مشاهده حواله های فروش
-                    CL_LMethods.OpenWindow(OWNERWIN, new HAVALE_LIST());
-                    break;
+                //case WinNameType.HAVALE_LIST: //مشاهده حواله های فروش
+                //    CL_LMethods.OpenWindow(OWNERWIN, new HAVALE_LIST());
+                //    break;
 
                 case WinNameType.HEAD_LST_ENTEGHAL_WIN: //انتقال از انبار به انبار
-                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_ENTEGHAL_WIN((double?)_PARAMETERS_.FirstOrDefault()));
+                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_ENTEGHAL_WIN(
+                 _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                 _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])));
                     break;
 
                 case WinNameType.HEAD_LST_HAV_OTHER_WIN: //سایر حواله انبار ها
-                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_HAV_OTHER_WIN((double?)_PARAMETERS_.FirstOrDefault()));
+                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_HAV_OTHER_WIN(
+                 _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                 _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])));
                     break;
 
                 case WinNameType.HEAD_LST_HAVL: //حواله انبار فروش
-                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_HAVL((double?)_PARAMETERS_.FirstOrDefault()));
+                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_HAVL(
+                 _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                 _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])));
                     break;
 
                 case WinNameType.HEAD_LST_RASID: //رسید انبار
-                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_RASID((double?)_PARAMETERS_.FirstOrDefault()));
+                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_RASID(
+                 _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                 _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])));
                     break;
 
                 case WinNameType.HEAD_LST_RASID_OTHER_WIN: //سایر رسید انبار ها
-                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_RASID_OTHER_WIN((double?)_PARAMETERS_.FirstOrDefault()));
+                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_RASID_OTHER_WIN(
+                 _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                 _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])));
                     break;
 
                 case WinNameType.MOGUDI_SEARCH_MAIN: //جستجو گر موجودی
@@ -1181,7 +1201,9 @@ namespace Functions
                     break;
 
                 case WinNameType.DEED_HEAD: //صدور و ویرایش اسناد
-                    CL_LMethods.OpenWindow(OWNERWIN, new DEED_HEAD((double?)_PARAMETERS_.FirstOrDefault()), isModalDialog: false, allowMultipleInstances: true);
+                    CL_LMethods.OpenWindow(OWNERWIN, new DEED_HEAD(
+                 _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                 _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])), isModalDialog: false, allowMultipleInstances: true);
                     break;
 
                 case WinNameType.DEED_HEAD_LIST: //لیست اسناد
@@ -1221,7 +1243,9 @@ namespace Functions
                     break;
 
                 case WinNameType.PGET_HED: //خزانه داری
-                    CL_LMethods.OpenWindow(OWNERWIN, new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED((double?)_PARAMETERS_.FirstOrDefault()), isModalDialog: false, allowMultipleInstances: false);
+                    CL_LMethods.OpenWindow(OWNERWIN, new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED(
+                 _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                 _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])), isModalDialog: false, allowMultipleInstances: false);
                     break;
 
                 case WinNameType.PGET_HED_LIST: //لیست خزانه ها
@@ -1233,76 +1257,170 @@ namespace Functions
                     break;
 
                 case WinNameType.HEAD_LST_BRFR: //فاکتور برگشت فروش
-                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_BRFR((double?)_PARAMETERS_.FirstOrDefault()));
+                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_BRFR(
+                 _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                 _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])));
                     break;
 
                 case WinNameType.HEAD_LST_FROOSH_BACK2: //فاکتور برگشت فروش - عادی
-                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_FROOSH_BACK2((double?)_PARAMETERS_.FirstOrDefault()));
+                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_FROOSH_BACK2(
+                 _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                 _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])));
                     break;
 
-                case WinNameType.HEAD_LST_FROOSH_AUTO_DETECT: //فاکتور فروش 
+                case WinNameType.HEAD_LST_FROOSH_AUTO_DETECT: // فاکتور فروش (Auto-Detect)
                     {
-                        var MostaghimDastrasi = CL_HESABDARI.LETSGO("FRMOST"); //فاکتور فروش مستقیم عمل شود از تعیین سطح دسترسی
-                        var MostaghimAmalShavad = Strings.Mid(Baseknow.OPTIONSS, 53, 1) == "5"; //فاکتور فروش مستقیم تیک داره از تنظیمات بیشتر
+                        var MostaghimDastrasi = CL_HESABDARI.LETSGO("FRMOST");                // دسترسی فاکتور مستقیم
+                        var MostaghimAmalShavad = Strings.Mid(Baseknow.OPTIONSS, 53, 1) == "5"; // گزینه "فروش مستقیم" در تنظیمات
 
-                        if (MostaghimAmalShavad && MostaghimDastrasi) //مستقیم
+                        // Get Parameters: NumbersPair > IsDirect > IsExport > IsFromAutomation
+                        string? numbersPair = (_PARAMETERS_.Length > 0) ? _PARAMETERS_[0]?.ToString() : null;
+                        bool isDirect = (_PARAMETERS_.Length > 1) && Convert.ToBoolean(_PARAMETERS_[1]);
+                        bool isExporty = (_PARAMETERS_.Length > 2) && Convert.ToBoolean(_PARAMETERS_[2]);
+                        bool fromAutomation = (_PARAMETERS_.Length > 3) && Convert.ToBoolean(_PARAMETERS_[3]);
+
+                        if (MostaghimAmalShavad && MostaghimDastrasi) // مستقیم
                         {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_DIRECT, OWNERWIN, (string?)_PARAMETERS_.FirstOrDefault());
+                            CL_MenuManager.OpenWinMenu(
+                                CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_DIRECT,
+                                OWNERWIN,
+                                numbersPair,
+                                true,           // 👈 مستقیم
+                                isExporty,      // صادراتی بودن طبق ورودی
+                                fromAutomation
+                            );
                         }
-                        else if (Strings.Mid(Baseknow.OPTIONSS, 18, 1) != "5") //غیر مستقیم
+                        else if (Strings.Mid(Baseknow.OPTIONSS, 18, 1) != "5") // غیر مستقیم
                         {
-                            if (Baseknow.TKHF < 2) { }
-                            else
+                            if (Baseknow.TKHF >= 2)
                             {
-                                CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, OWNERWIN, (string?)_PARAMETERS_.FirstOrDefault());
+                                CL_MenuManager.OpenWinMenu(
+                                    CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE,
+                                    OWNERWIN,
+                                    numbersPair,
+                                    false,          // 👈 غیر مستقیم
+                                    isExporty,
+                                    fromAutomation
+                                );
                             }
+                            // else: هیچ کاری نکن (همان منطق قبلی‌ات)
                         }
                         else
                         {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_DIRECT, OWNERWIN, (string?)_PARAMETERS_.FirstOrDefault());
+                            // پیش‌فرض: مستقیم
+                            CL_MenuManager.OpenWinMenu(
+                                CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_DIRECT,
+                                OWNERWIN,
+                                numbersPair,
+                                true,
+                                isExporty,
+                                fromAutomation
+                            );
                         }
-
+                        break;
                     }
-                    break;
+
 
                 case WinNameType.HEAD_LST_FROOSH22_DIRECT: //فاکتور فروش مستقیم
-                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_FROOSH22((string?)_PARAMETERS_.FirstOrDefault(), true, false));
+                    //CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_FROOSH22((string?)_PARAMETERS_.FirstOrDefault(), true, false));
+
+                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_FROOSH22(
+                                _PARAMETERS_.Length > 0 ? (string?)_PARAMETERS_[0] : null,
+                                true,
+                                false,
+                                _PARAMETERS_.Length > 3 && Convert.ToBoolean(_PARAMETERS_[3])
+                                )
+                                );
                     break;
 
                 case WinNameType.HEAD_LST_FROOSH22_HAVALEHEE: //فاکتور فروش با انتخاب حواله
-                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_FROOSH22((string?)_PARAMETERS_.FirstOrDefault(), false, false));
+                    //CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_FROOSH22((string?)_PARAMETERS_.FirstOrDefault(), false, false));
+                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_FROOSH22(
+                                   _PARAMETERS_.Length > 0 ? (string?)_PARAMETERS_[0] : null,
+                                   false,
+                                   false,
+                                   _PARAMETERS_.Length > 3 && Convert.ToBoolean(_PARAMETERS_[3])
+                                   )
+                                   );
                     break;
 
                 case WinNameType.HEAD_LST_FROOSH22_SADERATI: //فاکتور فروش (با انتخاب حواله) صادراتی
-                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_FROOSH22((string?)_PARAMETERS_.FirstOrDefault(), false, true));
+                    //CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_FROOSH22((string?)_PARAMETERS_.FirstOrDefault(), false, true));
+                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_FROOSH22(
+                                              _PARAMETERS_.Length > 0 ? (string?)_PARAMETERS_[0] : null,
+                                              false,
+                                              true,
+                                              _PARAMETERS_.Length > 3 && Convert.ToBoolean(_PARAMETERS_[3])
+                                              )
+                                              );
                     break;
 
                 case WinNameType.HEAD_LST_KH_BACK: //فاکتور برگشت خرید - عادی
-                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_KH_BACK((double?)_PARAMETERS_.FirstOrDefault()));
+                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_KH_BACK(
+                                _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                                _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])
+                                )
+                                );
                     break;
 
                 case WinNameType.HEAD_LST_KH_BACK_AZAD: //فاکتور برگشت خرید آزاد
-                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_KH_BACK_AZAD((double?)_PARAMETERS_.FirstOrDefault()));
+                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_KH_BACK_AZAD(
+                                _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                                _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])
+                                )
+                                );
                     break;
 
                 case WinNameType.HEAD_LST_KHADAMAT: //فاکتور (فروش) خدمات
-                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_KHADAMAT((double?)_PARAMETERS_.FirstOrDefault()));
+                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_KHADAMAT(
+                                _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                                _PARAMETERS_.Length > 1 ? (string?)_PARAMETERS_[1] : null,
+                                _PARAMETERS_.Length > 2 && Convert.ToBoolean(_PARAMETERS_[2])
+                                )
+                                );
                     break;
 
                 case WinNameType.HEAD_LST_KHAREED1_DIRECT: //فاکتور خرید مستقیم
-                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_KHAREED1((double?)_PARAMETERS_.FirstOrDefault(), true, false));
+                    //CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_KHAREED1((double?)_PARAMETERS_.FirstOrDefault(), true, false));
+                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_KHAREED1(
+                                _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                                true,
+                                false,
+                                _PARAMETERS_.Length > 3 && Convert.ToBoolean(_PARAMETERS_[3])
+                                )
+                                );
+
                     break;
 
                 case WinNameType.HEAD_LST_KHAREED1_RASID: //فاکتور خرید با انتخاب رسید
-                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_KHAREED1((double?)_PARAMETERS_.FirstOrDefault(), false, false));
+                    //CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_KHAREED1((double?)_PARAMETERS_.FirstOrDefault(), false, false));
+                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_KHAREED1(
+                                _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                                false,
+                                false,
+                                _PARAMETERS_.Length > 3 && Convert.ToBoolean(_PARAMETERS_[3])
+                                )
+                        );
                     break;
 
                 case WinNameType.HEAD_LST_KHAREED1_SADERATI: //فاکتور خرید (با انتخاب رسید) صادراتی
                     CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_KHAREED1((double?)_PARAMETERS_.FirstOrDefault(), false, true));
+                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_KHAREED1(
+                                _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                                false,
+                                true,
+                                _PARAMETERS_.Length > 3 && Convert.ToBoolean(_PARAMETERS_[3])
+                                )
+                        );
                     break;
 
-                case WinNameType.HEAD_LST_PISHFROOSH2: //پیش فاکتور فروش
-                    CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_PISHFROOSH2((double?)_PARAMETERS_.FirstOrDefault()));
+                case WinNameType.HEAD_LST_PISHFROOSH2: // پیش فاکتور فروش
+                    CL_LMethods.OpenWindow(OWNERWIN,
+                        new HEAD_LST_PISHFROOSH2(
+                            _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                            _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])
+                        )
+                    );
                     break;
 
                 case WinNameType.IRAN_SALES_MAP: //گزارش فروش روی نقشه
@@ -1503,8 +1621,8 @@ namespace Functions
 
                 case WinNameType.VISITOR_GOL_REP_MAR: //مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه (در تاریخ برگشت)
                     CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_GOL_REP_MAR(), default, false);
-                    break;   
-                    
+                    break;
+
                 case WinNameType.HAVALE_EXIT_SAYER: //صدور برگه خروج سایر مواد از انبار
                     CL_LMethods.OpenWindow(OWNERWIN, new HAVALE_EXIT_SAYER(), default, false);
                     break;
@@ -1514,7 +1632,7 @@ namespace Functions
             }
         }
 
-        public static void MenuBaseOnKindOpen(Window Thewindowthis, CL_CCNNMANAGER dbms, int kind, object _NUM_, bool SanadMabnaee = true)
+        public static void MenuBaseOnKindOpen(Window Thewindowthis, CL_CCNNMANAGER dbms, int kind, object _NUM_, bool SanadMabnaee = true, bool _isCalledFromAutomasion_ = false)
         {
             switch (kind)
             {
@@ -1525,7 +1643,7 @@ namespace Functions
                         var _N_Sb_ = dbms.DoGetDataSQL<double?>($"SELECT TOP 1 N_S FROM dbo.DEED_HED WHERE base = {_NUM_}").FirstOrDefault();
                         if (_N_Sb_ != null)
                         {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, Thewindowthis, (double)_N_Sb_);
+                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, Thewindowthis, (double)_N_Sb_, _isCalledFromAutomasion_);
                         }
                     }
                     else
@@ -1534,25 +1652,25 @@ namespace Functions
                         var _N_S2_ = dbms.DoGetDataSQL<double?>($"SELECT TOP 1 N_S FROM dbo.DEED_HED WHERE N_S = {_NUM_}").FirstOrDefault();
                         if (_N_S2_ != null)
                         {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, Thewindowthis, (double)_N_S2_);
+                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, Thewindowthis, (double)_N_S2_, _isCalledFromAutomasion_);
                         }
                     }
                     break;
 
                 case 1:
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID, Thewindowthis, Convert.ToDouble(_NUM_));
+                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
                     break;
 
                 case 2:
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAVL, Thewindowthis, Convert.ToDouble(_NUM_));
+                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAVL, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
                     break;
 
                 case 3:
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK, Thewindowthis, Convert.ToDouble(_NUM_));
+                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
                     break;
 
                 case 4:
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_BACK2, Thewindowthis, Convert.ToDouble(_NUM_));
+                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_BACK2, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
                     break;
 
                 case 5:
@@ -1560,7 +1678,7 @@ namespace Functions
                     var _N_S_KHAZANEH_ = dbms.DoGetDataSQL<double?>($"SELECT ID FROM dbo.PGET_HED WHERE N_S = {_NUM_}").FirstOrDefault();
                     if (_N_S_KHAZANEH_ != null)
                     {
-                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, Thewindowthis, _N_S_KHAZANEH_);
+                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, Thewindowthis, _N_S_KHAZANEH_, _isCalledFromAutomasion_);
                     }
                     else
                     {
@@ -1569,7 +1687,7 @@ namespace Functions
                         _N_S_KHAZANEH_ = dbms.DoGetDataSQL<double?>($"SELECT ID FROM dbo.PGET_HED WHERE ID = {_NUM_}").FirstOrDefault();
                         if (_N_S_KHAZANEH_ != null)
                         {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, Thewindowthis, _KHAZANEH_);
+                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, Thewindowthis, _KHAZANEH_, _isCalledFromAutomasion_);
                         }
                     }
                     break;
@@ -1579,16 +1697,31 @@ namespace Functions
                     break;
 
                 case 12:
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, Thewindowthis, Convert.ToDouble(_NUM_));
+                    CL_MenuManager.OpenWinMenu(
+                          CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID,
+                          Thewindowthis,
+                          Convert.ToDouble(_NUM_),
+                          false,
+                          false,
+                          _isCalledFromAutomasion_    // FromAutomation
+                          );
                     break;
 
                 case 13:
                     //گرفتن شماره فاکتور و شماره حواله از فاکتور های فروش
+                    //Get Parameters: Numbers > IsDirect > IsExport > IsfromAutomasion
                     var RST = dbms.DoGetDataSQL<HEAD_LST>($"SELECT NUMBER, NUMBER1 FROM dbo.HEAD_LST WHERE NUMBER={_NUM_} AND TAG=13").FirstOrDefault();
                     if (RST != null && RST?.NUMBER1 != null)
                     {
-                        var NUMBERTOOPEMN = $"{RST.NUMBER1},{RST.NUMBER}";
-                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, Thewindowthis, NUMBERTOOPEMN);
+                        var NUMBERTOOPEN = $"{RST.NUMBER1},{RST.NUMBER}";
+                        CL_MenuManager.OpenWinMenu(
+                            CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT,
+                            Thewindowthis,             // 👈 این باید OWNERWIN باشد، نه داخل params
+                            NUMBERTOOPEN,               // string? numbersPair
+                            false,                      // IsDirect (در Auto-Detect تعیین نهایی می‌شود)
+                            false,                      // IsExport  (در Auto-Detect ممکنه override بشه)
+                            _isCalledFromAutomasion_    // FromAutomation
+                            );
                     }
 
                     //HEAD_LST_FROOSH22? newWindow = null;
@@ -1613,7 +1746,7 @@ namespace Functions
 
                 case 20:
                     //new HEAD_LST_PISHFROOSH2(_NUM_).Show();
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, Thewindowthis, Convert.ToDouble(_NUM_));
+                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
                     break;
 
                 case 24:
@@ -1621,7 +1754,7 @@ namespace Functions
                     break;
 
                 case 25:
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_BRFR, Thewindowthis, Convert.ToDouble(_NUM_));
+                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_BRFR, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
                     break;
 
                 case 26:
@@ -1629,7 +1762,7 @@ namespace Functions
                     break;
 
                 case 27:
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK_AZAD, Thewindowthis, Convert.ToDouble(_NUM_));
+                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK_AZAD, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
                     break;
 
                 case 32:
@@ -1674,7 +1807,7 @@ namespace Functions
                     break;
 
                 case 100:
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, Thewindowthis, Convert.ToDouble(_NUM_));
+                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
                     break;
 
                 case 90:

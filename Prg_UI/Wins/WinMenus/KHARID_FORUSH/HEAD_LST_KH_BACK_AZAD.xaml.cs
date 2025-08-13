@@ -169,7 +169,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         /// شماره فاكتور برگشت NUMBER
         /// </summary>
         /// <param name="number_to_open"></param>
-        public HEAD_LST_KH_BACK_AZAD(double? number_to_open = null)
+        public HEAD_LST_KH_BACK_AZAD(double? number_to_open = null, bool _isAutomasion_ = false)
         {
             InitializeComponent();
 
@@ -178,10 +178,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (number_to_open != null)
             {
                 NUMBER.Text = number_to_open.ToString(); //شماره  حواله
-                NUMBER.UpdateLayout();
+                IsOpenedFromAutomation = _isAutomasion_;
             }
         }
-
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
         UniversControl universControl = new UniversControl();
@@ -423,6 +422,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
+            ChangeIsHappend = false;
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -3753,6 +3753,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
         }
         public PAY_GETD_SUB22_MODEL? PAY_GETD_WAS_ROW_ITEM { get; set; }
+        public bool IsOpenedFromAutomation { get; } = false;
+
         public void PAY_GETD_SUB_ReGetData()
         {
             if (!string.IsNullOrEmpty(NUMBER.Text) && NUMBER.Text != "0") //Did Saved
