@@ -3354,6 +3354,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         {
             IsSaveSuccess = false;
 
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null) { return; }

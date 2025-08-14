@@ -354,11 +354,14 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 132; Baseknow.UUSER = "Prima Chopan";    
 
             //Baseknow.USERCOD = 116; Baseknow.UUSER = "Mr.Salmani";
+
             Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
 
             CL_Generaly.SHIFT_OF_USER = 1;
             CL_Generaly.VAHED_OF_USER = 1;
             Baseknow.UGRP = "1";
+
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_BRFR, this);
 
             //new PRICE_ELAMIETF_FORM().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID_OTHER_WIN, this);
@@ -383,7 +386,7 @@ namespace Prg_UI.Wins
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN_LIMITED, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
 
             //new WinConnectionChoose().ShowDialog();
             //new HEAD_LST_HAVL(4306d).ShowDialog();
@@ -400,7 +403,7 @@ namespace Prg_UI.Wins
 
             //new WinConnectionChoose().Show();
 
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this , 2021d);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);

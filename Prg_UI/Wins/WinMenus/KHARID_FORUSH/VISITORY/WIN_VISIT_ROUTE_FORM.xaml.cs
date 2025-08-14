@@ -1436,7 +1436,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         }
         private void DG_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             if (!HeaderIsValid()) { return; }
 
             var ROW = e.Row.Item as VISIT_ROUTE_DTL;

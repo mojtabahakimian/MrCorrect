@@ -903,10 +903,8 @@ namespace Wins.WinMenus.ANBAR
 
         private void ANBARGRD_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {
@@ -947,10 +945,8 @@ namespace Wins.WinMenus.ANBAR
         }
         private void ANBARGRD_SUB2_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {
@@ -990,10 +986,8 @@ namespace Wins.WinMenus.ANBAR
         }
         private void ANBARGRD_SUB3_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {

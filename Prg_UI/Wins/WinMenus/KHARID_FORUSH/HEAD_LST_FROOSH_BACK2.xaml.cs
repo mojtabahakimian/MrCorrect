@@ -1881,10 +1881,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void INVO_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {
@@ -3632,15 +3630,14 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void PAY_GETP_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             var FINAL_CROW_ITEM = (e.Row.Item as PAY_GETP_MODEL);
 
             var DG = PAY_GETP_SUB;
 
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
-
+            
             if (e.Row.Item == null)
             {
                 return;
@@ -4120,6 +4117,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void VISITOR_DTL_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             if (e.Row.Item == null)
             {
                 return;

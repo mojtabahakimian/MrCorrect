@@ -792,6 +792,9 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         }
         private void OTHER_DTL_SUB_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             if (e.Row.Item == null)
             {
                 return;

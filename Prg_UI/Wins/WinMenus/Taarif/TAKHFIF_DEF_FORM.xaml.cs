@@ -888,10 +888,8 @@ namespace Wins.WinMenus.Taarif
         }
         private void TAKHFIF_DTL_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {
@@ -946,10 +944,8 @@ namespace Wins.WinMenus.Taarif
         }
         private void CUSTKIND_TF_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {

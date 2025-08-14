@@ -5940,6 +5940,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void INVO_LST_sub_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             if (e.Row.Item == null) { return; }
 
             var ROW = e.Row.Item as INVO_LST_FACTOR22;
@@ -9773,6 +9776,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         }
         private void VISITOR_DTL_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             if (e.Row.Item == null) { return; }
             var FINAL_CROW_ITEM = (e.Row.Item as VISITOR_DTL);
 
@@ -9999,6 +10005,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     double sum = SAYER_VISITOR_DATA.Sum(item => item.PURSANT ?? 0.0);
                     Text190.Text = sum.ToString();
 
+                    SANAD();
                 }
                 else
                 {

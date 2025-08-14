@@ -225,10 +225,8 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
 
         private void NOTE_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (e.EditAction == DataGridEditAction.Cancel)
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             // گرفتن آیتم (رکورد) که ویرایش شده است
             NOTES editedItem = e.Row.Item as NOTES;

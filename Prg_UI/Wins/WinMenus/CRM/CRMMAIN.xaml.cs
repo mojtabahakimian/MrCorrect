@@ -222,18 +222,20 @@ namespace Prg_UI.Wins.WinMenus.CRM
             if (record == null) return;
 
             // Get the column's mapping name from the grid's CurrentColumn property
-            switch (e.MappingName)
-            {
-                case nameof(COPMANES.COMPANY_NAME):
-                    CheckCompanyName(record.COMPANY_NAME);
-                    break;
-                case nameof(COPMANES.FACT_TEL):
-                    CheckFactTel(record.FACT_TEL);
-                    break;
-                case nameof(COPMANES.MOBILE):
-                    CheckMobile(record.MOBILE);
-                    break;
-            }
+            //switch (e.MappingName)
+            //{
+            //    case nameof(COPMANES.COMPANY_NAME):
+            //        CheckCompanyName(record.COMPANY_NAME);
+            //        break;
+            //    case nameof(COPMANES.FACT_TEL):
+            //        CheckFactTel(record.FACT_TEL);
+            //        break;
+            //    case nameof(COPMANES.MOBILE):
+            //        CheckMobile(record.MOBILE);
+            //        break;
+            //}
+            
+
         }
 
         private void CRM_MASTER_SUB_RowValidated(object sender, RowValidatedEventArgs e)

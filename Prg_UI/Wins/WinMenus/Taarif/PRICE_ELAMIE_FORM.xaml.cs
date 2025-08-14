@@ -1203,7 +1203,9 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         }
         private void DG_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             if (!HeaderIsValid()) { return; }
 
             var ROW = e.Row.Item as PRICE_ELAMIE_DTL;

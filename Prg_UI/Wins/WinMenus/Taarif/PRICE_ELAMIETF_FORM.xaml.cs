@@ -1301,7 +1301,9 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         }
         private void DG_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             if (!HeaderIsValid()) { return; }
 
             var ROW = e.Row.Item as PRICE_ELAMIETF_DTL_MODEL;
@@ -1852,7 +1854,9 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         }
         private void SUB_EXPTF_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             if (e.Row.Item == null) { return; }
             var ROW = e.Row.Item as PRICE_ELAMIETF_EXCEPTION;
 

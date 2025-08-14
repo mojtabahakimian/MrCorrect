@@ -1584,6 +1584,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         bool IsSaveSuccess = true;
         private void Child14_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             if (e.Row.Item == null)
             {
                 return;
