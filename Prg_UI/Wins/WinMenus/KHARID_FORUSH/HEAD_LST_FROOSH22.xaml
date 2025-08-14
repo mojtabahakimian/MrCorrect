@@ -1077,6 +1077,15 @@
                             </Style>
                         </DataGrid.Style>
                         <DataGrid.Columns >
+                            <DataGridTextColumn Header="کد حساب" Width="80" MinWidth="80" Binding="{Binding CUST_NO}" IsReadOnly="True">
+                                <DataGridTextColumn.CellStyle>
+                                    <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                        <Setter Property="Focusable" Value="False"/>
+                                        <Setter Property="KeyboardNavigation.IsTabStop" Value="False"/>
+                                        <Setter Property="IsTabStop"  Value="False"/>
+                                    </Style>
+                                </DataGridTextColumn.CellStyle>
+                            </DataGridTextColumn>
                             <DataGridTextColumn x:Name="CUST_NO_NAME_COLUMN" Binding="{Binding CUST_NO_NAME, UpdateSourceTrigger=LostFocus}" Header="نام شخص" MinWidth="200" Width="auto"/>
                             <DataGridTextColumn x:Name="cUST_NOColumn" IsReadOnly="True" Visibility="Hidden" Binding="{Binding CUST_NO, UpdateSourceTrigger=LostFocus}" Header="کد شخص" Width="SizeToHeader"/>
 

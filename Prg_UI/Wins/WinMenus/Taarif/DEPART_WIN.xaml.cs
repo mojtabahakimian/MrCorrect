@@ -254,6 +254,9 @@ namespace Wins.WinMenus.Taarif
         }
         private void DEPART_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             var ROW = e.Row.Item as DEPART_MODEL;
 
             if (!BodyIsValid(ROW))

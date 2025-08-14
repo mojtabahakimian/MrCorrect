@@ -2289,10 +2289,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void INVO_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (!HeaderIsValid())
             {

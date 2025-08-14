@@ -717,10 +717,8 @@ namespace Wins.WinMenus.Taarif
         }
         private void TDETA_HES4_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {

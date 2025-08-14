@@ -1550,10 +1550,8 @@ namespace Wins.WinSetting
         }
         private void OPANBACCESS_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {
@@ -2211,10 +2209,8 @@ namespace Wins.WinSetting
 
         private void BLOCKED_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {
@@ -2577,10 +2573,8 @@ namespace Wins.WinSetting
         }
         private void UNBLOCKED_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {
@@ -3036,10 +3030,8 @@ namespace Wins.WinSetting
         }
         private void CHARTSAZMANI_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {
@@ -3574,6 +3566,7 @@ namespace Wins.WinSetting
         }
         private void BLOCK_CUSTOMER_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             var ROW = e.Row.Item as BLOCK_CUSTOMER;
@@ -4127,6 +4120,7 @@ namespace Wins.WinSetting
         }
         private void USER_ENDN_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             var ROW = e.Row.Item as SALGROUP_MODEL;

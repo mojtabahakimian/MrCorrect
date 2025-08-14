@@ -204,13 +204,11 @@ namespace Wins.WinMenus.Taarif
         }
         private void TCOD_BANKS_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             var ROW = e.Row.Item as TCOD_BANKS;
             if (!BodyIsValid(ROW)) { return; }
-
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
 
             if (e.Row.Item == null)
             {
@@ -382,6 +380,6 @@ namespace Wins.WinMenus.Taarif
             }
         }
 
-     
+
     }
 }

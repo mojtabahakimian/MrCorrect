@@ -1077,12 +1077,10 @@ namespace Wins.WinMenus.Taarif
         //Saving Master DataGrid:
         private void GRADE_CUST_TAB_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            var ROW = e.Row.Item as GRADE_CUST_TAB;
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            var ROW = e.Row.Item as GRADE_CUST_TAB;
 
             if (e.Row.Item == null)
             {
@@ -1491,10 +1489,8 @@ namespace Wins.WinMenus.Taarif
         }
         private void GRADE_GRP_SUB_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             #region GET_VALUE_FOR_DATAGRID_PROPERTIES
             DataGridRow row1 = e.Row;
