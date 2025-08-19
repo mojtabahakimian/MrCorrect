@@ -25,6 +25,7 @@ using Syncfusion.UI.Xaml.ScrollAxis;
 using Syncfusion.UI.Xaml.BulletGraph;
 using Syncfusion.UI.Xaml.Grid.Helpers;
 using Prg_Proccessy.MODELS;
+using System.Windows.Threading;
 
 namespace Prg_UI.Wins.WinMenus.CRM
 {
@@ -141,12 +142,12 @@ namespace Prg_UI.Wins.WinMenus.CRM
             if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
             {
                 e.Handled = true;
-                CL_LMethods.SendKey_US(Key.Tab);
+                var element = Keyboard.FocusedElement as UIElement;
+                element?.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
             }
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            FILL_ALL_COMBOBOXES();
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
             CL_HESABDARI.SETSECURITY(this.GetType().Name, "VCHD", new WindowInteropHelper(this).Handle, this.GetType().Name);
             if (!this.IsLoaded)
@@ -155,26 +156,6 @@ namespace Prg_UI.Wins.WinMenus.CRM
                 return;
             }
             ReGetData();
-        }
-
-        private void FILL_ALL_COMBOBOXES()
-        {
-            List<Status_List> items = new List<Status_List>()
-            {
-                new Status_List() { NAME = Baseknow.IT1.ToString(), CODE = 1 },
-                new Status_List() { NAME = Baseknow.IT2.ToString(), CODE = 2 },
-                new Status_List() { NAME = Baseknow.IT3.ToString(), CODE = 3 },
-                new Status_List() { NAME = Baseknow.IT4.ToString(), CODE = 4 },
-                new Status_List() { NAME = Baseknow.IT5.ToString(), CODE = 5 },
-                new Status_List() { NAME = Baseknow.IT6.ToString(), CODE = 6 },
-                new Status_List() { NAME = Baseknow.IT7.ToString(), CODE = 7 },
-                new Status_List() { NAME = Baseknow.IT8.ToString(), CODE = 8 },
-                new Status_List() { NAME = Baseknow.IT9.ToString(), CODE = 9 },
-            };
-
-            STATUS_COLUMN.ItemsSource = items.ToList();
-
-            STATUS_FAC_COLUMN.ItemsSource = dbms.DoGetDataSQL<Fac_List>("SELECT COPMANES.STATUS_FACT FROM COPMANES GROUP BY COPMANES.STATUS_FACT");
         }
 
         private void ReGetData()
@@ -213,35 +194,51 @@ namespace Prg_UI.Wins.WinMenus.CRM
 
         private void CRM_MASTER_SUB_CurrentCellEndEdit(object sender, CurrentCellEndEditEventArgs e)
         {
-            // Cast the sender to the SfDataGrid
             var grid = sender as SfDataGrid;
-            //if (grid == null || grid.SelectedItem == null || grid.CurrentColumn == null) return;
-
-            //// Get the record from the grid's SelectedItem property
-            var record = grid.SelectedItem as COPMANES;
-            if (record == null) return;
-
-            // Get the column's mapping name from the grid's CurrentColumn property
-            switch (e.MappingName)
+            var column = grid?.CurrentColumn?.MappingName;
+            Dispatcher.BeginInvoke(new Action(() =>
             {
-                case nameof(COPMANES.COMPANY_NAME):
-                    CheckCompanyName(record.COMPANY_NAME);
-                    break;
-                case nameof(COPMANES.FACT_TEL):
-                    CheckFactTel(record.FACT_TEL);
-                    break;
-                case nameof(COPMANES.MOBILE):
-                    CheckMobile(record.MOBILE);
-                    break;
+                var record = grid?.CurrentItem as COPMANES;
+                if (record == null || string.IsNullOrEmpty(column)) return;
+                switch (column)
+                {
+                    case nameof(COPMANES.COMPANY_NAME):
+                        CheckCompanyName(record.COMPANY_NAME);
+                        break;
+                    case nameof(COPMANES.FACT_TEL):
+                        CheckFactTel(record.FACT_TEL);
+                        break;
+                    case nameof(COPMANES.MOBILE):
+                        CheckMobile(record.MOBILE);
+                        break;
+                }
+            }), DispatcherPriority.Background);
+        }
+
+        private void CRM_MASTER_SUB_AddNewRowInitiating(object sender, AddNewRowInitiatingEventArgs e)
+        {
+            if (e.NewObject is COPMANES row)
+            {
+                var today = Tarikh.FullCurrentDate;
+                row.DT = int.TryParse(today, out var dtVal) ? (int?)dtVal : null;
+                row.DATE_SABT = Tarikh.GetRawGregorianDateTime(today);
             }
         }
 
         private void CRM_MASTER_SUB_RowValidated(object sender, RowValidatedEventArgs e)
         {
-            // ensure any pending edits are pushed to the bound item before persisting
-            CRM_MASTER_SUB.View.CommitEdit();
+            if (CRM_MASTER_SUB.View?.IsEditingItem == true)
+            {
+                CRM_MASTER_SUB.View.CommitEdit();
+            }
             var row = e.RowData as COPMANES;
             if (row == null) return;
+            if (row.DATE_SABT == null || row.DT == null)
+            {
+                var today = Tarikh.FullCurrentDate;
+                row.DT = row.DT ?? (int.TryParse(today, out var dtVal) ? (int?)dtVal : null);
+                row.DATE_SABT = row.DATE_SABT ?? Tarikh.GetRawGregorianDateTime(today);
+            }
             var baseParams = new
             {
                 row.COMPANY_NAME,
@@ -330,6 +327,7 @@ namespace Prg_UI.Wins.WinMenus.CRM
             }
             LoadDetail();
         }
+
         private void CheckCompanyName(string? text)
         {
             if (string.IsNullOrWhiteSpace(text)) return;
