@@ -97,10 +97,11 @@
                 HeaderStyle="{StaticResource KDGHeader}"
                 AllowEditing="True"
                 AddNewRowPosition="Top"
+                AddNewRowInitiating="CRM_MASTER_SUB_AddNewRowInitiating"
                 RowValidated="CRM_MASTER_SUB_RowValidated"
                 SelectionChanged="CRM_MASTER_SUB_SelectionChanged"
                 CurrentCellEndEdit="CRM_MASTER_SUB_CurrentCellEndEdit"
-                Margin="4,50,4,324" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True">
+                Margin="4,50,4,0" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" Height="226" VerticalAlignment="Top">
             <syncfusion:SfDataGrid.Columns>
                 <syncfusion:GridTextColumn MappingName="DT" HeaderText="تاریخ" Width="100"/>
                 <syncfusion:GridTextColumn MappingName="IDCN" HeaderText="گردش" Width="70"/>
@@ -134,8 +135,7 @@
             </syncfusion:SfDataGrid.Columns>
         </syncfusion:SfDataGrid>
 
-        <DataGrid x:Name="DETAIL_CRM_SUB" IsReadOnly="False" EnableColumnVirtualization="True" EnableRowVirtualization="True" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ScrollViewer.CanContentScroll="False" ItemsSource="{Binding EVENT_DATA}" ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" CellStyle="{StaticResource CellFocusyBorder}" HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}" VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}" KeyboardNavigation.TabNavigation="Contained" AutoGenerateColumns="False" FlowDirection="RightToLeft" SelectionUnit="FullRow" CanUserDeleteRows="False" Margin="4,334,4,47" BorderThickness="1" CanUserAddRows="True" IsEnabled="False" RowEditEnding="DETAIL_CRM_SUB_RowEditEnding">
-            <DataGrid.Style>
+        <DataGrid x:Name="DETAIL_CRM_SUB" IsReadOnly="False" EnableColumnVirtualization="True" EnableRowVirtualization="True" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ScrollViewer.CanContentScroll="False" ItemsSource="{Binding EVENT_DATA}" ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" CellStyle="{StaticResource CellFocusyBorder}" HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}" VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}" KeyboardNavigation.TabNavigation="Contained" AutoGenerateColumns="False" FlowDirection="RightToLeft" SelectionUnit="FullRow" CanUserDeleteRows="False" Margin="4,334,4,47" BorderThickness="1" CanUserAddRows="True" IsEnabled="False" RowEditEnding="DETAIL_CRM_SUB_RowEditEnding">            <DataGrid.Style>
                 <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                     <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
                     <Setter Property="GridLinesVisibility" Value="All"/>
