@@ -26,6 +26,10 @@ using Syncfusion.UI.Xaml.BulletGraph;
 using Syncfusion.UI.Xaml.Grid.Helpers;
 using Prg_Proccessy.MODELS;
 using System.Windows.Threading;
+using Prg_UI.HelperWins;
+using Prg_UI.UiTools;
+using Syncfusion.Data;
+using SelectionChangedEventArgs = System.Windows.Controls.SelectionChangedEventArgs;
 
 namespace Prg_UI.Wins.WinMenus.CRM
 {
@@ -141,9 +145,10 @@ namespace Prg_UI.Wins.WinMenus.CRM
         {
             if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
             {
+
                 e.Handled = true;
-                var element = Keyboard.FocusedElement as UIElement;
-                element?.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                CL_LMethods.SendKey_US(Key.Tab);
+
             }
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -155,7 +160,29 @@ namespace Prg_UI.Wins.WinMenus.CRM
                 this.Close();
                 return;
             }
+
+            FILL_ALL_COMBOBOXES();
             ReGetData();
+        }
+
+        private void FILL_ALL_COMBOBOXES()
+        {
+            List<Status_List> items = new List<Status_List>()
+            {
+                new Status_List() { NAME = Baseknow.IT1.ToString(), CODE = 1 },
+                new Status_List() { NAME = Baseknow.IT2.ToString(), CODE = 2 },
+                new Status_List() { NAME = Baseknow.IT3.ToString(), CODE = 3 },
+                new Status_List() { NAME = Baseknow.IT4.ToString(), CODE = 4 },
+                new Status_List() { NAME = Baseknow.IT5.ToString(), CODE = 5 },
+                new Status_List() { NAME = Baseknow.IT6.ToString(), CODE = 6 },
+                new Status_List() { NAME = Baseknow.IT7.ToString(), CODE = 7 },
+                new Status_List() { NAME = Baseknow.IT8.ToString(), CODE = 8 },
+                new Status_List() { NAME = Baseknow.IT9.ToString(), CODE = 9 },
+            };
+
+            STATUS_COLUMN.ItemsSource = items.ToList();
+
+            STATUS_FAC_COLUMN.ItemsSource = dbms.DoGetDataSQL<Fac_List>("SELECT COPMANES.STATUS_FACT FROM COPMANES GROUP BY COPMANES.STATUS_FACT");
         }
 
         private void ReGetData()
@@ -186,53 +213,75 @@ namespace Prg_UI.Wins.WinMenus.CRM
             }
         }
 
-        private void CRM_MASTER_SUB_SelectionChanged(object sender, GridSelectionChangedEventArgs e)
+        private void CRM_MASTER_SUB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!NowIsReady) return;
             LoadDetail();
         }
 
-        private void CRM_MASTER_SUB_CurrentCellEndEdit(object sender, CurrentCellEndEditEventArgs e)
-        {
-            var grid = sender as SfDataGrid;
-            var column = grid?.CurrentColumn?.MappingName;
-            Dispatcher.BeginInvoke(new Action(() =>
+        private void CRM_MASTER_SUB_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {     
+            if (sender is not DataGrid grid) return;
+
+            var binding = (e.Column as DataGridBoundColumn)?.Binding as Binding;
+            var mappingName = binding?.Path?.Path;
+
+            var record = e.Row.Item as COPMANES;
+            if (record == null || mappingName == null) return;
+
+            switch (mappingName)
             {
-                var record = grid?.CurrentItem as COPMANES;
-                if (record == null || string.IsNullOrEmpty(column)) return;
-                switch (column)
-                {
-                    case nameof(COPMANES.COMPANY_NAME):
-                        CheckCompanyName(record.COMPANY_NAME);
-                        break;
-                    case nameof(COPMANES.FACT_TEL):
-                        CheckFactTel(record.FACT_TEL);
-                        break;
-                    case nameof(COPMANES.MOBILE):
-                        CheckMobile(record.MOBILE);
-                        break;
-                }
-            }), DispatcherPriority.Background);
+                case nameof(COPMANES.COMPANY_NAME):
+                    string? text = record.COMPANY_NAME;
+                    if (string.IsNullOrWhiteSpace(text)) return;
+                    string shart = BuildShart(text, "NAME");
+                    string shart2 = BuildShart(text, "TNAME");
+                    if (shart.Length > 0 && shart2.Length > 0)
+                        shart = $"(({shart}) or ({shart2}))";
+                    var cnt = dbms.DoGetDataSQL<int>($"SELECT COUNT(1) FROM cust_hesab_dtl WHERE {shart}").FirstOrDefault();
+                    if (cnt > 0)
+                    {
+                        new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").Show();
+                    }
+                    var shartCust = shart.Replace("TNAME", "NAME").Replace("NAME", "COMPANY_NAME");
+                    var cnt2 = dbms.DoGetDataSQL<int>($"SELECT COUNT(1) FROM COPMANES WHERE {shartCust}").FirstOrDefault();
+                    if (cnt2 > 0)
+                    {
+                        // new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").Show();
+                    }
+                    break;
+                case nameof(COPMANES.FACT_TEL):
+                    CheckFactTel(record.FACT_TEL);
+                    break;
+                case nameof(COPMANES.MOBILE):
+                    CheckMobile(record.MOBILE);
+                    break;
+            }
+
         }
 
-        private void CRM_MASTER_SUB_AddNewRowInitiating(object sender, AddNewRowInitiatingEventArgs e)
+        private void CRM_MASTER_SUB_InitializingNewItem(object sender, InitializingNewItemEventArgs e)
         {
-            if (e.NewObject is COPMANES row)
+            if (e.NewItem is COPMANES row)
             {
                 var today = Tarikh.FullCurrentDate;
                 row.DT = int.TryParse(today, out var dtVal) ? (int?)dtVal : null;
                 row.DATE_SABT = Tarikh.GetRawGregorianDateTime(today);
+
+                row.STATUS = 1;
+                row.USER_NAME = Baseknow.UUSER.ToString();
             }
         }
 
-        private void CRM_MASTER_SUB_RowValidated(object sender, RowValidatedEventArgs e)
+        private void CRM_MASTER_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (CRM_MASTER_SUB.View?.IsEditingItem == true)
-            {
-                CRM_MASTER_SUB.View.CommitEdit();
-            }
-            var row = e.RowData as COPMANES;
+
+            if (Keyboard.IsKeyDown(Key.Escape)) return;
+            if (e.EditAction == DataGridEditAction.Cancel) return;
+
+            var row = e.Row.Item as COPMANES;
             if (row == null) return;
+
             if (row.DATE_SABT == null || row.DT == null)
             {
                 var today = Tarikh.FullCurrentDate;
@@ -287,7 +336,6 @@ namespace Prg_UI.Wins.WinMenus.CRM
             if (Keyboard.IsKeyDown(Key.Escape)) return;
             if (e.EditAction == DataGridEditAction.Cancel) return;
             // commit edit so the row item reflects latest user changes
-            e.Row.BindingGroup.CommitEdit();
             if (e.Row.Item == null) return;
             var row = e.Row.Item as CRMEVENTS;
             var master = CRM_MASTER_SUB.SelectedItem as COPMANES;
@@ -335,16 +383,16 @@ namespace Prg_UI.Wins.WinMenus.CRM
             string shart2 = BuildShart(text, "TNAME");
             if (shart.Length > 0 && shart2.Length > 0)
                 shart = $"(({shart}) or ({shart2}))";
-            var cnt = dbms.DoGetDataSQL<int>($"SELECT COUNT(1) FROM cust_hesab_dtl WHERE {shart}").FirstOrDefault();
-            if (cnt > 0)
-            {
-                MessageBox.Show("مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد");
-            }
+            //var cnt = dbms.DoGetDataSQL<int>($"SELECT COUNT(1) FROM cust_hesab_dtl WHERE {shart}").FirstOrDefault();
+            //if (cnt > 0)
+            //{
+            //    new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").Show();
+            //}
             var shartCust = shart.Replace("TNAME", "NAME").Replace("NAME", "COMPANY_NAME");
             var cnt2 = dbms.DoGetDataSQL<int>($"SELECT COUNT(1) FROM COPMANES WHERE {shartCust}").FirstOrDefault();
             if (cnt2 > 0)
             {
-                MessageBox.Show("مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد");
+               // new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").Show();
             }
         }
 
@@ -385,208 +433,5 @@ namespace Prg_UI.Wins.WinMenus.CRM
                 MessageBox.Show("مشابه اين شماره قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد");
             }
         }
-
-
-        #region _SfDataGrid_
-        private readonly FilterService<COPMANES> filterService = new FilterService<COPMANES>();
-        public ObservableCollection<string> ActiveFilters { get; set; } = new ObservableCollection<string>();
-
-        private string? CurrentCellValue = null;
-        private RowColumnIndex CurrentCellIndex;
-        public string SelectedSfDgTextCell { get; private set; }
-        private void CRM_MASTER_SUB_CurrentCellActivated(object sender, Syncfusion.UI.Xaml.Grid.CurrentCellActivatedEventArgs e)
-        {
-            UpdateCurrentCellValue(e.CurrentRowColumnIndex);
-        }
-        private void UpdateCurrentCellValue(RowColumnIndex rowColumnIndex)
-        {
-            CurrentCellIndex = rowColumnIndex; // Update current cell index
-            CurrentCellValue = null; // Reset current cell value
-
-            int rowIndex = rowColumnIndex.RowIndex;
-            int columnIndex = this.CRM_MASTER_SUB.ResolveToGridVisibleColumnIndex(rowColumnIndex.ColumnIndex);
-            if (columnIndex < 0) return;
-
-            var mappingName = this.CRM_MASTER_SUB.Columns[columnIndex].MappingName;
-            var recordIndex = this.CRM_MASTER_SUB.ResolveToRecordIndex(rowIndex);
-            if (recordIndex < 0) return;
-
-            var record = this.CRM_MASTER_SUB.View.Records.GetItemAt(recordIndex);
-            CurrentCellValue = record?.GetType()?.GetProperty(mappingName)?.GetValue(record)?.ToString();
-        }
-        private void FilterBySelection_Click(object sender, RoutedEventArgs e)
-        {
-            var selectedText = GetSelectedText();
-            var (columnName, filterValue) = GetSelectedCellDetails(); // Get the details of the selected cell
-
-            if (!string.IsNullOrEmpty(selectedText))
-            {
-                // Add the Contains filter to the filter service (inclusion filter)
-                filterService.AddFilter(columnName, selectedText, isExclusion: false); // False means it's an inclusion filter
-                ActiveFilters.Add($"{columnName} Contains {selectedText}");
-                // Apply the cumulative filter to the data grid
-                ApplyCumulativeFilter();
-            }
-            else
-            {
-                if (filterValue != null)
-                {
-                    // Add the filter to the filter service
-                    filterService.AddFilter(columnName, filterValue);
-                    // Add the filter to the list of active filters
-                    ActiveFilters.Add($"{columnName} = {filterValue}");
-                    // Apply the cumulative filter to the data grid
-                    ApplyCumulativeFilter();
-                }
-            }
-
-        }
-        private void FilterExcludingSelection_Click(object sender, RoutedEventArgs e)
-        {
-            var selectedText = GetSelectedText();
-            if (!string.IsNullOrEmpty(selectedText))
-            {
-                var (columnName, filterValue) = GetSelectedCellDetails(); // Get the details of the selected cell
-                if (filterValue != null)
-                {
-                    // Add the Not Contains filter to the filter service (exclusion filter)
-                    filterService.AddFilter(columnName, selectedText, isExclusion: true); // True means it's an exclusion filter
-                                                                                          // Add the exclusion filter to the list of active filters
-                    ActiveFilters.Add($"{columnName} Does Not Contain {selectedText}");
-                    // Apply the cumulative filter to the data grid
-                    ApplyCumulativeFilter();
-                }
-            }
-            else
-            {
-                var (columnName, filterValue) = GetSelectedCellDetails(); // Get the details of the selected cell
-                if (filterValue != null)
-                {
-                    // Add the exclusion filter to the filter service
-                    filterService.AddFilter(columnName, $"!{filterValue}");
-                    // Add the filter to the list of active filters
-                    ActiveFilters.Add($"{columnName} != {filterValue}");
-                    // Apply the cumulative filter to the data grid
-                    ApplyCumulativeFilter();
-                }
-            }
-        }
-        private void RemoveFilterSort_Click(object sender, RoutedEventArgs e)
-        {
-            // Clear all filters in the filter service
-            filterService.ClearFilters();
-            // Clear the list of active filters
-            ActiveFilters.Clear();
-            // Apply the cumulative filter to the data grid
-            ApplyCumulativeFilter();
-        }
-        private (string ColumnName, object FilterValue) GetSelectedCellDetails()
-        {
-            // Check if there is a current cell selected in the data grid
-            if (CRM_MASTER_SUB.SelectionController.CurrentCellManager.CurrentCell != null)
-            {
-                var columnName = CRM_MASTER_SUB.SelectionController.CurrentCellManager.CurrentCell.GridColumn.MappingName; // Get the name of the column
-                                                                                                                           // Return the column name and the current cell value
-                                                                                                                           //if (CurrentCellValue == null)
-                                                                                                                           //{
-                                                                                                                           //    return (columnName, SelectedSfDgTextCell);
-                                                                                                                           //}
-                                                                                                                           //else
-                {
-                    return (columnName, CurrentCellValue);
-                }
-            }
-            return (null, null); // If no cell is selected, return null values
-        }
-        private void ApplyCumulativeFilter()
-        {
-            // Set the filter for the data grid view using the filter service
-            CRM_MASTER_SUB.View.Filter = item => filterService.ApplyFilter(item as COPMANES);
-            // Refresh the filter to update the view
-            CRM_MASTER_SUB.View.RefreshFilter();
-        }
-
-        private void CRM_MASTER_SUB_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            var element = e.OriginalSource as FrameworkElement;
-            if (element != null)
-            {
-                element.ContextMenu = this.Resources["DataGridContextMenu"] as ContextMenu;
-            }
-        }
-        private void CRM_MASTER_SUB_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            var element = e.OriginalSource as FrameworkElement;
-            if (element != null)
-            {
-                element.ContextMenu = this.Resources["DataGridContextMenu"] as ContextMenu;
-            }
-
-            return;
-
-            var point = e.GetPosition(CRM_MASTER_SUB);
-
-            // Get the element under the mouse
-            var hitElement = e.OriginalSource as DependencyObject;
-            if (hitElement == null) return;
-
-            // Find the cell element
-            var cell = FindParent<Syncfusion.UI.Xaml.Grid.GridCell>(hitElement);
-            if (cell == null) return;
-
-            // Check if the cell is in edit mode
-            if (CRM_MASTER_SUB.SelectionController.CurrentCellManager.CurrentCell.IsEditing)
-            {
-                var editingElement = CRM_MASTER_SUB.FindElementOfType<TextBox>();
-                if (editingElement != null)
-                {
-                    // Capture the selected text instead of the full text
-                    SelectedSfDgTextCell = editingElement.SelectedText;
-                }
-            }
-
-            ////// Get the DataGrid and the VisualContainer
-            //var visualContainer = CRM_MASTER_SUB?.GetVisualContainer();
-
-            //if (visualContainer == null) return;
-
-            //// Get the position of the mouse click
-            //var position = e.GetPosition(visualContainer);
-
-            //// Get the cell's RowColumnIndex
-            //var cellIndex = visualContainer.PointToCellRowColumnIndex(position);
-            //if (cellIndex.RowIndex < 0 || cellIndex.ColumnIndex < 0) return;
-
-            //var rowColumnIndex = new RowColumnIndex(cellIndex.RowIndex, cellIndex.ColumnIndex);
-            //UpdateCurrentCellValue(rowColumnIndex);
-
-            //// Check if the cell is in edit mode
-            //if (CRM_MASTER_SUB.SelectionController.CurrentCellManager.CurrentCell.IsEditing)
-            //{
-            //    var editingElement = CRM_MASTER_SUB.FindElementOfType<TextBox>();
-            //    if (editingElement != null)
-            //    {
-            //        CurrentCellValue = editingElement.Text; // Update with the text being edited
-            //    }
-            //}
-
-        }
-        private string GetSelectedText()
-        {
-            var dataGrid = CRM_MASTER_SUB;
-            var currentCell = dataGrid.SelectionController.CurrentCellManager.CurrentCell;
-
-            if (currentCell != null && currentCell.IsEditing)
-            {
-                // Find the editing element (which will be a TextBox in edit mode)
-                var editingElement = dataGrid.FindElementOfType<TextBox>();
-                if (editingElement != null)
-                {
-                    return editingElement.SelectedText; // Return the selected text
-                }
-            }
-            return string.Empty;
-        }
-        #endregion
     }
 }
