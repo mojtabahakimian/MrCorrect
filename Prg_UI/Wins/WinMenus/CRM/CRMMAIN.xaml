@@ -14,56 +14,26 @@
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
         FontFamily="{StaticResource IRANYEKAN}"
+        WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
-        Height="600" Width="5389"
+        Height="600" Width="1200"
         Loaded="Window_Loaded" ContentRendered="Window_ContentRendered" PreviewKeyDown="Window_PreviewKeyDown">
+
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
 
-        <Style x:Key="KDG" TargetType="syncfusion:SfDataGrid" BasedOn="{StaticResource SfDataGridStyle}">
-            <Setter Property="CurrentCellBorderBrush" Value="{StaticResource GENERAL_Grlicom}" />
-            <Setter Property="Foreground" Value="{StaticResource MaterialDesignBody}" />
-            <Setter Property="Background" Value="{StaticResource MaterialDesign.Brush.Background}" />
-            <Setter Property="BorderBrush" Value="{StaticResource MaterialDesignDivider}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="RowHeight" Value="32" />
-            <Setter Property="HeaderRowHeight" Value="40" />
-            <Setter Property="SelectionMode" Value="Single" />
-            <Setter Property="GridLinesVisibility" Value="Both" />
-        </Style>
-
-        <Style x:Key="KDGHeader" TargetType="syncfusion:GridHeaderCellControl" BasedOn="{StaticResource GridHeaderCellControlStyle}">
-            <Setter Property="Background" Value="{StaticResource MaterialDesign.Brush.Background}" />
-            <Setter Property="Foreground" Value="{StaticResource MaterialDesignBody}" />
-            <Setter Property="BorderBrush" Value="{Binding Background, ElementName=GENERAL_RANG}"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Height" Value="Auto"/>
-        </Style>
-
-        <Style TargetType="syncfusion:GridCell" BasedOn="{StaticResource GridCellStyle}">
-            <Setter Property="BorderBrush" Value="{Binding BorderBrush, ElementName=GENERAL_RANG}" />
-        </Style>
-
-        <ContextMenu x:Key="DataGridContextMenu" FontFamily="{StaticResource IRANYEKAN}">
-            <MenuItem Header="پالودن با این بخش" Click="FilterBySelection_Click" />
-            <MenuItem Header="پالودن بدون این بخش" Click="FilterExcludingSelection_Click" />
-            <Separator/>
-            <MenuItem Header="حذف پالودن (فیلتر)" Click="RemoveFilterSort_Click" />
-        </ContextMenu>
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
     </WindowChrome.WindowChrome>
+
     <Grid x:Name="mygrid">
-        
         <Grid.RowDefinitions>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        
         <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Width="1" />
         <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}" CornerRadius="10" Padding="8" BorderThickness="1" Margin="0,0,0,-185">
             <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
@@ -81,61 +51,97 @@
                 </Grid>
             </Border>
         </Border>
+        <DataGrid x:Name="CRM_MASTER_SUB"
+                  Grid.Row="0"
+                  ItemsSource="{Binding CUSTOMER_DATA}"
+                  AutoGenerateColumns="False"
+                  ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                  CellStyle="{StaticResource CellFocusyBorder}"
+                  HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                  VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                  KeyboardNavigation.TabNavigation="Contained"
+                  FlowDirection="RightToLeft"
+                  SelectionUnit="FullRow"
+                  CanUserDeleteRows="False"
+                  CanUserAddRows="True"
+                  EnableColumnVirtualization="True"
+                  EnableRowVirtualization="True"
+                  VirtualizingPanel.IsVirtualizing="True"
+                  VirtualizingPanel.VirtualizationMode="Recycling"
+                  Margin="4,50,4,0"
+                  Height="226"
+                  VerticalAlignment="Top"
+                  IsReadOnly="False"
+                  SelectionChanged="CRM_MASTER_SUB_SelectionChanged"
+                  CellEditEnding="CRM_MASTER_SUB_CellEditEnding"
+                  InitializingNewItem="CRM_MASTER_SUB_InitializingNewItem"
+                  RowEditEnding="CRM_MASTER_SUB_RowEditEnding">
+            <DataGrid.Style>
+                <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                    <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                    <Setter Property="GridLinesVisibility" Value="All"/>
+                </Style>
+            </DataGrid.Style>
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding DT}" Header="تاریخ" Width="100"/>
+                <DataGridTextColumn Binding="{Binding IDCN}" Header="گردش" Width="70"/>
+                <DataGridTextColumn Binding="{Binding COMPANY_NAME}" Header="نام شرکت" Width="300"/>
+                <DataGridTextColumn Binding="{Binding MANAGER}" Header="مدیر عامل" Width="300"/>
+                <DataGridTextColumn Binding="{Binding FACT_TEL}" Header="تلفن کارخانه" Width="300"/>
+                <DataGridTextColumn Binding="{Binding MOBILE}" Header="موبایل مدیرعامل" Width="150"/>
 
-        <syncfusion:SfDataGrid x:Name="CRM_MASTER_SUB" Grid.Row="0" ContextMenu="{StaticResource DataGridContextMenu}"
-                ItemsSource="{Binding CUSTOMER_DATA}"
-                AutoGenerateColumns="False"
-                SelectionUnit="Row"
-                AllowDraggingRows="True"
-                AllowDraggingColumns="True"
-                AllowResizingColumns="True"
-                AllowFiltering="True"
-                AllowSorting="True"
-                RowHeight="30"
-                FlowDirection="RightToLeft"
-                Style="{StaticResource KDG}"
-                HeaderStyle="{StaticResource KDGHeader}"
-                AllowEditing="True"
-                AddNewRowPosition="Top"
-                AddNewRowInitiating="CRM_MASTER_SUB_AddNewRowInitiating"
-                RowValidated="CRM_MASTER_SUB_RowValidated"
-                SelectionChanged="CRM_MASTER_SUB_SelectionChanged"
-                CurrentCellEndEdit="CRM_MASTER_SUB_CurrentCellEndEdit"
-                Margin="4,50,4,0" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" Height="226" VerticalAlignment="Top">
-            <syncfusion:SfDataGrid.Columns>
-                <syncfusion:GridTextColumn MappingName="DT" HeaderText="تاریخ" Width="100"/>
-                <syncfusion:GridTextColumn MappingName="IDCN" HeaderText="گردش" Width="70"/>
-                <syncfusion:GridTextColumn MappingName="COMPANY_NAME" HeaderText="نام شرکت" Width="300"/>
-                <syncfusion:GridTextColumn MappingName="MANAGER" HeaderText="مدیر عامل" Width="300"/>
-                <syncfusion:GridTextColumn MappingName="FACT_TEL" HeaderText="تلفن کارخانه" Width="300"/>
-                <syncfusion:GridTextColumn MappingName="MOBILE" HeaderText="موبایل مدیرعامل" Width="150"/>
-                <syncfusion:GridComboBoxColumn x:Name="STATUS_COLUMN" DisplayMemberPath="NAME" SelectedValuePath="CODE" MappingName="STATUS" HeaderText="وضعیت" Width="200" />
-                <syncfusion:GridTextColumn MappingName="USER_NAME" HeaderText="نام کارشناس" Width="150"/>
-                <syncfusion:GridTextColumn MappingName="PERNUM" HeaderText="تعداد پرسنل" Width="100"/>
-                <syncfusion:GridComboBoxColumn x:Name="STATUS_FAC_COLUMN" DisplayMemberPath="STATUS_FACT" SelectedValuePath="STATUS_FACT" MappingName="STATUS_FACT" HeaderText="وضعیت کارخانه" Width="130"/>
-                <syncfusion:GridTextColumn MappingName="PRODUCTS" HeaderText="محصولات" Width="250"/>
-                <syncfusion:GridTextColumn MappingName="ACCOUNTANT" HeaderText="حسابدار" Width="100"/>
-                <syncfusion:GridTextColumn MappingName="SOFTWARE" HeaderText="سابقه کار" Width="300"/>
-                <syncfusion:GridTextColumn MappingName="ESP_PERSON" HeaderText="اشخاص ذی نفوذ" Width="300" />
-                <syncfusion:GridTextColumn MappingName="ADDR" HeaderText="آدرس" Width="400"/>
-                <syncfusion:GridTextColumn  MappingName="REAGENT" HeaderText="معرف" Width="150"/>
-                <syncfusion:GridTextColumn MappingName="COMMENT" HeaderText="توضیحات"  Width="500"/>
-                <syncfusion:GridTextColumn MappingName="CITY" HeaderText="شهر" Width="70"/>
-                <syncfusion:GridTextColumn MappingName="DATE_SABT" HeaderText="تاریخ ثبت" Width="200"/>
-                <syncfusion:GridTextColumn MappingName="PIC" HeaderText="ضمیمه" Width="100"/>
-                <syncfusion:GridTextColumn MappingName="ID" HeaderText="شماره"  Width="100"/>
+                <!-- STATUS: مثل GridComboBoxColumn در SfDataGrid -->
+                <DataGridComboBoxColumn x:Name="STATUS_COLUMN"
+                                        Header="وضعیت"
+                                        Width="200"
+                                        DisplayMemberPath="NAME"
+                                        SelectedValuePath="CODE"
+                                        ItemsSource="{Binding DataContext.StatusItems, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        SelectedValueBinding="{Binding STATUS, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
-                <syncfusion:GridTextColumn MappingName="USERID" HeaderText="کد کارشناس" IsHidden="True" />
-                <syncfusion:GridTextColumn MappingName="LONGITUDE" HeaderText="طول" IsHidden="True"/>
-                <syncfusion:GridTextColumn MappingName="LATITUDE" HeaderText="عرض" IsHidden="True"/>
-                <syncfusion:GridTextColumn MappingName="OSTANID" HeaderText="کد استان" IsHidden="True"/>
-                <syncfusion:GridTextColumn MappingName="SHAHRID" HeaderText="کد شهرستان" IsHidden="True"/>
-                <syncfusion:GridTextColumn MappingName="CRT" HeaderText="CRT" IsHidden="True"/>
-                <syncfusion:GridTextColumn MappingName="UID" HeaderText="UID" IsHidden="True"/>
-            </syncfusion:SfDataGrid.Columns>
-        </syncfusion:SfDataGrid>
+                <DataGridTextColumn Binding="{Binding USER_NAME}" Header="نام کارشناس" Width="150" IsReadOnly="True"/>
+                <DataGridTextColumn Binding="{Binding PERNUM}" Header="تعداد پرسنل" Width="100"/>
 
-        <DataGrid x:Name="DETAIL_CRM_SUB" IsReadOnly="False" EnableColumnVirtualization="True" EnableRowVirtualization="True" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ScrollViewer.CanContentScroll="False" ItemsSource="{Binding EVENT_DATA}" ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" CellStyle="{StaticResource CellFocusyBorder}" HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}" VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}" KeyboardNavigation.TabNavigation="Contained" AutoGenerateColumns="False" FlowDirection="RightToLeft" SelectionUnit="FullRow" CanUserDeleteRows="False" Margin="4,334,4,47" BorderThickness="1" CanUserAddRows="True" IsEnabled="False" RowEditEnding="DETAIL_CRM_SUB_RowEditEnding">            <DataGrid.Style>
+                <!-- STATUS_FACT: مثل GridComboBoxColumn در SfDataGrid -->
+                <DataGridComboBoxColumn x:Name="STATUS_FAC_COLUMN"
+                                        Header="وضعیت کارخانه"
+                                        Width="130"
+                                        DisplayMemberPath="STATUS_FACT"
+                                        SelectedValuePath="STATUS_FACT"
+                                        ItemsSource="{Binding DataContext.StatusFactItems, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        SelectedValueBinding="{Binding STATUS_FACT, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <DataGridTextColumn Binding="{Binding PRODUCTS}" Header="محصولات" Width="250"/>
+                <DataGridTextColumn Binding="{Binding ACCOUNTANT}" Header="حسابدار" Width="100"/>
+                <!-- توجه: در SfDataGrid برای SOFTWARE هدر "سابقه کار" بود -->
+                <DataGridTextColumn Binding="{Binding SOFTWARE}" Header="سابقه کار" Width="300"/>
+                <DataGridTextColumn Binding="{Binding ESP_PERSON}" Header="اشخاص ذی نفوذ" Width="300"/>
+                <DataGridTextColumn Binding="{Binding ADDR}" Header="آدرس" Width="400"/>
+                <DataGridTextColumn Binding="{Binding REAGENT}" Header="معرف" Width="150"/>
+                <DataGridTextColumn Binding="{Binding COMMENT}" Header="توضیحات" Width="500"/>
+                <DataGridTextColumn Binding="{Binding CITY}" Header="شهر" Width="70"/>
+                <DataGridTextColumn Binding="{Binding DATE_SABT}" Header="تاریخ ثبت" Width="200"/>
+                <DataGridTextColumn Binding="{Binding PIC}" Header="ضمیمه" Width="100"/>
+                <DataGridTextColumn Binding="{Binding ID}" Header="شماره" Width="100"/>
+
+                <!-- ستون‌های مخفی مثل SfDataGrid (IsHidden=True -> Visibility=Collapsed) -->
+                <DataGridTextColumn Binding="{Binding USERID}" Header="کد کارشناس" Visibility="Collapsed"/>
+                <DataGridTextColumn Binding="{Binding LONGITUDE}" Header="طول" Visibility="Collapsed"/>
+                <DataGridTextColumn Binding="{Binding LATITUDE}" Header="عرض" Visibility="Collapsed"/>
+                <DataGridTextColumn Binding="{Binding OSTANID}" Header="کد استان" Visibility="Collapsed"/>
+                <DataGridTextColumn Binding="{Binding SHAHRID}" Header="کد شهرستان" Visibility="Collapsed"/>
+                <DataGridTextColumn Binding="{Binding CRT}" Header="CRT" Visibility="Collapsed"/>
+                <DataGridTextColumn Binding="{Binding UID}" Header="UID" Visibility="Collapsed"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <DataGrid x:Name="DETAIL_CRM_SUB" IsReadOnly="False"
+                  EnableColumnVirtualization="True" 
+                  EnableRowVirtualization="True"
+                  VirtualizingPanel.IsVirtualizing="True"
+                  VirtualizingPanel.VirtualizationMode="Recycling"
+                  ItemsSource="{Binding EVENT_DATA}" ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" CellStyle="{StaticResource CellFocusyBorder}" HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}" VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}" KeyboardNavigation.TabNavigation="Contained" AutoGenerateColumns="False" FlowDirection="RightToLeft" SelectionUnit="FullRow" CanUserDeleteRows="False" Margin="4,334,4,47" BorderThickness="1" CanUserAddRows="True" IsEnabled="False" RowEditEnding="DETAIL_CRM_SUB_RowEditEnding">
+            <DataGrid.Style>
                 <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                     <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
                     <Setter Property="GridLinesVisibility" Value="All"/>
@@ -143,7 +149,7 @@
             </DataGrid.Style>
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding IDDE}" Header="شناسه" Width="Auto" />
-                <DataGridTextColumn Binding="{Binding COMPANY_NAME}" Header="نام شرکت" Width="200" />
+                <DataGridTextColumn Binding="{Binding COMPANY_NAME}" Header="نام شرکت" Width="200" Visibility="Hidden" />
                 <DataGridTextColumn Binding="{Binding INFO_DATE, StringFormat=####/##/##}" Header="تاریخ" Width="100" />
                 <DataGridTextColumn Binding="{Binding INFO_TIME}" Header="زمان" Width="Auto" />
                 <DataGridTextColumn Binding="{Binding SALER}" Header="فروشنده" Width="200" />
@@ -163,4 +169,5 @@
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
+
 </Window>
