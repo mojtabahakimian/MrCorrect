@@ -32,19 +32,18 @@ using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
-using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
 using Wins.WinMenus.KHARID_FORUSH;
 using System.ComponentModel;
 using Functions;
-using static Functions.CL_UTILITY;
-using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
-using System.Security.Cryptography;
 using static Prg_UI.HelperWins.Msgwin;
 using Rpts;
+using Wins.WinOther;
+using static Interfaces.INavigator;
+using System.Windows.Threading;
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
 {
-    public partial class HEAD_LST_HAVL : Window
+    public partial class HEAD_LST_HAVL : Window, ISearchableWindow
     {
         #region Header Window Begin
         //Header Window Begin
@@ -214,16 +213,17 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         }
         #endregion
 
-        public HEAD_LST_HAVL(double? _NUMBER_HAVL = null)
+        public HEAD_LST_HAVL(double? _NUMBER_HAVL = null, bool _isAutomasion_ = false)
         {
             if (_NUMBER_HAVL != null && _NUMBER_HAVL > -1)
             {
                 NUMBER_TO_OPEN = (double)_NUMBER_HAVL;
+                IsOpenedFromAutomation = _isAutomasion_;
             }
             InitializeComponent();
             this.DataContext = this;
         }
-
+        public bool IsOpenedFromAutomation { get; } = false;
         public ObservableCollection<INVO_LST_FACTOR22> HAVALEH_INVO_DATA { get; set; } = new ObservableCollection<INVO_LST_FACTOR22>();
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
@@ -284,7 +284,25 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         /// سلول جاری در حال اصلاح
         /// </summary>
         public DataGridCell CURRENT_CELL_ROW { get; set; }
-
+        public int INVO_LST_SUB_DEF_INDEX_COL
+        {
+            get
+            {
+                if (INVO_LST_HAVL_SUB.Columns.Count > 0)
+                {
+                    int? defaultcolumnindex = INVO_LST_HAVL_SUB.Columns.FirstOrDefault(c => c.SortMemberPath is not null && c.SortMemberPath == "ANBAR")?.DisplayIndex;
+                    if (defaultcolumnindex is null || defaultcolumnindex < 0)
+                    {
+                        datagridname_tbox_def_index_col = 0;
+                    }
+                    else
+                    {
+                        datagridname_tbox_def_index_col = (int)defaultcolumnindex;
+                    }
+                }
+                return datagridname_tbox_def_index_col;
+            }
+        }
         public INVO_LST_FACTOR22 FROM_SAERCH_KAL { get; set; } = new INVO_LST_FACTOR22();
 
         private bool _bl;
@@ -355,8 +373,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 }
 
                 CUST_NO.IsEnabled = ican;
-                CUST_NO2.IsEnabled = ican;
-                STACKPANEL_SAVE_HAVALE.IsEnabled = ican;
+                BUTTON_SAVE_HAVALE.IsEnabled = ican;
+                DELETE_HAVALE.IsEnabled = ican;
 
                 //if (!CL_HESABDARI.LETSGO("EHANBAR")) //!کلید اصلاح حواله انبار بازرگانی
                 //{
@@ -368,7 +386,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 //}
 
                 //TAMIR.UpdateLayout(); var _TAMIR_ = Convert.ToBoolean(TAMIR.IsChecked ?? false); //تایید بارگیری
-                if (CL_LMethods.IsNumeric(NUMBER.Text) && NUMBER.Text != "0")
+                if (!_navigationManager.IsNewRecord)
                 {
                     INVO_LST_HAVL_SUB.IsReadOnly = !ican;
                 }
@@ -409,6 +427,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             byte FTAG = 2;
             string WhereCondition = FTAG > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {FTAG}) " : "  ";
             WhereCondition = CL_LMethods.GetRestrictedSqlQuery(FTAG, WhereCondition);
+            
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                WhereCondition = $" WHERE NUMBER = {NUMBER_TO_OPEN} AND TAG = {FTAG} ";
+            }
 
             _navigationManager = new NavigationManager<HEAD_LST>(
                 dbms,
@@ -457,40 +480,77 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             PERSONEL.DisplayMemberPath = "SAL_NAME";
             PERSONEL.SelectedValuePath = "IDD";
 
-            Form_Current();
 
             GetDefaultFocus();
+
+            CL_LMethods.SetTabIndexes(
+                 DATE_N,
+                 MAS,
+                 TAH,
+                 MOLAH,
+                 CUST_NO,
+                 SHARAYET,
+                 BUTTON_SAVE_HAVALE,
+                 INVO_LST_HAVL_SUB
+                 );
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            DataGrid dg = INVO_LST_HAVL_SUB;
+            DataGrid DG = INVO_LST_HAVL_SUB;
             UIElement uie = e.OriginalSource as UIElement;
 
             try
             {
                 if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
                 {
-                    if (uie is DataGridCell || (uie as FrameworkElement)?.Parent is DataGridCell)
-                    {
-                        ///////در این روش کلید تب عمل میکند و حالت فوکوس روی حالت در حال ادیت هست
-                        if (INVO_LST_HAVL_SUB.SelectedIndex == INVO_LST_HAVL_SUB.Items.Count - 2 && INVO_LST_HAVL_SUB.CurrentColumn.DisplayIndex == 8)
-                        {
-                            //DataGridRow row = (DataGridRow)INVO_LST_HAVL_SUB.ItemContainerGenerator.ContainerFromIndex(INVO_LST_HAVL_SUB.Items.Count - 1);
-                            //if (row is null)
-                            //{
-                            //    INVO_LST_HAVL_SUB.UpdateLayout();
-                            //    INVO_LST_HAVL_SUB.ScrollIntoView(INVO_LST_HAVL_SUB.Items[INVO_LST_HAVL_SUB.Items.Count - 1]);
-                            //    row = (DataGridRow)INVO_LST_HAVL_SUB.ItemContainerGenerator.ContainerFromIndex(INVO_LST_HAVL_SUB.Items.Count - 1);
-                            //}
-
-                            INVO_LST_HAVL_SUB.SelectedIndex = INVO_LST_HAVL_SUB.Items.Count - 1;
-                            INVO_LST_HAVL_SUB.CurrentCell = new DataGridCellInfo(INVO_LST_HAVL_SUB.SelectedItem, INVO_LST_HAVL_SUB.Columns[0]);
-
-                            //INVO_LST_HAVL_SUB.BeginEdit();
-                        }
-                    }
                     e.Handled = true;
-                    CL_LMethods.SendKey_US(Key.Tab);
+
+                    if (BUTTON_SAVE_HAVALE.IsFocused)
+                    {
+                        BUTTON_SAVE_HAVALE_Click(null, null);
+                        return;
+                    }
+                    else
+                    {
+                        if (INVO_LST_HAVL_SUB.IsKeyboardFocusWithin)
+                        {
+                            if (DG.CurrentColumn != null)
+                            {
+                                int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                                bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                                bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+                                if (isLastColumn)
+                                {
+                                    // If it's the last column, move focus to the first cell of next row
+                                    if (isLastRow)
+                                    {
+                                        // Add focus to new row if needed
+                                        DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
+
+                                        DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[INVO_LST_SUB_DEF_INDEX_COL]);
+
+                                        Dispatcher.BeginInvoke(new Action(() =>
+                                        {
+                                            DG.BeginEdit();
+                                        }), DispatcherPriority.Background);
+
+                                        //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
+                                        var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                                        if (focusedWindow != null)
+                                        {
+                                            Dispatcher.BeginInvoke(new Action(() =>
+                                            {
+                                                focusedWindow.Activate();
+                                                focusedWindow.Focus();
+                                            }), DispatcherPriority.Background);
+                                        }
+                                        return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                    }
+                                }
+                            }
+                        }
+                        CL_LMethods.SendKey_US(Key.Tab);
+                    }
                 }
                 else
                 {
@@ -509,7 +569,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
                                 //BUTTON_SAVE_HAVALE_Click(null, null);
 
-                                if (AllisWell)
+                                if (!_navigationManager.IsNewRecord)
                                 {
                                     OTHER_DTL win = new OTHER_DTL(2, CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle));
                                     win.NUMBER = Convert.ToInt64(NUMBER.Text);
@@ -530,6 +590,17 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 }
             }
             catch { /*ignore*/ }
+
+            if (!INVO_LST_HAVL_SUB.IsKeyboardFocusWithin && !INVO_LST_HAVL_SUB.IsFocused) //Only On Form F7 Pressed Not DataGrid
+            {
+                if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+                    var searchWindow = new EnhancedSearchWindow(this);
+                    searchWindow.Owner = this;
+                    searchWindow.ShowDialog();
+                }
+            }
 
             ///////در این روش تابع فوکوس توسط سی شارپ اجرا میشود منتها از لحاظ ظاهری در صورت لود مجدد دیتاگرید فوکوس به کار خود ادامه میدهد اما در ظاهر برنامه فوکوس مثلا بالای سطر اول مانده 
             ///////در این حالت فوکوس روی ادیت شده نـــیست 
@@ -571,26 +642,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
         }
 
-        private bool OnInsertRecord(HEAD_LST record)
-        {
-            try
-            {
-                var itemtoadd = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 * FROM HEAD_LST  WHERE NUMBER = {NUMBER.Text} AND TAG = 2").FirstOrDefault();
-                record = itemtoadd;
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
-        }
-        private void RefreshAfterUpdate()
-        {
-            NewRecord = false;
-            var CURRENT_HEADER = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = 2").FirstOrDefault();
-            _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
-        }
         private void OnCurrentRecordChanged(HEAD_LST QRE_HED)
         {
             if (_navigationManager.IsNewRecord)
@@ -646,6 +697,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     TAMIR.IsChecked = false;
                 }
 
+                INVO_LST_HAVL_SUB.IsReadOnly = true;
+
                 //DATAGRID_SUB
                 ReGetdata();
 
@@ -673,6 +726,26 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
                 Form_Current();
             }
+        }
+        private bool OnInsertRecord(HEAD_LST record)
+        {
+            try
+            {
+                var itemtoadd = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 * FROM HEAD_LST  WHERE NUMBER = {NUMBER.Text} AND TAG = 2").FirstOrDefault();
+                record = itemtoadd;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+        private void RefreshAfterUpdate()
+        {
+            NewRecord = false;
+            var CURRENT_HEADER = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = 2").FirstOrDefault();
+            _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
         }
 
         private void Summer()
@@ -862,10 +935,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             {
                 this.INVO_LST_HAVL_SUB.IsReadOnly = true;
             }
-            else
-            {
-                this.INVO_LST_HAVL_SUB.IsReadOnly = false;
-            }
+
             if (Baseknow.SIGN ?? false)
             {
                 if (this.SGN1.IsChecked == true || this.SGN3.IsChecked == true)
@@ -1042,107 +1112,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         /// </summary>
         /// <param name="YN"></param>
 
-        private bool HeaderIsValid(bool _DisplayErrors = true)
-        {
-            List<MsgModel> ErrosMessages = new List<MsgModel>();
-
-            string date_n_val = DATE_N.Text.ToRawTarikh();
-            if (!string.IsNullOrEmpty(date_n_val))
-            {
-                if (!Tarikh.IsValidedDate(date_n_val))
-                {
-                    DATE_N.Text = null;
-                    ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار تاریخ صحیح نیست" });
-                }
-                else
-                {
-                    if (!Tarikh.IsSyncedDateNow(date_n_val, (bool)Baseknow.CTL_DT))
-                    {
-                        DATE_N.Text = null;
-                        ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ مربوط به سال جاری نیست" });
-                    }
-                }
-            }
-            else
-            {
-                DATE_N.Text = null;
-                ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ نمی تواند خالی باشد" });
-            }
-
-            //if (string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text == "0")  //واحد
-            //{
-            //    ErrosMessages.Add(new MsgModel { MessageText_U = "شماره رسید صحیح انتخاب نشده !" });
-            //}
-
-            if (DEPATMAN.SelectedValue is null)  //واحد
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "واحد نمیتواند خالی باشد." });
-            }
-            if (CUST_KIND.SelectedValue is null) //نوع مشتری
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "نوع مشتری نمیتواند خالی باشد." });
-            }
-            if (CUST_NO.SelectedValue is null) //حساب مشتری
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "نام مشتری نمیتواند خالی باشد." });
-            }
-            //if (SHIFT.SelectedValue is null) //شیفت
-            //{
-            //    ErrosMessages.Add(new MsgModel { MessageText_U = "شیفت نمیتواند خالی باشد." });
-            //}
-
-            if (!string.IsNullOrEmpty(DATE_N.Text?.ToRawTarikh()))
-            {
-                if (CL_HESABDARI.CHEKDATEM(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), Convert.ToBoolean(Baseknow.CTL_DT)) == true) //Return true mean's Problem
-                {
-                    //تاریخ صحیح نیست
-                    ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ فاکتور را بررسی کنید" });
-                }
-            }
-
-            if (IsNull(this.CUST_NO.SelectedValue) || this.CUST_NO.SelectedIndex < 0)
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = " مشتري مشخص نشده است ....!" });
-            }
-            else if (CL_HESABDARI.BLOCKEDCUST(this.CUST_NO2.SelectedValue.ToString()))
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = " حساب مشتري مسدود گرديده است لطفا با مديريت مالي تماس بگيريد" });
-            }
-
-            if (!IsNull(CUST_NO.SelectedValue))
-            {
-                if (CL_HESABDARI.ISTAF(CUST_NO.SelectedValue.ToString()))
-                {
-                    ErrosMessages.Add(new MsgModel { MessageText_U = " حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!" });
-                }
-            }
-
-            if (IsNull(this.CUST_KIND.SelectedValue) || CUST_KIND.SelectedIndex < 0)
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "نوع  مشتري مشخص نشده است ....!" });
-            }
-            //if (IsNull(this.SHIFT.SelectedValue) || SHIFT.SelectedIndex < 0)
-            //{
-            //    ErrosMessages.Add(new MsgModel { MessageText_U = "شيفت مشخص نشده است ....!" });
-            //}
-            if (IsNull(this.DEPATMAN.SelectedValue) || DEPATMAN.SelectedIndex < 0)
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "واحد فروش مشخص نشده است ....!" });
-            }
-
-            if (ErrosMessages.Any())
-            {
-                if (_DisplayErrors)
-                {
-                    ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct().Select(message => new MsgModel { MessageText_U = message }).ToList();
-                    new MsgListwin(false, ErrosMessages).ShowDialog();
-                }
-
-                return false;
-            }
-
-            return true;
-        }
 
         private void PERSONEL_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -1318,105 +1287,50 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
         private void CUST_NO_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
+            if (CUST_NO.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
+            TextBox CUTSNO_TEX = (TextBox)CUST_NO.Template.FindName("PART_EditableTextBox", CUST_NO);
+            if (CUTSNO_TEX is null)
             {
-                if (CUST_NO.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
-                TextBox CUTSNO_TEX = (TextBox)CUST_NO.Template.FindName("PART_EditableTextBox", CUST_NO);
-                if (CUTSNO_TEX is null)
+                return;
+            }
+            if (CUST_NO.SelectedValue is not null)
+            {
+                if ((CUST_NO.SelectedItem as Custom_CUST_HESAB).NAME == CUTSNO_TEX.Text)
                 {
                     return;
                 }
-                if (CUST_NO.SelectedValue is not null)
-                {
-                    if ((CUST_NO.SelectedItem as Custom_CUST_HESAB).NAME == CUTSNO_TEX.Text)
-                    {
-                        return;
-                    }
-                }
+            }
 
-                if (CUTSNO_TEX.Text == "+" || CUTSNO_TEX.Text == "++")
-                {
-                    ComboSearch CMBSearch = new ComboSearch("HEAD_LST_HAVL", I_AM_HEAD_LST_HAVLAH);//Search Plusy Form Specialy for Customers
-                    CMBSearch.ShowDialog();
-                    if (CUST_NO.SelectedValue is null)
-                    {
-                        return;
-                    }
-                }
-                else if (Information.IsNumeric(CUTSNO_TEX.Text))
-                {
-                    try
-                    {
-                        var rst = dbms.DoGetDataSQL<SQL1_FACTOR>("SELECT N_KOL , NUMBER,TNUMBER FROM TDETA_HES WHERE N_KOL = " + Baseknow.BEDEHKAR + " and NUMBER = 1 and tNUMBER = " + CUTSNO_TEX.Text).ToList();
-                        if (rst.Count == 1)
-                        {
-                            var _data_hes = rst.FirstOrDefault()?.n_kol + "-" + rst.FirstOrDefault()?.NUMBER + "-" + rst.FirstOrDefault()?.tNUMBER;
-                            var _data_name = dbms.DoGetDataSQL<string>($"SELECT TOP 1 NAME FROM CUST_HESAB WHERE hes = N'{_data_hes}'").FirstOrDefault();
-                            if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == _data_hes))
-                            {
-                                ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = _data_hes, NAME = _data_name });
-                            }
-                            CUST_NO.Items.Refresh();
-                            CUST_NO.SelectedValue = null;
-                            this.CUST_NO2.SelectedValue = _data_hes;
-                        }
-                        else
-                        {
-                            CUST_NO.SelectedValue = null;
-                            CUST_NO.Text = null;
-                            CUST_NO.Items.Refresh();
-                            return;
-                        }
-                    }
-                    catch (Exception) { }
-                }
-                else
-                {
-                    var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + CUTSNO_TEX.Text + "'").FirstOrDefault();
-                    if (data is not null && !string.IsNullOrEmpty(data.hes))
-                    {
-                        string thevalue = data.hes;
-                        if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
-                        {
-                            ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
-                        }
-                        CUST_NO.SelectedValue = null;
-                        CUST_NO.SelectedValue = thevalue;
-                        CUST_NO.Items.Refresh();
-                    }
-                    else
-                    {
-                        CUST_NO.SelectedValue = null;
-                        CUST_NO.Text = null;
-                        CUST_NO.Items.Refresh();
-                        return;
-                    }
-                }
+            var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(CUST_NO, dbms);
+            if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
+            {
+                universControl.PopNotifyShow($"مشتری نمی تواند خالی باشد", Pop1, Pop1Text1, Pop_Border1);
+                e.Handled = true;
+            }
 
-                if (CUST_NO.SelectedValue is not null)
+            if (CUST_NO.SelectedValue is not null)
+            {
+                if (CL_HESABDARI.ISTAF(CUST_NO.SelectedValue.ToString()))
                 {
-                    if (CL_HESABDARI.ISTAF(CUST_NO.SelectedValue.ToString()))
+                    Msgwin msgwin = new Msgwin(false, "حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!");
+                    msgwin.ShowDialog();
+                    CUST_NO.SelectedValue = null;
+                }
+                if (Convert.ToBoolean(Baseknow.SAGHF) || Convert.ToBoolean(Baseknow.SAGHF2))
+                {
+                    if (Convert.ToBoolean(CL_HESABDARI.Checketebar(CUST_NO.SelectedValue.ToString())) == false || Convert.ToBoolean(CL_HESABDARI.ChecketebarMEG(this.CUST_NO.SelectedValue.ToString())) == false)
                     {
-                        Msgwin msgwin = new Msgwin(false, "حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!");
+                        Msgwin msgwin = new Msgwin(false, "اعتبار اين مشتري تمام شده است و نمي تواند خريد نمايد...!");
                         msgwin.ShowDialog();
                         CUST_NO.SelectedValue = null;
                     }
-                    if (Convert.ToBoolean(Baseknow.SAGHF) || Convert.ToBoolean(Baseknow.SAGHF2))
-                    {
-                        if (Convert.ToBoolean(CL_HESABDARI.Checketebar(CUST_NO.SelectedValue.ToString())) == false || Convert.ToBoolean(CL_HESABDARI.ChecketebarMEG(this.CUST_NO.SelectedValue.ToString())) == false)
-                        {
-                            Msgwin msgwin = new Msgwin(false, "اعتبار اين مشتري تمام شده است و نمي تواند خريد نمايد...!");
-                            msgwin.ShowDialog();
-                            CUST_NO.SelectedValue = null;
-                        }
-                    }
-                    if (CL_HESABDARI.BLOCKEDCUST(CUST_NO2.SelectedValue.ToString()))
-                    {
-                        CUST_NO.SelectedItem = null;
-                        universControl.PopNotifyShow(" حساب مسدود گرديده است لطفا با مديريت مالي تماس بگيريد", Pop1, Pop1Text1, Pop_Border1);
-                        return;
-                    }
                 }
-
+                if (CL_HESABDARI.BLOCKEDCUST(CUST_NO2.SelectedValue.ToString()))
+                {
+                    CUST_NO.SelectedItem = null;
+                    universControl.PopNotifyShow(" حساب مسدود گرديده است لطفا با مديريت مالي تماس بگيريد", Pop1, Pop1Text1, Pop_Border1);
+                    return;
+                }
             }
         }
 
@@ -1516,7 +1430,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 if (RST is null)
                 {
                     AllowEdits = true;
-
                     AllowDeletions = true;
                 }
                 else
@@ -1907,7 +1820,256 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
             dbms.DoExecuteSQL("UPDATE HEAD_LST SET SGN3usid= " + Baseknow.USERCOD + ",SGN3 =" + Interaction.IIf(SGN3.IsChecked == true, 1, 0) + $" WHERE TAG = 2 AND NUMBER = " + NUMBER.Text);
         }
+        private void INVO_LST_HAVL_SUB_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (NowIsReady && !(e is null))
+            {
+                //IF IS NOT NULL
+                if (!(INVO_LST_HAVL_SUB.Items.Count < 1) && !(INVO_LST_HAVL_SUB.SelectedItem is null))
+                {
+                    if (INVO_LST_HAVL_SUB.SelectedItem.ToString() != "{NewItemPlaceholder}")
+                    {
+                        //WAS_ROW_ITEM = (INVO_LST_FACTOR22)INVO_LST_HAVL_SUB.SelectedItem;
 
+                        if (!(INVO_LST_HAVL_SUB.CurrentCell.Column is null))
+                            CURRENT_COLUMN_INDEX = INVO_LST_HAVL_SUB.CurrentCell.Column.DisplayIndex;
+
+                        CURRENT_ROW_INDEX = INVO_LST_HAVL_SUB.SelectedIndex;
+                    }
+                }
+            }
+        }
+        private void MEGH_AfterUpdate(INVO_LST_FACTOR22 CURRENT_ITMES_ROW, int row_index)
+        {
+            long Temp;
+            double MAND;
+            if (CURRENT_ITMES_ROW.CODE is null || CURRENT_ITMES_ROW.ANBAR is null || CURRENT_ITMES_ROW.MEGH is null || CURRENT_ITMES_ROW.MEGHk is null)
+            {
+                return;
+            }
+            CURRENT_ITMES_ROW.MEGHk = CURRENT_ITMES_ROW.MEGH * CL_HESABDARI.GETNESBAT(CURRENT_ITMES_ROW.CODE, (int)CURRENT_ITMES_ROW.VAHED_K);
+            CURRENT_ITMES_ROW.MEGH_R = CURRENT_ITMES_ROW.MEGHk;
+            if (CURRENT_ITMES_ROW.ANBAR != 0)
+            {
+                CURRENT_ITMES_ROW.AVRAGE = CL_HESABDARI.LASTAVRAGE(CURRENT_ITMES_ROW.CODE, Convert.ToInt64(CURRENT_ITMES_ROW.ANBAR), Convert.ToInt64(DATE_N.Text.ToRawTarikh()));
+                min = CL_HESABDARI.Getmin((int)CURRENT_ITMES_ROW.ANBAR, CURRENT_ITMES_ROW.CODE);
+
+                var RST = dbms.DoGetDataSQL<STUF_STK>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + CURRENT_ITMES_ROW.ANBAR).FirstOrDefault();
+                if (RST is null)
+                {
+                    Msgwin msgwin = new Msgwin(false, "كالا به انبار فوق تعلق ندارد.");
+                    msgwin.ShowDialog();
+                }
+                else if (Baseknow.RMOG is true && !IsNull(Baseknow.RMOG))
+                {
+                    var RST1 = dbms.DoGetDataSQL<double?>("SELECT  ROUND(ISNULL(AK_MOGO_AVL_KOL.SMEGH, 0) - ISNULL(AK_MOGO_FR.MEG, 0),2) AS mand  FROM         dbo.AK_MOGO_AVL_KOL(99999999," + CURRENT_ITMES_ROW.ANBAR + ") AK_MOGO_AVL_KOL RIGHT OUTER JOIN   dbo.STUF_FSK ON AK_MOGO_AVL_KOL.CODE = dbo.STUF_FSK.CODE AND AK_MOGO_AVL_KOL.ANBAR = dbo.STUF_FSK.ANBAR LEFT OUTER JOIN  dbo.AK_MOGO_FR(99999999," + CURRENT_ITMES_ROW.ANBAR + ") AK_MOGO_FR ON dbo.STUF_FSK.CODE = AK_MOGO_FR.CODE AND dbo.STUF_FSK.ANBAR = AK_MOGO_FR.ANBAR WHERE     (dbo.STUF_FSK.CODE = N'" + CURRENT_ITMES_ROW.CODE + "') AND (dbo.STUF_FSK.ANBAR = " + CURRENT_ITMES_ROW.ANBAR + ")").FirstOrDefault();
+                    if (!(RST1 is null))
+                    {
+                        //RST1.Fields("MAND")
+                        MAND = (double)RST1;
+                        // If Math.Round(rst.Fields("MAND") - (Me.MEGHk - (val(Me.MEGHk.TAG) - Me.MEGH_MAR)), 2) < min And Forms![BASEKNOW]![MOJU] And Me.ANBAR > 0 Then
+                        if (Math.Round((double)(RST1 - (CURRENT_ITMES_ROW.MEGHk - (Conversion.Val(WAS_ROW_ITEM.MEGHk) - CURRENT_ITMES_ROW.MEGH_MAR))), (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && CURRENT_ITMES_ROW.ANBAR != 0 && Baseknow.MOJU)
+                        {
+                            Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد." + "حداقل موجودي تعريف شده در اف دو :" + min);
+                            msgwin.ShowDialog();
+                            CURRENT_ITMES_ROW.MEGH = WAS_ROW_ITEM.MEGH;
+                            CURRENT_ITMES_ROW.MEGHk = WAS_ROW_ITEM.MEGHk;
+                            CURRENT_ITMES_ROW.MABL_K = WAS_ROW_ITEM.MABL_K;
+                            CURRENT_ITMES_ROW.MABL = WAS_ROW_ITEM.MABL;
+                            chek = true;
+                            var RST1_1 = dbms.DoGetDataSQL<STUF_STK>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + CURRENT_ITMES_ROW.ANBAR).FirstOrDefault();
+                            string where_qre = " WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + CURRENT_ITMES_ROW.ANBAR;
+                            if (!(RST1_1 is null))
+                            {
+                                //RST1_1.Fields("MOGODI") = MAND;
+                                //RST1_1.Fields("MOGODI_A") = 0;
+                                dbms.DoExecuteSQL($"UPDATE dbo.STUF_STK SET MOGODI = {MAND} , MOGODI_A = {0} {where_qre} ");
+                            }
+                        }
+                        else
+                        {
+                            var RST2_1 = dbms.DoGetDataSQL<STUF_STK>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + CURRENT_ITMES_ROW.ANBAR).FirstOrDefault();
+                            string where_qre = " WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + CURRENT_ITMES_ROW.ANBAR;
+                            if (!(RST2_1 is null))
+                            {
+                                var _MOGODI = MAND - (CURRENT_ITMES_ROW.MEGHk - (Conversion.Val(WAS_ROW_ITEM.MEGHk) - CURRENT_ITMES_ROW.MEGH_MAR));
+                                //RST2_1.Fields("MOGODI_A") = 0;
+                                //RST2_1.update();
+                                dbms.DoExecuteSQL($"UPDATE dbo.STUF_STK SET MOGODI = {_MOGODI} , MOGODI_A = {0} {where_qre} ");
+                            }
+                        }
+                    }
+                }
+                else if (CURRENT_ITMES_ROW.CODE == WAS_ROW_ITEM.CODE)
+                {
+                    if (Math.Round((double)(RST.MOGODI + RST.MOGODI_A - (CURRENT_ITMES_ROW.MEGHk - (Conversion.Val(WAS_ROW_ITEM.MEGHk) - CURRENT_ITMES_ROW.MEGH_MAR))), (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && CURRENT_ITMES_ROW.ANBAR != 0 && Baseknow.MOJU)
+                    {
+                        // If (rst.Fields("MOGODI") + rst.Fields("MOGODI_A")) - (Me.MEGHk - (val(Me.MEGHk.TAG) - Me.MEGH_MAR)) < min And Forms![BASEKNOW]![MOJU] And Me.ANBAR > 0 Then
+                        Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد." + "حداقل موجودي تعريف شده در اف دو :" + min);
+                        msgwin.ShowDialog();
+
+                        CURRENT_ITMES_ROW.MEGH = WAS_ROW_ITEM.MEGH;
+                        CURRENT_ITMES_ROW.MEGHk = WAS_ROW_ITEM.MEGHk;
+                        CURRENT_ITMES_ROW.MABL_K = WAS_ROW_ITEM.MABL_K;
+                        CURRENT_ITMES_ROW.MEGH_R = WAS_ROW_ITEM.MEGH_R;
+                        chek = true;
+                    }
+                }
+                // If (rst.Fields("MOGODI") + rst.Fields("MOGODI_A")) - (Me.MEGHk - Me.MEGH_MAR) < min And Forms![BASEKNOW]![MOJU] And Me.ANBAR > 0 Then
+                else if (Math.Round((double)(RST.MOGODI + RST.MOGODI_A - (CURRENT_ITMES_ROW.MEGHk - CURRENT_ITMES_ROW.MEGH_MAR)), (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && CURRENT_ITMES_ROW.ANBAR != 0 && Baseknow.MOJU)
+                {
+                    Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد." + "حداقل موجودي تعريف شده در اف دو :" + min);
+                    CURRENT_ITMES_ROW.MEGH = WAS_ROW_ITEM.MEGH;
+                    CURRENT_ITMES_ROW.MEGHk = WAS_ROW_ITEM.MEGHk;
+                    CURRENT_ITMES_ROW.MABL_K = WAS_ROW_ITEM.MABL_K;
+                    CURRENT_ITMES_ROW.MEGH_R = WAS_ROW_ITEM.MEGH_R;
+                    chek = true;
+                }
+            }
+            if (CURRENT_ITMES_ROW.MABL == 0)
+            {
+                var TheCol = INVO_LST_HAVL_SUB.Columns.FirstOrDefault(c => c.SortMemberPath == "MABL_K").DisplayIndex;
+                var DGCInf = new DataGridCellInfo(INVO_LST_HAVL_SUB.Items[row_index], INVO_LST_HAVL_SUB.Columns[TheCol]);
+                var THECELL = CL_LMethods.GetDataGridCell(DGCInf);
+                //MABL_K.TabStop = true;
+                if (!(THECELL is null))
+                    THECELL.IsTabStop = true;
+            }
+            else
+            {
+                var TheCol = INVO_LST_HAVL_SUB.Columns.FirstOrDefault(c => c.SortMemberPath == "MABL_K").DisplayIndex;
+                var DGCInf = new DataGridCellInfo(INVO_LST_HAVL_SUB.Items[row_index], INVO_LST_HAVL_SUB.Columns[TheCol]);
+                var THECELL = CL_LMethods.GetDataGridCell(DGCInf);
+                if (!(THECELL is null))
+                    THECELL.IsTabStop = false;
+                CURRENT_ITMES_ROW.MABL_K = Math.Round((double)(CURRENT_ITMES_ROW.MABL * CURRENT_ITMES_ROW.MEGHk));
+            }
+            if (CURRENT_ITMES_ROW.N_MOIN != Math.Round((double)(CURRENT_ITMES_ROW.N_KOL * CURRENT_ITMES_ROW.MABL_K / 100)) + Math.Round((double)((CURRENT_ITMES_ROW.MABL_K - Math.Round((double)(CURRENT_ITMES_ROW.N_KOL * CURRENT_ITMES_ROW.MABL_K / 100))) * CURRENT_ITMES_ROW.TKHN / 100)))
+            {
+                CURRENT_ITMES_ROW.N_MOIN = Math.Round((double)(CURRENT_ITMES_ROW.N_KOL * CURRENT_ITMES_ROW.MABL_K / 100)) + Math.Round((double)((CURRENT_ITMES_ROW.MABL_K - Math.Round((double)(CURRENT_ITMES_ROW.N_KOL * CURRENT_ITMES_ROW.MABL_K / 100))) * CURRENT_ITMES_ROW.TKHN / 100));
+            }
+            if (TICMBAA.IsChecked is true)
+            {
+                var RST = dbms.DoGetDataSQL<CUSTOM_STUF_DEF_2>("SELECT CMBAA ,CODE FROM STUF_DEF WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "'").FirstOrDefault();
+                if (!(RST is null))
+                {
+                    if ((bool)RST.CMBAA)
+                    {
+                        if (CURRENT_ITMES_ROW.IMBAA != Math.Round((double)((CURRENT_ITMES_ROW.MABL_K - CURRENT_ITMES_ROW.N_MOIN) * CL_HESABDARI.GetArzesh(CURRENT_ITMES_ROW.CODE.ToString()) / 100)))
+                        {
+                            CURRENT_ITMES_ROW.IMBAA = Math.Round((double)((CURRENT_ITMES_ROW.MABL_K - CURRENT_ITMES_ROW.N_MOIN) * CL_HESABDARI.GetArzesh(CURRENT_ITMES_ROW.CODE.ToString()) / 100));
+                        }
+                    }
+                    else if (CURRENT_ITMES_ROW.IMBAA != 0)
+                    {
+                        Msgwin msgwin = new Msgwin(true, "اين كالا در تعريف كالا مشمول ماليات معرفي نشده است آيا ماليات آنرا صفر كنم؟");
+                        msgwin.ShowDialog();
+                        if (msgwin.DialogResult is true)
+                        {
+                            CURRENT_ITMES_ROW.IMBAA = 0;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                CURRENT_ITMES_ROW.IMBAA = 0;
+            }
+        }
+
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            // Handle the selected item
+            if (selectedItem is HEAD_LST item)
+            {
+                if (item != null)
+                {
+                    //_navigationManager.MoveReGetData(INavigator.Jahat.)
+                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.NUMBER.Equals(Convert.ToDouble(item.NUMBER)));
+                    if (itemfound != null)
+                    {
+                        _navigationManager.IsNewRecord = false;
+
+                        // 1) Find its index in the master list
+                        int idx = _navigationManager.RecordsData.IndexOf(itemfound);
+                        if (idx < 0)
+                        {
+                            // not found (perhaps filtered out?), bail out
+                            new Msgwin(false, "یافت نشد: مورد انتخاب شده در لیست اصلی وجود ندارد").Show();
+                            return;
+                        }
+
+                        // 2) Tell the navigation manager to move to that position
+                        _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+                        //OnCurrentRecordChanged(itemfound);
+                    }
+                }
+            }
+        }
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+                 new SearchableProperty { DisplayName = "شماره حواله", PropertyPath = "NUMBER", PropertyType = typeof(double) },
+                 new SearchableProperty { DisplayName = "تاریخ", PropertyPath = "DATE_N", PropertyType = typeof(long) },
+                 new SearchableProperty { DisplayName = "کد مشتری", PropertyPath = "CUST_NO", PropertyType = typeof(string) },
+                 new SearchableProperty { DisplayName = "کاربر", PropertyPath = "USER_NAME", PropertyType = typeof(string) },
+                 new SearchableProperty { DisplayName = "تحویل گیرنده", PropertyPath = "TAH", PropertyType = typeof(string) },
+                 new SearchableProperty { DisplayName = "تحویل دهنده", PropertyPath = "MOLAH", PropertyType = typeof(string) },
+                 new SearchableProperty { DisplayName = "ملاحظات", PropertyPath = "SHARAYET", PropertyType = typeof(string) },
+                 // Add other searchable properties
+            };
+        }
+
+        #endregion
+
+        private void INVO_LST_HAVL_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete)
+                e.Handled = true;
+
+            if (NowIsReady && e.Key == Key.Delete && DELETE_HAVALE.IsEnabled)
+            {
+                e.Handled = true;
+                DELETE_HAVALE_Click(null, null);
+            }
+            else if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && e.Key == Key.G)
+            {
+                e.Handled = true;
+                if (Convert.ToDouble(NUMBER.Text ?? "0") > 0 && INVO_LST_HAVL_SUB.Items.Count > 0)
+                {
+                    Msgwin msgwin = new Msgwin(true, "آیا از باز کردن پنجره سایر اطلاعات مطمئن هستید؟"); msgwin.ShowDialog();
+                    if (msgwin.DialogResult is true)
+                    {
+                        BUTTON_SAVE_HAVALE_Click(null, null);
+
+                        if (!_navigationManager.IsNewRecord)
+                        {
+                            OTHER_DTL win = new OTHER_DTL(2, CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle));
+                            win.NUMBER = Convert.ToInt64(NUMBER.Text);
+                            win.Show();
+                        }
+                    }
+                }
+            }
+        }
+        private void INVO_LST_HAVL_SUB_GotFocus(object sender, RoutedEventArgs e)
+        {
+            string tah_tex = ((TextBox)TAH.Template.FindName("PART_EditableTextBox", TAH)).Text;
+            string molah_tex = ((TextBox)MOLAH.Template.FindName("PART_EditableTextBox", MOLAH)).Text;
+            string mas_tex = ((TextBox)MAS.Template.FindName("PART_EditableTextBox", MAS)).Text;
+
+            //بررسی کلیه مقادیر این درست انختاب یا وارد شدند یا نه 
+            if ((!Tarikh.IsValidedDate(DATE_N.Text.ToRawTarikh()) || CUST_KIND.SelectedIndex == -1 || CUST_NO.SelectedIndex == -1 || DEPATMAN.SelectedIndex == -1))
+            {
+                universControl.PopNotifyShow("بعضی آیتم های بالای  حواله را  خالی گذاشتید یا درست وارد نکردید لطفا بررسی کنید", Pop1, Pop1Text1, Pop_Border1);
+                return;
+            }
+
+
+        }
         private void INVO_LST_HAVL_SUB_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (NowIsReady && INVO_LST_HAVL_SUB.SelectedItem != null && INVO_LST_HAVL_SUB.SelectedItem.ToStringNullSafe() != "{NewItemPlaceholder}")
@@ -1927,60 +2089,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         {
             //var NI = new INVO_LST_FACTOR22 { CODE = ANBARDefaultValue };
             //e.NewItem = NI;
-        }
-        private void FillVahedBasedOnKala(DataGridPreparingCellForEditEventArgs e)
-        {
-            int DefVale = 0;
-            var CKALA = ((INVO_LST_FACTOR22)e.Row.Item).CODE;
-
-            FrameworkElement element = e.EditingElement;
-            ComboBox TheVahedCmb = CL_LMethods.GetVisualChild<ComboBox>(element);
-            if (element is ComboBox)
-                TheVahedCmb = element as ComboBox;
-
-            if (e.Column.SortMemberPath == "VAHED_K")
-            {
-                if (!(e.EditingElement is null) && element is ComboBox)
-                {
-                    RST_KALAVAHED_LST = dbms.DoGetDataSQL<Custom_VAHEDK>($"SELECT dbo.MODULE_D.VAHED, dbo.TCOD_VAHEDS.NAMES FROM dbo.MODULE_D INNER JOIN dbo.TCOD_VAHEDS ON dbo.MODULE_D.VAHED = dbo.TCOD_VAHEDS.CODE WHERE (dbo.MODULE_D.CODE = N'{CKALA}')").ToList();
-
-                    DefVale = Convert.ToInt32((e.EditingElement as ComboBox).SelectedValue);
-
-                    TheVahedCmb.ItemsSource = RST_KALAVAHED_LST;
-                    if (DefVale is 0)
-                    {
-                        (e.EditingElement as ComboBox).SelectedIndex = 0;
-                    }
-                    else
-                    {
-                        (e.EditingElement as ComboBox).SelectedValue = DefVale;
-                    }
-                }
-            }
-            else
-            {
-                if (!(e.EditingElement is null) && element is ComboBox)
-                {
-                    if (TheVahedCmb.DisplayMemberPath == "NAMES" && TheVahedCmb.SelectedValuePath == "CODE")
-                    {
-                    }
-                    else
-                    {
-                        RST_FULLVAHED_LST = dbms.DoGetDataSQL<Custom_VAHEDK>("SELECT CODE AS VAHED,NAMES FROM dbo.TCOD_VAHEDS").ToList();
-                        TheVahedCmb.ItemsSource = RST_FULLVAHED_LST;
-
-                        if (DefVale is 0)
-                        {
-                            (e.EditingElement as ComboBox).SelectedIndex = 0;
-                        }
-                        else
-                        {
-                            (e.EditingElement as ComboBox).SelectedValue = DefVale;
-                        }
-                    }
-
-                }
-            }
         }
         private void INVO_LST_HAVL_SUB_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
         {
@@ -2598,346 +2706,140 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 }
             }
         }
-
-        private void INVO_LST_HAVL_SUB_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void INVO_LST_HAVL_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (NowIsReady && !(e is null))
-            {
-                //IF IS NOT NULL
-                if (!(INVO_LST_HAVL_SUB.Items.Count < 1) && !(INVO_LST_HAVL_SUB.SelectedItem is null))
-                {
-                    if (INVO_LST_HAVL_SUB.SelectedItem.ToString() != "{NewItemPlaceholder}")
-                    {
-                        //WAS_ROW_ITEM = (INVO_LST_FACTOR22)INVO_LST_HAVL_SUB.SelectedItem;
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+            if (e.Row.Item == null) { return; }
+            var ROW = e.Row.Item as INVO_LST_FACTOR22;
+            if (ConstructorRowDetector.IsPristine(ROW)) { INVO_LST_SUB_CANCEL_EDIT(); return; }
 
-                        if (!(INVO_LST_HAVL_SUB.CurrentCell.Column is null))
-                            CURRENT_COLUMN_INDEX = INVO_LST_HAVL_SUB.CurrentCell.Column.DisplayIndex;
 
-                        CURRENT_ROW_INDEX = INVO_LST_HAVL_SUB.SelectedIndex;
-                    }
-                }
-            }
-        }
-        private void MEGH_AfterUpdate(INVO_LST_FACTOR22 CURRENT_ITMES_ROW, int row_index)
-        {
-            long Temp;
-            double MAND;
-            if (CURRENT_ITMES_ROW.CODE is null || CURRENT_ITMES_ROW.ANBAR is null || CURRENT_ITMES_ROW.MEGH is null || CURRENT_ITMES_ROW.MEGHk is null)
+            if (!BodyIsValid(ROW))
             {
-                return;
-            }
-            CURRENT_ITMES_ROW.MEGHk = CURRENT_ITMES_ROW.MEGH * CL_HESABDARI.GETNESBAT(CURRENT_ITMES_ROW.CODE, (int)CURRENT_ITMES_ROW.VAHED_K);
-            CURRENT_ITMES_ROW.MEGH_R = CURRENT_ITMES_ROW.MEGHk;
-            if (CURRENT_ITMES_ROW.ANBAR != 0)
-            {
-                CURRENT_ITMES_ROW.AVRAGE = CL_HESABDARI.LASTAVRAGE(CURRENT_ITMES_ROW.CODE, Convert.ToInt64(CURRENT_ITMES_ROW.ANBAR), Convert.ToInt64(DATE_N.Text.ToRawTarikh()));
-                min = CL_HESABDARI.Getmin((int)CURRENT_ITMES_ROW.ANBAR, CURRENT_ITMES_ROW.CODE);
-
-                var RST = dbms.DoGetDataSQL<STUF_STK>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + CURRENT_ITMES_ROW.ANBAR).FirstOrDefault();
-                if (RST is null)
-                {
-                    Msgwin msgwin = new Msgwin(false, "كالا به انبار فوق تعلق ندارد.");
-                    msgwin.ShowDialog();
-                }
-                else if (Baseknow.RMOG is true && !IsNull(Baseknow.RMOG))
-                {
-                    var RST1 = dbms.DoGetDataSQL<double?>("SELECT  ROUND(ISNULL(AK_MOGO_AVL_KOL.SMEGH, 0) - ISNULL(AK_MOGO_FR.MEG, 0),2) AS mand  FROM         dbo.AK_MOGO_AVL_KOL(99999999," + CURRENT_ITMES_ROW.ANBAR + ") AK_MOGO_AVL_KOL RIGHT OUTER JOIN   dbo.STUF_FSK ON AK_MOGO_AVL_KOL.CODE = dbo.STUF_FSK.CODE AND AK_MOGO_AVL_KOL.ANBAR = dbo.STUF_FSK.ANBAR LEFT OUTER JOIN  dbo.AK_MOGO_FR(99999999," + CURRENT_ITMES_ROW.ANBAR + ") AK_MOGO_FR ON dbo.STUF_FSK.CODE = AK_MOGO_FR.CODE AND dbo.STUF_FSK.ANBAR = AK_MOGO_FR.ANBAR WHERE     (dbo.STUF_FSK.CODE = N'" + CURRENT_ITMES_ROW.CODE + "') AND (dbo.STUF_FSK.ANBAR = " + CURRENT_ITMES_ROW.ANBAR + ")").FirstOrDefault();
-                    if (!(RST1 is null))
-                    {
-                        //RST1.Fields("MAND")
-                        MAND = (double)RST1;
-                        // If Math.Round(rst.Fields("MAND") - (Me.MEGHk - (val(Me.MEGHk.TAG) - Me.MEGH_MAR)), 2) < min And Forms![BASEKNOW]![MOJU] And Me.ANBAR > 0 Then
-                        if (Math.Round((double)(RST1 - (CURRENT_ITMES_ROW.MEGHk - (Conversion.Val(WAS_ROW_ITEM.MEGHk) - CURRENT_ITMES_ROW.MEGH_MAR))), (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && CURRENT_ITMES_ROW.ANBAR != 0 && Baseknow.MOJU)
-                        {
-                            Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد." + "حداقل موجودي تعريف شده در اف دو :" + min);
-                            msgwin.ShowDialog();
-                            CURRENT_ITMES_ROW.MEGH = WAS_ROW_ITEM.MEGH;
-                            CURRENT_ITMES_ROW.MEGHk = WAS_ROW_ITEM.MEGHk;
-                            CURRENT_ITMES_ROW.MABL_K = WAS_ROW_ITEM.MABL_K;
-                            CURRENT_ITMES_ROW.MABL = WAS_ROW_ITEM.MABL;
-                            chek = true;
-                            var RST1_1 = dbms.DoGetDataSQL<STUF_STK>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + CURRENT_ITMES_ROW.ANBAR).FirstOrDefault();
-                            string where_qre = " WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + CURRENT_ITMES_ROW.ANBAR;
-                            if (!(RST1_1 is null))
-                            {
-                                //RST1_1.Fields("MOGODI") = MAND;
-                                //RST1_1.Fields("MOGODI_A") = 0;
-                                dbms.DoExecuteSQL($"UPDATE dbo.STUF_STK SET MOGODI = {MAND} , MOGODI_A = {0} {where_qre} ");
-                            }
-                        }
-                        else
-                        {
-                            var RST2_1 = dbms.DoGetDataSQL<STUF_STK>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + CURRENT_ITMES_ROW.ANBAR).FirstOrDefault();
-                            string where_qre = " WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + CURRENT_ITMES_ROW.ANBAR;
-                            if (!(RST2_1 is null))
-                            {
-                                var _MOGODI = MAND - (CURRENT_ITMES_ROW.MEGHk - (Conversion.Val(WAS_ROW_ITEM.MEGHk) - CURRENT_ITMES_ROW.MEGH_MAR));
-                                //RST2_1.Fields("MOGODI_A") = 0;
-                                //RST2_1.update();
-                                dbms.DoExecuteSQL($"UPDATE dbo.STUF_STK SET MOGODI = {_MOGODI} , MOGODI_A = {0} {where_qre} ");
-                            }
-                        }
-                    }
-                }
-                else if (CURRENT_ITMES_ROW.CODE == WAS_ROW_ITEM.CODE)
-                {
-                    if (Math.Round((double)(RST.MOGODI + RST.MOGODI_A - (CURRENT_ITMES_ROW.MEGHk - (Conversion.Val(WAS_ROW_ITEM.MEGHk) - CURRENT_ITMES_ROW.MEGH_MAR))), (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && CURRENT_ITMES_ROW.ANBAR != 0 && Baseknow.MOJU)
-                    {
-                        // If (rst.Fields("MOGODI") + rst.Fields("MOGODI_A")) - (Me.MEGHk - (val(Me.MEGHk.TAG) - Me.MEGH_MAR)) < min And Forms![BASEKNOW]![MOJU] And Me.ANBAR > 0 Then
-                        Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد." + "حداقل موجودي تعريف شده در اف دو :" + min);
-                        msgwin.ShowDialog();
-
-                        CURRENT_ITMES_ROW.MEGH = WAS_ROW_ITEM.MEGH;
-                        CURRENT_ITMES_ROW.MEGHk = WAS_ROW_ITEM.MEGHk;
-                        CURRENT_ITMES_ROW.MABL_K = WAS_ROW_ITEM.MABL_K;
-                        CURRENT_ITMES_ROW.MEGH_R = WAS_ROW_ITEM.MEGH_R;
-                        chek = true;
-                    }
-                }
-                // If (rst.Fields("MOGODI") + rst.Fields("MOGODI_A")) - (Me.MEGHk - Me.MEGH_MAR) < min And Forms![BASEKNOW]![MOJU] And Me.ANBAR > 0 Then
-                else if (Math.Round((double)(RST.MOGODI + RST.MOGODI_A - (CURRENT_ITMES_ROW.MEGHk - CURRENT_ITMES_ROW.MEGH_MAR)), (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && CURRENT_ITMES_ROW.ANBAR != 0 && Baseknow.MOJU)
-                {
-                    Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد." + "حداقل موجودي تعريف شده در اف دو :" + min);
-                    CURRENT_ITMES_ROW.MEGH = WAS_ROW_ITEM.MEGH;
-                    CURRENT_ITMES_ROW.MEGHk = WAS_ROW_ITEM.MEGHk;
-                    CURRENT_ITMES_ROW.MABL_K = WAS_ROW_ITEM.MABL_K;
-                    CURRENT_ITMES_ROW.MEGH_R = WAS_ROW_ITEM.MEGH_R;
-                    chek = true;
-                }
-            }
-            if (CURRENT_ITMES_ROW.MABL == 0)
-            {
-                var TheCol = INVO_LST_HAVL_SUB.Columns.FirstOrDefault(c => c.SortMemberPath == "MABL_K").DisplayIndex;
-                var DGCInf = new DataGridCellInfo(INVO_LST_HAVL_SUB.Items[row_index], INVO_LST_HAVL_SUB.Columns[TheCol]);
-                var THECELL = CL_LMethods.GetDataGridCell(DGCInf);
-                //MABL_K.TabStop = true;
-                if (!(THECELL is null))
-                    THECELL.IsTabStop = true;
-            }
-            else
-            {
-                var TheCol = INVO_LST_HAVL_SUB.Columns.FirstOrDefault(c => c.SortMemberPath == "MABL_K").DisplayIndex;
-                var DGCInf = new DataGridCellInfo(INVO_LST_HAVL_SUB.Items[row_index], INVO_LST_HAVL_SUB.Columns[TheCol]);
-                var THECELL = CL_LMethods.GetDataGridCell(DGCInf);
-                if (!(THECELL is null))
-                    THECELL.IsTabStop = false;
-                CURRENT_ITMES_ROW.MABL_K = Math.Round((double)(CURRENT_ITMES_ROW.MABL * CURRENT_ITMES_ROW.MEGHk));
-            }
-            if (CURRENT_ITMES_ROW.N_MOIN != Math.Round((double)(CURRENT_ITMES_ROW.N_KOL * CURRENT_ITMES_ROW.MABL_K / 100)) + Math.Round((double)((CURRENT_ITMES_ROW.MABL_K - Math.Round((double)(CURRENT_ITMES_ROW.N_KOL * CURRENT_ITMES_ROW.MABL_K / 100))) * CURRENT_ITMES_ROW.TKHN / 100)))
-            {
-                CURRENT_ITMES_ROW.N_MOIN = Math.Round((double)(CURRENT_ITMES_ROW.N_KOL * CURRENT_ITMES_ROW.MABL_K / 100)) + Math.Round((double)((CURRENT_ITMES_ROW.MABL_K - Math.Round((double)(CURRENT_ITMES_ROW.N_KOL * CURRENT_ITMES_ROW.MABL_K / 100))) * CURRENT_ITMES_ROW.TKHN / 100));
-            }
-            if (TICMBAA.IsChecked is true)
-            {
-                var RST = dbms.DoGetDataSQL<CUSTOM_STUF_DEF_2>("SELECT CMBAA ,CODE FROM STUF_DEF WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "'").FirstOrDefault();
-                if (!(RST is null))
-                {
-                    if ((bool)RST.CMBAA)
-                    {
-                        if (CURRENT_ITMES_ROW.IMBAA != Math.Round((double)((CURRENT_ITMES_ROW.MABL_K - CURRENT_ITMES_ROW.N_MOIN) * CL_HESABDARI.GetArzesh(CURRENT_ITMES_ROW.CODE.ToString()) / 100)))
-                        {
-                            CURRENT_ITMES_ROW.IMBAA = Math.Round((double)((CURRENT_ITMES_ROW.MABL_K - CURRENT_ITMES_ROW.N_MOIN) * CL_HESABDARI.GetArzesh(CURRENT_ITMES_ROW.CODE.ToString()) / 100));
-                        }
-                    }
-                    else if (CURRENT_ITMES_ROW.IMBAA != 0)
-                    {
-                        Msgwin msgwin = new Msgwin(true, "اين كالا در تعريف كالا مشمول ماليات معرفي نشده است آيا ماليات آنرا صفر كنم؟");
-                        msgwin.ShowDialog();
-                        if (msgwin.DialogResult is true)
-                        {
-                            CURRENT_ITMES_ROW.IMBAA = 0;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                CURRENT_ITMES_ROW.IMBAA = 0;
-            }
-        }
-
-        private void INVO_LST_HAVL_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Delete)
-                e.Handled = true;
-
-            if (NowIsReady && e.Key == Key.Delete && DELETE_HAVALE.IsEnabled)
-            {
-                e.Handled = true;
-                DELETE_HAVALE_Click(null, null);
-            }
-            else if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && e.Key == Key.G)
-            {
-                e.Handled = true;
-                if (Convert.ToDouble(NUMBER.Text ?? "0") > 0 && INVO_LST_HAVL_SUB.Items.Count > 0)
-                {
-                    Msgwin msgwin = new Msgwin(true, "آیا از باز کردن پنجره سایر اطلاعات مطمئن هستید؟"); msgwin.ShowDialog();
-                    if (msgwin.DialogResult is true)
-                    {
-                        BUTTON_SAVE_HAVALE_Click(null, null);
-
-                        if (AllisWell)
-                        {
-                            OTHER_DTL win = new OTHER_DTL(2, CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle));
-                            win.NUMBER = Convert.ToInt64(NUMBER.Text);
-                            win.Show();
-                        }
-                    }
-                }
-            }
-        }
-
-        private void INVO_LST_HAVL_SUB_GotFocus(object sender, RoutedEventArgs e)
-        {
-            string tah_tex = ((TextBox)TAH.Template.FindName("PART_EditableTextBox", TAH)).Text;
-            string molah_tex = ((TextBox)MOLAH.Template.FindName("PART_EditableTextBox", MOLAH)).Text;
-            string mas_tex = ((TextBox)MAS.Template.FindName("PART_EditableTextBox", MAS)).Text;
-
-            //بررسی کلیه مقادیر این درست انختاب یا وارد شدند یا نه 
-            if (!Tarikh.IsValidedDate(DATE_N.Text.ToRawTarikh()) ||
-                CUST_KIND.SelectedIndex == -1 ||
-                CUST_NO.SelectedIndex == -1 ||
-                DEPATMAN.SelectedIndex == -1 ||
-                string.IsNullOrEmpty(tah_tex) ||
-                string.IsNullOrEmpty(molah_tex)
-                )
-            {
-                universControl.PopNotifyShow("بعضی آیتم های بالای  حواله را  خالی گذاشتید یا درست وارد نکردید لطفا بررسی کنید", Pop1, Pop1Text1, Pop_Border1);
+                INVO_LST_SUB_CANCEL_EDIT();
                 return;
             }
 
+            List<MsgModel> ErrosMessages = new List<MsgModel>();
+            //اگر نال هست اصلاح کن به صفر
+            _ = (ROW.MEGH_MAR is null) ? ROW.MEGH_MAR = 0 : ROW.MEGH_MAR;
+            _ = (ROW.MEGH_R is null) ? ROW.MEGH_R = 0 : ROW.MEGH_R;
+            _ = (ROW.MABL is null) ? ROW.MABL = 0 : ROW.MABL;
+            _ = (ROW.MABL_K is null) ? ROW.MABL_K = 0 : ROW.MABL_K;
 
+            IVM.StartTransaction(); // Start the transaction again if is disposed before ****************************************************************
+            bool CurrentRowisNew = true;
+            string _qre = "";
+            if (ROW.id is null || ROW.id <= 0) //INSERT
+            {
+                _qre = $@"INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
+                                OUTPUT INSERTED.id
+                                VALUES({NUMBER.Text},2,{ROW.ANBAR},NULL,N'{ROW.CODE}',{ROW.MEGH},{ROW.MEGHk},{ROW.MEGH_MAR},N'{ROW.MANDAH}',{ROW.MABL},{ROW.MABL_K},{Convert.ToByte(ROW.FROM_A)},N'{ROW.N_RASID}',
+                                {ROW.MEGH_R},{ROW.SANAD_NO},NULL,{ROW.ANBARF},{ROW.VAHED_K},{ROW.N_KOL},{ROW.N_MOIN},{ROW.N_TAF},{ROW.AVRAGE},{ROW.AVRAGE2},{ROW.IMBAA},{ROW.TOTALARZ},N'{ROW.VISITOR}',{ROW.TKHN},
+                                {(ROW.JAY is null ? "NULL" : ROW.JAY)},{(ROW.JAYO is null ? "NULL" : ROW.JAYO)})";
+
+                var (errorMsgs, infoMsgs, invDetails, queryOutputs) = IVM.CheckInventoryAndExecuteQuery<long>(new List<object> { ROW }, _qre, null, false);
+                ErrosMessages.AddRange(errorMsgs);
+
+                if (queryOutputs.Any())
+                {
+                    ROW.id = queryOutputs.FirstOrDefault(); // Update the list with the new ID
+                    IVM.TM.ExecuteSqlCommandCtc($"UPDATE dbo.INVO_LST SET RADIF = (SELECT ISNULL(MAX(RADIF) + 1, 1) AS NewRADIF FROM dbo.INVO_LST WHERE NUMBER={NUMBER.Text} AND TAG=2) FROM dbo.INVO_LST WHERE id = {ROW.id}");
+                }
+            }
+            else //UPDATE
+            {
+                CurrentRowisNew = false;
+                _qre = $@"UPDATE dbo.INVO_LST
+                          SET ANBAR={ROW.ANBAR},
+                              CODE=N'{ROW.CODE}',	
+                              MEGH={ROW.MEGH},
+                              MEGHk={ROW.MEGHk},
+                              MEGH_MAR={ROW.MEGH_MAR},
+                              MANDAH=N'{ROW.MANDAH}',
+                              MABL={ROW.MABL},
+                              MABL_K={ROW.MABL_K},
+                              FROM_A={Convert.ToByte(ROW.FROM_A)},
+                              N_RASID=N'{ROW.N_RASID}',
+                              MEGH_R={ROW.MEGH_R},
+                              SANAD_NO={ROW.SANAD_NO},
+                              ANBARF={ROW.ANBARF},
+                              VAHED_K={ROW.VAHED_K},
+                              N_KOL={ROW.N_KOL},
+                              N_MOIN={ROW.N_MOIN},
+                              N_TAF={ROW.N_TAF},
+                              AVRAGE={ROW.AVRAGE},
+                              AVRAGE2={ROW.AVRAGE2},
+                              IMBAA={ROW.IMBAA},
+                              TOTALARZ={ROW.TOTALARZ},
+                              VISITOR=N'{ROW.VISITOR}',
+                              TKHN={ROW.TKHN},
+                              JAY={(ROW.JAY is null ? "NULL" : ROW.JAY)},
+                              JAYO={(ROW.JAYO is null ? "NULL" : ROW.JAYO)}	
+                            WHERE id = {ROW.id} AND TAG = 2";
+
+                var (errorMsgs, _, _, _) = IVM.CheckInventoryAndExecuteQuery<int>(new List<object> { ROW }, _qre, null, false);
+                ErrosMessages.AddRange(errorMsgs);
+            }
+
+            // Handle error messages for row
+            if (ErrosMessages.Any())
+            {
+                IVM.RollbackTransaction(); // Rollback the transaction if there are errors
+                if (CurrentRowisNew)
+                {
+                    ROW.id = null; //Bring Back to null (New State because of Rollback Transaction)
+                }
+                INVO_LST_SUB_CANCEL_EDIT();
+                IVM.ShowErrorMessages(ErrosMessages);
+                return;
+            }
+            else
+            {
+                IVM.CommitTransaction(); // Commit the transaction if no errors
+            }
+            // End of the transaction again if is disposed before ****************************************************************
+
+            HAVL_AfterUpdate();
+            Summer();
+            ChangeIsHappend = false;
         }
 
         InventoryManager IVM = new InventoryManager(); //مدیریت موجودی ایزوله
-        bool AllisWell = true;
+        private int datagridname_tbox_def_index_col;
+
         private void BUTTON_SAVE_HAVALE_Click(object sender, RoutedEventArgs e)
         {
-            AllisWell = true;
-
-            string tah_tex = ((TextBox)TAH.Template.FindName("PART_EditableTextBox", TAH)).Text;
-            string molah_tex = ((TextBox)MOLAH.Template.FindName("PART_EditableTextBox", MOLAH)).Text;
-            string mas_tex = ((TextBox)MAS.Template.FindName("PART_EditableTextBox", MAS)).Text;
-
-            #region Validatoring_Header
-            if (Convert.ToBoolean(Baseknow.SAGHF) || Convert.ToBoolean(Baseknow.SAGHF2))
+            if (!HeaderIsValid())
             {
-                if (Convert.ToBoolean(CL_HESABDARI.Checketebar(CUST_NO2.SelectedValue.ToStringNullSafe())) == false || Convert.ToBoolean(CL_HESABDARI.ChecketebarMEG(CUST_NO2.SelectedValue.ToStringNullSafe())) == false)
-                {
-                    Msgwin msgwin = new Msgwin(false, "اعتبار اين مشتري تمام شده است و نمي تواند خريد نمايد...!"); msgwin.ShowDialog();
-                }
-            }
-
-
-            if (string.IsNullOrEmpty(tah_tex))
-            {
-                universControl.PopNotifyShowUp(".هشدار : فیلد تحویل دهنهد خالی است", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
-                //Msgwin msgwin = new Msgwin(false, "هشدار : فیلد تحویل دهنهد خالی است"); msgwin.ShowDialog();
-                //AllisWell = false;
-            }
-            if (string.IsNullOrEmpty(molah_tex))
-            {
-                universControl.PopNotifyShowUp(".هشدار : فیلد توسط خالی است", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
-                //Msgwin msgwin = new Msgwin(false, "هشدار : فیلد توسط خالی است"); msgwin.ShowDialog();
-                //AllisWell = false;
-            }
-            #endregion
-
-            //Process Prc = Process.Start("C:\\correct\\prc\\prc.exe", "1354");
-            //Process Prc = ProcLoader.Start();
-            if (AllisWell != true || !HeaderIsValid())
-            {
-                //ProcLoader.Stop(Prc);
                 return;
             }
-            long MBK, CMABL = default;
-            double nesba;
-            var takh = default(double);
-            var min = default(double);
 
-            #region Validatoring_Detail
-            //اگر از قبل چیزی هست یکدور صحت سنجی و درص ورت لزوم اصلاح کن
-            //اطلاعات قبلی از دیتابیس
-
-            foreach (var item_tmp in INVO_LST_HAVL_SUB.Items)
+            if (!DoCmdSaveHeader())
             {
-                var CHECKITEM = (item_tmp as INVO_LST_FACTOR22);
-                if (!(CHECKITEM is null))
-                {    //کنترل مقدار والیه که یا صفر باشه یا مقدار داشتته باشه , خالی نباشه
-                    if (
-                        string.IsNullOrEmpty(CHECKITEM.ANBAR.ToStringNullSafe()) ||
-                        string.IsNullOrEmpty(CHECKITEM.NAME_CODE.ToStringNullSafe()) ||
-                        string.IsNullOrEmpty(CHECKITEM.CODE.ToStringNullSafe()) ||
-                        string.IsNullOrEmpty(CHECKITEM.VAHED_K.ToStringNullSafe()) ||
-                        string.IsNullOrEmpty(CHECKITEM.MEGH.ToStringNullSafe()) ||
-                        string.IsNullOrEmpty(CHECKITEM.MEGHk.ToStringNullSafe())
-                    )
-                    {
-                        //ProcLoader.Stop(Prc);
-                        Msgwin msgwin = new Msgwin(false, ".بعضی از مقدایر سطر حواله فروش خالی است "); msgwin.ShowDialog();
-                        AllisWell = false;
-                    }
-                }
+                return;
             }
-            //اطلاعات جدید از دیتاگرید_________________________________________________________________________
-            //اگر تا اینجا درسته که نال نره چک کنه
-            if (AllisWell)
+
+            INVO_LST_HAVL_SUB.IsReadOnly = false;
+
+            universControl.PopNotifyShow(".مقادیر ذخیره شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+
+            if (HAVALEH_INVO_DATA.Count == 0)
             {
-                foreach (var item in INVO_LST_HAVL_SUB.Items)
-                {
-                    var UPD_TIM = item as INVO_LST_FACTOR22;
-                    if (!(UPD_TIM is null))
-                    {
-                        //اگر نال هست اصلاح کن به صفر
-                        _ = (UPD_TIM.MEGH_MAR is null) ? UPD_TIM.MEGH_MAR = 0 : UPD_TIM.MEGH_MAR;
-                        _ = (UPD_TIM.MEGH_R is null) ? UPD_TIM.MEGH_R = 0 : UPD_TIM.MEGH_R;
-                        _ = (UPD_TIM.MABL is null) ? UPD_TIM.MABL = 0 : UPD_TIM.MABL;
-                        _ = (UPD_TIM.MABL_K is null) ? UPD_TIM.MABL_K = 0 : UPD_TIM.MABL_K;
-
-                        //محاسبه نسب باتوجه به واحد و کالا
-                        nesba = CL_HESABDARI.GETNESBAT(UPD_TIM.CODE, (int)UPD_TIM.VAHED_K);
-                        //محاسبه مبلغ باتوجه به مقدار
-                        MBK = (long)Math.Round((double)(UPD_TIM.MEGH * nesba * UPD_TIM.MABL));
-                        //محاسبه و ثبت مجددا مقدار کل
-                        UPD_TIM.MEGHk = Convert.ToDouble(UPD_TIM.MEGH * nesba);
-                        UPD_TIM.MABL_K = Math.Round((double)(UPD_TIM.MEGH * nesba * UPD_TIM.MABL));
-
-                        //بررسی موجودی و حداقل موجودی
-                        if (Strings.Mid(Baseknow.OPTIONSS, 59, 1) == "5")
-                        {
-
-                            //برای اینکه مقدار ذخیره شده در دیتابیس رو با مقدار کل تغییر یافته در دیتاگرید مقایسه کنیم و مقدار اضافه شده رو بدست بیاریم و از موجودی کم کنیم
-                            double ROW_TAG_MEGHK = 0;
-                            if (UPD_TIM.id is null || UPD_TIM.id is 0) { }
-                            else
-                            {
-                                ROW_TAG_MEGHK = (double)dbms.DoGetDataSQL<double?>($"SELECT TOP(1) MEGHk FROM dbo.INVO_LST WHERE TAG = 2 AND id = {UPD_TIM.id}").FirstOrDefault();
-                            }
-
-
-                            double MAND;
-                            UPD_TIM.AVRAGE = CL_HESABDARI.LASTAVRAGE(UPD_TIM.CODE, Convert.ToInt64(UPD_TIM.ANBAR), Convert.ToInt64(DATE_N.Text.ToRawTarikh()));
-                            min = CL_HESABDARI.Getmin((int)UPD_TIM.ANBAR, UPD_TIM.CODE);
-                            var RST = dbms.DoGetDataSQL<STUF_STK>("SELECT CODE, ANBAR, MOGODI_A, MOGODI, MABL_M FROM STUF_STK WHERE CODE = '" + UPD_TIM.CODE + "' AND ANBAR = " + UPD_TIM.ANBAR).FirstOrDefault();
-                            if (RST is null)
-                            {
-                                Msgwin msgwin = new Msgwin(false, "كالا به انبار فوق تعلق ندارد.");
-                                msgwin.ShowDialog();
-                                AllisWell = false;
-                            }
-
-                        }
-                    }
-                }
+                INVO_LST_HAVL_SUB.Focus();
+                var DEFINDX = (INVO_LST_HAVL_SUB.SelectedIndex < 0) ? 0 : INVO_LST_HAVL_SUB.SelectedIndex;
+                CL_LMethods.FocusCellReadyToEdit(INVO_LST_HAVL_SUB, "ANBAR", DEFINDX, true);
             }
-            #endregion
+        }
 
-            #region Header_Saving
-            var _FNUMCO_ = string.IsNullOrEmpty(FNUMCO.Text) ? "NULL" : FNUMCO.Text;
-            if (AllisWell)
+        private bool DoCmdSaveHeader()
+        {
+            try
             {
+                var _FNUMCO_ = string.IsNullOrEmpty(FNUMCO.Text) ? "NULL" : FNUMCO.Text;
+
                 //Frist New Fresh Insert Add   
-                if (string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text.Equals("0"))
+                if (_navigationManager.IsNewRecord)
                 {
                     double num = 0;
                     using (IDbConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
@@ -2967,11 +2869,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                                               	  2 ,
                                               	  {(string.IsNullOrEmpty(ANBAR.Text) ? "0" : ANBAR.Text)}   ,
                                               	  {DATE_N.Text.ToRawTarikh()}   ,
-                                              	  N'{tah_tex}' ,
+                                              	  N'{TAH.Text}' ,
                                               	  {((MAS.SelectedValue is null) ? "0" : MAS.SelectedValue)} ,
                                               	  0,
                                               	  N'{CUST_NO.SelectedValue}' ,
-                                              	  N'{molah_tex}' ,
+                                              	  N'{MOLAH.Text}' ,
                                               	  0,
                                               	  0,
                                               	  N'',
@@ -3026,172 +2928,197 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 //Update Edit
                 else
                 {
-                    dbms.DoExecuteSQL($@"UPDATE dbo.HEAD_LST SET DATE_N={DATE_N.Text.ToRawTarikh()}, FNUMCO={_FNUMCO_}, MAS={(MAS.SelectedValue is null ? "0" : MAS.SelectedValue)}, SADER={SADER.SelectedValue}, TAH=N'{tah_tex}', MOLAH=N'{molah_tex}', ANBAR={(string.IsNullOrEmpty(ANBAR.Text) ? "0" : ANBAR.Text)}, DEPATMAN={DEPATMAN.SelectedValue}, CUST_NO=N'{CUST_NO.SelectedValue}', SHARAYET=N'{SHARAYET.Text}', OKF={Convert.ToByte(OKF.IsChecked)}, TAMIR={GetTamirLikeAccess(TAMIR.IsChecked.ToString())},SGN1usid={(SGN1usid.Tag is null ? "NULL" : SGN1usid.Tag)},SGN2usid={(SGN2usid.Tag is null ? "NULL" : SGN2usid.Tag)},SGN3usid={(SGN3usid.Tag is null ? "NULL" : SGN3usid.Tag)} WHERE TAG=2 AND NUMBER={NUMBER.Text}");
+                    dbms.DoExecuteSQL($@"UPDATE dbo.HEAD_LST SET DATE_N={DATE_N.Text.ToRawTarikh()}, FNUMCO={_FNUMCO_}, MAS={(MAS.SelectedValue is null ? "0" : MAS.SelectedValue)}, SADER={SADER.SelectedValue}, TAH=N'{TAH.Text}', MOLAH=N'{MOLAH.Text}', ANBAR={(string.IsNullOrEmpty(ANBAR.Text) ? "0" : ANBAR.Text)}, DEPATMAN={DEPATMAN.SelectedValue}, CUST_NO=N'{CUST_NO.SelectedValue}', SHARAYET=N'{SHARAYET.Text}', OKF={Convert.ToByte(OKF.IsChecked)}, TAMIR={GetTamirLikeAccess(TAMIR.IsChecked.ToString())},SGN1usid={(SGN1usid.Tag is null ? "NULL" : SGN1usid.Tag)},SGN2usid={(SGN2usid.Tag is null ? "NULL" : SGN2usid.Tag)},SGN3usid={(SGN3usid.Tag is null ? "NULL" : SGN3usid.Tag)} WHERE TAG=2 AND NUMBER={NUMBER.Text}");
                 }
             }
-            #endregion
-
-
-            var MasterTopErrorMessages = new List<MsgModel>();
-            if (AllisWell)
+            catch (Exception)
             {
-                List<MsgModel> ErrosMessages = new List<MsgModel>();
-                foreach (var item in HAVALEH_INVO_DATA)
-                {
-                    if (CL_LMethods.IsNewPlaceHolder(INVO_LST_HAVL_SUB, item)) continue;
-
-                    //اگر نال هست اصلاح کن به صفر
-                    _ = (item.MEGH_MAR is null) ? item.MEGH_MAR = 0 : item.MEGH_MAR;
-                    _ = (item.MEGH_R is null) ? item.MEGH_R = 0 : item.MEGH_R;
-                    _ = (item.MABL is null) ? item.MABL = 0 : item.MABL;
-                    _ = (item.MABL_K is null) ? item.MABL_K = 0 : item.MABL_K;
-
-                    //var _idd = item.GetType().GetProperty("id").GetValue(item);
-                    //int AnbarCode = (int)item.GetType().GetProperty("ANBAR").GetValue(item); //انبار
-                    //var AnbarName = dbms.DoGetDataSQL<string>($"SELECT TOP 1 NAMES FROM dbo.TCOD_ANBAR WHERE CODE = {AnbarCode}").FirstOrDefault();
-                    //var CodeKala = item.GetType().GetProperty("CODE").GetValue(item);
-                    //double _MEGHk_ = (double)item.GetType().GetProperty("MEGHk").GetValue(item);
-
-                    IVM.StartTransaction(); // Start the transaction again if is disposed before ****************************************************************
-
-                    bool CurrentRowisNew = true;
-                    string _qre = "";
-                    if (item.id is null || item.id <= 0) //INSERT
-                    {
-                        _qre = $@"INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
-                                VALUES({NUMBER.Text},2,{item.ANBAR},NULL,N'{item.CODE}',{item.MEGH},{item.MEGHk},{item.MEGH_MAR},N'{item.MANDAH}',{item.MABL},{item.MABL_K},{Convert.ToByte(item.FROM_A)},N'{item.N_RASID}',
-                                {item.MEGH_R},{item.SANAD_NO},NULL,{item.ANBARF},{item.VAHED_K},{item.N_KOL},{item.N_MOIN},{item.N_TAF},{item.AVRAGE},{item.AVRAGE2},{item.IMBAA},{item.TOTALARZ},N'{item.VISITOR}',{item.TKHN},
-                                {(item.JAY is null ? "NULL" : item.JAY)},{(item.JAYO is null ? "NULL" : item.JAYO)})";
-
-                        var (errorMsgs, infoMsgs, invDetails, queryOutputs) = IVM.CheckInventoryAndExecuteQuery<long>(new List<object> { item }, _qre, null, false);
-                        ErrosMessages.AddRange(errorMsgs);
-
-
-                        if (queryOutputs.Any())
-                        {
-                            item.id = queryOutputs.FirstOrDefault(); // Update the list with the new ID
-                                                                     //اصلاح شماره ردیف
-                            IVM.TM.ExecuteSqlCommandCtc($"UPDATE dbo.INVO_LST SET RADIF = (SELECT ISNULL(MAX(RADIF) + 1, 1) AS NewRADIF FROM dbo.INVO_LST WHERE NUMBER={NUMBER.Text} AND TAG=2) FROM dbo.INVO_LST WHERE id = {item.id}");
-                        }
-                    }
-                    else //UPDATE
-                    {
-                        CurrentRowisNew = false;
-
-                        _qre = $@"UPDATE dbo.INVO_LST
-                          SET ANBAR={item.ANBAR},
-                              CODE=N'{item.CODE}',	
-                              MEGH={item.MEGH},
-                              MEGHk={item.MEGHk},
-                              MEGH_MAR={item.MEGH_MAR},
-                              MANDAH=N'{item.MANDAH}',
-                              MABL={item.MABL},
-                              MABL_K={item.MABL_K},
-                              FROM_A={Convert.ToByte(item.FROM_A)},
-                              N_RASID=N'{item.N_RASID}',
-                              MEGH_R={item.MEGH_R},
-                              SANAD_NO={item.SANAD_NO},
-                              ANBARF={item.ANBARF},
-                              VAHED_K={item.VAHED_K},
-                              N_KOL={item.N_KOL},
-                              N_MOIN={item.N_MOIN},
-                              N_TAF={item.N_TAF},
-                              AVRAGE={item.AVRAGE},
-                              AVRAGE2={item.AVRAGE2},
-                              IMBAA={item.IMBAA},
-                              TOTALARZ={item.TOTALARZ},
-                              VISITOR=N'{item.VISITOR}',
-                              TKHN={item.TKHN},
-                              JAY={(item.JAY is null ? "NULL" : item.JAY)},
-                              JAYO={(item.JAYO is null ? "NULL" : item.JAYO)}	
-                            WHERE id = {item.id} AND TAG = 2";
-
-                        var (errorMsgs, _, _, _) = IVM.CheckInventoryAndExecuteQuery<int>(new List<object> { item }, _qre, null, false);
-                        ErrosMessages.AddRange(errorMsgs);
-                    }
-
-                    // Handle error messages for row
-                    if (ErrosMessages.Any())
-                    {
-                        IVM.RollbackTransaction(); // Rollback the transaction if there are errors
-                        if (CurrentRowisNew)
-                        {
-                            item.id = null; //Bring Back to null (New State because of Rollback Transaction)
-                        }
-                    }
-                    else
-                    {
-                        IVM.CommitTransaction(); // Commit the transaction if no errors
-                    }
-
-                    MasterTopErrorMessages.AddRange(ErrosMessages); //Add Error to Top Message to show it later after this loop 
-                }
-
-                // Handle error messages
-                if (MasterTopErrorMessages.Any())
-                {
-                    AllisWell = false;
-                    IVM.ShowErrorMessages(MasterTopErrorMessages);
-                    return;
-                }
+                new Msgwin(false, "خطا در انجام عملیات ذخیره سربرگ حواله").Show();
+                return false;
             }
 
-
-            //Finaliy
-            if (AllisWell)
-            {
-                //Everything was Successfully
-                ReGetdata();
-                universControl.PopNotifyShow(".مقادیر ذخیره شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
-
-                HAVL_AfterUpdate();
-
-                INVO_LST_HAVL_SUB.CommitEdit();
-
-                ChangeIsHappend = false;
-            }
-
-            //ProcLoader.Stop(Prc);
+            return true;
         }
 
-        private void INVO_LST_HAVL_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
+        private bool HeaderIsValid(bool _DisplayErrors = true)
         {
-            if (e.Row.Item == null)
-            {
-                return;
-            }
+            List<MsgModel> ErrosMessages = new List<MsgModel>();
 
-            var REND_ROW = e.Row.Item as INVO_LST_FACTOR22;
-            var AllisWell = true;
-            if (REND_ROW is null)
+            string date_n_val = DATE_N.Text.ToRawTarikh();
+            if (!string.IsNullOrEmpty(date_n_val))
             {
-                universControl.PopNotifyShow(".بعضی از مقدایر سطر حواله خالی یا غیر مجاز است", Pop1, Pop1Text1, Pop_Border1);
-                AllisWell = false;
-            }
-            else if (
-                          string.IsNullOrEmpty(REND_ROW.ANBAR.ToStringNullSafe()) ||
-                          string.IsNullOrEmpty(REND_ROW.NAME_CODE.ToStringNullSafe()) ||
-                          string.IsNullOrEmpty(REND_ROW.CODE.ToStringNullSafe()) ||
-                          string.IsNullOrEmpty(REND_ROW.VAHED_K.ToStringNullSafe()) ||
-                          string.IsNullOrEmpty(REND_ROW.MEGH.ToStringNullSafe()) ||
-                          REND_ROW.MEGH is 0 ||
-                          REND_ROW.MEGHk is 0 ||
-                          string.IsNullOrEmpty(REND_ROW.MEGHk.ToStringNullSafe())
-                      )
-            {
-                universControl.PopNotifyShow(".بعضی از مقدایر سطر حواله خالی یا غیر مجاز است", Pop1, Pop1Text1, Pop_Border1);
-                AllisWell = false;
-            }
-            if (AllisWell)
-            {
-                /////DGR_SUB_INVOLST.CommitEdit();
+                if (!Tarikh.IsValidedDate(date_n_val))
+                {
+                    DATE_N.Text = null;
+                    ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار تاریخ صحیح نیست" });
+                }
+                else
+                {
+                    if (!Tarikh.IsSyncedDateNow(date_n_val, (bool)Baseknow.CTL_DT))
+                    {
+                        DATE_N.Text = null;
+                        ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ مربوط به سال جاری نیست" });
+                    }
+                }
             }
             else
             {
-                //e.Cancel = true;
-                INVO_LST_SUB_CANCEL_EDIT();
-                return;
+                DATE_N.Text = null;
+                ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ نمی تواند خالی باشد" });
             }
+
+            if (DEPATMAN.SelectedValue is null)  //واحد
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "واحد نمیتواند خالی باشد." });
+            }
+            if (CUST_KIND.SelectedValue is null) //نوع مشتری
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "نوع مشتری نمیتواند خالی باشد." });
+            }
+            if (CUST_NO.SelectedValue is null) //حساب مشتری
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "نام مشتری نمیتواند خالی باشد." });
+            }
+
+            if (!string.IsNullOrEmpty(DATE_N.Text?.ToRawTarikh()))
+            {
+                if (CL_HESABDARI.CHEKDATEM(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), Convert.ToBoolean(Baseknow.CTL_DT)) == true) //Return true mean's Problem
+                {
+                    //تاریخ صحیح نیست
+                    ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ فاکتور را بررسی کنید" });
+                }
+            }
+
+            if (IsNull(this.CUST_NO.SelectedValue) || this.CUST_NO.SelectedIndex < 0)
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = " مشتري مشخص نشده است ....!" });
+            }
+            else if (CL_HESABDARI.BLOCKEDCUST(this.CUST_NO2.SelectedValue.ToString()))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = " حساب مشتري مسدود گرديده است لطفا با مديريت مالي تماس بگيريد" });
+            }
+
+            if (!IsNull(CUST_NO.SelectedValue))
+            {
+                if (CL_HESABDARI.ISTAF(CUST_NO.SelectedValue.ToString()))
+                {
+                    ErrosMessages.Add(new MsgModel { MessageText_U = " حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!" });
+                }
+            }
+
+            if (Convert.ToBoolean(Baseknow.SAGHF) || Convert.ToBoolean(Baseknow.SAGHF2))
+            {
+                if (Convert.ToBoolean(CL_HESABDARI.Checketebar(CUST_NO.SelectedValue.ToStringNullSafe())) == false || Convert.ToBoolean(CL_HESABDARI.ChecketebarMEG(CUST_NO.SelectedValue.ToStringNullSafe())) == false)
+                {
+                    ErrosMessages.Add(new MsgModel { MessageText_U = "اعتبار اين مشتري تمام شده است و نمي تواند خريد نمايد...!" });
+                }
+            }
+
+            if (IsNull(this.CUST_KIND.SelectedValue) || CUST_KIND.SelectedIndex < 0)
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "نوع  مشتري مشخص نشده است ....!" });
+            }
+
+            if (IsNull(this.DEPATMAN.SelectedValue) || DEPATMAN.SelectedIndex < 0)
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "واحد فروش مشخص نشده است ....!" });
+            }
+
+            if (ErrosMessages.Any())
+            {
+                if (_DisplayErrors)
+                {
+                    ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct().Select(message => new MsgModel { MessageText_U = message }).ToList();
+                    new MsgListwin(false, ErrosMessages).ShowDialog();
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+        private bool BodyIsValid(INVO_LST_FACTOR22 TheRow)
+        {
+            var errors = (from object i in INVO_LST_HAVL_SUB.ItemsSource
+                          let c = INVO_LST_HAVL_SUB.ItemContainerGenerator.ContainerFromItem(i)
+                          where c != null && Validation.GetHasError(c)
+                          select c).Any();
+            if (errors)
+            {
+                universControl.PopNotifyShow("داده های وارد شده مربوط به سطر ها درست نیست", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return false;
+            }
+
+            List<MsgModel> ErrosMessages = new List<MsgModel>();
+
+            // Validate ANBAR
+            if (!int.TryParse(TheRow.ANBAR?.ToStringNullSafe(), out int _))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "انبار صحیح انتخاب نشده" });
+            }
+            // Validate CODE
+            if (string.IsNullOrEmpty(TheRow.CODE) || TheRow.CODE.Length > 15)
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "کالا صحیح وارد نشده" });
+            }
+            if (string.IsNullOrEmpty(TheRow.NAME_CODE))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "نام کالا صحیح وارد نشده" });
+            }
+            // Validate MEGH
+            if (!double.TryParse(TheRow.MEGH?.ToStringNullSafe(), out double _))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار کالا صحیح وارد نشده" });
+            }
+            // Validate MEGHk
+            if (!double.TryParse(TheRow.MEGHk?.ToStringNullSafe(), out double _))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار کل کالا صحیح وارد نشده" });
+            }
+
+            // Validate MANDAH
+            if (TheRow.MANDAH?.Length > 50)
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "ملاحظات سطر کالا صحیح وارد نشده یا مجاز نیست" });
+            }
+            // Validate VAHED_K
+            if (!int.TryParse(TheRow.VAHED_K?.ToStringNullSafe(), out int _))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "واحد کالا صحیح وارد نشده" });
+            }
+
+            if (TheRow?.id != null && TheRow?.CODE != null && TheRow?.VAHED_K != null && TheRow?.MABL != null && TheRow?.MEGH != null)
+            {
+                double nesba;
+                //محاسبه نسب باتوجه به واحد و کالا
+                nesba = CL_HESABDARI.GETNESBAT(TheRow.CODE, (int)TheRow.VAHED_K);
+                //محاسبه و ثبت مجددا مقدار کل
+                TheRow.MEGHk = Convert.ToDouble(TheRow.MEGH * nesba);
+                TheRow.MABL_K = Math.Round((double)(TheRow.MEGHk * TheRow.MABL));
+
+                //بررسی موجودی و حداقل موجودی
+                if (Strings.Mid(Baseknow.OPTIONSS, 59, 1) == "5")
+                {
+                    TheRow.AVRAGE = CL_HESABDARI.LASTAVRAGE(TheRow.CODE, Convert.ToInt64(TheRow.ANBAR), Convert.ToInt64(DATE_N.Text.ToRawTarikh()));
+                    min = CL_HESABDARI.Getmin((int)TheRow.ANBAR, TheRow.CODE);
+                    var RST = dbms.DoGetDataSQL<STUF_STK>("SELECT CODE, ANBAR, MOGODI_A, MOGODI, MABL_M FROM STUF_STK WHERE CODE = '" + TheRow.CODE + "' AND ANBAR = " + TheRow.ANBAR).FirstOrDefault();
+                    if (RST is null)
+                    {
+                        ErrosMessages.Add(new MsgModel { MessageText_U = $"كالا {TheRow.CODE} به انبار فوق تعلق ندارد." });
+                    }
+                }
+            }
+
+            if (ErrosMessages.Count > 0)
+            {
+                ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct()
+                    .Select(message => new MsgModel { MessageText_U = message }).ToList();
+                new MsgListwin(false, ErrosMessages).ShowDialog();
+
+                return false;
+            }
+
+            return true;
         }
 
         private void INVO_LST_SUB_CANCEL_EDIT(DataGridEditingUnit? _RC_ = null)
@@ -3259,8 +3186,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 var dt = DateTime.Now;
                 CL_HESABDARI.TR("HEAD_LST", "(NUMBER = " + NUMBER.Text + ") AND (TAG = 2)", dt, 1);
                 CL_HESABDARI.TR("INVO_LST", "(NUMBER = " + NUMBER.Text + ") AND (TAG = 2)", dt, 1);
-
-
 
                 for (int i = 0; i < INVO_LST_HAVL_SUB.SelectedItems.Count; i++)
                 {
@@ -3370,7 +3295,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             Process Prc = ProcLoader.Start();
             BUTTON_SAVE_HAVALE_Click(null, null);
 
-            if (!AllisWell)
+            if (!!_navigationManager.IsNewRecord)
             {
                 ProcLoader.Stop(Prc);
                 return;
@@ -3459,7 +3384,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         {
             BUTTON_SAVE_HAVALE_Click(null, null);
 
-            if (!AllisWell)
+            if (!!_navigationManager.IsNewRecord)
             {
                 return;
             }
@@ -3510,7 +3435,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         {
             BUTTON_SAVE_HAVALE_Click(null, null);
 
-            if (!AllisWell)
+            if (!!_navigationManager.IsNewRecord)
             {
                 return;
             }
@@ -3689,7 +3614,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         private void Command124_Click(object sender, RoutedEventArgs e)
         {
             BUTTON_SAVE_HAVALE_Click(null, null);
-            if (!AllisWell)
+            if (!!_navigationManager.IsNewRecord)
             {
                 return;
             }
@@ -3738,7 +3663,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         private void Command125_Click(object sender, RoutedEventArgs e)
         {
             BUTTON_SAVE_HAVALE_Click(null, null);
-            if (!AllisWell)
+            if (!!_navigationManager.IsNewRecord)
             {
                 return;
             }
@@ -3913,16 +3838,18 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             //Command111.IsEnabled = false; //چاپ2
             //Command123.IsEnabled = false; //چاپ اصلاحیه
 
+            DELETE_HAVALE.IsEnabled = false;
+            INVO_LST_HAVL_SUB.IsReadOnly = true;
+
+            Form_Current();
             AllowEdits = true;
 
             TAH.Focus();
-
-            Form_Current();
         }
 
         private void Window_ContentRendered(object sender, EventArgs e)
         {
-
+            ChangeIsHappend = false;
         }
 
         private void INVO_LST_HAVL_SUB_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)

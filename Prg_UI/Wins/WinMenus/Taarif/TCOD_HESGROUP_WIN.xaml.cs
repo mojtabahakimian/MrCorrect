@@ -200,16 +200,14 @@ namespace Wins.WinMenus.Taarif
         }
         private void TCOD_HESGROUP_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             var ROW = e.Row.Item as TCOD_HESGROUP;
 
             if (!BodyIsValid(ROW))
             {
                 TCOD_HESGROUP_SUB_CANCEL_EDIT();
-                return;
-            }
-
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
                 return;
             }
 

@@ -38,6 +38,7 @@ using System.Windows.Threading;
 using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
 using System.Windows.Data;
 using System.ComponentModel;
+using static Prg_UI.Functions.CL_LMethods;
 
 namespace Wins.WinMenus.SANATI
 {
@@ -84,7 +85,7 @@ namespace Wins.WinMenus.SANATI
         }
         //Header Window End;
         #endregion
-        public HAVALAH_EXIT(double? number_to_open = null)
+        public HAVALAH_EXIT(double? number_to_open = null, bool _isAutomasion_ = false)
         {
             InitializeComponent();
 
@@ -94,9 +95,10 @@ namespace Wins.WinMenus.SANATI
             {
                 NUMBER.Text = number_to_open.ToString();
                 NUMBER.UpdateLayout();
+                IsOpenedFromAutomation = _isAutomasion_;
             }
         }
-
+        public bool IsOpenedFromAutomation { get; } = false;
         #region LOCALMODEL
 
         public class DeedHedData
@@ -342,6 +344,11 @@ namespace Wins.WinMenus.SANATI
 
             string WhereCondition = $" WHERE (dbo.HEAD_LST.TAG = {FTAG}) ";
             WhereCondition = CL_LMethods.GetRestrictedSqlQuery(Convert.ToByte(FTAG), WhereCondition);
+
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG} ";
+            }
 
             _navigationManager = new NavigationManager<HEAD_LST>(
                 dbms,
@@ -1687,24 +1694,16 @@ namespace Wins.WinMenus.SANATI
         }
         private void INVO_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {
                 return;
             }
 
-
             var TheRow = e.Row.Item as INVO_LST_FACTOR22;
-
-            if (CL_LMethods.IsNewRowUnmodified(TheRow))
-            {
-                INVO_LST_SUB_CANCEL_EDIT();
-                return;   // The row is unmodified
-            }
+            if (ConstructorRowDetector.IsPristine(TheRow)) { INVO_LST_SUB_CANCEL_EDIT(); return; }
 
             if (!BodyIsValid(TheRow))
             {
@@ -2021,7 +2020,7 @@ namespace Wins.WinMenus.SANATI
                         CUST_NO.SelectedValue = null;
                     }
                 }
-                if (CL_HESABDARI.BLOCKEDCUST(CUST_NO2.SelectedValue.ToString()))
+                if (CL_HESABDARI.BLOCKEDCUST(CUST_NO.SelectedValue.ToString()))
                 {
                     CUST_NO.SelectedItem = null;
                     universControl.PopNotifyShow(" حساب مسدود گرديده است لطفا با مديريت مالي تماس بگيريد", Pop1, Pop1Text1, Pop_Border1);

@@ -120,17 +120,21 @@
                         VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                         KeyboardNavigation.TabNavigation="Contained"
                         ItemsSource="{Binding OTHER_DTL_DATA}"
-                        Margin="5,275,5,10"
+                        Margin="5,275,5,10" d:ItemsSource="{d:SampleData}"
                         AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" TabIndex="10" CellEditEnding="OTHER_DTL_SUB_SUB_CellEditEnding" PreviewKeyDown="OTHER_DTL_SUB_SUB_PreviewKeyDown" RowEditEnding="OTHER_DTL_SUB_SUB_RowEditEnding" CanUserDeleteRows="False" CanUserAddRows="False"  >
             <DataGrid.Style>
-                <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource DATAGRIDSTYLISH}"/>
+                <!--خط بندی سطر های دیتاگرید-->
+                <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                    <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                    <Setter Property="GridLinesVisibility" Value="All"/>
+                </Style>
             </DataGrid.Style>
             <DataGrid.Columns>
-                <DataGridTextColumn 	x:Name="NUMBER_COLUMN" Binding="{Binding NUMBER,UpdateSourceTrigger=LostFocus}" Header="NUMBER" Width="auto" MinWidth="50" Visibility="Hidden" />
-                <DataGridTextColumn 	x:Name="TAGG_COLUMN"    Binding="{Binding TAGG,UpdateSourceTrigger=LostFocus}"    Header="TAG"    Width="auto" MinWidth="50" Visibility="Hidden" />
-                <DataGridComboBoxColumn x:Name="CODE_COLUMN" MinWidth="80" Width="auto" Header="کالا" IsReadOnly="True" SelectedValueBinding="{Binding CODE,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAME" SelectedValuePath="CODE">
+                <DataGridTextColumn 	x:Name="NUMBER_COLUMN" Binding="{Binding NUMBER,UpdateSourceTrigger=PropertyChanged}" Header="NUMBER" Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridTextColumn 	x:Name="TAGG_COLUMN"    Binding="{Binding TAGG,UpdateSourceTrigger=PropertyChanged}"    Header="TAG"    Width="auto" MinWidth="50" Visibility="Hidden" />
+                <DataGridComboBoxColumn x:Name="CODE_COLUMN" MinWidth="80" Width="auto" Header="کالا" IsReadOnly="True" SelectedValueBinding="{Binding CODE,UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="NAME" SelectedValuePath="CODE">
                     <DataGridComboBoxColumn.EditingElementStyle>
-                        <Style TargetType="{x:Type ComboBox}">
+                        <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
                             <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
                             <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
                             <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
@@ -138,12 +142,12 @@
                         </Style>
                     </DataGridComboBoxColumn.EditingElementStyle>
                 </DataGridComboBoxColumn>
-                <DataGridTextColumn 	x:Name="CAM_KHALY_COLUMN" Binding="{Binding CAM_KHALY,UpdateSourceTrigger=LostFocus}"  Header="وزن خالی"   Width="auto" MinWidth="50" />
-                <DataGridTextColumn 	x:Name="CAM_POOR_COLUMN"  Binding="{Binding CAM_POOR,UpdateSourceTrigger=LostFocus}"   Header="وزن پر"     Width="auto" MinWidth="50" />
-                <DataGridTextColumn  	x:Name="MEGHk_COLUMN"     Binding="{Binding MEGHk,UpdateSourceTrigger=LostFocus}"      Header="وزن کالا"    Width="auto" MinWidth="50" IsReadOnly="True"/>
-                <DataGridTextColumn  	x:Name="VAZNH_COLUMN"     Binding="{Binding VAZNH,UpdateSourceTrigger=LostFocus}"      Header="وزن حواله"  Width="auto" MinWidth="50" />
-                <DataGridTextColumn  	x:Name="TOZIH_COLUMN"     Binding="{Binding TOZIH,UpdateSourceTrigger=LostFocus}"      Header="توضیحات"    Width="*" MinWidth="50" />
-                <DataGridTextColumn 	x:Name="RADIF_COLUMN" 	  Binding="{Binding RADIF,UpdateSourceTrigger=LostFocus}"      Header="RADIF"       Width="auto" MinWidth="50"  Visibility="Hidden" />
+                <DataGridTextColumn 	x:Name="CAM_KHALY_COLUMN" Binding="{Binding CAM_KHALY,UpdateSourceTrigger=PropertyChanged}"  Header="وزن خالی"   Width="auto" MinWidth="50" />
+                <DataGridTextColumn 	x:Name="CAM_POOR_COLUMN"  Binding="{Binding CAM_POOR,UpdateSourceTrigger=PropertyChanged}"   Header="وزن پر"     Width="auto" MinWidth="50" />
+                <DataGridTextColumn  	x:Name="MEGHk_COLUMN"     Binding="{Binding MEGHk,UpdateSourceTrigger=PropertyChanged}"      Header="وزن کالا"    Width="auto" MinWidth="50" IsReadOnly="True"/>
+                <DataGridTextColumn  	x:Name="VAZNH_COLUMN"     Binding="{Binding VAZNH,UpdateSourceTrigger=PropertyChanged}"      Header="وزن حواله"  Width="auto" MinWidth="50" />
+                <DataGridTextColumn  	x:Name="TOZIH_COLUMN"     Binding="{Binding TOZIH,UpdateSourceTrigger=PropertyChanged}"      Header="توضیحات"    Width="*" MinWidth="50" />
+                <DataGridTextColumn 	x:Name="RADIF_COLUMN" 	  Binding="{Binding RADIF,UpdateSourceTrigger=PropertyChanged}"      Header="RADIF"       Width="auto" MinWidth="50"  Visibility="Hidden" />
             </DataGrid.Columns>
         </DataGrid>
         <!--#endregion-->

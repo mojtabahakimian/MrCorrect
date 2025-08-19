@@ -206,7 +206,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             if (N_SERI.SelectedValue == null)
             {
                 e.Handled = true;
-                new Msgwin(false, "شماره سریال نمیتواند خالی باشد").Show();
+                new Msgwin(false, "شماره سریال نمیتواند خالی باشد").ShowDialog();
                 return;
             }
 
@@ -230,7 +230,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
             if (BANK.SelectedValue == null)
             {
-                new Msgwin(false, "بانک نمیتواند خالی باشد").Show();
+                new Msgwin(false, "بانک نمیتواند خالی باشد").ShowDialog();
                 return;
             }
             if (N_SERI.SelectedValue == null)

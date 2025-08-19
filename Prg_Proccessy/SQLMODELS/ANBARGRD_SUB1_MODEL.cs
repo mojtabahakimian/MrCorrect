@@ -24,8 +24,12 @@ namespace Prg_Proccessy.SQLMODELS
         public int? GRD_NUM { get => _grd_num; set { if (_grd_num == value) return; _grd_num = value; OnPropertyChanged("GRD_NUM"); } }
         private string? _code;
         public string? CODE { get => _code; set { if (_code == value) return; _code = value; OnPropertyChanged("CODE"); } }
-        private double? _mog;
-        public double? MOG { get => _mog; set { if (_mog == value) return; _mog = value; OnPropertyChanged("MOG"); } }
+        
+        private decimal? _mog;
+        public decimal? MOG { get => _mog; set { if (_mog == value) return; _mog = value; OnPropertyChanged("MOG"); } }
+
+        //if (Math.Abs(_mog.GetValueOrDefault()) < double.Epsilon) _mog = 0; // اگر مقدار بسیار نزدیک صفر است آن را صفر مثبت قرار بده این روش هم میشه
+
         private double? _num1;
         public double? NUM1 { get => _num1; set { if (_num1 == value) return; _num1 = value; OnPropertyChanged("NUM1"); } }
         private double? _num2;

@@ -369,13 +369,13 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         public ObservableCollection<VISITOR_DTL> SAYER_VISITOR_DATA { get; set; } = new ObservableCollection<VISITOR_DTL>();
 
         private NavigationManager<HEAD_LST> _navigationManager;
-
+        public bool IsOpenedFromAutomation { get; } = false;
         /// <summary>
         /// شماره فاکتور و شماره حواله را دریافت میکند به این صورت :
         /// LEFT → 1-FACTOR NUMBER1 , 2-HAVALEH NUMBER
         /// </summary>
         /// <param name="_openargs"></param>
-        public HEAD_LST_FROOSH22(string? _openargs = null, bool? _IsDirectFactor_ = null, bool _IsExporty_ = false)
+        public HEAD_LST_FROOSH22(string? _openargs = null, bool? _IsDirectFactor_ = null, bool _IsExporty_ = false, bool _isAutomasion_ = false)
         {
             OpenArgs = _openargs;
             InitializeComponent();
@@ -401,6 +401,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     NUMBER.Text = F_H[1]; //شماره حواله
                     NUMBER.UpdateLayout();
                 }
+                IsOpenedFromAutomation = _isAutomasion_;
             }
 
             this.DataContext = this;
@@ -1134,6 +1135,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             string WhereCondition = fTAG > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {fTAG}) " : "  ";
             WhereCondition = CL_LMethods.GetRestrictedSqlQuery(fTAG, WhereCondition);
 
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = {fTAG} ";
+            }
+
             _navigationManager = new NavigationManager<HEAD_LST>(
                 dbms,
                 x => x.NUMBER.ToString(), // property selector (used to find a record by its CODE)
@@ -1142,7 +1148,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 Convert.ToDouble(NUMBER.Text)
                 );
 
-            if (!string.IsNullOrEmpty(OpenArgs) && _navigationManager.NUMBER_TO_OPEN != null) //Had a paramter passed
+            if (!IsOpenedFromAutomation && !string.IsNullOrEmpty(OpenArgs) && _navigationManager.NUMBER_TO_OPEN != null) //Had a paramter passed
             {
                 //یعنی این شماره رو پیدا نکرده که اون رو ریست کنه
                 new Msgwin(false, $"شما به شماره فاکتور (حواله) {_navigationManager.NUMBER_TO_OPEN} دسترسی ندارید ").Show();
@@ -5934,14 +5940,13 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void INVO_LST_sub_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             if (e.Row.Item == null) { return; }
 
             var ROW = e.Row.Item as INVO_LST_FACTOR22;
-            if (CL_LMethods.IsNewRowUnmodified(ROW))
-            {
-                INVO_LST_SUB_CANCEL_EDIT(INVO_LST_sub, default);
-                return; //The row is unmodified
-            }
+            if (ConstructorRowDetector.IsPristine(ROW)) { INVO_LST_SUB_CANCEL_EDIT(INVO_LST_sub, default); return; }
 
             if (!IsRowValid(ROW))
             {
@@ -9771,6 +9776,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         }
         private void VISITOR_DTL_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             if (e.Row.Item == null) { return; }
             var FINAL_CROW_ITEM = (e.Row.Item as VISITOR_DTL);
 
@@ -9997,6 +10005,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     double sum = SAYER_VISITOR_DATA.Sum(item => item.PURSANT ?? 0.0);
                     Text190.Text = sum.ToString();
 
+                    SANAD();
                 }
                 else
                 {
@@ -12424,6 +12433,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
         }
 
-
+        private void Window_ContentRendered(object sender, EventArgs e)
+        {
+            ChangeIsHappend = false;
+        }
     }
 }

@@ -4,11 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Wins.WinMenus.ANBAR"
+        mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:CUC="clr-namespace:Prg_UI.CUC" 
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="Wins.WinMenus.ANBAR.HEAD_LST_HAV_OTHER_WIN" 
-        mc:Ignorable="d"
-
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         Background="{x:Null}"
         AllowsTransparency="True"
@@ -51,7 +51,7 @@
                 </Grid>
             </Border>
         </Border>
-        <CUC:NumericTextBox x:Name="NUMBER" Width="120" Visibility="Visible" RestoreLastValidValue="False" VerticalAlignment="Top" Text="" Tag="RD" Margin="0,67,98,0" InnerTabStop="True" IsHitTestVisible="False" IsReadOnly="False" Height="27" HorizontalAlignment="Right" DoesAcceptDouble="False"/>
+        <CUC:NumericTextBox x:Name="NUMBER" Width="120" Visibility="Visible" RestoreLastValidValue="False" VerticalAlignment="Top" Text="0" Tag="RD" Margin="0,67,98,0" InnerTabStop="True" IsHitTestVisible="False" IsReadOnly="False" Height="27" HorizontalAlignment="Right" DoesAcceptDouble="False"/>
         <Label Width="auto" VerticalAlignment="Top" Margin="0,69,32,0" HorizontalAlignment="Right" FontSize="10" FlowDirection="RightToLeft" Content="شماره رسید :"/>
         <Label x:Name="Label11_Copy3" Width="73" VerticalAlignment="Top" Margin="0,67,225,0" Height="25" HorizontalAlignment="Right" FontSize="10" FlowDirection="RightToLeft" Content="تاریخ سررسید : "/>
 
@@ -60,7 +60,7 @@
         <Label x:Name="Label11_Copy4" Content="کاربر : " Margin="0,67,399,0"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right" Width="32"/>
         <TextBox x:Name="FNUMCO"  Text="" Tag="RD" Height="25" Margin="0,67,609,0"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="114" TabIndex="3" />
         <Label x:Name="Label11_Copy2" Content="شماره داخلی : " Margin="0,67,543,0"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right" Width="66"/>
-        <ComboBox x:Name="hTAG" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Width="131" IsTextSearchEnabled="True" Margin="0,66,784,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" IsTabStop="True" TabIndex="4">
+        <ComboBox x:Name="hTAG" Padding="7,0,10,0" SelectedIndex="0" Style="{StaticResource FuzzyOutComboBox}" Width="131" IsTextSearchEnabled="True" Margin="0,66,784,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" IsTabStop="True" TabIndex="4">
             <d:ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel d:IsVirtualizing="True" d:VirtualizationMode="Recycling"/>
@@ -100,24 +100,24 @@
             </d:ComboBox.ItemsPanel>
         </ComboBox>
         <CheckBox x:Name="OKF" Content="تایید برگه" Margin="263,72,0,0" VerticalAlignment="Top" FontSize="10" HorizontalAlignment="Left" Width="64" IsHitTestVisible="False" Focusable="False" />
-        <Button x:Name="ESLAH" Content="اصلاح برگه"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="145,67,0,0" HorizontalAlignment="Left" Width="100" Height="32" VerticalAlignment="Top" Click="ESLAH_Click" />
-        <Button x:Name="Command106" Content="چاپ رسید انبار"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="40,66,0,0" HorizontalAlignment="Left" Width="100" Height="32" VerticalAlignment="Top" Click="Command106_Click"  />
-        <Button x:Name="SAVE_BTN"  Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="145,119,0,0" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" TabIndex="9" Click="SAVE_BTN_Click" />
-        <Button x:Name="DELETE_BTN"  Tag="hazfer"  Content="حذف سطر"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="40,119,0,0" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" TabIndex="9" Click="DELETE_BTN_Click" />
-        <ComboBox x:Name="PERSONEL" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,0,408,54" VerticalAlignment="Bottom" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="312" Height="28" SelectionChanged="PERSONEL_SelectionChanged">
+        <Button x:Name="ESLAH" Content="اصلاح برگه"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="149,67,0,0" HorizontalAlignment="Left" Width="100" Height="35" VerticalAlignment="Top" Click="ESLAH_Click" />
+        <Button x:Name="Command106" Content="چاپ رسید انبار"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="40,67,0,0" HorizontalAlignment="Left" Width="100" Height="35" VerticalAlignment="Top" Click="Command106_Click"  />
+        <Button x:Name="SAVE_BTN"  Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="149,119,0,0" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" TabIndex="9" Click="SAVE_BTN_Click" />
+        <Button x:Name="DELETE_BTN"  Tag="hazfer"  Content="حذف سطر"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="40,119,0,0" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" TabIndex="9" Click="DELETE_BTN_Click" />
+        <ComboBox x:Name="PERSONEL" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,0,408,67" VerticalAlignment="Bottom" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="312" Height="28" SelectionChanged="PERSONEL_SelectionChanged">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                 </ItemsPanelTemplate>
             </ComboBox.ItemsPanel>
         </ComboBox>
-        <TextBox x:Name="MOGU" Text="" IsReadOnly="True" Tag="RD" Height="25" Margin="0,0,581,87"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="139" IsTabStop="False" IsHitTestVisible="False" />
-        <CheckBox x:Name="SGN1" IsEnabled="False" Content="انبار " HorizontalAlignment="Right" Margin="0,0,25,90" VerticalAlignment="Bottom" Width="80" FontSize="10" Click="SGN1_Click"/>
-        <CheckBox x:Name="SGN2" IsEnabled="False" Content="کنترل کیفیت" HorizontalAlignment="Right" Margin="0,0,25,60" VerticalAlignment="Bottom" Width="80" FontSize="10" Click="SGN2_Click" />
-        <TextBox x:Name="sgn1usid"  Text="" IsReadOnly="True" Height="25" Margin="0,0,111,87"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="206" IsTabStop="False" IsHitTestVisible="False" />
-        <TextBox x:Name="sgn2usid"  Text="" IsReadOnly="True" Height="25" Margin="0,0,111,57"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="206" IsTabStop="False" IsHitTestVisible="False" />
-        <TextBox x:Name="Text59" Text="" IsReadOnly="True" Tag="RD" Height="25" Margin="40,0,0,86"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Left" Width="140" IsTabStop="False" IsHitTestVisible="False" />
-        <Label x:Name="Label11_Copy7" Content="جمع تحویلی : " Margin="179,0,0,86"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="64"/>
+        <TextBox x:Name="MOGU" Text="" IsReadOnly="True" Tag="RD" Height="25" Margin="0,0,581,100"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="139" IsTabStop="False" IsHitTestVisible="False" />
+        <CheckBox x:Name="SGN1" IsEnabled="False" Content="انبار " HorizontalAlignment="Right" Margin="0,0,25,103" VerticalAlignment="Bottom" Width="80" FontSize="10" Click="SGN1_Click"/>
+        <CheckBox x:Name="SGN2" IsEnabled="False" Content="کنترل کیفیت" HorizontalAlignment="Right" Margin="0,0,25,73" VerticalAlignment="Bottom" Width="80" FontSize="10" Click="SGN2_Click" />
+        <TextBox x:Name="sgn1usid"  Text="" IsReadOnly="True" Height="25" Margin="0,0,111,100"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="206" IsTabStop="False" IsHitTestVisible="False" />
+        <TextBox x:Name="sgn2usid"  Text="" IsReadOnly="True" Height="25" Margin="0,0,111,70"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="206" IsTabStop="False" IsHitTestVisible="False" />
+        <TextBox x:Name="Text59" Text="" IsReadOnly="True" Tag="RD" Height="25" Margin="40,0,0,99"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Left" Width="140" IsTabStop="False" IsHitTestVisible="False" />
+        <Label x:Name="Label11_Copy7" Content="جمع تحویلی : " Margin="179,0,0,99"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="64"/>
         <DataGrid x:Name="INVO_LST_HAV_SUB_OTHER" 
             EnableColumnVirtualization="True"
             EnableRowVirtualization="True"
@@ -131,7 +131,7 @@
             VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
             ItemsSource="{Binding INVO_HAV_OTHER_DATA}"
             KeyboardNavigation.TabNavigation="Contained"
-            Margin="4,194,4,131" 
+            Margin="4,194,4,147" 
             AutoGenerateColumns="False" 
             FlowDirection="RightToLeft" 
             SelectionUnit="FullRow" 
@@ -139,7 +139,8 @@
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->
-                <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                    <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
                     <Setter Property="GridLinesVisibility" Value="Horizontal"/>
                 </Style>
             </DataGrid.Style>
@@ -303,7 +304,8 @@
             </DataGrid.Columns>
 
         </DataGrid>
-        <Label x:Name="Label11_Copy8" Content="ارجاع به : " Margin="0,0,356,55"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="47"/>
-        <Label x:Name="Label11_Copy9" Content="موجودی : " Margin="0,0,528,88"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="48"/>
+        <Label x:Name="Label11_Copy8" Content="ارجاع به : " Margin="0,0,356,68"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="47"/>
+        <Label x:Name="Label11_Copy9" Content="موجودی : " Margin="0,0,528,101"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="48"/>
+        <CNC:RecordNavigatorControl x:Name = "navigatorControl" VerticalAlignment = "Bottom" Margin = "40,0,24,10" />
     </Grid>
 </Window>

@@ -174,7 +174,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                 case 26: WINTILENAME.Content = "سایر حواله انبار ها"; break;
 
-                case 25: WINTILENAME.Content = "فاکتور های برگشت فروش آزاد رسید شده"; break;
+                case 25:
+                    WINTILENAME.Content = "فاکتور های برگشت فروش آزاد رسید شده";
+                    NUMBER_HAV_COLUMN.HeaderText = "شماره برگه";
+                    break;
                 case 24: WINTILENAME.Content = "سایر رسید انبار ها"; break;
 
                 case 23:
@@ -207,10 +210,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                 case 9:
                     WINTILENAME.Content = "برگه های ورود کالای ساخته شده";
-                    NUMBER_HAV_COLUMN.HeaderText = "شماره رسید انبار";
+                    NUMBER_HAV_COLUMN.HeaderText = "شماره برگه";
                     CUST_HESAB_COLUMN.HeaderText = "حساب مسئول شیفت";
                     CUST_NAME_COLUMN.HeaderText = "نام مسئول شیفت";
-                    TARIKH_FAC_COLUMN.HeaderText = "تاریخ رسید";
+                    TARIKH_FAC_COLUMN.HeaderText = "تاریخ";
                     MODAT_COLUMN.IsHidden = true;
                     break;
 
@@ -382,8 +385,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         {
                             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAV_OTHER_WIN, this, (double)currentRow.NUMBER);
                         }
-                        break;   
-                    
+                        break;
+
                     case 27: //فاکتور برگشت خرید آزاد
                         if (currentRow?.NUMBER != null)
                         {

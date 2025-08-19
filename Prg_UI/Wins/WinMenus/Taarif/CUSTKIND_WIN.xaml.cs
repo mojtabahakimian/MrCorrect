@@ -197,6 +197,9 @@ namespace Wins.WinMenus.Taarif
         }
         private void CUSTKIND_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             var ROW = e.Row.Item as CUSTKIND;
 
             if (!BodyIsValid(ROW))
@@ -204,10 +207,7 @@ namespace Wins.WinMenus.Taarif
                 CUSTKIND_SUB_CANCEL_EDIT();
                 return;
             }
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+         
 
             if (e.Row.Item == null)
             {

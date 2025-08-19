@@ -43,20 +43,21 @@ using Wins.WinOther;
 
 namespace Prg_UI.Wins.WinMenus.HESABDARI
 {
-    public partial class DEED_HEAD : Window , ISearchableWindow
+    public partial class DEED_HEAD : Window, ISearchableWindow
     {
         public double N_S_NUMBER { get; set; } = -1;
-        public DEED_HEAD(double? _n_s_ = null)
+        public DEED_HEAD(double? _n_s_ = null, bool _isAutomasion_ = false)
         {
             if (_n_s_ != null && _n_s_ > 0)
             {
                 N_S_NUMBER = (double)_n_s_;
+                IsOpenedFromAutomation = _isAutomasion_;
             }
             InitializeComponent();
             this.Owner = PublicVRB.WINBASE;//#OWNER
             this.DataContext = this;
         }
-
+        public bool IsOpenedFromAutomation { get; } = false;
         #region Header Window Begin
         //Header Window Begin
         private void Btn_Close_Click(object sender, RoutedEventArgs e)
@@ -317,7 +318,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
-            
+
             I_AM_SANAD = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
 
             CL_HESABDARI.SETSECURITY(this.GetType().Name, "SANAD", new WindowInteropHelper(this).Handle, this.GetType().Name);
@@ -608,7 +609,13 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         private void ReGetMasterData()
         {
-            var MasterHead = dbms.DoGetDataSQL<DEED_HED>($"SELECT N_S, DATE_S, SHARH_S, NO_S, GHATEI, USER_NAME, base, SGN1, SGN2, SGN3, SGN4, OKF, sgn1usid, sgn2usid, sgn3usid, BAYEG FROM dbo.DEED_HED ORDER BY N_S").ToList();
+            string WhereCondition = "";
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                WhereCondition = $" WHERE N_S = {N_S_NUMBER} ";
+            }
+
+            var MasterHead = dbms.DoGetDataSQL<DEED_HED>($"SELECT N_S, DATE_S, SHARH_S, NO_S, GHATEI, USER_NAME, base, SGN1, SGN2, SGN3, SGN4, OKF, sgn1usid, sgn2usid, sgn3usid, BAYEG FROM dbo.DEED_HED {WhereCondition} ORDER BY N_S").ToList();
             RecordsData.Source = MasterHead;
 
             if (N_S_NUMBER > 0) //Opened by number (N_S)
@@ -1577,6 +1584,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         bool IsSaveSuccess = true;
         private void Child14_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             if (e.Row.Item == null)
             {
                 return;
@@ -1668,7 +1678,30 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             DG_ON_CURRENT();
 
-            CmdSaveRecord(e.Row.Item as DEED_DTL);
+
+            try
+            {
+                CmdSaveRecord(e.Row.Item as DEED_DTL);
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Number == 2627 || ex.Number == 2601) // 2627 & 2601 : duplicate key
+                {
+                    universControl.PopNotifyShowUp("این سطر تکراری است و نمی‌توان آن را ثبت کرد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                }
+                else if (ex.Number == 547)   // 547 : foreign key constraint violation
+                {
+                    universControl.PopNotifyShowUp("ابتدا سربرگ مربوطه را ذخیره کنید، سپس جزئیات را ثبت نمایید.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                }
+                else
+                {
+                    universControl.PopNotifyShowUp("خطا در انجام عملیات ثبت سطر ! اطلاعات ذخیره نشده است.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
 
             IsSaveSuccess = true;
 
@@ -2120,7 +2153,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 }
             }
 
-   
+
 
 
             if (e.Key is Key.Delete && Keyboard.Modifiers == ModifierKeys.None)
@@ -2252,6 +2285,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
+            ChangeIsHappend = false;
         }
 
         private void Child14_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -2401,7 +2435,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     //Report Loading
                     Process Prc = ProcLoader.Start();
 
-                    
+
 
                     var report = new StiReport();
 
@@ -2505,7 +2539,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     //Report Loading
                     Process Prc = ProcLoader.Start();
 
-                    
+
 
                     var report = new StiReport();
 
@@ -2849,7 +2883,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     }
                 }
                 catch (Exception) { }
-           
+
             }
         }
         private void Child14_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)

@@ -666,6 +666,9 @@ namespace Wins.WinMenus.Taarif
         }
         private void TAKHPERS_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             if (e.Row.Item == null)
             {
                 return;

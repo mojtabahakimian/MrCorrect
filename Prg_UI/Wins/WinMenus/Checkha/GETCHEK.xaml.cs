@@ -236,7 +236,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 if (rst?.Count > 0)
                 {
                     var first = rst.First();
-                    new Msgwin(false, "چکی با همین سریال و بانک قبلاً ثبت شده است...").Show();
+                    new Msgwin(false, "چکی با همین سریال و بانک قبلاً ثبت شده است...").ShowDialog();
 
                     N_SERI.Text = first.N_SERI?.ToString();
                     BANK.SelectedValue = first.BANK.ToString();
@@ -270,7 +270,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             {
                 if (CL_HESABDARI.GETKOL(selected) != Baseknow.BANKHA)
                 {
-                    new Msgwin(false, "چک در این بخش فقط به بانک قابل واگذاری می‌باشد").Show();
+                    new Msgwin(false, "چک در این بخش فقط به بانک قابل واگذاری می‌باشد").ShowDialog();
                     CANCEL = true;
                 }
 
@@ -623,7 +623,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 if (SAYADI.Text.Length < 16 && SAYADI.Text != "0")
                 {
                     Msgwin msgwin = new Msgwin(false, "شماره صیادی نباید کمتر از 16 رقم باشد.");
-                    msgwin.Show();
+                    msgwin.ShowDialog();
                 }
             }
         }

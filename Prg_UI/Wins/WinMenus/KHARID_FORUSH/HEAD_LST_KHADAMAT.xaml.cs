@@ -129,7 +129,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             public double? MaxOfNUMBER { get; set; }
         }
         #endregion
-        public HEAD_LST_KHADAMAT(double? number_to_open = null, string _OpenArg_ = null)
+        public HEAD_LST_KHADAMAT(double? number_to_open = null, string _OpenArg_ = null, bool _isAutomasion_ = false)
         {
             InitializeComponent();
 
@@ -139,6 +139,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 NUMBER.Text = number_to_open.ToString(); //شماره رسید
                 NUMBER.UpdateLayout();
+                IsOpenedFromAutomation = _isAutomasion_;
             }
 
             if (!string.IsNullOrEmpty(_OpenArg_))
@@ -147,7 +148,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
         }
-
+        public bool IsOpenedFromAutomation { get; } = false;
         public string OpenArgs { get; set; }
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
@@ -334,6 +335,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
+            ChangeIsHappend = false;
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -2544,10 +2546,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void INVO_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {
@@ -3857,6 +3857,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void PAY_GETD_SUB22_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             if (e.Row.Item == null)
             {
                 return;

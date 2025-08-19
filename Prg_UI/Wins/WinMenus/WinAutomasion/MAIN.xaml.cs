@@ -1331,7 +1331,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                         return;
                     });
                 }
-                CL_MenuManager.MenuBaseOnKindOpen(this, dbms, (int)SelectedRow.skid, SelectedRow.num, true);
+                CL_MenuManager.MenuBaseOnKindOpen(this, dbms, (int)SelectedRow.skid, SelectedRow.num, true, _isCalledFromAutomasion_: true);
             }
         }
         private void BTN_SENDPM_Click(object sender, RoutedEventArgs e)

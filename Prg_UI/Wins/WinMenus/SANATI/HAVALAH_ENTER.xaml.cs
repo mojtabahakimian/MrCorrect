@@ -33,12 +33,14 @@ using Stimulsoft.Report;
 using Stimulsoft.Report.Components;
 using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
 using System.Windows.Data;
-using static Functions.InventoryManager;
 using System.Threading.Tasks;
+using Wins.WinOther;
+using static Interfaces.INavigator;
+using static Prg_UI.Functions.CL_LMethods;
 
 namespace Wins.WinMenus.SANATI
 {
-    public partial class HAVALAH_ENTER : Window
+    public partial class HAVALAH_ENTER : Window, ISearchableWindow
     {
         #region Header Window Begin
         //Header Window Begin
@@ -81,7 +83,7 @@ namespace Wins.WinMenus.SANATI
         }
         //Header Window End;
         #endregion
-        public HAVALAH_ENTER(double? number_to_open = null)
+        public HAVALAH_ENTER(double? number_to_open = null, bool _isAutomasion_ = false)
         {
             InitializeComponent();
 
@@ -91,9 +93,10 @@ namespace Wins.WinMenus.SANATI
             {
                 NUMBER.Text = number_to_open.ToString();
                 NUMBER.UpdateLayout();
+                IsOpenedFromAutomation = _isAutomasion_;
             }
         }
-
+        public bool IsOpenedFromAutomation { get; } = false;
         #region LOCALMODEL
 
         public class DeedHedData
@@ -272,6 +275,51 @@ namespace Wins.WinMenus.SANATI
         public Visual I_AM_VK_SAKHTEH { get; private set; }
         public List<FSAKHT_COMBO> N_KOL_ALL { get; private set; }
 
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            // Handle the selected item
+            if (selectedItem is HEAD_LST item)
+            {
+                if (item != null)
+                {
+                    //_navigationManager.MoveReGetData(INavigator.Jahat.)
+                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.NUMBER.Equals(Convert.ToDouble(item.NUMBER)));
+                    if (itemfound != null)
+                    {
+                        _navigationManager.IsNewRecord = false;
+
+                        // 1) Find its index in the master list
+                        int idx = _navigationManager.RecordsData.IndexOf(itemfound);
+                        if (idx < 0)
+                        {
+                            // not found (perhaps filtered out?), bail out
+                            new Msgwin(false, "یافت نشد: مورد انتخاب شده در لیست اصلی وجود ندارد").Show();
+                            return;
+                        }
+
+                        // 2) Tell the navigation manager to move to that position
+                        _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+                        //OnCurrentRecordChanged(itemfound);
+                    }
+                }
+            }
+        }
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+                new SearchableProperty { DisplayName = "شماره برگه", PropertyPath = "NUMBER", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "تاریخ", PropertyPath = "DATE_N", PropertyType = typeof(long) },
+                new SearchableProperty { DisplayName = "کد مسئول شیفت", PropertyPath = "CUST_NO", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "کاربر", PropertyPath = "USER_NAME", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "ملاحظات", PropertyPath = "MOLAH", PropertyType = typeof(string) },
+                // Add other searchable properties
+            };
+        }
+        #endregion
+
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
@@ -321,6 +369,11 @@ namespace Wins.WinMenus.SANATI
 
             string WhereCondition = $" WHERE (dbo.HEAD_LST.TAG = {FTAG}) ";
             WhereCondition = CL_LMethods.GetRestrictedSqlQuery(Convert.ToByte(FTAG), WhereCondition);
+            
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG} ";
+            }
 
             _navigationManager = new NavigationManager<HEAD_LST>(
                 dbms,
@@ -510,6 +563,16 @@ namespace Wins.WinMenus.SANATI
                 }
             }
 
+            if (!INVO_LST_SUB.IsKeyboardFocusWithin && !INVO_LST_SUB.IsFocused) //Only On Form F7 Pressed Not DataGrid
+            {
+                if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+                    var searchWindow = new EnhancedSearchWindow(this);
+                    searchWindow.Owner = this;
+                    searchWindow.ShowDialog();
+                }
+            }
 
             if (e.Key is Key.Enter || e.Key is Key.Tab ||
                 e.Key is Key.LeftShift ||
@@ -1664,10 +1727,8 @@ namespace Wins.WinMenus.SANATI
 
         private void INVO_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {
@@ -1675,11 +1736,7 @@ namespace Wins.WinMenus.SANATI
             }
 
             var TheRow = e.Row.Item as INVO_LST_FACTOR22;
-            if (CL_LMethods.IsNewRowUnmodified(TheRow))
-            {
-                INVO_LST_SUB_CANCEL_EDIT();
-                return;   // The row is unmodified
-            }
+            if (ConstructorRowDetector.IsPristine(TheRow)) { INVO_LST_SUB_CANCEL_EDIT(); return; }
 
             if (!BodyIsValid(TheRow))
             {
@@ -2438,7 +2495,12 @@ namespace Wins.WinMenus.SANATI
 
         private void BTN_FACTORHA_Click(object sender, RoutedEventArgs e)
         {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FACTORS_LST, this, FTAG);
 
+            if (NewRecord)
+            {
+                this.Close();
+            }
         }
 
         //چاپ فاکتور

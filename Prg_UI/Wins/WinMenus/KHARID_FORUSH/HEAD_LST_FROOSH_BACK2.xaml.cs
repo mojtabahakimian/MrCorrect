@@ -136,7 +136,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         #endregion
 
-        public HEAD_LST_FROOSH_BACK2(double? number_to_open = null)
+        public HEAD_LST_FROOSH_BACK2(double? number_to_open = null, bool _isAutomasion_ = false)
         {
             InitializeComponent();
 
@@ -147,10 +147,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 OpenArgs = number_to_open.ToString(); //شماره حواله            
                 NUMBER.Text = OpenArgs; //NUMBER_TO_OPEN
                 NUMBER.UpdateLayout();
+                IsOpenedFromAutomation = _isAutomasion_;
             }
 
         }
-
+        public bool IsOpenedFromAutomation { get; } = false;
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
         UniversControl universControl = new UniversControl();
@@ -443,6 +444,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
+            ChangeIsHappend = false;
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -457,9 +459,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             FILL_ALL_COMBOBOXES();
 
-
             string WhereCondition = FTAG > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {FTAG}) " : "  ";
             WhereCondition = CL_LMethods.GetRestrictedSqlQuery(FTAG, WhereCondition);
+
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG} ";
+            }
 
             _navigationManager = new NavigationManager<HEAD_LST>(
                 dbms,
@@ -469,7 +475,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 Convert.ToDouble(NUMBER.Text)
                 );
 
-            if (!string.IsNullOrEmpty(OpenArgs) && _navigationManager.NUMBER_TO_OPEN != null) //Had a paramter passed
+            if (!IsOpenedFromAutomation && !string.IsNullOrEmpty(OpenArgs) && _navigationManager.NUMBER_TO_OPEN != null) //Had a paramter passed
             {
                 //یعنی این شماره رو پیدا نکرده که اون رو ریست کنه
                 new Msgwin(false, $"شما به این شماره {_navigationManager.NUMBER_TO_OPEN} دسترسی ندارید ").Show();
@@ -1875,10 +1881,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void INVO_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {
@@ -3626,15 +3630,14 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void PAY_GETP_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             var FINAL_CROW_ITEM = (e.Row.Item as PAY_GETP_MODEL);
 
             var DG = PAY_GETP_SUB;
 
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
-
+            
             if (e.Row.Item == null)
             {
                 return;
@@ -4114,6 +4117,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void VISITOR_DTL_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             if (e.Row.Item == null)
             {
                 return;

@@ -2,14 +2,12 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
-using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
-using Stimulsoft.Base;
 using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
 using Syncfusion.Data.Extensions;
@@ -29,11 +27,12 @@ using static AUTO_BAZ.LocalModles;
 using static Prg_UI.Functions.CL_LMethods;
 using System.Diagnostics;
 using Functions;
-
+using Wins.WinOther;
+using static Interfaces.INavigator;
 
 namespace Wins.WinMenus.ANBAR
 {
-    public partial class ANBGRD_HEAD_WIN : Window
+    public partial class ANBGRD_HEAD_WIN : Window, ISearchableWindow
     {
         #region Header Window Begin
         //Header Window Begin
@@ -95,6 +94,8 @@ namespace Wins.WinMenus.ANBAR
 
         UniversControl universControl = new UniversControl();
 
+        private NavigationManager<ANBGRD_HEAD_LST_MODEL> _navigationManager;
+
         public ObservableCollection<ANBARGRD_SUB1_MODEL> ANBARGRD_SUB1_MODEL_DATA { get; set; } = new ObservableCollection<ANBARGRD_SUB1_MODEL>();
         public ObservableCollection<ANBARGRD_SUB2_MODEL> ANBARGRD_SUB2_MODEL_DATA { get; set; } = new ObservableCollection<ANBARGRD_SUB2_MODEL>();
         public ObservableCollection<ANBARGRD_SUB3_MODEL> ANBARGRD_SUB3_MODEL_DATA { get; set; } = new ObservableCollection<ANBARGRD_SUB3_MODEL>();
@@ -129,6 +130,51 @@ namespace Wins.WinMenus.ANBAR
         public string? ENTERED_VALUE_ROW { get; private set; }
         public ANBARGRD_SUB1_MODEL? CURRENT_ROW_ITEMS { get; private set; }
         public ANBARGRD_SUB1_MODEL? WAS_ROW_ITEM { get; private set; }
+
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            // Handle the selected item
+            if (selectedItem is ANBGRD_HEAD_LST_MODEL item)
+            {
+                if (item != null)
+                {
+                    //_navigationManager.MoveReGetData(INavigator.Jahat.)
+                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.GRD_NUM.Equals(Convert.ToInt32(item.GRD_NUM)));
+                    if (itemfound != null)
+                    {
+                        _navigationManager.IsNewRecord = false;
+
+                        // 1) Find its index in the master list
+                        int idx = _navigationManager.RecordsData.IndexOf(itemfound);
+                        if (idx < 0)
+                        {
+                            // not found (perhaps filtered out?), bail out
+                            new Msgwin(false, "یافت نشد: مورد انتخاب شده در لیست اصلی وجود ندارد").Show();
+                            return;
+                        }
+
+                        // 2) Tell the navigation manager to move to that position
+                        _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+                        //OnCurrentRecordChanged(itemfound);
+                    }
+                }
+            }
+        }
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+                new SearchableProperty { DisplayName = "شماره", PropertyPath = "GRD_NUM", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "تاریخ", PropertyPath = "GRD_DATE", PropertyType = typeof(long) },
+                new SearchableProperty { DisplayName = "حساب کسری و اضافات", PropertyPath = "GRD_HES", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "توضیحات", PropertyPath = "COMMENT", PropertyType = typeof(string) },
+                // Add other searchable properties
+            };
+        }
+        #endregion
+
 
 
         private bool _bl;
@@ -179,7 +225,12 @@ namespace Wins.WinMenus.ANBAR
 
                 GRD_ANBAR.IsEnabled = ican; //انبار
                 GRD_HES.IsEnabled = ican; //حساب کسری و اضافت
-                BTN_SAVE.IsEnabled = ican;
+
+                if (!_navigationManager.IsNewRecord)
+                {
+                    Command19.IsEnabled = ican;
+                    BTN_SAVE.IsEnabled = ican;
+                }
             }
         }
 
@@ -226,6 +277,7 @@ namespace Wins.WinMenus.ANBAR
         {
             NowIsReady = true;
         }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
@@ -239,30 +291,28 @@ namespace Wins.WinMenus.ANBAR
                 return;
             }
 
-
             Fill_ComboBoxes();
 
             #region LoadExisting
-            if (NUMBER_TO_OPEN > 0)
-            {
-                var RST = dbms.DoGetDataSQL<ANBGRD_HEAD_LST_MODEL>($"SELECT GRD_NUM, GRD_DATE, GRD_ANBAR, GRD_HES, N_S, COMMENT, USER_NAME, CRT, UID FROM dbo.ANBGRD_HEAD WHERE GRD_NUM = {NUMBER_TO_OPEN}").FirstOrDefault();
-                GRD_NUM.Text = RST.GRD_NUM.ToStringNullSafe(); //شماره
-                GRD_DATE.Text = RST.GRD_DATE.ToStringNullSafe(); //تاریخ
-                GRD_ANBAR.SelectedValue = RST.GRD_ANBAR; //انبار
-                GRD_HES.SelectedValue = RST.GRD_HES; //حساب کسری و اضافت
-                COMMENT.Text = RST.COMMENT; //توضیحات
-                N_S.Text = RST?.N_S?.ToStringNullSafe(); //شماره سند
-                USER_NAME.Text = RST?.USER_NAME; //کاربر
-                AllowEdits = false;
 
-            }
-            ReGetData();
-            ReGetData2();
-            ReGetData3();
+            _navigationManager = new NavigationManager<ANBGRD_HEAD_LST_MODEL>(
+                dbms,
+                x => x.GRD_NUM.ToString(), // property selector (used to find a record by its CODE)
+                $"SELECT * FROM ANBGRD_HEAD ORDER BY GRD_NUM", //All Record of The Table
+                x => $"SELECT * FROM ANBGRD_HEAD WHERE GRD_NUM = {x?.GRD_NUM}", //On Change for One Record
+                Convert.ToInt32(NUMBER_TO_OPEN)
+                );
+
+            // Hook up the OnInsertRecord event
+            _navigationManager.CurrentRecordChanged += OnCurrentRecordChanged;
+            _navigationManager.OnInsertRecord += OnInsertRecord;
+
+            // Link the navigation manager to the universal control
+            navigatorControl.NavigationManager = _navigationManager;
+
+            // Now raise the initialization events to update the UI
+            _navigationManager.RaiseInitializationEvents();
             #endregion
-
-            Form_Current();
-            GRD_DATE.Focus();
 
             Command19.IsEnabled = false;
 
@@ -313,6 +363,16 @@ namespace Wins.WinMenus.ANBAR
             }
             catch { /*ignore*/ }
 
+            if (!ANBARGRD_SUB_IsFocused) //Only On Form F7 Pressed Not DataGrid
+            {
+                if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+                    var searchWindow = new EnhancedSearchWindow(this);
+                    searchWindow.Owner = this;
+                    searchWindow.ShowDialog();
+                }
+            }
 
             if (e.Key is Key.Delete && Keyboard.Modifiers == ModifierKeys.None)
             {
@@ -335,6 +395,74 @@ namespace Wins.WinMenus.ANBAR
                 ChangeIsHappend = true;
             }
         }
+
+        private void OnCurrentRecordChanged(ANBGRD_HEAD_LST_MODEL HEADER_FAC)
+        {
+            if (_navigationManager.IsNewRecord)
+            {
+                ClearFreshAll(); //Form_Current(); //should be in this ClearFreshAll(); method too at the end
+            }
+            else if (HEADER_FAC == null)
+            {
+                if (_navigationManager.NUMBER_TO_OPEN != null)
+                {
+                    new Msgwin(false, "چنین شماره ای وجود ندارد").ShowDialog();
+                    return;
+                }
+            }
+            else
+            {
+                if (HEADER_FAC is null)
+                {
+                    new Msgwin(false, "این برگه خالی است").Show();
+                    return;
+                }
+
+                GRD_NUM.Text = HEADER_FAC.GRD_NUM.ToStringNullSafe(); //شماره
+                GRD_DATE.Text = HEADER_FAC.GRD_DATE.ToStringNullSafe(); //تاریخ
+                GRD_ANBAR.SelectedValue = HEADER_FAC.GRD_ANBAR; //انبار
+                GRD_HES.SelectedValue = HEADER_FAC.GRD_HES; //حساب کسری و اضافت
+                COMMENT.Text = HEADER_FAC.COMMENT; //توضیحات
+                N_S.Text = HEADER_FAC?.N_S?.ToStringNullSafe(); //شماره سند
+                USER_NAME.Text = HEADER_FAC?.USER_NAME; //کاربر
+                AllowEdits = false;
+
+                ReGetData();
+                ReGetData2();
+                ReGetData3();
+
+                Form_Current();
+
+                GetDefaultFocus();
+            }
+        }
+
+        private void GetDefaultFocus()
+        {
+            GRD_DATE.Focus();
+            GRD_DATE.SelectAll();
+        }
+
+        private bool OnInsertRecord(ANBGRD_HEAD_LST_MODEL record)
+        {
+            try
+            {
+                var itemtoadd = dbms.DoGetDataSQL<ANBGRD_HEAD_LST_MODEL>($"SELECT * FROM ANBGRD_HEAD WHERE GRD_NUM = {GRD_NUM.Text}").FirstOrDefault();
+                record = itemtoadd;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+        private void RefreshAfterUpdate()
+        {
+            var CURRENT_HEADER = dbms.DoGetDataSQL<ANBGRD_HEAD_LST_MODEL>($"SELECT * FROM ANBGRD_HEAD WHERE GRD_NUM = {GRD_NUM.Text}").FirstOrDefault();
+            _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
+        }
+
 
         public void Form_Current()
         {
@@ -577,7 +705,7 @@ namespace Wins.WinMenus.ANBAR
                     }
                     else
                     {
-                        if (Convert.ToDouble(ENTERED_VALUE_ROW) - CURRENT_ROW_ITEMS.MOG == 0)
+                        if (Convert.ToDecimal(ENTERED_VALUE_ROW) - CURRENT_ROW_ITEMS.MOG == 0)
                         {
                             CURRENT_ROW_ITEMS.NUM2 = Convert.ToDouble(ENTERED_VALUE_ROW);
                             CURRENT_ROW_ITEMS.NUM3 = Convert.ToDouble(ENTERED_VALUE_ROW);
@@ -659,7 +787,7 @@ namespace Wins.WinMenus.ANBAR
                     }
                     else
                     {
-                        if (Convert.ToDouble(ENTERED_VALUE_ROW) - CURRENT_ROW_ITEMS.MOG == 0)
+                        if (Convert.ToDecimal(ENTERED_VALUE_ROW) - CURRENT_ROW_ITEMS.MOG == 0)
                         {
                             CURRENT_ROW_ITEMS.NUM3 = Convert.ToDouble(ENTERED_VALUE_ROW);
                         }
@@ -775,10 +903,8 @@ namespace Wins.WinMenus.ANBAR
 
         private void ANBARGRD_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {
@@ -819,10 +945,8 @@ namespace Wins.WinMenus.ANBAR
         }
         private void ANBARGRD_SUB2_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {
@@ -862,10 +986,8 @@ namespace Wins.WinMenus.ANBAR
         }
         private void ANBARGRD_SUB3_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null)
             {
@@ -943,14 +1065,13 @@ namespace Wins.WinMenus.ANBAR
         }
         public bool VALIDATION()
         {
-            var S_ANBAR_DATE = dbms.DoGetDataSQL<ANB2>($"SELECT * FROM ANBGRD_HEAD WHERE GRD_ANBAR = {GRD_ANBAR.SelectedValue} AND GRD_DATE = {GRD_DATE.Text.ToRawTarikh()}").ToList();
-
-            if (S_ANBAR_DATE.Count >= 1)
+            if (IsNull(this.GRD_DATE.Text.ToRawTarikh()))
             {
-                Msgwin msgwin = new Msgwin(false, " در حال حاضر انباری با همین تاریخ وجود دارد ، لطفا تاریخ را تغییر دهید");
+                Msgwin msgwin = new Msgwin(false, " تاریخ نمی تواند خالی باشد ....!");
                 msgwin.ShowDialog();
                 return false;
             }
+
             if (IsNull(this.GRD_NUM.Text))
             {
                 Msgwin msgwin = new Msgwin(false, " شماره نمی تواند خالی باشد ....!");
@@ -972,12 +1093,24 @@ namespace Wins.WinMenus.ANBAR
                 return false;
             }
 
-            if (IsNull(this.GRD_DATE.Text.ToRawTarikh()))
+            var S_ANBAR_DATE = dbms.DoGetDataSQL<ANB2>($"SELECT * FROM ANBGRD_HEAD WHERE GRD_ANBAR = {GRD_ANBAR.SelectedValue} AND GRD_DATE = {GRD_DATE.Text.ToRawTarikh()}").ToList();
+
+            bool DateChanged = false;
+            if (!string.IsNullOrEmpty(GRD_DATE.Text.ToRawTarikh()))
             {
-                Msgwin msgwin = new Msgwin(false, " تاریخ نمی تواند خالی باشد ....!");
-                msgwin.ShowDialog();
-                return false;
+                DateChanged = GRD_DATE.Text.ToRawTarikh() != _navigationManager?.CurrentRecord?.GRD_DATE?.ToStringNullSafe();
             }
+
+            if ((_navigationManager?.IsNewRecord ?? false) || DateChanged)
+            {
+                if (S_ANBAR_DATE.Count >= 1)
+                {
+                    Msgwin msgwin = new Msgwin(false, " در حال حاضر انبار گردانی با همین تاریخ وجود دارد ، لطفا تاریخ را تغییر دهید");
+                    msgwin.ShowDialog();
+                    return false;
+                }
+            }
+
             return true;
         }
         public void DATE_VALIDATION()
@@ -1084,7 +1217,7 @@ namespace Wins.WinMenus.ANBAR
             }
             //Here Save
             var number = dbms.DoGetDataSQL<double?>("SELECT MAX(GRD_NUM)+1 FROM ANBGRD_HEAD").FirstOrDefault();
-            if (string.IsNullOrEmpty(GRD_NUM.Text))
+            if (_navigationManager.IsNewRecord)
             {
                 if (number is null)
                 {
@@ -1099,6 +1232,8 @@ namespace Wins.WinMenus.ANBAR
                 //INSERT
                 dbms.DoExecuteSQL(@$"INSERT INTO dbo.ANBGRD_HEAD (       GRD_NUM,                     GRD_DATE,                GRD_ANBAR,                    GRD_HES,          COMMENT,           USER_NAME) 
                                                                    VALUES ({GRD_NUM.Text},{GRD_DATE.Text.ToRawTarikh()},{GRD_ANBAR.SelectedValue}, N'{GRD_HES.SelectedValue}',N'{COMMENT.Text}', N'{USER_NAME.Text}')");
+
+                RefreshAfterUpdate();
             }
             else
             {
@@ -1109,10 +1244,12 @@ namespace Wins.WinMenus.ANBAR
                                                           GRD_ANBAR = {GRD_ANBAR.SelectedValue},
                                                           GRD_HES = N'{GRD_HES.SelectedValue}',
                                                           COMMENT = N'{COMMENT.Text}',
-                                                          USER_NAME = N'{USER_NAME.Text}',
+                                                          USER_NAME = N'{USER_NAME.Text}'
                                                       WHERE 
                                                           GRD_NUM = {GRD_NUM.Text}");
             }
+
+            universControl.PopNotifyShowUp("ذخیره انجام شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
 
             ChangeIsHappend = false;
             Command19.IsEnabled = true;
@@ -1135,7 +1272,7 @@ namespace Wins.WinMenus.ANBAR
         }
         private void BTN_DELETE_Click(object sender, RoutedEventArgs e)
         {
-            if (!BTN_DELETE.IsEnabled || NewRecord) { return; }
+            if (!BTN_DELETE.IsEnabled || _navigationManager.IsNewRecord) { return; }
 
             var IsVisible = BTN_DELETE.Visibility == Visibility.Visible;
             if (!BTN_DELETE.IsEnabled || !IsVisible) { return; }
@@ -1145,7 +1282,6 @@ namespace Wins.WinMenus.ANBAR
                 new Msgwin(false, "هنوز انبار گردانی شماره نگرفته , ابتدا آنرا ذخیره کنید").ShowDialog();
                 return;
             }
-
 
             Msgwin msgwin = new Msgwin(true, "آیا از حذف اطمینان دارید ؟");
             msgwin.ShowDialog();
@@ -1164,78 +1300,108 @@ namespace Wins.WinMenus.ANBAR
                 CL_HESABDARI.TR("ANBGRD_LST", "(GRD_NUM = " + this.GRD_NUM.Text + ")", dt, 1);
 
 
-                if (ANBARGRD_SUB1_MODEL_DATA.Count > 0) //Any Sub Items ?
+                if (ANBARGRD_SUB1_MODEL_DATA.Count > 0 && ANBARGRD_SUB_IsFocused && ANBARGRD_SUB.SelectedItems.Count > 0) //Any Sub Items ?
                 {
-                    if (ANBARGRD_SUB_IsFocused)
+                    if (!(ANBARGRD_SUB.SelectedItems is null))
                     {
-                        if (!(ANBARGRD_SUB.SelectedItems is null))
+                        bool IsDeletedSomething = false;
+                        List<MsgModel> ErrosMessages = new List<MsgModel>();
+
+                        var editableCollectionView = ANBARGRD_SUB.Items as IEditableCollectionView;
+                        if (editableCollectionView != null && editableCollectionView.IsEditingItem) { editableCollectionView.CommitEdit(); }
+
+                        for (int i = 0; i < ANBARGRD_SUB.SelectedItems.Count; i++)
                         {
-                            bool IsDeletedSomething = false;
-                            List<MsgModel> ErrosMessages = new List<MsgModel>();
+                            var item = ANBARGRD_SUB.SelectedItems[i];
 
-                            var editableCollectionView = ANBARGRD_SUB.Items as IEditableCollectionView;
-                            if (editableCollectionView != null && editableCollectionView.IsEditingItem) { editableCollectionView.CommitEdit(); }
-
-                            for (int i = 0; i < ANBARGRD_SUB.SelectedItems.Count; i++)
+                            if (CL_LMethods.IsNewPlaceHolder(ANBARGRD_SUB, item))
                             {
-                                var item = ANBARGRD_SUB.SelectedItems[i];
-
-                                if (CL_LMethods.IsNewPlaceHolder(ANBARGRD_SUB, item))
-                                {
-                                    continue; // Skip deletion for new placeholder items
-                                }
-
-                                var _CODE_ = item.GetType()?.GetProperty("CODE")?.GetValue(item);
-
-                                if (_CODE_ != null)
-                                {
-                                    try
-                                    {
-                                        IsDeletedSomething = true;
-
-                                        ESLAH_Click(null, null);
-
-                                        dbms.DoExecuteSQL($@"DELETE FROM dbo.ANBGRD_LST WHERE (GRD_NUM = " + this.GRD_NUM.Text + ") AND (CODE = N'" + _CODE_ + "')");
-                                    }
-                                    catch (SqlException ex)
-                                    {
-                                        if (ex.Number == 547)
-                                        {
-                                            ErrosMessages.Add(new MsgModel { MessageText_U = "این آیتم دارای گردش است و نمیتوان آنرا حذف کرد" });
-                                        }
-                                        else
-                                        {
-                                            ErrosMessages.Add(new MsgModel { MessageText_U = "خطا پایگاه داده در انجام عملیات حذف" });
-                                        }
-                                    }
-                                    catch (Exception)
-                                    {
-                                        ErrosMessages.Add(new MsgModel { MessageText_U = "خطا در انجام عملیات حذف" });
-                                    }
-                                }
+                                continue; // Skip deletion for new placeholder items
                             }
 
-                            if (ErrosMessages.Count > 0)
-                            {
-                                ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct()
-                                      .Select(message => new MsgModel { MessageText_U = message }).ToList();
-                                new MsgListwin(false, ErrosMessages).ShowDialog();
+                            var _CODE_ = item.GetType()?.GetProperty("CODE")?.GetValue(item);
 
-                                return;
-                            }
-
-                            if (IsDeletedSomething)
+                            if (_CODE_ != null)
                             {
-                                ReGetData();
+                                try
+                                {
+                                    IsDeletedSomething = true;
+
+                                    ESLAH_Click(null, null);
+
+                                    dbms.DoExecuteSQL($@"DELETE FROM dbo.ANBGRD_LST WHERE (GRD_NUM = " + this.GRD_NUM.Text + ") AND (CODE = N'" + _CODE_ + "')");
+                                }
+                                catch (SqlException ex)
+                                {
+                                    if (ex.Number == 547)
+                                    {
+                                        ErrosMessages.Add(new MsgModel { MessageText_U = "این آیتم دارای گردش است و نمیتوان آنرا حذف کرد" });
+                                    }
+                                    else
+                                    {
+                                        ErrosMessages.Add(new MsgModel { MessageText_U = "خطا پایگاه داده در انجام عملیات حذف" });
+                                    }
+                                }
+                                catch (Exception)
+                                {
+                                    ErrosMessages.Add(new MsgModel { MessageText_U = "خطا در انجام عملیات حذف" });
+                                }
                             }
                         }
+
+                        if (ErrosMessages.Count > 0)
+                        {
+                            ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct()
+                                  .Select(message => new MsgModel { MessageText_U = message }).ToList();
+                            new MsgListwin(false, ErrosMessages).ShowDialog();
+
+                            return;
+                        }
+
+                        if (IsDeletedSomething)
+                        {
+                            ReGetData();
+                        }
                     }
+
                 }
                 else
                 {
-                    //Delete From Header if there is no sub data
                     //dbms.DoExecuteSQL($"DELETE FROM ANBGRD_HEAD WHERE GRD_NUM = {GRD_NUM.Text}");
+                    if (!string.IsNullOrEmpty(GRD_NUM.Text) && GRD_NUM.Text != "0")
+                    {
+                        try
+                        {
+                            dbms.DoExecuteSQL($@"DELETE FROM ANBGRD_HEAD WHERE GRD_NUM = {GRD_NUM.Text}");
+
+                            SANAD();
+
+                            _navigationManager.DeleteCurrentRecord(); //Refresh Record Source
+                        }
+                        catch (SqlException ex)
+                        {
+                            if (e != null)
+                            {
+                                e.Handled = true;
+                            }
+
+                            if (ex.Number == 547)
+                            {
+                                new Msgwin(false, "این برگه دارای اطلاعات وابسته است , ابتدا آنرا حذف کنید").ShowDialog();
+                                return;
+                            }
+                            else
+                            {
+                                new Msgwin(false, "حذف به دلیل خطا در بروز پایگاه داده انجام نشد!").ShowDialog(); return;
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            new Msgwin(false, "خطا در انجام عملیات حذف!").ShowDialog(); return;
+                        }
+                    }
                 }
+
             }
         }
 
@@ -1288,7 +1454,7 @@ namespace Wins.WinMenus.ANBAR
             {
 
                 Msgwin msgwin = new Msgwin(false, "اشكالي در انتقال كالاها به وجود آمده است .ممكن است براي يك كالا دوتا فرمول تعريف كرده باشيد لطفا برسي كنيد");
-                msgwin.ShowDialog();
+                msgwin.Show();
             }
 
             ReGetData();
@@ -1455,9 +1621,13 @@ namespace Wins.WinMenus.ANBAR
         private void BTN_NEWABARGRD_Click(object sender, RoutedEventArgs e)
         {
             //Clear for new
+            ClearFreshAll();
+        }
+
+        private void ClearFreshAll()
+        {
             GRD_NUM.Text = null;
             NewRecord = true;
-            AllowEdits = true;
             NUMBER_TO_OPEN = null;
 
             ANBARGRD_SUB1_MODEL_DATA?.Clear();
@@ -1470,6 +1640,13 @@ namespace Wins.WinMenus.ANBAR
             GRD_DATE.Text = null; //تاریخ
             GRD_ANBAR.SelectedValue = null; GRD_ANBAR.Items.Refresh();  //انبار
             GRD_HES.SelectedValue = null; GRD_HES.Items.Refresh();  //حساب کسری و اضافت
+
+            Command19.IsEnabled = false;
+            BTN_SAVE.IsEnabled = true;
+
+            AllowEdits = true;
+
+            GetDefaultFocus();
         }
     }
 }

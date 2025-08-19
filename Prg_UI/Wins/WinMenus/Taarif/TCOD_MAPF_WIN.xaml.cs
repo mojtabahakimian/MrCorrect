@@ -25,6 +25,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
+using Wins.WinOther;
 
 namespace Wins.WinMenus.Taarif
 {
@@ -147,16 +149,14 @@ namespace Wins.WinMenus.Taarif
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "نام نمی تواند خالی باشد" });
             }
-
+            else if (ROW?.MPNAME.Length > 49)
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "نام طولانی است" });
+            }
             if (!int.TryParse(ROW?.MPCODE.ToStringNullSafe(), out _))
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "کد مجاز نیست" });
             }
-            if (!int.TryParse(ROW?.MPNAME.ToStringNullSafe(), out _))
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "نام مجاز نیست" });
-            }
-
 
             if (ErrosMessages.Count > 0)
             {
@@ -233,13 +233,11 @@ namespace Wins.WinMenus.Taarif
         }
         private void TCOD_MAP_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             var ROW = e.Row.Item as TCOD_MAP;
             if (!BodyIsValid(ROW))
-            {
-                return;
-            }
-
-            if (Keyboard.IsKeyDown(Key.Escape))
             {
                 return;
             }
@@ -288,7 +286,7 @@ namespace Wins.WinMenus.Taarif
                 ROW.ID = _idd;
             }
 
-            ReGetData();
+            //ReGetData();
         }
 
         private void FILL_ALL_COMBOBOXES()
@@ -298,7 +296,7 @@ namespace Wins.WinMenus.Taarif
         private void ReGetData()
         {
             TCOD_MAP_DATA?.Clear();
-            var _DATA_ = dbms.DoGetDataSQL<TCOD_MAP>("SELECT MPP, MPCODE, MPNAME, OSCO, CRT, UID, ID FROM dbo.TCOD_MAP WHERE (MPP < 100)").ToList();
+            var _DATA_ = dbms.DoGetDataSQL<TCOD_MAP>("SELECT MPP, MPCODE, MPNAME, OSCO, CRT, UID, ID FROM dbo.TCOD_MAP  WHERE(MPP< 100)").ToList();
             foreach (var item in _DATA_)
             {
                 TCOD_MAP_DATA.Add(item);
@@ -327,9 +325,83 @@ namespace Wins.WinMenus.Taarif
                 ChangeIsHappend = true;
             }
         }
-
+        private int datagridname_tbox_def_index_col;
+        public int INVO_LST_SUB_DEF_INDEX_COL
+        {
+            get
+            {
+                if (TCOD_MAP_SUB.Columns.Count > 0)
+                {
+                    int? defaultcolumnindex = TCOD_MAP_SUB.Columns.FirstOrDefault(c => c.SortMemberPath is not null && c.SortMemberPath == "MPP")?.DisplayIndex;
+                    if (defaultcolumnindex is null || defaultcolumnindex < 0)
+                    {
+                        datagridname_tbox_def_index_col = 0;
+                    }
+                    else
+                    {
+                        datagridname_tbox_def_index_col = (int)defaultcolumnindex;
+                    }
+                }
+                return datagridname_tbox_def_index_col;
+            }
+        }
         private void TCOD_MAP_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            try
+            {
+                DataGrid DG = TCOD_MAP_SUB;
+                UIElement uie = e.OriginalSource as UIElement;
+
+                if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+                    try
+                    {
+                        if (TCOD_MAP_SUB.IsKeyboardFocusWithin)
+                        {
+                            if (DG.CurrentColumn != null)
+                            {
+                                int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                                bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                                bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+                                if (isLastColumn)
+                                {
+                                    // If it's the last column, move focus to the first cell of next row
+                                    if (isLastRow)
+                                    {
+                                        // Add focus to new row if needed
+                                        DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
+
+                                        DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[INVO_LST_SUB_DEF_INDEX_COL]);
+
+                                        Dispatcher.BeginInvoke(new Action(() =>
+                                        {
+                                            DG.BeginEdit();
+                                        }), DispatcherPriority.Background);
+
+                                        //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
+                                        var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                                        if (focusedWindow != null)
+                                        {
+                                            Dispatcher.BeginInvoke(new Action(() =>
+                                            {
+                                                focusedWindow.Activate();
+                                                focusedWindow.Focus();
+                                            }), DispatcherPriority.Background);
+                                        }
+
+                                        return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                    }
+                                }
+                            }
+                        }
+                        CL_LMethods.SendKey_US(Key.Tab);
+                    }
+                    catch { /*ignore*/ }
+                }
+            }
+            catch { }
+
             if (e.Key is Key.Delete)
             {
                 if (TCOD_MAP_SUB.Items.Count > 0 && TCOD_MAP_SUB.SelectedItem != null)
