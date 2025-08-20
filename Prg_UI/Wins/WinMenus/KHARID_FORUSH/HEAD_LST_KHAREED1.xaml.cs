@@ -1348,12 +1348,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                         //FNUMCO.Text = string.IsNullOrEmpty(rst.FNUMCO.ToStringNullSafe()) ? "0" : rst.FNUMCO.ToStringNullSafe();
                         //DEPATMAN.SelectedValue = rst.DEPATMAN; DEPATMAN.Items.Refresh();
-                        //USER_NAME.Text = rst.USER_NAME;
+                        USER_NAME.Text = rst.USER_NAME; //دریافت نام کاربر از رسید انبار خرید برای فاکتور خرید غیر مستقیم
 
-                        if (!IsExporty)
-                        {
-                            MAS.Text = rst.MAS.ToStringNullSafe();
-                        }
                         ////CL_HESABDARI.LOGFACT(Convert.ToDouble(NUMBER.Text), ;?;, Convert.ToDouble(NUMBER1.Text), "UPDATEFACTOR");
                     }
 
@@ -2801,14 +2797,14 @@ namespace Wins.WinMenus.KHARID_FORUSH
                             }
 
 
-                            db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER,         NUMBER1,           TAG,     DATE_N,  MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF)
-                                               VALUES ({NUMBER.Text}, {NUMBER1.Text}    ,{FTAG},        0,    0,   0,       0,        0,        0,        0,    0   )", null, transaction);
+                            db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER,         NUMBER1,           TAG,     DATE_N,  MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF,     UID)
+                                               VALUES ({NUMBER.Text}, {NUMBER1.Text}    ,{FTAG},        0,    0,   0,       0,        0,        0,        0,    0    , {Baseknow.USERCOD})", null, transaction);
 
 
                             if (IsDirectFactor)
                             {
-                                db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER,         NUMBER1,           TAG,     DATE_N,  MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF)
-                                               VALUES ({NUMBER.Text}, {NUMBER1.Text}    ,{HTAG},        0,    0,   0,       0,        0,        0,        0,    0   )", null, transaction);
+                                db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER,         NUMBER1,           TAG,     DATE_N,  MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF,     UID)
+                                               VALUES ({NUMBER.Text}, {NUMBER1.Text}    ,{HTAG},        0,    0,   0,       0,        0,        0,        0,    0    , {Baseknow.USERCOD})", null, transaction);
                             }
 
                             transaction.Commit();

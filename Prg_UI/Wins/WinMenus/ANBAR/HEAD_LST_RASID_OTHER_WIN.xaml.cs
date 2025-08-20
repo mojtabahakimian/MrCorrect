@@ -1476,49 +1476,49 @@ namespace Wins.WinMenus.ANBAR
                     msgwin.ShowDialog();
                     return;
                 }
-                else if ((bool)Baseknow.RMOG && !IsNull(Baseknow.RMOG))
-                {
-                    var RST3 = dbms.DoGetDataSQL<double?>("SELECT  ROUND(ISNULL(AK_MOGO_AVL_KOL.SMEGH, 0) - ISNULL(AK_MOGO_FR.MEG, 0),2) AS mand FROM dbo.AK_MOGO_AVL_KOL(99999999," + CURRENT_ITMES_ROW.ANBAR + ") AK_MOGO_AVL_KOL RIGHT OUTER JOIN   dbo.STUF_FSK ON AK_MOGO_AVL_KOL.CODE = dbo.STUF_FSK.CODE AND AK_MOGO_AVL_KOL.ANBAR = dbo.STUF_FSK.ANBAR LEFT OUTER JOIN  dbo.AK_MOGO_FR(99999999," + CURRENT_ITMES_ROW.ANBAR + ") AK_MOGO_FR ON dbo.STUF_FSK.CODE = AK_MOGO_FR.CODE AND dbo.STUF_FSK.ANBAR = AK_MOGO_FR.ANBAR WHERE     (dbo.STUF_FSK.CODE = N'" + CURRENT_ITMES_ROW.CODE + "') AND (dbo.STUF_FSK.ANBAR = " + CURRENT_ITMES_ROW.ANBAR + ")").ToList();
-                    if (RST3.Count > 0)
-                    {
-                        MAND = Convert.ToDouble(RST3.FirstOrDefault());
-                        if (Math.Round((double)(RST3.FirstOrDefault() - WAS_ROW_ITEM.MEGHk - CURRENT_ITMES_ROW.MEGHk - CURRENT_ITMES_ROW.MEGH_MAR), Convert.ToInt32(Baseknow.DIG)) < Math.Round(min, (int)Baseknow.DIG) && CURRENT_ITMES_ROW.ANBAR != 0 && Baseknow.MOJU)
-                        {
-                            Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد." + "حداقل موجودي تعريف شده در اف دو :" + min);
-                            msgwin.ShowDialog();
+                //else if ((bool)Baseknow.RMOG && !IsNull(Baseknow.RMOG))
+                //{
+                //    var RST3 = dbms.DoGetDataSQL<double?>("SELECT  ROUND(ISNULL(AK_MOGO_AVL_KOL.SMEGH, 0) - ISNULL(AK_MOGO_FR.MEG, 0),2) AS mand FROM dbo.AK_MOGO_AVL_KOL(99999999," + CURRENT_ITMES_ROW.ANBAR + ") AK_MOGO_AVL_KOL RIGHT OUTER JOIN   dbo.STUF_FSK ON AK_MOGO_AVL_KOL.CODE = dbo.STUF_FSK.CODE AND AK_MOGO_AVL_KOL.ANBAR = dbo.STUF_FSK.ANBAR LEFT OUTER JOIN  dbo.AK_MOGO_FR(99999999," + CURRENT_ITMES_ROW.ANBAR + ") AK_MOGO_FR ON dbo.STUF_FSK.CODE = AK_MOGO_FR.CODE AND dbo.STUF_FSK.ANBAR = AK_MOGO_FR.ANBAR WHERE     (dbo.STUF_FSK.CODE = N'" + CURRENT_ITMES_ROW.CODE + "') AND (dbo.STUF_FSK.ANBAR = " + CURRENT_ITMES_ROW.ANBAR + ")").ToList();
+                //    if (RST3.Count > 0)
+                //    {
+                //        MAND = Convert.ToDouble(RST3.FirstOrDefault());
+                //        if (Math.Round((double)(RST3.FirstOrDefault() - WAS_ROW_ITEM.MEGHk - CURRENT_ITMES_ROW.MEGHk - CURRENT_ITMES_ROW.MEGH_MAR), Convert.ToInt32(Baseknow.DIG)) < Math.Round(min, (int)Baseknow.DIG) && CURRENT_ITMES_ROW.ANBAR != 0 && Baseknow.MOJU)
+                //        {
+                //            Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد." + "حداقل موجودي تعريف شده در اف دو :" + min);
+                //            msgwin.ShowDialog();
 
-                            CURRENT_ITMES_ROW = WAS_ROW_ITEM;
-                            chek = true;
+                //            CURRENT_ITMES_ROW = WAS_ROW_ITEM;
+                //            chek = true;
 
-                            var RST4 = dbms.DoGetDataSQL<STUF_STK>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + CURRENT_ITMES_ROW.ANBAR).ToList();
-                            if (RST4.Count > 0)
-                            {
-                                RST4.FirstOrDefault().MOGODI = MAND;
-                                RST4.FirstOrDefault().MOGODI_A = 0;
-                                dbms.DoExecuteSQL($@"UPDATE STUF_STK SET MOGODI = {RST4.FirstOrDefault().MOGODI},MOGODI_A = {RST4.FirstOrDefault().MOGODI_A} WHERE CODE = {CURRENT_ITMES_ROW.CODE} AND ANBAR = {CURRENT_ITMES_ROW.ANBAR}");
-                            }
-                        }
-                        else
-                        {
-                            var RST5 = dbms.DoGetDataSQL<STUF_STK>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + CURRENT_ITMES_ROW.ANBAR).ToList();
-                            if (RST5.Count > 0)
-                            {
-                                RST5.FirstOrDefault().MOGODI = MAND - (double)WAS_ROW_ITEM.MEGHk - (double)CURRENT_ITMES_ROW.MEGHk - (double)CURRENT_ITMES_ROW.MEGH_MAR;
-                                RST5.FirstOrDefault().MOGODI_A = 0;
-                                dbms.DoExecuteSQL($@"UPDATE STUF_STK SET MOGODI = {RST5.FirstOrDefault().MOGODI},MOGODI_A = {RST5.FirstOrDefault().MOGODI_A} WHERE CODE = {CURRENT_ITMES_ROW.CODE} AND ANBAR = {CURRENT_ITMES_ROW.ANBAR}");
-                            }
-                        }
-                    }
-                }
-                else if (CURRENT_ITMES_ROW.CODE == WAS_ROW_ITEM.CODE)
-                {
-                    if ((RST2.FirstOrDefault().MOGODI + RST2.FirstOrDefault().MOGODI_A - (double)WAS_ROW_ITEM.MEGHk - (double)CURRENT_ITMES_ROW.MEGHk - (double)CURRENT_ITMES_ROW.MEGH_MAR) < min && Baseknow.MOJU && (int)CURRENT_ITMES_ROW.ANBAR > 0)
-                    {
-                        Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد." + "حداقل موجودي تعريف شده در اف دو :" + min);
-                        CURRENT_ITMES_ROW = WAS_ROW_ITEM;
-                        chek = true;
-                    }
-                }
+                //            var RST4 = dbms.DoGetDataSQL<STUF_STK>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + CURRENT_ITMES_ROW.ANBAR).ToList();
+                //            if (RST4.Count > 0)
+                //            {
+                //                RST4.FirstOrDefault().MOGODI = MAND;
+                //                RST4.FirstOrDefault().MOGODI_A = 0;
+                //                dbms.DoExecuteSQL($@"UPDATE STUF_STK SET MOGODI = {RST4.FirstOrDefault().MOGODI},MOGODI_A = {RST4.FirstOrDefault().MOGODI_A} WHERE CODE = {CURRENT_ITMES_ROW.CODE} AND ANBAR = {CURRENT_ITMES_ROW.ANBAR}");
+                //            }
+                //        }
+                //        else
+                //        {
+                //            var RST5 = dbms.DoGetDataSQL<STUF_STK>("SELECT * FROM STUF_STK WHERE CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + CURRENT_ITMES_ROW.ANBAR).ToList();
+                //            if (RST5.Count > 0)
+                //            {
+                //                RST5.FirstOrDefault().MOGODI = MAND - (double)WAS_ROW_ITEM.MEGHk - (double)CURRENT_ITMES_ROW.MEGHk - (double)CURRENT_ITMES_ROW.MEGH_MAR;
+                //                RST5.FirstOrDefault().MOGODI_A = 0;
+                //                dbms.DoExecuteSQL($@"UPDATE STUF_STK SET MOGODI = {RST5.FirstOrDefault().MOGODI},MOGODI_A = {RST5.FirstOrDefault().MOGODI_A} WHERE CODE = {CURRENT_ITMES_ROW.CODE} AND ANBAR = {CURRENT_ITMES_ROW.ANBAR}");
+                //            }
+                //        }
+                //    }
+                //}
+                //else if (CURRENT_ITMES_ROW.CODE == WAS_ROW_ITEM.CODE)
+                //{
+                //    if ((RST2.FirstOrDefault().MOGODI + RST2.FirstOrDefault().MOGODI_A - (double)WAS_ROW_ITEM.MEGHk - (double)CURRENT_ITMES_ROW.MEGHk - (double)CURRENT_ITMES_ROW.MEGH_MAR) < min && Baseknow.MOJU && (int)CURRENT_ITMES_ROW.ANBAR > 0)
+                //    {
+                //        Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد." + "حداقل موجودي تعريف شده در اف دو :" + min);
+                //        CURRENT_ITMES_ROW = WAS_ROW_ITEM;
+                //        chek = true;
+                //    }
+                //}
             }
             #endregion
 
@@ -1988,7 +1988,6 @@ namespace Wins.WinMenus.ANBAR
                     dbms.DoExecuteSQL($"INSERT INTO dbo.TR_INVO_LST (UP_TIME, UP_DATE, NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA) SELECT {Tarikh.GET_OADATE_DAO()}AS Expr1," + CL_HESABDARI.FARSIDATE() + " AS Expr2, NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K , FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA FROM dbo.INVO_LST WHERE (NUMBER = " + this.NUMBER.Text + ") And (TAG = 24)");
                 }
                 //this.AllowAdditions = true;
-                this.AllowDeletions = true;
                 this.INVO_LST_RASIDA_SUB.IsReadOnly = true;
                 if ((bool)SGN1.IsChecked || (bool)SGN2.IsChecked)
                 {
@@ -2006,9 +2005,20 @@ namespace Wins.WinMenus.ANBAR
                 }
                 else
                 {
-                    this.AllowEdits = true;
-                    ALL_ITEMS_ENABLE();
-                    this.INVO_LST_RASIDA_SUB.IsReadOnly = false;
+                    //فاکتور برگشت فروش آزاد از سایر رسید انبار ها
+                    bool AnyCrossAzadInvoiced = dbms.DoGetDataSQL<int?>($"SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WHERE TAG = 25 AND NUMBER = {NUMBER.Text} ").Any();
+                    if (AnyCrossAzadInvoiced)
+                    {
+                        INVO_LST_RASIDA_SUB.IsReadOnly = true;
+                        universControl.PopNotifyShowUp("این برگه دارای مرجوعی (برگشت فروش آزاد) است و نمیتوان آنرا تغییر داد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
+                    }
+                    else
+                    {
+                        this.AllowEdits = true;
+                        this.AllowDeletions = true;
+                        ALL_ITEMS_ENABLE();
+                        this.INVO_LST_RASIDA_SUB.IsReadOnly = false;
+                    }
                 }
                 //this["INVO_LST_RASIDA_SUB"].Form.Refresh();
             }
@@ -2055,10 +2065,9 @@ namespace Wins.WinMenus.ANBAR
                 return;
             }
 
-            CL_HESABDARI.PERSONELUpdate(24, Convert.ToDouble(this.NUMBER.Text), Convert.ToInt32(this.PERSONEL.SelectedValue), "'ساير رسيد انبار شماره: " + this.NUMBER.Text + " مورخ " + Strings.Format(this.DATE_N.Text.ToRawTarikh(), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToString()) + "','" + this.CUST_NO.SelectedValue + "'");
+            CL_HESABDARI.PERSONELUpdate(24, Convert.ToDouble(this.NUMBER.Text), Convert.ToInt32(this.PERSONEL.SelectedValue), "'ساير رسيد انبار شماره: " + this.NUMBER.Text + " مورخ " + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToString()) + "','" + this.CUST_NO.SelectedValue + "'");
 
-            Msgwin msgwin = new Msgwin(false, "ارجاع داده شد.");
-            msgwin.ShowDialog();
+            universControl.PopNotifyShow($".ارجاع داده شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
         }
 
         private void SGN1_Click(object sender, RoutedEventArgs e)
@@ -2155,7 +2164,7 @@ namespace Wins.WinMenus.ANBAR
         private void DELETE_BTN_Click(object sender, RoutedEventArgs e)
         {
             var IsVisible = DELETE_BTN.Visibility == Visibility.Visible;
-            if (!DELETE_BTN.IsEnabled || !IsVisible) { return; }
+            if (!DELETE_BTN.IsEnabled || INVO_LST_RASIDA_SUB.IsReadOnly || !IsVisible) { return; }
 
             if (DELETE_BTN.IsEnabled)
             {

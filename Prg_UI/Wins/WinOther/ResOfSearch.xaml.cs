@@ -149,6 +149,19 @@ namespace Prg_UI.Wins.WinOther
             comboBox.ItemsSource = list;
             return list;
         }
+        private void HandleDefaultSelection(CUST_HESAB_DTL selectedVal)
+        {
+            IsSelectedItmFromResult = true;
+
+            string thevalue = $"{selectedVal.N_KOL}-{selectedVal.NUMBER}-{selectedVal.TNUMBER}";
+            if (!string.IsNullOrEmpty(selectedVal?.tnumber2.ToStringNullSafe()) && selectedVal?.tnumber2.ToStringNullSafe() != "NULL")
+            {
+                thevalue = selectedVal?.tnumber2.ToString();
+                selectedVal.NAME = selectedVal.TNAME;
+            }
+
+            SELECTED_HESAB = new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME };
+        }
         private void ResDGR1_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && ResDGR1.Items.Count > 0 && ResDGR1.SelectedItem != null)
@@ -163,11 +176,16 @@ namespace Prg_UI.Wins.WinOther
                     return;
                 }
 
+                if (Win_US == null)
+                {
+                    HandleDefaultSelection(selectedVal);
+                    Close();
+                    return;
+                }
+
                 switch (WhoFinalyCallMe)
                 {
                     case "HEAD_LST_PISHFROOSH2":
-
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -193,7 +211,6 @@ namespace Prg_UI.Wins.WinOther
                         }
                         break;
                     case "F_MENU_KOL_MOIN_TAFZIL":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -257,7 +274,6 @@ namespace Prg_UI.Wins.WinOther
                         }
                         break;
                     case "HEAD_LST_HAVL":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -282,7 +298,6 @@ namespace Prg_UI.Wins.WinOther
                         }
                         break;
                     case "HEAD_LST_RASID":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -307,7 +322,6 @@ namespace Prg_UI.Wins.WinOther
                         }
                         break;
                     case "HEAD_LST_FROOSH22":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -332,7 +346,6 @@ namespace Prg_UI.Wins.WinOther
                         }
                         break;
                     case "POSHTE_FACTOR": //پشت فاکتور
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -355,7 +368,6 @@ namespace Prg_UI.Wins.WinOther
                         }
                         break;
                     case "CREATE_CHEKDP":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -378,7 +390,6 @@ namespace Prg_UI.Wins.WinOther
                         }
                         break;
                     case "CREATE_CHEKPDP":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -401,7 +412,6 @@ namespace Prg_UI.Wins.WinOther
                         }
                         break;
                     case "PGET_HED":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -431,7 +441,6 @@ namespace Prg_UI.Wins.WinOther
                         }
                         break;
                     case "DEED_HEAD":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -461,7 +470,6 @@ namespace Prg_UI.Wins.WinOther
                         }
                         break;
                     case "AZAE":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -479,9 +487,7 @@ namespace Prg_UI.Wins.WinOther
 
                         }
                         break;
-
                     case "paymentformorder_CUST_NO":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -506,7 +512,6 @@ namespace Prg_UI.Wins.WinOther
                         }
                         break;
                     case "paymentformorder_ORDERER":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -531,7 +536,6 @@ namespace Prg_UI.Wins.WinOther
                         }
                         break;
                     case "HEAD_LST_KHAREED1":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -555,9 +559,7 @@ namespace Prg_UI.Wins.WinOther
                             (Win_US as HEAD_LST_KHAREED1).CUST_NO.Items.Refresh(); //Just to select and display new selectedValue
                         }
                         break;
-
                     case "HEAD_LST_KHADAMAT":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -581,9 +583,7 @@ namespace Prg_UI.Wins.WinOther
                             (Win_US as HEAD_LST_KHADAMAT).CUST_NO.Items.Refresh(); //Just to select and display new selectedValue
                         }
                         break;
-
                     case "HEAD_LST_KH_BACK_AZAD":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -606,9 +606,7 @@ namespace Prg_UI.Wins.WinOther
                             (Win_US as HEAD_LST_KH_BACK_AZAD).CUST_NO.Items.Refresh(); //Just to select and display new selectedValue
                         }
                         break;
-
                     case "POSHTE_FACTOR_AZADF": //پشت فاکتور
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -630,9 +628,7 @@ namespace Prg_UI.Wins.WinOther
                             (Win_US as HEAD_LST_BRFR).HESAB_POSHTEF_FROM_SEARCH.NAME = selectedVal.NAME;
                         }
                         break;
-
                     case "WIN_MESSAGEPANEL":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -654,9 +650,7 @@ namespace Prg_UI.Wins.WinOther
 
                         }
                         break;
-
                     case "MESSAGEPANEL_CUSTOMER":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -678,9 +672,7 @@ namespace Prg_UI.Wins.WinOther
 
                         }
                         break;
-
                     case "WIN_F_MENU_KHFR":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -705,7 +697,6 @@ namespace Prg_UI.Wins.WinOther
                         }
                         break;
                     case "HEAD_LST_HAV_OTHER_WIN":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -727,10 +718,8 @@ namespace Prg_UI.Wins.WinOther
                             (Win_US as HEAD_LST_HAV_OTHER_WIN).HESAB_FROM_SEARCH.NAME = selectedVal.NAME;
                         }
                         break;
-
                     case "F_USER_PERMITION_FORMS_BLOCKED_SUB":
                     case "F_USER_PERMITION_FORMS_UNBLOCKED_SUB":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -753,9 +742,7 @@ namespace Prg_UI.Wins.WinOther
 
                         }
                         break;
-
                     case "VOSULDIALOG":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -776,9 +763,7 @@ namespace Prg_UI.Wins.WinOther
 
                         }
                         break;
-
                     case "VOSULDIALOG2":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -799,9 +784,7 @@ namespace Prg_UI.Wins.WinOther
 
                         }
                         break;
-
                     case "BEHESABDIALOG":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -822,9 +805,7 @@ namespace Prg_UI.Wins.WinOther
 
                         }
                         break;
-
                     case "ZASESABBEESAB":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -845,9 +826,7 @@ namespace Prg_UI.Wins.WinOther
 
                         }
                         break;
-
                     case "HAVALAH_ENTER":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -872,7 +851,6 @@ namespace Prg_UI.Wins.WinOther
                         }
                         break;
                     case "F_MENU_DATE_HES":
-                        selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null) && Win_US != null)
                         {
                             IsSelectedItmFromResult = true;
@@ -894,22 +872,23 @@ namespace Prg_UI.Wins.WinOther
                             (Win_US as F_MENU_DATE_HES).HESAB_FROM_SEARCH.NAME = selectedVal.NAME;
                         }
                         break;
-
                     default:
                         selectedVal = ResDGR1.SelectedItem as CUST_HESAB_DTL;
                         if (!(selectedVal is null))
                         {
-                            IsSelectedItmFromResult = true;
+                            //IsSelectedItmFromResult = true;
                             e.Handled = true;
 
-                            string thevalue = $"{selectedVal.N_KOL}-{selectedVal.NUMBER}-{selectedVal.TNUMBER}";
-                            if (!string.IsNullOrEmpty(selectedVal?.tnumber2.ToStringNullSafe()) && selectedVal?.tnumber2.ToStringNullSafe() != "NULL")
-                            {
-                                thevalue = selectedVal?.tnumber2.ToString();
-                                selectedVal.NAME = selectedVal.TNAME;
-                            }
+                            //string thevalue = $"{selectedVal.N_KOL}-{selectedVal.NUMBER}-{selectedVal.TNUMBER}";
+                            //if (!string.IsNullOrEmpty(selectedVal?.tnumber2.ToStringNullSafe()) && selectedVal?.tnumber2.ToStringNullSafe() != "NULL")
+                            //{
+                            //    thevalue = selectedVal?.tnumber2.ToString();
+                            //    selectedVal.NAME = selectedVal.TNAME;
+                            //}
 
-                            SELECTED_HESAB = new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME };
+                            //SELECTED_HESAB = new Custom_CUST_HESAB { hes = thevalue, NAME = selectedVal.NAME };
+
+                            HandleDefaultSelection(selectedVal);
                         }
                         break;
                 }

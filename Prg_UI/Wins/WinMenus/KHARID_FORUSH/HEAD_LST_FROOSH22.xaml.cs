@@ -6772,40 +6772,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                 INVO_LST_sub.ItemsSource = FACTOR22_INVO_DATA;
 
-                //Re Focus On Last Row was Focused - 2
-                #region Way2
-                //if (INVO_LST_sub.Items.Count > 0)
-                //{
-                //    INVO_LST_sub.Focus();
-                //    DataGridRow row = INVO_LST_sub.ItemContainerGenerator.ContainerFromIndex(CURRENT_ROW_INDEX) as DataGridRow;
-                //    if (row is null)
-                //    {
-                //        object item = INVO_LST_sub.Items[CURRENT_ROW_INDEX];
-                //        INVO_LST_sub.ScrollIntoView(INVO_LST_sub.Items[CURRENT_ROW_INDEX]);
-                //        row = (DataGridRow)INVO_LST_sub.ItemContainerGenerator.ContainerFromIndex(CURRENT_ROW_INDEX);
-                //        INVO_LST_sub.SelectedItem = item;
-
-                //        //ستون که میخوای باتوجه به ردیفی که خودم میدونم روش فوکوس کنم
-                //        var col_index = INVO_LST_sub.Columns.FirstOrDefault(c => c.SortMemberPath == "CODE").DisplayIndex;
-                //        DataGridCell cell = CL_LMethods.GetCell(INVO_LST_sub, row, Convert.ToInt32(col_index));
-                //        if (cell != null)
-                //            cell.Focus();
-                //    }
-                //    else
-                //    {
-                //        object item = INVO_LST_sub.Items[CURRENT_ROW_INDEX];
-                //        INVO_LST_sub.SelectedItem = item;
-                //        INVO_LST_sub.ScrollIntoView(item);
-                //        //ستون که میخوای باتوجه به ردیفی که خودم میدونم روش فوکوس کنم
-                //        var col_index = INVO_LST_sub.Columns.FirstOrDefault(c => c.SortMemberPath == "CODE").DisplayIndex;
-                //        DataGridCell cell = CL_LMethods.GetCell(INVO_LST_sub, row, Convert.ToInt32(col_index));
-                //        if (cell != null)
-                //            cell.Focus();
-                //    }
-                //}
-                #endregion
-                //Text59.Text = Convert.ToString(AllInvo.Sum(x => x.MABL_K));
-
                 if (!IsDirectFactor)
                 {
                     var rst = dbms.DoGetDataSQL<_FACT_HEAD_HAV_>("SELECT HEAD_LST.CUST_NO,HEAD_LST.MAS,HEAD_LST.DEPATMAN,HEAD_LST.TICMBAA,HEAD_LST.SHARAYET,HEAD_LST.FNUMCO,HEAD_LST.JAY,MODAT_PPID,PEID,PEPID,HEAD_LST.USER_NAME FROM HEAD_LST WHERE (((HEAD_LST.NUMBER) = " + NUMBER.Text + ") And ((HEAD_LST.TAG) = 2)) GROUP BY TICMBAA,HEAD_LST.CUST_NO,HEAD_LST.MAS,HEAD_LST.FNUMCO,HEAD_LST.SHARAYET,HEAD_LST.JAY,HEAD_LST.DEPATMAN,MODAT_PPID,PEID,PEPID,HEAD_LST.USER_NAME").FirstOrDefault();
@@ -6860,8 +6826,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                         PEID.SelectedValue = rst.PEID; PEID.Items.Refresh();
                         PEPID.SelectedValue = rst.PEPID; PEPID.Items.Refresh();
-                        MAS.Text = rst.MAS.ToStringNullSafe();
-                        //USER_NAME.Text = rst.USER_NAME;
+                        USER_NAME.Text = rst.USER_NAME; //نام کابری از حواله گرفته میشود در فاکتور با حواله یعنی غیر مستقیم
                         CL_HESABDARI.LOGFACT(Convert.ToDouble(NUMBER.Text), 13, Convert.ToDouble(NUMBER1.Text), "UPDATEFACTOR");
                     }
 
@@ -7414,7 +7379,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
 
             //ذخیره خام سربرگ اولیه
-            if (!SaveMasterNewNumber())
+            if (!SaveMasterNewNumberINSERT())
             {
                 return; // get out if was not succesfull
             }
@@ -8153,7 +8118,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             #endregion
             return true;
         }
-        private bool SaveMasterNewNumber()
+        private bool SaveMasterNewNumberINSERT()
         {
             try
             {
@@ -10318,6 +10283,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         private void Command100_Click(object sender, RoutedEventArgs e) //چاپ فاکتور
         {
             if (Convert.ToDouble(NUMBER.Text) < 0) return;
+            if (_navigationManager.IsNewRecord) return;
 
             double min;
             bool NOTPR = false;
@@ -10353,14 +10319,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
             if (NOTPR == false)
             {
-                if (ChangeIsHappend) //تغیری اتفاق افتاده برو اول ذخیره کن
-                {
-                    BUTTON_SAVE_HAVALE_Click(null, null);
-                }
-                if (ChangeIsHappend) //ذخیره کامل انجام نشده خطایی داشته پس ادامه نه
-                {
-                    return;
-                }
                 //DoCmd.OpenReport("INVOICE_FROOSH_22", acPreview, "", "NUMBER1 =" + Me.NUMBER1 + " AND HTAG =" + Me.Dtag, , 2);
 
                 if (IsExporty)
@@ -11003,6 +10961,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         private void Command139_Click(object sender, RoutedEventArgs e)
         {
             if (Convert.ToDouble(NUMBER.Text) < 0) return;
+            if (_navigationManager.IsNewRecord) return;
 
             double JAMFACT;
             if ((bool)Baseknow.SAGHF || (bool)Baseknow.SAGHF2)
@@ -11013,14 +10972,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     return;
                 }
             }
-            if (ChangeIsHappend) //تغیری اتفاق افتاده برو اول ذخیره کن
-            {
-                BUTTON_SAVE_HAVALE_Click(null, null);
-            }
-            if (ChangeIsHappend) //ذخیره کامل انجام نشده خطایی داشته پس ادامه نه
-            {
-                return;
-            }
+
+
             // Call CheckCustomPage("HAVLAH_ANBAR_KHORUG", frm.RecordsetClone.RecordCount * 0.9 + 20)
 
             //DoCmd dbms.DoGetDataSQL<> Report("INVOICE_FROOSH_2_MBA", acPreview, "", "NUMBER =" + this.NUMBER + " AND HTAG =2");
