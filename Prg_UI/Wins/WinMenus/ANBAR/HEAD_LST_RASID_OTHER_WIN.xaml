@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:local="clr-namespace:Wins.WinMenus.ANBAR"
-        xmlns:CUC="clr-namespace:Prg_UI.CUC"
+        xmlns:CUC="clr-namespace:Prg_UI.CUC" Closing="Window_Closing"
         xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="Wins.WinMenus.ANBAR.HEAD_LST_RASID_OTHER_WIN"
         mc:Ignorable="d"
-        
+        CNC:ChangeTracker.Enable="True"
         Background="{x:Null}"
         AllowsTransparency="True"
         MaxHeight="{Binding Height, Source={x:Static SystemParameters.WorkArea}}"
@@ -23,6 +23,16 @@
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"  VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+
+        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="کارت انبار این کالا"  Click="MenuItem_Click_1">
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="Warehouse" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
+
+
     </Window.Resources>
 
     <Grid x:Name="mygrid">
@@ -127,12 +137,13 @@
             ScrollViewer.CanContentScroll="False"
             SelectedIndex="0"
             ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+            ContextMenu="{StaticResource ContextUtilityMenu1}"
             CellStyle="{StaticResource CellFocusyBorder}"
             HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
             VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
             ItemsSource="{Binding INVO_RASIDA_DATA}"
             KeyboardNavigation.TabNavigation="Contained"
-            Margin="4,230,4,147" 
+            Margin="4,230,4,147"  MouseRightButtonUp="INVO_LST_sub_MouseRightButtonUp"
             AutoGenerateColumns="False" 
             FlowDirection="RightToLeft" 
             SelectionUnit="FullRow" 

@@ -52,7 +52,9 @@ ORDER BY CONVERT(BIGINT, CODE), DATE_N, BARGAH, NUMBER</SqlCommand>
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Resources isList="true" count="0" />
-    <Variables isList="true" count="0" />
+    <Variables isList="true" count="1">
+      <value>,MogRunning,MogRunning,MogRunning,System.Decimal,_x0030_,False,False,False,False</value>
+    </Variables>
   </Dictionary>
   <EngineVersion>EngineV2</EngineVersion>
   <GlobalizationStrings isList="true" count="0" />
@@ -256,6 +258,7 @@ ORDER BY CONVERT(BIGINT, CODE), DATE_N, BARGAH, NUMBER</SqlCommand>
           <Parent isRef="4" />
         </PageHeaderBand1>
         <Table1 Ref="18" type="Stimulsoft.Report.Components.Table.StiTable" isKey="true">
+          <BeforePrintEvent>MogRunning = MogRunning + KART_KALA.MEG;</BeforePrintEvent>
           <Border>None;[192:0:0];1;Solid;False;4;Black</Border>
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
@@ -407,8 +410,8 @@ ORDER BY CONVERT(BIGINT, CODE), DATE_N, BARGAH, NUMBER</SqlCommand>
               <Brush>[255:255:255]</Brush>
               <ClientRectangle>0,0.8,2,0.8</ClientRectangle>
               <Conditions isList="true" count="2">
-                <value>KART_KALA.MEG,LessThan,_x0030_,,Numeric,[242:220:219],[149:55:52],IRANYekanFN_x002C_9,True,False,,,None</value>
-                <value>KART_KALA.MEG,GreaterThan,_x0030_,,Numeric,[0:0:0],[128:230:137],IRANYekanFN_x002C_9,True,False,,,None</value>
+                <value>_x007B_MogRunning_x0020__x003C__x0020_0_x007D_,[242:220:219],[149:55:52],IRANYekanFN_x002C_9,True,False,,,None</value>
+                <value>_x007B_MogRunning_x0020__x003E__x0020_0_x007D_,[0:0:0],[128:230:137],IRANYekanFN_x002C_9,True,False,,,None</value>
               </Conditions>
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
@@ -421,7 +424,7 @@ ORDER BY CONVERT(BIGINT, CODE), DATE_N, BARGAH, NUMBER</SqlCommand>
               <Page isRef="4" />
               <Parent isRef="18" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>{KART_KALA.MEG}</Text>
+              <Text>{SumRunning(Table1,KART_KALA.MEG)}</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="27" type="NumberFormat" isKey="true">
                 <DecimalDigits>2</DecimalDigits>
@@ -429,7 +432,7 @@ ORDER BY CONVERT(BIGINT, CODE), DATE_N, BARGAH, NUMBER</SqlCommand>
                 <NegativePattern>3</NegativePattern>
                 <UseLocalSetting>False</UseLocalSetting>
               </TextFormat>
-              <Type>Expression</Type>
+              <Type>Totals</Type>
               <VertAlignment>Center</VertAlignment>
             </Table1_Cell8>
             <Table1_Cell9 Ref="28" type="TableCell" isKey="true">
@@ -631,10 +634,10 @@ ORDER BY CONVERT(BIGINT, CODE), DATE_N, BARGAH, NUMBER</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>11/13/2024 9:17:14 PM</ReportChanged>
+  <ReportChanged>8/18/2025 11:44:48 PM</ReportChanged>
   <ReportCreated>1/29/2024 9:06:45 AM</ReportCreated>
-  <ReportFile>E:\prg\MrCorrect283\Prg_UI\Rpts\ANBAR\R_KA_KALA2.mrt</ReportFile>
-  <ReportGuid>d8ede725eaee4f779a87982d24b301d8</ReportGuid>
+  <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\ANBAR\R_KA_KALA2.mrt</ReportFile>
+  <ReportGuid>8e0707be54ef4f2e81bb574844b12143</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

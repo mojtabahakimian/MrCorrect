@@ -14,6 +14,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Prg_Proccessy.FUNCTIONS;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
+using Prg_Proccessy.SQLMODELS;
+using Prg_UI.UiTools;
+using static Functions.InventoryManager;
 
 namespace Wins.WinMenus.ANBAR
 {
@@ -125,7 +129,7 @@ namespace Wins.WinMenus.ANBAR
             CANBAR.SelectedValuePath = "CODE";
 
             //var MasterAK = dbms.DoGetDataSQL<_MODEL_F_MENU_KART>("SELECT  STUF_DEF.CODE, STUF_DEF.NAME, STUF_DEF.CODE AS Expr1 FROM   STUF_DEF INNER JOIN  STUF_FSK ON STUF_DEF.CODE = STUF_FSK.CODE WHERE (STUF_FSK.ANBAR = " + ANBAR.SelectedValue + ") GROUP BY STUF_DEF.CODE, STUF_DEF.NAME, STUF_DEF.CODE ORDER BY STUF_DEF.NAME").ToList();
-            var MasterAK = dbms.DoGetDataSQL<_MODEL_F_MENU_KART>("SELECT STUF_DEF.CODE, STUF_DEF.NAME, STUF_DEF.CODE AS Expr1 FROM STUF_DEF INNER JOIN STUF_FSK ON STUF_DEF.CODE = STUF_FSK.CODE WHERE (STUF_FSK.ANBAR = 1) GROUP BY STUF_DEF.CODE, STUF_DEF.NAME, STUF_DEF.CODE ORDER BY STUF_DEF.NAME").ToList();
+            var MasterAK = dbms.DoGetDataSQL<_MODEL_F_MENU_KART>("SELECT STUF_DEF.CODE, STUF_DEF.NAME, STUF_DEF.CODE AS Expr1 FROM STUF_DEF INNER JOIN STUF_FSK ON STUF_DEF.CODE = STUF_FSK.CODE GROUP BY STUF_DEF.CODE, STUF_DEF.NAME, STUF_DEF.CODE ORDER BY STUF_DEF.NAME").ToList();
             KALA.DisplayMemberPath = "NAME";
             KALA.SelectedValuePath = "CODE";
             KALA.ItemsSource = MasterAK; KALA.SelectedIndex = -1; KALA.Items.Refresh();
@@ -212,7 +216,7 @@ namespace Wins.WinMenus.ANBAR
 
         private void OpenReport()
         {
-            
+
             var report = new StiReport();
             //var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.{THE_RPT_NAME}.mrt");
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.{THE_RPT_NAME}.mrt");
@@ -231,18 +235,22 @@ namespace Wins.WinMenus.ANBAR
             report["KALACODE"] = KALA.SelectedValue.ToString();
             ((StiSqlSource)report.Dictionary.DataSources["KART_KALA"]).CommandTimeout = 300;
 
+            var decimalPlaces = Baseknow.DIG.HasValue ? (int)Baseknow.DIG.Value : 2;
+
             if (THE_RPT_NAME != "KARTR2")
             {
                 //Report_Open:
                 var _ONE_ = (report.GetComponentByName("Table1_Cell8") as StiTableCell); //موجودی
                 if (_ONE_ != null)
                 {
-                    (report.GetComponentByName("Table1_Cell8") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(2, ".", (int)Baseknow.DIG, ",", 3, true, false, ""); //MEGK
-                }  
+                    //(report.GetComponentByName("Table1_Cell8") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(2, ".", (int)Baseknow.DIG, ",", 3, true, false, ""); //MEGK
+                    (report.GetComponentByName("Table1_Cell8") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(decimalPlaces, ".", decimalPlaces, ",", 3, true, false, ""); //MEGK
+                }
                 var _SECOND_ = (report.GetComponentByName("Table1_Cell9") as StiTableCell); //موجودی
                 if (_SECOND_ != null)
                 {
-                    (report.GetComponentByName("Table1_Cell9") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(2, ".", (int)Baseknow.DIG, ",", 3, true, false, ""); //MEGK
+                    //(report.GetComponentByName("Table1_Cell9") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(2, ".", (int)Baseknow.DIG, ",", 3, true, false, ""); //MEGK
+                    (report.GetComponentByName("Table1_Cell9") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(decimalPlaces, ".", decimalPlaces, ",", 3, true, false, ""); //MEGK
                 }
             }
 
@@ -281,6 +289,40 @@ namespace Wins.WinMenus.ANBAR
                 {
                     e.Handled = true;
                     CL_LMethods.SendKey_US(Key.Tab);
+                }
+            }
+        }
+
+        private void KALA_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (KALA.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
+            TextBox KALA_TEX = (TextBox)KALA.Template.FindName("PART_EditableTextBox", KALA);
+            if (KALA_TEX is null)
+            {
+                return;
+            }
+            if (KALA.SelectedValue is not null)
+            {
+                if ((KALA.SelectedItem as _MODEL_F_MENU_KART)?.NAME == KALA_TEX.Text)
+                {
+                    return;
+                }
+            }
+
+            var EnteredKalaText = KALA_TEX.Text.Trim();
+
+            if (CANBAR.SelectedValue != null && !string.IsNullOrEmpty(EnteredKalaText))
+            {
+                //اگر عدد وارد کرده برم سرغ کد کالا
+                if (int.TryParse(EnteredKalaText.ToString(), out _))
+                {
+                    var FoundKala = dbms.DoGetDataSQL<_MODEL_F_MENU_KART>($"SELECT TOP (1) dbo.STUF_FSK.CODE, dbo.STUF_DEF.NAME FROM dbo.STUF_DEF INNER JOIN dbo.STUF_FSK ON dbo.STUF_DEF.CODE = dbo.STUF_FSK.CODE WHERE (dbo.STUF_DEF.CODE = N'{EnteredKalaText}') AND (dbo.STUF_FSK.ANBAR = {CANBAR.SelectedValue})").FirstOrDefault();
+                    if (!ReferenceEquals(FoundKala, null))
+                    {
+                        KALA.SelectedValue = FoundKala.CODE;
+                        KALA.Text = FoundKala.NAME;
+                        KALA.Items.Refresh();
+                    }
                 }
             }
         }

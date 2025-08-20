@@ -2886,5 +2886,10 @@ namespace Wins.WinMenus.ANBAR
 
             GetDefaultFocus();
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+           
+        }
     }
 }

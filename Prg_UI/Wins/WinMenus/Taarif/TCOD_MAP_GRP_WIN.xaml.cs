@@ -15,6 +15,8 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
+using static Prg_UI.Functions.CL_LMethods;
 
 namespace Wins.WinMenus.Taarif
 {
@@ -85,13 +87,84 @@ namespace Wins.WinMenus.Taarif
 
             ReGetData();
         }
+        private int datagridname_tbox_def_index_col;
+        public int INVO_LST_SUB_DEF_INDEX_COL
+        {
+            get
+            {
+                if (TCOD_MAP_GRP_SUB.Columns.Count > 0)
+                {
+                    int? defaultcolumnindex = TCOD_MAP_GRP_SUB.Columns.FirstOrDefault(c => c.SortMemberPath is not null && c.SortMemberPath == "MPP")?.DisplayIndex;
+                    if (defaultcolumnindex is null || defaultcolumnindex < 0)
+                    {
+                        datagridname_tbox_def_index_col = 0;
+                    }
+                    else
+                    {
+                        datagridname_tbox_def_index_col = (int)defaultcolumnindex;
+                    }
+                }
+                return datagridname_tbox_def_index_col;
+            }
+        }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            try
             {
-                e.Handled = true;
-                CL_LMethods.SendKey_US(Key.Tab);
+                DataGrid DG = TCOD_MAP_GRP_SUB;
+                UIElement uie = e.OriginalSource as UIElement;
+
+                if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+
+                    try
+                    {
+                        if (TCOD_MAP_GRP_SUB.IsKeyboardFocusWithin)
+                        {
+                            if (DG.CurrentColumn != null)
+                            {
+                                int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                                bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                                bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+                                if (isLastColumn)
+                                {
+                                    // If it's the last column, move focus to the first cell of next row
+                                    if (isLastRow)
+                                    {
+                                        // Add focus to new row if needed
+                                        DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
+
+                                        DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[INVO_LST_SUB_DEF_INDEX_COL]);
+
+                                        Dispatcher.BeginInvoke(new Action(() =>
+                                        {
+                                            DG.BeginEdit();
+                                        }), DispatcherPriority.Background);
+
+                                        //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
+                                        var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                                        if (focusedWindow != null)
+                                        {
+                                            Dispatcher.BeginInvoke(new Action(() =>
+                                            {
+                                                focusedWindow.Activate();
+                                                focusedWindow.Focus();
+                                            }), DispatcherPriority.Background);
+                                        }
+
+                                        return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                    }
+                                }
+                            }
+                        }
+
+                        CL_LMethods.SendKey_US(Key.Tab);
+                    }
+                    catch { /*ignore*/ }
+                }
             }
+            catch { }
 
             if (e.Key is Key.Enter || e.Key is Key.Tab ||
                 e.Key is Key.LeftShift ||
@@ -186,6 +259,9 @@ namespace Wins.WinMenus.Taarif
         }
         private void TCOD_MAP_GRP_SUB_CellEditEnding(object sender, System.Windows.Controls.DataGridCellEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             #region REFILL_CURRENTS_
             DataGridRow row1 = e.Row;
             int row_index = ((DataGrid)sender).ItemContainerGenerator.IndexFromContainer(row1);
@@ -211,7 +287,7 @@ namespace Wins.WinMenus.Taarif
 
             if (e.Column.SortMemberPath == "MPP")
             {
-                if (string.IsNullOrEmpty(CURRENT_ROW_ITEMS?.MPP.ToStringNullSafe()))
+                if (string.IsNullOrEmpty(ENTERED_VALUE_ROW?.ToString()))
                 {
                     universControl.PopNotifyShow("کد مپ نمیتوان خالی باشد", Pop1, Pop1Text1, Pop_Border1);
                     CURRENT_ROW_ITEMS.MPP = WAS_ROW_ITEM?.MPP;
@@ -220,7 +296,7 @@ namespace Wins.WinMenus.Taarif
             }
             if (e.Column.SortMemberPath == "MPNAME")
             {
-                if (string.IsNullOrEmpty(CURRENT_ROW_ITEMS?.MPNAME.ToStringNullSafe()))
+                if (string.IsNullOrEmpty(ENTERED_VALUE_ROW?.ToString()))
                 {
                     universControl.PopNotifyShow("نام مپ نمیتوان خالی باشد", Pop1, Pop1Text1, Pop_Border1);
                     CURRENT_ROW_ITEMS.MPNAME = WAS_ROW_ITEM?.MPNAME;
@@ -229,7 +305,7 @@ namespace Wins.WinMenus.Taarif
             }
             if (e.Column.SortMemberPath == "SIZEF")
             {
-                if (string.IsNullOrEmpty(CURRENT_ROW_ITEMS?.SIZEF.ToStringNullSafe()))
+                if (string.IsNullOrEmpty(ENTERED_VALUE_ROW?.ToString()))
                 {
                     universControl.PopNotifyShow("سايز كد در مپ نمیتوان خالی باشد", Pop1, Pop1Text1, Pop_Border1);
                     CURRENT_ROW_ITEMS.SIZEF = WAS_ROW_ITEM?.SIZEF;
@@ -239,26 +315,29 @@ namespace Wins.WinMenus.Taarif
         }
         private void TCOD_MAP_GRP_SUB_RowEditEnding(object sender, System.Windows.Controls.DataGridRowEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
             var ROW = e.Row.Item as TCOD_MAP_GRP;
+            if (ConstructorRowDetector.IsPristine(ROW)) { TCOD_MAP_GRP_SUB_CANCEL_EDIT(); return; }
+
             if (!BodyIsValid(ROW))
             {
                 return;
             }
 
-            if (Keyboard.IsKeyDown(Key.Escape))
-            {
-                return;
-            }
 
+            long? _idd = null;
             try
             {
+
                 if (ROW?.ID is null) //INSERT
                 {
-                    dbms.DoExecuteSQL($@"INSERT INTO dbo.TCOD_MAP_GRP(MPP, MPNAME, SIZEF, STARTF)
+                    _idd = dbms.DoGetDataSQL<long?>($@"INSERT INTO dbo.TCOD_MAP_GRP(MPP, MPNAME, SIZEF, STARTF)
+                                         OUTPUT INSERTED.ID
                                          VALUES({ROW.MPP},
                                          N'{ROW.MPNAME}' ,
                                          {ROW.SIZEF} ,
-                                         {(ROW.STARTF is null ? "NULL" : ROW.STARTF)} )");
+                                         {(ROW.STARTF is null ? "NULL" : ROW.STARTF)} )").FirstOrDefault();
                 }
                 else //UPDATE
                 {
@@ -274,16 +353,26 @@ namespace Wins.WinMenus.Taarif
 
                 if (ex.Number == 2601 || ex.Number == 2627)
                 {
-                    new Msgwin(false, "این کد تکراری است !");
+                    new Msgwin(false, "این کد تکراری است !").ShowDialog();
+                }
+                else
+                {
+                    new Msgwin(false, "خطا در ذخیره!").ShowDialog(); return;
                 }
                 return;
             }
             catch (Exception)
             {
-                new Msgwin(false, "خطا در انجام عملیات حذف!").ShowDialog(); return;
+                TCOD_MAP_GRP_SUB_CANCEL_EDIT();
+                new Msgwin(false, "خطا در انجام عملیات ذخیره!").ShowDialog(); return;
             }
 
-            ReGetData();
+            if (_idd != null)
+            {
+                ROW.ID = _idd;
+            }
+
+            //ReGetData();
         }
         private void ReGetData()
         {
@@ -298,7 +387,7 @@ namespace Wins.WinMenus.Taarif
         }
         private void TCOD_MAP_GRP_SUB_CANCEL_EDIT(DataGridEditingUnit? _RC_ = null)
         {
-            TCOD_MAP_GRP_SUB.Dispatcher.InvokeAsync(() =>
+            TCOD_MAP_GRP_SUB.Dispatcher.Invoke(() =>
             {
                 TCOD_MAP_GRP_SUB.CellEditEnding -= TCOD_MAP_GRP_SUB_CellEditEnding;
                 TCOD_MAP_GRP_SUB.RowEditEnding -= TCOD_MAP_GRP_SUB_RowEditEnding;
@@ -317,8 +406,19 @@ namespace Wins.WinMenus.Taarif
         }
         private void TCOD_MAP_GRP_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+
+
             if (e.Key is Key.Delete)
             {
+                try
+                {
+                    if (e.OriginalSource is TextBox textBox && !textBox.IsReadOnly)
+                    {
+                        return;
+                    }
+                }
+                catch { }
+
                 if (TCOD_MAP_GRP_SUB.Items.Count > 0 && TCOD_MAP_GRP_SUB.SelectedItem != null)
                 {
                     if (!(TCOD_MAP_GRP_SUB.SelectedItems is null))

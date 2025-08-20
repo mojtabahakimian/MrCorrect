@@ -38,6 +38,8 @@ using Wins.WinOther;
 using static Interfaces.INavigator;
 using System.ComponentModel;
 using System.Windows.Threading;
+using Wins.WinMenus.ANBAR;
+using System.Windows.Data;
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
 {
@@ -1782,7 +1784,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 if (msgwin.DialogResult == true)
                 {
                     e.Cancel = true;
-                    BUTTON_SAVE_RASID_Click(null, null);
+                    //BUTTON_SAVE_RASID_Click(null, null);
                 }
             }
 
@@ -3176,6 +3178,60 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 {
                     return;
                 }
+            }
+        }
+
+        //کارت انبار این کالا
+        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        {
+            if (INVO_LST_RASID_SUB.Items.Count > 0)
+            {
+                if (INVO_LST_RASID_SUB.SelectedItem is not null)
+                {
+                    var Row = INVO_LST_RASID_SUB.SelectedItem as INVO_LST_FACTOR22;
+                    if (Row?.ANBAR != null && !string.IsNullOrEmpty(Row.CODE))
+                    {
+                        F_MENU_KART f_MENU_KART = new F_MENU_KART("R", Row.ANBAR.ToString(), Row.CODE);
+                        f_MENU_KART.ExternalCallShowReport();
+                        f_MENU_KART.Close();
+                    }
+                }
+            }
+        }
+
+        private void INVO_LST_sub_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            DataGrid dataGrid = sender as DataGrid;
+            if (dataGrid == null) return;
+
+            if (dataGrid.SelectedItems.Count > 0)
+            {
+                return;
+            }
+
+            // Find the row under the mouse
+            DependencyObject dep = (DependencyObject)e.OriginalSource;
+            while (dep != null && !(dep is DataGridRow))
+            {
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+
+            DataGridRow row = dep as DataGridRow;
+            if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
+            {
+                // Select the row under the mouse
+                dataGrid.SelectedItem = row.Item;
+
+                // Show the context menu
+                dataGrid.ContextMenu.IsOpen = true;
+
+                // Mark the event as handled to prevent the default context menu behavior
+                e.Handled = true;
+            }
+            else
+            {
+                // No valid row, don't show context menu
+                e.Handled = true;
             }
         }
 

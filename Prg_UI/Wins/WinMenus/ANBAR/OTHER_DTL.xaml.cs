@@ -17,6 +17,11 @@ using static Prg_Proccessy.SQLMODELS.CTABLES;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
 using Wins.WinMenus.KHARID_FORUSH;
 using Microsoft.IdentityModel.Tokens;
+using Functions;
+using Microsoft.Data.SqlClient;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Reflection;
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
 {
@@ -723,8 +728,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
             catch (Exception ex)
             {
+                new Msgwin(false, "خطایی وجود دارد و امکان ذخیره نیست").Show();
                 return false;
-                new Msgwin(false, "خطایی وجود دارد و امکان ذخیره نیست").ShowDialog();
             }
 
             return true;
@@ -788,7 +793,82 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         private void OTHER_DTL_SUB_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Delete)
+            {
                 e.Handled = true;
+                if (!OTHER_DTL_SUB_SUB.IsEnabled || OTHER_DTL_SUB_SUB.IsReadOnly || !IsVisible) { return; }
+
+                var editableCollectionView = OTHER_DTL_SUB_SUB.Items as IEditableCollectionView;
+                if (editableCollectionView != null && editableCollectionView.IsEditingItem && editableCollectionView.CanCancelEdit)
+                {
+                    try { editableCollectionView.CancelEdit(); } catch { }
+                }
+
+                _ = AuditLogger.LogActionAsync(
+                      actionType: "DELETE",
+                      tableName: "سایر اطلاعات Ctrl + G",
+                      recordId: NUMBER.ToString(),
+                      oldValue: TAG.ToString(),
+                      newValue: null,
+                      additionalInfo: $@"{this.GetType().Name} , EXE PATH : {System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}");
+
+                if (OTHER_DTL_DATA.Count > 0)
+                {
+                    if (OTHER_DTL_SUB_SUB.SelectedItems != null && OTHER_DTL_SUB_SUB.SelectedItems.Count > 0)
+                    {
+                        Msgwin msgwin = new Msgwin(true, "آیا مایل به حذف هستید ؟"); msgwin.ShowDialog();
+                        if (msgwin.DialogResult == true)
+                        {
+                            List<MsgModel> ErrosMessages = new List<MsgModel>();
+                            for (int i = 0; i < OTHER_DTL_SUB_SUB.SelectedItems.Count; i++)
+                            {
+                                var item = OTHER_DTL_SUB_SUB.SelectedItems[i];
+
+                                if (CL_LMethods.IsNewPlaceHolder(OTHER_DTL_SUB_SUB, item)) // Check if the item is a new placeholder Row
+                                {
+                                    OTHER_DTL_DATA.Remove((OTHER_DTL_SUB_MONITOR)item);
+                                    continue; // Skip deletion for new placeholder items
+                                }
+
+                                var _NUMBER_ = item.GetType().GetProperty("NUMBER").GetValue(item);
+                                var _TAGG_ = item.GetType().GetProperty("TAGG").GetValue(item);
+                                var _CODE_ = item.GetType().GetProperty("CODE").GetValue(item);
+
+                                if (_NUMBER_ != null && _TAGG_ != null && _CODE_ != null)
+                                {
+                                    try
+                                    {
+                                        dbms.DoExecuteSQL($@"DELETE FROM dbo.OTHER_DTL_SUB WHERE NUMBER = {_NUMBER_} AND TAGG = {_TAGG_} AND CODE = {_CODE_}");
+                                    }
+                                    catch (SqlException ex)
+                                    {
+                                        if (ex.Number == 547)
+                                        {
+                                            ErrosMessages.Add(new MsgModel { MessageText_U = "این آیتم دارای گردش است و نمیتوان آنرا حذف کرد" });
+                                        }
+                                        else
+                                        {
+                                            ErrosMessages.Add(new MsgModel { MessageText_U = "خطا پایگاه داده در انجام عملیات حذف" });
+                                        }
+                                    }
+                                    catch (Exception)
+                                    {
+                                        ErrosMessages.Add(new MsgModel { MessageText_U = "خطا در انجام عملیات حذف" });
+                                    }
+                                }
+                            }
+
+                            if (ErrosMessages.Any())
+                            {
+                                ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct()
+                                    .Select(message => new MsgModel { MessageText_U = message }).ToList();
+                                new MsgListwin(false, ErrosMessages).ShowDialog();
+                            }
+
+                            ReGetData();
+                        }
+                    }
+                }
+            }
         }
         private void OTHER_DTL_SUB_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
@@ -910,22 +990,40 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 {
                     case "PISH":
                         {
-                            dbms.DoExecuteSQL("INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) SELECT     NUMBER, TAG, CODE, RADIF  FROM         dbo.INVO_LST WHERE  TAG = 20 AND NUMBER = " + this.NUMBER);
+                            //dbms.DoExecuteSQL("INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) SELECT     NUMBER, TAG, CODE, RADIF  FROM         dbo.INVO_LST WHERE  TAG = 20 AND NUMBER = " + this.NUMBER);
+                            dbms.DoExecuteSQL("INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF)" +
+                                " SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i " +
+                                "WHERE i.TAG = 20 AND i.NUMBER = " + this.NUMBER +
+                                " AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) GROUP BY i.NUMBER, i.TAG, i.CODE");
+
                             break;
                         }
                     case "HAV":
                         {
-                            dbms.DoExecuteSQL("INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) SELECT     NUMBER, TAG, CODE, RADIF  FROM         dbo.INVO_LST WHERE  TAG = 2 AND NUMBER = " + this.NUMBER);
+                            //dbms.DoExecuteSQL("DELETE FROM dbo.OTHER_DTL_SUB WHERE TAGG = 2 AND NUMBER = " + this.NUMBER);
+                            //dbms.DoExecuteSQL("INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) SELECT     NUMBER, TAG, CODE, RADIF  FROM         dbo.INVO_LST WHERE  TAG = 2 AND NUMBER = " + this.NUMBER);
+                            dbms.DoExecuteSQL("INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) " +
+                                "SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i " +
+                                "WHERE i.TAG = 2 AND i.NUMBER = " + this.NUMBER + " " +
+                                "AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) GROUP BY i.NUMBER, i.TAG, i.CODE");
                             break;
                         }
                     case "FROOSH22":
                         {
-                            dbms.DoExecuteSQL("INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) SELECT     NUMBER, TAG, CODE, RADIF  FROM         dbo.INVO_LST WHERE  TAG = 2 AND NUMBER = " + this.NUMBER);
+                            //dbms.DoExecuteSQL("INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) SELECT     NUMBER, TAG, CODE, RADIF  FROM         dbo.INVO_LST WHERE  TAG = 2 AND NUMBER = " + this.NUMBER);
+                            dbms.DoExecuteSQL("INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) " +
+                                "SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i" +
+                                " WHERE i.TAG = 2 AND i.NUMBER = " + this.NUMBER +
+                                " AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) GROUP BY i.NUMBER, i.TAG, i.CODE");
                             break;
                         }
                     case "RASID":
                         {
-                            dbms.DoExecuteSQL("INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) SELECT     NUMBER, TAG, CODE, RADIF  FROM         dbo.INVO_LST WHERE  TAG = 1 AND NUMBER = " + this.NUMBER);
+                            //dbms.DoExecuteSQL("INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) SELECT     NUMBER, TAG, CODE, RADIF  FROM         dbo.INVO_LST WHERE  TAG = 1 AND NUMBER = " + this.NUMBER);
+                            dbms.DoExecuteSQL("INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF)" +
+                                " SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i" +
+                                " WHERE i.TAG = 1 AND i.NUMBER = " + this.NUMBER +
+                                " AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) GROUP BY i.NUMBER, i.TAG, i.CODE");
                             break;
                         }
                 }

@@ -329,6 +329,11 @@ namespace Wins.WinMenus.ANBAR
             {
                 if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
                 {
+                    if (BTN_SAVE.IsFocused)
+                    {
+                        return;
+                    }
+
                     e.Handled = true;
                     if (ANBARGRD_SUB_IsFocused)
                     {
@@ -1103,9 +1108,10 @@ namespace Wins.WinMenus.ANBAR
 
             if ((_navigationManager?.IsNewRecord ?? false) || DateChanged)
             {
+                
                 if (S_ANBAR_DATE.Count >= 1)
                 {
-                    Msgwin msgwin = new Msgwin(false, " در حال حاضر انبار گردانی با همین تاریخ وجود دارد ، لطفا تاریخ را تغییر دهید");
+                    Msgwin msgwin = new Msgwin(false, $"در حال حاضر انبار گردانی ثبت شده به شماره {S_ANBAR_DATE.FirstOrDefault().GRD_NUM} با همین تاریخ و همین انبار وجود دارد ، لطفا تاریخ را تغییر دهید");
                     msgwin.ShowDialog();
                     return false;
                 }

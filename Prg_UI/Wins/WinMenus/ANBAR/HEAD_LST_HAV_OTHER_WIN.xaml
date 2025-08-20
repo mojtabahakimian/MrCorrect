@@ -22,6 +22,15 @@
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"  VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+
+        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="کارت انبار این کالا"  Click="MenuItem_Click_1">
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="Warehouse" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
+
     </Window.Resources>
 
     <Grid x:Name="mygrid">
@@ -126,13 +135,14 @@
             ScrollViewer.CanContentScroll="False"
             SelectedIndex="0"
             ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+            ContextMenu="{StaticResource ContextUtilityMenu1}"
             CellStyle="{StaticResource CellFocusyBorder}"
             HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
             VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
             ItemsSource="{Binding INVO_HAV_OTHER_DATA}"
             KeyboardNavigation.TabNavigation="Contained"
             Margin="4,194,4,147" 
-            AutoGenerateColumns="False" 
+            AutoGenerateColumns="False" MouseRightButtonUp="INVO_LST_sub_MouseRightButtonUp"
             FlowDirection="RightToLeft" 
             SelectionUnit="FullRow" 
             BorderThickness="1" CellEditEnding="INVO_LST_HAV_SUB_OTHER_CellEditEnding" RowEditEnding="INVO_LST_HAV_SUB_OTHER_RowEditEnding" IsKeyboardFocusWithinChanged="INVO_LST_HAV_SUB_OTHER_IsKeyboardFocusWithinChanged" BeginningEdit="INVO_LST_HAV_SUB_OTHER_BeginningEdit" PreviewKeyDown="INVO_LST_HAV_SUB_OTHER_PreviewKeyDown" SelectionChanged="INVO_LST_HAV_SUB_OTHER_SelectionChanged" PreparingCellForEdit="INVO_LST_HAV_SUB_OTHER_PreparingCellForEdit" PreviewMouseLeftButtonUp="INVO_LST_HAV_SUB_OTHER_PreviewMouseLeftButtonUp" CanUserDeleteRows="False">

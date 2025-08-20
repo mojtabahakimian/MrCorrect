@@ -356,6 +356,8 @@ namespace Wins.WinMenus.Taarif
             NowIsReady = true;
 
             I_AM_STUF_DEF = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
+
+            ChangeIsHappend = false;
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -1418,7 +1420,7 @@ namespace Wins.WinMenus.Taarif
 
         private void STUF_FSK_SUB_CANCEL_EDIT(DataGridEditingUnit? _RC_ = null)
         {
-            STUF_FSK_sub.Dispatcher.InvokeAsync(() =>
+            STUF_FSK_sub.Dispatcher.Invoke(() =>
             {
                 STUF_FSK_sub.CellEditEnding -= STUF_FSK_sub_CellEditEnding;
                 STUF_FSK_sub.RowEditEnding -= STUF_FSK_sub_RowEditEnding;
@@ -1582,11 +1584,6 @@ namespace Wins.WinMenus.Taarif
             var ROW = e.Row.Item as STUF_FSK;
 
             if (!FSK_BodyIsValid(ROW))
-            {
-                return;
-            }
-
-            if (Keyboard.IsKeyDown(Key.Escape))
             {
                 return;
             }

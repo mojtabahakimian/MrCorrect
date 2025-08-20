@@ -40,6 +40,8 @@ using Rpts;
 using Wins.WinOther;
 using static Interfaces.INavigator;
 using System.Windows.Threading;
+using Wins.WinMenus.ANBAR;
+using System.Windows.Data;
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
 {
@@ -517,7 +519,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                             if (DG.CurrentColumn != null)
                             {
                                 int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                                bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                                bool isLastColumn = currentColumnIndex == 9;
                                 bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
                                 if (isLastColumn)
                                 {
@@ -558,23 +560,19 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     {
                         e.Handled = true; //Mark the event as handled to prevent further processing
 
-                        if (Convert.ToDouble(NUMBER.Text) > 0 /*&& DATE_N.IsEnabled*/)
+                        if (!_navigationManager.IsNewRecord)
                         {
-                            Msgwin msgwin = new Msgwin(true, "آیا از باز کردن پنجره سایر اطلاعات مطمئن هستید؟"); msgwin.ShowDialog();
-                            if (msgwin.DialogResult is true)
+                            DateTime dt = dt = DateTime.Now;
+                            CL_HESABDARI.TR("HEAD_LST", "(NUMBER = " + NUMBER.Text + ") AND (TAG = 2)", dt, 1);
+                            CL_HESABDARI.TR("INVO_LST", "(NUMBER = " + NUMBER.Text + ") AND (TAG = 2)", dt, 1);
+
+                            //BUTTON_SAVE_HAVALE_Click(null, null);
+
+                            if (!_navigationManager.IsNewRecord)
                             {
-                                DateTime dt = dt = DateTime.Now;
-                                CL_HESABDARI.TR("HEAD_LST", "(NUMBER = " + NUMBER.Text + ") AND (TAG = 2)", dt, 1);
-                                CL_HESABDARI.TR("INVO_LST", "(NUMBER = " + NUMBER.Text + ") AND (TAG = 2)", dt, 1);
-
-                                //BUTTON_SAVE_HAVALE_Click(null, null);
-
-                                if (!_navigationManager.IsNewRecord)
-                                {
-                                    OTHER_DTL win = new OTHER_DTL(2, CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle));
-                                    win.NUMBER = Convert.ToInt64(NUMBER.Text);
-                                    win.Show();
-                                }
+                                OTHER_DTL win = new OTHER_DTL(2, CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle));
+                                win.NUMBER = Convert.ToInt64(NUMBER.Text);
+                                win.Show();
                             }
                         }
                     }
@@ -3861,6 +3859,60 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             else
             {
                 IsDataGrid_SUB_IsFocused = true;
+            }
+        }
+
+        //کارت انبار این کالا
+        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        {
+            if (INVO_LST_HAVL_SUB.Items.Count > 0)
+            {
+                if (INVO_LST_HAVL_SUB.SelectedItem is not null)
+                {
+                    var Row = INVO_LST_HAVL_SUB.SelectedItem as INVO_LST_FACTOR22;
+                    if (Row?.ANBAR != null && !string.IsNullOrEmpty(Row.CODE))
+                    {
+                        F_MENU_KART f_MENU_KART = new F_MENU_KART("R", Row.ANBAR.ToString(), Row.CODE);
+                        f_MENU_KART.ExternalCallShowReport();
+                        f_MENU_KART.Close();
+                    }
+                }
+            }
+        }
+
+        private void INVO_LST_sub_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            DataGrid dataGrid = sender as DataGrid;
+            if (dataGrid == null) return;
+
+            if (dataGrid.SelectedItems.Count > 0)
+            {
+                return;
+            }
+
+            // Find the row under the mouse
+            DependencyObject dep = (DependencyObject)e.OriginalSource;
+            while (dep != null && !(dep is DataGridRow))
+            {
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+
+            DataGridRow row = dep as DataGridRow;
+            if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
+            {
+                // Select the row under the mouse
+                dataGrid.SelectedItem = row.Item;
+
+                // Show the context menu
+                dataGrid.ContextMenu.IsOpen = true;
+
+                // Mark the event as handled to prevent the default context menu behavior
+                e.Handled = true;
+            }
+            else
+            {
+                // No valid row, don't show context menu
+                e.Handled = true;
             }
         }
     }
