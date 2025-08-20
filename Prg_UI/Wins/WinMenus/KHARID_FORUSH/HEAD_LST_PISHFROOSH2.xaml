@@ -23,6 +23,13 @@
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="کارت انبار این کالا"  Click="MenuItem_Click_1">
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="Warehouse" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
@@ -67,8 +74,8 @@
         <CNC:NumericTextBox x:Name="NUMBER" IsReadOnly="True" DoesAcceptDouble="False" DigitGroupOnEnter="False" RestoreLastValidValue="False" LastValueShouldZero="False" Text="" Height="30" Margin="0,16,71,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Right" Width="91" Grid.Row="1"/>
 
         <DataGrid   
-                d:ItemsSource="{d:SampleData}"
-                x:Name="INVO_LST_SUB" 
+                d:ItemsSource="{d:SampleData}" ContextMenu="{StaticResource ContextUtilityMenu1}"
+                x:Name="INVO_LST_SUB"  MouseRightButtonUp="INVO_LST_sub_MouseRightButtonUp"
                 EnableColumnVirtualization="True"
                 EnableRowVirtualization="True"
                 VirtualizingPanel.IsVirtualizing="True"

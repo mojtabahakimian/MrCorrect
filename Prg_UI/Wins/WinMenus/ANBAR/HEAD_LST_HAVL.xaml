@@ -27,6 +27,15 @@
         <ItemsPanelTemplate x:Key="VSP">
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"  VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
+        
+        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="کارت انبار این کالا"  Click="MenuItem_Click_1">
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="Warehouse" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
+
     </Window.Resources>
     <Grid Margin="-1,0,1,0" DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
         <Grid.RowDefinitions>
@@ -160,8 +169,9 @@
                     EnableRowVirtualization="True"
                     VirtualizingPanel.IsVirtualizing="True"
                     VirtualizingPanel.VirtualizationMode="Recycling"
-                    ScrollViewer.CanContentScroll="False"
+                    ScrollViewer.CanContentScroll="False"  MouseRightButtonUp="INVO_LST_sub_MouseRightButtonUp"
                     Tag="RD"
+                    ContextMenu="{StaticResource ContextUtilityMenu1}"
                     ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"           
                     HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
 					VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
@@ -179,8 +189,8 @@
                     </Style>
                 </DataGrid.Style>
                 <DataGrid.Columns >
-                    <DataGridTextColumn Header="ردیف" x:Name="RADIF_COL"  Binding="{Binding RADIF, UpdateSourceTrigger=PropertyChanged}"  Width="auto"   MinWidth="40" Visibility="Hidden"/>
-                    <DataGridTextColumn Header="آیدی" x:Name="id_COL"  Binding="{Binding id, UpdateSourceTrigger=PropertyChanged}"  Width="auto"   MinWidth="40" Visibility="Hidden"/>
+                    <DataGridTextColumn Header="ردیف" x:Name="RADIF_COL"  Binding="{Binding RADIF, UpdateSourceTrigger=PropertyChanged}"  Width="auto"   MinWidth="40" Visibility="Collapsed"/>
+                    <DataGridTextColumn Header="آیدی" x:Name="id_COL"  Binding="{Binding id, UpdateSourceTrigger=PropertyChanged}"  Width="auto"   MinWidth="40" Visibility="Collapsed"/>
 
                     <DataGridComboBoxColumn x:Name="ANBAR_COL" MinWidth="150" Width="auto" Header=" انبار " SelectedValueBinding="{Binding ANBAR, UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAMES" SelectedValuePath="CODE">
                         <DataGridComboBoxColumn.EditingElementStyle>
@@ -217,7 +227,7 @@
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="کد کالا" x:Name="CODEKALA_COL" Binding="{Binding CODE, UpdateSourceTrigger=LostFocus}" Visibility="Hidden"  Width="auto"   MinWidth="80"/>
+                    <DataGridTextColumn Header="کد کالا" x:Name="CODEKALA_COL" Binding="{Binding CODE, UpdateSourceTrigger=LostFocus}" Visibility="Collapsed"  Width="auto"   MinWidth="80"/>
 
                     <DataGridComboBoxColumn x:Name="VAHED_COL"  Width="auto"   MinWidth="90" Header=" واحد کالا " Visibility="Visible"
                                         SelectedValueBinding="{Binding VAHED_K, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="NAMES" SelectedValuePath="VAHED">
@@ -282,10 +292,10 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="مقدار مرجوعی" x:Name="MEGH_MAR_COL" Binding="{Binding MEGH_MAR, UpdateSourceTrigger=LostFocus}" Visibility="Hidden"  Width="auto"   MinWidth="80"/>
-                    <DataGridTextColumn Header="مقدار تحویلی" x:Name="MEGH_R_COL" Binding="{Binding MEGH_R, UpdateSourceTrigger=LostFocus}" Visibility="Hidden"  Width="auto"   MinWidth="80"/>
-                    <DataGridTextColumn Header="مبلغ" x:Name="MABL_COL" Binding="{Binding MABL, UpdateSourceTrigger=LostFocus}" Visibility="Hidden"  Width="auto"   MinWidth="80"/>
-                    <DataGridTextColumn Header="مبلغ کل" x:Name="MABL_K_COL" Binding="{Binding MABL_K, UpdateSourceTrigger=LostFocus}" Visibility="Hidden"  Width="auto"   MinWidth="80"/>
+                    <DataGridTextColumn Header="مقدار مرجوعی" x:Name="MEGH_MAR_COL" Binding="{Binding MEGH_MAR, UpdateSourceTrigger=LostFocus}" Visibility="Collapsed"  Width="auto"   MinWidth="80"/>
+                    <DataGridTextColumn Header="مقدار تحویلی" x:Name="MEGH_R_COL" Binding="{Binding MEGH_R, UpdateSourceTrigger=LostFocus}" Visibility="Collapsed"  Width="auto"   MinWidth="80"/>
+                    <DataGridTextColumn Header="مبلغ" x:Name="MABL_COL" Binding="{Binding MABL, UpdateSourceTrigger=LostFocus}" Visibility="Collapsed"  Width="auto"   MinWidth="80"/>
+                    <DataGridTextColumn Header="مبلغ کل" x:Name="MABL_K_COL" Binding="{Binding MABL_K, UpdateSourceTrigger=LostFocus}" Visibility="Collapsed"  Width="auto"   MinWidth="80"/>
                 </DataGrid.Columns>
             </DataGrid>
             <CheckBox x:Name="SGN1" Tag="RD" Content="فروش" Margin="0,0,11,96" Height="23" VerticalAlignment="Bottom" Click="SGN1_Click" Grid.Column="2" HorizontalAlignment="Right" Width="89" />

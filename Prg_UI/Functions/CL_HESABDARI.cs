@@ -5339,7 +5339,11 @@ namespace Prg_Proccessy.FUNCTIONS
                 //if (rst.Fields(3) == true)
                 if (rst.GetType().GetProperties()[3].GetValue(rst, null) is true && TheWindo.GetType().Name != "HEAD_LST_RASID")
                 {
-                    (TheWindo.FindName("SGN3") as CheckBox).IsEnabled = true;
+                    var sgn3 = TheWindo.FindName("SGN3") as CheckBox;
+                    if (sgn3 != null)
+                    {
+                        sgn3.IsEnabled = true;
+                    }
                     //FRM["SGN3"].Enabled = true;
                     //FRM["SGN3"].Locked = false;
                 }

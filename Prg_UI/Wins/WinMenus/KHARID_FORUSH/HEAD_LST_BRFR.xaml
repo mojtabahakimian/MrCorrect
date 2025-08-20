@@ -20,6 +20,15 @@
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+
+        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="کارت انبار این کالا"  Click="MenuItem_Click_1">
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="Warehouse" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
+
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
@@ -99,8 +108,8 @@
                     <CheckBox x:Name="OKF" IsChecked="False"  Content="تایید فاکتور" HorizontalAlignment="Left" Margin="547,17,0,0" VerticalAlignment="Top" Width="80" FontSize="10" IsHitTestVisible="False" Focusable="False"/>
 
                     <DataGrid   
-                        x:Name="INVO_LST_SUB"
-                        EnableColumnVirtualization="True"
+                        x:Name="INVO_LST_SUB" ContextMenu="{StaticResource ContextUtilityMenu1}"
+                        EnableColumnVirtualization="True"  MouseRightButtonUp="INVO_LST_sub_MouseRightButtonUp"
                         EnableRowVirtualization="True"
                         VirtualizingPanel.IsVirtualizing="True"
                         VirtualizingPanel.VirtualizationMode="Recycling"

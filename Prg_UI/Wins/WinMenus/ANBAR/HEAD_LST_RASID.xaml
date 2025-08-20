@@ -20,6 +20,16 @@
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+
+        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="کارت انبار این کالا"  Click="MenuItem_Click_1">
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="Warehouse" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
+
+
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
@@ -136,12 +146,13 @@
                 VirtualizingPanel.VirtualizationMode="Recycling"
                 ScrollViewer.CanContentScroll="False"
                 SelectedIndex="0"
+                ContextMenu="{StaticResource ContextUtilityMenu1}"
                 ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
                 CellStyle="{StaticResource CellFocusyBorder}"
                 HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                 VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
             
-                Tag="RD"
+                Tag="RD" MouseRightButtonUp="INVO_LST_sub_MouseRightButtonUp"
                 ItemsSource="{Binding INVO_DATA_RASID_KHARID}"
                 CellEditEnding="INVO_LST_RASID_SUB_CellEditEnding" PreparingCellForEdit="INVO_LST_RASID_SUB_PreparingCellForEdit" SelectionChanged="INVO_LST_RASID_SUB_SelectionChanged" PreviewMouseLeftButtonDown="INVO_LST_RASID_SUB_PreviewMouseLeftButtonDown" GotFocus="INVO_LST_RASID_SUB_GotFocus" RowEditEnding="INVO_LST_RASID_SUB_RowEditEnding" BeginningEdit="INVO_LST_RASID_SUB_BeginningEdit" MouseDoubleClick="INVO_LST_RASID_SUB_MouseDoubleClick" PreviewKeyDown="INVO_LST_RASID_SUB_PreviewKeyDown"
             

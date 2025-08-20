@@ -17,7 +17,7 @@
         FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
-        Title="HEAD_LST_ENTEGHAL_WIN" Height="755" MinHeight="657" Width="1225" MinWidth="1214" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" ContentRendered="Window_ContentRendered">
+        Title="HEAD_LST_ENTEGHAL_WIN" Height="755" MinHeight="657" Width="1225" MinWidth="1214" Closing="Window_Closing" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" ContentRendered="Window_ContentRendered">
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"  VirtualizingPanel.VirtualizationMode="Recycling"/>

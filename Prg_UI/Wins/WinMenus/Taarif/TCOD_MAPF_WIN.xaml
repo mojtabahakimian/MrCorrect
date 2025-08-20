@@ -63,7 +63,7 @@
             CellStyle="{StaticResource CellFocusyBorder}"
             HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
             VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
-            ItemsSource="{Binding TCOD_MAP_DATA}"
+            ItemsSource="{Binding TCOD_MAP_DATA}" d:ItemsSource="{d:SampleData}"
             KeyboardNavigation.TabNavigation="Contained"
             Margin="7,90,8,10" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" BeginningEdit="TCOD_MAP_SUB_BeginningEdit" CellEditEnding="TCOD_MAP_SUB_CellEditEnding" RowEditEnding="TCOD_MAP_SUB_RowEditEnding" PreviewKeyDown="TCOD_MAP_SUB_PreviewKeyDown">
 
@@ -82,7 +82,7 @@
             </DataGrid.Style>
 
             <DataGrid.Columns>
-                <DataGridComboBoxColumn x:Name="MPP_COLUMN"  Width="auto" Header="کد گروه" SelectedValueBinding="{Binding MPP,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="MPNAME" SelectedValuePath="MPP">
+                <DataGridComboBoxColumn x:Name="MPP_COLUMN"  Width="150" Header="کد گروه" SelectedValueBinding="{Binding MPP,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="MPNAME" SelectedValuePath="MPP">
                     <DataGridComboBoxColumn.EditingElementStyle>
                         <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
                             <Setter Property="IsEditable" Value="True"/>
@@ -96,7 +96,7 @@
                         </Style>
                     </DataGridComboBoxColumn.ElementStyle>
                 </DataGridComboBoxColumn>
-                <DataGridTextColumn x:Name="MPCODE_COLUMN" Binding="{Binding MPCODE,UpdateSourceTrigger=LostFocus}" Header="کد" Width="auto"/>
+                <DataGridTextColumn x:Name="MPCODE_COLUMN" Binding="{Binding MPCODE,UpdateSourceTrigger=LostFocus}" Header="کد" Width="100"/>
                 <DataGridTextColumn x:Name="MPNAME_COLUMN" Binding="{Binding MPNAME,UpdateSourceTrigger=LostFocus}" Header="نام" Width="*">
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
