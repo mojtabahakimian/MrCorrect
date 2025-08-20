@@ -75,7 +75,7 @@
                   SelectionChanged="CRM_MASTER_SUB_SelectionChanged"
                   CellEditEnding="CRM_MASTER_SUB_CellEditEnding"
                   InitializingNewItem="CRM_MASTER_SUB_InitializingNewItem"
-                  RowEditEnding="CRM_MASTER_SUB_RowEditEnding">
+                  RowEditEnding="CRM_MASTER_SUB_RowEditEnding" PreviewKeyDown="CRM_MASTER_SUB_PreviewKeyDown">
             <DataGrid.Style>
                 <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                     <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
@@ -97,7 +97,7 @@
                                         DisplayMemberPath="NAME"
                                         SelectedValuePath="CODE"
                                         ItemsSource="{Binding DataContext.StatusItems, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                        SelectedValueBinding="{Binding STATUS, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                        SelectedValueBinding="{Binding STATUS, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
 
                 <DataGridTextColumn Binding="{Binding USER_NAME}" Header="نام کارشناس" Width="150" IsReadOnly="True"/>
                 <DataGridTextColumn Binding="{Binding PERNUM}" Header="تعداد پرسنل" Width="100"/>
@@ -109,7 +109,7 @@
                                         DisplayMemberPath="STATUS_FACT"
                                         SelectedValuePath="STATUS_FACT"
                                         ItemsSource="{Binding DataContext.StatusFactItems, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                        SelectedValueBinding="{Binding STATUS_FACT, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                        SelectedValueBinding="{Binding STATUS_FACT, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
 
                 <DataGridTextColumn Binding="{Binding PRODUCTS}" Header="محصولات" Width="250"/>
                 <DataGridTextColumn Binding="{Binding ACCOUNTANT}" Header="حسابدار" Width="100"/>
@@ -121,7 +121,7 @@
                 <DataGridTextColumn Binding="{Binding COMMENT}" Header="توضیحات" Width="500"/>
                 <DataGridTextColumn Binding="{Binding CITY}" Header="شهر" Width="70"/>
                 <DataGridTextColumn Binding="{Binding DATE_SABT}" Header="تاریخ ثبت" Width="200"/>
-                <DataGridTextColumn Binding="{Binding PIC}" Header="ضمیمه" Width="100"/>
+                <DataGridTextColumn Binding="{Binding PIC}" Header="ضمیمه" Width="100" IsReadOnly="True"/>
                 <DataGridTextColumn Binding="{Binding ID}" Header="شماره" Width="100"/>
 
                 <!-- ستون‌های مخفی مثل SfDataGrid (IsHidden=True -> Visibility=Collapsed) -->
@@ -140,7 +140,7 @@
                   EnableRowVirtualization="True"
                   VirtualizingPanel.IsVirtualizing="True"
                   VirtualizingPanel.VirtualizationMode="Recycling"
-                  ItemsSource="{Binding EVENT_DATA}" ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" CellStyle="{StaticResource CellFocusyBorder}" HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}" VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}" KeyboardNavigation.TabNavigation="Contained" AutoGenerateColumns="False" FlowDirection="RightToLeft" SelectionUnit="FullRow" CanUserDeleteRows="False" Margin="4,334,4,47" BorderThickness="1" CanUserAddRows="True" IsEnabled="False" RowEditEnding="DETAIL_CRM_SUB_RowEditEnding">
+                  ItemsSource="{Binding EVENT_DATA}" ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" CellStyle="{StaticResource CellFocusyBorder}" HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}" VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}" KeyboardNavigation.TabNavigation="Contained" AutoGenerateColumns="False" FlowDirection="RightToLeft" SelectionUnit="FullRow" CanUserDeleteRows="False" Margin="4,334,4,47" BorderThickness="1" CanUserAddRows="True" IsEnabled="False" RowEditEnding="DETAIL_CRM_SUB_RowEditEnding" InitializingNewItem="DETAIL_CRM_SUB_InitializingNewItem" PreviewKeyDown="DETAIL_CRM_SUB_PreviewKeyDown">
             <DataGrid.Style>
                 <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                     <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
@@ -148,24 +148,31 @@
                 </Style>
             </DataGrid.Style>
             <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding IDDE}" Header="شناسه" Width="Auto" />
-                <DataGridTextColumn Binding="{Binding COMPANY_NAME}" Header="نام شرکت" Width="200" Visibility="Hidden" />
                 <DataGridTextColumn Binding="{Binding INFO_DATE, StringFormat=####/##/##}" Header="تاریخ" Width="100" />
-                <DataGridTextColumn Binding="{Binding INFO_TIME}" Header="زمان" Width="Auto" />
-                <DataGridTextColumn Binding="{Binding SALER}" Header="فروشنده" Width="200" />
-                <DataGridTextColumn Binding="{Binding BUYER}" Header="خریدار" Width="100" />
+                <DataGridTextColumn Binding="{Binding INFO_TIME, StringFormat={}{0:00\:00}}" Header="ساعت" Width="Auto" />
+
+                <DataGridComboBoxColumn x:Name="SALER_COLUMN" SelectedValueBinding="{Binding SALER, UpdateSourceTrigger=LostFocus}" DisplayMemberPath="SALER" SelectedValuePath="SALER" Header="تماس گیرنده" Width="200" />
+                <DataGridComboBoxColumn x:Name="BUYER_COLUMN" SelectedValueBinding="{Binding BUYER, UpdateSourceTrigger=LostFocus}" DisplayMemberPath="BUYER" SelectedValuePath="BUYER" Header="طرف مذاکره" Width="200" />
                 <DataGridTextColumn Binding="{Binding COMMENT}" Header="توضیحات" Width="300" />
+                
                 <DataGridTextColumn Binding="{Binding NEXT_DATE, StringFormat=####/##/##}" Header="تماس بعدی" Width="Auto" />
-                <DataGridTextColumn Binding="{Binding NEXT_TIME}" Header="زمان بعدی" Width="Auto" />
-                <DataGridTextColumn Binding="{Binding STATUS}" Header="وضعیت" Width="Auto" />
-                <DataGridTextColumn Binding="{Binding PIC}" Header="تصویر" Width="Auto" />
-                <DataGridTextColumn Binding="{Binding IDC}" Header="ID مشتری" Width="Auto" />
+                <DataGridTextColumn Binding="{Binding NEXT_TIME}" Header="ساعت تماس" Width="Auto" />
+                <DataGridTextColumn Binding="{Binding MITING}" Header="جلسه" Width="Auto" />
+
+                <DataGridComboBoxColumn x:Name="STATUS2_COLUMN" SelectedValueBinding="{Binding STATUS, UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAME" SelectedValuePath="CODE" Header="وضعیت" Width="Auto" />
+
+                <DataGridTextColumn Binding="{Binding PIC}" Header="ضمیمه" IsReadOnly="True" Width="Auto" />
+
+                
                 <DataGridTextColumn Binding="{Binding PAYAM}" Header="پیام" Width="Auto" />
-                <DataGridTextColumn Binding="{Binding MITING}" Header="میتینگ" Width="Auto" />
-                <DataGridTextColumn Binding="{Binding USERID}" Header="کاربر" Width="Auto" />
-                <DataGridTextColumn Binding="{Binding CDATETI}" Header="تاریخ ثبت" Width="Auto" />
-                <DataGridTextColumn Binding="{Binding CRT}" Header="CRT" Width="Auto" />
-                <DataGridTextColumn Binding="{Binding UID}" Header="UID" Width="Auto" />
+                <DataGridTextColumn Binding="{Binding USERID}" Header="کد کاربر" Width="Auto" />
+                <DataGridTextColumn x:Name="CDATETI_COLUMN" Binding="{Binding CDATETI}" Header="تاریخ و ساعت ایجاد" Width="Auto" />
+                
+                <DataGridTextColumn Binding="{Binding IDDE}" Header="شناسه" Width="Auto" Visibility="Collapsed" />
+                <DataGridTextColumn Binding="{Binding COMPANY_NAME}" Header="نام شرکت" Width="200" Visibility="Collapsed" />
+                <DataGridTextColumn Binding="{Binding IDC}" Header="ID مشتری" Width="Auto" Visibility="Collapsed"/>
+                <DataGridTextColumn Binding="{Binding CRT}" Header="CRT" Width="Auto" Visibility="Collapsed"/>
+                <DataGridTextColumn Binding="{Binding UID}" Header="UID" Width="Auto" Visibility="Collapsed"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
