@@ -135,6 +135,14 @@ namespace Prg_UI.Wins.WinMenus.CRM
         {
             public string? STATUS_FACT { get; set; }
         }
+        public class Saler_List
+        {
+            public string? SALER { get; set; }
+        }
+        public class Buyer_List
+        {
+            public string? BUYER { get; set; }
+        }
 
         public bool NowIsReady { get; private set; }
         private void Window_ContentRendered(object sender, EventArgs e)
@@ -183,6 +191,11 @@ namespace Prg_UI.Wins.WinMenus.CRM
             STATUS_COLUMN.ItemsSource = items.ToList();
 
             STATUS_FAC_COLUMN.ItemsSource = dbms.DoGetDataSQL<Fac_List>("SELECT COPMANES.STATUS_FACT FROM COPMANES GROUP BY COPMANES.STATUS_FACT");
+
+            SALER_COLUMN.ItemsSource = dbms.DoGetDataSQL<Saler_List>("SELECT SALER FROM CRMEVENTS GROUP BY SALER ORDER BY SALER").ToList();
+            BUYER_COLUMN.ItemsSource = dbms.DoGetDataSQL<Buyer_List>("SELECT BUYER FROM CRMEVENTS GROUP BY BUYER ORDER BY BUYER").ToList();
+
+            STATUS2_COLUMN.ItemsSource = items.ToList();
         }
 
         private void ReGetData()
@@ -197,6 +210,7 @@ namespace Prg_UI.Wins.WinMenus.CRM
         private void LoadDetail()
         {
             EVENT_DATA?.Clear();
+
             var current = CRM_MASTER_SUB.SelectedItem as COPMANES;
             if (current != null && current.ID != null)
             {
@@ -431,6 +445,83 @@ namespace Prg_UI.Wins.WinMenus.CRM
             if (cnt2 > 0)
             {
                 MessageBox.Show("مشابه اين شماره قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد");
+            }
+        }
+
+        private void DETAIL_CRM_SUB_InitializingNewItem(object sender, InitializingNewItemEventArgs e)
+        {
+            if (e.NewItem is CRMEVENTS row)
+            {
+                row.INFO_DATE = Convert.ToInt32(Tarikh.FullCurrentDate);
+
+                row.SALER = Baseknow.UUSER.ToString();
+
+                var time24 = DateTime.Now.ToString("HHmm", System.Globalization.CultureInfo.InvariantCulture);
+                row.INFO_TIME = Convert.ToInt32(time24);
+
+                row.CDATETI = DateTime.Now;
+            }
+        }
+
+        private void CRM_MASTER_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Delete || Keyboard.Modifiers != ModifierKeys.None) return;
+            e.Handled = true;
+            //if (!AllowDeletions) return;
+
+            var rows = CRM_MASTER_SUB.SelectedItems.Cast<COPMANES>().ToList();
+            if (rows.Count == 0) return;
+
+            bool blocked = false;
+            foreach (var row in rows)
+            {
+                if (row == null) continue;
+                if (row.ID != null)
+                {
+                    var dep = dbms.DoGetDataSQL<int>("SELECT COUNT(1) FROM CRMEVENTS WHERE idc=@id", new { id = row.ID }).FirstOrDefault();
+                    if (dep > 0)
+                    {
+                        blocked = true;
+                        continue;
+                    }
+                    dbms.DoExecuteSQL("DELETE FROM COPMANES WHERE ID=@id", new { id = row.ID });
+                }
+                CUSTOMER_DATA.Remove(row);
+            }
+            EVENT_DATA.Clear();
+            if (blocked)
+            {
+                new Msgwin(false, "شما نمي توانيداطلاعاتي كه در جاي ديگر استفاده شده است راحذف كنيد. براي حذف آن ابتدا بايد اطلاعات  وابسته را حذف كنيد").ShowDialog();
+            }
+        }
+
+        private void DETAIL_CRM_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Delete || Keyboard.Modifiers != ModifierKeys.None) return;
+            e.Handled = true;
+            //if (!AllowDeletions) return;
+
+            var rows = DETAIL_CRM_SUB.SelectedItems.Cast<CRMEVENTS>().ToList();
+            if (rows.Count == 0) return;
+
+            var master = CRM_MASTER_SUB.SelectedItem as COPMANES;
+            int removed = 0;
+            foreach (var row in rows)
+            {
+                if (row == null) continue;
+                if (row.IDDE != null)
+                {
+                    dbms.DoExecuteSQL("DELETE FROM CRMEVENTS WHERE idde=@id", new { id = row.IDDE });
+                    removed++;
+                }
+                EVENT_DATA.Remove(row);
+            }
+
+            if (master != null && master.IDCN != null)
+            {
+                master.IDCN -= removed;
+                if (master.IDCN < 0) master.IDCN = 0;
+                CRM_MASTER_SUB.Items.Refresh();
             }
         }
     }
