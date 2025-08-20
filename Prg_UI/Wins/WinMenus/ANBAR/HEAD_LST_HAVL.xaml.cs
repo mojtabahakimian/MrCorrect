@@ -429,7 +429,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             byte FTAG = 2;
             string WhereCondition = FTAG > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {FTAG}) " : "  ";
             WhereCondition = CL_LMethods.GetRestrictedSqlQuery(FTAG, WhereCondition);
-            
+
             if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
             {
                 WhereCondition = $" WHERE NUMBER = {NUMBER_TO_OPEN} AND TAG = {FTAG} ";
@@ -1127,9 +1127,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             if (PERSONEL.SelectedIndex > -1 && !(PERSONEL.SelectedValue is null))
             {
-                Meidnum = CL_HESABDARI.PERSONELUpdate(2, Convert.ToDouble(NUMBER.Text), Convert.ToInt32(PERSONEL.SelectedValue), "'حواله شماره: " + this.NUMBER.Text + " مورخ " + String.Format("####/##/##", DATE_N.Text.ToRawTarikh()) + "  به نام: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToString()) + "','" + this.CUST_NO.SelectedValue + "'");
-                Msgwin msgwin = new Msgwin(false, "ارجاع داده شد.");
-                msgwin.ShowDialog();
+                Meidnum = CL_HESABDARI.PERSONELUpdate(2, Convert.ToDouble(NUMBER.Text), Convert.ToInt32(PERSONEL.SelectedValue), "'حواله شماره: " + this.NUMBER.Text + " مورخ " + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToString()) + "','" + this.CUST_NO.SelectedValue + "'");
+                universControl.PopNotifyShow($".ارجاع داده شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
             }
             else
             {

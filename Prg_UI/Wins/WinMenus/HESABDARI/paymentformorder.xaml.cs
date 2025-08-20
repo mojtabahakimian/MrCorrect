@@ -176,7 +176,7 @@ namespace Wins.WinMenus.HESABDARI
                 SGN1.IsEnabled = false;
                 SGN2.IsEnabled = false;
                 SGN3.IsEnabled = false;
-                PERSONEL.IsEnabled = false;
+                //PERSONEL.IsEnabled = false;
                 BTN_SAVE.IsEnabled = false;
             }
             else
@@ -186,7 +186,7 @@ namespace Wins.WinMenus.HESABDARI
                     SGN1.IsEnabled = false;
                     SGN2.IsEnabled = false;
                     SGN3.IsEnabled = false;
-                    PERSONEL.IsEnabled = false;
+                    //PERSONEL.IsEnabled = false;
                 }
             }
         }
@@ -433,7 +433,7 @@ namespace Wins.WinMenus.HESABDARI
             SGN1.IsEnabled = true;
             SGN2.IsEnabled = true;
             SGN3.IsEnabled = true;
-            PERSONEL.IsEnabled = true;
+            //PERSONEL.IsEnabled = true;
 
             NewRecord = false;
             ChangeIsHappend = false;
@@ -828,7 +828,9 @@ namespace Wins.WinMenus.HESABDARI
 
             if (NewRecord)
             {
-                BTN_SAVE_Click(null, null);
+                e.Handled = true;
+                universControl.PopNotifyShowUp($"ابتدا روی دکمه ذخیره کلیک کنید سپس ارجاع بدید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
+                return;
             }
 
             string SelectedTextCMB = ((COMBOPERSONEL)PERSONEL.SelectedItem).SAL_NAME.ToStringNullSafe();

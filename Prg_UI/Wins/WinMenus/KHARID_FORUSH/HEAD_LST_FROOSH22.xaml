@@ -605,7 +605,7 @@
 
                     <!--<CNC:NumericTextBox DoesAcceptDouble="False" x:Name="NUMBER"  Text="0" Height="27" Margin="265,9,0,0"  VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Left" Width="110" NumericLostFocus="NUMBER_NumericLostFocus" IsReadOnly="True" PreviewMouseDoubleClick="NUMBER_PreviewMouseDoubleClick" />-->
 
-                    <ComboBox x:Name="NUMBER"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Text="0" DisplayMemberPath="NUMBER" SelectedValuePath="NUMBER" IsTextSearchEnabled="True" IsHitTestVisible="False" Margin="265,9,0,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="110" PreviewLostKeyboardFocus="NUMBER_PreviewLostKeyboardFocus">
+                    <ComboBox x:Name="NUMBER" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Text="0" DisplayMemberPath="NUMBER" SelectedValuePath="NUMBER" IsTextSearchEnabled="True" IsHitTestVisible="False" Margin="265,9,0,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="110" PreviewLostKeyboardFocus="NUMBER_PreviewLostKeyboardFocus">
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
