@@ -93,6 +93,7 @@ namespace Prg_UI.Wins.WinMenus.CRM
         // متغیرها برای نگهداری وضعیت فیلترها
         private string _companyNameFilter = string.Empty;
         private string _phoneFilter = string.Empty;
+        private string _dateFilter = string.Empty;
         private int? _selectedStatus = null; // null به معنی "همه" است
 
         public bool ChangeIsHappend { get; private set; } = false;
@@ -551,19 +552,24 @@ namespace Prg_UI.Wins.WinMenus.CRM
                 // شرط اول: فیلتر وضعیت
                 bool statusMatch = _selectedStatus == null || customer.STATUS == _selectedStatus;
 
-                // شرط دوم: فیلتر نام شرکت (جستجوی شامل)
+                // شرط دوم: فیلتر نام شرکت
                 bool companyNameMatch = string.IsNullOrWhiteSpace(_companyNameFilter) ||
                                         (customer.COMPANY_NAME?.Contains(_companyNameFilter, StringComparison.OrdinalIgnoreCase) ?? false);
 
-                // شرط سوم: فیلتر تلفن کارخانه (جستجوی شامل)
+                // شرط سوم: فیلتر تلفن کارخانه
                 bool phoneMatch = string.IsNullOrWhiteSpace(_phoneFilter) ||
                                   (customer.FACT_TEL?.Contains(_phoneFilter) ?? false);
 
+                // جدید: شرط چهارم: فیلتر تاریخ
+                // ابتدا کاراکترهای اضافه ماسک را حذف می‌کنیم
+                string dateFilterNumeric = _dateFilter.Replace("/", "").Replace("_", "").Trim();
+                bool dateMatch = string.IsNullOrWhiteSpace(dateFilterNumeric) ||
+                                 (customer.DT.HasValue && customer.DT.Value.ToString().StartsWith(dateFilterNumeric));
+
                 // نتیجه نهایی: رکورد باید تمام شرایط را داشته باشد
-                return statusMatch && companyNameMatch && phoneMatch;
+                return statusMatch && companyNameMatch && phoneMatch && dateMatch;
             };
         }
-
         // رویداد برای دکمه رادیویی "همه"
         private void AllStatus_Checked(object sender, RoutedEventArgs e)
         {
@@ -583,21 +589,25 @@ namespace Prg_UI.Wins.WinMenus.CRM
 
         private void FilterTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (sender is TextBox textBox)
-            {
-                // تشخیص اینکه کدام تکست‌باکس تغییر کرده است
-                if (textBox.Name == "CompanyNameFilterTextBox")
-                {
-                    _companyNameFilter = textBox.Text;
-                }
-                else if (textBox.Name == "PhoneFilterTextBox")
-                {
-                    _phoneFilter = textBox.Text;
-                }
+            // از as استفاده می‌کنیم تا اگر sender یکی از این نوع‌ها نبود، خطا ندهد
+            var control = sender as Control;
+            if (control == null) return;
 
-                // اعمال مجدد فیلترها
-                ApplyCombinedFilters();
+            if (control.Name == "CompanyNameFilterTextBox")
+            {
+                _companyNameFilter = (control as TextBox).Text;
             }
+            else if (control.Name == "PhoneFilterTextBox")
+            {
+                _phoneFilter = (control as TextBox).Text;
+            }
+            else if (control.Name == "DateFilterMaskedTextBox")
+            {
+                // برای MaskedTextBox باید به نوع خودش کست شود
+                _dateFilter = (control as Xceed.Wpf.Toolkit.MaskedTextBox).Text;
+            }
+
+            ApplyCombinedFilters();
         }
     }
 }

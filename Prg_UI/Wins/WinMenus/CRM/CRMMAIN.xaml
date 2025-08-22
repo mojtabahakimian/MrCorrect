@@ -66,34 +66,37 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
                     <TextBox x:Name="CompanyNameFilterTextBox" 
-             Grid.Column="0"
-             Style="{StaticResource FuzzyOut}"
-             Padding="3"
-             Height="30"
-             VerticalAlignment="Center"
-             MaxLength="50"
-             Margin="5,2"
-             TextChanged="FilterTextBox_TextChanged"/>
+                        Grid.Column="0"
+                        Style="{StaticResource FuzzyOut}" Padding="3" Height="30" VerticalAlignment="Center" MaxLength="50" Margin="5,2"
+                        TextChanged="FilterTextBox_TextChanged"/>
                     <TextBlock Grid.Column="1" Text="نام شرکت:" VerticalAlignment="Center" Margin="5,0"/>
 
                     <TextBox x:Name="PhoneFilterTextBox"
-             Grid.Column="2"
-             Style="{StaticResource FuzzyOut}"
-             Padding="3"
-             Height="30"
-             VerticalAlignment="Center"
-             MaxLength="50"
-             Margin="15,2,5,2"
-             TextChanged="FilterTextBox_TextChanged"/>
+                        Grid.Column="2"
+                        Style="{StaticResource FuzzyOut}" Padding="3" Height="30" VerticalAlignment="Center" MaxLength="50" Margin="15,2,5,2"
+                        TextChanged="FilterTextBox_TextChanged"/>
                     <TextBlock Grid.Column="3" Text="تلفن کارخانه:" VerticalAlignment="Center" Margin="5,0"/>
 
+                    <xctk:MaskedTextBox x:Name="DateFilterMaskedTextBox"
+                        Grid.Column="4"
+                        Style="{StaticResource FuzzyOut}" 
+                        Padding="3"
+                        Mask="0000/00/00"
+                        Height="30"
+                        VerticalAlignment="Center"
+                        Width="90"
+                        Margin="15,2,5,2"
+                        TextChanged="FilterTextBox_TextChanged"/>
+                    <TextBlock Grid.Column="5" Text="قرار ها در این تاریخ:" VerticalAlignment="Center" Margin="5,0"/>
 
                 </Grid>
 
-                <Separator Margin="0,5"/>
+                <Separator Visibility="Hidden" Margin="0,5"/>
 
                 <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
                     <TextBlock Text="فیلتر بر اساس وضعیت:" VerticalAlignment="Center" Margin="5,0"/>
