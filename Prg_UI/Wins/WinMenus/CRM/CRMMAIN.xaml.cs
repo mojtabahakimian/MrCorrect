@@ -87,7 +87,13 @@ namespace Prg_UI.Wins.WinMenus.CRM
         public ObservableCollection<CRMEVENTS> EVENT_DATA { get; set; } = new ObservableCollection<CRMEVENTS>();
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+        //متغیر برای نگهداری فیلتر بر اساس وضعیت
         public List<Status_List> StatusItems { get; set; }
+
+        // متغیرها برای نگهداری وضعیت فیلترها
+        private string _companyNameFilter = string.Empty;
+        private string _phoneFilter = string.Empty;
+        private int? _selectedStatus = null; // null به معنی "همه" است
 
         public bool ChangeIsHappend { get; private set; } = false;
 
@@ -531,47 +537,66 @@ namespace Prg_UI.Wins.WinMenus.CRM
             }
         }
 
-        private void ApplyFilter(int? statusCode)
+        private void ApplyCombinedFilters()
         {
-            // اگر دیتا آماده نیست، کاری نکن
             if (!NowIsReady) return;
 
-            // گرفتن ویو پیش‌فرض از کالکشن دیتا
             var view = CollectionViewSource.GetDefaultView(CUSTOMER_DATA);
+            if (view == null) return;
 
-            if (statusCode == null)
+            view.Filter = item =>
             {
-                // اگر کد وضعیت نال بود (گزینه "همه")، فیلتر را بردار
-                view.Filter = null;
-            }
-            else
-            {
-                // اعمال فیلتر بر اساس کد وضعیت
-                view.Filter = item =>
-                {
-                    if (item is COPMANES customer)
-                    {
-                        return customer.STATUS == statusCode;
-                    }
-                    return false;
-                };
-            }
+                if (item is not COPMANES customer) return false;
+
+                // شرط اول: فیلتر وضعیت
+                bool statusMatch = _selectedStatus == null || customer.STATUS == _selectedStatus;
+
+                // شرط دوم: فیلتر نام شرکت (جستجوی شامل)
+                bool companyNameMatch = string.IsNullOrWhiteSpace(_companyNameFilter) ||
+                                        (customer.COMPANY_NAME?.Contains(_companyNameFilter, StringComparison.OrdinalIgnoreCase) ?? false);
+
+                // شرط سوم: فیلتر تلفن کارخانه (جستجوی شامل)
+                bool phoneMatch = string.IsNullOrWhiteSpace(_phoneFilter) ||
+                                  (customer.FACT_TEL?.Contains(_phoneFilter) ?? false);
+
+                // نتیجه نهایی: رکورد باید تمام شرایط را داشته باشد
+                return statusMatch && companyNameMatch && phoneMatch;
+            };
         }
 
         // رویداد برای دکمه رادیویی "همه"
         private void AllStatus_Checked(object sender, RoutedEventArgs e)
         {
-            // فیلتر را با ارسال مقدار نال حذف می‌کنیم
-            ApplyFilter(null);
+            _selectedStatus = null; // null به معنی "همه"
+            ApplyCombinedFilters();
         }
 
         // رویداد برای سایر وضعیت‌ها
         private void Status_Checked(object sender, RoutedEventArgs e)
         {
-            // کد وضعیت را از ویژگی Tag دکمه رادیویی می‌خوانیم
             if (sender is RadioButton radioButton && radioButton.Tag is int statusCode)
             {
-                ApplyFilter(statusCode);
+                _selectedStatus = statusCode;
+                ApplyCombinedFilters();
+            }
+        }
+
+        private void FilterTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                // تشخیص اینکه کدام تکست‌باکس تغییر کرده است
+                if (textBox.Name == "CompanyNameFilterTextBox")
+                {
+                    _companyNameFilter = textBox.Text;
+                }
+                else if (textBox.Name == "PhoneFilterTextBox")
+                {
+                    _phoneFilter = textBox.Text;
+                }
+
+                // اعمال مجدد فیلترها
+                ApplyCombinedFilters();
             }
         }
     }

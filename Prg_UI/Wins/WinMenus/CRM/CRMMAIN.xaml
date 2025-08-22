@@ -39,9 +39,9 @@
 
         <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Width="1" />
         <Border Grid.RowSpan="3" Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}" CornerRadius="10" Padding="8" BorderThickness="1" Margin="0,0,0,0">
-            
-        
-            
+
+
+
             <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
                 <Grid>
                     <Label Content="مدیریت ارتباط با مشتری" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
@@ -59,34 +59,71 @@
         </Border>
 
         <Border Grid.Row="0" Margin="4,45,4,0" Padding="5" CornerRadius="5" BorderThickness="1" BorderBrush="{StaticResource GENERAL_Grlicom}">
-            <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
-                <TextBlock Text="فیلتر بر اساس وضعیت:" VerticalAlignment="Center" Margin="5,0"/>
+            <StackPanel Orientation="Vertical">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                <RadioButton x:Name="AllStatusRadioButton" 
-                     GroupName="StatusFilter" 
-                     Content="همه" 
-                     IsChecked="True" 
-                     VerticalAlignment="Center"
-                     Margin="10,0"
-                     Checked="AllStatus_Checked"/>
+                    <TextBox x:Name="CompanyNameFilterTextBox" 
+             Grid.Column="0"
+             Style="{StaticResource FuzzyOut}"
+             Padding="3"
+             Height="30"
+             VerticalAlignment="Center"
+             MaxLength="50"
+             Margin="5,2"
+             TextChanged="FilterTextBox_TextChanged"/>
+                    <TextBlock Grid.Column="1" Text="نام شرکت:" VerticalAlignment="Center" Margin="5,0"/>
 
-                <ItemsControl x:Name="StatusFilterItemsControl" ItemsSource="{Binding StatusItems}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <RadioButton GroupName="StatusFilter" 
-                                 Content="{Binding NAME}" 
-                                 Tag="{Binding CODE}"
-                                 VerticalAlignment="Center"
-                                 Margin="10,0"
-                                 Checked="Status_Checked"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                    <TextBox x:Name="PhoneFilterTextBox"
+             Grid.Column="2"
+             Style="{StaticResource FuzzyOut}"
+             Padding="3"
+             Height="30"
+             VerticalAlignment="Center"
+             MaxLength="50"
+             Margin="15,2,5,2"
+             TextChanged="FilterTextBox_TextChanged"/>
+                    <TextBlock Grid.Column="3" Text="تلفن کارخانه:" VerticalAlignment="Center" Margin="5,0"/>
+
+
+                </Grid>
+
+                <Separator Margin="0,5"/>
+
+                <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
+                    <TextBlock Text="فیلتر بر اساس وضعیت:" VerticalAlignment="Center" Margin="5,0"/>
+
+                    <RadioButton x:Name="AllStatusRadioButton" 
+                         GroupName="StatusFilter" 
+                         Content="همه" 
+                         IsChecked="True" 
+                         VerticalAlignment="Center"
+                         Margin="10,0"
+                         Checked="AllStatus_Checked"/>
+
+                    <ItemsControl x:Name="StatusFilterItemsControl" ItemsSource="{Binding StatusItems}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <RadioButton GroupName="StatusFilter" 
+                                     Content="{Binding NAME}" 
+                                     Tag="{Binding CODE}"
+                                     VerticalAlignment="Center"
+                                     Margin="10,0"
+                                     Checked="Status_Checked"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
             </StackPanel>
         </Border>
 
@@ -208,7 +245,7 @@
                 <DataGridComboBoxColumn x:Name="SALER_COLUMN" SelectedValueBinding="{Binding SALER, UpdateSourceTrigger=LostFocus}" DisplayMemberPath="SALER" SelectedValuePath="SALER" Header="تماس گیرنده" Width="200" />
                 <DataGridComboBoxColumn x:Name="BUYER_COLUMN" SelectedValueBinding="{Binding BUYER, UpdateSourceTrigger=LostFocus}" DisplayMemberPath="BUYER" SelectedValuePath="BUYER" Header="طرف مذاکره" Width="200" />
                 <DataGridTextColumn Binding="{Binding COMMENT}" Header="توضیحات" Width="300" />
-                
+
                 <DataGridTextColumn Binding="{Binding NEXT_DATE, StringFormat=####/##/##}" Header="تماس بعدی" Width="Auto" />
                 <DataGridTextColumn Binding="{Binding NEXT_TIME}" Header="ساعت تماس" Width="Auto" />
                 <DataGridTextColumn Binding="{Binding MITING}" Header="جلسه" Width="Auto" />
@@ -217,11 +254,11 @@
 
                 <DataGridTextColumn Binding="{Binding PIC}" Header="ضمیمه" IsReadOnly="True" Width="Auto" />
 
-                
+
                 <DataGridTextColumn Binding="{Binding PAYAM}" Header="پیام" Width="Auto" />
                 <DataGridTextColumn Binding="{Binding USERID}" Header="کد کاربر" Width="Auto" />
                 <DataGridTextColumn x:Name="CDATETI_COLUMN" Binding="{Binding CDATETI}" Header="تاریخ و ساعت ایجاد" Width="Auto" />
-                
+
                 <DataGridTextColumn Binding="{Binding IDDE}" Header="شناسه" Width="Auto" Visibility="Collapsed" />
                 <DataGridTextColumn Binding="{Binding COMPANY_NAME}" Header="نام شرکت" Width="200" Visibility="Collapsed" />
                 <DataGridTextColumn Binding="{Binding IDC}" Header="ID مشتری" Width="Auto" Visibility="Collapsed"/>
