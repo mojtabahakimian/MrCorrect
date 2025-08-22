@@ -1751,6 +1751,7 @@ namespace Functions
 
                 case 24:
                     //new HEAD_LST_RASID_OTHER_WIN(_NUM_).Show();
+                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID_OTHER_WIN, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
                     break;
 
                 case 25:
@@ -1759,6 +1760,7 @@ namespace Functions
 
                 case 26:
                     //new HEAD_LST_HAV_OTHER_WIN(_NUM_).Show();
+                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAV_OTHER_WIN, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
                     break;
 
                 case 27:

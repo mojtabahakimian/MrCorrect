@@ -5187,6 +5187,11 @@ namespace Prg_Proccessy.FUNCTIONS
                     {
                         rst = dbms.DoGetDataSQL<Q10>("SELECT   USERCO, SGN0137 , SGN0237,SGN0337 FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
                         break;
+                    }    
+                case 36:
+                    {
+                        rst = dbms.DoGetDataSQL<_QRE15_>("SELECT   USERCO, SGN0136 , SGN0236,SGN0336 FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                        break;
                     }
                 case 20:
                     {
