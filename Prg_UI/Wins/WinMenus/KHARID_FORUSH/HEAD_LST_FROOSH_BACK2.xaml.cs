@@ -4232,7 +4232,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
             catch (SqlException ex)
             {
-                VISITOR_DTL_SUB.Dispatcher.InvokeAsync(() =>
+                VISITOR_DTL_SUB.Dispatcher.Invoke(() =>
                 {
                     VISITOR_DTL_SUB.CellEditEnding -= VISITOR_DTL_SUB_CellEditEnding;
                     VISITOR_DTL_SUB.CancelEdit();
