@@ -87,6 +87,7 @@ namespace Prg_UI.Wins.WinMenus.CRM
         public ObservableCollection<CRMEVENTS> EVENT_DATA { get; set; } = new ObservableCollection<CRMEVENTS>();
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+        public List<Status_List> StatusItems { get; set; }
 
         public bool ChangeIsHappend { get; private set; } = false;
 
@@ -175,7 +176,8 @@ namespace Prg_UI.Wins.WinMenus.CRM
 
         private void FILL_ALL_COMBOBOXES()
         {
-            List<Status_List> items = new List<Status_List>()
+            // نام این متغیر را از items به statusList تغییر می‌دهیم تا با Property جدید تداخل نداشته باشد
+            List<Status_List> statusList = new List<Status_List>()
             {
                 new Status_List() { NAME = Baseknow.IT1.ToString(), CODE = 1 },
                 new Status_List() { NAME = Baseknow.IT2.ToString(), CODE = 2 },
@@ -188,14 +190,18 @@ namespace Prg_UI.Wins.WinMenus.CRM
                 new Status_List() { NAME = Baseknow.IT9.ToString(), CODE = 9 },
             };
 
-            STATUS_COLUMN.ItemsSource = items.ToList();
+            // مقداردهی Property جدید
+            StatusItems = statusList;
+
+            // بایند کردن به ItemsControl (چون DataContext خود پنجره است، این کار می‌کند)
+            StatusFilterItemsControl.ItemsSource = StatusItems;
+
+            STATUS_COLUMN.ItemsSource = statusList.ToList();
+            STATUS2_COLUMN.ItemsSource = statusList.ToList();
 
             STATUS_FAC_COLUMN.ItemsSource = dbms.DoGetDataSQL<Fac_List>("SELECT COPMANES.STATUS_FACT FROM COPMANES GROUP BY COPMANES.STATUS_FACT");
-
             SALER_COLUMN.ItemsSource = dbms.DoGetDataSQL<Saler_List>("SELECT SALER FROM CRMEVENTS GROUP BY SALER ORDER BY SALER").ToList();
             BUYER_COLUMN.ItemsSource = dbms.DoGetDataSQL<Buyer_List>("SELECT BUYER FROM CRMEVENTS GROUP BY BUYER ORDER BY BUYER").ToList();
-
-            STATUS2_COLUMN.ItemsSource = items.ToList();
         }
 
         private void ReGetData()
@@ -234,7 +240,7 @@ namespace Prg_UI.Wins.WinMenus.CRM
         }
 
         private void CRM_MASTER_SUB_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
-        {     
+        {
             if (sender is not DataGrid grid) return;
 
             var binding = (e.Column as DataGridBoundColumn)?.Binding as Binding;
@@ -406,7 +412,7 @@ namespace Prg_UI.Wins.WinMenus.CRM
             var cnt2 = dbms.DoGetDataSQL<int>($"SELECT COUNT(1) FROM COPMANES WHERE {shartCust}").FirstOrDefault();
             if (cnt2 > 0)
             {
-               // new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").Show();
+                // new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").Show();
             }
         }
 
@@ -522,6 +528,50 @@ namespace Prg_UI.Wins.WinMenus.CRM
                 master.IDCN -= removed;
                 if (master.IDCN < 0) master.IDCN = 0;
                 CRM_MASTER_SUB.Items.Refresh();
+            }
+        }
+
+        private void ApplyFilter(int? statusCode)
+        {
+            // اگر دیتا آماده نیست، کاری نکن
+            if (!NowIsReady) return;
+
+            // گرفتن ویو پیش‌فرض از کالکشن دیتا
+            var view = CollectionViewSource.GetDefaultView(CUSTOMER_DATA);
+
+            if (statusCode == null)
+            {
+                // اگر کد وضعیت نال بود (گزینه "همه")، فیلتر را بردار
+                view.Filter = null;
+            }
+            else
+            {
+                // اعمال فیلتر بر اساس کد وضعیت
+                view.Filter = item =>
+                {
+                    if (item is COPMANES customer)
+                    {
+                        return customer.STATUS == statusCode;
+                    }
+                    return false;
+                };
+            }
+        }
+
+        // رویداد برای دکمه رادیویی "همه"
+        private void AllStatus_Checked(object sender, RoutedEventArgs e)
+        {
+            // فیلتر را با ارسال مقدار نال حذف می‌کنیم
+            ApplyFilter(null);
+        }
+
+        // رویداد برای سایر وضعیت‌ها
+        private void Status_Checked(object sender, RoutedEventArgs e)
+        {
+            // کد وضعیت را از ویژگی Tag دکمه رادیویی می‌خوانیم
+            if (sender is RadioButton radioButton && radioButton.Tag is int statusCode)
+            {
+                ApplyFilter(statusCode);
             }
         }
     }
