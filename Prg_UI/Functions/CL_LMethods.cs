@@ -477,16 +477,29 @@ namespace Prg_UI.Functions
                 return false;
             }
         }
-        public static void SendKey_US(Key key)
+        public static void SendKey_US(Key key, bool isPreviewEvent = false)
         {
             if (Keyboard.PrimaryDevice != null)
             {
                 if (Keyboard.PrimaryDevice.ActiveSource != null)
                 {
-                    var e = new KeyEventArgs(Keyboard.PrimaryDevice, Keyboard.PrimaryDevice.ActiveSource, 0, key)
+                    KeyEventArgs e = null;
+
+                    if (isPreviewEvent)
                     {
-                        RoutedEvent = Keyboard.KeyDownEvent
-                    };
+                        e = new KeyEventArgs(Keyboard.PrimaryDevice, Keyboard.PrimaryDevice.ActiveSource, 0, key)
+                        {
+                            RoutedEvent = Keyboard.PreviewKeyDownEvent
+                        };
+                    }
+                    else
+                    {
+                        e = new KeyEventArgs(Keyboard.PrimaryDevice, Keyboard.PrimaryDevice.ActiveSource, 0, key)
+                        {
+                            RoutedEvent = Keyboard.KeyDownEvent
+                        };
+                    }
+
                     InputManager.Current.ProcessInput(e);
 
                     // Note: Based on your requirements you may also need to fire events for:

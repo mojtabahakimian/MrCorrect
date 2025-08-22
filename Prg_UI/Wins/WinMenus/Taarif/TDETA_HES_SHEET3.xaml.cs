@@ -305,7 +305,9 @@ namespace Wins.WinMenus.Taarif
             TOB_COLUMN.ItemsSource = new List<TobItem>
             {
                 new TobItem { CODE = 1, NAMES = "حقیقی" },
-                new TobItem { CODE = 2, NAMES = "حقوقی" }
+                new TobItem { CODE = 2, NAMES = "حقوقی" },
+                new TobItem { CODE = 3, NAMES = "مشارکت مدنی" },
+                new TobItem { CODE = 4, NAMES = "اتباع غیر ایرانی" }
             };
 
         }

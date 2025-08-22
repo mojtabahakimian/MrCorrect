@@ -1205,6 +1205,13 @@ namespace Prg_Proccessy.SQLMODELS
             public bool? KFR_HESAB { get; set; }
             public bool? KFR_MODIR { get; set; }
         }
+        public class _QRE15_
+        {
+            public int? USERCO { get; set; }
+            public bool? SGN0136 { get; set; }
+            public bool? SGN0236 { get; set; }
+            public bool? SGN0336 { get; set; }
+        }
         public class DETA_HES_MODEL1
         {
             public int? N_KOL { get; set; }

@@ -511,15 +511,27 @@ namespace Wins.WinMenus.ANBAR
                     {
                         sgn1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn1usid)?.SAL_NAME;
                     }
+                    else
+                    {
+                        sgn1usid.Text = null;
+                    }
 
                     if (HEADER_FAC?.sgn2usid is not null)
                     {
                         sgn2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn2usid)?.SAL_NAME;
                     }
+                    else
+                    {
+                        sgn2usid.Text = null;
+                    }
 
                     if (HEADER_FAC?.sgn3usid is not null)
                     {
                         sgn3usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn3usid)?.SAL_NAME;
+                    }
+                    else
+                    {
+                        sgn3usid.Text = null;
                     }
 
                     OKF.IsChecked = HEADER_FAC.OKF; //تایید فاکتور
