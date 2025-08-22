@@ -131,7 +131,7 @@
                 </Style>
             </Button.Style>
         </Button>
-        <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="False" DigitGroupOnEnter="False" InnerTabStop="True"  Text="" x:Name="SAYADI" Height="27" Margin="0,445,130,0" IsReadOnly="False" Tag="RD" VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="161" TabIndex="10" Focusable="True" LostFocus="SAYADI_LostFocus" />
+        <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="False" DigitGroupOnEnter="False" InnerTabStop="True" MaxLength="16" Text="" x:Name="SAYADI" Height="27" Margin="0,445,130,0" IsReadOnly="False" Tag="RD" VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="161" TabIndex="10" Focusable="True" LostFocus="SAYADI_LostFocus" />
         <ComboBox x:Name="KIND" IsEnabled="False" Visibility="Hidden" Text="KIND" Tag="RD" Padding="7,0,10,0" Style="{StaticResource MaterialDesignOutlinedComboBox}" IsTextSearchEnabled="True" Margin="124,412,373,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>

@@ -479,19 +479,19 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
                     var KhazanehRow = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST);
                     var CheckExistData = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE N_SERI = {KhazanehRow.N_SERI} AND BANK = {KhazanehRow.BANK} AND DATE_S = {DATE_S.Text.ToRawTarikh()}").ToList();
-
                     var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
                     var _SHOBEH_ = SHOBEH.SelectedValue.ToStringNullSafe().Length > 20 ? SHOBEH.SelectedValue.ToStringNullSafe().Substring(0, 19) : SHOBEH.SelectedValue.ToStringNullSafe();
 
+                    var _SAYADI_ = SAYADI.Text.Length > 16 ? SAYADI.Text.Substring(0, 16) : SAYADI.Text;
                     if (CheckExistData.Count > 0)
                     {
-                        dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD SET N_SERI = {N_SERI.Text}, BANK = {BANK.SelectedValue}, DATE_S = {DATE_S.Text.ToRawTarikh()}, DATE = {DATE.Text.ToRawTarikh()}, SHOBEH = N'{_SHOBEH_}', MABL = {MABL.Text}, NAME_TAH = N'{_NAME_TAH_}', ANBAR = {ANBAR}, RADIF = {RADIF.Text}, CUST_NO = N'{CUST_NO}', VAZ = 1, LIST_NO = {LIST_NO.SelectedValue}, KIND = {KIND.SelectedValue}, SANDUGH = {SANDUGH.SelectedValue} , SAYADI = N'{SAYADI.Text}' , N_HESAB = {(string.IsNullOrEmpty(N_HESAB.Text) ? "NULL" : N_HESAB.Text)} , N_KOL = {(string.IsNullOrEmpty(N_KOL) ? "NULL" : N_KOL)} , N_MOIN = {(string.IsNullOrEmpty(N_MOIN) ? "NULL" : N_MOIN)} , N_TAF = {(string.IsNullOrEmpty(N_TAF) ? "NULL" : N_TAF)}
+                        dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD SET N_SERI = {N_SERI.Text}, BANK = {BANK.SelectedValue}, DATE_S = {DATE_S.Text.ToRawTarikh()}, DATE = {DATE.Text.ToRawTarikh()}, SHOBEH = N'{_SHOBEH_}', MABL = {MABL.Text}, NAME_TAH = N'{_NAME_TAH_}', ANBAR = {ANBAR}, RADIF = {RADIF.Text}, CUST_NO = N'{CUST_NO}', VAZ = 1, LIST_NO = {LIST_NO.SelectedValue}, KIND = {KIND.SelectedValue}, SANDUGH = {SANDUGH.SelectedValue} , SAYADI = N'{_SAYADI_}' , N_HESAB = {(string.IsNullOrEmpty(N_HESAB.Text) ? "NULL" : N_HESAB.Text)} , N_KOL = {(string.IsNullOrEmpty(N_KOL) ? "NULL" : N_KOL)} , N_MOIN = {(string.IsNullOrEmpty(N_MOIN) ? "NULL" : N_MOIN)} , N_TAF = {(string.IsNullOrEmpty(N_TAF) ? "NULL" : N_TAF)}
                                                              WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue}  ");
                     }
                     else
                     {
                         dbms.DoExecuteSQL($@"INSERT INTO dbo.PAY_GETD(N_SERI,                BANK,                     DATE_S,                     DATE,                   SHOBEH,       MABL,          NAME_TAH,  ANBAR,       RADIF,     CUST_NO,VAZ,                LIST_NO,                KIND,                SANDUGH,                                                       N_HESAB ,            SAYADI,                                            N_KOL,                                             N_MOIN,                                            N_TAF)
-				                                        VALUES({N_SERI.Text},{BANK.SelectedValue},{DATE_S.Text.ToRawTarikh()},{DATE.Text.ToRawTarikh()},N'{_SHOBEH_}',{MABL.Text},N'{_NAME_TAH_}',{ANBAR},{RADIF.Text},N'{CUST_NO}',  1,{LIST_NO.SelectedValue},{KIND.SelectedValue},{SANDUGH.SelectedValue},{(string.IsNullOrEmpty(N_HESAB.Text) ? "NULL" : N_HESAB.Text)} , N'{SAYADI.Text}' , {(string.IsNullOrEmpty(N_KOL) ? "NULL" : N_KOL)}, {(string.IsNullOrEmpty(N_MOIN) ? "NULL" : N_MOIN)}, {(string.IsNullOrEmpty(N_TAF) ? "NULL" : N_TAF)})");
+				                                        VALUES({N_SERI.Text},{BANK.SelectedValue},{DATE_S.Text.ToRawTarikh()},{DATE.Text.ToRawTarikh()},N'{_SHOBEH_}',{MABL.Text},N'{_NAME_TAH_}',{ANBAR},{RADIF.Text},N'{CUST_NO}',  1,{LIST_NO.SelectedValue},{KIND.SelectedValue},{SANDUGH.SelectedValue},{(string.IsNullOrEmpty(N_HESAB.Text) ? "NULL" : N_HESAB.Text)} , N'{_SAYADI_}' , {(string.IsNullOrEmpty(N_KOL) ? "NULL" : N_KOL)}, {(string.IsNullOrEmpty(N_MOIN) ? "NULL" : N_MOIN)}, {(string.IsNullOrEmpty(N_TAF) ? "NULL" : N_TAF)})");
                     }
 
                     Msgwin msgwin1 = new Msgwin(false, $"شماره دفتر :{this.RADIF.Text}");
