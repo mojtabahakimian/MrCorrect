@@ -87,6 +87,14 @@ namespace Prg_UI.Wins.WinMenus.CRM
         public ObservableCollection<CRMEVENTS> EVENT_DATA { get; set; } = new ObservableCollection<CRMEVENTS>();
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+        //متغیر برای نگهداری فیلتر بر اساس وضعیت
+        public List<Status_List> StatusItems { get; set; }
+
+        // متغیرها برای نگهداری وضعیت فیلترها
+        private string _companyNameFilter = string.Empty;
+        private string _phoneFilter = string.Empty;
+        private string _dateFilter = string.Empty;
+        private int? _selectedStatus = null; // null به معنی "همه" است
 
         public bool ChangeIsHappend { get; private set; } = false;
 
@@ -175,7 +183,8 @@ namespace Prg_UI.Wins.WinMenus.CRM
 
         private void FILL_ALL_COMBOBOXES()
         {
-            List<Status_List> items = new List<Status_List>()
+            // نام این متغیر را از items به statusList تغییر می‌دهیم تا با Property جدید تداخل نداشته باشد
+            List<Status_List> statusList = new List<Status_List>()
             {
                 new Status_List() { NAME = Baseknow.IT1.ToString(), CODE = 1 },
                 new Status_List() { NAME = Baseknow.IT2.ToString(), CODE = 2 },
@@ -188,14 +197,18 @@ namespace Prg_UI.Wins.WinMenus.CRM
                 new Status_List() { NAME = Baseknow.IT9.ToString(), CODE = 9 },
             };
 
-            STATUS_COLUMN.ItemsSource = items.ToList();
+            // مقداردهی Property جدید
+            StatusItems = statusList;
+
+            // بایند کردن به ItemsControl (چون DataContext خود پنجره است، این کار می‌کند)
+            StatusFilterItemsControl.ItemsSource = StatusItems;
+
+            STATUS_COLUMN.ItemsSource = statusList.ToList();
+            STATUS2_COLUMN.ItemsSource = statusList.ToList();
 
             STATUS_FAC_COLUMN.ItemsSource = dbms.DoGetDataSQL<Fac_List>("SELECT COPMANES.STATUS_FACT FROM COPMANES GROUP BY COPMANES.STATUS_FACT");
-
             SALER_COLUMN.ItemsSource = dbms.DoGetDataSQL<Saler_List>("SELECT SALER FROM CRMEVENTS GROUP BY SALER ORDER BY SALER").ToList();
             BUYER_COLUMN.ItemsSource = dbms.DoGetDataSQL<Buyer_List>("SELECT BUYER FROM CRMEVENTS GROUP BY BUYER ORDER BY BUYER").ToList();
-
-            STATUS2_COLUMN.ItemsSource = items.ToList();
         }
 
         private void ReGetData()
@@ -234,7 +247,7 @@ namespace Prg_UI.Wins.WinMenus.CRM
         }
 
         private void CRM_MASTER_SUB_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
-        {     
+        {
             if (sender is not DataGrid grid) return;
 
             var binding = (e.Column as DataGridBoundColumn)?.Binding as Binding;
@@ -406,7 +419,7 @@ namespace Prg_UI.Wins.WinMenus.CRM
             var cnt2 = dbms.DoGetDataSQL<int>($"SELECT COUNT(1) FROM COPMANES WHERE {shartCust}").FirstOrDefault();
             if (cnt2 > 0)
             {
-               // new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").Show();
+                // new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").Show();
             }
         }
 
@@ -523,6 +536,78 @@ namespace Prg_UI.Wins.WinMenus.CRM
                 if (master.IDCN < 0) master.IDCN = 0;
                 CRM_MASTER_SUB.Items.Refresh();
             }
+        }
+
+        private void ApplyCombinedFilters()
+        {
+            if (!NowIsReady) return;
+
+            var view = CollectionViewSource.GetDefaultView(CUSTOMER_DATA);
+            if (view == null) return;
+
+            view.Filter = item =>
+            {
+                if (item is not COPMANES customer) return false;
+
+                // شرط اول: فیلتر وضعیت
+                bool statusMatch = _selectedStatus == null || customer.STATUS == _selectedStatus;
+
+                // شرط دوم: فیلتر نام شرکت
+                bool companyNameMatch = string.IsNullOrWhiteSpace(_companyNameFilter) ||
+                                        (customer.COMPANY_NAME?.Contains(_companyNameFilter, StringComparison.OrdinalIgnoreCase) ?? false);
+
+                // شرط سوم: فیلتر تلفن کارخانه
+                bool phoneMatch = string.IsNullOrWhiteSpace(_phoneFilter) ||
+                                  (customer.FACT_TEL?.Contains(_phoneFilter) ?? false);
+
+                // جدید: شرط چهارم: فیلتر تاریخ
+                // ابتدا کاراکترهای اضافه ماسک را حذف می‌کنیم
+                string dateFilterNumeric = _dateFilter.Replace("/", "").Replace("_", "").Trim();
+                bool dateMatch = string.IsNullOrWhiteSpace(dateFilterNumeric) ||
+                                 (customer.DT.HasValue && customer.DT.Value.ToString().StartsWith(dateFilterNumeric));
+
+                // نتیجه نهایی: رکورد باید تمام شرایط را داشته باشد
+                return statusMatch && companyNameMatch && phoneMatch && dateMatch;
+            };
+        }
+        // رویداد برای دکمه رادیویی "همه"
+        private void AllStatus_Checked(object sender, RoutedEventArgs e)
+        {
+            _selectedStatus = null; // null به معنی "همه"
+            ApplyCombinedFilters();
+        }
+
+        // رویداد برای سایر وضعیت‌ها
+        private void Status_Checked(object sender, RoutedEventArgs e)
+        {
+            if (sender is RadioButton radioButton && radioButton.Tag is int statusCode)
+            {
+                _selectedStatus = statusCode;
+                ApplyCombinedFilters();
+            }
+        }
+
+        private void FilterTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // از as استفاده می‌کنیم تا اگر sender یکی از این نوع‌ها نبود، خطا ندهد
+            var control = sender as Control;
+            if (control == null) return;
+
+            if (control.Name == "CompanyNameFilterTextBox")
+            {
+                _companyNameFilter = (control as TextBox).Text;
+            }
+            else if (control.Name == "PhoneFilterTextBox")
+            {
+                _phoneFilter = (control as TextBox).Text;
+            }
+            else if (control.Name == "DateFilterMaskedTextBox")
+            {
+                // برای MaskedTextBox باید به نوع خودش کست شود
+                _dateFilter = (control as Xceed.Wpf.Toolkit.MaskedTextBox).Text;
+            }
+
+            ApplyCombinedFilters();
         }
     }
 }
