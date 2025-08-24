@@ -1016,7 +1016,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 return false;
             }
 
-            if (RowExisting == null) //Insert
+            if (_navigationManager.IsNewRecord) //Insert
             {
                 string insertSql = @"
                                     INSERT INTO PRICE_ELAMIE 

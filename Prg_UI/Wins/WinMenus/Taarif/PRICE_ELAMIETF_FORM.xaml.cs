@@ -272,7 +272,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                             if (DG.CurrentColumn != null)
                             {
                                 int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                                bool isLastColumn = currentColumnIndex == DG.Columns.Count - 2;
+                                bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
                                 bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
 
                                 if (isLastColumn)
@@ -1058,19 +1058,20 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
             var masterRecord = new PRICE_ELAMIETF
             {
-                PENAME = PEPNAME_TEX,
                 PEID = _PEPID_,
+                PENAME = PEPNAME_TEX,
                 PEDATE = Convert.ToInt32(PEPDATE.Text.ToRawTarikh()),
-                PEPDEPART = (int)PEPDEPART.SelectedValue,
                 TR_DATE = DateTime.Now,
+                PEPDEPART = (int)PEPDEPART.SelectedValue,
                 SGN1 = SGN1.IsChecked ?? false,
                 SGN2 = SGN2.IsChecked ?? false,
                 SGN3 = SGN3.IsChecked ?? false,
                 USERNAME = USERNAME.Text,
+                UID = Baseknow.USERCOD,
             };
 
-            var RowExisting = dbms.DoGetDataSQL<string?>($"SELECT 1 FROM PRICE_ELAMIETF WHERE PENAME = @PEPNAME AND PEDATE = @PEPDATE",
-                new { PEPNAME = PEPNAME.Text, PEPDATE = Convert.ToInt32(PEPDATE.Text.ToRawTarikh()) }).FirstOrDefault();
+            var RowExisting = dbms.DoGetDataSQL<string?>($"SELECT 1 FROM PRICE_ELAMIETF WHERE PENAME = @PENAME AND PEDATE = @PEDATE",
+                new { PENAME = PEPNAME.Text, PEDATE = Convert.ToInt32(PEPDATE.Text.ToRawTarikh()) }).FirstOrDefault();
 
             if (NewRecord && RowExisting != null)
             {
@@ -1079,13 +1080,13 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 return false;
             }
 
-            if (RowExisting == null) //Insert
+            if (_navigationManager.IsNewRecord) //Insert
             {
                 string insertSql = @"
                                     INSERT INTO PRICE_ELAMIETF 
-                                        (PEID, PEPNAME, PEPDATE, PEPDEPART, TR_DATE, SGN1, SGN2, SGN3, USERNAME)
+                                        (PEID, PENAME, PEDATE, PEPDEPART, TR_DATE, SGN1, SGN2, SGN3, USERNAME, UID)
                                     VALUES 
-                                        (@PEID, @PEPNAME, @PEPDATE, @PEPDEPART, @TR_DATE, @SGN1, @SGN2, @SGN3, @USERNAME)";
+                                        (@PEID, @PENAME, @PEDATE, @PEPDEPART, @TR_DATE, @SGN1, @SGN2, @SGN3, @USERNAME ,@UID)";
                 _ = dbms.DoExecuteSQL(insertSql, masterRecord);
                 PEID.Text = _PEPID_.ToString();
                 RefreshAfterUpdate();
@@ -1095,12 +1096,13 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 string updateSql = @"
                                     UPDATE PRICE_ELAMIETF
                                     SET
-                                        PEPNAME = @PEPNAME,
-                                        PEPDATE = @PEPDATE,
+                                        PENAME = @PENAME,
+                                        PEDATE = @PEDATE,
                                         PEPDEPART = @PEPDEPART,
                                         SGN1 = @SGN1,
                                         SGN2 = @SGN2,
-                                        SGN3 = @SGN3
+                                        SGN3 = @SGN3,
+                                        USERNAME = @USERNAME
                                     WHERE
                                         PEID = @PEID";
                 _ = dbms.DoExecuteSQL(updateSql, masterRecord);
@@ -1327,8 +1329,8 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 {
                     // بررسی وجود رکورد با کلید جدید
                     var duplicatePGID = dbms.DoGetDataSQL<PRICE_ELAMIETF_DTL_MODEL>(
-                        "SELECT TOP 1 * FROM dbo.PRICE_ELAMIETF_DTL WHERE PEID = @PPID AND CUSTCODE = @CUSTCODE",
-                        new { PPID = ROW.PPID, CUSTCODE = ROW.CUSTCODE }).FirstOrDefault();
+                        "SELECT TOP 1 * FROM dbo.PRICE_ELAMIETF_DTL WHERE PEID = @PEID AND CUSTCODE = @CUSTCODE",
+                        new { PEID = ROW.PEID, CUSTCODE = ROW.CUSTCODE }).FirstOrDefault();
 
                     if (duplicatePGID != null)
                     {

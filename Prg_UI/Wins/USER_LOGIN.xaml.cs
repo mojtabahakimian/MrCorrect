@@ -362,8 +362,7 @@ namespace Prg_UI.Wins
             Baseknow.UGRP = "1";
 
 
-            //new PRICE_ELAMIETF_FORM().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_REQUEST_WIN, this);
+            new PRICE_ELAMIETF_FORM().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAV_OTHER_WIN, this);
 
