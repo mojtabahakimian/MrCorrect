@@ -764,7 +764,7 @@ namespace Functions
             /// <summary>
             /// تعریف اعلامیه قیمت
             /// </summary>
-            PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT
+            PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT,
         }
         #endregion
 

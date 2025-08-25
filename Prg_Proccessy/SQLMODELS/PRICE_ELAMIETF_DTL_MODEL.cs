@@ -13,6 +13,7 @@ namespace Prg_Proccessy.SQLMODELS
         {
             TF1 = 0;
             TF2 = 0;
+            SUB_DETAIL_EXP ??= new ObservableCollection<PRICE_ELAMIETF_EXCEPTION?>();
         }
 
         private int _peid;

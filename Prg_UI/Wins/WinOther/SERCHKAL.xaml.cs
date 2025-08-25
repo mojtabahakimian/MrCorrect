@@ -7,6 +7,7 @@ using Prg_UI.Functions;
 using Prg_UI.Wins.WinMenus.ANBAR;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -147,28 +148,75 @@ namespace Prg_UI.Wins.WinOther
         {
             Process Prc = ProcLoader.Start();
 
-
-            //anb = ANBARfunc(); //Matter in future
-            int anb = int.Parse(anbars);
-            DefaultQuery = "SELECT     mogudi_1_1.CODE, ROUND(ISNULL(ISNULL(mogudi_1_1.SMEGH, 0) - ISNULL(mogudi_2_2.SMEGH, 0), 0), 2) AS mog, ISNULL(mogudi_2_2.SMEGH, 0) AS MEGF, "
-            + " ISNULL(mogudi_1_1.SMEGH, 0) AS megk, STUF_DEF.NAME + N' ' + ISNULL(STUF_DEF.TOZIH, N' ') + N' ' + ISNULL(STUF_DEF.N_FANI, N' ') as name, dbo.TCOD_VAHEDS.NAMES, dbo.TCOD_VAHEDS.CODE AS VAHED, ' ' AS KK, mogudi_1_1.ANBAR, CAST(mogudi_1_1.CODE AS BIGINT) AS VCOD," +
-            " dbo.STUF_DEF.N_FANI, dbo.STUF_DEF.TOZIH, ISNULL(dbo.FNESBAT.FNESBAT, 1) AS NESBAT, ROUND(ISNULL(ISNULL(mogudi_1_1.SMEGH, 0)" +
-            " - ISNULL(mogudi_2_2.SMEGH, 0), 0) / ISNULL(dbo.FNESBAT.FNESBAT, 1), 0) AS MANDF, dbo.STUF_DEF.B_SEF, dbo.STUF_DEF.MABL_F, dbo.STUF_DEF.MAX_M," +
-            " dbo.STUF_DEF.VAZN, ROUND(ISNULL(ISNULL(mogudi_1_1.SMEGH, 0) - ISNULL(mogudi_2_2.SMEGH, 0), 0), 2) * dbo.STUF_DEF.VAZN AS VAZNK" +
-            " FROM         dbo.TCOD_VAHEDS INNER JOIN  dbo.STUF_DEF INNER JOIN    dbo.STUF_FSK ON dbo.STUF_DEF.CODE = dbo.STUF_FSK.CODE ON dbo.TCOD_VAHEDS.CODE = dbo.STUF_DEF.VAHED LEFT OUTER JOIN  dbo.mogudi_2_2(" + anb + ") mogudi_2_2 ON dbo.STUF_FSK.ANBAR = mogudi_2_2.ANBAR AND   dbo.STUF_FSK.CODE = mogudi_2_2.CODE LEFT OUTER JOIN   dbo.mogudi_1_1(" + anb + ") mogudi_1_1 ON dbo.STUF_FSK.ANBAR = mogudi_1_1.ANBAR AND   dbo.STUF_FSK.CODE = mogudi_1_1.CODE LEFT OUTER JOIN"
-            + " dbo.FNESBAT ON dbo.STUF_DEF.CODE = dbo.FNESBAT.CODE  WHERE     (NOT (mogudi_1_1.CODE IS NULL))";
-
-            System.Collections.Generic.IEnumerable<SLQ1> QreResult = dbms.DoGetDataSQL<SLQ1>(DefaultQuery); //Default data if there is no any conditions
-
-            if (!string.IsNullOrEmpty(shart)) //شرط خالی نیست
+            // ورودی‌های شما: string anbars, string shart
+            int? anb = null;
+            string extracondtion = string.Empty;
+            if (int.TryParse(anbars, out var parsed))
             {
-                var STR = " AND " + shart;
-                DefaultQuery += STR;
-                QreResult = dbms.DoGetDataSQL<SLQ1>(DefaultQuery + "  ");
+                anb = parsed; // در غیر این صورت null باقی می‌ماند
+            }
+            else
+            {
+                mOGColumn.Visibility = Visibility.Hidden; //موجودی
+                extracondtion = " DISTINCT ";
             }
 
-            //Finally Show Result ------------
-            serchkalDGR.ItemsSource = QreResult.ToList();
+            // کوئری پارامترایز (فقط یک‌بار تعریف کن)
+            var sql = $@"
+                SELECT  {extracondtion}
+                    COALESCE(m1.CODE, SF.CODE) AS CODE,
+                    ROUND(ISNULL(ISNULL(m1.SMEGH, 0) - ISNULL(m2.SMEGH, 0), 0), 2) AS mog,
+                    ISNULL(m2.SMEGH, 0) AS MEGF,
+                    ISNULL(m1.SMEGH, 0) AS megk,
+                    SD.NAME + N' ' + ISNULL(SD.TOZIH, N' ') + N' ' + ISNULL(SD.N_FANI, N' ') AS name,
+                    TV.NAMES,
+                    TV.CODE AS VAHED,
+                    N' ' AS KK,
+                    m1.ANBAR,
+                    CAST(COALESCE(m1.CODE, SF.CODE) AS BIGINT) AS VCOD,
+                    SD.N_FANI,
+                    SD.TOZIH,
+                    ISNULL(FN.FNESBAT, 1) AS NESBAT,
+                    ROUND(
+                        ISNULL(ISNULL(m1.SMEGH, 0) - ISNULL(m2.SMEGH, 0), 0) / ISNULL(FN.FNESBAT, 1),
+                        0
+                    ) AS MANDF,
+                    SD.B_SEF,
+                    SD.MABL_F,
+                    SD.MAX_M,
+                    SD.VAZN,
+                    ROUND(ISNULL(ISNULL(m1.SMEGH, 0) - ISNULL(m2.SMEGH, 0), 0), 2) * SD.VAZN AS VAZNK
+                FROM dbo.TCOD_VAHEDS AS TV
+                INNER JOIN dbo.STUF_DEF AS SD
+                    INNER JOIN dbo.STUF_FSK AS SF ON SD.CODE = SF.CODE
+                    ON TV.CODE = SD.VAHED
+                LEFT JOIN dbo.mogudi_2_2(@ANB) AS m2
+                    ON SF.ANBAR = m2.ANBAR AND SF.CODE = m2.CODE
+                LEFT JOIN dbo.mogudi_1_1(@ANB) AS m1
+                    ON SF.ANBAR = m1.ANBAR AND SF.CODE = m1.CODE
+                LEFT JOIN dbo.FNESBAT AS FN
+                    ON SD.CODE = FN.CODE
+                WHERE
+                    (@ANB IS NULL OR m1.CODE IS NOT NULL)
+                ";
+
+            //   -- اگر انبار مشخص است، فقط ردیف‌هایی که در TVF موجودند را نگه داریم
+            //--اگر انبار خالی است(@ANB IS NULL)، این شرط True می‌شود و همه‌ی اقلام می‌آیند
+
+            var parameters = new
+            {
+                ANB = anb // دپر/Dapper خودش Null را هندل می‌کنـد
+            };
+
+            if (!string.IsNullOrWhiteSpace(shart))
+            {
+                // چون قبلاً WHERE داریم، همین را اضافه می‌کنیم:
+                sql += " AND " + shart;
+            }
+
+            IEnumerable<SLQ1> result = dbms.DoGetDataSQL<SLQ1>(sql, parameters);
+
+            serchkalDGR.ItemsSource = result;
 
             if (serchk != null)
             {

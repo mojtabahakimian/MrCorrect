@@ -80,10 +80,11 @@
                 ItemsSource="{Binding PRICE_ELAMIETF_DTL_DATA}"
                 KeyboardNavigation.TabNavigation="Contained"
 
+                
+                d:RowDetailsVisibilityMode="Visible"
                 RowDetailsVisibilityMode="Collapsed"
                 
                 VirtualizingPanel.ScrollUnit="Pixel"
-                ScrollViewer.CanContentScroll="True"
                 AutoGenerateColumns="False" 
                 FlowDirection="RightToLeft" 
                 SelectionUnit="FullRow"
@@ -114,13 +115,13 @@
                                     <Button.Style>
                                         <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding PETID}" Value="0">
+                                                <DataTrigger Binding="{Binding PETID,UpdateSourceTrigger=PropertyChanged}" Value="0">
                                                     <Setter Property="IsEnabled" Value="False"/>
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding PETID}" Value="">
+                                                <DataTrigger Binding="{Binding PETID,UpdateSourceTrigger=PropertyChanged}" Value="">
                                                     <Setter Property="IsEnabled" Value="False"/>
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding PETID}" Value="{x:Null}">
+                                                <DataTrigger Binding="{Binding PETID,UpdateSourceTrigger=PropertyChanged}" Value="{x:Null}">
                                                     <Setter Property="IsEnabled" Value="False"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -189,9 +190,10 @@
                                   HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                                   VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                                   AutoGenerateColumns="False"
-                                  CanUserReorderColumns="False"
-                                  CellEditEnding="SUB_EXPTF_CellEditEnding"
-                                  RowEditEnding="SUB_EXPTF_RowEditEnding" PreviewKeyDown="SUB_EXPTF_PreviewKeyDown">
+                                  SelectionChanged="SUB_EXPTF_SelectionChanged"
+                                  CanUserReorderColumns="False" IsKeyboardFocusWithinChanged="SUB_EXPTF_IsKeyboardFocusWithinChanged"
+                                  CellEditEnding="SUB_EXPTF_CellEditEnding" PreparingCellForEdit="SUB_EXPTF_PreparingCellForEdit"
+                                  RowEditEnding="SUB_EXPTF_RowEditEnding" PreviewKeyDown="SUB_EXPTF_PreviewKeyDown" KeyDown="SUB_EXPTF_KeyDown">
                             <DataGrid.Style>
                                 <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                                     <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
@@ -201,20 +203,20 @@
                             <DataGrid.ColumnHeaderStyle>
                                 <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource CenteryHeaderstyle}" />
                             </DataGrid.ColumnHeaderStyle>
-
                             <DataGrid.Columns>
-
-                                <DataGridTemplateColumn Header="کالای مشمول تخفیف استثنا" Width="350" Visibility="Visible">
+                                <DataGridTemplateColumn x:Name="EXCEPTION_ITEM_COL" Header="کالای مشمول تخفیف استثنا" Width="350" Visibility="Visible">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Text, ElementName=THECMB, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
-                                                <ComboBox x:Name="THECMB"
+                                            <StackPanel Focusable="False">
+                                                <!-- مهم: TextBlock فوکوس را نگیرد -->
+                                                <TextBlock Focusable="False"
+                                                           Text="{Binding Text, ElementName=THECMB, UpdateSourceTrigger=PropertyChanged}"
+                                                           VerticalAlignment="Center"/>
+                                                <ComboBox x:Name="THECMB" Focusable="False"
                                                           ItemsSource="{Binding DataContext.CODE_ROWSOURCE, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                                                           DisplayMemberPath="NAME" SelectedValuePath="CODE"
                                                           Visibility="Collapsed"
                                                           IsEditable="True"
-                                                          Width="auto"
                                                           SelectedValue="{Binding CODE, UpdateSourceTrigger=PropertyChanged}">
                                                     <ComboBox.ItemsPanel>
                                                         <ItemsPanelTemplate>
@@ -227,10 +229,10 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                     <DataGridTemplateColumn.CellEditingTemplate>
                                         <DataTemplate>
-                                            <ComboBox ItemsSource="{Binding DataContext.CODE_ROWSOURCE, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                            <ComboBox x:Name="THECMB_EDIT"
+                                                      ItemsSource="{Binding DataContext.CODE_ROWSOURCE, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                                                       DisplayMemberPath="NAME" SelectedValuePath="CODE"
                                                       IsEditable="True"
-                                                      Width="auto"
                                                       SelectedValue="{Binding CODE, UpdateSourceTrigger=PropertyChanged}">
                                                 <ComboBox.ItemsPanel>
                                                     <ItemsPanelTemplate>
@@ -241,6 +243,7 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
+
 
                                 <DataGridTextColumn Header="کد کالا" Width="80" MinWidth="80" Binding="{Binding CODE,UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True">
                                     <DataGridTextColumn.CellStyle>
@@ -303,7 +306,9 @@
             <Button x:Name="BTN_SAVE" Click="BTN_SAVE_Click" Content="ذخیره" BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Foreground="#DDFFFFFF" Height="36" Margin="0,109,8,0" VerticalAlignment="Top" TabIndex="4" HorizontalAlignment="Right" Width="115" />
             <Button x:Name="Command106" Content="چاپ" Margin="224,109,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Width="101" Foreground="#DDFFFFFF" FontWeight="Bold" Click="Command106_Click"/>
             <Label Content="تاریخ اعمال از:" FlowDirection="RightToLeft" Width="Auto" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="258,16,0,0" FontSize="10"/>
-            <TextBox x:Name="PEPNAME" Height="30" Margin="335,14,81,0"   Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" IsTabStop="False" MaxLength="250" />
+
+            <TextBox x:Name="PENAME" Height="30" Margin="335,14,81,0" FlowDirection="RightToLeft" TextAlignment="Left" Text="" Style="{StaticResource FuzzyOut}" TextWrapping="Wrap" VerticalAlignment="Top" Visibility="Visible" Padding="3" MaxLength="250"/>
+
             <Label Content="نام (عنوان) :" Margin="0,16,21,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="59" Height="26" VerticalAlignment="Top"/>
             <TextBox x:Name="PEID" IsReadOnly="True" Height="30" Margin="12,14,0,0"   Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" IsTabStop="False" HorizontalAlignment="Left" Width="106" />
             <Label Content="شماره:" Margin="119,16,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="35" Height="26" VerticalAlignment="Top"/>

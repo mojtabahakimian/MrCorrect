@@ -2504,17 +2504,6 @@ namespace Wins.WinMenus.ANBAR
                 }
             }
         }
-        private static bool IsInside<T>(DependencyObject start) where T : DependencyObject
-        {
-            for (DependencyObject cur = start; cur != null;)
-            {
-                if (cur is T) return true;
-                var parent = LogicalTreeHelper.GetParent(cur);
-                if (parent == null && cur is Visual v) parent = VisualTreeHelper.GetParent(v);
-                cur = parent;
-            }
-            return false;
-        }
         private void Command106_Click(object sender, RoutedEventArgs e)
         {
             Process Prc = ProcLoader.Start();

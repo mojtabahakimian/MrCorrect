@@ -4,6 +4,7 @@ using MaterialDesignThemes.Wpf;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
+using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Prg_UI.Wins.WinMenus.HESABDARI;
 using Syncfusion.Data.Extensions;
@@ -280,6 +281,18 @@ namespace Wins.WinMenus.HESABDARI
                 {
                     new F_MENU_KOL_MOIN_TAFZIL(row?.HES.ToString());
                 }
+            }
+        }
+
+        private async void EXPORTEXCEL_BTN(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "ExportedExcel");
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
             }
         }
     }
