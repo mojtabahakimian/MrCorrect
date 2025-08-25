@@ -34,8 +34,6 @@ using Prg_Proccessy.Generaly;
 using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
 using Microsoft.VisualBasic;
 using static Prg_UI.Functions.CL_LMethods;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
-using System.Diagnostics;
 using System.Windows.Controls.Primitives;
 
 namespace Prg_UI.Wins.WinMenus.Taarif
@@ -312,6 +310,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                     else if (BTN_SAVE.IsFocused)
                     {
                         BTN_SAVE.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                        return;
                     }
 
                     if (SUB_EXPTF_IsFocused)
@@ -362,7 +361,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             if (!nonDataKeys.Contains(e.Key))
             {
                 var focused = Keyboard.FocusedElement as DependencyObject;
-                if (focused != null && (IsInside<TextBoxBase>(focused) || IsInside<ComboBox>(focused) || IsInside<CheckBox>(focused)))
+                if (focused != null && (CL_LMethods.IsInside<TextBoxBase>(focused) || CL_LMethods.IsInside<ComboBox>(focused) || CL_LMethods.IsInside<CheckBox>(focused)))
                 {
                     ChangeIsHappend = true;
                 }
@@ -640,7 +639,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
 
             CODE_ROWSOURCE?.Clear();
-            var CODE_RST = dbms.DoGetDataSQL<STUF_TINY>("SELECT CODE, NAME FROM STUF_DEF WHERE (NOT (MENUIT IS NULL)) ORDER BY NAME").ToList();
+            var CODE_RST = dbms.DoGetDataSQL<STUF_TINY>("SELECT CODE, NAME FROM STUF_DEF  ORDER BY NAME").ToList(); //WHERE (NOT (MENUIT IS NULL))
             foreach (var item in CODE_RST)
             {
                 CODE_ROWSOURCE?.Add(item);
@@ -1791,7 +1790,42 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             }
             catch { }
         }
+        private void SUB_EXPTF_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if ((bool)e.NewValue == false)
+            {
+                SUB_EXPTF_IsFocused = false;
+            }
+            else
+            {
+                SUB_EXPTF_IsFocused = true;
+            }
+        }
+        public ObservableCollection<PRICE_ELAMIETF_EXCEPTION> SelectedExceptions { get; } = new ObservableCollection<PRICE_ELAMIETF_EXCEPTION>();
+        private void SUB_EXPTF_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is not DataGrid grid)
+                return;
 
+            // حذف موارد برداشته‌شده
+            if (e.RemovedItems != null)
+            {
+                foreach (var item in e.RemovedItems.OfType<PRICE_ELAMIETF_EXCEPTION>())
+                {
+                    SelectedExceptions.Remove(item);
+                }
+            }
+
+            // اضافه‌کردن موارد انتخاب‌شده
+            if (e.AddedItems != null)
+            {
+                foreach (var item in e.AddedItems.OfType<PRICE_ELAMIETF_EXCEPTION>())
+                {
+                    if (!SelectedExceptions.Contains(item))
+                        SelectedExceptions.Add(item);
+                }
+            }
+        }
         private bool SUB_EXPTF_IsValid(PRICE_ELAMIETF_EXCEPTION? ROW)
         {
             List<MsgModel> ErrosMessages = new List<MsgModel>();
@@ -2014,50 +2048,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 new Msgwin(false, "خطا در انجام عملیات حذف!").ShowDialog(); return;
             }
         }
-
         #endregion
-
-        private void SUB_EXPTF_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if ((bool)e.NewValue == false)
-            {
-                SUB_EXPTF_IsFocused = false;
-            }
-            else
-            {
-                SUB_EXPTF_IsFocused = true;
-            }
-        }
-
-        public ObservableCollection<PRICE_ELAMIETF_EXCEPTION> SelectedExceptions { get; } = new ObservableCollection<PRICE_ELAMIETF_EXCEPTION>();
-        private void SUB_EXPTF_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (sender is not DataGrid grid)
-                return;
-
-            // حذف موارد برداشته‌شده
-            if (e.RemovedItems != null)
-            {
-                foreach (var item in e.RemovedItems.OfType<PRICE_ELAMIETF_EXCEPTION>())
-                {
-                    SelectedExceptions.Remove(item);
-                }
-            }
-
-            // اضافه‌کردن موارد انتخاب‌شده
-            if (e.AddedItems != null)
-            {
-                foreach (var item in e.AddedItems.OfType<PRICE_ELAMIETF_EXCEPTION>())
-                {
-                    if (!SelectedExceptions.Contains(item))
-                        SelectedExceptions.Add(item);
-                }
-            }
-        }
-
-        private void SUB_EXPTF_KeyDown(object sender, KeyEventArgs e)
-        {
-
-        }
+    
     }
 }

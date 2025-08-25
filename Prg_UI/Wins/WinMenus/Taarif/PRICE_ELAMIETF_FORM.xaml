@@ -193,7 +193,7 @@
                                   SelectionChanged="SUB_EXPTF_SelectionChanged"
                                   CanUserReorderColumns="False" IsKeyboardFocusWithinChanged="SUB_EXPTF_IsKeyboardFocusWithinChanged"
                                   CellEditEnding="SUB_EXPTF_CellEditEnding" PreparingCellForEdit="SUB_EXPTF_PreparingCellForEdit"
-                                  RowEditEnding="SUB_EXPTF_RowEditEnding" PreviewKeyDown="SUB_EXPTF_PreviewKeyDown" KeyDown="SUB_EXPTF_KeyDown">
+                                  RowEditEnding="SUB_EXPTF_RowEditEnding" PreviewKeyDown="SUB_EXPTF_PreviewKeyDown">
                             <DataGrid.Style>
                                 <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                                     <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
@@ -304,7 +304,7 @@
             <Button x:Name="BTN_DELETE" Content="حذف" Tag="hazfer" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="12,109,0,0" Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Width="84" Click="BTN_DELETE_Click" />
 
             <Button x:Name="BTN_SAVE" Click="BTN_SAVE_Click" Content="ذخیره" BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Foreground="#DDFFFFFF" Height="36" Margin="0,109,8,0" VerticalAlignment="Top" TabIndex="4" HorizontalAlignment="Right" Width="115" />
-            <Button x:Name="Command106" Content="چاپ" Margin="224,109,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Width="101" Foreground="#DDFFFFFF" FontWeight="Bold" Click="Command106_Click"/>
+            <Button x:Name="Command106" Content="چاپ" Margin="224,109,0,0" Visibility="Collapsed" Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Width="101" Foreground="#DDFFFFFF" FontWeight="Bold" Click="Command106_Click"/>
             <Label Content="تاریخ اعمال از:" FlowDirection="RightToLeft" Width="Auto" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="258,16,0,0" FontSize="10"/>
 
             <TextBox x:Name="PENAME" Height="30" Margin="335,14,81,0" FlowDirection="RightToLeft" TextAlignment="Left" Text="" Style="{StaticResource FuzzyOut}" TextWrapping="Wrap" VerticalAlignment="Top" Visibility="Visible" Padding="3" MaxLength="250"/>

@@ -58,7 +58,7 @@
         </Popup>
         <!--HEADER↑-->
 
-        <Button x:Name="BTN_SAVE" Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="37,466,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Click="BTN_SAVE_Click" TabIndex="14" />
+        <Button x:Name="BTN_SAVE" Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="142,422,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Click="BTN_SAVE_Click" TabIndex="14" />
         <Label Content="شماره" HorizontalAlignment="Right" Margin="0,52,94,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
         <TextBox x:Name="IDD" Text="" Height="30" Margin="0,51,136,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" HorizontalAlignment="Right" Width="67" IsReadOnly="True" />
         <Label Content="تاریخ" HorizontalAlignment="Right" Margin="0,88,96,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
@@ -132,7 +132,7 @@
         <Label Content="روز" HorizontalAlignment="Right" Margin="0,479,642,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
 
 
-        <CheckBox x:Name="SGN1" Content="مدیر واحد" HorizontalAlignment="Right" Margin="0,0,81,150" VerticalAlignment="Bottom" Width="NaN" Click="SGN1_Click">
+        <CheckBox x:Name="SGN1" Content="مدیر واحد" HorizontalAlignment="Right" Margin="0,0,81,158" VerticalAlignment="Bottom" Width="NaN" Click="SGN1_Click">
             <CheckBox.Style>
                 <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
                     <Style.Triggers>
@@ -149,7 +149,7 @@
                 </Style>
             </CheckBox.Style>
         </CheckBox>
-        <CheckBox x:Name="SGN2" Content="حسابداری" HorizontalAlignment="Right" Margin="0,0,83,117" VerticalAlignment="Bottom" Width="NaN" Click="SGN2_Click">
+        <CheckBox x:Name="SGN2" Content="حسابداری" HorizontalAlignment="Right" Margin="0,0,83,125" VerticalAlignment="Bottom" Width="NaN" Click="SGN2_Click">
             <CheckBox.Style>
                 <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
                     <Style.Triggers>
@@ -166,7 +166,7 @@
                 </Style>
             </CheckBox.Style>
         </CheckBox>
-        <CheckBox x:Name="SGN3" Content="مدير عامل" HorizontalAlignment="Right" Margin="0,0,80,85" VerticalAlignment="Bottom" Width="NaN" Click="SGN3_Click">
+        <CheckBox x:Name="SGN3" Content="مدير عامل" HorizontalAlignment="Right" Margin="0,0,80,93" VerticalAlignment="Bottom" Width="NaN" Click="SGN3_Click">
             <CheckBox.Style>
                 <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
                     <Style.Triggers>
@@ -183,25 +183,26 @@
                 </Style>
             </CheckBox.Style>
         </CheckBox>
-        <TextBox x:Name="SGN1usid"   Style="{StaticResource FuzzyOut}" Padding="3"  Margin="0,0,158,147" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="202" IsReadOnly="True"/>
-        <TextBox x:Name="SGN2usid"   Style="{StaticResource FuzzyOut}" Padding="3"  Margin="0,0,158,114" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="202" IsReadOnly="True"/>
-        <TextBox x:Name="SGN3usid"   Style="{StaticResource FuzzyOut}" Padding="3"  Margin="0,0,158,82" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft"  HorizontalAlignment="Right" Width="202" IsReadOnly="True"/>
-        <Label Content="ارجاع به:" Margin="0,0,109,51"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="43" Height="26" VerticalAlignment="Bottom"/>
-        <ComboBox x:Name="PERSONEL"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,0,158,49" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" SelectionChanged="PERSONEL_SelectionChanged" HorizontalAlignment="Right" Width="254">
+        <TextBox x:Name="SGN1usid"   Style="{StaticResource FuzzyOut}" Padding="3"  Margin="0,0,158,155" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="202" IsReadOnly="True"/>
+        <TextBox x:Name="SGN2usid"   Style="{StaticResource FuzzyOut}" Padding="3"  Margin="0,0,158,122" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="202" IsReadOnly="True"/>
+        <TextBox x:Name="SGN3usid"   Style="{StaticResource FuzzyOut}" Padding="3"  Margin="0,0,158,90" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft"  HorizontalAlignment="Right" Width="202" IsReadOnly="True"/>
+        <Label Content="ارجاع به:" Margin="0,0,109,59"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="43" Height="26" VerticalAlignment="Bottom"/>
+        <ComboBox x:Name="PERSONEL"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,0,158,57" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" SelectionChanged="PERSONEL_SelectionChanged" HorizontalAlignment="Right" Width="254">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                 </ItemsPanelTemplate>
             </ComboBox.ItemsPanel>
         </ComboBox>
-        <Button x:Name="Command77" Click="Command77_Click" Content="چاپ"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="37,425,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" />
-        <Button x:Name="Command81" Click="Command81_Click" Content="چاپ با امضاء"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="37,383,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" />
+        <Button x:Name="Command77" Click="Command77_Click" Content="چاپ"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="142,463,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" />
+        <Button x:Name="Command81" Click="Command81_Click" Content="چاپ با امضاء"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="37,463,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" />
 
-        <Border Background="{Binding Background, ElementName=GENERAL_RANG}" Height="11" VerticalAlignment="Top" CornerRadius="1" Opacity="0.3" Margin="0,550,0,0" />
-        <Button x:Name="BTN_NEW_PAYORDER" Content="درخواست جدید"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="37,505,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" TabIndex="14" Click="BTN_NEW_PAYORDER_Click" />
+        <Border Background="{Binding Background, ElementName=GENERAL_RANG}" Height="11" VerticalAlignment="Top" CornerRadius="1" Opacity="0.3" Margin="0,546,0,0" />
+        <Button x:Name="BTN_NEW_PAYORDER" Visibility="Collapsed" Content="درخواست جدید +"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="37,506,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" TabIndex="14" Click="BTN_NEW_PAYORDER_Click" />
         <Button x:Name="BTN_INFO_RECIVER" Click="BTN_INFO_RECIVER_Click" Content="مشخصات دریافت کننده" Style="{StaticResource MaterialDesignFlatButton}" FontSize="10" Margin="37,198,0,0" Height="29" VerticalAlignment="Top" HorizontalAlignment="Left" Width="108" Padding="0,4,0,4" />
+        <Button x:Name="ESLAH" Click="ESLAH_Click" Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="37,422,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" />
 
-
+        <CNC:RecordNavigatorControl x:Name="navigatorControl" VerticalAlignment="Bottom" Margin="10,0,12,10"/>
 
     </Grid>
 </Window>
