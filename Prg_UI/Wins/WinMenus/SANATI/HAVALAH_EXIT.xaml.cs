@@ -39,6 +39,7 @@ using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
 using System.Windows.Data;
 using System.ComponentModel;
 using static Prg_UI.Functions.CL_LMethods;
+using System.Windows.Controls.Primitives;
 
 namespace Wins.WinMenus.SANATI
 {
@@ -559,17 +560,32 @@ namespace Wins.WinMenus.SANATI
             }
 
 
-            if (e.Key is Key.Enter || e.Key is Key.Tab ||
-                e.Key is Key.LeftShift ||
-                e.Key is Key.CapsLock ||
-                e.Key is Key.Right ||
-                e.Key is Key.LeftAlt ||
-                e.Key is Key.RightAlt)
-            { /* Not Changed */ }
-            else
+            // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
+            var nonDataKeys = new[]
             {
-                //Change Happend
-                ChangeIsHappend = true;
+                Key.Enter, Key.Tab, Key.LeftShift, Key.RightShift,
+                Key.CapsLock, Key.Left, Key.Right, Key.Up, Key.Down,
+                Key.LeftAlt, Key.RightAlt, Key.LeftCtrl, Key.RightCtrl,
+                Key.F1, Key.F2, Key.F3, Key.F4, Key.F5, Key.F6,
+                Key.F7, Key.F8, Key.F9, Key.F10, Key.F11, Key.F12,
+                Key.Escape, Key.Insert, Key.Home, Key.End,
+                Key.PageUp, Key.PageDown
+            };
+            if (!nonDataKeys.Contains(e.Key))
+            {
+                var focused = Keyboard.FocusedElement as DependencyObject;
+                if (focused != null && (CL_LMethods.IsInside<TextBoxBase>(focused) || CL_LMethods.IsInside<ComboBox>(focused) || CL_LMethods.IsInside<CheckBox>(focused)))
+                {
+                    ChangeIsHappend = true;
+                }
+                else
+                {
+                    var focusedElement = Keyboard.FocusedElement;
+                    if (focusedElement is Xceed.Wpf.Toolkit.MaskedTextBox)
+                    {
+                        ChangeIsHappend = true;
+                    }
+                }
             }
         }
 

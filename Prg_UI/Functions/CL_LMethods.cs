@@ -87,7 +87,17 @@ namespace Prg_UI.Functions
             }
         }
 
-      
+        public static bool IsInside<T>(DependencyObject start) where T : DependencyObject
+        {
+            for (DependencyObject cur = start; cur != null;)
+            {
+                if (cur is T) return true;
+                var parent = LogicalTreeHelper.GetParent(cur);
+                if (parent == null && cur is Visual v) parent = VisualTreeHelper.GetParent(v);
+                cur = parent;
+            }
+            return false;
+        }
         public static Theme MYTHEME { get; set; }
         /// <summary>
         /// , new WindowInteropHelper(this).Handle |_______________|
@@ -142,7 +152,21 @@ namespace Prg_UI.Functions
 
             return null;
         }
-
+        public static T FindAncestor<T>(DependencyObject start) where T : DependencyObject
+        {
+            for (var p = start; p != null; p = VisualTreeHelper.GetParent(p))
+                if (p is T t) return t;
+            return null;
+        }
+        public static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            while (child != null)
+            {
+                if (child is T parent) return parent;
+                child = VisualTreeHelper.GetParent(child);
+            }
+            return null;
+        }
         public static T FindParent<T>(DependencyObject child) where T : DependencyObject
         {
             DependencyObject parent = VisualTreeHelper.GetParent(child);

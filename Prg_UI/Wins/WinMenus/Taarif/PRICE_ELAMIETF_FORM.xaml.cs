@@ -34,7 +34,9 @@ using Prg_Proccessy.Generaly;
 using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
 using Microsoft.VisualBasic;
 using static Prg_UI.Functions.CL_LMethods;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using System.Diagnostics;
+using System.Windows.Controls.Primitives;
 
 namespace Prg_UI.Wins.WinMenus.Taarif
 {
@@ -244,7 +246,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             {
                 ican = value;
 
-                PEPNAME.IsReadOnly = !ican; //نام عنوان
+                PENAME.IsReadOnly = !ican; //نام عنوان
                 PEPDATE.IsReadOnly = !ican; //تاریخ از اعمال
                 DG_SUB.IsReadOnly = !ican;
 
@@ -267,55 +269,61 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
                     if (DG_SUB.IsKeyboardFocusWithin)
                     {
-                        try
+                        if (DG.CurrentColumn != null)
                         {
-                            if (DG.CurrentColumn != null)
+                            int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                            bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                            bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+
+                            if (isLastColumn)
                             {
-                                int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                                bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
-                                bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
-
-                                if (isLastColumn)
+                                // If it's the last column, move focus to the first cell of next row
+                                if (isLastRow)
                                 {
-                                    // If it's the last column, move focus to the first cell of next row
-                                    if (isLastRow)
+                                    e.Handled = true;
+
+                                    // Add focus to new row if needed
+                                    DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
+
+                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[DG_SUB_DEF_INDEX_COL]);
+
+                                    Dispatcher.BeginInvoke(new Action(() =>
                                     {
-                                        // Add focus to new row if needed
-                                        DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
+                                        DG.BeginEdit();
+                                    }), DispatcherPriority.Background);
 
-                                        DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[DG_SUB_DEF_INDEX_COL]);
-
+                                    //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
+                                    var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                                    if (focusedWindow != null)
+                                    {
                                         Dispatcher.BeginInvoke(new Action(() =>
                                         {
-                                            DG.BeginEdit();
+                                            focusedWindow.Activate();
+                                            focusedWindow.Focus();
                                         }), DispatcherPriority.Background);
-
-                                        //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
-                                        var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
-                                        if (focusedWindow != null)
-                                        {
-                                            Dispatcher.BeginInvoke(new Action(() =>
-                                            {
-                                                focusedWindow.Activate();
-                                                focusedWindow.Focus();
-                                            }), DispatcherPriority.Background);
-                                        }
-
-                                        return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
                                     }
+
+                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
                                 }
                             }
                         }
-                        catch { /*ignore*/ }
 
                     }
                     else if (BTN_SAVE.IsFocused)
                     {
                         BTN_SAVE.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                        return;
                     }
 
-                    CL_LMethods.SendKey_US(Key.Tab);
+                    if (SUB_EXPTF_IsFocused)
+                    {
+                        this.PreviewKeyDown -= Window_PreviewKeyDown;
+                        CL_LMethods.SendKey_US(Key.Tab, SUB_EXPTF_IsFocused);
+                        this.PreviewKeyDown += Window_PreviewKeyDown;
+                    }
+                    else
+                    {
+                        CL_LMethods.SendKey_US(Key.Tab);
+                    }
                 }
                 else
                 {
@@ -340,17 +348,32 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             catch { }
 
 
-            if (e.Key is Key.Enter || e.Key is Key.Tab ||
-                e.Key is Key.LeftShift ||
-                e.Key is Key.CapsLock ||
-                e.Key is Key.Right ||
-                e.Key is Key.LeftAlt ||
-                e.Key is Key.RightAlt)
-            { /* Not Changed */ }
-            else
+            // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
+            var nonDataKeys = new[]
             {
-                //Change Happend
-                ChangeIsHappend = true;
+                Key.Enter, Key.Tab, Key.LeftShift, Key.RightShift,
+                Key.CapsLock, Key.Left, Key.Right, Key.Up, Key.Down,
+                Key.LeftAlt, Key.RightAlt, Key.LeftCtrl, Key.RightCtrl,
+                Key.F1, Key.F2, Key.F3, Key.F4, Key.F5, Key.F6,
+                Key.F7, Key.F8, Key.F9, Key.F10, Key.F11, Key.F12,
+                Key.Escape, Key.Insert, Key.Home, Key.End,
+                Key.PageUp, Key.PageDown
+            };
+            if (!nonDataKeys.Contains(e.Key))
+            {
+                var focused = Keyboard.FocusedElement as DependencyObject;
+                if (focused != null && (IsInside<TextBoxBase>(focused) || IsInside<ComboBox>(focused) || IsInside<CheckBox>(focused)))
+                {
+                    ChangeIsHappend = true;
+                }
+                else
+                {
+                    var focusedElement = Keyboard.FocusedElement;
+                    if (focusedElement is Xceed.Wpf.Toolkit.MaskedTextBox)
+                    {
+                        ChangeIsHappend = true;
+                    }
+                }
             }
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -397,7 +420,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             }
 
             CL_LMethods.SetTabIndexes(
-             PEPNAME,
+             PENAME,
              PEPDATE,
              PEPDEPART,
              BTN_SAVE,
@@ -442,7 +465,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 Command106.IsEnabled = true;
 
                 PEID.Text = HEADER_FAC.PEID.ToString();
-                PEPNAME.Text = HEADER_FAC?.PENAME; //نام عنوان
+                PENAME.Text = HEADER_FAC?.PENAME; //نام عنوان
                 PEPDATE.Text = HEADER_FAC?.PEDATE?.ToString(); //تاریخ از اعمال
                 PEPDEPART.SelectedValue = HEADER_FAC?.PEPDEPART; //دپارتمان(واحد)
 
@@ -487,7 +510,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
 
         /*
-         * PEPNAME.IsReadOnly = !ican; //نام عنوان
+         * PENAME.IsReadOnly = !ican; //نام عنوان
            PEPDATE.IsReadOnly = !ican; //تاریخ از اعمال
            PEPDEPART.IsReadOnly = !ican; //دپارتمان(واحد)
            
@@ -625,8 +648,8 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         }
         private void MakeDefaultFocuseReady()
         {
-            PEPNAME.Focus();
-            PEPNAME.SelectAll();
+            PENAME.Focus();
+            PENAME.SelectAll();
         }
         private void DataGridActivation()
         {
@@ -644,7 +667,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             NewRecord = true;
 
             PEID.Text = null;
-            PEPNAME.Text = null;
+            PENAME.Text = null;
             USERNAME.Text = Baseknow.UUSER;
             PEPDATE.Text = Tarikh.FullCurrentDate;
             PEPDEPART.SelectionChanged -= PEPDEPART_SelectionChanged;
@@ -700,7 +723,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         {
             List<MsgModel> ErrosMessages = new List<MsgModel>();
 
-            if (string.IsNullOrEmpty(PEPNAME.Text) || string.IsNullOrWhiteSpace(PEPNAME.Text)) //حساب مشتری
+            if (string.IsNullOrEmpty(PENAME.Text) || string.IsNullOrWhiteSpace(PENAME.Text)) //حساب مشتری
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "نام نمیتواند خالی باشد" });
             }
@@ -824,6 +847,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         public PRICE_ELAMIETF_DTL_MODEL? CURRENT_ROW_ITEMS { get; private set; }
         public PRICE_ELAMIETF_DTL_MODEL? WAS_ROW_ITEM { get; private set; } = new PRICE_ELAMIETF_DTL_MODEL();
         public double Meidnum { get; private set; }
+        public bool SUB_EXPTF_IsFocused { get; private set; }
 
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e) //**********************************************************************************************
         {
@@ -947,7 +971,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 _ = AuditLogger.LogActionAsync(
                     actionType: "DELETE",
                     tableName: "تعریف اعلامیه تخفیف",
-                    recordId: PEPNAME.Text,
+                    recordId: PENAME.Text,
                     oldValue: "",
                     newValue: null,
                     additionalInfo: $@"{this.GetType().Name} , EXE PATH : {System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}");
@@ -1054,12 +1078,12 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             {
                 _PEPID_ = (int)CL_HESABDARI.GetLIDD("PRICE_ELAMIETF", "PEID");
             }
-            string PEPNAME_TEX = PEPNAME.Text.Trim();
+            string PENAME_TEX = PENAME.Text.Trim();
 
             var masterRecord = new PRICE_ELAMIETF
             {
                 PEID = _PEPID_,
-                PENAME = PEPNAME_TEX,
+                PENAME = PENAME_TEX,
                 PEDATE = Convert.ToInt32(PEPDATE.Text.ToRawTarikh()),
                 TR_DATE = DateTime.Now,
                 PEPDEPART = (int)PEPDEPART.SelectedValue,
@@ -1071,11 +1095,11 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             };
 
             var RowExisting = dbms.DoGetDataSQL<string?>($"SELECT 1 FROM PRICE_ELAMIETF WHERE PENAME = @PENAME AND PEDATE = @PEDATE",
-                new { PENAME = PEPNAME.Text, PEDATE = Convert.ToInt32(PEPDATE.Text.ToRawTarikh()) }).FirstOrDefault();
+                new { PENAME = PENAME.Text, PEDATE = Convert.ToInt32(PEPDATE.Text.ToRawTarikh()) }).FirstOrDefault();
 
             if (NewRecord && RowExisting != null)
             {
-                Msgwin msgwin0 = new Msgwin(true, $"این اعلامیه به نام '{PEPNAME_TEX}' با تاریخ اعمال {PEPDATE.Text.ToRawTarikh()} از قبل وجود دارد , آیا از اضافه کردن تکراری آن مطمئن هستید ؟");
+                Msgwin msgwin0 = new Msgwin(true, $"این اعلامیه به نام '{PENAME_TEX}' با تاریخ اعمال {PEPDATE.Text.ToRawTarikh()} از قبل وجود دارد , آیا از اضافه کردن تکراری آن مطمئن هستید ؟");
                 _ = msgwin0.ShowDialog();
                 return false;
             }
@@ -1338,26 +1362,27 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                         universControl.PopNotifyShow("این نوع مشتری و نوع پرداخت قبلاً ثبت شده (تکراری) است", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                         return;
                     }
-
                     //Getting New PERID for New Row
-                    var NewPerID = (int)CL_HESABDARI.GetLIDD("PRICE_ELAMIETF_DTL_MODEL", "PERID");
-                    var DetailRecord = new PRICE_ELAMIETF_DTL_MODEL
+                    var NewPETID = (int)CL_HESABDARI.GetLIDD("PRICE_ELAMIETF_DTL", "PETID");
+                    string sql = @"
+                                INSERT INTO dbo.PRICE_ELAMIETF_DTL
+                                    (PEID, CUSTCODE, PPID, TF1, TF2, PETID, TR_DATE, USERNAME, UID)
+                                VALUES
+                                    (@PEID, @CUSTCODE, @PPID, @TF1, @TF2, @PETID, @TR_DATE, @USERNAME, @UID)";
+                    var parameters = new
                     {
                         PEID = ROW.PEID,
-                        //PERID = NewPerID, // PeR
-
-                        USERNAME = ROW.USERNAME,
+                        CUSTCODE = ROW.CUSTCODE,
+                        PPID = ROW.PPID,
+                        TF1 = ROW.TF1,
+                        TF2 = ROW.TF2,
+                        PETID = NewPETID,
                         TR_DATE = DateTime.Now,
+                        USERNAME = ROW.USERNAME,
                         UID = Baseknow.USERCOD
                     };
-
-                    dbms.DoExecuteSQL(@"
-                             INSERT INTO PRICE_ELAMIETF_DTL_MODEL
-                                (PERID, PEID, PRICE1, TR_DATE, USERNAME, PGID, UID)
-                            VALUES
-                                (@PERID, @PEID, @PRICE1, @TR_DATE, @USERNAME, @PGID, @UID)", DetailRecord);
-
-                    idd = NewPerID;
+                    dbms.DoExecuteSQL(sql, parameters);
+                    idd = NewPETID;
                 }
                 else //UPDATE
                 {
@@ -1370,27 +1395,22 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                         return;
                     }
 
-                    var DetailRecord = new PRICE_ELAMIETF_DTL_MODEL
+                    string sql = @"
+                        UPDATE dbo.PRICE_ELAMIETF_DTL
+                        SET
+                            TF1 = @TF1,
+                            TF2 = @TF2,
+                            USERNAME = @USERNAME
+                        WHERE PETID = @PETID";
+                    var parameters = new
                     {
-                        PEID = ROW.PEID,
-                        //PERID = ROW.PERID, // PeR
-
+                        TF1 = ROW.TF1,
+                        TF2 = ROW.TF2,
                         USERNAME = ROW.USERNAME,
+                        PETID = ROW.PETID
                     };
-
-                    string updateSql = @"
-                                    UPDATE PRICE_ELAMIETF_DTL_MODEL
-                                    SET
-                                        PEID = @PEID,
-                                        PGID = @PGID
-                                        PRICE1 = @PRICE1,
-                                        USERNAME = @USERNAME,
-                                    WHERE
-                                        PERID = @PERID";
-
-                    dbms.DoExecuteSQL(updateSql, DetailRecord);
+                    dbms.DoExecuteSQL(sql, parameters);
                 }
-
             }
             catch (SqlException ex)
             {
@@ -1400,7 +1420,10 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 {
                     new Msgwin(false, "آیتم تکراری وارد شده آنرا اصلاح کنید").ShowDialog();
                 }
-
+                else
+                {
+                    new Msgwin(false, "خطا در انجام عملیات").ShowDialog();
+                }
                 return;
             }
             catch (Exception)
@@ -1455,17 +1478,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         }
         private void DG_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            string CURRENT_COLUMN_NAME = "";
-            if (DG_SUB.CurrentCell.Column is not null)
-            {
-                CURRENT_COLUMN_NAME = DG_SUB.CurrentCell.Column?.SortMemberPath;
-            }
-            else
-            {
-                return;
-            }
-
-            if (e.Key == Key.Delete && BTN_DELETE.IsEnabled)
+            if (e.Key == Key.Delete && BTN_DELETE.IsEnabled && !SUB_EXPTF_IsFocused)
             {
                 try
                 {
@@ -1585,7 +1598,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 Meidnum = CL_HESABDARI.PERSONELUpdate(TAG, Convert.ToDouble(PEID.Text),
                     Convert.ToInt32(PERSONEL.SelectedValue), "'اعلامیه تخفیف  شماره: " + PEID.Text
                     + " مورخ " + Strings.Format(Convert.ToInt64(PEPDATE.Text.ToRawTarikh()), "####/##/##") +
-                    "  به نام: " + PEPNAME.Text + "'");
+                    "  به نام: " + PENAME.Text + "'");
 
                 universControl.PopNotifyShow($".ارجاع داده شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
             }
@@ -1612,31 +1625,29 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             DataGrid DG = sender as DataGrid;
             if (DG is null) { return; }
 
-            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None) //EnterTab and ComeDown On NewRow
+            if (SUB_EXPTF_IsFocused)
             {
-                if (DG != null)
+                if ((e.Key is Key.Enter || e.Key is Key.Tab) && Keyboard.Modifiers == ModifierKeys.None) //EnterTab and ComeDown On NewRow
                 {
-                    e.Handled = true;
-
-                    if (DG.IsKeyboardFocusWithin)
+                    if (DG != null)
                     {
                         if (DG.CurrentColumn != null)
                         {
                             int DefaultColumnIndex = CL_LMethods.GetLastColumn(DG).DisplayIndex;
                             int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                            bool isLastColumn = currentColumnIndex == 4; //مدارک
+                            bool isLastColumn = currentColumnIndex == 3;
                             bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
                             if (isLastColumn)
                             {
                                 // If it's the last column, move focus to the first cell of next row
                                 if (isLastRow)
                                 {
+                                    e.Handled = true;
+
                                     // Add focus to new row if needed
                                     DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
 
-                                    int defaultcolumnindex = (int)(DG.Columns.FirstOrDefault(c => c.SortMemberPath is not null && c.SortMemberPath == "CODE")?.DisplayIndex);
-
-                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[defaultcolumnindex]);
+                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[0]);
 
                                     Dispatcher.BeginInvoke(new Action(() =>
                                     {
@@ -1648,16 +1659,30 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                             }
                         }
                     }
-                    CL_LMethods.SendKey_US(Key.Tab);
                 }
-            }
 
-
-            if (e.Key is Key.Delete && DG.IsKeyboardFocusWithin)
-            {
-                if (DG.Items.Count > 0 && DG.SelectedItem != null)
+                if (e.Key == Key.Delete && BTN_DELETE.IsEnabled)
                 {
-                    if (!(DG.SelectedItems is null))
+                    try
+                    {
+                        // 1) اگر داخل یک TextBox در حالت ویرایش هستیم، کاری نکنیم
+                        if (e.OriginalSource is TextBox textBox && !textBox.IsReadOnly)
+                        {
+                            // اجازه بدهید Delete عادی متن کارش رو بکنه
+                            return;
+                        }
+                        //else
+                        //{
+                        //    // اگر داخل حالت ویرایش سلول هستیم، از رفتار پیش‌فرض Delete (حذف کاراکتر) استفاده کن
+                        //    var cell = DataGridHelper.FindVisualParent<DataGridCell>(e.OriginalSource as DependencyObject);
+                        //    if (cell != null && cell.IsEditing)
+                        //        return;
+                        //}
+                    }
+                    catch { }
+
+                    var selected = SelectedExceptions.ToList();
+                    if (selected != null && selected.Count > 0)
                     {
                         bool IsDeletedSomething = false;
                         List<MsgModel> ErrosMessages = new List<MsgModel>();
@@ -1665,9 +1690,9 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                         Msgwin msgwin = new Msgwin(true, "آیا مایل به حذف هستید ؟"); msgwin.ShowDialog();
                         if (msgwin.DialogResult == true)
                         {
-                            for (int i = 0; i < DG.SelectedItems.Count; i++)
+                            for (int i = 0; i < selected.Count; i++)
                             {
-                                var item = DG.SelectedItems[i];
+                                var item = selected[i];
 
                                 if (!(item.ToStringNullSafe() is "{NewItemPlaceholder}"))
                                 {
@@ -1719,8 +1744,11 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                             return;
                         }
                     }
+
                 }
+
             }
+
         }
         private void SUB_EXPTF_CANCEL_EDIT(object sender)
         {
@@ -1735,6 +1763,33 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 DG.RowEditEnding += SUB_EXPTF_RowEditEnding;
                 DG.CellEditEnding += SUB_EXPTF_CellEditEnding;
             });
+        }
+        private void SUB_EXPTF_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
+        {
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+            if (e.Row.Item == null) { return; }
+            try
+            {
+                if (e.Column is DataGridTemplateColumn && e.Column.Header.Equals("کالای مشمول تخفیف استثنا"))
+                {
+                    var combo = e.EditingElement as ComboBox ?? FindVisualChild<ComboBox>(e.EditingElement);
+                    if (combo == null) return;
+
+                    // combo.IsDropDownOpen = true;
+                    combo.Focus();
+                    // فوکوس به TextBox داخلی و قرار دادن Caret داخل آن
+                    combo.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        var tb = combo.Template?.FindName("PART_EditableTextBox", combo) as TextBox;
+                        if (tb != null)
+                        {
+                            tb.Focus();
+                            tb.SelectAll();    // یا: tb.CaretIndex = tb.Text?.Length ?? 0;
+                        }
+                    }), System.Windows.Threading.DispatcherPriority.Input);
+                }
+            }
+            catch { }
         }
 
         private bool SUB_EXPTF_IsValid(PRICE_ELAMIETF_EXCEPTION? ROW)
@@ -1833,24 +1888,46 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             //نام مشتری
             if (e.Column.SortMemberPath == "CODE" || e.Column.Header.ToString() == "کالای مشمول تخفیف استثنا")
             {
-                var HSC = Kala_Combo?.SelectedItem as STUF_TINY;
-                if (Kala_Combo?.SelectedValue is null || HSC?.NAME != ENTERED_VALUE_ROW) //if is different then
+                if (string.IsNullOrEmpty(ENTERED_VALUE_ROW?.Trim()))
                 {
-                    var _SelectedKala_ = CL_LMethods.GetKalaBySearch(dbms, default, ENTERED_VALUE_ROW);
-
-                    if (string.IsNullOrEmpty(_SelectedKala_?.CODE))
-                    {
-                        SUB_EXPTF_CANCEL_EDIT(sender);
-                        universControl.PopNotifyShowUp($"کالا نمیتواند خالی باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
-                    }
-                    else
-                    {
-                        CurrentItemRow.CODE = _SelectedKala_.CODE;
-                    }
+                    universControl.PopNotifyShowUp($"کالا نمیتواند خالی باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                    return;
                 }
                 else
                 {
-                    //CurrentItemRow.NAME_HES = HSC.NAME;
+                    var HSC = Kala_Combo?.SelectedItem as STUF_TINY;
+                    if (Kala_Combo?.SelectedValue is null || HSC?.NAME != ENTERED_VALUE_ROW) //if is different then
+                    {
+                        INVO_LST_FACTOR22? _SelectedKala_ = CL_LMethods.GetKalaBySearch(dbms, default, ENTERED_VALUE_ROW);
+
+                        if (string.IsNullOrEmpty(_SelectedKala_?.CODE))
+                        {
+                            SUB_EXPTF_CANCEL_EDIT(sender);
+                            universControl.PopNotifyShowUp($"کالا نمیتواند خالی باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                        }
+                        else
+                        {
+                            if (Kala_Combo?.ItemsSource is ObservableCollection<STUF_TINY> source)
+                            {
+                                if (source != null)
+                                {
+                                    if (!source.Any(item => item?.CODE == _SelectedKala_?.CODE))
+                                    {
+                                        if (!string.IsNullOrEmpty(_SelectedKala_?.CODE))
+                                        {
+                                            source.Add(new STUF_TINY { CODE = _SelectedKala_.CODE, NAME = _SelectedKala_.NAME_CODE });
+                                        }
+                                    }
+                                    CurrentItemRow.CODE = _SelectedKala_.CODE;
+                                    Kala_Combo.SelectedValue = _SelectedKala_.CODE; //مشتری
+                                    //Kala_Combo.Items.Refresh();
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                    }
                 }
             }
         }
@@ -1868,54 +1945,56 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 return;
             }
 
-            int? id = null;
+
+            ROW.PETID = (DG_SUB.SelectedItem as PRICE_ELAMIETF_DTL_MODEL).PETID;
+            ROW.USERNAME = Baseknow.UUSER;
+
             try
             {
                 if (ROW?.EXCEPTION_ID is null || ROW?.EXCEPTION_ID == 0) //INSERT
                 {
-                    var MAXID = dbms.DoGetDataSQL<int?>($"SELECT Max(GCGRPID)+1 AS MIDD FROM PRICE_ELAMIETF_EXCEPTION").FirstOrDefault();
-                    if (MAXID is null || MAXID == 0)
-                    {
-                        MAXID = 1;
-                    }
+                    var MAXID = (int)CL_HESABDARI.GetLIDD("PRICE_ELAMIETF_EXCEPTION", "EXCEPTION_ID");
 
-                    //var ParentRow = GRADE_CUST_TAB_SUB.SelectedItem as GRADE_CUST_TAB;
-                    //var qre = @$"INSERT INTO dbo.PRICE_ELAMIETF_EXCEPTION(GCGRPID, GCGRPNAME, GCGRPZARIB, GCGRPGRADE, GCTABID, GCVALUESCAL, GCPS)
-                    //                                OUTPUT INSERTED.EXCEPTION_ID
-                    //                                VALUES({MAXID},
-                    //                                N'{ROW.GCGRPNAME}' ,
-                    //                                {ROW.GCGRPZARIB} ,
-                    //                                {ROW.GCGRPGRADE} ,
-                    //                                {ParentRow.GCTABID} ,
-                    //                                {(ROW.GCVALUESCAL is null ? "NULL" : ROW.GCVALUESCAL)} ,
-                    //                                @img)
-                    //                                ";
-                    //if (ROW?.GCPS is null)
-                    //{
-                    //    id = dbms.DoGetDataSQL<int?>(qre, new { img = (byte[])null }).FirstOrDefault();
-                    //}
-                    //else
-                    //{
-                    //    id = dbms.DoGetDataSQL<int?>(qre, new { img = ROW.GCPS }).FirstOrDefault();
-                    //}
+                    string sql = @"
+                                   INSERT INTO dbo.PRICE_ELAMIETF_EXCEPTION
+                                       (PETID, CODE, EXCEPTION_TF1, EXCEPTION_TF2, USERNAME, UID)
+                                   VALUES
+                                       (@PETID, @CODE, @EXCEPTION_TF1, @EXCEPTION_TF2, @USERNAME, @UID)";
+                    var parameters = new
+                    {
+                        PETID = ROW.PETID,
+                        CODE = ROW.CODE,
+                        EXCEPTION_TF1 = ROW.EXCEPTION_TF1,
+                        EXCEPTION_TF2 = ROW.EXCEPTION_TF2,
+                        USERNAME = ROW.USERNAME,
+                        UID = Baseknow.USERCOD
+                    };
+
+                    dbms.DoExecuteSQL(sql, parameters);
+                    ROW.EXCEPTION_ID = MAXID;
                 }
                 else //UPDATE
                 {
-                    //var qre = @$" UPDATE dbo.PRICE_ELAMIETF_EXCEPTION
-                    //                      SET GCGRPNAME = N'{ROW.GCGRPNAME}', 
-                    //                      GCGRPZARIB = {ROW.GCGRPZARIB}, GCGRPGRADE = {ROW.GCGRPGRADE}, 
-                    //                      GCVALUESCAL = {(ROW.GCVALUESCAL is null ? "NULL" : ROW.GCVALUESCAL)},
-                    //                      GCPS = @img
-                    //                      WHERE GCGRPID = {ROW.GCGRPID} ";
-                    //if (ROW?.GCPS is null)
-                    //{
-                    //    //dbms.DoExecuteSQL(qre, new { img = "NULL" });
-                    //    dbms.DoExecuteSQL(qre, new { img = (byte[])null });
-                    //}
-                    //else
-                    //{
-                    //    dbms.DoExecuteSQL(qre, new { img = ROW.GCPS });
-                    //}
+                    string sql = @"
+                     UPDATE dbo.PRICE_ELAMIETF_EXCEPTION
+                     SET
+                         EXCEPTION_TF1 = @EXCEPTION_TF1,
+                         EXCEPTION_TF2 = @EXCEPTION_TF2,
+                         USERNAME = @USERNAME,
+                         UID = @UID,
+                         TR_DATE = GETDATE()
+                     WHERE EXCEPTION_ID = @EXCEPTION_ID";
+
+                    var parameters = new
+                    {
+                        CODE = ROW.CODE,
+                        EXCEPTION_TF1 = ROW.EXCEPTION_TF1,
+                        EXCEPTION_TF2 = ROW.EXCEPTION_TF2,
+                        USERNAME = ROW.USERNAME,
+                        EXCEPTION_ID = ROW.EXCEPTION_ID
+                    };
+
+                    dbms.DoExecuteSQL(sql, parameters);
                 }
 
             }
@@ -1934,12 +2013,51 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             {
                 new Msgwin(false, "خطا در انجام عملیات حذف!").ShowDialog(); return;
             }
-            if (id != null) // اگر آیدی برای ذخیره جدید گرفته بیا پرش کن واگر نه که آپدیت بوده و رد شد
-            {
-                ROW.EXCEPTION_ID = (int)id;
-            }
         }
 
         #endregion
+
+        private void SUB_EXPTF_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if ((bool)e.NewValue == false)
+            {
+                SUB_EXPTF_IsFocused = false;
+            }
+            else
+            {
+                SUB_EXPTF_IsFocused = true;
+            }
+        }
+
+        public ObservableCollection<PRICE_ELAMIETF_EXCEPTION> SelectedExceptions { get; } = new ObservableCollection<PRICE_ELAMIETF_EXCEPTION>();
+        private void SUB_EXPTF_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is not DataGrid grid)
+                return;
+
+            // حذف موارد برداشته‌شده
+            if (e.RemovedItems != null)
+            {
+                foreach (var item in e.RemovedItems.OfType<PRICE_ELAMIETF_EXCEPTION>())
+                {
+                    SelectedExceptions.Remove(item);
+                }
+            }
+
+            // اضافه‌کردن موارد انتخاب‌شده
+            if (e.AddedItems != null)
+            {
+                foreach (var item in e.AddedItems.OfType<PRICE_ELAMIETF_EXCEPTION>())
+                {
+                    if (!SelectedExceptions.Contains(item))
+                        SelectedExceptions.Add(item);
+                }
+            }
+        }
+
+        private void SUB_EXPTF_KeyDown(object sender, KeyEventArgs e)
+        {
+
+        }
     }
 }
