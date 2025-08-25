@@ -2,6 +2,7 @@
 using Prg_Proccessy.FUNCTIONS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
+using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using System;
 using System.Linq;
@@ -127,11 +128,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                         break;
 
                     case HEAD_LST_RASID:
-                        (WIN_COME as HEAD_LST_RASID).MOLAH.Text = paramsString;
+                        (WIN_COME as HEAD_LST_RASID).TAH.Text = paramsString; //فیلد دتحویل گیرنده
 
-                        dbms.DoExecuteSQL($@"UPDATE dbo.HEAD_LST SET MOLAH = N'{paramsString}'
+                        dbms.DoExecuteSQL($@"UPDATE dbo.HEAD_LST SET TAH = N'{paramsString}'
                                              WHERE NUMBER = {(WIN_COME as HEAD_LST_RASID).NUMBER.Text} AND TAG IN (1) ");
-                        break; 
+                        break;
 
                     case HEAD_LST_KHADAMAT:
                         (WIN_COME as HEAD_LST_KHADAMAT).MOLAH.Text = paramsString;
@@ -149,7 +150,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             catch (Exception ex)
             {
                 // Handle the error if needed
-                MessageBox.Show("An error occurred: " + ex.Message);
+                new Msgwin(false, "خطا در انجام عملیات").ShowDialog();
             }
 
             Close();

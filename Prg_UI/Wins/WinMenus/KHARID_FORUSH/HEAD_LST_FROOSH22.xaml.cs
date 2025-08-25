@@ -2639,8 +2639,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     N_S.Text = SanadNumber.ToString();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                AUTO_BAZ.Functions.CL_LMethods.LogWriter.WriteLog($"GENSANADFROOSH exception for invoice {NUMBER.Text}: {ex.Message}");
+                AUTO_BAZ.Functions.CL_LMethods.ExpectionLogWriter.WriteLog(ex, "GENSANADFROOSH");
                 new Msgwin(false, "خطا در انجام علمیات صدور سند برای فاکتور فروش").Show();
             }
             LETSANAD = false;
@@ -2658,8 +2660,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 this.runone = true;
             }
         }
-
-
 
         private void DEPATMAN_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
@@ -3203,7 +3203,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
         }
 
-
         private void TICMBAA_Click(object sender, RoutedEventArgs e)
         {
             if (NewRecord)
@@ -3249,7 +3248,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             //بروز رسانی مانده حساب مشتری
             MasterSummerAndMandeh();
         }
-        private void JAYEHZAH()
+        private void JAYEHZAH(bool _DisplayMsg_ = true)
         {
             try
             {
@@ -3276,14 +3275,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 // بروزرسانی دیتاگرید جایزه
                 ReGetdata();
 
-                universControl.PopNotifyShow($".وضعیت جایزه بروز شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+                if (_DisplayMsg_)
+                {
+                    universControl.PopNotifyShow($".وضعیت جایزه بروز شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+                }
             }
             catch (Exception ex)
             {
                 new Msgwin(false, $"خطا در پردازش جوایز: {ex.Message}").ShowDialog();
             }
         }
-
 
         private void SGN1_Click(object sender, RoutedEventArgs e)
         {
@@ -7458,7 +7459,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             #endregion
 
             //ذخیره مجدد جایزه
-            JAYEHZAH();
+            JAYEHZAH(false);
 
             // محاسبه مجدد مالیات و ذخیره آن
             #region TICMBAA_AfterUpdate
@@ -7562,7 +7563,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             //try
             //{
             //    List<MsgModel> ErrosMessages = new List<MsgModel>();
-
             var msgs = CL_HESABDARI.RunCalculateVisitorPorsant(Convert.ToInt64(NUMBER.Text), hTAG);
             //    //foreach (var matn in msgs)
             //    //{
@@ -7613,7 +7613,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             DisplayError = true; //reset it
             SavedSuccessBtn = true; //ذخیره با موفقیت انجام شده
 
-            universControl.PopNotifyShow("اطلاعات با موفقیت ذخیره شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+            universControl.PopNotifyShow("اطلاعات با موفقیت ذخیره شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C", 1);
         } //SAVE -------------------------------------------------------------------------
 
         private void CalculateIMBAA()
@@ -7862,6 +7862,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
             catch (Exception ex)
             {
+                CL_LMethods.DoWriteMyLog("خطا در ذخیره سربرگ فاکتور فروش", ex);
                 new Msgwin(false, $"خطا در انجام عملیات").Show();
                 return false;
             }
@@ -8229,6 +8230,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
             catch (Exception ex)
             {
+                CL_LMethods.DoWriteMyLog("خطا در ذخیره SaveMasterNewNumberINSERT فاکتور فروش", ex);
                 new Msgwin(false, $"خطا در انجام عملیات").Show();
                 return false;
             }
@@ -9435,8 +9437,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 }
                 return;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                CL_LMethods.DoWriteMyLog("خطا در ذخیره PAY_GETD_SUB22_RowEditEnding فاکتور فروش", ex);
                 new Msgwin(false, "خطا در انجام عملیات").Show(); return;
             }
 
@@ -10000,8 +10003,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 }
                 return;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                CL_LMethods.DoWriteMyLog("خطا در ذخیره VISITOR_DTL_SUB_RowEditEnding فاکتور فروش", ex);
                 new Msgwin(false, "خطا در انجام عملیات").Show(); return;
             }
 
@@ -10297,8 +10301,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void Command100_Click(object sender, RoutedEventArgs e) //چاپ فاکتور
         {
-            if (Convert.ToDouble(NUMBER.Text) < 0) return;
             if (_navigationManager.IsNewRecord) return;
+            if (Convert.ToDouble(NUMBER.Text) < 0) return;
 
             double min;
             bool NOTPR = false;
@@ -10694,6 +10698,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void Command120_Click(object sender, RoutedEventArgs e)
         {
+            if (_navigationManager.IsNewRecord) return;
             if (Convert.ToDouble(NUMBER.Text) < 0) return;
 
             double min;
@@ -10975,8 +10980,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void Command139_Click(object sender, RoutedEventArgs e)
         {
-            if (Convert.ToDouble(NUMBER.Text) < 0) return;
             if (_navigationManager.IsNewRecord) return;
+            if (Convert.ToDouble(NUMBER.Text) < 0) return;
 
             double JAMFACT;
             if ((bool)Baseknow.SAGHF || (bool)Baseknow.SAGHF2)
@@ -11156,6 +11161,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private async void custprint_Click(object sender, RoutedEventArgs e)
         {
+            if (_navigationManager.IsNewRecord) return;
             if (Convert.ToDouble(NUMBER.Text) < 0) return;
 
             double JAMFACT;
@@ -11366,15 +11372,18 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         }
         private void Command113_Click(object sender, RoutedEventArgs e)
         {
-            return;
+            if (_navigationManager.IsNewRecord) return;
+            if (Convert.ToDouble(NUMBER.Text) < 0) return;
         }
         private void Command170_Click(object sender, RoutedEventArgs e)
         {
-            return;
+            if (_navigationManager.IsNewRecord) return;
+            if (Convert.ToDouble(NUMBER.Text) < 0) return;
         }
         private void PRSS_Click(object sender, RoutedEventArgs e)
         {
-            return;
+            if (_navigationManager.IsNewRecord) return;
+            if (Convert.ToDouble(NUMBER.Text) < 0) return;
         }
 
         private void MODAT_PPID_SelectionChanged(object sender, SelectionChangedEventArgs e)

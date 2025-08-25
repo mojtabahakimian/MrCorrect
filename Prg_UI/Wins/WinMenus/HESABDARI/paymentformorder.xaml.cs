@@ -1,26 +1,37 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using DocumentFormat.OpenXml.Bibliography;
+using Functions;
+using MaterialDesignThemes.Wpf;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
+using Syncfusion.CompoundFile.XlsIO.Native;
+using Syncfusion.Windows.Controls.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using Wins.WinOther;
+using static Interfaces.INavigator;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
+using static Wins.WinMenus.ANBAR.HEAD_LST_HAV_OTHER_WIN;
 
 namespace Wins.WinMenus.HESABDARI
 {
-    public partial class paymentformorder : Window
+    public partial class paymentformorder : Window, ISearchableWindow
     {
         #region Header Window Begin
         //Header Window Begin
@@ -64,7 +75,8 @@ namespace Wins.WinMenus.HESABDARI
         //Header Window End;
         #endregion
 
-        public paymentformorder(double? number_to_open = null, bool is_read_only_mode = false)
+        public bool IsOpenedFromAutomation { get; } = false;
+        public paymentformorder(double? number_to_open = null, bool is_read_only_mode = false, bool _isAutomasion_ = false)
         {
             InitializeComponent();
 
@@ -75,12 +87,15 @@ namespace Wins.WinMenus.HESABDARI
             if (number_to_open != null)
             {
                 NUMBER_TO_OPEN = (double)number_to_open;
+                IsOpenedFromAutomation = _isAutomasion_;
             }
         }
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
         UniversControl universControl = new UniversControl();
+
+        private NavigationManager<PAYORDER> _navigationManager;
 
         public double? NUMBER_TO_OPEN { get; set; }
         public bool NowIsReady { get; private set; }
@@ -148,10 +163,33 @@ namespace Wins.WinMenus.HESABDARI
             set
             {
                 ican = value;
-
                 //TextBox.IsReadOnly = !ican;
-
                 //ComboBox.IsEnabled = ican;
+
+                PAYDATE.IsReadOnly = !ican; //تاریخ
+                MABLS.IsReadOnly = !ican; //مبلغ
+                BABAT.IsReadOnly = !ican; //بابت
+                CUST_NO_TXT.IsReadOnly = !ican; //دریافت کننده(نماینده)
+                TOZIH.IsReadOnly = !ican; //توضیحات
+
+                CUST_NO.IsEnabled = ican; //حساب دریافت کننده
+                CUST_NO2.IsEnabled = ican; //حساب دریافت کننده
+                ORDERER.IsEnabled = ican;
+                ORDERERID.IsEnabled = ican; //درخواست کننده
+
+                CACHTIC.IsEnabled = ican; //نقد
+                CHEKTIC.IsEnabled = ican; //چک شرکت
+                CHEKMTIC.IsEnabled = ican; //چک مشتری
+
+                CHACHMABL.IsReadOnly = !ican; //مبلغ نقد
+                CHEKMABL.IsReadOnly = !ican; //مبلغ چک شرکت
+                CHEKFAGH.IsReadOnly = !ican; // تعداد فقره چک شرکت
+                CHEKDIST.IsReadOnly = !ican; // تعداد فقره چک شرکت با فاصله روز
+                CHEKMMABL.IsReadOnly = !ican; //مبلغ چک مشتری
+                CHEKMFAGH.IsReadOnly = !ican; //تعداد فقره چک مشتری
+                CHEKMDIST.IsReadOnly = !ican; //تعداد فقره چک مشتری با فاصله روز
+
+                CUST_NO.SelectedIndex = -1; CUST_NO.Items.Refresh();
             }
         }
         public Visual I_AM_PAYORRDER { get; private set; }
@@ -161,35 +199,6 @@ namespace Wins.WinMenus.HESABDARI
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
-        }
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
-
-            I_AM_PAYORRDER = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
-
-            FILL_ALL_COMBOBOXES();
-
-            ReGetMasterData();
-
-            if (IS_READ_ONLY_MODE)
-            {
-                SGN1.IsEnabled = false;
-                SGN2.IsEnabled = false;
-                SGN3.IsEnabled = false;
-                //PERSONEL.IsEnabled = false;
-                BTN_SAVE.IsEnabled = false;
-            }
-            else
-            {
-                if (string.IsNullOrEmpty(IDD.Text) || IDD.Text == "0")
-                {
-                    SGN1.IsEnabled = false;
-                    SGN2.IsEnabled = false;
-                    SGN3.IsEnabled = false;
-                    //PERSONEL.IsEnabled = false;
-                }
-            }
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -206,6 +215,14 @@ namespace Wins.WinMenus.HESABDARI
             //    e.Handled = true;
             //    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
             //}
+
+            if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                e.Handled = true;
+                var searchWindow = new EnhancedSearchWindow(this);
+                searchWindow.Owner = this;
+                searchWindow.ShowDialog();
+            }
 
             // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
             var nonDataKeys = new[]
@@ -235,6 +252,261 @@ namespace Wins.WinMenus.HESABDARI
                 }
             }
         }
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
+
+            I_AM_PAYORRDER = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
+
+            FILL_ALL_COMBOBOXES();
+
+            string WhereCondition = string.Empty;
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                WhereCondition = $" WHERE IDD = {NUMBER_TO_OPEN} ";
+            }
+            _navigationManager = new NavigationManager<PAYORDER>(
+                dbms,
+                x => x.IDD.ToString(), // property selector (used to find a record by its CODE)
+                $"SELECT * FROM PAYORDER {WhereCondition} ORDER BY IDD", //All Record of The Table
+                x => $"SELECT * FROM PAYORDER WHERE IDD = {x?.IDD}", //On Change for One Record
+                Convert.ToDouble(NUMBER_TO_OPEN)
+                );
+            // Hook up the OnInsertRecord event
+            _navigationManager.CurrentRecordChanged += OnCurrentRecordChanged;
+            _navigationManager.OnInsertRecord += OnInsertRecord;
+            navigatorControl.NavigationManager = _navigationManager;
+            _navigationManager.RaiseInitializationEvents();
+        }
+
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            // Handle the selected item
+            if (selectedItem is PAYORDER item)
+            {
+                if (item != null)
+                {
+                    //_navigationManager.MoveReGetData(INavigator.Jahat.)
+                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.IDD.Equals(Convert.ToDouble(item.IDD)));
+                    if (itemfound != null)
+                    {
+                        _navigationManager.IsNewRecord = false;
+
+                        // 1) Find its index in the master list
+                        int idx = _navigationManager.RecordsData.IndexOf(itemfound);
+                        if (idx < 0)
+                        {
+                            // not found (perhaps filtered out?), bail out
+                            new Msgwin(false, "یافت نشد: مورد انتخاب شده در لیست اصلی وجود ندارد").Show();
+                            return;
+                        }
+
+                        // 2) Tell the navigation manager to move to that position
+                        _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+                        //OnCurrentRecordChanged(itemfound);
+                    }
+                }
+            }
+        }
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+                new SearchableProperty { DisplayName = "شماره درخواست",           PropertyPath = "IDD",          PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "تاریخ (yyyymmdd)",        PropertyPath = "PAYDATE",      PropertyType = typeof(long) },
+                new SearchableProperty { DisplayName = "تاریخ ثبت",               PropertyPath = "DTT",          PropertyType = typeof(DateTime) },
+                new SearchableProperty { DisplayName = "مبلغ کل",                 PropertyPath = "MABLS",        PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "بابت",                    PropertyPath = "BABAT",        PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "کد حساب دریافت‌کننده",    PropertyPath = "CUST_NO",      PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "نام/شرح حساب گیرنده",     PropertyPath = "CUST_NO_TXT",  PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "درخواست‌کننده",           PropertyPath = "ORDERER",      PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "توضیحات",                 PropertyPath = "TOZIH",        PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "کاربر ثبت‌کننده",         PropertyPath = "USERNAME",     PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "نقدی",                   PropertyPath = "CACHTIC",      PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "مبلغ نقد",                PropertyPath = "CHACHMABL",    PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "چک شرکت",                PropertyPath = "CHEKTIC",      PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "مبلغ چک شرکت",            PropertyPath = "CHEKMABL",     PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "تعداد فقره چک شرکت",      PropertyPath = "CHEKFAGH",     PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "فاصله چک شرکت (روز)",     PropertyPath = "CHEKDIST",     PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "چک مشتری",               PropertyPath = "CHEKMTIC",     PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "مبلغ چک مشتری",           PropertyPath = "CHEKMMABL",    PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "تعداد فقره چک مشتری",     PropertyPath = "CHEKMFAGH",    PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "فاصله چک مشتری (روز)",    PropertyPath = "CHEKMDIST",    PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "امضای مدیر واحد",         PropertyPath = "SGN1",         PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "امضای حسابداری",          PropertyPath = "SGN2",         PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "امضای مدیرعامل",          PropertyPath = "SGN3",         PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "شناسه امضاکننده۱",       PropertyPath = "sgn1usid",     PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "شناسه امضاکننده۲",       PropertyPath = "sgn2usid",     PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "شناسه امضاکننده۳",       PropertyPath = "sgn3usid",     PropertyType = typeof(int) },
+            };
+        }
+        #endregion
+
+        private void OnCurrentRecordChanged(PAYORDER HEADER_FAC)
+        {
+            if (_navigationManager.IsNewRecord)
+            {
+                ClearFreshAll(); //Form_Current(); //should be in this ClearFreshAll(); method too at the end
+            }
+            else if (HEADER_FAC == null)
+            {
+                if (_navigationManager.NUMBER_TO_OPEN != null)
+                {
+                    new Msgwin(false, "چنین شماره ای وجود ندارد").ShowDialog();
+                    return;
+                }
+            }
+            else
+            {
+                if (HEADER_FAC is null)
+                {
+                    new Msgwin(false, "این برگه خالی است").Show();
+                    return;
+                }
+          
+                if (true)
+                {
+                    var _HES_ = CL_HESABDARI.GETUSERCO((int)Baseknow.USERCOD);
+                    var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + _HES_ + "'").FirstOrDefault();
+                    if (data is not null && !string.IsNullOrEmpty(data.hes))
+                    {
+                        string thevalue = data.hes;
+                        if (!((List<Custom_CUST_HESAB>)ORDERER.ItemsSource).Any(item => item?.hes == thevalue))
+                        {
+                            ((List<Custom_CUST_HESAB>)ORDERER.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
+                        }
+                        ORDERER.SelectedValue = null;
+                        ORDERER.SelectedValue = thevalue;
+                        ORDERER.Items.Refresh();
+                    }
+                }
+                var _IDD_ = HEADER_FAC.IDD;
+
+                if (!IsNull(_IDD_))
+                {
+                    var RST = dbms.DoGetDataSQL<PAYORDER>("SELECT * FROM PAYORDER WHERE IDD = " + _IDD_).FirstOrDefault();
+                    if (RST != null)
+                    {
+                        this.IDD.Text = RST.IDD.ToString();
+                        this.MABLS.Text = RST.MABLS.ToString();
+                        this.BABAT.Text = RST.BABAT;
+                        if (RST.CUST_NO != null)
+                        {
+                            var _HES_ = RST.CUST_NO;
+                            var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + _HES_ + "'").FirstOrDefault();
+                            if (data is not null && !string.IsNullOrEmpty(data.hes))
+                            {
+                                string thevalue = data.hes;
+                                if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                                {
+                                    ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
+                                }
+                                CUST_NO.SelectedValue = null;
+                                CUST_NO.SelectedValue = thevalue;
+                                CUST_NO.Items.Refresh();
+                            }
+                        }
+                        if (RST.ORDERER != null)
+                        {
+                            var _HES_ = RST.ORDERER;
+                            var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + _HES_ + "'").FirstOrDefault();
+                            if (data is not null && !string.IsNullOrEmpty(data.hes))
+                            {
+                                string thevalue = data.hes;
+                                if (!((List<Custom_CUST_HESAB>)ORDERER.ItemsSource).Any(item => item?.hes == thevalue))
+                                {
+                                    ((List<Custom_CUST_HESAB>)ORDERER.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
+                                }
+                                ORDERER.SelectedValue = null;
+                                ORDERER.SelectedValue = thevalue;
+                                ORDERER.Items.Refresh();
+                            }
+                        }
+
+                        this.CUST_NO_TXT.Text = RST.CUST_NO_TXT;
+                        this.PAYDATE.Text = RST.PAYDATE.ToString();
+                        this.TOZIH.Text = RST.TOZIH;
+                        this.CACHTIC.IsChecked = Convert.ToBoolean(RST.CACHTIC);
+                        this.CHACHMABL.Text = RST.CHACHMABL.ToString();
+                        this.CHEKTIC.IsChecked = Convert.ToBoolean(RST.CHEKTIC);
+                        this.CHEKMABL.Text = RST.CHEKMABL.ToString();
+                        this.CHEKFAGH.Text = RST.CHEKFAGH.ToString();
+                        this.CHEKDIST.Text = RST.CHEKDIST.ToString();
+                        this.CHEKMTIC.IsChecked = Convert.ToBoolean(RST.CHEKMTIC);
+                        this.CHEKMMABL.Text = RST.CHEKMMABL.ToString();
+                        this.CHEKMFAGH.Text = RST.CHEKMFAGH.ToString();
+                        this.CHEKMDIST.Text = RST.CHEKMDIST.ToString();
+                        this.USERNAME.Text = RST.USERNAME;
+
+
+                        SGN1.IsChecked = Convert.ToBoolean(RST.SGN1);
+                        SGN2.IsChecked = Convert.ToBoolean(RST.SGN2);
+                        SGN3.IsChecked = Convert.ToBoolean(RST.SGN3);
+
+                        SGN1usid.Tag = Convert.ToInt32(RST.sgn1usid);
+                        SGN2usid.Tag = Convert.ToInt32(RST.sgn2usid);
+                        SGN3usid.Tag = Convert.ToInt32(RST.sgn3usid);
+
+                        SGN1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == RST?.sgn1usid)?.SAL_NAME;
+                        SGN2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == RST?.sgn2usid)?.SAL_NAME;
+                        SGN3usid.Text = rst_personel.FirstOrDefault(x => x.IDD == RST?.sgn3usid)?.SAL_NAME;
+                    }
+                    else
+                    {
+                        new Msgwin(false, "چنین درخواست پرداختی وجود ندارد !").ShowDialog();
+                        this.Close();
+                        return;
+                    }
+                }
+                CL_HESABDARI.LetSigneTick(this.GetType().Name, 100, Convert.ToInt32(Baseknow.USERCOD), new WindowInteropHelper(this).Handle);
+
+                Form_Current();
+
+                if (IS_READ_ONLY_MODE)
+                {
+                    SGN1.IsEnabled = false;
+                    SGN2.IsEnabled = false;
+                    SGN3.IsEnabled = false;
+                    //PERSONEL.IsEnabled = false;
+                    BTN_SAVE.IsEnabled = false;
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(IDD.Text) || IDD.Text == "0")
+                    {
+                        SGN1.IsEnabled = false;
+                        SGN2.IsEnabled = false;
+                        SGN3.IsEnabled = false;
+                        //PERSONEL.IsEnabled = false;
+                    }
+                }
+
+            }
+        }
+        private bool OnInsertRecord(PAYORDER record)
+        {
+            try
+            {
+                var itemtoadd = dbms.DoGetDataSQL<PAYORDER>($"SELECT TOP 1 * FROM PAYORDER  WHERE IDD = {IDD.Text} ").FirstOrDefault();
+                record = itemtoadd;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+        private void RefreshAfterUpdate()
+        {
+            //NewRecord = false;
+
+            var CURRENT_HEADER = dbms.DoGetDataSQL<PAYORDER>($"SELECT * FROM PAYORDER WHERE IDD = {IDD.Text} ").FirstOrDefault();
+            _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
+        }
+
         private void FILL_ALL_COMBOBOXES()
         {
             //var RST_HESABS = dbms.DoGetDataSQL<Custom_CUST_HESAB>(@"SELECT hes,NAME FROM CUST_HESAB").ToList();
@@ -269,122 +541,7 @@ namespace Wins.WinMenus.HESABDARI
         }
         public void Form_Current()
         {
-        }
-        public void ReGetMasterData()
-        {
-            PAYDATE.Focus();
-            PAYDATE.Text = Tarikh.FullCurrentDate;
-            PAYDATE.SelectAll();
-
-            USERNAME.Text = Baseknow.UUSER;
-
-            #region Form_Load
-
-            if (true)
-            {
-                var _HES_ = CL_HESABDARI.GETUSERCO((int)Baseknow.USERCOD);
-                var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + _HES_ + "'").FirstOrDefault();
-                if (data is not null && !string.IsNullOrEmpty(data.hes))
-                {
-                    string thevalue = data.hes;
-                    if (!((List<Custom_CUST_HESAB>)ORDERER.ItemsSource).Any(item => item?.hes == thevalue))
-                    {
-                        ((List<Custom_CUST_HESAB>)ORDERER.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
-                    }
-                    ORDERER.SelectedValue = null;
-                    ORDERER.SelectedValue = thevalue;
-                    ORDERER.Items.Refresh();
-                }
-            }
-
-            if (!IsNull(NUMBER_TO_OPEN))
-            {
-                var RST = dbms.DoGetDataSQL<PAYORDER>("SELECT * FROM PAYORDER WHERE IDD = " + NUMBER_TO_OPEN).FirstOrDefault();
-                if (RST != null)
-                {
-                    this.IDD.Text = RST.IDD.ToString();
-                    this.MABLS.Text = RST.MABLS.ToString();
-                    this.BABAT.Text = RST.BABAT;
-                    if (RST.CUST_NO != null)
-                    {
-                        var _HES_ = RST.CUST_NO;
-                        var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + _HES_ + "'").FirstOrDefault();
-                        if (data is not null && !string.IsNullOrEmpty(data.hes))
-                        {
-                            string thevalue = data.hes;
-                            if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
-                            {
-                                ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
-                            }
-                            CUST_NO.SelectedValue = null;
-                            CUST_NO.SelectedValue = thevalue;
-                            CUST_NO.Items.Refresh();
-                        }
-                    }
-                    if (RST.ORDERER != null)
-                    {
-                        var _HES_ = RST.ORDERER;
-                        var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + _HES_ + "'").FirstOrDefault();
-                        if (data is not null && !string.IsNullOrEmpty(data.hes))
-                        {
-                            string thevalue = data.hes;
-                            if (!((List<Custom_CUST_HESAB>)ORDERER.ItemsSource).Any(item => item?.hes == thevalue))
-                            {
-                                ((List<Custom_CUST_HESAB>)ORDERER.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
-                            }
-                            ORDERER.SelectedValue = null;
-                            ORDERER.SelectedValue = thevalue;
-                            ORDERER.Items.Refresh();
-                        }
-                    }
-
-                    this.CUST_NO_TXT.Text = RST.CUST_NO_TXT;
-                    this.PAYDATE.Text = RST.PAYDATE.ToString();
-                    this.TOZIH.Text = RST.TOZIH;
-                    this.CACHTIC.IsChecked = Convert.ToBoolean(RST.CACHTIC);
-                    this.CHACHMABL.Text = RST.CHACHMABL.ToString();
-                    this.CHEKTIC.IsChecked = Convert.ToBoolean(RST.CHEKTIC);
-                    this.CHEKMABL.Text = RST.CHEKMABL.ToString();
-                    this.CHEKFAGH.Text = RST.CHEKFAGH.ToString();
-                    this.CHEKDIST.Text = RST.CHEKDIST.ToString();
-                    this.CHEKMTIC.IsChecked = Convert.ToBoolean(RST.CHEKMTIC);
-                    this.CHEKMMABL.Text = RST.CHEKMMABL.ToString();
-                    this.CHEKMFAGH.Text = RST.CHEKMFAGH.ToString();
-                    this.CHEKMDIST.Text = RST.CHEKMDIST.ToString();
-                    this.USERNAME.Text = RST.USERNAME;
-
-
-                    SGN1.IsChecked = Convert.ToBoolean(RST.SGN1);
-                    SGN2.IsChecked = Convert.ToBoolean(RST.SGN2);
-                    SGN3.IsChecked = Convert.ToBoolean(RST.SGN3);
-
-                    SGN1usid.Tag = Convert.ToInt32(RST.sgn1usid);
-                    SGN2usid.Tag = Convert.ToInt32(RST.sgn2usid);
-                    SGN3usid.Tag = Convert.ToInt32(RST.sgn3usid);
-
-                    SGN1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == RST?.sgn1usid)?.SAL_NAME;
-                    SGN2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == RST?.sgn2usid)?.SAL_NAME;
-                    SGN3usid.Text = rst_personel.FirstOrDefault(x => x.IDD == RST?.sgn3usid)?.SAL_NAME;
-                }
-                else
-                {
-                    new Msgwin(false, "چنین درخواست پرداختی وجود ندارد !").ShowDialog();
-                    this.Close();
-                    return;
-                }
-            }
-            //if ((bool)Baseknow.SIGN)
-            //{
-            //    this.SGN1.Visibility = true;
-            //    this.SGN2.Visibility = true;
-            //    this.SGN3.Visibility = true;
-            //    this.sgn1usid.Visibility = true;
-            //    this.sgn2usid.Visibility = true;
-            //    this.sgn3usid.Visibility = true;
-            //    this.PERSONEL.Visibility = true;
-            //}
-            CL_HESABDARI.LetSigneTick(this.GetType().Name, 100, Convert.ToInt32(Baseknow.USERCOD), new WindowInteropHelper(this).Handle);
-            #endregion
+            AllowEdits = false;
         }
         private bool HeaderIsValid(bool _DisplayErrors = true)
         {
@@ -784,6 +941,8 @@ namespace Wins.WinMenus.HESABDARI
                     SELECT CAST(SCOPE_IDENTITY() as int)";
                     var idd = dbms.DoGetDataSQL<int>(insertSql, payOrder).FirstOrDefault();
                     this.IDD.Text = idd.ToString();
+
+                    RefreshAfterUpdate();
                 }
                 else
                 {
@@ -913,7 +1072,61 @@ namespace Wins.WinMenus.HESABDARI
             PERSONEL.SelectedValue = null; PERSONEL.Items.Refresh();
             PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
 
-            ReGetMasterData();
+            //ReGetMasterData();
+        }
+
+        private void ClearFreshAll()
+        {
+            IS_READ_ONLY_MODE = false;
+            NUMBER_TO_OPEN = null;
+
+            IDD.Text = null; //شماره
+            PAYDATE.Text = Tarikh.FullCurrentDate;
+            USERNAME.Text = Baseknow.UUSER;
+            MABLS.Text = "0"; //مبلغ
+            BABAT.Text = null; //بابت
+            CUST_NO.SelectedValue = null; //حساب دریافت کننده
+            CUST_NO2.SelectedValue = null; //حساب دریافت کننده
+            CUST_NO_TXT.Text = null; //دریافت کننده(نماینده)
+            TOZIH.Text = null; //توضیحات
+            ORDERER.SelectedValue = null; ORDERERID.SelectedValue = null; //درخواست کننده
+
+            CACHTIC.IsChecked = false; //نقد
+            CHEKTIC.IsChecked = false; //چک شرکت
+            CHEKMTIC.IsChecked = false; //چک مشتری
+            CHACHMABL.Text = "0"; //مبلغ نقد
+            CHEKMABL.Text = "0"; //مبلغ چک شرکت
+            CHEKFAGH.Text = "0"; // تعداد فقره چک شرکت
+            CHEKDIST.Text = "0"; // تعداد فقره چک شرکت با فاصله روز
+            CHEKMMABL.Text = "0"; //مبلغ چک مشتری
+            CHEKMFAGH.Text = "0"; //تعداد فقره چک مشتری
+            CHEKMDIST.Text = "0"; //تعداد فقره چک مشتری با فاصله روز
+
+            SGN1.IsChecked = false; //مدیر واحد
+            SGN2.IsChecked = false;
+            SGN3.IsChecked = false;
+
+            CUST_NO.SelectedIndex = -1; CUST_NO.Items.Refresh();
+
+            SGN1usid.Text = null; SGN1usid.Tag = null; SGN1.IsChecked = false;
+            SGN2usid.Text = null; SGN2usid.Tag = null; SGN2.IsChecked = false;
+            SGN3usid.Text = null; SGN3usid.Tag = null; SGN3.IsChecked = false;
+
+            PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
+            PERSONEL.SelectedIndex = -1; PERSONEL.Items.Refresh();
+            PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+
+            Form_Current();
+
+            AllowEdits = true;
+
+            GetDefaultFocus();
+        }
+
+        private void GetDefaultFocus()
+        {
+            PAYDATE.Focus();       
+            PAYDATE.SelectAll();
         }
 
         private void BTN_INFO_RECIVER_Click(object sender, RoutedEventArgs e)
@@ -993,6 +1206,19 @@ namespace Wins.WinMenus.HESABDARI
                 }
             }
 
+        }
+
+        private void ESLAH_Click(object sender, RoutedEventArgs e)
+        {
+            if (CL_HESABDARI.LETSGO("PAYORDL"))
+            {
+                if (!NewRecord)
+                {
+                    var dt = DateTime.Now;
+                    CL_HESABDARI.TR("payorder", "(idd = " + IDD.Text + " )", dt, 1);
+                    AllowEdits = true;
+                }
+            }
         }
     }
 }

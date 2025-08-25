@@ -1278,6 +1278,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         private void Child14_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+            if (e.Row.Item == null) { return; }
+
             #region NEED
             ComboBox Comboval = null;
             TextBox TexboVal = null;
@@ -1587,17 +1591,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         {
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
-
-            if (e.Row.Item == null)
-            {
-                return;
-            }
+            if (e.Row.Item == null) { return; }
 
             var ROW = e.Row.Item as DEED_DTL;
-            if (e.Row.Item == null || ROW is null)
-            {
-                return;
-            }
+            if (ConstructorRowDetector.IsPristine(ROW)) { Child14_CANCEL_EDIT(); return; }
+            if (ROW is null) { return; }
 
 
             IsSaveSuccess = false;
@@ -1624,9 +1622,15 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             //    return;
 
             //}
+            if (ROW.HES_K == null)
+            {
+                universControl.PopNotifyShow("حساب کل نمی‌تواند خالی باشد.", Pop1, Pop1Text1, Pop_Border1);
+                Child14_CANCEL_EDIT();
+                return;
+            }
 
 
-            if (CURRENT_ITMES_ROW?.NAME_HES is null || CURRENT_ITMES_ROW.HES is null)
+            if (ROW?.NAME_HES is null || ROW.HES is null)
             {
                 universControl.PopNotifyShow("حساب به درستی انتخاب نشده.", Pop1, Pop1Text1, Pop_Border1);
 
@@ -1634,7 +1638,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 return;
             }
 
-            if (CURRENT_ITMES_ROW.BED == 0 && CURRENT_ITMES_ROW.BES == 0)
+            if (ROW.BED == 0 && ROW.BES == 0)
             {
                 universControl.PopNotifyShow("بدهکار یا بستانکار نمیتواند خالی باشد !.", Pop1, Pop1Text1, Pop_Border1);
 
@@ -1678,7 +1682,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             #endregion
 
             DG_ON_CURRENT();
-
 
             try
             {

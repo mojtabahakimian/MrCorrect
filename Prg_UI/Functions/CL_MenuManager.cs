@@ -1235,7 +1235,13 @@ namespace Functions
                     break;
 
                 case WinNameType.paymentformorder: //درخواست پرداخت وجه
-                    CL_LMethods.OpenWindow(OWNERWIN, new paymentformorder((double?)_PARAMETERS_.FirstOrDefault(), _PARAMETERS_.Length > 1 ? (bool)_PARAMETERS_[1] : false));
+                    //CL_LMethods.OpenWindow(OWNERWIN, new paymentformorder((double?)_PARAMETERS_.FirstOrDefault(), _PARAMETERS_.Length > 1 ? (bool)_PARAMETERS_[1] : false));
+
+                    CL_LMethods.OpenWindow(OWNERWIN, new paymentformorder(
+                        _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                        _PARAMETERS_.Length > 1 ? (bool)_PARAMETERS_[1] : false,
+                        _PARAMETERS_.Length > 2 && Convert.ToBoolean(_PARAMETERS_[2]))
+                        );
                     break;
 
                 case WinNameType.paymentformorder_LIST: //لیست درخواست پرداخت وجه
@@ -1809,7 +1815,7 @@ namespace Functions
                     break;
 
                 case 100:
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
+                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, Thewindowthis, Convert.ToDouble(_NUM_), false, _isCalledFromAutomasion_);
                     break;
 
                 case 90:

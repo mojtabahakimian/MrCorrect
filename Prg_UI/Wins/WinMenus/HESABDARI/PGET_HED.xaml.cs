@@ -2158,6 +2158,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         {
             if (!NowIsReady || PGET_LST_SUB == null || PGET_LST_SUB.Items.Count == 0) return;
 
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+            if (e.Row.Item == null) { return; }
+
+
             DataGrid dataGrid = PGET_LST_SUB;
             int row_index = dataGrid?.ItemContainerGenerator.IndexFromContainer(e.Row) ?? -1;
 
@@ -3367,12 +3372,16 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         bool IsSaveSuccess = true;
         private void PGET_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            IsSaveSuccess = false;
-
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
             if (e.Row.Item == null) { return; }
+            var ROW = e.Row.Item as PGET_LST;
+            if (ConstructorRowDetector.IsPristine(ROW)) { PGET_HED_SUB_CANCEL_EDIT(); return; }
+            if (ROW is null) { return; }
+
+            IsSaveSuccess = false;
+
 
             //Form_BeforeUpdate
             PGET_LST? THE_ROW_ITEM = (e.Row.Item as PGET_LST);
