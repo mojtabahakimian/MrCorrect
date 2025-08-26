@@ -744,7 +744,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             CUST_NO.SelectedIndex = -1; CUST_NO.Items.Refresh();
 
             DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER; DEPATMAN.Items.Refresh(); //واحد
-
+            SHIFT.SelectedValue = CL_Generaly.SHIFT_OF_USER; SHIFT.Items.Refresh(); //شیفت این کاربر
             CUST_KIND.SelectedIndex = 0; CUST_KIND.Items.Refresh(); //نوع مشتری 
 
             OKF.IsChecked = false; //تایید فاکتور
@@ -3655,7 +3655,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             var DG = PAY_GETP_SUB;
 
-            
+
             if (e.Row.Item == null)
             {
                 return;

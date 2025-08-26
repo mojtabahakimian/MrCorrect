@@ -315,6 +315,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه بر اساس گروه (در تاریخ برگشت)", WIN_NAME = CL_MenuManager.WinNameType.VISITOR_GOL_GRP_REP_MAR });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه (در تاریخ برگشت)", WIN_NAME = CL_MenuManager.WinNameType.VISITOR_GOL_REP_MAR });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "صدور برگه خروج سایر مواد از انبار", WIN_NAME = CL_MenuManager.WinNameType.HAVALE_EXIT_SAYER });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مدیریت ارتباط با مشتری | CRM", WIN_NAME = CL_MenuManager.WinNameType.CRMMAIN });
 
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());
 

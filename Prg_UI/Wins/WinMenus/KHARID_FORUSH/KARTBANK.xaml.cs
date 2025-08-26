@@ -167,6 +167,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 new Msgwin(false, "كليد اصلاح را بزنيد تا فاكتور قابل اصلاح باشد").ShowDialog();
                 Close();
             }
+
+            Text0.Focus();
         }
     }
 }

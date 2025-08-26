@@ -677,6 +677,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             DATE_N.Text = Tarikh.FullCurrentDate; //تاریخ
             USER_NAME.Text = Baseknow.UUSER; // نام کاربری
+            SHIFT.SelectedValue = CL_Generaly.SHIFT_OF_USER; SHIFT.Items.Refresh();
 
             CUST_NO.SelectedIndex = -1; CUST_NO.Items.Refresh();
 
@@ -2591,6 +2592,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             MABL_HAV.IsReadOnly = !CAN;
             TAKHFIF.IsReadOnly = !CAN;
             MABL_HAZ.IsReadOnly = !CAN;
+            FNUMCO.IsReadOnly = !CAN;
 
             MOIN_VAR.IsEnabled = CAN;
             CMB_MOIN_VAR.IsEnabled = CAN;
@@ -2618,6 +2620,33 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             CAM_KHALY.IsReadOnly = !CAN;
             CAM_POOR.IsReadOnly = !CAN;
             TOZIH.IsReadOnly = !CAN;
+
+            //مودیان
+            inty.IsEnabled = CAN;
+            inp.IsEnabled = CAN;
+            ins.IsEnabled = CAN;
+            CUT.IsEnabled = CAN;
+            setm.IsEnabled = CAN;
+
+            sbc.IsReadOnly = !CAN;
+            bbc.IsReadOnly = !CAN;
+            ft.IsReadOnly = !CAN;
+            bpn.IsReadOnly = !CAN;
+            scln.IsReadOnly = !CAN;
+            scc.IsReadOnly = !CAN;
+            cdcn.IsReadOnly = !CAN;
+            cdcd.IsReadOnly = !CAN;
+            crn.IsReadOnly = !CAN;
+            irtaxid.IsReadOnly = !CAN;
+            billid.IsReadOnly = !CAN;
+            todam.IsReadOnly = !CAN;
+            tonw.IsReadOnly = !CAN;
+            torv.IsReadOnly = !CAN;
+            tocv.IsReadOnly = !CAN;
+            cap.IsReadOnly = !CAN;
+            insp.IsReadOnly = !CAN;
+            tvop.IsReadOnly = !CAN;
+            tax17.IsReadOnly = !CAN;
         }
         private void SANAD()
         {
@@ -6827,10 +6856,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                             }
                         }
 
+                        MOLAH.Text = Strings.Left(rst.SHARAYET.ToStringNullSafe(), 200); //ملاحظات سربرگ حواله تگ 2 => SHARAYET ====== ملاحظات سربرگ فاکتور با تگ 13 => MOLAH
+
                         MAS_MAGHSAD_HV = (double)rst.MAS;
 
                         FNUMCO.Text = string.IsNullOrEmpty(rst.FNUMCO.ToStringNullSafe()) ? "0" : rst.FNUMCO.ToStringNullSafe();
-                        MOLAH.Text = Strings.Left(rst.SHARAYET.ToStringNullSafe(), 200); //ملاحظات سربرگ حواله تگ 2 => SHARAYET ====== ملاحظات سربرگ فاکتور با تگ 13 => MOLAH
 
                         JAY.IsChecked = Convert.ToBoolean(rst.JAY);
                         TICMBAA.IsChecked = rst.TICMBAA;
@@ -7613,7 +7643,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             DisplayError = true; //reset it
             SavedSuccessBtn = true; //ذخیره با موفقیت انجام شده
 
-            universControl.PopNotifyShow("اطلاعات با موفقیت ذخیره شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C", 1);
+            universControl.PopNotifyShow(".اطلاعات با موفقیت ذخیره شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C", 1);
         } //SAVE -------------------------------------------------------------------------
 
         private void CalculateIMBAA()
@@ -7786,9 +7816,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 }
                 else
                 {
+                    //HEADER_FAC?.MOLAH //این خط حذف شد
                     _qre = $@"UPDATE dbo.HEAD_LST
                     SET NUMBER = {NUMBER.Text},
-                    TAH = N'{HEADER_FAC?.TAH}', MAS = {MAS_MAGHSAD_HV}, VAS = {VAS}, N_S = {_n_s}, CUST_NO = N'{CUST_NO.SelectedValue}', MOLAH = N'{HEADER_FAC?.MOLAH}',
+                    TAH = N'{HEADER_FAC?.TAH}', MAS = {MAS_MAGHSAD_HV}, VAS = {VAS}, N_S = {_n_s}, CUST_NO = N'{CUST_NO.SelectedValue}', MOLAH = N'{MOLAH.Text}',
                     M_NAGHD = {M_NAGHD2.Text}, MABL_VAR = {MABL_VAR2.Text}, MOIN_VAR = N'{CMB_MOIN_VAR2.SelectedValue}', MABL_HAV = {MABL_HAV2.Text}, MOIN_HAV = N'{CMB_MOIN_HAV2.SelectedValue}',
                     MABL_HAZ = {MABL_HAZ.Text}, MOIN_HAZ = N'{CMB_MOIN_HAZ.SelectedValue}', TAKHFIF = {TAKHFIF2.Text},
                     DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue}, CUST_KIND = {CUST_KIND.SelectedValue},
@@ -8545,7 +8576,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 if (NUMBER.Text != "0" && NUMBER.Text != null) //Saved Before
                 {
-                    BUTTON_SAVE_HAVALE_Click(null, null); // اول ذخیره IVNO_LST
+                    if (!SavedSuccessBtn || _navigationManager.IsNewRecord)
+                    {
+                        BUTTON_SAVE_HAVALE_Click(null, null); // اول ذخیره IVNO_LST
+                    }
 
                     if (SavedSuccessBtn)
                     {
@@ -8563,7 +8597,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 if (NUMBER.Text != "0" && NUMBER.Text != null) //Saved Before
                 {
-                    BUTTON_SAVE_HAVALE_Click(null, null); // اول ذخیره IVNO_LST
+                    if (!SavedSuccessBtn || _navigationManager.IsNewRecord)
+                    {
+                        BUTTON_SAVE_HAVALE_Click(null, null); // اول ذخیره IVNO_LST
+                    }
+
                     if (SavedSuccessBtn)
                     {
                         KARTBANK kartbank = new KARTBANK(I_AM_FOROOSH22);

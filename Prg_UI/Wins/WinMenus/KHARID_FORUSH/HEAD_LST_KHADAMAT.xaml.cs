@@ -646,7 +646,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             MAS.Text = "0"; //مدت
 
             DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER; DEPATMAN.Items.Refresh(); //واحد
-
+            SHIFT.SelectedValue = CL_Generaly.SHIFT_OF_USER; SHIFT.Items.Refresh(); //شیفت این کاربر
             CUST_KIND.SelectedIndex = 0; CUST_KIND.Items.Refresh(); //نوع مشتری 
 
             OKF.IsChecked = false; //تایید فاکتور

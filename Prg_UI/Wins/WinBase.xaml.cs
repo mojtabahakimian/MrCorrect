@@ -1104,5 +1104,11 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT, this); //تعریف اعلامیه قیمت
         }
+
+        private void Button_Click_90(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CRMMAIN, this); //مدیریت ارتباط با مشتری CRM
+
+        }
     }
 }

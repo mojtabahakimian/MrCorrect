@@ -11,16 +11,16 @@
     FontFamily="{StaticResource IRANYEKAN}"
     AllowsTransparency="True"
     AllowDrop="True" WindowStyle="None"
-    Title="" Height="100" Width="430"  WindowStartupLocation="CenterScreen"  KeyDown="Window_KeyDown" Loaded="Window_Loaded">
+    Title="" Height="100" Width="430"  WindowStartupLocation="CenterScreen"  KeyDown="Window_KeyDown" Loaded="Window_Loaded" >
     <Grid x:Name="mygrid">
-        <Border CornerRadius="10,10,10,10"  Padding="8" RenderTransformOrigin="0.5,0.5" Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding ElementName=GENERAL_RANG,Path=Background}" Grid.ColumnSpan="5">
+        <Border CornerRadius="10,10,10,10"  Padding="8" RenderTransformOrigin="0.5,0.5" Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding ElementName=GENERAL_RANG,Path=Background}" BorderThickness="1" Grid.ColumnSpan="5">
             <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding ElementName=GENERAL_RANG,Path=Background}"  Margin="-7.999,-7.928,-8,0" VerticalAlignment="Top" MinHeight="27" UseLayoutRounding="False" Height="16.667" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
                 <Label Content="کارت بانک" Padding="10,6,6,6" Foreground="White" FontSize="9"/>
             </Border>
         </Border>
-        <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" ThreeTwoZero="True"   x:Name="Text0"  Height="27"   VerticalAlignment="Bottom"   Visibility="Visible"  HorizontalAlignment="Left" Width="166"  Text="0" Margin="193,0,0,24" />
+        <CNC:NumericTextBox  DoesAcceptDouble="False" IsDigitGroupActive="True" ThreeTwoZero="True"   x:Name="Text0"  Height="27"   VerticalAlignment="Bottom"   Visibility="Visible"  HorizontalAlignment="Left" Width="166"  Text="0" Margin="193,0,0,24" />
         <TextBlock Text="کارت بانک :" HorizontalAlignment="Left" Height="23" Margin="361,50,0,0" VerticalAlignment="Top" Width="60" FlowDirection="RightToLeft"/>
-        <Button x:Name="OK_BTN" FontSize="8"   Width="67" Height="35" Content="تایید" HorizontalAlignment="Left" Margin="6,43,0,0" VerticalAlignment="Top"  Padding="1,1,1,4" TabIndex="1" BorderBrush="{x:Null}" Foreground="#DDFFFFFF" Click="OK_BTN_Click"/>
+        <Button x:Name="OK_BTN" FontSize="10"   Width="67" Height="35" Content="تایید" HorizontalAlignment="Left" Margin="6,44,0,0" VerticalAlignment="Top"  Padding="1,1,1,4" TabIndex="1" BorderBrush="{x:Null}" Foreground="#DDFFFFFF" Click="OK_BTN_Click"/>
 
         <ComboBox x:Name="PORTP"  Padding="7,0,10,0" Style="{StaticResource MaterialDesignOutlinedComboBox}" IsTextSearchEnabled="True" Margin="78,48,0,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="110" SelectedValue="COM1" SelectedValuePath="Content">
             <ComboBoxItem Content="COM1"/>

@@ -37,6 +37,7 @@ using Prg_UI.Wins.WinMenus.BARNAME_RIZI;
 using Prg_UI.Wins.WinMenus.SANATI;
 using Prg_UI.Wins.WinMenus.Taarif;
 using System.Threading;
+using Prg_UI.Wins.WinMenus.CRM;
 
 namespace Functions
 {
@@ -765,6 +766,10 @@ namespace Functions
             /// تعریف اعلامیه قیمت
             /// </summary>
             PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT,
+            /// <summary>
+            /// مدیریت ارتباط با مشتری CRM
+            /// </summary>
+            CRMMAIN,
         }
         #endregion
 
@@ -781,6 +786,8 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+                case WinNameType.CRMMAIN: /* مدیریت ارتباط با مشتری CRM */ CL_LMethods.OpenWindow(OWNERWIN, new CRMMAIN(), isModalDialog: false, allowMultipleInstances: false); break;
+
                 case WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT: /* تعریف اعلامیه قیمت */ CL_LMethods.OpenWindow(OWNERWIN, new PRICE_ELAMIE_FORM(), isModalDialog: false, allowMultipleInstances: false); break;
                 //Mojtaba}
 
