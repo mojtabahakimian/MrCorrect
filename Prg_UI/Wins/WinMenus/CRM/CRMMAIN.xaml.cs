@@ -170,7 +170,8 @@ namespace Prg_UI.Wins.WinMenus.CRM
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
-            CL_HESABDARI.SETSECURITY(this.GetType().Name, "VCHD", new WindowInteropHelper(this).Handle, this.GetType().Name);
+            //CL_HESABDARI.SETSECURITY(this.GetType().Name, "VCHD", new WindowInteropHelper(this).Handle, this.GetType().Name);
+            CL_HESABDARI.LETSGO(this.GetType().Name, "NOTE");
             if (!this.IsLoaded)
             {
                 this.Close();
@@ -214,7 +215,7 @@ namespace Prg_UI.Wins.WinMenus.CRM
         private void ReGetData()
         {
             CUSTOMER_DATA?.Clear();
-            var customers = dbms.DoGetDataSQL<COPMANES>(@"SELECT COPMANES.*, eventscount.idcn FROM COPMANES LEFT OUTER JOIN eventscount ON COPMANES.id = eventscount.idc ORDER BY COPMANES.id").ToList();
+            var customers = dbms.DoGetDataSQL<COPMANES>($@"SELECT COPMANES.*, eventscount.idcn FROM COPMANES LEFT OUTER JOIN eventscount ON COPMANES.id = eventscount.idc where  COPMANES.userid={Baseknow.USERCOD.ToString()} ORDER BY COPMANES.id ").ToList();
             foreach (var item in customers)
             {
                 CUSTOMER_DATA.Add(item);
