@@ -394,7 +394,7 @@
                                     </Style>
                                 </DataGridTextColumn.CellStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn 	x:Name="MANDAH_COLUMN" 	      Binding="{Binding MANDAH,UpdateSourceTrigger=LostFocus}"           Header="ملاحظات"              Width="200" MinWidth="130" Visibility="Visible" >
+                            <DataGridTextColumn 	x:Name="MANDAH_COLUMN" 	      Binding="{Binding MANDAH,UpdateSourceTrigger=LostFocus}"           Header="ملاحظات"              Width="250" MinWidth="130" Visibility="Visible" >
                                 <DataGridTextColumn.EditingElementStyle>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                                         <Setter Property="MaxLength" Value="48" />
@@ -703,7 +703,7 @@
                         </Style>
                     </Grid.Style>
                     <Label Content="مبلغ تخفیف :" Margin="0,160,34,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                    <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" x:Name="M_NAGHD"   Text="0" Height="27" Margin="0,65,104,0"    VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Right" Width="123"  PreviewLostKeyboardFocus="M_NAGHD_PreviewLostKeyboardFocus" MaxLength="16" />
+                    <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" x:Name="M_NAGHD"   Text="0" Height="27" Margin="0,65,104,0"    VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Right" Width="123"  PreviewLostKeyboardFocus="M_NAGHD_PreviewLostKeyboardFocus" MaxLength="16" TabIndex="99" />
 
 
                     <DataGrid x:Name="PAY_GETD_SUB22"
@@ -1077,7 +1077,7 @@
                             </Style>
                         </DataGrid.Style>
                         <DataGrid.Columns >
-                            <DataGridTextColumn Header="کد حساب" Width="80" MinWidth="80" Binding="{Binding CUST_NO}" IsReadOnly="True">
+                            <DataGridTextColumn Header="کد حساب" Width="100" MinWidth="80" Binding="{Binding CUST_NO}" IsReadOnly="True">
                                 <DataGridTextColumn.CellStyle>
                                     <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
                                         <Setter Property="Focusable" Value="False"/>
@@ -1202,6 +1202,7 @@
             </TabItem>
             <TabItem Header="مودیان" x:Name="moadian" IsKeyboardFocusWithinChanged="moadian_IsKeyboardFocusWithinChanged">
                 <Grid>
+                    <Button IsEnabled="{Binding ElementName=ESLAH,Path=IsEnabled,UpdateSourceTrigger=PropertyChanged}" Content="اصلاح برگه" Margin="0,20,414,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Right" Width="92" Foreground="#DDFFFFFF" FontWeight="Bold" Click="ESLAH_Click"/>
 
                     <CNC:NumericTextBox x:Name="torv" IsDigitGroupActive="True" DoesAcceptDouble="False" Text="0" Height="28" Margin="42,228,0,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="300" DigitGroupOnEnter="True"  />
                     <ComboBox x:Name="inty"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" DisplayMemberPath="NAME" SelectedValuePath="ID" IsTextSearchEnabled="True" Margin="0,96,200,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" Width="300" HorizontalAlignment="Right">
@@ -1212,8 +1213,8 @@
                         </ComboBox.ItemsPanel>
                     </ComboBox>
                     <Button x:Name="BTN_SEND_INVOICE" Click="BTN_SEND_INVOICE_Click"  Content="ارسال فاکتور به سامانه مودیان"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Foreground="#DDFFFFFF" Margin="0,20,34,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Right" Width="186" />
-                    <Label Content="شماره منحصر به فرد مالیاتی صورتحساب مرجع:" Margin="246,27,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top"/>
-                    <TextBox x:Name="irtaxid"   Text="" Height="28" Margin="42,26,0,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="200" HorizontalAlignment="Left" />
+                    <Label Content="شماره منحصر به فرد مالیاتی صورتحساب مرجع:" Margin="246,51,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top"/>
+                    <TextBox x:Name="irtaxid"   Text="" Height="28" Margin="42,50,0,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="200" HorizontalAlignment="Left" />
                     <Label Content="نوع صورتحساب:" Margin="0,97,122,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="26" VerticalAlignment="Top"/>
                     <Label Content="الگوی صورتحساب:" Margin="0,130,113,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="26" VerticalAlignment="Top"/>
                     <ComboBox x:Name="inp"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" DisplayMemberPath="NAME" SelectedValuePath="ID"  IsTextSearchEnabled="True" Margin="0,129,200,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" Width="300" HorizontalAlignment="Right">
@@ -1239,8 +1240,8 @@
                     <TextBox x:Name="ft"   Text="0" Height="28" Margin="0,261,200,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="300" HorizontalAlignment="Right" AutomationProperties.HelpText="0" />
                     <Label Content="شماره گذرنامه خریدار:" Margin="0,295,100,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="26" VerticalAlignment="Top"/>
                     <TextBox x:Name="bpn"   Text="0" Height="28" Margin="0,294,200,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="300" HorizontalAlignment="Right" />
-                    <Label Content="شماره پروانه گمرکی:" Margin="856,328,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top"/>
-                    <TextBox x:Name="scln"   Text="0" Height="28" Margin="554,328,0,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="300" HorizontalAlignment="Left" />
+                    <Label Content="شماره پروانه گمرکی:" Margin="866,0,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Height="26" VerticalAlignment="Center"/>
+                    <TextBox x:Name="scln"   Text="0" Height="28" Margin="560,0,0,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Center" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="300" HorizontalAlignment="Left" />
                     <Label Content="کد گمرک محل اظهار فروشنده:" Margin="0,361,66,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="26" VerticalAlignment="Top"/>
                     <TextBox x:Name="scc"   Text="0" Height="28" Margin="0,360,200,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="300" HorizontalAlignment="Right" />
                     <Label Content="شماره کوتاژ اظهارنامه گمرکی:" Margin="0,394,71,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="26" VerticalAlignment="Top"/>

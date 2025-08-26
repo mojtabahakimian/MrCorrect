@@ -110,7 +110,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-         
+            Text0.Focus();
+            Text0.SelectAll();
         }
         private void OK_BTN_Click(object sender, RoutedEventArgs e)
         {

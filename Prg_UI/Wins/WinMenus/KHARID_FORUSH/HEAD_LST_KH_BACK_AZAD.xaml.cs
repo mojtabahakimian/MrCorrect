@@ -682,7 +682,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             USER_NAME.Text = Baseknow.UUSER; // نام کاربری
 
             CUST_NO.SelectedIndex = -1; CUST_NO.Items.Refresh();
-
+            SHIFT.SelectedValue = CL_Generaly.SHIFT_OF_USER; SHIFT.Items.Refresh(); //شیفت این کاربر
 
             DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER; DEPATMAN.Items.Refresh(); //واحد
 

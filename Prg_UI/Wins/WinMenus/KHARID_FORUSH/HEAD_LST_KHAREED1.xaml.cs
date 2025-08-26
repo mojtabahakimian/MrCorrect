@@ -4910,7 +4910,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             DATE_N.Text = Tarikh.FullCurrentDate; //تاریخ
             USER_NAME.Text = Baseknow.UUSER; // نام کاربری
-
+            SHIFT.SelectedValue = CL_Generaly.SHIFT_OF_USER; SHIFT.Items.Refresh(); //شیفت این کاربر
             CUST_NO.SelectedIndex = -1; CUST_NO.Items.Refresh();
             MOLAH.Text = null;
             MAS.Text = "0"; //مدت

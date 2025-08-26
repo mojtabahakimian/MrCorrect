@@ -78,9 +78,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 (THEWIN as HEAD_LST_FROOSH22).M_NAGHD2.Text = Text0.Text;
                 var HLFW = (THEWIN as HEAD_LST_FROOSH22);
                 CL_HESABDARI.APLAYTAKH(Convert.ToInt64(HLFW.NUMBER.Text), 2, Convert.ToDouble(HLFW.M_NAGHD.Text), Convert.ToDouble(HLFW.MABL_VAR.Text), Convert.ToDouble(HLFW.MABL_HAV.Text), (bool)HLFW.TICMBAA.IsChecked);
-                HLFW.BUTTON_SAVE_HAVALE_Click(null,null);
+                HLFW.BUTTON_SAVE_HAVALE_Click(null, null);
                 this.Close();
-              
+
             }
             //HEAD_LST_FROOSH2
             if (true)
@@ -112,6 +112,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 new Msgwin(false, "كليد اصلاح را بزنيد تا فاكتور قابل اصلاح باشد").ShowDialog();
                 Close();
             }
+
+            Text0.Focus();
         }
     }
 }
