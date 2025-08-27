@@ -7786,8 +7786,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 //Saving ...
                 string _qre = null;
 
-                string _n_s = string.IsNullOrEmpty(N_S.Text) ? "NULL" : N_S.Text;
-                if (Convert.ToDouble(_n_s) <= 0) _n_s = "NULL";
+                string _n_s = "NULL";
+                if (double.TryParse(N_S.Text, out var n_sVal) && n_sVal > 0)
+                {
+                    _n_s = n_sVal.ToString();
+                }
 
                 var HEADER_FAC = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TAH,MOLAH FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {hTAG}").FirstOrDefault(); //برای فاکتور غیر مستقیم
 

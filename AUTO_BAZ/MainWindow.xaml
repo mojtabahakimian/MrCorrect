@@ -62,7 +62,7 @@
                     </Button>
                 </StackPanel>
                 <TextBlock x:Name="SERVER_NAME_LBL" TextAlignment="Center" TextWrapping="Wrap"  Text="MERCEDES\SQL2019  Yazdsepar1401" Margin="11,0,10,58" FontSize="14" Foreground="White" Height="55" VerticalAlignment="Bottom"/>
-                <Label Content="نسخه 1404/05/18    1.3.9" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"  Margin="0,0,21,130" Foreground="#7FFFFFFF" HorizontalAlignment="Right" Width="153" Height="30" VerticalAlignment="Bottom" FontSize="13"/>
+                <Label Content="نسخه 1404/06/06    1.4.0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"  Margin="0,0,21,130" Foreground="#7FFFFFFF" HorizontalAlignment="Right" Width="153" Height="30" VerticalAlignment="Bottom" FontSize="13"/>
             </Grid>
         </Border>
 

@@ -49,7 +49,7 @@ namespace AUTO_BAZ.Functions
             });
         }
 
-        private static bool _defac = true;
+        private static volatile bool _defac = true; // Make it volatile for thread-safe reads
         /// <summary>
         /// تیک حساب هایی که نیست بساز
         /// </summary>
@@ -57,14 +57,21 @@ namespace AUTO_BAZ.Functions
         {
             get
             {
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                try
                 {
-                    var winy = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
-                    if (winy != null)
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
-                        _defac = Convert.ToBoolean(winy?.defacc?.IsChecked);
-                    }
-                }));
+                        var winy = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
+                        if (winy != null)
+                        {
+                            _defac = Convert.ToBoolean(winy?.defacc?.IsChecked);
+                        }
+                    }));
+                }
+                catch (Exception)
+                {
+                    return true;
+                }
                 return _defac;
             }
         }

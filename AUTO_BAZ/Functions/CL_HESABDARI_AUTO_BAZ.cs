@@ -5534,7 +5534,7 @@ namespace AUTO_BAZ.Functions
                             ,{HFRST[HFRST_EOF].NUMBER}
                             ,{13})");
 
-                                if (Convert.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) != 1d)
+                                if (SafeToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) != 1d)
                                 {
                                     CREATHES(Baseknow.GHEYMAT, Convert.ToInt64(jst_thr[jst_thr_EOF].CODE), Convert.ToInt64(jst_thr[jst_thr_EOF].CODE), jst_thr[jst_thr_EOF].NAME);
                                 }
@@ -5544,7 +5544,7 @@ namespace AUTO_BAZ.Functions
                                     //SDRST.AddNew(); // قيمت تمام شده
                                     N_S = max_ns;
                                     HES_K = Baseknow.GHEYMAT;
-                                    if (Convert.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                                    if (SafeToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
                                     {
                                         HES_M = 1;
                                         HES_T = 1;
@@ -5632,7 +5632,7 @@ namespace AUTO_BAZ.Functions
                                 HES_K = Baseknow.GHEYMAT;
                                 if (!string.IsNullOrEmpty(Baseknow.tindata))
                                 {
-                                    if (Convert.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                                    if (SafeToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
                                     {
                                         HES_M = 1;
                                         HES_T = 1;
@@ -6204,18 +6204,18 @@ namespace AUTO_BAZ.Functions
                             {
                                 if ((bool)!PRST[PRST_EOF].STAT)
                                 {
-                                    if (Math.Round((double)((JAMF - HFRST[HFRST_EOF].TAKHFIF + ((Convert.ToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * PRST[PRST_EOF].DARSAD / 100)) != PRST[PRST_EOF].PURSANT)
+                                    if (Math.Round((double)((JAMF - HFRST[HFRST_EOF].TAKHFIF + ((SafeToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * PRST[PRST_EOF].DARSAD / 100)) != PRST[PRST_EOF].PURSANT)
                                     {
-                                        PRST[PRST_EOF].PURSANT = Math.Round((double)((JAMF - HFRST[HFRST_EOF].TAKHFIF + ((Convert.ToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * PRST[PRST_EOF].DARSAD / 100));
+                                        PRST[PRST_EOF].PURSANT = Math.Round((double)((JAMF - HFRST[HFRST_EOF].TAKHFIF + ((SafeToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * PRST[PRST_EOF].DARSAD / 100));
 
                                         dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET PURSANT = {PRST[PRST_EOF].PURSANT} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{PRST[PRST_EOF].CUST_NO}' AND (TAG = 2) ");
                                         //PRST.update;
                                     }
                                 }
 
-                                else if (PRST[PRST_EOF].DARSAD != PRST[PRST_EOF].PURSANT / (JAMF - HFRST[HFRST_EOF].TAKHFIF + ((Convert.ToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * 100)
+                                else if (PRST[PRST_EOF].DARSAD != PRST[PRST_EOF].PURSANT / (JAMF - HFRST[HFRST_EOF].TAKHFIF + ((SafeToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * 100)
                                 {
-                                    PRST[PRST_EOF].DARSAD = PRST[PRST_EOF].PURSANT / (JAMF - HFRST[HFRST_EOF].TAKHFIF + ((Convert.ToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * 100;
+                                    PRST[PRST_EOF].DARSAD = PRST[PRST_EOF].PURSANT / (JAMF - HFRST[HFRST_EOF].TAKHFIF + ((SafeToDouble(Strings.Mid(Convert.ToString(Baseknow.OPTIONSS), 62, 1)) == 5) ? (HFRST[HFRST_EOF].MBAA) : 0)) * 100;
                                     dbms.DoExecuteSQL($"UPDATE VISITOR_DTL SET DARSAD = {PRST[PRST_EOF].DARSAD} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER}) AND CUST_NO = N'{PRST[PRST_EOF].CUST_NO}' AND (TAG = 2) ");
                                     //PRST.update;
                                 }
@@ -6677,6 +6677,8 @@ namespace AUTO_BAZ.Functions
                 }));
             }
 
+            bool isDefaccChecked = Generaly.defacc;
+
             double? _SANAD_NUMBER = null;
             //rst.GetType().GetProperties()[4].GetValue(rst, null) 
             //, CKOL = default, CMOIN = default, CTAF = default, CTAF2 = default, CTAF3 = default, CTAF4 = default, HKOL = default, HMOIN = default, HTAF = default, HTAF2 = default, HTAF3 = default, HTAF4 = default, takh;
@@ -6875,7 +6877,7 @@ namespace AUTO_BAZ.Functions
                     if (jst[jst_EOF].MABL_K != 0)
                     {
 
-                        if (Generaly.defacc)
+                        if (isDefaccChecked)
                         {
                             CREATHES(Baseknow.MOGODIA, jst[jst_EOF].ANBAR, Convert.ToInt64(jst[jst_EOF].CODE), jst[jst_EOF].NAME);
                         }
@@ -7177,7 +7179,7 @@ namespace AUTO_BAZ.Functions
                     }
                     if (KHSAY != 0d)
                     {
-                        if (Generaly.defacc)
+                        if (isDefaccChecked)
                         {
                             CREATHES(Baseknow.KHARID, 11, 1, "ساير 2");
                             // كنترل خريد '
@@ -7205,7 +7207,7 @@ namespace AUTO_BAZ.Functions
                         if (HS[(int)K] != 0d)
                         {
                             // كنترل خريد '
-                            if (Generaly.defacc)
+                            if (isDefaccChecked)
                             {
                                 var INP1 = K + 4L;
                                 //CREATHES(System.Convert.ToInt64(@Forms["baseknow"]["KHARID"]), K + 4, 1, GETGRPKALA(K + 4));
@@ -8817,6 +8819,8 @@ namespace AUTO_BAZ.Functions
             double? SANAD_NUMBER = null;
             bool IsSuccessfully = true;
 
+            bool isDefaccChecked = Generaly.defacc;
+
             double progress = 0;
             MainWindow auto_run = null;
             if (InternalCalling)
@@ -8899,7 +8903,7 @@ namespace AUTO_BAZ.Functions
                             {
                                 if (JST0[ii].MABLK * CHRST_0[EOF].SumOfMEGHk != 0)
                                 {
-                                    if (Generaly.defacc)
+                                    if (isDefaccChecked)
                                     {
                                         try
                                         {
@@ -8927,7 +8931,7 @@ namespace AUTO_BAZ.Functions
                             {
                                 if (JST.FirstOrDefault().IMBIBE_SAR * JST.FirstOrDefault().MEGHk > 0)
                                 {
-                                    if (Generaly.defacc)
+                                    if (isDefaccChecked)
                                     {
                                         try
                                         {
@@ -8951,7 +8955,7 @@ namespace AUTO_BAZ.Functions
                                 }
                                 if (JST.FirstOrDefault().IMBIBE_MANF * JST.FirstOrDefault().MEGHk > 0)
                                 {
-                                    if (Generaly.defacc)
+                                    if (isDefaccChecked)
                                     {
                                         try
                                         {
@@ -9001,7 +9005,7 @@ namespace AUTO_BAZ.Functions
                             {
                                 if (JST_1[O].MABLK * CHRST[satr].SumOfMEGHk != 0)
                                 {
-                                    if (Generaly.defacc)
+                                    if (isDefaccChecked)
                                     {
                                         try
                                         {
@@ -9030,7 +9034,7 @@ namespace AUTO_BAZ.Functions
                             {
                                 if (JST.FirstOrDefault().IMBIBE_SAR * CHRST[satr].SumOfMEGHk > 0)
                                 {
-                                    if (Generaly.defacc)
+                                    if (isDefaccChecked)
                                     {
                                         try
                                         {
@@ -9096,6 +9100,8 @@ namespace AUTO_BAZ.Functions
                     auto_run = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
                 }));
             }
+
+            bool isDefaccChecked = Generaly.defacc;
 
             long CON, i;
             object a = default, fs;
@@ -9260,14 +9266,15 @@ namespace AUTO_BAZ.Functions
                 {
                     if (Strings.Mid(Baseknow.OPTIONSS, 13, 1) == "5")
                     {
-                        if (Generaly.defacc && !ISHESAB(Baseknow.MFROSH, 4, Convert.ToInt64(JST_3[Y].CODE)))
+                        if (isDefaccChecked && !ISHESAB(Baseknow.MFROSH, 4, Convert.ToInt64(JST_3[Y].CODE)))
                         {
                             try
                             {
                                 CREATHES(Baseknow.MFROSH, 4, Convert.ToInt64(JST_3[Y].CODE), JST_3[Y].NAME); //JST_3[Y].(4)
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
+                                ExpectionLogWriter.WriteLog(ex, "سند برگشت فروش : ساخت حساب");
                             }
                         }
                         //SDRST.AddNew(); // فروش
@@ -9287,14 +9294,15 @@ namespace AUTO_BAZ.Functions
                     }
                     else if (JST_3[Y].ANBAR != 0)
                     {
-                        if (Generaly.defacc && !ISHESAB(Baseknow.MFROSH, Convert.ToDouble(JST_3[Y].CODE), Convert.ToInt64(JST_3[Y].CODE)))
+                        if (isDefaccChecked && !ISHESAB(Baseknow.MFROSH, Convert.ToDouble(JST_3[Y].CODE), Convert.ToInt64(JST_3[Y].CODE)))
                         {
                             try
                             {
                                 CREATHES(Baseknow.MFROSH, Convert.ToDouble(JST_3[Y].CODE), Convert.ToInt64(JST_3[Y].CODE), JST_3[Y].NAME); //JST_3[Y].(4)
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
+                                ExpectionLogWriter.WriteLog(ex, "سند برگشت فروش : ساخت حساب");
                             }
                         }
                         if (JST_3[Y].MABL_K > 0)
@@ -9329,14 +9337,15 @@ namespace AUTO_BAZ.Functions
                     }
                     else
                     {
-                        if (Generaly.defacc && !ISHESAB(Baseknow.DARAM, HFRST[ROW].DEPATMAN, Convert.ToInt64(JST_3[Y].CODE)))
+                        if (isDefaccChecked && !ISHESAB(Baseknow.DARAM, HFRST[ROW].DEPATMAN, Convert.ToInt64(JST_3[Y].CODE)))
                         {
                             try
                             {
                                 CREATHES(Baseknow.DARAM, HFRST[ROW].DEPATMAN, Convert.ToInt64(JST_3[Y].CODE), JST_3[Y].NAME); //JST_3[Y].(4)
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
+                                ExpectionLogWriter.WriteLog(ex, "سند برگشت فروش : ساخت حساب");
                             }
                         }
                         //SDRST.AddNew(); // در آمد
@@ -9361,14 +9370,15 @@ namespace AUTO_BAZ.Functions
                         MAVAD = Math.Round((double)(GETSTANDARDPRICE_MAVAD(JST_3[Y].CODE, HFRST[ROW].DATE_N) * JST_3[Y].MEGH_MAR));
                         DAST = Math.Round((double)(GETSTANDARDPRICE_DAST(JST_3[Y].CODE, HFRST[ROW].DATE_N) * JST_3[Y].MEGH_MAR));
                         SAR = Math.Round((double)(GETSTANDARDPRICE_SAR(JST_3[Y].CODE, HFRST[ROW].DATE_N) * JST_3[Y].MEGH_MAR));
-                        if (Generaly.defacc && !ISHESAB(Baseknow.MOGODIA, JST_3[Y].ANBAR, Convert.ToInt64(JST_3[Y].CODE)))
+                        if (isDefaccChecked && !ISHESAB(Baseknow.MOGODIA, JST_3[Y].ANBAR, Convert.ToInt64(JST_3[Y].CODE)))
                         {
                             try
                             {
                                 CREATHES(Baseknow.MOGODIA, JST_3[Y].ANBAR, Convert.ToInt64(JST_3[Y].CODE), JST_3[Y].NAME); //JST_3[Y].(4)
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
+                                ExpectionLogWriter.WriteLog(ex, "سند برگشت فروش : ساخت حساب");
                             }
                         }
                         if (MAVAD + DAST + SAR != 0d && Strings.Mid(Baseknow.OPTIONSS, 66, 1) != "5")
@@ -9389,14 +9399,15 @@ namespace AUTO_BAZ.Functions
                                                              VALUES ({max_ns}, {Baseknow.MOGODIA},    {JST_3[Y].ANBAR}, {JST_3[Y].CODE},  N'{_hes}',N'{_SHARH}',{_BED},{HFRST[ROW].NUMBER} ,4)");
                             if (SafeToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) != 1d)
                             {
-                                if (Generaly.defacc && !ISHESAB(Baseknow.GHEYMAT, Convert.ToDouble(JST_3[Y].CODE), Convert.ToInt64(JST_3[Y].CODE)))
+                                if (isDefaccChecked && !ISHESAB(Baseknow.GHEYMAT, Convert.ToDouble(JST_3[Y].CODE), Convert.ToInt64(JST_3[Y].CODE)))
                                 {
                                     try
                                     {
                                         CREATHES(Baseknow.GHEYMAT, Convert.ToDouble(JST_3[Y].CODE), Convert.ToInt64(JST_3[Y].CODE), JST_3[Y].NAME); //JST_3[Y].(4)
                                     }
-                                    catch (Exception)
+                                    catch (Exception ex)
                                     {
+                                        ExpectionLogWriter.WriteLog(ex, "سند برگشت فروش : ساخت حساب");
                                     }
                                 }
                             }
@@ -9431,14 +9442,15 @@ namespace AUTO_BAZ.Functions
                             }
                             if (DAST != 0d)
                             {
-                                if (Generaly.defacc && !ISHESAB(Baseknow.GHEYMAT, Convert.ToDouble(JST_3[Y].CODE), 9999999))
+                                if (isDefaccChecked && !ISHESAB(Baseknow.GHEYMAT, Convert.ToDouble(JST_3[Y].CODE), 9999999))
                                 {
                                     try
                                     {
                                         CREATHES(Baseknow.GHEYMAT, Convert.ToDouble(JST_3[Y].CODE), 9999999, "دستمزد " + JST_3[Y].NAME); //JST_3[Y].(4)
                                     }
-                                    catch (Exception)
+                                    catch (Exception ex)
                                     {
+                                        ExpectionLogWriter.WriteLog(ex, "سند برگشت فروش : ساخت حساب");
                                     }
                                 }
                                 //SDRST.AddNew(); // قيمت تمام شده
@@ -9458,14 +9470,15 @@ namespace AUTO_BAZ.Functions
                             }
                             if (SAR != 0d)
                             {
-                                if (Generaly.defacc && !ISHESAB(Baseknow.GHEYMAT, Convert.ToDouble(JST_3[Y].CODE), 9999998))
+                                if (isDefaccChecked && !ISHESAB(Baseknow.GHEYMAT, Convert.ToDouble(JST_3[Y].CODE), 9999998))
                                 {
                                     try
                                     {
                                         CREATHES(Baseknow.GHEYMAT, Convert.ToDouble(JST_3[Y].CODE), 9999998, "سربار " + JST_3[Y].NAME); //JST_3[Y].(4)
                                     }
-                                    catch (Exception)
+                                    catch (Exception ex)
                                     {
+                                        ExpectionLogWriter.WriteLog(ex, "سند برگشت فروش : ساخت حساب");
                                     }
                                 }
                                 //SDRST.AddNew(); // قيمت تمام شده
@@ -9643,15 +9656,16 @@ namespace AUTO_BAZ.Functions
                             {
                                 if (Strings.Mid(Baseknow.OPTIONSS, 13, 1) == "5")
                                 {
-                                    if (Generaly.defacc && !ISHESAB(Baseknow.TFROSH, 3, Convert.ToInt64(rstopen[F].CODE)))
+                                    if (isDefaccChecked && !ISHESAB(Baseknow.TFROSH, 3, Convert.ToInt64(rstopen[F].CODE)))
                                     {
                                         try
                                         {
                                             CREATHES(Baseknow.TFROSH, 3, Convert.ToInt64(rstopen[F].CODE), "تخفيف " + GETKALANAME(Convert.ToDouble(rstopen[F].CODE)));
 
                                         }
-                                        catch (Exception)
+                                        catch (Exception ex)
                                         {
+                                            ExpectionLogWriter.WriteLog(ex, "سند برگشت فروش : ساخت حساب");
                                             //DoCmd.OpenForm("MESAG", default, default, default, default, acDialog, "اخطار مهم ...! حساب متناظر كالا در تخفيفات فروش وجود ندارد  و من قادر به ايجاد آن نيستم زيرا يك حساب با همين نام ولي با كد ديگر تعريف شده است لطفا با سرپرست سيستم تماس بگيريد.");
                                         }
                                     }
@@ -9673,14 +9687,15 @@ namespace AUTO_BAZ.Functions
                                 }
                                 else
                                 {
-                                    if (Generaly.defacc && !ISHESAB(Baseknow.TFROSH, rstopen[F].CUST_KIND, Convert.ToInt64(rstopen[F].CODE)))
+                                    if (isDefaccChecked && !ISHESAB(Baseknow.TFROSH, rstopen[F].CUST_KIND, Convert.ToInt64(rstopen[F].CODE)))
                                     {
                                         try
                                         {
                                             CREATHES(Baseknow.TFROSH, rstopen[F].CUST_KIND, Convert.ToInt64(rstopen[F].CODE), "تخفيف " + GETKALANAME(Convert.ToDouble(rstopen[F].CODE)));
                                         }
-                                        catch (Exception)
+                                        catch (Exception ex)
                                         {
+                                            ExpectionLogWriter.WriteLog(ex, "سند برگشت فروش : ساخت حساب");
                                             //DoCmd.OpenForm("MESAG", default, default, default, default, acDialog, "اخطار مهم ...! حساب متناظر تخفيفات كالا  وجود ندارد  و من قادر به ايجاد آن نيستم زيرا يك حساب با همين نام ولي با كد ديگر تعريف شده است لطفا با سرپرست سيستم تماس بگيريد.");
                                         }
                                     }
@@ -9931,7 +9946,7 @@ namespace AUTO_BAZ.Functions
                     auto_run = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
                 }));
             }
-
+            bool isDefaccChecked = Generaly.defacc;
             long CON, i;
             object a = default, fs;
             double? max_ns, MABL_CHK = 0, JAMF, JAMCH, CKOL = null, JAMFKH;
@@ -10178,7 +10193,7 @@ namespace AUTO_BAZ.Functions
                         MAVAD = Math.Round((double)(GETSTANDARDPRICE_MAVAD(jst_sec[jst_sec_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_sec[jst_sec_EOF].MEGHk));
                         DAST = Math.Round((double)(GETSTANDARDPRICE_DAST(jst_sec[jst_sec_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_sec[jst_sec_EOF].MEGHk));
                         SAR = Math.Round((double)(GETSTANDARDPRICE_SAR(jst_sec[jst_sec_EOF].CODE, (long)HFRST[HFRST_EOF].DATE_N) * jst_sec[jst_sec_EOF].MEGHk));
-                        if (Generaly.defacc)
+                        if (isDefaccChecked)
                         {
                             CREATHES(Baseknow.MOGODIA, jst_sec[jst_sec_EOF].ANBAR, Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), jst_sec[jst_sec_EOF].NAME);
                         }
@@ -10195,7 +10210,7 @@ namespace AUTO_BAZ.Functions
                             //if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) != 1d)
                             if (tindataFlag is null || tindataFlag != 1d)
                             {
-                                if (Generaly.defacc)
+                                if (isDefaccChecked)
                                 {
                                     CREATHES(Baseknow.GHEYMAT, Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), jst_sec[jst_sec_EOF].NAME);
                                 }
@@ -10572,6 +10587,8 @@ namespace AUTO_BAZ.Functions
                 }));
             }
             long CON, i;
+            bool isDefaccChecked = Generaly.defacc;
+
 
             double? max_ns, MABL_CHK = null, JAMF, JAMCH, CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null, takh;
             string shart;
@@ -10655,7 +10672,7 @@ namespace AUTO_BAZ.Functions
                 var JST = dbms.DoGetDataSQL<QUERY_MODEL3>("SELECT INVO_LST.MABL_K, INVO_LST.MEGHk, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME FROM STUF_DEF INNER JOIN INVO_LST ON (STUF_DEF.CODE = INVO_LST.CODE) AND (STUF_DEF.CODE = INVO_LST.CODE) WHERE (((INVO_LST.NUMBER)=" + HEDRST[ROW].NUMBER + ") AND ((INVO_LST.TAG)=14)); ").ToList();
                 for (int EOF = 0; EOF < JST.Count; EOF++) //while (!JST.EOF())
                 {
-                    if (Generaly.defacc)
+                    if (isDefaccChecked)
                     {
                         try
                         {
@@ -10769,7 +10786,7 @@ namespace AUTO_BAZ.Functions
                         {
                             if (Math.Round((double)rst_o[U].N_MOIN) != 0)
                             {
-                                if (Generaly.defacc)
+                                if (isDefaccChecked)
                                 {
                                     try
                                     {
@@ -10819,7 +10836,7 @@ namespace AUTO_BAZ.Functions
 
                             if (Math.Round((double)(rst_w[Q].MABL_K / 100 * rst_w[Q].TAFPER)) != 0)
                             {
-                                if (Generaly.defacc)
+                                if (isDefaccChecked)
                                 {
                                     try
                                     {
@@ -10973,6 +10990,8 @@ namespace AUTO_BAZ.Functions
                 }));
             }
 
+            bool isDefaccChecked = Generaly.defacc;
+
             LogWriter.WriteLog("شروع باز سازي از انبار گردانی شماره : " + NUMBER + " تا فاكتور شماره :" + NUMBER2 + DateTime.Now);
             Parallel.For(0, HEDRST.Count, HEDRST_EOF =>
             {
@@ -11031,7 +11050,7 @@ namespace AUTO_BAZ.Functions
                 JAMF = 0d;
                 for (int I = 0; I < JST.Count; I++) // while (!JST.EOF())
                 {
-                    if (Generaly.defacc)
+                    if (isDefaccChecked)
                     {
                         CREATHES(Baseknow.MOGODIA, HEDRST[HEDRST_EOF].GRD_ANBAR, Convert.ToInt64(JST[I].CODE), JST[I].CODE);
                     }

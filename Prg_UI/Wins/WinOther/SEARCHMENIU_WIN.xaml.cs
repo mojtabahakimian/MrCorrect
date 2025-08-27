@@ -303,7 +303,8 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست چکهای دریافتی سررسید شده", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_DCHSS });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست چکهای برگشتی (دریافتی)", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_CHKB });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف اعلامیه قیمت", WIN_NAME = CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT });
-
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف اعلامیه تخفیف", WIN_NAME = CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_TAKHFIF });
+            
             //گزارشات ویزیتوری
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در ماه فروش)", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_DATE_VISIT_VISITDLV });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در تاریخ برگشت)", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_DATE_VISIT_VISITKALMA });

@@ -55,7 +55,7 @@
 
         <Label Content="شماره:" HorizontalAlignment="Right" Margin="0,53,35,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
         <Label Content="در خصوص (تماس گیرنده):" HorizontalAlignment="Right" Margin="0,94,36,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
-        <Label Content="متن" HorizontalAlignment="Right" Margin="0,130,36,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Label Content="متن" HorizontalAlignment="Right" Margin="0,126,36,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
         <Label Content="وضعیت:" HorizontalAlignment="Right" Margin="0,0,36,119" VerticalAlignment="Bottom" FlowDirection="RightToLeft" Width="auto"/>
         <UniformGrid Columns="1" Rows="1" FlowDirection="RightToLeft" Height="65" VerticalAlignment="Bottom">
             <Button x:Name="BTN_SAVEREMIND" Click="BTN_SAVEREMIND_Click" Content="ذخیره" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" Width="170"/>
@@ -72,7 +72,7 @@
                 </ItemsPanelTemplate>
             </ComboBox.ItemsPanel>
         </ComboBox>
-        <TextBox x:Name="PAYAM" Text="" Margin="32,162,39,154" Style="{StaticResource FuzzyOut}" Padding="3" TextWrapping="Wrap" TextAlignment="Right"  Visibility="Visible" MaxLength="2047" />
+        <TextBox x:Name="PAYAM" Text="" Margin="32,156,39,160" Style="{StaticResource FuzzyOut}" Padding="3" TextWrapping="Wrap"  FlowDirection="RightToLeft" Visibility="Visible" MaxLength="2047" />
         <ComboBox x:Name="STATUS" IsHitTestVisible="False" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Background="{x:Null}" BorderThickness="1" IsTextSearchEnabled="True" Margin="570,0,87,118" VerticalAlignment="Bottom" IsEditable="True" Height="30" SelectedIndex="0" DisplayMemberPath="STATUS_NAME" 
             SelectedValuePath="STATUS" TabIndex="2"/>
         <ComboBox x:Name="PERSONEL" Margin="191,52,240,0" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Background="{x:Null}" BorderThickness="1" IsTextSearchEnabled="True" Height="30" VerticalAlignment="Top" FlowDirection="RightToLeft" IsEditable="True"

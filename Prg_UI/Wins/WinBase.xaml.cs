@@ -1110,5 +1110,10 @@ namespace Prg_UI.Wins
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CRMMAIN, this); //مدیریت ارتباط با مشتری CRM
 
         }
+
+        private void Image_PreviewMouseDown_8(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CRMMAIN, this); //مدیریت ارتباط با مشتری CRM
+        }
     }
 }

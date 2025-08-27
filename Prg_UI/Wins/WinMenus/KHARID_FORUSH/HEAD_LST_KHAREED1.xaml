@@ -55,7 +55,7 @@
                 </Grid>
             </Border>
         </Border>
-        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative" FlowDirection="RightToLeft" Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
             <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
                 <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
                     <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"

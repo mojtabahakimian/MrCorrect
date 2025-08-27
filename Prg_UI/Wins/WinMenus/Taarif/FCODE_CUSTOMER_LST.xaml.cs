@@ -473,7 +473,7 @@ namespace Wins.WinMenus.Taarif
         }
         private void SYNCFUSION_DG_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.L)
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.L)
             {
                 e.Handled = true; // Mark event as handled
                 //CalculateSumForCurrentColumn(SYNCFUSION_DG);

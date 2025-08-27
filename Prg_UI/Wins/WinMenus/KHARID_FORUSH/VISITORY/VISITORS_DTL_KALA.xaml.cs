@@ -421,7 +421,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         }
         private void SYNCFUSION_DG_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.L)
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.L)
             {
                 CalculateSumForCurrentColumn(SYNCFUSION_DG);
                 e.Handled = true; // Mark event as handled

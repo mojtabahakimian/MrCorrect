@@ -2931,7 +2931,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     {
                         _ServerFilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
                     }
-                    if (CURRENT_ITMES_ROW.FHES is not null)
+                    if (CURRENT_ITMES_ROW.FHES is not null && PGET_LST_SUB.SelectedItem != null)
                     {
                         BAKCHEKP bAKCHEKP = new BAKCHEKP(I_AM_KHAZANEH, _ServerFilter, CURRENT_ROW_INDEX);
                         bAKCHEKP.ShowDialog();
@@ -3062,6 +3062,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     }
                 }
 
+                if (PGET_LST_SUB.SelectedItem == null)
+                {
+                    return;
+                }
+
                 if (CURRENT_ITMES_ROW.NAHVA == 5 && CURRENT_ITMES_ROW.NO_AM == 2)
                 {
                     if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
@@ -3074,7 +3079,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     {
                         _ServerFilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
                     }
-                    if (CURRENT_ITMES_ROW.THES is not null)
+                    if (CURRENT_ITMES_ROW.THES is not null && PGET_LST_SUB.SelectedItem != null)
                     {
                         BAKCHEK bAKCHEK = new BAKCHEK(I_AM_KHAZANEH, _ServerFilter, CURRENT_ROW_INDEX);
                         bAKCHEK.ShowDialog();
@@ -3093,7 +3098,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     {
                         _ServerFilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
                     }
-                    if (CURRENT_ITMES_ROW.THES is not null)
+                    if (CURRENT_ITMES_ROW.THES is not null && PGET_LST_SUB.SelectedItem != null)
                     {
                         FORCHEK fORCHEK = new FORCHEK(I_AM_KHAZANEH, _ServerFilter, CURRENT_ROW_INDEX);
                         fORCHEK.ShowDialog();
@@ -3133,6 +3138,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 if (string.IsNullOrEmpty(TheHesab))
                 {
                     universControl.PopNotifyShow($"حساب متناظر برای قسمت \"به حساب\" , وارد شده {CURRENT_ITMES_ROW.THES} , در سیستم وجود ندارد !", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B", 4);
+                    return;
+                }
+
+                if (PGET_LST_SUB.SelectedItem == null)
+                {
                     return;
                 }
 

@@ -618,7 +618,7 @@ namespace Wins.WinMenus.Checkha
         }
         private void TOHESAB_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.L)
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.L)
             {
                 CalculateSumForCurrentColumn(TOHESAB_SUB);
 

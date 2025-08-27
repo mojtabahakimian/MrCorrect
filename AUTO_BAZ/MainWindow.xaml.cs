@@ -315,6 +315,14 @@ namespace AUTO_BAZ
                     this.Close();
                     winConnectionChoose.ShowDialog();
                 }
+
+                CL_LOCKWATCH Lockwatch = new CL_LOCKWATCH();
+
+                //CL_LMethods.DoWriteMyLog($"Lockwatch.GoCheck()  : {Lockwatch.GoCheck()}");
+                if (Lockwatch.GoCheck() == false)
+                {
+                    CL_LMethods.GoExitTheApplication();
+                }
             }
 
             SERVER_NAME_LBL.Text = CL_Generaly.General_Servername + " | " + CL_Generaly.General_DBname;

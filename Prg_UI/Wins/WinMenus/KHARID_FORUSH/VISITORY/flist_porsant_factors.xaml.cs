@@ -32,6 +32,7 @@ using static Prg_Proccessy.SQLMODELS.CTABLES;
 using System.Diagnostics;
 using System.Windows.Controls;
 using Prg_Proccessy.Generaly;
+using static Stimulsoft.Report.StiOptions;
 
 namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 {
@@ -165,8 +166,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
             CUST_KIND_COLUMN.ItemsSource = dbms.DoGetDataSQL<Q4>("SELECT CUST_COD, CUSTKNAME FROM CUSTKIND").ToList();
         }
-
-
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
@@ -199,6 +198,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 FLIST_PORSANT_DATA.Add(item);
             }
 
+            GenerateAutomaticSummary(SYNCFUSION_DG);
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -470,10 +470,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         }
         private void SYNCFUSION_DG_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.L)
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.L)
             {
                 CalculateSumForCurrentColumn(SYNCFUSION_DG);
-                e.Handled = true; // Mark event as handled
+                e.Handled = true;
             }
         }
         private void CalculateSumForCurrentColumn(SfDataGrid _DG_)
@@ -534,10 +534,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 return null;
             }
         }
+
         public void GenerateAutomaticSummary(SfDataGrid _DG_, bool _ClearAnySummaryBefore_ = false)
         {
-            return; //Temprary Disabled
-
             if (_ClearAnySummaryBefore_)
             {
                 SYNCFUSION_DG.TableSummaryRows.Clear();
@@ -566,20 +565,32 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 if (propertyInfo == null)
                     continue;
 
-                if (column.MappingName == "BED" || column.MappingName == "BES")
+                //var propertyInfo = dataType.GetProperty(column.MappingName);
+                //if (propertyInfo == null)
+                //    continue;
+
+                if (IsNumericType(propertyInfo.PropertyType) && (column.MappingName.ToLower() == "sumofmabl_k" || column.MappingName.ToLower() == "expr2"))
                 {
-                    if (IsNumericType(propertyInfo.PropertyType))
+                    var summaryColumn = new GridSummaryColumn
                     {
-                        var summaryColumn = new GridSummaryColumn
-                        {
-                            Name = column.MappingName + "Sum",
-                            MappingName = column.MappingName,
-                            SummaryType = Syncfusion.Data.SummaryType.DoubleAggregate,
-                            //Format = "{Sum:N0}"
-                            Format = "{Sum:N0}"
-                        };
-                        summaryColumns.Add(summaryColumn);
-                    }
+                        Name = column.MappingName + "Sum",
+                        MappingName = column.MappingName,
+                        SummaryType = Syncfusion.Data.SummaryType.DoubleAggregate,
+                        //Format = "{Sum:N0}"
+                        Format = "{Sum:N0}"
+                    };
+                    summaryColumns.Add(summaryColumn);
+                }
+                else if (column.MappingName.ToLower() == "mm")
+                {
+                    // متنی یا غیر عددی → فقط Count
+                    summaryColumns.Add(new GridSummaryColumn
+                    {
+                        Name = column.MappingName + "Count",
+                        MappingName = column.MappingName,
+                        SummaryType = Syncfusion.Data.SummaryType.CountAggregate,
+                        Format = "تعداد: {Count:N0}"
+                    });
                 }
             }
 

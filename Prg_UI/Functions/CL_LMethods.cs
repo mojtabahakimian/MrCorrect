@@ -2021,13 +2021,21 @@ namespace Prg_UI.Functions
         {
             CL_LMethods.CleanupBeforeExiting();
 
-            Application.Current.Dispatcher.Invoke(() =>
+            var dispatcher = Application.Current.Dispatcher;
+
+            if (dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished)
+                return;
+
+            dispatcher.BeginInvoke(new Action(() =>
             {
+                if (dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished)
+                    return;
+
                 Application.Current.Shutdown();
 
                 //Commented because it may leads some error before cleaning up !
                 //try { System.Environment.Exit(0); } catch { } //Just in case
-            });
+            }));
         }
 
         public static bool IsNumeric(string input)

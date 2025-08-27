@@ -7,6 +7,7 @@
     <UseWPF>true</UseWPF>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <ApplicationIcon>Assets\1.ico</ApplicationIcon>
+	<UseWindowsForms>true</UseWindowsForms>
 	  
 	 <!--<IsExe>false</IsExe>
 	  <SelfContained>false</SelfContained>-->
@@ -21,6 +22,18 @@
 
   <ItemGroup>
     <None Remove="Assets\IranYekanRG.TTF" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <COMReference Include="TINYLib">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>0</VersionMinor>
+      <VersionMajor>1</VersionMajor>
+      <Guid>df1d4b1e-d56e-4a40-ba98-2cc06080e796</Guid>
+      <Lcid>0</Lcid>
+      <Isolated>false</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -66,6 +79,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Prg_Proccessy\Prg_Proccessy.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="AxInterop.TINYLib">
+      <HintPath>DLLS\AxInterop.TINYLib.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

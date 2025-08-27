@@ -3297,8 +3297,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             string _qre = null;
 
-            string _n_s = string.IsNullOrEmpty(N_S.Text) ? "NULL" : N_S.Text;
-            if (Convert.ToDouble(_n_s) <= 0) _n_s = "NULL";
+            string _n_s = "NULL";
+            if (double.TryParse(N_S.Text, out var n_sVal) && n_sVal > 0)
+            {
+                _n_s = n_sVal.ToString();
+            }
 
             _qre = $@"UPDATE dbo.HEAD_LST
                     SET NUMBER = {NUMBER.Text}, DATE_N = {DATE_N.Text.ToRawTarikh()}, 

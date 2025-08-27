@@ -94,7 +94,7 @@ namespace AUTO_BAZ.Functions
                 }
             }
         }
-
+       
         public class ExpectionLogWriter
         {
             public static void WriteLog(Exception er, string tittle, string _path = "C:\\CORRECT\\AUTO_BAZ_LOG\\MatterLog.txt")
@@ -138,6 +138,24 @@ namespace AUTO_BAZ.Functions
         public static string ToStringNullSafe(this object value)
         {
             return (value ?? string.Empty).ToString();
+        }
+        public static void GoExitTheApplication()
+        {
+            var dispatcher = Application.Current.Dispatcher;
+
+            if (dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished)
+                return;
+
+            dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished)
+                    return;
+
+                Application.Current.Shutdown();
+
+                //Commented because it may leads some error before cleaning up !
+                //try { System.Environment.Exit(0); } catch { } //Just in case
+            }));
         }
         public static void AutoScrollToCurrentItem(ListBox listBox, int index)
         {

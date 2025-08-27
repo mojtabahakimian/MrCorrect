@@ -170,7 +170,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         bool isClosing = false;
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            isClosing = true;
+            isClosing = true;         
 
             //ON_Close
             if (can)

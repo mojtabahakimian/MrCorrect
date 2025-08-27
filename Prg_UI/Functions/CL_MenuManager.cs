@@ -770,6 +770,10 @@ namespace Functions
             /// مدیریت ارتباط با مشتری CRM
             /// </summary>
             CRMMAIN,
+            /// <summary>
+            /// تعریف اعلامیه تخفیف
+            /// </summary>
+            PRICE_ELAMIE_FORM_ELAMIYEH_TAKHFIF
         }
         #endregion
 
@@ -787,6 +791,8 @@ namespace Functions
             {
                 //Mojtaba{
                 case WinNameType.CRMMAIN: /* مدیریت ارتباط با مشتری CRM */ CL_LMethods.OpenWindow(OWNERWIN, new CRMMAIN(), isModalDialog: false, allowMultipleInstances: false); break;
+
+                case WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_TAKHFIF: /* تعریف اعلامیه تخفیف */ CL_LMethods.OpenWindow(OWNERWIN, new PRICE_ELAMIETF_FORM(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT: /* تعریف اعلامیه قیمت */ CL_LMethods.OpenWindow(OWNERWIN, new PRICE_ELAMIE_FORM(), isModalDialog: false, allowMultipleInstances: false); break;
                 //Mojtaba}

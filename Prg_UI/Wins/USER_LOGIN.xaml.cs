@@ -351,19 +351,19 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 139; Baseknow.UUSER = "negar sadeghi";
             //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
 
-            Baseknow.USERCOD = 132; Baseknow.UUSER = "Prima Chopan";    
+            //Baseknow.USERCOD = 132; Baseknow.UUSER = "Prima Chopan";    
 
             //Baseknow.USERCOD = 116; Baseknow.UUSER = "Mr.Salmani";
 
-            //Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
+            Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
 
             CL_Generaly.SHIFT_OF_USER = 1;
             CL_Generaly.VAHED_OF_USER = 1;
             Baseknow.UGRP = "1";
 
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CRMMAIN, this );
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this );
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_VISIT_ROUTE_FORM, this);

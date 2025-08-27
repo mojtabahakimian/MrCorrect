@@ -188,6 +188,21 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         {
             isClosing = true;
 
+            var parentWindow = THE_WIN as PGET_HED;
+            if (can || parentWindow == null || INDEX_DG < 0)
+            {
+                return;
+            }
+            var currentItem = parentWindow.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST;
+            if (currentItem == null)
+            {
+                return;
+            }
+            if (!HeaderIsValid(false))
+            {
+                return;
+            }
+
             #region ON_Close
             double? CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL, HMOIN, HTAF, HTAF2, HTAF3, HTAF4, KHMAVAV;
             double KHNIM;
@@ -338,16 +353,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void _SaveExit_Click(object sender, RoutedEventArgs e)
         {
-            List<MsgModel> ErrosMessages = new List<MsgModel>();
-            if (IsNull(this.N_SERI.Text) || IsNull(this.BANK.SelectedValue) || IsNull(this.DATE_S.Text.ToRawTarikh()) || this.DATE_S.Text.ToRawTarikh() == "")
+            if (!HeaderIsValid())
             {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "شماره سريال ، نام بانك و تاريخ سررسيد  نمي تواند خالي باشد!" });
-            }
-            if (ErrosMessages.Any())
-            {
-                ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct()
-                .Select(message => new MsgModel { MessageText_U = message }).ToList();
-                new MsgListwin(false, ErrosMessages).ShowDialog();
                 return;
             }
 
@@ -393,6 +400,24 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();
 
             this.Close();
+        }
+
+        private bool HeaderIsValid(bool _DisplayMsg_ = true)
+        {
+            List<MsgModel> ErrosMessages = new List<MsgModel>();
+            if (IsNull(this.N_SERI.Text) || IsNull(this.BANK.SelectedValue) || IsNull(this.DATE_S.Text.ToRawTarikh()) || this.DATE_S.Text.ToRawTarikh() == "")
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "شماره سريال ، نام بانك و تاريخ سررسيد  نمي تواند خالي باشد!" });
+            }
+            if (ErrosMessages.Any())
+            {
+                ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct()
+                .Select(message => new MsgModel { MessageText_U = message }).ToList();
+                new MsgListwin(false, ErrosMessages).ShowDialog();
+                return false;
+            }
+
+            return true;
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)

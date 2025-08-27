@@ -365,7 +365,7 @@ namespace Wins.WinMenus.HESABDARI
                     new Msgwin(false, "این برگه خالی است").Show();
                     return;
                 }
-          
+
                 if (true)
                 {
                     var _HES_ = CL_HESABDARI.GETUSERCO((int)Baseknow.USERCOD);
@@ -1091,6 +1091,9 @@ namespace Wins.WinMenus.HESABDARI
             TOZIH.Text = null; //توضیحات
             ORDERER.SelectedValue = null; ORDERERID.SelectedValue = null; //درخواست کننده
 
+            var _HES_ = CL_HESABDARI.GETUSERCO((int)Baseknow.USERCOD);
+            ORDERER.SelectedValue = _HES_; ORDERER.Items.Refresh();
+
             CACHTIC.IsChecked = false; //نقد
             CHEKTIC.IsChecked = false; //چک شرکت
             CHEKMTIC.IsChecked = false; //چک مشتری
@@ -1125,7 +1128,7 @@ namespace Wins.WinMenus.HESABDARI
 
         private void GetDefaultFocus()
         {
-            PAYDATE.Focus();       
+            PAYDATE.Focus();
             PAYDATE.SelectAll();
         }
 

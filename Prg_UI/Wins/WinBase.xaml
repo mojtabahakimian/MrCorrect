@@ -5091,7 +5091,7 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="132" Height="124" Cursor="Hand">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_8"  Width="132" Height="124" Cursor="Hand">
                         <Image.Source>
                             <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/Customer.png" CacheOption="OnLoad"/>
                         </Image.Source>

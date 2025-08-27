@@ -14,7 +14,6 @@ using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Prg_UI.Wins.WinMenus.ANBAR;
 using Prg_UI.Wins.WinOther;
-using Stimulsoft.Base;
 using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
@@ -34,18 +33,17 @@ using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
 using Wins.WinMenus.ANBAR;
 using Functions.SMSService;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
-using Microsoft.IdentityModel.Tokens;
-using ImageMagick;
 using System.Windows.Data;
 using Rpts;
 using static Prg_UI.Functions.CL_LMethods;
 using System.Windows.Controls.Primitives;
+using Wins.WinOther;
+using static Interfaces.INavigator;
 
 namespace Wins.WinMenus.KHARID_FORUSH
 {
-    public partial class HEAD_LST_KHAREED1 : Window
+    public partial class HEAD_LST_KHAREED1 : Window, ISearchableWindow
     {
         #region Header Window Begin
         //Header Window Begin
@@ -797,6 +795,17 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 }
             }
 
+            if (INVO_LST_SUB != null && !INVO_LST_SUB.IsKeyboardFocusWithin && !INVO_LST_SUB.IsFocused) //Only On Form F7 Pressed Not DataGrid
+            {
+                if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+                    var searchWindow = new EnhancedSearchWindow(this);
+                    searchWindow.Owner = this;
+                    searchWindow.ShowDialog();
+                }
+            }
+
 
             // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
             var nonDataKeys = new[]
@@ -827,6 +836,51 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
         }
 
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            // Handle the selected item
+            if (selectedItem is HEAD_LST item)
+            {
+                if (item != null)
+                {
+                    //_navigationManager.MoveReGetData(INavigator.Jahat.)
+                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.NUMBER.Equals(Convert.ToDouble(item.NUMBER)));
+                    if (itemfound != null)
+                    {
+                        _navigationManager.IsNewRecord = false;
+
+                        // 1) Find its index in the master list
+                        int idx = _navigationManager.RecordsData.IndexOf(itemfound);
+                        if (idx < 0)
+                        {
+                            // not found (perhaps filtered out?), bail out
+                            new Msgwin(false, "یافت نشد: مورد انتخاب شده در لیست اصلی وجود ندارد").Show();
+                            return;
+                        }
+
+                        // 2) Tell the navigation manager to move to that position
+                        _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+                        //OnCurrentRecordChanged(itemfound);
+                    }
+                }
+            }
+        }
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+           new SearchableProperty { DisplayName = "شماره فاکتور", PropertyPath = "NUMBER1", PropertyType = typeof(double) },
+           new SearchableProperty { DisplayName = "شماره رسید", PropertyPath = "NUMBER", PropertyType = typeof(double) },
+           new SearchableProperty { DisplayName = "تاریخ", PropertyPath = "DATE_N", PropertyType = typeof(long) },
+           new SearchableProperty { DisplayName = "کد مشتری", PropertyPath = "CUST_NO", PropertyType = typeof(string) },
+           new SearchableProperty { DisplayName = "کاربر", PropertyPath = "USER_NAME", PropertyType = typeof(string) },
+           new SearchableProperty { DisplayName = "ملاحظات", PropertyPath = "MOLAH", PropertyType = typeof(string) },
+           // Add other searchable properties
+       };
+        }
+        #endregion
 
         private void SecurityAllCheck()
         {
@@ -3112,8 +3166,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             string _qre = null;
 
-            string _n_s = string.IsNullOrEmpty(N_S.Text) ? "NULL" : N_S.Text;
-            if (Convert.ToDouble(_n_s) <= 0) _n_s = "NULL";
+            string _n_s = "NULL";
+            if (double.TryParse(N_S.Text, out var n_sVal) && n_sVal > 0)
+            {
+                _n_s = n_sVal.ToString();
+            }
 
 
             string _DATEUPDATE_ = $", DATE_N = {DATE_N.Text.ToRawTarikh()} ";
@@ -3589,11 +3646,26 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void SANAD()
         {
-            var _SanadNumber_ = AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.GENSANADKHAREED(Convert.ToInt64(NUMBER.Text), Convert.ToInt64(NUMBER.Text), false);
+            try
+            {
+                var _SanadNumber_ = AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.GENSANADKHAREED(Convert.ToInt64(NUMBER.Text), Convert.ToInt64(NUMBER.Text), false);
 
-            Summer();
+                if (_SanadNumber_ != null)
+                {
+                    N_S.Text = _SanadNumber_.ToString();
+                }
 
-            GetBalancePerson();
+                Summer();
+
+                GetBalancePerson();
+            }
+            catch (Exception ex)
+            {
+                AUTO_BAZ.Functions.CL_LMethods.LogWriter.WriteLog($"GENSANADKHAREED exception for invoice {NUMBER.Text}: {ex.Message}");
+                AUTO_BAZ.Functions.CL_LMethods.ExpectionLogWriter.WriteLog(ex, "GENSANADKHAREED");
+                new Msgwin(false, "خطا در انجام علمیات صدور سند برای فاکتور خرید").Show();
+            }
+
         }
 
         #region POSHTE_FACTOR

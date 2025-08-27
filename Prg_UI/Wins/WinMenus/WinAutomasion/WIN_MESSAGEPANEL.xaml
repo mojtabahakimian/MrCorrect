@@ -74,7 +74,7 @@
                 </ItemsPanelTemplate>
             </ComboBox.ItemsPanel>
         </ComboBox>
-        <TextBox x:Name="PAYAM" Text="" Margin="32,153,39,150" Style="{StaticResource FuzzyOut}" Padding="3" TextWrapping="Wrap" TextAlignment="Right"  Visibility="Visible" MaxLength="2047" AcceptsReturn="True" />
+        <TextBox x:Name="PAYAM" Text="" Margin="32,153,39,150" Style="{StaticResource FuzzyOut}" Padding="3" TextWrapping="Wrap" FlowDirection="RightToLeft" Visibility="Visible" MaxLength="2047" AcceptsReturn="True" />
         <ComboBox x:Name="STATUS" IsHitTestVisible="False" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Background="{x:Null}" BorderThickness="1" IsTextSearchEnabled="True" Margin="341,0,87,108" VerticalAlignment="Bottom" IsEditable="True" Height="30" SelectedIndex="0" DisplayMemberPath="STATUS_NAME" 
             SelectedValuePath="STATUS" TabIndex="2"/>
         <TextBox x:Name="STDATE" Text="" Height="30" Margin="178,0,0,108"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible" MaxLength="48" HorizontalAlignment="Left" Width="92" Focusable="False" IsHitTestVisible="False" />

@@ -16,6 +16,7 @@
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
         FontFamily="{StaticResource IRANYEKAN}"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         Title="flist_porsant_factors" Height="450" Width="4318" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
@@ -157,13 +158,12 @@
            EnableDataVirtualization="True"
            SelectionUnit="Row"
            IsReadOnly="True"
-           AllowDraggingRows="True"
            AllowDraggingColumns="True"
            AllowResizingColumns="True"
            AllowFiltering="True"
            AllowSorting="True"
            RowHeight="30"
-                              
+           SelectionMode="Extended"                   
            FrozenColumnCount="0"
            FlowDirection="RightToLeft"
            d:ItemsSource="{d:SampleData ItemCount=5}"
@@ -180,14 +180,18 @@
                 <ResourceDictionary>
                     <Style TargetType="TextBox">
                         <Setter Property="AcceptsReturn" Value="True" />
-                        <Setter Property="Height" Value="40" />
+                        <Setter Property="Height" Value="30" />
                     </Style>
                 </ResourceDictionary>
             </syncfusion:SfDataGrid.Resources>
 
             <syncfusion:SfDataGrid.Columns>
-                <syncfusion:GridTextColumn HeaderText="ماه" MappingName="mm" Width="60"/> 
-                <syncfusion:GridTextColumn HeaderText="تاریخ فاکتور" MappingName="DATE_N" Width="130"/>
+                <syncfusion:GridTextColumn HeaderText="ماه" MappingName="mm" Width="60"/>
+                <syncfusion:GridTextColumn HeaderText="تاریخ فاکتور" MappingName="DATE_N" Width="130">
+                    <syncfusion:GridTextColumn.DisplayBinding>
+                        <Binding Path="DATE_N" StringFormat="####/##/##" />
+                    </syncfusion:GridTextColumn.DisplayBinding>
+                </syncfusion:GridTextColumn>
                 <syncfusion:GridTextColumn HeaderText="کد ویزیتور" MappingName="CUST_NO" Width="130"/>
                 <syncfusion:GridTextColumn HeaderText="نام ویزیتور" MappingName="Expr1" Width="400"/>
                 <syncfusion:GridTextColumn HeaderText="درصد" MappingName="DARSAD" Width="100" />
