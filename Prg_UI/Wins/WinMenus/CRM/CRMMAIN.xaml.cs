@@ -87,6 +87,7 @@ namespace Prg_UI.Wins.WinMenus.CRM
         public ObservableCollection<CRMEVENTS> EVENT_DATA { get; set; } = new ObservableCollection<CRMEVENTS>();
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+        public string SQL_HOLD_DATA { get; set; }
         //متغیر برای نگهداری فیلتر بر اساس وضعیت
         public List<Status_List> StatusItems { get; set; }
 
@@ -215,6 +216,9 @@ namespace Prg_UI.Wins.WinMenus.CRM
         private void ReGetData()
         {
             CUSTOMER_DATA?.Clear();
+            //برای لیست فعالیت ها و بررسی نام شرکت
+            SQL_HOLD_DATA = $@"SELECT COPMANES.*, eventscount.idcn FROM COPMANES LEFT OUTER JOIN eventscount ON COPMANES.id = eventscount.idc where  COPMANES.userid={Baseknow.USERCOD.ToString()} ORDER BY COPMANES.id ";
+
             var customers = dbms.DoGetDataSQL<COPMANES>($@"SELECT COPMANES.*, eventscount.idcn FROM COPMANES LEFT OUTER JOIN eventscount ON COPMANES.id = eventscount.idc where  COPMANES.userid={Baseknow.USERCOD.ToString()} ORDER BY COPMANES.id ").ToList();
             foreach (var item in customers)
             {
@@ -250,6 +254,8 @@ namespace Prg_UI.Wins.WinMenus.CRM
         private void CRM_MASTER_SUB_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
             if (sender is not DataGrid grid) return;
+            var New_Record = e.Row.IsNewItem;
+
 
             var binding = (e.Column as DataGridBoundColumn)?.Binding as Binding;
             var mappingName = binding?.Path?.Path;
@@ -260,22 +266,30 @@ namespace Prg_UI.Wins.WinMenus.CRM
             switch (mappingName)
             {
                 case nameof(COPMANES.COMPANY_NAME):
-                    string? text = record.COMPANY_NAME;
-                    if (string.IsNullOrWhiteSpace(text)) return;
-                    string shart = BuildShart(text, "NAME");
-                    string shart2 = BuildShart(text, "TNAME");
-                    if (shart.Length > 0 && shart2.Length > 0)
-                        shart = $"(({shart}) or ({shart2}))";
-                    var cnt = dbms.DoGetDataSQL<int>($"SELECT COUNT(1) FROM cust_hesab_dtl WHERE {shart}").FirstOrDefault();
-                    if (cnt > 0)
+                    if (New_Record)
                     {
-                        new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").Show();
-                    }
-                    var shartCust = shart.Replace("TNAME", "NAME").Replace("NAME", "COMPANY_NAME");
-                    var cnt2 = dbms.DoGetDataSQL<int>($"SELECT COUNT(1) FROM COPMANES WHERE {shartCust}").FirstOrDefault();
-                    if (cnt2 > 0)
-                    {
-                        // new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").Show();
+                        var cOMP_name = e.EditingElement as TextBox;
+                        string? text = cOMP_name.Text;
+                        if (string.IsNullOrWhiteSpace(text)) return;
+                        string shart = BuildShart(text, "NAME");
+                        string shart2 = BuildShart(text, "TNAME");
+                        if (shart.Length > 0 && shart2.Length > 0)
+                            shart = $"(({shart}) or ({shart2}))";
+                        var cnt = dbms.DoGetDataSQL<int>($"SELECT COUNT(1) FROM cust_hesab_dtl WHERE {shart}").FirstOrDefault();
+                        if (cnt > 0)
+                        {
+                            new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").Show();
+                            new COMPANS(SQL_HOLD_DATA).ShowDialog();
+                            return;
+                        }
+                        var shartCust = shart.Replace("TNAME", "NAME").Replace("NAME", "COMPANY_NAME");
+                        var cnt2 = dbms.DoGetDataSQL<int>($"SELECT COUNT(1) FROM COPMANES WHERE {shartCust}").FirstOrDefault();
+                        if (cnt2 > 0)
+                        {
+                            new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").Show();
+                            new COMPANS(SQL_HOLD_DATA).ShowDialog();
+                            return;
+                        }
                     }
                     break;
                 case nameof(COPMANES.FACT_TEL):
