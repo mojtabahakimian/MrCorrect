@@ -30,6 +30,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using Stimulsoft.Base;
 using Microsoft.Xaml.Behaviors;
+using System.Threading.Tasks;
 
 namespace Prg_UI
 {
@@ -320,6 +321,7 @@ namespace Prg_UI
             catch (IOException ioEx)
             {
             }
+
         }
 
         public static ISplashScreen splashScreen;
