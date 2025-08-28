@@ -188,8 +188,6 @@ namespace Wins.WinMenus.HESABDARI
                 CHEKMMABL.IsReadOnly = !ican; //مبلغ چک مشتری
                 CHEKMFAGH.IsReadOnly = !ican; //تعداد فقره چک مشتری
                 CHEKMDIST.IsReadOnly = !ican; //تعداد فقره چک مشتری با فاصله روز
-
-                CUST_NO.SelectedIndex = -1; CUST_NO.Items.Refresh();
             }
         }
         public Visual I_AM_PAYORRDER { get; private set; }
@@ -403,8 +401,7 @@ namespace Wins.WinMenus.HESABDARI
                                 {
                                     ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
                                 }
-                                CUST_NO.SelectedValue = null;
-                                CUST_NO.SelectedValue = thevalue;
+                                CUST_NO.SelectedValue = _HES_;
                                 CUST_NO.Items.Refresh();
                             }
                         }
@@ -420,7 +417,7 @@ namespace Wins.WinMenus.HESABDARI
                                     ((List<Custom_CUST_HESAB>)ORDERER.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
                                 }
                                 ORDERER.SelectedValue = null;
-                                ORDERER.SelectedValue = thevalue;
+                                ORDERER.SelectedValue = _HES_;
                                 ORDERER.Items.Refresh();
                             }
                         }
@@ -1008,10 +1005,21 @@ namespace Wins.WinMenus.HESABDARI
                 return;
             }
 
-            string SelectedTextCMB = ((COMBOPERSONEL)PERSONEL.SelectedItem).SAL_NAME.ToStringNullSafe();
+            string selectedTextCmb = (PERSONEL.SelectedItem as COMBOPERSONEL)?.SAL_NAME.ToStringNullSafe() ?? string.Empty;
 
-            Meidnum = CL_HESABDARI.PERSONELUpdate(100, Convert.ToDouble(IDD.Text), Convert.ToInt32(PERSONEL.SelectedValue), "'درخواست پرداخت شماره: " + IDD.Text + " مورخ " + Strings.Format(Convert.ToInt64(PAYDATE.Text.ToRawTarikh()), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(CUST_NO.SelectedValue.ToString()) + " " + CUST_NO.SelectedValue + " بابت :" + BABAT.Text + " توسط " + CL_HESABDARI.GETTAFNAME(ORDERER.SelectedValue.ToString()) + " به مبلغ :" + MABLS.Text + "','" + CUST_NO.SelectedValue + "'");
-            universControl.PopNotifyShow($"ارجاع داده به {SelectedTextCMB} شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+            string custNo = CUST_NO.SelectedValue?.ToString() ?? string.Empty;
+            string orderer = ORDERER.SelectedValue?.ToString() ?? string.Empty;
+
+            Meidnum = CL_HESABDARI.PERSONELUpdate(100,
+                Convert.ToDouble(IDD.Text),
+                Convert.ToInt32(PERSONEL.SelectedValue),
+                "'درخواست پرداخت شماره: " + IDD.Text + " مورخ " +
+                Strings.Format(Convert.ToInt64(PAYDATE.Text.ToRawTarikh()), "####/##/##") +
+                "  به نام: " + CL_HESABDARI.GETTAFNAME(custNo) + " " + custNo +
+                " بابت :" + BABAT.Text + " توسط " + CL_HESABDARI.GETTAFNAME(orderer) +
+                " به مبلغ :" + MABLS.Text + "','" + custNo + "'");
+
+            universControl.PopNotifyShow($"ارجاع داده به {selectedTextCmb} شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
         }
 
         private void Command77_Click(object sender, RoutedEventArgs e)
