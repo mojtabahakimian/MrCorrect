@@ -278,7 +278,7 @@ namespace Prg_UI.Wins.WinMenus.CRM
                         var cnt = dbms.DoGetDataSQL<int>($"SELECT COUNT(1) FROM cust_hesab_dtl WHERE {shart}").FirstOrDefault();
                         if (cnt > 0)
                         {
-                            new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").Show();
+                            new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").ShowDialog();
                             new COMPANS(SQL_HOLD_DATA).ShowDialog();
                             return;
                         }
@@ -286,17 +286,43 @@ namespace Prg_UI.Wins.WinMenus.CRM
                         var cnt2 = dbms.DoGetDataSQL<int>($"SELECT COUNT(1) FROM COPMANES WHERE {shartCust}").FirstOrDefault();
                         if (cnt2 > 0)
                         {
-                            new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").Show();
+                            new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").ShowDialog(); ;
                             new COMPANS(SQL_HOLD_DATA).ShowDialog();
                             return;
                         }
                     }
                     break;
                 case nameof(COPMANES.FACT_TEL):
-                    CheckFactTel(record.FACT_TEL);
+                    if (New_Record)
+                    {
+                        var tEL = e.EditingElement as TextBox;
+                        string? tel = tEL.Text;
+                        if (string.IsNullOrWhiteSpace(tel)) return;
+                        var cnt = dbms.DoGetDataSQL<int>("SELECT COUNT(1) FROM cust_hesab WHERE TEL Like @p", new { p = "%" + tel + "%" }).FirstOrDefault();
+                        if (cnt > 0)
+                        {
+                            new Msgwin(false, "مشابه اين شماره قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").ShowDialog(); ;
+                        }
+                    }
                     break;
                 case nameof(COPMANES.MOBILE):
-                    CheckMobile(record.MOBILE);
+                    if (New_Record)
+                    {
+                        var tEL = e.EditingElement as TextBox;
+                        string? tel = tEL.Text;
+                        if (string.IsNullOrWhiteSpace(tel)) return;
+                        var cnt = dbms.DoGetDataSQL<int>("SELECT COUNT(1) FROM cust_hesab WHERE TEL Like @p", new { p = "%" + tel + "%" }).FirstOrDefault();
+                        if (cnt > 0)
+                        {
+                            new Msgwin(false, "مشابه اين شماره قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").ShowDialog(); ;
+
+                        }
+                        var cnt2 = dbms.DoGetDataSQL<int>("SELECT COUNT(1) FROM COPMANES WHERE MOBILE Like @p", new { p = "%" + tel + "%" }).FirstOrDefault();
+                        if (cnt2 > 0)
+                        {
+                            new Msgwin(false, "مشابه اين شماره قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").ShowDialog(); ;
+                        }
+                    }
                     break;
             }
 
@@ -418,25 +444,6 @@ namespace Prg_UI.Wins.WinMenus.CRM
             LoadDetail();
         }
 
-        private void CheckCompanyName(string? text)
-        {
-            if (string.IsNullOrWhiteSpace(text)) return;
-            string shart = BuildShart(text, "NAME");
-            string shart2 = BuildShart(text, "TNAME");
-            if (shart.Length > 0 && shart2.Length > 0)
-                shart = $"(({shart}) or ({shart2}))";
-            //var cnt = dbms.DoGetDataSQL<int>($"SELECT COUNT(1) FROM cust_hesab_dtl WHERE {shart}").FirstOrDefault();
-            //if (cnt > 0)
-            //{
-            //    new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").Show();
-            //}
-            var shartCust = shart.Replace("TNAME", "NAME").Replace("NAME", "COMPANY_NAME");
-            var cnt2 = dbms.DoGetDataSQL<int>($"SELECT COUNT(1) FROM COPMANES WHERE {shartCust}").FirstOrDefault();
-            if (cnt2 > 0)
-            {
-                // new Msgwin(false, "مشابه اين نام قبلا تعريف شده است لطفا دقت کنيد که مشتري جديد باشد").Show();
-            }
-        }
 
         private string BuildShart(string text, string field)
         {
