@@ -25,6 +25,20 @@ namespace Wins.WinSamplesEmpty
 {
     public partial class Window4 : Window
     {
+ 
+
+        public Window4(double? number_to_open = null)
+        {
+            InitializeComponent();
+
+            this.DataContext = this;
+
+            if (number_to_open != null)
+            {
+                NUMBER_TO_OPEN = (double)number_to_open;
+            }
+        }
+
         #region Header Window Begin
         //Header Window Begin
         private void Btn_Close_Click(object sender, RoutedEventArgs e)
@@ -66,19 +80,6 @@ namespace Wins.WinSamplesEmpty
         }
         //Header Window End;
         #endregion
-
-        public Window4(double? number_to_open = null)
-        {
-            InitializeComponent();
-
-            this.DataContext = this;
-
-            if (number_to_open != null)
-            {
-                NUMBER_TO_OPEN = (double)number_to_open;
-            }
-        }
-
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
         UniversControl universControl = new UniversControl();
