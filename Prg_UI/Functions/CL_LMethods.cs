@@ -60,7 +60,7 @@ namespace Prg_UI.Functions
             /// </summary>
             public static bool IsPristine<T>(T instance)
             {
-                if (instance is null) return true;                  // امنیت در برابر NRE
+                if (instance is null) return true; // امنیت در برابر NRE
 
                 var type = typeof(T);
 
