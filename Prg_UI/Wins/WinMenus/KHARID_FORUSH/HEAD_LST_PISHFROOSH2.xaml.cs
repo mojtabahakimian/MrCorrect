@@ -5647,7 +5647,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     else
                         _fprice_ = Strings.Format((PRICE * -1), "بستانكار");
 
-                    (report.GetComponentByName("MANDAH") as StiText).Text = _fprice_;
+                    (report.GetComponentByName("MANDAH") as StiText).Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
                 }
             }
 

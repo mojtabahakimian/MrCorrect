@@ -3397,7 +3397,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 else
                 {
                     var _mandah = Interaction.IIf(rst_0.FirstOrDefault() > 0, Strings.Format(rst_0.FirstOrDefault(), "##,# ريال بدهكار"), Strings.Format(rst_0.FirstOrDefault() * -1, "##,# ريال بستانكار"));
-                    (report.GetComponentByName("MANDAH") as StiText).Text = _mandah.ToString();
+                    (report.GetComponentByName("MANDAH") as StiText).Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
                 }
             }
 
