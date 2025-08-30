@@ -1,0 +1,721 @@
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.ANBAR.HEAD_SERCH_MAIN_ADVANC"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.ANBAR"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        mc:Ignorable="d"
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        MaxHeight="{Binding Height, Source={x:Static SystemParameters.WorkArea}}"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="{StaticResource IRANYEKAN}"
+        WindowStartupLocation="CenterScreen"
+        Title="" Height="768" Width="1280" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" d:Height="3000" PreviewKeyDown="Window_PreviewKeyDown">
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+    </Window.Resources>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+    <Grid x:Name="mygrid" d:Margin="0,0,0,-650">
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1" Margin="-1,0,1,0">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label x:Name="LABEL_HEADER" Content="جستجو در گردش کالا های پیشرفته" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Button x:Name="Btn_Close" Click="Btn_Close_Click" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowMaximize" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                </Grid>
+            </Border>
+        </Border>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                                                   Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+        <!--HEADER↑-->
+        <Grid Margin="15,50,15,15" FlowDirection="RightToLeft">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="139*"/>
+                <ColumnDefinition Width="111*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Grid.ColumnSpan="2">
+                <Grid Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="111*" />
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="97*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                    </Grid.RowDefinitions>
+
+                    <!--Column 1-->
+                    <Label Content="شماره برگه :" Grid.Row="0" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <CNC:NumericTextBox x:Name="NUMBER" Text="" TextAlignment="Right" DoesAcceptDouble="False" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="NUMBERB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="NUMBERC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="NUMBERBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="نوع برگه :" Grid.Row="1" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <ComboBox Padding="7,0,10,0" Width="150" x:Name="TAGCODE" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="TAGCODEB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="TAGCODEC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="TAGCODEBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="تاريخ برگه :" Grid.Row="2" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <xctk:MaskedTextBox x:Name="DATE_N" Style="{StaticResource FuzzyOut}" FlowDirection="LeftToRight" Padding="3" Mask="0000/00/00" Height="30" BorderThickness="1" FontSize="12" Width="150"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="DATE_NB" Margin="5" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="DATE_NC" VerticalAlignment="Center"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="DATE_NBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="كد كالا :" Grid.Row="3" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <CNC:NumericTextBox x:Name="CODE" Text="" TextAlignment="Right" DoesAcceptDouble="False" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="CODEB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="CODEC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="CODEBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="نام كالا :" Grid.Row="4" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <TextBox x:Name="KALA" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" Width="150"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="KALAB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="KALAC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="KALABS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="مقدار کالا :" Grid.Row="5" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <CNC:NumericTextBox x:Name="MEGH" Text="" TextAlignment="Right" DoesAcceptDouble="True" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="MEGHB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="MEGHC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="MEGHBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="مقدار كل كالا :" Grid.Row="6" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="6" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <CNC:NumericTextBox x:Name="MEGHk" Text="" TextAlignment="Right" DoesAcceptDouble="True" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="MEGHkB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="MEGHkC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="MEGHkBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="نام شخص :" Grid.Row="7" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <TextBox x:Name="CUSTNAME" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" Width="150"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="CUSTNAMEB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="CUSTNAMEC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="CUSTNAMEBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="کد شخص :" Grid.Row="8" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="8" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <TextBox x:Name="hes" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" Width="150"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="hesB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="hesC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="hesBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="مبلغ :" Grid.Row="9" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="9" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <CNC:NumericTextBox x:Name="MABL" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="MABLB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="MABLC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="MABLBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="مبلغ كل :" Grid.Row="10" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="10" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <CNC:NumericTextBox x:Name="MABL_K" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="MABL_KB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="MABL_KC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="MABL_KBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="درصد تخفيف :" Grid.Row="11" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="11" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <CNC:NumericTextBox MaxLength="6" x:Name="N_KOL" IsPercentageMode="True" RestoreLastValidValue="False" LastValueShouldZero="False" DoesAcceptDouble="True" TextAlignment="Right" Text="" Width="150"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="N_KOLB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="N_KOLC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="N_KOLBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="مبلغ تخفيف :" Grid.Row="12" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="12" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <CNC:NumericTextBox x:Name="N_MOIN" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="N_MOINB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="N_MOINC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="N_MOINBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="ارزش افزوده :" Grid.Row="13" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="13" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <CNC:NumericTextBox x:Name="IMBAA" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="IMBAAB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="IMBAAC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="IMBAABS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="درصد تخفيف نقدی :" Grid.Row="14" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="14" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <CNC:NumericTextBox MaxLength="6" x:Name="TKHN" IsPercentageMode="True" RestoreLastValidValue="False" LastValueShouldZero="False" DoesAcceptDouble="True" TextAlignment="Right" Text="" Width="150"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="TKHNB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="TKHNC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="TKHNBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="مبلغ خالص :" Grid.Row="15" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="15" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <CNC:NumericTextBox x:Name="KHFR" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="KHFRB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="KHFRC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="KHFRBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="قابل پرداخت :" Grid.Row="16" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="16" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <CNC:NumericTextBox x:Name="GHFR" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="GHFRB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="GHFRC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="GHFRBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="Price :" Grid.Row="17" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="17" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <CNC:NumericTextBox x:Name="N_TAF" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="N_TAFB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="N_TAFC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="N_TAFBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="Total Price :" Grid.Row="18" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="18" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <CNC:NumericTextBox x:Name="TOTALARZ" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="TOTALARZB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="TOTALARZC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="TOTALARZBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="فی ميانگين :" Grid.Row="19" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="19" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <CNC:NumericTextBox x:Name="AVRAGE" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="AVRAGEB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="AVRAGEC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="AVRAGEBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="مبلغ ریالی :" Grid.Row="20" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="20" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <CNC:NumericTextBox x:Name="MABRIAL" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="MABRIALB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="MABRIALC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="MABRIALBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="واحد كالا :" Grid.Row="21" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="21" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <ComboBox Padding="7,0,10,0" Width="150" x:Name="VAHCODE" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="VAHCODEB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="VAHCODEC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="VAHCODEBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="گروه كالا :" Grid.Row="22" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="22" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <ComboBox Padding="7,0,10,0" Width="150" x:Name="GRPCODE" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="GRPCODEB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="GRPCODEC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="GRPCODEBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="استان :" Grid.Row="23" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="23" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <ComboBox Padding="7,0,10,0" Width="150" x:Name="OSTANID" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="OSTANIDB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="OSTANIDC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="OSTANIDBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="شهر :" Grid.Row="24" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="24" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <ComboBox Padding="7,0,10,0" Width="150" x:Name="SHAHRID" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="SHAHRIDB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="SHAHRIDC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="SHAHRIDBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Label Content="مسیر ویزیت | ویزیتور :" Grid.Row="25" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="25" Grid.ColumnSpan="4" Margin="125,0,0,0">
+                        <ComboBox Padding="7,0,10,0" Width="353" x:Name="ROUTE_NAME" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="ROUTE_NAMEB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="ROUTE_NAMEC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="ROUTE_NAMEBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <!--Column 2-->
+                    <Label Content="توضیحات :" Grid.Row="0" Grid.Column="2" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="4">
+                        <TextBox x:Name="MOLAH" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" Width="150"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="MOLAHB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="MOLAHC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="MOLAHBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+                    
+                    <Label Content="ملاحظات :" Grid.Row="1" Grid.Column="2" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="4">
+                        <TextBox x:Name="SHARAYET" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" Width="150"/>
+                        <ComboBox Padding="7,0,10,0" Width="70" x:Name="SHARAYETB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                        <CheckBox x:Name="SHARAYETC" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="SHARAYETBS" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Left" Margin="430,20,0,0" Grid.ColumnSpan="2">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Content="اجرای گزارش" Width="120" Margin="5" x:Name="ExecuteButton" BorderBrush="{x:Null}" Height="34" FontSize="10" Foreground="#DDFFFFFF"/>
+                    <Button Content="ذخیره گزارش" Width="120" Margin="5" x:Name="BTN_SAVE" BorderBrush="{x:Null}" Height="34" FontSize="10" Foreground="#DDFFFFFF"/>
+                    <Button Content="بارگذاری گزارش" Width="120" Margin="5" x:Name="LoadButton" BorderBrush="{x:Null}" Height="34" FontSize="10" Foreground="#DDFFFFFF"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                    <CheckBox x:Name="RSUM" Content="جمع زیر گزارش اضافه شود" VerticalAlignment="Center" Margin="20,0,0,0"/>
+                    <ComboBox x:Name="ANDOR" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Width="80" VerticalAlignment="Center" SelectedIndex="0" Margin="10,0">
+                        <ComboBoxItem Content="و"/>
+                        <ComboBoxItem Content="یا"/>
+                    </ComboBox>
+                    <Label Content="شرط بعدی بوسیله" VerticalAlignment="Center"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+
+    </Grid>
+</Window>
