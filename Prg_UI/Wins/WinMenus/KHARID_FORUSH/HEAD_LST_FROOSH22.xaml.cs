@@ -10447,7 +10447,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 else
                 {
                     var _mandah = Interaction.IIf(rst_0 > 0, Strings.Format(rst_0, "##,# ريال بدهكار"), Strings.Format(rst_0 * -1, "##,# ريال بستانكار"));
-                    (report.GetComponentByName("MANDAH") as StiText).Text = _mandah.ToString();
+                    (report.GetComponentByName("MANDAH") as StiText).Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
                 }
             }
             else
@@ -10820,7 +10820,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         }
                         else
                         {
-                            (report.GetComponentByName("MANDAH") as StiText).Text = "  كل مانده حساب : " + Interaction.IIf(rst.FirstOrDefault() > 0, Strings.Format(rst.FirstOrDefault(0), "##,# ريال بدهكار"), Strings.Format(rst.FirstOrDefault() * -1, "##,# ريال بستانكار"));
+                            (report.GetComponentByName("MANDAH") as StiText).Text = "  كل مانده حساب : " + CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
                         }
                     }
                     else
