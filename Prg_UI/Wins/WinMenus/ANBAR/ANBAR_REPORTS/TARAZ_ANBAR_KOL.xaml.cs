@@ -69,9 +69,8 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         }
         //Header Window End;
         #endregion
-        public TARAZ_ANBAR_KOL(string _SQL_DATA_)
+        public TARAZ_ANBAR_KOL()
         {
-            SQL_DATA = _SQL_DATA_;
 
             InitializeComponent();
 
@@ -113,7 +112,7 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         {
             TARAZ_KOL_DATA?.Clear();
 
-            var MasterHead = dbms.DoGetDataSQL<MDS>($"{SQL_DATA}").ToList();
+            var MasterHead = dbms.DoGetDataSQL<MDS>($"SELECT * FROM TARAZ_ANBAR_KOL").ToList();
 
             foreach (var item in MasterHead)
             {

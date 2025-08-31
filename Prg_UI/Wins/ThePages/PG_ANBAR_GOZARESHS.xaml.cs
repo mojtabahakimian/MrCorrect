@@ -134,7 +134,7 @@ namespace Wins.ThePages
 
         private void Image_PreviewMouseDown_10(object sender, MouseButtonEventArgs e)
         {
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.C_TARAZ_ANBAR_KHAS, null);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.TARAZ_ANBAR_KOL, null);
         }
 
         private void Image_PreviewMouseDown_11(object sender, MouseButtonEventArgs e)

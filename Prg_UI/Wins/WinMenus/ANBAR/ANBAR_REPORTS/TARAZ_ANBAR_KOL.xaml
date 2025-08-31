@@ -140,17 +140,17 @@
                 <syncfusion:GridTextColumn HeaderText="مقدار کاهش" MappingName="MEGFR" Width="130"/>
                 <syncfusion:GridTextColumn HeaderText="مبلغ کاهش" MappingName="MABFR" Width="150"/>
 
-                <syncfusion:GridTextColumn HeaderText="مقدار موجودی" MappingName="MAGMA" Width="130">
+                <syncfusion:GridTextColumn HeaderText="مقدار موجودی" MappingName="MEGMA" Width="130">
                     <syncfusion:GridTextColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding MABLK}" Background="LightSkyBlue"/>
+                            <TextBlock Text="{Binding MEGMA}" Background="LightSkyBlue"/>
                             <!-- Change 'LightYellow' to any desired color -->
                         </DataTemplate>
                     </syncfusion:GridTextColumn.CellTemplate>
                 </syncfusion:GridTextColumn>
 
                 <syncfusion:GridTextColumn HeaderText="مبلغ موجودی" MappingName="MABMA" Width="150"/>
-                <syncfusion:GridTextColumn HeaderText="کد کالا" MappingName="VCODE" Width="100"/>
+                <syncfusion:GridTextColumn HeaderText="کد کالا" MappingName="CODE" Width="100"/>
 
             </syncfusion:SfDataGrid.Columns>
         </syncfusion:SfDataGrid>

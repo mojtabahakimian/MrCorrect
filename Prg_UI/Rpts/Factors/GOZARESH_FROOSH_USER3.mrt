@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <MS_x0020_SQL Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>MS SQL</Alias>
-        <ConnectionStringEncrypted>9BrNoe9K+yFqe73M+lTjF9U0gS5FWVKk4k25gHM9InvVeHfP5wX6XX0IqNRjbCIPxHD7z2J9c91qbFm9ehnrG8lwdytTe0mIx1rZzOnc</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9Bp3iU18QpxqFb34TQCk59V8lWhFBZPIfwjt3P4cokbE8vcJTkwTmelpTZh/ATI30Xhl609Xk/VrQajM5Bgl</ConnectionStringEncrypted>
         <Key>6f2a847f8b23432eafaa10f7ed6e88ac</Key>
         <Name>MS SQL</Name>
       </MS_x0020_SQL>
@@ -37,8 +37,12 @@
         <Key>d0a9e4728efc4be5aca72051320d332e</Key>
         <Name>GOZARESH_FROOSH_ROZANEH3</Name>
         <NameInSource>MS SQL</NameInSource>
-        <Parameters isList="true" count="0" />
-        <SqlCommand>SELECT * FROM dbo.GOZARESH_FROOSH_ROZANEH3(1, '10000101', '14030615')</SqlCommand>
+        <Parameters isList="true" count="3">
+          <value>DEPART_PARM,,6,20</value>
+          <value>FDATE_PARM,,12,20</value>
+          <value>EDATE_PARM,,12,20</value>
+        </Parameters>
+        <SqlCommand>SELECT * FROM dbo.GOZARESH_FROOSH_ROZANEH3(@DEPART_PARM, @FDATE_PARM, @EDATE_PARM)</SqlCommand>
       </GOZARESH_FROOSH_ROZANEH3>
     </DataSources>
     <Relations isList="true" count="0" />
@@ -61,7 +65,23 @@
           <Brush>Transparent</Brush>
           <ClientRectangle>0,0.4,19,1.8</ClientRectangle>
           <Components isList="true" count="9">
-            <Text2 Ref="6" type="Text" isKey="true">
+            <Text1 Ref="6" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,0,19,1</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,14,Bold</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text1</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>گزارش فروش اداری</Text>
+              <TextBrush>[192:80:77]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text1>
+            <Text2 Ref="7" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>3.4,0,1,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -76,7 +96,7 @@
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </Text2>
-            <Text14 Ref="7" type="Text" isKey="true">
+            <Text14 Ref="8" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0,0,1.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -93,7 +113,7 @@
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text14>
-            <Text15 Ref="8" type="Text" isKey="true">
+            <Text15 Ref="9" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>1.49,0,0.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -108,7 +128,7 @@
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </Text15>
-            <Text16 Ref="9" type="Text" isKey="true">
+            <Text16 Ref="10" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>2,0,1.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -125,22 +145,6 @@
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text16>
-            <Text1 Ref="10" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>0,0,19,1</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,14,Bold</Font>
-              <HorAlignment>Center</HorAlignment>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text1</Name>
-              <Page isRef="4" />
-              <Parent isRef="5" />
-              <Text>گزارش فروش اداری</Text>
-              <TextBrush>[192:80:77]</TextBrush>
-              <Type>Expression</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text1>
             <Text7 Ref="11" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>7.5,1,1.3,0.6</ClientRectangle>
@@ -1407,10 +1411,10 @@
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>9/10/2024 3:59:43 PM</ReportChanged>
+  <ReportChanged>8/31/2025 3:13:59 PM</ReportChanged>
   <ReportCreated>1/29/2024 9:06:45 AM</ReportCreated>
-  <ReportFile>C:\Users\Administrator\Desktop\GOZARESH_FROOSH_USER3.mrt</ReportFile>
-  <ReportGuid>d045bc719ea2434fad6177858b98f4b9</ReportGuid>
+  <ReportFile>C:\prg\Made Reports\All\GOZARESH_FROOSH_USER3.mrt</ReportFile>
+  <ReportGuid>db63aada6a5c4307934bf7013aaeaa64</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

@@ -38,6 +38,7 @@ using Prg_UI.Wins.WinMenus.SANATI;
 using Prg_UI.Wins.WinMenus.Taarif;
 using System.Threading;
 using Prg_UI.Wins.WinMenus.CRM;
+using Prg_UI.Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
 
 namespace Functions
 {
@@ -773,7 +774,43 @@ namespace Functions
             /// <summary>
             /// تعریف اعلامیه تخفیف
             /// </summary>
-            PRICE_ELAMIE_FORM_ELAMIYEH_TAKHFIF
+            PRICE_ELAMIE_FORM_ELAMIYEH_TAKHFIF,
+            /// <summary>
+            /// لسیت تراز موجودی کل انبار ها
+            /// </summary>
+            TARAZ_ANBAR_KOL,
+            /// <summary>
+            /// گزارش خلاصه فروش روزانه کاربران
+            /// </summary>
+            F_MENU_GOZARESH_FROOSH_FK,
+            /// <summary>
+            /// گزارش فاکتور های فروش به اشخاص
+            /// </summary>
+            WIN_F_MENU_KHFR_FLIST,
+            /// <summary>
+            /// گزارش خرید کالا ها به تفکیک انبار
+            /// </summary>
+            F_MENU_ANBAR_FRKH_RK,
+            /// <summary>
+            /// صورت وضعیت معاملات اشخاص
+            /// </summary>
+            F_MENU_KOL_MOIN_TAFZIL_VAZ,
+            /// <summary>
+            /// صورت وضعیت معاملات تاریخ چک
+            /// </summary>
+            F_MENU_KOL_MOIN_TAFZIL_FRKMA4,
+            /// <summary>
+            /// گزارش خلاصه فروش روزانه به تفکیک فاکتور
+            /// </summary>
+            F_MENU_GOZARESH_FROOSH_FR,
+            /// <summary>
+            /// لیست فروش کالا ها به تفکیک اشخاص
+            /// </summary>
+            F_MENU_DATE_HES,
+            /// <summary>
+            /// راس گیری
+            /// </summary>
+            RAAS
         }
         #endregion
 
@@ -789,6 +826,43 @@ namespace Functions
         {
             switch (_TYPE_)
             {
+
+                case WinNameType.RAAS:
+                    CL_LMethods.OpenWindow(OWNERWIN, new RAAS(), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.F_MENU_DATE_HES:
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_DATE_HES(), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.F_MENU_GOZARESH_FROOSH_FR:
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_GOZARESH_FROOSH("FR"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.F_MENU_KOL_MOIN_TAFZIL_FRKMA4: 
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_TAFZIL("FRKMA4"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.F_MENU_KOL_MOIN_TAFZIL_VAZ: 
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_TAFZIL("VAZ"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.F_MENU_ANBAR_FRKH_RK:
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_ANBAR_FRKH("RK"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.WIN_F_MENU_KHFR_FLIST:
+                    CL_LMethods.OpenWindow(OWNERWIN, new WIN_F_MENU_KHFR("FLIST"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.F_MENU_GOZARESH_FROOSH_FK: 
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_GOZARESH_FROOSH("FK"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.TARAZ_ANBAR_KOL: //لیست تراز موجودی کل انبار ها
+                    CL_LMethods.OpenWindow(OWNERWIN, new TARAZ_ANBAR_KOL(), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
                 //Mojtaba{
                 case WinNameType.CRMMAIN: /* مدیریت ارتباط با مشتری CRM */ CL_LMethods.OpenWindow(OWNERWIN, new CRMMAIN(), isModalDialog: false, allowMultipleInstances: false); break;
 

@@ -210,7 +210,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_8">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/FACTORHA/SellFactors.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -219,7 +219,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_9">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/FACTORHA/RasGiri.png" CacheOption="OnLoad"/>
                             </Image.Source>

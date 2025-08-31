@@ -145,7 +145,7 @@
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal"/>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_3">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/GOZARESHAT_INVOCE/UsersDailySellList.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -163,7 +163,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_4">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/GOZARESHAT_INVOCE/SellListSumByKala.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -172,7 +172,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_5">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/GOZARESHAT_INVOCE/KharidListByKala.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -181,7 +181,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_6">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/GOZARESHAT_INVOCE/AmarSellByDay.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -190,7 +190,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_7">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/GOZARESHAT_INVOCE/SellReportsByPerson.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -199,7 +199,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_8">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/GOZARESHAT_INVOCE/KalaBuyReportByAnbar.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -212,7 +212,7 @@
                 <StackPanel FlowDirection="RightToLeft" Orientation="Vertical">
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_9">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/GOZARESHAT_INVOCE/SellReportsByGroup.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -221,7 +221,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_10">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/GOZARESHAT_INVOCE/SellreportByVahed.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -230,7 +230,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_11">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/GOZARESHAT_INVOCE/KalaBuyReportByAnbar.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -257,7 +257,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_12">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/GOZARESHAT_INVOCE/SooratStatusPerson.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -266,7 +266,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_13">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/GOZARESHAT_INVOCE/SooratStatusCheckByDate.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -275,7 +275,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_14">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/GOZARESHAT_INVOCE/BargeBedoonGhabzeBascool.png" CacheOption="OnLoad"/>
                             </Image.Source>

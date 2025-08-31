@@ -100,5 +100,10 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.MASRAF_CENTER, null);
         }
+
+        private void Image_PreviewMouseDown_14(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.TCOD_MARKAZHAZ_WIN, null);
+        }
     }
 }

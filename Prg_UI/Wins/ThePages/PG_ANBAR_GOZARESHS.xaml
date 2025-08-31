@@ -273,7 +273,7 @@
                         <Label Content="لیست تراز انبار به تفکیک نوع برگه" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" IsEnabled="False">
+                    <WrapPanel FlowDirection="RightToLeft" Visibility="Collapsed" Orientation="Horizontal" IsEnabled="False">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/ANBAR_GOZARESHAT/RepairAnbarStock.png" CacheOption="OnLoad"/>

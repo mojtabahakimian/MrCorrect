@@ -62,5 +62,15 @@ namespace Wins.ThePages
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_SADERATI, null /*DEFAULT OWNER MAIN*/);
 
         }
+
+        private void Image_PreviewMouseDown_8(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, null /*DEFAULT OWNER MAIN*/);
+        }
+
+        private void Image_PreviewMouseDown_9(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.RAAS , null /*DEFAULT OWNER MAIN*/);
+        }
     }
 }
