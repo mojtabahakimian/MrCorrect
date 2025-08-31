@@ -342,6 +342,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 (report.GetComponentByName("DT1_N") as StiText).Text = dt1;
                 (report.GetComponentByName("DT2_N") as StiText).Text = dt2;
                 (report.GetComponentByName("DT2_N") as StiText).Text = dt3;
+
+                new WINRPT(report, "صورت وضعیت معاملات تاریخ چک").Show();
             }
 
             if (OPEN_ARG != "TAF")  //if (this.OpenArgs == "RMOIN")

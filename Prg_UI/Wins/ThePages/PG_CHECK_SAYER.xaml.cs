@@ -24,5 +24,15 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CHAPCHEK, null);
         }
+
+        private void Image_PreviewMouseDown_1(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_CHKB, null);
+        }
+
+        private void Image_PreviewMouseDown_2(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_DCHSS, null);
+        }
     }
 }

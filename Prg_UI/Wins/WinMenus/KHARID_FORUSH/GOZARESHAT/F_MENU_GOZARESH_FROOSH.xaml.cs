@@ -18,6 +18,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
+using Rpts;
 
 namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 {
@@ -138,6 +139,70 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                 USERR.Visibility = Visibility.Hidden;
             }
         }
+
+        private void OpenReport()
+        {
+            var report = new StiReport();
+            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.GOZARESH_FROOSH_USER.mrt");
+            report.Load(pathreport);
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            report.Dictionary.Databases.Clear();
+            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
+
+            (report.GetComponentByName("DT1_N") as StiText).Text = DT1.Text.ToString();
+            (report.GetComponentByName("DT2_N") as StiText).Text = DT2.Text.ToString();
+
+            report["USER_PARM"] = USERR.SelectedValue.ToString();
+            report["SHIFT_PARM"] = DT2.Text.ToString();
+            report["VAHED_PARM"] = DEPART.SelectedValue.ToString();
+            report["FDATE_PARM"] = DT1.Text.ToRawTarikh();
+            report["EDATE_PARM"] = DT2.Text.ToRawTarikh();
+
+            new WINRPT(report, "لیست کالا ها جهت ویزیت").Show();
+        }
+
+        private void OpenReport_2()
+        {
+            var report = new StiReport();
+            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.LIST_FROOSH_ANBARS_DTL.mrt");
+            report.Load(pathreport);
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            report.Dictionary.Databases.Clear();
+            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
+
+            (report.GetComponentByName("DT1_N") as StiText).Text = DT1.Text.ToString();
+            (report.GetComponentByName("DT2_N") as StiText).Text = DT2.Text.ToString();
+
+
+            report["USER_PARM"] = USERR.SelectedValue.ToString();
+            report["SHIFT_PARM"] = DT2.Text.ToString();
+            report["VAHED_PARM"] = DEPART.SelectedValue.ToString();
+            report["FDATE_PARM"] = DT1.Text.ToRawTarikh();
+            report["EDATE_PARM"] = DT2.Text.ToRawTarikh();
+
+            new WINRPT(report, "لیست کالا ها جهت ویزیت").Show();
+        }
+
+        private void OpenReport_3()
+        {
+            var report = new StiReport();
+            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.GOZARESH_FROOSH_USER3.mrt");
+            report.Load(pathreport);
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            report.Dictionary.Databases.Clear();
+            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
+
+            (report.GetComponentByName("AZDATE") as StiText).Text = DT1.Text.ToString();
+            (report.GetComponentByName("TADATE") as StiText).Text = DT2.Text.ToString();
+
+
+            report["DEPART_PARM"] = DEPART.SelectedValue.ToString();
+            report["FDATE_PARM"] = DT1.Text.ToRawTarikh();
+            report["EDATE_PARM"] = DT2.Text.ToRawTarikh();
+
+            new WINRPT(report, "گزارش خلاصه فروش روزانه کاربران").Show();
+        }
+
         private void BTN_GO_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -191,17 +256,23 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                         if (SSHIFT == "%")
                         {
                             //OpenReport("GOZARESH_FROOSH_USER3");
+
+                            OpenReport_3();
                         }
                         else
                         {
                             //OpenReport("GOZARESH_FROOSH_USER");
+
+                            OpenReport();
+
                         }
-                        //OpenForm(this.Name, true);
                         break;
 
                     case "FR":
                         //OpenReport("LIST_FROOSH_ANBARS_DTL");
-                        //OpenForm(this.Name, true);
+
+                        OpenReport_2();
+
                         break;
 
                     case "FK":
@@ -216,120 +287,10 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                         }
                         else
                         {
-                            //OpenReport("GOZARESH_FROOSH_USER3");//Last Point Coding
+                            //OpenReport("GOZARESH_FROOSH_USER3");
 
-                            
-                            var report = new StiReport();
-                            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.INVOICE_FROOSH_22.mrt");
-                            report.Load(pathreport);
-
-                            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
-                            report.Dictionary.Databases.Clear();
-                            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
-
-                            //((StiSqlSource)report.Dictionary.DataSources["FACTOR_DATA"]).CommandTimeout = 300;
-
-
-                            #region OpenReport_GroupFooter0_Format
-                            if (true)
-                            {
-                                var rst = dbms.DoGetDataSQL<int?>("SELECT COUNT(M_NAGHD) AS SumOfM_NAGHD FROM dbo.HEAD_LST WHERE     (DATE_N BETWEEN " + DT1.Text.ToRawTarikh() + " AND " + DT2.Text.ToRawTarikh() + " ) AND (TAG = 13)   AND  (DEPATMAN = " + DEPART.SelectedValue + " ) AND (M_NAGHD > 0)").FirstOrDefault();
-                                if (rst != null && rst > 0)
-                                {
-                                    (report.GetComponentByName("CNAGHD") as StiText).Enabled = true; //  this.CNAGHD.Visible = true;
-                                    (report.GetComponentByName("CNAGHD") as StiText).Text = "( " + rst + " )";
-                                }
-                            }
-                            if (true)
-                            {
-                                var rst = dbms.DoGetDataSQL<int?>("SELECT COUNT(TAKHFIF) AS MM FROM dbo.HEAD_LST WHERE     (DATE_N BETWEEN " + DT1.Text.ToRawTarikh() + " AND " + DT2.Text.ToRawTarikh() + " ) AND (TAG = 13)  AND  (DEPATMAN = " + DEPART.SelectedValue + " ) AND (TAKHFIF > 0)").FirstOrDefault();
-                                if (rst != null && rst > 0)
-                                {
-                                    (report.GetComponentByName("MANDG") as StiText).Enabled = true; // this.CTAKH.Visible = true;
-                                    (report.GetComponentByName("CTAKH") as StiText).Text = "( " + rst + " )";
-                                    (report.GetComponentByName("Label137") as StiText).Enabled = true;
-                                }
-                            }
-                            if (true)
-                            {
-                                var rst = dbms.DoGetDataSQL<FMG1>("SELECT SUM(M_NAGHD) AS naghd, COUNT(M_NAGHD) AS countn FROM dbo.HEAD_LST WHERE     (DATE_N BETWEEN " + DT1.Text.ToRawTarikh() + " AND " + DT2.Text.ToRawTarikh() + ") AND (TAG = 4) AND   (DEPATMAN = " + DEPART.SelectedValue + ") AND (M_NAGHD > 0)").FirstOrDefault();
-
-                                if (rst != null)
-                                {
-                                    //(report.GetComponentByName("MNAGHD") as StiText).Enabled = true; // this.MNAGHD.Visible = true;
-                                    //(report.GetComponentByName("MNAGHD") as StiText).Text = "( " + rst + " )";
-                                    //this.LMNAGHD.Visible = true;
-                                    //(report.GetComponentByName("LMNAGHD") as StiText).Enabled = true;
-                                    //(report.GetComponentByName("SANDOGH") as StiText).Enabled = true;
-                                    //(report.GetComponentByName("LSANDOGH") as StiText).Enabled = true;
-                                    //var SumOfM_NAGHD = Convert.ToDouble((report.GetComponentByName("Text18") as StiText).Text);
-                                    //this.SANDOGH.CAPTION = (SumOfM_NAGHD - rst);
-                                    //(report.GetComponentByName("MNAGHD") as StiText).Text = ;
-                                    //(report.GetComponentByName("SANDOGH") as StiText).Text = ;
-                                }
-                            }
-                            if (true)
-                            {
-                                var rst = dbms.DoGetDataSQL<int?>("SELECT     COUNT(MABL_VAR) AS MM FROM dbo.HEAD_LST WHERE     (DATE_N BETWEEN " + DT1.Text.ToRawTarikh() + " AND " + DT2.Text.ToRawTarikh() + " ) AND (TAG = 13)  AND  (DEPATMAN = " + DEPART.SelectedValue + " ) AND (MABL_VAR > 0)").FirstOrDefault();
-                                if (rst != null && rst > 0)
-                                {
-                                    //(report.GetComponentByName("MANDG") as StiText).Enabled = true; // this.CVAR.Visible = true;
-                                    //this.CVAR.CAPTION = "( " + rst + " )";
-                                    //(report.GetComponentByName("_YOUR_") as StiText).Text = ;
-                                }
-                            }
-                            if (true)
-                            {
-                                var rst = dbms.DoGetDataSQL<int?>("SELECT COUNT(MABL_HAV) AS MM FROM dbo.HEAD_LST WHERE (DATE_N BETWEEN " + DT1.Text.ToRawTarikh() + " AND " + DT2.Text.ToRawTarikh() + " ) AND (TAG = 13) AND  (DEPATMAN = " + DEPART.SelectedValue + " ) AND (MABL_HAV > 0)").FirstOrDefault();
-                                if (rst != null && rst > 0)
-                                {
-                                    //(report.GetComponentByName("MANDG") as StiText).Enabled = true; //this.CHAV.Visible = true;
-                                    //this.CHAV.CAPTION = "( " + rst + " )";
-                                    //(report.GetComponentByName("_YOUR_") as StiText).Text = ;
-                                }
-                            }
-                            if (true)
-                            {
-                                var rst = dbms.DoGetDataSQL<int?>("SELECT COUNT(dbo.PAY_GETD.MABL) AS SumOfMABL FROM dbo.HEAD_LST INNER JOIN   dbo.PAY_GETD ON dbo.HEAD_LST.TAG = dbo.PAY_GETD.TAG AND dbo.HEAD_LST.NUMBER = dbo.PAY_GETD.NUMBER AND  dbo.HEAD_LST.TAG = dbo.PAY_GETD.TAG AND dbo.HEAD_LST.NUMBER = dbo.PAY_GETD.NUMBER AND dbo.HEAD_LST.TAG = dbo.PAY_GETD.TAG AND   dbo.HEAD_LST.NUMBER = dbo.PAY_GETD.NUMBER AND dbo.HEAD_LST.TAG = dbo.PAY_GETD.TAG AND  dbo.HEAD_LST.NUMBER = dbo.PAY_GETD.NUMBER WHERE     (DATE_N BETWEEN " + DT1.Text.ToRawTarikh() + " AND " + DT2.Text.ToRawTarikh() + " ) AND  (DEPATMAN = " + DEPART.SelectedValue + " ) AND   (dbo.HEAD_LST.TAG = 2)").FirstOrDefault();
-                                if (rst != null && rst > 0)
-                                {
-                                    //(report.GetComponentByName("MANDG") as StiText).Enabled = true; //this.CASN.Visible = true;
-                                    //this.CASN.CAPTION = "( " + rst + " )";
-                                    //(report.GetComponentByName("_YOUR_") as StiText).Text = ;
-                                }
-                            }
-                            if (true)
-                            {
-                                var rst = dbms.DoGetDataSQL<FMG2>("SELECT TOP 100 PERCENT SUM(SMAB + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD) AS MAND, COUNT(smab + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD) As TEDAD FROM         dbo.GUSER_FACT_PERDEPART_SUB3(" + DT1.Text.ToRawTarikh() + ", " + DT2.Text.ToRawTarikh() + ", " + DEPART.SelectedValue + ", '%', '%') GUSER_FACT_PERDEPART_SUB3 WHERE     (SMAB + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD > 0)").FirstOrDefault();
-                                if (rst != null)
-                                {
-                                    //this.BED.CAPTION = Strings.Format(rst.Fields("mand"), "#,###");
-                                    //this.CBED.CAPTION = "( " + rst.Fields("tedad") + " )";
-                                    //this.CBED.Visible = true;
-                                    //(report.GetComponentByName("MANDG") as StiText).Enabled = true;
-                                    //(report.GetComponentByName("_YOUR_") as StiText).Text = ;
-                                }
-                            }
-                            if (true)
-                            {
-                                //var rst = dbms.DoGetDataSQL<FMG2>("SELECT TOP 100 PERCENT SUM(SMAB + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD) AS MAND, COUNT(smab + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD) As TEDAD FROM         dbo.GUSER_FACT_PERDEPART_SUB3(" + DT1.Text.ToRawTarikh() + ", " + DT2.Text.ToRawTarikh() + ", " + DEPART.SelectedValue + ", '%', '%') GUSER_FACT_PERDEPART_SUB3 WHERE     (SMAB + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD < 0)").FirstOrDefault();
-                                //if (rst != null)
-                                //{
-                                //    this.BES.CAPTION = Strings.Format(rst.Fields("mand") * -1, "#,###");
-                                //    this.cbes.CAPTION = "( " + rst.Fields("tedad") + " )";
-                                //    this.cbes.Visible = true;
-                                //    (report.GetComponentByName("MANDG") as StiText).Enabled = true;
-                                //    (report.GetComponentByName("_YOUR_") as StiText).Text = ;
-                                //}
-                            }
-                            #endregion
-
-                            //report.Render();
-                            //report.Show();
-
-                            new Rpts.WINRPT(report, "گزارش فروش روزانه واحد ها").Show();
+                            OpenReport_3();
                         }
-                        //OpenForm(this.Name, true);
                         break;
                 }
             }

@@ -70,6 +70,8 @@
 		<None Remove="Rpts\Checkha\CHEK_DLISTS.mrt" />
 		<None Remove="Rpts\Checkha\ELVSL_ADA.mrt" />
 		<None Remove="Rpts\DASHBOARD\ELAMIEY_DEF.mrt" />
+		<None Remove="Rpts\Factors\GOZARESH_FROOSH_USER.mrt" />
+		<None Remove="Rpts\Factors\GOZARESH_FROOSH_USER3.mrt" />
 		<None Remove="Rpts\Factors\HAVLAH_BRDIRECT.mrt" />
 		<None Remove="Rpts\Factors\HAVLAH_ENTER.mrt" />
 		<None Remove="Rpts\Factors\HAVLAH_ENTER_BACK.mrt" />
@@ -92,6 +94,7 @@
 		<None Remove="Rpts\Factors\INVOICE_KH_BACK.mrt" />
 		<None Remove="Rpts\Factors\INVOICE_KH_BACK_AZAD.mrt" />
 		<None Remove="Rpts\Factors\INVOIC_FROOSH_BACK2.mrt" />
+		<None Remove="Rpts\Factors\LIST_FROOSH_ANBARS_DTL.mrt" />
 		<None Remove="Rpts\Factors\LIST_FROOSH_KALA_BASKOL.mrt" />
 		<None Remove="Rpts\Factors\R_FROOSH_DAYLY_1.mrt" />
 		<None Remove="Rpts\Factors\R_GARDESH_KHFR_DAFTAR_A4.mrt" />
@@ -472,6 +475,8 @@
 		<EmbeddedResource Include="Rpts\Checkha\CHEK_DLISTS.mrt" />
 		<EmbeddedResource Include="Rpts\Checkha\ELVSL_ADA.mrt" />
 		<EmbeddedResource Include="Rpts\DASHBOARD\ELAMIEY_DEF.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\GOZARESH_FROOSH_USER.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\GOZARESH_FROOSH_USER3.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\HAVLAH_BRDIRECT.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\HAVLAH_ENTER.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\HAVLAH_ENTER_BACK.mrt" />
@@ -494,6 +499,7 @@
 		<EmbeddedResource Include="Rpts\Factors\INVOICE_KH_BACK.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\INVOICE_KH_BACK_AZAD.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\INVOIC_FROOSH_BACK2.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\LIST_FROOSH_ANBARS_DTL.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\LIST_FROOSH_KALA_BASKOL.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\R_FROOSH_DAYLY_1.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\R_GARDESH_KHFR_DAFTAR_A4.mrt" />
