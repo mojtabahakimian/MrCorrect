@@ -17,6 +17,9 @@ using System.Linq;
 using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using static Wins.WinOther.SEARCHMENIU_WIN;
+using Stimulsoft.Report.Dictionary;
+using Stimulsoft.Report;
+using System.Reflection;
 
 namespace Prg_UI.Wins
 {
@@ -843,7 +846,7 @@ namespace Prg_UI.Wins
 
         private void Button_Click_43(object sender, RoutedEventArgs e)
         {
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_FROOSHDAY, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_FROOSHDAY, null);
         }
 
         private void Button_Click_44(object sender, RoutedEventArgs e)
@@ -858,6 +861,16 @@ namespace Prg_UI.Wins
 
         private void Button_Click_46(object sender, RoutedEventArgs e)
         {
+            var report = new StiReport();
+            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.R_MOGUDI_ANBARHA.mrt");
+            report.Load(pathreport);
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            report.Dictionary.Databases.Clear();
+            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
+
+            //report.Render();
+            //report.Show();
+            new Rpts.WINRPT(report, "گزارش موجودی کل انبار ها").Show();
         }
 
         private void Button_Click_47(object sender, RoutedEventArgs e)
@@ -1114,6 +1127,91 @@ namespace Prg_UI.Wins
         private void Image_PreviewMouseDown_8(object sender, MouseButtonEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CRMMAIN, this); //مدیریت ارتباط با مشتری CRM
+        }
+
+        private void Button_Click_91(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_FROOSH, null);
+        }
+
+        private void Button_Click_92(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ANBAR_FRKH, null);
+        }
+
+        private void Button_Click_93(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ANBAR_FRKH_RK, null);
+        }
+
+        private void Button_Click_94(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL_VAZ, null);
+        }
+
+        private void Button_Click_95(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL_FRKMA4, null);
+        }
+
+        private void Button_Click_96(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_HBGHB, null);
+        }
+
+        private void Button_Click_97(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_GOZARESH_FROOSH_FK, null);
+        }
+
+        private void Button_Click_98(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_CFRALL, null);
+        }
+
+        private void Button_Click_99(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_CKRALL, null);
+        }
+
+        private void Button_Click_100(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_AMFDAY, null);
+        }
+
+        private void Button_Click_101(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_FLIST, null);
+        }
+
+        private void Button_Click_102(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_FLIST, null);
+        }
+
+        private void Button_Click_103(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.RAAS, null);
+        }
+
+        private void Button_Click_104(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_CHKB, null);
+        }
+
+        private void Button_Click_105(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_DCHSS, null);
+        }
+
+        private void Button_Click_106(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.ADAMTARAZ, null);
+        }
+
+        private void Button_Click_107(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.TCOD_MARKAZHAZ_WIN, null);
         }
     }
 }
