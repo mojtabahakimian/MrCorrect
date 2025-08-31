@@ -59,6 +59,7 @@
 		<None Remove="Rpts\ANBAR\r_counter3.mrt" />
 		<None Remove="Rpts\ANBAR\R_KA_KALA.mrt" />
 		<None Remove="Rpts\ANBAR\R_KA_KALA2.mrt" />
+		<None Remove="Rpts\ANBAR\R_MOGUDI_ANBARHA.mrt" />
 		<None Remove="Rpts\ANBAR\R_TAG.mrt" />
 		<None Remove="Rpts\ANBAR\R_TARAZ_ANBARHA.mrt" />
 		<None Remove="Rpts\ANBAR\R_TARAZ_ANBARHA_KHAS.mrt" />
@@ -464,6 +465,7 @@
 		<EmbeddedResource Include="Rpts\ANBAR\r_counter3.mrt" />
 		<EmbeddedResource Include="Rpts\ANBAR\R_KA_KALA.mrt" />
 		<EmbeddedResource Include="Rpts\ANBAR\R_KA_KALA2.mrt" />
+		<EmbeddedResource Include="Rpts\ANBAR\R_MOGUDI_ANBARHA.mrt" />
 		<EmbeddedResource Include="Rpts\ANBAR\R_TAG.mrt" />
 		<EmbeddedResource Include="Rpts\ANBAR\R_TARAZ_ANBARHA.mrt" />
 		<EmbeddedResource Include="Rpts\ANBAR\R_TARAZ_ANBARHA_KHAS.mrt" />

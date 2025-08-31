@@ -1,6 +1,12 @@
 ﻿using Functions;
+using Prg_Proccessy.MODELS;
+using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.Wins.WinMenus.ANBAR;
+using Stimulsoft.Report.Components;
+using Stimulsoft.Report.Dictionary;
+using Stimulsoft.Report;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -114,7 +120,16 @@ namespace Wins.ThePages
 
         private void Image_PreviewMouseDown_6(object sender, MouseButtonEventArgs e)
         {
+            var report = new StiReport();
+            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.R_MOGUDI_ANBARHA.mrt");
+            report.Load(pathreport);
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            report.Dictionary.Databases.Clear();
+            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
+            //report.Render();
+            //report.Show();
+            new Rpts.WINRPT(report, "گزارش موجودی کل انبار ها").Show();
         }
 
         private void Image_PreviewMouseDown_7(object sender, MouseButtonEventArgs e)
