@@ -18,13 +18,21 @@ using Prg_UI.UiTools;
 using System.Text;
 using Syncfusion.Data;
 using Prg_UI.HelperWins;
-using System.Reflection;
+using Wins.WinMenus.KHARID_FORUSH;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Reflection;
 using System.Threading;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
+using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_SERCH_MAIN_ADVANC;
+using Syncfusion.Windows.Controls.PivotGrid;
+using DocumentFormat.OpenXml.Drawing.Spreadsheet;
+using Prg_Proccessy.MODELS;
+using Prg_Proccessy.FUNCTIONS;
 
-namespace Wins.WinMenus.KHARID_FORUSH
+namespace Prg_UI.Wins.WinMenus.ANBAR
 {
-    public partial class FACTORS_LST : Window
+    public partial class KALAS_MAIN_ADVANCE : Window
     {
         #region Header Window Begin
         //Header Window Begin
@@ -67,188 +75,152 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         //Header Window End;
         #endregion
-
-        public FACTORS_LST(byte? _TAGCODE_)
+        public KALAS_MAIN_ADVANCE()
         {
             InitializeComponent();
 
             this.DataContext = this;
 
-            if (_TAGCODE_ != null)
-            {
-                TAGCODE = (byte)_TAGCODE_;
-            }
-
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
+
             GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
         }
-        CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
         UniversControl universControl = new UniversControl();
-        public ObservableCollection<HEAD_LST_SRC> FACTOR_DATA { get; set; } = new ObservableCollection<HEAD_LST_SRC>();
+
+        CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+        public ObservableCollection<KALAS> FACTOR_DATA { get; set; } = new ObservableCollection<KALAS>();
         public bool NowIsReady { get; private set; }
-        public byte TAGCODE { get; private set; }
+        public string SqlQueryPassed { get; set; } = "";
+        public bool isSummed { get; set; } = false;
+
+        public List<string> ColumnSelectedPassed { get; set; } = new List<string>();
+
+        #region ComboBoxItemPassed
+        //public List<TAGCOD>? TAGCODE_Data { get; set; }
+        //public List<TCOD_VAHEDS>? VAHCODE_Data { get; set; }
+        //public List<TCOD_STUFGROUP>? GRPCODE_Data { get; set; }
+        //public List<TCOD_OSTAN>? OSTANID_Data { get; set; }
+        //public List<TCOD_CITY>? SHAHRID_Data { get; set; }
+        //public List<CMB1>? ROUTE_NAME_Data { get; set; }
+        //public List<TCOD_ANBAR>? ANBARCODE_Data { get; set; }
+        //public List<SALA_DTL>? USER_NAME_Data { get; set; }
+        //public List<Custom_DEPART>? DEPATMAN_Data { get; set; }
+        //public List<TheSHIFT1>? SHIFT_ID_Data { get; set; }
+        //public List<CUSTKIND>? CUST_COD_Data { get; set; }
+        //public List<CMB2>? N_RASID_Data { get; set; }
+        //public List<CMB3>? MM_Data { get; set; }
+        #endregion
+
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
+        }
+        public static GridColumn FindColumn(SfDataGrid grid, string columnName)
+        {
+            if (grid == null || string.IsNullOrWhiteSpace(columnName))
+                return null;
+
+            #region MyRegion
+            ////نوع برگه
+            //if (string.Equals(columnName, "TAGCODE", StringComparison.OrdinalIgnoreCase)) columnName = "BARGAH";
+
+            ////نام انبار
+            //if (string.Equals(columnName, "ANBARCODE", StringComparison.OrdinalIgnoreCase)) columnName = "ANBNAME";
+
+            ////نام گروه کالا
+            //if (string.Equals(columnName, "GRPCODE", StringComparison.OrdinalIgnoreCase)) columnName = "GRPNAME";
+
+            ////نام واحد کالا
+            //if (string.Equals(columnName, "VAHCODE", StringComparison.OrdinalIgnoreCase)) columnName = "VAHEDNAME";
+
+            ////واحد : دپارتمان
+            //if (string.Equals(columnName, "DEPATMAN", StringComparison.OrdinalIgnoreCase)) columnName = "DEPNAME";
+
+            ////شیفت
+            //if (string.Equals(columnName, "SHIFT_ID", StringComparison.OrdinalIgnoreCase)) columnName = "SHNAME";
+
+            ////شیفت
+            //if (string.Equals(columnName, "SHIFT_ID", StringComparison.OrdinalIgnoreCase)) columnName = "SHNAME";
+            #endregion
+
+            var key = columnName.Trim();
+
+            // 1) MappingName
+            var col = grid.Columns.FirstOrDefault(c =>
+                string.Equals(c.MappingName, key, StringComparison.OrdinalIgnoreCase));
+            if (col != null) return col;
+
+            // 2) HeaderText
+            col = grid.Columns.FirstOrDefault(c =>
+                string.Equals(c.HeaderText, key, StringComparison.OrdinalIgnoreCase));
+            if (col != null) return col;
+
+            // 3) x:Name (اگر ستون در XAML تعریف شده باشد)
+            var byXamlName = grid.FindName(key) as GridColumn; // مثلا "TAGCODE"
+            if (byXamlName != null) return byXamlName;
+
+            return col;
+        }
+        private GridColumn FindColumnSafe(string name)
+        {
+            // اگر متد FindColumn خودت را داری همان را صدا بزن؛ در غیراینصورت MappingName را چک کن
+            var col = SYNCFUSION_DG.Columns.FirstOrDefault(c => string.Equals(c.MappingName, name, StringComparison.OrdinalIgnoreCase));
+            if (col != null) return col;
+
+            // x:Name در صورت تعریف دستی
+            return this.FindName(name) as GridColumn;
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             //Process Prc = ProcLoader.Start();
 
+            List<string> NON = new List<string>();
+            foreach (var columnName in ColumnSelectedPassed)
+            {
+                // پیدا کردن ستون با اسم مشخص
+                var column = FindColumn(SYNCFUSION_DG, columnName);
+
+                if (column != null)
+                {
+                    column.IsHidden = false;
+                }
+                else
+                {
+                    //NON.Add(columnName.Trim());
+                }
+            }
+
+            var digits = Baseknow.DIG;
+            void SetDigits(string colName)
+            {
+                var col = FindColumnSafe(colName);
+                if (col is GridNumericColumn gnc)
+                {
+                    gnc.NumberDecimalDigits = (int)digits;
+                }
+            }
+            SetDigits("MEGH");
+            SetDigits("MEGHk");
+            SetDigits("MEGH_MAR");
+
             FACTOR_DATA?.Clear();
 
-            string WhereCondition = TAGCODE > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {TAGCODE}) " : "  ";
-
-            //if (TAGCODE == 2 || TAGCODE == 13 || TAGCODE == 20) //حواله , فاکتور , پیش فاکتور
-            //{
-            //    WhereCondition = CL_LMethods.GetRestrictedSqlQuery(TAGCODE, WhereCondition);
-            //}
-
-            WhereCondition = CL_LMethods.GetRestrictedSqlQuery(TAGCODE, WhereCondition);
-
-            var MasterHead = dbms.DoGetDataSQL<HEAD_LST_SRC>(@$" SELECT dbo.HEAD_LST.NUMBER1, dbo.HEAD_LST.TAH, dbo.HEAD_LST.NUMBER, dbo.HEAD_LST.DATE_N, dbo.HEAD_LST.MAS, dbo.HEAD_LST.N_S, dbo.HEAD_LST.CUST_NO, dbo.CUST_HESAB.NAME, dbo.HEAD_LST.MOLAH, 
-                                                                     dbo.HEAD_LST.M_NAGHD, dbo.HEAD_LST.MABL_VAR, dbo.HEAD_LST.MOIN_VAR, dbo.HEAD_LST.MABL_HAV, dbo.HEAD_LST.MOIN_HAV, dbo.HEAD_LST.MABL_HAZ, dbo.HEAD_LST.MOIN_HAZ, dbo.HEAD_LST.TAKHFIF, 
-                                                                     dbo.HEAD_LST.MOIN_KHF,dbo.HEAD_LST.TAG, dbo.DEPART.DEPNAME, dbo.SHIFT.SHNAME, dbo.CUSTKIND.CUSTKNAME, dbo.HEAD_LST.USER_NAME, dbo.HEAD_LST.SHARAYET, dbo.HEAD_LST.MBAA, dbo.HEAD_LST.HMBAA, 
-                                                                     dbo.HEAD_LST.TICMBAA, dbo.HEAD_LST.TKHF, dbo.HEAD_LST.OKF, dbo.HEAD_LST.JAY, dbo.HEAD_LST.SGN1, dbo.HEAD_LST.SGN2, dbo.HEAD_LST.SGN3, dbo.HEAD_LST.sgn1usid, dbo.HEAD_LST.sgn2usid, 
-                                                                     dbo.HEAD_LST.sgn3usid, dbo.HEAD_LST.CRT, dbo.HEAD_LST.UID, dbo.PRICE_ELAMIE.PEPNAME, dbo.PRICE_ELAMIETF.PENAME, dbo.PRICE_PAYNO.PPAME
-                                                                     FROM dbo.HEAD_LST LEFT OUTER JOIN
-                                                                     dbo.PRICE_PAYNO ON dbo.HEAD_LST.MODAT_PPID = dbo.PRICE_PAYNO.PPID LEFT OUTER JOIN
-                                                                     dbo.PRICE_ELAMIETF ON dbo.HEAD_LST.PEID = dbo.PRICE_ELAMIETF.PEID LEFT OUTER JOIN
-                                                                     dbo.CUSTKIND ON dbo.HEAD_LST.CUST_KIND = dbo.CUSTKIND.CUST_COD LEFT OUTER JOIN
-                                                                     dbo.PRICE_ELAMIE ON dbo.HEAD_LST.PEPID = dbo.PRICE_ELAMIE.PEPID LEFT OUTER JOIN
-                                                                     dbo.DEPART ON dbo.HEAD_LST.DEPATMAN = dbo.DEPART.DEPATMAN LEFT OUTER JOIN
-                                                                     dbo.SHIFT ON dbo.HEAD_LST.SHIFT = dbo.SHIFT.SHIFT_ID LEFT OUTER JOIN
-                                                                     dbo.CUST_HESAB ON dbo.HEAD_LST.CUST_NO = dbo.CUST_HESAB.hes
-                                                                     {WhereCondition}
-                                                                     ORDER BY dbo.HEAD_LST.NUMBER1,dbo.HEAD_LST.NUMBER DESC ").ToList();
+            var MasterHead = dbms.DoGetDataSQL<KALAS>(SqlQueryPassed).ToList();
             foreach (var item in MasterHead)
             {
                 FACTOR_DATA.Add(item);
             }
 
-            #region COLUMN_DISPLAYER
-
-            if (TAGCODE == 13)
-            {
-                ISEND_COLUMN.IsHidden = false; //نمایش ستون مودیان
-            }
-
-            switch (TAGCODE)
-            {
-                //فاکتوری ها
-                case 3:
-                case 4:
-                case 12:
-                case 13:
-                case 14:
-                case 20:
-                case 27:
-                    NUMBER_FAC_COLUMN.IsHidden = false; //Show
-                    break;
-
-                //انباری ها
-                case 1:
-                case 2:
-                case 5:
-                case 23:
-                case 24:
-                case 26:
-                    TARIKH_FAC_COLUMN.HeaderText = "تاریخ";
-                    NUMBER_FAC_COLUMN.IsHidden = true; //Hide
-                    MODAT_COLUMN.IsHidden = true;
-                    SANAD_COLUMN.IsHidden = true;
-                    NAGHD_COLUMN.IsHidden = true;
-                    VARIZI_COLUMN.IsHidden = true;
-                    MOEENVARIZ_COLUMN.IsHidden = true;
-                    MABL_HAV_COLUMN.IsHidden = true;
-                    MOEEN_HAV_COLUMN.IsHidden = true;
-                    MABL_KHAD_COLUMN.IsHidden = true;
-                    MOEEN_KHAD_COLUMN.IsHidden = true;
-                    MABL_TAKHFIF_COLUMN.IsHidden = true;
-                    break;
-
-                default: break;
-            }
-            #endregion
-
-            switch (TAGCODE) //عنوان پنجره
-            {
-                case 27:
-                    WINTILENAME.Content = "فاکتور های برگشت خرید آزاد";
-                    break;
-
-                case 26: WINTILENAME.Content = "سایر حواله انبار ها"; break;
-
-                case 25:
-                    WINTILENAME.Content = "فاکتور های برگشت فروش آزاد رسید شده";
-                    NUMBER_HAV_COLUMN.HeaderText = "شماره برگه";
-                    break;
-                case 24: WINTILENAME.Content = "سایر رسید انبار ها"; break;
-
-                case 23:
-                    WINTILENAME.Content = "درخواست خرید ها";
-                    TAH_COLUMN.IsHidden = false;
-                    break;
-
-                case 20:
-                    WINTILENAME.Content = "پیش فاکتور ها";
-                    NUMBER_FAC_COLUMN.IsHidden = true;
-                    SANAD_COLUMN.IsHidden = true;
-                    NUMBER_HAV_COLUMN.HeaderText = "شماره پیش فاکتور";
-                    break;
-
-                case 14: WINTILENAME.Content = "فاکتور های خدمات"; break;
-                case 13: WINTILENAME.Content = "فاکتور های فروش"; break;
-                case 12:
-                    WINTILENAME.Content = "فاکتور های خرید";
-                    NUMBER_HAV_COLUMN.HeaderText = "شماره رسید انبار ها";
-                    break;
-
-                case 10:
-                    WINTILENAME.Content = "برگه های خروج مواد اولیه";
-                    NUMBER_HAV_COLUMN.HeaderText = "شماره حواله انبار";
-                    CUST_HESAB_COLUMN.HeaderText = "حساب مسئول شیفت";
-                    CUST_NAME_COLUMN.HeaderText = "نام مسئول شیفت";
-                    TARIKH_FAC_COLUMN.HeaderText = "تاریخ حواله";
-                    MODAT_COLUMN.IsHidden = true;
-                    break;
-
-                case 9:
-                    WINTILENAME.Content = "برگه های ورود کالای ساخته شده";
-                    NUMBER_HAV_COLUMN.HeaderText = "شماره برگه";
-                    CUST_HESAB_COLUMN.HeaderText = "حساب مسئول شیفت";
-                    CUST_NAME_COLUMN.HeaderText = "نام مسئول شیفت";
-                    TARIKH_FAC_COLUMN.HeaderText = "تاریخ";
-                    MODAT_COLUMN.IsHidden = true;
-                    break;
-
-                case 5:
-                    WINTILENAME.Content = "انتقال از انبار به انبار";
-                    break;
-
-                case 4: WINTILENAME.Content = "فاکتور های برگشت فروش - عادی"; break;
-                case 3: WINTILENAME.Content = "فاکتور های برگشت خرید - عادی"; break;
-
-                case 2:
-                    WINTILENAME.Content = "حواله های فروش";
-                    NUMBER_FAC_COLUMN.IsHidden = true;
-                    break;
-
-                case 1:
-                    WINTILENAME.Content = "رسید های خرید";
-                    NUMBER_HAV_COLUMN.HeaderText = "شماره رسید";
-                    NUMBER_FAC_COLUMN.IsHidden = true;
-                    break;
-
-                default: WINTILENAME.Content = "همه نوع فاکتور"; break;
-            }
-
             //SYNCFUSION_DG.ColumnSizer = GridLengthUnitType.Auto;
 
-            GenerateAutomaticSummary(SYNCFUSION_DG);
+            FILL_ALL_COMBOBOXES();
 
-            // Ensure the SfDataGrid is not null before subscribing
+            if (isSummed)
+            {
+                GenerateAutomaticSummary(SYNCFUSION_DG);
+            }
+
             if (SYNCFUSION_DG != null)
             {
                 SYNCFUSION_DG.FilterChanged += View_FilterChanged;
@@ -259,15 +231,71 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             //ProcLoader.Stop(Prc);
         }
+
+        private void FILL_ALL_COMBOBOXES()
+        {
+            //نوع برگه
+            TAGCODE.ItemsSource = dbms.DoGetDataSQL<TAGCOD>($"SELECT CODE, BARGAH FROM TAGCOD").ToList();
+
+            //واحد کالا
+            VAHCODE.ItemsSource = dbms.DoGetDataSQL<TCOD_VAHEDS>($"SELECT CODE, NAMES FROM TCOD_VAHEDS").ToList();
+
+            //گروه کالا
+            GRPCODE.ItemsSource = dbms.DoGetDataSQL<TCOD_STUFGROUP>($"SELECT CODE, NAMES FROM TCOD_STUFGROUP").ToList();
+
+            //استان
+            var ALL_OSTAN = dbms.DoGetDataSQL<TCOD_OSTAN>("SELECT OSCODE, OSNAME FROM TCOD_OSTAN ORDER BY OSNAME").ToList();
+            foreach (var item in ALL_OSTAN) { item.OSNAME = item.OSNAME?.FixPersianChars(); }
+            OSTANID.ItemsSource = ALL_OSTAN; //Combobox Ui
+
+            //کد شهر
+            var ALL_SHAHR = dbms.DoGetDataSQL<TCOD_CITY>("SELECT CITYCODE, CITYNAME FROM TCOD_CITY ORDER BY CITYNAME").ToList();
+            SHAHRID.ItemsSource = ALL_SHAHR;
+
+            //مسیر ویزیت
+            //ROUTE_NAME.ItemsSource = dbms.DoGetDataSQL<CMB1>($@"SELECT Visit_route.ROUTE_NAME, Visit_route.ROUTE_NAME+N' - '+CUST_HESAB.NAME+N' - '+CUST_HESAB.hes AS Expr1
+            //                                                       FROM Visit_route
+            //                                                            INNER JOIN CUST_HESAB ON Visit_route.HES=CUST_HESAB.hes
+            //                                                       WHERE(Visit_route.RACTIVE=1)").ToList();
+            //انبار
+            ANBARCODE.ItemsSource = dbms.DoGetDataSQL<TCOD_ANBAR>($"SELECT CODE, NAMES FROM TCOD_ANBAR").ToList();
+
+            ////کاربران
+            //var RST_PERSONEL = dbms.DoGetDataSQL<SALA_DTL>("SELECT SAL_NAME, IDD FROM dbo.SALA_DTL WHERE (ENABL=0) ORDER BY IDD").ToList();
+            //foreach (var rows in RST_PERSONEL)
+            //{
+            //    if (!string.IsNullOrEmpty(rows?.SAL_NAME))
+            //    {
+            //        rows.SAL_NAME = CL_HESABDARI.DECODEUN(rows.SAL_NAME);
+            //    }
+            //}
+            //USER_NAME.ItemsSource = RST_PERSONEL;
+
+            //واحد فروش
+            DEPATMAN.ItemsSource = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
+
+            //شیفت
+            SHIFT_ID.ItemsSource = dbms.DoGetDataSQL<TheSHIFT1>("SELECT SHIFT_ID, SHNAME FROM SHIFT ORDER BY SHIFT.SHNAME").ToList();
+
+            //نوع مشتری
+            CUST_COD.ItemsSource = dbms.DoGetDataSQL<CUSTKIND>("SELECT CUST_COD, CUSTKNAME FROM CUSTKIND").ToList();
+
+            //محل مصرف
+            N_RASID_COLUMN.ItemsSource = dbms.DoGetDataSQL<CMB2>("SELECT dbo.HEAD_MANF.FNUMB, ISNULL(dbo.HEAD_MANF.NAMES, dbo.STUF_DEF.NAME) AS NAM FROM dbo.STUF_DEF RIGHT OUTER JOIN dbo.HEAD_MANF ON dbo.STUF_DEF.CODE = dbo.HEAD_MANF.CODE;").ToList();
+
+            //ماه
+            MM_COLUMN.ItemsSource = dbms.DoGetDataSQL<CMB3>("SELECT MON_ID, MON FROM MON").ToList();
+        }
+
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None && SYNCFUSION_DG.SelectedItem != null)
             {
                 e.Handled = true;
 
-                var currentRow = SYNCFUSION_DG.SelectedItem as HEAD_LST_SRC;
+                var currentRow = SYNCFUSION_DG.SelectedItem as KALAS;
 
-                switch (currentRow?.TAG)
+                switch (currentRow?.TAGCODE)
                 {
                     case 1: // رسید خرید
                         if (currentRow?.NUMBER != null)
@@ -446,7 +474,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             ROWCOUNT_TEXTBLK.Text = recordCount.ToString();
         }
 
-        private readonly FilterService<HEAD_LST_SRC> filterService = new FilterService<HEAD_LST_SRC>();
+        private readonly FilterService<KALAS> filterService = new FilterService<KALAS>();
         public ObservableCollection<string> ActiveFilters { get; set; } = new ObservableCollection<string>();
 
         private string? CurrentCellValue = null;
@@ -586,7 +614,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         private void ApplyCumulativeFilter() // Method to apply all cumulative filters to the data grid
         {
             // Set the filter for the data grid view using the filter service
-            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as HEAD_LST_SRC);
+            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as KALAS);
             // Refresh the filter to update the view
             SYNCFUSION_DG.View.RefreshFilter();
 
@@ -762,12 +790,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             var summaryColumns = new ObservableCollection<ISummaryColumn>();
 
-            var dataType = typeof(HEAD_LST_SRC);
+            var dataType = typeof(KALAS);
 
             //foreach (var column in SYNCFUSION_DG.Columns)
             foreach (var column in _DG_.Columns.OfType<GridTextColumn>())
             {
-                var propertyInfo = typeof(HEAD_LST_SRC).GetProperty(column.MappingName);
+                var propertyInfo = typeof(KALAS).GetProperty(column.MappingName);
                 if (propertyInfo == null)
                     continue;
 
@@ -775,7 +803,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 //if (propertyInfo == null)
                 //    continue;
 
-                if (IsNumericType(propertyInfo.PropertyType) && (column.MappingName.ToLower() == "meghk" || column.MappingName.ToLower() == "mablk"))
+                //if (IsNumericType(propertyInfo.PropertyType) && (column.MappingName.ToLower() == "meghk" || column.MappingName.ToLower() == "mablk"))
+                if (CheckField(column.MappingName))
                 {
                     var summaryColumn = new GridSummaryColumn
                     {
@@ -794,6 +823,19 @@ namespace Wins.WinMenus.KHARID_FORUSH
             _DG_.TableSummaryRows.Add(summaryRow);
 
 
+        }
+
+        private bool CheckField(string fieldName)
+        {
+            var numericFields = new[]
+            {
+                "MEGH", "MEGHk", "MABL", "MABL_K", "N_KOL", "N_MOIN", "IMBAA",
+                "MEGH_MAR", "MAS", "N_RASID", "KHFR", "GHFR", "N_TAF", "TOTALARZ",
+                "TAMIR", "MIN_M", "MAX_M", "N_SEF", "B_SEF", "MABL_F", "AVRAGE",
+                "MABRIAL", "VAZN", "TKHN"
+            };
+
+            return numericFields.Contains(fieldName.ToUpper());
         }
         private bool IsNumericType(Type type)
         {
@@ -845,13 +887,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
         private void BTN_ISEND_Click(object sender, RoutedEventArgs e)
         {
-            var CurrentRow = SYNCFUSION_DG.SelectedItem as HEAD_LST_SRC;
+            var CurrentRow = SYNCFUSION_DG.SelectedItem as KALAS;
 
             if (CurrentRow != null && CurrentRow?.NUMBER != null && CurrentRow?.NUMBER > 0)
             {
                 CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_MOADIAN_SINGLE, this, Convert.ToDouble(CurrentRow.NUMBER));
             }
         }
-
     }
 }
