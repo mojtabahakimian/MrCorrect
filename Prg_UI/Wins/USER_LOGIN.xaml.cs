@@ -361,7 +361,8 @@ namespace Prg_UI.Wins
             CL_Generaly.VAHED_OF_USER = 1;
             Baseknow.UGRP = "1";
 
-            new WIN_GRADE_SHART_FUNC_FORM().Show();
+            new SQLSTATEFORM().Show();
+            //new HEAD_SERCH_MAIN_ADVANC().Show();
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this );

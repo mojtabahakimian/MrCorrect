@@ -12,7 +12,7 @@
         AllowDrop="True" WindowStyle="None"
         FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
-        Title="تعریف مشتری" MinHeight="600" MinWidth="550" Height="558" Width="556"  PreviewTextInput="Window_PreviewTextInput"  ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" Closing="Window_Closing">
+        Title="تعریف مشتری" MinHeight="600" MinWidth="550" Height="558" d:Height="1920" Width="556"  PreviewTextInput="Window_PreviewTextInput"  ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" Closing="Window_Closing">
     <Window.Resources>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
     </Window.Resources>
