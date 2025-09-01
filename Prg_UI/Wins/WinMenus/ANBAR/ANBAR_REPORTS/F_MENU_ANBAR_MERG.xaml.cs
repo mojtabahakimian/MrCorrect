@@ -142,9 +142,9 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
             string SHART;
             string PATH;
             int i;
-            if (IsNull(this.F2.Text.ToRawTarikh()) || IsNull(this.F1.Text.ToRawTarikh()) || IsNull(this.ANBAR.SelectedValue))
+            if (string.IsNullOrEmpty(this.F2.Text) || string.IsNullOrEmpty(this.F1.Text) || IsNull(this.ANBAR.SelectedValue))
             {
-                Msgwin msgwin = new Msgwin(false, "گارامترها کافی نیست!");
+                Msgwin msgwin = new Msgwin(false, "پارامترها کافی نیست!");
                 msgwin.ShowDialog();
                 return;
             }

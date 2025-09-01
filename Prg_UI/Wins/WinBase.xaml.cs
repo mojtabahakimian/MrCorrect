@@ -20,6 +20,7 @@ using static Wins.WinOther.SEARCHMENIU_WIN;
 using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
 using System.Reflection;
+using Rpts;
 
 namespace Prg_UI.Wins
 {
@@ -870,7 +871,7 @@ namespace Prg_UI.Wins
 
             //report.Render();
             //report.Show();
-            new Rpts.WINRPT(report, "گزارش موجودی کل انبار ها").Show();
+            new WINRPT(report, "گزارش موجودی کل انبار ها").Show();
         }
 
         private void Button_Click_47(object sender, RoutedEventArgs e)
