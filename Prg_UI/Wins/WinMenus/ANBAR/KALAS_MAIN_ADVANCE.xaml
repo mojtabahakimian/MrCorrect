@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.ANBAR"
         mc:Ignorable="d"
+        WindowState="Maximized"
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         xmlns:sfusion="clr-namespace:Syncfusion.UI.Xaml.Grid;assembly=Syncfusion.SfGrid.WPF"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -152,7 +153,7 @@
             <syncfusion:SfDataGrid.Columns>
                 <!-- Core Information -->
                 <syncfusion:GridTextColumn HeaderText="کد کالا" MappingName="code" x:Name="CODE" TextAlignment="Left" IsHidden="True"/>
-                <syncfusion:GridTextColumn HeaderText="نام کالا" MappingName="kala" x:Name="KALA" IsHidden="True" TextAlignment="Left" />
+                <syncfusion:GridTextColumn HeaderText="نام کالا" MappingName="kala" x:Name="KALA" Width="300" ColumnSizer="SizeToCells"  IsHidden="True" TextAlignment="Left" />
                 <!--BARGAH-->
                 <!--<syncfusion:GridTextColumn HeaderText="نوع برگه" MappingName="BARGAH" IsHidden="True" TextAlignment="Left" />-->
                 <syncfusion:GridComboBoxColumn 
@@ -301,7 +302,7 @@
 
                 <!-- Customer and Personnel Information -->
                 <syncfusion:GridTextColumn HeaderText="کد شخص" MappingName="hes" x:Name="HES" TextAlignment="Left" IsHidden="True"/>
-                <syncfusion:GridTextColumn HeaderText="نام شخص" MappingName="CUSTNAME" Width="250" x:Name="CUSTNAME" TextAlignment="Left"  IsHidden="True"/>
+                <syncfusion:GridTextColumn HeaderText="نام شخص" MappingName="CUSTNAME" Width="300" x:Name="CUSTNAME" ColumnSizer="SizeToCells" TextAlignment="Left"  IsHidden="True"/>
                 <!--<syncfusion:GridTextColumn HeaderText="نوع مشتری" MappingName="CUSTKNAME" TextAlignment="Left"  IsHidden="True" />-->
                 <syncfusion:GridComboBoxColumn 
                     x:Name="CUST_COD" IsHidden="True"
@@ -318,7 +319,7 @@
                     SelectedValuePath="SAL_NAME"
                     DisplayMemberPath="SAL_NAME"/>-->
 
-                <syncfusion:GridTextColumn HeaderText="ملاحظات" MappingName="SHARAYET" x:Name="SHARAYET" TextAlignment="Left"  IsHidden="True" />
+                <syncfusion:GridTextColumn HeaderText="ملاحظات" MappingName="SHARAYET" Width="150" x:Name="SHARAYET" TextAlignment="Left"  IsHidden="True" />
 
                 <!-- Warehouse and Grouping -->
                 <!--<syncfusion:GridTextColumn HeaderText="نام انبار" MappingName="ANBNAME" TextAlignment="Left" IsHidden="True"/>-->
@@ -332,7 +333,7 @@
                 <!--<syncfusion:GridTextColumn HeaderText="نام گروه کالا" MappingName="GRPNAME" TextAlignment="Left"  IsHidden="True"/>-->
                 <syncfusion:GridComboBoxColumn IsHidden="True" 
                     x:Name="GRPCODE"
-                    HeaderText="گروه کالا"
+                    HeaderText="گروه کالا"  ColumnSizer="SizeToCells" 
                     MappingName="GRPCODE"
                     SelectedValuePath="CODE"
                     DisplayMemberPath="NAMES"/>

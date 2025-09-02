@@ -206,7 +206,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             FACTOR_DATA?.Clear();
 
+            CL_LMethods.DoWriteMyLog(SqlQueryPassed, default);
+
             var MasterHead = dbms.DoGetDataSQL<KALAS>(SqlQueryPassed).ToList();
+
             foreach (var item in MasterHead)
             {
                 FACTOR_DATA.Add(item);
@@ -793,7 +796,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             var dataType = typeof(KALAS);
 
             //foreach (var column in SYNCFUSION_DG.Columns)
-            foreach (var column in _DG_.Columns.OfType<GridTextColumn>())
+            foreach (var column in _DG_.Columns)
             {
                 var propertyInfo = typeof(KALAS).GetProperty(column.MappingName);
                 if (propertyInfo == null)
@@ -804,7 +807,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 //    continue;
 
                 //if (IsNumericType(propertyInfo.PropertyType) && (column.MappingName.ToLower() == "meghk" || column.MappingName.ToLower() == "mablk"))
-                if (CheckField(column.MappingName))
+                if (CheckField(column.MappingName.ToUpper()))
                 {
                     var summaryColumn = new GridSummaryColumn
                     {

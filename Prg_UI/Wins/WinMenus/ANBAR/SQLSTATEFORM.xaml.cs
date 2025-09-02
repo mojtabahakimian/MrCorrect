@@ -30,6 +30,7 @@ using Prg_Proccessy.MODELS;
 using Stimulsoft.System.Data.Sql;
 using System.Runtime.Intrinsics.X86;
 using Stimulsoft.Database;
+using Prg_UI.Functions.SqlTools;
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
 {

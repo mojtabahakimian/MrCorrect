@@ -7,6 +7,7 @@ using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.CUC;
 using Prg_UI.Functions;
+using Prg_UI.Functions.SqlTools;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Stimulsoft.Controls.Win.Editors;
@@ -293,7 +294,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             ResetDefaultUi();
 
-            //CheckAllCheckBoxes(this);
+            CheckAllCheckBoxes(this);
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -1469,59 +1470,59 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 SHART += $"(TKHN {tkhnOp?.SelectedValue ?? "="} {tkhnTextBox.Text})";
             }
 
-            // col1 field
-            var col1Combo = FindName("col1") as ComboBox;
-            var col1Op = FindName("col1B") as ComboBox;
-            if (col1Combo?.SelectedValue != null)
-            {
-                ChShart();
-                SHART += $"(col1 {col1Op?.SelectedValue ?? "="} {col1Combo.SelectedValue})";
-            }
+            //// col1 field
+            //var col1Combo = FindName("col1") as ComboBox;
+            //var col1Op = FindName("col1B") as ComboBox;
+            //if (col1Combo?.SelectedValue != null)
+            //{
+            //    ChShart();
+            //    SHART += $"(col1 {col1Op?.SelectedValue ?? "="} {col1Combo.SelectedValue})";
+            //}
 
-            // col2 field
-            var col2Combo = FindName("col2") as ComboBox;
-            var col2Op = FindName("col2B") as ComboBox;
-            if (col2Combo?.SelectedValue != null)
-            {
-                ChShart();
-                SHART += $"(col2 {col2Op?.SelectedValue ?? "="} {col2Combo.SelectedValue})";
-            }
+            //// col2 field
+            //var col2Combo = FindName("col2") as ComboBox;
+            //var col2Op = FindName("col2B") as ComboBox;
+            //if (col2Combo?.SelectedValue != null)
+            //{
+            //    ChShart();
+            //    SHART += $"(col2 {col2Op?.SelectedValue ?? "="} {col2Combo.SelectedValue})";
+            //}
 
-            // col3 field
-            var col3Combo = FindName("col3") as ComboBox;
-            var col3Op = FindName("col3B") as ComboBox;
-            if (col3Combo?.SelectedValue != null)
-            {
-                ChShart();
-                SHART += $"(col3 {col3Op?.SelectedValue ?? "="} {col3Combo.SelectedValue})";
-            }
+            //// col3 field
+            //var col3Combo = FindName("col3") as ComboBox;
+            //var col3Op = FindName("col3B") as ComboBox;
+            //if (col3Combo?.SelectedValue != null)
+            //{
+            //    ChShart();
+            //    SHART += $"(col3 {col3Op?.SelectedValue ?? "="} {col3Combo.SelectedValue})";
+            //}
 
-            // col4 field
-            var col4Combo = FindName("col4") as ComboBox;
-            var col4Op = FindName("col4B") as ComboBox;
-            if (col4Combo?.SelectedValue != null)
-            {
-                ChShart();
-                SHART += $"(col4 {col4Op?.SelectedValue ?? "="} {col4Combo.SelectedValue})";
-            }
+            //// col4 field
+            //var col4Combo = FindName("col4") as ComboBox;
+            //var col4Op = FindName("col4B") as ComboBox;
+            //if (col4Combo?.SelectedValue != null)
+            //{
+            //    ChShart();
+            //    SHART += $"(col4 {col4Op?.SelectedValue ?? "="} {col4Combo.SelectedValue})";
+            //}
 
-            // col5 field
-            var col5Combo = FindName("col5") as ComboBox;
-            var col5Op = FindName("col5B") as ComboBox;
-            if (col5Combo?.SelectedValue != null)
-            {
-                ChShart();
-                SHART += $"(col5 {col5Op?.SelectedValue ?? "="} {col5Combo.SelectedValue})";
-            }
+            //// col5 field
+            //var col5Combo = FindName("col5") as ComboBox;
+            //var col5Op = FindName("col5B") as ComboBox;
+            //if (col5Combo?.SelectedValue != null)
+            //{
+            //    ChShart();
+            //    SHART += $"(col5 {col5Op?.SelectedValue ?? "="} {col5Combo.SelectedValue})";
+            //}
 
-            // col6 field
-            var col6Combo = FindName("col6") as ComboBox;
-            var col6Op = FindName("col6B") as ComboBox;
-            if (col6Combo?.SelectedValue != null)
-            {
-                ChShart();
-                SHART += $"(col6 {col6Op?.SelectedValue ?? "="} {col6Combo.SelectedValue})";
-            }
+            //// col6 field
+            //var col6Combo = FindName("col6") as ComboBox;
+            //var col6Op = FindName("col6B") as ComboBox;
+            //if (col6Combo?.SelectedValue != null)
+            //{
+            //    ChShart();
+            //    SHART += $"(col6 {col6Op?.SelectedValue ?? "="} {col6Combo.SelectedValue})";
+            //}
 
             // col7 field
             var col7Combo = FindName("col7") as ComboBox;
@@ -1736,7 +1737,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
                 if (SQLSTA != "SELECT  FROM KALAS ")
                 {
-                    SQLSTAFIN = SQLSTAFIN + " OPTION (FORCE ORDER, LOOP JOIN, HASH JOIN, ORDER GROUP)";
+                    SQLSTAFIN = SQLSTA + SQLSTAFIN + " OPTION (FORCE ORDER, LOOP JOIN, HASH JOIN, ORDER GROUP)";
 
                     if (_isSave_)
                     {
