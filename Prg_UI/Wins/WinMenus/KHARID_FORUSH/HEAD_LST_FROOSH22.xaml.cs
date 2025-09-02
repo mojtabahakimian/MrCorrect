@@ -1488,18 +1488,31 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     string thevalue = HEADER_FAC?.CUST_NO;
                     var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + thevalue + "'").FirstOrDefault();
 
-                    if (CUST_NO.ItemsSource == null)
+                    //if (CUST_NO.ItemsSource == null)
+                    //{
+                    //    CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
+                    //}
+
+                    //if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                    //{
+                    //    if (data?.NAME != null)
+                    //    {
+                    //        ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
+                    //    }
+                    //}
+
+                    var itemsSource = CUST_NO.ItemsSource as List<Custom_CUST_HESAB>;
+                    if (itemsSource == null)
                     {
-                        CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
+                        itemsSource = new List<Custom_CUST_HESAB>();
+                        CUST_NO.ItemsSource = itemsSource;
                     }
 
-                    if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                    if (data != null && !itemsSource.Any(item => item?.hes == thevalue))
                     {
-                        if (data?.NAME != null)
-                        {
-                            ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
-                        }
+                        itemsSource.Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
                     }
+
                     CUST_NO.SelectedValue = HEADER_FAC.CUST_NO; //مشتری
                     CUST_NO.Items.Refresh();
                 }
@@ -6823,19 +6836,26 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                     if (rst is not null)
                     {
-                        string thevalue = rst.CUST_NO;
+                        string? thevalue = rst?.CUST_NO;
 
                         if (!string.IsNullOrEmpty(thevalue))
                         {
                             var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT TOP 1 hes, NAME FROM dbo.CUST_HESAB WHERE HES = N'" + thevalue + "'").FirstOrDefault();
 
-                            if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                            var itemsSource = CUST_NO.ItemsSource as List<Custom_CUST_HESAB>;
+                            if (itemsSource == null)
                             {
-                                ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
+                                itemsSource = new List<Custom_CUST_HESAB>();
+                                CUST_NO.ItemsSource = itemsSource;
                             }
+
+                            if (data != null && !itemsSource.Any(item => item?.hes == thevalue))
+                            {
+                                itemsSource.Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
+                            }
+
                             CUST_NO.SelectedValue = thevalue;
                             CUST_NO.Items.Refresh();
-
 
                             if (Convert.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 19, 1)) == 5)
                             {
@@ -9627,7 +9647,14 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     foreach (var item in QRE_LST)
                     {
                         var CUSTDATA = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + item.CUST_NO + "'").FirstOrDefault();
-                        item.CUST_NO_NAME = CUSTDATA.NAME;
+                        if (CUSTDATA != null)
+                        {
+                            item.CUST_NO_NAME = CUSTDATA.NAME;
+                        }
+                        else
+                        {
+                            item.CUST_NO_NAME = "مشتری یافت نشد";
+                        }
                         SAYER_VISITOR_DATA.Add(item);
                     }
                 }
