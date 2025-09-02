@@ -93,7 +93,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         public bool NowIsReady { get; private set; }
         public string SqlQueryPassed { get; set; } = "";
         public bool isSummed { get; set; } = false;
-
+        public List<string> RestrictionMessages { get; set; } = new List<string>();
         public List<string> ColumnSelectedPassed { get; set; } = new List<string>();
 
         #region ComboBoxItemPassed
@@ -230,6 +230,16 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 SYNCFUSION_DG.Loaded += (s, e) => UpdateRowCountLabel();
 
                 UpdateRowCountLabel();
+            }
+
+            if (RestrictionMessages.Any())
+            {
+                LBL_STATE.Content = "دسترسی شما با این شرایط محدود شده است: " + string.Join(", ", RestrictionMessages);
+                LBL_STATE.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                LBL_STATE.Visibility = Visibility.Collapsed;
             }
 
             //ProcLoader.Stop(Prc);

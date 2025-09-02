@@ -18,19 +18,17 @@ using Prg_UI.UiTools;
 using System.Text;
 using Syncfusion.Data;
 using Prg_UI.HelperWins;
-using Wins.WinMenus.KHARID_FORUSH;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Threading;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
 using System.Windows.Interop;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
-using Stimulsoft.System.Data.Sql;
-using System.Runtime.Intrinsics.X86;
-using Stimulsoft.Database;
 using Prg_UI.Functions.SqlTools;
+using System.Windows.Media;
+using Syncfusion.UI.Xaml.Grid.Helpers;
+using Microsoft.Data.SqlClient;
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
 {
@@ -203,6 +201,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
 
         }
+
         public ObservableCollection<SQLSTATE> SFG_DATA { get; set; } = new ObservableCollection<SQLSTATE>();
 
         private sealed class YesNoItem
@@ -242,6 +241,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
         private string? CurrentCellValue = null;
         private RowColumnIndex CurrentCellIndex;
+        private string CurrentMappingBindName = "";
         private void SYNCFUSION_DG_CurrentCellActivated(object sender, Syncfusion.UI.Xaml.Grid.CurrentCellActivatedEventArgs e) // Event handler for when a cell is activated in the data grid
         {
             if (e?.CurrentRowColumnIndex == null)
@@ -271,6 +271,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             if (columnIndex < 0) return;
 
             var mappingName = this.SYNCFUSION_DG.Columns[columnIndex].MappingName;
+            CurrentMappingBindName = mappingName;
             var recordIndex = this.SYNCFUSION_DG.ResolveToRecordIndex(rowIndex);
             if (recordIndex < 0) return;
 
@@ -466,12 +467,52 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             catch { }
 
         }
+
+        byte DSKU = 0;
+        bool DSKU_KEYDOWN = false;
+        bool DSKU_DOUBE_CLICK = false;
         private void SYNCFUSION_DG_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.L)
             {
                 CalculateSumForCurrentColumn(SYNCFUSION_DG);
                 e.Handled = true; // Mark event as handled
+            }
+
+            //Ctrl + E
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.E)
+            {
+                e.Handled = true;
+                DSKU_KEYDOWN = true;
+                UnlockifSecrectRequested();
+            }
+
+        }
+        private void SYNCFUSION_DG_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            // نام ستون فعال؛ در XAML هم MappingName = "CR_DATE"
+            var mappingName = SYNCFUSION_DG.CurrentColumn?.MappingName;
+            if (string.Equals(mappingName, "CR_DATE", StringComparison.OrdinalIgnoreCase))
+            {
+                e.Handled = true;
+                DSKU_DOUBE_CLICK = true;
+                DSKU++;
+                UnlockifSecrectRequested();
+            }
+        }
+
+        private void UnlockifSecrectRequested()
+        {
+            if (DSKU_KEYDOWN && DSKU_DOUBE_CLICK)
+            {
+                DSKU = 0;
+                DSKU_KEYDOWN = false;
+                DSKU_DOUBE_CLICK = false;
+                SQLST.IsHidden = false;
+                SQLST.Width = 700;
+                SP_HEIGHCHANGE.Visibility = Visibility.Visible;
+                SYNCFUSION_DG.IsReadOnly = false;   // قفل گرید باز شد
+                LBL_COUNT.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E525B735"));
             }
         }
         private void CalculateSumForCurrentColumn(SfDataGrid _DG_)
@@ -645,5 +686,56 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
         }
         #endregion
+
+        private void SYNCFUSION_DG_RowValidating(object sender, RowValidatingEventArgs e)
+        {
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+            if (e.RowData == null) { return; }
+
+            if (SYNCFUSION_DG.IsReadOnly) { return; }
+
+            var row = e.RowData as SQLSTATE;
+
+            if (string.IsNullOrEmpty(row?.SQLST))
+            {
+                e.IsValid = false; // keep the user in edit until valid
+            }
+        }
+
+        private void SYNCFUSION_DG_RowValidated(object sender, RowValidatedEventArgs e)
+        {
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+            if (SYNCFUSION_DG.IsReadOnly) { return; }
+
+            var row = e.RowData as SQLSTATE;
+            if (row == null) return;
+
+            try
+            {
+                dbms.DoExecuteSQL($@"
+                        UPDATE dbo.SQLSTATE
+                        SET SQLST = {row.SQLST},
+                        WHERE ID = {row.IDD}
+                    ");
+            }
+            catch (SqlException ex)
+            {
+                // Cancel current edit at row level (uses IEditableObject underneath)
+                if (SYNCFUSION_DG?.View != null)
+                    SYNCFUSION_DG.View.CancelEdit();
+
+                if (ex.Number == 2601 || ex.Number == 2627)
+                {
+                    new Msgwin(false, "این اطلاعات تکراری است !").ShowDialog();
+                }
+                return;
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خطا در انجام عملیات!").ShowDialog();
+                return;
+            }
+
+        }
     }
 }

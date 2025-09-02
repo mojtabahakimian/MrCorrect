@@ -2091,20 +2091,27 @@ namespace Prg_UI.Functions
             return ErrCode;
         }
 
-        public static string GetRestrictedSqlQuery(byte TAGCODE, string DEF_VALUE = " WHERE ")
-        {
-            //const string REPLACEMENT_VALUE = "dbo.HEAD_LST.";
 
-            string WhereCondition = DEF_VALUE;
+        #region MyRegion
+        public class RestrictionInfo
+        {
+            public string WhereClause { get; set; }
+            public List<string> RestrictionMessages { get; set; } = new List<string>();
+        }
+        private static RestrictionInfo GenerateRestrictedSqlQueryInfo(byte TAGCODE, string DEF_VALUE = " WHERE ")
+        {
+            var info = new RestrictionInfo
+            {
+                WhereClause = DEF_VALUE
+            };
 
             CL_CCNNMANAGER? dbms = new CL_CCNNMANAGER();
 
-
             string GetAndQreOrNo()
             {
-                if (WhereCondition.ToUpper().Contains("WHERE"))
+                if (info.WhereClause.ToUpper().Contains("WHERE"))
                 {
-                    if (string.IsNullOrEmpty(WhereCondition.Replace("WHERE", "").Trim()) || string.IsNullOrWhiteSpace(WhereCondition.Replace("WHERE", "").Trim()))
+                    if (string.IsNullOrEmpty(info.WhereClause.Replace("WHERE", "").Trim()) || string.IsNullOrWhiteSpace(info.WhereClause.Replace("WHERE", "").Trim()))
                     {
                         return "";
                     }
@@ -2128,14 +2135,13 @@ namespace Prg_UI.Functions
             {
                 if (IsDateLimited) //تاریخ قابل برگشت اعمال شود همراه با محدود به کاربری خودش
                 {
+                    info.RestrictionMessages.Add("محدود به تاریخ برگشت فاکتور");
                     var sqlQuery = $"SELECT TOP 100 PERCENT DATE_N FROM dbo.HEAD_LST WHERE (TAG = {TAGCODE}) AND (DEPATMAN = {CL_Generaly.VAHED_OF_USER}) AND (USER_NAME = N'{CL_HESABDARI.UCurrentUser()}') GROUP BY DATE_N ORDER BY DATE_N DESC";
                     var result = dbms.DoGetDataSQL<long>(sqlQuery).ToList(); //Get Last New Bigest Date
 
-                    //تعداد فاکتور هایی که بین فاکتور های ثبت شده میتوان دید در واقع چند شماره فاکتور میتوان به عقب برگشت و مشاهده کرد
                     if (result.Count > 0 && Convert.ToDouble(Baseknow.CPI) > 0) //تعداد تاریخ قابل برگشت برای مشاهده
                     {
                         long? dateResult = null;
-                        // Ensure that CPI is within the bounds of the result list
                         int index = Convert.ToInt32(Baseknow.CPI);
                         if (index >= 0 && index < result.Count)
                         {
@@ -2146,23 +2152,27 @@ namespace Prg_UI.Functions
                             dateResult = result.FirstOrDefault(); // Fallback to first item
                         }
 
-                        WhereCondition += dateResult > 0
+                        info.WhereClause += dateResult > 0
                             ? $" {GetAndQreOrNo()} dbo.HEAD_LST.USER_NAME = N'{CL_HESABDARI.UCurrentUser()}' AND dbo.HEAD_LST.DATE_N >= {dateResult} "
                             : string.Empty;
                     }
                 }
                 else
                 {
+                    bool defaultUserRestriction = true;
                     if (IsOnlyDepartemanVahed) //فقط واحد های خودش
                     {
-                        WhereCondition += $" {GetAndQreOrNo()} dbo.HEAD_LST.DEPATMAN = {CL_Generaly.VAHED_OF_USER} ";
+                        info.WhereClause += $" {GetAndQreOrNo()} dbo.HEAD_LST.DEPATMAN = {CL_Generaly.VAHED_OF_USER} ";
+                        info.RestrictionMessages.Add("محدود به واحد سازمانی شما");
+                        defaultUserRestriction = false;
 
                         if (IsZirMajmoehChart && Convert.ToBoolean(Baseknow.mrcorrect)) //علاوه بر واحد , محدود به زیرمجموعه هم بشه
                         {
                             string vs = CL_HESABDARI.UserOnChart(Convert.ToInt32(Baseknow.USERCOD));
                             if (!string.IsNullOrEmpty(vs))
                             {
-                                WhereCondition += $"  {GetAndQreOrNo()} {vs} ";
+                                info.WhereClause += $"  {GetAndQreOrNo()} {vs} ";
+                                info.RestrictionMessages.Add("محدود به زیرمجموعه‌های شما در چارت");
                             }
                         }
                     }
@@ -2171,24 +2181,37 @@ namespace Prg_UI.Functions
                         string vs = CL_HESABDARI.UserOnChart(Convert.ToInt32(Baseknow.USERCOD));
                         if (!string.IsNullOrEmpty(vs))
                         {
-                            WhereCondition += $"  {GetAndQreOrNo()} {vs} ";
+                            info.WhereClause += $"  {GetAndQreOrNo()} {vs} ";
+                            info.RestrictionMessages.Add("محدود به زیرمجموعه‌های شما در چارت");
+                            defaultUserRestriction = false;
                         }
                     }
-                    else
+
+                    if (defaultUserRestriction)
                     {
                         //فقط فاکتور های کاربری خودش را ببیند
-                        WhereCondition += $" {GetAndQreOrNo()} ((USER_NAME = N'{CL_HESABDARI.UCurrentUser()}') OR  (USER_NAME = N'{CL_LMethods.NormalizeArabicPersian(CL_HESABDARI.UCurrentUser().ToString())}')) ";
-                        //Load all data as default that is username equals
+                        info.WhereClause += $" {GetAndQreOrNo()} ((USER_NAME = N'{CL_HESABDARI.UCurrentUser()}') OR  (USER_NAME = N'{CL_LMethods.NormalizeArabicPersian(CL_HESABDARI.UCurrentUser().ToString())}')) ";
+                        info.RestrictionMessages.Add("فقط نمایش اطلاعات ثبت شده توسط شما");
                     }
                 }
             }
-            if (string.IsNullOrEmpty(WhereCondition) || string.IsNullOrWhiteSpace(WhereCondition) || WhereCondition == " WHERE ")
+
+            if (string.IsNullOrEmpty(info.WhereClause) || string.IsNullOrWhiteSpace(info.WhereClause) || info.WhereClause.Trim() == "WHERE")
             {
-                WhereCondition = string.Empty;
+                info.WhereClause = string.Empty;
             }
 
-            return WhereCondition;
+            return info;
         }
+        public static string GetRestrictedSqlQuery(byte TAGCODE, string DEF_VALUE = " WHERE ")
+        {
+            return GenerateRestrictedSqlQueryInfo(TAGCODE, DEF_VALUE).WhereClause;
+        }
+        public static RestrictionInfo GetRestrictedSqlQueryWithDetails(byte TAGCODE, string DEF_VALUE = " WHERE ")
+        {
+            return GenerateRestrictedSqlQueryInfo(TAGCODE, DEF_VALUE);
+        }
+        #endregion
 
         // Helper method to convert List to DataTable if needed
         public static DataTable ConvertToDataTable<T>(IList<T> data)

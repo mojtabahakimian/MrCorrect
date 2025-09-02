@@ -116,55 +116,68 @@
         </Popup>
         <!--HEADER↑-->
 
-        <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" 
-           ContextMenu="{StaticResource DataGridContextMenu}"
-           ItemsSource="{Binding SFG_DATA}" 
-           AutoGenerateColumns="False"
-           EnableDataVirtualization="True"
-           SelectionUnit="Row"
-           AllowEditing="True"
-           IsReadOnly="True"
-           AllowDraggingColumns="True"
-           AllowResizingColumns="True"
-           AllowFiltering="True"
-           AllowSorting="True"
-           FilterRowPosition="Top"
-           SelectionMode="Extended"
-           RowHeight="30"
-           FrozenColumnCount="0"
-           FlowDirection="RightToLeft"
-           d:ItemsSource="{d:SampleData ItemCount=5}"
-           Style="{StaticResource KDG}"
-           HeaderStyle="{StaticResource KDGHeader}"
-           CurrentCellActivated="SYNCFUSION_DG_CurrentCellActivated"
-           PreviewMouseRightButtonDown="SYNCFUSION_DG_PreviewMouseRightButtonDown"
-           Margin="10,49,10,46" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged" PreviewKeyDown="SYNCFUSION_DG_PreviewKeyDown">
+        <DockPanel Margin="10,45,10,46">
+            <StackPanel x:Name="SP_HEIGHCHANGE" Visibility="Collapsed" d:Visibility="Visible" Orientation="Horizontal" Margin="10" DockPanel.Dock="Top">
+                <TextBlock Text="Row:" Margin="0,0,6,0"/>
+                <Slider Minimum="30" Maximum="500" Value="{Binding ElementName=SYNCFUSION_DG, Path=RowHeight, Mode=TwoWay}" Width="160" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                <TextBlock Text="Header:" Margin="12,0,6,0"/>
+                <Slider Minimum="24" Maximum="80" Value="{Binding ElementName=SYNCFUSION_DG, Path=HeaderRowHeight, Mode=TwoWay}" Width="160"/>
+            </StackPanel>
 
-            <syncfusion:SfDataGrid.Resources>
-                <ResourceDictionary>
-                    <Style TargetType="TextBox">
-                        <Setter Property="AcceptsReturn" Value="True" />
-                        <Setter Property="Height" Value="30" />
-                    </Style>
-                </ResourceDictionary>
-            </syncfusion:SfDataGrid.Resources>
+            <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" 
+                ContextMenu="{StaticResource DataGridContextMenu}"
+                ItemsSource="{Binding SFG_DATA}" 
+                AutoGenerateColumns="False"
+                EnableDataVirtualization="True"
+                SelectionUnit="Row"
+                AllowEditing="True"
+                IsReadOnly="True"
+                AllowDraggingColumns="True"
+                AllowResizingColumns="True"
+                AllowFiltering="True"
+                AllowSorting="True"
+                FilterRowPosition="Top"
+                SelectionMode="Extended"
+                RowHeight="30"
+                RowValidating="SYNCFUSION_DG_RowValidating"
+                RowValidated="SYNCFUSION_DG_RowValidated"
+                FrozenColumnCount="0"
+                FlowDirection="RightToLeft"
+                d:ItemsSource="{d:SampleData ItemCount=5}"
+                Style="{StaticResource KDG}"
+                HeaderStyle="{StaticResource KDGHeader}"
+                CurrentCellActivated="SYNCFUSION_DG_CurrentCellActivated"
+                PreviewMouseRightButtonDown="SYNCFUSION_DG_PreviewMouseRightButtonDown" PreviewMouseDoubleClick="SYNCFUSION_DG_PreviewMouseDoubleClick"
+                AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged" PreviewKeyDown="SYNCFUSION_DG_PreviewKeyDown">
 
-            <syncfusion:SfDataGrid.Columns>
-                <!-- Core Information -->
-                <syncfusion:GridTextColumn HeaderText="شماره" MappingName="IDD" x:Name="IDD" TextAlignment="Left" />
-                <syncfusion:GridTextColumn HeaderText="SQL STATMENT" MappingName="SQLST" x:Name="SQLST" ColumnSizer="Star" IsHidden="True"/>
-                <syncfusion:GridTextColumn HeaderText="عنوان گزارش" MappingName="TITEL" x:Name="TITEL" ColumnSizer="Star" TextAlignment="Left"/>
-                <syncfusion:GridTextColumn HeaderText="كاربر سازنده" MappingName="USER_NAME" ColumnSizer="Star" x:Name="USER_NAME" TextAlignment="Left"/>
+                <syncfusion:SfDataGrid.Resources>
+                    <ResourceDictionary>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                            <Setter Property="AcceptsReturn" Value="True" />
+                            <Setter Property="Height" Value="30" />
+                        </Style>
+                    </ResourceDictionary>
+                </syncfusion:SfDataGrid.Resources>
 
-                <syncfusion:GridComboBoxColumn x:Name="LETOTHER_COLUMN" HeaderText="اجازه برای دیگران" MappingName="LETOTHER" TextAlignment="Left"
-                                               SelectedValuePath="CODE" DisplayMemberPath="NAME"/>
+                <syncfusion:SfDataGrid.Columns>
+                    <!-- Core Information -->
+                    <syncfusion:GridTextColumn HeaderText="شماره" MappingName="IDD" x:Name="IDD" TextAlignment="Left" IsReadOnly="True" />
+                    <syncfusion:GridTextColumn HeaderText="SQL STATMENT" MappingName="SQLST" x:Name="SQLST" ColumnSizer="Star" TextAlignment="Right" IsHidden="True"/>
+                    <syncfusion:GridTextColumn HeaderText="عنوان گزارش" MappingName="TITEL" x:Name="TITEL" ColumnSizer="Star" IsReadOnly="True"  TextAlignment="Left"/>
+                    <syncfusion:GridTextColumn HeaderText="كاربر سازنده" MappingName="USER_NAME" ColumnSizer="Star" x:Name="USER_NAME" IsReadOnly="True"  TextAlignment="Left"/>
 
-                <syncfusion:GridDateTimeColumn x:Name="CR_DATE" HeaderText="زمان ایجاد"  ColumnSizer="Star" MappingName="CR_DATE" Pattern="FullDateTime"/>
-            </syncfusion:SfDataGrid.Columns>
+                    <syncfusion:GridComboBoxColumn x:Name="LETOTHER_COLUMN" HeaderText="اجازه برای دیگران" MappingName="LETOTHER"  IsReadOnly="True" TextAlignment="Left"
+                                            SelectedValuePath="CODE" DisplayMemberPath="NAME"/>
 
-        </syncfusion:SfDataGrid>
+                    <syncfusion:GridDateTimeColumn x:Name="CR_DATE" HeaderText="زمان ایجاد"  IsReadOnly="True"  ColumnSizer="Star" MappingName="CR_DATE" Pattern="FullDateTime"/>
+                </syncfusion:SfDataGrid.Columns>
 
-        <Label Content="تعداد رکورد ها:" Margin="0,0,16,11" FlowDirection="RightToLeft" Width="84" HorizontalAlignment="Right" Height="27" VerticalAlignment="Bottom"/>
+            </syncfusion:SfDataGrid>
+        </DockPanel>
+
+
+
+        <Label x:Name="LBL_COUNT" Content="تعداد رکورد ها:" Margin="0,0,16,11" FlowDirection="RightToLeft" Width="84" HorizontalAlignment="Right" Height="27" VerticalAlignment="Bottom"/>
         <TextBlock x:Name="ROWCOUNT_TEXTBLK" Text=""  Margin="0,0,100,11"  FlowDirection="RightToLeft" Width="230" HorizontalAlignment="Right" Height="23" VerticalAlignment="Bottom"/>
 
 

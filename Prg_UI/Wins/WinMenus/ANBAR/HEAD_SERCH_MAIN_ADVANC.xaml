@@ -1887,7 +1887,7 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Button Content="اجرای گزارش" Width="120" Margin="5" x:Name="ExecuteButton" BorderBrush="{x:Null}" Height="34" FontSize="10" Foreground="#DDFFFFFF" Click="ExecuteButton_Click"/>
                     <Button Content="ذخیره گزارش" Width="120" Margin="5" x:Name="BTN_SAVE" BorderBrush="{x:Null}" Height="34" FontSize="10" Foreground="#DDFFFFFF" Click="BTN_SAVE_Click"/>
-                    <CheckBox IsChecked="True"  x:Name="RSUM" Content="جمع زیر گزارش اضافه شود" VerticalAlignment="Center"/>
+                    <CheckBox IsChecked="True"  x:Name="RSUM" Content="جمع زیر گزارش اضافه شود" Visibility="Collapsed" VerticalAlignment="Center"/>
                     <ComboBox x:Name="ANDOR" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Width="80" VerticalAlignment="Center" SelectedIndex="0" Margin="10,0" SelectionChanged="ANDOR_SelectionChanged">
                         <ComboBoxItem Content="و"/>
                         <ComboBoxItem Content="یا"/>
