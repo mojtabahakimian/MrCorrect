@@ -27,6 +27,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using Wins.WinMenus.WinAutomasion;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
 using static Prg_UI.HelperWins.Msgwin;
@@ -294,7 +295,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             ResetDefaultUi();
 
-            CheckAllCheckBoxes(this);
+            //CheckAllCheckBoxes(this);
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -900,7 +901,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
         private void CreateShart()
         {
-            SHART = "";
+            //SHART = "";
 
             // NUMBER field
             var numberTextBox = FindName("NUMBER") as NumericTextBox;
@@ -1558,8 +1559,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         }
         private void CreateField()
         {
-            SQLT = "SELECT ";
-            grbCOL = "";
+            if (string.IsNullOrEmpty(SQLT))
+            {
+                SQLT = "SELECT ";
+                grbCOL = "";
+            }
 
             void Add(string field, CheckBox cb, ComboBox agg)
             {
@@ -1722,7 +1726,33 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     return;
                 }
 
+                // Apply user restrictions //ست کردن دسترسی محدود طبق دسترسی فاکتور فروش
+                const string REPLACEMENT_VALUE = "dbo.HEAD_LST.";
+                byte _TAG_ = 0;
+                if (TAGCODE?.SelectedValue != null)
+                {
+                    byte.TryParse(TAGCODE.SelectedValue.ToString(), out _TAG_);
+                }
+                var restrictionInfo = CL_LMethods.GetRestrictedSqlQueryWithDetails(_TAG_, " WHERE "); // Assuming TAGCODE 0 is appropriate for a general search
+                if (!string.IsNullOrEmpty(restrictionInfo.WhereClause))
+                {
+                    if (!string.IsNullOrEmpty(SHART))
+                    {
+                        SHART += " AND " + restrictionInfo.WhereClause.Replace("WHERE", "");
+                    }
+                    else
+                    {
+                        SHART = restrictionInfo.WhereClause.Replace("WHERE", "");
+                    }
+
+                    SHART = SHART.Replace(REPLACEMENT_VALUE, null);
+                }
+
                 SQLSTA = SQLT + " FROM KALAS " + (string.IsNullOrEmpty(SHART) ? "" : " WHERE " + SHART) + (grb != "Group By " ? " " + grb : "");
+
+                //string whereClause = string.IsNullOrEmpty(SHART) ? " WHERE " : $" WHERE {SHART}";
+                //whereClause = CL_LMethods.GetRestrictedSqlQuery(tag, whereClause).Replace(REPLACEMENT_VALUE, null);
+                //SQLSTA = SQLT + " FROM KALAS" + (string.IsNullOrEmpty(whereClause) ? string.Empty : whereClause) + (grb != "Group By " ? " " + grb : string.Empty);
 
                 if (RSUM.IsChecked ?? false)
                 {
@@ -1737,6 +1767,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
                 if (SQLSTA != "SELECT  FROM KALAS ")
                 {
+
                     SQLSTAFIN = SQLSTA + SQLSTAFIN + " OPTION (FORCE ORDER, LOOP JOIN, HASH JOIN, ORDER GROUP)";
 
                     if (_isSave_)
@@ -1751,8 +1782,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     KMA = new KALAS_MAIN_ADVANCE();
                     KMA.SqlQueryPassed = SQLSTAFIN;
                     KMA.ColumnSelectedPassed = SelectedColumns;
-
-                    KMA.isSummed = RSUM.IsChecked ?? false; //جمع زیر گزارش
+                    KMA.RestrictionMessages = restrictionInfo.RestrictionMessages;
+                    KMA.isSummed = true; //جمع زیر گزارش
 
                     KMA.Show();
                 }
@@ -1774,20 +1805,26 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         {
             if (!NowIsReady) { return; }
 
+            CreateField();
+            CreateShart();
+
             //ANDOR_AfterUpdate
             if (!string.IsNullOrEmpty(SHART) && ANDOR.SelectedValue != null)
             {
-                if (ANDOR.SelectedValue == "و")
+                if (ANDOR.SelectedValue is ComboBoxItem SelectedVal)
                 {
-                    SHART = SHART + " AND ";
-                }
-                else
-                {
-                    SHART = SHART + " OR ";
-                }
+                    if (SelectedVal?.Content == "و")
+                    {
+                        SHART = SHART + " AND ";
+                    }
+                    else
+                    {
+                        SHART = SHART + " OR ";
+                    }
 
-                ResetDefaultUi();
-                CreateShart();
+                    ClearFreshAll();
+                    ResetDefaultUi();
+                }
             }
         }
 
@@ -1809,7 +1846,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
         private void BTN_OPENREPORT_Click(object sender, RoutedEventArgs e)
         {
-
+            bool isSQLSTATEFORMOpen = Application.Current.Windows.OfType<SQLSTATEFORM>().Any();
+            if (!isSQLSTATEFORMOpen)
+            {
+                new SQLSTATEFORM().Show();
+            }
         }
 
     }
