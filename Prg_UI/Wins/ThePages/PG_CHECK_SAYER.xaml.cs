@@ -34,5 +34,15 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_DCHSS, null);
         }
+
+        private void Image_PreviewMouseDown_3(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CHRE_LSPH, null);
+        }
+
+        private void Image_PreviewMouseDown_4(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_SERILA, null);
+        }
     }
 }

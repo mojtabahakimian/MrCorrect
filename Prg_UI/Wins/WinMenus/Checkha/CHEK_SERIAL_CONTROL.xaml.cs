@@ -1,49 +1,47 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using Functions;
+using MaterialDesignThemes.Wpf;
+using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
-using System.Linq;
-using System.Windows;
-using System.Windows.Input;
-using static Prg_UI.Functions.CL_LMethods;
-using Functions;
-using Prg_Proccessy.SQLMODELS;
-using Syncfusion.Data.Extensions;
+using Prg_UI.HelperWins;
+using Prg_UI.UiTools;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
 using System;
-using System.Collections.ObjectModel;
-using Syncfusion.UI.Xaml.BulletGraph;
-using System.Windows.Controls;
-using Prg_UI.UiTools;
-using System.Text;
-using Syncfusion.Data;
-using Prg_UI.HelperWins;
-using Wins.WinMenus.KHARID_FORUSH;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+using Wins.WinMenus.ANBAR;
+using static Prg_UI.Functions.CL_LMethods;
+using Syncfusion.Data.Extensions;
+using Syncfusion.UI.Xaml.BulletGraph;
+using Prg_Proccessy.MODELS;
+using Syncfusion.Data;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Threading;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
-using System.Windows.Interop;
-using Prg_Proccessy.FUNCTIONS;
-using Prg_Proccessy.MODELS;
-using Stimulsoft.System.Data.Sql;
-using System.Runtime.Intrinsics.X86;
-using Stimulsoft.Database;
+using Prg_Proccessy.Generaly;
 
-namespace Prg_UI.Wins.WinMenus.ANBAR
+namespace Prg_UI.Wins.WinMenus.Checkha
 {
-    public partial class CHRE_LSPH : Window
+    /// <summary>
+    /// Interaction logic for CHEK_SERIAL_CONTROL.xaml
+    /// </summary>
+    public partial class CHEK_SERIAL_CONTROL : Window
     {
-        public CHRE_LSPH()
-        {
-            InitializeComponent();
-
-            this.DataContext = this;
-
-            Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
-            GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
-        }
 
         #region Header Window Begin
         //Header Window Begin
@@ -87,167 +85,118 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         //Header Window End;
         #endregion
 
+        public CHEK_SERIAL_CONTROL(string _sql_data)
+        {
+            SQL_DATA = _sql_data;
+
+            InitializeComponent();
+
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
+
+            GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
+
+            this.DataContext = this;
+        }
+
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
         UniversControl universControl = new UniversControl();
-
+        public ObservableCollection<VDK> SERIAL_CONTORL_DATA { get; set; } = new ObservableCollection<VDK>();
         public bool NowIsReady { get; private set; }
-        public double? NUMBER_TO_OPEN { get; set; }
-        public bool ChangeIsHappend { get; private set; }
-
-        private bool _bl;
-        public bool AllowDeletions
+        public string SQL_DATA { get; private set; }
+        public class VDK
         {
-            get { return _bl; }
-            set
-            {
-                _bl = value;
-
-                // Get the window handle
-                IntPtr handle = new WindowInteropHelper(this).Handle;
-
-                // Only proceed if the handle is valid
-                if (handle != IntPtr.Zero)
-                {
-                    CL_LMethods.AllowDeletions(this.GetType().Name, _bl, handle);
-                }
-                else
-                {
-                    // Defer the operation until the window is fully rendered
-                    this.Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        // Try again after the window is fully initialized
-                        IntPtr newHandle = new WindowInteropHelper(this).Handle;
-                        if (newHandle != IntPtr.Zero)
-                        {
-                            CL_LMethods.AllowDeletions(this.GetType().Name, _bl, newHandle);
-                        }
-                    }), System.Windows.Threading.DispatcherPriority.Loaded);
-                }
-            }
+            public double? N_SERI { get; set; }
+            public int? BANK { get; set; }
+            public long? DATE_S { get; set; }
+            public long? DATE { get; set; }
+            public string? SHOBEH { get; set; }
+            public double? MABL { get; set; }
+            public string? N_HESAB { get; set; }
+            public int? N_S { get; set; }
+            public string? NAMES { get; set; }
+            public string? NAME_TAH { get; set; }
+            public int? RADIF { get; set; }
+            public int? N_KOL { get; set; }
+            public int? N_MOIN { get; set; }
+            public int? N_TAF { get; set; }
+            public int? N_KOL2 { get; set; }
+            public int? N_MOIN2 { get; set; }
+            public int? N_TAF2 { get; set; }
+            public int? N_KOL3 { get; set; }
+            public int? N_MOIN3 { get; set; }
+            public int? N_TAF3 { get; set; }
+            public double? VAZ { get; set; }
+            public string? HES1 { get; set; }
+            public string? HES2 { get; set; }
+            public string? HES3 { get; set; }
+            public DateTime? CRT { get; set; }
+            public int? UID { get; set; }
+            public string? SAYADI { get; set; }
         }
-        private bool ican;
-        public bool AllowEdits
-        {
-            get { return ican; }
-            set
-            {
-                ican = value;
-                //TextBox.IsReadOnly = !ican;
-                //ComboBox.IsEnabled = ican;
-            }
-        }
+
+
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
         }
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None && SYNCFUSION_DG.SelectedItem != null)
-            {
-                e.Handled = true;
-
-                CL_LMethods.SendKey_US(Key.Tab, true);
-
-                if (SYNCFUSION_DG.SelectedItem is SQLSTATE CurrentRow)
-                {
-                    if (!string.IsNullOrEmpty(CurrentRow?.SQLST))
-                    {
-                        List<string> columnNames = SqlColumnParser.ExtractColumnNames(CurrentRow.SQLST);
-
-                        var KMA = new KALAS_MAIN_ADVANCE();
-                        KMA.SqlQueryPassed = CurrentRow.SQLST;
-                        KMA.ColumnSelectedPassed = columnNames;
-
-                        KMA.isSummed = true; //جمع زیر گزارش
-
-                        KMA.Show();
-                    }
-
-                }
-            }
-        }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
-            CL_HESABDARI.SETSECURITY(this.GetType().Name, "SAVEREP", new WindowInteropHelper(this).Handle, this.GetType().Name);
-            if (!this.IsLoaded)
-            {
-                this.Close();
-                return;
-            }
+            SERIAL_CONTORL_DATA?.Clear();
 
-            SFG_DATA?.Clear();
+            var MasterHead = dbms.DoGetDataSQL<VDK>(@$"{SQL_DATA}").ToList();
 
-            string sqlAll = @"SELECT * FROM dbo.SQLSTATE";
-            string sqlFiltered = sqlAll + @" WHERE USER_NAME = @U OR LETOTHER = 1";
-
-            var MasterHead = dbms.DoGetDataSQL<SQLSTATE>(sqlFiltered, new { U = Baseknow.UUSER }).ToList();
             foreach (var item in MasterHead)
             {
-                SFG_DATA?.Add(item);
-            }
-
-            FILL_ALL_COMBOBOXES();
-
-            //SYNCFUSION_DG.ColumnSizer = GridLengthUnitType.Auto;
-
-            if (SYNCFUSION_DG != null)
-            {
-                SYNCFUSION_DG.FilterChanged += View_FilterChanged;
-                SYNCFUSION_DG.Loaded += (s, e) => UpdateRowCountLabel();
-
-                UpdateRowCountLabel();
+                SERIAL_CONTORL_DATA.Add(item);
             }
 
         }
-        public ObservableCollection<SQLSTATE> SFG_DATA { get; set; } = new ObservableCollection<SQLSTATE>();
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            //if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None && SYNCFUSION_DG.SelectedItem != null)
+            //{
+            //    e.Handled = true;
 
-        private sealed class YesNoItem
-        {
-            public byte CODE { get; set; }   // با tinyint دیتابیس هماهنگ است
-            public string NAME { get; set; }
+            //    var currentRow = SYNCFUSION_DG.SelectedItem as VDK;
+
+            //    if (currentRow?.NUMBER != null)
+            //    {
+            //        OpenWindow(typeof(HEAD_LST_RASID_OTHER_WIN), (double)currentRow.NUMBER, "یک پنجره رسید انبار از قبل باز شده ابتدا آنرا ببندید.");
+            //    }
+
+            //}
         }
-        private void FILL_ALL_COMBOBOXES()
+        public void OpenWindow(Type windowType, object parameter, string errorMessage)
         {
-            LETOTHER_COLUMN.ItemsSource = new List<YesNoItem>
+            if (windowType == null || !typeof(Window).IsAssignableFrom(windowType))
+                return;
+
+            if (!CL_LMethods.IsWindowOpen(windowType)) //CL_LMethods.IsWindowOpen<HEAD_LST_FROOSH22>()
             {
-                new() { CODE = 1, NAME = "بله" },
-                new() { CODE = 0, NAME = "نه"  },
-            };
+                var constructor = windowType.GetConstructor(new[] { parameter.GetType() });
+                if (constructor != null)
+                {
+                    var window = (Window)constructor.Invoke(new[] { parameter });
+                    window.Show();
+                }
+            }
+            else
+            {
+                new Msgwin(false, errorMessage).ShowDialog();
+            }
         }
 
-        #region FilterBy
-        private void View_FilterChanged(object sender, GridFilterEventArgs e)
-        {
-            UpdateRowCountLabel();
-        }
-        private void UpdateRowCountLabel()
-        {
-            // Defensive checks
-            if (ROWCOUNT_TEXTBLK == null) return;
-            if (SYNCFUSION_DG?.View == null) return;
-
-            // Safely retrieve the record count
-            var recordCount = SYNCFUSION_DG.View.Records?.Count ?? 0;
-
-            // Set the label content
-            ROWCOUNT_TEXTBLK.Text = recordCount.ToString();
-        }
-
-        private readonly FilterService<SQLSTATE> filterService = new FilterService<SQLSTATE>();
+        #region _SfDataGrid_
+        private readonly FilterService<VDK> filterService = new FilterService<VDK>();
         public ObservableCollection<string> ActiveFilters { get; set; } = new ObservableCollection<string>();
-
         private string? CurrentCellValue = null;
         private RowColumnIndex CurrentCellIndex;
         private void SYNCFUSION_DG_CurrentCellActivated(object sender, Syncfusion.UI.Xaml.Grid.CurrentCellActivatedEventArgs e) // Event handler for when a cell is activated in the data grid
         {
-            if (e?.CurrentRowColumnIndex == null)
-            {
-                return;
-            }
-
             UpdateCurrentCellValue(e.CurrentRowColumnIndex);
         }
         private void SYNCFUSION_DG_SelectionChanged(object sender, GridSelectionChangedEventArgs e) // Event handler for when the selection changes in the data grid
@@ -274,24 +223,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             if (recordIndex < 0) return;
 
             var record = this.SYNCFUSION_DG.View.Records.GetItemAt(recordIndex);
-
-
-            if (record == null)
-            {
-                return;
-            }
-            if (string.IsNullOrEmpty(mappingName))
-            {
-                return;
-            }
-            var property = record.GetType().GetProperty(mappingName);
-            if (property == null)
-            {
-                Console.WriteLine("Property " + mappingName + " not found on type " + record.GetType().Name);
-                return;
-            }
-
-            //CurrentCellValue = property.GetValue(record)?.ToString();
             CurrentCellValue = record?.GetType()?.GetProperty(mappingName)?.GetValue(record)?.ToString();
         }
         private void FilterBySelection_Click(object sender, RoutedEventArgs e)
@@ -304,23 +235,21 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 // Add the Contains filter to the filter service (inclusion filter)
                 filterService.AddFilter(columnName, selectedText, isExclusion: false); // False means it's an inclusion filter
                 ActiveFilters.Add($"{columnName} Contains {selectedText}");
+                // Apply the cumulative filter to the data grid
+                ApplyCumulativeFilter();
             }
             else
             {
                 if (filterValue != null)
                 {
-                    //برای اینکه دقیقا همون آیتم رو فیلتر کنه:
-                    //filterService.AddFilter(columnName, filterValue, isExclusion: false, isExactMatch: false);
-
                     // Add the filter to the filter service
                     filterService.AddFilter(columnName, filterValue);
                     // Add the filter to the list of active filters
-
                     ActiveFilters.Add($"{columnName} = {filterValue}");
                     // Apply the cumulative filter to the data grid
+                    ApplyCumulativeFilter();
                 }
             }
-            ApplyCumulativeFilter();
         }
         private void FilterExcludingSelection_Click(object sender, RoutedEventArgs e)
         {
@@ -376,19 +305,39 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         private void ApplyCumulativeFilter() // Method to apply all cumulative filters to the data grid
         {
             // Set the filter for the data grid view using the filter service
-            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as SQLSTATE);
+            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as VDK);
             // Refresh the filter to update the view
             SYNCFUSION_DG.View.RefreshFilter();
-
-            UpdateRowCountLabel();
         }
         private void SYNCFUSION_DG_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            var element = e.OriginalSource as FrameworkElement;
-            if (element != null)
+            if (!string.IsNullOrEmpty(GetSelectedText()))
             {
-                element.ContextMenu = this.Resources["DataGridContextMenu"] as ContextMenu;
+                var element = e.OriginalSource as FrameworkElement;
+                if (element != null)
+                {
+                    element.ContextMenu = this.Resources["DataGridContextMenu"] as ContextMenu;
+                }
             }
+        }
+
+
+        private T FindChildElement<T>(DependencyObject parent) where T : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T typedChild)
+                {
+                    return typedChild;
+                }
+                var result = FindChildElement<T>(child);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+            return null;
         }
         private string GetSelectedText()
         {
@@ -401,12 +350,21 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 var editingElement = dataGrid.FindElementOfType<TextBox>();
                 if (editingElement != null)
                 {
-                    return editingElement.SelectedText; // Return the selected text
+                    if (!string.IsNullOrEmpty(editingElement.SelectedText))
+                    {
+                        return editingElement.SelectedText; // Return the selected text
+                    }
                 }
+
+                var editingElement2 = FindChildElement<TextBox>(dataGrid);
+                if (editingElement2 != null)
+                {
+                    return editingElement2.SelectedText;
+                }
+
             }
             return string.Empty;
         }
-
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
             CopySelectedRowsToClipboard();
@@ -419,7 +377,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 if (!string.IsNullOrEmpty(_SelectedTextCell_))
                 {
                     Clipboard.SetText(_SelectedTextCell_);
-                    universControl.PopNotifyShow("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                    universControl.PopNotifyShowUp("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
                     return;
                 }
             }
@@ -533,6 +491,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         }
         public void GenerateAutomaticSummary(SfDataGrid _DG_, bool _ClearAnySummaryBefore_ = false)
         {
+            return; //Temprary Disabled
+
             if (_ClearAnySummaryBefore_)
             {
                 SYNCFUSION_DG.TableSummaryRows.Clear();
@@ -552,50 +512,37 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             var summaryColumns = new ObservableCollection<ISummaryColumn>();
 
-            var dataType = typeof(SQLSTATE);
+            var dataType = typeof(VDK);
 
             //foreach (var column in SYNCFUSION_DG.Columns)
             foreach (var column in _DG_.Columns.OfType<GridTextColumn>())
             {
-                var propertyInfo = typeof(SQLSTATE).GetProperty(column.MappingName);
+                var propertyInfo = typeof(VDK).GetProperty(column.MappingName);
                 if (propertyInfo == null)
                     continue;
 
-                //var propertyInfo = dataType.GetProperty(column.MappingName);
-                //if (propertyInfo == null)
-                //    continue;
-
-                //if (IsNumericType(propertyInfo.PropertyType) && (column.MappingName.ToLower() == "meghk" || column.MappingName.ToLower() == "mablk"))
-                if (CheckField(column.MappingName))
+                if (column.MappingName == "BED" || column.MappingName == "BES")
                 {
-                    var summaryColumn = new GridSummaryColumn
+                    if (IsNumericType(propertyInfo.PropertyType))
                     {
-                        Name = column.MappingName + "Sum",
-                        MappingName = column.MappingName,
-                        SummaryType = Syncfusion.Data.SummaryType.DoubleAggregate,
-                        //Format = "{Sum:N0}"
-                        Format = "{Sum:N0}"
-                    };
-                    summaryColumns.Add(summaryColumn);
+                        var summaryColumn = new GridSummaryColumn
+                        {
+                            Name = column.MappingName + "Sum",
+                            MappingName = column.MappingName,
+                            SummaryType = Syncfusion.Data.SummaryType.DoubleAggregate,
+                            //Format = "{Sum:N0}"
+                            Format = "{Sum:N0}"
+                        };
+                        summaryColumns.Add(summaryColumn);
+                    }
                 }
             }
 
             summaryRow.SummaryColumns = summaryColumns;
 
             _DG_.TableSummaryRows.Add(summaryRow);
-        }
 
-        private bool CheckField(string fieldName)
-        {
-            var numericFields = new[]
-            {
-               "MEGH", "MEGHk", "MABL", "MABL_K", "N_KOL", "N_MOIN", "IMBAA",
-               "MEGH_MAR", "MAS", "N_RASID", "KHFR", "GHFR", "N_TAF", "TOTALARZ",
-               "TAMIR", "MIN_M", "MAX_M", "N_SEF", "B_SEF", "MABL_F", "AVRAGE",
-               "MABRIAL", "VAZN", "TKHN"
-           };
 
-            return numericFields.Contains(fieldName.ToUpper());
         }
         private bool IsNumericType(Type type)
         {
