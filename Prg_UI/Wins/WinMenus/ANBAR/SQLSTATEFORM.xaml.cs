@@ -32,9 +32,9 @@ using Microsoft.Data.SqlClient;
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
 {
-    public partial class CHRE_LSPH : Window
+    public partial class SQLSTATEFORM : Window
     {
-        public CHRE_LSPH()
+        public SQLSTATEFORM()
         {
             InitializeComponent();
 
