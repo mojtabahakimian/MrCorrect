@@ -352,6 +352,11 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست چکهای دریافتی سر رسید شده", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_DCHSS });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست چکهای برگشتی", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_CHKB });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست چکهای دریافتی با مبالغ", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_DCHSS });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش به حساب گذاشتن چکها", WIN_NAME = CL_MenuManager.WinNameType.CHRE_LSPH });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش چکهای دریافتی سررسید شده", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_RCHEKD });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست چکهای پرداختی سررسید شده", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_PCHSS });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست چکهای موجود در صندوق", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_CHKM });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "کنترل سریالی چکهای پرداختی", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_SERILA });
 
             //حسابداری
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "کنترل اسناد و دفاتر چک", WIN_NAME = CL_MenuManager.WinNameType.ADAMTARAZ });

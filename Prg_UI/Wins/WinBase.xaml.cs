@@ -1214,5 +1214,30 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.TCOD_MARKAZHAZ_WIN, null);
         }
+
+        private void Button_Click_108(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CHRE_LSPH, null);
+        }
+
+        private void Button_Click_109(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_RCHEKD, null);
+        }
+
+        private void Button_Click_110(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_PCHSS, null);
+        }
+
+        private void Button_Click_111(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_CHKM, null);
+        }
+
+        private void Button_Click_112(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_SERILA, null);
+        }
     }
 }

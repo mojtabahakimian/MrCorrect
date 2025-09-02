@@ -230,7 +230,6 @@ WHERE(PAY_GETD.N_KOL=@KOL_PARAM OR PAY_GETD.N_KOL IS NULL)AND(PAY_GETD.N_KOL2 IS
         <Table1 Ref="16" type="Stimulsoft.Report.Components.Table.StiTable" isKey="true">
           <Border>None;[192:0:0];1;Solid;False;4;Black</Border>
           <Brush>Transparent</Brush>
-          <BusinessObjectGuid isNull="true" />
           <ClientRectangle>0,3.2,19,2.2</ClientRectangle>
           <ColumnCount>9</ColumnCount>
           <Components isList="true" count="18">
@@ -626,6 +625,7 @@ WHERE(PAY_GETD.N_KOL=@KOL_PARAM OR PAY_GETD.N_KOL IS NULL)AND(PAY_GETD.N_KOL2 IS
             </Table1_Cell18>
           </Components>
           <Conditions isList="true" count="0" />
+          <DataRelationName isNull="true" />
           <DataSourceName>DataSource1</DataSourceName>
           <Expressions isList="true" count="0" />
           <Filters isList="true" count="0" />
@@ -636,7 +636,14 @@ WHERE(PAY_GETD.N_KOL=@KOL_PARAM OR PAY_GETD.N_KOL IS NULL)AND(PAY_GETD.N_KOL2 IS
           <Page isRef="4" />
           <Parent isRef="4" />
           <RowCount>2</RowCount>
-          <Sort isList="true" count="0" />
+          <Sort isList="true" count="6">
+            <value>ASC</value>
+            <value>DATE_S</value>
+            <value>ASC</value>
+            <value>N_SERI</value>
+            <value>DESC</value>
+            <value>BANK</value>
+          </Sort>
         </Table1>
         <FooterBand1 Ref="38" type="FooterBand" isKey="true">
           <Brush>Transparent</Brush>
@@ -706,10 +713,10 @@ WHERE(PAY_GETD.N_KOL=@KOL_PARAM OR PAY_GETD.N_KOL IS NULL)AND(PAY_GETD.N_KOL2 IS
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>12/10/2024 4:27:36 PM</ReportChanged>
+  <ReportChanged>9/2/2025 12:50:49 PM</ReportChanged>
   <ReportCreated>1/29/2024 9:06:45 AM</ReportCreated>
-  <ReportFile>E:\prg\MrCorrect306\Prg_UI\Rpts\Checkha\CHEK_DLISTS.mrt</ReportFile>
-  <ReportGuid>7354d16d98774a46a8714fb7b83e6407</ReportGuid>
+  <ReportFile>C:\prg\MC\Prg_UI\Rpts\Checkha\CHEK_DLISTS.mrt</ReportFile>
+  <ReportGuid>0dae4255e7224a28a177210abfc6ab3a</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

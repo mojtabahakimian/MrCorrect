@@ -39,6 +39,7 @@ using Prg_UI.Wins.WinMenus.Taarif;
 using System.Threading;
 using Prg_UI.Wins.WinMenus.CRM;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
+using Prg_UI.Wins.WinMenus.Checkha;
 
 namespace Functions
 {
@@ -810,7 +811,27 @@ namespace Functions
             /// <summary>
             /// راس گیری
             /// </summary>
-            RAAS
+            RAAS,
+            /// <summary>
+            /// کزارش به حساب گذاشتن چکها
+            /// </summary>
+            CHRE_LSPH,
+            /// <summary>
+            /// گزارش چکهای دریافتی سررسید شده
+            /// </summary>
+            F_MENU_CHEK_RCHEKD,
+            /// <summary>
+            /// لیست چکهای پرداختی سررسید شده
+            /// </summary>
+            F_MENU_CHEK_PCHSS,
+            /// <summary>
+            /// لیست چکهای موجود در صندوق
+            /// </summary>
+            F_MENU_CHEK_CHKM,
+            /// <summary>
+            /// کنترل سریالی چکهای پرداختی
+            /// </summary>
+            F_MENU_SERILA
         }
         #endregion
 
@@ -826,6 +847,26 @@ namespace Functions
         {
             switch (_TYPE_)
             {
+
+                case WinNameType.F_MENU_SERILA:
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_SERILA(), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.F_MENU_CHEK_CHKM:
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_CHEK("chkm", "لیست چکهای موجود در صندوق"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.F_MENU_CHEK_PCHSS:
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_CHEK("pchss", "لیست چکهای پرداختی سررسید شده"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.F_MENU_CHEK_RCHEKD:
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_CHEK("rchekd", "گزارش چکهای دریافتی سررسید شده"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.CHRE_LSPH:
+                    CL_LMethods.OpenWindow(OWNERWIN, new Prg_UI.Wins.WinMenus.Checkha.CHRE_LSPH(), isModalDialog: false, allowMultipleInstances: false);
+                    break;
 
                 case WinNameType.RAAS:
                     CL_LMethods.OpenWindow(OWNERWIN, new RAAS(), isModalDialog: false, allowMultipleInstances: false);

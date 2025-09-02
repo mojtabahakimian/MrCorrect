@@ -196,7 +196,8 @@ namespace Wins.WinMenus.Checkha
                 //    OpenForm("CHEK_DLISTS", 1, 800501);
                 //    break;
                 case "pchss": //چک های پرداختی سررسید شده
-                    //OpenForm("CHEK_PLISTS", 2, 800602);
+                    _sql_query = $" SELECT * FROM dbo.CHEK_PLIST WHERE (DATE_S >= {DT1.Text.ToRawTarikh()} AND DATE_S <= {DT2.Text.ToRawTarikh()}  AND (NAME_TAH LIKE '%%%' or NAME_TAH  is null)) ";
+                    new CHEK_PLISTS(_sql_query).Show();
                     break;
 
                 case "dchss":
@@ -230,9 +231,10 @@ namespace Wins.WinMenus.Checkha
                 //case "rchekp":
                 //    OpenReport("CHEK_PLIST");
                 //    break;
-                //case "chkm":
-                //    OpenForm("CHEK_MOGUD", 2, 8009);
-                //    break;
+                case "chkm":
+                    _sql_query = $"SELECT * FROM dbo.CHEK_MOGUD WHERE (DATE >= {DT1.Text.ToRawTarikh()} AND DATE <= {DT2.Text.ToRawTarikh()})";
+                    new CHEK_MOGUD(_sql_query).Show();
+                    break;
                 case "chkb": new CHEK_BARGASHTI_MAIN(DT1.Text.ToRawTarikh(), DT2.Text.ToRawTarikh()).Show(); break;
 
                 case "chkv":

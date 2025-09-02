@@ -100,5 +100,15 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHECK_MONP, null);
         }
+
+        private void Image_PreviewMouseDown_15(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_RCHEKD, null);
+        }
+
+        private void Image_PreviewMouseDown_16(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_PCHSS, null);
+        }
     }
 }
