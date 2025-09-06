@@ -128,9 +128,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                         break;
 
                     case HEAD_LST_RASID:
-                        (WIN_COME as HEAD_LST_RASID).TAH.Text = paramsString; //فیلد دتحویل گیرنده
-
-                        dbms.DoExecuteSQL($@"UPDATE dbo.HEAD_LST SET TAH = N'{paramsString}'
+                        //(WIN_COME as HEAD_LST_RASID).TAH.Text = paramsString; //فیلد تحویل گیرنده
+                        dbms.DoExecuteSQL($@"UPDATE dbo.HEAD_LST SET SHARAYET = N'{paramsString}'
                                              WHERE NUMBER = {(WIN_COME as HEAD_LST_RASID).NUMBER.Text} AND TAG IN (1) ");
                         break;
 

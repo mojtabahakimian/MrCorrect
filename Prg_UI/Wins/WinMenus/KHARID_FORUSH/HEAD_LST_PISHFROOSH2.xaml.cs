@@ -709,8 +709,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
             CUST_NO2.SelectedValuePath = "hes";
 
             //VAHEDJARI
-            DEPATMAN.ItemsSource = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
-            DEPATMAN.DisplayMemberPath = "DEPNAME";
+            var RST = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
+            foreach (var item in RST)
+            {
+                item.DEPNAME = item.DEPNAME.NormalizeArabicPersian();
+            }
+            DEPATMAN.ItemsSource = RST; DEPATMAN.DisplayMemberPath = "DEPNAME";
             DEPATMAN.SelectedValuePath = "DEPATMAN";
             DEPATMAN.SelectionChanged -= DEPATMAN_SelectionChanged;
             DEPATMAN.SelectedIndex = 0;

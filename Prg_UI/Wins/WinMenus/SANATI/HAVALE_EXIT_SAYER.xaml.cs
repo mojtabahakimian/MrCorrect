@@ -698,7 +698,13 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             CUST_NO2.SelectedValuePath = "hes";
 
             //دپارتمان
-            DEPATMAN.ItemsSource = dbms.DoGetDataSQL<DP_MODEL>("SELECT DEPART.DEPATMAN, DEPART.DEPNAME FROM DEPART ORDER BY DEPART.DEPNAME;").ToList();
+            var RST = dbms.DoGetDataSQL<DP_MODEL>("SELECT DEPART.DEPATMAN, DEPART.DEPNAME FROM DEPART ORDER BY DEPART.DEPNAME;").ToList();
+            foreach (var item in RST)
+            {
+                item.DEPNAME = item.DEPNAME.NormalizeArabicPersian();
+            }
+            DEPATMAN.ItemsSource = RST;
+
             DEPATMAN.DisplayMemberPath = "DEPNAME";
             DEPATMAN.SelectedValuePath = "DEPATMAN";
 

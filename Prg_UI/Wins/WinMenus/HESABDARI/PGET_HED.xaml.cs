@@ -989,8 +989,12 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             KIND.SelectedIndex = 0;
 
             //واحد ها
-            DEPATMAN.ItemsSource = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
-            DEPATMAN.DisplayMemberPath = "DEPNAME";
+            var RST = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
+            foreach (var item in RST)
+            {
+                item.DEPNAME = item.DEPNAME.NormalizeArabicPersian();
+            }
+            DEPATMAN.ItemsSource = RST; DEPATMAN.DisplayMemberPath = "DEPNAME";
             DEPATMAN.SelectedValuePath = "DEPATMAN";
             DEPATMAN.SelectedValue = null;
             DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER;

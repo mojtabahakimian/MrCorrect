@@ -29,11 +29,7 @@ using Prg_UI.Wins.WinMenus.ANBAR;
 using Prg_UI.Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.KHARID_FORUSH;
 using Functions;
-using DocumentFormat.OpenXml.Drawing;
-using ImageMagick;
-using System.Threading.Tasks;
 using Path = System.IO.Path;
-using static Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET.BUDGET3;
 using System.Collections.Generic;
 using System.Windows.Interop;
 
@@ -4130,20 +4126,26 @@ namespace Prg_Proccessy.FUNCTIONS
             {
                 var RST = dbms.DoGetDataSQL<SECURITYQuery>("SELECT TFORMS.CAPTION, TFORMS.kind, SAL_CHEK.USERCO, SAL_CHEK.RUN, SAL_CHEK.SEE, SAL_CHEK.INP, SAL_CHEK.UPD, SAL_CHEK.DEL FROM TFORMS INNER JOIN (SALA_DTL INNER JOIN SAL_CHEK ON SALA_DTL.IDD = SAL_CHEK.USERCO) ON TFORMS.IDH = SAL_CHEK.OBJECT WHERE     (TFORMS.FORMNAME = '" + WANTEDFORM(frm) + "') AND (SAL_CHEK.USERCO = " + Baseknow.USERCOD + " )").FirstOrDefault();
 
+                ////if (RST.INP != true || RST.UPD != true) { TheWind.IsEnabled = false; return; }
+
                 if (RST != null)
                 {
-                    if (RST.SEE != true)
+                    if (RST.SEE != true) //SEE : دیدن | مشاهده داده
                     {
                         TheWind.Close();
                         Msgwin msgwin = new Msgwin(false, "شماره اجازه دسترسی به این بخش را ندارید !"); msgwin.ShowDialog();
                         return;
                     }
-                    else if (RST.INP != true || RST.UPD != true)
+                    else if (RST.INP != true) //INP : اضافه کردن | ورود داده
                     {
-                        TheWind.IsEnabled = false;
-                        return;
+                        //TheWind.IsEnabled = false;
+                        CL_HELPER.SetInsertButtonSecurity(TheWind, TheWind.Name, isInsertAllowed: false);
                     }
-                    else if (RST.DEL != true)
+                    else if (RST.UPD != true) //UPD : بهنگام سازی | ویرایش
+                    {
+                        CL_HELPER.SetEditButtonSecurity(TheWind, TheWind.Name, isEditAllowed: false);
+                    }
+                    else if (RST.DEL != true) //DEL : حذف کردن
                     {
                         ////The Buttons Can Delete the Tag name is : "hazfer" #Check
                         //var TheDeletorBtn = CL_LMethods.FindVisualChildren<Button>(TheWind).Where(x => x.Tag != null && x.Tag.ToString() == "hazfer").ToList();
@@ -5187,7 +5189,7 @@ namespace Prg_Proccessy.FUNCTIONS
                     {
                         rst = dbms.DoGetDataSQL<Q10>("SELECT   USERCO, SGN0137 , SGN0237,SGN0337 FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
                         break;
-                    }    
+                    }
                 case 36:
                     {
                         rst = dbms.DoGetDataSQL<_QRE15_>("SELECT   USERCO, SGN0136 , SGN0236,SGN0336 FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
@@ -5363,7 +5365,7 @@ namespace Prg_Proccessy.FUNCTIONS
                         }
                     }
 
-                  
+
 
                     //(TheWindo.FindName("SGN3") as CheckBox).Visibility = Visibility.Hidden;
                     //FRM["SGN3"].Enabled = false;

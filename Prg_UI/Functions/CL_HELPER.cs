@@ -187,6 +187,49 @@ namespace Functions
             }
         }
 
+        public static void SetInsertButtonSecurity(Window wind, string windowName, bool isInsertAllowed)
+        {
+            IEnumerable<Button>? insertBtns = null;
+
+            insertBtns = FindVisualChildren<Button>(wind)
+                .Where(btn => (btn.Name != null && btn.Name.IndexOf("SAVE", StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        (btn.Content is string content && content.IndexOf("ذخیره", StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        (btn.Content is string content2 && content2.IndexOf("ذخيره", StringComparison.OrdinalIgnoreCase) >= 0)
+                        )
+                        .ToList();
+
+            if (insertBtns == null)
+            {
+                insertBtns = FindVisualChildren<Button>(wind).Where(b => b.Name?.ToString()?.ToLower() == "save_btn");
+            }
+
+            foreach (var btn in insertBtns)
+            {
+                btn.IsEnabled = isInsertAllowed;
+                btn.Visibility = isInsertAllowed ? Visibility.Visible : Visibility.Hidden;
+            }
+
+            insertBtns = null;
+        }
+
+        public static void SetEditButtonSecurity(Window wind, string windowName, bool isEditAllowed)
+        {
+            IEnumerable<Button> editBtns = null;
+
+            editBtns = FindVisualChildren<Button>(wind).Where(b => b.Name?.ToString()?.ToLower() == "eslah");
+
+            if (editBtns == null)
+            {
+                editBtns = FindVisualChildren<Button>(wind).Where(b => b.Tag?.ToString()?.ToLower() == "editer");
+            }
+
+            foreach (var btn in editBtns)
+            {
+                btn.IsEnabled = isEditAllowed;
+                btn.Visibility = isEditAllowed ? Visibility.Visible : Visibility.Hidden;
+            }
+        }
+
         private static void LogError(string message)
         {
             Debug.WriteLine($"[ERROR] {DateTime.Now}: {message}");

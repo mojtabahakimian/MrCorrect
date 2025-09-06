@@ -453,8 +453,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             SecurityAllCheck();
 
-            FILL_ALL_COMBOBOXES();
+            if (!this.IsLoaded)
+            {
+                this.Close();
+                return;
+            }
 
+            FILL_ALL_COMBOBOXES();
 
             string WhereCondition = FTAG > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {FTAG}) " : "  ";
             WhereCondition = CL_LMethods.GetRestrictedSqlQuery(FTAG, WhereCondition);
@@ -482,7 +487,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             // Now raise the initialization events to update the UI
             _navigationManager.RaiseInitializationEvents();
 
-            #region Form_Open
+            //Form_Open
             if (Baseknow.OPTIONSS.Substring(67, 1) == "5" && !IsExporty)
             {
                 this.PARAMS.Visibility = Visibility.Visible;
@@ -491,19 +496,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 this.PARAMS.Visibility = Visibility.Hidden;
             }
-            #endregion
 
             Form_Current();
-
-
-            //DATE_N; //تاریخ
-            //NUMBER; //شماره رسید انبار
-            //CUST_NO; //مشتری
-            //CUST_KIND; //نوع مشتری
-            //MOLAH; //ملاحظات
-            //MAS; //مدت
-            //BTN_SAVE; //دکمه ذخیره
-            //INVO_LST_SUB;
 
             CL_LMethods.SetTabIndexes(
              DATE_N,
@@ -518,7 +512,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
              );
 
             MakeDefaultFocuseReady();
-
         }
 
         private void OnCurrentRecordChanged(HEAD_LST HEADER_FAC)
@@ -946,7 +939,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
             CUST_NO2.SelectedValuePath = "hes";
 
             //واحد ها
-            DEPATMAN.ItemsSource = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
+            var RST = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
+            foreach (var item in RST)
+            {
+                item.DEPNAME = item.DEPNAME.NormalizeArabicPersian();
+            }
+            DEPATMAN.ItemsSource = RST;
+
             DEPATMAN.DisplayMemberPath = "DEPNAME";
             DEPATMAN.SelectedValuePath = "DEPATMAN";
             DEPATMAN.SelectedIndex = 0;
@@ -1192,23 +1191,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 if (!CL_HESABDARI.BLOCKEDMK(CUST_NO.SelectedValue.ToString()))
                 {
-                    var manResult = dbms.DoGetDataSQL<double?>($@"
-                    SELECT SUM(BED - BES) AS MAN 
-                    FROM dbo.DEED_DTL 
-                    WHERE HES_K = {CL_HESABDARI.GETKOL(CUST_NO.SelectedValue.ToString())} 
-                    AND HES_M = {CL_HESABDARI.GETMOIN(CUST_NO.SelectedValue.ToString())} 
-                    AND HES_T = {CL_HESABDARI.GETTAF(CUST_NO.SelectedValue.ToString())}").FirstOrDefault();
-
-                    if (manResult.HasValue)
+                    if (CUST_NO.SelectedValue != null)
                     {
-                        if (CUST_NO.SelectedValue != null)
-                        {
-                            MANDAH.Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
-                        }
-                    }
-                    else
-                    {
-                        MANDAH.Text = "0";
+                        MANDAH.Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
                     }
                 }
                 else
@@ -1345,6 +1330,14 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 LABEL_HEADER.Content = "فاکتور خرید صادراتی";
             }
 
+            if (!CL_HESABDARI.LETSGO("ESLAHRF"))
+            {
+                ESLAH.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                ESLAH.Visibility = Visibility.Visible;
+            }
 
         }
 
@@ -5117,6 +5110,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 // No valid row, don't show context menu
                 e.Handled = true;
             }
+        }
+
+        private void DEPATMAN_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
         }
     }
 }

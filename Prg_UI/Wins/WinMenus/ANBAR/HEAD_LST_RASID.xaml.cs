@@ -675,19 +675,14 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             {
                 e.Handled = true; //Mark the event as handled to prevent further processing
 
-                if (!string.IsNullOrEmpty(NUMBER.Text) && Convert.ToDouble(NUMBER.Text) > 0)
+                if (!_navigationManager.IsNewRecord && !string.IsNullOrEmpty(NUMBER.Text) && Convert.ToDouble(NUMBER.Text) > 0)
                 {
                     Msgwin msgwin = new Msgwin(true, "آیا از باز کردن پنجره سایر اطلاعات مطمئن هستید؟"); msgwin.ShowDialog();
                     if (msgwin.DialogResult is true)
                     {
-                        BUTTON_SAVE_RASID_Click(null, null);
-
-                        if (IsSaveSuccess)
-                        {
-                            OTHER_DTL win = new OTHER_DTL(1, CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle));
-                            win.NUMBER = Convert.ToInt64(NUMBER.Text);
-                            win.Show();
-                        }
+                        OTHER_DTL win = new OTHER_DTL(1, CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle));
+                        win.NUMBER = Convert.ToInt64(NUMBER.Text);
+                        win.Show();
                     }
                 }
             }
