@@ -47,5 +47,35 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4, default); //گزارش تراز های آزمایشی حسابهای معین
         }
+
+        private void Image_PreviewMouseDown_4(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_FT4, default); 
+        }
+
+        private void Image_PreviewMouseDown_5(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_FT4M, default);
+        }
+
+        private void Image_PreviewMouseDown_6(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_FT4T, default);
+        }
+
+        private void Image_PreviewMouseDown_7(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_RT4, default);
+        }
+
+        private void Image_PreviewMouseDown_8(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_RFT4T, default);
+        }
+
+        private void Image_PreviewMouseDown_9(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_OTHER, default);
+        }
     }
 }

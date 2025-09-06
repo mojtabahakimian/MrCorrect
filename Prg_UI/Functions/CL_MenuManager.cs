@@ -833,6 +833,7 @@ namespace Functions
             /// </summary>
             F_MENU_SERILA,
             /// <summary>
+
             /// جستجو در گردش کالا های پیشرفته | F12 پیشرفته
             /// </summary>
             HEAD_SERCH_MAIN_ADVANC_F12,
@@ -840,6 +841,31 @@ namespace Functions
             /// گزارشات ساخته شده توسط کاربران از F12 پیشرفته
             /// </summary>
             SQLSTATEFORM_CRTL_M
+
+            /// لیست رتاز آزمایشی چهار ستونی کل
+            /// </summary>
+            FMENU_TARAZ_4_FT4,
+            /// <summary>
+            /// لیست تراز آزمایشی چهار ستونی معین
+            /// </summary>
+            FMENU_TARAZ_4_FT4M,
+            /// <summary>
+            /// لیست تراز آزمایشی چهار ستونی تفضیلی
+            /// </summary>
+            FMENU_TARAZ_4_FT4T,
+            /// <summary>
+            /// گزارش تراز آزمایشی چهار ستونی حسابهای کل
+            /// </summary>
+            FMENU_TARAZ_4_RT4,
+            /// <summary>
+            /// گزارش تراز آزمایشی چهار ستونی حسابهای کل ، معین و تفضیلی
+            /// </summary>
+            FMENU_TARAZ_4_RFT4T,
+            /// <summary>
+            /// گزارش تراز کل ، معین ، تفضیلی و بالاتر
+            /// </summary>
+            FMENU_TARAZ_4_OTHER
+
         }
         #endregion
 
@@ -860,6 +886,30 @@ namespace Functions
 
                 case WinNameType.HEAD_SERCH_MAIN_ADVANC_F12: /*  جستجو در گردش کالا های پیشرفته | F12 پیشرفته */ CL_LMethods.OpenWindow(OWNERWIN, new HEAD_SERCH_MAIN_ADVANC(), isModalDialog: false, allowMultipleInstances: false); break;
                 //Mojtaba}
+
+                case WinNameType.FMENU_TARAZ_4_OTHER:
+                    CL_LMethods.OpenWindow(OWNERWIN, new FMENU_TARAZ_4("OTHER"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.FMENU_TARAZ_4_RFT4T:
+                    CL_LMethods.OpenWindow(OWNERWIN, new FMENU_TARAZ_4("RFT4T"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.FMENU_TARAZ_4_RT4:
+                    CL_LMethods.OpenWindow(OWNERWIN, new FMENU_TARAZ_4("RT4"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.FMENU_TARAZ_4_FT4T:
+                    CL_LMethods.OpenWindow(OWNERWIN, new FMENU_TARAZ_4("FT4T"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.FMENU_TARAZ_4_FT4M:
+                    CL_LMethods.OpenWindow(OWNERWIN, new FMENU_TARAZ_4("FT4M"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.FMENU_TARAZ_4_FT4:
+                    CL_LMethods.OpenWindow(OWNERWIN, new FMENU_TARAZ_4("FT4"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
 
                 case WinNameType.F_MENU_SERILA:
                     CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_SERILA(), isModalDialog: false, allowMultipleInstances: false);

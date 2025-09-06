@@ -187,7 +187,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                         this.HHHM.Visibility = Visibility.Visible;
                         break;
                     }
-                case "other":
+                case "OTHER":
                     {
                         L_HHHS.Visibility = Visibility.Visible;
                         this.HHHS.Visibility = Visibility.Visible;
@@ -224,16 +224,16 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
         private void Commnd5_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+
 
             string sql;
             string PATH;
             int i;
-            if (IsNull(this.DT1.Text.ToRawTarikh()))
+            if (string.IsNullOrEmpty(this.DT1.Text.ToRawTarikh()))
             {
                 DT1.Text = Convert.ToString(Baseknow.YEA + "0101");
             }
-            if (IsNull(this.DT1.Text.ToRawTarikh()) || IsNull(this.DT2.Text.ToRawTarikh()))
+            if (string.IsNullOrEmpty(this.DT1.Text.ToRawTarikh()) || string.IsNullOrEmpty(this.DT2.Text.ToRawTarikh()))
             {
                 universControl.PopNotifyShow("پارامتر ها کافی نیست!", Pop1, Pop1Text1, Pop_Border1);
                 return;
@@ -343,7 +343,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                         new MARKAZ($"{DT1.Text.ToRawTarikh()}", $"{DT2.Text.ToRawTarikh()}", $"{SNDNUM1.Text}", $"{SNDNUM1.Text}").Show();
                         break;
                     }
-                case "other":
+                case "OTHER":
                     {
                         //DoCmd.DeleteObject(acTable, "TARAZ_DTL_1");
                         //dbms.DoExecuteSQL("SELECT dbo.TDETA_HES2.N_KOL, dbo.TDETA_HES2.NUMBER, dbo.TDETA_HES2.TNUMBER, dbo.DEED_DTL.HES_T2, dbo.DEED_DTL.HES_T3, dbo.DEED_DTL.HES_T4,   dbo.DEED_DTL.BED, dbo.DEED_DTL.BES, dbo.TDETA_HES2.ECODE INTO            dbo.TARAZ_DTL_1 FROM         dbo.DEED_HED INNER JOIN                       dbo.DEED_DTL ON dbo.DEED_HED.N_S = dbo.DEED_DTL.N_S INNER JOIN                       dbo.TDETA_HES2 ON dbo.DEED_DTL.HES_K = dbo.TDETA_HES2.N_KOL AND dbo.DEED_DTL.HES_M = dbo.TDETA_HES2.NUMBER AND                       dbo.DEED_DTL.HES_T = dbo.TDETA_HES2.TNUMBER AND dbo.DEED_DTL.HES_T2 = dbo.TDETA_HES2.TNUMBER2 WHERE     (dbo.DEED_HED.DATE_S >= " + this.DT1.Text.ToRawTarikh() + ") AND (dbo.DEED_HED.DATE_S <= " + this.DT2.Text.ToRawTarikh() + ") AND (dbo.DEED_HED.N_S BETWEEN " + this.SNDNUM1.Text + " AND " + this.SNDNUM2.Text + ")");
@@ -355,7 +355,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                         OpenReport2();
                         //DoCmd.OpenReport("SURATMABEVAMASAREF", acViewPreview);
                         break;
-                    }
+                    }        
             }
         }
 

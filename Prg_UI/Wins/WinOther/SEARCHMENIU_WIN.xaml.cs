@@ -368,6 +368,14 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف مرکز هزینه", WIN_NAME = CL_MenuManager.WinNameType.TCOD_MARKAZHAZ_WIN });
 
 
+            //ترازها و مراکز هزینه
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست تراز آزمایشی چهار ستونی کل", WIN_NAME = CL_MenuManager.WinNameType.FMENU_TARAZ_4_FT4 });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست تراز آزمایشی چهار ستونی معین", WIN_NAME = CL_MenuManager.WinNameType.FMENU_TARAZ_4_FT4M });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست تراز آزمایشی چهار ستونی تفضیلی", WIN_NAME = CL_MenuManager.WinNameType.FMENU_TARAZ_4_FT4T });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = " گزارش تراز کل ، معین ، تفضیلی و بالاتر", WIN_NAME = CL_MenuManager.WinNameType.FMENU_TARAZ_4_OTHER });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش تراز آزمایشی چهار ستونی حسابهای کل", WIN_NAME = CL_MenuManager.WinNameType.FMENU_TARAZ_4_RT4 });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش تراز آزمایشی چهار ستونی حسابهای کل ، معین و تفضیلی", WIN_NAME = CL_MenuManager.WinNameType.FMENU_TARAZ_4_RFT4T });
+
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());
 
             // Loading user-specific access level

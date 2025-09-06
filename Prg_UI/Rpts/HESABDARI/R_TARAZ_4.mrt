@@ -108,7 +108,7 @@
             </DT2_N>
             <DT1_N Ref="10" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>3,1.4,2.6,0.6</ClientRectangle>
+              <ClientRectangle>3,1.4,4.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>WeblogmaYekan,9</Font>
@@ -280,6 +280,7 @@
         </ColumnHeaderBand1>
         <DataBand2 Ref="21" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
+          <BusinessObjectGuid isNull="true" />
           <ClientRectangle>0,5.8,19,0.8</ClientRectangle>
           <Components isList="true" count="9">
             <Text1 Ref="22" type="Text" isKey="true">
@@ -676,10 +677,10 @@
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>4/4/2025 11:42:31 AM</ReportChanged>
+  <ReportChanged>9/6/2025 9:57:42 AM</ReportChanged>
   <ReportCreated>9/5/2021 1:38:11 PM</ReportCreated>
-  <ReportFile>C:\prg\Made Reports\All\TARAZ_4.mrt</ReportFile>
-  <ReportGuid>6033a227b64e4b2eb333332938187151</ReportGuid>
+  <ReportFile>C:\prg\MC\Prg_UI\Rpts\HESABDARI\R_TARAZ_4.mrt</ReportFile>
+  <ReportGuid>ad4414cbef67474088843eaa07b4bf8c</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>
