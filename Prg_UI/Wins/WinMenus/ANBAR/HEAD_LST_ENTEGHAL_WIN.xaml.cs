@@ -1267,6 +1267,9 @@ namespace Wins.WinMenus.ANBAR
 
         private void INVO_LST_ENTEGHAL_SUB_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
+            if (e.EditAction == DataGridEditAction.Cancel) { return; }
+            if (Keyboard.IsKeyDown(Key.Escape)) { return; }
+
             #region NEED
             ComboBox Comboval = null;
             TextBox TexboVal = null;
@@ -1861,10 +1864,17 @@ namespace Wins.WinMenus.ANBAR
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
-            if (e.Row.Item == null)
+            var ROW = e.Row.Item as GRADE_SHART_FUNC;
+            if (e.Row.Item == null || ROW is null) { return; }
+            if (ConstructorRowDetector.IsPristine(ROW)) { INVO_LST_ENTEGHAL_SUB_CANCEL_EDIT(); return; }
+
+            if (ANBAR.SelectedValue == null || ANBARF.SelectedValue == null)
             {
+                universControl.PopNotifyShow("یکی از فیلد های انبار خالی است", Pop1, Pop1Text1, Pop_Border1);
+                INVO_LST_ENTEGHAL_SUB_CANCEL_EDIT();
                 return;
             }
+
 
             #region Validation
             if (CURRENT_ITMES_ROW.CODE is null && CURRENT_ITMES_ROW.VAHED_K is null && CURRENT_ITMES_ROW.MEGH == 0 && CURRENT_ITMES_ROW.MEGHk == 0)
@@ -2901,7 +2911,7 @@ namespace Wins.WinMenus.ANBAR
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-           
+
         }
     }
 }

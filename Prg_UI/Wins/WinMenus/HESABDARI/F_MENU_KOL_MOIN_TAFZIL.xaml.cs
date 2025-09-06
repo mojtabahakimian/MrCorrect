@@ -440,6 +440,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             //}
             #endregion
 
+            try { this?.Close(); } catch (Exception) { }
         }
 
         private bool IsNull(object hTAF2)

@@ -2519,7 +2519,7 @@ namespace Prg_UI.Functions
 
             return string.Equals(normalizedInput1, normalizedInput2, comparisonType);
         }
-        public static string NormalizeArabicPersian(string input)
+        public static string NormalizeArabicPersian(this string input)
         {
             if (string.IsNullOrEmpty(input))
                 return input;
@@ -2536,6 +2536,37 @@ namespace Prg_UI.Functions
 
             return normalized;
         }
+        public static List<string> NormalizeArabicPersian(this List<string> inputs)
+        {
+            if (inputs == null || inputs.Count == 0)
+                return inputs;
+
+            var results = new List<string>(inputs.Count);
+
+            foreach (var input in inputs)
+            {
+                if (string.IsNullOrEmpty(input))
+                {
+                    results.Add(input);
+                    continue;
+                }
+
+                var normalized = input
+                    .Replace(ArabicYeh, PersianYeh)
+                    .Replace(ArabicKaf, PersianKaf)
+                    .Replace(ArabicTehMarbuta, PersianHeh)
+                    .Trim();
+
+                // Additional normalization steps
+                normalized = normalized.Normalize(NormalizationForm.FormD);
+                normalized = Regex.Replace(normalized, @"\p{Mn}", "");
+
+                results.Add(normalized);
+            }
+
+            return results;
+        }
+
         public static string ReplacePerArab(string input, bool IsArabicy)
         {
             if (IsArabicy)

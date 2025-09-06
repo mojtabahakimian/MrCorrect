@@ -831,7 +831,15 @@ namespace Functions
             /// <summary>
             /// کنترل سریالی چکهای پرداختی
             /// </summary>
-            F_MENU_SERILA
+            F_MENU_SERILA,
+            /// <summary>
+            /// جستجو در گردش کالا های پیشرفته | F12 پیشرفته
+            /// </summary>
+            HEAD_SERCH_MAIN_ADVANC_F12,
+            /// <summary>
+            /// گزارشات ساخته شده توسط کاربران از F12 پیشرفته
+            /// </summary>
+            SQLSTATEFORM_CRTL_M
         }
         #endregion
 
@@ -847,6 +855,11 @@ namespace Functions
         {
             switch (_TYPE_)
             {
+                //Mojtaba{
+                case WinNameType.SQLSTATEFORM_CRTL_M: /* گزارشات ساخته شده توسط کاربران */ CL_LMethods.OpenWindow(OWNERWIN, new SQLSTATEFORM(), isModalDialog: false, allowMultipleInstances: false); break;
+
+                case WinNameType.HEAD_SERCH_MAIN_ADVANC_F12: /*  جستجو در گردش کالا های پیشرفته | F12 پیشرفته */ CL_LMethods.OpenWindow(OWNERWIN, new HEAD_SERCH_MAIN_ADVANC(), isModalDialog: false, allowMultipleInstances: false); break;
+                //Mojtaba}
 
                 case WinNameType.F_MENU_SERILA:
                     CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_SERILA(), isModalDialog: false, allowMultipleInstances: false);
@@ -880,11 +893,11 @@ namespace Functions
                     CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_GOZARESH_FROOSH("FR"), isModalDialog: false, allowMultipleInstances: false);
                     break;
 
-                case WinNameType.F_MENU_KOL_MOIN_TAFZIL_FRKMA4: 
+                case WinNameType.F_MENU_KOL_MOIN_TAFZIL_FRKMA4:
                     CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_TAFZIL("FRKMA4"), isModalDialog: false, allowMultipleInstances: false);
                     break;
 
-                case WinNameType.F_MENU_KOL_MOIN_TAFZIL_VAZ: 
+                case WinNameType.F_MENU_KOL_MOIN_TAFZIL_VAZ:
                     CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_TAFZIL("VAZ"), isModalDialog: false, allowMultipleInstances: false);
                     break;
 
@@ -896,7 +909,7 @@ namespace Functions
                     CL_LMethods.OpenWindow(OWNERWIN, new WIN_F_MENU_KHFR("FLIST"), isModalDialog: false, allowMultipleInstances: false);
                     break;
 
-                case WinNameType.F_MENU_GOZARESH_FROOSH_FK: 
+                case WinNameType.F_MENU_GOZARESH_FROOSH_FK:
                     CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_GOZARESH_FROOSH("FK"), isModalDialog: false, allowMultipleInstances: false);
                     break;
 

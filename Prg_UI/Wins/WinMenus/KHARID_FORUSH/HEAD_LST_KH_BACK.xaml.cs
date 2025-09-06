@@ -598,23 +598,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 if (!CL_HESABDARI.BLOCKEDMK(CUST_NO.SelectedValue.ToStringNullSafe()) && CUST_NO.SelectedValue != null)
                 {
-                    var manResult = dbms.DoGetDataSQL<double?>($@"
-                        SELECT SUM(BED - BES) AS MAN 
-                        FROM dbo.DEED_DTL 
-                        WHERE HES_K = {CL_HESABDARI.GETKOL(CUST_NO.SelectedValue.ToString())} 
-                        AND HES_M = {CL_HESABDARI.GETMOIN(CUST_NO.SelectedValue.ToString())} 
-                        AND HES_T = {CL_HESABDARI.GETTAF(CUST_NO.SelectedValue.ToString())}").FirstOrDefault();
-
-                    if (manResult.HasValue)
+                    if (CUST_NO.SelectedValue != null)
                     {
-                        if (CUST_NO.SelectedValue != null)
-                        {
-                            MANDAH.Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
-                        }
-                    }
-                    else
-                    {
-                        MANDAH.Text = "0";
+                        MANDAH.Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
                     }
                 }
                 else
@@ -1026,8 +1012,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
             CUST_NO2.SelectedValuePath = "hes";
 
             //واحد ها
-            DEPATMAN.ItemsSource = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
-            DEPATMAN.DisplayMemberPath = "DEPNAME";
+            var RST = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
+            foreach (var item in RST)
+            {
+                item.DEPNAME = item.DEPNAME.NormalizeArabicPersian();
+            }
+            DEPATMAN.ItemsSource = RST; DEPATMAN.DisplayMemberPath = "DEPNAME";
             DEPATMAN.SelectedValuePath = "DEPATMAN";
             DEPATMAN.SelectedIndex = 0;
             DEPATMAN.SelectedItem = 0;

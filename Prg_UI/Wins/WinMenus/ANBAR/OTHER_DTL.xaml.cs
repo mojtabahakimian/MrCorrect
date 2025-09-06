@@ -719,11 +719,18 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         {
             try
             {
-                if (IsSavedHeader_OTHER_DTL() && OTHER_DTL_SUB_SUB?.ItemsSource != null) //Succeed Saved Header
+                if (IsSavedHeader_OTHER_DTL()) //Succeed Saved Header
                 {
-                    Save_OTHERDTL_SUB_Detail();
+                    if (OTHER_DTL_DATA.Any())
+                    {
+                        Save_OTHERDTL_SUB_Detail();
+                    }
                     G_Flag = 1;
                     universControl.PopNotifyShow(".مقادیر ذخیره شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+                }
+                else
+                {
+                    universControl.PopNotifyShowUp(".مقادیر ذخیره شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
                 }
             }
             catch (Exception ex)
