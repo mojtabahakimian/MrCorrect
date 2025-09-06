@@ -1073,7 +1073,7 @@
                                 </Grid>
                             </Button>
 
-                            <Button Margin="1" Style="{StaticResource MaterialDesignFlatButton}"  Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                            <Button Margin="1" Style="{StaticResource MaterialDesignFlatButton}" Click="Button_Click_113"  Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                 <Grid Width="189">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="10*"/>
@@ -1090,7 +1090,7 @@
                                 </Grid>
                             </Button>
 
-                            <Button Margin="1" Style="{StaticResource MaterialDesignFlatButton}"  Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                            <Button Margin="1" Style="{StaticResource MaterialDesignFlatButton}"  Height="40" Click="Button_Click_114" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                 <Grid Width="189">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="10*"/>
@@ -1107,7 +1107,7 @@
                                 </Grid>
                             </Button>
 
-                            <Button Margin="1" Style="{StaticResource MaterialDesignFlatButton}"  Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                            <Button Margin="1" Style="{StaticResource MaterialDesignFlatButton}"  Height="40" Click="Button_Click_115" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                 <Grid Width="189">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="10*"/>
@@ -1124,7 +1124,7 @@
                                 </Grid>
                             </Button>
 
-                            <Button Margin="1" Style="{StaticResource MaterialDesignFlatButton}"  Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                            <Button Margin="1" Style="{StaticResource MaterialDesignFlatButton}"  Height="40" Click="Button_Click_116" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                 <Grid Width="189">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="10*"/>
@@ -1141,7 +1141,7 @@
                                 </Grid>
                             </Button>
 
-                            <Button Margin="1" Style="{StaticResource MaterialDesignFlatButton}"  Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                            <Button Margin="1" Style="{StaticResource MaterialDesignFlatButton}"  Height="40" Click="Button_Click_116" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                 <Grid Width="189">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="10*"/>
@@ -1154,7 +1154,7 @@
                                         <RowDefinition Height="10"/>
                                     </Grid.RowDefinitions>
                                     <materialDesign:PackIcon Grid.Column="0" Kind="ListBox" Height="Auto" Width="27" Grid.RowSpan="3" VerticalAlignment="Stretch" Margin="6,0,0,0"/>
-                                    <TextBlock Text="گزارش تراز آزمایشی چهار ستونی معین" FontSize="9" Margin="43,5,-2,5" Grid.RowSpan="3" Grid.ColumnSpan="3"/>
+                                    <TextBlock Text="گزارش تراز آزمایشی چهار ستونی کل" FontSize="9" Margin="43,5,7,5" Grid.RowSpan="3" Grid.ColumnSpan="3"/>
                                 </Grid>
                             </Button>
 

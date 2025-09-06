@@ -831,7 +831,31 @@ namespace Functions
             /// <summary>
             /// کنترل سریالی چکهای پرداختی
             /// </summary>
-            F_MENU_SERILA
+            F_MENU_SERILA,
+            /// <summary>
+            /// لیست رتاز آزمایشی چهار ستونی کل
+            /// </summary>
+            FMENU_TARAZ_4_FT4,
+            /// <summary>
+            /// لیست تراز آزمایشی چهار ستونی معین
+            /// </summary>
+            FMENU_TARAZ_4_FT4M,
+            /// <summary>
+            /// لیست تراز آزمایشی چهار ستونی تفضیلی
+            /// </summary>
+            FMENU_TARAZ_4_FT4T,
+            /// <summary>
+            /// گزارش تراز آزمایشی چهار ستونی حسابهای کل
+            /// </summary>
+            FMENU_TARAZ_4_RT4,
+            /// <summary>
+            /// گزارش تراز آزمایشی چهار ستونی حسابهای کل ، معین و تفضیلی
+            /// </summary>
+            FMENU_TARAZ_4_RFT4T,
+            /// <summary>
+            /// گزارش تراز کل ، معین ، تفضیلی و بالاتر
+            /// </summary>
+            FMENU_TARAZ_4_OTHER
         }
         #endregion
 
@@ -847,6 +871,30 @@ namespace Functions
         {
             switch (_TYPE_)
             {
+
+                case WinNameType.FMENU_TARAZ_4_OTHER:
+                    CL_LMethods.OpenWindow(OWNERWIN, new FMENU_TARAZ_4("OTHER"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.FMENU_TARAZ_4_RFT4T:
+                    CL_LMethods.OpenWindow(OWNERWIN, new FMENU_TARAZ_4("RFT4T"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.FMENU_TARAZ_4_RT4:
+                    CL_LMethods.OpenWindow(OWNERWIN, new FMENU_TARAZ_4("RT4"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.FMENU_TARAZ_4_FT4T:
+                    CL_LMethods.OpenWindow(OWNERWIN, new FMENU_TARAZ_4("FT4T"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.FMENU_TARAZ_4_FT4M:
+                    CL_LMethods.OpenWindow(OWNERWIN, new FMENU_TARAZ_4("FT4M"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.FMENU_TARAZ_4_FT4:
+                    CL_LMethods.OpenWindow(OWNERWIN, new FMENU_TARAZ_4("FT4"), isModalDialog: false, allowMultipleInstances: false);
+                    break;
 
                 case WinNameType.F_MENU_SERILA:
                     CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_SERILA(), isModalDialog: false, allowMultipleInstances: false);

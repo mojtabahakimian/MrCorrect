@@ -135,7 +135,7 @@
 
                 <StackPanel FlowDirection="RightToLeft" Orientation="Vertical" Width="315">
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" PreviewMouseDown="Image_PreviewMouseDown_4" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/HESABDARI_SUB/MoratabSaziAsnad.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -143,7 +143,7 @@
                         <Label Content="لیست تراز آزمایشی چهار ستونی کل" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" PreviewMouseDown="Image_PreviewMouseDown_5" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/HESABDARI_SUB/MoratabSaziAsnad.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -151,7 +151,7 @@
                         <Label Content="لیست تراز آزمایشی چهار ستونی معین" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" PreviewMouseDown="Image_PreviewMouseDown_6" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/HESABDARI_SUB/MoratabSaziAsnad.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -159,7 +159,7 @@
                         <Label Content="لیست تراز آزمایشی چهار ستونی تفضیلی" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" PreviewMouseDown="Image_PreviewMouseDown_7" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/HESABDARI_SUB/MoratabSaziAsnad.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -167,7 +167,7 @@
                         <Label Content="گزارش تراز آزمایشی چهار ستونی حسابهای کل" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" PreviewMouseDown="Image_PreviewMouseDown_8" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/HESABDARI_SUB/MoratabSaziAsnad.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -192,7 +192,7 @@
                         <Label Content="گزارش تراز آزمایشی حسابهای معین" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" PreviewMouseDown="Image_PreviewMouseDown_9" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/HESABDARI_SUB/MoratabSaziAsnad.png" CacheOption="OnLoad"/>
                             </Image.Source>
