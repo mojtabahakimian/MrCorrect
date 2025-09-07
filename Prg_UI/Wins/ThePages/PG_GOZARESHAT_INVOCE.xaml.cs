@@ -65,7 +65,7 @@ namespace Wins.ThePages
 
         private void Image_PreviewMouseDown_8(object sender, MouseButtonEventArgs e)
         {
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_FLIST, null);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_KLIST, null);
         }
 
         private void Image_PreviewMouseDown_9(object sender, MouseButtonEventArgs e)

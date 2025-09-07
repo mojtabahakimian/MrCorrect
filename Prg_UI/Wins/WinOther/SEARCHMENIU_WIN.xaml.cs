@@ -330,7 +330,8 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست خرید به تفکیک کالا ....", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_DATE_CKRALL });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "امار فروش کالا ها به تفکیک روز", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_DATE_AMFDAY });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش فاکتور های فروش به اشخاص", WIN_NAME = CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_FLIST });
-            //MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش فاکتور های خرید به اشخاص", WIN_NAME = CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_FLIST });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش فاکتور های خرید به اشخاص", WIN_NAME = CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_KLIST });
+
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش فاکتور های فروش به صورت گروهی", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_FROOSH });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش فروش کالا ها به تفکیک انبار", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_ANBAR_FRKH });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش خرید کالا ها به تفکیک انبار", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_ANBAR_FRKH_RK });
@@ -340,7 +341,7 @@ namespace Wins.WinOther
 
             //سایر گزارشات خرید فروش
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست کالا های فروش نرفته اکد", WIN_NAME = CL_MenuManager.WinNameType.FROOSH_NARAFTAH });
-            //MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست کالا های فروش نرفته به شخص", WIN_NAME = CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_FLIST });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست کالا های فروش نرفته به شخص", WIN_NAME = CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_FONARP });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست محدود شده مشتریانی که خرید نکرده اند", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_DATE_CUSTNP });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست خرید به تفکیک کالا و قبض باسکول", WIN_NAME = CL_MenuManager.WinNameType.LIST_KHARID });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست فروش به تفکیک کالا و قبض باسکول", WIN_NAME = CL_MenuManager.WinNameType.LIST_FROOSH });
