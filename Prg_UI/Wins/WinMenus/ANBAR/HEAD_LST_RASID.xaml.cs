@@ -830,6 +830,13 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                             return;
                         }
 
+                        if (CURRENT_ITMES_ROW.ANBAR == null)
+                        {
+                            universControl.PopNotifyShow("لطفا ابتدا انبار را انتخاب کنید", Pop1, Pop1Text1, Pop_Border1);
+                            INVO_LST_RASID_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                            return;
+                        }
+
                         #region +Enter
                         //OpenSearchKala(ENTERED_VALUE_ROW.ToString(), CURRENT_ITMES_ROW.NAME_CODE.ToString(), null);
                         if (CURRENT_ITMES_ROW.NAME_CODE == "+" || CURRENT_ITMES_ROW.NAME_CODE == "++" && !IsNull(CURRENT_ITMES_ROW.ANBAR))
@@ -898,6 +905,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                             //اگر نام کالای وارد شده با قبل از وارد شدن برار بود در اصل یعنی مقدار واقعا تغییر نکرده بود رد شو
                             if (ENTERED_VALUE_ROW.ToString() != WAS_ROW_ITEM.NAME_CODE)
                             {
+
+
                                 //الکی نره روی گات فوکوس دیتاگرید
                                 INVO_LST_RASID_SUB.GotFocus -= INVO_LST_RASID_SUB_GotFocus;
 

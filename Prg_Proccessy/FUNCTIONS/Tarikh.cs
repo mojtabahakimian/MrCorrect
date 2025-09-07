@@ -52,6 +52,11 @@ namespace Prg_Proccessy.FUNCTIONS
         }
         public static bool IsSyncedDateNow(string dt, bool flag)
         {
+            if (string.IsNullOrEmpty(dt) || dt.Length < 4)
+            {
+                return false;
+            }
+
             string sal = dt.Substring(0, 4);
             bool res = true;
             if (flag)//آیا تیک کنترل شود تاریخ وارد شده با تاریخ سال مالی یکی است ؟
@@ -131,7 +136,7 @@ namespace Prg_Proccessy.FUNCTIONS
             get
             {
                 //var GregorianDate2 = DateTime.Now.ToString(null, CultureInfo.GetCultureInfo("en-US")); ////UtcNow is Time of Europe so not using
-                _ADFullCurrentDate = DateTime.Now.ToString("yyyymmdd", CultureInfo.InvariantCulture);
+                _ADFullCurrentDate = DateTime.Now.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
                 return _ADFullCurrentDate;
             }
 

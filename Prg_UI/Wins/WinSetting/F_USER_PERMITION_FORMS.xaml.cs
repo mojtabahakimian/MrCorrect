@@ -4087,7 +4087,7 @@ namespace Wins.WinSetting
                         {
                             if (string.IsNullOrEmpty(Baseknow.tindata))
                             {
-                                universControl.PopNotifyShow("خطا:براي استفاده از تبلت لازم است آن را از شركت خريداري نماييد", Pop1, Pop1Text1, Pop_Border1, Secound_Wait: 3);
+                                universControl.PopNotifyShowUp("خطا:براي استفاده از تبلت لازم است آن را از شركت خريداري نماييد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red, 3);
                                 USER_ENDN_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
                             }
                         }
