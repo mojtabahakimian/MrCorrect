@@ -63,8 +63,9 @@ namespace Prg_SendInvoice.CNNMANAGER
                             break;
                         case "Integrated Security":
                             integratedSecurityProvided = true;
-                            connectionStringBuilder.IntegratedSecurity = value.Equals("SSPI", StringComparison.OrdinalIgnoreCase);
-                            value.Equals("True", StringComparison.OrdinalIgnoreCase);
+                            //connectionStringBuilder.IntegratedSecurity = value.Equals("SSPI", StringComparison.OrdinalIgnoreCase);
+                            //value.Equals("True", StringComparison.OrdinalIgnoreCase);
+                            connectionStringBuilder.IntegratedSecurity = value.Equals("SSPI", StringComparison.OrdinalIgnoreCase) || value.Equals("True", StringComparison.OrdinalIgnoreCase);
                             break;
                     }
                 }

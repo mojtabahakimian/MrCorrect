@@ -57,7 +57,7 @@
         <Label Content="شماره بارنامه :" Margin="0,62,371,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="66" Height="28" VerticalAlignment="Top"/>
         <TextBox x:Name="BARNAMEH"  Height="28" Margin="349,62,439,0"  Tag="RD"  Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" TabIndex="1" PreviewKeyDown="BARNAMEH_PreviewKeyDown" PreviewLostKeyboardFocus="BARNAMEH_PreviewLostKeyboardFocus" PreviewTextInput="BARNAMEH_PreviewTextInput"/>
         <Label Content="نام راننده :" Margin="230,62,0,0"  FlowDirection="RightToLeft" FontSize="10" Height="28" VerticalAlignment="Top" HorizontalAlignment="Left" Width="52"/>
-        <ComboBox x:Name="DRIVER" Tag="RD" Padding="7,0,10,0" IsSynchronizedWithCurrentItem="True" IsTextSearchEnabled="True" Style="{StaticResource FuzzyOutComboBox}" Margin="20,62,0,0" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" Grid.Column="0" SelectionChanged="DRIVER_SelectionChanged" TabIndex="2" VerticalAlignment="Top" HorizontalAlignment="Left" Width="203">
+        <ComboBox x:Name="DRIVER" Tag="RD" Padding="7,0,10,0" StaysOpenOnEdit="True" Style="{StaticResource FuzzyOutComboBox}" Margin="20,62,0,0" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" Grid.Column="0" SelectionChanged="DRIVER_SelectionChanged" PreviewLostKeyboardFocus="DRIVER_PreviewLostKeyboardFocus" TabIndex="2" VerticalAlignment="Top" HorizontalAlignment="Left" Width="203">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -69,7 +69,7 @@
         <Label Content="موبایل راننده :" Margin="0,105,41,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="65" Height="28" VerticalAlignment="Top"/>
         <TextBox x:Name="DRIVER_MOB"  Height="28" Margin="0,107,115,0"  Tag="RD"  Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" TabIndex="3" PreviewKeyDown="DRIVER_MOB_PreviewKeyDown" PreviewLostKeyboardFocus="DRIVER_MOB_PreviewLostKeyboardFocus" PreviewTextInput="DRIVER_MOB_PreviewTextInput" HorizontalAlignment="Right" Width="203"/>
         <Label Content="شماره ماشین :" Margin="0,107,364,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="70" Height="28" VerticalAlignment="Top"/>
-        <ComboBox x:Name="CAMIUN_NUM" Tag="RD"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsSynchronizedWithCurrentItem="True" IsTextSearchEnabled="True" Margin="349,107,439,0" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" SelectionChanged="CAMIUN_NUM_SelectionChanged" TabIndex="4" VerticalAlignment="Top">
+        <ComboBox x:Name="CAMIUN_NUM" Tag="RD"  Padding="7,0,10,0" PreviewLostKeyboardFocus="CAMIUN_NUM_PreviewLostKeyboardFocus" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="349,107,439,0" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" SelectionChanged="CAMIUN_NUM_SelectionChanged" TabIndex="4" VerticalAlignment="Top">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -77,7 +77,7 @@
             </ComboBox.ItemsPanel>
         </ComboBox>
         <Label Content="نوع ماشین :" Margin="228,107,0,0"  FlowDirection="RightToLeft" FontSize="10" Height="28" VerticalAlignment="Top" HorizontalAlignment="Left" Width="60"/>
-        <ComboBox x:Name="CAMIUN" Tag="RD"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsSynchronizedWithCurrentItem="True" IsTextSearchEnabled="True" Margin="20,107,0,0" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" Grid.Column="0" TabIndex="5" VerticalAlignment="Top" HorizontalAlignment="Left" Width="203">
+        <ComboBox x:Name="CAMIUN" Tag="RD"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="20,107,0,0" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" Grid.Column="0" TabIndex="5" VerticalAlignment="Top" HorizontalAlignment="Left" Width="203">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>

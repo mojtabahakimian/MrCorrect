@@ -10,7 +10,7 @@ namespace Prg_Proccessy.FUNCTIONS
     {
         public static string GetBetweenStr(string strSource, string strStart, string strEnd)
         {
-            if (strSource.Contains(strStart) || strSource.Contains(strEnd))
+            if (strSource.Contains(strStart) && strSource.Contains(strEnd))
             {
                 var nstrsorce = strSource.Replace(" ", "");
                 var nstrstart = strStart.Replace(" ", "");

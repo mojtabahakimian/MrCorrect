@@ -148,7 +148,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 //DoCmd.RunCommand(acCmdSaveRecord);
                 INSERTVAZN();
                 //this.OTHER_DTL_SUB_SUB.Requery();
-                CAMIUN.Focus();
+                //CAMIUN.Focus();
             }
         }
         void DRIVER_AfterUpdate()
@@ -173,7 +173,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 }
                 //DoCmd.RunCommand(acCmdSaveRecord);
                 ReGetData();
-                DRIVER_MOB.Focus();
+                //DRIVER_MOB.Focus();
             }
         }
         /// <summary>
@@ -744,11 +744,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
         private void DRIVER_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            DRIVER_AfterUpdate();
+       
         }
         private void CAMIUN_NUM_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            CAMIUN_NUM_AfterUpdate();
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -1041,6 +1040,23 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             {
                 universControl.PopNotifyShow("ابتدا مشخصات راننده و كاميون را وارد كنيد ", Pop1, Pop1Text1, Pop_Border1);
             }
+        }
+
+        private void DRIVER_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (DRIVER.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
+            TextBox CUTSNO_TEX = (TextBox)DRIVER.Template.FindName("PART_EditableTextBox", DRIVER);
+            if (CUTSNO_TEX is null)
+            {
+                return;
+            }
+
+            DRIVER_AfterUpdate();
+        }
+
+        private void CAMIUN_NUM_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            CAMIUN_NUM_AfterUpdate();
         }
     }
 }

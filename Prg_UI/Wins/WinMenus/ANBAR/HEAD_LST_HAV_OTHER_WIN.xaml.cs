@@ -1793,6 +1793,11 @@ namespace Wins.WinMenus.ANBAR
             #region CODE_After_Update
             if (e.Column.SortMemberPath == "NAME_CODE")
             {
+                if (CURRENT_ITMES_ROW?.ANBAR == null || CURRENT_ITMES_ROW?.CODE == null)
+                {
+                    return;
+                }
+
                 var min = default(double);
                 double MAND;
                 var RST0 = dbms.DoGetDataSQL<STUF_STK>("SELECT * FROM STUF_STK where CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + CURRENT_ITMES_ROW.ANBAR).ToList();
@@ -1885,6 +1890,10 @@ namespace Wins.WinMenus.ANBAR
             #region MEGH_After_Update
             if (e.Column.SortMemberPath == "MEGH")
             {
+                if (CURRENT_ITMES_ROW?.ANBAR == null || CURRENT_ITMES_ROW?.CODE == null || CURRENT_ITMES_ROW?.MEGH == null)
+                {
+                    return;
+                }
 
                 double min;
                 long Temp;
@@ -1968,6 +1977,11 @@ namespace Wins.WinMenus.ANBAR
             #region VAHED_K_After_Update          
             if (e.Column.SortMemberPath == "VAHED_K")
             {
+                if (CURRENT_ITMES_ROW?.ANBAR == null || CURRENT_ITMES_ROW?.CODE == null || CURRENT_ITMES_ROW?.VAHED_K == null || CURRENT_ITMES_ROW?.MEGH == null)
+                {
+                    return;
+                }
+
                 var RST = dbms.DoGetDataSQL<HLQ10>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + CURRENT_ITMES_ROW.CODE + "' AND ((VAHEDS.VAHED)= " + CURRENT_ITMES_ROW.VAHED_K + ")))").ToList();
                 if (RST.Count == 0)
                 {
@@ -1985,6 +1999,11 @@ namespace Wins.WinMenus.ANBAR
             #region VAHED_K_Not_In_List
             if (e.Column.SortMemberPath == "VAHED_K")
             {
+                if (CURRENT_ITMES_ROW?.ANBAR == null || CURRENT_ITMES_ROW?.CODE == null || CURRENT_ITMES_ROW?.VAHED_K == null || CURRENT_ITMES_ROW?.MEGH == null)
+                {
+                    return;
+                }
+
                 var RST = dbms.DoGetDataSQL<HLQ10>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + CURRENT_ITMES_ROW.CODE + "' AND ((VAHEDS.VAHED)= " + CURRENT_ITMES_ROW.VAHED_K + ")))").ToList();
                 if (RST.Count == 0)
                 {

@@ -840,7 +840,7 @@ namespace Functions
             /// <summary>
             /// گزارشات ساخته شده توسط کاربران از F12 پیشرفته
             /// </summary>
-            SQLSTATEFORM_CRTL_M
+            SQLSTATEFORM_CRTL_M,
 
             /// لیست رتاز آزمایشی چهار ستونی کل
             /// </summary>

@@ -294,6 +294,12 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                         {
                             //OpenReport("INVOICE_FROOSH_3GRP3");
 
+                            if (HMOIN.SelectedValue is null)
+                            {
+                                universControl.PopNotifyShow("لطفا یک حساب را انتخاب کنید.", Pop1, Pop1Text1, Pop_Border1);
+                                return;
+                            }
+
                             var report = new StiReport();
                             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.INVOICE_FROOSH_3GRP3.mrt");
                             report.Load(pathreport);

@@ -204,7 +204,7 @@ namespace Wins.WinMenus.Checkha
         public string SelectedSfDgTextCell { get; private set; }
         private void PAY_GETP_SUB_CurrentCellActivated(object sender, Syncfusion.UI.Xaml.Grid.CurrentCellActivatedEventArgs e)
         {
-            UpdateCurrentCellValue(e.CurrentRowColumnIndex);
+            if (e?.CurrentRowColumnIndex == null) return; UpdateCurrentCellValue(e.CurrentRowColumnIndex);
         }
         private void PAY_GETP_SUB_SelectionChanged(object sender, GridSelectionChangedEventArgs e)
         {
@@ -231,7 +231,7 @@ namespace Wins.WinMenus.Checkha
             if (recordIndex < 0) return;
 
             var record = this.PAY_GETP_SUB.View.Records.GetItemAt(recordIndex);
-            CurrentCellValue = record?.GetType()?.GetProperty(mappingName)?.GetValue(record)?.ToString();
+            CurrentCellValue = record?.GetType()?.GetProperty(mappingName ?? string.Empty)?.GetValue(record)?.ToString();
         }
         private void FilterBySelection_Click(object sender, RoutedEventArgs e)
         {
