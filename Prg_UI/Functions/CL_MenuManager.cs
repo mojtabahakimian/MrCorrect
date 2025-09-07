@@ -855,7 +855,11 @@ namespace Functions
             /// <summary>
             /// گزارش تراز کل ، معین ، تفضیلی و بالاتر
             /// </summary>
-            FMENU_TARAZ_4_OTHER
+            FMENU_TARAZ_4_OTHER,
+            /// <summary>
+            /// گزارش فاکتور های خرید به اشخاص
+            /// </summary>
+            WIN_F_MENU_KHFR_KLIST
         }
         #endregion
 
@@ -871,6 +875,10 @@ namespace Functions
         {
             switch (_TYPE_)
             {
+
+                case WinNameType.WIN_F_MENU_KHFR_KLIST: //لیست کالا های فروش نرفته به شخص
+                    CL_LMethods.OpenWindow(OWNERWIN, new WIN_F_MENU_KHFR("KLIST"));
+                    break;
 
                 case WinNameType.FMENU_TARAZ_4_OTHER:
                     CL_LMethods.OpenWindow(OWNERWIN, new FMENU_TARAZ_4("OTHER"), isModalDialog: false, allowMultipleInstances: false);
