@@ -117,7 +117,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void Fill_ComboBoxes()
         {
-            BANK.ItemsSource = dbms.DoGetDataSQL<Query2T>("SELECT PAY_GETD.BANK, TCOD_BANKS.NAMES FROM PAY_GETD INNER JOIN TCOD_BANKS ON PAY_GETD.BANK = TCOD_BANKS.CODE").ToList();
+            BANK.ItemsSource = dbms.DoGetDataSQL<Query2T>("SELECT DISTINCT PAY_GETD.BANK, TCOD_BANKS.NAMES FROM PAY_GETD INNER JOIN TCOD_BANKS ON PAY_GETD.BANK = TCOD_BANKS.CODE").ToList();
             BANK.SelectedValuePath = "BANK";
             BANK.DisplayMemberPath = "NAMES";
 

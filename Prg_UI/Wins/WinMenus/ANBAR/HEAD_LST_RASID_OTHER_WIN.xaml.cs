@@ -1100,6 +1100,11 @@ namespace Wins.WinMenus.ANBAR
             #region CODE_Not_In_List
             if (e.Column.SortMemberPath == "NAME_CODE")
             {
+                if (CURRENT_ITMES_ROW?.ANBAR == null)
+                {
+                    return;
+                }
+
                 if (ENTERED_VALUE_ROW.ToString() != WAS_ROW_ITEM.NAME_CODE.ToStringNullSafe().Trim() ||
                     (string.IsNullOrEmpty(ENTERED_VALUE_ROW.ToStringNullSafe()) || string.IsNullOrWhiteSpace(ENTERED_VALUE_ROW.ToStringNullSafe())))
                 {
@@ -1351,6 +1356,11 @@ namespace Wins.WinMenus.ANBAR
             #region CODE_After_Update
             if (e.Column.SortMemberPath == "NAME_CODE")
             {
+                if (CURRENT_ITMES_ROW?.ANBAR == null || CURRENT_ITMES_ROW.CODE == null)
+                {
+                    return;
+                }
+
                 var min = default(double);
                 double MAND;
                 var RST0 = dbms.DoGetDataSQL<STUF_STK>("SELECT * FROM STUF_STK where CODE = '" + CURRENT_ITMES_ROW.CODE + "' AND ANBAR = " + CURRENT_ITMES_ROW.ANBAR).ToList();
@@ -1439,9 +1449,44 @@ namespace Wins.WinMenus.ANBAR
             }
             #endregion
 
+            #region VAHED_K_Not_In_List
+            if (e.Column.SortMemberPath == "VAHED_K")
+            {
+                if (CURRENT_ITMES_ROW?.ANBAR == null || CURRENT_ITMES_ROW?.CODE == null || CURRENT_ITMES_ROW.VAHED_K == null)
+                {
+                    return;
+                }
+                var RST = dbms.DoGetDataSQL<HLQ10>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + CURRENT_ITMES_ROW.CODE + "' AND ((VAHEDS.VAHED)= " + CURRENT_ITMES_ROW.VAHED_K + ")))").ToList();
+                if (RST.Count == 0)
+                {
+                    Msgwin msgwin = new Msgwin(false, "واحد تعريف شده ناقص ميباشد نسبت آن مشخص نگرديده است.در بخش تعريف كالا آن را اصلاح كنيد.");
+                    msgwin.ShowDialog();
+                    CURRENT_ITMES_ROW.VAHED_K = null;
+                }
+                else
+                {
+                    CURRENT_ITMES_ROW.MEGHk = CURRENT_ITMES_ROW.MEGH * RST.FirstOrDefault().NESBAT;
+                    if (CURRENT_ITMES_ROW.MABL == 0)
+                    {
+                        //MABL_K.TabStop = true;
+                    }
+                    else
+                    {
+                        //MABL_K.TabStop = true;
+                        CURRENT_ITMES_ROW.MABL_K = CURRENT_ITMES_ROW.MEGHk * CURRENT_ITMES_ROW.MABL;
+                    }
+                }
+            }
+            #endregion
+
             #region VAHED_K_After_Update          
             if (e.Column.SortMemberPath == "VAHED_K")
             {
+                if (CURRENT_ITMES_ROW?.ANBAR == null || CURRENT_ITMES_ROW?.CODE == null || CURRENT_ITMES_ROW.VAHED_K == null)
+                {
+                    return;
+                }
+
                 var RST = dbms.DoGetDataSQL<HLQ10>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + CURRENT_ITMES_ROW.CODE + "' AND ((VAHEDS.VAHED)= " + CURRENT_ITMES_ROW.VAHED_K + ")))").ToList();
                 if (RST.Count == 0)
                 {
@@ -1459,6 +1504,10 @@ namespace Wins.WinMenus.ANBAR
             #region MEGH_After_Update
             if (e.Column.SortMemberPath == "MEGH")
             {
+                if (CURRENT_ITMES_ROW?.ANBAR == null || CURRENT_ITMES_ROW?.CODE == null || CURRENT_ITMES_ROW.MEGH == null || CURRENT_ITMES_ROW?.VAHED_K == null)
+                {
+                    return;
+                }
 
                 double min;
                 long Temp;
@@ -1530,31 +1579,6 @@ namespace Wins.WinMenus.ANBAR
             }
             #endregion
 
-            #region VAHED_K_Not_In_List
-            if (e.Column.SortMemberPath == "VAHED_K")
-            {
-                var RST = dbms.DoGetDataSQL<HLQ10>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + CURRENT_ITMES_ROW.CODE + "' AND ((VAHEDS.VAHED)= " + CURRENT_ITMES_ROW.VAHED_K + ")))").ToList();
-                if (RST.Count == 0)
-                {
-                    Msgwin msgwin = new Msgwin(false, "واحد تعريف شده ناقص ميباشد نسبت آن مشخص نگرديده است.در بخش تعريف كالا آن را اصلاح كنيد.");
-                    msgwin.ShowDialog();
-                    CURRENT_ITMES_ROW.VAHED_K = null;
-                }
-                else
-                {
-                    CURRENT_ITMES_ROW.MEGHk = CURRENT_ITMES_ROW.MEGH * RST.FirstOrDefault().NESBAT;
-                    if (CURRENT_ITMES_ROW.MABL == 0)
-                    {
-                        //MABL_K.TabStop = true;
-                    }
-                    else
-                    {
-                        //MABL_K.TabStop = true;
-                        CURRENT_ITMES_ROW.MABL_K = CURRENT_ITMES_ROW.MEGHk * CURRENT_ITMES_ROW.MABL;
-                    }
-                }
-            }
-            #endregion
         }
 
         private void INVO_LST_RASIDA_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)

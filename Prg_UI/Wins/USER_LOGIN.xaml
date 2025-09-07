@@ -40,14 +40,26 @@
         <!--Headeing-->
         <Label x:Name="Lbl_usernam" Visibility="Collapsed"  Content="نام کاربری :"  HorizontalAlignment="Left" Margin="316,108,0,0" VerticalAlignment="Top" Width="64"  FlowDirection="RightToLeft" Height="32" PreviewMouseDoubleClick="Lbl_usernam_PreviewMouseDoubleClick"/>
         <Label x:Name="label" Visibility="Collapsed"   Content="رمز عبور :"  HorizontalAlignment="Left" Margin="316,147,0,0" VerticalAlignment="Top" Width="54"  FlowDirection="RightToLeft" Height="30" Cursor="Hand" PreviewMouseLeftButtonUp="Label_PreviewMouseLeftButtonUp" />
-        <materialDesign:PackIcon Kind="User" Visibility="Visible"   PreviewMouseDoubleClick="Lbl_usernam_PreviewMouseDoubleClick" Margin="313,140,0,0" Height="30" Width="27"/>
-        <TextBox  x:Name="Krbri" HorizontalAlignment="Left" Height="28" Padding="3"    materialDesign:HintAssist.Hint="نام کاربری"   Margin="317,142,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="230"  TabIndex="2" FlowDirection="RightToLeft" TextChanged="Krbri_TextChanged"/>
+        <materialDesign:PackIcon Kind="User" Visibility="Visible" PreviewMouseDoubleClick="Lbl_usernam_PreviewMouseDoubleClick" Margin="313,140,0,0" Height="30" Width="27"/>
+
+        <ComboBox x:Name="CmbUsers" FlowDirection="RightToLeft"
+                  IsEditable="True" Text="{Binding ElementName=Krbri,Path=Text,UpdateSourceTrigger=PropertyChanged}"
+                  IsTextSearchEnabled="True"
+                  StaysOpenOnEdit="True"
+                  materialDesign:HintAssist.Hint="انتخاب کاربر"
+                  DisplayMemberPath="SAL_NAME"
+                  SelectedValuePath="IDD"
+                  SelectionChanged="CmbUsers_SelectionChanged"
+                  Margin="316,141,18,0" VerticalAlignment="Top"/>
+
+        <TextBox x:Name="Krbri" HorizontalAlignment="Left" Visibility="Hidden" Height="28" Padding="3" materialDesign:HintAssist.Hint="نام کاربری" Margin="317,142,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="230" FlowDirection="RightToLeft" TextChanged="Krbri_TextChanged"/>
+
         <Label x:Name="VorudLabel" Content="ورود کاربران" Visibility="Collapsed" HorizontalContentAlignment="Center" Margin="0,56,1,0" VerticalAlignment="Top"  FlowDirection="RightToLeft" FontSize="14"  PreviewMouseLeftButtonUp="VorudLabel_PreviewMouseLeftButtonUp" Cursor="Hand"/>
 
         <Button x:Name="Greet" Content="ورود" Margin="0,281,21,0" Cursor="Hand"  
                 GotFocus="Greet_GotFocus"
                 LostFocus="Greet_LostFocus"
-                Height="39" VerticalAlignment="Top" HorizontalAlignment="Right" Width="227" FontWeight="Bold" Click="Btn_Goin" TabIndex="6" Padding="0,-1,3,4" Foreground="White" BorderBrush="#00000000" FontSize="14" IsDefault="True" IsEnabled="False">
+                Height="39" VerticalAlignment="Top" HorizontalAlignment="Right" Width="227" FontWeight="Bold" Click="Btn_Goin" Padding="0,-1,3,4" Foreground="White" BorderBrush="#00000000" FontSize="14" IsDefault="True" IsEnabled="False">
             <Button.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="{Binding Background.Color, ElementName=GENERAL_RANG}" />
@@ -67,12 +79,12 @@
 
         <Label x:Name="lblconnecting" Visibility="Hidden" Content=". . . در حال تست" HorizontalAlignment="Left" Margin="0,49,0,0" VerticalAlignment="Center" Height="271" Width="400" Background="#D8252526" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"  FontSize="22"/>
 
-        <CheckBox x:Name="dispass" Content="نمایش رمز"  HorizontalAlignment="Left" Margin="317,225,0,0" VerticalAlignment="Top" Width="77"  Height="21"  Unchecked="RemovedTick" Checked="PutedTick" Padding="5,-3,0,0" UseLayoutRounding="False" Cursor="Hand" Foreground="{Binding Foreground, ElementName=label}" FontSize="11"/>
+        <CheckBox x:Name="dispass" Content="نمایش رمز"  HorizontalAlignment="Left" Margin="315,225,0,0" VerticalAlignment="Top" Width="78"  Height="21"  Unchecked="RemovedTick" Checked="PutedTick" Padding="5,-3,0,0" UseLayoutRounding="False" Cursor="Hand" Foreground="{Binding Foreground, ElementName=label}" FontSize="11"/>
 
-        <PasswordBox x:Name="Rmzo"  CommandManager.PreviewExecuted="Rmzo_PreviewExecuted" Padding="3"  materialDesign:HintAssist.Hint="رمز عبور"  ContextMenu="{x:Null}" HorizontalAlignment="Left" Height="28" Margin="317,187,0,0" VerticalAlignment="Top" Width="230"  TabIndex="3" FlowDirection="RightToLeft" PasswordChanged="Rmzo_PasswordChanged"/>
+        <PasswordBox x:Name="Rmzo"  CommandManager.PreviewExecuted="Rmzo_PreviewExecuted" Padding="3"  materialDesign:HintAssist.Hint="رمز عبور"  ContextMenu="{x:Null}" HorizontalAlignment="Left" Height="28" Margin="317,187,0,0" VerticalAlignment="Top" Width="230" FlowDirection="RightToLeft" PasswordChanged="Rmzo_PasswordChanged"/>
         <TextBox x:Name="SecoRmzo"  Visibility="Hidden" HorizontalAlignment="Left"   materialDesign:HintAssist.Hint="رمز عبور" Padding="3" Height="28" Margin="313,192,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="230" FlowDirection="RightToLeft"  CommandManager.PreviewExecuted="SecoRmzo_PreviewExecuted"  ContextMenu="{x:Null}"  TextChanged="SecoRmzo_TextChanged" />
         <ComboBox x:Name="mycmb" HorizontalAlignment="Left" Margin="313,199,0,0" VerticalAlignment="Top" Width="135" Background="White" Visibility="Collapsed"/>
-        <Label x:Name="cnnparamlbl" Visibility="Hidden" Cursor="Hand" Content="اتصال به دیتابیس" Margin="9,274,411,10"  MouseLeftButtonUp="cnnparamlbl_MouseLeftButtonUp" FontSize="10" TabIndex="1"/>
+        <Label x:Name="cnnparamlbl" Visibility="Hidden" Cursor="Hand" Content="اتصال به دیتابیس" Margin="9,274,411,10"  MouseLeftButtonUp="cnnparamlbl_MouseLeftButtonUp" FontSize="10"/>
         <Border BorderThickness="1" CornerRadius="1,1,1,10" HorizontalAlignment="Left" Height="328" Margin="-1,48,0,0" VerticalAlignment="Top" Width="291">
             <Border.Background>
                 <!--<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">

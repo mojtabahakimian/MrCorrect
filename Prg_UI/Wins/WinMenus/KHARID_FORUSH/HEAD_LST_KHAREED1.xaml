@@ -99,7 +99,7 @@
                     <Label Content="واحد :" Margin="1023,44,20,0"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Top"/>
 
                     <CNC:NumericTextBox DoesAcceptDouble="False"  x:Name="MAS" Text="0" Height="26" Margin="410,113,0,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="66"  />
-                    <ComboBox x:Name="DEPATMAN"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="808,42,59,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1">
+                    <ComboBox x:Name="DEPATMAN"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="808,42,59,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" SelectionChanged="DEPATMAN_SelectionChanged">
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>

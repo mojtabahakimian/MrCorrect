@@ -277,7 +277,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
         public string SelectedSfDgTextCell { get; private set; }
         private void VGR_GRID_CurrentCellActivated(object sender, Syncfusion.UI.Xaml.Grid.CurrentCellActivatedEventArgs e)
         {
-            UpdateCurrentCellValue(e.CurrentRowColumnIndex);
+            if (e?.CurrentRowColumnIndex == null) return; UpdateCurrentCellValue(e.CurrentRowColumnIndex);
         }
         private void VGR_GRID_SelectionChanged(object sender, GridSelectionChangedEventArgs e)
         {
@@ -304,7 +304,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             if (recordIndex < 0) return;
 
             var record = this.VGR_GRID.View.Records.GetItemAt(recordIndex);
-            CurrentCellValue = record?.GetType()?.GetProperty(mappingName)?.GetValue(record)?.ToString();
+            CurrentCellValue = record?.GetType()?.GetProperty(mappingName ?? string.Empty)?.GetValue(record)?.ToString();
         }
         private void FilterBySelection_Click(object sender, RoutedEventArgs e)
         {

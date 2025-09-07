@@ -21,6 +21,7 @@ using Prg_UI.Wins.WinMenus.WinDEFAULT;
 using Prg_UI.Wins.WinSetting;
 using Stimulsoft.Base;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -45,6 +46,7 @@ namespace Prg_UI.Wins
         System.Windows.Threading.DispatcherTimer MyTimer;
         bool NowIsReady = false;
         public bool Krbri_IsFocused { get; private set; } = false;
+        public List<SALA_DTL> USRLST { get; private set; }
 
         private Window GetWindowBasedOnSection(string sectionName)
         {
@@ -266,12 +268,12 @@ namespace Prg_UI.Wins
             InitializeComponent();
             this.Topmost = true;
         }
-
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             //async
             //await
             //CL_PRC_LOADER.StartPreloader();
+            FILL_ALL_COMBOBOXES();
 
             WasUser();
 
@@ -320,8 +322,9 @@ namespace Prg_UI.Wins
             //this.Show(); //Here for debug comment
             this.Activate();
 
-            Krbri.SelectAll();
-            Krbri.Focus();
+            CmbUsers.Focus();
+
+            CL_LMethods.SetTabIndexes(CmbUsers, Rmzo, Greet);
 
             #region VERY_IMPORTANT_IT_IS_TEMPRORY
             //Yazdsepar
@@ -356,22 +359,25 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 116; Baseknow.UUSER = "Mr.Salmani";
 
             Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
+            //Baseknow.USERCOD = 112; Baseknow.UUSER = "Mr.Tashakori";
 
             CL_Generaly.SHIFT_OF_USER = 1;
             CL_Generaly.VAHED_OF_USER = 1;
             Baseknow.UGRP = "1";
 
-            new SQLSTATEFORM().Show();
+            //new HEAD_LST_ENTEGHAL_WIN().Show();
+
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID_OTHER_WIN, this);
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this );
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this );
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_VISIT_ROUTE_FORM, this);
 
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this, 245d);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this, 245d);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAV_OTHER_WIN, this);
 
@@ -447,6 +453,19 @@ namespace Prg_UI.Wins
                     CL_LMethods.SendKey_US(Key.Tab);
                 }
             }
+        }
+
+        private void FILL_ALL_COMBOBOXES()
+        {
+            USRLST = dbms.DoGetDataSQL<SALA_DTL>("SELECT IDD,SAL_NAME,PSAL_NAME,GRSAL FROM SALA_DTL WHERE ENABL = 0 ORDER BY SAL_NAME").ToList();
+            foreach (var item in USRLST)
+            {
+                item.SAL_NAME = CL_HESABDARI.DECODEUN(item.SAL_NAME.ToString()).FixPersianChars();
+                item.PSAL_NAME = CL_HESABDARI.DECODEPS(item.PSAL_NAME.ToString()).FixPersianChars();
+            }
+
+            CmbUsers.ItemsSource = USRLST;
+
         }
 
         private void Greet_GotFocus(object sender, RoutedEventArgs e)
@@ -530,13 +549,6 @@ namespace Prg_UI.Wins
                     });
                 }
                 byte incorPassEnt = 0;
-
-                var USRLST = dbms.DoGetDataSQL<SALA_DTL>("SELECT * FROM SALA_DTL WHERE ENABL = 0 ORDER BY SAL_NAME").ToList();
-                foreach (var item in USRLST)
-                {
-                    item.SAL_NAME = CL_HESABDARI.DECODEUN(item.SAL_NAME.ToString()).FixPersianChars();
-                    item.PSAL_NAME = CL_HESABDARI.DECODEPS(item.PSAL_NAME.ToString()).FixPersianChars();
-                }
 
                 var USF = USRLST.Where(x => x.SAL_NAME.Equals(Krbri.Text.FixPersianChars())).FirstOrDefault();
                 if (USF is null)
@@ -742,6 +754,18 @@ namespace Prg_UI.Wins
         {
             MyTimer?.Stop();
             MyTimer = null;
+        }
+
+        private void CmbUsers_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //if (CmbUsers.SelectedItem is SALA_DTL u)
+            //{
+            //    // مقداردهی TextBox نام کاربری
+            //    Krbri.Text = u.SAL_NAME;
+            //    // تمرکز روی رمز
+            //    if (Rmzo.Visibility == Visibility.Visible) Rmzo.Focus();
+            //    else if (SecoRmzo.Visibility == Visibility.Visible) SecoRmzo.Focus();
+            //}
         }
     }
 }

@@ -104,20 +104,28 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
             I_AM_WIN_F_MENU_KHFR = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
-
+        
             switch (OpenArgs)
             {
                 //case "F":
                 case "FROOSHDAY":
                     WIN_HEADER_NAME.Content = "خلاصه فروش روزانه به تفكيك اشخاص";
+                    CL_HESABDARI.SETSECURITY(this.GetType().Name, "R_FROOSH_DAYLY", new WindowInteropHelper(this).Handle, this.GetType().Name);
                     break;
 
                 //case "K":
                 case "FKHAREDAY":
                     WIN_HEADER_NAME.Content = "خلاصه خـريد روزانه به تفكيك اشخاص";
+                    CL_HESABDARI.SETSECURITY(this.GetType().Name, "R_KHARED_DAYLY", new WindowInteropHelper(this).Handle, this.GetType().Name);
                     break;
 
                 default: break;
+            }
+
+            if (!this.IsLoaded)
+            {
+                this.Close();
+                return;
             }
 
             FILL_ALL_COMBOBOXES();
@@ -169,10 +177,11 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
         private void BTN_GO_Click(object sender, RoutedEventArgs e)
         {
             string sql;
-            string mmoin = "%";
+            //string mmoin = "%";
+            string mmoin = HMOIN.SelectedValue?.ToString() ?? "%";
 
             string dt1 = DT1.Text.ToRawTarikh();
-            string dt2 = DT1.Text.ToRawTarikh();
+            string dt2 = DT2.Text.ToRawTarikh();
             if (!string.IsNullOrEmpty(dt1) || !string.IsNullOrEmpty(dt2))
             {
                 if (!Tarikh.IsValidedDate(dt1) || !Tarikh.IsValidedDate(dt2))
@@ -284,6 +293,12 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                         if (kindp == 1)
                         {
                             //OpenReport("INVOICE_FROOSH_3GRP3");
+
+                            if (HMOIN.SelectedValue is null)
+                            {
+                                universControl.PopNotifyShow("لطفا یک حساب را انتخاب کنید.", Pop1, Pop1Text1, Pop_Border1);
+                                return;
+                            }
 
                             var report = new StiReport();
                             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.INVOICE_FROOSH_3GRP3.mrt");

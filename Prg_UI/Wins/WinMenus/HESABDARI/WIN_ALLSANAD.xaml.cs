@@ -148,7 +148,7 @@ namespace Wins.WinMenus.HESABDARI
         private RowColumnIndex CurrentCellIndex;
         private void SYNCFUSION_DG_CurrentCellActivated(object sender, Syncfusion.UI.Xaml.Grid.CurrentCellActivatedEventArgs e) // Event handler for when a cell is activated in the data grid
         {
-            UpdateCurrentCellValue(e.CurrentRowColumnIndex);
+            if (e?.CurrentRowColumnIndex == null) return; UpdateCurrentCellValue(e.CurrentRowColumnIndex);
         }
         private void SYNCFUSION_DG_SelectionChanged(object sender, GridSelectionChangedEventArgs e) // Event handler for when the selection changes in the data grid
         {
@@ -176,12 +176,12 @@ namespace Wins.WinMenus.HESABDARI
             int columnIndex = this.SYNCFUSION_DG.ResolveToGridVisibleColumnIndex(rowColumnIndex.ColumnIndex);
             if (columnIndex < 0) return;
 
-            var mappingName = this.SYNCFUSION_DG.Columns[columnIndex].MappingName;
+            var mappingName = this.SYNCFUSION_DG.Columns[columnIndex].MappingName; if (string.IsNullOrEmpty(mappingName)) return;
             var recordIndex = this.SYNCFUSION_DG.ResolveToRecordIndex(rowIndex);
             if (recordIndex < 0) return;
 
             var record = this.SYNCFUSION_DG.View.Records.GetItemAt(recordIndex);
-            CurrentCellValue = record?.GetType()?.GetProperty(mappingName)?.GetValue(record)?.ToString();
+            CurrentCellValue = record?.GetType()?.GetProperty(mappingName ?? string.Empty)?.GetValue(record)?.ToString();
         }
         private void FilterBySelection_Click(object sender, RoutedEventArgs e)
         {

@@ -148,7 +148,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 //DoCmd.RunCommand(acCmdSaveRecord);
                 INSERTVAZN();
                 //this.OTHER_DTL_SUB_SUB.Requery();
-                CAMIUN.Focus();
+                //CAMIUN.Focus();
             }
         }
         void DRIVER_AfterUpdate()
@@ -173,7 +173,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 }
                 //DoCmd.RunCommand(acCmdSaveRecord);
                 ReGetData();
-                DRIVER_MOB.Focus();
+                //DRIVER_MOB.Focus();
             }
         }
         /// <summary>
@@ -719,11 +719,18 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         {
             try
             {
-                if (IsSavedHeader_OTHER_DTL() && OTHER_DTL_SUB_SUB?.ItemsSource != null) //Succeed Saved Header
+                if (IsSavedHeader_OTHER_DTL()) //Succeed Saved Header
                 {
-                    Save_OTHERDTL_SUB_Detail();
+                    if (OTHER_DTL_DATA.Any())
+                    {
+                        Save_OTHERDTL_SUB_Detail();
+                    }
                     G_Flag = 1;
                     universControl.PopNotifyShow(".مقادیر ذخیره شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+                }
+                else
+                {
+                    universControl.PopNotifyShowUp(".مقادیر ذخیره شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
                 }
             }
             catch (Exception ex)
@@ -737,11 +744,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
         private void DRIVER_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            DRIVER_AfterUpdate();
+       
         }
         private void CAMIUN_NUM_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            CAMIUN_NUM_AfterUpdate();
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -1034,6 +1040,23 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             {
                 universControl.PopNotifyShow("ابتدا مشخصات راننده و كاميون را وارد كنيد ", Pop1, Pop1Text1, Pop_Border1);
             }
+        }
+
+        private void DRIVER_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (DRIVER.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
+            TextBox CUTSNO_TEX = (TextBox)DRIVER.Template.FindName("PART_EditableTextBox", DRIVER);
+            if (CUTSNO_TEX is null)
+            {
+                return;
+            }
+
+            DRIVER_AfterUpdate();
+        }
+
+        private void CAMIUN_NUM_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            CAMIUN_NUM_AfterUpdate();
         }
     }
 }

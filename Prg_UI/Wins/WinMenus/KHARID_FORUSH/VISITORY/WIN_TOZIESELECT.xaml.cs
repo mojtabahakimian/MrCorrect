@@ -219,7 +219,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 return;
             }
 
-            UpdateCurrentCellValue(e.CurrentRowColumnIndex);
+            if (e?.CurrentRowColumnIndex == null) return; UpdateCurrentCellValue(e.CurrentRowColumnIndex);
         }
         private void SYNCFUSION_DG_SelectionChanged(object sender, GridSelectionChangedEventArgs e) // Event handler for when the selection changes in the data grid
         {
@@ -242,7 +242,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             int columnIndex = this.SYNCFUSION_DG.ResolveToGridVisibleColumnIndex(rowColumnIndex.ColumnIndex);
             if (columnIndex < 0) return;
 
-            var mappingName = this.SYNCFUSION_DG.Columns[columnIndex].MappingName;
+            var mappingName = this.SYNCFUSION_DG.Columns[columnIndex].MappingName; if (string.IsNullOrEmpty(mappingName)) return;
             var recordIndex = this.SYNCFUSION_DG.ResolveToRecordIndex(rowIndex);
             if (recordIndex < 0) return;
 
@@ -273,7 +273,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             }
 
             //CurrentCellValue = property.GetValue(record)?.ToString();
-            CurrentCellValue = record?.GetType()?.GetProperty(mappingName)?.GetValue(record)?.ToString();
+            CurrentCellValue = record?.GetType()?.GetProperty(mappingName ?? string.Empty)?.GetValue(record)?.ToString();
         }
         private void FilterBySelection_Click(object sender, RoutedEventArgs e)
         {
