@@ -344,25 +344,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                 case "KLIST":
                     //OpenReport("LIST_INVOICE_KHARED");
 
-                    var report = new StiReport();
-                    var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.LIST_INVOICE_KHARED.mrt");
-                    report.Load(pathreport);
-                    string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
-                    report.Dictionary.Databases.Clear();
-                    report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
-
-                    report["FDATE_PARM"] = DT1.Text.ToRawTarikh();
-                    report["EDATE_PARM"] = DT2.Text.ToRawTarikh();
-                    report["CUST_PARM"] = HMOIN.SelectedValue.ToString();
-
-                    (report.GetComponentByName("SAL_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
-
-                    //((StiSqlSource)report.Dictionary.DataSources["q_khreed_dayly"]).CommandTimeout = 300;
-
-                    //report.Render();
-                    //report.Show();
-
-                    new Rpts.WINRPT(report, WIN_HEADER_NAME.Content.ToStringNullSafe()).Show();
+                    Open_Report();
                     break;
 
                 case "KHFR":
@@ -392,6 +374,29 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
                 CL_LMethods.SendKey_US(Key.Tab);
             }
+        }
+
+        private void Open_Report()
+        {
+            var report = new StiReport();
+            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.LIST_INVOICE_KHARED.mrt");
+            report.Load(pathreport);
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            report.Dictionary.Databases.Clear();
+            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
+
+            report["FDATE_PARM"] = DT1.Text.ToRawTarikh();
+            report["EDATE_PARM"] = DT2.Text.ToRawTarikh();
+            report["CUST_PARM"] = HMOIN.SelectedValue.ToString();
+
+            (report.GetComponentByName("SAL_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
+
+            //((StiSqlSource)report.Dictionary.DataSources["q_khreed_dayly"]).CommandTimeout = 300;
+
+            //report.Render();
+            //report.Show();
+
+            new Rpts.WINRPT(report, WIN_HEADER_NAME.Content.ToStringNullSafe()).Show();
         }
     }
 }
