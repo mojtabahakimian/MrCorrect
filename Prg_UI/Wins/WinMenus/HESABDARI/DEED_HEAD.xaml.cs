@@ -2708,25 +2708,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         {
             if (Child14.IsReadOnly == false)
             {
-                return;
-                var grid = sender as DataGrid;
-                if (grid != null && grid?.CurrentCell != null && grid.CurrentCell.Column != null)
-                {
-                    var cellContent = grid.CurrentCell.Column.GetCellContent(grid.CurrentCell.Item);
-                    string _CELL_VALUE_ = null;
-                    if (cellContent is TextBlock textBlock) _CELL_VALUE_ = textBlock.Text;
-                    else if (cellContent is TextBox textBox) _CELL_VALUE_ = textBox.Text;
-
-                    var CurrentData = Child14.Items[Child14.SelectedIndex] as VISITOR_DTL;
-
-                    if (grid.CurrentCell.Column.SortMemberPath == "HES")
-                    {
-                        if (CURRENT_ITMES_ROW?.HES is not null)
-                        {
-                            new F_MENU_KOL_MOIN_TAFZIL(CURRENT_ITMES_ROW.HES.ToString());
-                        }
-                    }
-                }
+              
             }
         }
         private void Child14_PreviewKeyDown(object sender, KeyEventArgs e)

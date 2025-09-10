@@ -1052,10 +1052,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
         }
         private void UNVDER_PERSONEL_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (NowIsReady && UNVDER_PERSONEL.SelectedIndex > -1)
-            {
-                DoLoadKartabl();
-            }
+           
         }
 
         private void tASKSDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1523,6 +1520,15 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
 
 
                 AutoRefreshToggle.IsChecked = false;
+            }
+        }
+
+        private void UNVDER_PERSONEL_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (UNVDER_PERSONEL.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
+            if (NowIsReady && UNVDER_PERSONEL.SelectedIndex > -1)
+            {
+                DoLoadKartabl();
             }
         }
     }

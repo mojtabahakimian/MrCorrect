@@ -2,6 +2,7 @@
 using MaterialDesignThemes.Wpf;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
+using Prg_UI.Functions;
 using Syncfusion.Data;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
@@ -68,6 +69,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
         public ObservableCollection<PGET_JOTEJU> PGET_JOTEJU_DATA { get; set; } = new ObservableCollection<PGET_JOTEJU>();
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            var inv = CL_LMethods.GetRestrictedSqlQueryWithDetails(0, default, true); // HEAD_LST-oriented
+            var pgetWhere = inv.WhereClause.Replace("dbo.HEAD_LST.", "dbo.PGET_HED.").Replace("DATE_N", "DATE");
+
             PGET_JOTEJU_DATA?.Clear();
             var MasterHead = dbms.DoGetDataSQL<PGET_JOTEJU>(@$"SELECT        dbo.PGET_LST.ID, dbo.PGET_LST.DATE, dbo.PGET_LST.RADIF, dbo.PGET_LST.NO_AM, dbo.PGET_LST.NAHVA, dbo.PGET_LST.FHES_K, dbo.PGET_LST.FHES_M, dbo.PGET_LST.THES_K, dbo.PGET_LST.THES_M, 
                                                                                         dbo.PGET_LST.SHARH, dbo.PGET_LST.MABL, dbo.PGET_LST.N_SERI, dbo.PGET_LST.BANK, ISNULL(TOTA_HES_1.NAME, N' ') + N'-' + ISNULL(DETA_HES_1.NAME, N' ') + N'-' + ISNULL(TDETA_HES_1.NAME, N' ') AS FHES, 
@@ -85,12 +89,21 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                                                                         TDETA_HES_1.N_KOL = dbo.PGET_LST.THES_K INNER JOIN
                                                                                         dbo.PGET_HED ON dbo.PGET_LST.ID = dbo.PGET_HED.ID AND dbo.PGET_LST.DATE = dbo.PGET_HED.DATE LEFT OUTER JOIN
                                                                                         dbo.PAY_GETP ON dbo.PGET_LST.N_SERI = dbo.PAY_GETP.N_SERI AND dbo.PGET_LST.BANK = dbo.PAY_GETP.BANK LEFT OUTER JOIN
-                                                                                        dbo.PAY_GETD ON dbo.PGET_LST.N_SERI = dbo.PAY_GETD.N_SERI AND dbo.PGET_LST.BANK = dbo.PAY_GETD.BANK").ToList();
+                                                                                        dbo.PAY_GETD ON dbo.PGET_LST.N_SERI = dbo.PAY_GETD.N_SERI AND dbo.PGET_LST.BANK = dbo.PAY_GETD.BANK {pgetWhere}").ToList();
             foreach (var item in MasterHead)
             {
                 PGET_JOTEJU_DATA.Add(item);
             }
 
+            if (inv.RestrictionMessages.Any())
+            {
+                LBL_STATE.Content = "دسترسی شما با این شرایط محدود شده است: " + string.Join(", ", inv.RestrictionMessages);
+                LBL_STATE.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                LBL_STATE.Visibility = Visibility.Collapsed;
+            }
         }
 
         private readonly FilterService<PGET_JOTEJU> filterService = new FilterService<PGET_JOTEJU>();

@@ -98,7 +98,9 @@
         </Popup>
         <!--HEADER↑-->
 
-        <syncfusion:SfDataGrid x:Name="PGET_JOTEJU_DATA_SUB" ContextMenu="{StaticResource DataGridContextMenu}"
+        <DockPanel Margin="10,45,10,45" LastChildFill="True">
+            <Label x:Name="LBL_STATE" DockPanel.Dock="Top" Content="" Margin="5" Visibility="Collapsed" FlowDirection="RightToLeft"/>
+            <syncfusion:SfDataGrid x:Name="PGET_JOTEJU_DATA_SUB" ContextMenu="{StaticResource DataGridContextMenu}"
                    ItemsSource="{Binding PGET_JOTEJU_DATA}" 
                    AutoGenerateColumns="False"
                    EnableDataVirtualization="True"
@@ -118,54 +120,56 @@
                    HeaderStyle="{StaticResource KDGHeader}"
                    BorderBrush="{StaticResource GENERAL_Grlicom}"
                    CurrentCellActivated="PGET_JOTEJU_DATA_SUB_CurrentCellActivated"
-                   Margin="10,49,10,10" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="PGET_JOTEJU_DATA_SUB_SelectionChanged">
+                   AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="PGET_JOTEJU_DATA_SUB_SelectionChanged">
 
-            <syncfusion:SfDataGrid.Columns>
-                <syncfusion:GridTextColumn HeaderText="شماره دریافت پرداخت" MappingName="ID" />
+                <syncfusion:SfDataGrid.Columns>
+                    <syncfusion:GridTextColumn HeaderText="شماره دریافت پرداخت" MappingName="ID" />
 
-                <syncfusion:GridTextColumn MappingName="DATE" HeaderText="تاریخ">
-                    <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="DATE" StringFormat="####/##/##" />
-                    </syncfusion:GridTextColumn.DisplayBinding>
-                </syncfusion:GridTextColumn>
-                <syncfusion:GridTextColumn HeaderText="ردیف" MappingName="RADIF" />
-                <syncfusion:GridTextColumn HeaderText="نوع عملیات" MappingName="NO_AM" />
-                <syncfusion:GridTextColumn HeaderText="نحوه" MappingName="NAHVA" />
-                <syncfusion:GridTextColumn MappingName="dates" HeaderText="تاریخ سررسید">
-                    <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="dates" StringFormat="####/##/##" />
-                    </syncfusion:GridTextColumn.DisplayBinding>
-                </syncfusion:GridTextColumn>
+                    <syncfusion:GridTextColumn MappingName="DATE" HeaderText="تاریخ">
+                        <syncfusion:GridTextColumn.DisplayBinding>
+                            <Binding Path="DATE" StringFormat="####/##/##" />
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
+                    <syncfusion:GridTextColumn HeaderText="ردیف" MappingName="RADIF" />
+                    <syncfusion:GridTextColumn HeaderText="نوع عملیات" MappingName="NO_AM" />
+                    <syncfusion:GridTextColumn HeaderText="نحوه" MappingName="NAHVA" />
+                    <syncfusion:GridTextColumn MappingName="dates" HeaderText="تاریخ سررسید">
+                        <syncfusion:GridTextColumn.DisplayBinding>
+                            <Binding Path="dates" StringFormat="####/##/##" />
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                <syncfusion:GridTextColumn MappingName="MABL" HeaderText="مبلغ">
-                    <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="MABL"  StringFormat="{}{0:#,0}" /> 
-                    </syncfusion:GridTextColumn.DisplayBinding>
-                </syncfusion:GridTextColumn>
+                    <syncfusion:GridTextColumn MappingName="MABL" HeaderText="مبلغ">
+                        <syncfusion:GridTextColumn.DisplayBinding>
+                            <Binding Path="MABL"  StringFormat="{}{0:#,0}" />
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                <syncfusion:GridTextColumn HeaderText="به کل" MappingName="THES_K" />
-                <syncfusion:GridTextColumn HeaderText="به معین" MappingName="THES_M" />
-                <syncfusion:GridTextColumn HeaderText="به تفضیلی" MappingName="THES_T" />
-                <syncfusion:GridTextColumn HeaderText="از کل" MappingName="FHES_K" />
-                <syncfusion:GridTextColumn HeaderText="از معین" MappingName="FHES_M" />
-                <syncfusion:GridTextColumn HeaderText="ازتفضيلی" MappingName="FHES_T" />
-                <syncfusion:GridTextColumn HeaderText="ازحساب" MappingName="FHES" />
-                <syncfusion:GridTextColumn HeaderText="به حساب" MappingName="THES" />
-                <syncfusion:GridTextColumn HeaderText="شرح" MappingName="SHARH" />
-                <syncfusion:GridTextColumn HeaderText="شماره سریال" MappingName="N_SERI" />
-                <syncfusion:GridTextColumn HeaderText="بانک" MappingName="BANK" />
-                <syncfusion:GridTextColumn HeaderText="از تفضیلی 2" MappingName="FHES_T2" />
-                <syncfusion:GridTextColumn HeaderText="به تفضیلی 2" MappingName="THES_T2" />
-                <syncfusion:GridTextColumn HeaderText="از تفضیلی 3" MappingName="FHES_T3" />
-                <syncfusion:GridTextColumn HeaderText="به تفضیلی 3" MappingName="THES_T3" />
-                <syncfusion:GridTextColumn HeaderText="از تفضیلی 4" MappingName="FHES_T4" />
-                <syncfusion:GridTextColumn HeaderText="به تفضیلی 4" MappingName="THES_T4" />
-                <syncfusion:GridTextColumn HeaderText="از حساب" MappingName="Expr1" />
-                <syncfusion:GridTextColumn HeaderText="به حساب" MappingName="Expr2" />
-                <syncfusion:GridTextColumn HeaderText="کاربر" MappingName="USER_NAME" Width="200" />
+                    <syncfusion:GridTextColumn HeaderText="به کل" MappingName="THES_K" />
+                    <syncfusion:GridTextColumn HeaderText="به معین" MappingName="THES_M" />
+                    <syncfusion:GridTextColumn HeaderText="به تفضیلی" MappingName="THES_T" />
+                    <syncfusion:GridTextColumn HeaderText="از کل" MappingName="FHES_K" />
+                    <syncfusion:GridTextColumn HeaderText="از معین" MappingName="FHES_M" />
+                    <syncfusion:GridTextColumn HeaderText="ازتفضيلی" MappingName="FHES_T" />
+                    <syncfusion:GridTextColumn HeaderText="ازحساب" MappingName="FHES" />
+                    <syncfusion:GridTextColumn HeaderText="به حساب" MappingName="THES" />
+                    <syncfusion:GridTextColumn HeaderText="شرح" MappingName="SHARH" />
+                    <syncfusion:GridTextColumn HeaderText="شماره سریال" MappingName="N_SERI" />
+                    <syncfusion:GridTextColumn HeaderText="بانک" MappingName="BANK" />
+                    <syncfusion:GridTextColumn HeaderText="از تفضیلی 2" MappingName="FHES_T2" />
+                    <syncfusion:GridTextColumn HeaderText="به تفضیلی 2" MappingName="THES_T2" />
+                    <syncfusion:GridTextColumn HeaderText="از تفضیلی 3" MappingName="FHES_T3" />
+                    <syncfusion:GridTextColumn HeaderText="به تفضیلی 3" MappingName="THES_T3" />
+                    <syncfusion:GridTextColumn HeaderText="از تفضیلی 4" MappingName="FHES_T4" />
+                    <syncfusion:GridTextColumn HeaderText="به تفضیلی 4" MappingName="THES_T4" />
+                    <syncfusion:GridTextColumn HeaderText="از حساب" MappingName="Expr1" />
+                    <syncfusion:GridTextColumn HeaderText="به حساب" MappingName="Expr2" />
+                    <syncfusion:GridTextColumn HeaderText="کاربر" MappingName="USER_NAME" Width="200" />
 
-            </syncfusion:SfDataGrid.Columns>
-        </syncfusion:SfDataGrid>
+                </syncfusion:SfDataGrid.Columns>
+            </syncfusion:SfDataGrid>
+
+        </DockPanel>
 
     </Grid>
 </Window>

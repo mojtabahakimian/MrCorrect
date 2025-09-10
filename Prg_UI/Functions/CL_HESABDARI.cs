@@ -8691,15 +8691,41 @@ namespace Prg_Proccessy.FUNCTIONS
             return BLOCKEDRet;
         }
 
-        public static long MGETKOL(string SHES)
+        //public static long MGETKOL(string SHES)
+        //{
+        //    long MGETKOLRet = default;
+        //    byte i;
+        //    i = 1;
+        //    while (Strings.Mid(SHES, i, 1) != "-" && i <= Strings.Len(SHES))
+        //        i = (byte)(i + 1);
+        //    MGETKOLRet = Conversions.ToLong(Strings.Left(SHES, i - 1));
+        //    return MGETKOLRet;
+        //}
+        public static long MGETKOL(string shes)
         {
-            long MGETKOLRet = default;
-            byte i;
-            i = 1;
-            while (Strings.Mid(SHES, i, 1) != "-" && i <= Strings.Len(SHES))
-                i = (byte)(i + 1);
-            MGETKOLRet = Conversions.ToLong(Strings.Left(SHES, i - 1));
-            return MGETKOLRet;
+            if (string.IsNullOrWhiteSpace(shes)) return 0;
+
+            shes = CL_LMethods.NormalizeDigits(shes.Trim());
+
+            // برو تا اولین رقم
+            int start = 0;
+            while (start < shes.Length && !char.IsDigit(shes[start]))
+                start++;
+            if (start >= shes.Length) return 0;
+
+            // عددِ قبل از اولین '-' را جدا کن
+            int dash = shes.IndexOf('-', start);
+            string token = dash >= 0 ? shes.Substring(start, dash - start)
+                                     : shes.Substring(start);
+
+            // فقط رقم‌ها را نگه دار (اگر کاراکتر غیرعددی قاطی باشد)
+            var digitsOnly = new StringBuilder(token.Length);
+            foreach (var ch in token)
+                if (char.IsDigit(ch)) digitsOnly.Append(ch);
+
+            return long.TryParse(digitsOnly.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var val)
+                ? val
+                : 0;
         }
         public static long MGETMOIN(string SHES)
         {

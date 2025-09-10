@@ -1879,19 +1879,18 @@ namespace Functions
 
                 case 5:
                 case 34:
-                    var _N_S_KHAZANEH_ = dbms.DoGetDataSQL<double?>($"SELECT ID FROM dbo.PGET_HED WHERE N_S = {_NUM_}").FirstOrDefault();
-                    if (_N_S_KHAZANEH_ != null)
+                    double _KHAZANEH_ = Convert.ToDouble(_NUM_);
+                    var THE_KHAZANEH = dbms.DoGetDataSQL<double?>($"SELECT ID FROM dbo.PGET_HED WHERE ID = {_NUM_}").FirstOrDefault();
+                    if (THE_KHAZANEH != null)
                     {
-                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, Thewindowthis, _N_S_KHAZANEH_, _isCalledFromAutomasion_);
+                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, Thewindowthis, _KHAZANEH_, _isCalledFromAutomasion_);
                     }
                     else
                     {
-                        double _KHAZANEH_ = Convert.ToDouble(_NUM_);
-
-                        _N_S_KHAZANEH_ = dbms.DoGetDataSQL<double?>($"SELECT ID FROM dbo.PGET_HED WHERE ID = {_NUM_}").FirstOrDefault();
-                        if (_N_S_KHAZANEH_ != null)
+                        THE_KHAZANEH = dbms.DoGetDataSQL<double?>($"SELECT ID FROM dbo.PGET_HED WHERE N_S = {_NUM_}").FirstOrDefault();
+                        if (THE_KHAZANEH != null)
                         {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, Thewindowthis, _KHAZANEH_, _isCalledFromAutomasion_);
+                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, Thewindowthis, THE_KHAZANEH, _isCalledFromAutomasion_);
                         }
                     }
                     break;

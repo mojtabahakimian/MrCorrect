@@ -29,6 +29,7 @@ using Prg_UI.Functions.SqlTools;
 using System.Windows.Media;
 using Syncfusion.UI.Xaml.Grid.Helpers;
 using Microsoft.Data.SqlClient;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
 {
@@ -179,10 +180,49 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             SFG_DATA?.Clear();
 
-            string sqlAll = @"SELECT * FROM dbo.SQLSTATE";
-            string sqlFiltered = sqlAll + @" WHERE USER_NAME = @U OR LETOTHER = 1";
+            const string sqlSub = @"SELECT sd.SAL_NAME  
+                                    FROM dbo.CHARTSAZMANI cs
+                                        LEFT JOIN SALA_DTL sd
+                                            ON cs.SUBUSERCO = sd.IDD
+                                        LEFT JOIN USER_PERSONEL_ORDER uo
+                                            ON cs.SUBUSERCO = uo.PERSONEL_ID
+                                               AND uo.USER_ID = @UserId WHERE cs.USERCO = @UserId";
+            List<string> MyAllowedUsers = dbms.DoGetDataSQL<string>(sqlSub, new { UserId = Baseknow.USERCOD }).ToList();
+            for (int i = 0; i < MyAllowedUsers.Count; i++)
+            {
+                MyAllowedUsers[i] = CL_HESABDARI.DECODEUN(MyAllowedUsers[i]);
+                MyAllowedUsers[i] = CL_LMethods.NormalizeForMatching(MyAllowedUsers[i]);
+            } // Decrypte Username and Normalize
 
-            var MasterHead = dbms.DoGetDataSQL<SQLSTATE>(sqlFiltered, new { U = Baseknow.UUSER }).ToList();
+            //const string sqlFiltered = @"SELECT IDD, SQLST, TITEL, USER_NAME, LETOTHER, CR_DATE, CRT, UID FROM dbo.SQLSTATE WHERE (USER_NAME IN @Users)";
+
+            const string sqlFiltered = @"
+                 SELECT IDD, SQLST, TITEL, USER_NAME, LETOTHER, CR_DATE, CRT, UID
+                 FROM dbo.SQLSTATE
+                 WHERE LETOTHER = 1 OR
+                 (
+                     REPLACE(
+                     REPLACE(
+                     REPLACE(
+                     REPLACE(
+                     REPLACE(
+                     REPLACE(
+                     REPLACE(
+                         LTRIM(RTRIM(USER_NAME)),
+                         NCHAR(0x00A0), N' '         -- NBSP -> space
+                     ),  NCHAR(0x202F), N' '         -- NNBSP -> space
+                     ),  NCHAR(0x2007), N' '         -- FIGURE SPACE -> space
+                     ),  NCHAR(0x0640), N''          -- Tatweel
+                     ),  NCHAR(0x0649), NCHAR(0x06CC) -- ى -> ی
+                     ),  NCHAR(0x064A), NCHAR(0x06CC) -- ي -> ی
+                     ),  NCHAR(0x0643), NCHAR(0x06A9) -- ك -> ک
+                     )
+                     COLLATE Arabic_100_CI_AI
+                     IN @Users
+                 )";
+
+            //حالا کد سی شارپی بنویس که فقط به کاربرانی که دسترسی دارد ببیند
+            var MasterHead = dbms.DoGetDataSQL<SQLSTATE>(sqlFiltered, new { Users = MyAllowedUsers.ToArray() }).ToList();
             foreach (var item in MasterHead)
             {
                 SFG_DATA?.Add(item);
