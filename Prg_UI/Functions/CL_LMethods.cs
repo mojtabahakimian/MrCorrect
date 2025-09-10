@@ -2095,10 +2095,15 @@ namespace Prg_UI.Functions
         #region MyRegion
         public class RestrictionInfo
         {
-            public string WhereClause { get; set; }
+            private string _whereClause = " WHERE ";
+            public string WhereClause
+            {
+                get => _whereClause ?? " WHERE ";
+                set => _whereClause = value ?? " WHERE ";
+            }
             public List<string> RestrictionMessages { get; set; } = new List<string>();
         }
-        private static RestrictionInfo GenerateRestrictedSqlQueryInfo(byte TAGCODE, string DEF_VALUE = " WHERE ")
+        private static RestrictionInfo GenerateRestrictedSqlQueryInfo(byte TAGCODE, string DEF_VALUE = " WHERE ", bool isOthery = false)
         {
             var info = new RestrictionInfo
             {
@@ -2133,7 +2138,7 @@ namespace Prg_UI.Functions
 
             if (!CanSeeAllInvoice) //به همه فاکتور ها دسترسی نداره!
             {
-                if (IsDateLimited) //تاریخ قابل برگشت اعمال شود همراه با محدود به کاربری خودش
+                if (!isOthery && IsDateLimited) //تاریخ قابل برگشت اعمال شود همراه با محدود به کاربری خودش
                 {
                     info.RestrictionMessages.Add("محدود به تاریخ برگشت فاکتور");
                     var sqlQuery = $"SELECT TOP 100 PERCENT DATE_N FROM dbo.HEAD_LST WHERE (TAG = {TAGCODE}) AND (DEPATMAN = {CL_Generaly.VAHED_OF_USER}) AND (USER_NAME = N'{CL_HESABDARI.UCurrentUser()}') GROUP BY DATE_N ORDER BY DATE_N DESC";
@@ -2207,9 +2212,9 @@ namespace Prg_UI.Functions
         {
             return GenerateRestrictedSqlQueryInfo(TAGCODE, DEF_VALUE).WhereClause;
         }
-        public static RestrictionInfo GetRestrictedSqlQueryWithDetails(byte TAGCODE, string DEF_VALUE = " WHERE ")
+        public static RestrictionInfo GetRestrictedSqlQueryWithDetails(byte TAGCODE, string DEF_VALUE = " WHERE ", bool isOthery = false)
         {
-            return GenerateRestrictedSqlQueryInfo(TAGCODE, DEF_VALUE);
+            return GenerateRestrictedSqlQueryInfo(TAGCODE, DEF_VALUE, isOthery);
         }
         #endregion
 
@@ -2505,12 +2510,64 @@ namespace Prg_UI.Functions
             }
         }
         #region ArabicPersianStringComparer
-        private const string ArabicYeh = "\u064A";
-        private const string PersianYeh = "\u06CC";
-        private const string ArabicKaf = "\u0643";
-        private const string PersianKaf = "\u06A9";
-        private const string ArabicTehMarbuta = "\u0629";
-        private const string PersianHeh = "\u0647";
+        private const char ArabicYeh = '\u064A'; // ي
+        private const char PersianYeh = '\u06CC'; // ی
+        private const char ArabicAlefMaksura = '\u0649'; // ى
+        private const char ArabicKaf = '\u0643'; // ك
+        private const char PersianKaf = '\u06A9'; // ک
+        private const char ArabicTehMarbuta = '\u0629'; // ة
+        private const char PersianHeh = '\u0647'; // ه
+        private const char Tatweel = '\u0640'; // ـ (کشیده)
+        private static readonly Regex CombiningMarks = new(@"\p{Mn}", RegexOptions.Compiled);
+        private static readonly Regex MultiSpaces = new(@"\s{2,}", RegexOptions.Compiled);
+
+        public static string NormalizeForMatching(this string input)
+        {
+            if (string.IsNullOrEmpty(input)) return input;
+
+            string s = input.Trim();
+            s = s
+                .Replace('\u064A', '\u06CC') // ي -> ی
+                .Replace('\u0649', '\u06CC') // ى -> ی
+                .Replace('\u0643', '\u06A9') // ك -> ک
+                .Replace('\u0629', '\u0647') // ة -> ه
+                .Replace("\u0640", "");      // حذف Tatweel
+
+            s = s.Replace('\u00A0', ' ').Replace('\u202F', ' ').Replace('\u2007', ' ');
+            s = MultiSpaces.Replace(s, " ");
+
+            return s;
+        }
+        public static string NormalizeArabicPersian(this string input)
+        {
+            if (string.IsNullOrEmpty(input)) return input;
+
+            string s = input.Trim().Normalize(NormalizationForm.FormKC);
+
+            s = s
+                .Replace('\u064A', '\u06CC') // ي -> ی
+                .Replace('\u0649', '\u06CC') // ى -> ی
+                .Replace('\u0643', '\u06A9') // ك -> ک
+                .Replace('\u0629', '\u0647') // ة -> ه
+                .Replace('\u0622', '\u0627') // آ -> ا
+                .Replace('\u0623', '\u0627') // أ -> ا
+                .Replace('\u0625', '\u0627') // إ -> ا
+                .Replace('\u0671', '\u0627') // ٱ -> ا
+                .Replace("\u0640", "");      // Tatweel
+
+            // فاصله‌های ناسازگار
+            s = s.Replace('\u00A0', ' ').Replace('\u202F', ' ').Replace('\u2007', ' ');
+            s = MultiSpaces.Replace(s, " ");
+
+            // حذف اعراب ترکیبی
+            s = s.Normalize(NormalizationForm.FormD);
+            s = CombiningMarks.Replace(s, string.Empty);
+            s = s.Normalize(NormalizationForm.FormC);
+
+            return s;
+        }
+
+
         public static bool CompareArabicPersianStrings(string input1, string input2, StringComparison comparisonType = StringComparison.Ordinal)
         {
             // Normalize both inputs
@@ -2518,23 +2575,6 @@ namespace Prg_UI.Functions
             var normalizedInput2 = NormalizeArabicPersian(input2);
 
             return string.Equals(normalizedInput1, normalizedInput2, comparisonType);
-        }
-        public static string NormalizeArabicPersian(this string input)
-        {
-            if (string.IsNullOrEmpty(input))
-                return input;
-
-            var normalized = input
-                .Replace(ArabicYeh, PersianYeh)
-                .Replace(ArabicKaf, PersianKaf)
-                .Replace(ArabicTehMarbuta, PersianHeh)
-                .Trim();
-
-            // Additional normalization steps
-            normalized = normalized.Normalize(NormalizationForm.FormD);
-            normalized = Regex.Replace(normalized, @"\p{Mn}", "");
-
-            return normalized;
         }
         public static List<string> NormalizeArabicPersian(this List<string> inputs)
         {
@@ -2565,6 +2605,18 @@ namespace Prg_UI.Functions
             }
 
             return results;
+        }
+        public static string NormalizeDigits(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return s;
+            var sb = new StringBuilder(s.Length);
+            foreach (var ch in s)
+            {
+                if (ch >= '\u06F0' && ch <= '\u06F9') sb.Append((char)('0' + (ch - '\u06F0')));   // Persian
+                else if (ch >= '\u0660' && ch <= '\u0669') sb.Append((char)('0' + (ch - '\u0660'))); // Arabic
+                else sb.Append(ch);
+            }
+            return sb.ToString();
         }
 
         public static string ReplacePerArab(string input, bool IsArabicy)

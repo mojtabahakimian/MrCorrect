@@ -241,15 +241,24 @@ namespace Wins.WinMenus.WinAutomasion
             //    }
             //}
 
-            var rst_personel = dbms.DoGetDataSQL<COMBOPERSONEL>("SELECT SAL_NAME, GRSAL, ENABL, IDD as USERCO FROM SALA_DTL WHERE (ENABL=0)").ToList();
-            foreach (var rows in rst_personel)
-            {
-                if (!string.IsNullOrEmpty(rows?.SAL_NAME))
-                {
-                    rows.SAL_NAME = CL_HESABDARI.DECODEUN(rows.SAL_NAME);
-                }
-            }
+            //کبموباکس مجری
+            string sql = @"
+               SELECT sd.SAL_NAME, sd.PSAL_NAME, sd.GRSAL, sd.ENABL, sd.IDD as USERCO
+               FROM SALA_DTL sd
+               LEFT JOIN USER_PERSONEL_ORDER uo 
+                    ON sd.IDD = uo.PERSONEL_ID AND uo.USER_ID = @UserId
+               WHERE sd.ENABL = 0
+               ORDER BY
+                    CASE WHEN uo.SORT_ORDER IS NULL THEN 1 ELSE 0 END,
+                    uo.SORT_ORDER, sd.SAL_NAME";
+            var rst_personel = dbms.DoGetDataSQL<COMBOPERSONEL>(sql, new { UserId = Baseknow.USERCOD }).ToList();
+            foreach (var item_person in rst_personel)
+                item_person.SAL_NAME = CL_HESABDARI.DECODEUN(item_person.SAL_NAME);
 
+            //مجری در دیتاگرید
+            PERSONEL.ItemsSource = rst_personel;
+            PERSONEL.SelectedValue = null;
+            PERSONEL.SelectedValue = Baseknow.USERCOD;
 
 
             DEFAULTVAL_COMPCODE = dbms.DoGetDataSQL<string>($"SELECT HES FROM SALA_DTL WHERE IDD = {Baseknow.USERCOD}").FirstOrDefault();
@@ -263,10 +272,6 @@ namespace Wins.WinMenus.WinAutomasion
             COMP_COD.SelectedValue = DEFAULTVAL_COMPCODE; COMP_COD.Items.Refresh();
 
 
-            //مجری در دیتاگرید
-            PERSONEL.ItemsSource = rst_personel;
-            PERSONEL.SelectedValue = null;
-            PERSONEL.SelectedValue = Baseknow.USERCOD;
 
             //وضعیت در دیتاگرید
             STATUS_COMBO_DATA.Add(new CutsomStatus_Model { STATUS = 1, STATUS_NAME = "انجام نشده" });
@@ -697,7 +702,7 @@ namespace Wins.WinMenus.WinAutomasion
                     {
                         new Msgwin(false, $"پیام به خاطر خطا {(PERSONEL.SelectedItem as COMBOPERSONEL)?.SAL_NAME} ارسال نشد!").ShowDialog();
                     }
-                 
+
                 }
             }
             catch (Exception)

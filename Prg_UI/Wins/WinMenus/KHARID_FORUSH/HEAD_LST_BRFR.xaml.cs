@@ -42,6 +42,7 @@ using static Interfaces.INavigator;
 using Wins.WinMenus.ANBAR;
 using System.Windows.Data;
 using System.Windows.Controls.Primitives;
+using static Prg_UI.Functions.CL_LMethods;
 
 namespace Wins.WinMenus.KHARID_FORUSH
 {
@@ -3928,37 +3929,21 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             if (grid != null && grid?.CurrentCell != null && grid.CurrentCell.Column != null)
             {
-                var cellContent = grid.CurrentCell.Column.GetCellContent(grid.CurrentCell.Item);
-                string _CELL_VALUE_ = null;
-                if (cellContent is TextBlock textBlock) _CELL_VALUE_ = textBlock.Text;
-                else if (cellContent is TextBox textBox) _CELL_VALUE_ = textBox.Text;
-
-                var CurrentData = VISITOR_DTL_SUB.Items[VISITOR_DTL_SUB.SelectedIndex] as VISITOR_DTL;
-
-                if (grid.CurrentCell.Column.SortMemberPath == "CUST_NO")
+                if (grid.CurrentCell.Item is VISITOR_DTL VisitorRow && VisitorRow != null)
                 {
+                    var Hes = VisitorRow.CUST_NO;
+                    var Kol = CL_HESABDARI.GETKOL(Hes);
+                    var Moin = CL_HESABDARI.GETMOIN(Hes);
+                    var Taf = CL_HESABDARI.GETTAF(Hes);
+
                     double MAN;
-                    if (CL_HESABDARI.BLOCKED(CL_HESABDARI.GETKOL(_CELL_VALUE_), CL_HESABDARI.GETMOIN(_CELL_VALUE_), CL_HESABDARI.GETTAF(_CELL_VALUE_)))
+                    if (CL_HESABDARI.BLOCKED(Kol, Moin, Taf))
                     {
                         new Msgwin(false, "حساب مورد نظر مسدود مي باشد!").ShowDialog();
                         return;
                     }
-                    dbms.DoExecuteSQL("IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_NAME = '" + "MOIN" + Baseknow.USERCOD + "')   DROP TABLE " + "MOIN" + Baseknow.USERCOD);
-                    dbms.DoExecuteSQL("SELECT  N_S, DATE_S, HES_K, HES_M, HES_T, SHARH, BED, BES, MAND, NAME, MOIN, TAFZIL, ID, NO_S, N_SERI, BANK, NUMBER, TAG INTO dbo.MOIN" + Baseknow.USERCOD + " FROM         dbo.QDAFTARTAFZIL(1, 99999999 , " + CL_HESABDARI.GETKOL(_CELL_VALUE_) + " , " + CL_HESABDARI.GETMOIN(_CELL_VALUE_) + " , " + CL_HESABDARI.GETTAF(_CELL_VALUE_) + ") QDAFTARTAFZIL ORDER BY N_S, BED DESC");
-                    MAN = 0d;
 
-                    var TempTable = "MOIN" + Baseknow.USERCOD;
-                    var rst = dbms.DoGetDataSQL<R_DAFTAR_MOIN_LIST_MODEL>("SELECT * FROM " + TempTable).ToList();
-                    for (int i = 0; i < rst.Count; i++) //while (!rst.EOF())
-                    {
-                        MAN = (double)(MAN + rst[i].MAND);
-                        rst[i].MAND = MAN;
-                        dbms.DoExecuteSQL($@"UPDATE {TempTable} SET MAND = {MAN}");
-                        //rst.update();
-                        //rst.MoveNext();
-                    }
-                    //DoCmd.OpenForm("R_DAFTAR_MOIN_LIST", acFormDS);
-                    new R_DAFTAR_MOIN_LIST(TempTable, _CELL_VALUE_).ShowDialog();
+                    new F_MENU_KOL_MOIN_TAFZIL(Hes);
                 }
             }
         }
@@ -4220,12 +4205,19 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
-            if (e.Row.Item == null)
-            {
-                return;
-            }
-
+            if (e.Row.Item == null) { return; }
             var FINAL_CROW_ITEM = (e.Row.Item as VISITOR_DTL);
+            if (ConstructorRowDetector.IsPristine(FINAL_CROW_ITEM))
+            {
+                VISITOR_DTL_SUB.Dispatcher.Invoke(() =>
+                {
+                    VISITOR_DTL_SUB.CellEditEnding -= VISITOR_DTL_SUB_CellEditEnding;
+                    VISITOR_DTL_SUB.RowEditEnding -= VISITOR_DTL_SUB_RowEditEnding;
+                    VISITOR_DTL_SUB.CancelEdit();
+                    VISITOR_DTL_SUB.CellEditEnding += VISITOR_DTL_SUB_CellEditEnding;
+                    VISITOR_DTL_SUB.RowEditEnding += VISITOR_DTL_SUB_RowEditEnding;
+                }); return;
+            }
 
             #region Validations
             List<MsgModel> ErrosMessages = new List<MsgModel>();

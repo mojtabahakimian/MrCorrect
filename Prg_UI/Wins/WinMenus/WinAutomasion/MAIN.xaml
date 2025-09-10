@@ -411,11 +411,11 @@
                     <RadioButton  Margin="10" KeyboardNavigation.TabNavigation="None"  x:Name="Hameh" Content="همه"         Tag="0" GroupName="Frame102"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="68" FlowDirection="RightToLeft" Foreground="White" Click="Hameh_Click" Background="White" BorderBrush="White"/>
                     <TextBlock  KeyboardNavigation.TabNavigation="None" Margin="10" Text="مشاهده فعالیت کاربران"    FlowDirection="RightToLeft"  HorizontalAlignment="Right"  Foreground="White"/>
 
-                    <ComboBox x:Name="UNVDER_PERSONEL" IsTextSearchEnabled="True"  KeyboardNavigation.TabNavigation="None"
+                    <ComboBox x:Name="UNVDER_PERSONEL" IsTextSearchEnabled="True"  KeyboardNavigation.TabNavigation="None" PreviewLostKeyboardFocus="UNVDER_PERSONEL_PreviewLostKeyboardFocus"
                               Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" 
                               DisplayMemberPath="SAL_NAME"
                               SelectedValuePath="USERCO"
-                              IsEditable="True" BorderThickness="0,0,0,1"   FlowDirection="RightToLeft" Foreground="Black" Width="153" SelectionChanged="UNVDER_PERSONEL_SelectionChanged" BorderBrush="White" Height="25" >
+                              IsEditable="True" BorderThickness="0,0,0,1"   FlowDirection="RightToLeft" Foreground="Black" Width="153" SelectionChanged="UNVDER_PERSONEL_SelectionChanged" BorderBrush="White" Height="29" >
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>

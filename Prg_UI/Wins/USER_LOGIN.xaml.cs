@@ -37,6 +37,7 @@ using Wins.WinMenus.KHARID_FORUSH;
 using Wins.WinMenus.Taarif;
 using Wins.WinSetting;
 using static Functions.SMSService.SmsServiceFactory;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
 
 namespace Prg_UI.Wins
 {
@@ -358,30 +359,30 @@ namespace Prg_UI.Wins
 
             //Baseknow.USERCOD = 116; Baseknow.UUSER = "Mr.Salmani";
 
-            Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
             //Baseknow.USERCOD = 112; Baseknow.UUSER = "Mr.Tashakori";
+
+            Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
 
             CL_Generaly.SHIFT_OF_USER = 1;
             CL_Generaly.VAHED_OF_USER = 1;
             Baseknow.UGRP = "1";
 
-            //new HEAD_LST_ENTEGHAL_WIN().Show();
+            //new PGET_LST_SEARCH().Show();
 
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID_OTHER_WIN, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.SQLSTATEFORM_CRTL_M, this);
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this );
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "7099,7116");
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_VISIT_ROUTE_FORM, this);
-
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this, 245d);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAV_OTHER_WIN, this);
 
-            //new HEAD_LST_BRFR().Show(); //فاکتور برگشت فروش (آزاد) رسید شده TAG = 25
+            //new WinBase().Show(); //فاکتور برگشت فروش (آزاد) رسید شده TAG = 25
 
             //new HEAD_LST_FROOSH_BACK2().Show(); //فاکتور برگشت فروش - عادی TAG = 4
 
