@@ -369,12 +369,12 @@ namespace Prg_UI.Wins
 
             //new PGET_LST_SEARCH().Show();
 
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.SQLSTATEFORM_CRTL_M, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this);
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "7099,7116");
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this);
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_VISIT_ROUTE_FORM, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
