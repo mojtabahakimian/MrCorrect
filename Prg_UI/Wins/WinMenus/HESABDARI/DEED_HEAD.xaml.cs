@@ -2280,24 +2280,50 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         private void DG_ON_CURRENT()
         {
-
-            #region DataGrid_On_Current
-            //ERROR
-
-            var BED = 0L;
-            var BES = 0L;
-
-            foreach (var item in SANAD_DATA)
+            // اگر دیتایی نباشد، فیلدها را صفر کن
+            if (Child14 == null || Child14.Items == null || Child14.Items.Count == 0)
             {
-                BED = Convert.ToInt64(item.BED) + BED;
-                BES = Convert.ToInt64(item.BES) + BES;
+                bedt.Text = best.Text = SSBED.Text = SSBES.Text = "0";
+                return;
             }
 
+            // لیست «نمایش‌داده‌شده» تا مرتب‌سازی/فیلتر را رعایت کنیم
+            var items = Child14.Items.OfType<DEED_DTL>().ToList();
+            if (items.Count == 0)
+            {
+                bedt.Text = best.Text = SSBED.Text = SSBES.Text = "0";
+                return;
+            }
 
-            bedt.Text = BED.ToString();
-            best.Text = BES.ToString();
-            Information.Err().Clear();
-            #endregion
+            long totalBed = 0, totalBes = 0;
+            long uptoBed = 0, uptoBes = 0;
+
+            // ایندکس سطر انتخابی (با احتساب NewItemPlaceholder)
+            int selected = Child14.SelectedIndex;
+            if (selected < 0) selected = items.Count - 1; // اگر هیچ‌سطر انتخاب نیست، تا آخر جمع بزن
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                var r = items[i];
+                long bed = (long)(r?.BED ?? 0);
+                long bes = (long)(r?.BES ?? 0);
+
+                totalBed += bed;
+                totalBes += bes;
+
+                // جمع تا «واردِ» سطر جاری (inclusive)
+                if (i <= selected)
+                {
+                    uptoBed += bed;
+                    uptoBes += bes;
+                }
+            }
+
+            SSBED.Text = totalBed.ToString();   // جمع سند (بدهکار/بستانکار کل)
+            SSBES.Text = totalBes.ToString();     
+            
+            bedt.Text = uptoBed.ToString();   // جمع سند (بدهکار/بستانکار کل)
+            best.Text = uptoBes.ToString();
         }
 
 
@@ -2319,6 +2345,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 CURRENT_COLUMN_INDEX = Child14.CurrentCell.Column.DisplayIndex;
 
             CURRENT_ROW_INDEX = Child14.SelectedIndex;
+
+            DG_ON_CURRENT();
         }
 
         public bool CmdSaveRecord(DEED_DTL ROW)
@@ -2701,6 +2729,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         CURRENT_COLUMN_INDEX = Child14.CurrentCell.Column.DisplayIndex;
                     }
                     CURRENT_ROW_INDEX = Child14.SelectedIndex;
+
+                    DG_ON_CURRENT();
                 }
             }
         }
