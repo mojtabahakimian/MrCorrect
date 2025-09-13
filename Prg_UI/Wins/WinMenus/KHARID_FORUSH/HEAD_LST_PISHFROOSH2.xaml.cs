@@ -3410,7 +3410,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 TAKHFIF.Text = string.IsNullOrEmpty(HEADER.TAKHFIF.ToStringNullSafe()) ? "0" : HEADER.TAKHFIF.ToStringNullSafe();
                 MBAA.Text = string.IsNullOrEmpty(HEADER.MBAA.ToStringNullSafe()) ? "0" : HEADER.MBAA.ToStringNullSafe();
                 MABL_HAZ.Text = string.IsNullOrEmpty(HEADER.MABL_HAZ.ToStringNullSafe()) ? "0" : HEADER.MABL_HAZ.ToStringNullSafe();
-                SHARAYET.Text = string.IsNullOrEmpty(HEADER.SHARAYET.ToStringNullSafe()) ? "0" : HEADER.SHARAYET.ToStringNullSafe();
+                SHARAYET.Text = HEADER?.SHARAYET?.ToStringNullSafe();
 
                 MODAT_PPID_Enter(); //بروز رسانی داده های نحوه پرداخت بر اساس داده ها وارد شده
 
@@ -4413,7 +4413,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             ((StiSqlDatabase)(report.Dictionary.Databases["MS SQL"])).ConnectionString = CL_CCNNMANAGER.CONNECTION_STR;
 
             report["NUMBER_PARAM"] = NUMBER.Text;
-            (report.GetComponentByName("SHARAYET_TEX") as StiText).Text = SHARAYET.Text;
+            (report.GetComponentByName("SHARAYET") as StiText).Text = SHARAYET.Text;
 
             ShowEmzaha(report);
 

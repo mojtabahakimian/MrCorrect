@@ -1144,8 +1144,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             _navigationManager = new NavigationManager<HEAD_LST>(
                 dbms,
                 x => x.NUMBER.ToString(), // property selector (used to find a record by its CODE)
-                $"SELECT * FROM HEAD_LST {WhereCondition} ORDER BY NUMBER", //All Record of The Table
-                x => $"SELECT * FROM HEAD_LST WHERE NUMBER = {x?.NUMBER} AND TAG = {fTAG}", //On Change for One Record
+                $"SELECT NUMBER, TAG, ANBAR, NUMBER1, DATE_N, TAH, MAS, VAS, N_S, CUST_NO, MOLAH, M_NAGHD, MABL_VAR, MOIN_VAR, MABL_HAV, MOIN_HAV, MABL_HAZ, MOIN_HAZ, TAKHFIF, MOIN_KHF, ANBARF, FNUMCO, DEPATMAN, SHIFT, CUST_KIND, USER_NAME, SHARAYET, SGN1, SGN2, SGN3, SGN4, MBAA, HMBAA, TAMIR, TICMBAA, TKHF, OKF, SADER, ARZD, ARZKIND, CDDATE, CDTIME, OKDATE, OKTIME, JAY, MODAT_PPID, PEPID, PEID, sgn1usid, sgn2usid, sgn3usid, CRT, UID, ARZKIND2, ARZCODING FROM HEAD_LST {WhereCondition} ORDER BY NUMBER", //All Record of The Table
+                x => $"SELECT NUMBER, TAG, ANBAR, NUMBER1, DATE_N, TAH, MAS, VAS, N_S, CUST_NO, MOLAH, M_NAGHD, MABL_VAR, MOIN_VAR, MABL_HAV, MOIN_HAV, MABL_HAZ, MOIN_HAZ, TAKHFIF, MOIN_KHF, ANBARF, FNUMCO, DEPATMAN, SHIFT, CUST_KIND, USER_NAME, SHARAYET, SGN1, SGN2, SGN3, SGN4, MBAA, HMBAA, TAMIR, TICMBAA, TKHF, OKF, SADER, ARZD, ARZKIND, CDDATE, CDTIME, OKDATE, OKTIME, JAY, MODAT_PPID, PEPID, PEID, sgn1usid, sgn2usid, sgn3usid, CRT, UID, ARZKIND2, ARZCODING FROM HEAD_LST WHERE NUMBER = {x?.NUMBER} AND TAG = {fTAG}", //On Change for One Record
                 Convert.ToDouble(NUMBER.Text)
                 );
 
@@ -1166,7 +1166,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             // Now raise the initialization events to update the UI
             _navigationManager.RaiseInitializationEvents();
-
 
             Form_Current();
 
@@ -1486,7 +1485,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 if (HEADER_FAC?.CUST_NO != null)
                 {
                     string thevalue = HEADER_FAC?.CUST_NO;
-                    var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + thevalue + "'").FirstOrDefault();
+                    var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT TOP 1 hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + thevalue + "'").FirstOrDefault();
 
                     //if (CUST_NO.ItemsSource == null)
                     //{
@@ -1674,7 +1673,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 }
 
                 #region MOADIAN
-                var MoadianHead = dbms.DoGetDataSQL<HEAD_LST_EXTENDED>($"SELECT * FROM dbo.HEAD_LST_EXTENDED WHERE NUMBER = {NUMBER.Text} AND tgu = 2").FirstOrDefault();
+                var MoadianHead = dbms.DoGetDataSQL<HEAD_LST_EXTENDED>($"SELECT NUMBER, tgu, inty, inp, ins, tob, sbc, bbc, ft, bpn, scln, scc, cdcn, cdcd, crn, billid, todam, tonw, torv, tocv, setm, cap, insp, tvop, tax17, cut, irtaxid, CRT, UID, exr, sscv FROM dbo.HEAD_LST_EXTENDED WHERE NUMBER = {NUMBER.Text} AND tgu = 2").FirstOrDefault();
                 if (MoadianHead != null)
                 {
                     inty.SelectedValue = MoadianHead.inty; inty.Items.Refresh();
@@ -1810,7 +1809,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         /// (NUMBER1.Text) old
         /// </summary>
 
-
         private bool newrecord = false;
         public bool NewRecord
         {
@@ -1824,7 +1822,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             //    newrecord = value;
             //}
         }
-
 
         //private bool NewRecord(object SSS)
         //{
@@ -2183,8 +2180,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     }
                 }
 
-
-
                 if (_navigationManager.IsNewRecord) //this.NewRecord
                 {
                     //New Code // this.Page58.IsEnabled = false;
@@ -2271,7 +2266,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 this.SGN1.Visibility = Visibility.Visible;
                 this.SGN2.Visibility = Visibility.Visible;
                 this.SGN3.Visibility = Visibility.Visible;
-                var rst = dbms.DoGetDataSQL<SGNS_CSHARP>("SELECT    FFR_FROOSH,FFR_HESAB,FFR_MODIR FROM dbo.SIGN WHERE     USERCO = " + Baseknow.USERCOD).FirstOrDefault();
+                var rst = dbms.DoGetDataSQL<SGNS_CSHARP>("SELECT FFR_FROOSH,FFR_HESAB,FFR_MODIR FROM dbo.SIGN WHERE USERCO = " + Baseknow.USERCOD).FirstOrDefault();
                 if (!(rst is null) && NewRecord)
                 {
                     if ((bool)rst.FFR_FROOSH)
@@ -8689,9 +8684,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 //Erro Check Matter مشکل اینجا کوئری و نمایش داده های کمبوباکس هست که نجوه jion جدول درست نیست 
                 var QRE_LST = dbms.DoGetDataSQL<TAKHFIF_APLAY>($@"SELECT dbo.TAKHFIF_APLAY.TID, dbo.TAKHFIF_APLAY.NUMBER, dbo.TAKHFIF_APLAY.KIND, dbo.TAKHFIF_DEF.TSHARH
-                                                              FROM dbo.TAKHFIF_APLAY
-                                                                   RIGHT OUTER JOIN dbo.TAKHFIF_DEF ON dbo.TAKHFIF_APLAY.TID=dbo.TAKHFIF_DEF.TID
-                                                              WHERE (dbo.TAKHFIF_APLAY.NUMBER={NUMBER.Text}) ").ToList();
+                                                                  FROM dbo.TAKHFIF_APLAY
+                                                                       RIGHT OUTER JOIN dbo.TAKHFIF_DEF ON dbo.TAKHFIF_APLAY.TID=dbo.TAKHFIF_DEF.TID
+                                                                  WHERE (dbo.TAKHFIF_APLAY.NUMBER={NUMBER.Text}) ").ToList();
 
                 //ComboBox:
                 Combo6Column.ItemsSource = dbms.DoGetDataSQL<TAKHFIF_DEF>("SELECT TID, TSHARH FROM TAKHFIF_DEF").ToList();
@@ -8787,7 +8782,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 //PAY_GETD_SUB22_DATA
                 PAY_GETD_SUB22_DATA?.Clear();
-                var QRE_LST = dbms.DoGetDataSQL<PAY_GETD_SUB22_MODEL>($@"SELECT * FROM PAY_GETD WHERE NUMBER = {NUMBER.Text} AND TAG = {hTAG} AND (N_KOL IS NULL OR N_KOL <> 911) ").ToList();
+                var QRE_LST = dbms.DoGetDataSQL<PAY_GETD_SUB22_MODEL>($@"SELECT N_SERI, BANK, DATE_S, DATE, SHOBEH, MABL, NAME_TAH, N_HESAB, N_S, N_KOL, N_MOIN, N_TAF, N_KOL2, N_MOIN2, N_TAF2, N_KOL3, N_MOIN3, N_TAF3, NUMBER, TAG, ANBAR, RADIF, CUST_NO, VAZ, LIST_NO, KIND, SANDUGH, HES1, HES2, HES3, ESTELAM, CRT, UID, SAYADI, ID FROM PAY_GETD WHERE NUMBER = {NUMBER.Text} AND TAG = {hTAG} AND (N_KOL IS NULL OR N_KOL <> 911) ").ToList();
                 if (QRE_LST.Count > 0)
                 {
                     foreach (var item in QRE_LST)
@@ -9645,7 +9640,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             if (!string.IsNullOrEmpty(NUMBER.Text) && NUMBER.Text != "0") //Did Saved
             {
                 SAYER_VISITOR_DATA?.Clear();
-                var QRE_LST = dbms.DoGetDataSQL<VISITOR_DTL>($@"SELECT * FROM VISITOR_DTL WHERE NUMBER = {NUMBER.Text} AND TAG = {hTAG}").ToList();
+                var QRE_LST = dbms.DoGetDataSQL<VISITOR_DTL>($@"SELECT NUMBER, TAG, CUST_NO, DARSAD, PURSANT, TOZIH, STAT, PORID, CRT, UID, ID, LOG FROM VISITOR_DTL WHERE NUMBER = {NUMBER.Text} AND TAG = {hTAG}").ToList();
                 if (QRE_LST.Count > 0)
                 {
                     foreach (var item in QRE_LST)
@@ -10466,16 +10461,19 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 (report.GetComponentByName("MANDG") as StiText).Enabled = true;
 
                 //EXEC dbo.GETKOL => SELECT CUST_NO FROM HEAD_LST WHERE TAG = 13 AND NUMBER = 5338 --Current Invoice NUMBER
-                var rst_0 = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(this.CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(this.CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(this.CUST_NO.SelectedValue.ToString()) + ")").FirstOrDefault();
-                if (rst_0 == null)
-                {
-                    (report.GetComponentByName("MANDAH") as StiText).Text = "0";
-                }
-                else
-                {
-                    var _mandah = Interaction.IIf(rst_0 > 0, Strings.Format(rst_0, "##,# ريال بدهكار"), Strings.Format(rst_0 * -1, "##,# ريال بستانكار"));
-                    (report.GetComponentByName("MANDAH") as StiText).Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
-                }
+                //var rst_0 = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(this.CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(this.CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(this.CUST_NO.SelectedValue.ToString()) + ")").FirstOrDefault();
+
+                //if (rst_0 == null)
+                //{
+                //    (report.GetComponentByName("MANDAH") as StiText).Text = "0";
+                //}
+                //else
+                //{
+                //    var _mandah = Interaction.IIf(rst_0 > 0, Strings.Format(rst_0, "##,# ريال بدهكار"), Strings.Format(rst_0 * -1, "##,# ريال بستانكار"));
+                //    (report.GetComponentByName("MANDAH") as StiText).Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
+                //}
+
+                (report.GetComponentByName("MANDAH") as StiText).Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
             }
             else
             {
@@ -10641,7 +10639,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 report.Dictionary.Variables.Add("MABL_TO_WORD", Convert.ToInt64(jamf + MBA - HAZ - taf));
             }
             double MANN, mm;
-            var rst_00 = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(CUST_NO.SelectedValue.ToString()) + ")").ToList();
+            var rst_00 = dbms.DoGetDataSQL<double?>($"SELECT SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE HES = N'{CUST_NO.SelectedValue.ToString()}' ").ToList();
             if (rst_00.Count == 0)
             {
                 (report.GetComponentByName("MANDG") as StiText).Text = "0";
@@ -10805,7 +10803,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 if (ChangeIsHappend) //تغیری اتفاق افتاده برو اول ذخیره کن
                 {
-
                     BUTTON_SAVE_HAVALE_Click(null, null);
                 }
                 if (ChangeIsHappend) //ذخیره کامل انجام نشده خطایی داشته پس ادامه نه
@@ -10840,15 +10837,17 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 {
                     if (!(CL_HESABDARI.BLOCKEDMK(CUST_NO.SelectedValue.ToString())))
                     {
-                        var rst = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(CUST_NO.SelectedValue.ToString()) + ")").ToList();
-                        if (rst.Count == 0)
-                        {
-                            (report.GetComponentByName("MANDAH") as StiText).Text = "  كل مانده حساب : 0  ";
-                        }
-                        else
-                        {
-                            (report.GetComponentByName("MANDAH") as StiText).Text = "  كل مانده حساب : " + CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
-                        }
+                        //var rst = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES_K = " + CL_HESABDARI.GETKOL(CUST_NO.SelectedValue.ToString()) + ") AND (HES_M = " + CL_HESABDARI.GETMOIN(CUST_NO.SelectedValue.ToString()) + ") AND (HES_T = " + CL_HESABDARI.GETTAF(CUST_NO.SelectedValue.ToString()) + ")").ToList();
+                        //if (rst.Count == 0)
+                        //{
+                        //    (report.GetComponentByName("MANDAH") as StiText).Text = "  كل مانده حساب : 0  ";
+                        //}
+                        //else
+                        //{
+                        //    (report.GetComponentByName("MANDAH") as StiText).Text = "  كل مانده حساب : " + CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
+                        //}
+
+                        (report.GetComponentByName("MANDAH") as StiText).Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
                     }
                     else
                     {

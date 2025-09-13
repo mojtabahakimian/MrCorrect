@@ -23,12 +23,13 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_Proccessy.Generaly;
 using static Prg_UI.Functions.CL_LMethods;
 using Wins.WinMenus.KHARID_FORUSH;
+using Prg_Proccessy.MODELS;
 
 namespace Prg_UI.Rpts
 {
     public partial class Win_INVOICE_PISHFROOSH2 : Window
     {
-        
+
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         string TAG_Pas = "";
         string NUMBER_Pas = "";
@@ -60,7 +61,7 @@ namespace Prg_UI.Rpts
             //Process Prc = Process.Start("C:\\correct\\prc\\prc.exe", "1354");
             Process Prc = ProcLoader.Start();
 
-            
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.INVOICE_PISHFROOSH2.mrt");
             report.Load(pathreport);
@@ -115,15 +116,14 @@ namespace Prg_UI.Rpts
                 {
                     //this.VAZN.CAPTION = "وزن كل به كيلو : " + ROUND(rst.Fields("Weight"));
                     //Text34 the label
-                    if (string.IsNullOrEmpty(Convert.ToString(Math.Round(Convert.ToDouble(rst.Weight)))) || Convert.ToDouble(rst.Weight) == 0)
+                    if (CL_LMethods.IsNumeric(rst.Weight?.ToString()) && rst.Weight > 0)
                     {
-                        (report.GetComponentByName("vazn") as StiText).Enabled = false;
-                        (report.GetComponentByName("Text34") as StiText).Text = "";
-                        (report.GetComponentByName("Text34") as StiText).Enabled = false;
+                        (report.GetComponentByName("vazn") as StiText).Enabled = true;
+                        (report.GetComponentByName("vazn") as StiText).Text = "وزن : " + Convert.ToString(Math.Round(Convert.ToDouble(rst.Weight)));
                     }
                     else
                     {
-                        (report.GetComponentByName("vazn") as StiText).Text = Convert.ToString(Math.Round(Convert.ToDouble(rst.Weight)));
+                        (report.GetComponentByName("vazn") as StiText).Enabled = false;
                     }
                 }
             }
@@ -139,6 +139,12 @@ namespace Prg_UI.Rpts
             //report.Dictionary.Variables["Variable1"].Value = addad.ToString();
             //report.Dictionary.Databases["MS SQL"].Parameters["ParameterName"].Value = "";
             //}
+
+            (report.GetComponentByName("WIDTH_D") as StiText).Text = Baseknow.WIDTH_D; // نام شرکت
+            if (THE_WIN is HEAD_LST_PISHFROOSH2 PISHWIN)
+            {
+                (report.GetComponentByName("SHARAYET") as StiText).Text = PISHWIN?.SHARAYET.Text;
+            }
 
             //Ending {
             //report.Compile();
