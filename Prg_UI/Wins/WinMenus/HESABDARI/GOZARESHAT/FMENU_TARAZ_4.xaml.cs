@@ -357,6 +357,8 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                         break;
                     }        
             }
+
+            this.Close();
         }
 
         private void OpenReport()

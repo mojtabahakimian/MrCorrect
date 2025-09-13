@@ -31,7 +31,7 @@ namespace Prg_UI.CUC
                 TextBoxStyle = defaultStyle;
             }
 
-            this.IsKeyboardFocusWithinChanged += NumericTextBox_IsKeyboardFocusWithinChanged;
+            //this.IsKeyboardFocusWithinChanged += NumericTextBox_IsKeyboardFocusWithinChanged;
 
             TXB0.TextAlignment = TextAlignment; // Set default alignment
         }
@@ -263,10 +263,10 @@ namespace Prg_UI.CUC
 
         private void NumericTextBox_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if ((bool)e.OldValue && !(bool)e.NewValue) // If focus was within and now is not
-            {
-                RaiseEvent(new RoutedEventArgs(NumericLostFocusEvent, this));
-            }
+            //if ((bool)e.OldValue && !(bool)e.NewValue) // If focus was within and now is not
+            //{
+            //    RaiseEvent(new RoutedEventArgs(NumericLostFocusEvent, this));
+            //}
         }
 
         //Methods & Event Control
@@ -522,6 +522,9 @@ namespace Prg_UI.CUC
             }
 
             FormatNumericValue();
+
+            // 3. Raise the custom routed event.
+            RaiseEvent(new RoutedEventArgs(NumericLostFocusEvent, this));
         }
         private void TXB0_Pasting(object sender, DataObjectPastingEventArgs e)
         {

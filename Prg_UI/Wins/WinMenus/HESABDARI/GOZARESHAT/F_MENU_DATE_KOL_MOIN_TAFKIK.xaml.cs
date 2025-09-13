@@ -239,6 +239,8 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
             _sql_query = $"SELECT hname, NAMET, SumOfBED, SumOfBES, BEDBES, HES_T, HES_K FROM dbo.Q_TAFKIK_MOIN('{HKOL.SelectedValue}', '{HMOIN1.SelectedValue}', '{TAFZ1.SelectedValue}', '{TAFZ2.SelectedValue}', '{DT1.Text.ToRawTarikh()}', '{DT2.Text.ToRawTarikh()}'){_where}{_where_q}";
             OpenReport();
+
+            this.Close();
         }
 
         private void HKOL_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)

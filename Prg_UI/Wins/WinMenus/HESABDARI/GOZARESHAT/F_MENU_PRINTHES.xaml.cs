@@ -205,6 +205,8 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             }
             //DoCmd.OpenReport("TOTA_HES", acViewPreview, default, "kol >= " + this.HKOL + " and kol <= " + this.H2K);
             OpenReport();
+
+            this.Close();
         }
 
         private void OpenReport()

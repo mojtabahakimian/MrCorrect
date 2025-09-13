@@ -184,24 +184,24 @@
                 <syncfusion:GridTextColumn x:Name="sHARHColumn" HeaderText="شرح" MappingName="SHARH" Width="550" ColumnSizer="AutoLastColumnFill"/>
                 <syncfusion:GridTextColumn x:Name="bEDColumn" HeaderText="بدهکار" MappingName="BED" Width="150" >
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="BED"  StringFormat="{}{0:#,0}" /> 
+                        <Binding Path="BED"  StringFormat="{}{0:#,0;#,0}" /> 
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
                 <syncfusion:GridTextColumn x:Name="bESColumn" HeaderText="بستانکار" MappingName="BES" Width="150"  >
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="BES"  StringFormat="{}{0:#,0}" /> 
+                        <Binding Path="BES"  StringFormat="{}{0:#,0;#,0}" /> 
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
-                <syncfusion:GridTextColumn x:Name="tshColumn" HeaderText="تشخیص" MappingName="TSH" Width="100" />
+                <syncfusion:GridTextColumn x:Name="tshColumn" HeaderText="تش" MappingName="TSH" Width="60" TextAlignment="Center"/>
                 <syncfusion:GridTextColumn x:Name="mANDColumn" HeaderText="مانده" MappingName="MAND"  Width="150" >
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="MAND"  StringFormat="{}{0:#,0}" /> 
+                        <Binding Path="MAND"  StringFormat="{}{0:#,0;#,0}" /> 
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 
                 <syncfusion:GridTextColumn x:Name="aRZDColumn" HeaderText="نرخ ارز" MappingName="ARZD">
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="ARZD"  StringFormat="{}{0:#,0}" /> 
+                        <Binding Path="ARZD"  StringFormat="{}{0:#,0;#,0}" /> 
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
                 <syncfusion:GridTextColumn x:Name="hES_KColumn" HeaderText="حساب کل" MappingName="HES_K" IsHidden="True"  />
