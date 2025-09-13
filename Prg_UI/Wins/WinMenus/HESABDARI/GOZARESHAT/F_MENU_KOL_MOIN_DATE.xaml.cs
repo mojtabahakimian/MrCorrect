@@ -251,6 +251,8 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
             //DoCmd.OpenReport("R_DAFTAR_MOIN", acViewPreview);
             OpenReport();
+            
+            this.Close();
         }
 
         private void OpenReport()

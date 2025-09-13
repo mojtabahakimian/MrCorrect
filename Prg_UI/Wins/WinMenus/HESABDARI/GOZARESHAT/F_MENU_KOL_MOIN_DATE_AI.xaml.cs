@@ -752,6 +752,8 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
                 OpenReportAI();
             }
+            
+            this.Close();
         }
 
         private void OpenReportAI()

@@ -171,10 +171,10 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             foreach (var item in MasterHead)
             {
                 //Fix:
-                item.SumOfBES = Math.Truncate(item.SumOfBES ?? 0);
-                item.SumOfBED = Math.Truncate(item.SumOfBED ?? 0);
-                item.bed = Math.Truncate(item.bed ?? 0);
-                item.bes = Math.Truncate(item.bes ?? 0);
+                item.SumOfBES = Math.Abs(Math.Truncate(item.SumOfBES ?? 0));
+                item.SumOfBED = Math.Abs(Math.Truncate(item.SumOfBED ?? 0));
+                item.bed = Math.Abs(Math.Truncate(item.bed ?? 0));
+                item.bes = Math.Abs(Math.Truncate(item.bes ?? 0));
 
                 TARAZ_DATA.Add(item);
             }
