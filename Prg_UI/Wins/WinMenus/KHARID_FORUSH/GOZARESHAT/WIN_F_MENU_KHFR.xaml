@@ -73,7 +73,7 @@
         <xctk:MaskedTextBox x:Name="DT1" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="30" Margin="0,106,84,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" />
         <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="30" Margin="0,107,240,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" />
         <RadioButton x:Name="Option23" GroupName="RD1" Content="پیش نمایش" HorizontalAlignment="Left" Margin="170,111,0,0" VerticalAlignment="Top" Width="95" Padding="4,-2,0,0" Height="22" IsChecked="True"/>
-        <RadioButton x:Name="Option25" GroupName="RD1" Content="چاپ" HorizontalAlignment="Left" Margin="109,111,0,0" VerticalAlignment="Top" Width="55" Padding="4,-2,0,0" Height="22" HorizontalContentAlignment="Center"/>
+        <RadioButton x:Name="Option25" IsEnabled="False" Visibility="Hidden" GroupName="RD1" Content="چاپ" HorizontalAlignment="Left" Margin="109,111,0,0" VerticalAlignment="Top" Width="55" Padding="4,-2,0,0" Height="22" HorizontalContentAlignment="Center"/>
         <!--HEADER↑-->
 
     </Grid>
