@@ -93,7 +93,7 @@
 
             <TextBox x:Name="MOLAH"   Text="" Height="30" Margin="388,88,81,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" TabIndex="3" />
             <Button x:Name="ESLAH" Content="اصلاح برگه" Margin="289,8,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="92" Foreground="#DDFFFFFF" FontWeight="Bold" Click="ESLAH_Click"/>
-            <CheckBox x:Name="OKF" IsChecked="False"  Content="تایید حواله" HorizontalAlignment="Left" Margin="207,15,0,0" VerticalAlignment="Top" Width="73" FontSize="10" IsHitTestVisible="False" Focusable="False"/>
+            <CheckBox x:Name="OKF" IsChecked="False"  Content="تایید حواله" HorizontalAlignment="Left" Margin="208,15,0,0" VerticalAlignment="Top" Width="73" FontSize="10" IsHitTestVisible="False" Focusable="False"/>
 
             <DataGrid   
                   d:ItemsSource="{d:SampleData ItemCount=2}"

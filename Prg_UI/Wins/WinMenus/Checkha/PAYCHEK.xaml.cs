@@ -472,22 +472,30 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).SHARH = Strings.Left("چك " + N_SERI.Text + "بانك " + CL_HESABDARI.GETBANK(Convert.ToDouble(this.BANK.SelectedValue)) + " " + SHOBEH.SelectedValue + " مورخ " + Strings.Format(Convert.ToInt32(DATE_S.Text.ToRawTarikh()), "####/##/##") + "-" + NAME_TAH.Text, 255);
 
                 var KhazanehRow = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST);
-                var CheckExistData = dbms.DoGetDataSQL<PAY_GETP>($"SELECT * FROM PAY_GETP WHERE N_SERI = {KhazanehRow.N_SERI} AND BANK = {KhazanehRow.BANK} AND DATE_S = {DATE_S.Text.ToRawTarikh()}").ToList();
+                var CheckExistData = dbms.DoGetDataSQL<PAY_GETP>($"SELECT * FROM PAY_GETP WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()}").ToList();
 
                 var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
 
                 var _SHOBEH_ = SHOBEH.SelectedValue.ToStringNullSafe().Length > 20 ? SHOBEH.SelectedValue.ToStringNullSafe().Substring(0, 19) : SHOBEH.SelectedValue.ToStringNullSafe();
 
-                if (CheckExistData.Count > 0)
+                try
                 {
-                    dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETP SET N_SERI = {N_SERI.Text}, BANK = {BANK.SelectedValue}, DATE_S = {DATE_S.Text.ToRawTarikh()}, DATE = {DATE.Text.ToRawTarikh()}, SHOBEH = N'{_SHOBEH_}', MABL = {MABL.Text}, NAME_TAH = N'{_NAME_TAH_}', N_HESAB = N'{N_HESAB.Text}', N_S = NULL, N_KOL = {(N_KOL is null ? "NULL" : N_KOL)}, N_MOIN = {(N_MOIN is null ? "NULL" : N_MOIN)}, N_TAF = {(N_TAF is null ? "NULL" : N_TAF)}, N_KOL2 = NULL, N_MOIN2 = NULL, N_TAF2 = NULL, N_KOL3 = NULL, N_MOIN3 = NULL, N_TAF3 = NULL, NUMBER = NULL, TAG = NULL, ANBAR = NULL, RADIF = NULL, CUST_NO = DEFAULT, KIND = {KIND.SelectedValue}, VAZ = NULL, HES1 = N'{HES1.SelectedValue}', HES2 = NULL, HES3 = NULL, SAYADI = N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}'
-                                                           WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue}");
-                }
-                else
-                {
-                    dbms.DoExecuteSQL($@"INSERT INTO dbo.PAY_GETP       (N_SERI,                BANK,                     DATE_S,                     DATE,                   SHOBEH,       MABL,          NAME_TAH,          N_HESAB, N_S,  N_KOL,  N_MOIN,  N_TAF, N_KOL2, N_MOIN2, N_TAF2, N_KOL3, N_MOIN3, N_TAF3, NUMBER, TAG, ANBAR, RADIF, CUST_NO,                KIND, VAZ,                   HES1, HES2, HES3, SAYADI)
+                    if (CheckExistData.Count > 0)
+                    {
+                        dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETP SET N_SERI = {N_SERI.Text}, BANK = {BANK.SelectedValue}, DATE_S = {DATE_S.Text.ToRawTarikh()}, DATE = {DATE.Text.ToRawTarikh()}, SHOBEH = N'{_SHOBEH_}', MABL = {MABL.Text}, NAME_TAH = N'{_NAME_TAH_}', N_HESAB = N'{N_HESAB.Text}', N_S = NULL, N_KOL = {(N_KOL is null ? "NULL" : N_KOL)}, N_MOIN = {(N_MOIN is null ? "NULL" : N_MOIN)}, N_TAF = {(N_TAF is null ? "NULL" : N_TAF)}, N_KOL2 = NULL, N_MOIN2 = NULL, N_TAF2 = NULL, N_KOL3 = NULL, N_MOIN3 = NULL, N_TAF3 = NULL, NUMBER = NULL, TAG = NULL, ANBAR = NULL, RADIF = NULL, CUST_NO = DEFAULT, KIND = {KIND.SelectedValue}, VAZ = NULL, HES1 = N'{HES1.SelectedValue}', HES2 = NULL, HES3 = NULL, SAYADI = N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}'
+                                                           WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()}");
+                    }
+                    else
+                    {
+                        dbms.DoExecuteSQL($@"INSERT INTO dbo.PAY_GETP       (N_SERI,                BANK,                     DATE_S,                     DATE,                   SHOBEH,       MABL,          NAME_TAH,          N_HESAB, N_S,  N_KOL,  N_MOIN,  N_TAF, N_KOL2, N_MOIN2, N_TAF2, N_KOL3, N_MOIN3, N_TAF3, NUMBER, TAG, ANBAR, RADIF, CUST_NO,                KIND, VAZ,                   HES1, HES2, HES3, SAYADI)
 				                                           VALUES({N_SERI.Text},{BANK.SelectedValue},{DATE_S.Text.ToRawTarikh()},{DATE.Text.ToRawTarikh()},N'{_SHOBEH_}',{MABL.Text},N'{_NAME_TAH_}',N'{N_HESAB.Text}',NULL,{N_KOL},{N_MOIN},{N_TAF},   NULL,    NULL,   NULL,   NULL,    NULL,   NULL,   NULL,NULL,  NULL,  NULL,       0,{KIND.SelectedValue},NULL,N'{HES1.SelectedValue}', NULL, NULL, N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}')");
+                    }
                 }
+                catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 2627)
+                {
+                    new Msgwin(false, "اطلاعات تکراری است").ShowDialog(); return;
+                }
+              
 
 
                 (THE_WIN as PGET_HED).CmdSaveRecord(((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST));

@@ -361,6 +361,8 @@ namespace Prg_UI.Wins
 
             //Baseknow.USERCOD = 112; Baseknow.UUSER = "Mr.Tashakori";
 
+            //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
+
             Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
 
             CL_Generaly.SHIFT_OF_USER = 1;
@@ -369,10 +371,10 @@ namespace Prg_UI.Wins
 
             //new PGET_LST_SEARCH().Show();
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "7099,7116");
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "7099,7116");
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);

@@ -590,7 +590,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text1>
             <Text2 Ref="33" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>4.2,0.6,4.4,0.6</ClientRectangle>
+              <ClientRectangle>3.2,0.6,5.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -630,6 +630,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <Name>Text3</Name>
               <Page isRef="4" />
               <Parent isRef="5" />
+              <Text>{SmallFactor.NUMBER1}</Text>
               <TextBrush>Black</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
@@ -637,7 +638,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text3>
             <Text4 Ref="36" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.4,0.6,0.8,0.6</ClientRectangle>
+              <ClientRectangle>1.6,0.6,0.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -654,7 +655,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text4>
             <Text5 Ref="37" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0.6,1.4,0.6</ClientRectangle>
+              <ClientRectangle>0,0.6,1.6,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -662,6 +663,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <Name>Text5</Name>
               <Page isRef="4" />
               <Parent isRef="5" />
+              <Text>{SmallFactor.DATE_N}</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="38" type="CustomFormat" isKey="true">
                 <StringFormat>####/##/##</StringFormat>
@@ -2144,10 +2146,10 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>5/25/2025 5:37:10 PM</ReportChanged>
+  <ReportChanged>9/13/2025 2:17:25 PM</ReportChanged>
   <ReportCreated>11/22/2023 3:11:09 PM</ReportCreated>
-  <ReportFile>E:\prg\MrCorrect403\Prg_UI\Rpts\Factors\INVOICE_FROOSH_2_1.mrt</ReportFile>
-  <ReportGuid>6f66584e98504c1da700042bfe86e3ba</ReportGuid>
+  <ReportFile>C:\Users\Administrator\Desktop\INVOICE_FROOSH_2_1.mrt</ReportFile>
+  <ReportGuid>69d5aad7d5a34ee5b4cecbb8bbbfd7c9</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

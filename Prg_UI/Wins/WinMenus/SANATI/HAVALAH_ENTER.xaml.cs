@@ -256,7 +256,7 @@ namespace Wins.WinMenus.SANATI
                 CUST_NO2.IsReadOnly = !ican;// فقط کد مشتری
                 MOLAH.IsReadOnly = !ican;// ملاحظات سربرگ
 
-                //INVO_LST_SUB.IsReadOnly = !ican;
+                INVO_LST_SUB.IsReadOnly = !ican;
 
                 //__ENABLEY
                 FNUMCO.IsEnabled = ican;
@@ -362,15 +362,12 @@ namespace Wins.WinMenus.SANATI
                     //    this.Close();
                     //    return;
                     //}
-
-
-
                 }
             }
 
             string WhereCondition = $" WHERE (dbo.HEAD_LST.TAG = {FTAG}) ";
             WhereCondition = CL_LMethods.GetRestrictedSqlQuery(Convert.ToByte(FTAG), WhereCondition);
-            
+
             if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
             {
                 WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG} ";
@@ -1450,7 +1447,7 @@ namespace Wins.WinMenus.SANATI
                             SERCHK sERCHK = new SERCHK(I_AM_VK_SAKHTEH, CURRENT_ITEMS_ROW.ANBAR.ToString());
                             sERCHK.ShowDialog();
 
-                            if (FROM_SEARCH_KAL.CODE is null)
+                            if (FROM_SEARCH_KAL.CODE is null && sERCHK.SELECTED_KALA?.CODE == null)
                             {
                                 //اگر درست مقدار نداده بود فوکوس رو برگردون که اصلاحش کنه
                                 var TheCol00 = INVO_LST_SUB.Columns.FirstOrDefault(c => c.SortMemberPath == "NAME_CODE").DisplayIndex;
@@ -1463,8 +1460,8 @@ namespace Wins.WinMenus.SANATI
                             }
                             else
                             {
-                                CURRENT_ITEMS_ROW.CODE = FROM_SEARCH_KAL.CODE;
-                                CURRENT_ITEMS_ROW.NAME_CODE = FROM_SEARCH_KAL.NAME_CODE;
+                                CURRENT_ITEMS_ROW.CODE = sERCHK.SELECTED_KALA?.CODE;
+                                CURRENT_ITEMS_ROW.NAME_CODE = sERCHK.SELECTED_KALA.NAME_CODE;
 
                                 CURRENT_ITEMS_ROW.VAHED_K = CL_LMethods.TOP_VAHED_K(dbms, CURRENT_ITEMS_ROW.CODE);
 
@@ -1512,32 +1509,6 @@ namespace Wins.WinMenus.SANATI
 
                                         return;
                                     }
-                                }
-                            }
-                            else
-                            {
-                                CL_KALA_SEARCH.Go_Search_Kala(ENTERED_VALUE_ROW.ToString(), CURRENT_ITEMS_ROW.ANBAR.ToString(), I_AM_VK_SAKHTEH);
-                                if (FROM_SEARCH_KAL.CODE is null)
-                                {
-                                    INVO_LST_SUB.CellEditEnding -= INVO_LST_SUB_CellEditEnding;
-                                    INVO_LST_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                                    INVO_LST_SUB.CellEditEnding += INVO_LST_SUB_CellEditEnding;
-
-                                    CURRENT_ITEMS_ROW.NAME_CODE = WAS_ROW_ITEM.NAME_CODE;
-                                    CURRENT_ITEMS_ROW.CODE = WAS_ROW_ITEM.CODE;
-
-                                    return;
-                                }
-                                else
-                                {
-                                    CURRENT_ITEMS_ROW.CODE = FROM_SEARCH_KAL.CODE;
-                                    CURRENT_ITEMS_ROW.NAME_CODE = FROM_SEARCH_KAL.NAME_CODE;
-
-                                    CURRENT_ITEMS_ROW.VAHED_K = CL_LMethods.TOP_VAHED_K(dbms, CURRENT_ITEMS_ROW.CODE);
-
-                                    //Cleaning
-                                    FROM_SEARCH_KAL.CODE = null;
-                                    FROM_SEARCH_KAL.NAME_CODE = null;
                                 }
                             }
                         }
@@ -2473,10 +2444,10 @@ namespace Wins.WinMenus.SANATI
             {
                 this.AllowDeletions = false;
                 this.AllowEdits = false;
-                INVO_LST_SUB.IsReadOnly = true;
                 ESLAH.IsEnabled = true;
             }
 
+            INVO_LST_SUB.IsReadOnly = true;
         }
 
         //کارت انبار این کالا
