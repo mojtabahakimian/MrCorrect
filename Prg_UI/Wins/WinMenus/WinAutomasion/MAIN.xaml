@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:conv="clr-namespace:Validatory"
-        
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         
         FontFamily="{StaticResource IRANYEKAN}"
@@ -41,6 +41,13 @@
             </Style.Triggers>
         </Style>-->
 
+        <ContextMenu x:Key="ContextUtilityMenu2" IsEnabled="{Binding ElementName=tASKSDataGrid,Path=IsEnabled}" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="مشاهره پرونده تماس گیرنده" Click="MenuItem_Click">
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="FolderOutline"/>
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
 
     </Window.Resources>
 
@@ -98,18 +105,18 @@
                   d:ItemsSource="{d:SampleData ItemCount=5}"
                   ContextMenuOpening="tASKSDataGrid_ContextMenuOpening"
                   ItemsSource="{Binding TASK_DATA}"
-                      
+                  ContextMenu="{StaticResource ContextUtilityMenu2}"     
                   IsReadOnly="True"
                   CanUserDeleteRows="False"
                   CanUserAddRows="False"
-                      
+                  MouseRightButtonUp="tASKSDataGrid_MouseRightButtonUp"      
                   EnableRowVirtualization="True"
                   VirtualizingPanel.IsVirtualizing="True"
                   VirtualizingPanel.VirtualizationMode="Recycling"
                   VirtualizingPanel.ScrollUnit="Pixel"
                   ScrollViewer.CanContentScroll="True"
-                  FlowDirection="RightToLeft" AutoGenerateColumns="False"  Margin="10,220,3,10" BorderThickness="1"  SelectionChanged="tASKSDataGrid_SelectionChanged" PreviewMouseLeftButtonUp="tASKSDataGrid_PreviewMouseLeftButtonUp" SelectionMode="Single"  PreviewKeyDown="tASKSDataGrid_PreviewKeyDown" IsKeyboardFocusWithinChanged="tASKSDataGrid_IsKeyboardFocusWithinChanged">
-                
+                  FlowDirection="RightToLeft" AutoGenerateColumns="False"  Margin="10,220,3,60" BorderThickness="1"  SelectionChanged="tASKSDataGrid_SelectionChanged" PreviewMouseLeftButtonUp="tASKSDataGrid_PreviewMouseLeftButtonUp" SelectionMode="Single"  PreviewKeyDown="tASKSDataGrid_PreviewKeyDown" IsKeyboardFocusWithinChanged="tASKSDataGrid_IsKeyboardFocusWithinChanged">
+
                 <DataGrid.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -304,11 +311,11 @@
                     <DataGridTextColumn   Binding="{Binding ENDATE,  StringFormat=####/##/##, UpdateSourceTrigger=PropertyChanged}" Header="تاریخ انجام"   Width="100" />
                     <DataGridTextColumn   Binding="{Binding ENTIME,  StringFormat=##:##, UpdateSourceTrigger=PropertyChanged}" Header="زمان انجام"  Width="90" />
                     <DataGridTextColumn  x:Name="uSERNAMEColumn" Binding="{Binding USERNAME,  UpdateSourceTrigger=PropertyChanged}" Header="کاربر"  Width="90" />
-                    
+
                     <DataGridTextColumn  x:Name="skidColumn" Binding="{Binding skid,  UpdateSourceTrigger=PropertyChanged}" Header="نوع سند"  Width="90" />
                     <DataGridTextColumn  x:Name="sEEColumn" Binding="{Binding SEE,  UpdateSourceTrigger=PropertyChanged}" Header="دیدن"  Width="90" />
                     <DataGridTextColumn  x:Name="uSERCOColumn" Binding="{Binding USERCO,  UpdateSourceTrigger=PropertyChanged}" Header="کد کاربر" />
-                    
+
                     <!--<DataGridTextColumn  x:Name="numColumn" Binding="{Binding num,  UpdateSourceTrigger=PropertyChanged}" Header="num" Visibility="Hidden" />
                     <DataGridTextColumn x:Name="sUMTIMEColumn" Binding="{Binding SUMTIME,  UpdateSourceTrigger=PropertyChanged}" Visibility="Hidden" Header="SUMTIME"  />
                     <DataGridTextColumn x:Name="ssColumn" Binding="{Binding ss,  UpdateSourceTrigger=PropertyChanged}" Visibility="Hidden" Header="ss"  />
@@ -454,6 +461,7 @@
             </Grid>
 
             <!--<Label x:Name="LBL_COUNTER" Content="0" HorizontalAlignment="Left" Width="48" Margin="290,164,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Height="26"/>-->
+            <CNC:DataGridNavigationControl Visibility="{Binding ElementName=tASKSDataGrid,Path=Visibility}" x:Name="GR_NAV_DATAGRID" NewButtonEnabled="False" ReloadButtonEnabled="False" Height="55" TargetDataGrid="{Binding ElementName=tASKSDataGrid}" VerticalAlignment="Bottom"/>
 
         </Grid>
 

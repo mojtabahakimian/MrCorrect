@@ -23,6 +23,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -162,7 +163,6 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             PERSONEL.Focus();
 
             LoadRefresherSettings();
-
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -1052,7 +1052,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
         }
         private void UNVDER_PERSONEL_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-           
+
         }
 
         private void tASKSDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1529,6 +1529,78 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             if (NowIsReady && UNVDER_PERSONEL.SelectedIndex > -1)
             {
                 DoLoadKartabl();
+            }
+        }
+
+        private void tASKSDataGrid_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            DataGrid dataGrid = sender as DataGrid;
+            if (dataGrid == null) return;
+
+            if (dataGrid.SelectedItems.Count > 0)
+            {
+                return;
+            }
+
+            // Find the row under the mouse
+            DependencyObject dep = (DependencyObject)e.OriginalSource;
+            while (dep != null && !(dep is DataGridRow))
+            {
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+
+            DataGridRow row = dep as DataGridRow;
+            if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
+            {
+                // Select the row under the mouse
+                dataGrid.SelectedItem = row.Item;
+
+                // Show the context menu
+                dataGrid.ContextMenu.IsOpen = true;
+
+                // Mark the event as handled to prevent the default context menu behavior
+                e.Handled = true;
+            }
+            else
+            {
+                // No valid row, don't show context menu
+                e.Handled = true;
+            }
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            string compCod = COMP_COD.SelectedValue?.ToStringNullSafe();
+
+            if (string.IsNullOrEmpty(compCod) || compCod == "0")
+            {
+                new Msgwin(false, "مشتري مشخص نشده است ....!").ShowDialog();
+                return;
+            }
+
+            if (CL_HESABDARI.BLOCKEDMK(compCod))
+            {
+                new Msgwin(false, "حساب مورد نظر مسدود مي باشد!").ShowDialog();
+                return;
+            }
+
+            try
+            {
+                string[] codeParts = compCod.Split('-');
+                string tNumber = codeParts.LastOrDefault();
+
+                if (!string.IsNullOrEmpty(tNumber))
+                {
+                    new TASKS_COMPANY(compCod).ShowDialog();
+                }
+                else
+                {
+                    new Msgwin(false, "کد مشتری معتبر نمی باشد.").ShowDialog();
+                }
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, $"خطا در باز کردن پرونده مشتری").ShowDialog();
             }
         }
     }
