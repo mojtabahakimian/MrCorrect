@@ -16,7 +16,7 @@
         FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
-        Title="" Height="825" Width="1080" MinHeight="795" MinWidth="1020" Loaded="Window_Loaded" Closing="Window_Closing" Activated="Window_Activated" ContentRendered="Window_ContentRendered" PreviewKeyDown="Window_PreviewKeyDown">
+        Title="" Height="825" Width="1080" d:Width="2000" MinHeight="795" MinWidth="1020" Loaded="Window_Loaded" Closing="Window_Closing" Activated="Window_Activated" ContentRendered="Window_ContentRendered" PreviewKeyDown="Window_PreviewKeyDown">
 
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">
@@ -112,7 +112,7 @@
         </Popup>
 
         <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
-        <TabControl Margin="10,46,10,50">
+        <TabControl Margin="10,46,10,50" materialDesign:TransitionAssist.DisableTransitions="True">
             <TabItem Header="فاکتور" x:Name="Page57">
                 <Grid x:Name="FACTOR_GRID">
                     <Grid.RowDefinitions>
@@ -173,7 +173,7 @@
                         </Style>
                     </DataGrid.Style>-->
                     <DataGrid   x:Name="INVO_LST_sub" ContextMenuOpening="INVO_LST_sub_ContextMenuOpening" MouseRightButtonUp="INVO_LST_sub_MouseRightButtonUp"                               
-                                EnableColumnVirtualization="True"
+                                EnableColumnVirtualization="True" d:ItemsSource="{d:SampleData}"
                                 EnableRowVirtualization="True"
                                 VirtualizingPanel.IsVirtualizing="True"
                                 VirtualizingPanel.VirtualizationMode="Recycling"
@@ -367,7 +367,7 @@
                             <DataGridTextColumn 	x:Name="CUST_NO_COLUMN" 	  Binding="{Binding CUST_NO,UpdateSourceTrigger=LostFocus}"          Header="CUST NO"         MinWidth="50" Visibility="Hidden" />
                             <DataGridTextColumn 	x:Name="ANBARF_COLUMN" 	      Binding="{Binding ANBARF,UpdateSourceTrigger=LostFocus}"           Header="ANBARF"          MinWidth="50" Visibility="Hidden" />
                             <DataGridTextColumn 	                              Binding="{Binding VAHED_K,UpdateSourceTrigger=LostFocus}"          Header="VAHED K"         MinWidth="50" Visibility="Hidden" />
-                            <DataGridTextColumn 	x:Name="N_KOL_COLUMN" 	      Binding="{Binding N_KOL,UpdateSourceTrigger=LostFocus, StringFormat={}{0:F2}}"            Header="%تخفیف"               Width="100" MinWidth="70" Visibility="Visible" >
+                            <DataGridTextColumn 	x:Name="N_KOL_COLUMN" 	      Binding="{Binding N_KOL,UpdateSourceTrigger=LostFocus, StringFormat={}{0:F2}}"            Header="%ت"               Width="70"  Visibility="Visible" >
                                 <DataGridTextColumn.EditingElementStyle>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                                         <Setter Property="MaxLength" Value="5" />

@@ -1,0 +1,234 @@
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.WinAutomasion.TASKS_COMPANY"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.WinAutomasion"
+        mc:Ignorable="d"
+        
+        WindowState="Maximized"
+        xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+        xmlns:sfusion="clr-namespace:Syncfusion.UI.Xaml.Grid;assembly=Syncfusion.SfGrid.WPF"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        MaxHeight="{Binding Height, Source={x:Static SystemParameters.WorkArea}}"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        AllowDrop="True" WindowStyle="None"
+        FontFamily="{StaticResource IRANYEKAN}"
+        WindowStartupLocation="CenterScreen"
+        Title="پرونده تماس گیرنده مشتری اتوماسیون" Height="450" Width="800" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+
+        <!-- Style for SfDataGrid -->
+        <Style x:Key="KDG"  TargetType="syncfusion:SfDataGrid" BasedOn="{StaticResource SfDataGridStyle}">
+            <Setter Property="CurrentCellBorderBrush" Value="{StaticResource GENERAL_Grlicom}" />
+            <Setter Property="Foreground" Value="{StaticResource MaterialDesignBody}" />
+            <Setter Property="Background" Value="{StaticResource MaterialDesign.Brush.Background}" />
+            <Setter Property="BorderBrush" Value="{StaticResource MaterialDesignDivider}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="RowHeight" Value="32" />
+            <Setter Property="HeaderRowHeight" Value="40" />
+            <Setter Property="SelectionMode" Value="Single" />
+            <Setter Property="GridLinesVisibility" Value="Both" />
+        </Style>
+        <!-- Modified Column Header Style -->
+        <Style x:Key="KDGHeader" TargetType="syncfusion:GridHeaderCellControl" BasedOn="{StaticResource GridHeaderCellControlStyle}">
+            <Setter Property="Background" Value="{StaticResource MaterialDesign.Brush.Background}" />
+            <Setter Property="Foreground" Value="{StaticResource MaterialDesignBody}" />
+            <Setter Property="BorderBrush" Value="{Binding Background, ElementName=GENERAL_RANG}"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Height" Value="Auto"/>
+        </Style>
+
+        <Style TargetType="sfusion:GridCell" BasedOn="{StaticResource GridCellStyle}">
+            <Setter Property="BorderBrush" Value="{Binding BorderBrush, ElementName=GENERAL_RANG}" />
+        </Style>
+
+
+        <!--FilterStylePopup { -->
+
+        <!--FilterStylePopup } -->
+
+
+        <ContextMenu x:Key="DataGridContextMenu" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="پالودن با این بخش" Click="FilterBySelection_Click">
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="Filter"  FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <!--Filter Excluding Selection-->
+            <MenuItem Header="پالودن بدون این بخش" Click="FilterExcludingSelection_Click" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="FilterRemove" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Header="کـپـی" Click="MenuItem_Click" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="ContentCopy" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="حذف پالودن (فیلتر)" Click="RemoveFilterSort_Click" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="FilterRemoveOutline" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Header="خروجی اکسل" Click="EXPORTEXCEL_BTN" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="FileExcelOutline" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
+    </Window.Resources>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+    <Grid x:Name="mygrid">
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
+            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <Label x:Name="LABEL_HEADER" Content="پرونده تماس گیرنده مشتری اتوماسیون" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Button x:Name="Btn_Close" Click="Btn_Close_Click" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowMaximize" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False">
+                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
+                    </Button>
+                </Grid>
+            </Border>
+        </Border>
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                                               Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
+        </Popup>
+        <!--HEADER↑-->
+
+        <DockPanel Margin="10,45,10,45" LastChildFill="True">
+            <Label x:Name="LBL_STATE" DockPanel.Dock="Top" Content="" Margin="5" Visibility="Collapsed" FlowDirection="RightToLeft"/>
+            <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" 
+                ContextMenu="{StaticResource DataGridContextMenu}"
+                ItemsSource="{Binding FACTOR_DATA}" 
+                AutoGenerateColumns="False"
+                EnableDataVirtualization="True"
+                SelectionUnit="Row"
+                AllowEditing="True"
+                IsReadOnly="True"
+                AllowDraggingColumns="True"
+                AllowResizingColumns="True"
+                AllowFiltering="True"
+                AllowSorting="True"
+                FilterRowPosition="Top"
+                SelectionMode="Extended"
+                RowHeight="30"
+                FrozenColumnCount="0"
+                FlowDirection="RightToLeft"
+                d:ItemsSource="{d:SampleData ItemCount=5}"
+                Style="{StaticResource KDG}"
+                HeaderStyle="{StaticResource KDGHeader}"
+                CurrentCellActivated="SYNCFUSION_DG_CurrentCellActivated"
+                PreviewMouseRightButtonDown="SYNCFUSION_DG_PreviewMouseRightButtonDown"
+                AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged" PreviewKeyDown="SYNCFUSION_DG_PreviewKeyDown">
+
+                <syncfusion:SfDataGrid.Resources>
+                    <ResourceDictionary>
+                        <Style TargetType="TextBox">
+                            <Setter Property="AcceptsReturn" Value="True" />
+                            <Setter Property="Height" Value="30" />
+                        </Style>
+                    </ResourceDictionary>
+                </syncfusion:SfDataGrid.Resources>
+
+                <syncfusion:SfDataGrid.Columns>
+                    <syncfusion:GridTextColumn MappingName="IDNUM" HeaderText="شماره" IsReadOnly="True" Width="90"/>
+                    <!-- مجری -->
+                    <syncfusion:GridComboBoxColumn x:Name="PERSONEL_COL"
+                             HeaderText="مجری"
+                             MappingName="PERSONEL"
+                             Width="200"
+                             ItemsSource="{Binding PERSONEL_COMBO_DATA}"
+                             DisplayMemberPath="SAL_NAME"
+                             SelectedValuePath="IDD">
+                    </syncfusion:GridComboBoxColumn>
+                    
+                    <syncfusion:GridTextColumn MappingName="COMP_COD" HeaderText="کد" Width="150"/>
+                    <syncfusion:GridTextColumn MappingName="NAME" HeaderText="نام تماس گیرنده" Width="200"/>
+
+                    <syncfusion:GridTextColumn MappingName="TASK" HeaderText="وظیفه" Width="300"/>
+                    
+                    <syncfusion:GridTextColumn MappingName="USERNAME" HeaderText="کاربر" Width="150"/>
+                    <!-- اولویت -->
+                    <syncfusion:GridComboBoxColumn x:Name="PERIORITY_COL"
+                                       HeaderText="اولویت"
+                                       MappingName="PERIORITY"
+                                       Width="100"
+                                       ItemsSource="{Binding PERIORITY_COMBO_DATA}"
+                                       DisplayMemberPath="PERIORITY_NAME"
+                                       SelectedValuePath="PERIORITY" />
+
+                    <!-- وضعیت -->
+                    <syncfusion:GridComboBoxColumn x:Name="STATUS_COL"
+                                       HeaderText="وضعیت"
+                                       MappingName="STATUS"
+                                       Width="90"
+                                       ItemsSource="{Binding STATUS_COMBO_DATA}"
+                                       DisplayMemberPath="STATUS_NAME"
+                                       SelectedValuePath="STATUS">
+                    </syncfusion:GridComboBoxColumn>
+
+                    <!-- تاریخ ارجاع -->
+
+                    <syncfusion:GridTextColumn HeaderText="تاریخ ارجاع" MappingName="STDATE" Width="70">
+                        <syncfusion:GridTextColumn.DisplayBinding>
+                            <Binding Path="STDATE" StringFormat="####/##/##" />
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
+
+                    <!-- زمان ارجاع -->
+                    <syncfusion:GridTextColumn HeaderText="زمان ارجاع" MappingName="STTIME" Width="90">
+                        <syncfusion:GridTextColumn.DisplayBinding>
+                            <Binding Path="STTIME" StringFormat="##:##" />
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
+
+                    <!-- تاریخ انجام -->
+                    <syncfusion:GridTextColumn HeaderText="تاریخ انجام" MappingName="ENDATE" Width="100">
+                        <syncfusion:GridTextColumn.DisplayBinding>
+                            <Binding Path="ENDATE" StringFormat="####/##/##" />
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
+
+                    <!-- زمان انجام -->
+                    <syncfusion:GridTextColumn HeaderText="زمان انجام" MappingName="ENTIME" Width="90">
+                        <syncfusion:GridTextColumn.DisplayBinding>
+                            <Binding Path="ENTIME" StringFormat="##:##" />
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
+
+                </syncfusion:SfDataGrid.Columns>
+
+            </syncfusion:SfDataGrid>
+        </DockPanel>
+
+        <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft" Margin="10,0,10,8" Height="30" VerticalAlignment="Bottom">
+            <Label Content="تعداد رکورد ها:" FlowDirection="RightToLeft" Width="84" HorizontalAlignment="Right" Height="27"/>
+            <TextBlock x:Name="ROWCOUNT_TEXTBLK" Text=""  FlowDirection="RightToLeft" Width="230" HorizontalAlignment="Right" Height="23"/>
+        </StackPanel>
+
+
+    </Grid>
+</Window>

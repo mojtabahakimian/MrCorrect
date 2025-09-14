@@ -18,18 +18,19 @@ using Prg_UI.UiTools;
 using System.Text;
 using Syncfusion.Data;
 using Prg_UI.HelperWins;
-using Wins.WinMenus.KHARID_FORUSH;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Threading;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
-using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_SERCH_MAIN_ADVANC;
+using System.Diagnostics;
+using static Prg_UI.Wins.WinMenus.WinAutomasion.MAIN;
+using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 
-namespace Prg_UI.Wins.WinMenus.ANBAR
+namespace Prg_UI.Wins.WinMenus.WinAutomasion
 {
-    public partial class KALAS_MAIN_ADVANCE : Window
+    public partial class TASKS_COMPANY : Window
     {
         #region Header Window Begin
         //Header Window Begin
@@ -72,7 +73,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         }
         //Header Window End;
         #endregion
-        public KALAS_MAIN_ADVANCE()
+
+        public TASKS_COMPANY(string _Openargs_)
         {
             InitializeComponent();
 
@@ -81,145 +83,65 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
 
             GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
+
+            OperArgs = _Openargs_;
         }
 
         UniversControl universControl = new UniversControl();
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
-        public ObservableCollection<KALAS> FACTOR_DATA { get; set; } = new ObservableCollection<KALAS>();
+        public ObservableCollection<TASKS> FACTOR_DATA { get; set; } = new ObservableCollection<TASKS>();
         public bool NowIsReady { get; private set; }
-        public string SqlQueryPassed { get; set; } = "";
-        public bool isSummed { get; set; } = false;
-        public List<string> RestrictionMessages { get; set; } = new List<string>();
-        public List<string> ColumnSelectedPassed { get; set; } = new List<string>();
+        public string OperArgs { get; }
 
-        #region ComboBoxItemPassed
-        //public List<TAGCOD>? TAGCODE_Data { get; set; }
-        //public List<TCOD_VAHEDS>? VAHCODE_Data { get; set; }
-        //public List<TCOD_STUFGROUP>? GRPCODE_Data { get; set; }
-        //public List<TCOD_OSTAN>? OSTANID_Data { get; set; }
-        //public List<TCOD_CITY>? SHAHRID_Data { get; set; }
-        //public List<CMB1>? ROUTE_NAME_Data { get; set; }
-        //public List<TCOD_ANBAR>? ANBARCODE_Data { get; set; }
-        //public List<SALA_DTL>? USER_NAME_Data { get; set; }
-        //public List<Custom_DEPART>? DEPATMAN_Data { get; set; }
-        //public List<TheSHIFT1>? SHIFT_ID_Data { get; set; }
-        //public List<CUSTKIND>? CUST_COD_Data { get; set; }
-        //public List<CMB2>? N_RASID_Data { get; set; }
-        //public List<CMB3>? MM_Data { get; set; }
-        #endregion
+        public ObservableCollection<CutsomPeriority_Model> PERIORITY_COMBO_DATA { get; } = new();
+        public ObservableCollection<CutsomStatus_Model> STATUS_COMBO_DATA { get; } = new();
+        public ObservableCollection<COMBOPERSONEL> PERSONEL_COMBO_DATA { get; } = new();
 
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
         }
-        public static GridColumn FindColumn(SfDataGrid grid, string columnName)
-        {
-            if (grid == null || string.IsNullOrWhiteSpace(columnName))
-                return null;
-
-            #region MyRegion
-            ////نوع برگه
-            //if (string.Equals(columnName, "TAGCODE", StringComparison.OrdinalIgnoreCase)) columnName = "BARGAH";
-
-            ////نام انبار
-            //if (string.Equals(columnName, "ANBARCODE", StringComparison.OrdinalIgnoreCase)) columnName = "ANBNAME";
-
-            ////نام گروه کالا
-            //if (string.Equals(columnName, "GRPCODE", StringComparison.OrdinalIgnoreCase)) columnName = "GRPNAME";
-
-            ////نام واحد کالا
-            //if (string.Equals(columnName, "VAHCODE", StringComparison.OrdinalIgnoreCase)) columnName = "VAHEDNAME";
-
-            ////واحد : دپارتمان
-            //if (string.Equals(columnName, "DEPATMAN", StringComparison.OrdinalIgnoreCase)) columnName = "DEPNAME";
-
-            ////شیفت
-            //if (string.Equals(columnName, "SHIFT_ID", StringComparison.OrdinalIgnoreCase)) columnName = "SHNAME";
-
-            ////شیفت
-            //if (string.Equals(columnName, "SHIFT_ID", StringComparison.OrdinalIgnoreCase)) columnName = "SHNAME";
-            #endregion
-
-            var key = columnName.Trim();
-
-            // 1) MappingName
-            var col = grid.Columns.FirstOrDefault(c =>
-                string.Equals(c.MappingName, key, StringComparison.OrdinalIgnoreCase));
-            if (col != null) return col;
-
-            // 2) HeaderText
-            col = grid.Columns.FirstOrDefault(c =>
-                string.Equals(c.HeaderText, key, StringComparison.OrdinalIgnoreCase));
-            if (col != null) return col;
-
-            // 3) x:Name (اگر ستون در XAML تعریف شده باشد)
-            var byXamlName = grid.FindName(key) as GridColumn; // مثلا "TAGCODE"
-            if (byXamlName != null) return byXamlName;
-
-            return col;
-        }
-        private GridColumn FindColumnSafe(string name)
-        {
-            // اگر متد FindColumn خودت را داری همان را صدا بزن؛ در غیراینصورت MappingName را چک کن
-            var col = SYNCFUSION_DG.Columns.FirstOrDefault(c => string.Equals(c.MappingName, name, StringComparison.OrdinalIgnoreCase));
-            if (col != null) return col;
-
-            // x:Name در صورت تعریف دستی
-            return this.FindName(name) as GridColumn;
-        }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //Process Prc = ProcLoader.Start();
-
-            List<string> NON = new List<string>();
-            foreach (var columnName in ColumnSelectedPassed)
-            {
-                // پیدا کردن ستون با اسم مشخص
-                var column = FindColumn(SYNCFUSION_DG, columnName);
-
-                if (column != null)
-                {
-                    column.IsHidden = false;
-                }
-                else
-                {
-                    //NON.Add(columnName.Trim());
-                }
-            }
-
-            var digits = Baseknow.DIG;
-            void SetDigits(string colName)
-            {
-                var col = FindColumnSafe(colName);
-                if (col is GridNumericColumn gnc)
-                {
-                    gnc.NumberDecimalDigits = (int)digits;
-                }
-            }
-            SetDigits("MEGH");
-            SetDigits("MEGHk");
-            SetDigits("MEGH_MAR");
+            Process Prc = ProcLoader.Start();
 
             FACTOR_DATA?.Clear();
 
-            CL_LMethods.DoWriteMyLog(SqlQueryPassed, default);
+            //string query = @$" SELECT TSK.IDNUM, CH.NAME, TSK.GR,
+            //                       TSK.PERSONEL, TSK.TASK,
+            //                       TSK.PERIORITY, TSK.STATUS,
+            //                       TSK.STDATE, TSK.STTIME,
+            //                       TSK.ENDATE, TSK.ENTIME,
+            //                       TSK.USERNAME, TSK.COMP_COD,
+            //                       TSK.SUMTIME, TSK.pic,
+            //                       TSK.ss, TSK.skid,
+            //                       TSK.num, TSK.tg,
+            //                       TSK.CTIM, TSK.USERCO, TSK.SEE
+            //                    FROM dbo.TASKS AS TSK WITH (INDEX(IX_TASKS_Status1))
+            //                         LEFT HASH JOIN dbo.CUST_HESAB AS CH
+            //                             ON CH.hes = TSK.COMP_COD
+            //                    WHERE TSK.COMP_COD = N'{OperArgs}'
+            //                    ORDER BY TSK.IDNUM";
 
-            var MasterHead = dbms.DoGetDataSQL<KALAS>(SqlQueryPassed).ToList();
+            //var MasterHead = dbms.DoGetDataSQL<TASKS>(query);
 
-            foreach (var item in MasterHead)
-            {
-                FACTOR_DATA.Add(item);
-            }
+            //foreach (var item in MasterHead)
+            //{
+            //    FACTOR_DATA.Add(item);
+            //}
+            
+            FILL_ALL_COMBOBOXES();
+
+            ReGetData();
 
             //SYNCFUSION_DG.ColumnSizer = GridLengthUnitType.Auto;
 
-            FILL_ALL_COMBOBOXES();
 
-            if (isSummed)
-            {
-                GenerateAutomaticSummary(SYNCFUSION_DG);
-            }
+            //if (isSummed)
+            //{
+            //    GenerateAutomaticSummary(SYNCFUSION_DG);
+            //}
 
             if (SYNCFUSION_DG != null)
             {
@@ -229,72 +151,60 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 UpdateRowCountLabel();
             }
 
-            if (RestrictionMessages.Any())
-            {
-                LBL_STATE.Content = "دسترسی شما با این شرایط محدود شده است: " + string.Join(", ", RestrictionMessages);
-                LBL_STATE.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                LBL_STATE.Visibility = Visibility.Collapsed;
-            }
+            //if (RestrictionMessages.Any())
+            //{
+            //    LBL_STATE.Content = "دسترسی شما با این شرایط محدود شده است: ");
+            //    LBL_STATE.Visibility = Visibility.Visible;
+            //}
+            //else
+            //{
+            //    LBL_STATE.Visibility = Visibility.Collapsed;
+            //}
 
-            //ProcLoader.Stop(Prc);
+            ProcLoader.Stop(Prc);
         }
 
         private void FILL_ALL_COMBOBOXES()
         {
-            //نوع برگه
-            TAGCODE.ItemsSource = dbms.DoGetDataSQL<TAGCOD>($"SELECT CODE, BARGAH FROM TAGCOD").ToList();
+            // وضعیت
+            STATUS_COMBO_DATA.Clear();
+            STATUS_COMBO_DATA.Add(new CutsomStatus_Model { STATUS = 1, STATUS_NAME = "انجام نشده" });
+            STATUS_COMBO_DATA.Add(new CutsomStatus_Model { STATUS = 2, STATUS_NAME = "انجام شده" });
+            STATUS_COMBO_DATA.Add(new CutsomStatus_Model { STATUS = 3, STATUS_NAME = "لغو شده" });
 
-            //واحد کالا
-            VAHCODE.ItemsSource = dbms.DoGetDataSQL<TCOD_VAHEDS>($"SELECT CODE, NAMES FROM TCOD_VAHEDS").ToList();
+            // اولویت
+            PERIORITY_COMBO_DATA.Clear();
+            PERIORITY_COMBO_DATA.Add(new CutsomPeriority_Model { PERIORITY = 1, PERIORITY_NAME = "فوری" });
+            PERIORITY_COMBO_DATA.Add(new CutsomPeriority_Model { PERIORITY = 2, PERIORITY_NAME = "معمولی" });
 
-            //گروه کالا
-            GRPCODE.ItemsSource = dbms.DoGetDataSQL<TCOD_STUFGROUP>($"SELECT CODE, NAMES FROM TCOD_STUFGROUP").ToList();
+            ////زیر مجموعه کاربران مجاز برای محدود کردن پرونده دیدن
+            //const string sqlSub = @"
+            //     SELECT
+            //          sd.SAL_NAME,
+            //          sd.PSAL_NAME,
+            //          sd.GRSAL,
+            //          sd.ENABL,
+            //          cs.SUBUSERCO     AS IDD,   
+            //          cs.SUBUSERCO     AS USERCO 
+            //     FROM dbo.CHARTSAZMANI        cs
+            //     LEFT JOIN SALA_DTL           sd  ON cs.SUBUSERCO = sd.IDD
+            //     LEFT JOIN USER_PERSONEL_ORDER uo  ON cs.SUBUSERCO = uo.PERSONEL_ID
+            //                                      AND uo.USER_ID   = @UserId
+            //     WHERE cs.USERCO  = @UserId
+            //     ORDER BY
+            //          CASE WHEN uo.SORT_ORDER IS NULL THEN 1 ELSE 0 END,  -- اولويات كاربر
+            //          uo.SORT_ORDER,
+            //          sd.SAL_NAME;";
+            //List<COMBOPERSONEL> sub_rst_personel = dbms.DoGetDataSQL<COMBOPERSONEL>(sqlSub, new { UserId = Baseknow.USERCOD }).ToList();
 
-            //استان
-            var ALL_OSTAN = dbms.DoGetDataSQL<TCOD_OSTAN>("SELECT OSCODE, OSNAME FROM TCOD_OSTAN ORDER BY OSNAME").ToList();
-            foreach (var item in ALL_OSTAN) { item.OSNAME = item.OSNAME?.FixPersianChars(); }
-            OSTANID.ItemsSource = ALL_OSTAN; //Combobox Ui
-
-            //کد شهر
-            var ALL_SHAHR = dbms.DoGetDataSQL<TCOD_CITY>("SELECT CITYCODE, CITYNAME FROM TCOD_CITY ORDER BY CITYNAME").ToList();
-            SHAHRID.ItemsSource = ALL_SHAHR;
-
-            //مسیر ویزیت
-            //ROUTE_NAME.ItemsSource = dbms.DoGetDataSQL<CMB1>($@"SELECT Visit_route.ROUTE_NAME, Visit_route.ROUTE_NAME+N' - '+CUST_HESAB.NAME+N' - '+CUST_HESAB.hes AS Expr1
-            //                                                       FROM Visit_route
-            //                                                            INNER JOIN CUST_HESAB ON Visit_route.HES=CUST_HESAB.hes
-            //                                                       WHERE(Visit_route.RACTIVE=1)").ToList();
-            //انبار
-            ANBARCODE.ItemsSource = dbms.DoGetDataSQL<TCOD_ANBAR>($"SELECT CODE, NAMES FROM TCOD_ANBAR").ToList();
-
-            ////کاربران
-            //var RST_PERSONEL = dbms.DoGetDataSQL<SALA_DTL>("SELECT SAL_NAME, IDD FROM dbo.SALA_DTL WHERE (ENABL=0) ORDER BY IDD").ToList();
-            //foreach (var rows in RST_PERSONEL)
-            //{
-            //    if (!string.IsNullOrEmpty(rows?.SAL_NAME))
-            //    {
-            //        rows.SAL_NAME = CL_HESABDARI.DECODEUN(rows.SAL_NAME);
-            //    }
-            //}
-            //USER_NAME.ItemsSource = RST_PERSONEL;
-
-            //واحد فروش
-            DEPATMAN.ItemsSource = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
-
-            //شیفت
-            SHIFT_ID.ItemsSource = dbms.DoGetDataSQL<TheSHIFT1>("SELECT SHIFT_ID, SHNAME FROM SHIFT ORDER BY SHIFT.SHNAME").ToList();
-
-            //نوع مشتری
-            CUST_COD.ItemsSource = dbms.DoGetDataSQL<CUSTKIND>("SELECT CUST_COD, CUSTKNAME FROM CUSTKIND").ToList();
-
-            //محل مصرف
-            N_RASID_COLUMN.ItemsSource = dbms.DoGetDataSQL<CMB2>("SELECT dbo.HEAD_MANF.FNUMB, ISNULL(dbo.HEAD_MANF.NAMES, dbo.STUF_DEF.NAME) AS NAM FROM dbo.STUF_DEF RIGHT OUTER JOIN dbo.HEAD_MANF ON dbo.STUF_DEF.CODE = dbo.HEAD_MANF.CODE;").ToList();
-
-            //ماه
-            MM_COLUMN.ItemsSource = dbms.DoGetDataSQL<CMB3>("SELECT MON_ID, MON FROM MON").ToList();
+            // مجری (مرتب‌سازی بر اساس سفارش کاربر)
+            var rows = dbms.DoGetDataSQL<COMBOPERSONEL>(@"SELECT SAL_NAME, IDD FROM dbo.SALA_DTL").ToList();
+            PERSONEL_COMBO_DATA.Clear();
+            foreach (var item in rows)
+            {
+                item.SAL_NAME = CL_HESABDARI.DECODEUN(item.SAL_NAME);
+                PERSONEL_COMBO_DATA.Add(item);
+            }
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -303,168 +213,21 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             {
                 e.Handled = true;
 
-                var currentRow = SYNCFUSION_DG.SelectedItem as KALAS;
+                var currentRow = SYNCFUSION_DG.SelectedItem as TASKS;
 
-                switch (currentRow?.TAGCODE)
-                {
-                    case 1: // رسید خرید
-                        if (currentRow?.NUMBER != null)
-                        {
-                            //OpenWindow(typeof(HEAD_LST_RASID), (double)currentRow.NUMBER, "یک پنجره رسید خرید از قبل باز شده ابتدا آنرا ببندید.");
+                //switch (currentRow?.TAGCODE)
+                //{
+                //    case 1: // رسید خرید
+                //        if (currentRow?.NUMBER != null)
+                //        {
+                //            //OpenWindow(typeof(HEAD_LST_RASID), (double)currentRow.NUMBER, "یک پنجره رسید خرید از قبل باز شده ابتدا آنرا ببندید.");
 
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 2: // حواله فروش
-                        if (currentRow?.NUMBER != null)
-                        {
-                            //OpenWindow(typeof(HEAD_LST_HAVL), (double)currentRow.NUMBER, "یک پنجره حواله فروش از قبل باز شده ابتدا آنرا ببندید.");
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAVL, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 3: //فاکتور برگشت خرید عادی	
-                        if (currentRow?.NUMBER != null)
-                        {
-                            //OpenWindow(typeof(HEAD_LST_KH_BACK), (double)currentRow.NUMBER, "یک پنجره فاکتور برگشت خرید عادی از قبل باز شده ابتدا آنرا ببندید.");
-                            //SELECT* FROM dbo.HEAD_LST WHERE NUMBER = 2 AND TAG = 3--فاکتور برگشت خرید عادی Normal Only Header because Detail load FROM dbo.INVO_LST WHERE NUMBER = 2073 AND TAG = 1
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 4:
-                        if (currentRow?.NUMBER != null)
-                        {
-                            //OpenWindow(typeof(HEAD_LST_FROOSH_BACK2), (double)currentRow.NUMBER, "یک پنجره فاکتور برگشت فروش عادی از قبل باز شده ابتدا آنرا ببندید.");
-                            //SELECT * FROM dbo.HEAD_LST WHERE NUMBER = 254  AND TAG = 4 --فاکتور برگشت فروش استاندارد عادی Normal Only Header because Detail load FROM dbo.INVO_LST WHERE NUMBER = 5361 AND TAG = 2
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_BACK2, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 5: //انتقال از انبار به انبار
-                        if (currentRow?.NUMBER != null)
-                        {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_ENTEGHAL_WIN, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 9: //برگه ورود
-                        if (currentRow?.NUMBER != null)
-                        {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALAH_ENTER, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 10: //برگه خروج مواد اولیه
-                        if (currentRow?.NUMBER != null)
-                        {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALAH_EXIT, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 12: // فاکتور خرید
-                        if (currentRow?.NUMBER1 != null && currentRow?.NUMBER != null)
-                        {
-                            //OpenWindow(typeof(HEAD_LST_KHAREED1), currentRow.NUMBER1 + "," + currentRow.NUMBER, "یک پنجره فاکتور خرید از قبل باز شده ابتدا آنرا ببندید.");
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this, currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 13: // فاکتور فروش
-                        if (currentRow?.NUMBER1 != null && currentRow?.NUMBER != null)
-                        {
-                            //OpenWindow(typeof(HEAD_LST_FROOSH22), currentRow.NUMBER1 + "," + currentRow.NUMBER, "یک پنجره فاکتور فروش از قبل باز شده ابتدا آنرا ببندید.");
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this, currentRow.NUMBER1 + "," + currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 14: // فاکتور خدمات
-                        if (currentRow?.NUMBER1 != null && currentRow?.NUMBER != null)
-                        {
-                            //OpenWindow(typeof(HEAD_LST_KHADAMAT), currentRow.NUMBER1 + "," + currentRow.NUMBER, "یک پنجره فاکتور خدمات از قبل باز شده ابتدا آنرا ببندید.");
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHADAMAT, this, currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 20: //پیش فاکتور ها
-                        if (currentRow?.NUMBER != null)
-                        {
-                            try
-                            {
-                                Application.Current.Windows.OfType<HEAD_LST_PISHFROOSH2>().FirstOrDefault()?.Close();
-                            }
-                            catch { }
-
-                            //OpenWindow(typeof(HEAD_LST_PISHFROOSH2), (double)currentRow.NUMBER, "یک پنجره پیش فاکتور از قبل باز شده ابتدا آنرا ببندید.");
-
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 23: //درخواست خرید
-                        if (currentRow?.NUMBER != null)
-                        {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_REQUEST_WIN, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 24: //سایر رسید انبار ها
-                        if (currentRow?.NUMBER != null)
-                        {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID_OTHER_WIN, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 25: //فاکتور برگشت فروش آزاد رسید شده
-                        if (currentRow?.NUMBER != null)
-                        {
-                            //SELECT * FROM dbo.HEAD_LST WHERE NUMBER = 954 AND TAG = 25 --فاکتور برگشت فروش رسید شده : آزاد Normal Only Header because Detail load FROM dbo.INVO_LST WHERE NUMBER = 954 AND TAG = 24
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_BRFR, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 26: //سایر حواله انبار ها
-                        if (currentRow?.NUMBER != null)
-                        {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAV_OTHER_WIN, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 27: //فاکتور برگشت خرید آزاد
-                        if (currentRow?.NUMBER != null)
-                        {
-                            //SELECT * FROM dbo.HEAD_LST WHERE NUMBER = 3 AND TAG = 27   --فاکتور برگشت خرید آزاد Normal Only Header because Detail load FROM dbo.INVO_LST WHERE NUMBER = 3 AND TAG = 26
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK_AZAD, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                }
+                //            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID, this, (double)currentRow.NUMBER);
+                //        }
+                //        break;
+                //}
             }
         }
-        public void OpenWindow(Type windowType, object parameter, string errorMessage)
-        {
-            if (windowType == null || !typeof(Window).IsAssignableFrom(windowType))
-                return;
-
-            var constructor = windowType.GetConstructor(new[] { parameter.GetType() });
-            if (constructor != null)
-            {
-                var window = (Window)constructor.Invoke(new[] { parameter });
-                window.Show();
-            }
-
-            return; //Check is there any open window before ?
-            if (!CL_LMethods.IsWindowOpen(windowType)) //CL_LMethods.IsWindowOpen<HEAD_LST_FROOSH22>()
-            {
-
-            }
-            else
-            {
-                new Msgwin(false, errorMessage).ShowDialog();
-            }
-        }
-
 
         #region FilterBy
         private void View_FilterChanged(object sender, GridFilterEventArgs e)
@@ -484,7 +247,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             ROWCOUNT_TEXTBLK.Text = recordCount.ToString();
         }
 
-        private readonly FilterService<KALAS> filterService = new FilterService<KALAS>();
+        private readonly FilterService<TASKS> filterService = new FilterService<TASKS>();
         public ObservableCollection<string> ActiveFilters { get; set; } = new ObservableCollection<string>();
 
         private string? CurrentCellValue = null;
@@ -624,7 +387,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         private void ApplyCumulativeFilter() // Method to apply all cumulative filters to the data grid
         {
             // Set the filter for the data grid view using the filter service
-            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as KALAS);
+            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as TASKS);
             // Refresh the filter to update the view
             SYNCFUSION_DG.View.RefreshFilter();
 
@@ -800,12 +563,12 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             var summaryColumns = new ObservableCollection<ISummaryColumn>();
 
-            var dataType = typeof(KALAS);
+            var dataType = typeof(TASKS);
 
             //foreach (var column in SYNCFUSION_DG.Columns)
             foreach (var column in _DG_.Columns)
             {
-                var propertyInfo = typeof(KALAS).GetProperty(column.MappingName);
+                var propertyInfo = typeof(TASKS).GetProperty(column.MappingName);
                 if (propertyInfo == null)
                     continue;
 
@@ -895,14 +658,56 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         }
         #endregion
 
+        private void ReGetData()
+        {
+            IEnumerable<TASKS> items;
+            if (IsCompCod(OperArgs))
+            {
+                //items = dbms.DoGetDataSQL<TASKS>(
+                //    "SELECT IDNUM, GR, PERSONEL, TASK, PERIORITY, STATUS, STDATE, STTIME, ENDATE, ENTIME, USERNAME, COMP_COD, SUMTIME, pic, ss, skid, num, tg, CTIM, USERCO, SEE, SEET, CRT, UID FROM dbo.TASKS WHERE COMP_COD = @Code ORDER BY IDNUM",
+                //    new { Code = OperArgs }).ToList();
+
+                const string query = @" SELECT  TSK.IDNUM, CH.NAME, TSK.GR,
+                                                TSK.PERSONEL, TSK.TASK,
+                                                TSK.PERIORITY, TSK.STATUS,
+                                                TSK.STDATE, TSK.STTIME,
+                                                TSK.ENDATE, TSK.ENTIME,
+                                                TSK.USERNAME, TSK.COMP_COD,
+                                                TSK.SUMTIME, TSK.pic,
+                                                TSK.ss, TSK.skid,
+                                                TSK.num, TSK.tg,
+                                                TSK.CTIM, TSK.USERCO, TSK.SEE
+                                        FROM dbo.TASKS AS TSK
+                                        LEFT JOIN dbo.CUST_HESAB AS CH
+                                          ON CH.hes = TSK.COMP_COD
+                                        WHERE TSK.COMP_COD = @operargs
+                                        ORDER BY TSK.IDNUM";
+
+                items = dbms.DoGetDataSQL<TASKS>(query, new { operargs = OperArgs }).ToList();
+            }
+            else
+            {
+                items = dbms.DoGetDataSQL<TASKS>(
+                    "SELECT IDNUM, GR, PERSONEL, TASK, PERIORITY, STATUS, STDATE, STTIME, ENDATE, ENTIME, USERNAME, COMP_COD, SUMTIME, pic, ss, skid, num, tg, CTIM, USERCO, SEE, SEET, CRT, UID FROM dbo.TASKS WHERE USERNAME = @User ORDER BY IDNUM",
+                    new { User = OperArgs }).ToList();
+            }
+
+            FACTOR_DATA.Clear();
+            foreach (var item in items)
+            {
+                FACTOR_DATA.Add(item);
+            }
+        }
+
+        private static bool IsCompCod(string arg) => !string.IsNullOrEmpty(arg) && arg.Replace("-", "").All(char.IsDigit);
         private void BTN_ISEND_Click(object sender, RoutedEventArgs e)
         {
-            var CurrentRow = SYNCFUSION_DG.SelectedItem as KALAS;
+            var CurrentRow = SYNCFUSION_DG.SelectedItem as TASKS;
 
-            if (CurrentRow != null && CurrentRow?.NUMBER != null && CurrentRow?.NUMBER > 0)
-            {
-                CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_MOADIAN_SINGLE, this, Convert.ToDouble(CurrentRow.NUMBER));
-            }
+            //if (CurrentRow != null && CurrentRow?.NUMBER != null && CurrentRow?.NUMBER > 0)
+            //{
+            //    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_MOADIAN_SINGLE, this, Convert.ToDouble(CurrentRow.NUMBER));
+            //}
         }
     }
 }
