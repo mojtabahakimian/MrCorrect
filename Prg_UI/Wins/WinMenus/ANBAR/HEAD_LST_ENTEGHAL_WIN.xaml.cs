@@ -1864,7 +1864,7 @@ namespace Wins.WinMenus.ANBAR
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
-            var ROW = e.Row.Item as GRADE_SHART_FUNC;
+            var ROW = e.Row.Item as INVO_LST_FACTOR22;
             if (e.Row.Item == null || ROW is null) { return; }
             if (ConstructorRowDetector.IsPristine(ROW)) { INVO_LST_ENTEGHAL_SUB_CANCEL_EDIT(); return; }
 
