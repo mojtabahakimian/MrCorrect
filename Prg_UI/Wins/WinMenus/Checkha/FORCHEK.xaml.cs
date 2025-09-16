@@ -210,7 +210,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 return;
             }
 
-            if (N_SERI.SelectedValue?.ToString() != N_SERI.Text.Trim())
+            if (!IsNull(N_SERI.SelectedValue?.ToString()))
             {
                 FOR_CHK_SERCH fOR_CHK_SERCH = new FOR_CHK_SERCH("1", "N_SERI = " + N_SERI.SelectedValue.ToStringNullSafe(), I_AM_FORCHECK);
                 fOR_CHK_SERCH.ShowDialog();
