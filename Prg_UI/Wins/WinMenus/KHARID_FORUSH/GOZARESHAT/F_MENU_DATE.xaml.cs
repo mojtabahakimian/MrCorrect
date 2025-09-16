@@ -21,6 +21,7 @@ using Wins.WinMenus.HESABDARI.GOZARESHAT;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
 using System.Windows.Controls;
+using Prg_UI.Wins.WinMenus.SANATI;
 
 namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 {
@@ -213,6 +214,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
                     case "AMTOL":
                         //OpenForm("AMAR_TOLID");
+                        new AMAR_TOLID(DT1.Text.ToRawTarikh(), DT2.Text.ToRawTarikh()).Show(); //لیست فروش روزانه به تفکیک نوع کالا
                         break;
 
                     case "CAMTOL":

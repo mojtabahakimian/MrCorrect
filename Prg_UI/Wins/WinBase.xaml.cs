@@ -1259,5 +1259,10 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_RT4, null);
         }
+
+        private void Button_Click_117(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.AMAR_TOLID, null);
+        }
     }
 }

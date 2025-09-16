@@ -377,6 +377,9 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش تراز آزمایشی چهار ستونی حسابهای کل", WIN_NAME = CL_MenuManager.WinNameType.FMENU_TARAZ_4_RT4 });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش تراز آزمایشی چهار ستونی حسابهای کل ، معین و تفضیلی", WIN_NAME = CL_MenuManager.WinNameType.FMENU_TARAZ_4_RFT4T });
 
+            //حسابداری صنعتی
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست آمار تولید", WIN_NAME = CL_MenuManager.WinNameType.AMAR_TOLID });
+
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());
 
             // Loading user-specific access level
