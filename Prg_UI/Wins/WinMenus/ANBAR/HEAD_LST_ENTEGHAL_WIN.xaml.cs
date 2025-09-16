@@ -1714,15 +1714,20 @@ namespace Wins.WinMenus.ANBAR
             #region MEGH_After_Update
             if (e.Column.SortMemberPath == "MEGH")
             {
+                if (string.IsNullOrEmpty(ENTERED_VALUE_ROW.ToStringNullSafe()) || !double.TryParse(ENTERED_VALUE_ROW.ToString(), out _))
+                {
+                    CURRENT_ITMES_ROW.MEGH = 0;
+                    return;
+                }
+                if (CURRENT_ITMES_ROW?.ANBAR is null || CURRENT_ITMES_ROW?.CODE is null || CURRENT_ITMES_ROW?.VAHED_K is null)
+                {
+                    return;
+                }
+
                 double min;
                 long Temp;
                 double MAND;
                 min = CL_HESABDARI.Getmin(Convert.ToInt32(this.ANBAR.SelectedValue), CURRENT_ITMES_ROW.CODE);
-
-                if (CURRENT_ITMES_ROW.CODE is null)
-                {
-                    return;
-                }
 
                 var rst = dbms.DoGetDataSQL<HLE_QT4>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + CURRENT_ITMES_ROW.CODE + "' AND ((VAHEDS.VAHED)= " + CURRENT_ITMES_ROW.VAHED_K + ")))").ToList();
                 if (rst.Count == 0)

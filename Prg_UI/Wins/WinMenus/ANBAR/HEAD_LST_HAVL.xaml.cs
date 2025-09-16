@@ -2271,7 +2271,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                             CURRENT_ITMES_ROW.NAME_CODE = WAS_ROW_ITEM.NAME_CODE;
                             return;
                         }
-                        if ((e.Row.Item as INVO_LST_FACTOR22).ANBAR is null)
+                        if (CURRENT_ITMES_ROW?.ANBAR is null)
                         {
                             return;
                         }

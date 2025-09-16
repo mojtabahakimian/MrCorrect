@@ -14,42 +14,42 @@
       <QSL_INVOICE_FROOSH Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>QSL_INVOICE_FROOSH</Alias>
         <Columns isList="true" count="71">
-          <value>ORIGINAL,NUMBER,NUMBER,NUMBER,System.Double,e8dcaf464de14afe801eaa0e0ea19b1a</value>
-          <value>ORIGINAL,TAG,TAG,TAG,System.Double,_x0035_595a604a0cb4b04a0e301517b9cebc9</value>
+          <value>ORIGINAL,NUMBER,NUMBER,NUMBER,System.Decimal,e8dcaf464de14afe801eaa0e0ea19b1a</value>
+          <value>ORIGINAL,TAG,TAG,TAG,System.Decimal,_x0035_595a604a0cb4b04a0e301517b9cebc9</value>
           <value>ORIGINAL,DATE_N,DATE_N,DATE_N,System.Int64,_x0035_38be08c118a4ede97031dabc460ff94</value>
           <value>ORIGINAL,CUST_NO,CUST_NO,CUST_NO,System.String,_x0033_7aa066e1bdf4422805a0d042dc9a2ce</value>
           <value>ORIGINAL,ANBAR,ANBAR,ANBAR,System.Int32,a74a001b7aa841228edb8257e59f4f93</value>
-          <value>ORIGINAL,NUMBER1,NUMBER1,NUMBER1,System.Double,_x0030_5034d08820442b2836d990f450144f7</value>
+          <value>ORIGINAL,NUMBER1,NUMBER1,NUMBER1,System.Decimal,_x0030_5034d08820442b2836d990f450144f7</value>
           <value>ORIGINAL,TAH,TAH,TAH,System.String,_x0035_d8c3dcaf935442e81d82762cf293b8f</value>
-          <value>ORIGINAL,MAS,MAS,MAS,System.Double,_x0032_5333a1daeea4060bb2358c4c2c728de</value>
-          <value>ORIGINAL,VAS,VAS,VAS,System.Double,_x0036_af5e5eef70644669d8cdd66f14b6f12</value>
-          <value>ORIGINAL,N_S,N_S,N_S,System.Double,bb1a6643abf7427cbb0ac4ccfbcaf2b8</value>
-          <value>ORIGINAL,M_NAGHD,M_NAGHD,M_NAGHD,System.Double,d19335f4790346a286a2c79c9062ccc1</value>
-          <value>ORIGINAL,MABL_VAR,MABL_VAR,MABL_VAR,System.Double,b7243b0c529e4a0596fcd0358f187149</value>
+          <value>ORIGINAL,MAS,MAS,MAS,System.Decimal,_x0032_5333a1daeea4060bb2358c4c2c728de</value>
+          <value>ORIGINAL,VAS,VAS,VAS,System.Decimal,_x0036_af5e5eef70644669d8cdd66f14b6f12</value>
+          <value>ORIGINAL,N_S,N_S,N_S,System.Decimal,bb1a6643abf7427cbb0ac4ccfbcaf2b8</value>
+          <value>ORIGINAL,M_NAGHD,M_NAGHD,M_NAGHD,System.Decimal,d19335f4790346a286a2c79c9062ccc1</value>
+          <value>ORIGINAL,MABL_VAR,MABL_VAR,MABL_VAR,System.Decimal,b7243b0c529e4a0596fcd0358f187149</value>
           <value>ORIGINAL,MOIN_VAR,MOIN_VAR,MOIN_VAR,System.String,b4a31d6e37684787ac33f67ba053a3c4</value>
-          <value>ORIGINAL,MABL_HAV,MABL_HAV,MABL_HAV,System.Double,_x0037_f76b68d8d48475b9921388cf8f823ae</value>
+          <value>ORIGINAL,MABL_HAV,MABL_HAV,MABL_HAV,System.Decimal,_x0037_f76b68d8d48475b9921388cf8f823ae</value>
           <value>ORIGINAL,MOIN_HAV,MOIN_HAV,MOIN_HAV,System.String,_x0033_c61dd9f46844ed59e484618a15bbcd6</value>
-          <value>ORIGINAL,MABL_HAZ,MABL_HAZ,MABL_HAZ,System.Double,e41ff1ddeccf41fe97d8ae74b288f242</value>
+          <value>ORIGINAL,MABL_HAZ,MABL_HAZ,MABL_HAZ,System.Decimal,e41ff1ddeccf41fe97d8ae74b288f242</value>
           <value>ORIGINAL,MOIN_HAZ,MOIN_HAZ,MOIN_HAZ,System.String,b491ff8bfe7649fe85aac9b02f215401</value>
-          <value>ORIGINAL,TAKHFIF,TAKHFIF,TAKHFIF,System.Double,_x0036_c26bee80bd8402689b57ce3b727e096</value>
+          <value>ORIGINAL,TAKHFIF,TAKHFIF,TAKHFIF,System.Decimal,_x0036_c26bee80bd8402689b57ce3b727e096</value>
           <value>ORIGINAL,MOIN_KHF,MOIN_KHF,MOIN_KHF,System.String,_x0030_12381ae23cf46acbbd954406c1bef73</value>
           <value>ORIGINAL,ANBARF,ANBARF,ANBARF,System.Int32,_x0036_80c4aa25b6d405ab30998955c58a722</value>
-          <value>ORIGINAL,FNUMCO,FNUMCO,FNUMCO,System.Double,_x0039_2862ef6d50d4d0ea1bd9cb002069657</value>
-          <value>ORIGINAL,INUMBER,INUMBER,INUMBER,System.Double,_x0032_3dc1368f6b34a95986fc5e7927ed6f7</value>
-          <value>ORIGINAL,ITAG,ITAG,ITAG,System.Double,_x0031_0b1ed670c284c11a3609240379e95f5</value>
+          <value>ORIGINAL,FNUMCO,FNUMCO,FNUMCO,System.Decimal,_x0039_2862ef6d50d4d0ea1bd9cb002069657</value>
+          <value>ORIGINAL,INUMBER,INUMBER,INUMBER,System.Decimal,_x0032_3dc1368f6b34a95986fc5e7927ed6f7</value>
+          <value>ORIGINAL,ITAG,ITAG,ITAG,System.Decimal,_x0031_0b1ed670c284c11a3609240379e95f5</value>
           <value>ORIGINAL,IANBAR,IANBAR,IANBAR,System.Int32,bbc5c28e9fe444f8ac4518b33ceaed6e</value>
-          <value>ORIGINAL,RADIF,RADIF,RADIF,System.Double,fb8e9c4e93604214988187f32c307759</value>
+          <value>ORIGINAL,RADIF,RADIF,RADIF,System.Decimal,fb8e9c4e93604214988187f32c307759</value>
           <value>ORIGINAL,CODE,CODE,CODE,System.String,_x0039_4e4257000ad4dedad67e8e3701abcf3</value>
-          <value>ORIGINAL,MEGH,MEGH,MEGH,System.Double,_x0033_7655390f6b44911afb69879bf5284bc</value>
-          <value>ORIGINAL,MEGHk,MEGHk,MEGHk,System.Double,_x0039_9a4d63384844725b87554e405f5a6bf</value>
-          <value>ORIGINAL,MEGH_MAR,MEGH_MAR,MEGH_MAR,System.Double,_x0030_080d2efa38841549f1bb5431cd8a187</value>
+          <value>ORIGINAL,MEGH,MEGH,MEGH,System.Decimal,_x0033_7655390f6b44911afb69879bf5284bc</value>
+          <value>ORIGINAL,MEGHk,MEGHk,MEGHk,System.Decimal,_x0039_9a4d63384844725b87554e405f5a6bf</value>
+          <value>ORIGINAL,MEGH_MAR,MEGH_MAR,MEGH_MAR,System.Decimal,_x0030_080d2efa38841549f1bb5431cd8a187</value>
           <value>ORIGINAL,MANDAH,MANDAH,MANDAH,System.String,_x0032_ded04dde9884b9db166cc185f08aa4a</value>
-          <value>ORIGINAL,MABL,MABL,MABL,System.Double,_x0030_88c23060fe04bdd97f70762dead84b3</value>
-          <value>ORIGINAL,MABL_K,MABL_K,MABL_K,System.Double,_x0039_a62ea3e06e54c2bbf79d66c2ccc2ad0</value>
+          <value>ORIGINAL,MABL,MABL,MABL,System.Decimal,_x0030_88c23060fe04bdd97f70762dead84b3</value>
+          <value>ORIGINAL,MABL_K,MABL_K,MABL_K,System.Decimal,_x0039_a62ea3e06e54c2bbf79d66c2ccc2ad0</value>
           <value>ORIGINAL,FROM_A,FROM_A,FROM_A,System.Boolean,_x0036_241ef71204a4cf9bb10daa23b8f7938</value>
           <value>ORIGINAL,N_RASID,N_RASID,N_RASID,System.String,_x0039_cc7b18901794163aef9e01155e12322</value>
-          <value>ORIGINAL,MEGH_R,MEGH_R,MEGH_R,System.Double,c6c55484cc45442884d1e7128efdd668</value>
-          <value>ORIGINAL,ICUST_NO,ICUST_NO,ICUST_NO,System.Double,_x0034_f0d356906494e2ea6eb61c8bd3fc24b</value>
+          <value>ORIGINAL,MEGH_R,MEGH_R,MEGH_R,System.Decimal,c6c55484cc45442884d1e7128efdd668</value>
+          <value>ORIGINAL,ICUST_NO,ICUST_NO,ICUST_NO,System.Decimal,_x0034_f0d356906494e2ea6eb61c8bd3fc24b</value>
           <value>ORIGINAL,NAME,NAME,NAME,System.String,b17e22bec30f47f5b6756cd4847659aa</value>
           <value>ORIGINAL,ADDRESS,ADDRESS,ADDRESS,System.String,a769e8ecc84c43ae96e6260f98c6fc61</value>
           <value>ORIGINAL,TEL,TEL,TEL,System.String,d69bfc80d9dd44e6b09e1d6966011dec</value>
@@ -58,7 +58,7 @@
           <value>ORIGINAL,MOLAH,MOLAH,MOLAH,System.String,_x0032_bde6003f21e41b38a99f03ae06d7dc2</value>
           <value>ORIGINAL,hes,hes,hes,System.String,_x0039_b9b40c2d1024dd3963aaa2673b4a3a0</value>
           <value>ORIGINAL,KALA,KALA,KALA,System.String,_x0033_0bc1056307745dd8fb5c93a3111dfb0</value>
-          <value>ORIGINAL,N_KOL,N_KOL,N_KOL,System.Double,_x0037_ac169d49d0f42758310fe5e58ff6682</value>
+          <value>ORIGINAL,N_KOL,N_KOL,N_KOL,System.Decimal,_x0037_ac169d49d0f42758310fe5e58ff6682</value>
           <value>ORIGINAL,CODE_E,CODE_E,CODE_E,System.String,c425c6df2c9b468baa23417ca77b4ef0</value>
           <value>ORIGINAL,ECODE,ECODE,ECODE,System.String,_x0035_84c639c213d4b55bc1214950b4f744b</value>
           <value>ORIGINAL,PCODE,PCODE,PCODE,System.String,_x0030_fca46ce539e4aca913c95c790dc041e</value>
@@ -68,16 +68,16 @@
           <value>ORIGINAL,TOZIH,TOZIH,TOZIH,System.String,_x0035_7558bdc327e4575b8d79913fc5d81ea</value>
           <value>ORIGINAL,CUST_COD,CUST_COD,CUST_COD,System.Int32,_x0039_4aa2fca29cb4ea58e197669e6ae417e</value>
           <value>ORIGINAL,MOBILE,MOBILE,MOBILE,System.String,_x0036_6a6310c24284d91a0c0defeb9b2be56</value>
-          <value>ORIGINAL,IMBAA,IMBAA,IMBAA,System.Double,_x0031_d75d1d60b154d9f914c14ccf1865f1c</value>
-          <value>ORIGINAL,N_MOIN,N_MOIN,N_MOIN,System.Double,d8879311507b4163b85944d2fcabdc55</value>
-          <value>ORIGINAL,MABKBT,MABKBT,MABKBT,System.Double,d94979e7991448d0a838cd3f69d383c2</value>
-          <value>ORIGINAL,MABKN,MABKN,MABKN,System.Double,f7e6d091548d46698fab3293281bbc28</value>
+          <value>ORIGINAL,IMBAA,IMBAA,IMBAA,System.Decimal,_x0031_d75d1d60b154d9f914c14ccf1865f1c</value>
+          <value>ORIGINAL,N_MOIN,N_MOIN,N_MOIN,System.Decimal,d8879311507b4163b85944d2fcabdc55</value>
+          <value>ORIGINAL,MABKBT,MABKBT,MABKBT,System.Decimal,d94979e7991448d0a838cd3f69d383c2</value>
+          <value>ORIGINAL,MABKN,MABKN,MABKN,System.Decimal,f7e6d091548d46698fab3293281bbc28</value>
           <value>ORIGINAL,HESAB,HESAB,HESAB,System.String,_x0036_25f420e42594f619cf8426b26936fe0</value>
           <value>ORIGINAL,DEPNAME,DEPNAME,DEPNAME,System.String,c92ba84056374cf29bab6d5c288ef574</value>
           <value>ORIGINAL,DEPART,DEPART,DEPART,System.String,a880f89941e740a09e70e14cf12ee9c2</value>
           <value>ORIGINAL,N_FANI,N_FANI,N_FANI,System.String,_x0033_fb9ce14c4b74cab82536a8c6b8fdcef</value>
           <value>ORIGINAL,KALA2,KALA2,KALA2,System.String,_x0031_2547d593780475d81fc9bc9c469a597</value>
-          <value>ORIGINAL,TKHN,TKHN,TKHN,System.Double,_x0035_64b4b00d8c64e72bfc3899f6a84babb</value>
+          <value>ORIGINAL,TKHN,TKHN,TKHN,System.Decimal,_x0035_64b4b00d8c64e72bfc3899f6a84babb</value>
           <value>ORIGINAL,sgn1usid,sgn1usid,sgn1usid,System.Int32,_x0039_86241ec65a44ed98300f209f57f0716</value>
           <value>ORIGINAL,sgn2usid,sgn2usid,sgn2usid,System.Int32,_x0039_71e1d385b784cbcaaa206fc9d7a178d</value>
           <value>ORIGINAL,sgn3usid,sgn3usid,sgn3usid,System.Int32,f86f14e45d02493bad6128a2eb61135b</value>
@@ -2053,7 +2053,8 @@
             </Text67>
             <SHARAYET Ref="121" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.6,1.1,5.3,0.8</ClientRectangle>
+              <CanShrink>True</CanShrink>
+              <ClientRectangle>5.5,1.1,5.4,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -2061,8 +2062,10 @@
               <Name>SHARAYET</Name>
               <Page isRef="5" />
               <Parent isRef="94" />
+              <ShrinkFontToFit>True</ShrinkFontToFit>
+              <ShrinkFontToFitMinimumSize>6</ShrinkFontToFitMinimumSize>
               <TextBrush>Black</TextBrush>
-              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <TextOptions>,,RightToLeft=True,,WordWrap=True,A=0</TextOptions>
               <Type>Expression</Type>
             </SHARAYET>
             <EndPointPrimitive9 Ref="122" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
@@ -2503,10 +2506,10 @@
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>9/13/2025 4:33:02 PM</ReportChanged>
+  <ReportChanged>9/16/2025 7:15:31 PM</ReportChanged>
   <ReportCreated>9/13/2025 3:29:02 PM</ReportCreated>
   <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\INVOICE_PISH_2_MBA.mrt</ReportFile>
-  <ReportGuid>7d1018766d144260864c069bebf6f4bc</ReportGuid>
+  <ReportGuid>a1ec4f06302e4a7e98de0a060ece52ad</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Inches</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

@@ -1308,6 +1308,11 @@ namespace Wins.WinMenus.ANBAR
             #region CODE_Not_In_List
             if (e.Column.SortMemberPath == "NAME_CODE")
             {
+                if (CURRENT_ITMES_ROW?.ANBAR == null)
+                {
+                    return;
+                }
+
                 if (ENTERED_VALUE_ROW.ToString() == "+" || ENTERED_VALUE_ROW.ToString() == "++" && !IsNull(CURRENT_ITMES_ROW.ANBAR))
                 {
                     CURRENT_ITMES_ROW.CODE = "";
@@ -1548,6 +1553,16 @@ namespace Wins.WinMenus.ANBAR
             #region MEGH_After_Update
             if (e.Column.SortMemberPath == "MEGH")
             {
+                if (string.IsNullOrEmpty(ENTERED_VALUE_ROW.ToStringNullSafe()) || !double.TryParse(ENTERED_VALUE_ROW.ToString(), out _))
+                {
+                    CURRENT_ITMES_ROW.MEGH = 0;
+                    return;
+                }
+                if (CURRENT_ITMES_ROW?.ANBAR is null || CURRENT_ITMES_ROW?.CODE is null || CURRENT_ITMES_ROW?.VAHED_K is null)
+                {
+                    return;
+                }
+
                 double min;
                 long Temp;
                 double MAND;
@@ -1555,10 +1570,7 @@ namespace Wins.WinMenus.ANBAR
                 // If RST.RecordCount > 0 Then
                 // If IsNull(RST.Fields("MIN_M")) Then
                 min = CL_HESABDARI.Getmin((int)CURRENT_ITMES_ROW.ANBAR, CURRENT_ITMES_ROW.CODE);
-                if (CURRENT_ITMES_ROW.CODE is null || CURRENT_ITMES_ROW.VAHED_K is null)
-                {
-                    return;
-                }
+               
 
                 var RST = dbms.DoGetDataSQL<RLQ5>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + CURRENT_ITMES_ROW.CODE + "' AND ((VAHEDS.VAHED)= " + CURRENT_ITMES_ROW.VAHED_K + ")))").ToList();
                 if (RST.Count == 0)

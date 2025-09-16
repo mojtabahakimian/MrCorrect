@@ -473,7 +473,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 dbms,
                 x => x.NUMBER.ToString(), // property selector (used to find a record by its CODE)
                 $"SELECT * FROM HEAD_LST {WhereCondition} ORDER BY NUMBER", //All Record of The Table
-            x => $"SELECT * FROM HEAD_LST WHERE NUMBER = {x?.NUMBER} AND TAG = {FTAG}", //On Change for One Record
+            x => $"SELECT TOP 1 * FROM HEAD_LST WHERE NUMBER = {x?.NUMBER} AND TAG = {FTAG}", //On Change for One Record
             Convert.ToDouble(NUMBER.Text)
             );
 
@@ -1381,25 +1381,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                     ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
                                 }
                                 CUST_NO.SelectedValue = thevalue;
-                                CUST_NO.Items.Refresh();
-
-                                if (Convert.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 19, 1)) == 5)
-                                {
-                                    var rstkind = dbms.DoGetDataSQL<CUST_HESAB>("SELECT TOP 1 hes,CUST_COD, NAME FROM dbo.CUST_HESAB WHERE HES = N'" + CUST_NO.SelectedValue + "'").FirstOrDefault();
-                                    if (!(rstkind?.CUST_COD is null))
-                                    {
-                                        CUST_KIND.SelectedValue = null;
-                                        CUST_KIND.SelectedValue = rstkind.CUST_COD;
-                                        CUST_KIND.Items.Refresh();
-                                    }
-                                    else
-                                    {
-                                        if (CUST_KIND.SelectedValue is null)
-                                        {
-                                            universControl.PopNotifyShow("نوع مشتري در تعريف مشتري مشخص نشده است.", Pop1, Pop1Text1, Pop_Border1);
-                                        }
-                                    }
-                                }
+                                CUST_NO.Items.Refresh();                      
                             }
                         }
                         var RSTDATE = dbms.DoGetDataSQL<string?>($"SELECT TOP 1 DATE_N FROM HEAD_LST WHERE NUMBER = {NUMBER.SelectedValue} AND TAG = {HTAG}").FirstOrDefault();

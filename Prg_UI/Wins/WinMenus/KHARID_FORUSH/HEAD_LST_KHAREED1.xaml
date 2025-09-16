@@ -296,7 +296,7 @@
 
                     </DataGrid>
 
-                    <CheckBox x:Name="SGN1" IsChecked="False"  Content="بازرگانی" Margin="0,0,6,84" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="82" Click="SGN1_Click" IsEnabled="False">
+                    <CheckBox x:Name="SGN1" IsChecked="False"  Content="بازرگانی" Margin="0,0,6,84" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="82" Click="SGN1_Click">
                         <CheckBox.Style>
                             <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
                                 <Style.Triggers>
@@ -307,7 +307,7 @@
                             </Style>
                         </CheckBox.Style>
                     </CheckBox>
-                    <CheckBox x:Name="SGN2" Content="حسابداری" IsChecked="False"  Margin="0,0,6,51" HorizontalAlignment="Right" Width="82" Height="23" VerticalAlignment="Bottom" Click="SGN2_Click" IsEnabled="False">
+                    <CheckBox x:Name="SGN2" Content="حسابداری" IsChecked="False"  Margin="0,0,6,51" HorizontalAlignment="Right" Width="82" Height="23" VerticalAlignment="Bottom" Click="SGN2_Click">
                         <CheckBox.Style>
                             <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
                                 <Style.Triggers>
@@ -318,7 +318,7 @@
                             </Style>
                         </CheckBox.Style>
                     </CheckBox>
-                    <CheckBox x:Name="SGN3" Content="مدیر عامل" IsChecked="False"  Margin="0,0,6,19" HorizontalAlignment="Right" Width="82" Height="23" VerticalAlignment="Bottom" Click="SGN3_Click" IsEnabled="False">
+                    <CheckBox x:Name="SGN3" Content="مدیر عامل" IsChecked="False"  Margin="0,0,6,19" HorizontalAlignment="Right" Width="82" Height="23" VerticalAlignment="Bottom" Click="SGN3_Click">
                         <CheckBox.Style>
                             <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
                                 <Style.Triggers>

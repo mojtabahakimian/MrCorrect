@@ -43,6 +43,7 @@ using Rpts;
 using static Prg_UI.HelperWins.Msgwin;
 using Wins.WinMenus.ANBAR;
 using System.Windows.Controls.Primitives;
+using static Prg_UI.Rpts.Win_INVOICE_PISHFROOSH2;
 
 namespace Wins.WinMenus.KHARID_FORUSH
 {
@@ -851,13 +852,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "مدت زمان توافق نمیتواند خالی باشد" });
             }
-            if (CL_HESABDARI.BLOCKEDCUST(CUST_NO2.SelectedValue.ToStringNullSafe()))
+            if (CL_HESABDARI.BLOCKEDCUST(CUST_NO.SelectedValue.ToStringNullSafe()))
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "حساب مشتري مسدود گرديده است لطفا با مديريت مالي تماس بگيريد" });
             }
             if (Convert.ToBoolean(Baseknow.SAGHF) || Convert.ToBoolean(Baseknow.SAGHF2))
             {
-                if (Convert.ToBoolean(CL_HESABDARI.Checketebar(CUST_NO2.SelectedValue.ToStringNullSafe())) == false || Convert.ToBoolean(CL_HESABDARI.ChecketebarMEG(CUST_NO2.SelectedValue.ToStringNullSafe())) == false)
+                if (Convert.ToBoolean(CL_HESABDARI.Checketebar(CUST_NO.SelectedValue.ToStringNullSafe())) == false || Convert.ToBoolean(CL_HESABDARI.ChecketebarMEG(CUST_NO.SelectedValue.ToStringNullSafe())) == false)
                 {
                     ErrosMessages.Add(new MsgModel { MessageText_U = "اعتبار اين مشتري تمام شده است و نمي تواند خريد نمايد...!" });
                 }
@@ -3507,7 +3508,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
         private void CheckBlockCust()//بررسی مسددودی یا بلاک بودن یک حساب
         {
-            if (CL_HESABDARI.BLOCKEDCUST(CUST_NO2.SelectedValue.ToString()))
+            if (CL_HESABDARI.BLOCKEDCUST(CUST_NO.SelectedValue.ToString()))
             {
                 CUST_NO.SelectedItem = null;
                 //MessageBox.Show(" حساب مشتري مسدود گرديده است لطفا با مديريت مالي تماس بگيريد", "", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -3519,7 +3520,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             if (Convert.ToBoolean(Baseknow.SAGHF) || Convert.ToBoolean(Baseknow.SAGHF2))
             {
-                if (Convert.ToBoolean(CL_HESABDARI.Checketebar(CUST_NO2.SelectedValue.ToString())) == false || Convert.ToBoolean(CL_HESABDARI.ChecketebarMEG(CUST_NO2.SelectedValue.ToString())) == false)
+                if (Convert.ToBoolean(CL_HESABDARI.Checketebar(CUST_NO.SelectedValue.ToString())) == false || Convert.ToBoolean(CL_HESABDARI.ChecketebarMEG(CUST_NO.SelectedValue.ToString())) == false)
                 {
                     CUST_NO2.SelectedItem = null;
                     universControl.PopNotifyShow("دقت کنيد اعتبار اين مشتري تمام شده است و نمي تواند خريد نمايد...!", Pop1, Pop1Text1, Pop_Border1, "#FFDC9E18");
@@ -3607,30 +3608,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
         private void CUST_NO_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (NowIsReady == true)
-            {
-                if (CUST_NO.SelectedItem != null && CUST_NO.Text != null)
-                {
-                    CUST_NO.SelectedValue = ((Custom_CUST_HESAB)CUST_NO.SelectedItem).hes;
-                    var rst = dbms.DoGetDataSQL<Custom2_CUST_HESAB>("SELECT     hes, CUST_COD FROM dbo.CUST_HESAB WHERE     (hes = N'" + CUST_NO.SelectedValue.ToString() + "')").ToList();
 
-                    if (rst.Count() > 0)
-                    {
-                        foreach (var item in rst)
-                        {
-                            if (item.CUST_COD != null)
-                            {
-                                CUST_KIND.SelectedValue = item.CUST_COD;
-                            }
-                            else
-                            {
-                                new Msgwin(false, "نوع مشتری در تعریف مشتری مشخص نشده است ضروری است آنرا تعریف کنید ! ").ShowDialog();
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
         }
         private void CUST_NO_LostFocus(object sender, RoutedEventArgs e)
         {
@@ -3651,7 +3629,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
             if (CUST_NO.SelectedValue is not null)
             {
-                if ((CUST_NO.SelectedItem as Custom_CUST_HESAB).NAME == CUTSNO_TEX.Text)
+                if ((CUST_NO.SelectedItem as Custom_CUST_HESAB)?.NAME == CUTSNO_TEX.Text)
                 {
                     return;
                 }
@@ -3681,7 +3659,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         }
                         CUST_NO.Items.Refresh();
                         CUST_NO.SelectedValue = _data_hes;
-                        this.CUST_NO2.SelectedValue = _data_hes;
+                        this.CUST_NO.SelectedValue = _data_hes;
                     }
                     else
                     {
@@ -3733,7 +3711,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         CUST_NO.SelectedValue = null;
                     }
                 }
-                if (CL_HESABDARI.BLOCKEDCUST(CUST_NO2.SelectedValue.ToString()))
+                if (CL_HESABDARI.BLOCKEDCUST(CUST_NO.SelectedValue.ToString()))
                 {
                     CUST_NO.SelectedItem = null;
                     universControl.PopNotifyShow(" حساب مسدود گرديده است لطفا با مديريت مالي تماس بگيريد", Pop1, Pop1Text1, Pop_Border1);
@@ -3741,13 +3719,22 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 }
             }
 
-            //if (!NewRecord)
-            //{
-            //    if (HeaderIsValid(false))
-            //        INVO_LST_SUB.IsReadOnly = false;
-            //    else
-            //        INVO_LST_SUB.IsReadOnly = true;
-            //}
+            if (NowIsReady && CUST_NO?.SelectedItem != null && !string.IsNullOrEmpty(CUST_NO?.Text))
+            {
+                if (Convert.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 19, 1)) == 5)
+                {
+                    var selectedCustomer = dbms.DoGetDataSQL<Custom2_CUST_HESAB>($"SELECT TOP 1 CUST_COD FROM dbo.CUST_HESAB WHERE hes = N'{CUST_NO.SelectedValue}'").FirstOrDefault();
+                    if (selectedCustomer?.CUST_COD != null)
+                    {
+                        CUST_KIND.SelectedValue = selectedCustomer.CUST_COD; CUST_KIND.Items.Refresh();
+                    }
+                    else if (selectedCustomer != null)
+                    {
+                        universControl.PopNotifyShowUp("نوع مشتری در تعریف مشتری مشخص نشده است ضروری است آنرا تعریف کنید ! ", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
+                    }
+                }
+            }
+
 
         }
         private void CUST_KIND_LostFocus(object sender, RoutedEventArgs e)
@@ -4395,17 +4382,83 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
         private void Command100_Click(object sender, RoutedEventArgs e)
         {
-            if (NewRecord || INVO_LST_PISH2_DATA.Count < 1) { return; }
+            //چاپ
 
-            Win_INVOICE_PISHFROOSH2 win_INVOICE_PISHFROOSH2 = new Win_INVOICE_PISHFROOSH2(NUMBER.Text, I_AM_PISHFACTOR);
-            win_INVOICE_PISHFROOSH2.ShowDialog();
-        }
-        private void Command139_Click(object sender, RoutedEventArgs e)
-        {
-            if (NewRecord && INVO_LST_PISH2_DATA.Count < 1) { return; }
+            if (NewRecord || INVO_LST_PISH2_DATA.Count < 1) { return; }
 
             Process Prc = ProcLoader.Start();
 
+            var report = new StiReport();
+            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.INVOICE_PISHFROOSH2.mrt");
+            report.Load(pathreport);
+            ((StiSqlDatabase)(report.Dictionary.Databases["MS SQL"])).ConnectionString = CL_CCNNMANAGER.CONNECTION_STR;
+
+            double NUMBER_Pas = Convert.ToDouble(NUMBER.Text);
+
+            report["NUMBER_PARAM"] = NUMBER.Text;
+
+            double JAMF, KH, BAA, TF;
+            JAMF = 0d;
+            TF = 0d;
+            BAA = 0d;
+            KH = 0d;
+            var jst = dbms.DoGetDataSQL<jst_JAMTAF>("SELECT     SUM(MABL_K) AS JAMF, SUM(N_MOIN) AS TF, SUM(IMBAA) AS BAA FROM dbo.INVO_LST WHERE (NUMBER = " + NUMBER_Pas + ") And (TAG = 20)").ToList();
+            if (jst.Count > 0 && !ReferenceEquals(jst.FirstOrDefault(), null))
+            {
+                JAMF = Convert.ToDouble(jst.Select(x => x.JAMF).FirstOrDefault());
+                TF = Convert.ToDouble(jst.Select(x => x.TF).FirstOrDefault());
+                BAA = Convert.ToDouble(jst.Select(x => x.BAA).FirstOrDefault());
+            };
+
+            var jst2 = dbms.DoGetDataSQL<jst_KH>("SELECT     SUM(MABL_HAZ) AS KH FROM dbo.HEAD_LST WHERE (NUMBER = " + NUMBER_Pas + ") And (TAG = 20)").ToList();
+
+            if (jst2.Count > 0 && !ReferenceEquals(jst2.FirstOrDefault(), null))
+            {
+                KH = Convert.ToDouble(jst2.Select(x => x.KH).FirstOrDefault());
+            }
+            (report.GetComponentByName("MABK") as StiText).Text = JAMF.ToString();
+            (report.GetComponentByName("TF") as StiText).Text = TF.ToString();
+            (report.GetComponentByName("KH") as StiText).Text = KH.ToString();
+
+            (report.GetComponentByName("MABAA") as StiText).Text = BAA.ToString();
+            (report.GetComponentByName("PAY") as StiText).Text = (JAMF + KH + BAA - TF).ToString();
+            var rst = dbms.DoGetDataSQL<rst_weight>("SELECT SUM(dbo.STUF_DEF.VAZN * dbo.INVO_LST.MEGHk) AS Weight FROM   dbo.INVO_LST INNER JOIN   dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE WHERE     (dbo.INVO_LST.TAG = 20) AND (dbo.INVO_LST.NUMBER = " + NUMBER_Pas + ")").FirstOrDefault();
+            if (!ReferenceEquals(rst, null))
+            {
+                if (!ReferenceEquals(rst.Weight, null))
+                {
+                    if (CL_LMethods.IsNumeric(rst.Weight?.ToString()) && rst.Weight > 0)
+                    {
+                        (report.GetComponentByName("vazn") as StiText).Enabled = true;
+                        (report.GetComponentByName("vazn") as StiText).Text = "وزن : " + Convert.ToString(Math.Round(Convert.ToDouble(rst.Weight)));
+                    }
+                    else
+                    {
+                        (report.GetComponentByName("vazn") as StiText).Enabled = false;
+                    }
+                }
+            }
+
+            double addad = JAMF + KH + BAA - TF;
+
+            report.Dictionary.Variables.Add("Variable1", Convert.ToInt64(addad));
+
+            (report.GetComponentByName("WIDTH_D") as StiText).Text = Baseknow.WIDTH_D; // نام شرکت
+            (report.GetComponentByName("SHARAYET") as StiText).Text = SHARAYET.Text;
+            (report.GetComponentByName("DATE_N_FL") as StiText).Text = "تاریخ : " + DATE_N.Text;
+
+            ShowEmzaha(report);
+
+            new WINRPT(report, "پیش فاکتور").Show();
+
+            ProcLoader.Stop(Prc);
+        }
+        private void Command139_Click(object sender, RoutedEventArgs e)
+        {
+            //چاپ 1
+            if (NewRecord && INVO_LST_PISH2_DATA.Count < 1) { return; }
+
+            Process Prc = ProcLoader.Start();
 
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.INVOICE_PISH_2_MBA.mrt");
@@ -4416,9 +4469,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
             (report.GetComponentByName("SHARAYET") as StiText).Text = SHARAYET.Text;
 
             ShowEmzaha(report);
-
-            //report.Render();
-            //report.Show();
 
             new WINRPT(report, "پیش فاکتور").Show();
             ProcLoader.Stop(Prc);
@@ -4453,272 +4503,281 @@ namespace Wins.WinMenus.KHARID_FORUSH
             PURSANT = 0L;
             DARSAD = 0d;
 
-            var rst = dbms.DoGetDataSQL<int?>("select pishpross from sazman").FirstOrDefault();
-            if (rst == 1)
+            try
             {
-                Msgwin msgwin = new Msgwin(false, "کاربر ديگردي در حال صدور پيش فاکتور است لطفا با کمي صبر دوباره تلاش کنيد"); msgwin.ShowDialog();
-                dbms.DoExecuteSQL("UPDATE    dbo.sazman SET   pishpross = 0");
-            }
-            else
-            {
-            n2:
-                dbms.DoExecuteSQL("UPDATE    dbo.sazman SET   pishpross = 1");
-                var RST2 = dbms.DoGetDataSQL<bool>("select OKF from HEAD_lst where NUMBER  = " + NUMBER.Text + " and tag = 20").FirstOrDefault();
-                if (RST2)
+                var rst = dbms.DoGetDataSQL<int?>("select pishpross from sazman").FirstOrDefault();
+                if (rst == 1)
                 {
-                    if (Strings.Mid(Baseknow.OPTIONSS, 45, 1) == "5")
+                    Msgwin msgwin = new Msgwin(false, "کاربر ديگردي در حال صدور پيش فاکتور است لطفا با کمي صبر دوباره تلاش کنيد"); msgwin.ShowDialog();
+                    dbms.DoExecuteSQL("UPDATE    dbo.sazman SET   pishpross = 0");
+                }
+                else
+                {
+                n2:
+                    dbms.DoExecuteSQL("UPDATE    dbo.sazman SET   pishpross = 1");
+                    var RST2 = dbms.DoGetDataSQL<bool>("select OKF from HEAD_lst where NUMBER  = " + NUMBER.Text + " and tag = 20").FirstOrDefault();
+                    if (RST2)
                     {
-                        Baseknow.Text44 = false;
-                        Msgwin msgwin = new Msgwin(false, "کاربر ديگردي در حال صدور پيش فاکتور است لطفا با کمي صبر دوباره تلاش کنيد"); msgwin.ShowDialog();
-                        if (Baseknow.Text44)
+                        if (Strings.Mid(Baseknow.OPTIONSS, 45, 1) == "5")
+                        {
+                            Baseknow.Text44 = false;
+                            Msgwin msgwin = new Msgwin(false, "کاربر ديگردي در حال صدور پيش فاکتور است لطفا با کمي صبر دوباره تلاش کنيد"); msgwin.ShowDialog();
+                            if (Baseknow.Text44)
+                            {
+                                dbms.DoExecuteSQL("UPDATE    dbo.sazman SET   pishpross = 0");
+                                ProcLoader.Stop(Prc);
+                                return;
+                            }
+                        }
+                        else
                         {
                             dbms.DoExecuteSQL("UPDATE    dbo.sazman SET   pishpross = 0");
+                            Msgwin msgwin = new Msgwin(false, "اين پيش فاكتور قبلا به فاكتور تبديل شده است و اجازه تبديل مجدد نداريد"); msgwin.ShowDialog();
                             ProcLoader.Stop(Prc);
                             return;
                         }
-                    }
-                    else
+                    };
+                    if (CL_HESABDARI.BLOCKEDCUST(CUST_NO.SelectedValue.ToString()))
                     {
                         dbms.DoExecuteSQL("UPDATE    dbo.sazman SET   pishpross = 0");
-                        Msgwin msgwin = new Msgwin(false, "اين پيش فاكتور قبلا به فاكتور تبديل شده است و اجازه تبديل مجدد نداريد"); msgwin.ShowDialog();
+                        Msgwin msgwin = new Msgwin(false, "حساب مشتري مسدود گرديده است لطفا با مديريت مالي تماس بگيريد"); msgwin.ShowDialog();
                         ProcLoader.Stop(Prc);
                         return;
                     }
-                };
-                if (CL_HESABDARI.BLOCKEDCUST(CUST_NO2.SelectedValue.ToString()))
-                {
-                    dbms.DoExecuteSQL("UPDATE    dbo.sazman SET   pishpross = 0");
-                    Msgwin msgwin = new Msgwin(false, "حساب مشتري مسدود گرديده است لطفا با مديريت مالي تماس بگيريد"); msgwin.ShowDialog();
-                    ProcLoader.Stop(Prc);
-                    return;
-                }
-                else if (CUST_KIND.SelectedIndex < 0)
-                {
-                    dbms.DoExecuteSQL("UPDATE    dbo.sazman SET   pishpross = 0");
-                    Msgwin msgwin = new Msgwin(false, "نوع مشتري نميتواند خالي باشد"); msgwin.ShowDialog();
-                    ProcLoader.Stop(Prc);
-                    return;
-                }
-                JAYEZAH();
-
-                var RST2_2 = dbms.DoGetDataSQL<INVO_LST>("select * from invo_lst where NUMBER  = " + NUMBER.Text + " and tag = 20").ToList();
-                string where_conditioninvonumber = " where NUMBER  = " + NUMBER.Text + " and tag = 20";
-                //while (!RST2.EOF)
-                foreach (var RST2_2Fields in RST2_2)
-                {
-                    nesba = CL_HESABDARI.GETNESBAT(RST2_2Fields.CODE, (int)RST2_2Fields.VAHED_K);
-                    MBK = (long)Math.Round(RST2_2Fields.MEGH * nesba * RST2_2Fields.MABL);
-                    double inv_nmoin = Math.Round((double)(RST2_2Fields.N_KOL * MBK / 100)) + Math.Round((double)((MBK - Math.Round((double)(RST2_2Fields.N_KOL * MBK / 100))) * RST2_2Fields.TKHN / 100));
-                    takh = (double)(takh + inv_nmoin);
-                    dbms.DoExecuteSQL($"UPDATE INVO_LST SET MEGHk = {Convert.ToDouble(RST2_2Fields.MEGH * nesba)}, MABL_K = {Math.Round(RST2_2Fields.MEGH * nesba * RST2_2Fields.MABL)},N_MOIN = {inv_nmoin} {where_conditioninvonumber} AND id = {RST2_2Fields.id} ");
-
-                    if (Strings.Mid(Baseknow.OPTIONSS, 51, 1) == "5")
+                    else if (CUST_KIND.SelectedIndex < 0)
                     {
-                        var rst4 = dbms.DoGetDataSQL<PRT1>("select MABL_F , B_SEF from STUF_DEF where code = '" + RST2_2Fields.CODE + "'").ToList();
-                        if (rst4.Count == 1)
+                        dbms.DoExecuteSQL("UPDATE    dbo.sazman SET   pishpross = 0");
+                        Msgwin msgwin = new Msgwin(false, "نوع مشتري نميتواند خالي باشد"); msgwin.ShowDialog();
+                        ProcLoader.Stop(Prc);
+                        return;
+                    }
+                    var appendedSharayet = $"{SHARAYET.Text ?? string.Empty} ش.پ {NUMBER.Text}";
+                    if (appendedSharayet.Length > 7999)
+                    {
+                        new Msgwin(false, "شرایط پیش فاکتور پس از افزودن شماره پیش‌فاکتور بیش از ۸۰۰۰ کاراکتر می‌شود. لطفاً متن شرایط را کوتاه‌تر کنید.").ShowDialog();
+                        return;
+                    }
+
+                    JAYEZAH();
+
+                    var RST2_2 = dbms.DoGetDataSQL<INVO_LST>("select * from invo_lst where NUMBER  = " + NUMBER.Text + " and tag = 20").ToList();
+                    string where_conditioninvonumber = " where NUMBER  = " + NUMBER.Text + " and tag = 20";
+                    //while (!RST2.EOF)
+                    foreach (var RST2_2Fields in RST2_2)
+                    {
+                        nesba = CL_HESABDARI.GETNESBAT(RST2_2Fields.CODE, (int)RST2_2Fields.VAHED_K);
+                        MBK = (long)Math.Round(RST2_2Fields.MEGH * nesba * RST2_2Fields.MABL);
+                        double inv_nmoin = Math.Round((double)(RST2_2Fields.N_KOL * MBK / 100)) + Math.Round((double)((MBK - Math.Round((double)(RST2_2Fields.N_KOL * MBK / 100))) * RST2_2Fields.TKHN / 100));
+                        takh = (double)(takh + inv_nmoin);
+                        dbms.DoExecuteSQL($"UPDATE INVO_LST SET MEGHk = {Convert.ToDouble(RST2_2Fields.MEGH * nesba)}, MABL_K = {Math.Round(RST2_2Fields.MEGH * nesba * RST2_2Fields.MABL)},N_MOIN = {inv_nmoin} {where_conditioninvonumber} AND id = {RST2_2Fields.id} ");
+
+                        if (Strings.Mid(Baseknow.OPTIONSS, 51, 1) == "5")
                         {
-                            if (Baseknow.GHAYM.ToString() == "2")
+                            var rst4 = dbms.DoGetDataSQL<PRT1>("select MABL_F , B_SEF from STUF_DEF where code = '" + RST2_2Fields.CODE + "'").ToList();
+                            if (rst4.Count == 1)
                             {
-                                CMABL = Convert.ToInt64(rst4.Select(x => x.MABL_F).FirstOrDefault());
+                                if (Baseknow.GHAYM.ToString() == "2")
+                                {
+                                    CMABL = Convert.ToInt64(rst4.Select(x => x.MABL_F).FirstOrDefault());
+                                }
+                                else if (Baseknow.GHAYM.ToString() == "5")
+                                {
+                                    CMABL = Convert.ToInt64(rst4.Select(x => x.B_SEF).FirstOrDefault());
+                                }
+                                else
+                                {
+                                    // If Forms![BASEKNOW]![GHAYM] = 6 Then
+                                    // Set RST = New ADODB.Recordset
+                                    // RST.Open "SELECT     CUST_CO, TAKH_COD, TAFPER,PRICE_M FROM dbo.TAKHPERS WHERE     (CUST_CO = " & Me.CUST_KIND & ") AND (TAKH_COD = N'" & Me.CODE & "')", CurrentProject.Connection, adOpenKeyset, adLockOptimistic
+                                    // If RST.RecordCount > 0 Then
+                                    // CMABL = RST.Fields("PRICE_M")
+                                    // End If
+                                    // End If
+                                }
                             }
-                            else if (Baseknow.GHAYM.ToString() == "5")
+                            if (CMABL != RST2_2Fields.MABL && RST2_2Fields.MABL != 0)
                             {
-                                CMABL = Convert.ToInt64(rst4.Select(x => x.B_SEF).FirstOrDefault());
-                            }
-                            else
+                                Msgwin msgwin = new Msgwin(false, " قيمت كالاي " + RST2_2Fields.CODE + " : " + CL_HESABDARI.GETKALANAME(Convert.ToDouble(RST2_2Fields.CODE)) + " با قيمت سيستم منطبق نيست"); msgwin.ShowDialog();
+                            };
+                            var rst44 = dbms.DoGetDataSQL<PRT2>("SELECT TOP 100 PERCENT dbo.INVO_LST.MABL, dbo.HEAD_LST.DATE_N FROM         dbo.HEAD_LST INNER JOIN dbo.INVO_LST ON dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG AND dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER WHERE     (dbo.INVO_LST.TAG = 1) AND (dbo.INVO_LST.CODE = N'" + RST2_2Fields.CODE + "') ORDER BY dbo.HEAD_LST.DATE_N DESC").ToList();
+                            if (rst44.Count > 0)
                             {
-                                // If Forms![BASEKNOW]![GHAYM] = 6 Then
-                                // Set RST = New ADODB.Recordset
-                                // RST.Open "SELECT     CUST_CO, TAKH_COD, TAFPER,PRICE_M FROM dbo.TAKHPERS WHERE     (CUST_CO = " & Me.CUST_KIND & ") AND (TAKH_COD = N'" & Me.CODE & "')", CurrentProject.Connection, adOpenKeyset, adLockOptimistic
-                                // If RST.RecordCount > 0 Then
-                                // CMABL = RST.Fields("PRICE_M")
-                                // End If
-                                // End If
+                                if (rst44.Select(x => x.MABL).FirstOrDefault() > RST2_2Fields.MABL)
+                                {
+                                    Msgwin msgwin = new Msgwin(false, "قيمت فروش از قيمت خريد كمتر مي باشد. " + "کد کالا : " + RST2_2Fields.CODE + " نام کالا : " + CL_HESABDARI.GETKALANAME(Convert.ToDouble(RST2_2Fields.CODE)));
+                                    msgwin.ShowDialog();
+                                }
                             }
-                        }
-                        if (CMABL != RST2_2Fields.MABL && RST2_2Fields.MABL != 0)
-                        {
-                            Msgwin msgwin = new Msgwin(false, " قيمت كالاي " + RST2_2Fields.CODE + " : " + CL_HESABDARI.GETKALANAME(Convert.ToDouble(RST2_2Fields.CODE)) + " با قيمت سيستم منطبق نيست"); msgwin.ShowDialog();
                         };
-                        var rst44 = dbms.DoGetDataSQL<PRT2>("SELECT TOP 100 PERCENT dbo.INVO_LST.MABL, dbo.HEAD_LST.DATE_N FROM         dbo.HEAD_LST INNER JOIN dbo.INVO_LST ON dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG AND dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER WHERE     (dbo.INVO_LST.TAG = 1) AND (dbo.INVO_LST.CODE = N'" + RST2_2Fields.CODE + "') ORDER BY dbo.HEAD_LST.DATE_N DESC").ToList();
-                        if (rst44.Count > 0)
-                        {
-                            if (rst44.Select(x => x.MABL).FirstOrDefault() > RST2_2Fields.MABL)
-                            {
-                                Msgwin msgwin = new Msgwin(false, "قيمت فروش از قيمت خريد كمتر مي باشد. " + "کد کالا : " + RST2_2Fields.CODE + " نام کالا : " + CL_HESABDARI.GETKALANAME(Convert.ToDouble(RST2_2Fields.CODE)));
-                                msgwin.ShowDialog();
-                            }
-                        }
-                    };
-                }
-                TAKHFIF.Text = takh.ToString();
-                if (Strings.Mid(Baseknow.OPTIONSS, 59, 1) == "5")
-                {
-                    var RST2_5 = dbms.DoGetDataSQL<ThePart1>("SELECT     ANBAR, CODE, SUM(MEGHk) AS MEGHk FROM dbo.INVO_LST WHERE NUMBER = " + NUMBER.Text + " and tag = 20 GROUP BY ANBAR, CODE").ToList();
-                    foreach (var RST2_5Fields in RST2_5)
+                    }
+                    TAKHFIF.Text = takh.ToString();
+                    if (Strings.Mid(Baseknow.OPTIONSS, 59, 1) == "5")
                     {
-                        var rst3 = dbms.DoGetDataSQL<double?>("SELECT MIN_M FROM STUF_DEF WHERE CODE = '" + RST2_5Fields.CODE + "'").ToList();
-                        if (rst3.Count == 1)
+                        var RST2_5 = dbms.DoGetDataSQL<ThePart1>("SELECT     ANBAR, CODE, SUM(MEGHk) AS MEGHk FROM dbo.INVO_LST WHERE NUMBER = " + NUMBER.Text + " and tag = 20 GROUP BY ANBAR, CODE").ToList();
+                        foreach (var RST2_5Fields in RST2_5)
                         {
-                            if (string.IsNullOrEmpty(rst3.FirstOrDefault().ToString()))
+                            var rst3 = dbms.DoGetDataSQL<double?>("SELECT MIN_M FROM STUF_DEF WHERE CODE = '" + RST2_5Fields.CODE + "'").ToList();
+                            if (rst3.Count == 1)
                             {
-                                if (TAMIR.SelectedIndex == 1 || TAMIR.SelectedIndex == 4)
+                                if (string.IsNullOrEmpty(rst3.FirstOrDefault().ToString()))
+                                {
+                                    if (TAMIR.SelectedIndex == 1 || TAMIR.SelectedIndex == 4)
+                                    {
+                                        min = CL_HESABDARI.Getmin((int)RST2_5Fields.ANBAR, RST2_5Fields.CODE);
+                                    }
+                                    else
+                                    {
+                                        min = (double)RST2_5Fields.MEGHk;
+                                    }
+                                }
+                                else if (TAMIR.SelectedIndex == 1 || TAMIR.SelectedIndex == 4)
                                 {
                                     min = CL_HESABDARI.Getmin((int)RST2_5Fields.ANBAR, RST2_5Fields.CODE);
                                 }
                                 else
                                 {
-                                    min = (double)RST2_5Fields.MEGHk;
+                                    min = (double)(CL_HESABDARI.Getmin((int)RST2_5Fields.ANBAR, RST2_5Fields.CODE) + RST2_5Fields.MEGHk);
                                 }
                             }
-                            else if (TAMIR.SelectedIndex == 1 || TAMIR.SelectedIndex == 4)
+                            var rst_1 = dbms.DoGetDataSQL<double?>("SELECT  ROUND(ISNULL(AK_MOGO_AVL_KOL.SMEGH, 0) - ISNULL(AK_MOGO_FR.MEG, 0),2) AS mand  FROM         dbo.AK_MOGO_AVL_KOL(99999999," + RST2_5Fields.ANBAR + ") AK_MOGO_AVL_KOL RIGHT OUTER JOIN   dbo.STUF_FSK ON AK_MOGO_AVL_KOL.CODE = dbo.STUF_FSK.CODE AND AK_MOGO_AVL_KOL.ANBAR = dbo.STUF_FSK.ANBAR LEFT OUTER JOIN  dbo.AK_MOGO_FR(99999999," + RST2_5Fields.ANBAR + ") AK_MOGO_FR ON dbo.STUF_FSK.CODE = AK_MOGO_FR.CODE AND dbo.STUF_FSK.ANBAR = AK_MOGO_FR.ANBAR WHERE     (dbo.STUF_FSK.CODE = N'" + RST2_5Fields.CODE + "') AND (dbo.STUF_FSK.ANBAR = " + RST2_5Fields.ANBAR + ")").FirstOrDefault();
+                            if (!ReferenceEquals(rst_1, null))
                             {
-                                min = CL_HESABDARI.Getmin((int)RST2_5Fields.ANBAR, RST2_5Fields.CODE);
-                            }
-                            else
-                            {
-                                min = (double)(CL_HESABDARI.Getmin((int)RST2_5Fields.ANBAR, RST2_5Fields.CODE) + RST2_5Fields.MEGHk);
-                            }
+                                if (Math.Round((double)rst_1, Convert.ToInt32(Baseknow.DIG)) < Math.Round(min, Convert.ToInt32(Baseknow.DIG)) && RST2_5Fields.ANBAR != 0)
+                                {
+                                    Msgwin msgwin = new Msgwin(false, " خروج كالاي  " + RST2_5Fields.CODE + " : " + CL_HESABDARI.GETKALANAME(Convert.ToDouble(RST2_5Fields.CODE)) + " از انبار موجودي را به مقدار غير مجاز كاهش ميدهد.برگه قابل تبديل نيست" + " حداقل موجودي لازم  :" + (min - rst_1)); msgwin.ShowDialog();
+                                    NOTPR = true;
+                                }
+                            };
                         }
-                        var rst_1 = dbms.DoGetDataSQL<double?>("SELECT  ROUND(ISNULL(AK_MOGO_AVL_KOL.SMEGH, 0) - ISNULL(AK_MOGO_FR.MEG, 0),2) AS mand  FROM         dbo.AK_MOGO_AVL_KOL(99999999," + RST2_5Fields.ANBAR + ") AK_MOGO_AVL_KOL RIGHT OUTER JOIN   dbo.STUF_FSK ON AK_MOGO_AVL_KOL.CODE = dbo.STUF_FSK.CODE AND AK_MOGO_AVL_KOL.ANBAR = dbo.STUF_FSK.ANBAR LEFT OUTER JOIN  dbo.AK_MOGO_FR(99999999," + RST2_5Fields.ANBAR + ") AK_MOGO_FR ON dbo.STUF_FSK.CODE = AK_MOGO_FR.CODE AND dbo.STUF_FSK.ANBAR = AK_MOGO_FR.ANBAR WHERE     (dbo.STUF_FSK.CODE = N'" + RST2_5Fields.CODE + "') AND (dbo.STUF_FSK.ANBAR = " + RST2_5Fields.ANBAR + ")").FirstOrDefault();
-                        if (!ReferenceEquals(rst_1, null))
-                        {
-                            if (Math.Round((double)rst_1, Convert.ToInt32(Baseknow.DIG)) < Math.Round(min, Convert.ToInt32(Baseknow.DIG)) && RST2_5Fields.ANBAR != 0)
-                            {
-                                Msgwin msgwin = new Msgwin(false, " خروج كالاي  " + RST2_5Fields.CODE + " : " + CL_HESABDARI.GETKALANAME(Convert.ToDouble(RST2_5Fields.CODE)) + " از انبار موجودي را به مقدار غير مجاز كاهش ميدهد.برگه قابل تبديل نيست" + " حداقل موجودي لازم  :" + (min - rst_1)); msgwin.ShowDialog();
-                                NOTPR = true;
-                            }
-                        };
                     }
-                }
-                if (NOTPR)
-                {
-                    Msgwin msgwin = new Msgwin(false, " به دليل كسري كالاهاي مذكور پيش فاكتور قابل تبديل نمي باشد كالاهاي مذكور را حذف يا به حد مجاز كاهش دهيد و مجددا سعي كنيد"); msgwin.ShowDialog();
-                    dbms.DoExecuteSQL("UPDATE    dbo.sazman SET   pishpross = 0");
-                    ProcLoader.Stop(Prc);
-                    return;
-                }
-                if (Convert.ToBoolean(Baseknow.SAGHF) || Convert.ToBoolean(Baseknow.SAGHF2))
-                {
-                    if (Convert.ToBoolean(CL_HESABDARI.Checketebar(CUST_NO2.SelectedValue.ToString())) == false || Convert.ToBoolean(CL_HESABDARI.ChecketebarMEG(CUST_NO2.SelectedValue.ToString())) == false)
+                    if (NOTPR)
                     {
-                        Msgwin msgwin = new Msgwin(false, "اعتبار اين مشتري تمام شده است و نمي تواند خريد نمايد...!"); msgwin.ShowDialog();
+                        Msgwin msgwin = new Msgwin(false, " به دليل كسري كالاهاي مذكور پيش فاكتور قابل تبديل نمي باشد كالاهاي مذكور را حذف يا به حد مجاز كاهش دهيد و مجددا سعي كنيد"); msgwin.ShowDialog();
+                        dbms.DoExecuteSQL("UPDATE    dbo.sazman SET   pishpross = 0");
                         ProcLoader.Stop(Prc);
                         return;
                     }
-                }
-                if (NUMBER.Text != "0")
-                {
-                    if (string.IsNullOrEmpty(OKF.IsChecked.ToString()))
+                    if (Convert.ToBoolean(Baseknow.SAGHF) || Convert.ToBoolean(Baseknow.SAGHF2))
                     {
-                        OKF.IsChecked = false;
-                    }
-                    Msgwin msgwin = new Msgwin(true, "آيا مطمئن هستيد ! پيش فاكتور به حواله تبديل شود؟"); msgwin.ShowDialog();
-                    if (msgwin.DialogResult == true)
-                    {
-                        long NUM1;
-
-                        using (IDbConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+                        if (Convert.ToBoolean(CL_HESABDARI.Checketebar(CUST_NO.SelectedValue.ToString())) == false || Convert.ToBoolean(CL_HESABDARI.ChecketebarMEG(CUST_NO.SelectedValue.ToString())) == false)
                         {
-                            db.Open();
-                            using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
+                            Msgwin msgwin = new Msgwin(false, "اعتبار اين مشتري تمام شده است و نمي تواند خريد نمايد...!"); msgwin.ShowDialog();
+                            ProcLoader.Stop(Prc);
+                            return;
+                        }
+                    }
+                    if (NUMBER.Text != "0")
+                    {
+                        if (string.IsNullOrEmpty(OKF.IsChecked.ToString()))
+                        {
+                            OKF.IsChecked = false;
+                        }
+                        Msgwin msgwin = new Msgwin(true, "آيا مطمئن هستيد ! پيش فاكتور به حواله تبديل شود؟"); msgwin.ShowDialog();
+                        if (msgwin.DialogResult == true)
+                        {
+                            long NUM1;
+
+                            using (IDbConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
                             {
-                                var _MasMaghsad_ = db.Query<int?>($"SELECT SHAHRID FROM dbo.CUST_HESAB WHERE hes = N'{CUST_NO.SelectedValue}'", null, transaction).FirstOrDefault();
-
-                                //Fake Query for Lock Table
-                                db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
-                                //Fake Query for Lock Table
-
-                                var rst_11 = db.Query<double?>("SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)=2))", null, transaction).FirstOrDefault();
-                                if (rst_11 == 0 || ReferenceEquals(rst_11, null))
+                                db.Open();
+                                using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
                                 {
-                                    num = Baseknow.STHFR;
-                                }
-                                else
-                                {
-                                    num = Convert.ToInt64(rst_11 + 1);
-                                }
-                                CDTIME = CL_HESABDARI.GTFS().ToString();
-                                var rst_f = db.Query<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER = " + num, null, transaction).FirstOrDefault();
-                                var _NUMBER = num;
-                                var _TAG = 2;
-                                var _OKF = false;
-                                var _CUST_NO = CUST_NO.SelectedValue?.ToString();
-                                var _DATE_N = Convert.ToInt64(Tarikh.FullCurrentDate);
-                                var _USER_NAME = USER_NAME.Text;
-                                var _DEPATMAN = (int?)DEPATMAN.SelectedValue;
-                                var _CUST_KIND = (int?)CUST_KIND.SelectedValue;
-                                var _SHIFT = CL_Generaly.SHIFT_OF_USER;
-                                var _MOLAH = MOLAH.Text;
-                                var _TICMBAA = (bool?)TICMBAA.IsChecked;
-                                var _MABL_HAZ = string.IsNullOrEmpty(MABL_HAZ.Text) ? (double?)null : Convert.ToDouble(MABL_HAZ.Text.RemoveQut());
-                                var _TAKHFIF = string.IsNullOrEmpty(TAKHFIF.Text) ? (double?)null : Convert.ToDouble(TAKHFIF.Text.RemoveQut());
-                                var _MBAA = string.IsNullOrEmpty(MBAA.Text) ? (double?)null : Convert.ToDouble(MBAA.Text.RemoveQut());
-                                var _HMBAA = ((Convert.ToDouble(MBAA?.Text?.RemoveQut()) > 0) ? Baseknow.HESMBAA : (string)null)?.ToString();
-                                var _VAS = 1;
-                                var _OKDATE = Convert.ToInt64(Tarikh.FullCurrentDate);
-                                var _OKTIME = Convert.ToInt32(CL_HESABDARI.GTFS());
-                                var _SHARAYET = $"{SHARAYET.Text} ش.پ {NUMBER.Text}";
-                                var _JAY = (bool?)JAY.IsChecked;
-                                var _TAMIR = 0;
-                                var _MAS_NUMBER = string.IsNullOrEmpty(MAS.Text) ? 0d : Convert.ToDouble(MAS.Text);
-                                var _MAS = string.IsNullOrEmpty(_MasMaghsad_.ToStringNullSafe()) ? _MAS_NUMBER : Convert.ToInt32(_MasMaghsad_);
-                                var _MODAT_PPID = (int?)MODAT_PPID.SelectedValue;
-                                var _PEID = (int?)PEID.SelectedValue;
-                                var _PEPID = (int?)PEPID.SelectedValue;
+                                    var _MasMaghsad_ = db.Query<int?>($"SELECT SHAHRID FROM dbo.CUST_HESAB WHERE hes = N'{CUST_NO.SelectedValue}'", null, transaction).FirstOrDefault();
 
-                                db.Execute($@"INSERT INTO dbo.HEAD_LST(NUMBER,   TAG,                   OKF,                                        CUST_NO,   DATE_N,      USER_NAME,                                              DEPATMAN,                                               CUST_KIND,   SHIFT,      MOLAH,                              TICMBAA,                                              MABL_HAZ,                                             TAKHFIF,                                          MBAA,                                      HMBAA,   VAS,   OKDATE,   OKTIME,      SHARAYET,                              JAY,   TAMIR,                                                 MODAT_PPID,                                          PEID,                                           PEPID ,  MAS)
+                                    //Fake Query for Lock Table
+                                    db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
+                                    //Fake Query for Lock Table
+
+                                    var rst_11 = db.Query<double?>("SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)=2))", null, transaction).FirstOrDefault();
+                                    if (rst_11 == 0 || ReferenceEquals(rst_11, null))
+                                    {
+                                        num = Baseknow.STHFR;
+                                    }
+                                    else
+                                    {
+                                        num = Convert.ToInt64(rst_11 + 1);
+                                    }
+                                    CDTIME = CL_HESABDARI.GTFS().ToString();
+                                    var rst_f = db.Query<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER = " + num, null, transaction).FirstOrDefault();
+                                    var _NUMBER = num;
+                                    var _TAG = 2;
+                                    var _OKF = false;
+                                    var _CUST_NO = CUST_NO.SelectedValue?.ToString();
+                                    var _DATE_N = Convert.ToInt64(Tarikh.FullCurrentDate);
+                                    var _USER_NAME = USER_NAME.Text;
+                                    var _DEPATMAN = (int?)DEPATMAN.SelectedValue;
+                                    var _CUST_KIND = (int?)CUST_KIND.SelectedValue;
+                                    var _SHIFT = CL_Generaly.SHIFT_OF_USER;
+                                    var _MOLAH = MOLAH.Text;
+                                    var _TICMBAA = (bool?)TICMBAA.IsChecked;
+                                    var _MABL_HAZ = string.IsNullOrEmpty(MABL_HAZ.Text) ? (double?)null : Convert.ToDouble(MABL_HAZ.Text.RemoveQut());
+                                    var _TAKHFIF = string.IsNullOrEmpty(TAKHFIF.Text) ? (double?)null : Convert.ToDouble(TAKHFIF.Text.RemoveQut());
+                                    var _MBAA = string.IsNullOrEmpty(MBAA.Text) ? (double?)null : Convert.ToDouble(MBAA.Text.RemoveQut());
+                                    var _HMBAA = ((Convert.ToDouble(MBAA?.Text?.RemoveQut()) > 0) ? Baseknow.HESMBAA : (string)null)?.ToString();
+                                    var _VAS = 1;
+                                    var _OKDATE = Convert.ToInt64(Tarikh.FullCurrentDate);
+                                    var _OKTIME = Convert.ToInt32(CL_HESABDARI.GTFS());
+                                    var _SHARAYET = $"{(SHARAYET.Text ?? string.Empty)} ش.پ {NUMBER.Text}";
+                                    var _JAY = (bool?)JAY.IsChecked;
+                                    var _TAMIR = 0;
+                                    var _MAS_NUMBER = string.IsNullOrEmpty(MAS.Text) ? 0d : Convert.ToDouble(MAS.Text);
+                                    var _MAS = string.IsNullOrEmpty(_MasMaghsad_.ToStringNullSafe()) ? _MAS_NUMBER : Convert.ToInt32(_MasMaghsad_);
+                                    var _MODAT_PPID = (int?)MODAT_PPID.SelectedValue;
+                                    var _PEID = (int?)PEID.SelectedValue;
+                                    var _PEPID = (int?)PEPID.SelectedValue;
+
+                                    db.Execute($@"INSERT INTO dbo.HEAD_LST(NUMBER,   TAG,                   OKF,                                        CUST_NO,   DATE_N,      USER_NAME,                                              DEPATMAN,                                               CUST_KIND,   SHIFT,      MOLAH,                              TICMBAA,                                              MABL_HAZ,                                             TAKHFIF,                                          MBAA,                                      HMBAA,   VAS,   OKDATE,   OKTIME,      SHARAYET,                              JAY,   TAMIR,                                                 MODAT_PPID,                                          PEID,                                           PEPID ,  MAS)
                                                             VALUES ({_NUMBER},{_TAG},{Convert.ToByte(_OKF)},{(_CUST_NO != null ? $"'{_CUST_NO}'" : "NULL")},{_DATE_N},N'{_USER_NAME}',{(_DEPATMAN.HasValue ? _DEPATMAN.ToString() : "NULL")},{(_CUST_KIND.HasValue ? _CUST_KIND.ToString() : "NULL")},{_SHIFT},N'{_MOLAH}',{(Convert.ToByte(_TICMBAA ?? false))},{(_MABL_HAZ.HasValue ? _MABL_HAZ.ToString() : "NULL")},{(_TAKHFIF.HasValue ? _TAKHFIF.ToString() : "NULL")},{(_MBAA.HasValue ? _MBAA.ToString() : "NULL")},{(_HMBAA != null ? $"'{_HMBAA}'" : "NULL")},{_VAS},{_OKDATE},{_OKTIME},N'{_SHARAYET}',{(Convert.ToByte(_JAY ?? false))},{_TAMIR}, {(_MODAT_PPID.HasValue ? _MODAT_PPID.ToString() : "NULL")},{(_PEID.HasValue ? _PEID.ToString() : "NULL")},{(_PEPID.HasValue ? _PEPID.ToString() : "NULL")} , {_MAS})", null, transaction);
 
 
-                                //______//
-                                OKF.IsChecked = true;
-                                TAMIR.SelectedIndex = 2;
-                                db.Execute("UPDATE  dbo.HEAD_LST SET   TAMIR = 2,OKF = 1 WHERE TAG = 20 AND NUMBER = " + NUMBER.Text, null, transaction);
-                                db.Execute("INSERT INTO dbo.INVO_LST (NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ,TKHN) SELECT     " + num + " aS NUMBER, 2 AS tag, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO,  CUST_NO , ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ,TKHN FROM   dbo.INVO_LST  WHERE     (NUMBER = " + NUMBER.Text + " ) AND (TAG = 20) and (jay = 0)", null, transaction);
-                                db.Execute("INSERT INTO dbo.OTHER_DTL (NUMBER, TAG, REQUEST_NO, BARNAMEH, DRIVER, DRIVER_MOB, CAMIUN_NUM, MAGHSAD, CAM_KHALY, CAM_POOR, TOZIH, CAMIUN) SELECT     " + num + " AS Expr1, 2 AS Expr2, REQUEST_NO, BARNAMEH, DRIVER, DRIVER_MOB, CAMIUN_NUM, MAGHSAD, CAM_KHALY, CAM_POOR, TOZIH, CAMIUN FROM dbo.OTHER_DTL WHERE     (TAG = 20) AND (NUMBER = " + NUMBER.Text + ")", null, transaction);
-                                db.Execute("INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, CAM_KHALY, CAM_POOR, MEGHk, TOZIH, RADIF, VAZNH) SELECT     " + num + " AS Expr1, 2 AS Expr2, CODE, CAM_KHALY, CAM_POOR, MEGHk, TOZIH, RADIF, VAZNH FROM dbo.OTHER_DTL_SUB WHERE     (TAGG = 20) AND (NUMBER = " + NUMBER.Text + ")", null, transaction);
-                                // جايزه
-                                //var Jrst = new ADODB.Recordset();
-                                var MEGHTAA = default(long);
-                                var MEGHJAYY = default(long);
-                                var VAHEDD = default(long);
-                                if ((bool)JAY.IsChecked)
-                                {
-                                    //Fake Query for Lock Table
-                                    db.Execute("UPDATE TOP(1) dbo.INVO_LST SET MANDAH = MANDAH", null, transaction);
-                                    //Fake Query for Lock Table
-                                    var Jrst = db.Query<INVO_LST>("SELECT * FROM INVO_LST WHERE TAG = 2 AND NUMBER = " + num, null, transaction).ToList();
-                                    foreach (var JrstFields in Jrst)
+                                    //______//
+                                    OKF.IsChecked = true;
+                                    TAMIR.SelectedIndex = 2;
+                                    db.Execute("UPDATE  dbo.HEAD_LST SET   TAMIR = 2,OKF = 1 WHERE TAG = 20 AND NUMBER = " + NUMBER.Text, null, transaction);
+                                    db.Execute("INSERT INTO dbo.INVO_LST (NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ,TKHN) SELECT     " + num + " aS NUMBER, 2 AS tag, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO,  CUST_NO , ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ,TKHN FROM   dbo.INVO_LST  WHERE     (NUMBER = " + NUMBER.Text + " ) AND (TAG = 20) and (jay = 0)", null, transaction);
+                                    db.Execute("INSERT INTO dbo.OTHER_DTL (NUMBER, TAG, REQUEST_NO, BARNAMEH, DRIVER, DRIVER_MOB, CAMIUN_NUM, MAGHSAD, CAM_KHALY, CAM_POOR, TOZIH, CAMIUN) SELECT     " + num + " AS Expr1, 2 AS Expr2, REQUEST_NO, BARNAMEH, DRIVER, DRIVER_MOB, CAMIUN_NUM, MAGHSAD, CAM_KHALY, CAM_POOR, TOZIH, CAMIUN FROM dbo.OTHER_DTL WHERE     (TAG = 20) AND (NUMBER = " + NUMBER.Text + ")", null, transaction);
+                                    db.Execute("INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, CAM_KHALY, CAM_POOR, MEGHk, TOZIH, RADIF, VAZNH) SELECT     " + num + " AS Expr1, 2 AS Expr2, CODE, CAM_KHALY, CAM_POOR, MEGHk, TOZIH, RADIF, VAZNH FROM dbo.OTHER_DTL_SUB WHERE     (TAGG = 20) AND (NUMBER = " + NUMBER.Text + ")", null, transaction);
+                                    // جايزه
+                                    //var Jrst = new ADODB.Recordset();
+                                    var MEGHTAA = default(long);
+                                    var MEGHJAYY = default(long);
+                                    var VAHEDD = default(long);
+                                    if ((bool)JAY.IsChecked)
                                     {
-                                        var rst_two = db.Query<STUF_DEF>("select * from STUF_DEF where CODE = '" + JrstFields.CODE + "'", null, transaction).FirstOrDefault();
-                                        if (ReferenceEquals(rst_two, null))
+                                        //Fake Query for Lock Table
+                                        db.Execute("UPDATE TOP(1) dbo.INVO_LST SET MANDAH = MANDAH", null, transaction);
+                                        //Fake Query for Lock Table
+                                        var Jrst = db.Query<INVO_LST>("SELECT * FROM INVO_LST WHERE TAG = 2 AND NUMBER = " + num, null, transaction).ToList();
+                                        foreach (var JrstFields in Jrst)
                                         {
-                                        }
-                                        else
-                                        {
-                                            MEGHJAYY = (long)rst_two.MEGHJAY;
-                                            MEGHTAA = (long)rst_two.MEGHTA;
-                                            VAHEDD = rst_two.VAHED;
-                                        }
-                                        if (Strings.Mid(Baseknow.OPTIONSS, 52, 1) == "5" && string.IsNullOrEmpty(JrstFields.JAYO.ToString()) && JrstFields.JAY == 0)
-                                        {
-                                            var rst_three = db.Query<invo_edam>("select * from invo_edam where idd = " + JrstFields.id, null, transaction).FirstOrDefault();
-                                            string where_invo_edam_idd = $" where idd = " + JrstFields.id;
-                                            if (!ReferenceEquals(rst_three, null))
+                                            var rst_two = db.Query<STUF_DEF>("select * from STUF_DEF where CODE = '" + JrstFields.CODE + "'", null, transaction).FirstOrDefault();
+                                            if (ReferenceEquals(rst_two, null))
                                             {
-                                                if (rst_three.MEGHTA != MEGHTAA || rst_three.MEGHJAY != MEGHJAYY && MEGHTAA + MEGHJAYY > 0L)
+                                            }
+                                            else
+                                            {
+                                                MEGHJAYY = (long)rst_two.MEGHJAY;
+                                                MEGHTAA = (long)rst_two.MEGHTA;
+                                                VAHEDD = rst_two.VAHED;
+                                            }
+                                            if (Strings.Mid(Baseknow.OPTIONSS, 52, 1) == "5" && string.IsNullOrEmpty(JrstFields.JAYO.ToString()) && JrstFields.JAY == 0)
+                                            {
+                                                var rst_three = db.Query<invo_edam>("select * from invo_edam where idd = " + JrstFields.id, null, transaction).FirstOrDefault();
+                                                string where_invo_edam_idd = $" where idd = " + JrstFields.id;
+                                                if (!ReferenceEquals(rst_three, null))
                                                 {
-                                                    Msgwin msgwin1 = new Msgwin(true, "مقادير جايزه نسبت به قبل تغيير كرده است آيا مقادير جديد را جايگزين كنم؟"); msgwin1.ShowDialog();
-                                                    if (msgwin1.DialogResult == true)
+                                                    if (rst_three.MEGHTA != MEGHTAA || rst_three.MEGHJAY != MEGHJAYY && MEGHTAA + MEGHJAYY > 0L)
                                                     {
-                                                        db.Execute($"UPDATE invo_edam SET MEGHTA = {MEGHTAA}, MEGHJAY = {MEGHJAYY}, VAHED = {VAHEDD} {where_invo_edam_idd}", null, transaction);
+                                                        Msgwin msgwin1 = new Msgwin(true, "مقادير جايزه نسبت به قبل تغيير كرده است آيا مقادير جديد را جايگزين كنم؟"); msgwin1.ShowDialog();
+                                                        if (msgwin1.DialogResult == true)
+                                                        {
+                                                            db.Execute($"UPDATE invo_edam SET MEGHTA = {MEGHTAA}, MEGHJAY = {MEGHJAYY}, VAHED = {VAHEDD} {where_invo_edam_idd}", null, transaction);
+                                                        }
                                                     }
                                                 }
-                                            }
-                                            else if (MEGHTAA + MEGHJAYY > 0L)
-                                            {
-                                                db.Execute($@"INSERT INTO dbo.invo_edam (idd,    MEGHTA,    MEGHJAY,    VAHED,    NUMBER,    TAGH)
+                                                else if (MEGHTAA + MEGHJAYY > 0L)
+                                                {
+                                                    db.Execute($@"INSERT INTO dbo.invo_edam (idd,    MEGHTA,    MEGHJAY,    VAHED,    NUMBER,    TAGH)
                                                                               VALUES
                                                                               (   {JrstFields.id},
                                                                                   {MEGHTAA},
@@ -4726,63 +4785,59 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                                                                   {VAHEDD},
                                                                                   {JrstFields.NUMBER},
                                                                                   2)", null, transaction);
+                                                }
                                             }
                                         }
-                                    }
-                                    var rst_four = db.Query<tabdilhav_1>("SELECT dbo.INVO_LST.VAHED_K, dbo.invo_edam.idd, dbo.INVO_LST.CODE, dbo.invo_edam.VAHED, dbo.invo_edam.MEGHTA, dbo.invo_edam.MEGHJAY, dbo.INVO_LST.NUMBER, dbo.INVO_LST.TAG, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.JAY , dbo.INVO_LST.JAYO, dbo.INVO_LST.id FROM dbo.INVO_LST INNER JOIN dbo.invo_edam ON dbo.INVO_LST.id = dbo.invo_edam.idd WHERE     (dbo.INVO_LST.TAG = 2) AND (dbo.INVO_LST.JAY = 0) AND dbo.INVO_LST.NUMBER = " + num, null, transaction).ToList();
-                                    foreach (var rst_fourFields in rst_four)
-                                    {
-                                        if (ReferenceEquals(rst_fourFields.JAYO, null))
+                                        var rst_four = db.Query<tabdilhav_1>("SELECT dbo.INVO_LST.VAHED_K, dbo.invo_edam.idd, dbo.INVO_LST.CODE, dbo.invo_edam.VAHED, dbo.invo_edam.MEGHTA, dbo.invo_edam.MEGHJAY, dbo.INVO_LST.NUMBER, dbo.INVO_LST.TAG, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.JAY , dbo.INVO_LST.JAYO, dbo.INVO_LST.id FROM dbo.INVO_LST INNER JOIN dbo.invo_edam ON dbo.INVO_LST.id = dbo.invo_edam.idd WHERE     (dbo.INVO_LST.TAG = 2) AND (dbo.INVO_LST.JAY = 0) AND dbo.INVO_LST.NUMBER = " + num, null, transaction).ToList();
+                                        foreach (var rst_fourFields in rst_four)
                                         {
-                                            if (rst_fourFields.MEGHTA > 0 && rst_fourFields.MEGHJAY > 0)
+                                            if (ReferenceEquals(rst_fourFields.JAYO, null))
                                             {
-                                                if (rst_fourFields.MEGHk / rst_fourFields.MEGHTA >= 1)
+                                                if (rst_fourFields.MEGHTA > 0 && rst_fourFields.MEGHJAY > 0)
                                                 {
-                                                    db.Execute($@"INSERT INTO dbo.INVO_LST (NUMBER, TAG, ANBAR, RADIF, CODE 	, MEGH 	, MEGHk 	, SANAD_NO, VAHED_K, JAY)
-                                                                                                    VALUES
-                                                                                                    (   {rst_fourFields.NUMBER},
-                                                                                                        {rst_fourFields.TAG},
-                                                                                                        {rst_fourFields.ANBAR},
-                                                                                                        {rst_fourFields.RADIF + 1},
-                                                                                                        N'{rst_fourFields.CODE}',
-                                                                                                        {Math.Truncate(Convert.ToDouble(rst_fourFields.MEGHk / rst_fourFields.MEGHTA * rst_fourFields.MEGHJAY / CL_HESABDARI.GETVAHEDN(rst_fourFields.CODE, Convert.ToInt32(rst_fourFields.VAHED))))},	
-                                                                                                        {Math.Truncate((double)(Convert.ToDouble(rst_fourFields.MEGHk / rst_fourFields.MEGHTA) * rst_fourFields.MEGHJAY))}, 	
-                                                                                                        0,
-                                                                                                        {rst_fourFields.VAHED},
-                                                                                                        {rst_fourFields.id},
-                                                                                                        )
-                                                                                                    ", null, transaction);
+                                                    if (rst_fourFields.MEGHk / rst_fourFields.MEGHTA >= 1)
+                                                    {
+                                                        db.Execute($@"INSERT INTO dbo.INVO_LST (NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, SANAD_NO, VAHED_K, JAY)
+                                                                      SELECT
+                                                                          {rst_fourFields.NUMBER},
+                                                                          {rst_fourFields.TAG},
+                                                                          {rst_fourFields.ANBAR},
+                                                                          (SELECT ISNULL(MAX(RADIF), 0) + 1 FROM dbo.INVO_LST WHERE NUMBER = {rst_fourFields.NUMBER} AND TAG = {rst_fourFields.TAG}),
+                                                                          N'{rst_fourFields.CODE}',
+                                                                          {Math.Truncate(Convert.ToDouble(rst_fourFields.MEGHk / rst_fourFields.MEGHTA * rst_fourFields.MEGHJAY / CL_HESABDARI.GETVAHEDN(rst_fourFields.CODE, Convert.ToInt32(rst_fourFields.VAHED))))},
+                                                                          {Math.Truncate((double)(Convert.ToDouble(rst_fourFields.MEGHk / rst_fourFields.MEGHTA) * rst_fourFields.MEGHJAY))},
+                                                                          0,
+                                                                          {rst_fourFields.VAHED},
+                                                                          {rst_fourFields.id}
+                                                                    ", null, transaction);
+                                                    }
                                                 }
                                             }
                                             else
                                             {
                                             }
                                         }
-                                        else
+                                    }
+                                    var rst_five = db.Query<tabdilhav_2>("SELECT      CUST_NO, DARSAD, PURSANT, TOZIH,PORID FROM dbo.VISITOR_DTL WHERE (NUMBER = " + NUMBER.Text + ") And (TAG = 20)", null, transaction).FirstOrDefault();
+                                    if (!ReferenceEquals(rst_five, null))
+                                    {
+                                        if (string.IsNullOrEmpty(rst_five.CUST_NO.ToString()))
                                         {
+                                            Msgwin msgwin2 = new Msgwin(false, "مشخصات ويزيتور صحيح نيست واشكال دارد پورسانت ويزيتور در فاكتور را بررسي و اصلاح كنيد"); msgwin2.ShowDialog();
                                         }
                                     }
+                                    db.Execute("INSERT INTO dbo.VISITOR_DTL (NUMBER, TAG, CUST_NO, DARSAD, PURSANT, TOZIH,PORID) SELECT     " + num + ", 2, CUST_NO, DARSAD, PURSANT, TOZIH,PORID FROM dbo.VISITOR_DTL WHERE (NUMBER = " + NUMBER.Text + ") And (TAG = 20)", null, transaction);
+                                    Msgwin msgwin3 = new Msgwin(false, "پيش فاكتور تبديل به حواله  شماره :" + num + "  گرديد"); msgwin3.ShowDialog();
+                                    TAMIR.SelectedIndex = 2;
+                                    db.Execute("UPDATE  dbo.HEAD_LST SET   TAMIR = 2,OKF = 1 WHERE TAG = 20 AND NUMBER = " + NUMBER.Text, null, transaction);
+                                    INVO_LST_SUB.IsReadOnly = true;
+                                    this.TAMIR.IsEnabled = false;
+                                    transaction.Commit();
+                                    db?.Close();
                                 }
-                                var rst_five = db.Query<tabdilhav_2>("SELECT      CUST_NO, DARSAD, PURSANT, TOZIH,PORID FROM dbo.VISITOR_DTL WHERE (NUMBER = " + NUMBER.Text + ") And (TAG = 20)", null, transaction).FirstOrDefault();
-                                if (!ReferenceEquals(rst_five, null))
-                                {
-                                    if (string.IsNullOrEmpty(rst_five.CUST_NO.ToString()))
-                                    {
-                                        Msgwin msgwin2 = new Msgwin(false, "مشخصات ويزيتور صحيح نيست واشكال دارد پورسانت ويزيتور در فاكتور را بررسي و اصلاح كنيد"); msgwin2.ShowDialog();
-                                    }
-                                }
-                                db.Execute("INSERT INTO dbo.VISITOR_DTL (NUMBER, TAG, CUST_NO, DARSAD, PURSANT, TOZIH,PORID) SELECT     " + num + ", 2, CUST_NO, DARSAD, PURSANT, TOZIH,PORID FROM dbo.VISITOR_DTL WHERE (NUMBER = " + NUMBER.Text + ") And (TAG = 20)", null, transaction);
-                                Msgwin msgwin3 = new Msgwin(false, "پيش فاكتور تبديل به حواله  شماره :" + num + "  گرديد"); msgwin3.ShowDialog();
-                                TAMIR.SelectedIndex = 2;
-                                db.Execute("UPDATE  dbo.HEAD_LST SET   TAMIR = 2,OKF = 1 WHERE TAG = 20 AND NUMBER = " + NUMBER.Text, null, transaction);
-                                INVO_LST_SUB.IsReadOnly = true;
-                                this.TAMIR.IsEnabled = false;
-                                transaction.Commit();
-                                db?.Close();
                             }
-                        }
-                    };
-                    dbms.DoExecuteSQL($@"INSERT INTO	dbo.head_lst_log (UP_DATE,NUMBER,TAGG,RESERVED,UP_USER_NAME,fieldname,UDATEF)
+                        };
+                        dbms.DoExecuteSQL($@"INSERT INTO	dbo.head_lst_log (UP_DATE,NUMBER,TAGG,RESERVED,UP_USER_NAME,fieldname,UDATEF)
                                                        VALUES
                                                        (   GETDATE(),
                                                            {NUMBER.Text},
@@ -4792,18 +4847,23 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                                            N'TABDILHAVLA',
                                                            {Tarikh.FullCurrentDate}
                                                            )");
+                    }
+                }
+                dbms.DoExecuteSQL("UPDATE    dbo.sazman SET   pishpross = 0");
+                if (Convert.ToBoolean(Baseknow.SIGN))
+                {
+                    string SHARH;
+                    double td;
+                    td = Convert.ToDouble(DateTime.Now.ToOADate());
+
+                    SHARH = "حواله شماره: " + num + " مورخ " + Strings.Format(DATE_N.Text.ToRawTarikh(), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(CUST_NO.SelectedValue.ToString()) + " از پيش فاکتور : " + NUMBER.Text;
+                    dbms.DoExecuteSQL("insert into tasks(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO)  values (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.UCurrentUser() + "','" + SHARH + "','" + CUST_NO.SelectedValue + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",2," + num + ",2," + td + "," + Baseknow.USERCOD + " )");
                 }
             }
-            dbms.DoExecuteSQL("UPDATE    dbo.sazman SET   pishpross = 0");
-            dbms.DoExecuteSQL("UPDATE    dbo.sazman SET   pishpross = 0");
-            if (Convert.ToBoolean(Baseknow.SIGN))
+            catch (Exception)
             {
-                string SHARH;
-                double td;
-                td = Convert.ToDouble(DateTime.Now.ToOADate());
-
-                SHARH = "حواله شماره: " + num + " مورخ " + Strings.Format(DATE_N.Text.ToRawTarikh(), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(CUST_NO.SelectedValue.ToString()) + " از پيش فاکتور : " + NUMBER.Text;
-                dbms.DoExecuteSQL("insert into tasks(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO)  values (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.UCurrentUser() + "','" + SHARH + "','" + CUST_NO.SelectedValue + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",2," + num + ",2," + td + "," + Baseknow.USERCOD + " )");
+                ProcLoader.Stop(Prc);
+                new Msgwin(false, "خطا در انجام عملیات").Show(); return;
             }
 
             BTN_SAVE_Click(null, null);
@@ -5222,53 +5282,42 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         }
                         //Set rst = New ADODB.Recordset
                         {
-                            var rst = dbms.DoGetDataSQL<JAYMD>("SELECT dbo.INVO_LST.VAHED_K, dbo.invo_edam.idd, dbo.INVO_LST.CODE, dbo.invo_edam.VAHED, dbo.invo_edam.MEGHTA, dbo.invo_edam.MEGHJAY, dbo.INVO_LST.NUMBER, dbo.INVO_LST.TAG, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, dbo.INVO_LST.JAY , dbo.INVO_LST.JAYO, dbo.INVO_LST.id FROM dbo.INVO_LST INNER JOIN dbo.invo_edam ON dbo.INVO_LST.id = dbo.invo_edam.idd WHERE     (dbo.INVO_LST.TAG = 2) AND (dbo.INVO_LST.JAY = 0) AND dbo.INVO_LST.NUMBER = " + num).ToList();
-                            foreach (var Fields in rst) //while (!rst.EOF)
+                            var query = $@"SELECT 
+                                          L.VAHED_K, E.idd, L.CODE, E.VAHED, E.MEGHTA, E.MEGHJAY, 
+                                          L.NUMBER, L.TAG, L.ANBAR, L.RADIF, L.MEGH, L.MEGHk, 
+                                          L.JAY, L.JAYO, L.id 
+                                        FROM dbo.INVO_LST AS L
+                                        INNER JOIN dbo.invo_edam AS E ON L.id = E.idd 
+                                        WHERE (L.TAG = 2) AND (L.JAY = 0) AND (L.NUMBER = @num)";
+                            var parameters = new { num = num };
+                            var rst = dbms.DoGetDataSQL<JAYMD>(query, parameters).ToList();
+
+                            foreach (var fields in rst)
                             {
-                                if (IsNull(Fields.JAYO))
+                                if (fields.JAYO == null)
                                 {
-                                    if (Fields.MEGHTA > 0 & Fields.MEGHJAY > 0)
+                                    if (fields.MEGHTA > 0 && fields.MEGHJAY > 0)
                                     {
-                                        if (Fields.MEGHk / Fields.MEGHTA >= 1)
+                                        if (fields.MEGHk / fields.MEGHTA >= 1)
                                         {
-                                            //Jrst.AddNew();
-                                            //Jrst.Fields("NUMBER") = Fields.NUMBER;
-                                            //Jrst.Fields("TAG") = Fields.TAG;
-                                            //Jrst.Fields("ANBAR") = Fields.ANBAR;
-                                            //Jrst.Fields("JAY") = Fields.id;
-                                            //Jrst.Fields("CODE") = Fields.CODE;
-                                            //Jrst.Fields("SANAD_NO") = 0;
-                                            //Jrst.Fields("RADIF") = Fields.RADIF + 1;
-                                            //Jrst.Fields("VAHED_K") = Fields.VAHED;
-                                            //Jrst.Fields("MEGH") = Math.Truncate((double)(Fields.MEGHk / Fields.MEGHTA)) * Fields.MEGHJAY / CL_HESABDARI.GETVAHEDN(Fields.CODE, (int)Fields.VAHED);
-                                            //Jrst.Fields("MEGHK") = Math.Truncate((double)(Fields.MEGHk / Fields.MEGHTA)) * Fields.MEGHJAY;
-                                            //Jrst.update();
+                                            var insertQuery = $@"
+                                             INSERT INTO dbo.INVO_LST (NUMBER, TAG, ANBAR, JAY, CODE, SANAD_NO, RADIF, VAHED_K, MEGH, MEGHk)
+                                             SELECT
+                                                 {fields.NUMBER},
+                                                 {fields.TAG},
+                                                 {fields.ANBAR},
+                                                 {fields.id},
+                                                 N'{fields.CODE}',
+                                                 0,
+                                                 (SELECT ISNULL(MAX(RADIF), 0) + 1 FROM dbo.INVO_LST WHERE NUMBER = {fields.NUMBER} AND TAG = {fields.TAG}),
+                                                 {fields.VAHED},
+                                                 {Math.Truncate((double)((double)(fields.MEGHk / fields.MEGHTA) * fields.MEGHJAY / CL_HESABDARI.GETVAHEDN(fields.CODE, (int)fields.VAHED)))},
+                                                 {Math.Truncate((double)((double)(fields.MEGHk / fields.MEGHTA) * fields.MEGHJAY))}";
 
-                                            var insertQuery = $@"INSERT INTO INVO_LST 
-                                                    (NUMBER, TAG, ANBAR, JAY, CODE, SANAD_NO, RADIF, VAHED_K, MEGH, MEGHk)
-                                                VALUES 
-                                                    ({Fields.NUMBER},
-                                                     {Fields.TAG},
-                                                     {Fields.ANBAR},
-                                                     {Fields.id},
-                                                     '{Fields.CODE}',
-                                                     0,
-                                                     {Fields.RADIF + 1},
-                                                     {Fields.VAHED},
-                                                     {Math.Truncate((double)(Fields.MEGHk / Fields.MEGHTA)) * Fields.MEGHJAY / CL_HESABDARI.GETVAHEDN(Fields.CODE, (int)Fields.VAHED)},
-                                                     {Math.Truncate((double)(Fields.MEGHk / Fields.MEGHTA)) * Fields.MEGHJAY})";
-
-                                            dbms.DoExecuteSQL(insertQuery); //Jrst.update();
+                                            dbms.DoExecuteSQL(insertQuery);
                                         }
                                     }
-                                    else
-                                    {
-                                    }
                                 }
-                                else
-                                {
-                                }
-                                //rst.MoveNext();
                             }
                         }
                     }
