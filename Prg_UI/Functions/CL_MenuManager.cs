@@ -868,7 +868,11 @@ namespace Functions
             /// <summary>
             /// گزارش فاکتور های خرید به اشخاص
             /// </summary>
-            WIN_F_MENU_KHFR_KLIST
+            WIN_F_MENU_KHFR_KLIST,
+            /// <summary>
+            /// لیست امار تولید
+            /// </summary>
+            AMAR_TOLID
         }
         #endregion
 
@@ -889,6 +893,10 @@ namespace Functions
 
                 case WinNameType.HEAD_SERCH_MAIN_ADVANC_F12: /*  جستجو در گردش کالا های پیشرفته | F12 پیشرفته */ CL_LMethods.OpenWindow(OWNERWIN, new HEAD_SERCH_MAIN_ADVANC(), isModalDialog: false, allowMultipleInstances: false); break;
                 //Mojtaba}
+
+                case WinNameType.AMAR_TOLID: //لیست کالا های فروش نرفته به شخص
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_DATE("AMTOL"));
+                    break;
 
                 case WinNameType.WIN_F_MENU_KHFR_KLIST: //لیست کالا های فروش نرفته به شخص
                     CL_LMethods.OpenWindow(OWNERWIN, new WIN_F_MENU_KHFR("KLIST"));

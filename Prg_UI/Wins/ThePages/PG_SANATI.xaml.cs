@@ -39,5 +39,10 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALE_EXIT_SAYER, default); //صدور برگه خروج سایر مواد از انبار
         }
+
+        private void Image_PreviewMouseDown_2(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.AMAR_TOLID, default);
+        }
     }
 }
