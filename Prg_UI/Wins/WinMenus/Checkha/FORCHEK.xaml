@@ -38,7 +38,7 @@
         <Label x:Name="Label64" Content=": ردیف دفتر" HorizontalAlignment="Left" Margin="486,52,0,0" VerticalAlignment="Top" Width="auto"/>
         <TextBox x:Name="RADIF" Height="27" Margin="0,54,129,0" IsReadOnly="True" Tag="RD"  Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="81" IsTabStop="False" IsHitTestVisible="False" IsEnabled="False" />
         <Label x:Name="Label1" Content=": شماره سریال" HorizontalAlignment="Left" Margin="486,86,0,0" VerticalAlignment="Top" Width="auto"/>
-        <ComboBox x:Name="BANK" IsReadOnly="True" TabIndex="2" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="346,119,130,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" LostFocus="BANK_LostFocus" IsTabStop="True">
+        <ComboBox x:Name="BANK" IsReadOnly="True" TabIndex="2" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="346,119,130,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"  SelectedIndex="0" Background="{x:Null}" BorderThickness="1" LostFocus="BANK_LostFocus" IsTabStop="True">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
