@@ -394,5 +394,10 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 CL_LMethods.SendKey_US(Key.Tab);
             }
         }
+
+        private void BANK_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

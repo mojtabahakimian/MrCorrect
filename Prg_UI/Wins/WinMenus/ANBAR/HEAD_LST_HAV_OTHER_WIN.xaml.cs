@@ -2027,18 +2027,6 @@ namespace Wins.WinMenus.ANBAR
             }
             #endregion
 
-            if (e.Column.SortMemberPath == "NAME_CODE")
-            {
-                //ERROR
-                // CODEh_COLUMN.
-                // this.CODE.RowSource = "SELECT STUF_DEF.CODE, STUF_DEF.NAME, STUF_DEF.CODE FROM STUF_DEF ORDER BY STUF_DEF.NAME";
-                // this.CODE.Requery();
-                // if (CURRENT_ITMES_ROW.CODE == CURRENT_ITMES_ROW.CODEO && this.NewRecord)
-                // {
-                //     CODE_AfterUpdate();
-                // }
-                //REFRESHMOG(this.CODE, this.ANBAR, "head_lst_hav_other");
-            }
         }
 
         private void INVO_LST_HAV_SUB_OTHER_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)

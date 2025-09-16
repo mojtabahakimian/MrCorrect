@@ -261,12 +261,9 @@
 
                     </DataGrid>
 
-                    <CheckBox x:Name="SGN1"  IsChecked="False" Content="فروش" Margin="0,0,4,134" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="82" Click="SGN1_Click" IsEnabled="False">
-                    </CheckBox>
-                    <CheckBox x:Name="SGN2" IsChecked="False"  Content="انبار" Margin="0,0,4,101" HorizontalAlignment="Right" Width="82" Height="23" VerticalAlignment="Bottom" Click="SGN2_Click" IsEnabled="False">
-                    </CheckBox>
-                    <CheckBox x:Name="SGN3" IsChecked="False"  Content="حسابداری" Margin="0,0,4,69" HorizontalAlignment="Right" Width="82" Height="23" VerticalAlignment="Bottom" Click="SGN3_Click" IsEnabled="False">
-                    </CheckBox>
+                    <CheckBox x:Name="SGN1"  IsChecked="False" Content="فروش" Margin="0,0,4,134" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="82" Click="SGN1_Click"/>
+                    <CheckBox x:Name="SGN2" IsChecked="False"  Content="انبار" Margin="0,0,4,101" HorizontalAlignment="Right" Width="82" Height="23" VerticalAlignment="Bottom" Click="SGN2_Click"/>
+                    <CheckBox x:Name="SGN3" IsChecked="False"  Content="حسابداری" Margin="0,0,4,69" HorizontalAlignment="Right" Width="82" Height="23" VerticalAlignment="Bottom" Click="SGN3_Click"/>
                     <Label Content="موجودی:" Margin="0,0,500,131"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="44" Height="25" VerticalAlignment="Bottom"/>
                     <TextBox x:Name="MOGU" IsReadOnly="True" Margin="0,0,549,130"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="94"  Padding="3" Height="27" VerticalAlignment="Bottom" IsTabStop="False" />
                     <Label Content="جمع مرجوعات:" Margin="365,0,0,131" Width="auto" FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Height="25" VerticalAlignment="Bottom"/>

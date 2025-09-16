@@ -38,6 +38,7 @@ using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
 using Custom_VAHEDK = Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL.Custom_VAHEDK;
 using Rpts;
 using System.Windows.Controls.Primitives;
+using static Wins.WinMenus.KHARID_FORUSH.HEAD_LST_PISHFROOSH2;
 
 namespace Wins.WinMenus.KHARID_FORUSH
 {
@@ -3076,17 +3077,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             #region Form_BeforeUpdate
             //Form_BeforeUpdate
-            if (Convert.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 19, 1)) == 5d)
-            {
-                var RST = dbms.DoGetDataSQL<string?>("SELECT CUST_COD FROM dbo.CUST_HESAB WHERE (hes = N'" + CUST_NO.SelectedValue + "')").FirstOrDefault();
-                if (RST != null)
-                {
-                    if (CUST_KIND.SelectedValue.ToStringNullSafe() != RST) //CUST_COD
-                    {
-                        this.CUST_KIND.SelectedValue = RST; CUST_KIND.Items.Refresh();
-                    }
-                }
-            }
             CL_HESABDARI.ADDTAKH(Convert.ToInt64(CUST_KIND.SelectedValue), Convert.ToInt64(NUMBER.Text), HTAG);
             #endregion
 
@@ -3363,7 +3353,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
             if (CUST_NO.SelectedValue is not null)
             {
-                if ((CUST_NO.SelectedItem as Custom_CUST_HESAB).NAME == CUTSNO_TEX.Text)
+                if ((CUST_NO.SelectedItem as Custom_CUST_HESAB)?.NAME == CUTSNO_TEX.Text)
                 {
                     return;
                 }
@@ -3429,8 +3419,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 }
             }
 
-            CUST_NO_AfterUpdate();
-
             #region CUST_NO_Exit
             if (CUST_NO.SelectedValue is not null)
             {
@@ -3457,6 +3445,23 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 }
             }
             #endregion
+
+
+            if (NowIsReady && CUST_NO?.SelectedItem != null && !string.IsNullOrEmpty(CUST_NO?.Text))
+            {
+                if (Convert.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 19, 1)) == 5)
+                {
+                    var selectedCustomer = dbms.DoGetDataSQL<Custom2_CUST_HESAB>($"SELECT TOP 1 CUST_COD FROM dbo.CUST_HESAB WHERE hes = N'{CUST_NO.SelectedValue}'").FirstOrDefault();
+                    if (selectedCustomer?.CUST_COD != null)
+                    {
+                        CUST_KIND.SelectedValue = selectedCustomer.CUST_COD; CUST_KIND.Items.Refresh();
+                    }
+                    else if (selectedCustomer != null)
+                    {
+                        universControl.PopNotifyShowUp("نوع مشتری در تعریف مشتری مشخص نشده است ضروری است آنرا تعریف کنید ! ", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
+                    }
+                }
+            }
 
         }
         private void SANAD()
@@ -4697,16 +4702,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void CUST_NO_AfterUpdate()
         {
-            if (Convert.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 19, 1)) == 5d)
-            {
-                var rst = dbms.DoGetDataSQL<HES_QRE>("SELECT     hes, CUST_COD FROM dbo.CUST_HESAB WHERE     (hes = N'" + CUST_NO.SelectedValue + "')").FirstOrDefault();
-                if (!(rst is null))
-                {
-                    CUST_KIND.SelectedValue = null;
-                    CUST_KIND.SelectedValue = rst.CUST_COD;
-                    CUST_KIND.Items.Refresh();
-                }
-            }
         }
         private void SET_SPECIAL_TAKHFIF()
         {

@@ -5341,6 +5341,7 @@ namespace Prg_Proccessy.FUNCTIONS
                         break;
                     }
             }
+
             if (!ReferenceEquals(rst, null))
             {
                 //if (rst.Fields(3) == true)
@@ -5350,6 +5351,7 @@ namespace Prg_Proccessy.FUNCTIONS
                     if (sgn3 != null)
                     {
                         sgn3.IsEnabled = true;
+                        sgn3.IsHitTestVisible = true;
                     }
                     //FRM["SGN3"].Enabled = true;
                     //FRM["SGN3"].Locked = false;
@@ -5361,7 +5363,7 @@ namespace Prg_Proccessy.FUNCTIONS
                         var sgn3 = TheWindo.FindName("SGN3") as CheckBox;
                         if (sgn3 != null)
                         {
-                            sgn3.IsEnabled = false;
+                            sgn3.IsHitTestVisible = false;
                         }
                     }
 
@@ -5374,24 +5376,26 @@ namespace Prg_Proccessy.FUNCTIONS
                 if (rst.GetType().GetProperties()[2].GetValue(rst, null) is true)
                 {
                     (TheWindo.FindName("SGN2") as CheckBox).IsEnabled = true;
+                    (TheWindo.FindName("SGN2") as CheckBox).IsHitTestVisible = true;
                     //FRM["SGN2"].Enabled = true;
                     //FRM["SGN2"].Locked = false;
                 }
                 else
                 {
-                    (TheWindo.FindName("SGN2") as CheckBox).IsEnabled = false;
+                    (TheWindo.FindName("SGN2") as CheckBox).IsHitTestVisible = false;
                     //FRM["SGN2"].Enabled = false;
                     //FRM["SGN2"].Locked = true;
                 }
                 if (rst.GetType().GetProperties()[1].GetValue(rst, null) is true)
                 {
                     (TheWindo.FindName("SGN1") as CheckBox).IsEnabled = true;
+                    (TheWindo.FindName("SGN1") as CheckBox).IsHitTestVisible = true;
                     //FRM["SGN1"].Enabled = true;
                     //FRM["SGN1"].Locked = false;
                 }
                 else
                 {
-                    (TheWindo.FindName("SGN1") as CheckBox).IsEnabled = false;
+                    (TheWindo.FindName("SGN1") as CheckBox).IsHitTestVisible = false;
                     //FRM["SGN1"].Enabled = false;
                     //FRM["SGN1"].Locked = true;
                 }
@@ -5402,19 +5406,19 @@ namespace Prg_Proccessy.FUNCTIONS
                 var sgn1 = TheWindo.FindName("SGN1") as CheckBox;
                 if (sgn1 != null)
                 {
-                    sgn1.IsEnabled = false;
+                    sgn1.IsHitTestVisible = false;
                 }
 
                 var sgn2 = TheWindo.FindName("SGN2") as CheckBox;
                 if (sgn2 != null)
                 {
-                    sgn2.IsEnabled = false;
+                    sgn2.IsHitTestVisible = false;
                 }
 
                 var sgn3 = TheWindo.FindName("SGN3") as CheckBox;
                 if (sgn3 != null)
                 {
-                    sgn3.IsEnabled = false;
+                    sgn3.IsHitTestVisible = false;
                 }
                 //FRM["SGN3"].Enabled = false;
                 //FRM["SGN3"].Locked = true;
@@ -6268,7 +6272,18 @@ namespace Prg_Proccessy.FUNCTIONS
                     }
                     else
                     {
-                        FLS = FLS + "[" + RST2Fields.name + "] [" + RST2Fields.TYP + "] NULL,";
+                        //FLS = FLS + "[" + RST2Fields.name + "] [" + RST2Fields.TYP + "] NULL,";
+                        var isTridd = string.Equals(RST2Fields.name, "TRIDD", StringComparison.OrdinalIgnoreCase);
+                        if (isTridd)
+                        {
+                            var supportsIdentity = string.Equals(RST2Fields.TYP, "int", StringComparison.OrdinalIgnoreCase) || string.Equals(RST2Fields.TYP, "bigint", StringComparison.OrdinalIgnoreCase) || string.Equals(RST2Fields.TYP, "smallint", StringComparison.OrdinalIgnoreCase) || string.Equals(RST2Fields.TYP, "tinyint", StringComparison.OrdinalIgnoreCase);
+                            var identityClause = supportsIdentity ? " IDENTITY(1,1)" : string.Empty;
+                            FLS += "[" + RST2Fields.name + "] [" + RST2Fields.TYP + "]" + identityClause + " NOT NULL,";
+                        }
+                        else
+                        {
+                            FLS += "[" + RST2Fields.name + "] [" + RST2Fields.TYP + "] NULL,";
+                        }
                     }
                     //RST2.MoveNext();
                     //Wend;

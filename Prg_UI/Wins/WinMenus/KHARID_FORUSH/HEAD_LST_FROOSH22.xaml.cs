@@ -51,6 +51,7 @@ using Functions.SMSService;
 using Wins.WinOther;
 using static Interfaces.INavigator;
 using static Prg_UI.Functions.CL_LMethods;
+using static Wins.WinMenus.KHARID_FORUSH.HEAD_LST_PISHFROOSH2;
 
 
 //مواردی که باید بعدا در نظر گرفته شود :
@@ -2748,7 +2749,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
             if (CUST_NO.SelectedValue is not null)
             {
-                if ((CUST_NO.SelectedItem as Custom_CUST_HESAB).NAME == CUTSNO_TEX.Text)
+                if ((CUST_NO.SelectedItem as Custom_CUST_HESAB)?.NAME == CUTSNO_TEX.Text)
                 {
                     return;
                 }
@@ -2846,8 +2847,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             //MeTimer.IsEnabled = false;
             #endregion
 
-            CUST_NO_AfterUpdate();
-
             #region CUST_NO_Exit
             if (CUST_NO.SelectedValue is not null)
             {
@@ -2875,25 +2874,20 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
             #endregion
 
-            #region CUST_NO_KeyPress
-            //if (MeTimer.IsEnabled is false)
+
+            if (NowIsReady && CUST_NO?.SelectedItem != null && !string.IsNullOrEmpty(CUST_NO?.Text))
             {
-                ttime = 0d;
-                //this.TimerInterval = 100;
-                //MeTimer.IsEnabled = true;
-            }
-            #endregion
-        }
-        private void CUST_NO_AfterUpdate()
-        {
-            if (Convert.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 19, 1)) == 5d)
-            {
-                var rst = dbms.DoGetDataSQL<HES_QRE>("SELECT     hes, CUST_COD FROM dbo.CUST_HESAB WHERE     (hes = N'" + CUST_NO.SelectedValue + "')").FirstOrDefault();
-                if (!(rst is null))
+                if (Convert.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 19, 1)) == 5)
                 {
-                    CUST_KIND.SelectedValue = null;
-                    CUST_KIND.SelectedValue = rst.CUST_COD;
-                    CUST_KIND.Items.Refresh();
+                    var selectedCustomer = dbms.DoGetDataSQL<Custom2_CUST_HESAB>($"SELECT TOP 1 CUST_COD FROM dbo.CUST_HESAB WHERE hes = N'{CUST_NO.SelectedValue}'").FirstOrDefault();
+                    if (selectedCustomer?.CUST_COD != null)
+                    {
+                        CUST_KIND.SelectedValue = selectedCustomer.CUST_COD; CUST_KIND.Items.Refresh();
+                    }
+                    else if (selectedCustomer != null)
+                    {
+                        universControl.PopNotifyShowUp("نوع مشتری در تعریف مشتری مشخص نشده است ضروری است آنرا تعریف کنید ! ", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
+                    }
                 }
             }
         }
@@ -2917,14 +2911,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
 
             #region CUST_NO2_AfterUpdate
-            if (Convert.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 19, 1)) == 5d)
-            {
-                var rst = dbms.DoGetDataSQL<HLF0>("SELECT     hes, CUST_COD FROM dbo.CUST_HESAB WHERE     (hes = N'" + this.CUST_NO.SelectedValue + "')").ToList();
-                if (rst.Count > 0)
-                {
-                    this.CUST_KIND.SelectedValue = rst[0].CUST_COD;
-                }
-            };
             if (Convert.ToDouble(NUMBER.Text) > 0)
             {
                 //var rst0 = dbms.DoGetDataSQL<string>("SELECT   CUST_NO FROM dbo.HEAD_LST WHERE  (NUMBER = " + this.NUMBER.Text + ") AND (TAG = 2)").FirstOrDefault();
@@ -6857,24 +6843,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                             CUST_NO.SelectedValue = thevalue;
                             CUST_NO.Items.Refresh();
-
-                            if (Convert.ToDouble(Strings.Mid(Baseknow.OPTIONSS, 19, 1)) == 5)
-                            {
-                                var rstkind = dbms.DoGetDataSQL<CUST_HESAB>("SELECT TOP 1 hes,CUST_COD, NAME FROM dbo.CUST_HESAB WHERE HES = N'" + CUST_NO.SelectedValue + "'").FirstOrDefault();
-                                if (!(rstkind is null))
-                                {
-                                    if (CUST_KIND.SelectedValue == null)
-                                    {
-                                        CUST_KIND.SelectedValue = null;
-                                        CUST_KIND.SelectedValue = rstkind.CUST_COD;
-                                        CUST_KIND.Items.Refresh();
-                                    }
-                                }
-                                else
-                                {
-                                    universControl.PopNotifyShow("نوع مشتري در تعريف مشتري مشخص نشده است.", Pop1, Pop1Text1, Pop_Border1);
-                                }
-                            }
                         }
 
                         MOLAH.Text = Strings.Left(rst.SHARAYET.ToStringNullSafe(), 200); //ملاحظات سربرگ حواله تگ 2 => SHARAYET ====== ملاحظات سربرگ فاکتور با تگ 13 => MOLAH

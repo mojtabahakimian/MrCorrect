@@ -134,12 +134,12 @@
                 </DataGridTextColumn>
 
                 <!--<DataGridTemplateColumn x:Name="CODE_COLUMN2" Header="کد کالا" Width="80" MinWidth="80" IsReadOnly="True" >
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding CODE}" Focusable="False" IsHitTestVisible="False"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>-->
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding CODE}" Focusable="False" IsHitTestVisible="False"/>
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>-->
 
                 <DataGridTextColumn x:Name="NAME_CODE_COLUMN" Binding="{Binding NAME_CODE,UpdateSourceTrigger=LostFocus}"  Header="نام کالا"   Visibility="Visible"  Width="auto"   MinWidth="180">
                     <DataGridTextColumn.EditingElementStyle>
@@ -153,8 +153,8 @@
                 </DataGridTextColumn>
 
                 <DataGridComboBoxColumn x:Name="VAHED_K_COLUMN"  
-                                        Width="auto"   MinWidth="90" Header=" واحد کالا " Visibility="Visible" 
-                        SelectedValueBinding="{Binding VAHED_K, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="NAMES" SelectedValuePath="VAHED">
+                                    Width="auto"   MinWidth="90" Header=" واحد کالا " Visibility="Visible" 
+                    SelectedValueBinding="{Binding VAHED_K, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="NAMES" SelectedValuePath="VAHED">
                     <DataGridComboBoxColumn.EditingElementStyle>
                         <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
                             <Setter Property="IsEditable" Value="True"/>
@@ -206,7 +206,7 @@
                         </Style>
                     </DataGridTextColumn.CellStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn x:Name="MABL_COL" Header="مبلغ" Binding="{Binding MABL,UpdateSourceTrigger=LostFocus, StringFormat=\{0:N0\}}"    Width="auto"   MinWidth="90">
+                <DataGridTextColumn x:Name="MABL_COL" Header="مبلغ" Binding="{Binding MABL,UpdateSourceTrigger=LostFocus, StringFormat=\{0:N0\}}" Width="120" MinWidth="80">
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                             <Setter Property="MaxLength" Value="50" />
@@ -215,21 +215,21 @@
 
 
                 </DataGridTextColumn>
-                <DataGridTextColumn x:Name="MABL_K_COL" Header="مبلغ کل" Binding="{Binding MABL_K,UpdateSourceTrigger=LostFocus, StringFormat=\{0:N0\}}"  Width="auto"   MinWidth="100">
+                <DataGridTextColumn x:Name="MABL_K_COL" Header="مبلغ کل" Binding="{Binding MABL_K,UpdateSourceTrigger=LostFocus, StringFormat=\{0:N0\}}"  Width="auto"   MinWidth="130">
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                             <Setter Property="MaxLength" Value="50" />
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn x:Name="N_KOL_COL" Header="تخفیف" Binding="{Binding N_KOL, StringFormat=N2,UpdateSourceTrigger=LostFocus}"  Width="auto"   MinWidth="80">
+                <DataGridTextColumn x:Name="N_KOL_COL" Header="تخفیف" Binding="{Binding N_KOL, StringFormat=N2,UpdateSourceTrigger=LostFocus}" MinWidth="75" Width="80">
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                             <Setter Property="MaxLength" Value="50" />
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn x:Name="TKHN_COL" Header="ت.ن%" Binding="{Binding TKHN, StringFormat=N2,UpdateSourceTrigger=LostFocus}" MinWidth="80" Width="auto">
+                <DataGridTextColumn x:Name="TKHN_COL" Header="ت.ن%" Binding="{Binding TKHN, StringFormat=N2,UpdateSourceTrigger=LostFocus}"  MinWidth="75" Width="80">
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                             <Setter Property="MaxLength" Value="5" />

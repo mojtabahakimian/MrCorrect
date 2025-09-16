@@ -121,8 +121,8 @@
             </ComboBox.ItemsPanel>
         </ComboBox>
         <TextBox x:Name="MOGU" Text="" IsReadOnly="True" Tag="RD" Height="25" Margin="0,0,581,100"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="139" IsTabStop="False" IsHitTestVisible="False" />
-        <CheckBox x:Name="SGN1" IsEnabled="False" Content="انبار " HorizontalAlignment="Right" Margin="0,0,25,103" VerticalAlignment="Bottom" Width="80" FontSize="10" Click="SGN1_Click"/>
-        <CheckBox x:Name="SGN2" IsEnabled="False" Content="کنترل کیفیت" HorizontalAlignment="Right" Margin="0,0,25,73" VerticalAlignment="Bottom" Width="80" FontSize="10" Click="SGN2_Click" />
+        <CheckBox x:Name="SGN1" Content="انبار " HorizontalAlignment="Right" Margin="0,0,25,103" VerticalAlignment="Bottom" Width="80" FontSize="10" Click="SGN1_Click"/>
+        <CheckBox x:Name="SGN2" Content="کنترل کیفیت" HorizontalAlignment="Right" Margin="0,0,25,73" VerticalAlignment="Bottom" Width="80" FontSize="10" Click="SGN2_Click" />
         <TextBox x:Name="sgn1usid"  Text="" IsReadOnly="True" Height="25" Margin="0,0,111,100"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="206" IsTabStop="False" IsHitTestVisible="False" />
         <TextBox x:Name="sgn2usid"  Text="" IsReadOnly="True" Height="25" Margin="0,0,111,70"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="206" IsTabStop="False" IsHitTestVisible="False" />
         <TextBox x:Name="Text59" Text="" IsReadOnly="True" Tag="RD" Height="25" Margin="40,0,0,99"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Left" Width="140" IsTabStop="False" IsHitTestVisible="False" />
