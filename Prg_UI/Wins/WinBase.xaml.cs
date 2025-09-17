@@ -1264,5 +1264,15 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.AMAR_TOLID, null);
         }
+
+        private void Button_Click_118(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.AMAR_FROOSH_KOL, null);
+        }
+
+        private void Button_Click_119(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.AMAR_FROOSH_KOL_ALL, null);
+        }
     }
 }

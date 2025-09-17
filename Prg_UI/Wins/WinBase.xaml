@@ -4991,6 +4991,46 @@
                         </StackPanel>
                     </Expander>
 
+                    <Expander Foreground="{DynamicResource MaterialDesignBody}" FlowDirection="RightToLeft" Header="برنامه ریزی" Background="{x:Null}" BorderBrush="{x:Null}">
+                        <StackPanel>
+                            <Button Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Click="Button_Click_118" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                                <Grid Width="189">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="10*"/>
+                                        <ColumnDefinition Width="10*"/>
+                                        <ColumnDefinition Width="10*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="10"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="10"/>
+                                    </Grid.RowDefinitions>
+                                    <materialDesign:PackIcon Grid.Column="0" Kind="ListBox" Height="Auto" Width="27" Grid.RowSpan="3" VerticalAlignment="Stretch" Margin="6,0,0,0"/>
+                                    <TextBlock Text="نمودار فروش کلی" FontSize="12" Margin="43,5,-1,5" Grid.RowSpan="3" Grid.ColumnSpan="3"/>
+                                </Grid>
+                            </Button>
+
+                            <Button Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Click="Button_Click_119" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                                <Grid Width="189">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="10*"/>
+                                        <ColumnDefinition Width="10*"/>
+                                        <ColumnDefinition Width="10*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="10"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="10"/>
+                                    </Grid.RowDefinitions>
+                                    <materialDesign:PackIcon Grid.Column="0" Kind="ListBox" Height="Auto" Width="27" Grid.RowSpan="3" VerticalAlignment="Stretch" Margin="6,0,0,0"/>
+                                    <TextBlock Text="نمودار فروش کلی - ریالی بارگیری نشده" FontSize="12" Margin="43,5,-1,5" Grid.RowSpan="3" Grid.ColumnSpan="3"/>
+                                </Grid>
+                            </Button>
+
+                        </StackPanel>
+                    </Expander>
+
+
                 </StackPanel>
             </ScrollViewer>
 
