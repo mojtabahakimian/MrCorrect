@@ -377,8 +377,15 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش تراز آزمایشی چهار ستونی حسابهای کل", WIN_NAME = CL_MenuManager.WinNameType.FMENU_TARAZ_4_RT4 });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش تراز آزمایشی چهار ستونی حسابهای کل ، معین و تفضیلی", WIN_NAME = CL_MenuManager.WinNameType.FMENU_TARAZ_4_RFT4T });
 
+
             //حسابداری صنعتی
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست آمار تولید", WIN_NAME = CL_MenuManager.WinNameType.AMAR_TOLID });
+
+
+            //برنامه ریزی و تولید
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "نمودار فروش کلی - ریالی", WIN_NAME = CL_MenuManager.WinNameType.AMAR_FROOSH_KOL });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "نمودار فروش کلی - ریالی بارگیری نشده", WIN_NAME = CL_MenuManager.WinNameType.AMAR_FROOSH_KOL_ALL});
+
 
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());
 
