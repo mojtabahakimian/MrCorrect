@@ -185,10 +185,10 @@
                     </syncfusion:GridTemplateColumn.CellStyle>
                 </syncfusion:GridTemplateColumn>
                 
-                <syncfusion:GridTextColumn  HeaderText="کل" MappingName="N_KOL" Width="110" />
-                <syncfusion:GridTextColumn  HeaderText="معین" MappingName="NUMBER" Width="120" />
-                <syncfusion:GridTextColumn  HeaderText="تفضیلی" MappingName="TNUMBER" Width="120" />
-                <syncfusion:GridTextColumn  HeaderText="تفضیلی 2" MappingName="HES_T2" Width="120" />
+                <syncfusion:GridTextColumn  HeaderText="کل" MappingName="N_KOL" Width="90" />
+                <syncfusion:GridTextColumn  HeaderText="معین" MappingName="NUMBER" Width="100" />
+                <syncfusion:GridTextColumn  HeaderText="تفضیلی" MappingName="TNUMBER" Width="110" />
+                <syncfusion:GridTextColumn  HeaderText="تفضیلی 2" MappingName="HES_T2" Width="110" />
                 <syncfusion:GridTextColumn  HeaderText="نام حساب تفضیلی 2" MappingName="NAME" Width="300" />
 
                 <syncfusion:GridTextColumn  HeaderText="جمع بدهکار" MappingName="SumOfBED" Width="150" >

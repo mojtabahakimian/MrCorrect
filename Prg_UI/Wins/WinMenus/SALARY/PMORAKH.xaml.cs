@@ -26,17 +26,14 @@ using Stimulsoft.Report;
 using Stimulsoft.Report.Components;
 using System.Windows.Data;
 using Interfaces;
-using System.Drawing.Printing;
-using Stimulsoft.Report.Print;
-using Azure.Core;
-using Stimulsoft.Report.Units;
 using static Prg_UI.HelperWins.Msgwin;
 using Rpts;
 using System.Windows.Controls.Primitives;
+using System.Windows.Threading;
 
 namespace Wins.WinMenus.SALARY
 {
-    public partial class PMORAKH : Window
+    public partial class PMORAKH : Window, ISearchableWindow , IComboLookupProvider
     {
         #region Header Window Begin
         //Header Window Begin
@@ -130,7 +127,8 @@ namespace Wins.WinMenus.SALARY
                 else
                 {
                     // Defer the operation until the window is fully rendered
-                    this.Dispatcher.BeginInvoke(new Action(() => {
+                    this.Dispatcher.BeginInvoke(new Action(() =>
+                    {
                         // Try again after the window is fully initialized
                         IntPtr newHandle = new WindowInteropHelper(this).Handle;
                         if (newHandle != IntPtr.Zero)
@@ -244,6 +242,52 @@ namespace Wins.WinMenus.SALARY
             }
         }
 
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => RecordsData;
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            // Handle the selected item
+            if (selectedItem is PMORAKH_MODEL item)
+            {
+                if (item != null)
+                {
+                    var itemfound = RecordsData.View.Cast<PMORAKH_MODEL>().FirstOrDefault(x => x.CODE.Equals(Convert.ToInt32(item.CODE)));
+                    if (itemfound != null)
+                    {
+                        // Set the CurrentItem to the found item
+                        RecordsData.View.MoveCurrentTo(itemfound);
+
+                        MoveReGetData(INavigator.Jahat.CustomPosition, RecordsData.View?.CurrentPosition);
+                    }
+                }
+                else
+                {
+                    // Update your window with the selected item
+                    MoveReGetData(INavigator.Jahat.LastItem);
+                }
+
+            }
+        }
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+                new SearchableProperty { DisplayName = "شماره", PropertyPath = "IDNUM", PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "کد پرسنلی", PropertyPath = "CODE", PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "تاريخ درخواست", PropertyPath = "MODATE", PropertyType = typeof(long) },
+                new SearchableProperty { DisplayName = "تاريخ شروع", PropertyPath = "MOSTDATE", PropertyType = typeof(long) },
+                new SearchableProperty { DisplayName = "تاريخ پایان", PropertyPath = "MOENDATE", PropertyType = typeof(long) },
+                new SearchableProperty { DisplayName = "توضیحات", PropertyPath = "MOLAH", PropertyType = typeof(string) },
+            };
+        }
+        public IEnumerable<ComboLookupSpec> GetComboLookups()
+        {
+            yield return new ComboLookupSpec { DisplayName = "نام پرسنل", KeyPropertyPath = "CODE", Combo = CODE };
+            // مثال عمومی برای فرم‌های بعدی:
+            // yield return new ComboLookupSpec { DisplayName = "نام کالا", KeyPropertyPath = "GOOD_ID", Combo = GOODS_COMBO };
+            // yield return new ComboLookupSpec { DisplayName = "نام مشتری", KeyPropertyPath = "CUST_ID", Combo = CUSTOMER_COMBO };
+        }
+        #endregion
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
@@ -313,6 +357,18 @@ namespace Wins.WinMenus.SALARY
                 CL_LMethods.SendKey_US(Key.Tab);
             }
 
+            try
+            {
+                if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+                    var searchWindow = new EnhancedSearchWindow(this);
+                    searchWindow.Owner = this;
+                    searchWindow.ShowDialog();
+                }
+            }
+            catch { }
+
             // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
             var nonDataKeys = new[]
             {
@@ -345,6 +401,7 @@ namespace Wins.WinMenus.SALARY
         {
             //پرسنل
             CODE.ItemsSource = dbms.DoGetDataSQL<COMBO_PERSONE>($"SELECT CODE, PNAME + N' ' + PFAMILY + N' ' + RTRIM(CAST(CODE AS NVARCHAR)) AS PER FROM PERSONEL ORDER BY PNAME + N' ' + PFAMILY + N' ' + RTRIM(CAST(CODE AS NVARCHAR))").ToList();
+
 
             //نوع مرخصی
             KINDM.ItemsSource = new List<COMBOYMODEL>

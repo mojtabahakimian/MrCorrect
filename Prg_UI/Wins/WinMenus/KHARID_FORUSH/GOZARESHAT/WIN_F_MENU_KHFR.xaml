@@ -13,7 +13,7 @@
       AllowDrop="True" WindowStyle="None"
       FontFamily="{StaticResource IRANYEKAN}"
       WindowStartupLocation="CenterScreen"
-      Title="" Height="215" Width="605" MinHeight="215" MinWidth="605" MaxHeight="215" MaxWidth="605" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+      Title="" Height="215" Width="605" MinHeight="215" MinWidth="605" MaxHeight="215" MaxWidth="605" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"  VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -53,20 +53,21 @@
         <!--HEADER-->
 
         <Button x:Name="BTN_GO" Click="BTN_GO_Click" Content="تایید"  BorderBrush="{x:Null}" FontSize="11" Foreground="#DDFFFFFF" Margin="252,160,252,0" Height="34" VerticalAlignment="Top" Padding="16,2,16,4" />
-        <ComboBox x:Name="HHMOIN" IsSynchronizedWithCurrentItem="True" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="26,61,240,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1">
+        <ComboBox x:Name="HMOIN"  IsSynchronizedWithCurrentItem="True"  DisplayMemberPath="hes" SelectedValuePath="hes" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="375,61,0,0" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="146" VerticalAlignment="Top" PreviewLostKeyboardFocus="HMOIN_PreviewLostKeyboardFocus">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                 </ItemsPanelTemplate>
             </ComboBox.ItemsPanel>
         </ComboBox>
-        <ComboBox x:Name="HMOIN"  IsSynchronizedWithCurrentItem="True" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="375,61,0,0" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="146" VerticalAlignment="Top" PreviewLostKeyboardFocus="HMOIN_PreviewLostKeyboardFocus">
+        <ComboBox x:Name="HHMOIN" IsSynchronizedWithCurrentItem="True" DisplayMemberPath="NAME" SelectedValuePath="hes" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="26,61,240,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                 </ItemsPanelTemplate>
             </ComboBox.ItemsPanel>
         </ComboBox>
+    
         <Label Content="شخص:" HorizontalAlignment="Right" Margin="0,61,37,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
         <Label Content="از تاریخ:" HorizontalAlignment="Right" Margin="0,107,33,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
         <Label Content="تا تاریخ:" HorizontalAlignment="Right" Margin="0,107,185,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>

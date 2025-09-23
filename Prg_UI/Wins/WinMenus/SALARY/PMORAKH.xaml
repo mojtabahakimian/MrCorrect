@@ -119,7 +119,7 @@
                 </ItemsPanelTemplate>
             </ComboBox.ItemsPanel>
         </ComboBox>
-        <Button x:Name="BTN_MORAKH_LST" Content="لیست مرخصی های من"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,419,518,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Right" Width="212" Click="BTN_MORAKH_LST_Click" />
+        <Button x:Name="BTN_MORAKH_LST" Content="لیست مرخصی ها"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,419,518,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Right" Width="212" Click="BTN_MORAKH_LST_Click" />
         <Button x:Name="BTN_MYDAYOFF"  Content="مانده مرخصی من صرفا تا امروز" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,476,518,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Right" Width="212" Click="BTN_MYDAYOFF_Click" />
         <Button x:Name="BTN_NEWDAYOFF" Content="ثبت مرخصی جدید"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,541,486,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Right" Width="134" Click="BTN_NEWDAYOFF_Click" Visibility="Collapsed" />
 

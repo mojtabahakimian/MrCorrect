@@ -27,13 +27,54 @@ namespace Wins.WinOther
 
         // Specify the name of the identity property (for example, "EmployeeID" or "UserID")
     }
-
+    public interface IComboLookupProvider
+    {
+        IEnumerable<ComboLookupSpec> GetComboLookups();
+    }
+    public class ComboLookupSpec
+    {
+        public string DisplayName { get; set; }       // نام ستونی که در جستجو نشان داده می‌شود
+        public string KeyPropertyPath { get; set; }   // فیلد کلیدی داخل مدل (مثلاً "CODE")
+        public ComboBox Combo { get; set; }           // خود ComboBox
+    }
     // Defines a searchable property.
     public class SearchableProperty
     {
         public string DisplayName { get; set; }
         public string PropertyPath { get; set; }
         public Type PropertyType { get; set; }
+
+        // --- اختیاری: اگر پر شود یعنی این ستون Lookup است (نمایش/فیلتر روی متنِ ComboBox) ---
+        public IDictionary<string, string> LookupMap { get; set; }   // key: normalized key, val: display
+        public bool IsLookup => LookupMap != null;
+        // سازندهٔ راحت برای ComboBox
+        public static SearchableProperty FromCombo(string displayName, string keyPropertyPath, ComboBox combo)
+        {
+            var sv = combo.SelectedValuePath ?? "Id";
+            var dm = combo.DisplayMemberPath ?? string.Empty;
+            var items = combo.ItemsSource?.Cast<object>() ?? Enumerable.Empty<object>();
+
+            // کلیدها را string نرمال شده می‌گیریم تا با انواع مختلف (int, long, string) مشکلی نباشد
+            string Norm(object o) => CL_LMethods.NormalizeArabicPersian(Convert.ToString(o) ?? string.Empty).Trim();
+
+            var map = items
+                .Select(it => new
+                {
+                    Key = FastPropertyAccess.GetPropertyValue(it, sv),
+                    Val = FastPropertyAccess.GetPropertyValue(it, dm)
+                })
+                .Where(x => x.Key != null)
+                .GroupBy(x => Norm(x.Key))                 // اگر آیتم تکراری بود، اولی را نگه داریم
+                .ToDictionary(g => g.Key, g => Convert.ToString(g.First().Val) ?? string.Empty);
+
+            return new SearchableProperty
+            {
+                DisplayName = displayName,
+                PropertyPath = keyPropertyPath,            // روی این فیلد کلیدی سرچ می‌کنیم، ولی با LookupMap متن را می‌سازیم
+                PropertyType = typeof(string),
+                LookupMap = map
+            };
+        }
     }
 
     public partial class EnhancedSearchWindow : Window
@@ -115,12 +156,20 @@ namespace Wins.WinOther
 
             _searchableProperties = parentWindow.GetSearchableProperties().ToList();
 
+            // اگر فرم ComboBoxهایی برای Lookup معرفی کرده بود، آن‌ها را به لیست ستون‌ها اضافه کن
+            if (_parentWindow is IComboLookupProvider comboProvider)
+            {
+                foreach (var spec in comboProvider.GetComboLookups() ?? Enumerable.Empty<ComboLookupSpec>())
+                {
+                    if (spec?.Combo?.ItemsSource == null) continue;
+                    _searchableProperties.Add(SearchableProperty.FromCombo(spec.DisplayName, spec.KeyPropertyPath, spec.Combo));
+                }
+            }
+
             InitializeComponent();
             SetupUI();
 
         }
-
-
 
         private void SetupUI()
         {
@@ -141,22 +190,37 @@ namespace Wins.WinOther
             //    });
             //}
 
+
             foreach (var prop in _searchableProperties)
             {
                 var binding = new Binding(prop.PropertyPath);
 
-                // Example condition: if the property is a date, apply a custom format
-                if (prop.PropertyPath.ToStringNullSafe().ToUpper().Contains("DATE")) // Adjust this condition to suit your logic
-                {
+                // فرمت سادهٔ تاریخ (مثل قبل)
+                if (prop.PropertyPath.ToStringNullSafe().ToUpper().Contains("DATE"))
                     binding.StringFormat = "####/##/##";
-                }
 
-                _resultsGrid.Columns.Add(new System.Windows.Controls.DataGridTextColumn
+                var col = new System.Windows.Controls.DataGridTextColumn
                 {
                     Header = prop.DisplayName,
                     Binding = binding,
-                    MinWidth = 65 // Optionally apply other properties conditionally
-                });
+                    MinWidth = 65
+                };
+
+                // اگر Lookup بود، مقدار نمایش ستون را با Converter از روی Map نشان بده
+                if (prop.IsLookup)
+                {
+                    col.Binding = new Binding(prop.PropertyPath)
+                    {
+                        Converter = new LookupConverter { Map = prop.LookupMap }
+                    };
+
+                    _resultsGrid.Columns.Insert(1, col);
+                }
+                else
+                {
+                    _resultsGrid.Columns.Add(col);
+                }
+
             }
 
             // Handle double-click on a result.
@@ -191,46 +255,30 @@ namespace Wins.WinOther
                 return;
             }
 
+            string Norm(object o) => CL_LMethods.NormalizeArabicPersian(Convert.ToString(o) ?? string.Empty).Trim();
+
             _recordsView.Filter = item =>
             {
                 if (item == null) return false;
-                // Use compiled expression trees or reflection-based fast property access.
-                var value = FastPropertyAccess.GetPropertyValue(item, selectedProperty.PropertyPath);
-                if (value == null) return false;
 
-                string propValue = string.Empty;
+                var rawValue = FastPropertyAccess.GetPropertyValue(item, selectedProperty.PropertyPath);
+                if (rawValue == null) return false;
 
-                if (CHB_MachCase.IsChecked ?? false)
-                {
-                    return propValue.Equals(searchText, StringComparison.CurrentCultureIgnoreCase);
-                }
+                // اگر Lookup است، ابتدا مقدار کلید را به متن نمایشی تبدیل کن
+                var candidate = selectedProperty.IsLookup
+                              ? (selectedProperty.LookupMap.TryGetValue(Norm(rawValue), out var txt) ? txt : string.Empty)
+                              : Convert.ToString(rawValue) ?? string.Empty;
 
-                return propValue.Contains(searchText, StringComparison.CurrentCultureIgnoreCase);
-            };
+                var normalizedValue = Norm(candidate);
 
-            _recordsView.Filter = item =>
-            {
-                if (item == null)
-                    return false;
-
-                // Get the value based on the selected property path.
-                var value = FastPropertyAccess.GetPropertyValue(item, selectedProperty.PropertyPath);
-                if (value == null)
-                    return false;
-
-                var normalizedValue = CL_LMethods.NormalizeArabicPersian(value.ToString()).Trim();
-
-                if (CHB_MachCase.IsChecked ?? false)
-                {
-                    return normalizedValue.Equals(searchText, StringComparison.CurrentCultureIgnoreCase);
-                }
-
-                return normalizedValue.Contains(searchText, StringComparison.CurrentCultureIgnoreCase);
-
+                return (CHB_MachCase.IsChecked ?? false)
+                     ? normalizedValue.Equals(searchText, StringComparison.CurrentCultureIgnoreCase)
+                     : normalizedValue.Contains(searchText, StringComparison.CurrentCultureIgnoreCase);
             };
 
             _recordsView.Refresh();
         }
+
 
         private void ResetFilterButton_Click(object sender, RoutedEventArgs e)
         {
@@ -245,17 +293,14 @@ namespace Wins.WinOther
     // Helper class for fast property access.
     public class FastPropertyAccess
     {
-        private static readonly ConcurrentDictionary<string, PropertyInfo> _propertyCache =
-            new ConcurrentDictionary<string, PropertyInfo>();
+        private static readonly ConcurrentDictionary<(Type type, string path), PropertyInfo> _cache = new();
 
         public static object GetPropertyValue(object obj, string propertyPath)
         {
             if (obj == null) return null;
-
-            var property = _propertyCache.GetOrAdd(propertyPath, path =>
-                obj.GetType().GetProperty(path));
-
-            return property?.GetValue(obj);
+            var key = (obj.GetType(), propertyPath);
+            var pi = _cache.GetOrAdd(key, k => k.type.GetProperty(k.path));
+            return pi?.GetValue(obj);
         }
     }
 

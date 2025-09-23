@@ -132,7 +132,7 @@
         <Label Content="روز" HorizontalAlignment="Right" Margin="0,479,642,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
 
 
-        <CheckBox x:Name="SGN1" Content="مدیر واحد" HorizontalAlignment="Right" Margin="0,0,81,158" VerticalAlignment="Bottom" Width="NaN" Click="SGN1_Click">
+        <CheckBox x:Name="SGN1" Content="مدیر واحد" HorizontalAlignment="Right" Margin="0,0,81,158" VerticalAlignment="Bottom" Width="NaN" Click="SGN1_Click" IsEnabled="True">
             <CheckBox.Style>
                 <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
                     <Style.Triggers>
@@ -149,7 +149,7 @@
                 </Style>
             </CheckBox.Style>
         </CheckBox>
-        <CheckBox x:Name="SGN2" Content="حسابداری" HorizontalAlignment="Right" Margin="0,0,83,125" VerticalAlignment="Bottom" Width="NaN" Click="SGN2_Click">
+        <CheckBox x:Name="SGN2" Content="حسابداری" HorizontalAlignment="Right" Margin="0,0,83,125" VerticalAlignment="Bottom" Width="NaN" Click="SGN2_Click" IsEnabled="True">
             <CheckBox.Style>
                 <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
                     <Style.Triggers>
@@ -166,7 +166,7 @@
                 </Style>
             </CheckBox.Style>
         </CheckBox>
-        <CheckBox x:Name="SGN3" Content="مدير عامل" HorizontalAlignment="Right" Margin="0,0,80,93" VerticalAlignment="Bottom" Width="NaN" Click="SGN3_Click">
+        <CheckBox x:Name="SGN3" Content="مدير عامل" HorizontalAlignment="Right" Margin="0,0,80,93" VerticalAlignment="Bottom" Width="NaN" Click="SGN3_Click" IsEnabled="True">
             <CheckBox.Style>
                 <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
                     <Style.Triggers>

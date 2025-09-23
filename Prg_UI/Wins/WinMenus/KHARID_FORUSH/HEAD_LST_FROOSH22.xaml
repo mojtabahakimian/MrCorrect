@@ -218,7 +218,7 @@
                                     </Style>
                                 </DataGridTextColumn.CellStyle>
                             </DataGridTextColumn>
-                            <DataGridComboBoxColumn x:Name="ANBAR_COLUMN" MinWidth="80" Width="130" Header=" انبار " SelectedValueBinding="{Binding ANBAR,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAMES" SelectedValuePath="CODE">
+                            <DataGridComboBoxColumn x:Name="ANBAR_COLUMN" MinWidth="100" Width="130" Header=" انبار " SelectedValueBinding="{Binding ANBAR,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAMES" SelectedValuePath="CODE">
                                 <DataGridComboBoxColumn.EditingElementStyle>
                                     <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
                                         <Setter Property="IsEditable" Value="True"/>
@@ -374,7 +374,7 @@
                                     </Style>
                                 </DataGridTextColumn.EditingElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn 	x:Name="N_MOIN_COLUMN" 	      Binding="{Binding N_MOIN,UpdateSourceTrigger=LostFocus,StringFormat=\{0:N0\}}"           Header="مبلغ تخفیف"          Width="110" MinWidth="90" Visibility="Visible" >
+                            <DataGridTextColumn 	x:Name="N_MOIN_COLUMN" 	      Binding="{Binding N_MOIN,UpdateSourceTrigger=LostFocus,StringFormat=\{0:N0\}}"           Header="مبلغ تخفیف"          Width="110" MinWidth="100" Visibility="Visible" >
                                 <DataGridTextColumn.EditingElementStyle>
                                     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
                                     </Style>
