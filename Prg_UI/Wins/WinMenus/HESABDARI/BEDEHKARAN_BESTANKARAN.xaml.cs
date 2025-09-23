@@ -1,9 +1,9 @@
-﻿using AUTO_BAZ.Functions;
-using Functions;
+﻿using Functions;
 using MaterialDesignThemes.Wpf;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
+using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Prg_UI.Wins.WinMenus.HESABDARI;
@@ -66,6 +66,8 @@ namespace Wins.WinMenus.HESABDARI
         public BEDEHKARAN_BESTANKARAN()
         {
             InitializeComponent();
+
+            SYNCFUSION_DG.SelectionController = new SafeGridSelectionController(SYNCFUSION_DG);
 
             this.DataContext = this;
         }
@@ -175,13 +177,24 @@ namespace Wins.WinMenus.HESABDARI
             CurrentCellIndex = rowColumnIndex; // Update current cell index
             CurrentCellValue = null; // Reset current cell value
 
+            if (this.SYNCFUSION_DG?.Columns == null || this.SYNCFUSION_DG.Columns.Count == 0)
+            {
+                return;
+            }
+
             int rowIndex = rowColumnIndex.RowIndex;
             int columnIndex = this.SYNCFUSION_DG.ResolveToGridVisibleColumnIndex(rowColumnIndex.ColumnIndex);
             if (columnIndex < 0) return;
+            if (columnIndex >= this.SYNCFUSION_DG.Columns.Count) return;
 
             var mappingName = this.SYNCFUSION_DG.Columns[columnIndex].MappingName; if (string.IsNullOrEmpty(mappingName)) return;
             var recordIndex = this.SYNCFUSION_DG.ResolveToRecordIndex(rowIndex);
             if (recordIndex < 0) return;
+
+            if (recordIndex >= this.SYNCFUSION_DG.View.Records.Count)
+            {
+                return;
+            }
 
             var record = this.SYNCFUSION_DG.View.Records.GetItemAt(recordIndex);
 
