@@ -105,7 +105,7 @@
                 <DataGridTextColumn Header="ردیف" x:Name="RADIF_COL"  Binding="{Binding RADIF}"  Width="auto"   MinWidth="40" Visibility="Hidden"/>
                 <DataGridTextColumn Header="آیدی" x:Name="id_COL"  Binding="{Binding id}"  Width="auto"   MinWidth="40" Visibility="Hidden"/>
 
-                <DataGridComboBoxColumn x:Name="ANBAR_COLUMN" MinWidth="80" Width="auto" Header=" انبار " SelectedValueBinding="{Binding ANBAR,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAMES" SelectedValuePath="CODE">
+                <DataGridComboBoxColumn x:Name="ANBAR_COLUMN" MinWidth="130" Width="auto" Header=" انبار " SelectedValueBinding="{Binding ANBAR,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAMES" SelectedValuePath="CODE">
                     <DataGridComboBoxColumn.EditingElementStyle>
                         <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
                             <Setter Property="IsEditable" Value="True"/>
@@ -206,7 +206,7 @@
                         </Style>
                     </DataGridTextColumn.CellStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn x:Name="MABL_COL" Header="مبلغ" Binding="{Binding MABL,UpdateSourceTrigger=LostFocus, StringFormat=\{0:N0\}}" Width="120" MinWidth="80">
+                <DataGridTextColumn x:Name="MABL_COL" Header="مبلغ" Binding="{Binding MABL,UpdateSourceTrigger=LostFocus, StringFormat=\{0:N0\}}" Width="120" MinWidth="100">
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                             <Setter Property="MaxLength" Value="50" />

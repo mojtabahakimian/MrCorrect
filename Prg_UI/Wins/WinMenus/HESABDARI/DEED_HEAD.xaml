@@ -144,6 +144,8 @@
                   RowEditEnding="Child14_RowEditEnding"
                   IsKeyboardFocusWithinChanged="Child14_IsKeyboardFocusWithinChanged"
                   ContextMenu="{StaticResource ContextUtilityMenu1}"
+                  VirtualizingPanel.IsVirtualizing="True"
+                  VirtualizingPanel.VirtualizationMode="Recycling"
                   FlowDirection="RightToLeft" EnableRowVirtualization="True" Margin="20,165,14,163" LostFocus="Child14_LostFocus" PreviewMouseDoubleClick="Child14_PreviewMouseDoubleClick" PreviewKeyDown="Child14_PreviewKeyDown" PreviewMouseLeftButtonUp="Child14_PreviewMouseLeftButtonUp" SelectionChanged="Child14_SelectionChanged" BeginningEdit="Child14_BeginningEdit" CanUserDeleteRows="False" IsReadOnly="True" >
 
             <DataGrid.Style>

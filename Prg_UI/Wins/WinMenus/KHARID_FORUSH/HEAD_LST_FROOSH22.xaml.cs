@@ -1147,7 +1147,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             _navigationManager = new NavigationManager<HEAD_LST>(
                 dbms,
                 x => x.NUMBER.ToString(), // property selector (used to find a record by its CODE)
-                $"SELECT NUMBER, NUMBER1 FROM HEAD_LST {WhereCondition} ORDER BY NUMBER", //All Record of The Table
+                $"SELECT NUMBER1 , NUMBER , DATE_N , CUST_NO , USER_NAME , MOLAH FROM HEAD_LST {WhereCondition} ORDER BY NUMBER", //All Record of The Table
                 x => $"SELECT TOP 1 NUMBER, TAG, ANBAR, NUMBER1, DATE_N, TAH, MAS, VAS, N_S, CUST_NO, MOLAH, M_NAGHD, MABL_VAR, MOIN_VAR, MABL_HAV, MOIN_HAV, MABL_HAZ, MOIN_HAZ, TAKHFIF, MOIN_KHF, ANBARF, FNUMCO, DEPATMAN, SHIFT, CUST_KIND, USER_NAME, SHARAYET, SGN1, SGN2, SGN3, SGN4, MBAA, HMBAA, TAMIR, TICMBAA, TKHF, OKF, SADER, ARZD, ARZKIND, CDDATE, CDTIME, OKDATE, OKTIME, JAY, MODAT_PPID, PEPID, PEID, sgn1usid, sgn2usid, sgn3usid, CRT, UID, ARZKIND2, ARZCODING FROM HEAD_LST WHERE NUMBER = {x?.NUMBER} AND TAG = {fTAG}", //On Change for One Record
                 Convert.ToDouble(NUMBER.Text)
                 );

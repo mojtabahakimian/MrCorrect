@@ -177,6 +177,10 @@ namespace Wins.WinMenus.HESABDARI
                 ORDERER.IsEnabled = ican;
                 ORDERERID.IsEnabled = ican; //درخواست کننده
 
+                SGN1.IsEnabled = ican;
+                SGN2.IsEnabled = ican;
+                SGN3.IsEnabled = ican;
+
                 CACHTIC.IsEnabled = ican; //نقد
                 CHEKTIC.IsEnabled = ican; //چک شرکت
                 CHEKMTIC.IsEnabled = ican; //چک مشتری
@@ -463,9 +467,9 @@ namespace Wins.WinMenus.HESABDARI
 
                 if (IS_READ_ONLY_MODE)
                 {
-                    SGN1.IsEnabled = false;
-                    SGN2.IsEnabled = false;
-                    SGN3.IsEnabled = false;
+                    //SGN1.IsEnabled = false;
+                    //SGN2.IsEnabled = false;
+                    //SGN3.IsEnabled = false;
                     //PERSONEL.IsEnabled = false;
                     BTN_SAVE.IsEnabled = false;
                 }

@@ -160,8 +160,8 @@
                     </syncfusion:GridTemplateColumn.CellTemplate>
                 </syncfusion:GridTemplateColumn>
 
-                <syncfusion:GridTextColumn  HeaderText="حساب کل" MappingName="N_KOL" Width="110" />
-                <syncfusion:GridTextColumn  HeaderText="حساب معین" MappingName="NUMBER" Width="120" />
+                <syncfusion:GridTextColumn  HeaderText="حساب کل" MappingName="N_KOL" Width="100" />
+                <syncfusion:GridTextColumn  HeaderText="حساب معین" MappingName="NUMBER" Width="110" />
                 <syncfusion:GridTextColumn  HeaderText="نام حساب معين" MappingName="moin" Width="300" />
 
                 <syncfusion:GridTextColumn  HeaderText="جمع بدهکار" MappingName="SumOfBED" Width="150" >

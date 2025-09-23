@@ -9,7 +9,7 @@
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
         FontFamily="{StaticResource IRANYEKAN}"
-        Title="Window4" Height="385" Width="551" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded">
+        Title="F7" Height="385" Width="768" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded">
 
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">

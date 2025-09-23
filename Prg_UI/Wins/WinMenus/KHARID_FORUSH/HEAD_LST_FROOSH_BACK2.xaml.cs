@@ -930,9 +930,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                 TAKHFIF_MABL_PRICE();
 
-                ActivateChaps();
-
                 Form_Current();
+
+                ActivateChaps();
 
                 AllowEdits = false;
                 BTN_SAVE.IsEnabled = false;

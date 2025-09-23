@@ -1,18 +1,12 @@
 ﻿using MaterialDesignThemes.Wpf;
-using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
-using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.UiTools;
-using Prg_UI.Wins.WinOther;
-using Stimulsoft.Base;
 using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -21,10 +15,12 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
-using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
 using static Prg_UI.Functions.CL_LMethods;
 using System.Diagnostics;
 using Stimulsoft.Report.Components;
+using Prg_UI.HelperWins;
+using System.Collections.Generic;
+using System;
 
 namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 {
@@ -104,7 +100,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
             I_AM_WIN_F_MENU_KHFR = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
-        
+
             switch (OpenArgs)
             {
                 //case "F":
@@ -129,50 +125,62 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             }
 
             FILL_ALL_COMBOBOXES();
+
+            DT1.Text = Tarikh.FirstDayOfCurrentMonth;
+            DT2.Text = Tarikh.LastDayOfCurrentMonth;
+
+            HMOIN.Focus();
         }
         private void FILL_ALL_COMBOBOXES()
         {
-            HMOIN.ItemsSource = dbms.DoGetDataSQL<Q1>(
-              @"SELECT 
-        RTRIM(CAST(TDETA_HES.N_KOL AS nvarchar)) + '-' +
-        RTRIM(CAST(TDETA_HES.NUMBER AS nvarchar)) + '-' +
-        RTRIM(CAST(TDETA_HES.TNUMBER AS nvarchar)) AS hes
-    FROM TOTA_HES 
-        INNER JOIN DETA_HES ON TOTA_HES.NUMBER = DETA_HES.N_KOL
-        INNER JOIN TDETA_HES ON DETA_HES.NUMBER = TDETA_HES.NUMBER 
-                            AND DETA_HES.N_KOL = TDETA_HES.N_KOL"
-            ).ToList(); HMOIN.DisplayMemberPath = "hes";
-            HMOIN.SelectedValuePath = "hes";
+            var dataSource = new List<Custom_CUST_HESAB>();
 
-            HHMOIN.ItemsSource = dbms.DoGetDataSQL<Q2>(@"SELECT RTRIM(CAST(TDETA_HES.N_KOL AS nvarchar)) + '-' + RTRIM(CAST(TDETA_HES.NUMBER AS nvarchar)) + '-' + RTRIM(CAST(TDETA_HES.TNUMBER AS nvarchar)) AS hes, TDETA_HES.NAME FROM TOTA_HES INNER JOIN DETA_HES INNER JOIN TDETA_HES ON DETA_HES.NUMBER = TDETA_HES.NUMBER AND DETA_HES.N_KOL = TDETA_HES.N_KOL ON TOTA_HES.NUMBER = DETA_HES.N_KOL").ToList();
-            HHMOIN.DisplayMemberPath = "NAME";
-            HHMOIN.SelectedValuePath = "hes";
+            // کد حساب
+            HHMOIN.ItemsSource = dataSource;
+            // نام حساب
+            HMOIN.ItemsSource = dataSource;
         }
         private void HMOIN_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (HMOIN.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
+            if (!NowIsReady) { return; }
+
+
+            TextBox CUTSNO_TEX = (TextBox)HMOIN.Template.FindName("PART_EditableTextBox", HMOIN);
+            if (CUTSNO_TEX is null)
+            {
+                return;
+            }
+            if (HMOIN.SelectedValue is not null)
+            {
+                if ((HMOIN.SelectedItem as Custom_CUST_HESAB).NAME == CUTSNO_TEX.Text)
+                {
+                    return;
+                }
+            }
+
+            var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(HMOIN, dbms);
+            if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
+            {
+                universControl.PopNotifyShow($"حساب نمی تواند خالی باشد", Pop1, Pop1Text1, Pop_Border1);
+                e.Handled = true;
+            }
 
             if (HMOIN.SelectedValue is not null)
             {
-                HHMOIN.SelectedValue = HMOIN.SelectedValue;
+                if (CL_HESABDARI.ISTAF(HMOIN.SelectedValue.ToString()))
+                {
+                    Msgwin msgwin = new Msgwin(false, "حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!");
+                    msgwin.ShowDialog();
+                    HMOIN.SelectedValue = null;
+                }
+                //if (CL_HESABDARI.BLOCKEDCUST(HMOIN.SelectedValue.ToString()))
+                //{
+                //    HMOIN.SelectedItem = null;
+                //    universControl.PopNotifyShow(" حساب مسدود گرديده است لطفا با مديريت مالي تماس بگيريد", Pop1, Pop1Text1, Pop_Border1);
+                //    return;
+                //}
             }
-
-            //TextBox COMBO_TEX = (TextBox)HMOIN.Template.FindName("PART_EditableTextBox", HMOIN);
-
-            //if (HMOIN.SelectedValue is not null)
-            //{
-            //    if ((HMOIN.SelectedItem as Custom_CUST_HESAB).NAME == COMBO_TEX.Text)
-            //    {
-            //        return;
-            //    }
-            //}
-
-            //var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(HMOIN, dbms);
-            //if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
-            //{
-            //    universControl.PopNotifyShow($"شخص نمی تواند خالی باشد", Pop1, Pop1Text1, Pop_Border1);
-            //    e.Handled = true;
-            //}
         }
         private void BTN_GO_Click(object sender, RoutedEventArgs e)
         {
@@ -226,7 +234,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                     {
                         //OpenReport("R_FROOSH_DAYLY1");
 
-                        
+
                         var report = new StiReport();
                         var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.R_FROOSH_DAYLY_1.mrt");
                         report.Load(pathreport);
@@ -255,7 +263,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                     {
                         //OpenReport("R_KHARED_DAYLY");
 
-                        
+
                         var report = new StiReport();
                         var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.R_KHARED_DAYLY_1.mrt");
                         report.Load(pathreport);
@@ -331,12 +339,12 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                         else
                         {
                             sql = $"SELECT * FROM HEAD_LST WHERE SADER = 0 AND tag = 13 AND date_n >= '{dt1}' AND date_n <= '{dt2}' AND cust_no LIKE '{mmoin}' ORDER BY NUMBER1";
-                            var results = dbms.DoGetDataSQL<HEAD_LST>(sql);
+                            //var results = dbms.DoGetDataSQL<HEAD_LST>(sql);
 
-                            foreach (var result in results)
-                            {
-                                //OpenReport("INVOICE_FROOSH_2GR", $"(NUMBER = {result.NUMBER}) AND htag = 2");
-                            }
+                            //foreach (var result in results)
+                            //{
+                            //    //OpenReport("INVOICE_FROOSH_2GR", $"(NUMBER = {result.NUMBER}) AND htag = 2");
+                            //}
                         }
                     }
                     break;
@@ -397,6 +405,11 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             //report.Show();
 
             new Rpts.WINRPT(report, WIN_HEADER_NAME.Content.ToStringNullSafe()).Show();
+        }
+
+        private void Window_ContentRendered(object sender, System.EventArgs e)
+        {
+            Dispatcher.BeginInvoke(new Action(() => NowIsReady = true), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
         }
     }
 }
