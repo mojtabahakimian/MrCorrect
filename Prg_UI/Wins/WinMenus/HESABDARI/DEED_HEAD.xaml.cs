@@ -1685,7 +1685,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             try
             {
-                CmdSaveRecord(e.Row.Item as DEED_DTL);
+                CmdSaveRecord(ROW);
             }
             catch (SqlException ex)
             {
@@ -2365,8 +2365,30 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 ROW.N_S = Convert.ToDouble(N_S.Text);
                 ROW.ARZD = 1;
 
-                ID = dbms.DoGetDataSQL<long?>($@"INSERT INTO DEED_DTL (            N_S ,                                              N_SERI ,                                                BANK ,                                                RADIF ,                                               HES_K ,                                               HES_M ,                                               HES_T ,             BED ,             BES ,                HES ,             ARZD ,                                                HES_T2 ,                                                HES_T3,                                                   SHARH ,                                                HES_T4) 
-			                                      OUTPUT INSERTED.id VALUES ({ROW.N_S} ,{(ROW.N_SERI is null ? "NULL" : ROW.N_SERI)},{(ROW.BANK is null ? "NULL" : ROW.BANK)},{(ROW.RADIF is null ? "NULL" : ROW.RADIF)} , {(ROW.HES_K == null ? "NULL" : ROW.HES_K)} , {(ROW.HES_M == null ? "NULL" : ROW.HES_M)} , {(ROW.HES_T == null ? "NULL" : ROW.HES_T)} , {ROW.BED} , {ROW.BES} , N'{ROW.HES}' , {ROW.ARZD} , {(ROW.HES_T2 == null ? "NULL" : ROW.HES_T2)} , {(ROW.HES_T3 == null ? "NULL" : ROW.HES_T3)},N'{(ROW.SHARH is null ? "" : ROW.SHARH)}', {(ROW.HES_T4 == null ? "NULL" : ROW.HES_T4)})").FirstOrDefault();
+                //ID = dbms.DoGetDataSQL<long?>($@"INSERT INTO DEED_DTL (            N_S ,                                              N_SERI ,                                                BANK ,                                                RADIF ,                                               HES_K ,                                               HES_M ,                                               HES_T ,             BED ,             BES ,                HES ,             ARZD ,                                                HES_T2 ,                                                HES_T3,                                                   SHARH ,                                                HES_T4) 
+                //                         OUTPUT INSERTED.id VALUES ({ROW.N_S} ,{(ROW.N_SERI is null ? "NULL" : ROW.N_SERI)},{(ROW.BANK is null ? "NULL" : ROW.BANK)},{(ROW.RADIF is null ? "NULL" : ROW.RADIF)} , {(ROW.HES_K == null ? "NULL" : ROW.HES_K)} , {(ROW.HES_M == null ? "NULL" : ROW.HES_M)} , {(ROW.HES_T == null ? "NULL" : ROW.HES_T)} , {ROW.BED} , {ROW.BES} , N'{ROW.HES}' , {ROW.ARZD} , {(ROW.HES_T2 == null ? "NULL" : ROW.HES_T2)} , {(ROW.HES_T3 == null ? "NULL" : ROW.HES_T3)},N'{(ROW.SHARH is null ? "" : ROW.SHARH)}', {(ROW.HES_T4 == null ? "NULL" : ROW.HES_T4)})").FirstOrDefault();
+
+                ID = dbms.DoGetDataSQL<long?>($@"INSERT INTO DEED_DTL (N_S, N_SERI, BANK, RADIF, HES_K, HES_M, HES_T, BED, BES, HES, ARZD, HES_T2, HES_T3, SHARH, HES_T4) 
+                                          OUTPUT INSERTED.id VALUES (@N_S, @N_SERI, @BANK, @RADIF, @HES_K, @HES_M, @HES_T, @BED, @BES, @HES, @ARZD, @HES_T2, @HES_T3, @SHARH, @HES_T4)",
+                                       new
+                                       {
+                                           ROW.N_S,
+                                           ROW.N_SERI,
+                                           ROW.BANK,
+                                           ROW.RADIF,
+                                           ROW.HES_K,
+                                           ROW.HES_M,
+                                           ROW.HES_T,
+                                           BED = ROW.BED ?? 0,
+                                           BES = ROW.BES ?? 0,
+                                           ROW.HES,
+                                           ROW.ARZD,
+                                           ROW.HES_T2,
+                                           ROW.HES_T3,
+                                           SHARH = ROW.SHARH ?? "",
+                                           ROW.HES_T4
+                                       }).FirstOrDefault();
+
                 if (ID != null)
                 {
                     ROW.id = ID;
@@ -2377,22 +2399,59 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 ROW.N_S = Convert.ToDouble(N_S.Text);
                 ROW.ARZD = 1;
 
+                //dbms.DoExecuteSQL($@"UPDATE DEED_DTL SET 
+                //                            N_S = {ROW.N_S} , 
+                //                                        N_SERI = {(ROW.N_SERI is null ? "NULL" : ROW.N_SERI)},
+                //                                        BANK = {(ROW.BANK is null ? "NULL" : ROW.BANK)},
+                //                            RADIF = {(ROW.RADIF is null ? "NULL" : ROW.RADIF)} , 
+                //                            HES_K = {(ROW.HES_K == null ? "NULL" : ROW.HES_K)} , 
+                //                            HES_M = {(ROW.HES_M == null ? "NULL" : ROW.HES_M)} , 
+                //                            HES_T = {(ROW.HES_T == null ? "NULL" : ROW.HES_T)} , 
+                //                            BED = {ROW.BED} , 
+                //                            BES = {ROW.BES} , 
+                //                            HES = N'{ROW.HES}' , 
+                //                            ARZD = {ROW.ARZD} , 
+                //                            HES_T2 = {(ROW.HES_T2 == null ? "NULL" : ROW.HES_T2)} , 
+                //                            HES_T3 = {(ROW.HES_T3 == null ? "NULL" : ROW.HES_T3)} , 
+                //                            HES_T4 = {(ROW.HES_T4 == null ? "NULL" : ROW.HES_T4)},
+                //                                        SHARH = N'{(ROW.SHARH is null ? "NULL" : ROW.SHARH)}' WHERE id = {ROW.id}");
+
                 dbms.DoExecuteSQL($@"UPDATE DEED_DTL SET 
-				                                        N_S = {ROW.N_S} , 
-                                                        N_SERI = {(ROW.N_SERI is null ? "NULL" : ROW.N_SERI)},
-                                                        BANK = {(ROW.BANK is null ? "NULL" : ROW.BANK)},
-				                                        RADIF = {(ROW.RADIF is null ? "NULL" : ROW.RADIF)} , 
-				                                        HES_K = {(ROW.HES_K == null ? "NULL" : ROW.HES_K)} , 
-				                                        HES_M = {(ROW.HES_M == null ? "NULL" : ROW.HES_M)} , 
-				                                        HES_T = {(ROW.HES_T == null ? "NULL" : ROW.HES_T)} , 
-				                                        BED = {ROW.BED} , 
-				                                        BES = {ROW.BES} , 
-				                                        HES = N'{ROW.HES}' , 
-				                                        ARZD = {ROW.ARZD} , 
-				                                        HES_T2 = {(ROW.HES_T2 == null ? "NULL" : ROW.HES_T2)} , 
-				                                        HES_T3 = {(ROW.HES_T3 == null ? "NULL" : ROW.HES_T3)} , 
-				                                        HES_T4 = {(ROW.HES_T4 == null ? "NULL" : ROW.HES_T4)},
-                                                        SHARH = N'{(ROW.SHARH is null ? "NULL" : ROW.SHARH)}' WHERE id = {ROW.id}");
+                                                        N_S = @N_S, 
+                                                        N_SERI = @N_SERI,
+                                                        BANK = @BANK,
+				                                        RADIF = @RADIF, 
+				                                        HES_K = @HES_K, 
+				                                        HES_M = @HES_M, 
+				                                        HES_T = @HES_T, 
+				                                        BED = @BED, 
+				                                        BES = @BES, 
+				                                        HES = @HES, 
+				                                        ARZD = @ARZD, 
+				                                        HES_T2 = @HES_T2, 
+				                                        HES_T3 = @HES_T3, 
+				                                        HES_T4 = @HES_T4,
+                                                        SHARH = @SHARH
+                                                  WHERE id = @id",
+                                               new
+                                               {
+                                                   ROW.N_S,
+                                                   ROW.N_SERI,
+                                                   ROW.BANK,
+                                                   ROW.RADIF,
+                                                   ROW.HES_K,
+                                                   ROW.HES_M,
+                                                   ROW.HES_T,
+                                                   BED = ROW.BED ?? 0,
+                                                   BES = ROW.BES ?? 0,
+                                                   ROW.HES,
+                                                   ROW.ARZD,
+                                                   ROW.HES_T2,
+                                                   ROW.HES_T3,
+                                                   SHARH = ROW.SHARH ?? "",
+                                                   ROW.HES_T4,
+                                                   ROW.id
+                                               });
             }
 
             return true;

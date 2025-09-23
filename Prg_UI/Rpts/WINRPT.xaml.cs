@@ -9,6 +9,9 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using Microsoft.Data.SqlClient;
+using System.Diagnostics;
+using System.Threading;
 
 namespace Rpts
 {
@@ -104,7 +107,9 @@ namespace Rpts
 
             }
 
-            MyReport.Render();
+            ////MyReport.Render();
+            RenderReportWithRetry(MyReport);
+
 
             TheReportViewer.Report = MyReport;
 
@@ -141,6 +146,54 @@ namespace Rpts
         private void BTN_PRINT_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void RenderReportWithRetry(StiReport report, int maxAttempts = 3, int baseDelayMilliseconds = 300)
+        {
+            if (report is null)
+            {
+                throw new ArgumentNullException(nameof(report));
+            }
+
+            if (maxAttempts <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maxAttempts));
+            }
+
+            if (baseDelayMilliseconds < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(baseDelayMilliseconds));
+            }
+
+            var attempt = 0;
+            while (true)
+            {
+                try
+                {
+                    attempt++;
+                    report.Render();
+                    return;
+                }
+                catch (SqlException ex) when (IsDeadlockException(ex) && attempt < maxAttempts)
+                {
+                    var delay = baseDelayMilliseconds * attempt;
+                    //Debug.WriteLine($"Deadlock detected while rendering report (attempt {attempt}). Retrying in {delay} ms.");
+                    Thread.Sleep(delay);
+                }
+            }
+        }
+
+        private static bool IsDeadlockException(SqlException exception)
+        {
+            foreach (SqlError error in exception.Errors)
+            {
+                if (error.Number == 1205)
+                {
+                    return true;
+                }
+            }
+
+            return exception.Number == 1205;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
