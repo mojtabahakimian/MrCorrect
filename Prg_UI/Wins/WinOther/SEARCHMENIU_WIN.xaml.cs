@@ -225,6 +225,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش تراز موجودی کل انبار ها", WIN_NAME = CL_MenuManager.WinNameType.R_TARAZ_ANBARHA });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارشات ساخته شده توسط کاربران ", WIN_NAME = CL_MenuManager.WinNameType.SQLSTATEFORM_CRTL_M });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "جستجو در گردش کالا های پیشرفته | F12 پیشرفته ", WIN_NAME = CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_ADVANC_F12 });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "جستجو در گردش کالا ها | F12 عادی ", WIN_NAME = CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_F12 });
 
             //MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش موجودی انبار", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_ANBAR });
             //MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "صورت حساب هوشمند مشتریان جهت تسویه", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_DATE_AI });
@@ -384,7 +385,7 @@ namespace Wins.WinOther
 
             //برنامه ریزی و تولید
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "نمودار فروش کلی - ریالی", WIN_NAME = CL_MenuManager.WinNameType.AMAR_FROOSH_KOL });
-            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "نمودار فروش کلی - ریالی بارگیری نشده", WIN_NAME = CL_MenuManager.WinNameType.AMAR_FROOSH_KOL_ALL});
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "نمودار فروش کلی - ریالی بارگیری نشده", WIN_NAME = CL_MenuManager.WinNameType.AMAR_FROOSH_KOL_ALL });
 
 
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());

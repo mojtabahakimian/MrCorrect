@@ -98,13 +98,40 @@ namespace Prg_SendInvoice.CNNMANAGER
         [System.Diagnostics.DebuggerStepThrough]
         public IEnumerable<TEntity> DoGetDataSQL<TEntity>(string sql, object parameters = null)
         {
-            using (SqlConnection db = new SqlConnection(CONNECTION_STR))
+            //using (SqlConnection db = new SqlConnection(CONNECTION_STR))
+            //{
+            //    try
+            //    {
+            //        db.Open();
+            //        var results = db.Query<TEntity>(sql, parameters, commandTimeout: 3600);
+            //        return results;
+            //    }
+            //    catch (Exception er)
+            //    {
+            //        LogSqlQuery(sql, er);
+
+            //        throw; // Re-throw the exception to handle it further up the call stack
+            //    }
+            //    finally
+            //    {
+            //        db?.Close(); db?.Dispose();
+            //    }
+            //}
+            const int maxRetries = 3;
+
+            for (int attempt = 0; attempt <= maxRetries; attempt++)
             {
+                using var db = new SqlConnection(CONNECTION_STR);
                 try
                 {
                     db.Open();
                     var results = db.Query<TEntity>(sql, parameters, commandTimeout: 3600);
                     return results;
+                }
+                catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
+                {
+                    Thread.Sleep(200 * (attempt + 1));
+                    continue;
                 }
                 catch (Exception er)
                 {
@@ -117,6 +144,7 @@ namespace Prg_SendInvoice.CNNMANAGER
                     db?.Close(); db?.Dispose();
                 }
             }
+
             return null;
         }
         [System.Diagnostics.DebuggerStepThrough]

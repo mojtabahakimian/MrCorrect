@@ -876,7 +876,11 @@ namespace Functions
             /// <summary>
             /// نمودار فروش کلی - ریالی بارگیری نشده
             /// </summary>
-            AMAR_FROOSH_KOL_ALL
+            AMAR_FROOSH_KOL_ALL,
+            /// <summary>
+            /// جستجو در گردش کالا عادی
+            /// </summary>
+            HEAD_SERCH_MAIN_F12
         }
         #endregion
 
@@ -893,6 +897,8 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+                case WinNameType.HEAD_SERCH_MAIN_F12: /* جستجو در گردش کالا عادی */ CL_LMethods.OpenWindow(OWNERWIN, new HEAD_SERCH_MAIN(), isModalDialog: false, allowMultipleInstances: false); break;
+
                 case WinNameType.SQLSTATEFORM_CRTL_M: /* گزارشات ساخته شده توسط کاربران */ CL_LMethods.OpenWindow(OWNERWIN, new SQLSTATEFORM(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.HEAD_SERCH_MAIN_ADVANC_F12: /*  جستجو در گردش کالا های پیشرفته | F12 پیشرفته */ CL_LMethods.OpenWindow(OWNERWIN, new HEAD_SERCH_MAIN_ADVANC(), isModalDialog: false, allowMultipleInstances: false); break;

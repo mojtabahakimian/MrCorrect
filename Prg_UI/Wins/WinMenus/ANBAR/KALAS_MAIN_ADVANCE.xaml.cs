@@ -109,6 +109,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         //public List<CMB3>? MM_Data { get; set; }
         #endregion
 
+        public bool isAdvancedF12 { get; set; } = true;
+
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
@@ -171,6 +173,15 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             //Process Prc = ProcLoader.Start();
+
+            if (isAdvancedF12)
+            {
+                LABEL_HEADER.Content = "نتیجه جستجو در گردش کالا پـیشرفته";
+            }
+            else
+            {
+                LABEL_HEADER.Content = "نتیجه جستجو در گردش کالا";
+            }
 
             List<string> NON = new List<string>();
             foreach (var columnName in ColumnSelectedPassed)
