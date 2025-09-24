@@ -161,7 +161,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             ANBAR.SelectedValuePath = "CODE";
             ANBAR.DisplayMemberPath = "NAMES";
 
-            CANBAR.ItemsSource = dbms.DoGetDataSQL<Q3>($"SELECT TCOD_ANBAR.CODE FROM TCOD_ANBAR GROUP BY TCOD_ANBAR.CODE HAVING (((TCOD_ANBAR.CODE)<>0))").ToList();
+            CANBAR.ItemsSource = ANBAR.ItemsSource;
             CANBAR.SelectedValuePath = "CODE";
             CANBAR.DisplayMemberPath = "CODE";
         }
@@ -234,7 +234,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
         {
             
             var report = new StiReport();
-            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Kharid_Froosh.LIST_FROOSH_ANBARS.mrt");
+            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.LIST_FROOSH_ANBARS.mrt");
             report.Load(pathreport);
             string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
             report.Dictionary.Databases.Clear();
@@ -258,7 +258,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
         {
             
             var report = new StiReport();
-            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Kharid_Froosh.LIST_KHAREED_ANBARS.mrt");
+            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.LIST_KHAREED_ANBARS.mrt");
             report.Load(pathreport);
             string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
             report.Dictionary.Databases.Clear();
@@ -301,8 +301,10 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                 MANBAR = this.ANBAR.SelectedValue.ToString();
             }
             if (IsNull(this.KALA.SelectedValue))
-            {
+            {                
                 MKALA = "%";
+                universControl.PopNotifyShow("کالا نمیتواند خالی باشد!", Pop1, Pop1Text1, Pop_Border1);
+                return;
             }
             else
             {
