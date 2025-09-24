@@ -95,9 +95,11 @@
 		<None Remove="Rpts\Factors\INVOICE_KH_BACK.mrt" />
 		<None Remove="Rpts\Factors\INVOICE_KH_BACK_AZAD.mrt" />
 		<None Remove="Rpts\Factors\INVOIC_FROOSH_BACK2.mrt" />
+		<None Remove="Rpts\Factors\LIST_FROOSH_ANBARS.mrt" />
 		<None Remove="Rpts\Factors\LIST_FROOSH_ANBARS_DTL.mrt" />
 		<None Remove="Rpts\Factors\LIST_FROOSH_KALA_BASKOL.mrt" />
 		<None Remove="Rpts\Factors\LIST_INVOICE_KHARED.mrt" />
+		<None Remove="Rpts\Factors\LIST_KHAREED_ANBARS.mrt" />
 		<None Remove="Rpts\Factors\R_FROOSH_DAYLY_1.mrt" />
 		<None Remove="Rpts\Factors\R_GARDESH_KHFR_DAFTAR_A4.mrt" />
 		<None Remove="Rpts\Factors\R_GARSESH_KHFR_DAFTAR.mrt" />
@@ -502,9 +504,11 @@
 		<EmbeddedResource Include="Rpts\Factors\INVOICE_KH_BACK.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\INVOICE_KH_BACK_AZAD.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\INVOIC_FROOSH_BACK2.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\LIST_FROOSH_ANBARS.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\LIST_FROOSH_ANBARS_DTL.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\LIST_FROOSH_KALA_BASKOL.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\LIST_INVOICE_KHARED.mrt" />
+		<EmbeddedResource Include="Rpts\Factors\LIST_KHAREED_ANBARS.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\R_FROOSH_DAYLY_1.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\R_GARDESH_KHFR_DAFTAR_A4.mrt" />
 		<EmbeddedResource Include="Rpts\Factors\R_GARSESH_KHFR_DAFTAR.mrt" />
