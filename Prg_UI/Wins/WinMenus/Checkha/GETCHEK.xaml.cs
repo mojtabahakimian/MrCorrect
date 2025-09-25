@@ -151,6 +151,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     DATE_S.Text = CheckExistData.FirstOrDefault()?.DATE_S.ToString();
                     DATE.Text = CheckExistData.FirstOrDefault()?.DATE.ToString();
                     MABL.Text = CheckExistData.FirstOrDefault()?.MABL.ToString();
+                    HES.SelectedValue = CheckExistData.FirstOrDefault()?.HES1?.ToString();
                     NAME_TAH.SelectedValue = CheckExistData.FirstOrDefault()?.NAME_TAH?.ToString();
                     N_HESAB.Text = CheckExistData.FirstOrDefault()?.N_HESAB?.ToString();
                     SANDUGH.SelectedValue = CheckExistData.FirstOrDefault()?.SANDUGH?.ToString();
@@ -167,9 +168,20 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             SANDUGH.SelectedValuePath = "TNUMBER";
             SANDUGH.DisplayMemberPath = "NAME";
 
-            HES.ItemsSource = dbms.DoGetDataSQL<QueryT2>("SELECT RTRIM(CAST(TOTA_HES.NUMBER AS nvarchar)) + '-' + RTRIM(CAST(DETA_HES.NUMBER AS nvarchar)) + '-' + RTRIM(CAST(TDETA_HES.TNUMBER AS nvarchar)) AS hes, TDETA_HES.NAME FROM TOTA_HES INNER JOIN DETA_HES INNER JOIN TDETA_HES ON DETA_HES.NUMBER = TDETA_HES.NUMBER AND DETA_HES.N_KOL = TDETA_HES.N_KOL ON TOTA_HES.NUMBER = DETA_HES.N_KOL WHERE (dbo.DETA_HES.N_KOL  = " + Baseknow.BANKHA + ")").ToList();
+            HES.ItemsSource = dbms.DoGetDataSQL<QueryT2>(@"SELECT 
+                                                            RTRIM(CAST(TOTA_HES.NUMBER AS nvarchar)) + '-' + 
+                                                            RTRIM(CAST(DETA_HES.NUMBER AS nvarchar)) + '-' + 
+                                                            RTRIM(CAST(TDETA_HES.TNUMBER AS nvarchar)) AS hes, 
+                                                            TDETA_HES.NAME
+                                                        FROM TOTA_HES
+                                                        INNER JOIN DETA_HES 
+                                                            INNER JOIN TDETA_HES 
+                                                                ON DETA_HES.NUMBER = TDETA_HES.NUMBER 
+                                                               AND DETA_HES.N_KOL = TDETA_HES.N_KOL 
+                                                            ON TOTA_HES.NUMBER = DETA_HES.N_KOL
+                                                        ").ToList();
             HES.SelectedValuePath = "hes";
-            HES.DisplayMemberPath = "NAME";
+            HES.DisplayMemberPath = "hes";
 
             BANK.ItemsSource = dbms.DoGetDataSQL<TCOD_BANKS>("SELECT TCOD_BANKS.CODE, TCOD_BANKS.NAMES FROM TCOD_BANKS ORDER BY TCOD_BANKS.NAMES").ToList();
             BANK.SelectedValuePath = "CODE";
@@ -483,6 +495,24 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     var _SHOBEH_ = SHOBEH.SelectedValue.ToStringNullSafe().Length > 20 ? SHOBEH.SelectedValue.ToStringNullSafe().Substring(0, 19) : SHOBEH.SelectedValue.ToStringNullSafe();
 
                     var _SAYADI_ = SAYADI.Text.Length > 16 ? SAYADI.Text.Substring(0, 16) : SAYADI.Text;
+
+                    string selected = HES?.SelectedValue?.ToString();
+                    if (!string.IsNullOrEmpty(selected))
+                    {
+                        if (CL_HESABDARI.GETKOL(selected) != Baseknow.BANKHA)
+                        {
+                            new Msgwin(false, "چک در این بخش فقط به بانک قابل واگذاری می‌باشد").ShowDialog();
+                            CANCEL = true;
+                        }
+
+                        N_KOL = CL_HESABDARI.GETKOL(selected).ToString();
+                        N_MOIN = CL_HESABDARI.GETMOIN(selected).ToString();
+                        N_TAF = CL_HESABDARI.GETTAF(selected).ToString();
+                    }
+                    else
+                    {
+                        N_KOL = N_MOIN = N_TAF = null;
+                    }
 
                     try
                     {
