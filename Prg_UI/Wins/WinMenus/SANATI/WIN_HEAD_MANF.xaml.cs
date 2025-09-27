@@ -1527,10 +1527,12 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 IVM.ShowErrorMessages(ErrosMessages);
                 return;
             }
-            #endregion
 
             //Re Calculate Just In Case
             CURRENT_ITEMS_ROW.MABLK = ((CURRENT_ITEMS_ROW?.PERT ?? 0) + (CURRENT_ITEMS_ROW?.MEGHk ?? 0)) * (CURRENT_ITEMS_ROW?.SMABL ?? 0);
+            #endregion
+
+            TheRow.FNUMB = Convert.ToInt32(FNUMB.Text); //Get Master Into Detail Value
 
             try
             {
@@ -1547,17 +1549,17 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 else
                 {
                     const string updateSql = @"
-                 UPDATE dbo.DTL_MANF SET
-                     ANBAR = @ANBAR,
-                     VAHED_K = @VAHED_K,
-                     MEGH = @MEGH,
-                     MEGHk = @MEGHk,
-                     PERT = @PERT,
-                     SMABL = @SMABL,
-                     MABLK = @MABLK,
-                     TOZIH = @TOZIH,
-                     UID = @UID
-                 WHERE FNUMB = @FNUMB AND CODE = @CODE";
+                    UPDATE dbo.DTL_MANF SET
+                        ANBAR = @ANBAR,
+                        VAHED_K = @VAHED_K,
+                        MEGH = @MEGH,
+                        MEGHk = @MEGHk,
+                        PERT = @PERT,
+                        SMABL = @SMABL,
+                        MABLK = @MABLK,
+                        TOZIH = @TOZIH,
+                        UID = @UID
+                    WHERE FNUMB = @FNUMB AND CODE = @CODE";
 
                     dbms.DoExecuteSQL(updateSql, TheRow);
                 }
@@ -1575,7 +1577,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             {
                 new Msgwin(false, "خطا در انجام عملیات ذخیره!").ShowDialog(); return;
             }
-     
+
             #region CODE_AfterUpdate
             int TopHeadCode = Convert.ToInt32(CODE.SelectedValue); //HEAD_MANF_CODE
             double CurrentRowCode = Convert.ToDouble(TheRow.CODE); //Me.CODE
