@@ -152,7 +152,7 @@
                 </WrapPanel>
 
                 <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
-                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" PreviewMouseDown="Image_PreviewMouseDown_3" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
                         <Image.Source>
                             <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/MYSETTING/Password_Change.png" CacheOption="OnLoad"/>
                         </Image.Source>
@@ -161,7 +161,7 @@
                 </WrapPanel>
 
                 <WrapPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
-                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
+                    <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" PreviewMouseDown="Image_PreviewMouseDown_4" VerticalAlignment="Top" Cursor="Hand" Margin="5,0,0,0">
                         <Image.Source>
                             <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/MYSETTING/Taghir_User.png" CacheOption="OnLoad"/>
                         </Image.Source>

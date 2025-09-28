@@ -884,7 +884,15 @@ namespace Functions
             /// <summary>
             /// لیست آمار مصرف مواد
             /// </summary>
-            F_MENU_DATE_AMMAS
+            F_MENU_DATE_AMMAS,
+            /// <summary>
+            /// تغییر رمز عبور
+            /// </summary>
+            NEWPASSWORD,
+            /// <summary>
+            /// تغییر نام یا حذف کاربر
+            /// </summary>
+            USER_CHANGE
         }
         #endregion
 
@@ -907,6 +915,14 @@ namespace Functions
 
                 case WinNameType.HEAD_SERCH_MAIN_ADVANC_F12: /*  جستجو در گردش کالا های پیشرفته | F12 پیشرفته */ CL_LMethods.OpenWindow(OWNERWIN, new HEAD_SERCH_MAIN_ADVANC(), isModalDialog: false, allowMultipleInstances: false); break;
                 //Mojtaba}
+
+                case WinNameType.USER_CHANGE: //تغییر نام یا حذف کاربر
+                    CL_LMethods.OpenWindow(OWNERWIN, new USER_CHANGE());
+                    break;
+
+                case WinNameType.NEWPASSWORD: //تغییر رمز عبور
+                    CL_LMethods.OpenWindow(OWNERWIN, new NEWPASSWORD());
+                    break;
 
                 case WinNameType.F_MENU_DATE_AMMAS: //لیست آمار مصرف مواد
                     CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_DATE("AMMAS"));

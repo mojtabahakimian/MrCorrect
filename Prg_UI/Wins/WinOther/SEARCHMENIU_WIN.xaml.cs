@@ -388,6 +388,11 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "نمودار فروش کلی - ریالی", WIN_NAME = CL_MenuManager.WinNameType.AMAR_FROOSH_KOL });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "نمودار فروش کلی - ریالی بارگیری نشده", WIN_NAME = CL_MenuManager.WinNameType.AMAR_FROOSH_KOL_ALL });
 
+            //تنظیمات
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تغییر رمز عبور", WIN_NAME = CL_MenuManager.WinNameType.NEWPASSWORD });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تغییر نام یا حذف کاربر", WIN_NAME = CL_MenuManager.WinNameType.USER_CHANGE });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "پیشفرض واحد و شیفت", WIN_NAME = CL_MenuManager.WinNameType.DEFAULT });
+
 
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());
 

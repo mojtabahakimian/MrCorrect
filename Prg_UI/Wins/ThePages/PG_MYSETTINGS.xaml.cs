@@ -54,5 +54,15 @@ namespace Wins.ThePages
             Prg_UI.Properties.Settings.Default.IsRDPMode = Convert.ToBoolean(RemoteModeTB.IsChecked);
             Prg_UI.Properties.Settings.Default.Save();
         }
+
+        private void Image_PreviewMouseDown_3(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.NEWPASSWORD, null);
+        }
+
+        private void Image_PreviewMouseDown_4(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.USER_CHANGE, null);
+        }
     }
 }
