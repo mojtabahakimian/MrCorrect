@@ -141,6 +141,8 @@
 		<None Remove="Rpts\SANATI\HAVALE_EXIT_SAYER.mrt" />
 		<None Remove="Rpts\SANATI\HAVLAH_ENTER.mrt" />
 		<None Remove="Rpts\SANATI\HAVLAH_EXIT.mrt" />
+		<None Remove="Rpts\SANATI\PRINT_FORMULA.mrt" />
+		<None Remove="Rpts\SANATI\PRINT_FORMULA_2.mrt" />
 		<None Remove="Rpts\SETPERMIS\userobjectpermision.mrt" />
 		<None Remove="Rpts\STUF_DEF.mrt" />
 		<None Remove="Rpts\TAARIF\GRADE_REP.mrt" />
@@ -548,6 +550,8 @@
 		<EmbeddedResource Include="Rpts\SANATI\HAVALE_EXIT_SAYER.mrt" />
 		<EmbeddedResource Include="Rpts\SANATI\HAVLAH_ENTER.mrt" />
 		<EmbeddedResource Include="Rpts\SANATI\HAVLAH_EXIT.mrt" />
+		<EmbeddedResource Include="Rpts\SANATI\PRINT_FORMULA.mrt" />
+		<EmbeddedResource Include="Rpts\SANATI\PRINT_FORMULA_2.mrt" />
 		<EmbeddedResource Include="Rpts\SETPERMIS\userobjectpermision.mrt" />
 		<EmbeddedResource Include="Rpts\STUF_DEF.mrt" />
 		<EmbeddedResource Include="Rpts\TAARIF\GRADE_REP.mrt" />
