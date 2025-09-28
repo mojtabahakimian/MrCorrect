@@ -15,6 +15,7 @@ using Prg_UI.Wins.WinMenus.ANBAR;
 using Prg_UI.Wins.WinMenus.HESABDARI;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
+using Prg_UI.Wins.WinMenus.SANATI;
 using Prg_UI.Wins.WinMenus.Taarif;
 using Prg_UI.Wins.WinMenus.WinAutomasion;
 using Prg_UI.Wins.WinMenus.WinDEFAULT;
@@ -371,7 +372,8 @@ namespace Prg_UI.Wins
             CL_Generaly.VAHED_OF_USER = 1;
             Baseknow.UGRP = "1";
 
-            new F_MENU_DATE("AMMAS").Show();
+            new WIN_HEAD_MANF().Show();
+
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_F12, this);
 
