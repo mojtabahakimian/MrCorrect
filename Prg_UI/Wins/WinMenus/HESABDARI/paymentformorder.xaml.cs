@@ -16,6 +16,7 @@ using Syncfusion.CompoundFile.XlsIO.Native;
 using Syncfusion.Windows.Controls.Input;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Windows;
@@ -375,9 +376,9 @@ namespace Wins.WinMenus.HESABDARI
                     if (data is not null && !string.IsNullOrEmpty(data.hes))
                     {
                         string thevalue = data.hes;
-                        if (!((List<Custom_CUST_HESAB>)ORDERER.ItemsSource).Any(item => item?.hes == thevalue))
+                        if (!((ObservableCollection<Custom_CUST_HESAB>)ORDERER.ItemsSource).Any(item => item?.hes == thevalue))
                         {
-                            ((List<Custom_CUST_HESAB>)ORDERER.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
+                            ((ObservableCollection<Custom_CUST_HESAB>)ORDERER.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
                         }
                         ORDERER.SelectedValue = null;
                         ORDERER.SelectedValue = thevalue;
@@ -401,9 +402,9 @@ namespace Wins.WinMenus.HESABDARI
                             if (data is not null && !string.IsNullOrEmpty(data.hes))
                             {
                                 string thevalue = data.hes;
-                                if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                                if (!((ObservableCollection<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
                                 {
-                                    ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
+                                    ((ObservableCollection<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
                                 }
                                 CUST_NO.SelectedValue = _HES_;
                                 CUST_NO.Items.Refresh();
@@ -416,9 +417,9 @@ namespace Wins.WinMenus.HESABDARI
                             if (data is not null && !string.IsNullOrEmpty(data.hes))
                             {
                                 string thevalue = data.hes;
-                                if (!((List<Custom_CUST_HESAB>)ORDERER.ItemsSource).Any(item => item?.hes == thevalue))
+                                if (!((ObservableCollection<Custom_CUST_HESAB>)ORDERER.ItemsSource).Any(item => item?.hes == thevalue))
                                 {
-                                    ((List<Custom_CUST_HESAB>)ORDERER.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
+                                    ((ObservableCollection<Custom_CUST_HESAB>)ORDERER.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
                                 }
                                 ORDERER.SelectedValue = null;
                                 ORDERER.SelectedValue = _HES_;
@@ -511,7 +512,7 @@ namespace Wins.WinMenus.HESABDARI
         private void FILL_ALL_COMBOBOXES()
         {
             //var RST_HESABS = dbms.DoGetDataSQL<Custom_CUST_HESAB>(@"SELECT hes,NAME FROM CUST_HESAB").ToList();
-            var RST_HESABS = new List<Custom_CUST_HESAB>();
+            var RST_HESABS = new ObservableCollection<Custom_CUST_HESAB>();
             CUST_NO.ItemsSource = RST_HESABS;
             CUST_NO2.ItemsSource = CUST_NO.ItemsSource;
 
