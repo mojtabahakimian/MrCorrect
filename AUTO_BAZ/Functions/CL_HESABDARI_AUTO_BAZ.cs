@@ -8221,6 +8221,8 @@ namespace AUTO_BAZ.Functions
                     shart = "NO_S = 8 AND N_S = " + HEDRST[R].N_S.ToString();
 
                     SANAD_NUMBER = HEDRST[R].N_S;
+
+                    max_ns = HEDRST[R].N_S;
                 }
 
                 SHRST = dbms.DoGetDataSQL<DEED_HED>($"SELECT * FROM DEED_HED WHERE {shart} ").ToList();
@@ -8397,11 +8399,6 @@ namespace AUTO_BAZ.Functions
                         }
                         if (JST[T].MABL_K != 0)
                         {
-                            bool valdefacc = false;
-                            auto_run.Dispatcher.Invoke(new Action(() =>
-                            {
-                                valdefacc = auto_run.defacc.IsChecked is true;
-                            }));
                             if (valdefacc is true && !ISHESAB(Baseknow.HAZ_TOL, 99999, Convert.ToInt64(JST[T].CODE)))
                             {
                                 CREATHES(Baseknow.HAZ_TOL, 99999, Convert.ToInt64(JST[T].CODE), GETKALANAME(Convert.ToDouble(JST[T].CODE)));
@@ -8425,11 +8422,6 @@ namespace AUTO_BAZ.Functions
                         JAMCH = Math.Round((double)JST[T].MABL_K);
                         if (JST[T].SMAB * JST[T].MEGHk != 0)
                         {
-                            bool valdefacc = false;
-                            auto_run.Dispatcher.Invoke(new Action(() =>
-                            {
-                                valdefacc = auto_run.defacc.IsChecked is true;
-                            }));
 
                             CREATHES(Baseknow.CONKAL, 99999, Convert.ToInt64(JST[T].CODE), GETKALANAME(Convert.ToDouble(JST[T].CODE)));
 
@@ -8445,11 +8437,6 @@ namespace AUTO_BAZ.Functions
                         //Forms["GUG"].Form.Repaint();
                         if (JAMCH - JST[T].SMAB * JST[T].MEGHk != 0)
                         {
-                            bool valdefacc = false;
-                            auto_run.Dispatcher.Invoke(new Action(() =>
-                            {
-                                valdefacc = auto_run.defacc.IsChecked is true;
-                            }));
                             if (valdefacc is true)
                             {
                                 //Information.Err().Clear();
@@ -8501,14 +8488,6 @@ namespace AUTO_BAZ.Functions
                     {
                         if (Math.Abs((double)(JST2.FirstOrDefault().SBED - JST2.FirstOrDefault().SBES)) <= 40 && Math.Abs((double)(JST2.FirstOrDefault().SBED - JST2.FirstOrDefault().SBES)) != 0)
                         {
-                            bool valdefacc = true;
-                            if (InternalCalling)
-                            {
-                                auto_run.Dispatcher.Invoke(new Action(() =>
-                                {
-                                    valdefacc = auto_run.defacc.IsChecked is true;
-                                }));
-                            }
 
                             if (valdefacc is true)
                             {
