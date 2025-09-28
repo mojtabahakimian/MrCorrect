@@ -32,7 +32,7 @@
 -   **دسترسی به داده‌ها (Data Access)**:
     -   `System.Data.SqlClient` برای ارتباط پایه با دیتابیس.
     -   **Dapper** به عنوان یک Micro-ORM برای اجرای کوئری‌های بهینه.
--   **گزارش‌گیری**: **Stimulsoft Reports**
+-   **گزارش‌گیری**: ** 2023.1.1 Stimulsoft Reports**
 
 ---
 
