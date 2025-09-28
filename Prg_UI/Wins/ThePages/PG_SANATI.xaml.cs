@@ -44,5 +44,10 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.AMAR_TOLID, default);
         }
+
+        private void Image_PreviewMouseDown_3(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_AMMAS, default);
+        }
     }
 }

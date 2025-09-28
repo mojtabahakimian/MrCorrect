@@ -35,6 +35,7 @@ using System.Windows.Threading;
 using Wins.WinMenus.ANBAR;
 using Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.KHARID_FORUSH;
+using Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
 using Wins.WinMenus.Taarif;
 using Wins.WinSetting;
 using static Functions.SMSService.SmsServiceFactory;
@@ -372,6 +373,7 @@ namespace Prg_UI.Wins
             Baseknow.UGRP = "1";
 
             new WIN_HEAD_MANF().Show();
+
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_F12, this);
 

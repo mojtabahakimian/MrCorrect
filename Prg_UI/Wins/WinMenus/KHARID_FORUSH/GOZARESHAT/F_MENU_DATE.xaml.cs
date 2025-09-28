@@ -223,6 +223,8 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
                     case "AMMAS":
                         //OpenForm("GOZARESH_MASRAF_MAVAD");
+                        new GOZARESH_MASRAF_MAVAD(DT1.Text.ToRawTarikh(), DT2.Text.ToRawTarikh()).Show(); //لیست آمار مواد مصرف
+
                         break;
 
                     case "COMP":
