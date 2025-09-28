@@ -16,7 +16,7 @@
         FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
-        Title="" Height="825" Width="1080" d:Width="2000" MinHeight="795" MinWidth="1020" Loaded="Window_Loaded" Closing="Window_Closing" Activated="Window_Activated" ContentRendered="Window_ContentRendered" PreviewKeyDown="Window_PreviewKeyDown">
+        Title="" Height="825" Width="1080" d:Width="1024" MinHeight="795" MinWidth="1020" Loaded="Window_Loaded" Closing="Window_Closing" Activated="Window_Activated" ContentRendered="Window_ContentRendered" PreviewKeyDown="Window_PreviewKeyDown">
 
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">
@@ -187,7 +187,8 @@
                                 KeyboardNavigation.TabNavigation="Contained"
                                 ItemsSource="{Binding FACTOR22_INVO_DATA}"
                                 IsKeyboardFocusWithinChanged="INVO_LST_sub_IsKeyboardFocusWithinChanged"    
-                                ContextMenu="{StaticResource ContextUtilityMenu2}"  
+                                ContextMenu="{StaticResource ContextUtilityMenu2}"
+                                CanUserResizeColumns="True"
                                 Margin="3,241,6,5" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" LostFocus="INVO_LST_sub_LostFocus" CellEditEnding="INVO_LST_sub_CellEditEnding" PreviewMouseLeftButtonUp="INVO_LST_sub_PreviewMouseLeftButtonUp" SelectionChanged="INVO_LST_sub_SelectionChanged" PreviewGotKeyboardFocus="INVO_LST_sub_PreviewGotKeyboardFocus" RowEditEnding="INVO_LST_sub_RowEditEnding" PreviewKeyDown="INVO_LST_sub_PreviewKeyDown" PreparingCellForEdit="INVO_LST_sub_PreparingCellForEdit" BeginningEdit="INVO_LST_sub_BeginningEdit" TabIndex="5">
 
                         <DataGrid.Style>
@@ -202,7 +203,7 @@
                             <DataGridTextColumn 	x:Name="NUMBER_COLUMN"        Binding="{Binding NUMBER,UpdateSourceTrigger=LostFocus}"           Header="NUMBER" Visibility="Hidden" />
                             <DataGridTextColumn 	x:Name="TAG_COLUMN"        	  Binding="{Binding TAG,UpdateSourceTrigger=LostFocus}"              Header="TAG" Visibility="Hidden"  />
                             <DataGridTextColumn 	x:Name="CODEO_COLUMN"        	  Binding="{Binding CODEO,UpdateSourceTrigger=LostFocus}"        Header="CODEO"   Visibility="Hidden" />
-                            <DataGridTextColumn 	x:Name="JAY_COLUMN"          Binding="{Binding JAY,UpdateSourceTrigger=LostFocus}"  IsReadOnly="True"            Header="جايزه"  MinWidth="50" Visibility="Hidden" >
+                            <DataGridTextColumn 	x:Name="JAY_COLUMN"          Binding="{Binding JAY,UpdateSourceTrigger=LostFocus}"  IsReadOnly="True"            Header="جايزه"  MinWidth="100" Visibility="Hidden" >
                                 <DataGridTextColumn.CellStyle>
                                     <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
                                         <Setter Property="Background" Value="#CC00B3FF" />
@@ -218,7 +219,7 @@
                                     </Style>
                                 </DataGridTextColumn.CellStyle>
                             </DataGridTextColumn>
-                            <DataGridComboBoxColumn x:Name="ANBAR_COLUMN" MinWidth="100" Width="130" Header=" انبار " SelectedValueBinding="{Binding ANBAR,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAMES" SelectedValuePath="CODE">
+                            <DataGridComboBoxColumn x:Name="ANBAR_COLUMN" MinWidth="150" Header=" انبار " SelectedValueBinding="{Binding ANBAR,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAMES" SelectedValuePath="CODE">
                                 <DataGridComboBoxColumn.EditingElementStyle>
                                     <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
                                         <Setter Property="IsEditable" Value="True"/>
@@ -233,7 +234,7 @@
                                     </Style>
                                 </DataGridComboBoxColumn.ElementStyle>
                             </DataGridComboBoxColumn>
-                            <DataGridTextColumn Header="کد کالا" Width="80" MinWidth="80" Binding="{Binding CODE}" IsReadOnly="True">
+                            <DataGridTextColumn Header="کد کالا" MinWidth="80" Binding="{Binding CODE}" IsReadOnly="True">
                                 <DataGridTextColumn.CellStyle>
                                     <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
                                         <Setter Property="Focusable" Value="False"/>
@@ -244,15 +245,15 @@
                             </DataGridTextColumn>
                             <DataGridTextColumn 	x:Name="RADIF_COLUMN" 	      Binding="{Binding RADIF,UpdateSourceTrigger=LostFocus}"            Header="RADIF"      MinWidth="50"  Visibility="Hidden" />
                             <DataGridTextColumn 	x:Name="CODEh_COLUMN"          Binding="{Binding CODE,UpdateSourceTrigger=LostFocus}"            Header="کد کالا"      MinWidth="50" IsReadOnly="True"  Visibility="Hidden" />
-                            <DataGridTextColumn 	x:Name="NAME_CODE_COLUMN"	  Binding="{Binding NAME_CODE,UpdateSourceTrigger=LostFocus}"        Header="نام کالا"   Width="2.5*" MinWidth="100" >
+                            <DataGridTextColumn 	x:Name="NAME_CODE_COLUMN"	  Binding="{Binding NAME_CODE,UpdateSourceTrigger=LostFocus}"        Header="نام کالا"   Width="2.5*" MinWidth="250" >
                                 <DataGridTextColumn.EditingElementStyle>
                                     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
                                     </Style>
                                 </DataGridTextColumn.EditingElementStyle>
                             </DataGridTextColumn>
                             <DataGridComboBoxColumn x:Name="VAHED_K_COLUMN"  
-                             Width="120"   MinWidth="90" Header=" واحد کالا " Visibility="Visible" 
-          SelectedValueBinding="{Binding VAHED_K, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="NAMES" SelectedValuePath="VAHED">
+                                                    MinWidth="120" Header=" واحد کالا " Visibility="Visible" 
+                                                    SelectedValueBinding="{Binding VAHED_K, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="NAMES" SelectedValuePath="VAHED">
                                 <DataGridComboBoxColumn.EditingElementStyle>
                                     <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
                                         <Setter Property="IsEditable" Value="True"/>
@@ -272,14 +273,14 @@
                                     </Style>
                                 </DataGridComboBoxColumn.CellStyle>
                             </DataGridComboBoxColumn>
-                            <DataGridTextColumn 	x:Name="MEGH_COLUMN"	  Binding="{Binding MEGH,UpdateSourceTrigger=LostFocus}"       Header="مقدار"           Width="90" MinWidth="70" >
+                            <DataGridTextColumn 	x:Name="MEGH_COLUMN"	  Binding="{Binding MEGH,UpdateSourceTrigger=LostFocus}"       Header="مقدار"     MinWidth="90" >
                                 <DataGridTextColumn.EditingElementStyle>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                                         <Setter Property="MaxLength" Value="30" />
                                     </Style>
                                 </DataGridTextColumn.EditingElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn 	x:Name="MEGHK_COLUMN" 	      Binding="{Binding MEGHk,UpdateSourceTrigger=LostFocus}"                                  Header="مقدار کل"               Width="100" MinWidth="90" >
+                            <DataGridTextColumn 	x:Name="MEGHK_COLUMN" 	      Binding="{Binding MEGHk,UpdateSourceTrigger=LostFocus}"                                  Header="مقدار کل"            MinWidth="90" >
                                 <DataGridTextColumn.CellStyle>
                                     <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
                                         <Setter Property = "IsTabStop" Value = "False" />
@@ -291,23 +292,23 @@
                                     </Style>
                                 </DataGridTextColumn.EditingElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn x:Name="N_TAF_COLUMN" Binding="{Binding N_TAF,UpdateSourceTrigger=LostFocus}" Header="Unit Price" Width="110" d:Visibility="Visible" Visibility="Hidden">
+                            <DataGridTextColumn x:Name="N_TAF_COLUMN" Binding="{Binding N_TAF,UpdateSourceTrigger=LostFocus}" Header="Unit Price" MinWidth="110" d:Visibility="Hidden" Visibility="Hidden">
                                 <DataGridTextColumn.EditingElementStyle>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                                         <Setter Property="MaxLength" Value="30" />
                                     </Style>
                                 </DataGridTextColumn.EditingElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn x:Name="TOTALARZ_COLUMN" Binding="{Binding TOTALARZ,UpdateSourceTrigger=LostFocus}" Header="Line Total" Width="90" d:Visibility="Visible" Visibility="Hidden">
+                            <DataGridTextColumn x:Name="TOTALARZ_COLUMN" Binding="{Binding TOTALARZ,UpdateSourceTrigger=LostFocus}" Header="Line Total" MinWidth="120" d:Visibility="Hidden" Visibility="Hidden">
                                 <DataGridTextColumn.EditingElementStyle>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                                         <Setter Property="MaxLength" Value="30" />
                                     </Style>
                                 </DataGridTextColumn.EditingElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn 	x:Name="MEGH_MAR_COLUMN" 	  Binding="{Binding MEGH_MAR,UpdateSourceTrigger=LostFocus}"                               Header="MEGH MAR"            Width="50" MinWidth="50" Visibility="Hidden"  />
+                            <DataGridTextColumn 	x:Name="MEGH_MAR_COLUMN" 	  Binding="{Binding MEGH_MAR,UpdateSourceTrigger=LostFocus}"                               Header="MEGH MAR"    MinWidth="50" Visibility="Hidden"  />
 
-                            <DataGridTextColumn x:Name="MABL_COLUMN" Binding="{Binding MABL,UpdateSourceTrigger=LostFocus ,StringFormat=\{0:N0\}}" Header="مبلغ" Width="120" MinWidth="90">
+                            <DataGridTextColumn x:Name="MABL_COLUMN" Binding="{Binding MABL,UpdateSourceTrigger=LostFocus ,StringFormat=\{0:N0\}}" Header="مبلغ" MinWidth="110">
                                 <DataGridTextColumn.CellStyle>
                                     <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
                                         <Style.Triggers>
@@ -329,7 +330,7 @@
                                 </DataGridTextColumn.EditingElementStyle>
                             </DataGridTextColumn>
 
-                            <DataGridTextColumn x:Name="MABL_K_COLUMN" Binding="{Binding MABL_K,UpdateSourceTrigger=LostFocus,StringFormat=\{0:N0\}}" Header="مبلغ کل" Width="130" MinWidth="90">
+                            <DataGridTextColumn x:Name="MABL_K_COLUMN" Binding="{Binding MABL_K,UpdateSourceTrigger=LostFocus,StringFormat=\{0:N0\}}" Header="مبلغ کل" MinWidth="140">
                                 <DataGridTextColumn.CellStyle>
                                     <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
                                         <Setter Property = "IsTabStop" Value = "False" />
@@ -360,27 +361,28 @@
                             <DataGridTextColumn 	x:Name="CUST_NO_COLUMN" 	  Binding="{Binding CUST_NO,UpdateSourceTrigger=LostFocus}"          Header="CUST NO"         MinWidth="50" Visibility="Hidden" />
                             <DataGridTextColumn 	x:Name="ANBARF_COLUMN" 	      Binding="{Binding ANBARF,UpdateSourceTrigger=LostFocus}"           Header="ANBARF"          MinWidth="50" Visibility="Hidden" />
                             <DataGridTextColumn 	                              Binding="{Binding VAHED_K,UpdateSourceTrigger=LostFocus}"          Header="VAHED K"         MinWidth="50" Visibility="Hidden" />
-                            <DataGridTextColumn 	x:Name="N_KOL_COLUMN" 	      Binding="{Binding N_KOL,UpdateSourceTrigger=LostFocus, StringFormat={}{0:F2}}"            Header="%ت"       Width="75"  Visibility="Visible" >
+                            
+                            <DataGridTextColumn 	x:Name="N_KOL_COLUMN" 	      Binding="{Binding N_KOL,UpdateSourceTrigger=LostFocus, StringFormat={}{0:F2}}"            Header="%ت"    MinWidth="75"   Visibility="Visible" >
                                 <DataGridTextColumn.EditingElementStyle>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                                         <Setter Property="MaxLength" Value="5" />
                                     </Style>
                                 </DataGridTextColumn.EditingElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn 	x:Name="TKHN_COLUMN"          Binding="{Binding TKHN,UpdateSourceTrigger=LostFocus}" Header="ت.ن%" Width="75" MinWidth="70" Visibility="Hidden" >
+                            <DataGridTextColumn 	x:Name="TKHN_COLUMN"          Binding="{Binding TKHN,UpdateSourceTrigger=LostFocus}" Header="ت.ن%" MinWidth="70" Visibility="Hidden" >
                                 <DataGridTextColumn.EditingElementStyle>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                                         <Setter Property="MaxLength" Value="4" />
                                     </Style>
                                 </DataGridTextColumn.EditingElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn 	x:Name="N_MOIN_COLUMN" 	      Binding="{Binding N_MOIN,UpdateSourceTrigger=LostFocus,StringFormat=\{0:N0\}}"           Header="مبلغ تخفیف"          Width="110" MinWidth="100" Visibility="Visible" >
+                            <DataGridTextColumn 	x:Name="N_MOIN_COLUMN" 	      Binding="{Binding N_MOIN,UpdateSourceTrigger=LostFocus,StringFormat=\{0:N0\}}"           Header="مبلغ تخفیف"     MinWidth="130" Visibility="Visible" >
                                 <DataGridTextColumn.EditingElementStyle>
                                     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
                                     </Style>
                                 </DataGridTextColumn.EditingElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn 	x:Name="IMBAA_COLUMN" 	      Binding="{Binding IMBAA,UpdateSourceTrigger=LostFocus,StringFormat=\{0:N0\}}"  IsReadOnly="True"          Header="مالیات ب.ا.ا"       Width="120" MinWidth="120" Visibility="Visible" >
+                            <DataGridTextColumn 	x:Name="IMBAA_COLUMN" 	      Binding="{Binding IMBAA,UpdateSourceTrigger=LostFocus,StringFormat=\{0:N0\}}"  IsReadOnly="True"          Header="مالیات ب.ا.ا"   MinWidth="120" Visibility="Visible" >
                                 <DataGridTextColumn.CellStyle>
                                     <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
                                         <Setter Property = "IsTabStop" Value = "False"/>
@@ -400,7 +402,7 @@
                             <DataGridTextColumn 	x:Name="AVRAGE2_COLUMN" 	  Binding="{Binding AVRAGE2,UpdateSourceTrigger=LostFocus}"          Header="AVRAGE 2"         MinWidth="50" Visibility="Hidden" />
                             <DataGridTextColumn 	x:Name="VISITOR_COLUMN" 	  Binding="{Binding VISITOR,UpdateSourceTrigger=LostFocus}"          Header="VISITOR"          MinWidth="50" Visibility="Hidden" />
                             <DataGridTextColumn 	                              Binding="{Binding JAYO,UpdateSourceTrigger=LostFocus}"                         MinWidth="50" Visibility="Hidden" />
-                            <DataGridComboBoxColumn 	x:Name="JAYO_COLUMN"      SelectedValueBinding="{Binding JAYO, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="NAMES" SelectedValuePath="VAHED"            Header="الگوي جايزه"                Width="50" MinWidth="50" Visibility="Hidden" />
+                            <DataGridComboBoxColumn 	x:Name="JAYO_COLUMN"      SelectedValueBinding="{Binding JAYO, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="NAMES" SelectedValuePath="VAHED"            Header="الگوي جايزه"              MinWidth="60" Visibility="Hidden" />
                             <DataGridTextColumn 	x:Name="UID_COLUMN"   Binding="{Binding UID,UpdateSourceTrigger=LostFocus}"   Header="UID"  Visibility="Hidden"  />
                         </DataGrid.Columns>
 
@@ -650,7 +652,7 @@
                     <Label x:Name="LABEL_FNUMCO_" Content="شماره داخلی:" Margin="528,44,0,0" Visibility="Hidden"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="62" Height="25" VerticalAlignment="Top"/>
                     <Button x:Name="BTN_FACTORHA" Content="لیست فاکتور ها" Margin="117,200,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="118" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_FACTORHA_Click"/>
 
-                    <Grid x:Name="EXPORTY_GRID" Margin="0,196,120,0" d:Visibility="Visible" Visibility="Hidden" Height="42" VerticalAlignment="Top" HorizontalAlignment="Right" Width="694">
+                    <Grid x:Name="EXPORTY_GRID" Margin="0,196,120,0" d:Visibility="Visible" Visibility="Hidden" Height="42" VerticalAlignment="Top" HorizontalAlignment="Right" Width="644">
                         <Label Content="نرخ ارز $ :" Margin="0,0,5,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="auto" VerticalAlignment="Center"/>
                         <CNC:NumericTextBox x:Name="ARZD" Text="0" NumericLostFocus="ARZD_NumericLostFocus" DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Height="26" Margin="0,0,55,0" VerticalAlignment="Center" Visibility="Visible" MaxLength="16" HorizontalAlignment="Right" Width="110"/>
                         <Label Content="نوع ارز:" Margin="0,0,335,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="auto" VerticalAlignment="Center"/>
