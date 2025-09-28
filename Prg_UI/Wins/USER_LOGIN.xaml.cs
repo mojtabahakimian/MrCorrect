@@ -34,6 +34,7 @@ using System.Windows.Threading;
 using Wins.WinMenus.ANBAR;
 using Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.KHARID_FORUSH;
+using Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
 using Wins.WinMenus.Taarif;
 using Wins.WinSetting;
 using static Functions.SMSService.SmsServiceFactory;
@@ -370,9 +371,9 @@ namespace Prg_UI.Wins
             CL_Generaly.VAHED_OF_USER = 1;
             Baseknow.UGRP = "1";
 
-            new HEAD_SERCH_MAIN_ADVANC().Show();
+            new F_MENU_DATE("AMMAS").Show();
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_F12, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_F12, this);
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this);

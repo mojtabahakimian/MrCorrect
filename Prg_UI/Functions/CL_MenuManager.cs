@@ -880,7 +880,11 @@ namespace Functions
             /// <summary>
             /// جستجو در گردش کالا عادی
             /// </summary>
-            HEAD_SERCH_MAIN_F12
+            HEAD_SERCH_MAIN_F12,
+            /// <summary>
+            /// لیست آمار مصرف مواد
+            /// </summary>
+            F_MENU_DATE_AMMAS
         }
         #endregion
 
@@ -903,6 +907,10 @@ namespace Functions
 
                 case WinNameType.HEAD_SERCH_MAIN_ADVANC_F12: /*  جستجو در گردش کالا های پیشرفته | F12 پیشرفته */ CL_LMethods.OpenWindow(OWNERWIN, new HEAD_SERCH_MAIN_ADVANC(), isModalDialog: false, allowMultipleInstances: false); break;
                 //Mojtaba}
+
+                case WinNameType.F_MENU_DATE_AMMAS: //لیست آمار مصرف مواد
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_DATE("AMMAS"));
+                    break;
 
                 case WinNameType.AMAR_FROOSH_KOL_ALL: //نمودار فروش کلی - ریالی بارگیری نشده
                     CL_LMethods.OpenWindow(OWNERWIN, new AMAR_FROOSH_KOL_ALL());

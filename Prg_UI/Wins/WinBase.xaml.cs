@@ -1284,5 +1284,10 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_ADVANC_F12, null);
         }
+
+        private void Button_Click_122(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_AMMAS, null);
+        }
     }
 }
