@@ -32,6 +32,8 @@ using Functions;
 using Path = System.IO.Path;
 using System.Collections.Generic;
 using System.Windows.Interop;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Prg_Proccessy.FUNCTIONS
 {
@@ -39,6 +41,8 @@ namespace Prg_Proccessy.FUNCTIONS
     {
         static CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         private static readonly Random _rnd = new Random();
+
+
         #region Custom_Modelses
         public class PriceDtl
         {
@@ -9511,7 +9515,7 @@ namespace Prg_Proccessy.FUNCTIONS
         /// <param name="BayegBase"></param>
         /// <param name="n_s"></param>
         /// <returns></returns>
-        public static int? UpdateOrGenerateBAYEG(int BayegBase, int n_s)
+        public static int? UpdateOrGenerateBAYEG___OLD(int BayegBase, int n_s)
         {
             const int _bayeganbase_ = 100000000;
             if (BayegBase == default || BayegBase == null)
@@ -9526,7 +9530,7 @@ namespace Prg_Proccessy.FUNCTIONS
             using (var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
             {
                 db.Open();
-                using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
+                using (var transaction = db.BeginTransaction(IsolationLevel.ReadCommitted))
                 {
                     try
                     {
@@ -9581,6 +9585,168 @@ namespace Prg_Proccessy.FUNCTIONS
                             }
                         }
 
+                        return null;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction?.Rollback();
+                        try { File.AppendAllText("C:\\CORRECT\\DBMSLOG.txt", $"\n{DateTime.Now} - Error in UpdateOrGenerateBAYEG:\n{ex}\n"); } catch { }
+                        throw; // Re-throw to handle higher up if necessary
+                    }
+                }
+            }
+        }
+        public static int? UpdateOrGenerateBAYEG_BASEY(int BayegBase, int n_s)
+        {
+            const int _bayeganbase_ = 100000000;
+            var effectiveBase = BayegBase <= 0 ? _bayeganbase_ : BayegBase;
+
+            using (var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+            {
+                db.Open();
+                using (var transaction = db.BeginTransaction(IsolationLevel.ReadCommitted))
+                {
+                    try
+                    {
+                        const int defaultCommandTimeout = 60;
+                        // First try to set BAYEG for the requested row using the BASE column to avoid heavy updates
+                        const string updateCurrentRowSql = @"
+                            UPDATE dbo.DEED_HED
+                            SET BAYEG = @BaseOffset + BASE
+                            OUTPUT INSERTED.BAYEG
+                            WHERE N_S = @N_S AND (BAYEG IS NULL OR BAYEG = 0);";
+                        var updatedBayeg = db.QueryFirstOrDefault<int?>(new CommandDefinition(updateCurrentRowSql,
+                            new { BaseOffset = _bayeganbase_, N_S = n_s }, transaction: transaction, commandTimeout: defaultCommandTimeout));
+
+                        if (updatedBayeg.HasValue)
+                        {
+                            transaction.Commit();
+                            return updatedBayeg.Value;
+                        }
+
+                        // Check whether the row already has a BAYEG assigned
+                        var existingBayeg = db.QueryFirstOrDefault<int?>(
+                            new CommandDefinition(
+                                "SELECT BAYEG FROM dbo.DEED_HED WHERE N_S = @N_S",
+                                new { N_S = n_s },
+                                transaction: transaction,
+                                commandTimeout: defaultCommandTimeout));
+
+                        if (existingBayeg.HasValue && existingBayeg.Value > 0)
+                        {
+                            transaction.Commit();
+                            return existingBayeg.Value;
+                        }
+
+                        // Generate a new BAYEG value while keeping the table locked to avoid duplicates
+                        var nextBayeg = db.ExecuteScalar<int>(
+                            new CommandDefinition(
+
+                                @"SELECT ISNULL(MAX(BAYEG), @Base) FROM dbo.DEED_HED WITH (UPDLOCK, HOLDLOCK)",
+                                new { Base = effectiveBase },
+                                transaction: transaction,
+                                commandTimeout: defaultCommandTimeout));
+                        if (nextBayeg < effectiveBase)
+                        {
+                            nextBayeg = effectiveBase;
+                        }
+
+                        nextBayeg += 1;
+
+                        // Persist the generated BAYEG value for the row
+                        var generatedBayeg = db.QueryFirstOrDefault<int?>(
+                            new CommandDefinition(
+                                @"UPDATE dbo.DEED_HED
+                                  SET BAYEG = @NewBayeg
+                                  OUTPUT INSERTED.BAYEG
+                                  WHERE N_S = @N_S;",
+                                new { NewBayeg = nextBayeg, N_S = n_s },
+                                transaction: transaction,
+                                commandTimeout: defaultCommandTimeout));
+
+                        transaction.Commit();
+                        return generatedBayeg;
+                    }
+                    catch (Exception ex)
+                    {
+                        try { File.AppendAllText("C:\\CORRECT\\DBMSLOG.txt", $"\n{DateTime.Now} - Error in UpdateOrGenerateBAYEG:\n{ex}\n"); } catch { }
+                        transaction.Rollback();
+                        throw; // Re-throw to handle higher up if necessary
+                    }
+                }
+            }
+        }
+
+        public static int? UpdateOrGenerateBAYEG(int BayegBase, int n_s)
+        {
+            const int _bayeganbase_ = 100000000;
+            if (BayegBase == default || BayegBase == null)
+            {
+                BayegBase = _bayeganbase_ + 1;
+            }
+            else
+            {
+                BayegBase += 1;
+            }
+
+            using (var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+            {
+                db.Open();
+                using (var transaction = db.BeginTransaction(IsolationLevel.ReadCommitted))
+                {
+                    try
+                    {
+                        const int commandTimeoutSeconds = 60;
+
+                        //1. Get Exiting BAYEG of Current Row
+                        var existingBayegCommand = new CommandDefinition("SELECT BAYEG FROM dbo.DEED_HED WHERE N_S = @N_S",
+                            new { N_S = n_s }, transaction: transaction, commandTimeout: commandTimeoutSeconds);
+
+                        var existingBayeg = db.QueryFirstOrDefault<int?>(existingBayegCommand);
+                        if (existingBayeg.HasValue && existingBayeg.Value > 0)
+                        {
+                            transaction.Commit();
+                            return existingBayeg.Value;
+                        }
+
+                        //2. Get New Max BAYEG of Current Row
+                        var maxBayegCommand = new CommandDefinition(
+                                              "SELECT ISNULL(MAX(BAYEG) + 1, @BayegBase) FROM dbo.DEED_HED WITH (UPDLOCK, HOLDLOCK)",
+                                              new { BayegBase = BayegBase },
+                                              transaction: transaction,
+                                              commandTimeout: commandTimeoutSeconds);
+
+                        //3. Re Check the Generated New Max BAYEG to avoid duplicate
+                        var maxBayeg = db.ExecuteScalar<int>(maxBayegCommand);
+                        while (db.ExecuteScalar<int>(new CommandDefinition("SELECT COUNT(1) FROM dbo.DEED_HED WHERE BAYEG = @MaxBayeg",
+                                                        new { MaxBayeg = maxBayeg },
+                                                        transaction: transaction,
+                                                        commandTimeout: commandTimeoutSeconds)) > 0)
+                        {
+                            maxBayeg++;
+                        }
+
+                        //4. Finally Update BAYEG of Current row to new value
+                        const string updateSql = @"
+                            UPDATE dbo.DEED_HED
+                            SET BAYEG = @NewBayeg
+                            OUTPUT INSERTED.BAYEG
+                            WHERE N_S = @N_S AND (BAYEG IS NULL OR BAYEG = 0)";
+
+                        var updateCommand = new CommandDefinition(
+                                                 updateSql,
+                                                 new { NewBayeg = maxBayeg, N_S = n_s },
+                                                 transaction: transaction,
+                                                 commandTimeout: commandTimeoutSeconds);
+                        var result = db.QueryFirstOrDefault<int?>(updateCommand);
+
+                        if (result.HasValue)
+                        {
+                            transaction.Commit();
+                            return result.Value;
+                        }
+
+                        transaction.Commit();
                         return null;
                     }
                     catch (Exception ex)
@@ -10333,6 +10499,47 @@ namespace Prg_Proccessy.FUNCTIONS
         {
             // تولید عدد رندم بین 0 تا 99 و تبدیل به کاراکتر
             return (char)_rnd.Next(0, 100);
+        }
+
+        public static long LASTPRICENZ(string code, long dt)
+        {
+            // 1) آخرین قیمت خرید (MABL) غیرصفر تا تاریخ dt
+            const string sql1 = @"
+            SELECT TOP (1) il.MABL
+            FROM dbo.HEAD_LST AS hl
+            JOIN dbo.INVO_LST AS il
+              ON hl.[NUMBER] = il.[NUMBER] AND hl.TAG = il.TAG
+            WHERE il.MABL <> 0
+              AND hl.TAG = 1
+              AND il.CODE = @CODE
+              AND hl.DATE_N <= @DT
+            ORDER BY hl.DATE_N DESC, il.MABL DESC;";
+
+            var mabl = dbms.DoGetDataSQL<double?>(sql1, new { CODE = code, DT = dt }).FirstOrDefault();
+            if (mabl.HasValue)
+                return Convert.ToInt64(mabl.Value);
+
+            // 2) در صورت نبود رکورد/مقدار، از STUF_FSK بگیر (بیشترین FI_A)
+            const string sql2 = @"
+            SELECT TOP (1) FI_A
+            FROM dbo.STUF_FSK
+            WHERE CODE = @CODE
+            ORDER BY FI_A DESC;";
+
+            var fiA = dbms.DoGetDataSQL<double?>(sql2, new { CODE = code }).FirstOrDefault();
+            if (fiA.HasValue && fiA.Value != 0)
+                return Convert.ToInt64(fiA.Value);
+
+            // 3) در صورت نبود یا صفر بودن، از DTL_MANF بگیر (بیشترین SMABL)
+            const string sql3 = @"
+            SELECT TOP (1) SMABL
+            FROM dbo.DTL_MANF
+            WHERE CODE = @CODE
+            ORDER BY SMABL DESC;";
+
+            var smabl = dbms.DoGetDataSQL<double?>(sql3, new { CODE = code }).FirstOrDefault();
+
+            return smabl.HasValue ? Convert.ToInt64(smabl.Value) : 0L;
         }
     }
 }

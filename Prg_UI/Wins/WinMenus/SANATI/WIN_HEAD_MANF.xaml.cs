@@ -30,6 +30,13 @@ using System.Windows.Data;
 using System.ComponentModel;
 using static Prg_UI.Functions.CL_LMethods;
 using System.Windows.Controls.Primitives;
+using System.Globalization;
+using System.Text;
+using System.Diagnostics;
+using Rpts;
+using Stimulsoft.Report.Components;
+using Stimulsoft.Report.Dictionary;
+using Stimulsoft.Report;
 
 namespace Prg_UI.Wins.WinMenus.SANATI
 {
@@ -139,12 +146,12 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
         List<Custom_VAHEDK> RST_KALAVAHED_LST = null;
 
-        private double sum_of_megh_k = 0;
-        public double SUM_OF_MEGH_K
+        private decimal sum_of_megh_k = 0;
+        public decimal SUM_OF_MEGH_K
         {
             get
             {
-                sum_of_megh_k = (double)SUB_DATA.Sum(r => r.MEGHk);
+                sum_of_megh_k = (decimal)SUB_DATA.Sum(r => r.MEGHk);
                 if (sum_of_megh_k == 0) sum_of_megh_k = 0;
                 return sum_of_megh_k;
             }
@@ -254,9 +261,11 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 dbms,
                 x => x.FNUMB.ToString(), // property selector (used to find a record by its CODE)
                 $"SELECT * FROM HEAD_MANF {WhereCondition} ORDER BY FNUMB", //All Record of The Table
-            x => $"SELECT TOP 1 FNUMB, CODE, DATE_ACTIV, IMBIBE_MANF, IMBIBE_SAR, GHEYMAT, NAMES, N_KOL, NUMBER, TNUMBER, SA_HOUR, SA_NHOU, TOZIH, CRT, UID, ID FROM HEAD_MANF WHERE (NOT (CODE IS NULL)) ", //On Change for One Record
+              /*on navigation get ever record where*/ x => $"SELECT TOP 1 FNUMB, CODE, DATE_ACTIV, IMBIBE_MANF, IMBIBE_SAR, GHEYMAT, NAMES, N_KOL, NUMBER, TNUMBER, SA_HOUR, SA_NHOU, TOZIH, CRT, UID, ID FROM HEAD_MANF WHERE (NOT (CODE IS NULL)) AND FNUMB = {x.FNUMB} ", //On Change for One Record
             Convert.ToDouble(FNUMB.Text)
             );
+
+
 
             // Hook up the OnInsertRecord event
             _navigationManager.CurrentRecordChanged += OnCurrentRecordChanged;
@@ -392,7 +401,6 @@ namespace Prg_UI.Wins.WinMenus.SANATI
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             DataGrid DG = DG_SUB;
-            UIElement uie = e.OriginalSource as UIElement;
 
             if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
             {
@@ -488,14 +496,26 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             }
             if (CODE.SelectedValue is not null)
             {
-                if ((CODE.SelectedItem as Custom_CUST_HESAB).NAME == CODE_TEX.Text)
+                if ((CODE.SelectedItem as CODE_MODEL)?.NAME == CODE_TEX.Text)
                 {
                     return;
                 }
             }
 
+            var RST_KALA = CL_LMethods.GetKalaBySearch(dbms, default, CODE_TEX.Text);
+            if (RST_KALA != null)
+            {
+                CODE.SelectedValue = RST_KALA.CODE; CODE.Items.Refresh();
+            }
+            else
+            {
+                universControl.PopNotifyShowUp("چنین کالایی وجود ندارد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                return;
+            }
+
             string currentCode = CODE.SelectedValue?.ToString();
             int FnumbCode = Convert.ToInt32(FNUMB.Text);
+
 
             if (string.IsNullOrWhiteSpace(currentCode))
             {
@@ -742,7 +762,6 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                           where c != null && Validation.GetHasError(c)
                           select c).Any();
 
-
             if (errors)
             {
                 universControl.PopNotifyShow("داده های وارد شده مربوط به سطر ها درست نیست", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
@@ -752,61 +771,11 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             if (HeaderIsValid() is false) return; //اگر اطلاعات سربرگ صحیح نیست خارج شو
 
 
-            if (FNUMB.Text == "0")
-            {
-                using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
-                {
-                    db.Open();
-                    using (var transaction = db.BeginTransaction(System.Data.IsolationLevel.Serializable))
-                    {
-                        //Fake Query for Lock Table
-                        db.Execute("UPDATE TOP(1) HEAD_MANF SET MOLAH = MOLAH", null, transaction);
-                        //Fake Query for Lock Table
-
-                        var rst_11 = db.Query<double?>($"SELECT Max(HEAD_MANF.NUMBER) AS MaxOfNUMBER FROM HEAD_MANF", null, transaction).FirstOrDefault();
-                        if (rst_11 == 0 || ReferenceEquals(rst_11, null))
-                        {
-                            FNUMB.Text = "1"; //STTO ?
-                            FNUMB.UpdateLayout();
-                        }
-                        else
-                        {
-                            FNUMB.Text = Convert.ToDouble(rst_11 + 1).ToString();
-                            FNUMB.UpdateLayout();
-                        }
-
-                        const string sql = @"
-                            INSERT INTO dbo.HEAD_MANF (
-                                FNUMB, CODE, DATE_ACTIV, IMBIBE_MANF, IMBIBE_SAR, GHEYMAT, NAMES, 
-                                N_KOL, NUMBER, TNUMBER, SA_HOUR, SA_NHOU, TOZIH, CRT, UID
-                            ) VALUES (
-                                @FumbValue, @CodeValue, @DateActivValue, 0.0, 0.0, 0.0, NULL, 
-                                0, 0, 0, 0.0, 0, @TozihValue, GETDATE(), @UserIdValue
-                            )";
-                        var parameters = new
-                        {
-                            FumbValue = int.Parse(FNUMB.Text),
-                            CodeValue = CODE.SelectedValue.ToString(),
-                            DateActivValue = long.Parse(DATE_ACTIV.Text.ToRawTarikh()),
-                            TozihValue = TOZIH.Text.Trim(),
-                            UserIdValue = Baseknow.USERCOD
-                        };
-                        db.Execute(sql, parameters, transaction);
-
-                        transaction.Commit();
-                        db?.Close();
-
-                        ItwasNewFirstTime = true;
-
-                        _navigationManager.IsNewRecord = false;
-                        RefreshAfterUpdate();
-                    }
-                }
-            }
-
             DoCmdHeaderSave();
 
             this.DG_SUB.IsReadOnly = false;
+
+            Summer();
 
             SANAD();
 
@@ -829,7 +798,6 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
         private void SANAD()
         {
-            throw new NotImplementedException();
         }
 
         private void ESLAH_Click(object sender, RoutedEventArgs e)
@@ -915,6 +883,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             var editableCollectionView = DG_SUB.Items as IEditableCollectionView;
             if (editableCollectionView != null && editableCollectionView.IsEditingItem && editableCollectionView.CanCancelEdit)
             {
+                //to avoid any error because user might leave edited (not cimmitted) cell in DataGrid
                 try { editableCollectionView.CancelEdit(); } catch { }
             }
 
@@ -922,19 +891,18 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             msgwin.ShowDialog();
             if (msgwin.DialogResult == true)
             {
-                var OldRow = WAS_ROW_ITEM.Clone() as DTL_MANF;
-                var NewRow = ((DTL_MANF)DG_SUB.SelectedItem).Clone() as DTL_MANF;
-                _ = AuditLogger.LogActionAsync(
-                                  actionType: "SaveRow",
-                                  tableName: "تعیین سطح دسترسی : گروه کاربری",
-                                  recordId: FNUMB.Text,
-                                  oldValue: OldRow,
-                                  newValue: NewRow,
-                                  additionalInfo: $@"{this.GetType().Name} , EXE PATH : {System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}");
-
 
                 if (SUB_DATA.Count > 0 && DG_SUB.SelectedItems != null && DG_SUB.SelectedItems.Count > 0)
                 {
+                    var NewRow = ((DTL_MANF)DG_SUB.SelectedItem).Clone() as DTL_MANF;
+                    _ = AuditLogger.LogActionAsync(
+                                      actionType: "Delete",
+                                      tableName: "ایجاد فرمول ساخت : سطر ها",
+                                      recordId: FNUMB.Text,
+                                      oldValue: default,
+                                      newValue: NewRow,
+                                      additionalInfo: $@"{this.GetType().Name} , EXE PATH : {System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}");
+
                     GET_TR();
 
                     List<MsgModel> ErrosMessages = new List<MsgModel>();
@@ -988,6 +956,14 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 }
                 else
                 {
+                    _ = AuditLogger.LogActionAsync(
+                                   actionType: "Delete",
+                                   tableName: "ایجاد فرمول ساخت : سربرگ",
+                                   recordId: FNUMB.Text,
+                                   oldValue: default,
+                                   newValue: CODE.SelectedValue?.ToString(),
+                                   additionalInfo: $@"{this.GetType().Name} , EXE PATH : {System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}");
+
                     if (!string.IsNullOrEmpty(FNUMB.Text) && FNUMB.Text != "0" && !string.IsNullOrEmpty(FNUMB.Text) && FNUMB.Text != "0")
                     {
                         string sql = @"SELECT NUMBER, TAG, N_KOL 
@@ -1038,6 +1014,58 @@ namespace Prg_UI.Wins.WinMenus.SANATI
         }
         private bool DoCmdHeaderSave()
         {
+            if (FNUMB.Text == "0" || string.IsNullOrWhiteSpace(FNUMB.Text)) //Is Really New
+            {
+                using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+                {
+                    db.Open();
+                    using (var transaction = db.BeginTransaction(System.Data.IsolationLevel.Serializable))
+                    {
+                        //Fake Query for Lock Table
+                        db.Execute("UPDATE TOP(1) HEAD_MANF SET MOLAH = MOLAH", null, transaction);
+                        //Fake Query for Lock Table
+
+                        var rst_11 = db.Query<double?>($"SELECT Max(HEAD_MANF.NUMBER) AS MaxOfNUMBER FROM HEAD_MANF", null, transaction).FirstOrDefault();
+                        if (rst_11 == 0 || ReferenceEquals(rst_11, null))
+                        {
+                            FNUMB.Text = "1";
+                            FNUMB.UpdateLayout();
+                        }
+                        else
+                        {
+                            FNUMB.Text = Convert.ToDouble(rst_11 + 1).ToString();
+                            FNUMB.UpdateLayout();
+                        }
+
+                        const string sql = @"
+                            INSERT INTO dbo.HEAD_MANF (
+                                FNUMB, CODE, DATE_ACTIV, IMBIBE_MANF, IMBIBE_SAR, GHEYMAT, NAMES, 
+                                N_KOL, NUMBER, TNUMBER, SA_HOUR, SA_NHOU, TOZIH, CRT, UID
+                            ) VALUES (
+                                @FumbValue, @CodeValue, @DateActivValue, 0.0, 0.0, 0.0, NULL, 
+                                0, 0, 0, 0.0, 0, @TozihValue, GETDATE(), @UserIdValue
+                            )";
+                        var parameters = new
+                        {
+                            FumbValue = int.Parse(FNUMB.Text),
+                            CodeValue = CODE.SelectedValue.ToString(),
+                            DateActivValue = long.Parse(DATE_ACTIV.Text.ToRawTarikh()),
+                            TozihValue = TOZIH.Text.Trim(),
+                            UserIdValue = Baseknow.USERCOD
+                        };
+                        db.Execute(sql, parameters, transaction);
+
+                        transaction.Commit();
+                        db?.Close();
+
+                        ItwasNewFirstTime = true;
+
+                        _navigationManager.IsNewRecord = false;
+                        RefreshAfterUpdate();
+                    }
+                }
+            }
+
             const string updateQuery = @"
                 UPDATE dbo.HEAD_MANF 
                 SET 
@@ -1049,7 +1077,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                     IMBIBE_SAR = @ImbibeSar,
                     TOZIH = @Tozih
                 WHERE FNUMB = @Fumb";
-            var parameters = new
+            var parameters2 = new
             {
                 Fumb = int.Parse(FNUMB.Text),
                 Code = CODE.SelectedValue?.ToString(),
@@ -1060,7 +1088,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 ImbibeSar = decimal.Parse(IMBIBE_SAR.Text),
                 Tozih = TOZIH.Text.Trim(),
             };
-            _ = dbms.DoExecuteSQL(updateQuery, parameters);
+            _ = dbms.DoExecuteSQL(updateQuery, parameters2);
 
             return true;
         }
@@ -1078,7 +1106,9 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                         D.VAHED_K, 
                         D.MEGH, 
                         D.MEGHk, 
-                        D.TOZIH, 
+                        D.TOZIH,
+                        D.PERT,
+                        D.SMABL, D.MABLK ,
                         D.CRT, 
                         D.UID
                     FROM dbo.DTL_MANF D
@@ -1122,8 +1152,25 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
             if (e.Key == Key.Delete)
             {
-                var isEditing = ((IEditableCollectionView)DG_SUB.Items).IsEditingItem;
-                if (isEditing) { return; }
+                try
+                {
+                    var isEditing = ((IEditableCollectionView)DG_SUB.Items).IsEditingItem;
+                    if (isEditing) { return; }
+                    // 1) اگر داخل یک TextBox در حالت ویرایش هستیم، کاری نکنیم
+                    if (e.OriginalSource is TextBox textBox && !textBox.IsReadOnly)
+                    {
+                        // اجازه بدهید Delete عادی متن کارش رو بکنه
+                        return;
+                    }
+                    //else
+                    //{
+                    //    // اگر داخل حالت ویرایش سلول هستیم، از رفتار پیش‌فرض Delete (حذف کاراکتر) استفاده کن
+                    //    var cell = DataGridHelper.FindVisualParent<DataGridCell>(e.OriginalSource as DependencyObject);
+                    //    if (cell != null && cell.IsEditing)
+                    //        return;
+                    //}
+                }
+                catch { }
 
                 e.Handled = true;
                 BTN_DELETE_Click(null, null);
@@ -1688,7 +1735,10 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             IMBIBE_SAR.Text = "0";
             TOZIH.Text = null;
 
-            SUB_DATA?.Clear(); //دیتاگرید فاکتور فروش
+            SUB_DATA?.Clear();
+
+            SUM_AVALIEH.Text = "0";
+            SUM_TAMAMSHODEH.Text = "0";
 
             //PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
             //PERSONEL.Text = null;
@@ -1773,27 +1823,391 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             //ليست فرمولها و مواد
             if (_navigationManager.IsNewRecord) { return; }
 
+            new HEAD_MANF_DTL().Show();
         }
 
+        #region GheymatTamamShodehRooz
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             //قيمت تمام شده روز
             if (_navigationManager.IsNewRecord) { return; }
+            if (!HeaderIsValid()) { return; }
 
+            if (!long.TryParse(FNUMB.Text, out var formulaNumber) || formulaNumber == 0)
+            {
+                universControl.PopNotifyShow("شماره فرمول معتبر نیست.", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            long persianDate = CL_HESABDARI.FARSIDATE();
+            long prgId;
+
+            using var connection = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR);
+            connection.Open();
+
+            SqlTransaction? transaction = null;
+
+            Process Prc = ProcLoader.Start();
+
+            try
+            {
+                transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
+
+                prgId = connection.ExecuteScalar<long>(
+                    @"INSERT INTO dbo.PRGHEAD (PCODE, NUM, GRP, PRG_DATE, CRT, UID)
+                      OUTPUT INSERTED.PRGID
+                      VALUES (@PCODE, 1, 1010, @PRG_DATE, GETDATE(), @UID);",
+                    new
+                    {
+                        PCODE = CODE.SelectedValue?.ToString(),
+                        PRG_DATE = persianDate,
+                        UID = Baseknow.USERCOD
+                    },
+                    transaction);
+
+                connection.Execute(
+                    @"INSERT INTO dbo.PROGPAS1 (PRGID, CODA, CODB, VAHED, MEGH, MEGHK, PERT, KOLMAV, MABL, MABLK, RADAH, PASED)
+                      SELECT  @PRGID,
+                              h.CODE,
+                              d.CODE,
+                              d.VAHED_K,
+                              d.MEGH,
+                              d.MEGHk,
+                              d.PERT,
+                              d.MEGHk + d.PERT,
+                              d.SMABL,
+                              d.MABLK,
+                              s.RADAH,
+                              0
+                      FROM dbo.STUF_DEF AS s
+                      INNER JOIN dbo.DTL_MANF AS d ON s.CODE = d.CODE
+                      INNER JOIN dbo.HEAD_MANF AS h ON h.FNUMB = d.FNUMB
+                      WHERE h.FNUMB = @FNUMB;",
+                    new { PRGID = prgId, FNUMB = formulaNumber },
+                    transaction);
+
+                // -1 VBA ||| 1 C# 
+                /*
+                 * 5. PASED = 0 یا -1؟
+                    در C# برای چک کردن رکوردهای پردازش نشده از ISNULL(PASED, 0) = 0 استفاده شده، اما اگر در update مقدار -1 استفاده شود، باید شرط را تغییر داد.
+                 */
+                //ISNULL(RADAH, 0) این یعنی اگری RADAH نال بود موقتا فرض کن صفره نه نال و پردازش کن
+                //WHERE PRGID = @PRGID AND RADAH IS NOT NULL AND RADAH NOT IN (2,3);
+                connection.Execute(
+                    @"UPDATE dbo.PROGPAS1
+                      SET PASED = 1
+                      WHERE PRGID = @PRGID AND ISNULL(RADAH, 0) NOT IN (2, 3);", //UPDATE dbo.PROGPAS1 SET PASED = 1 WHERE RADAH = NULL (0) TOO 
+                    new { PRGID = prgId },
+                    transaction);
+
+                while (true)
+                {
+                    var pendingRows = connection.Query<ProgpasPendingRow>(
+                        @"SELECT CODA, CODB, ISNULL(MEGHK, 0) AS MEGHK
+                          FROM dbo.PROGPAS1
+                          WHERE PRGID = @PRGID AND ISNULL(PASED, 0) = 0;",
+                        new { PRGID = prgId },
+                        transaction).ToList();
+
+                    if (!pendingRows.Any())
+                    {
+                        break;
+                    }
+
+                    foreach (var row in pendingRows)
+                    {
+                        double multiplier = row.MEGHK;
+                        double? frNumber = null;
+
+                        if (multiplier != 0)
+                        {
+                            var candidate = CL_HESABDARI.GETLASTFR(row.CODB, persianDate);
+                            if (candidate != 0)
+                            {
+                                frNumber = candidate;
+
+                                connection.Execute(
+                                    @"INSERT INTO dbo.PROGPAS1 (PRGID, CODA, CODB, VAHED, MEGH, MEGHK, PERT, KOLMAV, MABL, MABLK, RADAH, PASED)
+                                      SELECT  @PRGID,
+                                              h.CODE,
+                                              d.CODE,
+                                              d.VAHED_K,
+                                              d.MEGH * @Multiplier,
+                                              d.MEGHk * @Multiplier,
+                                              d.PERT * @Multiplier,
+                                              (d.MEGHk + d.PERT) * @Multiplier,
+                                              d.SMABL,
+                                              d.MABLK * @Multiplier,
+                                              s.RADAH,
+                                              0
+                                      FROM dbo.STUF_DEF AS s
+                                      INNER JOIN dbo.DTL_MANF AS d ON s.CODE = d.CODE
+                                      INNER JOIN dbo.HEAD_MANF AS h ON h.FNUMB = d.FNUMB
+                                      WHERE h.FNUMB = @FR;",
+                                    new
+                                    {
+                                        PRGID = prgId,
+                                        Multiplier = multiplier,
+                                        FR = candidate
+                                    },
+                                    transaction);
+                            }
+                        }
+                        connection.Execute(
+                            @"UPDATE TOP (1) dbo.PROGPAS1
+                              SET PASED = 1, FR = @FR
+                              WHERE PRGID = @PRGID AND CODA = @CODA AND CODB = @CODB AND ISNULL(PASED, 0) = 0;",
+                            new
+                            {
+                                PRGID = prgId,
+                                row.CODA,
+                                row.CODB,
+                                FR = frNumber
+                            },
+                            transaction);
+                    }
+                }
+
+                var costRows = connection.Query<ProgpasCostRow>(
+                    @"SELECT CODA, CODB, ISNULL(MEGHK, 0) AS MEGHK
+                      FROM dbo.PROGPAS1
+                      WHERE PRGID = @PRGID;",
+                    new { PRGID = prgId },
+                    transaction).ToList();
+
+                foreach (var row in costRows)
+                {
+                    double unitPrice = GetLastPriceNz(connection, transaction, row.CODB, persianDate);
+                    double totalPrice = unitPrice * row.MEGHK; ////, 2, MidpointRounding.AwayFromZero
+                    connection.Execute(
+                        @"UPDATE TOP (1) dbo.PROGPAS1
+                          SET MABL = @MABL, MABLK = @MABLK
+                          WHERE PRGID = @PRGID AND CODA = @CODA AND CODB = @CODB;",
+                        new
+                        {
+                            PRGID = prgId,
+                            row.CODA,
+                            row.CODB,
+                            MABL = unitPrice,
+                            MABLK = totalPrice
+                        },
+                        transaction);
+                }
+
+                transaction.Commit();
+            }
+            catch (Exception ex)
+            {
+                ProcLoader.Stop(Prc);
+                transaction?.Rollback();
+                connection.Close();
+                new Msgwin(false, $"خطا در محاسبه قیمت تمام شده", "#FFFF0000", true).ShowDialog();
+                return;
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                {
+                    connection?.Close();
+                }
+            }
+
+            var summary = BuildCostSummary(prgId, persianDate);
+
+            //if (!string.IsNullOrWhiteSpace(summary.SummaryText))
+            //{
+            //    new Msgwin(false, summary.SummaryText, "", true).ShowDialog();
+            //}
+
+            ProcLoader.Stop(Prc);
+
+            OpenHeadManfDayWindow(prgId, summary);
         }
+        private static double GetLastPriceNz(SqlConnection connection, SqlTransaction transaction, string code, long date)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                return 0d;
+            }
+            var price = CL_HESABDARI.LASTPRICENZ(code, date);
+            return price;
+        }
+        private CostSummary BuildCostSummary(long prgId, long persianDate)
+        {
+            var builder = new StringBuilder();
+
+            builder.AppendLine("----------------------------------------------------------------------");
+            builder.Append("فرمول ساخت                                     ");
+            builder.AppendLine($"  {CODE.SelectedValue?.ToString()}");
+            builder.AppendLine("----------------------------------------------------------------------");
+
+            var detailRows = dbms.DoGetDataSQL<ProgpasSummaryRow>(
+                @"SELECT     q.CODB,
+                           q.VAHED,
+                           q.SumOfMEGH AS MEGH,
+                           q.SumOfMEGHK AS MEGHK,
+                           q.SumOfPERT AS PERT,
+                           q.SumOfKOLMAV AS KOLMAV,
+                           q.RADAH,
+                           s.NAME
+                  FROM dbo.QPROGPAS2 AS q
+                  INNER JOIN dbo.STUF_DEF AS s ON q.CODB = s.CODE
+                  WHERE q.PRGID = @PRGID
+                  ORDER BY q.RADAH, q.CODB;",
+                new { PRGID = prgId }).ToList();
+
+            double totalMaterial = 0d;
+
+            foreach (var row in detailRows)
+            {
+                double unitPrice = CL_HESABDARI.LASTPRICENZ(row.CODB, persianDate);
+
+                //double totalLine = Math.Round((row.MEGHK ?? 0d) * unitPrice);
+                double totalLine = (row.MEGHK ?? 0d) * unitPrice;
+
+                string codePart = (row.CODB ?? string.Empty).PadLeft(15);
+                string name = row.NAME ?? string.Empty;
+                if (name.Length > 70)
+                {
+                    name = name[..70];
+                }
+                string namePart = name.PadRight(70);
+                string qtyPart = (row.MEGHK ?? 0d).ToString("N4", CultureInfo.CurrentCulture).PadLeft(12);
+                string unitPricePart = unitPrice.ToString("N0", CultureInfo.CurrentCulture).PadLeft(12);
+                string totalPart = totalLine.ToString("N0", CultureInfo.CurrentCulture).PadLeft(12);
+
+                builder.AppendLine($"{codePart}  {namePart}      {qtyPart}       {unitPricePart}      {totalPart}");
+
+                totalMaterial += totalLine;
+            }
+
+            var laborInfo = dbms.DoGetDataSQL<ProgpasLaborRow>(
+                @"SELECT SUM(h.IMBIBE_MANF * p.MEGHK) AS MANF,
+                         SUM(h.IMBIBE_SAR * p.MEGHK) AS SAR
+                  FROM dbo.PROGPAS1 AS p
+                  INNER JOIN dbo.HEAD_MANF AS h ON p.FR = h.FNUMB
+                  WHERE p.PRGID = @PRGID AND ISNULL(p.RADAH, 0) <> 1;",
+                new { PRGID = prgId }).FirstOrDefault();
+
+            double baseLabor = Convert.ToDouble(IMBIBE_MANF.Text);
+            double baseOverhead = Convert.ToDouble(IMBIBE_SAR.Text);
+
+            double nestedLabor = laborInfo?.MANF ?? 0d;
+            double nestedOverhead = laborInfo?.SAR ?? 0d;
+
+            bool hasNested = laborInfo is not null && (laborInfo.MANF.HasValue || laborInfo.SAR.HasValue);
+
+            double totalLabor = hasNested ? baseLabor + nestedLabor : baseLabor;
+            double totalOverhead = hasNested ? baseOverhead + nestedOverhead : baseOverhead;
+
+            double roundedMaterial = Math.Round(totalMaterial, 0);
+            double roundedLabor = Math.Round(totalLabor, 0);
+            double roundedOverhead = Math.Round(totalOverhead, 0);
+            double totalCost = roundedMaterial + roundedLabor + roundedOverhead;
+
+            builder.AppendLine("----------------------------------------------------------------------");
+            builder.AppendLine($"جمع مواد : {roundedMaterial:N0}");
+            builder.AppendLine($"دستمزد  : {roundedLabor:N0}");
+            builder.AppendLine($"سربار   : {roundedOverhead:N0}");
+            builder.AppendLine("----------------------------------------------------------------------");
+            builder.AppendLine($"قيمت تمام شده   : {totalCost:N0}");
+            builder.AppendLine();
+            builder.AppendLine();
+
+            return new CostSummary(roundedMaterial, roundedLabor, roundedOverhead, builder.ToString());
+        }
+        private void OpenHeadManfDayWindow(long prgId, CostSummary summary)
+        {
+            try
+            {
+                var MAVADR = summary.TotalMaterial; //جمع مواد
+                var DASTR = summary.TotalLabor; //جمع دستمزد
+                var SARR = summary.TotalOverhead; //جمع سربار
+
+                var window = new WIN_HEAD_MANF_DAY(prgId, MAVADR, DASTR, SARR);
+                window.Show();
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, $"خطا در نمایش ریز اطلاعات", "#FFFF0000", true).ShowDialog();
+            }
+        }
+        private sealed record CostSummary(double TotalMaterial, double TotalLabor, double TotalOverhead, string SummaryText);
+        private sealed class ProgpasPendingRow
+        {
+            public string CODA { get; set; } = string.Empty;
+            public string CODB { get; set; } = string.Empty;
+            public double MEGHK { get; set; }
+        }
+        private sealed class ProgpasCostRow
+        {
+            public string CODA { get; set; } = string.Empty;
+            public string CODB { get; set; } = string.Empty;
+            public double MEGHK { get; set; }
+        }
+        private sealed class ProgpasSummaryRow
+        {
+            public string CODB { get; set; } = string.Empty;
+            public string? NAME { get; set; }
+            public double? MEGHK { get; set; }
+        }
+        private sealed class ProgpasLaborRow
+        {
+            public double? MANF { get; set; }
+            public double? SAR { get; set; }
+        }
+        #endregion
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
             //چاپ فرمول 2
             if (_navigationManager.IsNewRecord) { return; }
 
-        }
+            var report = new StiReport();
+            using var pathreport = Assembly.GetEntryAssembly()?.GetManifestResourceStream("Prg_UI.Rpts.SANATI.PRINT_FORMULA_2.mrt");
+            report.Load(pathreport);
+            ((StiSqlDatabase)report.Dictionary.Databases["MS SQL"]).ConnectionString = CL_CCNNMANAGER.CONNECTION_STR;
 
+            report["FNUMB_PARAM"] = FNUMB.Text;
+
+            (report.GetComponentByName("IMBIBE_MANF") as StiText).Text = IMBIBE_MANF.Text; //جذب هزینه دستمزد
+            (report.GetComponentByName("IMBIBE_SAR") as StiText).Text = IMBIBE_SAR.Text; //جذب هزینه سربار
+
+            (report.GetComponentByName("Text2") as StiText).Text = Baseknow.WIDTH_D; //نام شرکت
+            (report.GetComponentByName("smb") as StiText).Text = SUM_OF_MEGH_K.ToString(); //جمع مواد مصرفی
+
+            //Text228: قیمت تمام شده
+
+            new WINRPT(report, "چاپ 2 فرمول ساخت").Show();
+        }
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
             //چاپ فرمول
             if (_navigationManager.IsNewRecord) { return; }
+            //#,##0.######################
 
+            var report = new StiReport();
+            using var pathreport = Assembly.GetEntryAssembly()?.GetManifestResourceStream("Prg_UI.Rpts.SANATI.PRINT_FORMULA.mrt");
+            report.Load(pathreport);
+            ((StiSqlDatabase)report.Dictionary.Databases["MS SQL"]).ConnectionString = CL_CCNNMANAGER.CONNECTION_STR;
+
+            report["FNUMB_PARAM"] = FNUMB.Text;
+            (report.GetComponentByName("Text2") as StiText).Text = Baseknow.WIDTH_D; //نام شرکت
+
+            new WINRPT(report, "چاپ فرمول ساخت").Show();
+        }
+        private void ReCalcAfter()
+        {
+            // e.g SA_HOUR_AfterUpdate
+            IMBIBE_MANF.Text = Math.Round(Convert.ToDouble(SA_HOUR.Text ?? "0") / 3600 * Convert.ToDouble(SA_NHOU.Text ?? "0")).ToString();
+        }
+        private void SA_HOUR_NumericLostFocus(object sender, RoutedEventArgs e)
+        {
+            ReCalcAfter();
+        }
+        private void SA_NHOU_NumericLostFocus(object sender, RoutedEventArgs e)
+        {
+            ReCalcAfter();
         }
     }
 }

@@ -37,6 +37,7 @@ using Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.KHARID_FORUSH;
 using Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
 using Wins.WinMenus.Taarif;
+using Wins.WinSamplesEmpty;
 using Wins.WinSetting;
 using static Functions.SMSService.SmsServiceFactory;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
@@ -372,8 +373,11 @@ namespace Prg_UI.Wins
             CL_Generaly.VAHED_OF_USER = 1;
             Baseknow.UGRP = "1";
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "6250,6276");
+            //new WIN_HEAD_MANF().Show();
+            //new Window4().Show();
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this);
 
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "6250,6276");
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_F12, this);
 
@@ -471,7 +475,6 @@ namespace Prg_UI.Wins
             }
 
             CmbUsers.ItemsSource = USRLST;
-
         }
 
         private void Greet_GotFocus(object sender, RoutedEventArgs e)

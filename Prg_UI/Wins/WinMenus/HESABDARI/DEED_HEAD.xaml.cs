@@ -1039,6 +1039,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             if (string.IsNullOrEmpty(BAYEG.Text) || BAYEG.Text == "0")
             {
+                //BAYEG.Text = CL_HESABDARI.UpdateOrGenerateBAYEG(100000000, Convert.ToInt32(N_S.Text)).ToString();
                 BAYEG.Text = CL_HESABDARI.UpdateOrGenerateBAYEG(100000000, Convert.ToInt32(N_S.Text)).ToString();
             }
 
@@ -1073,7 +1074,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 }), DispatcherPriority.Background);
             }
 
-            universControl.PopNotifyShow("ذخیره سربرگ انجام شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+            universControl.PopNotifyShow(".ذخیره سربرگ انجام شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
 
             ChangeIsHappend = false;
         }
@@ -2320,8 +2321,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
 
             SSBED.Text = totalBed.ToString();   // جمع سند (بدهکار/بستانکار کل)
-            SSBES.Text = totalBes.ToString();     
-            
+            SSBES.Text = totalBes.ToString();
+
             bedt.Text = uptoBed.ToString();   // جمع سند (بدهکار/بستانکار کل)
             best.Text = uptoBes.ToString();
         }
@@ -2797,7 +2798,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         {
             if (Child14.IsReadOnly == false)
             {
-              
+
             }
         }
         private void Child14_PreviewKeyDown(object sender, KeyEventArgs e)
