@@ -6,6 +6,7 @@
       <MS_x0020_SQL Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>MS SQL</Alias>
         <ConnectionStringEncrypted>9Fz3oe9f88j5YYSJThwvf9EgoaFWXdOkRVvtbGM96bvf2LVIxlzZzcxG1YFpbKRGwlr1CU1Rw8XLRD0I5QDhXvNU3QLFCvPN7Fq53OkA417kWuEp</ConnectionStringEncrypted>
+        <Key>83db4096263b481096f3e479fdafd55a</Key>
         <Name>MS SQL</Name>
       </MS_x0020_SQL>
     </Databases>
@@ -13,22 +14,24 @@
       <DataSource1 Ref="3" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>DataSource1</Alias>
         <Columns isList="true" count="8">
-          <value>DATE_ACTIV,System.Int64</value>
-          <value>FNUMB,System.Int32</value>
-          <value>KALA,System.String</value>
-          <value>COKAL,System.String</value>
-          <value>MAVAD,System.String</value>
-          <value>PERT,System.Double</value>
-          <value>MEGHk,System.Double</value>
-          <value>SA_HOUR,System.Double</value>
+          <value>ORIGINAL,DATE_ACTIV,DATE_ACTIV,DATE_ACTIV,System.Int64,a65144dbdb024dcda5e6b049552ff097</value>
+          <value>ORIGINAL,FNUMB,FNUMB,FNUMB,System.Int32,_x0035_361adfbe02e48b69578ec7b12ad3e76</value>
+          <value>ORIGINAL,KALA,KALA,KALA,System.String,_x0033_26e4102825f4f4c9d37b8f528625f6e</value>
+          <value>ORIGINAL,COKAL,COKAL,COKAL,System.String,b1cf28a2a98d4510ab2e292748732953</value>
+          <value>ORIGINAL,MAVAD,MAVAD,MAVAD,System.String,_x0038_f285ac309a34d49ba9df49284964b1e</value>
+          <value>ORIGINAL,PERT,PERT,PERT,System.Decimal,ce8cae76d4bf430583a03169bff1914d</value>
+          <value>ORIGINAL,MEGHk,MEGHk,MEGHk,System.Decimal,_x0039_45f4e5af1ca4f2da14fd83a793a52ba</value>
+          <value>ORIGINAL,SA_HOUR,SA_HOUR,SA_HOUR,System.Decimal,_x0033_faa26ec04b74308a7a30e510493c975</value>
         </Columns>
         <CommandTimeout>30</CommandTimeout>
         <Dictionary isRef="1" />
         <Key>b89dbbb0834649da856af2cf6372bbe5</Key>
         <Name>DataSource1</Name>
         <NameInSource>MS SQL</NameInSource>
-        <Parameters isList="true" count="0" />
-        <SqlCommand>SELECT DATE_ACTIV, FNUMB, KALA, COKAL, MAVAD, PERT, MEGHk, SA_HOUR FROM dbo.PRINT_FORMULA WHERE (FNUMB = 826030908)</SqlCommand>
+        <Parameters isList="true" count="1">
+          <value>FNUMB_PARAM,,0,20</value>
+        </Parameters>
+        <SqlCommand>SELECT DATE_ACTIV, FNUMB, KALA, COKAL, MAVAD, PERT, MEGHk, SA_HOUR FROM dbo.PRINT_FORMULA WHERE (FNUMB = @FNUMB_PARAM)</SqlCommand>
       </DataSource1>
     </DataSources>
     <Relations isList="true" count="0" />
@@ -74,7 +77,7 @@
                 </Text1>
                 <Text2 Ref="8" type="Text" isKey="true">
                   <Brush>Transparent</Brush>
-                  <ClientRectangle>2,0.3,1.6,0.2</ClientRectangle>
+                  <ClientRectangle>0,0.3,5.4,0.2</ClientRectangle>
                   <Conditions isList="true" count="0" />
                   <Expressions isList="true" count="0" />
                   <Font>IRANYekanFN,10</Font>
@@ -353,6 +356,7 @@
             </HeaderDataSource1>
             <DataDataSource1 Ref="24" type="DataBand" isKey="true">
               <Brush>Transparent</Brush>
+              <BusinessObjectGuid isNull="true" />
               <ClientRectangle>0,2.6,5.4,0.3</ClientRectangle>
               <Components isList="true" count="6">
                 <MABLK Ref="25" type="Text" isKey="true">
@@ -412,7 +416,6 @@
                 <DataDataSource1_MEGHk Ref="28" type="Text" isKey="true">
                   <Border>All;Black;1;Solid;False;4;Black</Border>
                   <Brush>Transparent</Brush>
-                  <CanGrow>True</CanGrow>
                   <ClientRectangle>2.3,0,0.9,0.3</ClientRectangle>
                   <Conditions isList="true" count="0" />
                   <Expressions isList="true" count="0" />
@@ -639,7 +642,7 @@
                   <Name>Text9</Name>
                   <Page isRef="4" />
                   <Parent isRef="31" />
-                  <Text>جذب کار : {DataSource1.SA_HOUR}</Text>
+                  <Text>جذب کار : {DataSource1.SA_HOUR} ثانیه</Text>
                   <TextBrush>Black</TextBrush>
                   <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
                   <Type>Expression</Type>
@@ -700,10 +703,10 @@
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>9/27/2025 6:36:58 PM</ReportChanged>
+  <ReportChanged>9/30/2025 4:32:38 PM</ReportChanged>
   <ReportCreated>9/27/2025 5:58:35 PM</ReportCreated>
-  <ReportFile>C:\Users\Notriko\Desktop\PRINT_FORMULA_2.mrt</ReportFile>
-  <ReportGuid>649e14df5d94422d8a46cb4281ed1c5d</ReportGuid>
+  <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\SANATI\PRINT_FORMULA_2.mrt</ReportFile>
+  <ReportGuid>22c5784ee77746f6ac2f58b2b00d2922</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Inches</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

@@ -25,8 +25,6 @@ namespace Wins.WinSamplesEmpty
 {
     public partial class Window4 : Window
     {
- 
-
         public Window4(double? number_to_open = null)
         {
             InitializeComponent();
@@ -47,19 +45,19 @@ namespace Wins.WinSamplesEmpty
         }
         private void Btn_Max_Click(object sender, RoutedEventArgs e)
         {
-            PackIcon packIcon = new PackIcon();
+            PackIcon? packIcon = Btn_Max.Content as PackIcon;
+
             switch (WindowState)
             {
                 case WindowState.Maximized:
-                    //🗖,🗗
                     WindowState = WindowState.Normal;
-                    packIcon.Kind = PackIconKind.WindowMaximize;
-                    Btn_Max.Content = packIcon;
+                    if (packIcon != null)
+                        packIcon.Kind = PackIconKind.WindowMaximize;
                     break;
                 case WindowState.Normal:
                     WindowState = WindowState.Maximized;
-                    packIcon.Kind = PackIconKind.WindowRestore;
-                    Btn_Max.Content = packIcon;
+                    if (packIcon != null)
+                        packIcon.Kind = PackIconKind.WindowRestore;
                     break;
             }
         }
@@ -80,6 +78,7 @@ namespace Wins.WinSamplesEmpty
         }
         //Header Window End;
         #endregion
+
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
         UniversControl universControl = new UniversControl();
@@ -210,13 +209,13 @@ namespace Wins.WinSamplesEmpty
 
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e)
         {
-            if (!BTN_SAVE.IsEnabled) { return; }
+            //if (!BTN_SAVE.IsEnabled) { return; }
 
             ChangeIsHappend = false;
         }
         private void ESLAH_Click(object sender, RoutedEventArgs e)
         {
-            if (!ESLAH.IsEnabled) { return; }
+            //if (!ESLAH.IsEnabled) { return; }
         }
         private void BTN_DELETE_Click(object sender, RoutedEventArgs e)
         {

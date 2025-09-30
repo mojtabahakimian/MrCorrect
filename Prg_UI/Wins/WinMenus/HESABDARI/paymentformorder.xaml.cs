@@ -376,9 +376,9 @@ namespace Wins.WinMenus.HESABDARI
                     if (data is not null && !string.IsNullOrEmpty(data.hes))
                     {
                         string thevalue = data.hes;
-                        if (!((ObservableCollection<Custom_CUST_HESAB>)ORDERER.ItemsSource).Any(item => item?.hes == thevalue))
+                        if (!((ObservableCollection<CUST_HESAB>)ORDERER.ItemsSource).Any(item => item?.hes == thevalue))
                         {
-                            ((ObservableCollection<Custom_CUST_HESAB>)ORDERER.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
+                            ((ObservableCollection<CUST_HESAB>)ORDERER.ItemsSource).Add(new CUST_HESAB { hes = thevalue, NAME = data.NAME });
                         }
                         ORDERER.SelectedValue = null;
                         ORDERER.SelectedValue = thevalue;
@@ -402,9 +402,9 @@ namespace Wins.WinMenus.HESABDARI
                             if (data is not null && !string.IsNullOrEmpty(data.hes))
                             {
                                 string thevalue = data.hes;
-                                if (!((ObservableCollection<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                                if (!((ObservableCollection<CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
                                 {
-                                    ((ObservableCollection<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
+                                    ((ObservableCollection<CUST_HESAB>)CUST_NO.ItemsSource).Add(new CUST_HESAB { hes = thevalue, NAME = data.NAME });
                                 }
                                 CUST_NO.SelectedValue = _HES_;
                                 CUST_NO.Items.Refresh();
@@ -417,9 +417,9 @@ namespace Wins.WinMenus.HESABDARI
                             if (data is not null && !string.IsNullOrEmpty(data.hes))
                             {
                                 string thevalue = data.hes;
-                                if (!((ObservableCollection<Custom_CUST_HESAB>)ORDERER.ItemsSource).Any(item => item?.hes == thevalue))
+                                if (!((ObservableCollection<CUST_HESAB>)ORDERER.ItemsSource).Any(item => item?.hes == thevalue))
                                 {
-                                    ((ObservableCollection<Custom_CUST_HESAB>)ORDERER.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
+                                    ((ObservableCollection<CUST_HESAB>)ORDERER.ItemsSource).Add(new CUST_HESAB { hes = thevalue, NAME = data.NAME });
                                 }
                                 ORDERER.SelectedValue = null;
                                 ORDERER.SelectedValue = _HES_;
@@ -511,8 +511,8 @@ namespace Wins.WinMenus.HESABDARI
 
         private void FILL_ALL_COMBOBOXES()
         {
-            //var RST_HESABS = dbms.DoGetDataSQL<Custom_CUST_HESAB>(@"SELECT hes,NAME FROM CUST_HESAB").ToList();
-            var RST_HESABS = new ObservableCollection<Custom_CUST_HESAB>();
+            //var RST_HESABS = dbms.DoGetDataSQL<CUST_HESAB>(@"SELECT hes,NAME FROM CUST_HESAB").ToList();
+            var RST_HESABS = new ObservableCollection<CUST_HESAB>();
             CUST_NO.ItemsSource = RST_HESABS;
             CUST_NO2.ItemsSource = CUST_NO.ItemsSource;
 
@@ -626,14 +626,26 @@ namespace Wins.WinMenus.HESABDARI
             TextBox editableTextBox = (TextBox)comboBox.Template.FindName("PART_EditableTextBox", comboBox);
             if (editableTextBox == null) return; // Safety check
 
-            if (CUST_NO.SelectedValue != null && (CUST_NO.SelectedItem as Custom_CUST_HESAB)?.NAME == editableTextBox.Text)
+            if (CUST_NO.SelectedValue != null && (CUST_NO.SelectedItem as CUST_HESAB)?.NAME == editableTextBox.Text)
             {
                 return;
             }
 
-            CL_LMethods.GetSearchedValueCustomer(comboBox, "paymentformorder_CUST_NO", default, dbms, I_AM_PAYORRDER);
+            //CL_LMethods.GetSearchedValueCustomer(comboBox, "paymentformorder_CUST_NO", default, dbms, I_AM_PAYORRDER);
 
+            var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(CUST_NO, dbms);
+            if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
+            {
+                universControl.PopNotifyShow($"حساب دریافت کننده خالی است", Pop1, Pop1Text1, Pop_Border1);
+                e.Handled = true;
+            }
 
+            //CUST_NO.Items.Refresh();
+
+            //if (CUST_NO.SelectedValue == null)
+            //{
+            //    universControl.PopNotifyShowUp($"حساب دریافت کننده خالی است", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+            //}
         }
 
         private void ORDERER_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -644,12 +656,18 @@ namespace Wins.WinMenus.HESABDARI
             TextBox editableTextBox = (TextBox)comboBox.Template.FindName("PART_EditableTextBox", comboBox);
             if (editableTextBox == null) return; // Safety check
 
-            if (ORDERER.SelectedValue != null && (ORDERER.SelectedItem as Custom_CUST_HESAB)?.NAME == editableTextBox.Text)
+            if (ORDERER.SelectedValue != null && (ORDERER.SelectedItem as CUST_HESAB)?.NAME == editableTextBox.Text)
             {
                 return;
             }
 
-            CL_LMethods.GetSearchedValueCustomer(comboBox, "paymentformorder_ORDERER", default, dbms, I_AM_PAYORRDER);
+            var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(ORDERER, dbms);
+            if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
+            {
+                universControl.PopNotifyShow($"حساب درخواست کننده خالی است", Pop1, Pop1Text1, Pop_Border1);
+                e.Handled = true;
+            }
+
         }
 
         private void SGN1_Click(object sender, RoutedEventArgs e)
