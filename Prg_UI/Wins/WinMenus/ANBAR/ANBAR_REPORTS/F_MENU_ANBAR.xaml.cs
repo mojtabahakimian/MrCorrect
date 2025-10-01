@@ -92,7 +92,7 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         /// </summary>
         public FULL_HESAB HESAB_FROM_SEARCH { get; set; }
         public Visual I_AM_MENU_ANBAR { get; set; }
-        public INVO_LST_FACTOR22 FROM_SAERCH_KAL { get; set; } = new INVO_LST_FACTOR22();
+        public INVO_LST_FACTOR22 FROM_SEARCH_KAL { get; set; } = new INVO_LST_FACTOR22();
         public class Q1
         {
             public string? CODE { get; set; }
@@ -370,16 +370,16 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
                 SERCHK sERCHK = new SERCHK(I_AM_MENU_ANBAR, ANBAR.SelectedValue.ToString());
                 sERCHK.ShowDialog();
 
-                if (FROM_SAERCH_KAL.CODE is null)
+                if (FROM_SEARCH_KAL.CODE is null)
                 {
                     return;
                 }
                 else
                 {
-                    ANBAR.SelectedValue = Convert.ToInt32(FROM_SAERCH_KAL.CODE);
+                    KALA.SelectedValue = Convert.ToInt32(FROM_SEARCH_KAL.CODE);
                     //Cleaning
-                    FROM_SAERCH_KAL.CODE = null;
-                    FROM_SAERCH_KAL.NAME_CODE = null;
+                    FROM_SEARCH_KAL.CODE = null;
+                    FROM_SEARCH_KAL.NAME_CODE = null;
                 }
             }
         }
