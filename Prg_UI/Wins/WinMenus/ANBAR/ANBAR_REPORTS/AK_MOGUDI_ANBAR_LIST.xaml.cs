@@ -139,18 +139,20 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            //if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None && SYNCFUSION_DG.SelectedItem != null)
-            //{
-            //    e.Handled = true;
+            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None && SYNCFUSION_DG.SelectedItem != null)
+            {
+                e.Handled = true;
 
-            //    var currentRow = SYNCFUSION_DG.SelectedItem as MDS;
+                var currentRow = SYNCFUSION_DG.SelectedItem as MDS;
 
-            //    if (currentRow?.NUMBER != null)
-            //    {
-            //        OpenWindow(typeof(HEAD_LST_ENTEGHAL_WIN), null , "یک پنجره انتقالی از قبل باز شده ابتدا آنرا ببندید.");
-            //    }
+                if (currentRow?.CODE != null)
+                {
+                    F_MENU_KART f_MENU_KART = new F_MENU_KART("R", currentRow.ANBAR.ToString(), currentRow.CODE);
+                    f_MENU_KART.ExternalCallShowReport();
+                    f_MENU_KART.Close();
+                }
 
-            //}
+            }
         }
         public void OpenWindow(Type windowType, object parameter, string errorMessage)
         {

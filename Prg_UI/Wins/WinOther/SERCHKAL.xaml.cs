@@ -17,6 +17,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Wins.WinMenus.ANBAR;
+using Wins.WinMenus.ANBAR.ANBAR_REPORTS;
 using Wins.WinMenus.KHARID_FORUSH;
 using Wins.WinMenus.SANATI;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
@@ -472,6 +473,11 @@ namespace Prg_UI.Wins.WinOther
                     case "I_AM_VK_SAKHTEH":
                         (VL_WIN as HAVALAH_ENTER).FROM_SEARCH_KAL.CODE = CALA;
                         (VL_WIN as HAVALAH_ENTER).FROM_SEARCH_KAL.NAME_CODE = selectedVal.name;
+                        break;
+
+                    case "F_MENU_ANBAR":
+                        (VL_WIN as F_MENU_ANBAR).FROM_SEARCH_KAL.CODE = CALA;
+                        (VL_WIN as F_MENU_ANBAR).FROM_SEARCH_KAL.NAME_CODE = selectedVal.name;
                         break;
 
                     default:
