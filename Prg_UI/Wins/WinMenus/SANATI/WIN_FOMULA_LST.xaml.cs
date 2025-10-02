@@ -21,10 +21,13 @@ using Prg_UI.HelperWins;
 using System.Reflection;
 using System.Globalization;
 using System.Threading;
+using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
+using Wins.WinMenus.KHARID_FORUSH;
+using System.Collections.Generic;
 
-namespace Wins.WinMenus.KHARID_FORUSH
+namespace Prg_UI.Wins.WinMenus.SANATI
 {
-    public partial class FACTORS_LST : Window
+    public partial class WIN_FOMULA_LST : Window
     {
         #region Header Window Begin
         //Header Window Begin
@@ -34,19 +37,19 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void Btn_Max_Click(object sender, RoutedEventArgs e)
         {
-            PackIcon packIcon = new PackIcon();
+            PackIcon? packIcon = Btn_Max.Content as PackIcon;
+
             switch (WindowState)
             {
                 case WindowState.Maximized:
-                    //🗖,🗗
                     WindowState = WindowState.Normal;
-                    packIcon.Kind = PackIconKind.WindowMaximize;
-                    Btn_Max.Content = packIcon;
+                    if (packIcon != null)
+                        packIcon.Kind = PackIconKind.WindowMaximize;
                     break;
                 case WindowState.Normal:
                     WindowState = WindowState.Maximized;
-                    packIcon.Kind = PackIconKind.WindowRestore;
-                    Btn_Max.Content = packIcon;
+                    if (packIcon != null)
+                        packIcon.Kind = PackIconKind.WindowRestore;
                     break;
             }
         }
@@ -68,183 +71,57 @@ namespace Wins.WinMenus.KHARID_FORUSH
         //Header Window End;
         #endregion
 
-        public FACTORS_LST(byte? _TAGCODE_)
+        public WIN_FOMULA_LST()
         {
             InitializeComponent();
 
             this.DataContext = this;
 
-            if (_TAGCODE_ != null)
-            {
-                TAGCODE = (byte)_TAGCODE_;
-            }
-
             SYNCFUSION_DG.SelectionController = new SafeGridSelectionController(SYNCFUSION_DG);
 
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
             GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
-
         }
-        CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
+        CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         UniversControl universControl = new UniversControl();
-        public ObservableCollection<HEAD_LST_SRC> FACTOR_DATA { get; set; } = new ObservableCollection<HEAD_LST_SRC>();
+        public ObservableCollection<HEAD_MANF_MODEL> SFDG_DATA { get; set; } = new ObservableCollection<HEAD_MANF_MODEL>();
         public bool NowIsReady { get; private set; }
-        public byte TAGCODE { get; private set; }
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //Process Prc = ProcLoader.Start();
+            FILL_ALL_COMBOBOXES();
 
-            FACTOR_DATA?.Clear();
+            SFDG_DATA?.Clear();
 
-            string WhereCondition = TAGCODE > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {TAGCODE}) " : "  ";
-
-            //if (TAGCODE == 2 || TAGCODE == 13 || TAGCODE == 20) //حواله , فاکتور , پیش فاکتور
-            //{
-            //    WhereCondition = CL_LMethods.GetRestrictedSqlQuery(TAGCODE, WhereCondition);
-            //}
-
-            WhereCondition = CL_LMethods.GetRestrictedSqlQuery(TAGCODE, WhereCondition);
-
-            var MasterHead = dbms.DoGetDataSQL<HEAD_LST_SRC>(@$" SELECT dbo.HEAD_LST.NUMBER1, dbo.HEAD_LST.TAH, dbo.HEAD_LST.NUMBER, dbo.HEAD_LST.DATE_N, dbo.HEAD_LST.MAS, dbo.HEAD_LST.N_S, dbo.HEAD_LST.CUST_NO, dbo.CUST_HESAB.NAME, dbo.HEAD_LST.MOLAH, 
-                                                                     dbo.HEAD_LST.M_NAGHD, dbo.HEAD_LST.MABL_VAR, dbo.HEAD_LST.MOIN_VAR, dbo.HEAD_LST.MABL_HAV, dbo.HEAD_LST.MOIN_HAV, dbo.HEAD_LST.MABL_HAZ, dbo.HEAD_LST.MOIN_HAZ, dbo.HEAD_LST.TAKHFIF, 
-                                                                     dbo.HEAD_LST.MOIN_KHF,dbo.HEAD_LST.TAG, dbo.DEPART.DEPNAME, dbo.SHIFT.SHNAME, dbo.CUSTKIND.CUSTKNAME, dbo.HEAD_LST.USER_NAME, dbo.HEAD_LST.SHARAYET, dbo.HEAD_LST.MBAA, dbo.HEAD_LST.HMBAA, 
-                                                                     dbo.HEAD_LST.TICMBAA, dbo.HEAD_LST.TKHF, dbo.HEAD_LST.OKF, dbo.HEAD_LST.JAY, dbo.HEAD_LST.SGN1, dbo.HEAD_LST.SGN2, dbo.HEAD_LST.SGN3, dbo.HEAD_LST.sgn1usid, dbo.HEAD_LST.sgn2usid, 
-                                                                     dbo.HEAD_LST.sgn3usid, dbo.HEAD_LST.CRT, dbo.HEAD_LST.UID, dbo.PRICE_ELAMIE.PEPNAME, dbo.PRICE_ELAMIETF.PENAME, dbo.PRICE_PAYNO.PPAME
-                                                                     FROM dbo.HEAD_LST LEFT OUTER JOIN
-                                                                     dbo.PRICE_PAYNO ON dbo.HEAD_LST.MODAT_PPID = dbo.PRICE_PAYNO.PPID LEFT OUTER JOIN
-                                                                     dbo.PRICE_ELAMIETF ON dbo.HEAD_LST.PEID = dbo.PRICE_ELAMIETF.PEID LEFT OUTER JOIN
-                                                                     dbo.CUSTKIND ON dbo.HEAD_LST.CUST_KIND = dbo.CUSTKIND.CUST_COD LEFT OUTER JOIN
-                                                                     dbo.PRICE_ELAMIE ON dbo.HEAD_LST.PEPID = dbo.PRICE_ELAMIE.PEPID LEFT OUTER JOIN
-                                                                     dbo.DEPART ON dbo.HEAD_LST.DEPATMAN = dbo.DEPART.DEPATMAN LEFT OUTER JOIN
-                                                                     dbo.SHIFT ON dbo.HEAD_LST.SHIFT = dbo.SHIFT.SHIFT_ID LEFT OUTER JOIN
-                                                                     dbo.CUST_HESAB ON dbo.HEAD_LST.CUST_NO = dbo.CUST_HESAB.hes
-                                                                     {WhereCondition}
-                                                                     ORDER BY dbo.HEAD_LST.NUMBER1,dbo.HEAD_LST.NUMBER DESC ").ToList();
+            var MasterHead = dbms.DoGetDataSQL<HEAD_MANF_MODEL>(@$"SELECT dbo.HEAD_MANF.FNUMB,
+                                                                           dbo.HEAD_MANF.CODE,
+                                                                           dbo.STUF_DEF.NAME AS NAME_CODE,
+                                                                           dbo.HEAD_MANF.DATE_ACTIV,
+                                                                           dbo.HEAD_MANF.IMBIBE_MANF,
+                                                                           dbo.HEAD_MANF.IMBIBE_SAR,
+                                                                           dbo.HEAD_MANF.GHEYMAT,
+                                                                           dbo.HEAD_MANF.NAMES,
+                                                                           dbo.HEAD_MANF.N_KOL,
+                                                                           dbo.HEAD_MANF.NUMBER,
+                                                                           dbo.HEAD_MANF.TNUMBER,
+                                                                           dbo.HEAD_MANF.SA_HOUR,
+                                                                           dbo.HEAD_MANF.SA_NHOU,
+                                                                           dbo.HEAD_MANF.TOZIH,
+                                                                           dbo.HEAD_MANF.CRT,
+                                                                           dbo.HEAD_MANF.UID,
+                                                                           dbo.HEAD_MANF.ID
+                                                                    FROM dbo.HEAD_MANF
+                                                                        LEFT OUTER JOIN dbo.STUF_DEF
+                                                                            ON dbo.HEAD_MANF.CODE = dbo.STUF_DEF.CODE
+                                                                    WHERE (NOT (dbo.HEAD_MANF.CODE IS NULL))
+                                                                    ORDER BY dbo.HEAD_MANF.FNUMB;").ToList();
             foreach (var item in MasterHead)
             {
-                FACTOR_DATA.Add(item);
-            }
-
-            #region COLUMN_DISPLAYER
-
-            if (TAGCODE == 13)
-            {
-                ISEND_COLUMN.IsHidden = false; //نمایش ستون مودیان
-            }
-
-            switch (TAGCODE)
-            {
-                //فاکتوری ها
-                case 3:
-                case 4:
-                case 12:
-                case 13:
-                case 14:
-                case 20:
-                case 27:
-                    NUMBER_FAC_COLUMN.IsHidden = false; //Show
-                    break;
-
-                //انباری ها
-                case 1:
-                case 2:
-                case 5:
-                case 23:
-                case 24:
-                case 26:
-                    TARIKH_FAC_COLUMN.HeaderText = "تاریخ";
-                    NUMBER_FAC_COLUMN.IsHidden = true; //Hide
-                    MODAT_COLUMN.IsHidden = true;
-                    SANAD_COLUMN.IsHidden = true;
-                    NAGHD_COLUMN.IsHidden = true;
-                    VARIZI_COLUMN.IsHidden = true;
-                    MOEENVARIZ_COLUMN.IsHidden = true;
-                    MABL_HAV_COLUMN.IsHidden = true;
-                    MOEEN_HAV_COLUMN.IsHidden = true;
-                    MABL_KHAD_COLUMN.IsHidden = true;
-                    MOEEN_KHAD_COLUMN.IsHidden = true;
-                    MABL_TAKHFIF_COLUMN.IsHidden = true;
-                    break;
-
-                default: break;
-            }
-            #endregion
-
-            switch (TAGCODE) //عنوان پنجره
-            {
-                case 27:
-                    WINTILENAME.Content = "فاکتور های برگشت خرید آزاد";
-                    break;
-
-                case 26: WINTILENAME.Content = "سایر حواله انبار ها"; break;
-
-                case 25:
-                    WINTILENAME.Content = "فاکتور های برگشت فروش آزاد رسید شده";
-                    NUMBER_HAV_COLUMN.HeaderText = "شماره برگه";
-                    break;
-                case 24: WINTILENAME.Content = "سایر رسید انبار ها"; break;
-
-                case 23:
-                    WINTILENAME.Content = "درخواست خرید ها";
-                    TAH_COLUMN.IsHidden = false;
-                    break;
-
-                case 20:
-                    WINTILENAME.Content = "پیش فاکتور ها";
-                    NUMBER_FAC_COLUMN.IsHidden = true;
-                    SANAD_COLUMN.IsHidden = true;
-                    NUMBER_HAV_COLUMN.HeaderText = "شماره پیش فاکتور";
-                    break;
-
-                case 14: WINTILENAME.Content = "فاکتور های خدمات"; break;
-                case 13: WINTILENAME.Content = "فاکتور های فروش"; break;
-                case 12:
-                    WINTILENAME.Content = "فاکتور های خرید";
-                    NUMBER_HAV_COLUMN.HeaderText = "شماره رسید انبار ها";
-                    break;
-
-                case 10:
-                    WINTILENAME.Content = "برگه های خروج مواد اولیه";
-                    NUMBER_HAV_COLUMN.HeaderText = "شماره حواله انبار";
-                    CUST_HESAB_COLUMN.HeaderText = "حساب مسئول شیفت";
-                    CUST_NAME_COLUMN.HeaderText = "نام مسئول شیفت";
-                    TARIKH_FAC_COLUMN.HeaderText = "تاریخ حواله";
-                    MODAT_COLUMN.IsHidden = true;
-                    break;
-
-                case 9:
-                    WINTILENAME.Content = "برگه های ورود کالای ساخته شده";
-                    NUMBER_HAV_COLUMN.HeaderText = "شماره برگه";
-                    CUST_HESAB_COLUMN.HeaderText = "حساب مسئول شیفت";
-                    CUST_NAME_COLUMN.HeaderText = "نام مسئول شیفت";
-                    TARIKH_FAC_COLUMN.HeaderText = "تاریخ";
-                    MODAT_COLUMN.IsHidden = true;
-                    break;
-
-                case 5:
-                    WINTILENAME.Content = "انتقال از انبار به انبار";
-                    break;
-
-                case 4: WINTILENAME.Content = "فاکتور های برگشت فروش - عادی"; break;
-                case 3: WINTILENAME.Content = "فاکتور های برگشت خرید - عادی"; break;
-
-                case 2:
-                    WINTILENAME.Content = "حواله های فروش";
-                    NUMBER_FAC_COLUMN.IsHidden = true;
-                    break;
-
-                case 1:
-                    WINTILENAME.Content = "رسید های خرید";
-                    NUMBER_HAV_COLUMN.HeaderText = "شماره رسید";
-                    NUMBER_FAC_COLUMN.IsHidden = true;
-                    break;
-
-                default: WINTILENAME.Content = "همه نوع فاکتور"; break;
+                SFDG_DATA.Add(item);
             }
 
             //SYNCFUSION_DG.ColumnSizer = GridLengthUnitType.Auto;
@@ -262,174 +139,42 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             //ProcLoader.Stop(Prc);
         }
+
+        private void FILL_ALL_COMBOBOXES()
+        {
+            List<COMBOYMODEL_DOUBLEY> persianMonths = new List<COMBOYMODEL_DOUBLEY>
+            {
+                new COMBOYMODEL_DOUBLEY { ID = 1,  NAME = "فروردین" },
+                new COMBOYMODEL_DOUBLEY { ID = 2,  NAME = "اردیبهشت" },
+                new COMBOYMODEL_DOUBLEY { ID = 3,  NAME = "خرداد" },
+                new COMBOYMODEL_DOUBLEY { ID = 4,  NAME = "تیر" },
+                new COMBOYMODEL_DOUBLEY { ID = 5,  NAME = "مرداد" },
+                new COMBOYMODEL_DOUBLEY { ID = 6,  NAME = "شهریور" },
+                new COMBOYMODEL_DOUBLEY { ID = 7,  NAME = "مهر" },
+                new COMBOYMODEL_DOUBLEY { ID = 8,  NAME = "آبان" },
+                new COMBOYMODEL_DOUBLEY { ID = 9,  NAME = "آذر" },
+                new COMBOYMODEL_DOUBLEY { ID = 10, NAME = "دی" },
+                new COMBOYMODEL_DOUBLEY { ID = 11, NAME = "بهمن" },
+                new COMBOYMODEL_DOUBLEY { ID = 12, NAME = "اسفند" }
+            };
+
+            GHEYMAT_COLUMN.ItemsSource = persianMonths;
+        }
+
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None && SYNCFUSION_DG.SelectedItem != null)
             {
                 e.Handled = true;
 
-                var currentRow = SYNCFUSION_DG.SelectedItem as HEAD_LST_SRC;
+                var currentRow = SYNCFUSION_DG.SelectedItem as HEAD_MANF_MODEL;
 
-                switch (currentRow?.TAG)
+                if (currentRow?.FNUMB != null)
                 {
-                    case 1: // رسید خرید
-                        if (currentRow?.NUMBER != null)
-                        {
-                            //OpenWindow(typeof(HEAD_LST_RASID), (double)currentRow.NUMBER, "یک پنجره رسید خرید از قبل باز شده ابتدا آنرا ببندید.");
-
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 2: // حواله فروش
-                        if (currentRow?.NUMBER != null)
-                        {
-                            //OpenWindow(typeof(HEAD_LST_HAVL), (double)currentRow.NUMBER, "یک پنجره حواله فروش از قبل باز شده ابتدا آنرا ببندید.");
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAVL, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 3: //فاکتور برگشت خرید عادی	
-                        if (currentRow?.NUMBER != null)
-                        {
-                            //OpenWindow(typeof(HEAD_LST_KH_BACK), (double)currentRow.NUMBER, "یک پنجره فاکتور برگشت خرید عادی از قبل باز شده ابتدا آنرا ببندید.");
-                            //SELECT* FROM dbo.HEAD_LST WHERE NUMBER = 2 AND TAG = 3--فاکتور برگشت خرید عادی Normal Only Header because Detail load FROM dbo.INVO_LST WHERE NUMBER = 2073 AND TAG = 1
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 4:
-                        if (currentRow?.NUMBER != null)
-                        {
-                            //OpenWindow(typeof(HEAD_LST_FROOSH_BACK2), (double)currentRow.NUMBER, "یک پنجره فاکتور برگشت فروش عادی از قبل باز شده ابتدا آنرا ببندید.");
-                            //SELECT * FROM dbo.HEAD_LST WHERE NUMBER = 254  AND TAG = 4 --فاکتور برگشت فروش استاندارد عادی Normal Only Header because Detail load FROM dbo.INVO_LST WHERE NUMBER = 5361 AND TAG = 2
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_BACK2, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 5: //انتقال از انبار به انبار
-                        if (currentRow?.NUMBER != null)
-                        {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_ENTEGHAL_WIN, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 9: //برگه ورود
-                        if (currentRow?.NUMBER != null)
-                        {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALAH_ENTER, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 10: //برگه خروج مواد اولیه
-                        if (currentRow?.NUMBER != null)
-                        {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALAH_EXIT, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 12: // فاکتور خرید
-                        if (currentRow?.NUMBER1 != null && currentRow?.NUMBER != null)
-                        {
-                            //OpenWindow(typeof(HEAD_LST_KHAREED1), currentRow.NUMBER1 + "," + currentRow.NUMBER, "یک پنجره فاکتور خرید از قبل باز شده ابتدا آنرا ببندید.");
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this, currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 13: // فاکتور فروش
-                        if (currentRow?.NUMBER1 != null && currentRow?.NUMBER != null)
-                        {
-                            //OpenWindow(typeof(HEAD_LST_FROOSH22), currentRow.NUMBER1 + "," + currentRow.NUMBER, "یک پنجره فاکتور فروش از قبل باز شده ابتدا آنرا ببندید.");
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this, currentRow.NUMBER1 + "," + currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 14: // فاکتور خدمات
-                        if (currentRow?.NUMBER1 != null && currentRow?.NUMBER != null)
-                        {
-                            //OpenWindow(typeof(HEAD_LST_KHADAMAT), currentRow.NUMBER1 + "," + currentRow.NUMBER, "یک پنجره فاکتور خدمات از قبل باز شده ابتدا آنرا ببندید.");
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHADAMAT, this, currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 20: //پیش فاکتور ها
-                        if (currentRow?.NUMBER != null)
-                        {
-                            try
-                            {
-                                Application.Current.Windows.OfType<HEAD_LST_PISHFROOSH2>().FirstOrDefault()?.Close();
-                            }
-                            catch { }
-
-                            //OpenWindow(typeof(HEAD_LST_PISHFROOSH2), (double)currentRow.NUMBER, "یک پنجره پیش فاکتور از قبل باز شده ابتدا آنرا ببندید.");
-
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 23: //درخواست خرید
-                        if (currentRow?.NUMBER != null)
-                        {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_REQUEST_WIN, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 24: //سایر رسید انبار ها
-                        if (currentRow?.NUMBER != null)
-                        {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID_OTHER_WIN, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 25: //فاکتور برگشت فروش آزاد رسید شده
-                        if (currentRow?.NUMBER != null)
-                        {
-                            //SELECT * FROM dbo.HEAD_LST WHERE NUMBER = 954 AND TAG = 25 --فاکتور برگشت فروش رسید شده : آزاد Normal Only Header because Detail load FROM dbo.INVO_LST WHERE NUMBER = 954 AND TAG = 24
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_BRFR, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 26: //سایر حواله انبار ها
-                        if (currentRow?.NUMBER != null)
-                        {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAV_OTHER_WIN, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
-                    case 27: //فاکتور برگشت خرید آزاد
-                        if (currentRow?.NUMBER != null)
-                        {
-                            //SELECT * FROM dbo.HEAD_LST WHERE NUMBER = 3 AND TAG = 27   --فاکتور برگشت خرید آزاد Normal Only Header because Detail load FROM dbo.INVO_LST WHERE NUMBER = 3 AND TAG = 26
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK_AZAD, this, (double)currentRow.NUMBER);
-                        }
-                        break;
-
+                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_HEAD_MANF_FORMULSAKHT, this, (double)currentRow.FNUMB);
                 }
             }
         }
-        public void OpenWindow(Type windowType, object parameter, string errorMessage)
-        {
-            if (windowType == null || !typeof(Window).IsAssignableFrom(windowType))
-                return;
-
-            var constructor = windowType.GetConstructor(new[] { parameter.GetType() });
-            if (constructor != null)
-            {
-                var window = (Window)constructor.Invoke(new[] { parameter });
-                window.Show();
-            }
-
-            return; //Check is there any open window before ?
-            if (!CL_LMethods.IsWindowOpen(windowType)) //CL_LMethods.IsWindowOpen<HEAD_LST_FROOSH22>()
-            {
-
-            }
-            else
-            {
-                new Msgwin(false, errorMessage).ShowDialog();
-            }
-        }
-
 
         #region FilterBy
         private void View_FilterChanged(object sender, GridFilterEventArgs e)
@@ -449,7 +194,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             ROWCOUNT_TEXTBLK.Text = recordCount.ToString();
         }
 
-        private readonly FilterService<HEAD_LST_SRC> filterService = new FilterService<HEAD_LST_SRC>();
+        private readonly FilterService<HEAD_MANF_MODEL> filterService = new FilterService<HEAD_MANF_MODEL>();
         public ObservableCollection<string> ActiveFilters { get; set; } = new ObservableCollection<string>();
 
         private string? CurrentCellValue = null;
@@ -594,7 +339,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         private void ApplyCumulativeFilter() // Method to apply all cumulative filters to the data grid
         {
             // Set the filter for the data grid view using the filter service
-            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as HEAD_LST_SRC);
+            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as HEAD_MANF_MODEL);
             // Refresh the filter to update the view
             SYNCFUSION_DG.View.RefreshFilter();
 
@@ -770,12 +515,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             var summaryColumns = new ObservableCollection<ISummaryColumn>();
 
-            var dataType = typeof(HEAD_LST_SRC);
+            var dataType = typeof(HEAD_MANF_MODEL);
 
             //foreach (var column in SYNCFUSION_DG.Columns)
             foreach (var column in _DG_.Columns.OfType<GridTextColumn>())
             {
-                var propertyInfo = typeof(HEAD_LST_SRC).GetProperty(column.MappingName);
+                var propertyInfo = typeof(HEAD_MANF_MODEL).GetProperty(column.MappingName);
                 if (propertyInfo == null)
                     continue;
 
@@ -850,16 +595,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
         }
         #endregion
-
-        private void BTN_ISEND_Click(object sender, RoutedEventArgs e)
-        {
-            var CurrentRow = SYNCFUSION_DG.SelectedItem as HEAD_LST_SRC;
-
-            if (CurrentRow != null && CurrentRow?.NUMBER != null && CurrentRow?.NUMBER > 0)
-            {
-                CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_MOADIAN_SINGLE, this, Convert.ToDouble(CurrentRow.NUMBER));
-            }
-        }
 
     }
 }

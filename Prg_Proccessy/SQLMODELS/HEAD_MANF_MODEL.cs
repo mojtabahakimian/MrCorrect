@@ -8,6 +8,7 @@ namespace Prg_Proccessy.SQLMODELS
 
         public int FNUMB { get; set; }
         public string CODE { get; set; }
+        public string NAME_CODE { get; set; }
         public long? DATE_ACTIV { get; set; }
         public double IMBIBE_MANF { get; set; }
         public double IMBIBE_SAR { get; set; }

@@ -892,7 +892,11 @@ namespace Functions
             /// <summary>
             /// تغییر نام یا حذف کاربر
             /// </summary>
-            USER_CHANGE
+            USER_CHANGE,
+            /// <summary>
+            /// ایجاد فرمول ساخت
+            /// </summary>
+            WIN_HEAD_MANF_FORMULSAKHT
         }
         #endregion
 
@@ -909,6 +913,13 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+                case WinNameType.WIN_HEAD_MANF_FORMULSAKHT: /* ایجاد فرمول ساخت */
+                    CL_LMethods.OpenWindow(OWNERWIN, new WIN_HEAD_MANF(
+                                _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
+                                _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])
+                                )
+                    ); break;
+
                 case WinNameType.HEAD_SERCH_MAIN_F12: /* جستجو در گردش کالا عادی */ CL_LMethods.OpenWindow(OWNERWIN, new HEAD_SERCH_MAIN(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.SQLSTATEFORM_CRTL_M: /* گزارشات ساخته شده توسط کاربران */ CL_LMethods.OpenWindow(OWNERWIN, new SQLSTATEFORM(), isModalDialog: false, allowMultipleInstances: false); break;

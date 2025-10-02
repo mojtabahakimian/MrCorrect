@@ -382,6 +382,7 @@ namespace Wins.WinOther
             //حسابداری صنعتی
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست آمار تولید", WIN_NAME = CL_MenuManager.WinNameType.AMAR_TOLID });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست آمار مصرف مواد", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_DATE_AMMAS });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "ایجاد فرمول ساخت", WIN_NAME = CL_MenuManager.WinNameType.WIN_HEAD_MANF_FORMULSAKHT });
 
 
             //برنامه ریزی و تولید

@@ -375,7 +375,7 @@ namespace Prg_UI.Wins
 
             //new WIN_HEAD_MANF().Show();
             //new Window4().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_HEAD_MANF_FORMULSAKHT, this);
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "6250,6276");
 
