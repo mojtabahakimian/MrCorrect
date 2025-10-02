@@ -112,7 +112,7 @@
                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
                 CanUserResizeColumns="True"
                 CanUserDeleteRows="False" MouseRightButtonUp="DG_SUB_MouseRightButtonUp"
-                Margin="4,180,4,138" BorderThickness="1" CellEditEnding="DG_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_SUB_SelectionChanged" RowEditEnding="DG_SUB_RowEditEnding" PreviewKeyDown="DG_SUB_PreviewKeyDown" PreparingCellForEdit="DG_SUB_PreparingCellForEdit" BeginningEdit="DG_SUB_BeginningEdit" >
+                Margin="4,180,4,138" BorderThickness="1" CellEditEnding="DG_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_SUB_SelectionChanged" RowEditEnding="DG_SUB_RowEditEnding" PreviewKeyDown="DG_SUB_PreviewKeyDown" PreparingCellForEdit="DG_SUB_PreparingCellForEdit" BeginningEdit="DG_SUB_BeginningEdit" IsReadOnly="True" >
                 <DataGrid.Style>
                     <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                         <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>

@@ -632,7 +632,6 @@ namespace Wins.WinMenus.HESABDARI
             }
 
             //CL_LMethods.GetSearchedValueCustomer(comboBox, "paymentformorder_CUST_NO", default, dbms, I_AM_PAYORRDER);
-
             var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(CUST_NO, dbms);
             if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
             {

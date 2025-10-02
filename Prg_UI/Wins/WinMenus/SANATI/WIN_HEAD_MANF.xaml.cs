@@ -37,6 +37,7 @@ using Rpts;
 using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace Prg_UI.Wins.WinMenus.SANATI
 {
@@ -92,6 +93,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
             if (number_to_open != null)
             {
+                NUMBER_TO_OPEN = number_to_open;
                 FNUMB.Text = number_to_open.ToString();
                 FNUMB.UpdateLayout();
                 IsOpenedFromAutomation = _isAutomasion_;
@@ -225,6 +227,10 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 CODE.IsEnabled = ican;
 
                 // --- DataGrid Control ---
+                if (true)
+                {
+
+                }
                 DG_SUB.IsReadOnly = !ican;
             }
         }
@@ -261,7 +267,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 dbms,
                 x => x.FNUMB.ToString(), // property selector (used to find a record by its CODE)
                 $"SELECT * FROM HEAD_MANF {WhereCondition} ORDER BY FNUMB", //All Record of The Table
-              /*on navigation get ever record where*/ x => $"SELECT TOP 1 FNUMB, CODE, DATE_ACTIV, IMBIBE_MANF, IMBIBE_SAR, GHEYMAT, NAMES, N_KOL, NUMBER, TNUMBER, SA_HOUR, SA_NHOU, TOZIH, CRT, UID, ID FROM HEAD_MANF WHERE (NOT (CODE IS NULL)) AND FNUMB = {x.FNUMB} ", //On Change for One Record
+              /*on navigation get ever record where*/ x => $"SELECT TOP 1 FNUMB, CODE, DATE_ACTIV, IMBIBE_MANF, IMBIBE_SAR, GHEYMAT, NAMES, N_KOL, NUMBER, TNUMBER, SA_HOUR, SA_NHOU, TOZIH, CRT, UID, ID FROM HEAD_MANF WHERE FNUMB = {x.FNUMB} ", //On Change for One Record
             Convert.ToDouble(FNUMB.Text)
             );
 
@@ -291,7 +297,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
         }
         private void Form_Current()
         {
-            if (string.IsNullOrEmpty(CODE.SelectedValue?.ToStringNullSafe()))
+            if (_navigationManager.IsNewRecord || string.IsNullOrEmpty(CODE.SelectedValue?.ToStringNullSafe()))
             {
                 this.DG_SUB.IsReadOnly = true;
             }
@@ -301,7 +307,6 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             }
             this.AllowDeletions = false;
             this.AllowEdits = false;
-            this.DG_SUB.IsReadOnly = true;
         }
 
         private bool OnInsertRecord(HEAD_MANF_MODEL record)
@@ -1022,10 +1027,10 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                     using (var transaction = db.BeginTransaction(System.Data.IsolationLevel.Serializable))
                     {
                         //Fake Query for Lock Table
-                        db.Execute("UPDATE TOP(1) HEAD_MANF SET MOLAH = MOLAH", null, transaction);
+                        db.Execute("UPDATE TOP(1) HEAD_MANF SET TOZIH = TOZIH", null, transaction);
                         //Fake Query for Lock Table
 
-                        var rst_11 = db.Query<double?>($"SELECT Max(HEAD_MANF.NUMBER) AS MaxOfNUMBER FROM HEAD_MANF", null, transaction).FirstOrDefault();
+                        var rst_11 = db.Query<double?>($"SELECT Max(HEAD_MANF.FNUMB) AS MaxOfFNUMB FROM HEAD_MANF", null, transaction).FirstOrDefault();
                         if (rst_11 == 0 || ReferenceEquals(rst_11, null))
                         {
                             FNUMB.Text = "1";
@@ -1037,23 +1042,24 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                             FNUMB.UpdateLayout();
                         }
 
-                        const string sql = @"
+                        const string insertSql = @"
                             INSERT INTO dbo.HEAD_MANF (
                                 FNUMB, CODE, DATE_ACTIV, IMBIBE_MANF, IMBIBE_SAR, GHEYMAT, NAMES, 
-                                N_KOL, NUMBER, TNUMBER, SA_HOUR, SA_NHOU, TOZIH, CRT, UID
+                                N_KOL, NUMBER, TNUMBER, SA_HOUR, SA_NHOU, TOZIH, UID
                             ) VALUES (
-                                @FumbValue, @CodeValue, @DateActivValue, 0.0, 0.0, 0.0, NULL, 
-                                0, 0, 0, 0.0, 0, @TozihValue, GETDATE(), @UserIdValue
+                                @FnumValue, @CodeValue, @DateActivValue, 0.0, 0.0, 0.0, NULL, 
+                                NULL, NULL, NULL, 0.0, 0, @TozihValue, @UserIdValue
                             )";
                         var parameters = new
                         {
-                            FumbValue = int.Parse(FNUMB.Text),
+                            FnumValue = int.Parse(FNUMB.Text),
                             CodeValue = CODE.SelectedValue.ToString(),
                             DateActivValue = long.Parse(DATE_ACTIV.Text.ToRawTarikh()),
                             TozihValue = TOZIH.Text.Trim(),
                             UserIdValue = Baseknow.USERCOD
                         };
-                        db.Execute(sql, parameters, transaction);
+
+                        db.Execute(insertSql, parameters, transaction);
 
                         transaction.Commit();
                         db?.Close();
@@ -1810,14 +1816,17 @@ namespace Prg_UI.Wins.WinMenus.SANATI
         }
         private void BTN_FACTORHA_Click(object sender, RoutedEventArgs e)
         {
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FACTORS_LST, this, FTAG);
+            bool isWindowOpen = Application.Current.Windows.OfType<WIN_FOMULA_LST>().Any();
+            if (!isWindowOpen)
+            {
+                new WIN_FOMULA_LST().Show();
 
-            //if (NewRecord)
-            //{
-            //    this.Close();
-            //}
+                if (_navigationManager.IsNewRecord)
+                {
+                    this.Close();
+                }
+            }
         }
-
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             //ليست فرمولها و مواد
