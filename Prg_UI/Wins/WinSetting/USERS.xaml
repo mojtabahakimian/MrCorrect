@@ -1,0 +1,288 @@
+﻿<Window x:Class="Prg_UI.Wins.WinSetting.USERS"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        mc:Ignorable="d"
+        Background="{x:Null}"
+        AllowsTransparency="True"
+        WindowStyle="None"
+        FontFamily="{StaticResource IRANYEKAN}"
+        WindowStartupLocation="CenterScreen"
+        Title="تعریف کاربر جدید"
+        Height="691"
+        Width="1203"
+        MinHeight="480"
+        MinWidth="720"
+        Loaded="Window_Loaded"
+        ContentRendered="Window_ContentRendered"
+        PreviewKeyDown="Window_PreviewKeyDown">
+    <Window.Resources>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+    </Window.Resources>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+    </WindowChrome.WindowChrome>
+    <Grid x:Name="mygrid" Background="Transparent">
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Width="1" Height="1" Margin="0"/>
+
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}"
+                BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"
+                CornerRadius="10"
+                BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border x:Name="TitleDrawBar"
+                        Grid.Row="0"
+                        Style="{StaticResource BordG}"
+                        Background="{Binding Background, ElementName=GENERAL_RANG}"
+                        CornerRadius="10,10,0,0"
+                        VerticalAlignment="Top"
+                        MinHeight="38"
+                        MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                    <Grid>
+                        <Label x:Name="LABEL_HEADER"
+                               Content="تعریف کاربر جدید"
+                               Padding="21,10,10,10"
+                               Foreground="White"
+                               FontSize="14"/>
+                        <Button x:Name="Btn_Close"
+                                Margin="0,10,13,0"
+                                BorderBrush="{x:Null}"
+                                Background="Transparent"
+                                FontSize="12"
+                                Height="19"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Right"
+                                Click="Btn_Close_Click"
+                                Foreground="White"
+                                Width="24"
+                                Padding="1,-2,1,1"
+                                IsTabStop="False">
+                            <materialDesign:PackIcon Kind="WindowClose" Height="17" Width="21" Foreground="White"/>
+                        </Button>
+                        <Button x:Name="Btn_Minimize"
+                                Click="Btn_Minimize_Click"
+                                Margin="0,10,70,0"
+                                BorderBrush="{x:Null}"
+                                Background="Transparent"
+                                FontSize="12"
+                                Height="19"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Right"
+                                Foreground="White"
+                                Width="24"
+                                Padding="1,-2,1,1"
+                                IsTabStop="False">
+                            <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White"/>
+                        </Button>
+                        <Button x:Name="Btn_Max"
+                                Click="Btn_Max_Click"
+                                Margin="0,10,41,0"
+                                BorderBrush="{x:Null}"
+                                Background="Transparent"
+                                FontSize="12"
+                                Height="19"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Right"
+                                Foreground="White"
+                                Width="24"
+                                Padding="1,-2,1,1"
+                                IsTabStop="False">
+                            <materialDesign:PackIcon Kind="WindowMaximize" Height="17" Width="21" Foreground="White"/>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <Popup Grid.Row="0"
+                       x:Name="Pop1"
+                       AllowsTransparency="True"
+                       PopupAnimation="Fade"
+                       Placement="Relative"
+                       Focusable="False"
+                       PlacementTarget="{Binding ElementName=TitleDrawBar}"
+                       StaysOpen="True">
+                    <StackPanel Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
+                        <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
+                            <TextBox Padding="10"
+                                     IsReadOnly="True"
+                                     x:Name="Pop1Text1"
+                                     VerticalAlignment="Center"
+                                     Background="{x:Null}"
+                                     Text="محل نمایش اعلان های سیستم"
+                                     VerticalContentAlignment="Center"
+                                     HorizontalContentAlignment="Center"
+                                     BorderBrush="{x:Null}"
+                                     SelectionBrush="{x:Null}"
+                                     HorizontalAlignment="Center"
+                                     Foreground="White"/>
+                        </Border>
+                    </StackPanel>
+                </Popup>
+
+                <Grid Grid.Row="1" Margin="20" FlowDirection="RightToLeft">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="2*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- User Information Panel -->
+                    <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="5" Margin="0,0,20,0">
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="نام کاربر" Margin="0,0,0,5"/>
+                            <TextBox x:Name="UserNameTextBox"
+                                     Style="{StaticResource FuzzyOut}"
+                                     Padding="5"
+                                     Height="32"
+                                     HorizontalContentAlignment="Right"
+                                     TabIndex="0"/>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="گروه کاربری" Margin="0,0,0,5"/>
+                            <ComboBox x:Name="GroupCombo"
+                                      ItemsSource="{Binding GroupItems}"
+                                      SelectedValuePath="ID"
+                                      DisplayMemberPath="NAME"
+                                      SelectedIndex="0"
+                                      Style="{StaticResource FuzzyOutComboBox}"
+                                      Padding="5"
+                                      Height="32"
+                                      IsEditable="False"
+                                      TabIndex="1"/>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="رمز عبور" Margin="0,0,0,5"/>
+                            <PasswordBox x:Name="PasswordBox1"
+                                         Style="{StaticResource FuzzyOutPasswordBox}"
+                                         Padding="5"
+                                         Height="32"
+                                         TabIndex="2"/>
+                        </StackPanel>
+
+
+
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="تکرار رمز عبور" Margin="0,0,0,5"/>
+                            <PasswordBox x:Name="PasswordBox2"
+                                         Style="{StaticResource FuzzyOutPasswordBox}"
+                                         Padding="5"
+                                         Height="32"
+                                         TabIndex="3"/>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="معین معادل" Margin="0,0,0,5"/>
+                            <ComboBox x:Name="HesCombo"
+                                      ItemsSource="{Binding HesabItems}"
+                                      SelectedValuePath="hes"
+                                      DisplayMemberPath="DisplayName"
+                                      IsEditable="True"
+                                      IsTextSearchEnabled="True"
+                                      Style="{StaticResource FuzzyOutComboBox}"
+                                      Padding="5"
+                                      Height="32"
+                                      StaysOpenOnEdit="True"
+                                      SelectionChanged="HesCombo_SelectionChanged"
+                                      TabIndex="4"/>
+                        </StackPanel>
+
+                        <StackPanel>
+                            <TextBlock Text="کد معین" Margin="0,0,0,5"/>
+                            <ComboBox x:Name="HesCodeCombo"
+                                      ItemsSource="{Binding HesabItems}"
+                                      SelectedValuePath="hes"
+                                      DisplayMemberPath="hes"
+                                      IsEditable="True"
+                                      Style="{StaticResource FuzzyOutComboBox}"
+                                      Padding="5"
+                                      Height="32"
+                                      StaysOpenOnEdit="True"
+                                      SelectionChanged="HesCodeCombo_SelectionChanged"
+                                      LostFocus="HesCodeCombo_LostFocus"
+                                      TabIndex="5"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Signature Panel -->
+                    <Border Grid.Row="0"
+                            Grid.Column="1"
+                            Grid.RowSpan="5"
+                            BorderBrush="{StaticResource MaterialDesignDivider}">
+                        <Border.BorderThickness>
+                            <Thickness>1</Thickness>
+                        </Border.BorderThickness>
+                        <Border CornerRadius="6"
+                                Padding="10"
+                                Background="#FFF8F8F8">
+                            <Grid>
+                                <Image x:Name="SignatureImage"
+                                       Stretch="Uniform"
+                                       SnapsToDevicePixels="True"
+                                       Visibility="Collapsed"/>
+                                <TextBlock x:Name="SignaturePlaceholder"
+                                           Text="امضایی انتخاب نشده است"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Foreground="Gray"/>
+                            </Grid>
+                        </Border>
+                    </Border>
+
+                    <StackPanel Grid.Row="5"
+                                Grid.Column="1"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0,15,0,0"
+                                FlowDirection="RightToLeft">
+                        <Button x:Name="CaptureSignatureButton"
+                                Content="دریافت از فرم امضا"
+                                Margin="5"
+                                Style="{StaticResource MaterialDesignOutlinedSecondaryButton}"
+                                Click="CaptureSignatureButton_Click"
+                                TabIndex="6"/>
+                        <Button x:Name="UploadSignatureButton"
+                                Content="انتخاب تصویر"
+                                Margin="5"
+                                Style="{StaticResource MaterialDesignOutlinedSecondaryButton}"
+                                Click="UploadSignatureButton_Click"
+                                TabIndex="7"/>
+                        <Button x:Name="ClearSignatureButton"
+                                Content="حذف امضا"
+                                Margin="5"
+                                Style="{StaticResource MaterialDesignOutlinedSecondaryButton}"
+                                Click="ClearSignatureButton_Click"
+                                TabIndex="8"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                        <Button x:Name="ConfirmButton"
+                                Content="تایید"
+                                Width="120"
+                                Foreground="#DDFFFFFF"
+                                Margin="10,0"
+                                Style="{StaticResource GerdC}"
+                                Click="ConfirmButton_Click"
+                                TabIndex="9"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

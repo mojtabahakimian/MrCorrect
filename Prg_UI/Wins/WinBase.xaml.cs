@@ -1309,5 +1309,10 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_HEAD_MANF_FORMULSAKHT, default);
         }
+
+        private void Button_Click_127(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.USERS, default);
+        }
     }
 }

@@ -393,6 +393,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تغییر رمز عبور", WIN_NAME = CL_MenuManager.WinNameType.NEWPASSWORD });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تغییر نام یا حذف کاربر", WIN_NAME = CL_MenuManager.WinNameType.USER_CHANGE });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "پیشفرض واحد و شیفت", WIN_NAME = CL_MenuManager.WinNameType.DEFAULT });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف کاربر جدید", WIN_NAME = CL_MenuManager.WinNameType.USERS });
 
 
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());
