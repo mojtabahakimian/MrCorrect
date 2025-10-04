@@ -896,7 +896,11 @@ namespace Functions
             /// <summary>
             /// ایجاد فرمول ساخت
             /// </summary>
-            WIN_HEAD_MANF_FORMULSAKHT
+            WIN_HEAD_MANF_FORMULSAKHT,
+            /// <summary>
+            /// تعریف کاربر جدید
+            /// </summary>
+            USERS
         }
         #endregion
 
@@ -926,6 +930,10 @@ namespace Functions
 
                 case WinNameType.HEAD_SERCH_MAIN_ADVANC_F12: /*  جستجو در گردش کالا های پیشرفته | F12 پیشرفته */ CL_LMethods.OpenWindow(OWNERWIN, new HEAD_SERCH_MAIN_ADVANC(), isModalDialog: false, allowMultipleInstances: false); break;
                 //Mojtaba}
+
+                case WinNameType.USERS: //تغییر نام یا حذف کاربر
+                    CL_LMethods.OpenWindow(OWNERWIN, new USERS());
+                    break;
 
                 case WinNameType.USER_CHANGE: //تغییر نام یا حذف کاربر
                     CL_LMethods.OpenWindow(OWNERWIN, new USER_CHANGE());
