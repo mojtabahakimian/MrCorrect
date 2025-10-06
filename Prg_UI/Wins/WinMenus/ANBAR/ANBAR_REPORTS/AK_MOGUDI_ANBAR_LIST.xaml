@@ -167,6 +167,22 @@
             </syncfusion:SfDataGrid.Resources>
 
             <syncfusion:SfDataGrid.Columns>
+
+                <syncfusion:GridTemplateColumn HeaderText="کارت انبار کالا" x:Name="ISEND_COLUMN" Width="110" MappingName="IsButtony" IsHidden="True" AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
+                    <syncfusion:GridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button x:Name="BTN_ISEND" IsTabStop="False" Click="BTN_ISEND_Click" Tag="{Binding}"
+                                    materialDesign:ButtonAssist.CornerRadius="2"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                                    HorizontalContentAlignment="Center">
+                                <materialDesign:PackIcon Kind="Goal"/>
+                            </Button>
+
+                        </DataTemplate>
+                    </syncfusion:GridTemplateColumn.CellTemplate>
+                </syncfusion:GridTemplateColumn>
+
                 <syncfusion:GridTextColumn HeaderText="انبار" MappingName="ANBARN" Width="200"/>
                 <syncfusion:GridTextColumn HeaderText="کد انبار" MappingName="ANBAR" Width="100"/>
                 <syncfusion:GridTextColumn HeaderText="کدکالا" MappingName="CODE" Width="100" />
