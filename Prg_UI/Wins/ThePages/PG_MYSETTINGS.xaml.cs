@@ -35,7 +35,7 @@ namespace Wins.ThePages
 
         private void WrapPanel_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_SAZMAN, null);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_SAZMAN_MOSHAKHASAT, null);
         }
 
         private void Image_PreviewMouseDown_1(object sender, MouseButtonEventArgs e)
@@ -63,6 +63,11 @@ namespace Wins.ThePages
         private void Image_PreviewMouseDown_4(object sender, MouseButtonEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.USER_CHANGE, null);
+        }
+
+        private void WrapPanel_PreviewMouseDown_1(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_About, default);
         }
     }
 }

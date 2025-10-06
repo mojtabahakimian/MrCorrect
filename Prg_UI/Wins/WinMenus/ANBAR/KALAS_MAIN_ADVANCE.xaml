@@ -353,8 +353,8 @@
                     x:Name="DEPATMAN" IsHidden="True"
                     HeaderText="واحد | دپارتمان"
                     MappingName="DEPATMAN"
-                    SelectedValuePath="DEPNAME"
-                    DisplayMemberPath="DEPATMAN"/>
+                    SelectedValuePath="DEPATMAN"
+                    DisplayMemberPath="DEPNAME"/>
 
                     <!--<syncfusion:GridTextColumn HeaderText="شیفت" MappingName="SHNAME" TextAlignment="Left"  IsHidden="True" />-->
                     <syncfusion:GridComboBoxColumn 

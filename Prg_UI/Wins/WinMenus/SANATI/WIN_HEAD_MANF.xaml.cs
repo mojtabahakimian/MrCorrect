@@ -1411,8 +1411,6 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
                     if (string.IsNullOrEmpty(ENTERED_VALUE_ROW?.Trim()?.ToStringNullSafe()))
                     {
-                        CURRENT_ITEMS_ROW.CODE = WAS_ROW_ITEM.CODE;
-                        CURRENT_ITEMS_ROW.NAME_CODE = WAS_ROW_ITEM.NAME_CODE;
                         DG_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
                         return;
                     }

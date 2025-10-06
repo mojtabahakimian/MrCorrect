@@ -609,9 +609,9 @@ namespace Functions
             F_MENU_CHEK_CVP,
 
             /// <summary>
-            /// سازمان
+            /// مشصخات سیستم | سازمان
             /// </summary>
-            WIN_SAZMAN,
+            WIN_SAZMAN_MOSHAKHASAT,
             /// <summary>
             /// برگه ورود کالای ساخته شده
             /// </summary>
@@ -896,7 +896,11 @@ namespace Functions
             /// <summary>
             /// ایجاد فرمول ساخت
             /// </summary>
-            WIN_HEAD_MANF_FORMULSAKHT
+            WIN_HEAD_MANF_FORMULSAKHT,
+            /// <summary>
+            /// درباره تهیه کنندگان
+            /// </summary>
+            WIN_About,
         }
         #endregion
 
@@ -913,6 +917,9 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+
+                case WinNameType.WIN_About: /* درباره تهیه کنندگان */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_About(), isModalDialog: false, allowMultipleInstances: false); break;
+
                 case WinNameType.WIN_HEAD_MANF_FORMULSAKHT: /* ایجاد فرمول ساخت */
                     CL_LMethods.OpenWindow(OWNERWIN, new WIN_HEAD_MANF(
                                 _PARAMETERS_.Length > 0 ? (double?)_PARAMETERS_[0] : null,
@@ -1178,7 +1185,7 @@ namespace Functions
                                 );
                     break;
 
-                case WinNameType.WIN_SAZMAN: //سازمان
+                case WinNameType.WIN_SAZMAN_MOSHAKHASAT: //سازمان
                     CL_LMethods.OpenWindow(OWNERWIN, new WIN_SAZMAN(), isModalDialog: false, allowMultipleInstances: false);
                     break;
 

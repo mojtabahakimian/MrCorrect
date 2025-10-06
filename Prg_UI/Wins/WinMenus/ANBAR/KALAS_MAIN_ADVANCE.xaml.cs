@@ -26,6 +26,7 @@ using System.Threading;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_SERCH_MAIN_ADVANC;
 using Prg_Proccessy.MODELS;
+using System.ComponentModel;
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
 {
@@ -109,6 +110,19 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         //public List<CMB3>? MM_Data { get; set; }
         #endregion
 
+        #region LOCALMODEL
+        public class DEPARTEMAN_MODEL : INotifyPropertyChanged, ICloneable
+        {
+            public object Clone() { return this.MemberwiseClone(); }
+            public event PropertyChangedEventHandler PropertyChanged;
+            private void OnPropertyChanged(string propertyName) { PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName)); }
+            private int? _depatman;
+            public int? DEPATMAN { get => _depatman; set { if (_depatman == value) return; _depatman = value; OnPropertyChanged("DEPATMAN"); } }
+            private string? _depname;
+            public string? DEPNAME { get => _depname; set { if (_depname == value) return; _depname = value; OnPropertyChanged("DEPNAME"); } }
+        }
+        #endregion
+
         public bool isAdvancedF12 { get; set; } = true;
 
         private void Window_ContentRendered(object sender, EventArgs e)
@@ -173,6 +187,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             //Process Prc = ProcLoader.Start();
+            FILL_ALL_COMBOBOXES();
 
             if (isAdvancedF12)
             {
@@ -217,7 +232,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             CL_LMethods.DoWriteMyLog(SqlQueryPassed, default);
 
             var MasterHead = dbms.DoGetDataSQL<KALAS>(SqlQueryPassed).ToList();
-
             foreach (var item in MasterHead)
             {
                 FACTOR_DATA.Add(item);
@@ -225,7 +239,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             //SYNCFUSION_DG.ColumnSizer = GridLengthUnitType.Auto;
 
-            FILL_ALL_COMBOBOXES();
 
             if (isSummed)
             {
@@ -291,9 +304,9 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             //    }
             //}
             //USER_NAME.ItemsSource = RST_PERSONEL;
-
+            
             //واحد فروش
-            DEPATMAN.ItemsSource = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
+            DEPATMAN.ItemsSource = dbms.DoGetDataSQL<DEPARTEMAN_MODEL>("SELECT DEPATMAN,DEPNAME FROM dbo.DEPART ORDER BY DEPNAME").ToList(); //Custom_DEPART
 
             //شیفت
             SHIFT_ID.ItemsSource = dbms.DoGetDataSQL<TheSHIFT1>("SELECT SHIFT_ID, SHNAME FROM SHIFT ORDER BY SHIFT.SHNAME").ToList();

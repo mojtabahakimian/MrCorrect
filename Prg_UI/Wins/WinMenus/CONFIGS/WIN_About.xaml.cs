@@ -1,51 +1,33 @@
-﻿using Interfaces;
+﻿using Functions;
 using MaterialDesignThemes.Wpf;
-using Microsoft.Data.SqlClient;
 using Prg_Proccessy.FUNCTIONS;
-using Prg_Proccessy.MODELS;
-using Prg_Proccessy.SQLMODELS;
+using Prg_Proccessy.Generaly;
 using Prg_SendInvoice.CNNMANAGER;
+using Prg_SendInvoice.SQLMODELS;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
-using Syncfusion.Data.Extensions;
+using Syncfusion.Windows.Shared;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Threading;
+using Wins.WinSetting;
 
-namespace Wins.WinSamplesEmpty
+namespace Prg_UI.Wins.WinMenus.CONFIGS
 {
-    public partial class Window4 : Window
+    public partial class WIN_About : Window
     {
-        public Window4(double? number_to_open = null)
+        public WIN_About()
         {
             InitializeComponent();
 
             this.DataContext = this;
-
-            if (number_to_open != null)
-            {
-                NUMBER_TO_OPEN = (double)number_to_open;
-            }
         }
-
-        #region LOCALMODEL
-        public class HESAB_CMB_MODEL
-        {
-            public string? hes { get; set; }
-            public string? NAME { get; set; }
-            public string? Expr1 { get; set; }
-        }
-        #endregion
 
         #region Header Window Begin
         //Header Window Begin
@@ -92,13 +74,12 @@ namespace Wins.WinSamplesEmpty
         private readonly CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
         UniversControl universControl = new UniversControl();
-        //universControl.PopNotifyShowUp("اطلاعات با موفقیت ذخیره شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+
+        private SAZMAN _sazmanData; // برای نگهداری اطلاعات خوانده شده
 
         public bool NowIsReady { get; private set; }
         public double? NUMBER_TO_OPEN { get; set; }
         public bool ChangeIsHappend { get; private set; }
-
-
 
         private bool _bl;
         public bool AllowDeletions
@@ -120,7 +101,8 @@ namespace Wins.WinSamplesEmpty
                 else
                 {
                     // Defer the operation until the window is fully rendered
-                    this.Dispatcher.BeginInvoke(new Action(() => {
+                    this.Dispatcher.BeginInvoke(new Action(() =>
+                    {
                         // Try again after the window is fully initialized
                         IntPtr newHandle = new WindowInteropHelper(this).Handle;
                         if (newHandle != IntPtr.Zero)
@@ -139,26 +121,28 @@ namespace Wins.WinSamplesEmpty
             {
                 ican = value;
 
-                //TextBox.IsReadOnly = !ican;
-                //ComboBox.IsEnabled = ican;
+                bool isReadOnly = !ican;
+                BTN_SAVE.IsEnabled = ican;
+
+                UNIVERSITY_CO.IsReadOnly = isReadOnly;
+                NAME.IsReadOnly = isReadOnly;
+                IYALAT.IsReadOnly = isReadOnly;
+                CITY.IsReadOnly = isReadOnly;
+                ECODE.IsReadOnly = isReadOnly;
+                PCODE.IsReadOnly = isReadOnly;
+                MCODEM.IsReadOnly = isReadOnly;
+                MANAGER.IsReadOnly = isReadOnly;
+                MOAVEN.IsReadOnly = isReadOnly;
+                ZIHESAB.IsReadOnly = isReadOnly;
+                AMINAMVAL.IsReadOnly = isReadOnly;
+
+                SERVERNAM.IsReadOnly = isReadOnly;
+                Whether.IsReadOnly = isReadOnly;
             }
         }
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
-        }
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
-
-            //CL_HESABDARI.SETSECURITY(this.GetType().Name, "", new WindowInteropHelper(this).Handle, this.GetType().Name);
-            //if (!this.IsLoaded)
-            //{
-            //    this.Close();
-            //    return;
-            //}
-
-            FILL_ALL_COMBOBOXES();
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -197,43 +181,127 @@ namespace Wins.WinSamplesEmpty
                 }
             }
         }
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
+
+            VersionLabel.Text = CL_VERSION.MrCorrectFullVersion;
+
+            FILL_ALL_COMBOBOXES();
+
+            LoadSazmanData();
+
+            AllowEdits = false;
+
+        }
+        private void LoadSazmanData()
+        {
+            var result = dbms.DoGetDataSQL<SAZMAN>("SELECT TOP 1 * FROM SAZMAN");
+            _sazmanData = result.FirstOrDefault();
+            if (_sazmanData != null)
+            {
+                UNIVERSITY_CO.Text = _sazmanData.UNIVERSITY_CO.ToString();
+                NAME.Text = _sazmanData.NAME;
+                IYALAT.Text = _sazmanData.IYALAT;
+                CITY.Text = _sazmanData.CITY;
+                ECODE.Text = _sazmanData.ECODE;
+                PCODE.Text = _sazmanData.PCODE;
+                MCODEM.Text = _sazmanData.MCODEM;
+                MANAGER.Text = _sazmanData.MANAGER;
+                MOAVEN.Text = _sazmanData.MOAVEN;
+                ZIHESAB.Text = _sazmanData.ZIHESAB;
+                AMINAMVAL.Text = _sazmanData.AMINAMVAL;
+                SERVERNAM.Text = _sazmanData.SERVERNAM;
+                Whether.Text = _sazmanData.Whether;
+            }
+        }
         private void FILL_ALL_COMBOBOXES()
         {
             //COMBOHESAB.ItemsSource = dbms.DoGetDataSQL<HESAB_CMB_MODEL>($"SELECT hes, NAME FROM CUST_HESAB ORDER BY hes").ToList();
         }
 
-        private bool HeaderIsValid(bool _DisplayErrors = true)
+        private void BTN_ESLAH_Click(object sender, RoutedEventArgs e)
         {
-            List<MsgModel> ErrosMessages = new List<MsgModel>();
-
-            if (ErrosMessages.Any())
-            {
-                if (_DisplayErrors)
-                {
-                    ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct().Select(message => new MsgModel { MessageText_U = message }).ToList();
-                    new MsgListwin(false, ErrosMessages).ShowDialog();
-                }
-
-                return false;
-            }
-            return true;
+            AllowEdits = true;
         }
-
 
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e)
         {
-            //if (!BTN_SAVE.IsEnabled) { return; }
+            if (!AllowEdits || _sazmanData == null) return;
+
+            string sql = @"UPDATE SAZMAN SET 
+                UNIVERSITY_CO = @UNIVERSITY_CO, NAME = @NAME, IYALAT = @IYALAT, CITY = @CITY,
+                ECODE = @ECODE, PCODE = @PCODE, MCODEM = @MCODEM, MANAGER = @MANAGER,SERVERNAM=@SERVERNAM,Whether=@Whether
+                MOAVEN = @MOAVEN, ZIHESAB = @ZIHESAB, AMINAMVAL = @AMINAMVAL";
+            var parameters = new
+            {
+                UNIVERSITY_CO = UNIVERSITY_CO.Text,
+                NAME = NAME.Text,
+                IYALAT = IYALAT.Text,
+                CITY = CITY.Text,
+                ECODE = ECODE.Text,
+                PCODE = PCODE.Text,
+                MCODEM = MCODEM.Text,
+                MANAGER = MANAGER.Text,
+                MOAVEN = MOAVEN.Text,
+                ZIHESAB = ZIHESAB.Text,
+                AMINAMVAL = AMINAMVAL.Text,
+                SERVERNAM = SERVERNAM.Text,
+                Whether = Whether.Text,
+            };
+            try
+            {
+                dbms.DoExecuteSQL(sql, parameters);
+                new Msgwin(false, "تغییرات با موفقیت ذخیره شد");
+                AllowEdits = false;
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, "خطا در ذخیره اطلاعات");
+                return;
+            }
 
             ChangeIsHappend = false;
         }
-        private void ESLAH_Click(object sender, RoutedEventArgs e)
-        {
-            //if (!ESLAH.IsEnabled) { return; }
-        }
-        private void BTN_DELETE_Click(object sender, RoutedEventArgs e)
+
+        private void Command41_Click(object sender, RoutedEventArgs e)
         {
 
         }
 
+        private void Command39_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Command43_Click(object sender, RoutedEventArgs e)
+        {
+            //اصلاح کد پیج
+            dbms.OpenStoredProcedure("CODEPAGE");
+            dbms.OpenStoredProcedure("CODEPAGE2");
+            new Msgwin(false, "پروسیجرهای اصلاح کدپیج اجرا شدند.").Show();
+        }
+
+        private void Command38_Click(object sender, RoutedEventArgs e)
+        {
+            CL_LOCKWATCH Lockwatch = new CL_LOCKWATCH();
+            if (Lockwatch.GoCheck() == false)
+            {
+                //
+            }
+        }
+
+        private void Command42_Click(object sender, RoutedEventArgs e)
+        {
+            //تبدیل 1400
+        }
+
+        private void SERVERNAM_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(SERVERNAM.Text.Trim()))
+            {
+                SERVERNAM.Text = _sazmanData.SERVERNAM;
+            }
+        }
     }
 }

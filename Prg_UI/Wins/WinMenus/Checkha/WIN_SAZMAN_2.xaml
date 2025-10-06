@@ -1,15 +1,15 @@
-﻿<Window
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.Checkha.WIN_SAZMAN_2"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Wins.WinSamplesEmpty"
-        mc:Ignorable="d" x:Class="Wins.WinSamplesEmpty.Window4"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.Checkha"
+        mc:Ignorable="d"
         Title=""
         xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        Height="600" Width="800"
+        Height="400" Width="600"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         MinHeight="400"
         FontFamily="{StaticResource IRANYEKAN}"
@@ -36,7 +36,7 @@
             <Border  x:Name="TitleDrawBar" Style="{StaticResource BordG}"  Background="{Binding ElementName=GENERAL_RANG, Path=Background}"  CornerRadius="10,10,0,0" Margin="-9,-9,-9,0"  Height="38"  VerticalAlignment="Top" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
                 <Grid>
                     <!-- Window title -->
-                    <Label x:Name="LABEL_HEADER" Content="عنوان این پنجره" Padding="17,8,10,10" Foreground="White" Margin="0,0,110,0" VerticalAlignment="Center"/>
+                    <Label x:Name="LABEL_HEADER" Content="ادامه مشخصات حقوق" Padding="17,8,10,10" Foreground="White" Margin="0,0,110,0" VerticalAlignment="Center"/>
                     <!-- Window control buttons -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,13,0">
                         <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" Height="24" Padding="0,0,0,-1" IsTabStop="False" ToolTip="Minimize">
@@ -60,35 +60,47 @@
         </Popup>
 
         <!-- Content area -->
-        <Grid Margin="0,38,0,0">
-            <Button x:Name="BTN_SAVE" Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,43,131,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100" Click="BTN_SAVE_Click" />
-            <Button x:Name="ESLAH"  Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,43,236,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Right" Width="84" Click="ESLAH_Click" />
-            <Button x:Name="BTN_DELETE"  Content="حذف" Tag="hazfer" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,43,326,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Right" Width="84" Click="BTN_DELETE_Click" />
-            <Label Content="کد کالا:" HorizontalAlignment="Right" Margin="0,48,10,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
-            <TextBox Text="" Height="30" Margin="10,0,5,5"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible" MaxLength="48" />
-            <CNC:NumericTextBox DoesAcceptDouble="False" RestoreLastValidValue="False" LastValueShouldZero="False" Text="" Height="30" Margin="662,47,0,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="63"/>
-            <ComboBox x:Name="COMBOHESAB" 
-                      Text="{Binding Path=SelectedItem.hes, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
-                      SelectedValuePath="hes"
-                      TextSearch.TextPath="NAME"
-                      Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="128,119,272,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding NAME}" TextAlignment="Justify" MinWidth="200" Width="Auto" />
-                            <TextBlock Text="{Binding hes}" TextAlignment="Center" MinWidth="70"  Width="Auto" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-                <ComboBox.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
-                    </ItemsPanelTemplate>
-                </ComboBox.ItemsPanel>
-            </ComboBox>
-        
-            <xctk:MaskedTextBox Style="{StaticResource FuzzyOut}" Padding="3" Mask="0000/00/00" Height="30" Margin="0,119,82,0" VerticalAlignment="Top" BorderThickness="1" FontSize="12" HorizontalAlignment="Right" Width="88"/>
-            <Label Content="حساب کامل :" HorizontalAlignment="Right" Margin="0,120,196,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
+        <Grid Margin="0,38,0,0" FlowDirection="RightToLeft">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <GroupBox Header="برچسب فيلدها در حقوق" Style="{x:Null}" Grid.Row="0" Margin="10">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Content="ساير 1:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" />
+                    <TextBox x:Name="lECOL1" Style="{StaticResource FuzzyOut}" Padding="3" Grid.Row="0" MaxLength="50" Grid.Column="1" Margin="5" />
+
+                    <Label Content="ساير 2:" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" />
+                    <TextBox x:Name="lECOL2" Style="{StaticResource FuzzyOut}" Padding="3" Grid.Row="1" MaxLength="50" Grid.Column="1" Margin="5" />
+
+                    <Label Content="ساير3:" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" />
+                    <TextBox x:Name="lECOL3" Style="{StaticResource FuzzyOut}" Padding="3" Grid.Row="2" MaxLength="50" Grid.Column="1" Margin="5" />
+
+                    <Label Content="ساير4:" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" />
+                    <TextBox x:Name="lECOL4" Style="{StaticResource FuzzyOut}" Padding="3" Grid.Row="3" MaxLength="50" Grid.Column="1" Margin="5" />
+
+                    <Label Content="ساير كسورات 1:" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" />
+                    <TextBox x:Name="lKCOL1" Style="{StaticResource FuzzyOut}" Padding="3" Grid.Row="4" MaxLength="50" Grid.Column="1" Margin="5" />
+                </Grid>
+            </GroupBox>
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="5">
+                <Button x:Name="BTN_SAVE" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF"  Content="ذخيره و خروج" Margin="5" Padding="20,5" Click="BTN_SAVE_Click" />
+                <Button x:Name="BtnCancel" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF"  Content="انصراف" Margin="5" Padding="20,5" IsCancel="True" Click="BtnCancel_Click" />
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

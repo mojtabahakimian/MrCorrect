@@ -16,7 +16,7 @@
         AllowDrop="True" WindowStyle="None"
         FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
-        d:Width="5000"
+        d:Width="2000"
         Title="تعیین سطح دسترسی" Height="600" Width="978" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">

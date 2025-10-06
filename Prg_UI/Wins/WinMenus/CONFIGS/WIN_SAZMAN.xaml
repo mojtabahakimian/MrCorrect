@@ -17,13 +17,39 @@
         AllowDrop="True" WindowStyle="None"
         FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
-        Height="540" Width="800" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+        Height="780" Width="1445" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
 
+        <!-- Changing Enabled false style { -->
+        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="100"/>
+                    <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="100"/>
+                    <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="RadioButton" BasedOn="{StaticResource MaterialDesignRadioButton}">
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="100"/>
+                    <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <!-- Changing Enabled false style } -->
 
         <Style x:Key="CustomOutlinedPasswordBo2x" TargetType="PasswordBox" BasedOn="{StaticResource MaterialDesignOutlinedPasswordBox}">
             <!-- Retain all the original setters from MaterialDesignOutlinedPasswordBox -->
@@ -34,6 +60,39 @@
             <Setter Property="Margin" Value="163,49,317,0"/>
         </Style>
 
+
+        <Style TargetType="{x:Type TabControl}" BasedOn="{StaticResource MaterialDesignTabControl}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid KeyboardNavigation.TabNavigation="Local">
+                            <Grid.RowDefinitions>
+                                <!-- Row for the tab headers -->
+                                <RowDefinition Height="Auto"/>
+                                <!-- Row for the tab content -->
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <!-- Wrap the TabPanel inside a ScrollViewer -->
+                            <ScrollViewer Grid.Row="0"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Disabled"
+                              CanContentScroll="True">
+                                <TabPanel x:Name="HeaderPanel"
+                              IsItemsHost="True"
+                              Margin="2,2,2,0"
+                              Background="Transparent"/>
+                            </ScrollViewer>
+                            <!-- Content presenter for the selected tab content -->
+                            <ContentPresenter x:Name="PART_SelectedContentHost"
+                                  Margin="{TemplateBinding Padding}"
+                                  ContentSource="SelectedContent"
+                                  Focusable="False"
+                                  Grid.Row="1"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
@@ -67,8 +126,8 @@
         <!--HEADER↑-->
 
         <!--Start.......................................................................................-->
-        <TabControl Margin="10,46,10,10">
-            <TabItem Header="عمومی" IsSelected="True">
+        <TabControl Margin="10,46,10,10" materialDesign:TransitionAssist.DisableTransitions="True">
+            <TabItem Header="عمومی" >
                 <Grid>
                     <Label Content="متن بالای فاكتور:" FlowDirection="RightToLeft" HorizontalAlignment="Right" Margin="0,10,8,0" VerticalAlignment="Top" Width="auto"/>
                     <TextBox x:Name="WIDTH_D" Height="30" Margin="10,10,117,0" Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top"  Visibility="Visible" MaxLength="200" FlowDirection="RightToLeft" />
@@ -97,27 +156,18 @@
                     <Button x:Name="BTN_MORE" Content="تنظيمات بيشتر"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="100" Click="BTN_MORE_Click" Margin="10,0,0,98" />
                     <TextBox x:Name="OPTIONSS" Height="30" Margin="125,0,0,100" Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Bottom"  Visibility="Visible" MaxLength="48" FlowDirection="RightToLeft" TextAlignment="Center" IsReadOnly="True" HorizontalAlignment="Left" Width="311" />
                     <Button x:Name="BTN_SAVE_G" Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="115" Click="BTN_SAVE_Click" Margin="0,0,8,10" />
-                    <Button x:Name="BTN_ESLAH_G" Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="115" Click="BTN_ESLAH_Click" Margin="0,0,168,10" />
+                    <Button x:Name="BTN_ESLAH_G" Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="100" Click="BTN_ESLAH_Click" Margin="0,0,140,10" />
+
 
                 </Grid>
             </TabItem>
 
-            <!--<TabItem Header="اسناد و حساب">
-                <Grid>
-                    <Label Content="متن بالای فاكتور:" FlowDirection="RightToLeft" HorizontalAlignment="Right" Margin="0,10,8,0" VerticalAlignment="Top" Width="auto"/>
-                    <TextBox Height="30" Margin="10,10,117,0" Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top"  Visibility="Visible" MaxLength="200" FlowDirection="RightToLeft" />
-
-                    <Button Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="115" Click="BTN_SAVE_Click" Margin="0,0,8,10" />
-                    <Button Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="115" Click="BTN_ESLAH_Click" Margin="0,0,168,10" />
-                </Grid>
-            </TabItem>-->
-
             <TabItem Header="اسناد و حساب">
                 <Grid>
-                    <GroupBox Header="اشخاص مشخص شده  در حسابها" Style="{x:Null}" FlowDirection="RightToLeft" Margin="299,20,275,0" Height="91" VerticalAlignment="Top">
+                    <GroupBox x:Name="GRP_PERSON" Header="اشخاص مشخص شده در حسابها" Style="{x:Null}" FlowDirection="RightToLeft" Margin="299,20,275,0" Height="91" VerticalAlignment="Top">
                         <UniformGrid Margin="5" Rows="2" Columns="1">
-                            <RadioButton GroupName="HH" Content="نمايش داده شوند" IsChecked="True"/>
-                            <RadioButton GroupName="HH" Content="نمايش داده نشوند"/>
+                            <RadioButton GroupName="PERSON" Tag="1" Content="نمايش داده شوند" IsChecked="True"/>
+                            <RadioButton GroupName="PERSON" Tag="2"  Content="نمايش داده نشوند"/>
                         </UniformGrid>
                     </GroupBox>
 
@@ -125,31 +175,31 @@
                     <TextBlock FlowDirection="RightToLeft" HorizontalAlignment="Right" Margin="0,125,10,0" VerticalAlignment="Top" Width="144" TextWrapping="Wrap" Height="44" LineHeight="22"><Run Text="تعداد تاريخهاي قابل برگشت"/><LineBreak/><Run Text=" ومشاهده در فاكتور فروش:"/></TextBlock>
                     <CNC:NumericTextBox x:Name="CPI" Text="365" TextAlignment="Center" Margin="0,133,168,0" Height="28" VerticalAlignment="Top" HorizontalAlignment="Right" Width="58"/>
 
-                    <Button Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="115" Click="BTN_SAVE_Click" Margin="0,0,8,10" />
-                    <Button Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="115" Click="BTN_ESLAH_Click" Margin="0,0,143,10" />
+                    <Button Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="115" Click="BTN_SAVE_Click" Margin="0,0,10,16" />
+                    <Button Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="100" Click="BTN_ESLAH_Click" Margin="0,0,145,16" />
                     <CheckBox x:Name="CTL_DT" Content="تاريخ فقط مربوط به همين سال باشد" Width="216" Height="20" Margin="0,52,10,0" Padding="4,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
                     <CheckBox x:Name="SNDKH" Content="سند ها روزانه باشد" Width="216" Height="20" Margin="0,80,10,0" Padding="4,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
 
-                    <GroupBox Header="سند زدن" Style="{x:Null}" FlowDirection="RightToLeft" Margin="34,20,0,0" Height="112" VerticalAlignment="Top" HorizontalAlignment="Left" Width="206">
+                    <GroupBox x:Name="GRP_SANAD" Header="سند زدن" Style="{x:Null}" FlowDirection="RightToLeft" Margin="34,20,0,0" Height="112" VerticalAlignment="Top" HorizontalAlignment="Left" Width="206">
                         <UniformGrid Margin="5" Rows="3" Columns="1">
-                            <RadioButton GroupName="HH1" Content="در هر زمان اتوماتيک" IsChecked="True"/>
-                            <RadioButton GroupName="HH1" Content="در زمان تائيد توسط حسابداری"/>
-                            <RadioButton GroupName="HH1" Content="هيچكدام"/>
+                            <RadioButton GroupName="SANAD" Tag="1"  Content="در هر زمان اتوماتيک" IsChecked="True"/>
+                            <RadioButton GroupName="SANAD" Tag="2"  Content="در زمان تائيد توسط حسابداری"/>
+                            <RadioButton GroupName="SANAD" Tag="3"  Content="هيچكدام"/>
                         </UniformGrid>
                     </GroupBox>
-                    <GroupBox Header="تخفیفات فاکتورها" Style="{x:Null}" FlowDirection="RightToLeft" Margin="0,136,275,0" Height="115" VerticalAlignment="Top" HorizontalAlignment="Right" Width="206">
+                    <GroupBox x:Name="GRP_TKHF" Header="تخفیفات فاکتورها" Style="{x:Null}" FlowDirection="RightToLeft" Margin="0,136,275,0" Height="115" VerticalAlignment="Top" HorizontalAlignment="Right" Width="206">
                         <UniformGrid Margin="5" Rows="3" Columns="1">
-                            <RadioButton GroupName="HH" Content="مصوب عمل شود"/>
-                            <RadioButton GroupName="HH" Content="مبلغ كلی پشت فاكتور"/>
-                            <RadioButton GroupName="HH" Content="به ريز كالا عمل شود" IsChecked="True"/>
+                            <RadioButton GroupName="TKHF" Tag="2" Content="مصوب عمل شود"/>
+                            <RadioButton GroupName="TKHF" Tag="1" Content="مبلغ كلی پشت فاكتور"/>
+                            <RadioButton GroupName="TKHF" Tag="3" Content="به ريز كالا عمل شود" IsChecked="True"/>
                         </UniformGrid>
                     </GroupBox>
                     <TextBlock FlowDirection="RightToLeft" Margin="0,182,10,0" VerticalAlignment="Top" TextWrapping="Wrap" Height="22" LineHeight="22" Text="درصد ماليات بر ارزش افزوده:" HorizontalAlignment="Right" Width="144"/>
                     <CNC:NumericTextBox x:Name="ARSESH" Text="10" DoesAcceptDouble="True" TextAlignment="Center" Margin="0,179,168,0" Height="28" VerticalAlignment="Top" HorizontalAlignment="Right" Width="58"/>
                     <TextBlock FlowDirection="RightToLeft" Margin="0,283,257,0" VerticalAlignment="Top" TextWrapping="Wrap" Height="22" LineHeight="22" Text="فاصله از پائين كاغذ در چاپ سند :" HorizontalAlignment="Right" Width="174"/>
                     <CNC:NumericTextBox x:Name="TFTPAGE" Text="2.5" DoesAcceptDouble="True" TextAlignment="Center" Margin="0,280,435,0" Height="28" VerticalAlignment="Top" HorizontalAlignment="Right" Width="58"/>
-                    <CheckBox x:Name="CTL_DT_Copy" Content="سقف اعتبار اشخاص بر اساس مانده  حساب  كنترل گردد" Width="306" Height="20" Margin="217,329,0,0" Padding="4,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                    <CheckBox x:Name="CTL_DT_Copy1" Content="سقف اعتبار اشخاص بر اساس مانده   اسناد   كنترل گردد" Width="306" Height="20" Margin="217,357,0,0" Padding="4,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="SAGHF" Content="سقف اعتبار اشخاص بر اساس مانده  حساب  كنترل گردد" Width="306" Height="20" Margin="217,329,0,0" Padding="4,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="SAGHF2" Content="سقف اعتبار اشخاص بر اساس مانده   اسناد   كنترل گردد" Width="306" Height="20" Margin="217,357,0,0" Padding="4,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                     <Label Content="دفتر اسناد دريافتنی" Margin="77,134,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                     <DataGrid 
                         d:ItemsSource="{d:SampleData}"
@@ -166,9 +216,9 @@
                         ItemsSource="{Binding DAFT_ASN_DATA}"
                         KeyboardNavigation.TabNavigation="Contained"
                         AutoGenerateColumns="False"
-                        SelectionUnit="FullRow" 
-                        CanUserDeleteRows="False"
-                        Margin="17,168,510,128" BorderThickness="1">
+                        SelectionUnit="FullRow" PreviewKeyDown="DAFT_ASN_SUB_PreviewKeyDown"
+                        CanUserDeleteRows="False" RowEditEnding="DAFT_ASN_SUB_RowEditEnding" CellEditEnding="DAFT_ASN_SUB_CellEditEnding"
+                        Margin="17,168,510,340" BorderThickness="1" BeginningEdit="DAFT_ASN_SUB_BeginningEdit">
                         <DataGrid.Style>
                             <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                                 <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
@@ -205,11 +255,540 @@
                 </Grid>
             </TabItem>
 
+            <TabItem Header="فاکتور و انبار">
+                <Grid Margin="10" FlowDirection="RightToLeft">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="2" Margin="5,0" FlowDirection="RightToLeft">
+                        <GroupBox x:Name="GRP_GHAYM" Header="نمایش قیمت پیش فرض" Style="{x:Null}">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="GHAYM_1" GroupName="GHAYM" Tag="1" Content="آخرین قیمت فروش"/>
+                                <RadioButton x:Name="GHAYM_2" GroupName="GHAYM" Tag="2" Content="قیمت تعریف اولیه"/>
+                                <RadioButton x:Name="GHAYM_4" GroupName="GHAYM" Tag="4" Content="آخرین قیمت فروش به این مشتری"/>
+                                <RadioButton x:Name="GHAYM_5" GroupName="GHAYM" Tag="5" Content="قیمت مصوب"/>
+                                <RadioButton x:Name="GHAYM_3" GroupName="GHAYM" Tag="3" Content="هیچکدام"/>
+                                <RadioButton x:Name="GHAYM_7" GroupName="GHAYM" Tag="7" Content="اعلامیه قیمت"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="کالاها با موجودی صفر" x:Name="GRP_KALA" Style="{x:Null}" Margin="0,20,0,0">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="KALA_1" GroupName="KALA"   Tag="1" Content="نمایش داده شود"/>
+                                <RadioButton x:Name="KALA_2" GroupName="KALA" Tag="2" Content="نمایش داده نشود"/>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="5,0">
+                        <GroupBox Header="ستون مبلغ" x:Name="GRP_FRUP"  Style="{x:Null}">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="FRUP_0" GroupName="FRUP"  Tag="0" Content="قابل تغییر باشد"/>
+                                <RadioButton x:Name="FRUP_1" GroupName="FRUP" Tag="1" Content="قابل تغییر نباشد"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="در زمان تغییر مقادیر" x:Name="GRP_WAR"  Style="{x:Null}" Margin="0,15,0,0">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="WAR_1" GroupName="WAR" Tag="1" Content="اخطار داده شود"/>
+                                <RadioButton x:Name="WAR_2" GroupName="WAR"   Tag="2" Content="اخطار داده نشود"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="تاریخ فاکتور" x:Name="GRP_UPDDATE"  Style="{x:Null}" Margin="0,15,0,0">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="UPDDATE_1" GroupName="UPDDATE" Tag="1" Content="قابل تغییر باشد"/>
+                                <RadioButton x:Name="UPDDATE_0" GroupName="UPDDATE" Tag="0" Content="قابل تغییر نباشد"/>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="در زمان ورود کالای جدید" x:Name="GRP_LST"  Style="{x:Null}" Margin="0,15,0,0">
+                            <StackPanel Margin="10">
+                                <RadioButton x:Name="LST_1" GroupName="LST" Tag="1" Content="لیست بطور اتوماتیک باز شود"/>
+                                <RadioButton x:Name="LST_2" GroupName="LST"   Tag="2" Content="لیست باز نشود"/>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="0" Margin="5,0" FlowDirection="RightToLeft">
+                        <CheckBox x:Name="MOJU"   Content="موجودی انبار در زمان خروج کنترل شود"/>
+                        <CheckBox x:Name="RMOG"   Content="موجودی بصورت قطعی کنترل شود" Margin="0,10,0,0"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Label Content="تعداد اعشار در موجودی انبار:"/>
+                            <CNC:NumericTextBox x:Name="DIG" Width="50" TextAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Label Content="برچسب خدمات در چاپ فاکتور:"/>
+                            <TextBox x:Name="TFCODE_E" Width="150" materialDesign:HintAssist.Hint="مثال: خدمات نصب"/>
+                        </StackPanel>
+
+                        <CheckBox x:Name="CODEVIEW" Content="کد کالاها در زمان چاپ نمایش داده شود"  IsChecked="False" Margin="0,15,0,0"/>
+                        <CheckBox x:Name="MAND" Content="مانده حساب اشخاص روی فاکتور نمایش داده شود"   Margin="0,10,0,0"/>
+                        <CheckBox x:Name="SERFACB" Content="سفارشات تبلت بصورت فاکتور فروش ثبت شوند" Margin="0,10,0,0"/>
+                        <CheckBox x:Name="LOCKFAP" Content="فاکتور بعد از چاپ قفل گردد"   Margin="0,10,0,0"/>
+
+                        <ComboBox x:Name="DEFANB" DisplayMemberPath="NAMES" SelectedValuePath="CODE" materialDesign:HintAssist.Hint="پیش فرض انبار" Margin="0,25,0,0" Style="{StaticResource MaterialDesignFloatingHintComboBox}"/>
+                        <ComboBox x:Name="DEFTKH" DisplayMemberPath="CUSTKNAME" SelectedValuePath="CUST_COD"  materialDesign:HintAssist.Hint="پیش فرض نوع مشتری" Margin="0,15,0,0" Style="{StaticResource MaterialDesignFloatingHintComboBox}"/>
+
+                        <CheckBox x:Name="TRANSF" Content="سابقه تغییرات فاکتورها بعد از قفل شدن ذخیره گردد"   Margin="0,25,0,0"/>
+
+                    </StackPanel>
+
+                    <UniformGrid Columns="2" Rows="1" Margin="0,596,0,0" HorizontalAlignment="Left" Width="265">
+                        <Button Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" Width="115" Click="BTN_SAVE_Click"  />
+                        <Button Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" Width="100" Click="BTN_ESLAH_Click" />
+                    </UniformGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="حقوق">
+                <Grid Margin="10" FlowDirection="RightToLeft">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="1.5*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <GroupBox Grid.Column="2" Header="سر فصل حسابهای حقوق" Style="{x:Null}" FlowDirection="RightToLeft" Margin="5">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Label Grid.Row="0" Grid.Column="0" Content="هزینه حقوق اداری:" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="HAZEDAR" Grid.Row="0" Grid.Column="1"
+                                      Text="{Binding Path=SelectedItem.hes, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                                      TextSearch.TextPath="hes" 
+                                      SelectedValuePath="hes"
+                                      Style="{StaticResource MaterialDesignFloatingHintComboBox}"
+                                      IsEditable="True">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding NAME}" TextAlignment="Justify" MinWidth="200" Width="Auto" />
+                                            <TextBlock Text="{Binding hes}" TextAlignment="Center" MinWidth="70"  Width="Auto" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                                <ComboBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                    </ItemsPanelTemplate>
+                                </ComboBox.ItemsPanel>
+                            </ComboBox>
+                            <Label Grid.Row="1" Grid.Column="0" Content="هزینه حقوق تولید:" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="HAZTOLID" Grid.Row="1" Grid.Column="1" 
+                                      Text="{Binding Path=SelectedItem.hes, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                                      TextSearch.TextPath="hes" 
+                                      SelectedValuePath="hes" Style="{StaticResource MaterialDesignFloatingHintComboBox}" IsEditable="True">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding NAME}" TextAlignment="Justify" Width="400"  />
+                                            <TextBlock Text="{Binding hes}" TextAlignment="Justify" Width="100"  />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+
+                                <ComboBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                    </ItemsPanelTemplate>
+                                </ComboBox.ItemsPanel>
+                            </ComboBox>
+
+                            <Label Grid.Row="2" Grid.Column="0" Content="هزینه حقوق فروش:" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="HAZFROOSH" Grid.Row="2" Grid.Column="1" 
+                                      Text="{Binding Path=SelectedItem.hes, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                                      TextSearch.TextPath="hes" 
+                                      SelectedValuePath="hes" Style="{StaticResource MaterialDesignFloatingHintComboBox}" IsEditable="True">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding NAME}" TextAlignment="Justify" Width="400"  />
+                                            <TextBlock Text="{Binding hes}" TextAlignment="Justify" Width="100"  />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                                <ComboBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                    </ItemsPanelTemplate>
+                                </ComboBox.ItemsPanel>
+                            </ComboBox>
+
+                            <Label Grid.Row="3" Grid.Column="0" Content="هزینه حقوق خدمات:" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="HAZKHADAMAT" Grid.Row="3" Grid.Column="1" 
+                                      Text="{Binding Path=SelectedItem.hes, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                                      TextSearch.TextPath="hes" 
+                                      SelectedValuePath="hes" Style="{StaticResource MaterialDesignFloatingHintComboBox}" IsEditable="True">
+
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding NAME}" TextAlignment="Justify" Width="400"  />
+                                            <TextBlock Text="{Binding hes}" TextAlignment="Justify" Width="100"  />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                                <ComboBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                    </ItemsPanelTemplate>
+                                </ComboBox.ItemsPanel>
+                            </ComboBox>
+
+                            <Label Grid.Row="4" Grid.Column="0" Content="اداره بیمه:" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="EDABIM" Grid.Row="4" Grid.Column="1" 
+                                      Text="{Binding Path=SelectedItem.hes, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                                      TextSearch.TextPath="hes" 
+                                      SelectedValuePath="hes" Style="{StaticResource MaterialDesignFloatingHintComboBox}" IsEditable="True">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding NAME}" TextAlignment="Justify" Width="400"  />
+                                            <TextBlock Text="{Binding hes}" TextAlignment="Justify" Width="100"  />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+
+                                <ComboBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                    </ItemsPanelTemplate>
+                                </ComboBox.ItemsPanel>
+                            </ComboBox>
+
+                            <Label Grid.Row="5" Grid.Column="0" Content="هزینه 23% بیمه:" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="HAZBIM" Grid.Row="5" Grid.Column="1" 
+                                      Text="{Binding Path=SelectedItem.hes, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                                      TextSearch.TextPath="hes" 
+                                      SelectedValuePath="hes" Style="{StaticResource MaterialDesignFloatingHintComboBox}" IsEditable="True">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding NAME}" TextAlignment="Justify" Width="400"  />
+                                            <TextBlock Text="{Binding hes}" TextAlignment="Justify" Width="100"  />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                                <ComboBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                    </ItemsPanelTemplate>
+                                </ComboBox.ItemsPanel>
+                            </ComboBox>
+
+                            <Label Grid.Row="6" Grid.Column="0" Content="بستانکاران حقوق:" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="BESHO" Grid.Row="6" Grid.Column="1" 
+                                      Text="{Binding Path=SelectedItem.hes, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                                      TextSearch.TextPath="hes" 
+                                      SelectedValuePath="hes" Style="{StaticResource MaterialDesignFloatingHintComboBox}" IsEditable="True">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding NAME}" TextAlignment="Justify" Width="400"  />
+                                            <TextBlock Text="{Binding hes}" TextAlignment="Justify" Width="100"  />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                                <ComboBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                    </ItemsPanelTemplate>
+                                </ComboBox.ItemsPanel>
+                            </ComboBox>
+
+                            <Label Grid.Row="7" Grid.Column="0" Content="بدهکاران مساعده وغیره:" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="BEDMOS" Grid.Row="7" Grid.Column="1" 
+                                      Text="{Binding Path=SelectedItem.hes, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                                      TextSearch.TextPath="hes" 
+                                      SelectedValuePath="hes" Style="{StaticResource MaterialDesignFloatingHintComboBox}" IsEditable="True">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding NAME}" TextAlignment="Justify" Width="400"  />
+                                            <TextBlock Text="{Binding hes}" TextAlignment="Justify" Width="100"  />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                                <ComboBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                    </ItemsPanelTemplate>
+                                </ComboBox.ItemsPanel>
+                            </ComboBox>
+
+                            <Label Grid.Row="8" Grid.Column="0" Content="محل پرداخت:" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="PARDAKH" Grid.Row="8" Grid.Column="1" 
+                                      Text="{Binding Path=SelectedItem.hes, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                                      TextSearch.TextPath="hes" 
+                                      SelectedValuePath="hes" Style="{StaticResource MaterialDesignFloatingHintComboBox}" IsEditable="True">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding NAME}" TextAlignment="Justify" Width="400"  />
+                                            <TextBlock Text="{Binding hes}" TextAlignment="Justify" Width="100"  />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                                <ComboBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                    </ItemsPanelTemplate>
+                                </ComboBox.ItemsPanel>
+                            </ComboBox>
+
+                            <Label Grid.Row="9" Grid.Column="0" Content="اداره دارائی بابت مالیات:" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="HAZMALI" Grid.Row="9" Grid.Column="1" 
+                                      Text="{Binding Path=SelectedItem.hes, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                                      TextSearch.TextPath="hes" 
+                                      SelectedValuePath="hes" Style="{StaticResource MaterialDesignFloatingHintComboBox}" IsEditable="True">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding NAME}" TextAlignment="Justify" Width="400"  />
+                                            <TextBlock Text="{Binding hes}" TextAlignment="Justify" Width="100"  />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                                <ComboBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                    </ItemsPanelTemplate>
+                                </ComboBox.ItemsPanel>
+                            </ComboBox>
+
+                            <Label Grid.Row="10" Grid.Column="0" Content="صندوق پرسنل:" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="PSANDHES" Grid.Row="10" Grid.Column="1" 
+                                      Text="{Binding Path=SelectedItem.hes, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                                      TextSearch.TextPath="hes" 
+                                      SelectedValuePath="hes" Style="{StaticResource MaterialDesignFloatingHintComboBox}" IsEditable="True">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding NAME}" TextAlignment="Justify" Width="400"  />
+                                            <TextBlock Text="{Binding hes}" TextAlignment="Justify" Width="100"  />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                                <ComboBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                    </ItemsPanelTemplate>
+                                </ComboBox.ItemsPanel>
+                            </ComboBox>
+                        </Grid>
+                    </GroupBox>
+
+                    <StackPanel Grid.Column="1" Margin="5" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
+                            <Label Content="حق سنوات پایه:"/>
+                            <CNC:NumericTextBox x:Name="SANAVP" Width="100" DigitGroupOnEnter="True" IsDigitGroupActive="True"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft" Margin="0,10,0,0">
+                            <Label Content="حد اقل حقوق مشمول مالیات:"/>
+                            <CNC:NumericTextBox x:Name="SAGHFH" Width="100" DigitGroupOnEnter="True" IsDigitGroupActive="True"/>
+                        </StackPanel>
+                        <Button x:Name="BTN_TABLEMALIAT" Content="جدول مالیات حقوق" Width="150" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,20,0,0" Click="BTN_TABLEMALIAT_Click"/>
+                        <Button x:Name="BTN_MORE_SALARY" Content="بیشتر" Width="150" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,10,0,0" Click="BTN_MORE_SALARY_Click"/>
+                    </StackPanel>
+
+                    <GroupBox Grid.Column="0" Header="مشمول بیمه و مالیات" Style="{x:Null}" FlowDirection="RightToLeft" Margin="5">
+                        <ItemsControl Margin="10">
+                            <CheckBox Margin="3" x:Name="HEZA" Content="اضافه کار"/>
+                            <CheckBox Margin="3" x:Name="HPAD" Content="پاداش"/>
+                            <CheckBox Margin="3" x:Name="HOLA" Content="حق اولاد"/>
+                            <CheckBox Margin="3" x:Name="HKHA" Content="خواربار و مسکن"/>
+                            <CheckBox Margin="3" x:Name="HNAH" Content="حق نهار"/>
+                            <CheckBox Margin="3" x:Name="HJAZ" Content="حق جذب"/>
+                            <CheckBox Margin="3" x:Name="HRAN" Content="راندمان"/>
+                            <CheckBox Margin="3" x:Name="HCON" Content="شرایط محیط"/>
+                            <CheckBox Margin="3" x:Name="HSAY" Content="سایر"/>
+                            <CheckBox Margin="3" x:Name="HSHI" Content="حق شیفت"/>
+                            <CheckBox Margin="3" x:Name="HBON" Content="بن"/>
+                            <CheckBox Margin="3" x:Name="HTAHOL" Content="حق تاهل"/>
+                        </ItemsControl>
+                    </GroupBox>
+
+                    <UniformGrid Columns="2" Rows="1" Margin="10,596,0,10" HorizontalAlignment="Left" Width="255">
+                        <Button Content="ذخیره"  BorderBrush="{x:Null}" IsEnabled="{Binding ElementName=BTN_SAVE_G,Path=IsEnabled,UpdateSourceTrigger=PropertyChanged}" FontSize="10" Foreground="#DDFFFFFF" Height="34" Width="115" Click="BTN_SAVE_Click"  />
+                        <Button Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" Width="100" Click="BTN_ESLAH_Click" />
+                    </UniformGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="SANATI">
+                <Grid Margin="10" FlowDirection="RightToLeft">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="1" FlowDirection="RightToLeft">
+                        <CheckBox Margin="3" x:Name="ECONM" Content="مواد اولیه در زمان تولید خارج شود"/>
+                        <CheckBox x:Name="SANAT" Content="ارتيكل اسناد صنعتي صادر شود" Margin="3,5,0,0"/>
+
+                        <GroupBox Header="شماره شروع" Margin="0,15,0,0" Style="{x:Null}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="200"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Label Grid.Row="0" Grid.Column="0" Content="فاکتور فروش:" VerticalAlignment="Center" Margin="2"/>
+                                <CNC:NumericTextBox x:Name="STFR" Grid.Row="0" Grid.Column="1" Margin="2"/>
+
+                                <Label Grid.Row="1" Grid.Column="0" Content="فاکتور خرید:" VerticalAlignment="Center" Margin="2"/>
+                                <CNC:NumericTextBox x:Name="STKH" Grid.Row="1" Grid.Column="1" Margin="2"/>
+
+                                <Label Grid.Row="2" Grid.Column="0" Content="حواله فروش:" VerticalAlignment="Center" Margin="2"/>
+                                <CNC:NumericTextBox x:Name="STHFR" Grid.Row="2" Grid.Column="1" Margin="2"/>
+
+                                <Label Grid.Row="3" Grid.Column="0" Content="رسید انبار:" VerticalAlignment="Center" Margin="2"/>
+                                <CNC:NumericTextBox x:Name="STHKH" Grid.Row="3" Grid.Column="1" Margin="2"/>
+
+                                <Label Grid.Row="4" Grid.Column="0" Content="انتقالی:" VerticalAlignment="Center" Margin="2"/>
+                                <CNC:NumericTextBox x:Name="STENT" Grid.Row="4" Grid.Column="1" Margin="2"/>
+
+                                <Label Grid.Row="5" Grid.Column="0" Content="خروج سایر:" VerticalAlignment="Center" Margin="2"/>
+                                <CNC:NumericTextBox x:Name="STKHS" Grid.Row="5" Grid.Column="1" Margin="2"/>
+
+                                <Label Grid.Row="6" Grid.Column="0" Content="خروج:" VerticalAlignment="Center" Margin="2"/>
+                                <CNC:NumericTextBox x:Name="STKHH" Grid.Row="6" Grid.Column="1" Margin="2"/>
+
+                                <Label Grid.Row="7" Grid.Column="0" Content="تولید:" VerticalAlignment="Center" Margin="2"/>
+                                <CNC:NumericTextBox x:Name="STTOL" Grid.Row="7" Grid.Column="1" Margin="2"/>
+
+                                <Label Grid.Row="8" Grid.Column="0" Content="برگشت فروش:" VerticalAlignment="Center" Margin="2"/>
+                                <CNC:NumericTextBox x:Name="STFRB" Grid.Row="8" Grid.Column="1" Margin="2"/>
+
+                                <Label Grid.Row="9" Grid.Column="0" Content="برگشت خرید:" VerticalAlignment="Center" Margin="2"/>
+                                <CNC:NumericTextBox x:Name="STBKH" Grid.Row="9" Grid.Column="1" Margin="2"/>
+
+                                <Label Grid.Row="10" Grid.Column="0" Content="رسید مستقیم:" VerticalAlignment="Center" Margin="2"/>
+                                <CNC:NumericTextBox x:Name="STMO" Grid.Row="10" Grid.Column="1" Margin="2"/>
+
+                                <Label Grid.Row="11" Grid.Column="0" Content="فاکتور خدمات:" VerticalAlignment="Center" Margin="2"/>
+                                <CNC:NumericTextBox x:Name="STKHA" Grid.Row="11" Grid.Column="1" Margin="2"/>
+                            </Grid>
+                        </GroupBox>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="0" FlowDirection="RightToLeft">
+                        <GroupBox Header="عواملی که در نرخ يك ساعت كار بايد حذف شوند" Style="{x:Null}">
+                            <UniformGrid Columns="2" Margin="5">
+                                <CheckBox Margin="3" x:Name="SA_HOGH" Content="حقوق"/>
+                                <CheckBox Margin="3" x:Name="SA_40EZ" Content="۴۰٪ اضافه کار"/>
+                                <CheckBox Margin="3" x:Name="SA_EZAF" Content="اضافه کار"/>
+                                <CheckBox Margin="3" x:Name="SA_PADA" Content="پاداش"/>
+                                <CheckBox Margin="3" x:Name="SA_HOLA" Content="حق اولاد"/>
+                                <CheckBox Margin="3" x:Name="SA_KHAR" Content="خواربار و مسکن"/>
+                                <CheckBox Margin="3" x:Name="SA_NAHA" Content="حق نهار"/>
+                                <CheckBox Margin="3" x:Name="SA_JAZB" Content="حق جذب"/>
+                                <CheckBox Margin="3" x:Name="SA_RAND" Content="راندمان"/>
+                                <CheckBox Margin="3" x:Name="SA_COND" Content="شرایط محیط"/>
+                                <CheckBox Margin="3" x:Name="SA_SAYE" Content="سایر"/>
+                                <CheckBox Margin="3" x:Name="SA_23BI" Content="۲۳٪ بیمه"/>
+                            </UniformGrid>
+                        </GroupBox>
+
+                        <GroupBox Header="خروج مواد به کالای در جریان" Margin="0,20,0,0" x:Name="GRP_FINALS" Style="{x:Null}">
+                            <StackPanel Margin="10">
+                                <RadioButton Margin="3" GroupName="FINALS" Tag="0" Content="بصورت کلی انجام شود"/>
+                                <RadioButton Margin="3" GroupName="FINALS" Tag="1" Content="به معین کالای ساخته شده منتقل شود"/>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                    <UniformGrid Columns="2" Rows="1" Margin="0,596,0,10" HorizontalAlignment="Left" Width="281">
+                        <Button Content="ذخیره"  BorderBrush="{x:Null}" IsEnabled="{Binding ElementName=BTN_SAVE_G,Path=IsEnabled,UpdateSourceTrigger=PropertyChanged}" FontSize="10" Foreground="#DDFFFFFF" Height="34" Width="115" Click="BTN_SAVE_Click"  />
+                        <Button Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" Width="100" Click="BTN_ESLAH_Click" />
+                    </UniformGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="ISO">
+                <Grid FlowDirection="RightToLeft">
+                    <GroupBox Header="کدینگ فرمهای" Margin="20" Style="{x:Null}" VerticalAlignment="Top" HorizontalAlignment="Center" FlowDirection="RightToLeft">
+                        <Grid Margin="10" MinWidth="300">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Label Grid.Row="0" Grid.Column="0" Content="حواله انبار فروش:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="ISO_FROOSH" Grid.Row="0" Grid.Column="1" Margin="5"/>
+
+                            <Label Grid.Row="1" Grid.Column="0" Content="رسید انبار خرید:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="ISO_KHAREED" Grid.Row="1" Grid.Column="1" Margin="5"/>
+
+                            <Label Grid.Row="2" Grid.Column="0" Content="حواله خروج مواد اولیه:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="ISO_MAVAD" Grid.Row="2" Grid.Column="1" Margin="5"/>
+
+                            <Label Grid.Row="3" Grid.Column="0" Content="رسید انبار آمار تولید:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="ISO_TOLID" Grid.Row="3" Grid.Column="1" Margin="5"/>
+
+                            <Label Grid.Row="4" Grid.Column="0" Content="حواله خروج سایر مواد:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="ISO_MAVADSAYER" Grid.Row="4" Grid.Column="1" Margin="5"/>
+
+                            <Label Grid.Row="5" Grid.Column="0" Content="درخواست تولید:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="ISO_DTOLID" Grid.Row="5" Grid.Column="1" Margin="5"/>
+                        </Grid>
+                    </GroupBox>
+
+                    <UniformGrid Columns="2" Rows="1" Margin="0,600,0,6" HorizontalAlignment="Left" Width="275">
+                        <Button Content="ذخیره"  BorderBrush="{x:Null}" IsEnabled="{Binding ElementName=BTN_SAVE_G,Path=IsEnabled,UpdateSourceTrigger=PropertyChanged}" FontSize="10" Foreground="#DDFFFFFF" Height="34" Width="115" Click="BTN_SAVE_Click"  />
+                        <Button Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" Width="100" Click="BTN_ESLAH_Click" />
+                    </UniformGrid>
+                </Grid>
+            </TabItem>
+
             <TabItem Header="SMS تنظیمات">
                 <Grid>
                     <RadioButton x:Name="RB_TUBA"  GroupName="SMSGRP" Content="شرکت توبا TSMS.ir" HorizontalAlignment="Left" Margin="164,15,0,0" VerticalAlignment="Top" Width="128" Padding="4,0,0,0" IsChecked="True" Click="RB_TUBA_Click"/>
                     <RadioButton x:Name="RB_SMSIR" GroupName="SMSGRP" Content="شرکت ایده پردازان SMS.ir" HorizontalAlignment="Left" Margin="303,15,0,0" VerticalAlignment="Top" Width="160" Padding="4,0,0,0" Click="RB_SMSIR_Click"/>
-                    <Button x:Name="BTN_SAVE" Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="330,0,0,49" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="148" Click="BTN_SAVE_Click" />
+                    <Button x:Name="BTN_SAVE" Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="560,0,0,49" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="148" Click="BTN_SAVE_Click" />
                     <Label Content="سرویس ارائه دهنده پیامک :" HorizontalAlignment="Left" Margin="6,11,0,0" VerticalAlignment="Top" Width="auto"/>
                     <TextBox x:Name="SMS_USERNAME" Text="" Height="30" Margin="162,53,318,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" FlowDirection="RightToLeft" />
                     <CNC:NumericTextBox x:Name="SMS_TSMSHOST" DoesAcceptDouble="False"  LastValueShouldZero="False" Text="" Height="30" Margin="162,136,0,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="214" FlowDirection="RightToLeft"/>
@@ -222,16 +801,324 @@
 
                     <Label Content="Line Number :" HorizontalAlignment="Left" Margin="74,136,0,0" VerticalAlignment="Top" Width="auto"/>
 
-                    <CheckBox x:Name="PRMFR" Content="ارسال پيامك با تاييد كاربر باشد" Width="183" Height="20" Margin="0,80,85,0" Padding="4,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
-                    <CheckBox x:Name="DSMS" Content="ارسال پيامك فقط از طريق سرور انجام  شود" Width="242" Height="24" Margin="0,44,26,0" Padding="4,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="PRMFR" Content="ارسال پيامك با تاييد كاربر باشد" Width="183" Height="20" Margin="0,83,85,0" Padding="4,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="DSMS" Content="ارسال پيامك فقط از طريق سرور انجام  شود" Width="242" Height="24" Margin="0,47,26,0" Padding="4,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
                     <Label Content="عنوان پیامک :" HorizontalAlignment="Left" Margin="78,219,0,0" VerticalAlignment="Top" Width="auto"/>
                     <TextBox x:Name="SMS_OWNER" Style="{StaticResource FuzzyOut}" TextAlignment="Center" Padding="3" Height="30" Margin="164,220,358,0" VerticalAlignment="Top"  />
-                    <CheckBox x:Name="SMSACT" Content="ارسال پيامك فعال باشد" Width="146" Height="19" Margin="0,15,122,0" Padding="4,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
-                    <Button x:Name="BTN_SMSFORMAT" Content="تعريف فرمت ارسال پيامك"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="498,0,0,49" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="160" Click="BTN_SMSFORMAT_Click" />
-                    <Button x:Name="BTN_ESLAH" Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="162,0,0,49" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="143" Click="BTN_ESLAH_Click" />
+                    <CheckBox x:Name="SMSACT" Content="ارسال پيامك فعال باشد" Width="146" Height="19" Margin="0,18,122,0" Padding="4,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                    <Button x:Name="BTN_SMSFORMAT" Content="تعريف فرمت ارسال پيامك"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="728,0,0,49" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="160" Click="BTN_SMSFORMAT_Click" />
+                    <Button x:Name="BTN_ESLAH" Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="392,0,0,49" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="143" Click="BTN_ESLAH_Click" />
 
                 </Grid>
             </TabItem>
+
+            <TabItem Header="CRM تنظیمات">
+                <Grid Margin="10" FlowDirection="RightToLeft">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <GroupBox Grid.Column="0" Header="عناوین آیتم‌ها" Style="{x:Null}" FlowDirection="RightToLeft" Margin="5">
+                        <Grid Margin="10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Label Grid.Row="0" Grid.Column="0" Content="۱-آیتم اول:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="IT1" Grid.Row="0" Grid.Column="1" Margin="5"/>
+
+                            <Label Grid.Row="1" Grid.Column="0" Content="۲-آیتم دوم:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="IT2" Grid.Row="1" Grid.Column="1" Margin="5"/>
+
+                            <Label Grid.Row="2" Grid.Column="0" Content="۳-آیتم سوم:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="IT3" Grid.Row="2" Grid.Column="1" Margin="5"/>
+
+                            <Label Grid.Row="3" Grid.Column="0" Content="۴-آیتم چهارم:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="IT4" Grid.Row="3" Grid.Column="1" Margin="5"/>
+
+                            <Label Grid.Row="4" Grid.Column="0" Content="۵-آیتم پنجم:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="IT5" Grid.Row="4" Grid.Column="1" Margin="5"/>
+
+                            <Label Grid.Row="5" Grid.Column="0" Content="۶-آیتم ششم:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="IT6" Grid.Row="5" Grid.Column="1" Margin="5"/>
+
+                            <Label Grid.Row="6" Grid.Column="0" Content="۷-آیتم هفتم:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="IT7" Grid.Row="6" Grid.Column="1" Margin="5"/>
+
+                            <Label Grid.Row="7" Grid.Column="0" Content="۸-آیتم هشتم:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="IT8" Grid.Row="7" Grid.Column="1" Margin="5"/>
+
+                            <Label Grid.Row="8" Grid.Column="0" Content="۹-آیتم نهم:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="IT9" Grid.Row="8" Grid.Column="1" Margin="5"/>
+                        </Grid>
+                    </GroupBox>
+
+                    <GroupBox Grid.Column="1" Grid.ColumnSpan="2"  Style="{x:Null}" Header="عناوین ستون‌ها" FlowDirection="RightToLeft" Margin="5">
+                        <Grid Margin="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="5,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="نام شرکت:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="IS1" Grid.Column="1" Margin="5"/>
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="شهر:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="IS2" Grid.Column="1" Margin="5"/>
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="مدیر عامل:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="IS3" Grid.Column="1" Margin="5"/>
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="تلفن کارخانه:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="IS4" Grid.Column="1" Margin="5"/>
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="موبایل مدیر عامل:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="IS5" Grid.Column="1" Margin="5"/>
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="تعداد پرسنل:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="IS6" Grid.Column="1" Margin="5"/>
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="وضعیت کارخانه:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="IS7" Grid.Column="1" Margin="5"/>
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="محصولات:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="IS8" Grid.Column="1" Margin="5"/>
+                                </Grid>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="5,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="آدرس:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="IS9" Grid.Column="1" Margin="5"/>
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="حسابدار:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="IS10" Grid.Column="1" Margin="5"/>
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="نرم افزار:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="IS11" Grid.Column="1" Margin="5"/>
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="اشخاص ذی نفوذ:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="IS12" Grid.Column="1" Margin="5"/>
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="معرف:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="IS14" Grid.Column="1" Margin="5"/>
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="وضعیت:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="IS15" Grid.Column="1" Margin="5"/>
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="توضیحات:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="IS16" Grid.Column="1" Margin="5"/>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+
+                    <UniformGrid Rows="1" Columns="2" Margin="9,592,0,9" HorizontalAlignment="Left" Width="301">
+                        <Button Content="ذخیره"  BorderBrush="{x:Null}" IsEnabled="{Binding ElementName=BTN_SAVE_G,Path=IsEnabled,UpdateSourceTrigger=PropertyChanged}" FontSize="10" Foreground="#DDFFFFFF" Height="34" Width="115" Click="BTN_SAVE_Click"  />
+                        <Button Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" Width="100" Click="BTN_ESLAH_Click" />
+                    </UniformGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="SSM">
+                <Grid Margin="20" FlowDirection="RightToLeft">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Label Grid.Row="0" Grid.Column="0" Content="تعداد روزهای تاخیر مجاز:" VerticalAlignment="Center"/>
+                        <CNC:NumericTextBox x:Name="SSMTRTAKM" Grid.Row="0" Grid.Column="1" Margin="5"/>
+
+                        <Label Grid.Row="1" Grid.Column="0" Content="تعداد روزهای تعجیل مجاز:" VerticalAlignment="Center" Margin="20,0,0,0"/>
+                        <CNC:NumericTextBox x:Name="SSMTRTAGM" Grid.Row="1" Grid.Column="1" Margin="5"/>
+
+                        <Label Grid.Row="0" Grid.Column="2"  Content="حساب درآمد کسر تخفیف:" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="HDARKASRTAKHF" Grid.Row="0" Grid.Column="3" Margin="5" 
+                                  Text="{Binding Path=SelectedItem.hes, RelativeSource={RelativeSource Self}, UpdateSourceTrigger=PropertyChanged}"
+                                  TextSearch.TextPath="hes" 
+                                  SelectedValuePath="hes" Style="{StaticResource MaterialDesignFloatingHintComboBox}" IsEditable="True">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding NAME}" TextAlignment="Justify" Width="400"  />
+                                        <TextBlock Text="{Binding hes}" TextAlignment="Justify" Width="100"  />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+
+                        <CheckBox x:Name="SSMSNDAUTO" Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Content="سندهای تاخیر اتوماتیک در یکم هر ماه صادر شود" VerticalAlignment="Center" Margin="20,10,0,0"/>
+
+                        <Label Grid.Row="2" Grid.Column="0" Content="تعداد ماه برای کنترل مستر کارت (مثلا قبل از يك ماه):" VerticalAlignment="Center"/>
+                        <CNC:NumericTextBox x:Name="SSMTBMON" Grid.Row="2" Grid.Column="1" Margin="5"/>
+
+                        <Label Grid.Row="3" Grid.Column="0" Content="درصد کاهش یا افزایش تخفیف برحسب روز:" VerticalAlignment="Center"/>
+                        <CNC:NumericTextBox x:Name="SSMDARSAD" DoesAcceptDouble="True" Grid.Row="3" Grid.Column="1" Margin="5"/>
+                    </Grid>
+
+                    <UniformGrid Rows="1" Columns="2" Height="53" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="250">
+                        <Button Content="ذخیره"  BorderBrush="{x:Null}" IsEnabled="{Binding ElementName=BTN_SAVE_G,Path=IsEnabled,UpdateSourceTrigger=PropertyChanged}" FontSize="10" Foreground="#DDFFFFFF" Height="34" Width="115" Click="BTN_SAVE_Click"  />
+                        <Button Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" Width="100" Click="BTN_ESLAH_Click" />
+                    </UniformGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="مودیان">
+                <Grid Margin="20" FlowDirection="RightToLeft">
+                    <Grid Margin="0,0,0,58">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <GroupBox Grid.Row="0" Header="کلید خصوصی:" Style="{x:Null}" Margin="5">
+                            <TextBox x:Name="PRIVIATEKEY" 
+                                TextWrapping="Wrap" 
+                                AcceptsReturn="True" 
+                                VerticalScrollBarVisibility="Auto" 
+                                HorizontalScrollBarVisibility="Disabled"
+                                TextAlignment="Left" 
+                                FlowDirection="LeftToRight"/>
+                        </GroupBox>
+
+                        <GroupBox Grid.Row="1" Header="گواهی امضا:" Style="{x:Null}" Margin="5">
+                            <TextBox x:Name="Dcertificate" 
+                                TextWrapping="Wrap" 
+                                AcceptsReturn="True" 
+                                VerticalScrollBarVisibility="Auto" 
+                                HorizontalScrollBarVisibility="Disabled"
+                                TextAlignment="Left" 
+                                FlowDirection="LeftToRight"/>
+                        </GroupBox>
+
+                        <Grid Grid.Row="2" Margin="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Label Grid.Column="0" Content="حافظه مالیاتی:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="MEMORYID" Grid.Column="1" MaxLength="6" VerticalAlignment="Center"/>
+
+                            <Label Grid.Column="3" Content="حافظه مالیاتی تستی:" VerticalAlignment="Center"/>
+                            <TextBox x:Name="MEMORYIDsand" Grid.Column="4" MaxLength="6" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Grid>
+                    <UniformGrid Rows="1" Columns="2" Height="53" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="250">
+                        <Button Content="ذخیره"  BorderBrush="{x:Null}" IsEnabled="{Binding ElementName=BTN_SAVE_G,Path=IsEnabled,UpdateSourceTrigger=PropertyChanged}" FontSize="10" Foreground="#DDFFFFFF" Height="34" Width="115" Click="BTN_SAVE_Click"  />
+                        <Button Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" Width="100" Click="BTN_ESLAH_Click" />
+                    </UniformGrid>
+                </Grid>
+            </TabItem>
+
         </TabControl>
 
     </Grid>
