@@ -15,5 +15,15 @@ namespace Prg_Proccessy.SQLMODELS
         public DateTime? CRT { get => _crt; set { if (_crt == value) return; _crt = value; OnPropertyChanged("CRT"); } }
         private int? _uid;
         public int? UID { get => _uid; set { if (_uid == value) return; _uid = value; OnPropertyChanged("UID"); } }
+
+        private bool? _IsRowLocked;
+        public bool? IsRowLocked
+        {
+            get
+            {
+                _IsRowLocked = FIRSTNUM > 0;
+                return _IsRowLocked; 
+            }
+        }
     }
 }

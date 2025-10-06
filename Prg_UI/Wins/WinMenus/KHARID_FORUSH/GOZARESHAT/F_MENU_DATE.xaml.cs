@@ -18,9 +18,6 @@ using Rpts;
 using static Prg_UI.Functions.CL_LMethods;
 using System.Diagnostics;
 using Wins.WinMenus.HESABDARI.GOZARESHAT;
-using DocumentFormat.OpenXml.Spreadsheet;
-using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
-using System.Windows.Controls;
 using Prg_UI.Wins.WinMenus.SANATI;
 
 namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
@@ -370,6 +367,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             string tableName = $"BEDBESMAH{userCod}";
             dbms.DoExecuteSQL($"IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{tableName}') DROP TABLE {tableName}");
 
+            //#Last Point
             string sqlCommon = $@"
                                   SELECT   Q.TAFZIL, Q.HES_K, Q.HES_M, Q.SumOfBED, Q.SumOfBES, Q.BEDBES, Q.NAME, Q.MOIN,
                                            dbo.UIIF(Q.BEDBES, '>', 0, Q.BEDBES, 0) AS BEDM,

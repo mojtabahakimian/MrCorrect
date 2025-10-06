@@ -178,22 +178,25 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             //text operators
             TEXT_OP_DATA = new ObservableCollection<OperatorItem>
             {
-                new OperatorItem { OpValue = "="    },
-                new OperatorItem { OpValue = "<>"   },
-                new OperatorItem { OpValue =SHAMEL  },
-                new OperatorItem { OpValue = BEDUNE }
+                new OperatorItem { OpValue = "=" ,  OpDisplay = "=" },
+                new OperatorItem { OpValue = "<>" , OpDisplay =  "<>" },
+                new OperatorItem { OpValue =SHAMEL , OpDisplay = SHAMEL  },
+                new OperatorItem { OpValue = BEDUNE , OpDisplay=BEDUNE },
+
+                new OperatorItem { OpValue = "IS NOT NULL", OpDisplay = "خالی نباشد" }, // Add This
+                new OperatorItem { OpValue = "IS NULL", OpDisplay = "خالی باشد" }
             };
 
             //date operators
             DATE_OP_DATA = new ObservableCollection<OperatorItem>
             {
-                new OperatorItem { OpValue = "="     },
-                new OperatorItem { OpValue = "<>"   },
-                new OperatorItem { OpValue = ">"     },
-                new OperatorItem { OpValue = ">="   },
-                new OperatorItem { OpValue = "<"     },
-                new OperatorItem { OpValue = "<="    },
-                new OperatorItem { OpValue = BEYN   }
+                new OperatorItem { OpValue = "="  , OpDisplay = "="     },
+                new OperatorItem { OpValue = "<>" , OpDisplay = "<>"   },
+                new OperatorItem { OpValue = ">"  , OpDisplay = ">"     },
+                new OperatorItem { OpValue = ">=" , OpDisplay = ">="   },
+                new OperatorItem { OpValue = "<"  , OpDisplay = "<"     },
+                new OperatorItem { OpValue = "<=" , OpDisplay = "<="    },
+                new OperatorItem { OpValue = BEYN ,OpDisplay=BEYN  }
             };
 
             //aggregate operators
@@ -747,7 +750,15 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
         }
 
-        private static string TryCastNumeric(string field) => $"TRY_CONVERT(decimal(38,6), {field})";
+        //private static string TryCastNumeric(string field) => $"TRY_CONVERT(decimal(38,6), {field})";
+        private static string TryCastNumeric(string field)
+        {
+            // For SQL Server 2008 R2 and older, which do not support TRY_CONVERT.
+            // ISNUMERIC checks if a string can be converted to a numeric type.
+            // This returns 0 if conversion fails, which is safe for aggregation functions like SUM.
+            return $"CASE WHEN ISNUMERIC({field}) = 1 THEN CAST({field} AS decimal(38,6)) ELSE 0 END";
+        }
+
         private string FormatAgg(string field, ComboBox aggCombo)
         {
             var agg = aggCombo?.SelectedValue?.ToString();
@@ -1032,26 +1043,62 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 SHART += $"(MEGHk {meghkOp?.SelectedValue ?? "="} {meghkTextBox.Text})";
             }
 
+            // CUSTNAME field #edited
+            //var custnameTextBox = FindName("CUSTNAME") as TextBox;
+            //var custnameOp = FindName("CUSTNAMEB") as ComboBox;
+            //if (!string.IsNullOrEmpty(custnameTextBox?.Text))
+            //{
+            //    ChShart();
+            //    switch (custnameOp?.SelectedValue?.ToString())
+            //    {
+            //        case "=":
+            //            SHART += $"(CUSTNAME = '{custnameTextBox.Text}')";
+            //            break;
+            //        case "<>":
+            //            SHART += $"(CUSTNAME <> '{custnameTextBox.Text}')";
+            //            break;
+            //        case SHAMEL: //شامل
+            //            SHART += $"(CUSTNAME like '%{custnameTextBox.Text}%')";
+            //            break;
+            //        case BEDUNE: //بدون
+            //            SHART += $"(CUSTNAME not like '%{custnameTextBox.Text}%')";
+            //            break;
+            //    }
+            //}
+
             // CUSTNAME field
             var custnameTextBox = FindName("CUSTNAME") as TextBox;
             var custnameOp = FindName("CUSTNAMEB") as ComboBox;
-            if (!string.IsNullOrEmpty(custnameTextBox?.Text))
+            // بررسی می‌کنیم که آیا آیتمی انتخاب شده است یا نه
+            if (custnameOp?.SelectedItem is OperatorItem selectedOp)
             {
-                ChShart();
-                switch (custnameOp?.SelectedValue?.ToString())
+                string opValue = selectedOp.OpValue;
+
+                // **بخش جدید برای مدیریت حالت‌های "خالی باشد/نباشد"**
+                if (opValue == "IS NOT NULL" || opValue == "IS NULL")
                 {
-                    case "=":
-                        SHART += $"(CUSTNAME = '{custnameTextBox.Text}')";
-                        break;
-                    case "<>":
-                        SHART += $"(CUSTNAME <> '{custnameTextBox.Text}')";
-                        break;
-                    case SHAMEL: //شامل
-                        SHART += $"(CUSTNAME like '%{custnameTextBox.Text}%')";
-                        break;
-                    case BEDUNE: //بدون
-                        SHART += $"(CUSTNAME not like '%{custnameTextBox.Text}%')";
-                        break;
+                    ChShart();
+                    SHART += $"(CUSTNAME {opValue})";
+                }
+                // **بخش قبلی که فقط در صورت پر بودن TextBox اجرا می‌شود**
+                else if (!string.IsNullOrEmpty(custnameTextBox?.Text))
+                {
+                    ChShart();
+                    switch (opValue)
+                    {
+                        case "=":
+                            SHART += $"(CUSTNAME = '{custnameTextBox.Text}')";
+                            break;
+                        case "<>":
+                            SHART += $"(CUSTNAME <> '{custnameTextBox.Text}')";
+                            break;
+                        case SHAMEL: // شامل
+                            SHART += $"(CUSTNAME LIKE '%{custnameTextBox.Text}%')";
+                            break;
+                        case BEDUNE: // بدون
+                            SHART += $"(CUSTNAME NOT LIKE '%{custnameTextBox.Text}%')";
+                            break;
+                    }
                 }
             }
 

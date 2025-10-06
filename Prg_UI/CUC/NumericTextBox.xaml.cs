@@ -152,6 +152,28 @@ namespace Prg_UI.CUC
         public string Text
         {
             get => UnformatText((string)GetValue(TextProperty));
+
+            //get ////this is for avoid Input string was not in a correct format on leave
+            //{
+            //    string unformattedText = UnformatText((string)GetValue(TextProperty));
+
+            //    if (string.IsNullOrWhiteSpace(unformattedText))
+            //    {
+            //        if (LastValueShouldZero ?? false)
+            //        {
+            //            return "0";
+            //        }
+            //        else if (LastValueShouldZero == false && LastValidValue.HasValue)
+            //        {
+            //            return LastValidValue.Value.ToString(CultureInfo.InvariantCulture);
+            //        }
+            //        else
+            //        {
+            //            return "0"; // Default safe value
+            //        }
+            //    }
+            //    return unformattedText;
+            //}
             set
             {
                 if (!string.IsNullOrEmpty(value))
@@ -178,6 +200,8 @@ namespace Prg_UI.CUC
                 //OnPropertyChanged("Text");
             }
         }
+
+
 
         public bool DoesAcceptDouble
         {

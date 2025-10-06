@@ -1,52 +1,32 @@
-﻿using Interfaces;
-using MaterialDesignThemes.Wpf;
-using Microsoft.Data.SqlClient;
+﻿using MaterialDesignThemes.Wpf;
 using Prg_Proccessy.FUNCTIONS;
-using Prg_Proccessy.MODELS;
-using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
+using Prg_SendInvoice.SQLMODELS;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
-using Syncfusion.Data.Extensions;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Threading;
+using static Wins.WinSamplesEmpty.Window4;
 
-namespace Wins.WinSamplesEmpty
+namespace Prg_UI.Wins.WinMenus.Checkha
 {
-    public partial class Window4 : Window
+    /// <summary>
+    /// Interaction logic for WIN_SAZMAN_2.xaml
+    /// </summary>
+    public partial class WIN_SAZMAN_2 : Window
     {
-        public Window4(double? number_to_open = null)
+        public WIN_SAZMAN_2()
         {
             InitializeComponent();
 
             this.DataContext = this;
-
-            if (number_to_open != null)
-            {
-                NUMBER_TO_OPEN = (double)number_to_open;
-            }
         }
-
-        #region LOCALMODEL
-        public class HESAB_CMB_MODEL
-        {
-            public string? hes { get; set; }
-            public string? NAME { get; set; }
-            public string? Expr1 { get; set; }
-        }
-        #endregion
-
         #region Header Window Begin
         //Header Window Begin
         private void Btn_Close_Click(object sender, RoutedEventArgs e)
@@ -98,8 +78,6 @@ namespace Wins.WinSamplesEmpty
         public double? NUMBER_TO_OPEN { get; set; }
         public bool ChangeIsHappend { get; private set; }
 
-
-
         private bool _bl;
         public bool AllowDeletions
         {
@@ -120,7 +98,8 @@ namespace Wins.WinSamplesEmpty
                 else
                 {
                     // Defer the operation until the window is fully rendered
-                    this.Dispatcher.BeginInvoke(new Action(() => {
+                    this.Dispatcher.BeginInvoke(new Action(() =>
+                    {
                         // Try again after the window is fully initialized
                         IntPtr newHandle = new WindowInteropHelper(this).Handle;
                         if (newHandle != IntPtr.Zero)
@@ -151,12 +130,14 @@ namespace Wins.WinSamplesEmpty
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
-            //CL_HESABDARI.SETSECURITY(this.GetType().Name, "", new WindowInteropHelper(this).Handle, this.GetType().Name);
-            //if (!this.IsLoaded)
-            //{
-            //    this.Close();
-            //    return;
-            //}
+            var sql = $"SELECT lECOL1, lECOL2, lECOL3, lECOL4, lKCOL1 FROM SAZMAN";
+            var result = dbms.DoGetDataSQL<SAZMAN>(sql).FirstOrDefault();
+
+            lECOL1.Text = result.LECOL1;
+            lECOL2.Text = result.LECOL2;
+            lECOL3.Text = result.LECOL3;
+            lECOL4.Text = result.LECOL4;
+            lKCOL1.Text = result.LKCOL1;
 
             FILL_ALL_COMBOBOXES();
         }
@@ -169,71 +150,48 @@ namespace Wins.WinSamplesEmpty
                 CL_LMethods.SendKey_US(Key.Tab);
             }
 
-            // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
-            var nonDataKeys = new[]
-            {
-                Key.Enter, Key.Tab, Key.LeftShift, Key.RightShift,
-                Key.CapsLock, Key.Left, Key.Right, Key.Up, Key.Down,
-                Key.LeftAlt, Key.RightAlt, Key.LeftCtrl, Key.RightCtrl,
-                Key.F1, Key.F2, Key.F3, Key.F4, Key.F5, Key.F6,
-                Key.F7, Key.F8, Key.F9, Key.F10, Key.F11, Key.F12,
-                Key.Escape, Key.Insert, Key.Home, Key.End,
-                Key.PageUp, Key.PageDown
-            };
-            if (!nonDataKeys.Contains(e.Key))
-            {
-                var focused = Keyboard.FocusedElement as DependencyObject;
-                if (focused != null && (CL_LMethods.IsInside<TextBoxBase>(focused) || CL_LMethods.IsInside<ComboBox>(focused) || CL_LMethods.IsInside<CheckBox>(focused)))
-                {
-                    ChangeIsHappend = true;
-                }
-                else
-                {
-                    var focusedElement = Keyboard.FocusedElement;
-                    if (focusedElement is Xceed.Wpf.Toolkit.MaskedTextBox)
-                    {
-                        ChangeIsHappend = true;
-                    }
-                }
-            }
         }
         private void FILL_ALL_COMBOBOXES()
         {
-            //COMBOHESAB.ItemsSource = dbms.DoGetDataSQL<HESAB_CMB_MODEL>($"SELECT hes, NAME FROM CUST_HESAB ORDER BY hes").ToList();
         }
-
-        private bool HeaderIsValid(bool _DisplayErrors = true)
-        {
-            List<MsgModel> ErrosMessages = new List<MsgModel>();
-
-            if (ErrosMessages.Any())
-            {
-                if (_DisplayErrors)
-                {
-                    ErrosMessages = ErrosMessages.Select(x => x.MessageText_U).Distinct().Select(message => new MsgModel { MessageText_U = message }).ToList();
-                    new MsgListwin(false, ErrosMessages).ShowDialog();
-                }
-
-                return false;
-            }
-            return true;
-        }
-
 
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e)
         {
-            //if (!BTN_SAVE.IsEnabled) { return; }
+            if (!BTN_SAVE.IsEnabled) { return; }
+
+            var sqlBuilder = new StringBuilder();
+            sqlBuilder.Append("UPDATE SAZMAN SET ");
+            sqlBuilder.Append("lECOL1 = @lECOL1, ");
+            sqlBuilder.Append("lECOL2 = @lECOL2, ");
+            sqlBuilder.Append("lECOL3 = @lECOL3, ");
+            sqlBuilder.Append("lECOL4 = @lECOL4, ");
+            sqlBuilder.Append("lKCOL1 = @lKCOL1 ");
+            var parameters = new
+            {
+                lECOL1 = lECOL1.Text,
+                lECOL2 = lECOL2.Text,
+                lECOL3 = lECOL3.Text,
+                lECOL4 = lECOL4.Text,
+                lKCOL1 = lKCOL1.Text
+            };
+
+            var rowsAffected = dbms.DoExecuteSQL(sqlBuilder.ToString(), parameters);
+            if (rowsAffected > 0)
+            {
+                this.Close();
+            }
+            else
+            {
+                new Msgwin(false, "ذخیره انجام نشد !").Show();
+                return;
+            }
 
             ChangeIsHappend = false;
         }
-        private void ESLAH_Click(object sender, RoutedEventArgs e)
-        {
-            //if (!ESLAH.IsEnabled) { return; }
-        }
-        private void BTN_DELETE_Click(object sender, RoutedEventArgs e)
-        {
 
+        private void BtnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
-
     }
 }

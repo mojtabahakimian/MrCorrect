@@ -1,0 +1,490 @@
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.CONFIGS.WIN_OPTIONS"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.CONFIGS"
+        mc:Ignorable="d"
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        Height="768" Width="1024" d:Height="1024"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        MinHeight="400"
+        FontFamily="{StaticResource IRANYEKAN}"
+        Background="{x:Null}"
+        AllowsTransparency="True" AllowDrop="True"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="15"/>
+    </WindowChrome.WindowChrome>
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ScrollViewer.CanContentScroll="True"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Color="{Binding ElementName=GENERAL_RANG, Path=Background.Color}" Opacity="0.3"/>
+        <Style TargetType="Label" x:Key="SettingNumberLabel" BasedOn="{StaticResource MaterialDesignLabel}">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="5,0"/>
+        </Style>
+        <Style TargetType="CheckBox" x:Key="SettingCheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FlowDirection" Value="RightToLeft"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid x:Name="mygrid" Margin="8,8,8,0">
+        <!-- Hidden button for color binding reference -->
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Width="1" Height="1"/>
+        <!-- Main container -->
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding ElementName=GENERAL_RANG, Path=Background}" BorderThickness="1" CornerRadius="10" Padding="8">
+            <!-- Title bar -->
+            <Border  x:Name="TitleDrawBar" Style="{StaticResource BordG}"  Background="{Binding ElementName=GENERAL_RANG, Path=Background}"  CornerRadius="10,10,0,0" Margin="-9,-9,-9,0"  Height="38"  VerticalAlignment="Top" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <!-- Window title -->
+                    <Label x:Name="LABEL_HEADER" Content="تنظیمات" Padding="17,8,10,10" Foreground="White" Margin="0,0,110,0" VerticalAlignment="Center"/>
+                    <!-- Window control buttons -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,13,0">
+                        <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" Height="24" Padding="0,0,0,-1" IsTabStop="False" ToolTip="Minimize">
+                            <materialDesign:PackIcon Kind="WindowMinimize" Width="18" Height="18" Foreground="White"/>
+                        </Button>
+                        <Button x:Name="Btn_Max" Click="Btn_Max_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" FontSize="12" Height="24" Padding="0" Margin="4,0,0,0" IsTabStop="False" ToolTip="Maximize">
+                            <materialDesign:PackIcon Kind="WindowMaximize" Width="17" Height="17" Foreground="White"/>
+                        </Button>
+                        <Button x:Name="Btn_Close" Click="Btn_Close_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" Height="24" Padding="0" Margin="4,0,0,0" FontSize="12" IsTabStop="False" ToolTip="Close">
+                            <materialDesign:PackIcon Kind="WindowClose" Width="19" Height="19" Foreground="White"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Border>
+        <!-- Notification popup -->
+        <Popup x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative" Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Width="{Binding ElementName=mygrid, Path=ActualWidth, Mode=OneWay}" Height="84" Padding="10">
+                <TextBox x:Name="Pop1Text1" IsReadOnly="True" Background="Transparent" BorderBrush="Transparent" Foreground="White" Text="محل نمایش اعلان های سیستم" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+            </Border>
+        </Popup>
+
+        <!-- Content area -->
+        <Grid Margin="0,38,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <Grid Margin="15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="15"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="2">
+                        <StackPanel.Resources>
+                            <Style TargetType="Grid">
+                                <Setter Property="Margin" Value="0,5"/>
+                            </Style>
+                        </StackPanel.Resources>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check9" Grid.Column="0" Content="اولين انبار معرفي شده به عنوان انبار پيش فرض براي هر كاربر نشان داده شود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="1" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check10" Grid.Column="0" Content="كد مخصوص چاپ فاكتور خاص اين شركت:" Style="{StaticResource SettingCheckBox}"/>
+                            <TextBox x:Name="C1112" Grid.Column="1" Width="60" FlowDirection="RightToLeft" VerticalAlignment="Center" materialDesign:HintAssist.Hint="کد"/>
+                            <Label Grid.Column="2" Content="2" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check13" Grid.Column="0" Content="در زمان تعريف سرفصلهاي فروش آن را بصورت فروش... تعريف كن" Style="{StaticResource SettingCheckBox}" ToolTip="1-فروش داخلي 2-فروش صادراتي 3- تخفيفات فروش 4-برگشت فروش"/>
+                            <Label Grid.Column="1" Content="3" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check14" Grid.Column="0" Content="حساب ارزي فعال شود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="4" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check15" Grid.Column="0" Content="فيلد توضيحات و کد فني در تعريف كالا در زمان جستجوي كالا  نمايش داده نشود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="5" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check16" Grid.Column="0" Content="صدور فاكتور فقط براي حواله هايي كه تيك بار گيري خورده امكان پذير باشد" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="6" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check17" Grid.Column="0" Content="صدور رسيد خريد كالا فقط بر اساس درخواست كالا امكان پذير باشد" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="7" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check18" Grid.Column="0" Content="فاكتور فروش مستقيم عمل شود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="8" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check19" Grid.Column="0" Content="در فاكتور فروش نوع مشتري بر اساس تعريف نوع مشتري بصورت خودكار مقدار بگيرد" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="9" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ComboBox x:Name="C2425" Grid.Column="0" FlowDirection="RightToLeft" materialDesign:HintAssist.Hint="مثال : کارت ساعت جهانگستر" Style="{StaticResource MaterialDesignFloatingHintComboBox}" IsEditable="False"/>
+                            <Label Grid.Column="1" Content="10" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="اندازه فونت در فاكتور فروش" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                            <TextBox x:Name="C2728" Grid.Column="1" FlowDirection="RightToLeft" Width="60" VerticalAlignment="Center" materialDesign:HintAssist.Hint="اندازه" PreviewLostKeyboardFocus="C2728_PreviewLostKeyboardFocus" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                            <CheckBox x:Name="Check26" Grid.Column="2" IsChecked="False" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="3" Content="11" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check29" Grid.Column="0" Content="فاكتور فروش بدون انبار و با كمترين تعداد اينتر باشد" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="12" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check7" Grid.Column="0" Content="پنجره جستجوي كالا در فاكتور با اينتر خالي باز نشود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="13" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check30" Grid.Column="0" Content="كليه حسابها در فيلد محل مصرف نشان داده شود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="14" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check38" Grid.Column="0" Content="حساب صندوق (نقد) در خزانه داري بر اساس واحد و شيفت انتخاب شود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="15" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Label Grid.Column="0" Content="مدت زمان باز شدن پنجره ورود كاربر (Login)" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                            <TextBox x:Name="C4041" Grid.Column="1" Width="60" VerticalAlignment="Center" PreviewLostKeyboardFocus="C4041_PreviewLostKeyboardFocus" materialDesign:HintAssist.Hint="زمان" Margin="5,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                            <Label Grid.Column="2" Content="دقیقه" VerticalAlignment="Center"/>
+                            <CheckBox x:Name="Check39" Grid.Column="3" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="4" Content="16" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check42" Grid.Column="0" Content="مانده حساب ها در خزانه داري نشان داده شود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="17" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check43" Grid.Column="0" Content="مركز هزينه فعال شود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="18" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check44" Grid.Column="0" Content="پنجره سند حسابداري بر اساس رزولوشن مانيتور تنظيم شود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="19" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="0">
+                        <StackPanel.Resources>
+                            <Style TargetType="Grid">
+                                <Setter Property="Margin" Value="0,5"/>
+                            </Style>
+                        </StackPanel.Resources>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check32" Grid.Column="0" Content="در فاكتور فروش نوع مشتري در سند حسابداري ذكر شود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="22" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check33" Grid.Column="0" Content="در فاكتور فروش قيمت مصرف كننده نشان داده شود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="23" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check37" Grid.Column="0" Content="قيمت مصرف كننده از اف دو بيايد وگرنه از آخرين فاكتور ثبت شده ميگيرد" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="24" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check34" Grid.Column="0" Content="انتخاب نوع ترازوي ديجيتال" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="25" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check45" Grid.Column="0" Content="تبديل پيش فاكتور به فاكتور اجازه دهد كه تكراري فاكتور صادر كند" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="26" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check46" Grid.Column="0" Content="در زمان تبديل پيش فاكتور به فاكتور نام كاربر صادر كننده پيش فاكتور در ملاحظات فاكتور ذكر شود" Style="{StaticResource SettingCheckBox}" FontSize="10"/>
+                            <Label Grid.Column="1" Content="27" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check47" Grid.Column="0" Content="ستون تخفيفات نقدي علاوه بر ستون تخفيفات نمايش داده شود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="28" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check48" Grid.Column="0" Content="كيبورد اصلاح شود براي حرف ي و ك" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="29" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check49" Grid.Column="0" Content="فعال شدن دريافت شماره سريال كالا" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="30" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check50" Grid.Column="0" Content="مقدار كالا در فاكتور فروش صفر قبول نكند" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="31" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check52" Grid.Column="0" Content="جايزه در نرم افزار فعال باشد" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="32" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check53" Grid.Column="0" Content="فاكتور فروش مستقيم براي هركاربر از تعيين دسترسي انتخاب شود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="33" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check54" Grid.Column="0" Content="خلاصه و فشرده سازي فاكتور فعال شود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="34" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check55" Grid.Column="0" Content="در فاكتور فروش واحد فروش در سند حسابداري ذكر شود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="35" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check56" Grid.Column="0" Content="چند فرموله عمل كند" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="36" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check58" Grid.Column="0" Content="تخفيفات پيشرفته عمل كند" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="37" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check51" Grid.Column="0" Content="در زمان تبديل پيش فاكتور به فاكتور مبلغ فروش كنترل گردد كه اگر تغيير كرده اخطار دهد بجز مبالغ صفر" Style="{StaticResource SettingCheckBox}" FontSize="9.5"/>
+                            <Label Grid.Column="1" Content="38" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check59" Grid.Column="0" Content="در زمان تبديل پيش فاكتور به فاكتور موجودي كنترل گردد" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="39" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check60" Grid.Column="0" Content="مد محافظت شده فعال شود (نرم افزار کندتر ميشود)" Style="{StaticResource SettingCheckBox}" FontWeight="Bold"/>
+                            <Label Grid.Column="1" Content="40" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check61" Grid.Column="0" Content="موجودي بر اساس کاردکس در جستجوي کالا نشان داده شود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="41" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check62" Grid.Column="0" Content="ماليات بر ارزش افزوده جزء پورسانت لحاظ گردد" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="42" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check64" Grid.Column="0" FontSize="11" Content="در زمان صدور صورت حساب (Ctrl+F8) كنترل كند كه فاكتورهاي فروش سند خورده باشد" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="43" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check65" Grid.Column="0" Content="SSM فعال شود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="44" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check66" Grid.Column="0" Content="انبار کالاي ساخته شده ميانگين موزون استاندارد باشد" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="45" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check67" Grid.Column="0" Content="تاييد اسناد قبل از ورود سند فاکتور فروش و خروج مواد و توليد" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="46" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="Check68" Grid.Column="0" Content="پارامترهاي بيشتر در خريد نشان داده شود" Style="{StaticResource SettingCheckBox}"/>
+                            <Label Grid.Column="1" Content="47" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
+
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="15">
+                <Button x:Name="Command148" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100" Content="ذخيره و خروج" Margin="5" Click="SaveButton_Click"/>
+                <Button x:Name="Command147" Content="انصراف" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" VerticalAlignment="Top" HorizontalAlignment="Right" Width="80" Margin="5" Click="CancelButton_Click"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

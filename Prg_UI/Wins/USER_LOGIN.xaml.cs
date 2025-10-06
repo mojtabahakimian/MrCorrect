@@ -12,6 +12,7 @@ using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.Scriptses;
 using Prg_UI.Wins.WinMenus.ANBAR;
+using Prg_UI.Wins.WinMenus.CONFIGS;
 using Prg_UI.Wins.WinMenus.HESABDARI;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
@@ -33,6 +34,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Wins.WinMenus.ANBAR;
+using Wins.WinMenus.CONFIGS;
 using Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.KHARID_FORUSH;
 using Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
@@ -373,9 +375,12 @@ namespace Prg_UI.Wins
             CL_Generaly.VAHED_OF_USER = 1;
             Baseknow.UGRP = "1";
 
+            //new WIN_SAZMAN().Show();
+            //new WIN_About().Show();
+
             //new WIN_HEAD_MANF().Show();
             //new Window4().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_HEAD_MANF_FORMULSAKHT, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_KOL_FT4, this);
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "6250,6276");
 

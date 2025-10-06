@@ -41,7 +41,7 @@ namespace Prg_Proccessy.MODELS
         public static string OPTIONSS { get; set; }
         public static string UGRP { get; set; }
         public static double? DIG { get; set; }
-        public static short? PERSON { get; set; }
+        public static double? PERSON { get; set; }
         public static short? KALA { get; set; }
         public static double? CPI { get; set; }
         public static bool? SIGN { get; set; }

@@ -19,7 +19,7 @@ namespace Prg_SendInvoice.SQLMODELS
         public short? SANAD { get; set; }
         public short? GHAYM { get; set; }
         public short? KALA { get; set; }
-        public short? PERSON { get; set; }
+        public double? PERSON { get; set; }
         public double? DIG { get; set; }
         public double? WAR { get; set; }
         public double? LST { get; set; }
@@ -128,6 +128,7 @@ namespace Prg_SendInvoice.SQLMODELS
         public bool? BARCOD { get; set; }
         public bool? SAGHF { get; set; }
         public string SERVERNAM { get; set; }
+        public string Whether { get; set; }
         public bool? TENDAR { get; set; }
         public string LECOL1 { get; set; }
         public string LECOL2 { get; set; }
@@ -223,7 +224,11 @@ namespace Prg_SendInvoice.SQLMODELS
         public int? UID { get; set; }
         public string PRIVIATEKEY { get; set; }
         public string MEMORYID { get; set; }
+        public string MEMORYIDsand { get; set; }
+        public string Dcertificate { get; set; }
 
         public string? SMSTYPE { get; set; }
+
+        public bool? HTAHOL { get; set; }
     }
 }

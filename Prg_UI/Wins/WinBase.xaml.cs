@@ -945,7 +945,7 @@ namespace Prg_UI.Wins
 
             //new WIN_SAZMAN().Show();
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_SAZMAN, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_SAZMAN_MOSHAKHASAT, this);
         }
 
         private void Image_PreviewMouseLeftButtonDown_1(object sender, MouseButtonEventArgs e)
@@ -1312,6 +1312,8 @@ namespace Prg_UI.Wins
 
         private void Button_Click_127(object sender, RoutedEventArgs e)
         {
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_About, default);
+
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.USERS, default);
         }
     }

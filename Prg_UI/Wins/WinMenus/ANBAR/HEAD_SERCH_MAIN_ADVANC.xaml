@@ -114,7 +114,7 @@
                         <CNC:NumericTextBox x:Name="NUMBER" Text="" TextAlignment="Right" DoesAcceptDouble="False" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
                         <ComboBox Padding="7,0,10,0" Width="70" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                                   x:Name="NUMBERB" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
@@ -150,7 +150,7 @@
 
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="TAGCODEB" Margin="5,0,0,0" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                                   Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
@@ -179,7 +179,7 @@
                         <xctk:MaskedTextBox x:Name="DATE_N" Style="{StaticResource FuzzyOut}" FlowDirection="LeftToRight" Padding="3" Mask="0000/00/00" Height="30" BorderThickness="1" FontSize="12" Width="150"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="DATE_NB" Margin="5"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.DATE_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                                   Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1" SelectionChanged="DATE_NB_SelectionChanged">
@@ -212,7 +212,7 @@
                         <CNC:NumericTextBox x:Name="CODE" Text="" TextAlignment="Right" DoesAcceptDouble="False" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="CODEB"                                 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                                   Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
@@ -241,7 +241,7 @@
                         <TextBox x:Name="KALA" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" Width="150"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="KALAB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.TEXT_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                                   Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
@@ -270,7 +270,7 @@
                         <CNC:NumericTextBox x:Name="MEGH" Text="" TextAlignment="Right" DoesAcceptDouble="True" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="MEGHB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -298,7 +298,7 @@
                         <CNC:NumericTextBox x:Name="MEGHk" Text="" TextAlignment="Right" DoesAcceptDouble="True" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="MEGHkB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -326,7 +326,7 @@
                         <TextBox x:Name="CUSTNAME" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" Width="150"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="CUSTNAMEB"  
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.TEXT_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -354,7 +354,7 @@
                         <TextBox x:Name="hes" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" Width="150"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="hesB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.TEXT_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -382,7 +382,7 @@
                         <CNC:NumericTextBox x:Name="MABL" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="MABLB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -410,7 +410,7 @@
                         <CNC:NumericTextBox x:Name="MABL_K" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="MABL_KB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -438,7 +438,7 @@
                         <CNC:NumericTextBox MaxLength="6" x:Name="N_KOL" IsPercentageMode="True" RestoreLastValidValue="False" LastValueShouldZero="False" DoesAcceptDouble="True" TextAlignment="Right" Text="" Width="150"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="N_KOLB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -466,7 +466,7 @@
                         <CNC:NumericTextBox x:Name="N_MOIN" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="N_MOINB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -494,7 +494,7 @@
                         <CNC:NumericTextBox x:Name="IMBAA" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="IMBAAB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -522,7 +522,7 @@
                         <CNC:NumericTextBox MaxLength="6" x:Name="TKHN" IsPercentageMode="True" RestoreLastValidValue="False" LastValueShouldZero="False" DoesAcceptDouble="True" TextAlignment="Right" Text="" Width="150"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="TKHNB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -550,7 +550,7 @@
                         <CNC:NumericTextBox x:Name="KHFR" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="KHFRB"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -578,7 +578,7 @@
                         <CNC:NumericTextBox x:Name="GHFR" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="GHFRB"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -606,7 +606,7 @@
                         <CNC:NumericTextBox x:Name="N_TAF" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="N_TAFB"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -634,7 +634,7 @@
                         <CNC:NumericTextBox x:Name="TOTALARZ" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="TOTALARZB"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -662,7 +662,7 @@
                         <CNC:NumericTextBox x:Name="AVRAGE" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="AVRAGEB"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -690,7 +690,7 @@
                         <CNC:NumericTextBox x:Name="MABRIAL" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="MABRIALB"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -725,7 +725,7 @@
 
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="VAHCODEB"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -759,7 +759,7 @@
                         </ComboBox>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="GRPCODEB"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -793,7 +793,7 @@
                         </ComboBox>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="OSTANIDB"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -827,7 +827,7 @@
                         </ComboBox>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="SHAHRIDB"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -861,7 +861,7 @@
                         </ComboBox>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="ROUTE_NAMEB"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                                   Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
@@ -891,7 +891,7 @@
                         <TextBox x:Name="MOLAH" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" Width="150"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="MOLAHB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.TEXT_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -919,7 +919,7 @@
                         <TextBox x:Name="SHARAYET" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" Width="150"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="SHARAYETB"  
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.TEXT_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -947,7 +947,7 @@
                         <CNC:NumericTextBox x:Name="FNUMCO" Text="" TextAlignment="Right" DoesAcceptDouble="False" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="FNUMCOB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -975,7 +975,7 @@
                         <CNC:NumericTextBox x:Name="NUMBER1" Text="" TextAlignment="Right" DoesAcceptDouble="False" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="NUMBER1B" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1003,7 +1003,7 @@
                         <CNC:NumericTextBox x:Name="MEGH_MAR" Text="" TextAlignment="Right" DoesAcceptDouble="True" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="MEGH_MARB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1031,7 +1031,7 @@
                         <TextBox x:Name="MANDAH" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" Width="150"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="MANDAHB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.TEXT_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1065,7 +1065,7 @@
                         </ComboBox>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="ANBARCODEB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1093,7 +1093,7 @@
                         <CNC:NumericTextBox x:Name="N_S" Text="" TextAlignment="Right" DoesAcceptDouble="False" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="N_SB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1127,7 +1127,7 @@
                         </ComboBox>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="USER_NAMEB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.TEXT_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1161,7 +1161,7 @@
                         </ComboBox>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="DEPATMANB"                                   
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1195,7 +1195,7 @@
                         </ComboBox>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="SHIFT_IDB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1229,7 +1229,7 @@
                         </ComboBox>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="CUST_CODB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1257,7 +1257,7 @@
                         <CNC:NumericTextBox x:Name="MAS" Text="" TextAlignment="Right" DoesAcceptDouble="False" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="MASB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1291,7 +1291,7 @@
                         </ComboBox>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="N_RASIDB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1319,7 +1319,7 @@
                         <TextBox x:Name="N_FANI" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" Width="150"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="N_FANIB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.TEXT_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1353,7 +1353,7 @@
                         </ComboBox>
                         <ComboBox x:Name="MMB" Padding="7,0,10,0" Width="70" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1381,7 +1381,7 @@
                         <CNC:NumericTextBox x:Name="TAMIR" Text="" TextAlignment="Right" DoesAcceptDouble="False" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="TAMIRB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1409,7 +1409,7 @@
                         <CNC:NumericTextBox x:Name="MIN_M" Text="" TextAlignment="Right" DoesAcceptDouble="True" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="MIN_MB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1437,7 +1437,7 @@
                         <CNC:NumericTextBox x:Name="MAX_M" Text="" TextAlignment="Right" DoesAcceptDouble="True" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="MAX_MB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1465,7 +1465,7 @@
                         <CNC:NumericTextBox x:Name="N_SEF" Text="" TextAlignment="Right" DoesAcceptDouble="True" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="N_SEFB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1493,7 +1493,7 @@
                         <CNC:NumericTextBox x:Name="B_SEF" Text="" TextAlignment="Right" DoesAcceptDouble="True" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="B_SEFB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1521,7 +1521,7 @@
                         <CNC:NumericTextBox x:Name="MABL_F" RestoreLastValidValue="False" LastValueShouldZero="False"  DoesAcceptDouble="False" TextAlignment="Right" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" Text="" Width="150" MaxLength="16"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="MABL_FB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1549,7 +1549,7 @@
                         <CNC:NumericTextBox x:Name="VAZN" Text="" TextAlignment="Right" DoesAcceptDouble="True" RestoreLastValidValue="False" LastValueShouldZero="False" Width="150" Height="30"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="VAZNB" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1583,7 +1583,7 @@
                         </ComboBox>
                         <ComboBox x:Name="col1B" Padding="7,0,10,0" Width="70" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1617,7 +1617,7 @@
                         </ComboBox>
                         <ComboBox x:Name="col2B" Padding="7,0,10,0" Width="70" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1651,7 +1651,7 @@
                         </ComboBox>
                         <ComboBox x:Name="col3B" Padding="7,0,10,0" Width="70" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1685,7 +1685,7 @@
                         </ComboBox>
                         <ComboBox x:Name="col4B" Padding="7,0,10,0" Width="70" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1719,7 +1719,7 @@
                         </ComboBox>
                         <ComboBox x:Name="col5B" Padding="7,0,10,0" Width="70" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1753,7 +1753,7 @@
                         </ComboBox>
                         <ComboBox x:Name="col6B" Padding="7,0,10,0" Width="70" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1787,7 +1787,7 @@
                         </ComboBox>
                         <ComboBox x:Name="col7B" Padding="7,0,10,0" Width="70" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1821,7 +1821,7 @@
                         </ComboBox>
                         <ComboBox x:Name="col8B" Padding="7,0,10,0" Width="70" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
@@ -1855,7 +1855,7 @@
                         </ComboBox>
                         <ComboBox x:Name="col9B" Padding="7,0,10,0" Width="70" 
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpValue" 
+                                  DisplayMemberPath="OpDisplay" 
                                   SelectedValuePath="OpValue"
                                   ItemsSource="{Binding DataContext.NUMERIC_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>

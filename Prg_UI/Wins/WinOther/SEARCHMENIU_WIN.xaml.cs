@@ -273,7 +273,6 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست چکهای پرداختی اعلام وصول نشده", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_CVP });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "Ctrl + 7 چاپ سریع چک", WIN_NAME = CL_MenuManager.WinNameType.CHAPCHEK });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "ثبت و ویرایش مرخصی پرسنل", WIN_NAME = CL_MenuManager.WinNameType.PMORAKH });
-            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مشخصات سیسیتم", WIN_NAME = CL_MenuManager.WinNameType.WIN_SAZMAN });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تنظیم قالب و رنگ", WIN_NAME = CL_MenuManager.WinNameType.MaterialThemSettingy });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "صدور برگه خروج موارد اولیه از انبار", WIN_NAME = CL_MenuManager.WinNameType.HAVALAH_EXIT });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "صدور برگه ورود کالای ساخته شده به انبار", WIN_NAME = CL_MenuManager.WinNameType.HAVALAH_ENTER });
@@ -394,7 +393,12 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تغییر رمز عبور", WIN_NAME = CL_MenuManager.WinNameType.NEWPASSWORD });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تغییر نام یا حذف کاربر", WIN_NAME = CL_MenuManager.WinNameType.USER_CHANGE });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "پیشفرض واحد و شیفت", WIN_NAME = CL_MenuManager.WinNameType.DEFAULT });
+
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مشخصات سیسیتم", WIN_NAME = CL_MenuManager.WinNameType.WIN_SAZMAN_MOSHAKHASAT });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "درباره تهیه کنندگان", WIN_NAME = CL_MenuManager.WinNameType.WIN_About });
+
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف کاربر جدید", WIN_NAME = CL_MenuManager.WinNameType.USERS });
+
 
 
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());
