@@ -363,6 +363,7 @@ namespace Wins.WinOther
 
             //حسابداری
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "کنترل اسناد و دفاتر چک", WIN_NAME = CL_MenuManager.WinNameType.ADAMTARAZ });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "حسابهای ترازنامه", WIN_NAME = CL_MenuManager.WinNameType.TARAZHES_WIN });
 
 
             //تعاریف
@@ -392,8 +393,13 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تغییر رمز عبور", WIN_NAME = CL_MenuManager.WinNameType.NEWPASSWORD });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تغییر نام یا حذف کاربر", WIN_NAME = CL_MenuManager.WinNameType.USER_CHANGE });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "پیشفرض واحد و شیفت", WIN_NAME = CL_MenuManager.WinNameType.DEFAULT });
+
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مشخصات سیسیتم", WIN_NAME = CL_MenuManager.WinNameType.WIN_SAZMAN_MOSHAKHASAT });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "درباره تهیه کنندگان", WIN_NAME = CL_MenuManager.WinNameType.WIN_About });
+
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف کاربر جدید", WIN_NAME = CL_MenuManager.WinNameType.USERS });
+
+
 
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());
 

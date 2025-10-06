@@ -68,6 +68,11 @@ namespace Wins.ThePages
         private void WrapPanel_PreviewMouseDown_1(object sender, MouseButtonEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_About, default);
+
+        private void Image_PreviewMouseDown_5(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.USERS, default);
+
         }
     }
 }

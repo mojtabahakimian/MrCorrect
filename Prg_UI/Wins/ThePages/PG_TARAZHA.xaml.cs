@@ -77,5 +77,10 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_OTHER, default);
         }
+
+        private void Image_PreviewMouseDown_10(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.TARAZHES_WIN, default);
+        }
     }
 }

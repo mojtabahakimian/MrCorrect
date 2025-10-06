@@ -4455,7 +4455,7 @@
 
                     <Expander Foreground="{DynamicResource MaterialDesignBody}" x:Name="Tanzimat_Expan" FlowDirection="RightToLeft" Header="تنظیمات" Background="{x:Null}" BorderBrush="{x:Null}">
                         <StackPanel>
-                            <Button  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                            <Button  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Click="Button_Click_127" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                 <Grid Width="189">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="10*"/>

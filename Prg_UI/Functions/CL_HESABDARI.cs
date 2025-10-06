@@ -2949,6 +2949,11 @@ namespace Prg_Proccessy.FUNCTIONS
                         WANTEDFORMRet = "DEPEMAL";
                         break;
                     }
+                case "USERS":
+                    {
+                        WANTEDFORMRet = "USERS";
+                        break;
+                    }
             }
             return WANTEDFORMRet;
         }

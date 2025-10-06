@@ -898,9 +898,18 @@ namespace Functions
             /// </summary>
             WIN_HEAD_MANF_FORMULSAKHT,
             /// <summary>
+
             /// درباره تهیه کنندگان
             /// </summary>
             WIN_About,
+
+            /// تعریف کاربر جدید
+            /// </summary>
+            USERS,
+            /// <summary>
+            /// حسابهای ترازنامه
+            /// </summary>
+            TARAZHES_WIN
         }
         #endregion
 
@@ -933,6 +942,14 @@ namespace Functions
 
                 case WinNameType.HEAD_SERCH_MAIN_ADVANC_F12: /*  جستجو در گردش کالا های پیشرفته | F12 پیشرفته */ CL_LMethods.OpenWindow(OWNERWIN, new HEAD_SERCH_MAIN_ADVANC(), isModalDialog: false, allowMultipleInstances: false); break;
                 //Mojtaba}
+
+                case WinNameType.TARAZHES_WIN: //حسابهای ترازنامه
+                    CL_LMethods.OpenWindow(OWNERWIN, new TARAZHES_WIN());
+                    break;
+
+                case WinNameType.USERS: //تعریف کاربر جدید
+                    CL_LMethods.OpenWindow(OWNERWIN, new USERS());
+                    break;
 
                 case WinNameType.USER_CHANGE: //تغییر نام یا حذف کاربر
                     CL_LMethods.OpenWindow(OWNERWIN, new USER_CHANGE());
