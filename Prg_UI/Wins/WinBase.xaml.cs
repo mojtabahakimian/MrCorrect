@@ -1312,9 +1312,12 @@ namespace Prg_UI.Wins
 
         private void Button_Click_127(object sender, RoutedEventArgs e)
         {
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_About, default);
-
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.USERS, default);
+        }
+
+        private void Button_Click_128(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_About, default);
         }
     }
 }
