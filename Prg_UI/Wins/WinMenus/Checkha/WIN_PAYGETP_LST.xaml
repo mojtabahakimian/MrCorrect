@@ -118,6 +118,31 @@
 
             <syncfusion:SfDataGrid.Columns>
 
+                <syncfusion:GridTemplateColumn MappingName="IsButtony" HeaderText="سند" IsReadOnly="True" AllowResizing="False" Width="50" AllowFiltering="False" AllowSorting="False">
+                    <syncfusion:GridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button 
+                                IsTabStop="False"
+                                Click="Button_Click"
+                                Tag="{Binding}"
+                                materialDesign:ButtonAssist.CornerRadius="1"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                VerticalContentAlignment="Center"
+                                HorizontalContentAlignment="Center">
+                                <materialDesign:PackIcon Kind="FileDocument"/>
+                            </Button>
+                        </DataTemplate>
+                    </syncfusion:GridTemplateColumn.CellTemplate>
+                    <syncfusion:GridTemplateColumn.CellStyle>
+                        <Style TargetType="sfusion:GridCell">
+                            <Setter Property="IsTabStop" Value="False"/>
+                            <Setter Property="Focusable" Value="False"/>
+                        </Style>
+                    </syncfusion:GridTemplateColumn.CellStyle>
+                </syncfusion:GridTemplateColumn>
+
                 <syncfusion:GridTextColumn MappingName="N_SERI" HeaderText="شماره سریال" ColumnSizer="Auto" />
                 <syncfusion:GridTextColumn MappingName="BANK_NAME" HeaderText="بانک" ColumnSizer="Auto" />
                 <syncfusion:GridTextColumn MappingName="SHOBEH" HeaderText="نام شعبه" ColumnSizer="Auto" />

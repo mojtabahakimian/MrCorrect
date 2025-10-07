@@ -259,6 +259,21 @@
                             <CheckBox x:Name="Check44" Grid.Column="0" Content="پنجره سند حسابداري بر اساس رزولوشن مانيتور تنظيم شود" Style="{StaticResource SettingCheckBox}"/>
                             <Label Grid.Column="1" Content="19" Style="{StaticResource SettingNumberLabel}"/>
                         </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <UniformGrid Grid.Column="0" Rows="1" FlowDirection="RightToLeft">
+                                <Label Content="کد سبد شیری:" FontSize="10" Padding="4,7,4,4"/>
+                                <TextBox Width="80" FontSize="10" x:Name="TXB_SHIRI"/>
+                                <Label Content="کد سبد ماستی:" FontSize="10" Padding="4,7,4,4"/>
+                                <TextBox Width="80" FontSize="10" x:Name="TXB_MASTI"/>
+                                <Label Content="کد سبد مدرسه:" FontSize="10" Padding="4,7,4,4"/>
+                                <TextBox Width="80" FontSize="10"  x:Name="TXB_MADRESE"/>
+                            </UniformGrid>
+                            <Label Grid.Column="1" Content="-" Style="{StaticResource SettingNumberLabel}"/>
+                        </Grid>
                     </StackPanel>
 
                     <StackPanel Grid.Column="0">

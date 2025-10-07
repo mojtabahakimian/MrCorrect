@@ -382,7 +382,7 @@
 
             <Grid Margin="11,171,0,0" HorizontalAlignment="Left" Width="239" Height="37" VerticalAlignment="Top">
                 <Label Content="بروز رسانی خودکار:" FlowDirection="RightToLeft" Width="104" Height="auto" Margin="134,3,0,7" HorizontalAlignment="Left"/>
-                <ToggleButton x:Name="AutoRefreshToggle" Margin="96,6,0,6" HorizontalAlignment="Left" Width="34" Click="AutoRefreshToggle_Click"/>
+                <ToggleButton x:Name="AutoRefreshToggle" Margin="96,6,0,6" HorizontalAlignment="Left" Width="34" IsChecked="False" Click="AutoRefreshToggle_Click"/>
                 <ComboBox x:Name="RefreshIntervalCombo" DisplayMemberPath="NAME" SelectedValuePath="ID" SelectionChanged="RefreshIntervalCombo_SelectionChanged" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" HorizontalAlignment="Left" Width="89" Height="27"/>
             </Grid>
 

@@ -26,6 +26,8 @@ using Prg_UI.Wins.WinMenus.HESABDARI;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using Prg_Proccessy.Generaly;
+using Prg_Proccessy.FUNCTIONS;
 
 namespace Wins.WinMenus.HESABDARI
 {
@@ -90,11 +92,13 @@ namespace Wins.WinMenus.HESABDARI
         }
         //Header Window End;
         #endregion
-        public WIN_ALLSANAD()
+        public WIN_ALLSANAD(string _WhereCondtion_ = "")
         {
             InitializeComponent();
 
             this.DataContext = this;
+
+            WHERE_CONDITION = _WhereCondtion_;
         }
         public ObservableCollection<DEED_HED> HEADSANAD_DATA { get; set; } = new ObservableCollection<DEED_HED>();
         public ObservableCollection<DEED_DTL> SANAD_DATA { get; set; } = new ObservableCollection<DEED_DTL>();
@@ -102,12 +106,17 @@ namespace Wins.WinMenus.HESABDARI
         UniversControl universControl = new UniversControl();
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+
+        public string WHERE_CONDITION { get; set; } = "";
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             //Process Prc = ProcLoader.Start();
 
+            //" WHERE SHARH_S LIKE N'%1%' ";
+
             HEADSANAD_DATA?.Clear();
-            var MasterHead = dbms.DoGetDataSQL<DEED_HED>($"SELECT N_S, DATE_S, SHARH_S, NO_S, ANBAR, N_FACTOR, GHATEI, USER_NAME, base, SGN1, SGN2, SGN3, SGN4, OKF, sgn1usid, sgn2usid, sgn3usid, CRT, UID, BAYEG FROM dbo.DEED_HED ORDER BY N_S").ToList();
+            var MasterHead = dbms.DoGetDataSQL<DEED_HED>($"SELECT N_S, DATE_S, SHARH_S, NO_S, ANBAR, N_FACTOR, GHATEI, USER_NAME, base, SGN1, SGN2, SGN3, SGN4, OKF, sgn1usid, sgn2usid, sgn3usid, CRT, UID, BAYEG " +
+                $" FROM dbo.DEED_HED {WHERE_CONDITION}" + $" ORDER BY N_S").ToList();
             foreach (var item in MasterHead)
             {
                 HEADSANAD_DATA.Add(item);
@@ -590,7 +599,7 @@ namespace Wins.WinMenus.HESABDARI
             SANAD_DATA?.Clear();
             if (_N_S_ != null)
             {
-                
+
                 var Sanaddata = dbms.DoGetDataSQL<DEED_DTL>(@$"SELECT D.N_S, D.RADIF, D.HES_K, D.HES_M, D.HES_T, D.SHARH, D.BED, D.BES, D.N_SERI, D.BANK, D.NUMBER, D.TAG, D.HES, C.NAME AS NAME_HES,
                                                                D.id, D.ARZD, D.MHAZ_NO, D.HES_T2, D.HES_T3, D.HES_T4, D.CRT, D.UID
                                                                FROM dbo.DEED_DTL D
@@ -607,6 +616,57 @@ namespace Wins.WinMenus.HESABDARI
 
             SUM_BED_TEXTBOX.Text = SANAD_DATA.Sum(i => i.BED).ToStringNullSafe();
             SUM_BES_TEXTBOX.Text = SANAD_DATA.Sum(i => i.BES).ToStringNullSafe();
+
+            var PassedValue = CL_HESABDARI.GetBetweenStr(WHERE_CONDITION, "%", "%");
+            if (!string.IsNullOrWhiteSpace(PassedValue))
+            {
+                FocusRowBySharh(PassedValue);
+            }
+
+        }
+        private void FocusRowBySharh(string searchValue)
+        {
+            if (string.IsNullOrWhiteSpace(searchValue) || SANAD_DATA == null || SANAD_DATA.Count == 0)
+                return;
+
+            try
+            {
+                // Find the item with matching SHARH value (case-insensitive partial match)
+                var targetItem = SANAD_DATA.FirstOrDefault(item =>
+                    item.SHARH != null &&
+                    item.SHARH.IndexOf(searchValue, StringComparison.OrdinalIgnoreCase) >= 0);
+
+                if (targetItem != null)
+                {
+                    // Ensure UI is updated
+                    SANAD_DETAIL.UpdateLayout();
+
+                    // Set the selected item
+                    SANAD_DETAIL.SelectedItem = targetItem;
+
+                    // Scroll the item into view (important for virtualized rows)
+                    SANAD_DETAIL.ScrollIntoView(targetItem);
+
+                    // Get the row container
+                    var row = SANAD_DETAIL.ItemContainerGenerator.ContainerFromItem(targetItem) as DataGridRow;
+
+                    // If row is null due to virtualization, force generation
+                    if (row == null)
+                    {
+                        SANAD_DETAIL.UpdateLayout();
+                        SANAD_DETAIL.ScrollIntoView(targetItem);
+                        row = SANAD_DETAIL.ItemContainerGenerator.ContainerFromItem(targetItem) as DataGridRow;
+                    }
+
+                    if (row != null)
+                    {
+                        // Set focus to the row
+                        row.Focus();
+                        //FocusSpecificCell(row, 2); // Column index 2 is SHARH
+                    }
+                }
+            }
+            catch { }
         }
 
         private void SANAD_DETAIL_PreviewKeyDown(object sender, KeyEventArgs e)

@@ -579,6 +579,18 @@ namespace Wins.WinMenus.Checkha
 
             return true;
         }
-    
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            var CurrentRow = PAY_GETD_SUB.SelectedItem as PAY_GETD_MODEL;
+
+            if (CurrentRow != null && CurrentRow?.N_SERI != null)
+            {
+                //var IsAnyRow = dbms.DoGetDataSQL<double?>($"SELECT TOP 1 N_S FROM dbo.DEED_DTL WHERE SHARH LIKE N'%{CurrentRow.N_SERI}%'").Any();
+
+                string _WHERE_ = $" WHERE N_S IN ( (SELECT N_S FROM dbo.DEED_DTL WHERE SHARH LIKE N'%{CurrentRow.N_SERI}%') )  ";
+                CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD_LIST, this, _WHERE_);
+            }
+        }
     }
 }

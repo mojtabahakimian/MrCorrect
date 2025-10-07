@@ -1486,7 +1486,7 @@ namespace Functions
                     break;
 
                 case WinNameType.DEED_HEAD_LIST: //لیست اسناد
-                    CL_LMethods.OpenWindow(OWNERWIN, new WIN_ALLSANAD()); //CL_LMethods.OpenWindow(OWNERWIN, new DEED_HEAD_LIST());
+                    CL_LMethods.OpenWindow(OWNERWIN, new WIN_ALLSANAD((string)_PARAMETERS_[0])); //CL_LMethods.OpenWindow(OWNERWIN, new DEED_HEAD_LIST());
                     break;
 
                 case WinNameType.DEED_SEARCH_MAIN: //جستجو در شرح سند
@@ -1564,6 +1564,8 @@ namespace Functions
                         bool isExporty = (_PARAMETERS_.Length > 2) && Convert.ToBoolean(_PARAMETERS_[2]);
                         bool fromAutomation = (_PARAMETERS_.Length > 3) && Convert.ToBoolean(_PARAMETERS_[3]);
 
+                        bool IsFromPishfactor = (_PARAMETERS_.Length > 4) && Convert.ToBoolean(_PARAMETERS_[4]);
+
                         if (MostaghimAmalShavad && MostaghimDastrasi) // مستقیم
                         {
                             CL_MenuManager.OpenWinMenu(
@@ -1572,7 +1574,8 @@ namespace Functions
                                 numbersPair,
                                 true,           // 👈 مستقیم
                                 isExporty,      // صادراتی بودن طبق ورودی
-                                fromAutomation
+                                fromAutomation,
+                                IsFromPishfactor
                             );
                         }
                         else if (Strings.Mid(Baseknow.OPTIONSS, 18, 1) != "5") // غیر مستقیم
@@ -1585,7 +1588,8 @@ namespace Functions
                                     numbersPair,
                                     false,          // 👈 غیر مستقیم
                                     isExporty,
-                                    fromAutomation
+                                    fromAutomation,
+                                    IsFromPishfactor
                                 );
                             }
                             // else: هیچ کاری نکن (همان منطق قبلی‌ات)
@@ -1599,7 +1603,8 @@ namespace Functions
                                 numbersPair,
                                 true,
                                 isExporty,
-                                fromAutomation
+                                fromAutomation,
+                                IsFromPishfactor
                             );
                         }
                         break;
@@ -1613,7 +1618,8 @@ namespace Functions
                                 _PARAMETERS_.Length > 0 ? (string?)_PARAMETERS_[0] : null,
                                 true,
                                 false,
-                                _PARAMETERS_.Length > 3 && Convert.ToBoolean(_PARAMETERS_[3])
+                                _PARAMETERS_.Length > 3 && Convert.ToBoolean(_PARAMETERS_[3]),
+                                _PARAMETERS_.Length > 4 && Convert.ToBoolean(_PARAMETERS_[4])
                                 )
                                 );
                     break;
@@ -1624,7 +1630,8 @@ namespace Functions
                                    _PARAMETERS_.Length > 0 ? (string?)_PARAMETERS_[0] : null,
                                    false,
                                    false,
-                                   _PARAMETERS_.Length > 3 && Convert.ToBoolean(_PARAMETERS_[3])
+                                   _PARAMETERS_.Length > 3 && Convert.ToBoolean(_PARAMETERS_[3]),
+                                   _PARAMETERS_.Length > 4 && Convert.ToBoolean(_PARAMETERS_[4])
                                    )
                                    );
                     break;
@@ -1635,7 +1642,8 @@ namespace Functions
                                               _PARAMETERS_.Length > 0 ? (string?)_PARAMETERS_[0] : null,
                                               false,
                                               true,
-                                              _PARAMETERS_.Length > 3 && Convert.ToBoolean(_PARAMETERS_[3])
+                                              _PARAMETERS_.Length > 3 && Convert.ToBoolean(_PARAMETERS_[3]),
+                                              _PARAMETERS_.Length > 4 && Convert.ToBoolean(_PARAMETERS_[4])
                                               )
                                               );
                     break;

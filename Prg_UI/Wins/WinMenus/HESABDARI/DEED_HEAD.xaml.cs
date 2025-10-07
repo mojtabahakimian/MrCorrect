@@ -41,6 +41,7 @@ using System.Runtime.Serialization;
 using static Prg_UI.HelperWins.Msgwin;
 using Wins.WinOther;
 using System.Windows.Controls.Primitives;
+using Syncfusion.Windows.Shared;
 
 namespace Prg_UI.Wins.WinMenus.HESABDARI
 {
@@ -1538,50 +1539,47 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 }
                 else
                 {
-                    if (!string.IsNullOrWhiteSpace(WAS_ROW_ITEM?.HES) && !string.IsNullOrWhiteSpace(ENTERED_VALUE_ROW.ToStringNullSafe()))
+                    if (WAS_ROW_ITEM?.HES != ENTERED_VALUE_ROW.ToStringNullSafe())
                     {
-                        if (WAS_ROW_ITEM?.HES != ENTERED_VALUE_ROW.ToStringNullSafe())
+
+                        //CL_HESAB_SEARCH.Go_Search_Hesab(ENTERED_VALUE_ROW.ToString(), "DEED_HEAD", I_AM_SANAD);
+                        var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT * FROM dbo.CUST_HESAB WHERE hes = N'" + ENTERED_VALUE_ROW + "'").FirstOrDefault();
+                        if (data is not null && !string.IsNullOrEmpty(data.hes))
                         {
+                            CURRENT_ITMES_ROW.HES = data.hes;
+                            CURRENT_ITMES_ROW.NAME_HES = data.NAME;
 
-                            //CL_HESAB_SEARCH.Go_Search_Hesab(ENTERED_VALUE_ROW.ToString(), "DEED_HEAD", I_AM_SANAD);
-                            var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT * FROM dbo.CUST_HESAB WHERE hes = N'" + ENTERED_VALUE_ROW + "'").FirstOrDefault();
-                            if (data is not null && !string.IsNullOrEmpty(data.hes))
+
+                            if (!IsNull(CURRENT_ITMES_ROW.HES))
                             {
-                                CURRENT_ITMES_ROW.HES = data.hes;
-                                CURRENT_ITMES_ROW.NAME_HES = data.NAME;
+                                double? KOL = null, MOIN = null, taf = null;
+                                double? TAF2 = null;
+                                double? taf3 = null;
+                                double? taf4 = null;
 
-
-                                if (!IsNull(CURRENT_ITMES_ROW.HES))
-                                {
-                                    double? KOL = null, MOIN = null, taf = null;
-                                    double? TAF2 = null;
-                                    double? taf3 = null;
-                                    double? taf4 = null;
-
-                                    CURRENT_ITMES_ROW.HES_K = Convert.ToInt32(CL_HESABDARI.GETKOL(CURRENT_ITMES_ROW.HES));
-                                    CURRENT_ITMES_ROW.HES_M = Convert.ToInt32(CL_HESABDARI.GETMOIN(CURRENT_ITMES_ROW.HES));
-                                    CURRENT_ITMES_ROW.HES_T = Convert.ToInt32(CL_HESABDARI.GETTAF(CURRENT_ITMES_ROW.HES));
-                                    CL_HESABDARI.GETTAF3(CURRENT_ITMES_ROW.HES, ref KOL, ref MOIN, ref taf, ref TAF2, ref taf3, ref taf4);
-                                    CURRENT_ITMES_ROW.HES_T2 = (int?)TAF2;
-                                    CURRENT_ITMES_ROW.HES_T3 = (int?)taf3;
-                                    CURRENT_ITMES_ROW.HES_T4 = (int?)taf4;
-                                    // Me.HES_T2 = IIf(GETTAF2(Me.HES) = -1, Null, GETTAF2(Me.HES))
-                                }
+                                CURRENT_ITMES_ROW.HES_K = Convert.ToInt32(CL_HESABDARI.GETKOL(CURRENT_ITMES_ROW.HES));
+                                CURRENT_ITMES_ROW.HES_M = Convert.ToInt32(CL_HESABDARI.GETMOIN(CURRENT_ITMES_ROW.HES));
+                                CURRENT_ITMES_ROW.HES_T = Convert.ToInt32(CL_HESABDARI.GETTAF(CURRENT_ITMES_ROW.HES));
+                                CL_HESABDARI.GETTAF3(CURRENT_ITMES_ROW.HES, ref KOL, ref MOIN, ref taf, ref TAF2, ref taf3, ref taf4);
+                                CURRENT_ITMES_ROW.HES_T2 = (int?)TAF2;
+                                CURRENT_ITMES_ROW.HES_T3 = (int?)taf3;
+                                CURRENT_ITMES_ROW.HES_T4 = (int?)taf4;
+                                // Me.HES_T2 = IIf(GETTAF2(Me.HES) = -1, Null, GETTAF2(Me.HES))
                             }
-                            else
-                            {
-                                CURRENT_ITMES_ROW.HES = null;
-                                CURRENT_ITMES_ROW.NAME_HES = null;
-
-                                if (ENTERED_VALUE_ROW == "" || ENTERED_VALUE_ROW is null)
-                                {
-                                    universControl.PopNotifyShow("چنین حسابی وجود ندارد.", Pop1, Pop1Text1, Pop_Border1);
-                                    Child14_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                                }
-                                return;
-                            }
-
                         }
+                        else
+                        {
+                            CURRENT_ITMES_ROW.HES = null;
+                            CURRENT_ITMES_ROW.NAME_HES = null;
+
+                            if (!e.Row.IsNewItem && string.IsNullOrWhiteSpace(ENTERED_VALUE_ROW?.ToStringNullSafe()))
+                            {
+                                Child14_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                                universControl.PopNotifyShow("چنین حسابی وجود ندارد.", Pop1, Pop1Text1, Pop_Border1);
+                            }
+                            return;
+                        }
+
                     }
 
                 }

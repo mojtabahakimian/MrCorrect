@@ -132,6 +132,15 @@ namespace Prg_UI.Wins.WinMenus.WinDEFAULT
         }
         private void DEFAULT_VSH_SAVE_Click(object sender, RoutedEventArgs e)
         {
+            if (TFSAZMAN_CMB.SelectedValue == null)
+            {
+                new Msgwin(false, "واحد جاری سیستم نمیتواند خالی باشد").Show(); return;
+            }
+            if (SHIFT_CMB.SelectedValue == null)
+            {
+                new Msgwin(false, "شیفت سیستم نمیتواند خالی باشد").Show(); return;
+            }
+
             int UCOD = 0;
             UCOD = BASEKNOW_USERCOD();
             var RST_VAHED = dbms.DoGetDataSQL<DEFAULTDEP>($"SELECT TFSAZMAN, SHIFT, USERID FROM DEFAULTDEP WHERE USERID = {UCOD}").FirstOrDefault();

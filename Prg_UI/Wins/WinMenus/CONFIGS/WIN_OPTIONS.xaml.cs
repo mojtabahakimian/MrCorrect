@@ -1,15 +1,22 @@
 ﻿using Dapper;
 using MaterialDesignThemes.Wpf;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Options;
 using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_SendInvoice.SQLMODELS;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
+using Stimulsoft.System.Data.Sql;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -70,6 +77,8 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
         #endregion
 
         private readonly CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+
+        private readonly GeneralOptionManager GOM = new GeneralOptionManager();
 
         UniversControl universControl = new UniversControl();
         public bool NowIsReady { get; private set; }
@@ -142,6 +151,8 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            //test();
+
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
             FILL_ALL_COMBOBOXES();
@@ -150,8 +161,27 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
 
             WAS_C2728 = C2728.Text; //اندازه فونت در فاكتور فروش
             WAS_C4041 = C4041.Text; //زمان
-        }
 
+        }
+        private async void test()
+        {
+            await using var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR);
+            await db.OpenAsync(default);
+
+            const string sql = "SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName IN @OptionNames;";
+
+            var command = new CommandDefinition(sql, default, commandTimeout: 3600, cancellationToken: default);
+
+            var requiredOptions = new List<string>
+            {
+                "ShiryBasketCode",
+                "MastyBasketCode",
+                "MadreseBasketCode"
+            };
+
+            var result = dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { OptionNames = requiredOptions }).Result;
+            var test = result.ToList();
+        }
         private void FILL_ALL_COMBOBOXES()
         {
             var itemsList = new List<ComboBoxItemData>
@@ -165,7 +195,7 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             C2425.DisplayMemberPath = "Display";
             C2425.SelectedValuePath = "Value";
         }
-        private void LoadSettings()
+        private async void LoadSettings()
         {
             // ابتدا رکورد تنظیمات را برای گرفتن رشته OPTIONSS و ID اصلی می‌خوانیم
             string sql = "SELECT TOP 1 UNIVERSITY_CO, OPTIONSS FROM SAZMAN";
@@ -228,6 +258,8 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                     chk13.IsEnabled = false;
                 }
             }
+
+            await LoadGeneralOptionSettingAsync();
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -268,8 +300,9 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             }
         }
 
-        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        private async void SaveButton_Click(object sender, RoutedEventArgs e)
         {
+            Command148.IsEnabled = false;
             //Command148_Click
 
             var tnzBuilder = new StringBuilder();
@@ -323,12 +356,38 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             try
             {
                 dbms.DoExecuteSQL(sql, parameters);
-                new Msgwin(false, "تنظیمات با موفقیت ذخیره شد").ShowDialog();
-                this.Close();
+
+                #region GeneralOptionSaving
+                var optionsToSave = new List<GENERAL_OPTIONS>
+                {
+                    new GENERAL_OPTIONS { OptionName = "ShiryBasketCode", OptionValue = TXB_SHIRI.Text },
+                    new GENERAL_OPTIONS { OptionName = "MastyBasketCode", OptionValue = TXB_MASTI.Text },
+                    new GENERAL_OPTIONS { OptionName = "MadreseBasketCode", OptionValue = TXB_MADRESE.Text }
+                };
+                var saveTasks = new List<Task<bool>>();
+                foreach (var option in optionsToSave)
+                {
+                    saveTasks.Add(GOM.SaveOptionAsync(option));
+                }
+                bool[] results = await Task.WhenAll(saveTasks);
+                if (results.All(success => success))
+                {
+                    new Msgwin(false, "تنظیمات با موفقیت ذخیره شد").ShowDialog();
+                    this.Close();
+                }
+                else
+                {
+                    new Msgwin(false, "خطا: حداقل یکی از تنظیمات ذخیره نشد").ShowDialog();
+                }
+                #endregion
             }
             catch (Exception ex)
             {
                 new Msgwin(false, "خطا در ذخیره سازی").ShowDialog();
+            }
+            finally
+            {
+                Command148.IsEnabled = true;
             }
         }
 
@@ -354,6 +413,34 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                 C4041.Text = WAS_C4041;
             }
             C4041.Text = C4041.Text.Trim();
+        }
+
+        private async Task LoadGeneralOptionSettingAsync()
+        {
+            // 1. لیستی از نام تنظیمات مورد نیاز را تعریف کنید
+            var requiredOptions = new List<string>
+            {
+                "ShiryBasketCode",
+                "MastyBasketCode",
+                "MadreseBasketCode"
+            };
+            try
+            {
+                //////اگر میخوای غیر asyn صدا بزنی :
+                ////List<GENERAL_OPTIONS> options = Task.Run(async () => await GOM.GetOptionsAsync(requiredOptions)).Result;
+
+                // 2. تمام تنظیمات را با یک فراخوانی از پایگاه داده دریافت کنید
+                List<GENERAL_OPTIONS> options = await GOM.GetOptionsAsync(requiredOptions);
+                // با استفاده از FirstOrDefault، اگر مقداری در دیتابیس وجود نداشته باشد، خطا رخ نمی‌دهد و مقدار null برگردانده می‌شود.
+                TXB_SHIRI.Text = options.FirstOrDefault(o => o.OptionName == "ShiryBasketCode")?.OptionValue;
+                TXB_MASTI.Text = options.FirstOrDefault(o => o.OptionName == "MastyBasketCode")?.OptionValue;
+                TXB_MADRESE.Text = options.FirstOrDefault(o => o.OptionName == "MadreseBasketCode")?.OptionValue;
+            }
+            catch (Exception ex)
+            {
+                // لاگ کردن خطا و نمایش پیام مناسب
+                Console.WriteLine($"خطا در بارگذاری تنظیمات: {ex.Message}");
+            }
         }
 
     }
