@@ -6,6 +6,7 @@ using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using System.Data;
+using System.Text;
 using static Dapper.SqlMapper;
 
 namespace Prg_SendInvoice.CNNMANAGER
@@ -257,30 +258,7 @@ namespace Prg_SendInvoice.CNNMANAGER
                 return null;
             }
         }
-        public int? DoExecuteSQL_Safe(string sql, object parameters = null)
-        {
-            using (IDbConnection db = new SqlConnection(CONNECTION_STR))
-            {
-                //db.Open();
-                using (var transaction = db.BeginTransaction(System.Data.IsolationLevel.Serializable))
-                {
-                    try
-                    {
-                        var commandDefinition = new CommandDefinition(sql, parameters: parameters, commandTimeout: 300);
-                        var results = db.Execute(commandDefinition);
-                        transaction.Commit();
-                        //return db.Execute(sql, parameters);
-                        return results;
-                    }
-                    catch
-                    {
-                        transaction.Rollback();
-                    }
-                    db?.Close();
-                }
-            }
-            return null;
-        }
+
         //Safe ↑}
         //var rowsAffected = dbms.DoExecuteSQL("UPDATE MyTable SET Column1 = @value WHERE Id = @id", new { value = "NewValue", id = 1 });
 
@@ -389,6 +367,186 @@ namespace Prg_SendInvoice.CNNMANAGER
             }
             return null;
         }
+
+        #region CompleteAsync
+        /// <summary>
+        /// نسخه جدید و بهبودیافته برای اجرای کوئری‌های SELECT به صورت آسنکرون.
+        /// این متد دارای منطق تلاش مجدد برای خطاهای گذرا و قابلیت لغو عملیات است.
+        /// </summary>
+        [System.Diagnostics.DebuggerStepThrough]
+        public async Task<IEnumerable<TEntity>> SqlQueryAsync<TEntity>(string sql, object? parameters = null, CancellationToken cancellationToken = default)
+        {
+            const int maxRetries = 3;
+            const int baseDelayMilliseconds = 200;
+
+            // Transient SQL Server error codes worth retrying
+            var transientErrorNumbers = new[] { 1205, -2, 4060, 40197, 40501, 40613, 49918, 49919, 49920 };
+
+            for (int attempt = 0; attempt <= maxRetries; attempt++)
+            {
+                SqlConnection? db = null;
+                try
+                {
+                    db = new SqlConnection(CONNECTION_STR);
+
+                    // CRITICAL FIX: Pass CancellationToken to OpenAsync
+                    await db.OpenAsync(cancellationToken).ConfigureAwait(false);
+
+                    // CRITICAL FIX: Include cancellationToken in CommandDefinition
+                    var command = new CommandDefinition(
+                        commandText: sql,
+                        parameters: parameters,
+                        commandTimeout: 3600,
+                        cancellationToken: cancellationToken);
+
+                    var result = await db.QueryAsync<TEntity>(command).ConfigureAwait(false);
+
+                    return result;
+                }
+                catch (SqlException ex) when (transientErrorNumbers.Contains(ex.Number) && attempt < maxRetries)
+                {
+                    // Transient error - retry with exponential backoff
+                    var delay = baseDelayMilliseconds * (attempt + 1);
+                    await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
+                    // Loop continues to next attempt
+                }
+                catch (OperationCanceledException)
+                {
+                    // Operation was cancelled - log and rethrow
+                    await LogSqlQueryAsync(sql, new Exception("Query cancelled by user or timeout"));
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    // Non-transient error - log and rethrow
+                    await LogSqlQueryAsync(sql, ex);
+                    throw;
+                }
+                finally
+                {
+                    // Explicit disposal (await using doesn't work well with retry loops)
+                    if (db != null)
+                    {
+                        await db.DisposeAsync().ConfigureAwait(false);
+                    }
+                }
+            }
+
+            // All retries exhausted - return empty (or throw exception based on your requirements)
+            await LogSqlQueryAsync(sql, new Exception($"Max retries ({maxRetries}) exceeded"));
+            return Enumerable.Empty<TEntity>();
+        }
+        /// <summary>
+        /// نسخه جدید و بهبودیافته برای اجرای دستورات SQL (INSERT, UPDATE, DELETE) به صورت آسنکرون.
+        /// این متد دارای منطق تلاش مجدد برای خطاهای گذرا و قابلیت لغو عملیات است.
+        /// </summary>
+        [System.Diagnostics.DebuggerStepThrough]
+        public async Task<int> ExecuteSqlCommandAsync(string sql, object? parameters = null, CancellationToken cancellationToken = default)
+        {
+            const int maxRetries = 3;
+            const int baseDelayMilliseconds = 200;
+            var transientErrorNumbers = new[] { 1205, -2, 4060, 40197, 40501, 40613, 49918, 49919, 49920 };
+
+            for (int attempt = 0; attempt <= maxRetries; attempt++)
+            {
+                SqlConnection? db = null;
+                try
+                {
+                    // بررسی لغو قبل از شروع هر تلاش
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    db = new SqlConnection(CONNECTION_STR);
+
+                    // FIX: Pass CancellationToken to OpenAsync
+                    await db.OpenAsync(cancellationToken).ConfigureAwait(false);
+
+                    // FIX: Include cancellationToken in CommandDefinition
+                    var command = new CommandDefinition(
+                        commandText: sql,
+                        parameters: parameters,
+                        commandTimeout: 3600,
+                        cancellationToken: cancellationToken);
+
+                    var rowsAffected = await db.ExecuteAsync(command).ConfigureAwait(false);
+
+                    return rowsAffected;
+                }
+                catch (SqlException ex) when (transientErrorNumbers.Contains(ex.Number) && attempt < maxRetries)
+                {
+                    // خطای گذرا - تلاش مجدد با تاخیر فزاینده
+                    var delay = baseDelayMilliseconds * (attempt + 1);
+
+                    try
+                    {
+                        await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // اگر در حین تاخیر لغو شد، exception را پرتاب کن
+                        await LogSqlQueryAsync(sql, new Exception($"Command cancelled during retry attempt {attempt + 1}"));
+                        throw;
+                    }
+                    // ادامه به تلاش بعدی
+                }
+                catch (OperationCanceledException)
+                {
+                    // عملیات توسط کاربر یا timeout لغو شد
+                    await LogSqlQueryAsync(sql, new Exception("Command execution cancelled"));
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    // خطای غیر گذرا - ثبت و پرتاب مجدد
+                    await LogSqlQueryAsync(sql, ex);
+                    throw;
+                }
+                finally
+                {
+                    // FIX: Explicit disposal to ensure connection is returned to pool
+                    if (db != null)
+                    {
+                        await db.DisposeAsync().ConfigureAwait(false);
+                    }
+                }
+            }
+
+            // اگر تمام تلاش‌ها ناموفق بود
+            var finalError = new Exception($"Failed to execute SQL command after {maxRetries} retries");
+            await LogSqlQueryAsync(sql, finalError);
+
+            // FIX: Throw exception instead of returning -1 for consistency
+            throw finalError;
+        }
+
+        private static async Task LogSqlQueryAsync(string sql, Exception er)
+        {
+            try
+            {
+                // اگر مسیر فایل موجود نیست، ایجاد کن
+                string? directory = Path.GetDirectoryName(DbmsFullPathFile);
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                string logContent = $"\n\n------------------------------------------------------------" +
+                                    $"\n {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} User: {Baseknow.UUSER} (Async) \n" +
+                                    $" Error in Async SQL Operation: {sql?.Substring(0, Math.Min(sql.Length, 500))} \n" + // محدود کردن طول SQL
+                                    $" Message: {er.Message} \n" +
+                                    $" InnerException: {er.InnerException?.Message} \n" +
+                                    $" StackTrace: {er.StackTrace} \n" +
+                                    $" Source: {er.Source} \n" +
+                                    $" Method: {er.TargetSite?.Name} \n" +
+                                    $" ExceptionType: {er.GetType().FullName} \n";
+
+                await File.AppendAllTextAsync(DbmsFullPathFile, logContent, Encoding.UTF8).ConfigureAwait(false);
+            }
+            catch
+            {
+                // Silent fail - logging should never crash the app
+            }
+        }
+        #endregion
 
         public List<string> GetSQLServerList()
         {

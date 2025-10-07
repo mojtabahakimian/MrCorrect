@@ -44,6 +44,7 @@ using static Prg_UI.HelperWins.Msgwin;
 using Wins.WinMenus.ANBAR;
 using System.Windows.Controls.Primitives;
 using static Prg_UI.Rpts.Win_INVOICE_PISHFROOSH2;
+using Wins.WinMenus.WinAutomasion;
 
 namespace Wins.WinMenus.KHARID_FORUSH
 {
@@ -5339,7 +5340,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     var _ftrnums_ = dbms.DoGetDataSQL<dynamic>($"SELECT NUMBER1,NUMBER FROM dbo.HEAD_LST WHERE TAG = 13 AND NUMBER = {num}").FirstOrDefault();
                     string _FTRNUMS_ = _ftrnums_.NUMBER1 + "," + _ftrnums_.NUMBER;
 
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this, _FTRNUMS_);
+                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this, _FTRNUMS_, default, default, default, true);
+
+                
                     //DoCmd.OpenForm("HEAD_LST_FROOSH22", default, default, default, default, default, "NUMBER = " + num);
                 }
                 //Set rst = New ADODB.Recordset

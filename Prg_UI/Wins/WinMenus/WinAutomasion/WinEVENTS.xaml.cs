@@ -864,7 +864,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                 {
                     new Msgwin(false, "شماره درج شده صفر است !").Show(); return;
                 }
-                CL_MenuManager.MenuBaseOnKindOpen(this, dbms, (int)SelectedRow.skid, SelectedRow.num, false, _isCalledFromAutomasion_: true);
+                CL_MenuManager.MenuBaseOnKindOpen(this, dbms, (int)SelectedRow.skid, SelectedRow.num, true, _isCalledFromAutomasion_: true);
             }
 
         }

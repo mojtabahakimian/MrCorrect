@@ -52,6 +52,8 @@ using Wins.WinOther;
 using static Interfaces.INavigator;
 using static Prg_UI.Functions.CL_LMethods;
 using static Wins.WinMenus.KHARID_FORUSH.HEAD_LST_PISHFROOSH2;
+using System.Text;
+using System.Threading.Tasks;
 
 
 //مواردی که باید بعدا در نظر گرفته شود :
@@ -121,6 +123,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             public int? PEID { get; set; }
             public int? PEPID { get; set; }
             public string? USER_NAME { get; set; }
+        }
+        public class MG_MODEL3
+        {
+            public double? TAG { get; set; }
+            public double? mrgh { get; set; }
         }
         public class MG_MODEL2
         {
@@ -361,6 +368,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         //System.Windows.Threading.DispatcherTimer MeTimer = new System.Windows.Threading.DispatcherTimer();
 
+        GeneralOptionManager GOM = new();
+
         /// <summary>
         /// نمایش سطر های کالا در دیتاگرید
         /// </summary>
@@ -371,12 +380,14 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private NavigationManager<HEAD_LST> _navigationManager;
         public bool IsOpenedFromAutomation { get; } = false;
+        public bool IsFromPishFactorConverted { get; private set; }
+
         /// <summary>
         /// شماره فاکتور و شماره حواله را دریافت میکند به این صورت :
         /// LEFT → 1-FACTOR NUMBER1 , 2-HAVALEH NUMBER
         /// </summary>
         /// <param name="_openargs"></param>
-        public HEAD_LST_FROOSH22(string? _openargs = null, bool? _IsDirectFactor_ = null, bool _IsExporty_ = false, bool _isAutomasion_ = false)
+        public HEAD_LST_FROOSH22(string? _openargs = null, bool? _IsDirectFactor_ = null, bool _IsExporty_ = false, bool _isAutomasion_ = false, bool _isFromPish_ = false)
         {
             OpenArgs = _openargs;
             InitializeComponent();
@@ -403,6 +414,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     NUMBER.UpdateLayout();
                 }
                 IsOpenedFromAutomation = _isAutomasion_;
+
+                IsFromPishFactorConverted = _isFromPish_;
             }
 
             this.DataContext = this;
@@ -790,6 +803,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             AllowEdits = true;
 
+            INVO_LST_sub.IsReadOnly = true;
+
             GetDefaultFocus();
         }
 
@@ -1169,6 +1184,13 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             // Now raise the initialization events to update the UI
             _navigationManager.RaiseInitializationEvents();
+
+            if (IsFromPishFactorConverted) //اگر از طریق دکمه تبدیل به فاکتوراز پیش فاکتور آمده
+            {
+                //جهت اطمینان از اضافه شدن حساب مالیات به پشت فاکتور
+                CalculateIMBAA();
+                IsFromPishFactorConverted = false; //Reset to avoid ferther conflict
+            }
 
             Form_Current();
 
@@ -3287,9 +3309,14 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     new Msgwin(false, "شماره فاکتور نامعتبر است!").ShowDialog();
                     return;
                 }
+                bool isRewardSystemActive = JAY.IsChecked ?? false; // CheckBox named JAY
+
+                if (!isRewardSystemActive)
+                {
+                    return; //اگر تیک جایزه را نزده برگرد
+                }
 
                 short invoiceTag = hTAG; // مقدار ثابت
-                bool isRewardSystemActive = JAY.IsChecked ?? false; // CheckBox named JAY
                 int performingUserId = (int)Baseknow.USERCOD; // فرض بر اینکه UID اینجاست
 
                 // اجرای stored procedure
@@ -7635,7 +7662,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             universControl.PopNotifyShow(".اطلاعات با موفقیت ذخیره شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C", 1);
         } //SAVE -------------------------------------------------------------------------
 
-        private void CalculateIMBAA()
+        public void CalculateIMBAA()
         {
             // 1. Prepare variables
             double smbaa = 0d;
@@ -10850,65 +10877,109 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 }
                 MASTI = 0;
                 SHIRI = 0;
-                if (CL_HESABDARI.GETKALANAME(378) == "سبد شيري")
+
+                var requiredOptions = new List<string>
                 {
-                    var rst_01 = dbms.DoGetDataSQL<RPT_MODEL5>("SELECT  TOP 100 PERCENT dbo.INVO_LST.TAG, dbo.INVO_LST.CODE, SUM(dbo.INVO_LST.MEGHk - dbo.INVO_LST.MEGH_MAR) AS mrgh FROM dbo.INVO_LST INNER JOIN dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG  WHERE     (dbo.INVO_LST.CODE = N'378' ) AND (dbo.HEAD_LST.CUST_NO = N'" + CUST_NO.SelectedValue + " ') GROUP BY dbo.INVO_LST.CODE, dbo.INVO_LST.TAG ORDER BY dbo.INVO_LST.TAG ").ToList();
-                    if (rst_01.Count > 0)
+                    "ShiryBasketCode",
+                    "MastyBasketCode",
+                    "MadreseBasketCode"
+                };
+                List<GENERAL_OPTIONS> options = Task.Run(async () => await GOM.GetOptionsAsync(requiredOptions)).Result;
+                //if (CL_HESABDARI.GETKALANAME(378).FixPersianChars().Trim().Contains("سبد شیری"))
+                if (options.Any())
+                {
+                    //var rst_01 = dbms.DoGetDataSQL<RPT_MODEL5>("SELECT  TOP 100 PERCENT dbo.INVO_LST.TAG, dbo.INVO_LST.CODE, SUM(dbo.INVO_LST.MEGHk - dbo.INVO_LST.MEGH_MAR) AS mrgh FROM dbo.INVO_LST INNER JOIN dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG  WHERE     (dbo.INVO_LST.CODE = N'378' ) AND (dbo.HEAD_LST.CUST_NO = N'" + CUST_NO.SelectedValue + " ') GROUP BY dbo.INVO_LST.CODE, dbo.INVO_LST.TAG ORDER BY dbo.INVO_LST.TAG ").ToList();
+                    //if (rst_01.Count > 0)
+                    //{
+                    //    if (rst_01.FirstOrDefault().TAG == 1)
+                    //    {
+                    //        MASTI = (long)rst_01.Last().mrgh;
+                    //        if (rst_01.Count > 1)
+                    //        {
+                    //            MASTI = (long)(rst_01[rst_01.Count - 2].mrgh - MASTI);
+                    //        }
+                    //        (report.GetComponentByName("COMM") as StiText).Text += " مانده سبد شيري : " + MASTI;
+                    //        //if (!rst_01.EOF)
+                    //        //{
+                    //        //    rst_01.MoveNext();
+                    //        //    MASTI = rst_01.Fields["mrgh"] - MASTI;
+                    //        //    (report.GetComponentByName("COMM") as StiText).Text = (report.GetComponentByName("COMM") as StiText).Text + " مانده سبد شيري : " + MASTI;
+                    //        //}
+                    //        //else
+                    //        //{
+                    //        //    (report.GetComponentByName("COMM") as StiText).Text = (report.GetComponentByName("COMM") as StiText).Text + " مانده سبد شيري : " + MASTI;
+                    //        //}
+                    //    }
+                    //    var rst_02 = dbms.DoGetDataSQL<RPT_MODEL5>("SELECT  TOP 100 PERCENT dbo.INVO_LST.TAG, dbo.INVO_LST.CODE, SUM(dbo.INVO_LST.MEGHk - dbo.INVO_LST.MEGH_MAR) AS mrgh FROM dbo.INVO_LST INNER JOIN dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG  WHERE     (dbo.INVO_LST.CODE = N'375' ) AND (dbo.HEAD_LST.CUST_NO = N'" + CUST_NO.SelectedValue + " ') GROUP BY dbo.INVO_LST.CODE, dbo.INVO_LST.TAG ORDER BY dbo.INVO_LST.TAG ").ToList();
+                    //    if (rst_02.Count > 0)
+                    //    {
+                    //        if (rst_02[0].TAG == 1)
+                    //        {
+                    //            MASTI = (long)rst_02.Last().mrgh;
+                    //            if (rst_02.Count > 1)
+                    //            {
+                    //                MASTI = (long)(rst_02[rst_02.Count - 2].mrgh - MASTI);
+                    //                (report.GetComponentByName("COMM") as StiText).Text = (report.GetComponentByName("COMM") as StiText).Text + " مانده  سبد ماستي : " + MASTI;
+                    //            }
+                    //            else
+                    //            {
+                    //                (report.GetComponentByName("COMM") as StiText).Text = (report.GetComponentByName("COMM") as StiText).Text + " مانده  سبد ماستي : " + MASTI;
+                    //            }
+                    //        }
+                    //    }
+                    //    var rst_03 = dbms.DoGetDataSQL<RPT_MODEL5>("SELECT  TOP 100 PERCENT dbo.INVO_LST.TAG, dbo.INVO_LST.CODE, SUM(dbo.INVO_LST.MEGHk - dbo.INVO_LST.MEGH_MAR) AS mrgh FROM dbo.INVO_LST INNER JOIN dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG  WHERE     (dbo.INVO_LST.CODE = N'377' ) AND (dbo.HEAD_LST.CUST_NO = N'" + CUST_NO.SelectedValue + " ') GROUP BY dbo.INVO_LST.CODE, dbo.INVO_LST.TAG ORDER BY dbo.INVO_LST.TAG ").ToList();
+                    //    if (rst_03.Count > 0)
+                    //    {
+                    //        if (rst_03[0].TAG == 1)
+                    //        {
+                    //            MASTI = (long)rst_03.Last().mrgh;
+                    //            if (rst_03.Count > 1)
+                    //            {
+                    //                MASTI = (long)(rst_03[rst_03.Count - 2].mrgh - MASTI);
+                    //                (report.GetComponentByName("COMM") as StiText).Text = (report.GetComponentByName("COMM") as StiText).Text + " مانده  سبد مدرسه : " + MASTI;
+                    //            }
+                    //            else
+                    //            {
+                    //                (report.GetComponentByName("COMM") as StiText).Text = (report.GetComponentByName("COMM") as StiText).Text + " مانده  سبد مدرسه : " + MASTI;
+                    //            }
+                    //        }
+                    //    }
+                    //}
+
+                    var commCaptionBuilder = new StringBuilder();
+
+                    // Helper function to avoid repeating the query logic
+                    Action<string, string> calculateBasket = (code, caption) =>
                     {
-                        if (rst_01.FirstOrDefault().TAG == 1)
+                        string sqlBasket = @"
+                            SELECT l.TAG, SUM(l.MEGHk - l.MEGH_MAR) AS mrgh 
+                            FROM dbo.INVO_LST l INNER JOIN dbo.HEAD_LST h ON l.NUMBER = h.NUMBER AND l.TAG = h.TAG  
+                            WHERE (l.CODE = @Code) AND (h.CUST_NO = @CustNo) 
+                            GROUP BY l.CODE, l.TAG ORDER BY l.TAG";
+
+                        var results = dbms.DoGetDataSQL<MG_MODEL3>(sqlBasket, new { Code = code, CustNo = CUST_NO.SelectedValue }).ToList();
+                        if (results.Any() && results.First().TAG == 1)
                         {
-                            MASTI = (long)rst_01.Last().mrgh;
-                            if (rst_01.Count > 1)
+                            long masti = Convert.ToInt64(results.First().mrgh);
+                            if (results.Count > 1)
                             {
-                                MASTI = (long)(rst_01[rst_01.Count - 2].mrgh - MASTI);
+                                masti = Convert.ToInt64(results[1].mrgh) - masti;
                             }
-                            (report.GetComponentByName("COMM") as StiText).Text += " مانده سبد شيري : " + MASTI;
-                            //if (!rst_01.EOF)
-                            //{
-                            //    rst_01.MoveNext();
-                            //    MASTI = rst_01.Fields["mrgh"] - MASTI;
-                            //    (report.GetComponentByName("COMM") as StiText).Text = (report.GetComponentByName("COMM") as StiText).Text + " مانده سبد شيري : " + MASTI;
-                            //}
-                            //else
-                            //{
-                            //    (report.GetComponentByName("COMM") as StiText).Text = (report.GetComponentByName("COMM") as StiText).Text + " مانده سبد شيري : " + MASTI;
-                            //}
+                            commCaptionBuilder.Append($" {caption} : {masti} ");
                         }
-                        var rst_02 = dbms.DoGetDataSQL<RPT_MODEL5>("SELECT  TOP 100 PERCENT dbo.INVO_LST.TAG, dbo.INVO_LST.CODE, SUM(dbo.INVO_LST.MEGHk - dbo.INVO_LST.MEGH_MAR) AS mrgh FROM dbo.INVO_LST INNER JOIN dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG  WHERE     (dbo.INVO_LST.CODE = N'375' ) AND (dbo.HEAD_LST.CUST_NO = N'" + CUST_NO.SelectedValue + " ') GROUP BY dbo.INVO_LST.CODE, dbo.INVO_LST.TAG ORDER BY dbo.INVO_LST.TAG ").ToList();
-                        if (rst_02.Count > 0)
-                        {
-                            if (rst_02[0].TAG == 1)
-                            {
-                                MASTI = (long)rst_02.Last().mrgh;
-                                if (rst_02.Count > 1)
-                                {
-                                    MASTI = (long)(rst_02[rst_02.Count - 2].mrgh - MASTI);
-                                    (report.GetComponentByName("COMM") as StiText).Text = (report.GetComponentByName("COMM") as StiText).Text + " مانده  سبد ماستي : " + MASTI;
-                                }
-                                else
-                                {
-                                    (report.GetComponentByName("COMM") as StiText).Text = (report.GetComponentByName("COMM") as StiText).Text + " مانده  سبد ماستي : " + MASTI;
-                                }
-                            }
-                        }
-                        var rst_03 = dbms.DoGetDataSQL<RPT_MODEL5>("SELECT  TOP 100 PERCENT dbo.INVO_LST.TAG, dbo.INVO_LST.CODE, SUM(dbo.INVO_LST.MEGHk - dbo.INVO_LST.MEGH_MAR) AS mrgh FROM dbo.INVO_LST INNER JOIN dbo.HEAD_LST ON dbo.INVO_LST.NUMBER = dbo.HEAD_LST.NUMBER AND dbo.INVO_LST.TAG = dbo.HEAD_LST.TAG  WHERE     (dbo.INVO_LST.CODE = N'377' ) AND (dbo.HEAD_LST.CUST_NO = N'" + CUST_NO.SelectedValue + " ') GROUP BY dbo.INVO_LST.CODE, dbo.INVO_LST.TAG ORDER BY dbo.INVO_LST.TAG ").ToList();
-                        if (rst_03.Count > 0)
-                        {
-                            if (rst_03[0].TAG == 1)
-                            {
-                                MASTI = (long)rst_03.Last().mrgh;
-                                if (rst_03.Count > 1)
-                                {
-                                    MASTI = (long)(rst_03[rst_03.Count - 2].mrgh - MASTI);
-                                    (report.GetComponentByName("COMM") as StiText).Text = (report.GetComponentByName("COMM") as StiText).Text + " مانده  سبد مدرسه : " + MASTI;
-                                }
-                                else
-                                {
-                                    (report.GetComponentByName("COMM") as StiText).Text = (report.GetComponentByName("COMM") as StiText).Text + " مانده  سبد مدرسه : " + MASTI;
-                                }
-                            }
-                        }
-                    }
+                    };
+
+                    var _SHIRI_CODE_ = options.FirstOrDefault(o => o.OptionName == "ShiryBasketCode")?.OptionValue; //"378", "مانده  سبد شیری"
+                    var _MASTI_CODE_ = options.FirstOrDefault(o => o.OptionName == "MastyBasketCode")?.OptionValue; //"375", "مانده سبد ماستی"
+                    var _MADRESEH_CODE_ = options.FirstOrDefault(o => o.OptionName == "MadreseBasketCode")?.OptionValue; //"377", "مانده سبد مدرسه"
+
+                    calculateBasket(_SHIRI_CODE_, "مانده  سبد شیری");
+                    calculateBasket(_MASTI_CODE_, "مانده سبد ماستی");
+                    calculateBasket(_MADRESEH_CODE_, "مانده سبد مدرسه");
+
+                    (report.GetComponentByName("COMM") as StiText).Enabled = true;
+                    (report.GetComponentByName("COMM") as StiText).Text = commCaptionBuilder.ToString();
+
                 }
                 jamf = 0;
                 HAZ = 0;
@@ -12480,5 +12551,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         {
             ChangeIsHappend = false;
         }
+
+
     }
 }

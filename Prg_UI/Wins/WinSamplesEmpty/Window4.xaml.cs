@@ -26,6 +26,14 @@ namespace Wins.WinSamplesEmpty
 {
     public partial class Window4 : Window
     {
+        #region LOCALMODEL
+        public class HESAB_CMB_MODEL
+        {
+            public string? hes { get; set; }
+            public string? NAME { get; set; }
+            public string? Expr1 { get; set; }
+        }
+        #endregion
         public Window4(double? number_to_open = null)
         {
             InitializeComponent();
@@ -37,15 +45,6 @@ namespace Wins.WinSamplesEmpty
                 NUMBER_TO_OPEN = (double)number_to_open;
             }
         }
-
-        #region LOCALMODEL
-        public class HESAB_CMB_MODEL
-        {
-            public string? hes { get; set; }
-            public string? NAME { get; set; }
-            public string? Expr1 { get; set; }
-        }
-        #endregion
 
         #region Header Window Begin
         //Header Window Begin

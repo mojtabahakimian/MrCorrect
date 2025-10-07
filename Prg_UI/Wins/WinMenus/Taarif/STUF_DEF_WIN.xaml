@@ -213,7 +213,7 @@
         <StackPanel Margin="10,0,16,46" FlowDirection="RightToLeft" Background="Transparent" Height="227" VerticalAlignment="Bottom">
             <Expander Header="سایر واحدها و تخفیفات" Style="{x:Null}" IsExpanded="False" Height="auto" Margin="5">
                 <Grid>
-                    <Image x:Name="PIC" Height="140" Stretch="Uniform" VerticalAlignment="Top" Margin="312,6,0,0" HorizontalAlignment="Left" Width="288"/>
+                    <Image x:Name="PIC" Height="140" Stretch="Uniform" VerticalAlignment="Top" Margin="314,6,360,0"/>
                     <Label Content="قیمت مصوب 👆" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FlowDirection="RightToLeft" Height="28" Margin="0,152,136,270" HorizontalAlignment="Right" Width="218"/>
                     <Button x:Name="Command55"  Content="لیست تخفیفات" FlowDirection="RightToLeft" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" Width="121" Click="Command55_Click" Margin="0,149,7,267" HorizontalAlignment="Right" />
                     <DataGrid x:Name="TAKHPERS_SUB"   

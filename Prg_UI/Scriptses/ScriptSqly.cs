@@ -2072,6 +2072,13 @@ END;";
 									    HAVING vd.CUST_NO LIKE @visitor
 									)"); } catch { }
 
+                //تنظیمات عمومی بیشتر
+                try { db.Execute(@"CREATE TABLE [dbo].[GENERAL_OPTIONS] (
+								       [OptionName]  NVARCHAR(100) PRIMARY KEY NOT NULL,
+								       [OptionValue] NVARCHAR(500) NULL,
+								       [Description] NVARCHAR(1000) NULL,
+								       [LastUpdated] DATETIME DEFAULT GETDATE()
+								   );"); } catch { }
             }
         }
 

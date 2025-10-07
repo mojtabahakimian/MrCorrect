@@ -119,6 +119,15 @@
             CurrentCellActivated="SYNCFUSION_DG_CurrentCellActivated"
             Margin="10,49,10,50" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged">
 
+            <syncfusion:SfDataGrid.Resources>
+                <ResourceDictionary>
+                    <Style TargetType="TextBox">
+                        <Setter Property="AcceptsReturn" Value="True" />
+                        <Setter Property="Height" Value="30" />
+                    </Style>
+                </ResourceDictionary>
+            </syncfusion:SfDataGrid.Resources>
+
             <syncfusion:SfDataGrid.Columns>
 
                 <syncfusion:GridTemplateColumn MappingName="IsButtony" HeaderText="" IsReadOnly="True" AllowResizing="False" ColumnSizer="Auto" AllowFiltering="False" AllowSorting="False">
@@ -145,6 +154,7 @@
                         </Style>
                     </syncfusion:GridTemplateColumn.CellStyle>
                 </syncfusion:GridTemplateColumn>
+                
                 <syncfusion:GridTemplateColumn MappingName="IsButtony" HeaderText="" IsReadOnly="True" AllowResizing="False" Width="60" AllowFiltering="False" AllowSorting="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
