@@ -44,5 +44,10 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_SERILA, null);
         }
+
+        private void Image_PreviewMouseDown_5(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_PLISTS, null);
+        }
     }
 }

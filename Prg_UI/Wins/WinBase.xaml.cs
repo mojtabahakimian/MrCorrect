@@ -1319,5 +1319,10 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_About, default);
         }
+
+        private void Button_Click_129(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_PLISTS, default);
+        }
     }
 }
