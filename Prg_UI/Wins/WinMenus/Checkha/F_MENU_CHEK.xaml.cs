@@ -189,9 +189,10 @@ namespace Wins.WinMenus.Checkha
             // Handle actions based on OpenArgs
             switch (OpenArgs.ToStringNullSafe().ToLower())
             {
-                //case "pchs":
-                //    OpenForm("CHEK_PLISTS", 1, 800601);
-                //    break;
+                case "pchs":
+                    _sql_query = $" SELECT * FROM dbo.CHEK_PLIST WHERE (DATE_S >= {DT1.Text.ToRawTarikh()} AND DATE_S <= {DT2.Text.ToRawTarikh()}  AND (NAME_TAH LIKE '%%%' or NAME_TAH  is null)) ";
+                    new CHEK_PLISTS(_sql_query).Show();
+                    break;
                 //case "dchs":
                 //    OpenForm("CHEK_DLISTS", 1, 800501);
                 //    break;
@@ -246,9 +247,9 @@ namespace Wins.WinMenus.Checkha
                     //OpenForm("CHEK_VLISTALL", 1, 800503);
                     new CHEK_VLISTALL(DT1.Text.ToRawTarikh(), DT2.Text.ToRawTarikh(), HHMOIN.Text).Show();
                     break;
-                //case "chkp":
-                //    OpenForm("CHK_V_PRINT", 1, 8016);
-                //    break;
+                case "chkp":
+                    //OpenForm("CHK_V_PRINT", 1, 8016);
+                    break;
                 case "cvp":
                     //Calendar = System.Globalization.Calendar.CurrentEra; // Assuming your intent
                     //OpenForm("CHECK_PVLIST", 0, null);
