@@ -1333,6 +1333,8 @@ namespace Prg_UI.Wins
         private void Button_Click_131(object sender, RoutedEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_GRADE_SHART_FUNC_FORM, default);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_PLISTS, default);
+
         }
     }
 }
