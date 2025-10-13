@@ -34,6 +34,7 @@ using System.Collections.Generic;
 using System.Windows.Interop;
 using System.Threading.Tasks;
 using System.Threading;
+using Prg_UI.UiTools;
 
 namespace Prg_Proccessy.FUNCTIONS
 {
@@ -42,6 +43,62 @@ namespace Prg_Proccessy.FUNCTIONS
         static CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         private static readonly Random _rnd = new Random();
 
+        // قرارش بده داخل کلاس GRADE_FORMAT_WIN
+        public sealed class _UpformatAgg
+        {
+            public decimal SZ { get; set; }   // Sum of GFGZARIB (سطح ۱)
+            public decimal SGE { get; set; }  // Sum of (Avg(level2) * GFGZARIB(level1))
+        }
+        public class ResultUpformModel
+        {
+            public double JAMZARIB { get; internal set; }
+            public double EMTIAZ { get; internal set; }
+        }
+        public static ResultUpformModel Upformat(int? gfid)
+        {
+            if (gfid == null) return null;
+
+            var agg = dbms.DoGetDataSQL<_UpformatAgg>(@"
+                    ;WITH grp AS (
+                        SELECT 
+                            GFTID,
+                            SUM(CAST(GFGRPZARIB AS decimal(18,6))) AS sumZ,
+                            SUM(CAST(GFGRPGRADE AS decimal(18,6)) * CAST(GFGRPZARIB AS decimal(18,6))) AS sumZG
+                        FROM dbo.GRADE_GRP_FT
+                        GROUP BY GFTID
+                    ),
+                    tab AS (
+                        SELECT 
+                            t.GFTID,
+                            CAST(t.GFGZARIB AS decimal(18,6)) AS tabZ
+                        FROM dbo.GRADE_TAB_FT AS t
+                        WHERE t.GFID = @GFID
+                    )
+                    SELECT
+                        SZ  = ISNULL((SELECT SUM(tabZ) FROM tab), 0),
+                        SGE = ISNULL(SUM(CASE WHEN g.sumZ <> 0 THEN (g.sumZG / g.sumZ) * t.tabZ ELSE 0 END), 0)
+                    FROM tab AS t
+                    LEFT JOIN grp AS g ON g.GFTID = t.GFTID
+                ", new { GFID = gfid }).FirstOrDefault();
+
+            var master = new ResultUpformModel();
+            var SZ = agg?.SZ ?? 0m;
+            var SGE = agg?.SGE ?? 0m;
+
+            if (SZ != 0m)
+            {
+                var emtiaz = SGE / SZ;
+
+                dbms.DoExecuteSQL(
+                    "UPDATE dbo.GRADE_FORMAT SET JAMZARIB=@SZ, EMTIAZ=@EM WHERE IDD=@ID",
+                    new { SZ, EM = emtiaz, ID = gfid });
+
+                master.JAMZARIB = (double)SZ;
+                master.EMTIAZ = (double)emtiaz;
+            }
+
+            return master;
+        }
 
         #region Custom_Modelses
         public class PriceDtl

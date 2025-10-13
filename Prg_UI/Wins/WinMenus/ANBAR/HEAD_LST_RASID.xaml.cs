@@ -554,6 +554,28 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "واحد کالا صحیح وارد نشده" });
             }
+            else
+            {
+                //بررسی صحیح بودن واحد کالا نسبت به خود کالا
+                var RSTV1 = dbms.DoGetDataSQL<VAHED_K_NESBAT_2>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + TheRow.CODE + "' AND ((VAHEDS.VAHED)= " + TheRow.VAHED_K + ")))").ToList();
+                if (RSTV1.Count == 0)
+                {
+                    ErrosMessages.Add(new MsgModel { MessageText_U = "واحد تعريف شده ناقص ميباشد نسبت آن مشخص نگرديده است.در بخش تعريف كالا آن را اصلاح كنيد." });
+
+                    TheRow.VAHED_K = null;
+                }
+                //واحد کالا بررسی مقدار کل باتوجه به نسبت
+                else
+                {
+                    var NesbatMegh = RSTV1.FirstOrDefault().NESBAT * TheRow.MEGH;
+                    if (NesbatMegh != TheRow.MEGHk)
+                    {
+
+                        TheRow.MEGHk = NesbatMegh;
+                        ErrosMessages.Add(new MsgModel { MessageText_U = $"مقدار کل این سطر کالا با این مشخصات : کد کالا {TheRow.CODE} به مقدار کل {TheRow.MEGHk} مغایرت داشت و من آنرا به مقدار کل {NesbatMegh} اصلاح کردم , درصورتی که مورد تایید است جهت ذخیره آن مجددا دکمه ذخیره را بزنید" });
+                    }
+                }
+            }
 
             //انبار خالی نباشد
             if (TheRow?.ANBAR is null)
@@ -572,25 +594,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 }
             }
 
-            //بررسی صحیح بودن واحد کالا نسبت به خود کالا
-            var RSTV1 = dbms.DoGetDataSQL<VAHED_K_NESBAT_2>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + TheRow.CODE + "' AND ((VAHEDS.VAHED)= " + TheRow.VAHED_K + ")))").ToList();
-            if (RSTV1.Count == 0)
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "واحد تعريف شده ناقص ميباشد نسبت آن مشخص نگرديده است.در بخش تعريف كالا آن را اصلاح كنيد." });
 
-                TheRow.VAHED_K = null;
-            }
-            //واحد کالا بررسی مقدار کل باتوجه به نسبت
-            else
-            {
-                var NesbatMegh = RSTV1.FirstOrDefault().NESBAT * TheRow.MEGH;
-                if (NesbatMegh != TheRow.MEGHk)
-                {
-
-                    TheRow.MEGHk = NesbatMegh;
-                    ErrosMessages.Add(new MsgModel { MessageText_U = $"مقدار کل این سطر کالا با این مشخصات : کد کالا {TheRow.CODE} به مقدار کل {TheRow.MEGHk} مغایرت داشت و من آنرا به مقدار کل {NesbatMegh} اصلاح کردم , درصورتی که مورد تایید است جهت ذخیره آن مجددا دکمه ذخیره را بزنید" });
-                }
-            }
 
             //مقدار كالا نمي تواند صفر باشد بر اسا تنظیمات بیشتر
             if (Strings.Mid(Baseknow.OPTIONSS, 50, 1) == "5")
@@ -1185,6 +1189,13 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             if (!BodyIsValid(REND_ROW))
             {
+                INVO_LST_RASID_SUB_CANCEL_EDIT();
+                return;
+            }
+
+            if (!EnsureHeaderIsReadyForDetailRow())
+            {
+                INVO_LST_RASID_SUB_CANCEL_EDIT();
                 return;
             }
 
@@ -1285,6 +1296,21 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     WAS_ROW_ITEM = ((INVO_LST_FACTOR22)INVO_LST_RASID_SUB.SelectedItem).Clone() as INVO_LST_FACTOR22;
                 }
             }
+        }
+        private bool EnsureHeaderIsReadyForDetailRow()
+        {
+            if (!_navigationManager.IsNewRecord)
+            {
+                return true;
+            }
+
+            if (!HeaderIsValid() || (string.IsNullOrWhiteSpace(NUMBER.Text) || NUMBER.Text == "0"))
+            {
+                universControl.PopNotifyShowUp("ابتدا اطلاعات سربرگ را تکمیل و ذخیره کنید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                return false;
+            }
+
+            return true;
         }
         private void Window_ContentRendered(object sender, EventArgs e)
         {
@@ -1736,7 +1762,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
         private void INVO_LST_RASID_SUB_CANCEL_EDIT(DataGridEditingUnit? _RC_ = null)
         {
-            INVO_LST_RASID_SUB.Dispatcher.InvokeAsync(() =>
+            INVO_LST_RASID_SUB.Dispatcher.Invoke(() =>
             {
                 INVO_LST_RASID_SUB.CellEditEnding -= INVO_LST_RASID_SUB_CellEditEnding;
                 INVO_LST_RASID_SUB.RowEditEnding -= INVO_LST_RASID_SUB_RowEditEnding;
@@ -2031,7 +2057,13 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         }
         private void ESLAH_Click(object sender, RoutedEventArgs e)
         {
-            if ((bool)SGN1.IsChecked || (bool)SGN2.IsChecked)
+            if (_navigationManager.IsNewRecord || !ESLAH.IsEnabled)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            if ((SGN1.IsChecked ?? false) || (SGN2.IsChecked ?? false))
             {
                 new Msgwin(false, "لطفا ابتدا امضا را بردارید").ShowDialog();
             }
@@ -2412,6 +2444,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 NAME_CODE_COLUMN.IsReadOnly = false;
                 VAHED_K_COLUMN.IsReadOnly = false;
             }
+
+            INVO_LST_RASID_SUB.IsReadOnly = true;
         }
 
         private void INVO_LST_RASID_SUB_SelectionChanged(object sender, SelectionChangedEventArgs e)

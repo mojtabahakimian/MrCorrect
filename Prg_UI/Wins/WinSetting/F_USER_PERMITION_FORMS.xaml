@@ -16,8 +16,7 @@
         AllowDrop="True" WindowStyle="None"
         FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
-        d:Width="2000"
-        Title="تعیین سطح دسترسی" Height="600" Width="978" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+        Title="تعیین سطح دسترسی" Height="600" Width="1024" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -191,11 +190,11 @@
                         </ListBox>
                     </Border>
                     <Label Content="کاربر:" HorizontalAlignment="Left" Margin="263,14,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
-                    <Button x:Name="BTN_SELECT_ALLUSER" Content="انتخاب همه کاربران" Style="{StaticResource MaterialDesignFlatButton}" FontSize="10" Margin="10,78,0,0" Click="BTN_SELECT_ALLUSER_Click" VerticalAlignment="Top" Height="28" HorizontalAlignment="Left" Width="253" />
-                    <Button x:Name="BTN_SELECT_ALLPERMIS" Content="انتخاب همه دسترسی ها" Style="{StaticResource MaterialDesignFlatButton}" FontSize="10" Margin="302,78,10,0" VerticalAlignment="Top" Height="28" Click="BTN_SELECT_ALLPERMIS_Click" />
+                    <Button x:Name="BTN_SELECT_ALLUSER" Content="انتخاب همه کاربران" IsEnabled="False" Style="{StaticResource MaterialDesignFlatButton}" FontSize="10" Margin="10,78,0,0" Click="BTN_SELECT_ALLUSER_Click" VerticalAlignment="Top" Height="28" HorizontalAlignment="Left" Width="253"/>
+                    <Button x:Name="BTN_SELECT_ALLPERMIS" Content="انتخاب همه دسترسی ها" Style="{StaticResource MaterialDesignOutlinedSecondaryButton}" materialDesign:ButtonAssist.CornerRadius="15" FontSize="10" Margin="311,78,0,0" VerticalAlignment="Top" Height="28" Click="BTN_SELECT_ALLPERMIS_Click" HorizontalAlignment="Left" Width="180" />
                     <StackPanel Margin="0,48,10,0" Orientation="Horizontal" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="403" Height="30" VerticalAlignment="Top">
                         <Button x:Name="BTN_CLEAN_PSELECT" Content="پاکسازی دسترسی های انتخاب شده" Style="{StaticResource MaterialDesignFlatButton}" FontSize="10" Height="28" Click="BTN_CLEAN_PSELECT_Click" Width="184" />
-                        <RadioButton x:Name="MLT" Content="انتخاب چندگانه" GroupName="GRP1" Margin="3" Click="MLT_Click"/>
+                        <RadioButton x:Name="MLT" Content="انتخاب چندگانه" GroupName="GRP1" Margin="20,3,3,3" Click="MLT_Click"/>
                         <RadioButton x:Name="SS" Content="انتخاب تکی" GroupName="GRP1" IsChecked="True" Margin="10,3,3,3" Click="SS_Click"/>
                     </StackPanel>
                     <UniformGrid Margin="407,304,660,75">
@@ -1343,7 +1342,7 @@
                                     </Style>
                                 </DataGridComboBoxColumn.ElementStyle>
                             </DataGridComboBoxColumn>
-                            
+
                             <DataGridComboBoxColumn x:Name="DEFAULT_SHIFT_COLUMN" Width="auto" Header="شیفت پیش‌فرض"
                                                     SelectedValueBinding="{Binding DEFAULT_SHIFT, UpdateSourceTrigger=LostFocus}"
                                                     DisplayMemberPath="SHIFT_ID" SelectedValuePath="SHNAME" />

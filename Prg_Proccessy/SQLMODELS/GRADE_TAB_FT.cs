@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Prg_Proccessy.SQLMODELS
 {
-    public class GRADE_TAB_FT : INotifyPropertyChanged
+    public class GRADE_TAB_FT : INotifyPropertyChanged, IEditableObject
     {
         public object Clone()
         {
@@ -18,7 +14,23 @@ namespace Prg_Proccessy.SQLMODELS
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(strCaller));
         }
-        public List<GRADE_GRP_FT> GRADEGRPFT { get; set; } = new List<GRADE_GRP_FT>();
+        public GRADE_TAB_FT()
+        {
+            GFGZARIB = 0;
+
+            GRADEGRPFT ??= new ObservableCollection<GRADE_GRP_FT?>();
+        }
+        private ObservableCollection<GRADE_GRP_FT?> _GRADEGRPFT;
+        public ObservableCollection<GRADE_GRP_FT?> GRADEGRPFT
+        {
+            get => _GRADEGRPFT;
+            set
+            {
+                if (_GRADEGRPFT == value) return;
+                _GRADEGRPFT = value;
+                OnPropertyChanged(nameof(GRADEGRPFT));
+            }
+        }
 
         private int? _gfid;
         public int? GFID { get => _gfid; set { if (_gfid == value) return; _gfid = value; OnPropertyChanged("GFID"); } }
@@ -38,5 +50,36 @@ namespace Prg_Proccessy.SQLMODELS
         private int? _uid;
         public int? UID { get => _uid; set { if (_uid == value) return; _uid = value; OnPropertyChanged("UID"); } }
 
+        private GRADE_TAB_FT _backup;
+        private bool _inEdit;
+
+        public void BeginEdit()
+        {
+            if (_inEdit) return;
+            _backup = (GRADE_TAB_FT)this.Clone();
+            _inEdit = true;
+        }
+
+        public void CancelEdit()
+        {
+            if (!_inEdit || _backup is null) return;
+
+            GFID = _backup.GFID;
+            GFTID = _backup.GFTID;
+            GFNAMEFT = _backup.GFNAMEFT;
+            GFGZARIB = _backup.GFGZARIB;
+            CRT = _backup.CRT;
+            UID = _backup.UID;
+
+            _inEdit = false;
+            _backup = null;
+        }
+
+        public void EndEdit()
+        {
+            if (!_inEdit) return;
+            _inEdit = false;
+            _backup = null;
+        }
     }
 }

@@ -12,7 +12,7 @@
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
         FontFamily="{StaticResource IRANYEKAN}"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterScreen" Closed="Window_Closed"
         Height="323" Width="800" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">
@@ -52,7 +52,7 @@
         <!--HEADER↑-->
 
         <Label x:Name="ColumnLabel" Content="روی یک سطر برای جستجو کلیک کنید" HorizontalContentAlignment="Center" FontWeight="Bold" VerticalAlignment="Top" Margin="5,51,5,0"/>
-        <TextBox x:Name="SearchTextBox" Margin="10,145,12,143" KeyUp="SearchTextBox_KeyUp" FlowDirection="RightToLeft" PreviewGotKeyboardFocus="SearchTextBox_PreviewGotKeyboardFocus"/>
+        <TextBox x:Name="SearchTextBox" Margin="10,145,12,143" KeyUp="SearchTextBox_KeyUp" FlowDirection="RightToLeft" PreviewGotKeyboardFocus="SearchTextBox_PreviewGotKeyboardFocus" TextChanged="SearchTextBox_TextChanged"/>
         <Button Content="پاک سازی جستجو و ریست به حالت اولیه" Style="{StaticResource MaterialDesignFlatButton}" Margin="10,0,10,80" Click="ClearSearchButton_Click" Height="49" VerticalAlignment="Bottom" FontSize="12"/>
         <Button Content="بستن" Margin="10,0,10,16" Style="{StaticResource MaterialDesignFlatButton}"  Click="CloseButton_Click" Height="49" VerticalAlignment="Bottom" FontSize="12"/>
         <ComboBox x:Name="ColumnComboBox" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" SelectionChanged="ColumnComboBox_SelectionChanged" Margin="10,93,10,0" VerticalAlignment="Top" Height="35" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1">

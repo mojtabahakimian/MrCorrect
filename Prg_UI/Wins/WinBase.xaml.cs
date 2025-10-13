@@ -1319,5 +1319,20 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_About, default);
         }
+
+        private void Button_Click_129(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.TAKHFIF_DEF_FORM, default);
+        }
+
+        private void Button_Click_130(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Button_Click_131(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_GRADE_SHART_FUNC_FORM, default);
+        }
     }
 }

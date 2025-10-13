@@ -2,8 +2,58 @@
 
 namespace Prg_Proccessy.SQLMODELS
 {
-    public class DEED_DTL : INotifyPropertyChanged, ICloneable
+    public class DEED_DTL : INotifyPropertyChanged, ICloneable, IEditableObject
     {
+        private DEED_DTL _backupCopy;
+        private bool _inEdit;
+
+        #region IEditableObject Implementation
+        public void BeginEdit()
+        {
+            if (_inEdit) return;
+            _backupCopy = (DEED_DTL)this.Clone();
+            _inEdit = true;
+        }
+        public void EndEdit()
+        {
+            if (!_inEdit) return;
+            _backupCopy = null;
+            _inEdit = false;
+        }
+        public void CancelEdit()
+        {
+            if (!_inEdit || _backupCopy == null) return;
+
+            N_S = _backupCopy.N_S;
+            RADIF = _backupCopy.RADIF;
+            HES_K = _backupCopy.HES_K;
+            NAME_HES = _backupCopy.NAME_HES;
+            HES_M = _backupCopy.HES_M;
+            HES_T = _backupCopy.HES_T;
+            SHARH = _backupCopy.SHARH;
+            BED = _backupCopy.BED;
+            BES = _backupCopy.BES;
+            N_SERI = _backupCopy.N_SERI;
+            BANK = _backupCopy.BANK;
+            NUMBER = _backupCopy.NUMBER;
+            TAG = _backupCopy.TAG;
+            HES = _backupCopy.HES;
+            id = _backupCopy.id;
+            ARZD = _backupCopy.ARZD;
+            MHAZ_NO = _backupCopy.MHAZ_NO;
+            HES_T2 = _backupCopy.HES_T2;
+            HES_T3 = _backupCopy.HES_T3;
+            HES_T4 = _backupCopy.HES_T4;
+            CRT = _backupCopy.CRT;
+            UID = _backupCopy.UID;
+            SBED = _backupCopy.SBED;
+            SBES = _backupCopy.SBES;
+
+            _inEdit = false;
+            _backupCopy = null;
+        }
+        #endregion
+
         public object Clone()
         {
             return this.MemberwiseClone();

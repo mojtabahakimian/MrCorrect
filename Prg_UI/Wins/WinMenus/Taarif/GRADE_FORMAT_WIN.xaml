@@ -6,42 +6,43 @@
         xmlns:local="clr-namespace:Wins.WinMenus.Taarif"
         mc:Ignorable="d"
         xmlns:sf="http://schemas.syncfusion.com/wpf"
+        xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+        xmlns:sfusion="clr-namespace:Syncfusion.UI.Xaml.Grid;assembly=Syncfusion.SfGrid.WPF"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Background="{x:Null}"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
         FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
-        Title="Window3" Height="450" Width="800" Loaded="Window_Loaded">
+        Title="" Height="450" Width="800" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
-        <ItemsPanelTemplate x:Key="VSP">
-            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"  VirtualizingPanel.VirtualizationMode="Recycling"/>
-        </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
-
-        <Style x:Key="KDG" TargetType="{x:Type sf:SfDataGrid}">
+        <!-- Style for SfDataGrid -->
+        <Style x:Key="KDG"  TargetType="syncfusion:SfDataGrid" BasedOn="{StaticResource SfDataGridStyle}">
+            <Setter Property="CurrentCellBorderBrush" Value="{StaticResource GENERAL_Grlicom}" />
+            <Setter Property="Foreground" Value="{StaticResource MaterialDesignBody}" />
             <Setter Property="Background" Value="{StaticResource MaterialDesign.Brush.Background}" />
             <Setter Property="BorderBrush" Value="{StaticResource MaterialDesignDivider}" />
-            <Setter Property="Foreground" Value="{StaticResource MaterialDesignBody}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="RowHeight" Value="32" />
             <Setter Property="HeaderRowHeight" Value="40" />
             <Setter Property="SelectionMode" Value="Single" />
             <Setter Property="GridLinesVisibility" Value="Both" />
         </Style>
-
-        <Style  x:Key="KDGHeader" TargetType="{x:Type sf:GridHeaderCellControl}">
-            <Setter Property="Background" Value="{StaticResource MaterialDesign.Brush.Background}"/>
-            <Setter Property="Foreground" Value="{StaticResource MaterialDesignBody}"/>
+        <!-- Modified Column Header Style -->
+        <Style x:Key="KDGHeader" TargetType="syncfusion:GridHeaderCellControl" BasedOn="{StaticResource GridHeaderCellControlStyle}">
+            <Setter Property="Background" Value="{StaticResource MaterialDesign.Brush.Background}" />
+            <Setter Property="Foreground" Value="{StaticResource MaterialDesignBody}" />
+            <Setter Property="BorderBrush" Value="{Binding Background, ElementName=GENERAL_RANG}"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Height" Value="Auto"/>
         </Style>
 
-        <Style x:Key="KDGCell" TargetType="{x:Type sf:GridCell}">
-            <Setter Property="Background" Value="{StaticResource MaterialDesignCardBackground}"/>
-            <Setter Property="Foreground" Value="{StaticResource MaterialDesignBody}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource MaterialDesignDivider}"/>
-            <Setter Property="BorderThickness" Value="0"/>
+        <Style TargetType="sfusion:GridCell" BasedOn="{StaticResource GridCellStyle}">
+            <Setter Property="BorderBrush" Value="{Binding BorderBrush, ElementName=GENERAL_RANG}" />
         </Style>
-
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
@@ -52,7 +53,7 @@
         <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
             <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
                 <Grid>
-                    <Label Content="فرمت رده بندی مشتری" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
+                    <Label Content="تعریف فرمت گرید بندی مشتریان" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>
                     <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
                         <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
                     </Button>
@@ -76,56 +77,152 @@
         </Popup>
         <!--HEADER↑-->
 
-        <sf:SfDataGrid x:Name="GRADE_SUB" Visibility="Visible"
-                 AutoGenerateColumns="False" 
-                 ItemsSource="{Binding MASTER_GRADE_DATA}" Style="{StaticResource KDG}"
-                 FlowDirection="RightToLeft"
-                 HeaderStyle="{StaticResource KDGHeader}"
-                 AutoGenerateRelations="False" Margin="10,50,10,10" PreviewMouseDoubleClick="GRADE_SUB_PreviewMouseDoubleClick">
-
+        <sf:SfDataGrid x:Name="SYNCFUSION_DG" Visibility="Visible"
+                       AutoGenerateColumns="False" d:ItemsSource="{d:SampleData ItemCount=4}"
+                       ItemsSource="{Binding MASTER_GRADE_DATA}" Style="{StaticResource KDG}"
+                       FlowDirection="RightToLeft"
+                       HeaderStyle="{StaticResource KDGHeader}"
+                       AutoGenerateRelations="False" Margin="10,50,10,10"
+                       AllowRowHoverHighlighting="True" 
+                       AllowSelectionOnPointerPressed="True" 
+                       ScrollMode="Async" 
+                       ShowRowHeader="True" 
+                       ShowGroupDropArea="True"
+                       AllowEditing="True"
+                       EnableDataVirtualization="True"
+                       SelectionUnit="Row"
+                       SelectionMode="Extended"
+                       AllowDraggingColumns="True"
+                       AllowResizingColumns="True"
+                       AllowFiltering="True"
+                       AllowDeleting="True"
+                       AllowSorting="True"
+                       RowHeight="35"
+                       FrozenColumnCount="0"
+                       PreviewKeyDown="SYNCFUSION_DG_PreviewKeyDown"
+                       SelectionChanged="SYNCFUSION_DG_SelectionChanged"
+                       PreviewMouseRightButtonDown="SYNCFUSION_DG_PreviewMouseRightButtonDown"
+                       CurrentCellActivated="SYNCFUSION_DG_CurrentCellActivated"
+                       
+                       KeyboardNavigation.TabNavigation="Contained"
+                       KeyboardNavigation.ControlTabNavigation="Contained"
+                       
+                       RowValidating="SYNCFUSION_DG_RowValidating"
+                       RowValidated="SYNCFUSION_DG_RowValidated"
+                       CurrentCellBeginEdit="SYNCFUSION_DG_CurrentCellBeginEdit"
+                       CurrentCellEndEdit="SYNCFUSION_DG_CurrentCellEndEdit"
+                       RecordDeleting="SYNCFUSION_DG_RecordDeleting"
+                       RecordDeleted="SYNCFUSION_DG_RecordDeleted"
+                       
+                       NavigationMode="Cell"
+                       AddNewRowPosition="Bottom"
+                       GridValidationMode="InEdit" 
+                       GroupDropAreaText="برای گروه‌بندی، سربرگ ستون را به اینجا بکشید"
+                       PreviewMouseDoubleClick="SYNCFUSION_DG_PreviewMouseDoubleClick">
+            <syncfusion:SfDataGrid.Resources>
+                <ResourceDictionary>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                        <Setter Property="Height" Value="35" />
+                    </Style>
+                </ResourceDictionary>
+            </syncfusion:SfDataGrid.Resources>
+            <syncfusion:SfDataGrid.AddNewRowText>
+                سطر جدید
+            </syncfusion:SfDataGrid.AddNewRowText>
             <sf:SfDataGrid.Columns>
-                <sf:GridTextColumn MappingName="IDD" HeaderText="شماره"/>
-                <sf:GridTextColumn MappingName="GFNAME" HeaderText="عنوان فرمت"/>
-                <sf:GridTextColumn MappingName="TOZIH" HeaderText="توضیحات"/>
-                <sf:GridTextColumn MappingName="GFDATE" HeaderText="تاریخ">
+                <sf:GridTextColumn MappingName="IDD" HeaderText="شماره" AllowFocus="False" IsReadOnly="True" Width="100"/>
+                <sf:GridTextColumn MappingName="GFNAME" HeaderText="عنوان فرمت"  Width="250"/>
+                <sf:GridTextColumn MappingName="TOZIH" HeaderText="توضیحات"  Width="200"/>
+                <syncfusion:GridNumericColumn MappingName="JAMZARIB" HeaderText="جمع ضرائب گروه" TextAlignment="Center" MinValue="0">
+                    <syncfusion:GridNumericColumn.DisplayBinding>
+                        <Binding Path="JAMZARIB"  StringFormat="{}{0:#,0}" />
+                    </syncfusion:GridNumericColumn.DisplayBinding>
+                </syncfusion:GridNumericColumn>
+                <syncfusion:GridNumericColumn MappingName="EMTIAZ" HeaderText="امتیاز کل" TextAlignment="Center" MinValue="0">
+                    <syncfusion:GridNumericColumn.DisplayBinding>
+                        <Binding Path="EMTIAZ" StringFormat="{}{0:#,0}" />
+                    </syncfusion:GridNumericColumn.DisplayBinding>
+                </syncfusion:GridNumericColumn>
+                <sf:GridTextColumn MappingName="GFDATE" HeaderText="تاریخ"  Width="100">
                     <sf:GridTextColumn.DisplayBinding>
                         <Binding Path="GFDATE" StringFormat="####/##/##" />
                     </sf:GridTextColumn.DisplayBinding>
                 </sf:GridTextColumn>
-                <sf:GridTextColumn MappingName="USERNAME" HeaderText="نام کاربر" AllowResizing="True" TextAlignment="Justify" ColumnSizer="AutoLastColumnFill"/>
-
+                <syncfusion:GridTemplateColumn HeaderText="چاپ" Width="70" MappingName="IsButtony" AllowSorting="False" AllowFiltering="False" AllowFocus="False">
+                    <syncfusion:GridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button x:Name="BTN_ISEND" IsTabStop="False" Click="BTN_ISEND_Click" Tag="{Binding}"
+                                    materialDesign:ButtonAssist.CornerRadius="2"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                                    HorizontalContentAlignment="Center">
+                                <materialDesign:PackIcon Kind="Printer"/>
+                            </Button>
+                        </DataTemplate>
+                    </syncfusion:GridTemplateColumn.CellTemplate>
+                </syncfusion:GridTemplateColumn>
+                <sf:GridTextColumn MappingName="USERNAME" HeaderText="نام کاربر" AllowFocus="False" AllowResizing="True" TextAlignment="Justify" ColumnSizer="AutoLastColumnFill"/>
             </sf:SfDataGrid.Columns>
 
+            <!-- Details Level 1: GRADE_TAB_FT -->
             <sf:SfDataGrid.DetailsViewDefinition>
                 <sf:GridViewDefinition RelationalColumn="GRADETABFT">
                     <sf:GridViewDefinition.DataGrid>
-                        <sf:SfDataGrid AutoGenerateColumns="False" Style="{StaticResource KDG}" HeaderStyle="{StaticResource KDGHeader}">
+                        <sf:SfDataGrid x:Name="DG_GRADETABFT_SUB1" AutoGenerateColumns="False"
+                                       AllowEditing="True" AllowDeleting="True"
+                                       AddNewRowPosition="Bottom" GridValidationMode="InEdit"
+                                       RowValidating="TABFT_RowValidating"
+                                       RowValidated="TABFT_RowValidated"
+                                       CurrentCellBeginEdit="TABFT_CurrentCellBeginEdit"
+                                       RecordDeleting="TABFT_RecordDeleting"
+                                       DetailsViewLoading="DG_GRADETABFT_SUB1_DetailsViewLoading"
+                                       DetailsViewExpanded="DG_GRADETABFT_SUB1_DetailsViewExpanded"
+                                       SelectionChanged="DG_GRADETABFT_SUB1_SelectionChanged"
+                                       ItemsSource="{Binding GRADETABFT}"
+                                       SelectedItem="{Binding DataContext.SelectedTabFT,RelativeSource={RelativeSource AncestorType={x:Type Window}},Mode=TwoWay}"
+                                       Style="{StaticResource KDG}" HeaderStyle="{StaticResource KDGHeader}">
+                            <syncfusion:SfDataGrid.AddNewRowText>
+                                سطر جدید
+                            </syncfusion:SfDataGrid.AddNewRowText>
                             <sf:SfDataGrid.Columns>
-                                <sf:GridTextColumn MappingName="GFTID" HeaderText="شماره"/>
-                                <sf:GridTextColumn MappingName="GFNAMEFT" HeaderText="نام گروه"/>
-                                <sf:GridTextColumn MappingName="GFGZARIB" HeaderText="ضریب"/>
-                                <!-- Add other columns for GRADE_TAB_FT as needed -->
+                                <sf:GridTextColumn MappingName="GFTID" HeaderText="شماره"  AllowFocus="False" IsReadOnly="True" Width="100"/>
+                                <sf:GridTextColumn MappingName="GFNAMEFT" HeaderText="نام گروه" Width="250"/>
+                                <sf:GridNumericColumn MappingName="GFGZARIB" HeaderText="ضریب" TextAlignment="Center" MinValue="0"/>
                             </sf:SfDataGrid.Columns>
+
+                            <!-- Details Level 2: GRADE_GRP_FT -->
                             <sf:SfDataGrid.DetailsViewDefinition>
                                 <sf:GridViewDefinition RelationalColumn="GRADEGRPFT">
                                     <sf:GridViewDefinition.DataGrid>
-                                        
-                                        <sf:SfDataGrid AutoGenerateColumns="False" Style="{StaticResource KDG}" HeaderStyle="{StaticResource KDGHeader}" AllowResizingColumns="True">
+                                        <sf:SfDataGrid x:Name="DG_GRADEGRPFT_SUB2" AutoGenerateColumns="False"
+                                                       AllowEditing="True" AllowDeleting="True"
+                                                       AddNewRowPosition="Bottom" GridValidationMode="InEdit"
+                                                       RowValidating="GRPFT_RowValidating"
+                                                       RowValidated="GRPFT_RowValidated"
+                                                       CurrentCellBeginEdit="GRPFT_CurrentCellBeginEdit"
+                                                       RecordDeleting="GRPFT_RecordDeleting"
+                                                       AllowResizingColumns="True"
+                                                       SelectionChanged="DG_GRADEGRPFT_SUB2_SelectionChanged"
+                                                       ItemsSource="{Binding GRADEGRPFT}"
+                                                       Style="{StaticResource KDG}" HeaderStyle="{StaticResource KDGHeader}">
+                                            <syncfusion:SfDataGrid.AddNewRowText>
+                                                سطر جدید
+                                            </syncfusion:SfDataGrid.AddNewRowText>
                                             <sf:SfDataGrid.Columns>
-                                                <sf:GridTextColumn MappingName="GFGRPNAMEFT" HeaderText="عنوان سنجش"/>
-                                                <sf:GridComboBoxColumn x:Name="ArezeshComboColumn" DisplayMemberPath="GSCANAME" MinimumWidth="50" SelectedValuePath="GSCACOD" MappingName="GVALUESCALE" HeaderText="ارزش">
+                                                <sf:GridTextColumn MappingName="GFGRPNAMEFT" HeaderText="عنوان سنجش" Width="250"/>
+                                                <sf:GridComboBoxColumn x:Name="ArezeshComboColumn" IsEditable="True" DisplayMemberPath="GSCANAME" MinimumWidth="50" SelectedValuePath="GSCACOD" MappingName="GVALUESCALE" HeaderText="ارزش">
                                                     <sf:GridComboBoxColumn.DisplayBinding>
                                                         <Binding Path="GVALUESCALE" />
                                                     </sf:GridComboBoxColumn.DisplayBinding>
                                                 </sf:GridComboBoxColumn>
-                                                
-                                                <sf:GridTextColumn MappingName="GFGRPGRADE" HeaderText="امتیاز"/>
-                                                <sf:GridTextColumn MappingName="GFGRPZARIB" HeaderText="ضریب"/>
+                                                <sf:GridNumericColumn MappingName="GFGRPGRADE" TextAlignment="Center" HeaderText="امتیاز" MinValue="0"/>
+                                                <sf:GridNumericColumn MappingName="GFGRPZARIB" TextAlignment="Center" HeaderText="ضریب" MinValue="0"/>
                                             </sf:SfDataGrid.Columns>
                                         </sf:SfDataGrid>
                                     </sf:GridViewDefinition.DataGrid>
                                 </sf:GridViewDefinition>
                             </sf:SfDataGrid.DetailsViewDefinition>
+
                         </sf:SfDataGrid>
                     </sf:GridViewDefinition.DataGrid>
                 </sf:GridViewDefinition>

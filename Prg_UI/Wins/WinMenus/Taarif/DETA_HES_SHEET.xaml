@@ -79,7 +79,11 @@
             SelectionUnit="FullRow"
             SelectedIndex="0"
             IsKeyboardFocusWithinChanged="DETA_HES_IsKeyboardFocusWithinChanged"
-            
+            EnableColumnVirtualization="True"
+            EnableRowVirtualization="True"
+            VirtualizingPanel.IsVirtualizing="True"
+            VirtualizingPanel.VirtualizationMode="Recycling"
+            ScrollViewer.CanContentScroll="True"
           
             AutoGenerateColumns="False" Margin="10,94,10,10" RowEditEnding="DETA_HES_SUB_RowEditEnding" BeginningEdit="DETA_HES_SUB_BeginningEdit" CellEditEnding="DETA_HES_SUB_CellEditEnding" PreviewKeyDown="DETA_HES_SUB_PreviewKeyDown" PreviewMouseDoubleClick="DETA_HES_PreviewMouseDoubleClick">
             <DataGrid.Style>

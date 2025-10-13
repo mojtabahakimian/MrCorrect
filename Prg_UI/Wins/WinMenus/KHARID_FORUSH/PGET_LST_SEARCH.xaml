@@ -145,15 +145,15 @@
                         </syncfusion:GridTextColumn.DisplayBinding>
                     </syncfusion:GridTextColumn>
 
-                    <syncfusion:GridTextColumn HeaderText="به کل" MappingName="THES_K" />
-                    <syncfusion:GridTextColumn HeaderText="به معین" MappingName="THES_M" />
-                    <syncfusion:GridTextColumn HeaderText="به تفضیلی" MappingName="THES_T" />
-                    <syncfusion:GridTextColumn HeaderText="از کل" MappingName="FHES_K" />
-                    <syncfusion:GridTextColumn HeaderText="از معین" MappingName="FHES_M" />
-                    <syncfusion:GridTextColumn HeaderText="ازتفضيلی" MappingName="FHES_T" />
-                    <syncfusion:GridTextColumn HeaderText="ازحساب" MappingName="FHES" />
-                    <syncfusion:GridTextColumn HeaderText="به حساب" MappingName="THES" />
-                    <syncfusion:GridTextColumn HeaderText="شرح" MappingName="SHARH" />
+                    <syncfusion:GridTextColumn HeaderText="به کل" MappingName="THES_K" Width="150"/>
+                    <syncfusion:GridTextColumn HeaderText="به معین" MappingName="THES_M" Width="150" />
+                    <syncfusion:GridTextColumn HeaderText="به تفضیلی" MappingName="THES_T" Width="150" />
+                    <syncfusion:GridTextColumn HeaderText="از کل" MappingName="FHES_K" Width="150"/>
+                    <syncfusion:GridTextColumn HeaderText="از معین" MappingName="FHES_M"  Width="150"/>
+                    <syncfusion:GridTextColumn HeaderText="ازتفضيلی" MappingName="FHES_T" Width="150" />
+                    <syncfusion:GridTextColumn HeaderText="ازحساب" MappingName="FHES"  Width="150"/>
+                    <syncfusion:GridTextColumn HeaderText="به حساب" MappingName="THES" Width="150" />
+                    <syncfusion:GridTextColumn HeaderText="شرح" MappingName="SHARH"  Width="200"/>
                     <syncfusion:GridTextColumn HeaderText="شماره سریال" MappingName="N_SERI" />
                     <syncfusion:GridTextColumn HeaderText="بانک" MappingName="BANK" />
                     <syncfusion:GridTextColumn HeaderText="از تفضیلی 2" MappingName="FHES_T2" />

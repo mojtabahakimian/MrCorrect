@@ -3,6 +3,8 @@ using Prg_UI.Functions;
 using Prg_UI.UiTools;
 using System;
 using System.ComponentModel;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -128,13 +130,42 @@ namespace Wins.WinOther
             }
         }
 
+        private CancellationTokenSource? _typingCts;
+        private const int DebounceDelayMs = 500; // دلخواه: 250–500
+
+        private async void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_selectedColumn == null)
+                return;
+
+            // هر تغییر جدید، قبلی را لغو کند
+            _typingCts?.Cancel();
+            var cts = new CancellationTokenSource();
+            _typingCts = cts;
+
+            try
+            {
+                await Task.Delay(DebounceDelayMs, cts.Token); // صبر کن تا تایپ کاربر متوقف شود
+                if (!cts.IsCancellationRequested)
+                {
+                    var searchText = SearchTextBox.Text;
+                    ApplySearch(searchText);
+                }
+            }
+            catch (OperationCanceledException) { /* نادیده بگیر */ }
+            finally
+            {
+                if (_typingCts == cts) _typingCts = null;
+            }
+        }
+
         private void SearchTextBox_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if (_selectedColumn != null)
-            {
-                var searchText = SearchTextBox.Text;
-                ApplySearch(searchText);
-            }
+            //if (_selectedColumn != null)
+            //{
+            //    var searchText = SearchTextBox.Text;
+            //    ApplySearch(searchText);
+            //}
         }
 
         private void ApplySearch(string searchText)
@@ -287,5 +318,12 @@ namespace Wins.WinOther
                 SearchTextBox.SelectAll();
             }
         }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            _typingCts?.Cancel();
+        }
+
+
     }
 }

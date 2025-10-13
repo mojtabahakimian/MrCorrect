@@ -333,7 +333,9 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش فاکتور های خرید به اشخاص", WIN_NAME = CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_KLIST });
 
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش فاکتور های فروش به صورت گروهی", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_FROOSH });
+
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش فروش کالا ها به تفکیک انبار", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_ANBAR_FRKH });
+
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش خرید کالا ها به تفکیک انبار", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_ANBAR_FRKH_RK });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "صورت وضعیت معاملات اشخاص", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL_VAZ });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "صورت وضعیت معاملات تاریخ چک", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL_FRKMA4 });
@@ -393,11 +395,12 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تغییر رمز عبور", WIN_NAME = CL_MenuManager.WinNameType.NEWPASSWORD });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تغییر نام یا حذف کاربر", WIN_NAME = CL_MenuManager.WinNameType.USER_CHANGE });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "پیشفرض واحد و شیفت", WIN_NAME = CL_MenuManager.WinNameType.DEFAULT });
-
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مشخصات سیسیتم", WIN_NAME = CL_MenuManager.WinNameType.WIN_SAZMAN_MOSHAKHASAT });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "درباره تهیه کنندگان", WIN_NAME = CL_MenuManager.WinNameType.WIN_About });
-
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف کاربر جدید", WIN_NAME = CL_MenuManager.WinNameType.USERS });
+
+            //مدیریت فروش هوشمند
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف شروط گریدهای مشتریان", WIN_NAME = CL_MenuManager.WinNameType.WIN_GRADE_SHART_FUNC_FORM });
 
 
 

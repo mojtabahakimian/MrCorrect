@@ -2158,6 +2158,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         }
 
         private DateTime lastEscapeKeyPressTime;
+
+        private DataGridCellInfo? _editingCellInfo;
         private void PGET_LST_SUB_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
             if (!NowIsReady || PGET_LST_SUB == null || PGET_LST_SUB.Items.Count == 0) return;
@@ -2206,6 +2208,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                             CURRENT_CELL_ROW = cell;
                         }
                     }
+
+                    _editingCellInfo = new DataGridCellInfo(e.Row.Item, e.Column);
                 }
             }
             catch
@@ -3130,9 +3134,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 ENTERED_VALUE_ROW = ENTERED_VALUE_ROW.ToString().RemoveQut();
                 if (string.IsNullOrEmpty(ENTERED_VALUE_ROW.ToStringNullSafe()) || !long.TryParse(ENTERED_VALUE_ROW.ToString(), out _))
                 {
-                    // Restore focus to the cell that failed validation
-                    //PGET_HED_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                    //e.Cancel = true;
+                    RestoreFocusCell(e);
                     universControl.PopNotifyShow("مبلغ صحیح وارد نشده", Pop1, Pop1Text1, Pop_Border1);
                     return;
                 }
@@ -3373,6 +3375,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                             break;
                         }
                 }
+
+                //if (!BodyIsValid(CURRENT_ITMES_ROW))
+                //{
+                //    RestoreFocusCell(e);
+                //}
             }
 
             //شرح
@@ -3381,6 +3388,20 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             }
 
+        }
+
+        private void RestoreFocusCell(DataGridCellEditEndingEventArgs e)
+        {
+            e.Cancel = true;
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                PGET_LST_SUB.CurrentCell = _editingCellInfo.Value;
+                PGET_LST_SUB.BeginEdit();
+                if (e.EditingElement is TextBox tb)
+                {
+                    tb.SelectAll();
+                }
+            }), DispatcherPriority.Background);
         }
 
         bool IsSaveSuccess = true;
@@ -3470,7 +3491,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                     ChangeIsHappend = false;
 
-                    universControl.PopNotifyShow("ذخیره با موفقیت انجام شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+                    universControl.PopNotifyShow("ذخیره با موفقیت انجام شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C", 1);
                 }
             }
         }
@@ -3875,7 +3896,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             });
         }
 
-        public bool BodyIsValid(PGET_LST final_lst)
+        public bool BodyIsValid(PGET_LST final_lst, bool _DisplayMsg_ = true)
         {
             List<MsgModel> ErrosMessages = new List<MsgModel>();
             //Validation Checks...
@@ -3958,7 +3979,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             #endregion
 
-            if (ErrosMessages.Count > 0)
+            if (ErrosMessages.Any() && _DisplayMsg_)
             {
                 new MsgListwin(false, ErrosMessages).Show();
                 return false;
