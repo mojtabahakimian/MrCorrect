@@ -365,7 +365,7 @@ namespace Functions
             /// </summary>
             BEDEHKARAN_BESTANKARAN_LIMITED,
             /// <summary>
-            /// زارش حواله انبار گروهی
+            /// گزارش حواله انبار گروهی
             /// </summary>
             F_MENU_ANBAR_FRKH_GRP,
             /// <summary>
@@ -911,6 +911,9 @@ namespace Functions
             /// </summary>
             TARAZHES_WIN,
             /// <summary>
+            /// تعریف شروط گریدهای مشتریان
+            /// </summary>
+            WIN_GRADE_SHART_FUNC_FORM ,
             /// لیست چکهای پرداختی با مبالغ
             /// </summary>
             F_MENU_CHEK_PLISTS
@@ -930,6 +933,8 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+
+                case WinNameType.WIN_GRADE_SHART_FUNC_FORM: /* تعریف شروط گریدهای مشتریان */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_GRADE_SHART_FUNC_FORM(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_About: /* درباره تهیه کنندگان */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_About(), isModalDialog: false, allowMultipleInstances: false); break;
 
@@ -1494,7 +1499,12 @@ namespace Functions
                     break;
 
                 case WinNameType.DEED_HEAD_LIST: //لیست اسناد
-                    CL_LMethods.OpenWindow(OWNERWIN, new WIN_ALLSANAD((string)_PARAMETERS_[0])); //CL_LMethods.OpenWindow(OWNERWIN, new DEED_HEAD_LIST());
+                                                 //////CL_LMethods.OpenWindow(OWNERWIN, new DEED_HEAD_LIST());
+                                                 //CL_LMethods.OpenWindow(OWNERWIN, new WIN_ALLSANAD((string)_PARAMETERS_[0]));
+                    var whereCondition = _PARAMETERS_.Length > 0 && _PARAMETERS_[0] != null
+                     ? Convert.ToString(_PARAMETERS_[0]) ?? string.Empty
+                     : string.Empty;
+                    CL_LMethods.OpenWindow(OWNERWIN, new WIN_ALLSANAD(whereCondition));
                     break;
 
                 case WinNameType.DEED_SEARCH_MAIN: //جستجو در شرح سند

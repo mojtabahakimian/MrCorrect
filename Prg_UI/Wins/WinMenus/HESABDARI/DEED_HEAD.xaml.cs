@@ -41,7 +41,6 @@ using System.Runtime.Serialization;
 using static Prg_UI.HelperWins.Msgwin;
 using Wins.WinOther;
 using System.Windows.Controls.Primitives;
-using Syncfusion.Windows.Shared;
 
 namespace Prg_UI.Wins.WinMenus.HESABDARI
 {
@@ -609,15 +608,15 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             return true;
         }
 
+        string WhereLimitcondition = "";
         private void ReGetMasterData()
         {
-            string WhereCondition = "";
             if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
             {
-                WhereCondition = $" WHERE N_S = {N_S_NUMBER} ";
+                WhereLimitcondition = $" WHERE N_S = {N_S_NUMBER} ";
             }
 
-            var MasterHead = dbms.DoGetDataSQL<DEED_HED>($"SELECT N_S, DATE_S, SHARH_S, NO_S, GHATEI, USER_NAME, base, SGN1, SGN2, SGN3, SGN4, OKF, sgn1usid, sgn2usid, sgn3usid, BAYEG FROM dbo.DEED_HED {WhereCondition} ORDER BY N_S").ToList();
+            var MasterHead = dbms.DoGetDataSQL<DEED_HED>($"SELECT N_S, DATE_S, SHARH_S, NO_S, GHATEI, USER_NAME, base, SGN1, SGN2, SGN3, SGN4, OKF, sgn1usid, sgn2usid, sgn3usid, BAYEG FROM dbo.DEED_HED {WhereLimitcondition} ORDER BY N_S").ToList();
             RecordsData.Source = MasterHead;
 
             if (N_S_NUMBER > 0) //Opened by number (N_S)
@@ -1278,6 +1277,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             PERSONEL.SelectedValuePath = "IDD";
         }
 
+        private DataGridCellInfo? _editingCellInfo;
         private void Child14_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
@@ -1301,87 +1301,105 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 ENTERED_VALUE_ROW = TexboVal.Text.Trim();
 
             CURRENT_ITMES_ROW = e.Row.Item as DEED_DTL;
+
+            if (e.Column != null)
+            {
+                _editingCellInfo = new DataGridCellInfo(e.Row.Item, e.Column);
+            }
             #endregion
 
-            if (e.Column.SortMemberPath == "BES")
+            if (e.Column.SortMemberPath == "HES")
             {
-                #region On_Exit
-
-                if ((CURRENT_ITMES_ROW.HES == Baseknow.APA || CURRENT_ITMES_ROW.HES == Baseknow.APV) && CURRENT_ITMES_ROW.BES > 0)
+                if (CURRENT_ITMES_ROW.HES == "-" || CURRENT_ITMES_ROW.HES == "+")
                 {
-                    string _serverfilter = "";
-                    if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
+                    ComboSearch CMBSearch = new ComboSearch("DEED_HEAD", I_AM_SANAD);
+                    CMBSearch.ShowDialog();
+
+                    if (FROM_SEARCH.HES is not null)
                     {
-                        CURRENT_ITMES_ROW.N_SERI = 0;
-                        CURRENT_ITMES_ROW.BANK = 0;
-                        _serverfilter = "";
+                        CURRENT_ITMES_ROW.HES = FROM_SEARCH.HES;
+                        CURRENT_ITMES_ROW.NAME_HES = FROM_SEARCH.NAME;
+
+                        #region HES_After_Update
+                        double? KOL = null, MOIN = null, taf = null;
+                        double? TAF2 = null;
+                        double? taf3 = null;
+                        double? taf4 = null;
+
+                        if (!IsNull(CURRENT_ITMES_ROW.HES))
+                        {
+                            CURRENT_ITMES_ROW.HES_K = Convert.ToInt32(CL_HESABDARI.GETKOL(CURRENT_ITMES_ROW.HES));
+                            CURRENT_ITMES_ROW.HES_M = Convert.ToInt32(CL_HESABDARI.GETMOIN(CURRENT_ITMES_ROW.HES));
+                            CURRENT_ITMES_ROW.HES_T = Convert.ToInt32(CL_HESABDARI.GETTAF(CURRENT_ITMES_ROW.HES));
+                            CL_HESABDARI.GETTAF3(CURRENT_ITMES_ROW.HES, ref KOL, ref MOIN, ref taf, ref TAF2, ref taf3, ref taf4);
+                            CURRENT_ITMES_ROW.HES_T2 = (int?)TAF2;
+                            CURRENT_ITMES_ROW.HES_T3 = (int?)taf3;
+                            CURRENT_ITMES_ROW.HES_T4 = (int?)taf4;
+                            // Me.HES_T2 = IIf(GETTAF2(Me.HES) = -1, Null, GETTAF2(Me.HES))
+                        }
+                        #endregion
                     }
                     else
                     {
+                        CURRENT_ITMES_ROW.HES = null;
+                        CURRENT_ITMES_ROW.NAME_HES = null;
 
-                        _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.BES;
+                        if (ENTERED_VALUE_ROW == "" || ENTERED_VALUE_ROW is null)
+                        {
+                            universControl.PopNotifyShow("چنین حسابی وجود ندارد.", Pop1, Pop1Text1, Pop_Border1);
+                            Child14_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                        }
                     }
+                    FROM_SEARCH.HES = null;
+                    FROM_SEARCH.NAME = null;
 
-                    //DoCmd.OpenForm("SPAYCHEK", acNormal, default, "N_SERI = " + this.N_SERI + " AND BANK = " + this.BANK, default, acDialog);
-                    SPAYCHEK sPAYCHEK = new SPAYCHEK(_serverfilter, I_AM_SANAD, CURRENT_ITMES_ROW.BES.ToString(), CURRENT_ROW_INDEX);
-                    sPAYCHEK.ShowDialog();
 
-                    if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
-                    {
-                        CURRENT_ITMES_ROW.N_SERI = null;
-                        CURRENT_ITMES_ROW.BANK = null;
-                    }
                 }
-                #endregion
-
-                if (CURRENT_ITMES_ROW.BES is not null && CURRENT_ITMES_ROW.BED is not null)
+                else
                 {
-                    if (CURRENT_ITMES_ROW.BES > 0 && CURRENT_ITMES_ROW.BED > 0 || CURRENT_ITMES_ROW.BES == 0 && CURRENT_ITMES_ROW.BED == 0)
+                    if (WAS_ROW_ITEM?.HES != ENTERED_VALUE_ROW.ToStringNullSafe())
                     {
-                        Child14_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                        CURRENT_ITMES_ROW.BES = WAS_ROW_ITEM?.BES;
-                        universControl.PopNotifyShow("بدهكار و بستانكار سند صحيح نمي باشد", Pop1, Pop1Text1, Pop_Border1);
-                        return;
+
+                        //CL_HESAB_SEARCH.Go_Search_Hesab(ENTERED_VALUE_ROW.ToString(), "DEED_HEAD", I_AM_SANAD);
+                        var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT * FROM dbo.CUST_HESAB WHERE hes = N'" + ENTERED_VALUE_ROW + "'").FirstOrDefault();
+                        if (data is not null && !string.IsNullOrEmpty(data.hes))
+                        {
+                            CURRENT_ITMES_ROW.HES = data.hes;
+                            CURRENT_ITMES_ROW.NAME_HES = data.NAME;
+
+
+                            if (!IsNull(CURRENT_ITMES_ROW.HES))
+                            {
+                                double? KOL = null, MOIN = null, taf = null;
+                                double? TAF2 = null;
+                                double? taf3 = null;
+                                double? taf4 = null;
+
+                                CURRENT_ITMES_ROW.HES_K = Convert.ToInt32(CL_HESABDARI.GETKOL(CURRENT_ITMES_ROW.HES));
+                                CURRENT_ITMES_ROW.HES_M = Convert.ToInt32(CL_HESABDARI.GETMOIN(CURRENT_ITMES_ROW.HES));
+                                CURRENT_ITMES_ROW.HES_T = Convert.ToInt32(CL_HESABDARI.GETTAF(CURRENT_ITMES_ROW.HES));
+                                CL_HESABDARI.GETTAF3(CURRENT_ITMES_ROW.HES, ref KOL, ref MOIN, ref taf, ref TAF2, ref taf3, ref taf4);
+                                CURRENT_ITMES_ROW.HES_T2 = (int?)TAF2;
+                                CURRENT_ITMES_ROW.HES_T3 = (int?)taf3;
+                                CURRENT_ITMES_ROW.HES_T4 = (int?)taf4;
+                                // Me.HES_T2 = IIf(GETTAF2(Me.HES) = -1, Null, GETTAF2(Me.HES))
+                            }
+                        }
+                        else
+                        {
+                            CURRENT_ITMES_ROW.HES = null;
+                            CURRENT_ITMES_ROW.NAME_HES = null;
+
+                            if (!e.Row.IsNewItem && string.IsNullOrWhiteSpace(ENTERED_VALUE_ROW?.ToStringNullSafe()))
+                            {
+                                Child14_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                                universControl.PopNotifyShow("چنین حسابی وجود ندارد.", Pop1, Pop1Text1, Pop_Border1);
+                            }
+                            return;
+                        }
+
                     }
-                }
-            }
 
-            if (e.Column.SortMemberPath == "BED")
-            {
-                #region On_Exit
-
-                if ((CURRENT_ITMES_ROW.HES == Baseknow.ADA || CURRENT_ITMES_ROW.HES == Baseknow.ADV) && CURRENT_ITMES_ROW.BED > 0)
-                {
-                    string _serverfilter = "";
-                    if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
-                    {
-                        CURRENT_ITMES_ROW.N_SERI = 0;
-                        CURRENT_ITMES_ROW.BANK = 0;
-                    }
-
-
-                    SGETCHEK sGETCHEK = new SGETCHEK(I_AM_SANAD, CURRENT_ITMES_ROW.BED.ToString(), CURRENT_ROW_INDEX);
-                    sGETCHEK.ShowDialog();
-
-
-                    if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
-                    {
-                        CURRENT_ITMES_ROW.N_SERI = null;
-                        CURRENT_ITMES_ROW.BANK = null;
-                    }
-                }
-
-                #endregion
-
-                if (CURRENT_ITMES_ROW.BES is not null && CURRENT_ITMES_ROW.BED is not null)
-                {
-                    if (CURRENT_ITMES_ROW.BES > 0 && CURRENT_ITMES_ROW.BED > 0)
-                    {
-                        Child14_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                        CURRENT_ITMES_ROW.BED = WAS_ROW_ITEM?.BED;
-                        universControl.PopNotifyShow("بدهكار و بستانكار سند صحيح نمي باشد", Pop1, Pop1Text1, Pop_Border1);
-                        return;
-                    }
                 }
             }
 
@@ -1490,101 +1508,106 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 }
             }
 
-            if (e.Column.SortMemberPath == "HES")
+            if (e.Column.SortMemberPath == "BED")
             {
-                if (CURRENT_ITMES_ROW.HES == "-" || CURRENT_ITMES_ROW.HES == "+")
+                #region On_Exit
+
+                if ((CURRENT_ITMES_ROW.HES == Baseknow.ADA || CURRENT_ITMES_ROW.HES == Baseknow.ADV) && CURRENT_ITMES_ROW.BED > 0)
                 {
-                    ComboSearch CMBSearch = new ComboSearch("DEED_HEAD", I_AM_SANAD);
-                    CMBSearch.ShowDialog();
-
-                    if (FROM_SEARCH.HES is not null)
+                    string _serverfilter = "";
+                    if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
                     {
-                        CURRENT_ITMES_ROW.HES = FROM_SEARCH.HES;
-                        CURRENT_ITMES_ROW.NAME_HES = FROM_SEARCH.NAME;
-
-                        #region HES_After_Update
-                        double? KOL = null, MOIN = null, taf = null;
-                        double? TAF2 = null;
-                        double? taf3 = null;
-                        double? taf4 = null;
-
-                        if (!IsNull(CURRENT_ITMES_ROW.HES))
-                        {
-                            CURRENT_ITMES_ROW.HES_K = Convert.ToInt32(CL_HESABDARI.GETKOL(CURRENT_ITMES_ROW.HES));
-                            CURRENT_ITMES_ROW.HES_M = Convert.ToInt32(CL_HESABDARI.GETMOIN(CURRENT_ITMES_ROW.HES));
-                            CURRENT_ITMES_ROW.HES_T = Convert.ToInt32(CL_HESABDARI.GETTAF(CURRENT_ITMES_ROW.HES));
-                            CL_HESABDARI.GETTAF3(CURRENT_ITMES_ROW.HES, ref KOL, ref MOIN, ref taf, ref TAF2, ref taf3, ref taf4);
-                            CURRENT_ITMES_ROW.HES_T2 = (int?)TAF2;
-                            CURRENT_ITMES_ROW.HES_T3 = (int?)taf3;
-                            CURRENT_ITMES_ROW.HES_T4 = (int?)taf4;
-                            // Me.HES_T2 = IIf(GETTAF2(Me.HES) = -1, Null, GETTAF2(Me.HES))
-                        }
-                        #endregion
+                        CURRENT_ITMES_ROW.N_SERI = 0;
+                        CURRENT_ITMES_ROW.BANK = 0;
                     }
-                    else
+
+
+                    SGETCHEK sGETCHEK = new SGETCHEK(I_AM_SANAD, CURRENT_ITMES_ROW.BED.ToString(), CURRENT_ROW_INDEX);
+                    sGETCHEK.ShowDialog();
+
+
+                    if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
                     {
-                        CURRENT_ITMES_ROW.HES = null;
-                        CURRENT_ITMES_ROW.NAME_HES = null;
-
-                        if (ENTERED_VALUE_ROW == "" || ENTERED_VALUE_ROW is null)
-                        {
-                            universControl.PopNotifyShow("چنین حسابی وجود ندارد.", Pop1, Pop1Text1, Pop_Border1);
-                            Child14_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                        }
+                        CURRENT_ITMES_ROW.N_SERI = null;
+                        CURRENT_ITMES_ROW.BANK = null;
                     }
-                    FROM_SEARCH.HES = null;
-                    FROM_SEARCH.NAME = null;
-
-
                 }
-                else
+
+                #endregion
+
+                if (CURRENT_ITMES_ROW.BES is not null && CURRENT_ITMES_ROW.BED is not null)
                 {
-                    if (WAS_ROW_ITEM?.HES != ENTERED_VALUE_ROW.ToStringNullSafe())
+                    if (CURRENT_ITMES_ROW.BES > 0 && CURRENT_ITMES_ROW.BED > 0)
                     {
-
-                        //CL_HESAB_SEARCH.Go_Search_Hesab(ENTERED_VALUE_ROW.ToString(), "DEED_HEAD", I_AM_SANAD);
-                        var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT * FROM dbo.CUST_HESAB WHERE hes = N'" + ENTERED_VALUE_ROW + "'").FirstOrDefault();
-                        if (data is not null && !string.IsNullOrEmpty(data.hes))
-                        {
-                            CURRENT_ITMES_ROW.HES = data.hes;
-                            CURRENT_ITMES_ROW.NAME_HES = data.NAME;
-
-
-                            if (!IsNull(CURRENT_ITMES_ROW.HES))
-                            {
-                                double? KOL = null, MOIN = null, taf = null;
-                                double? TAF2 = null;
-                                double? taf3 = null;
-                                double? taf4 = null;
-
-                                CURRENT_ITMES_ROW.HES_K = Convert.ToInt32(CL_HESABDARI.GETKOL(CURRENT_ITMES_ROW.HES));
-                                CURRENT_ITMES_ROW.HES_M = Convert.ToInt32(CL_HESABDARI.GETMOIN(CURRENT_ITMES_ROW.HES));
-                                CURRENT_ITMES_ROW.HES_T = Convert.ToInt32(CL_HESABDARI.GETTAF(CURRENT_ITMES_ROW.HES));
-                                CL_HESABDARI.GETTAF3(CURRENT_ITMES_ROW.HES, ref KOL, ref MOIN, ref taf, ref TAF2, ref taf3, ref taf4);
-                                CURRENT_ITMES_ROW.HES_T2 = (int?)TAF2;
-                                CURRENT_ITMES_ROW.HES_T3 = (int?)taf3;
-                                CURRENT_ITMES_ROW.HES_T4 = (int?)taf4;
-                                // Me.HES_T2 = IIf(GETTAF2(Me.HES) = -1, Null, GETTAF2(Me.HES))
-                            }
-                        }
-                        else
-                        {
-                            CURRENT_ITMES_ROW.HES = null;
-                            CURRENT_ITMES_ROW.NAME_HES = null;
-
-                            if (!e.Row.IsNewItem && string.IsNullOrWhiteSpace(ENTERED_VALUE_ROW?.ToStringNullSafe()))
-                            {
-                                Child14_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                                universControl.PopNotifyShow("چنین حسابی وجود ندارد.", Pop1, Pop1Text1, Pop_Border1);
-                            }
-                            return;
-                        }
-
+                        Child14_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                        CURRENT_ITMES_ROW.BED = WAS_ROW_ITEM?.BED;
+                        universControl.PopNotifyShow("بدهكار و بستانكار سند صحيح نمي باشد", Pop1, Pop1Text1, Pop_Border1);
+                        return;
                     }
-
                 }
             }
 
+            if (e.Column.SortMemberPath == "BES")
+            {
+                #region On_Exit
+
+                if ((CURRENT_ITMES_ROW.HES == Baseknow.APA || CURRENT_ITMES_ROW.HES == Baseknow.APV) && CURRENT_ITMES_ROW.BES > 0)
+                {
+                    string _serverfilter = "";
+                    if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
+                    {
+                        CURRENT_ITMES_ROW.N_SERI = 0;
+                        CURRENT_ITMES_ROW.BANK = 0;
+                        _serverfilter = "";
+                    }
+                    else
+                    {
+
+                        _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.BES;
+                    }
+
+                    //DoCmd.OpenForm("SPAYCHEK", acNormal, default, "N_SERI = " + this.N_SERI + " AND BANK = " + this.BANK, default, acDialog);
+                    SPAYCHEK sPAYCHEK = new SPAYCHEK(_serverfilter, I_AM_SANAD, CURRENT_ITMES_ROW.BES.ToString(), CURRENT_ROW_INDEX);
+                    sPAYCHEK.ShowDialog();
+
+                    if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0)
+                    {
+                        CURRENT_ITMES_ROW.N_SERI = null;
+                        CURRENT_ITMES_ROW.BANK = null;
+                    }
+                }
+                #endregion
+
+                if (CURRENT_ITMES_ROW.BES is not null && CURRENT_ITMES_ROW.BED is not null)
+                {
+                    if (CURRENT_ITMES_ROW.BES > 0 && CURRENT_ITMES_ROW.BED > 0 || CURRENT_ITMES_ROW.BES == 0 && CURRENT_ITMES_ROW.BED == 0)
+                    {
+                        //CURRENT_ITMES_ROW.BES = WAS_ROW_ITEM?.BES;
+                        //Child14_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                        RestoreFocusCell(e);
+                        universControl.PopNotifyShow("بدهكار و بستانكار سند صحيح نمي باشد", Pop1, Pop1Text1, Pop_Border1);
+                        return;
+                    }
+                }
+            }
+
+        }
+        private void RestoreFocusCell(DataGridCellEditEndingEventArgs e)
+        {
+            try
+            {
+                e.Cancel = true;
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    Child14.CurrentCell = _editingCellInfo.Value;
+                    Child14.BeginEdit();
+                    if (e.EditingElement is TextBox tb)
+                    {
+                        tb.SelectAll();
+                    }
+                }), DispatcherPriority.Background);
+            }
+            catch { }
         }
 
         bool IsSaveSuccess = true;
@@ -2775,7 +2798,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         private void SANDLISTS_Click(object sender, RoutedEventArgs e)
         {
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD_LIST, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD_LIST, this, WhereLimitcondition);
         }
 
         private void Child14_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)

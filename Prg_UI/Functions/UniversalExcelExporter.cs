@@ -436,7 +436,7 @@ namespace Functions
                     for (int colIndex = 0; colIndex < dataGrid.Columns.Count; colIndex++)
                     {
                         var column = dataGrid.Columns[colIndex];
-                        if (!column.IsHidden)
+                        if (!column.IsHidden && !string.IsNullOrWhiteSpace(column.MappingName))
                         {
                             var propertyInfo = record.GetType().GetProperty(column.MappingName);
                             if (propertyInfo != null)

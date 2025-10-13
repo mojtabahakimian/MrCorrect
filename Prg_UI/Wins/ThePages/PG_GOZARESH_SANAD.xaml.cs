@@ -23,7 +23,8 @@ namespace Wins.ThePages
         private void Image_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             //new F_MENU_KOL_MOIN_TAFZIL("TAF").Show(); //چاپی
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, null /*DEFAULT OWNER MAIN*/ , "TAF");
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, null /*DEFAULT OWNER MAIN*/ , "TAF");
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL_TAF, null /*DEFAULT OWNER MAIN*/ , "TAF");
         }
 
         private void Image_PreviewMouseDown_1(object sender, MouseButtonEventArgs e)

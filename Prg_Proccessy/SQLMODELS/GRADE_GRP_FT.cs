@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace Prg_Proccessy.SQLMODELS
 {
@@ -17,6 +12,12 @@ namespace Prg_Proccessy.SQLMODELS
         public void OnPropertyChanged(string strCaller = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(strCaller));
+        }
+
+        public GRADE_GRP_FT()
+        {
+            GFGRPZARIB = 0;
+            GFGRPGRADE = 0;
         }
 
         private int? _gftid;

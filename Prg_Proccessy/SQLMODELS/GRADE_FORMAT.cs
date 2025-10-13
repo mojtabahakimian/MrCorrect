@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Prg_Proccessy.FUNCTIONS;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Prg_Proccessy.SQLMODELS
 {
@@ -18,7 +15,22 @@ namespace Prg_Proccessy.SQLMODELS
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(strCaller));
         }
-        public List<GRADE_TAB_FT> GRADETABFT { get; set; } = new List<GRADE_TAB_FT>();
+
+        public GRADE_FORMAT()
+        {
+            GFDATE = Convert.ToInt64(Tarikh.FullCurrentDate);
+
+            JAMZARIB = 0;
+            EMTIAZ = 0;
+
+            GRADETABFT ??= new ObservableCollection<GRADE_TAB_FT?>();
+        }
+        private ObservableCollection<GRADE_TAB_FT?> _GRADETABFT;
+        public ObservableCollection<GRADE_TAB_FT?> GRADETABFT
+        {
+            get => _GRADETABFT;
+            set { if (_GRADETABFT == value) return; _GRADETABFT = value; OnPropertyChanged(nameof(GRADETABFT)); }
+        }
 
         private int? _idd;
         public int? IDD { get => _idd; set { if (_idd == value) return; _idd = value; OnPropertyChanged("IDD"); } }

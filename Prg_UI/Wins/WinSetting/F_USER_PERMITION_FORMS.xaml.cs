@@ -656,7 +656,7 @@ namespace Wins.WinSetting
 
             bool Happenned = false;
             int PSC = 0;
-            List<MsgModel> ErrosMessages = new List<MsgModel>();
+            List<MsgModel> InfoMessages = new List<MsgModel>();
 
             var SingleUserApplyedName = "";
 
@@ -691,6 +691,14 @@ namespace Wins.WinSetting
 
                         permission.IsSelected = false; //reset selection
                     }
+
+                    _ = AuditLogger.LogActionAsync(
+                        actionType: "SaveRow",
+                        tableName: "تعیین سطح دسترسی : دسترسی کاربران",
+                        recordId: Baseknow.UUSER,
+                        oldValue: default,
+                        newValue: permission,
+                        additionalInfo: $@"{this.GetType().Name} , EXE PATH : {System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}");
                 }
 
                 if (Happenned)
@@ -700,7 +708,7 @@ namespace Wins.WinSetting
                     }
                     else
                     {
-                        ErrosMessages.Add(new MsgModel { MessageText_U = $"دسترسی های کاربر '{user.SAL_NAME}' بروز شد." });
+                        InfoMessages.Add(new MsgModel { MessageText_U = $"دسترسی های کاربر '{user.SAL_NAME}' بروز شد." });
                     }
                 }
             }
@@ -714,11 +722,17 @@ namespace Wins.WinSetting
                 }
                 else
                 {
-                    if (ErrosMessages.Count > 0)
+                    if (InfoMessages.Count > 0)
                     {
-                        new MsgListwin(false, ErrosMessages.Distinct().ToList()).ShowDialog();
-                        ErrosMessages?.Clear();
+                        new MsgListwin(false, InfoMessages.Distinct().ToList()).ShowDialog();
+                        InfoMessages?.Clear();
                     }
+
+                    // Reset IsSelected for all permissions
+                    foreach (var p in PERMISIONS_DATA) { p.IsSelected = false; }
+                    // Reset IsSelected for all users
+                    foreach (var p in ALL_USERS) { p.IsSelected = false; }
+
                     universControl.PopNotifyShow("ذخیره دسترسی ها انجام شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
                 }
             }
@@ -842,6 +856,8 @@ namespace Wins.WinSetting
                 UserListBox.SelectionMode = SelectionMode.Multiple;
                 PermissionListBox.SelectionMode = SelectionMode.Multiple;
             }
+
+            BTN_SELECT_ALLUSER.IsEnabled = MLT.IsChecked ?? false;
         }
 
         bool AllowFilterPermissions = true;
@@ -941,6 +957,13 @@ namespace Wins.WinSetting
         {
             if (!PermissionListBox.IsEnabled)
             {
+                return;
+            }
+
+            Msgwin msgwin = new Msgwin(true, "آیا از انتخاب همه دسترسی ها مطمئن هستید ؟"); msgwin.ShowDialog();
+            if (msgwin.DialogResult != true)
+            {
+                e.Handled = true;
                 return;
             }
 

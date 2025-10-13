@@ -195,7 +195,7 @@
                     ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"           
                     HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
 					VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}" GotFocus="PGET_LST_SUB_GotFocus" TabIndex="3" PreviewKeyDown="PGET_LST_SUB_PreviewKeyDown" PreviewMouseDoubleClick="PGET_LST_SUB_PreviewMouseDoubleClick" CanUserDeleteRows="False"                     
-                      >
+                    >
          
                 <DataGrid.Style>
                     <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
@@ -220,6 +220,10 @@
                                 <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
                             </Style>
                         </DataGridComboBoxColumn.EditingElementStyle>
+                        <DataGridComboBoxColumn.ElementStyle>
+                            <Style TargetType="{x:Type ComboBox}">
+                            </Style>
+                        </DataGridComboBoxColumn.ElementStyle>
                     </DataGridComboBoxColumn>
 
 
@@ -229,6 +233,10 @@
                                 <Setter Property="IsEditable" Value="True"/>
                             </Style>
                         </DataGridComboBoxColumn.EditingElementStyle>
+                        <DataGridComboBoxColumn.ElementStyle>
+                            <Style TargetType="{x:Type ComboBox}">
+                            </Style>
+                        </DataGridComboBoxColumn.ElementStyle>
                     </DataGridComboBoxColumn>
 
                     <DataGridTextColumn x:Name="tHESColumn" MinWidth="70" Header="به حساب" Binding="{Binding THES,UpdateSourceTrigger=LostFocus}"  Width="200" Visibility="Visible">

@@ -66,6 +66,11 @@
               FlowDirection="RightToLeft"
               SelectionUnit="FullRow"
               SelectedIndex="0"
+              EnableColumnVirtualization="True"
+              EnableRowVirtualization="True"
+              VirtualizingPanel.IsVirtualizing="True"
+              VirtualizingPanel.VirtualizationMode="Recycling"
+              ScrollViewer.CanContentScroll="True"
               IsKeyboardFocusWithinChanged="TOTA_HES_SUB_IsKeyboardFocusWithinChanged"
               AutoGenerateColumns="False" Margin="10,92,10,60" RowEditEnding="TOTA_HES_SUB_RowEditEnding" BeginningEdit="TOTA_HES_SUB_BeginningEdit" CellEditEnding="TOTA_HES_SUB_CellEditEnding" PreviewKeyDown="TOTA_HES_SUB_PreviewKeyDown" PreviewMouseDoubleClick="TOTA_HES_SUB_PreviewMouseDoubleClick">
             <DataGrid.Style>

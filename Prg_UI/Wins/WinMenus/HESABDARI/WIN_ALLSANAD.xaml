@@ -193,7 +193,8 @@
                     ItemsSource = "{Binding SANAD_DATA}"
                     FlowDirection="RightToLeft" EnableRowVirtualization="True" Margin="9,4,9,45" CanUserDeleteRows="False" PreviewKeyDown="SANAD_DETAIL_PreviewKeyDown">
                 <DataGrid.Style>
-                    <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                    <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                        <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
                         <Setter Property="GridLinesVisibility" Value="All"/>
                     </Style>
                 </DataGrid.Style>
@@ -210,5 +211,6 @@
         <Label Content="جمع(ریال) ها:" Margin="0,0,662,14" FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="65"/>
         <CNC:NumericTextBox x:Name="SUM_BED_TEXTBOX" TextAlignment="Center" DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" IsReadOnly="True" Height="30" Margin="158,0,0,12" VerticalAlignment="Bottom" Visibility="Visible" HorizontalAlignment="Left" Width="136" />
         <CNC:NumericTextBox x:Name="SUM_BES_TEXTBOX" TextAlignment="Center" DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" IsReadOnly="True" Height="30" VerticalAlignment="Bottom" Visibility="Visible" HorizontalAlignment="Left" Width="136" Margin="10,0,0,12" />
+        <Label Content="تغییرات در این پنجره ذخیره نــخواهد شد." Margin="0,0,10,14" FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="187"/>
     </Grid>
 </Window>

@@ -368,6 +368,10 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             dbms.DoExecuteSQL($"IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{tableName}') DROP TABLE {tableName}");
 
             //#Last Point
+            /*
+             *      dbo.UIIF(Q.BEDBES, '>', 0, Q.BEDBES, 0) AS BEDM,
+                                           dbo.UIIF(Q.BEDBES, '<', 0, Q.BEDBES * -1, 0) AS BESM,
+             */
             string sqlCommon = $@"
                                   SELECT   Q.TAFZIL, Q.HES_K, Q.HES_M, Q.SumOfBED, Q.SumOfBES, Q.BEDBES, Q.NAME, Q.MOIN,
                                            dbo.UIIF(Q.BEDBES, '>', 0, Q.BEDBES, 0) AS BEDM,
@@ -377,7 +381,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                                            Q.HES_T2, Q.HES_T3, Q.HES_T4, CUST_HESAB_1.NAME AS tafname
                                   INTO     {tableName}
                                   FROM     dbo.CUST_HESAB CUST_HESAB_1
-                                  INNER JOIN dbo.Q_BEDEHBESTANHA_SUB({dateVal}) Q ON CUST_HESAB_1.hes = Q.HES
+                                  INNER JOIN dbo.Q_BEDEHBESTANHA_SUB({dateVal},1) Q ON CUST_HESAB_1.hes = Q.HES
                                   LEFT OUTER JOIN dbo.CUST_HESAB
                                       INNER JOIN dbo.Visit_route ON dbo.CUST_HESAB.hes = dbo.Visit_route.HES
                                       ON Q.ROUTE_NAME = dbo.Visit_route.ROUTE_NAME";

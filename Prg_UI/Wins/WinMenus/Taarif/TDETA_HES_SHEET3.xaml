@@ -65,6 +65,11 @@
                   FlowDirection="RightToLeft"
                   SelectionUnit="FullRow"
                   SelectedIndex="0"
+                  EnableColumnVirtualization="True"
+                  EnableRowVirtualization="True"
+                  VirtualizingPanel.IsVirtualizing="True"
+                  VirtualizingPanel.VirtualizationMode="Recycling"
+                  ScrollViewer.CanContentScroll="True"
                   IsKeyboardFocusWithinChanged="TDETA_HES3_SUB_IsKeyboardFocusWithinChanged"
                   AutoGenerateColumns="False" Margin="10,93,10,55" RowEditEnding="TDETA_HES3_SUB_RowEditEnding" BeginningEdit="TDETA_HES3_SUB_BeginningEdit" CellEditEnding="TDETA_HES3_SUB_CellEditEnding" PreviewKeyDown="TDETA_HES3_SUB_PreviewKeyDown" PreviewMouseLeftButtonUp="TDETA_HES3_SUB_PreviewMouseLeftButtonUp" SelectionChanged="TDETA_HES3_SUB_SelectionChanged" PreparingCellForEdit="TDETA_HES3_SUB_PreparingCellForEdit">
             <DataGrid.Style>

@@ -135,7 +135,7 @@
 
 
         <DataGrid x:Name="Child14" AutoGenerateColumns="False" ContextMenuOpening="Child14_ContextMenuOpening" MouseRightButtonUp="Child14_MouseRightButtonUp"
-                  ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                  ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" d:ItemsSource="{d:SampleData ItemCount=5}"
                   CellStyle="{StaticResource CellFocusyBorder}"
                   HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                   VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
