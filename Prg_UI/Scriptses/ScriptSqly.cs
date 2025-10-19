@@ -2078,10 +2078,11 @@ END;";
 								       [OptionValue] NVARCHAR(500) NULL,
 								       [Description] NVARCHAR(1000) NULL,
 								       [LastUpdated] DATETIME DEFAULT GETDATE()
-								   );"); } catch { }   
 				
-				//لیست بدهکاران و بستانکاران F9 : مانده های صفر رو هم نشون بده
-				try { db.Execute(@"ALTER FUNCTION [dbo].[Q_BEDEHBESTANHA_SUB]
+								   );"); } catch { }
+      
+                //لیست بدهکاران و بستانکاران F9 : مانده های صفر رو هم نشون بده
+                try { db.Execute(@"ALTER FUNCTION [dbo].[Q_BEDEHBESTANHA_SUB]
 								   (
 								       @DT          bigint,
 								       @IncludeZero bit = 0   -- 0=به‌صورت پیش‌فرض گروه‌های با جمع صفر حذف می‌شوند؛ 1=همه برگردد (شرط حذف شود)
@@ -2134,6 +2135,10 @@ END;";
 								       HAVING
 								           (@IncludeZero = 1) OR (SUM(dbo.DEED_DTL.BED - dbo.DEED_DTL.BES) <> 0)
 								   )"); } catch { }
+
+				//اتوماسیون
+                try { db.Execute(@"ALTER TABLE MESAGEP ADD SNOOZE_COUNT INT DEFAULT 0 
+								   ALTER TABLE MESAGEP ADD LAST_NOTIFY_TIME DATETIME NULL"); } catch { }
             }
         }
 
