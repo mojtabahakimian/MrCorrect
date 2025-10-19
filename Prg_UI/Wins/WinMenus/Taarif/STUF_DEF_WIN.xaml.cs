@@ -16,6 +16,7 @@ using Prg_UI.Wins.WinMenus.ANBAR;
 using Prg_UI.Wins.WinOther;
 using Syncfusion.Data.Extensions;
 using Syncfusion.Windows.Controls.PivotGrid;
+using Syncfusion.Windows.Shared;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -33,6 +34,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
+using static Prg_UI.Functions.CL_LMethods;
 using static Prg_UI.HelperWins.Msgwin;
 using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
 
@@ -3448,7 +3450,6 @@ namespace Wins.WinMenus.Taarif
             RewardRules? CURRENT_ITEMS_ROW = e.Row.Item as RewardRules;
             #endregion
 
-
             //کالا
             #region CODE
             if (e.Column.SortMemberPath == "Reward_ProductID")
@@ -3493,6 +3494,7 @@ namespace Wins.WinMenus.Taarif
                 }
             }
             #endregion
+
         }
         private bool RewardRowIsValid(RewardRules rule, out List<string> errors)
         {
@@ -3554,8 +3556,9 @@ namespace Wins.WinMenus.Taarif
             {
                 return;
             }
-
             var ROW = e.Row.Item as RewardRules;
+
+            if (ConstructorRowDetector.IsPristine(ROW)) { INVOICE_REWARDS_CANCEL_EDIT(); return; }
 
             if (!RewardRowIsValid(ROW, out var errorList))
             {

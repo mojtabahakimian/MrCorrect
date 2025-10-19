@@ -1,11 +1,7 @@
 ﻿using MaterialDesignThemes.Wpf;
-using Prg_Proccessy.MODELS;
-using Prg_Proccessy.SQLMODELS;
-using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
 using System;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Interop;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using Wins.WinMenus.WinAutomasion;
@@ -22,27 +18,20 @@ namespace UiTools
         public int PASSED_IDNUM { get; set; }
 
         private bool _isPersiannotify;
+        private bool _isAnimatingOut;
+
         public bool IsPersianNotify
         {
             set
             {
                 _isPersiannotify = value;
-
-                if (_isPersiannotify)
-                {
-                    MATN_PANEL.FlowDirection = FlowDirection.RightToLeft;
-                }
-                else
-                {
-                    MATN_PANEL.FlowDirection = FlowDirection.LeftToRight;
-                }
+                MATN_PANEL.FlowDirection = _isPersiannotify ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
             }
         }
 
         public NotificationWindow(bool isPersiannotify = true)
         {
             InitializeComponent();
-
             IsPersianNotify = isPersiannotify;
 
             _timer = new DispatcherTimer();
@@ -75,19 +64,23 @@ namespace UiTools
             NotificationIcon.Kind = iconKind;
             PASSED_IDNUM = IDNUM;
 
+            // محاسبهٔ جایگذاری نهایی
             var workingArea = SystemParameters.WorkArea;
-            double bottomOffset = 10; // Start with a small offset from the bottom
+            double bottomOffset = 10;
+            foreach (var n in _activeNotifications)
+                bottomOffset += n.ActualHeight + 10;
 
-            foreach (var notification in _activeNotifications)
-            {
-                bottomOffset += notification.ActualHeight + 10;
-            }
+            double targetLeft = workingArea.Right - Width - 10;
+            double targetTop = workingArea.Bottom - Height - bottomOffset;
 
-            Left = workingArea.Right - Width - 10;
-            Top = workingArea.Bottom - Height - bottomOffset;
+            // حالت اولیه: کمی پایین‌تر از مقصد + نامرئی
+            Left = targetLeft;
+            Top = targetTop + 14;     // Slide Up فاصلهٔ شروع
+            Opacity = 0;
 
+            // نمایش و سپس انیمیشن ورودی (بدون چشمک)
             Show();
-            AnimateIn();
+            AnimateIn(targetTop);
 
             _timer.Interval = TimeSpan.FromSeconds(durationInSeconds);
             _timer.Start();
@@ -95,17 +88,15 @@ namespace UiTools
             _activeNotifications.Add(this);
 
             if (_activeNotifications.Count > 1)
-            {
                 ShowHideAllButton();
-            }
 
-            // Improve performance by disabling unnecessary rendering
-            var hwndSource = PresentationSource.FromVisual(this) as HwndSource;
-            if (hwndSource != null)
-            {
-                hwndSource.CompositionTarget.RenderMode = RenderMode.SoftwareOnly;
-            }
+            // نکته مهم: RenderMode را به حالت پیش‌فرض می‌گذاریم (حذف SoftwareOnly) تا انیمیشن روان باشد.
+            // قبلاً این خط باعث رندر نرم‌افزاری و تیک‌تیک می‌شد:
+            // var hwndSource = PresentationSource.FromVisual(this) as HwndSource;
+            // hwndSource?.CompositionTarget.RenderMode = RenderMode.SoftwareOnly;
+            // (عمداً حذف شد) :contentReference[oaicite:1]{index=1}
         }
+
         private void RepositionNotifications()
         {
             double bottomOffset = 10;
@@ -113,15 +104,18 @@ namespace UiTools
 
             foreach (var notification in _activeNotifications)
             {
+                double newTop = SystemParameters.WorkArea.Bottom - notification.Height - bottomOffset;
+
                 var slideUp = new DoubleAnimation
                 {
                     From = notification.Top,
-                    To = SystemParameters.WorkArea.Bottom - notification.Height - bottomOffset,
-                    Duration = TimeSpan.FromSeconds(0.5)
+                    To = newTop,
+                    Duration = TimeSpan.FromMilliseconds(240),
+                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
                 };
 
                 Storyboard.SetTarget(slideUp, notification);
-                Storyboard.SetTargetProperty(slideUp, new PropertyPath(Window.TopProperty));
+                Storyboard.SetTargetProperty(slideUp, new PropertyPath(TopProperty));
 
                 storyboard.Children.Add(slideUp);
                 bottomOffset += notification.ActualHeight + 10;
@@ -129,39 +123,86 @@ namespace UiTools
 
             storyboard.Begin();
         }
+
         private void Timer_Tick(object sender, EventArgs e)
         {
             _timer.Stop();
-            Dispatcher.Invoke(AnimateOut); // Ensure AnimateOut runs on the UI thread
+            Dispatcher.Invoke(AnimateOut);
         }
 
-        private void AnimateIn()
+        private void AnimateIn(double finalTop)
         {
-            var fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromSeconds(0.5));
-            BeginAnimation(OpacityProperty, fadeIn);
+            var sb = new Storyboard();
+
+            var fadeIn = new DoubleAnimation
+            {
+                From = 0,
+                To = 1,
+                Duration = TimeSpan.FromMilliseconds(220),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+            Storyboard.SetTarget(fadeIn, this);
+            Storyboard.SetTargetProperty(fadeIn, new PropertyPath(OpacityProperty));
+            sb.Children.Add(fadeIn);
+
+            var slide = new DoubleAnimation
+            {
+                From = finalTop + 14,
+                To = finalTop,
+                Duration = TimeSpan.FromMilliseconds(220),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+            Storyboard.SetTarget(slide, this);
+            Storyboard.SetTargetProperty(slide, new PropertyPath(TopProperty));
+            sb.Children.Add(slide);
+
+            sb.Begin();
         }
 
         private void AnimateOut()
         {
-            var fadeOut = new DoubleAnimation(1, 0, TimeSpan.FromSeconds(0.5));
-            fadeOut.Completed += (s, a) =>
+            if (_isAnimatingOut) return;   // جلوگیری از اجرای دوباره
+            _isAnimatingOut = true;
+
+            var sb = new Storyboard();
+
+            var fadeOut = new DoubleAnimation
             {
-                _timer.Tick -= Timer_Tick; // Unsubscribe from the event
+                From = Opacity,
+                To = 0,
+                Duration = TimeSpan.FromMilliseconds(200),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+            };
+            Storyboard.SetTarget(fadeOut, this);
+            Storyboard.SetTargetProperty(fadeOut, new PropertyPath(OpacityProperty));
+            sb.Children.Add(fadeOut);
+
+            var slideDown = new DoubleAnimation
+            {
+                From = Top,
+                To = Top + 12,
+                Duration = TimeSpan.FromMilliseconds(200),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+            };
+            Storyboard.SetTarget(slideDown, this);
+            Storyboard.SetTargetProperty(slideDown, new PropertyPath(TopProperty));
+            sb.Children.Add(slideDown);
+
+            sb.Completed += (s, a) =>
+            {
+                _timer.Tick -= Timer_Tick;
                 _activeNotifications.Remove(this);
                 Close();
+
                 if (_activeNotifications.Count <= 1)
-                {
                     HideHideAllButton();
-                }
                 else
-                {
                     _hideAllButton?.UpdatePosition();
-                }
+
                 RepositionNotifications();
             };
-            BeginAnimation(OpacityProperty, fadeOut);
 
-            //RepositionNotifications();
+            sb.Begin();
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -195,9 +236,6 @@ namespace UiTools
             if (PASSED_IDNUM > 0)
             {
                 INBOXPAN IBX = new INBOXPAN(PASSED_IDNUM);
-                //IBX.Owner = this;
-                //IBX.Topmost = false;
-                //IBX.WindowState = WindowState.Minimized;
                 IBX.Show();
             }
         }

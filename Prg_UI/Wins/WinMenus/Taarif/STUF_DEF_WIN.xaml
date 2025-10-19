@@ -312,7 +312,7 @@
                 </Grid>
             </Expander>
             <Expander Header="جوایز مرتبط با کالا" Height="auto" Style="{x:Null}" Margin="5">
-                <DataGrid x:Name="INVOICE_REWARDS_SUB"
+                <DataGrid x:Name="INVOICE_REWARDS_SUB" d:ItemsSource="{d:SampleData}"
                     EnableColumnVirtualization="True"
                     EnableRowVirtualization="True"
                     VirtualizingPanel.IsVirtualizing="True"
@@ -396,15 +396,15 @@
                                 </Style>
                             </DataGridComboBoxColumn.EditingElementStyle>
                             <DataGridComboBoxColumn.ElementStyle>
-                                <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                <Style TargetType="{x:Type ComboBox}">
                                 </Style>
                             </DataGridComboBoxColumn.ElementStyle>
                         </DataGridComboBoxColumn>
 
-                        <DataGridTextColumn Header="تاریخ شروع"  Binding="{Binding StartDate, StringFormat=####/##/##}"  MinWidth="65"/>
-                        <DataGridTextColumn Header="تاریخ پایان"  Binding="{Binding EndDate, StringFormat=####/##/##}"  MinWidth="65"/>
+                        <DataGridTextColumn Header="تاریخ شروع"  Binding="{Binding StartDate, StringFormat=####/##/##}"  MinWidth="120"/>
+                        <DataGridTextColumn Header="تاریخ پایان"  Binding="{Binding EndDate, StringFormat=####/##/##}"  MinWidth="120"/>
 
-                        <DataGridTextColumn x:Name="Description_COLUMN" Header="شرح" Binding="{Binding Description,UpdateSourceTrigger=LostFocus}" Width="auto" MinWidth="100">
+                        <DataGridTextColumn x:Name="Description_COLUMN" Header="شرح" Binding="{Binding Description,UpdateSourceTrigger=LostFocus}" Width="auto" MinWidth="200">
                             <DataGridTextColumn.EditingElementStyle>
                                 <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
                                     <Setter Property="MaxLength" Value="200" />

@@ -150,6 +150,23 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             ProcLoader.Stop(Prc);
         }
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                e.Handled = true;
+                var currentCell = SYNCFUSION_DG.SelectionController.CurrentCellManager.CurrentCell;
+                if (currentCell != null && !currentCell.IsEditing)
+                {
+                    var ROW = SYNCFUSION_DG.SelectedItem as MOIN_CUSTOM;
+
+                    if (ROW != null && ROW?.NO_S != null)
+                    {
+                        CL_MenuManager.MenuBaseOnKindOpen(this, dbms, (ROW?.TAG is null ? (int)ROW.NO_S : Convert.ToInt32(ROW?.TAG)), (ROW?.NUMBER is null ? ROW?.N_S : ROW?.NUMBER), false);
+                    }
+                }
+            }
+        }
 
         #region _SfDataGrid_
         private readonly FilterService<MOIN_CUSTOM> filterService = new FilterService<MOIN_CUSTOM>();
@@ -391,7 +408,53 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 CalculateSumForCurrentColumn(SYNCFUSION_DG);
                 e.Handled = true; // Mark event as handled
             }
+
+            //if (e.Key == Key.D1 && Keyboard.Modifiers == ModifierKeys.None)
+            //{
+            //    HandleNavigationToBalance();
+            //    e.Handled = true;
+            //    return;
+            //}
+
+            try
+            {
+                // NEW: Handle 'Ctrl+1' key for CURRENT ROW balance navigation
+                if (e.Key == Key.D1 && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+                {
+                    HandleNavigationToBalanceFromCurrentRow();
+                    e.Handled = true;
+                    return;
+                }
+
+                // VBA: KeyAscii = 49 (1 key)
+                // Handle '1' key for FINAL balance navigation (last row)
+                if (e.Key == Key.D1 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    HandleNavigationToBalanceFromLastRow();
+                    e.Handled = true;
+                    return;
+                }
+
+                // Also handle NumPad1 for both cases
+                if (e.Key == Key.NumPad1 && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+                {
+                    HandleNavigationToBalanceFromCurrentRow();
+                    e.Handled = true;
+                    return;
+                }
+
+                if (e.Key == Key.NumPad1 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    HandleNavigationToBalanceFromLastRow();
+                    e.Handled = true;
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+            }
         }
+
         private void CalculateSumForCurrentColumn(SfDataGrid _DG_)
         {
             // Ensure rows are selected
@@ -552,23 +615,282 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         #endregion
 
-
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        #region Balance Navigation Methods
+        /// <summary>
+        /// Handle navigation to balance when '1' key is pressed
+        /// Starts from LAST ROW and navigates backward
+        /// VBA: KeyAscii = 49 (1 key) logic - Original functionality
+        /// </summary>
+        private void HandleNavigationToBalanceFromLastRow()
         {
-            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            try
             {
-                e.Handled = true;
-                var currentCell = SYNCFUSION_DG.SelectionController.CurrentCellManager.CurrentCell;
-                if (currentCell != null && !currentCell.IsEditing)
+                // Check if grid has data
+                if (SYNCFUSION_DG.View.Records.Count == 0)
                 {
-                    var ROW = SYNCFUSION_DG.SelectedItem as MOIN_CUSTOM;
+                    universControl.PopNotifyShow("هیچ رکوردی برای جستجو وجود ندارد", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                    return;
+                }
 
-                    if (ROW != null && ROW?.NO_S != null)
-                    {
-                        CL_MenuManager.MenuBaseOnKindOpen(this, dbms, (ROW?.TAG is null ? (int)ROW.NO_S : Convert.ToInt32(ROW?.TAG)), (ROW?.NUMBER is null ? ROW?.N_S : ROW?.NUMBER), false);
-                    }
+                // Go to last record
+                int lastIndex = SYNCFUSION_DG.View.Records.Count - 1;
+                SYNCFUSION_DG.SelectedIndex = lastIndex;
+                SYNCFUSION_DG.ScrollInView(new RowColumnIndex(lastIndex, 0));
+
+                var lastRow = SYNCFUSION_DG.SelectedItem as MOIN_CUSTOM;
+                if (lastRow == null)
+                {
+                    return;
+                }
+
+                // Get MAND value from last row
+                decimal currentBalance = 0;
+                if (lastRow.MAND != null)
+                {
+                    decimal.TryParse(lastRow.MAND.ToString(), out currentBalance);
+                }
+
+                // Check if balance is zero
+                if (currentBalance == 0)
+                {
+                    universControl.PopNotifyShow("مانده نهایی صفر است", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+                    return;
+                }
+
+                // Determine balance type and navigate
+                string balanceType = DetermineBalanceType(currentBalance);
+
+                if (balanceType == "بد") // Debit
+                {
+                    NavigateBackwardForDebit(currentBalance, lastIndex);
+                }
+                else // Credit
+                {
+                    currentBalance = Math.Abs(currentBalance);
+                    NavigateBackwardForCredit(currentBalance, lastIndex);
                 }
             }
+            catch (Exception ex)
+            {
+                universControl.PopNotifyShow("خطا در جستجوی ریشه مانده نهایی", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+            }
+        }
+        /// <summary>
+        /// NEW: Handle navigation to balance from CURRENT SELECTED ROW
+        /// Starts from current row and navigates backward
+        /// Triggered by: Ctrl+1
+        /// </summary>
+        private void HandleNavigationToBalanceFromCurrentRow()
+        {
+            try
+            {
+                // Check if grid has data
+                if (SYNCFUSION_DG.View.Records.Count == 0)
+                {
+                    universControl.PopNotifyShow("هیچ رکوردی برای جستجو وجود ندارد", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                    return;
+                }
+
+                // Get current selected row
+                var currentRow = SYNCFUSION_DG.SelectedItem as MOIN_CUSTOM;
+                if (currentRow == null)
+                {
+                    universControl.PopNotifyShow("لطفاً یک سطر را انتخاب کنید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                    return;
+                }
+
+                // Get current row index
+                int currentIndex = SYNCFUSION_DG.SelectedIndex;
+                if (currentIndex < 0)
+                {
+                    return;
+                }
+
+                // Get MAND value from current row
+                decimal currentBalance = 0;
+                if (currentRow.MAND != null)
+                {
+                    decimal.TryParse(currentRow.MAND.ToString(), out currentBalance);
+                }
+
+                // Check if balance is zero
+                if (currentBalance == 0)
+                {
+                    universControl.PopNotifyShow("مانده سطر انتخابی صفر است", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+                    return;
+                }
+
+                // Determine balance type and navigate
+                string balanceType = DetermineBalanceType(currentBalance);
+
+                if (balanceType == "بد") // Debit
+                {
+                    NavigateBackwardForDebit(currentBalance, currentIndex);
+                }
+                else // Credit
+                {
+                    currentBalance = Math.Abs(currentBalance);
+                    NavigateBackwardForCredit(currentBalance, currentIndex);
+                }
+            }
+            catch (Exception ex)
+            {
+                universControl.PopNotifyShow("خطا در جستجوی ریشه مانده سطر انتخابی", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+            }
+        }
+        /// <summary>
+        /// Determine if balance is debit (بد) or credit (بس)
+        /// </summary>
+        private string DetermineBalanceType(decimal balance)
+        {
+            // Positive balance typically means debit, negative means credit
+            // Adjust based on your accounting logic
+            if (balance > 0)
+            {
+                return "بد"; // Debit
+            }
+            else
+            {
+                return "بس"; // Credit
+            }
+        }
+        /// <summary>
+        /// Navigate backward through records for debit balance
+        /// VBA: While MN > 0 And MN - Me.BED >= 0
+        /// </summary>
+        /// <param name="remainingBalance">Starting balance amount</param>
+        /// <param name="startIndex">Index to start navigation from</param>
+        private void NavigateBackwardForDebit(decimal remainingBalance, int startIndex)
+        {
+            try
+            {
+                int currentIndex = startIndex;
+                bool foundOrigin = false;
+
+                while (remainingBalance > 0 && currentIndex > 0)
+                {
+                    // Move to previous row
+                    currentIndex--;
+                    SYNCFUSION_DG.SelectedIndex = currentIndex;
+                    SYNCFUSION_DG.ScrollInView(new RowColumnIndex(currentIndex, 0));
+
+                    var currentRow = SYNCFUSION_DG.SelectedItem as MOIN_CUSTOM;
+                    if (currentRow == null)
+                    {
+                        break;
+                    }
+
+                    // Get BED (debit) value
+                    decimal bedValue = 0;
+                    if (currentRow.BED != null)
+                    {
+                        decimal.TryParse(currentRow.BED.ToString(), out bedValue);
+                    }
+
+                    // VBA: If MN - Me.BED > 0 Then
+                    if (remainingBalance - bedValue > 0)
+                    {
+                        // VBA: MN = MN - Me.BED
+                        remainingBalance = remainingBalance - bedValue;
+                    }
+                    else
+                    {
+                        // VBA: Exit Sub - Found the origin
+                        foundOrigin = true;
+                        break;
+                    }
+                }
+
+                // Ensure UI updates
+                SYNCFUSION_DG.Focus();
+
+                // Show notification
+                if (foundOrigin)
+                {
+                    //universControl.PopNotifyShowUp("ریشه مانده پیدا شد و سطر انتخاب گردید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
+                }
+                else
+                {
+                    universControl.PopNotifyShow("به اولین سطر رسیدیم", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+        /// <summary>
+        /// Navigate backward through records for credit balance
+        /// VBA: While MN > 0 And MN - Me.BES >= 0
+        /// </summary>
+        /// <param name="remainingBalance">Starting balance amount (absolute value)</param>
+        /// <param name="startIndex">Index to start navigation from</param>
+        private void NavigateBackwardForCredit(decimal remainingBalance, int startIndex)
+        {
+            try
+            {
+                int currentIndex = startIndex;
+                bool foundOrigin = false;
+
+                while (remainingBalance > 0 && currentIndex > 0)
+                {
+                    // Move to previous row
+                    currentIndex--;
+                    SYNCFUSION_DG.SelectedIndex = currentIndex;
+                    SYNCFUSION_DG.ScrollInView(new RowColumnIndex(currentIndex, 0));
+
+                    var currentRow = SYNCFUSION_DG.SelectedItem as MOIN_CUSTOM;
+                    if (currentRow == null)
+                    {
+                        break;
+                    }
+
+                    // Get BES (credit) value
+                    decimal besValue = 0;
+                    if (currentRow.BES != null)
+                    {
+                        decimal.TryParse(currentRow.BES.ToString(), out besValue);
+                    }
+
+                    // VBA: If MN - Me.BES > 0 Then
+                    if (remainingBalance - besValue > 0)
+                    {
+                        // VBA: MN = MN - Me.BES
+                        remainingBalance = remainingBalance - besValue;
+                    }
+                    else
+                    {
+                        // VBA: Exit Sub - Found the origin
+                        foundOrigin = true;
+                        break;
+                    }
+                }
+
+                // Ensure UI updates
+                SYNCFUSION_DG.Focus();
+
+                // Show notification
+                if (foundOrigin)
+                {
+                    //universControl.PopNotifyShowUp("ریشه مانده پیدا شد و سطر انتخاب گردید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
+                }
+                else
+                {
+                    universControl.PopNotifyShow("به اولین سطر رسیدیم", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+        #endregion
+
+        private void MenuItem_Click_2(object sender, RoutedEventArgs e)
+        {
+            HandleNavigationToBalanceFromLastRow();
+        }
+        private void MenuItem_Click_3(object sender, RoutedEventArgs e)
+        {
+            HandleNavigationToBalanceFromCurrentRow();
         }
     }
 }

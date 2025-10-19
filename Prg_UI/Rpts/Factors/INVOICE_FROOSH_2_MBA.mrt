@@ -1533,7 +1533,6 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text18 Ref="81" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <CanGrow>True</CanGrow>
               <ClientRectangle>9.6,0,1,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -1545,7 +1544,6 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <Parent isRef="71" />
               <Text>{FactorMBA.BARCODE}</Text>
               <TextBrush>Black</TextBrush>
-              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text18>
@@ -2482,10 +2480,10 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>8/25/2025 11:35:35 PM</ReportChanged>
+  <ReportChanged>10/14/2025 10:35:32 PM</ReportChanged>
   <ReportCreated>8/21/2025 1:21:32 AM</ReportCreated>
   <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\Factors\INVOICE_FROOSH_2_MBA.mrt</ReportFile>
-  <ReportGuid>bcc0fa56588b42ce868384d73815a82e</ReportGuid>
+  <ReportGuid>583c5988696c48a5b620ecae6a48a344</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Inches</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

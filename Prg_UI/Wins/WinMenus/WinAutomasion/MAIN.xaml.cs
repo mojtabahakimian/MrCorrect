@@ -118,6 +118,8 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
         }
         #endregion
 
+
+
         UniversControl universControl = new UniversControl();
         public BulkObservableCollection<TASKS> TASK_DATA { get; set; } = new BulkObservableCollection<TASKS>();
         public ObservableCollection<CutsomPeriority_Model> PERIORITY_COMBO_DATA { get; set; } = new ObservableCollection<CutsomPeriority_Model>();
@@ -300,21 +302,24 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
         private bool _isMainDisposed = false;
         private readonly CancellationTokenSource _Cts_ = new CancellationTokenSource();
         private int _refreshCounter = 0;
-        private int MRP_refreshIntervalSeconds = 1; //RefreshIntervalCombo.SelectedValue
+
+        private const int MsgAndRemindersInterval = 1;
 
         private DispatcherTimer KartablTimer;
         private readonly SemaphoreSlim _KartablSemaphore = new SemaphoreSlim(1, 1);
         private bool _isKartablDisposed = false;
-        private int _kartablIntervalSeconds = 60;
+        private int _kartablIntervalSeconds = 30;
         private void ConfigTimers()
         {
+            //نوتیفیکشن پیام ها و یادآوری ها
             MRPTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromSeconds(MRP_refreshIntervalSeconds)
+                Interval = TimeSpan.FromSeconds(MsgAndRemindersInterval)
             };
-            MRPTimer.Tick += async (sender, e) => await Timer_Tick();
+            MRPTimer.Tick += async (sender, e) => await MRP_TimerTick();
             MRPTimer.Start();
 
+            //سطر های داخل اتوماسیون :کارتابل
             KartablTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(_kartablIntervalSeconds)
@@ -322,7 +327,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             KartablTimer.Tick += async (sender, e) => await KartablTimer_Tick();
             KartablTimer.Start();
         }
-        private async Task Timer_Tick()
+        private async Task MRP_TimerTick()
         {
             if (_isMainDisposed)
             {
@@ -374,7 +379,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                 return;
             }
 
-            if ((bool)Hameh.IsChecked)
+            if (Hameh.IsChecked ?? false)
             {
                 return;
             }
@@ -413,10 +418,10 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
         {
             if (RefreshIntervalCombo.SelectedValue is int selectedInterval)
             {
-                MRP_refreshIntervalSeconds = selectedInterval;
-                if (MRPTimer != null)
+                _kartablIntervalSeconds = selectedInterval;
+                if (KartablTimer != null)
                 {
-                    MRPTimer.Interval = TimeSpan.FromSeconds(MRP_refreshIntervalSeconds);
+                    KartablTimer.Interval = TimeSpan.FromSeconds(_kartablIntervalSeconds);
                 }
 
                 if (NowIsReady) //Avoid to run this code at startup
@@ -436,154 +441,271 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                    Application.Current.Windows.OfType<Msgwin>().Any();
         }
 
+        /// <summary>
+        /// تنظیمات مربوط به سیستم Snooze پیام‌ها
+        /// </summary>
+        public static class SnoozeSettings
+        {
+            /// <summary>
+            /// حداکثر تعداد دفعات نمایش مجدد پیام (بعد از اولین بار)
+            /// </summary>
+            public const int MAX_SNOOZE_COUNT = 2;
+
+            /// <summary>
+            /// فاصله زمانی بین نمایش‌های مجدد (به دقیقه)
+            /// دفعه اول: بدون Snooze (مقدار بزرگ برای جلوگیری از نمایش مجدد فوری)
+            /// دفعه دوم: 15 دقیقه بعد
+            /// دفعه سوم: 30 دقیقه بعد
+            /// دفعه چهارم: 60 دقیقه بعد
+            /// </summary>
+            public static int GetSnoozeInterval(int snoozeCount)
+            {
+                switch (snoozeCount)
+                {
+                    case 0: return 5; // ✅ مقدار خیلی بزرگ - اولین نمایش، هنوز Snooze نشده
+                    case 1: return 15;           // 15 دقیقه بعد از اولین نمایش
+                    case 2: return 30;           // 30 دقیقه بعد
+                    case 3: return 60;           // 60 دقیقه بعد
+                    default: return int.MaxValue; // دیگر نمایش داده نمی‌شود
+                }
+            }
+        }
         private async Task CheckRemindersAndMessages()
         {
             try
             {
+                bool shouldExit = false;
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    if (CheckIfAnyRelatedWindowIsOpen()) return;
+                    shouldExit = CheckIfAnyRelatedWindowIsOpen();
                 });
 
-                // Check REMAINDER table
-                var remainders = await dbms.DoGetDataSQLAsync<REMAINDER>($@"
-                                                            SELECT * FROM REMAINDER 
-                                                            WHERE STATUS = 1 
-                                                            AND PERSONEL = {Baseknow.USERCOD} 
-                                                            AND STDATE = {Tarikh.GoGetPersianDate(true)}");
+                if (shouldExit) return;
+
+                // ==================== بخش 1: یادآوری‌ها ====================
+                var remainders = await dbms.SqlQueryAsync<REMAINDER>(@"
+                    SELECT IDNUM, PERSONEL, PAYAM, STATUS, CTDATE, CTTIME, USERNAME, COMP_COD, STDATE, STTIME, SMSOK, CRT, UID 
+                    FROM dbo.REMAINDER 
+                    WHERE STATUS = 1 
+                    AND PERSONEL = @UserCod 
+                    AND STDATE = @CurrentDate",
+                    new { UserCod = Baseknow.USERCOD, CurrentDate = Tarikh.GoGetPersianDate(true) });
+
+                var currentTime = new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute, 0);
+                var processedReminderIds = new List<int>();
+
                 foreach (var remainder in remainders)
                 {
                     TimeSpan? reminderTime = null;
                     if (remainder.STTIME.HasValue)
                     {
-                        //reminderTime = remainder.STTIME.Value.TimeOfDay;
                         reminderTime = new TimeSpan(remainder.STTIME.Value.Hour, remainder.STTIME.Value.Minute, 0);
                     }
-                    var currentTime = new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute, 0);
 
                     if (reminderTime != null && reminderTime <= currentTime)
                     {
-                        if (!CheckIfAnyRelatedWindowIsOpen()) //Other Window Is Not Open
+                        bool windowIsOpen = false;
+                        await Dispatcher.InvokeAsync(() =>
                         {
-                            //string test = ".....................:::::::::::::::|||||||||||||||||||||(         يادآوري          )|||||||||||||||||||||:::::::::::::::.....................\r\n\r\n\r\n";
-                            // Add new message
-                            var newMessage = new MESAGEP
+                            windowIsOpen = CheckIfAnyRelatedWindowIsOpen();
+                        });
+
+                        if (!windowIsOpen)
+                        {
+                            var updateResult = await dbms.DoExecuteSQLAsync("UPDATE REMAINDER SET STATUS = 2 WHERE IDNUM = @IdNum AND STATUS = 1", new { IdNum = remainder.IDNUM });
+
+                            if (updateResult > 0)
                             {
-                                PERSONEL = remainder.PERSONEL,
-                                COMP_COD = remainder.COMP_COD,
-                                PAYAM = @$".....................:::::::::::::::|||||||||||||||||||||(         يادآوري          )|||||||||||||||||||||:::::::::::::::.....................
-                                        
-                                                                                                                                                                        {remainder.PAYAM}",
-                                STATUS = 1,
-                                STDATE = remainder.STDATE,
-                                STTIME = DateTime.Now.Hour * 100 + DateTime.Now.Minute,
-                                USERNAME = remainder.USERNAME
-                            };
+                                var newMessage = new MESAGEP
+                                {
+                                    PERSONEL = remainder.PERSONEL,
+                                    COMP_COD = remainder.COMP_COD,
+                                    PAYAM = @$".....................:::::::::::::::|||||||||||||||||||||(         يادآوري          )|||||||||||||||||||||:::::::::::::::.....................
+                                    {remainder.PAYAM}",
+                                    STATUS = 1,
+                                    STDATE = remainder.STDATE,
+                                    STTIME = DateTime.Now.Hour * 100 + DateTime.Now.Minute,
+                                    USERNAME = remainder.USERNAME
+                                };
 
-                            await dbms.DoExecuteSQLAsync("INSERT INTO dbo.MESAGEP (PERSONEL, COMP_COD, PAYAM, STATUS, STDATE, STTIME, USERNAME) VALUES (@PERSONEL, @COMP_COD, @PAYAM, @STATUS, @STDATE, @STTIME, @USERNAME)", newMessage);
+                                await dbms.DoExecuteSQLAsync(@"
+                                INSERT INTO dbo.MESAGEP (PERSONEL, COMP_COD, PAYAM, STATUS, STDATE, STTIME, USERNAME) 
+                                VALUES (@PERSONEL, @COMP_COD, @PAYAM, @STATUS, @STDATE, @STTIME, @USERNAME)", newMessage);
 
-
-                            if (remainder.SMSOK == true)
-                            {
-                                var SMSAC = new CL_SMSAC();
-                                // Assuming you have a method for sending SMS
-                                await SMSAC.ErselSmsAsync(CL_HESABDARI.GETUSERCO((int)remainder.PERSONEL), $"ياد آوري {remainder.PAYAM} - {remainder.USERNAME}", (long)remainder.IDNUM, 2, false);
+                                if (remainder.SMSOK == true)
+                                {
+                                    var SMSAC = new CL_SMSAC();
+                                    await SMSAC.ErselSmsAsync(
+                                        CL_HESABDARI.GETUSERCO((int)remainder.PERSONEL),
+                                        $"ياد آوري {remainder.PAYAM} - {remainder.USERNAME}",
+                                        (long)remainder.IDNUM, 2, false);
+                                }
+                                processedReminderIds.Add((int)remainder.IDNUM);
                             }
-
-                            // Update remainder status
-                            await dbms.DoExecuteSQLAsync($"UPDATE REMAINDER SET STATUS = 2 WHERE IDNUM = {remainder.IDNUM}");
                         }
                     }
                 }
 
-                // Update yad label
-                var activeRemainders = await dbms.DoGetDataSQLAsync<int>($"SELECT COUNT(*) FROM REMAINDER WHERE STATUS = 1 AND PERSONEL = {Baseknow.USERCOD}");
-                await Dispatcher.InvokeAsync(() => yad.Content = activeRemainders.FirstOrDefault());
+                var activeRemainderCount = remainders.Count(r => r.STATUS == 1 && !processedReminderIds.Contains((int)r.IDNUM));
+                await Dispatcher.InvokeAsync(() => yad.Content = activeRemainderCount);
 
-                // Update tas label (assuming TASKS is a DataGrid in your WPF window)
                 await Dispatcher.InvokeAsync(() => tas.Content = tASKSDataGrid.Items.Count);
 
-                // Check MESAGEP table
-                var newMessages = await dbms.DoGetDataSQLAsync<MESAGEP>($"SELECT * FROM MESAGEP WHERE STATUS = 1 AND PERSONEL = {Baseknow.USERCOD}");
+                // ==================== بخش 2: پیام‌ها Snooze  ====================
+                var allMessages = await dbms.SqlQueryAsync<MESAGEP>(@"
+                    SELECT 
+                        IDNUM, 
+                        PERSONEL, 
+                        PAYAM, 
+                        STATUS, 
+                        STDATE, 
+                        STTIME, 
+                        USERNAME, 
+                        COMP_COD, 
+                        CRT, 
+                        UID, 
+                        ISNULL(IsNotifyCalled, 0) as IsNotifyCalled,
+                        ISNULL(SNOOZE_COUNT, 0) as SNOOZE_COUNT,
+                        LAST_NOTIFY_TIME                
+                    FROM dbo.MESAGEP 
+                    WHERE STATUS = 1 
+                    AND PERSONEL = @UserCod
+                    ORDER BY IDNUM DESC", new { UserCod = Baseknow.USERCOD });
+
+                var messagesToNotify = new List<MESAGEP>();
+                var currentDateTime = DateTime.Now;
+
+                foreach (var item in allMessages)
+                {
+                    if (item.STATUS == 1) //دیده نشده
+                    {
+                        bool shouldNotify = false;
+
+                        // ✅ چک 1: اولین بار نمایش
+                        if (!Convert.ToBoolean(item.IsNotifyCalled))
+                        {
+                            shouldNotify = true;
+                        }
+                        // ✅ چک 2: Snooze (نمایش مجدد)
+                        else if (item.SNOOZE_COUNT < SnoozeSettings.MAX_SNOOZE_COUNT)
+                        {
+                            if (item.LAST_NOTIFY_TIME.HasValue)
+                            {
+                                var minutesSinceLastNotify = (currentDateTime - item.LAST_NOTIFY_TIME.Value).TotalMinutes;
+                                var requiredInterval = SnoozeSettings.GetSnoozeInterval(item.SNOOZE_COUNT ?? 0);
+
+                                if (minutesSinceLastNotify >= requiredInterval)
+                                {
+                                    shouldNotify = true;
+                                }
+                            }
+                        }
+                        // ✅ چک 3: حداکثر Snooze رسیده - پیام در Inbox می‌ماند ولی Notification نمایش داده نمی‌شود
+                        if (shouldNotify)
+                        {
+                            messagesToNotify.Add(item);
+                        }
+                    }
+                }
+
+                // بروزرسانی تعداد کل پیام‌های خوانده نشده
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    nor.Content = newMessages.Count();
-                    if (newMessages.Any())
+                    nor.Content = allMessages.Count();
+                });
+
+                // نمایش Notification
+                if (messagesToNotify.Any())
+                {
+                    foreach (var item in messagesToNotify)
                     {
-                        bool isInboxPanOpen = Application.Current.Windows.OfType<INBOXPAN>().Any();
-                        bool isMESSAGEPANELOpen = Application.Current.Windows.OfType<WIN_MESSAGEPANEL>().Any();
+                        bool isReminder = item.PAYAM.Contains("يادآوري") && item.PAYAM.Contains("||||||||||||||||||||(");
 
-                        // Split into lines
-                        string[] MsgLines = newMessages.FirstOrDefault().PAYAM.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
-                        // Remove the first line and any blank/whitespace lines (including lines with just spaces)
-                        string cleanedText = string.Join(Environment.NewLine, MsgLines.Skip(1)
-                                                                                    .Select(line => line.Trim()) // Trim spaces from each line
-                                                                                    .Where(line => !string.IsNullOrEmpty(line)));
+                        string notificationTitle;
+                        string notificationBody;
+                        PackIconKind iconKind;
 
-                        //Notifications
-                        //foreach (var item in newMessages)
-                        //{
-                        //    if (item?.PAYAM != null && !Convert.ToBoolean(item.IsNotifyCalled)) //اگر پیامی هست و نوتیفیکیشن اون هم هنوز نمایش داده نشده
-                        //    {
-                        //        if ((bool)(item?.PAYAM.FixPersianChars().Contains("یادآوری")))
-                        //        {
-                        //            NotificationManager.Instance.EnqueueNotification("یادآوری",
-                        //            item?.PAYAM.Replace(CL_Generaly.REMIND_TITLE, null).Replace("\n\n", null).Replace("\n", null),
-                        //            PackIconKind.Clock, 6);
-                        //        }
-                        //        else
-                        //        {
-                        //            NotificationManager.Instance.EnqueueNotification("پیام",
-                        //             item?.PAYAM,
-                        //             PackIconKind.Message, 6);
-                        //        }
-
-                        //        dbms.DoExecuteSQL($"UPDATE dbo.MESAGEP SET IsNotifyCalled = 1 WHERE IDNUM = {item.IDNUM} AND PERSONEL = {item.PERSONEL}");
-                        //    }
-                        //}
-
-                        if (!Convert.ToBoolean(newMessages.FirstOrDefault()?.IsNotifyCalled))
+                        if (isReminder)
                         {
-                            if (MsgLines?.FirstOrDefault()?.FixPersianChars() == CL_Generaly.REMIND_TITLE.FixPersianChars())
-                            {
-                                NotificationManager.Instance.EnqueueNotification("یادآوری",
-                                cleanedText,
-                                PackIconKind.Clock, 6, default, newMessages.FirstOrDefault().IDNUM ?? 0);
+                            string cleanedText = item.PAYAM
+                                .Replace(CL_Generaly.REMIND_TITLE, "")
+                                .Replace(".....................:::::::::::::::|||||||||||||||||||||(         يادآوري          )|||||||||||||||||||||:::::::::::::::.....................", "")
+                                .Replace("\n\n", " ")
+                                .Replace("\n", " ")
+                                .Trim();
 
+                            if (item.SNOOZE_COUNT > 0)
+                            {
+                                notificationTitle = $"یادآوری (یادآوری #{item.SNOOZE_COUNT + 1})";
                             }
                             else
                             {
-                                NotificationManager.Instance.EnqueueNotification("پیام",
-                                 newMessages.FirstOrDefault()?.PAYAM,
-                                 PackIconKind.Message, 6, default, newMessages.FirstOrDefault().IDNUM ?? 0);
+                                notificationTitle = "یادآوری";
                             }
+
+                            notificationBody = cleanedText;
+                            iconKind = PackIconKind.Clock;
                         }
-
-                        dbms.DoExecuteSQL($"UPDATE dbo.MESAGEP SET IsNotifyCalled = 1 WHERE IDNUM = {newMessages.FirstOrDefault()?.IDNUM} AND PERSONEL = {newMessages.FirstOrDefault()?.PERSONEL}");
-
-                        //Original Message Window
-                        if (!isInboxPanOpen && !isMESSAGEPANELOpen && newMessages.FirstOrDefault()?.IDNUM != null)
+                        else
                         {
-                            //INBOXPAN IBX = new INBOXPAN(newMessages.First().IDNUM);
-                            ////IBX.Owner = this;
-                            ////IBX.Topmost = false;
-                            ////IBX.WindowState = WindowState.Minimized;
-                            //IBX.Show();
+                            var FromPersonName = rst_personel?.FirstOrDefault(i => i.USERCO == item.PERSONEL)?.SAL_NAME ?? "پیام";
+
+                            if (item.SNOOZE_COUNT > 0)
+                            {
+                                notificationTitle = $"{FromPersonName} (یادآوری #{item.SNOOZE_COUNT + 1})";
+                            }
+                            else
+                            {
+                                notificationTitle = FromPersonName;
+                            }
+
+                            notificationBody = item.PAYAM;
+                            iconKind = PackIconKind.Message;
                         }
 
+                        await Dispatcher.InvokeAsync(() =>
+                        {
+                            NotificationManager.Instance.EnqueueNotification(
+                                notificationTitle,
+                                notificationBody,
+                                iconKind,
+                                15, default, item.IDNUM ?? 0);
+                        });
                     }
-                });
 
-
+                    // ✅ Batch Update - بروزرسانی Snooze Counters
+                    foreach (var item in messagesToNotify)
+                    {
+                        // اگر اولین بار است
+                        if (!item.IsNotifyCalled.HasValue || !item.IsNotifyCalled.Value)
+                        {
+                            await dbms.DoExecuteSQLAsync(@"
+                            UPDATE dbo.MESAGEP 
+                            SET IsNotifyCalled = 1,
+                                SNOOZE_COUNT = 0,
+                                LAST_NOTIFY_TIME = GETDATE()
+                            WHERE IDNUM = @IDNUM",
+                                new { IDNUM = item.IDNUM });
+                        }
+                        // اگر Snooze است
+                        else
+                        {
+                            await dbms.DoExecuteSQLAsync(@"
+                            UPDATE dbo.MESAGEP SET 
+                                SNOOZE_COUNT = ISNULL(SNOOZE_COUNT, 0) + 1,
+                                LAST_NOTIFY_TIME = GETDATE()
+                            WHERE IDNUM = @IDNUM",
+                                new { IDNUM = item.IDNUM });
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
-                // Handle exceptions
-                await Dispatcher.InvokeAsync(() =>
-                    universControl.PopNotifyShow($"خطا در بروز رسانی تعداد کار ها", Pop1, Pop1Text1, Pop_Border1)
-                );
+                await Dispatcher.InvokeAsync(() => universControl.PopNotifyShow($"خطا در بروز رسانی پیام/یادآوری", Pop1, Pop1Text1, Pop_Border1));
             }
         }
+
         private async Task DoLoadKartabl(bool _IsFirstTime_ = false)
         {
             CanUisBeActive = false;
@@ -704,7 +826,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
            ORDER BY
                 CASE WHEN uo.SORT_ORDER IS NULL THEN 1 ELSE 0 END,
                 uo.SORT_ORDER, sd.SAL_NAME";
-            List<COMBOPERSONEL>? rst_personel = dbms.DoGetDataSQL<COMBOPERSONEL>(sql, new { UserId = Baseknow.USERCOD }).ToList();
+            rst_personel = dbms.DoGetDataSQL<COMBOPERSONEL>(sql, new { UserId = Baseknow.USERCOD }).ToList();
             foreach (var rows in rst_personel)
             {
                 if (!string.IsNullOrEmpty(rows?.SAL_NAME))
@@ -771,7 +893,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                 new COMBOYMODEL { NAME = "5 دقیقه",  ID = 300 },
                 new COMBOYMODEL { NAME = "15 دقیقه", ID = 900 },
             };
-            RefreshIntervalCombo.ItemsSource = NESBAT_MODEL; RefreshIntervalCombo.SelectedValue = 1; RefreshIntervalCombo.Items.Refresh();
+            RefreshIntervalCombo.ItemsSource = NESBAT_MODEL; RefreshIntervalCombo.SelectedValue = 30; RefreshIntervalCombo.Items.Refresh();
         }
         private void ESLAH_SATR(int _idnum)
         {
