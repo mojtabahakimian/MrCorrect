@@ -1021,7 +1021,7 @@ namespace Wins.WinMenus.Taarif
                 }
 
                 // 🔥 CRITICAL FIX: Reload the parent's detail collection after INSERT
-                if (isNewRecord)
+                if (false) //isNewRecord
                 {
                     var parentFormat = MASTER_GRADE_DATA.FirstOrDefault(m => m.IDD == row.GFID);
                     if (parentFormat != null)
@@ -1244,7 +1244,7 @@ namespace Wins.WinMenus.Taarif
                 // Assign parent FK to child
                 row.GFTID = parentGFTID;
 
-                CurrentParentTab = null; //Reset to avoid conflict
+                //CurrentParentTab = null; //Reset to avoid conflict
 
                 var TopParentRow = (SYNCFUSION_DG.SelectedItem as GRADE_FORMAT); //GFID
 
@@ -1333,11 +1333,11 @@ namespace Wins.WinMenus.Taarif
                 else if (ex.Number == 547) // FK violation
                     new Msgwin(false, "خطا: ارجاع به والد نامعتبر است!").ShowDialog();
                 else
-                    new Msgwin(false, $"خطا در ذخیره: {ex.Message}").ShowDialog();
+                    new Msgwin(false, $"خطا در ذخیره").ShowDialog();
             }
             catch (Exception ex)
             {
-                new Msgwin(false, $"خطای ناشناخته: {ex.Message}").ShowDialog();
+                new Msgwin(false, $"خطای ناشناخته").ShowDialog();
             }
         }
         private void GRPFT_RecordDeleting(object sender, RecordDeletingEventArgs e)
@@ -1580,7 +1580,7 @@ namespace Wins.WinMenus.Taarif
             var master = MASTER_GRADE_DATA.FirstOrDefault(m => m.IDD == gfid);
             if (master != null)
             {
-                master.JAMZARIB = (float?)Result.JAMZARIB;
+                master.JAMZARIB = (float?)Result.JAMZARIB ?? 0;
                 master.EMTIAZ = (float)Result.EMTIAZ;
             }
 

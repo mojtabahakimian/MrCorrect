@@ -13,7 +13,11 @@
         Topmost="True" 
         Width="350" 
         Height="100"
-        Opacity="100" FontFamily="{StaticResource IRANYEKAN}">
+        ShowActivated="False"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True"
+        Opacity="0" d:Opacity="100" 
+        FontFamily="{StaticResource IRANYEKAN}">
     <Border Background="#FF333333" CornerRadius="10" Padding="10">
         <Grid Margin="0,0,0,-5">
             <Grid.ColumnDefinitions>
