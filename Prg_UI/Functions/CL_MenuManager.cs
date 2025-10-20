@@ -920,7 +920,11 @@ namespace Functions
             /// <summary>
             /// چکهای پرداختی اعلام وصول یا برگشت شده
             /// </summary>
-            CHEKS_PBESTANKAR
+            CHEKS_PBESTANKAR,
+            /// <summary>
+            /// چکهای واگذار - برگشت - وصول شده
+            /// </summary>
+            CHEKS_BESTANKAR
         }
         #endregion
 
@@ -955,6 +959,10 @@ namespace Functions
 
                 case WinNameType.HEAD_SERCH_MAIN_ADVANC_F12: /*  جستجو در گردش کالا های پیشرفته | F12 پیشرفته */ CL_LMethods.OpenWindow(OWNERWIN, new HEAD_SERCH_MAIN_ADVANC(), isModalDialog: false, allowMultipleInstances: false); break;
                 //Mojtaba}
+
+                case WinNameType.CHEKS_BESTANKAR: //چکهای واگذار - برگشت - وصول شده
+                    CL_LMethods.OpenWindow(OWNERWIN, new CHEKS_BESTANKAR());
+                    break;
 
                 case WinNameType.CHEKS_PBESTANKAR: //چکهای پرداختی اعلام وصول یا برگشت شده
                     CL_LMethods.OpenWindow(OWNERWIN, new CHEKS_PBESTANKAR());

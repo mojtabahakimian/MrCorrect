@@ -1341,5 +1341,10 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CHEKS_PBESTANKAR, null);
         }
+
+        private void Button_Click_133(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CHEKS_BESTANKAR, null);
+        }
     }
 }

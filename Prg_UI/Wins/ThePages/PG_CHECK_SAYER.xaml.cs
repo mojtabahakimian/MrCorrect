@@ -54,5 +54,10 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CHEKS_PBESTANKAR, null);
         }
+
+        private void Image_PreviewMouseDown_7(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CHEKS_BESTANKAR, null);
+        }
     }
 }
