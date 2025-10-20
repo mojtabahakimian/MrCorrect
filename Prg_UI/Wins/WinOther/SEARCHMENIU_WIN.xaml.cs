@@ -363,6 +363,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست چکهای پرداختی با مبالغ", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_PLISTS });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست چکهای موجود در صندوق", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_CHKM });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "کنترل سریالی چکهای پرداختی", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_SERILA });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "چکهای پرداختی اعلام وصول یا برگشت شده", WIN_NAME = CL_MenuManager.WinNameType.CHEKS_PBESTANKAR });
 
             //حسابداری
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "کنترل اسناد و دفاتر چک", WIN_NAME = CL_MenuManager.WinNameType.ADAMTARAZ });

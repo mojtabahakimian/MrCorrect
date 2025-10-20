@@ -916,7 +916,11 @@ namespace Functions
             WIN_GRADE_SHART_FUNC_FORM ,
             /// لیست چکهای پرداختی با مبالغ
             /// </summary>
-            F_MENU_CHEK_PLISTS
+            F_MENU_CHEK_PLISTS,
+            /// <summary>
+            /// چکهای پرداختی اعلام وصول یا برگشت شده
+            /// </summary>
+            CHEKS_PBESTANKAR
         }
         #endregion
 
@@ -951,6 +955,10 @@ namespace Functions
 
                 case WinNameType.HEAD_SERCH_MAIN_ADVANC_F12: /*  جستجو در گردش کالا های پیشرفته | F12 پیشرفته */ CL_LMethods.OpenWindow(OWNERWIN, new HEAD_SERCH_MAIN_ADVANC(), isModalDialog: false, allowMultipleInstances: false); break;
                 //Mojtaba}
+
+                case WinNameType.CHEKS_PBESTANKAR: //چکهای پرداختی اعلام وصول یا برگشت شده
+                    CL_LMethods.OpenWindow(OWNERWIN, new CHEKS_PBESTANKAR());
+                    break;
 
                 case WinNameType.F_MENU_CHEK_PLISTS: //لیست چکهای پرداختی با مبالغ
                     CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_CHEK("pchs", "لیست چکهای پرداختی با مبالغ"));

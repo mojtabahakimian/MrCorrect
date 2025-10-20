@@ -3871,7 +3871,7 @@
                                         </Grid>
                                     </Button>
 
-                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
+                                    <Button  Style="{StaticResource MaterialDesignFlatButton}" Margin="1" Height="40" Click="Button_Click_132" Cursor="Hand" BorderBrush="{x:Null}" Background="{x:Null}">
                                         <Grid Width="189">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="10*"/>
