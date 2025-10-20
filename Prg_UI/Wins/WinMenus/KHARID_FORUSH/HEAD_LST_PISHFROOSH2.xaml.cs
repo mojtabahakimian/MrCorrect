@@ -2480,11 +2480,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     db.Open();
                     using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
                     {
-                        //Fake Query for Lock Table
-                        db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
-                        //Fake Query for Lock Table
+                        ////Fake Query for Lock Table
+                        //db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
+                        ////Fake Query for Lock Table
+                        //var rst_11 = db.Query<double?>("SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)=20))", null, transaction).FirstOrDefault();
 
-                        var rst_11 = db.Query<double?>("SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)=20))", null, transaction).FirstOrDefault();
+                        var rst_11 = db.Query<double?>("SELECT MAX(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WITH (UPDLOCK, HOLDLOCK) WHERE HEAD_LST.TAG = 20", transaction: transaction, commandTimeout: 60).FirstOrDefault();
+
                         if (rst_11 == 0 || ReferenceEquals(rst_11, null))
                         {
                             num = 1; //Baseknow.STHFR
@@ -5342,7 +5344,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                     CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this, _FTRNUMS_, default, default, default, true);
 
-                
+
                     //DoCmd.OpenForm("HEAD_LST_FROOSH22", default, default, default, default, default, "NUMBER = " + num);
                 }
                 //Set rst = New ADODB.Recordset

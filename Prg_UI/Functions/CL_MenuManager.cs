@@ -916,7 +916,11 @@ namespace Functions
             WIN_GRADE_SHART_FUNC_FORM ,
             /// لیست چکهای پرداختی با مبالغ
             /// </summary>
-            F_MENU_CHEK_PLISTS
+            F_MENU_CHEK_PLISTS,
+            /// <summary>
+            /// تعریف گروه بندی قیمتی
+            /// </summary>
+            PRICE_GRP_FORM_GRUHBANDI_GHEYMATI
         }
         #endregion
 
@@ -933,6 +937,8 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+
+                case WinNameType.PRICE_GRP_FORM_GRUHBANDI_GHEYMATI: /* تعریف گروه بندی قیمتی */ CL_LMethods.OpenWindow(OWNERWIN, new PRICE_GRP_FORM(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_GRADE_SHART_FUNC_FORM: /* تعریف شروط گریدهای مشتریان */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_GRADE_SHART_FUNC_FORM(), isModalDialog: false, allowMultipleInstances: false); break;
 

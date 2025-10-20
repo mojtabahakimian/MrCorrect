@@ -403,6 +403,8 @@ namespace Wins.WinOther
             //مدیریت فروش هوشمند
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف شروط گریدهای مشتریان", WIN_NAME = CL_MenuManager.WinNameType.WIN_GRADE_SHART_FUNC_FORM });
 
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف گروه بندی قیمتی", WIN_NAME = CL_MenuManager.WinNameType.PRICE_GRP_FORM_GRUHBANDI_GHEYMATI });
+
 
 
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());
