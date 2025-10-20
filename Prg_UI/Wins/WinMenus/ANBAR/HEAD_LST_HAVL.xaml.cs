@@ -2046,6 +2046,68 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             if (e.Key == Key.Delete)
                 e.Handled = true;
 
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.OemQuotes)
+            {
+                try
+                {
+                    if (INVO_LST_HAVL_SUB?.CurrentCell != null && INVO_LST_HAVL_SUB.IsEnabled && !INVO_LST_HAVL_SUB.IsReadOnly)
+                    {
+                        // Get the current cell
+                        DataGridCellInfo currentCell = INVO_LST_HAVL_SUB.CurrentCell;
+                        if (currentCell != null)
+                        {
+                            // Get the row index and column index of the current cell
+                            int rowIndex = INVO_LST_HAVL_SUB.Items.IndexOf(currentCell.Item);
+                            int columnIndex = INVO_LST_HAVL_SUB.Columns.IndexOf(currentCell.Column);
+
+                            // Check if it's not the first row
+                            if (rowIndex > 0)
+                            {
+                                // Get the value from the cell above
+                                object valueAbove = INVO_LST_HAVL_SUB.Items[rowIndex - 1];
+
+                                // Ensure that the column index is within bounds
+                                if (columnIndex >= 0 && columnIndex < INVO_LST_HAVL_SUB.Columns.Count)
+                                {
+                                    // Get the column information
+                                    var column = INVO_LST_HAVL_SUB.Columns[columnIndex];
+
+                                    // Ensure that the column has a valid SortMemberPath
+                                    if (!string.IsNullOrEmpty(column.SortMemberPath))
+                                    {
+                                        // Use reflection to get and set the property values
+                                        var propertyInfo = valueAbove.GetType().GetProperty(column.SortMemberPath);
+
+                                        // Ensure that the property exists and is not null
+                                        if (propertyInfo != null)
+                                        {
+                                            // Get the value from the above cell
+                                            object valueAboveCellValue = propertyInfo.GetValue(valueAbove);
+
+                                            // Cast currentCell.Item to the actual data type
+                                            var currentItem = currentCell.Item;
+
+                                            // Use reflection to set the value on the current item
+                                            if (currentItem.GetType().GetProperty(column.SortMemberPath) is PropertyInfo currentCellProperty)
+                                            {
+                                                // Set the value on the current cell's item
+                                                currentCellProperty.SetValue(currentItem, valueAboveCellValue);
+
+                                                INVO_LST_HAVL_SUB.Items.Refresh();
+
+                                                INVO_LST_HAVL_SUB.BeginEdit();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        e.Handled = true;
+                    }
+                }
+                catch { }
+            }
+
             if (NowIsReady && e.Key == Key.Delete && DELETE_HAVALE.IsEnabled)
             {
                 e.Handled = true;

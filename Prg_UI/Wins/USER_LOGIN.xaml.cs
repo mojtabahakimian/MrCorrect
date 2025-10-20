@@ -372,9 +372,8 @@ namespace Prg_UI.Wins
             Baseknow.UGRP = "1";
 
             //new GRADE_FORMAT_WIN().Show();
-            new PRICE_GRP_FORM().Show(); //***
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FACTORS_LST, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
 
             //new WIN_HEAD_MANF().Show();

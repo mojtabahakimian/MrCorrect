@@ -1316,7 +1316,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     }
                 }
                 catch { }
-
             }
 
 
