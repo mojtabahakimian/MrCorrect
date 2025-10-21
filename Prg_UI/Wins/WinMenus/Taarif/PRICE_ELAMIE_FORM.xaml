@@ -20,6 +20,25 @@
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+
+        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="کپـــی | Copy" Click="COPY_CLICK" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="ContentCopy" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="انتقال کپی | Paste" Click="PASTE_CLICK" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="ContentPaste" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Header="خروجی اکسل" Click="EXPORTEXCEL_BTN" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="FileExcelOutline" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
@@ -71,7 +90,7 @@
                 EnableRowVirtualization="True"
                 VirtualizingPanel.IsVirtualizing="True"
                 VirtualizingPanel.VirtualizationMode="Recycling"
-                SelectedIndex="0"
+                SelectedIndex="0" ContextMenu="{StaticResource ContextUtilityMenu1}" 
                 ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
                 CellStyle="{StaticResource CellFocusyBorder}"
                 HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"

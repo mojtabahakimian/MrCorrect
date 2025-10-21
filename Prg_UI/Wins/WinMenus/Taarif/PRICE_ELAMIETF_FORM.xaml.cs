@@ -35,6 +35,7 @@ using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
 using Microsoft.VisualBasic;
 using static Prg_UI.Functions.CL_LMethods;
 using System.Windows.Controls.Primitives;
+using static Functions.DataGridClipboardManager;
 
 namespace Prg_UI.Wins.WinMenus.Taarif
 {
@@ -236,6 +237,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         private bool ican;
         private List<COMBOPERSONEL> rst_personel;
 
+        DataGrid? CurrentDataGridFocused = default;
         public byte TAG { get; } = 31;
         public bool AllowEdits
         {
@@ -343,6 +345,52 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                         searchWindow.ShowDialog();
                     }
                 }
+
+                if (IsDataGridFocused())
+                {
+                    DataGrid focusedGrid = GetFocusedDataGrid();
+                    CurrentDataGridFocused = focusedGrid;
+
+                    var isEditing = ((IEditableCollectionView)focusedGrid.Items).IsEditingItem;
+                    var isNewEmpty = ((IEditableCollectionView)focusedGrid.Items).IsAddingNew;
+
+                    if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.C)
+                    {
+                        if (!isEditing && focusedGrid.IsEnabled)
+                        {
+                            e.Handled = true;
+
+                            if (focusedGrid.SelectedItem is PRICE_ELAMIETF_DTL_MODEL)
+                            {
+                                DataGridClipboardManager.CopySelectedItems<PRICE_ELAMIETF_DTL_MODEL>(focusedGrid);
+                            }
+                            else if (focusedGrid.SelectedItem is PRICE_ELAMIETF_EXCEPTION)
+                            {
+                                DataGridClipboardManager.CopySelectedItems<PRICE_ELAMIETF_EXCEPTION>(focusedGrid);
+                            }
+                        }
+                    }
+
+                    if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.V)
+                    {
+                        if (!isEditing && !isNewEmpty && !focusedGrid.IsReadOnly && focusedGrid.IsEnabled)
+                        {
+                            e.Handled = true;
+                            IsPastingRows = true;
+
+                            if (focusedGrid.SelectedItem is PRICE_ELAMIETF_DTL_MODEL)
+                            {
+                                DataGridClipboardManager.PasteItems<PRICE_ELAMIETF_DTL_MODEL>(focusedGrid, ValidateDataGridRow, AddItemToDataSource);
+                            }
+                            else if (focusedGrid.SelectedItem is PRICE_ELAMIETF_EXCEPTION)
+                            {
+                                DataGridClipboardManager.PasteItems<PRICE_ELAMIETF_EXCEPTION>(focusedGrid, ValidateDataGridRow, AddItemToDataSource);
+                            }
+                            IsPastingRows = false;
+                        }
+                    }
+                }
+
             }
             catch { }
 
@@ -427,6 +475,233 @@ namespace Prg_UI.Wins.WinMenus.Taarif
              );
 
             MakeDefaultFocuseReady();
+        }
+
+        private bool IsDataGridFocused()
+        {
+            var focusedElement = Keyboard.FocusedElement as DependencyObject
+                                 ?? FocusManager.GetFocusedElement(this) as DependencyObject;
+
+            return focusedElement != null && FindParent<DataGrid>(focusedElement) != null;
+        }
+        private DataGrid GetFocusedDataGrid()
+        {
+            var focusedElement = Keyboard.FocusedElement as DependencyObject
+                                 ?? FocusManager.GetFocusedElement(this) as DependencyObject;
+
+            return FindParent<DataGrid>(focusedElement);
+        }
+        private void COPY_CLICK(object sender, RoutedEventArgs e)
+        {
+            if (IsSubDataNull())
+            {
+                return;
+            }
+
+            if (IsDataGridFocused())
+            {
+                DataGrid focusedGrid = GetFocusedDataGrid();
+
+                if (focusedGrid.SelectedItem is PRICE_ELAMIETF_DTL_MODEL)
+                {
+                    var isEditing = ((IEditableCollectionView)focusedGrid.Items).IsEditingItem;
+                    if (!isEditing)
+                    {
+                        e.Handled = true;
+                        DataGridClipboardManager.CopySelectedItems<PRICE_ELAMIETF_DTL_MODEL>(focusedGrid);
+                    }
+                    else
+                    {
+                        var editingElement = CL_LMethods.FindChild<TextBox>(focusedGrid);
+                        if (editingElement != null)
+                        {
+                            if (!string.IsNullOrEmpty(editingElement.SelectedText))
+                            {
+                                Clipboard.SetText(editingElement.SelectedText);
+                            }
+                        }
+                    }
+                }
+                else if (focusedGrid.SelectedItem is PRICE_ELAMIETF_EXCEPTION)
+                {
+                    var isEditing = ((IEditableCollectionView)focusedGrid.Items).IsEditingItem;
+                    if (!isEditing)
+                    {
+                        e.Handled = true;
+                        DataGridClipboardManager.CopySelectedItems<PRICE_ELAMIETF_EXCEPTION>(focusedGrid);
+                    }
+                    else
+                    {
+                        var editingElement = CL_LMethods.FindChild<TextBox>(focusedGrid);
+                        if (editingElement != null)
+                        {
+                            if (!string.IsNullOrEmpty(editingElement.SelectedText))
+                            {
+                                Clipboard.SetText(editingElement.SelectedText);
+                            }
+                        }
+                    }
+                }
+            }
+           
+        }
+        private void ValidateDataGridRow(DataGridRowEditEndingEventArgs args, PasteValidationResult validationResult)
+        {
+            // Default to true
+            validationResult.IsRowValid = true;
+
+            if (args.Row.Item is PRICE_ELAMIETF_DTL_MODEL item)
+            {
+                //Reset id to be sure the new data will insert not update the same row existing before
+                item.PEID = default; //Master Head
+                item.PETID = default; //Row ID
+                item.SUB_DETAIL_EXP = default;
+
+                CURRENT_ROW_ITEMS = item;
+
+                //Final Validation
+                if (validationResult.IsRowValid) //Yet
+                {
+                    DG_SUB_RowEditEnding(DG_SUB, args);
+                    validationResult.IsRowValid = IsSaveSuccess;
+                }
+            }
+            else if (args.Row.Item is PRICE_ELAMIETF_EXCEPTION itemsub)
+            {
+                //Reset id to be sure the new data will insert not update the same row existing before
+                itemsub.EXCEPTION_ID = default;
+                itemsub.PETID = default;
+
+                CurrentItemRowSub = itemsub;
+
+                //Final Validation
+                if (validationResult.IsRowValid) //Yet
+                {
+                    SUB_EXPTF_RowEditEnding(CurrentDataGridFocused, args);
+                    validationResult.IsRowValid = IsSaveSuccess;
+                }
+            }
+            else
+            {
+                // If the item is not of type CUSTOM_MODEL, invalidate the row
+                args.Cancel = true;
+                validationResult.IsRowValid = false;
+            }
+        }
+        private void AddItemToDataSource(object item)
+        {
+            if (item is PRICE_ELAMIETF_DTL_MODEL item1)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    PRICE_ELAMIETF_DTL_DATA.Add(item1);
+                });
+            }
+            else if (item is PRICE_ELAMIETF_EXCEPTION itemsub)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (DG_SUB.SelectedItem is PRICE_ELAMIETF_DTL_MODEL)
+                    {
+                        (DG_SUB.SelectedItem as PRICE_ELAMIETF_DTL_MODEL).SUB_DETAIL_EXP.Add(itemsub);
+                    }
+                });
+            }
+        }
+        private bool IsSubDataNull()
+        {
+            if (DG_SUB != null && DG_SUB?.Items?.Count > 0 && PRICE_ELAMIETF_DTL_DATA?.Count > 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private void PASTE_CLICK(object sender, RoutedEventArgs e)
+        {
+            if (IsDataGridFocused())
+            {
+                DataGrid focusedGrid = GetFocusedDataGrid();
+
+                if (focusedGrid.ItemsSource is PRICE_ELAMIETF_DTL_MODEL)
+                {
+                    if (focusedGrid.SelectedItem != null || focusedGrid.SelectedItems.Count > 0)
+                    {
+                        var isEditing = ((IEditableCollectionView)focusedGrid.Items).IsEditingItem;
+                        if (!isEditing && !focusedGrid.IsReadOnly && focusedGrid.IsEnabled)
+                        {
+                            e.Handled = true;
+
+                            IsPastingRows = true;
+                            DataGridClipboardManager.PasteItems<PRICE_ELAMIETF_DTL_MODEL>(focusedGrid, ValidateDataGridRow, AddItemToDataSource);
+                            IsPastingRows = false;
+
+                            focusedGrid.CommitEdit();
+                        }
+                        else
+                        {
+                            // Execute the Paste command on the currently focused element
+                            if (ApplicationCommands.Paste.CanExecute(null, Keyboard.FocusedElement as IInputElement))
+                            {
+                                ApplicationCommands.Paste.Execute(null, Keyboard.FocusedElement as IInputElement);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        universControl.PopNotifyShowUp("عمل انتقال کپی را باید با راست کلیک روی یک سطر خالی انجام بدید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
+                    }
+                }
+                else if (focusedGrid.ItemsSource is PRICE_ELAMIETF_EXCEPTION)
+                {
+                    if (focusedGrid.SelectedItem != null || focusedGrid.SelectedItems.Count > 0)
+                    {
+                        var isEditing = ((IEditableCollectionView)focusedGrid.Items).IsEditingItem;
+                        if (!isEditing && !focusedGrid.IsReadOnly && focusedGrid.IsEnabled)
+                        {
+                            e.Handled = true;
+
+                            IsPastingRows = true;
+                            DataGridClipboardManager.PasteItems<PRICE_ELAMIETF_EXCEPTION>(focusedGrid, ValidateDataGridRow, AddItemToDataSource);
+                            IsPastingRows = false;
+
+                            focusedGrid.CommitEdit();
+                        }
+                        else
+                        {
+                            // Execute the Paste command on the currently focused element
+                            if (ApplicationCommands.Paste.CanExecute(null, Keyboard.FocusedElement as IInputElement))
+                            {
+                                ApplicationCommands.Paste.Execute(null, Keyboard.FocusedElement as IInputElement);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        universControl.PopNotifyShowUp("عمل انتقال کپی را باید با راست کلیک روی یک سطر خالی انجام بدید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
+                    }
+                }
+            }
+        }
+        private async void EXPORTEXCEL_BTN(object sender, RoutedEventArgs e)
+        {
+            if (IsSubDataNull())
+            {
+                return;
+            }
+
+            if (IsDataGridFocused())
+            {
+                DataGrid focusedGrid = GetFocusedDataGrid();
+                try
+                {
+                    await UniversalExcelExporter.ExportToExcelAsync(focusedGrid, "DGExportedExcel");
+                }
+                catch (Exception)
+                {
+                    new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
+                }
+            }
         }
 
         private bool OnInsertRecord(PRICE_ELAMIETF record)
@@ -1181,6 +1456,122 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             new WINRPT(report, "اعلامیه قیمت").Show();
         }
 
+        private void BTN_FACTORHA_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void SGN1_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(PEID.Text) || PEID.Text == "0")
+            {
+                var wasChecked = SGN1.IsChecked ?? false;
+                SGN1.IsChecked = !wasChecked;
+                return;
+            }
+
+            //double mid;
+            //string sharh;
+            //double td;
+            //var TAG = 30;
+
+            //mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(PEID.Text), TAG);
+            //if (mid > 0d)
+            //{
+            //    dbms.DoExecuteSQL(
+            //        $"INSERT INTO events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG) " +
+            //        $"VALUES ({mid},'{CL_HESABDARI.UCurrentUser()}'," +
+            //        $"'{CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD))}" +
+            //        $"{(SGN1.IsChecked == true ? " :امضا شد1 " : " :امضا برداشته شد1:")}'," +
+            //        $"{Tarikh.FullCurrentDate}," +
+            //        $"{(DateTime.Now.Hour * 100 + DateTime.Now.Minute)},{TAG},{PEID.Text},{TAG})");
+            //    dbms.DoExecuteSQL(
+            //        $"UPDATE TASKS SET PERSONEL = {CL_HESABDARI.GETUSERTASK(mid)}, STATUS = 1 WHERE IDNUM = {mid}");
+            //}
+            //else
+            //{
+            //    td = Tarikh.GET_OADATE_DAO();
+            //    sharh = $"'اعلامیه تخفیف شماره: {PEID.Text} مورخ " +
+            //            $"{Strings.Format(Convert.ToInt32(PEPDATE.Text.ToRawTarikh()), "####/##/##")}', '0'";
+            //    dbms.DoExecuteSQL(
+            //        $"INSERT INTO TASKS(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO) " +
+            //        $"VALUES ({Baseknow.USERCOD},'{CL_HESABDARI.UCurrentUser()}',{sharh}," +
+            //        $"{Tarikh.FullCurrentDate},{(DateTime.Now.Hour * 100 + DateTime.Now.Minute)}," +
+            //        $"{TAG},{PEID.Text},{TAG},GETDATE(),{Baseknow.USERCOD})");
+            //    mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(PEID.Text), TAG);
+            //    dbms.DoExecuteSQL(
+            //        $"INSERT INTO EVENTS(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG) " +
+            //        $"VALUES ({mid},'{CL_HESABDARI.UCurrentUser()}'," +
+            //        $"'{CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD))}" +
+            //        $"{(SGN1.IsChecked == true ? " : امضا شد1 " : " :امضا برداشته شد1 ")}'," +
+            //        $"{Tarikh.FullCurrentDate},{(DateTime.Now.Hour * 100 + DateTime.Now.Minute)}," +
+            //        $"{TAG},{PEID.Text},{TAG})");
+            //}
+            //Meidnum = mid;
+
+            ////SGN1usid.Tag = Baseknow.USERCOD;
+            ////SGN1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == Baseknow.USERCOD)?.SAL_NAME;
+
+            dbms.DoExecuteSQL($"UPDATE dbo.PRICE_ELAMIETF SET SGN1={Convert.ToByte(SGN1.IsChecked ?? false)} WHERE PEID={PEID.Text}");
+
+            Form_Current();
+            PERSONEL.Visibility = Visibility.Visible;
+        }
+        private void SGN2_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(PEID.Text) || PEID.Text == "0")
+            {
+                var SGN_WAS = Convert.ToBoolean(SGN2.IsChecked ?? false);
+                SGN2.IsChecked = !SGN_WAS;
+                return;
+            }
+
+            dbms.DoExecuteSQL($"UPDATE dbo.PRICE_ELAMIETF SET SGN2={Convert.ToByte(SGN2.IsChecked ?? false)} WHERE PEID={PEID.Text}");
+            Form_Current();
+            PERSONEL.Visibility = Visibility.Visible;
+        }
+        private void SGN3_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(PEID.Text) || PEID.Text == "0")
+            {
+                var SGN_WAS = Convert.ToBoolean(SGN3.IsChecked ?? false);
+                SGN3.IsChecked = !SGN_WAS;
+                return;
+            }
+
+            dbms.DoExecuteSQL($"UPDATE dbo.PRICE_ELAMIETF SET SGN3={Convert.ToByte(SGN3.IsChecked ?? false)} WHERE PEID={PEID.Text}");
+            Form_Current();
+            PERSONEL.Visibility = Visibility.Visible;
+        }
+        private void PERSONEL_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //After Update
+            if (PERSONEL.SelectedItem != null && !NewRecord && PEID.Text != "0")
+            {
+                Meidnum = CL_HESABDARI.PERSONELUpdate(TAG, Convert.ToDouble(PEID.Text),
+                    Convert.ToInt32(PERSONEL.SelectedValue), "'اعلامیه تخفیف  شماره: " + PEID.Text
+                    + " مورخ " + Strings.Format(Convert.ToInt64(PEPDATE.Text.ToRawTarikh()), "####/##/##") +
+                    "  به نام: " + PENAME.Text + "'");
+
+                universControl.PopNotifyShow($".ارجاع داده شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+            }
+            else
+            {
+                e.Handled = true;
+
+                PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
+                PERSONEL.Text = null;
+                PERSONEL.SelectedValue = null; PERSONEL.Items.Refresh();
+                PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+
+                universControl.PopNotifyShow($".هنوز ذخیره را انجام نداده اید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+            }
+        }
+        private void PEPDEPART_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
         private void DG_SUB_CANCEL_EDIT(DataGridEditingUnit? _RC_ = null)
         {
             DG_SUB.Dispatcher.Invoke(() =>
@@ -1202,6 +1593,8 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             });
         }
 
+        public bool IsPastingRows { get; private set; } = false;
+        bool IsSaveSuccess = true;
 
         private void DG_SUB_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
@@ -1329,13 +1722,19 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
-            if (!HeaderIsValid()) { return; }
+            if (!HeaderIsValid())
+            {
+                IsSaveSuccess = false;
+                DG_SUB_CANCEL_EDIT();
+                return;
+            }
 
             var ROW = e.Row.Item as PRICE_ELAMIETF_DTL_MODEL;
             if (e.Row.Item == null || ROW is null) { return; }
 
             if (ConstructorRowDetector.IsPristine(ROW)) { DG_SUB_CANCEL_EDIT(); return; } //اگر سطر «دست‌نخورده» است، بدون خطا عمل کن
 
+            IsSaveSuccess = false;
             if (!BodyIsValid(ROW))
             {
                 DG_SUB_CANCEL_EDIT();
@@ -1434,43 +1833,9 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 ROW.PETID = (int)idd;
             }
 
+            IsSaveSuccess = true;
         }
 
-        private void DG_SUB_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            //MouseRightButtonUp="DG_SUB_MouseRightButtonUp"
-            DataGrid dataGrid = sender as DataGrid;
-            if (dataGrid == null) return;
-
-            if (dataGrid.SelectedItems.Count > 0)
-            {
-                return;
-            }
-            // Find the row under the mouse
-            DependencyObject dep = (DependencyObject)e.OriginalSource;
-            while (dep != null && !(dep is DataGridRow))
-            {
-                dep = VisualTreeHelper.GetParent(dep);
-            }
-
-            DataGridRow row = dep as DataGridRow;
-            if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
-            {
-                // Select the row under the mouse
-                dataGrid.SelectedItem = row.Item;
-
-                // Show the context menu
-                dataGrid.ContextMenu.IsOpen = true;
-
-                // Mark the event as handled to prevent the default context menu behavior
-                e.Handled = true;
-            }
-            else
-            {
-                // No valid row, don't show context menu
-                e.Handled = true;
-            }
-        }
         private void DG_SUB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
@@ -1502,121 +1867,6 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             }
         }
 
-        private void BTN_FACTORHA_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void SGN1_Click(object sender, RoutedEventArgs e)
-        {
-            if (string.IsNullOrEmpty(PEID.Text) || PEID.Text == "0")
-            {
-                var wasChecked = SGN1.IsChecked ?? false;
-                SGN1.IsChecked = !wasChecked;
-                return;
-            }
-
-            //double mid;
-            //string sharh;
-            //double td;
-            //var TAG = 30;
-
-            //mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(PEID.Text), TAG);
-            //if (mid > 0d)
-            //{
-            //    dbms.DoExecuteSQL(
-            //        $"INSERT INTO events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG) " +
-            //        $"VALUES ({mid},'{CL_HESABDARI.UCurrentUser()}'," +
-            //        $"'{CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD))}" +
-            //        $"{(SGN1.IsChecked == true ? " :امضا شد1 " : " :امضا برداشته شد1:")}'," +
-            //        $"{Tarikh.FullCurrentDate}," +
-            //        $"{(DateTime.Now.Hour * 100 + DateTime.Now.Minute)},{TAG},{PEID.Text},{TAG})");
-            //    dbms.DoExecuteSQL(
-            //        $"UPDATE TASKS SET PERSONEL = {CL_HESABDARI.GETUSERTASK(mid)}, STATUS = 1 WHERE IDNUM = {mid}");
-            //}
-            //else
-            //{
-            //    td = Tarikh.GET_OADATE_DAO();
-            //    sharh = $"'اعلامیه تخفیف شماره: {PEID.Text} مورخ " +
-            //            $"{Strings.Format(Convert.ToInt32(PEPDATE.Text.ToRawTarikh()), "####/##/##")}', '0'";
-            //    dbms.DoExecuteSQL(
-            //        $"INSERT INTO TASKS(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO) " +
-            //        $"VALUES ({Baseknow.USERCOD},'{CL_HESABDARI.UCurrentUser()}',{sharh}," +
-            //        $"{Tarikh.FullCurrentDate},{(DateTime.Now.Hour * 100 + DateTime.Now.Minute)}," +
-            //        $"{TAG},{PEID.Text},{TAG},GETDATE(),{Baseknow.USERCOD})");
-            //    mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(PEID.Text), TAG);
-            //    dbms.DoExecuteSQL(
-            //        $"INSERT INTO EVENTS(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG) " +
-            //        $"VALUES ({mid},'{CL_HESABDARI.UCurrentUser()}'," +
-            //        $"'{CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD))}" +
-            //        $"{(SGN1.IsChecked == true ? " : امضا شد1 " : " :امضا برداشته شد1 ")}'," +
-            //        $"{Tarikh.FullCurrentDate},{(DateTime.Now.Hour * 100 + DateTime.Now.Minute)}," +
-            //        $"{TAG},{PEID.Text},{TAG})");
-            //}
-            //Meidnum = mid;
-
-            ////SGN1usid.Tag = Baseknow.USERCOD;
-            ////SGN1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == Baseknow.USERCOD)?.SAL_NAME;
-
-            dbms.DoExecuteSQL($"UPDATE dbo.PRICE_ELAMIETF SET SGN1={Convert.ToByte(SGN1.IsChecked ?? false)} WHERE PEID={PEID.Text}");
-
-            Form_Current();
-            PERSONEL.Visibility = Visibility.Visible;
-        }
-        private void SGN2_Click(object sender, RoutedEventArgs e)
-        {
-            if (string.IsNullOrEmpty(PEID.Text) || PEID.Text == "0")
-            {
-                var SGN_WAS = Convert.ToBoolean(SGN2.IsChecked ?? false);
-                SGN2.IsChecked = !SGN_WAS;
-                return;
-            }
-
-            dbms.DoExecuteSQL($"UPDATE dbo.PRICE_ELAMIETF SET SGN2={Convert.ToByte(SGN2.IsChecked ?? false)} WHERE PEID={PEID.Text}");
-            Form_Current();
-            PERSONEL.Visibility = Visibility.Visible;
-        }
-        private void SGN3_Click(object sender, RoutedEventArgs e)
-        {
-            if (string.IsNullOrEmpty(PEID.Text) || PEID.Text == "0")
-            {
-                var SGN_WAS = Convert.ToBoolean(SGN3.IsChecked ?? false);
-                SGN3.IsChecked = !SGN_WAS;
-                return;
-            }
-
-            dbms.DoExecuteSQL($"UPDATE dbo.PRICE_ELAMIETF SET SGN3={Convert.ToByte(SGN3.IsChecked ?? false)} WHERE PEID={PEID.Text}");
-            Form_Current();
-            PERSONEL.Visibility = Visibility.Visible;
-        }
-        private void PERSONEL_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            //After Update
-            if (PERSONEL.SelectedItem != null && !NewRecord && PEID.Text != "0")
-            {
-                Meidnum = CL_HESABDARI.PERSONELUpdate(TAG, Convert.ToDouble(PEID.Text),
-                    Convert.ToInt32(PERSONEL.SelectedValue), "'اعلامیه تخفیف  شماره: " + PEID.Text
-                    + " مورخ " + Strings.Format(Convert.ToInt64(PEPDATE.Text.ToRawTarikh()), "####/##/##") +
-                    "  به نام: " + PENAME.Text + "'");
-
-                universControl.PopNotifyShow($".ارجاع داده شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
-            }
-            else
-            {
-                e.Handled = true;
-
-                PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
-                PERSONEL.Text = null;
-                PERSONEL.SelectedValue = null; PERSONEL.Items.Refresh();
-                PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
-
-                universControl.PopNotifyShow($".هنوز ذخیره را انجام نداده اید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
-            }
-        }
-        private void PEPDEPART_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
 
         #region SUB_DETAIL_DATAGRID
         private void SUB_EXPTF_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -1802,6 +2052,8 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             }
         }
         public ObservableCollection<PRICE_ELAMIETF_EXCEPTION> SelectedExceptions { get; } = new ObservableCollection<PRICE_ELAMIETF_EXCEPTION>();
+        public PRICE_ELAMIETF_EXCEPTION? CurrentItemRowSub { get; private set; }
+
         private void SUB_EXPTF_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (sender is not DataGrid grid)
@@ -1881,8 +2133,8 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 ENTERED_VALUE_ROW = TexboVal?.Text?.Trim();
             }
 
-            var CurrentItemRow = e.Row.Item as PRICE_ELAMIETF_EXCEPTION;
-            if (CurrentItemRow == null)
+            CurrentItemRowSub = e.Row.Item as PRICE_ELAMIETF_EXCEPTION;
+            if (CurrentItemRowSub == null)
             {
                 return;
             }
@@ -1952,7 +2204,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                                             source.Add(new STUF_TINY { CODE = _SelectedKala_.CODE, NAME = _SelectedKala_.NAME_CODE });
                                         }
                                     }
-                                    CurrentItemRow.CODE = _SelectedKala_.CODE;
+                                    CurrentItemRowSub.CODE = _SelectedKala_.CODE;
                                     Kala_Combo.SelectedValue = _SelectedKala_.CODE; //مشتری
                                     //Kala_Combo.Items.Refresh();
                                 }
@@ -1973,12 +2225,12 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             if (e.Row.Item == null) { return; }
             var ROW = e.Row.Item as PRICE_ELAMIETF_EXCEPTION;
 
+            IsSaveSuccess = false;
             if (!SUB_EXPTF_IsValid(ROW))
             {
                 SUB_EXPTF_CANCEL_EDIT(sender);
                 return;
             }
-
 
             ROW.PETID = (DG_SUB.SelectedItem as PRICE_ELAMIETF_DTL_MODEL).PETID;
             ROW.USERNAME = Baseknow.UUSER;
@@ -2047,8 +2299,88 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             {
                 new Msgwin(false, "خطا در انجام عملیات حذف!").ShowDialog(); return;
             }
+
+            IsSaveSuccess = true;
         }
         #endregion
-    
+
+        private void DG_SUB_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            DataGrid? dg = sender as DataGrid;
+            if (dg == null) return;
+
+            if (dg.CurrentItem == null || dg.CurrentItem == CollectionView.NewItemPlaceholder)
+            {
+                e.Handled = true; // Cancel opening the menu. Avoids the crash.
+                return;
+            }
+            if (dg?.SelectedItem == null)
+            {
+                e.Handled = true;
+                return;
+            }
+            else if (dg?.ContextMenu == null)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            base.OnContextMenuOpening(e);
+        }
+        private void DG_SUB_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            DataGrid dataGrid = sender as DataGrid;
+
+            if (dataGrid == null) return;
+
+            try
+            {
+                // Find the row under the mouse
+                DependencyObject dep = (DependencyObject)e.OriginalSource;
+                while (dep != null && !(dep is DataGridRow))
+                {
+                    dep = VisualTreeHelper.GetParent(dep);
+                }
+
+                DataGridRow row = dep as DataGridRow;
+                if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
+                {
+                    // Select the row under the mouse
+                    dataGrid.SelectedItem = row.Item;
+
+                    // Show the context menu
+                    dataGrid.ContextMenu.IsOpen = true;
+
+                    // Mark the event as handled to prevent the default context menu behavior
+                    e.Handled = true;
+                }
+                else
+                {
+                    dataGrid.ContextMenu.IsOpen = true;
+                    e.Handled = true;
+                }
+            }
+            catch (Exception)
+            {
+                e.Handled = true;
+            }
+        }
+        private void DataGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var dataGrid = sender as DataGrid;
+            if (dataGrid == null)
+                return;
+
+            // پیدا کردن سطری که روی آن کلیک شده
+            var row = FindVisualParent<DataGridRow>(e.OriginalSource as DependencyObject);
+
+            if (row != null && !row.IsSelected)
+            {
+                row.IsSelected = true;
+                row.Focus();
+                dataGrid.SelectedItem = row.Item;
+            }
+        }
+
     }
 }
