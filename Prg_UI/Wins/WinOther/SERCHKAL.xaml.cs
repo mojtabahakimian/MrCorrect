@@ -392,6 +392,11 @@ namespace Prg_UI.Wins.WinOther
         }
         private void serchkalDGR_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (e.Key is Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                DataGridExtension.HandleKeyPress(sender, e, serchkalDGR);
+            }
+
             if (e.Key == Key.Enter && serchkalDGR.Items.Count > 0 && serchkalDGR.SelectedItem != null)
             {
                 e.Handled = true;

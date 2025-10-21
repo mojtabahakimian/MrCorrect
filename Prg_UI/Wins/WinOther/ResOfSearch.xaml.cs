@@ -164,6 +164,11 @@ namespace Prg_UI.Wins.WinOther
         }
         private void ResDGR1_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (e.Key is Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                DataGridExtension.HandleKeyPress(sender, e, ResDGR1);
+            }
+
             if (e.Key == Key.Enter && ResDGR1.Items.Count > 0 && ResDGR1.SelectedItem != null)
             {
                 e.Handled = true;
