@@ -623,7 +623,9 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             {
                 DataGrid focusedGrid = GetFocusedDataGrid();
 
-                if (focusedGrid.ItemsSource is PRICE_ELAMIETF_DTL_MODEL)
+                var itemType = GetDataGridItemType(focusedGrid);
+
+                if (itemType == typeof(PRICE_ELAMIETF_DTL_MODEL))
                 {
                     if (focusedGrid.SelectedItem != null || focusedGrid.SelectedItems.Count > 0)
                     {
@@ -652,7 +654,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                         universControl.PopNotifyShowUp("عمل انتقال کپی را باید با راست کلیک روی یک سطر خالی انجام بدید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
                     }
                 }
-                else if (focusedGrid.ItemsSource is PRICE_ELAMIETF_EXCEPTION)
+                else if (itemType == typeof(PRICE_ELAMIETF_EXCEPTION))
                 {
                     if (focusedGrid.SelectedItem != null || focusedGrid.SelectedItems.Count > 0)
                     {
@@ -702,6 +704,41 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                     new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
                 }
             }
+        }
+
+        /// <summary>
+        /// تشخیص نوع Generic از ItemsSource
+        /// </summary>
+        private Type GetDataGridItemType(DataGrid dataGrid)
+        {
+            if (dataGrid?.ItemsSource == null)
+            {
+                return null;
+            }
+
+            var itemsSourceType = dataGrid.ItemsSource.GetType();
+
+            // چک کردن Generic Collection (ObservableCollection<T>, List<T>, ...)
+            if (itemsSourceType.IsGenericType)
+            {
+                var genericArgs = itemsSourceType.GetGenericArguments();
+                if (genericArgs.Length > 0)
+                {
+                    return genericArgs[0]; // نوع T را برمی‌گرداند
+                }
+            }
+
+            // فالبک: استفاده از اولین آیتم
+            if (dataGrid.Items.Count > 0)
+            {
+                var firstItem = dataGrid.Items[0];
+                if (firstItem != null && firstItem != CollectionView.NewItemPlaceholder)
+                {
+                    return firstItem.GetType();
+                }
+            }
+
+            return null;
         }
 
         private bool OnInsertRecord(PRICE_ELAMIETF record)
@@ -2304,28 +2341,42 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         }
         #endregion
 
-        private void DG_SUB_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        private void DataGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            DataGrid? dg = sender as DataGrid;
-            if (dg == null) return;
+            var dataGrid = sender as DataGrid;
+            if (dataGrid == null)
+                return;
 
-            if (dg.CurrentItem == null || dg.CurrentItem == CollectionView.NewItemPlaceholder)
-            {
-                e.Handled = true; // Cancel opening the menu. Avoids the crash.
-                return;
-            }
-            if (dg?.SelectedItem == null)
-            {
-                e.Handled = true;
-                return;
-            }
-            else if (dg?.ContextMenu == null)
-            {
-                e.Handled = true;
-                return;
-            }
+            // پیدا کردن سطری که روی آن کلیک شده
+            var row = FindVisualParent<DataGridRow>(e.OriginalSource as DependencyObject);
 
-            base.OnContextMenuOpening(e);
+            if (row != null)
+            {
+                // انتخاب سطر
+                if (!row.IsSelected)
+                {
+                    row.IsSelected = true;
+                    dataGrid.SelectedItem = row.Item;
+                }
+
+                // تنظیم فوکوس روی سطر و DataGrid
+                row.Focus();
+
+                // اطمینان از اینکه DataGrid خودش هم فوکوس دارد
+                dataGrid.Focus();
+
+                // اگر سلول خاصی زیر موس است، آن را هم فوکوس کنیم
+                var cell = FindVisualParent<DataGridCell>(e.OriginalSource as DependencyObject);
+                if (cell != null)
+                {
+                    cell.Focus();
+                }
+            }
+            else
+            {
+                // اگر روی header یا جای دیگری کلیک شد، حداقل DataGrid را فوکوس کنیم
+                dataGrid.Focus();
+            }
         }
         private void DG_SUB_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
@@ -2335,6 +2386,12 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
             try
             {
+                // اطمینان از فوکوس بودن DataGrid قبل از باز کردن Context Menu
+                if (!dataGrid.IsKeyboardFocusWithin)
+                {
+                    dataGrid.Focus();
+                }
+
                 // Find the row under the mouse
                 DependencyObject dep = (DependencyObject)e.OriginalSource;
                 while (dep != null && !(dep is DataGridRow))
@@ -2347,6 +2404,9 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 {
                     // Select the row under the mouse
                     dataGrid.SelectedItem = row.Item;
+
+                    // تنظیم فوکوس روی سطر
+                    row.Focus();
 
                     // Show the context menu
                     dataGrid.ContextMenu.IsOpen = true;
@@ -2365,21 +2425,34 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 e.Handled = true;
             }
         }
-        private void DataGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        private void DG_SUB_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            var dataGrid = sender as DataGrid;
-            if (dataGrid == null)
-                return;
+            DataGrid? dg = sender as DataGrid;
+            if (dg == null) return;
 
-            // پیدا کردن سطری که روی آن کلیک شده
-            var row = FindVisualParent<DataGridRow>(e.OriginalSource as DependencyObject);
-
-            if (row != null && !row.IsSelected)
+            // اطمینان از فوکوس بودن DataGrid
+            if (!dg.IsKeyboardFocusWithin)
             {
-                row.IsSelected = true;
-                row.Focus();
-                dataGrid.SelectedItem = row.Item;
+                dg.Focus();
             }
+
+            if (dg.CurrentItem == null || dg.CurrentItem == CollectionView.NewItemPlaceholder)
+            {
+                e.Handled = true; // Cancel opening the menu. Avoids the crash.
+                return;
+            }
+            if (dg?.SelectedItem == null)
+            {
+                e.Handled = true;
+                return;
+            }
+            else if (dg?.ContextMenu == null)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            base.OnContextMenuOpening(e);
         }
 
     }
