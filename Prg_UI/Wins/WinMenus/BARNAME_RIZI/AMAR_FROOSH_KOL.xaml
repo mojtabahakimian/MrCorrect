@@ -52,6 +52,29 @@
         </Style>
 
 
+        <DataTemplate x:Key="CustomTooltipTemplate">
+            <Border CornerRadius="5" 
+                Background="#2C3E50" 
+                Padding="10" 
+                BorderBrush="#34495E" 
+                BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="{Binding Item.MN}" 
+                           FontWeight="Bold" 
+                           Foreground="White" 
+                           FontSize="14"/>
+
+                    <TextBlock Foreground="White" 
+                           Margin="0,5,0,0" 
+                           FontSize="12">
+                    <Run Text="مبلغ فروش: "/>
+                    <Run Text="{Binding Item.MABL_K, StringFormat='#,##0 ریال'}" 
+                         FontWeight="SemiBold"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
 
         <DataTemplate x:Key="CurrencyLabelTemplate">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -102,33 +125,40 @@
                 </Border>
             </StackPanel>
         </Popup>
+
+        <Popup x:Name="CustomTooltipPopup"
+           Placement="MousePoint"
+           AllowsTransparency="True">
+            <Border CornerRadius="5" Background="#2C3E50" Padding="10" BorderBrush="#34495E" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="{Binding MN}" FontWeight="Bold" Foreground="White" FontSize="14"/>
+                    <TextBlock Foreground="White" Margin="0,5,0,0" FontSize="12">
+                    <Run Text="مبلغ فروش: "/>
+                    <Run Text="{Binding MABL_K, StringFormat='#,##0 ریال'}" FontWeight="SemiBold"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </Popup>
         <!--Start.......................................................................................-->
 
 
-        <syncfusion:SfChart x:Name="salesChart" Margin="30,48,30,30">
-            <!-- محور X -->
+        <syncfusion:SfChart x:Name="salesChart" Margin="30,48,30,30" MouseMove="salesChart_MouseMove">
+
             <syncfusion:SfChart.PrimaryAxis>
-                <syncfusion:CategoryAxis Header="ماه" 
-                                         FontFamily="{StaticResource IRANYEKAN}"
-                                         FontSize="14"
-                                         />
+                <syncfusion:CategoryAxis Header="ماه" FontFamily="{StaticResource IRANYEKAN}" FontSize="14" />
             </syncfusion:SfChart.PrimaryAxis>
-            <!-- محور Y -->
             <syncfusion:SfChart.SecondaryAxis>
-                <syncfusion:NumericalAxis Header="مقدار فروش"
-                                          FontFamily="{StaticResource IRANYEKAN}"
-                                          FontSize="13"
-                                          LabelFormat="#,##0"
-                                          />
+                <syncfusion:NumericalAxis Header="مقدار فروش" FontFamily="{StaticResource IRANYEKAN}" FontSize="13" LabelFormat="#,##0" />
             </syncfusion:SfChart.SecondaryAxis>
-            <!-- سری ستونی -->
-            <syncfusion:ColumnSeries
-                ItemsSource="{Binding}"
-                XBindingPath="MN"
-                YBindingPath="MABL_K"
-                Palette="Custom"
-                
-                Label="مبلغ فروش (ریال)">
+
+            <syncfusion:ColumnSeries ItemsSource="{Binding}"
+                             XBindingPath="MN"
+                             YBindingPath="MABL_K"
+                             Palette="Custom"
+                             Label="مبلغ فروش (ریال)"
+                             EnableAnimation="True"
+                             AnimationDuration="0:0:1.5">
+
                 <syncfusion:ColumnSeries.ColorModel>
                     <syncfusion:ChartColorModel>
                         <syncfusion:ChartColorModel.CustomBrushes>
@@ -145,11 +175,10 @@
                 </syncfusion:ColumnSeries.ColorModel>
 
                 <syncfusion:ColumnSeries.AdornmentsInfo>
-                    <syncfusion:ChartAdornmentInfo
-                        ShowLabel="True"
-                        LabelPosition="Outer"
-                        FontSize="16"
-                        LabelTemplate="{StaticResource CurrencyLabelTemplate}" />
+                    <syncfusion:ChartAdornmentInfo ShowLabel="True"
+                                           LabelPosition="Outer"
+                                           FontSize="16"
+                                           LabelTemplate="{StaticResource CurrencyLabelTemplate}" />
                 </syncfusion:ColumnSeries.AdornmentsInfo>
 
             </syncfusion:ColumnSeries>
