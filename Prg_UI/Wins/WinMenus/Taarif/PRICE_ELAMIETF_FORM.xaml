@@ -21,6 +21,26 @@
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+
+        <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="کپـــی | Copy" Click="COPY_CLICK" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="ContentCopy" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="انتقال کپی | Paste" Click="PASTE_CLICK">
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="ContentPaste" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Header="خروجی اکسل" Click="EXPORTEXCEL_BTN" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="FileExcelOutline" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
+
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
@@ -67,7 +87,8 @@
 
             <DataGrid   
                 d:ItemsSource="{d:SampleData ItemCount=2}"
-                x:Name="DG_SUB"
+                x:Name="DG_SUB" ContextMenu="{StaticResource ContextUtilityMenu1}" 
+                ContextMenuOpening="DG_SUB_ContextMenuOpening" MouseRightButtonUp="DG_SUB_MouseRightButtonUp" PreviewMouseRightButtonDown="DataGrid_PreviewMouseRightButtonDown"
                 EnableColumnVirtualization="True"
                 EnableRowVirtualization="True"
                 VirtualizingPanel.IsVirtualizing="True"
@@ -79,7 +100,6 @@
                 VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                 ItemsSource="{Binding PRICE_ELAMIETF_DTL_DATA}"
                 KeyboardNavigation.TabNavigation="Contained"
-
                 
                 d:RowDetailsVisibilityMode="Visible"
                 RowDetailsVisibilityMode="Collapsed"
@@ -186,10 +206,10 @@
                 <DataGrid.RowDetailsTemplate>
                     <DataTemplate>
                         <DataGrid x:Name="SUB_EXPTF" IsReadOnly="{Binding Path=IsReadOnly,ElementName=DG_SUB,UpdateSourceTrigger=PropertyChanged}"
-                                  ItemsSource="{Binding SUB_DETAIL_EXP}" 
-                                  HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                                  ItemsSource="{Binding SUB_DETAIL_EXP}" ContextMenuOpening="DG_SUB_ContextMenuOpening" MouseRightButtonUp="DG_SUB_MouseRightButtonUp"
+                                  HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}" ContextMenu="{StaticResource ContextUtilityMenu1}"
                                   VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
-                                  AutoGenerateColumns="False"
+                                  AutoGenerateColumns="False" 
                                   SelectionChanged="SUB_EXPTF_SelectionChanged"
                                   CanUserReorderColumns="False" IsKeyboardFocusWithinChanged="SUB_EXPTF_IsKeyboardFocusWithinChanged"
                                   CellEditEnding="SUB_EXPTF_CellEditEnding" PreparingCellForEdit="SUB_EXPTF_PreparingCellForEdit"

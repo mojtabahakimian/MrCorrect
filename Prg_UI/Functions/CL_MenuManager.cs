@@ -375,7 +375,7 @@ namespace Functions
             /// <summary>
             /// لیست موجودی کالا ها به تفکیک انبار
             /// </summary>
-            F_MENU_ANBAR,
+            ////F_MENU_ANBAR,
             /// <summary>
             /// درخواست خرید
             /// </summary>
@@ -918,6 +918,9 @@ namespace Functions
             /// </summary>
             F_MENU_CHEK_PLISTS,
             /// <summary>
+            /// تعریف گروه بندی قیمتی
+            /// </summary>
+            PRICE_GRP_FORM_GRUHBANDI_GHEYMATI,
             /// چکهای پرداختی اعلام وصول یا برگشت شده
             /// </summary>
             CHEKS_PBESTANKAR,
@@ -925,6 +928,7 @@ namespace Functions
             /// چکهای واگذار - برگشت - وصول شده
             /// </summary>
             CHEKS_BESTANKAR
+
         }
         #endregion
 
@@ -941,6 +945,8 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+
+                case WinNameType.PRICE_GRP_FORM_GRUHBANDI_GHEYMATI: /* تعریف گروه بندی قیمتی */ CL_LMethods.OpenWindow(OWNERWIN, new PRICE_GRP_FORM(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_GRADE_SHART_FUNC_FORM: /* تعریف شروط گریدهای مشتریان */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_GRADE_SHART_FUNC_FORM(), isModalDialog: false, allowMultipleInstances: false); break;
 
@@ -1889,9 +1895,9 @@ namespace Functions
                     CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_ANBAR_MERG());
                     break;
 
-                case WinNameType.F_MENU_ANBAR: //لیست موجودی کالا ها به تفکیک انبار
-                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_ANBAR((string)_PARAMETERS_.FirstOrDefault()));
-                    break;
+                //case WinNameType.F_MENU_ANBAR: //لیست موجودی کالا ها به تفکیک انبار
+                //    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_ANBAR((string)_PARAMETERS_.FirstOrDefault()));
+                //    break;
 
                 case WinNameType.HEAD_LST_REQUEST_WIN: //درخواست خرید
                     CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_REQUEST_WIN((double?)_PARAMETERS_.FirstOrDefault()));

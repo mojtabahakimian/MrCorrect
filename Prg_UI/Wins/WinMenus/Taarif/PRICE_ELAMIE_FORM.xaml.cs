@@ -35,6 +35,8 @@ using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
 using Microsoft.VisualBasic;
 using static Prg_UI.Functions.CL_LMethods;
 using System.Windows.Controls.Primitives;
+using static Functions.DataGridClipboardManager;
+using Syncfusion.CompoundFile.XlsIO.Native;
 
 namespace Prg_UI.Wins.WinMenus.Taarif
 {
@@ -1111,6 +1113,237 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             });
         }
 
+        public bool IsPastingRows { get; private set; } = false;
+        private void DG_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            string CURRENT_COLUMN_NAME = "";
+            if (DG_SUB.CurrentCell.Column is not null)
+            {
+                CURRENT_COLUMN_NAME = DG_SUB.CurrentCell.Column?.SortMemberPath;
+            }
+            else
+            {
+                return;
+            }
+
+            string ColumnTarget = "";
+            if (e.Key == Key.Add)
+            {
+                if (CURRENT_COLUMN_NAME.Contains("PRICE1", StringComparison.OrdinalIgnoreCase))
+                {
+                    e.Handled = true;
+                    var text = "000";
+                    var target = Keyboard.FocusedElement;
+                    var routedEvent = TextCompositionManager.TextInputEvent;
+
+                    target.RaiseEvent(
+                        new TextCompositionEventArgs(InputManager.Current.PrimaryKeyboardDevice,
+                        new TextComposition(InputManager.Current, target, text))
+                        { RoutedEvent = routedEvent });
+                }
+            }
+            if (e.Key == Key.Subtract)
+            {
+                if (CURRENT_COLUMN_NAME.Contains("PRICE1", StringComparison.OrdinalIgnoreCase))
+                {
+                    e.Handled = true;
+                    var text = "00";
+                    var target = Keyboard.FocusedElement;
+                    var routedEvent = TextCompositionManager.TextInputEvent;
+
+                    target.RaiseEvent(
+                        new TextCompositionEventArgs(InputManager.Current.PrimaryKeyboardDevice,
+                        new TextComposition(InputManager.Current, target, text))
+                        { RoutedEvent = routedEvent });
+                }
+            }
+
+            if (e.Key == Key.Delete && BTN_DELETE.IsEnabled)
+            {
+                try
+                {
+                    // 1) اگر داخل یک TextBox در حالت ویرایش هستیم، کاری نکنیم
+                    if (e.OriginalSource is TextBox textBox && !textBox.IsReadOnly)
+                    {
+                        // اجازه بدهید Delete عادی متن کارش رو بکنه
+                        return;
+                    }
+                    //else
+                    //{
+                    //    // اگر داخل حالت ویرایش سلول هستیم، از رفتار پیش‌فرض Delete (حذف کاراکتر) استفاده کن
+                    //    var cell = DataGridHelper.FindVisualParent<DataGridCell>(e.OriginalSource as DependencyObject);
+                    //    if (cell != null && cell.IsEditing)
+                    //        return;
+                    //}
+                }
+                catch { }
+
+                e.Handled = true;
+                BTN_DELETE_Click(null, null);
+            }
+
+
+            #region COPYPASTE
+            var isEditing = ((IEditableCollectionView)DG_SUB.Items).IsEditingItem;
+            var isNewEmpty = ((IEditableCollectionView)DG_SUB.Items).IsAddingNew;
+
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.C) //Copy
+            {
+                if (!isEditing && DG_SUB.IsEnabled)
+                {
+                    e.Handled = true;
+
+                    DataGridClipboardManager.CopySelectedItems<PRICE_ELAMIE_DTL>(DG_SUB);
+                }
+            }
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.V) //Paste
+            {
+                if (!isEditing && !isNewEmpty && !DG_SUB.IsReadOnly && DG_SUB.IsEnabled)
+                {
+                    e.Handled = true;
+                    IsPastingRows = true;
+                    DataGridClipboardManager.PasteItems<PRICE_ELAMIE_DTL>(DG_SUB, ValidateDataGridRow, AddItemToDataSource);
+                    IsPastingRows = false;
+                }
+            }
+            #endregion
+        }
+        private void ValidateDataGridRow(DataGridRowEditEndingEventArgs args, PasteValidationResult validationResult)
+        {
+            // Default to true
+            validationResult.IsRowValid = true;
+
+            if (args.Row.Item is PRICE_ELAMIE_DTL item)
+            {
+                //Reset id to be sure the new data will insert not update the same row existing before
+
+                item.PEPID = default; //Master Head
+                item.PERID = default;
+
+                CURRENT_ROW_ITEMS = item;
+
+                //مبلغ
+                var _PRICE1_ = item.PRICE1.ToStringNullSafe();
+                if (!string.IsNullOrEmpty(_PRICE1_))
+                {
+                    var MABL_NUMBER = NumberExtractor.ExtractNumbersLine(_PRICE1_);
+                    if (!string.IsNullOrEmpty(MABL_NUMBER))
+                    {
+                        item.PRICE1 = float.Parse(MABL_NUMBER);
+                    }
+                    else
+                    {
+                        args.Cancel = true;
+                        validationResult.IsRowValid = false;
+                        validationResult.RowMessage = "فیلد مبغ وارد شده صحیح نیست";
+                    }
+                }
+                else
+                {
+                    args.Cancel = true;
+                    validationResult.IsRowValid = false;
+                    validationResult.RowMessage = "فیلد مبغ نمیتواند خالی باشد";
+                }
+
+                //Final Validation
+                if (validationResult.IsRowValid) //Yet
+                {
+                    DG_SUB_RowEditEnding(DG_SUB, args);
+                    validationResult.IsRowValid = IsSaveSuccess;
+                }
+            }
+            else
+            {
+                args.Cancel = true;
+                validationResult.IsRowValid = false;
+            }
+        }
+        private void AddItemToDataSource(PRICE_ELAMIE_DTL item)
+        {
+            // Ensure thread safety if MY_ALL_DATA is accessed from multiple threads
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                PRICE_ELAMIE_DTL_DATA.Add(item);
+            });
+        }
+        private bool IsSubDataNull()
+        {
+            if (DG_SUB != null && DG_SUB?.Items?.Count > 0 && PRICE_ELAMIE_DTL_DATA?.Count > 0)
+            {
+                return false;
+            }
+            return true;
+        }
+        private void COPY_CLICK(object sender, RoutedEventArgs e)
+        {
+            if (IsSubDataNull())
+            {
+                return;
+            }
+
+            var isEditing = ((IEditableCollectionView)DG_SUB.Items).IsEditingItem;
+            if (!isEditing)
+            {
+                e.Handled = true;
+                DataGridClipboardManager.CopySelectedItems<PRICE_ELAMIE_DTL>(DG_SUB);
+            }
+            else
+            {
+                var editingElement = CL_LMethods.FindChild<TextBox>(DG_SUB);
+                if (editingElement != null)
+                {
+                    if (!string.IsNullOrEmpty(editingElement.SelectedText))
+                    {
+                        Clipboard.SetText(editingElement.SelectedText);
+                    }
+                }
+            }
+        }
+        private void PASTE_CLICK(object sender, RoutedEventArgs e)
+        {
+            if (DG_SUB.SelectedItem != null || DG_SUB.SelectedItems.Count > 0)
+            {
+                var isEditing = ((IEditableCollectionView)DG_SUB.Items).IsEditingItem;
+                if (!isEditing && !DG_SUB.IsReadOnly && DG_SUB.IsEnabled)
+                {
+                    e.Handled = true;
+
+                    IsPastingRows = true;
+                    DataGridClipboardManager.PasteItems<PRICE_ELAMIE_DTL>(DG_SUB, ValidateDataGridRow, AddItemToDataSource);
+                    IsPastingRows = false;
+
+                    DG_SUB.CommitEdit();
+                }
+                else
+                {
+                    // Execute the Paste command on the currently focused element
+                    if (ApplicationCommands.Paste.CanExecute(null, Keyboard.FocusedElement as IInputElement))
+                    {
+                        ApplicationCommands.Paste.Execute(null, Keyboard.FocusedElement as IInputElement);
+                    }
+                }
+            }
+            else
+            {
+                universControl.PopNotifyShowUp("عمل انتقال کپی را باید با راست کلیک روی یک سطر خالی انجام بدید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
+            }
+        }
+        private async void EXPORTEXCEL_BTN(object sender, RoutedEventArgs e)
+        {
+            if (IsSubDataNull())
+            {
+                return;
+            }
+
+            try
+            {
+                await UniversalExcelExporter.ExportToExcelAsync(DG_SUB, "DGExportedExcel");
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
+            }
+        }
 
         private void DG_SUB_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
@@ -1217,17 +1450,25 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             //    }
             //}
         }
+        bool IsSaveSuccess = true;
         private void DG_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
 
-            if (!HeaderIsValid()) { return; }
+            if (!HeaderIsValid())
+            {
+                IsSaveSuccess = false;
+                DG_SUB_CANCEL_EDIT();
+                return; 
+            }
 
             var ROW = e.Row.Item as PRICE_ELAMIE_DTL;
             if (e.Row.Item == null || ROW is null) { return; }
 
             if (ConstructorRowDetector.IsPristine(ROW)) { DG_SUB_CANCEL_EDIT(); return; } //اگر سطر «دست‌نخورده» است، بدون خطا عمل کن
+
+            IsSaveSuccess = false;
 
             if (!BodyIsValid(ROW))
             {
@@ -1331,6 +1572,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 ROW.PERID = (int)idd;
             }
 
+            IsSaveSuccess = true;
         }
 
         private void DG_SUB_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
@@ -1385,74 +1627,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         {
 
         }
-        private void DG_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            string CURRENT_COLUMN_NAME = "";
-            if (DG_SUB.CurrentCell.Column is not null)
-            {
-                CURRENT_COLUMN_NAME = DG_SUB.CurrentCell.Column?.SortMemberPath;
-            }
-            else
-            {
-                return;
-            }
 
-            string ColumnTarget = "";
-            if (e.Key == Key.Add)
-            {
-                if (CURRENT_COLUMN_NAME.Contains("PRICE1", StringComparison.OrdinalIgnoreCase))
-                {
-                    e.Handled = true;
-                    var text = "000";
-                    var target = Keyboard.FocusedElement;
-                    var routedEvent = TextCompositionManager.TextInputEvent;
-
-                    target.RaiseEvent(
-                        new TextCompositionEventArgs(InputManager.Current.PrimaryKeyboardDevice,
-                        new TextComposition(InputManager.Current, target, text))
-                        { RoutedEvent = routedEvent });
-                }
-            }
-            if (e.Key == Key.Subtract)
-            {
-                if (CURRENT_COLUMN_NAME.Contains("PRICE1", StringComparison.OrdinalIgnoreCase))
-                {
-                    e.Handled = true;
-                    var text = "00";
-                    var target = Keyboard.FocusedElement;
-                    var routedEvent = TextCompositionManager.TextInputEvent;
-
-                    target.RaiseEvent(
-                        new TextCompositionEventArgs(InputManager.Current.PrimaryKeyboardDevice,
-                        new TextComposition(InputManager.Current, target, text))
-                        { RoutedEvent = routedEvent });
-                }
-            }
-
-            if (e.Key == Key.Delete && BTN_DELETE.IsEnabled)
-            {
-                try
-                {
-                    // 1) اگر داخل یک TextBox در حالت ویرایش هستیم، کاری نکنیم
-                    if (e.OriginalSource is TextBox textBox && !textBox.IsReadOnly)
-                    {
-                        // اجازه بدهید Delete عادی متن کارش رو بکنه
-                        return;
-                    }
-                    //else
-                    //{
-                    //    // اگر داخل حالت ویرایش سلول هستیم، از رفتار پیش‌فرض Delete (حذف کاراکتر) استفاده کن
-                    //    var cell = DataGridHelper.FindVisualParent<DataGridCell>(e.OriginalSource as DependencyObject);
-                    //    if (cell != null && cell.IsEditing)
-                    //        return;
-                    //}
-                }
-                catch { }
-
-                e.Handled = true;
-                BTN_DELETE_Click(null, null);
-            }
-        }
 
         private void BTN_FACTORHA_Click(object sender, RoutedEventArgs e)
         {
@@ -1569,5 +1744,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         {
 
         }
+
+     
     }
 }

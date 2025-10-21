@@ -47,7 +47,7 @@
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
     </WindowChrome.WindowChrome>
     <Grid x:Name="mygrid">
-        <Border  	  Background="{DynamicResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5"  Grid.ColumnSpan="5" BorderThickness="1">
+        <Border Background="{DynamicResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5"  Grid.ColumnSpan="5" BorderThickness="1">
             <Border x:Name="TitleDrawBar" Style="{DynamicResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
                 <Grid>
                     <Label x:Name="Label_hesab" Content="کدینگ" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0"/>

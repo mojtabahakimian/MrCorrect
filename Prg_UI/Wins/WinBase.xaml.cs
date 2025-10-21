@@ -1327,7 +1327,7 @@ namespace Prg_UI.Wins
 
         private void Button_Click_130(object sender, RoutedEventArgs e)
         {
-
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_GRP_FORM_GRUHBANDI_GHEYMATI, default);
         }
 
         private void Button_Click_131(object sender, RoutedEventArgs e)

@@ -2939,7 +2939,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             {
                 try
                 {
-                    if (INVO_LST_RASID_SUB.CurrentCell != null)
+                    if (INVO_LST_RASID_SUB?.CurrentCell != null && INVO_LST_RASID_SUB.IsEnabled && !INVO_LST_RASID_SUB.IsReadOnly)
                     {
                         // Get the current cell
                         DataGridCellInfo currentCell = INVO_LST_RASID_SUB.CurrentCell;
@@ -2981,6 +2981,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                                             {
                                                 // Set the value on the current cell's item
                                                 currentCellProperty.SetValue(currentItem, valueAboveCellValue);
+
+                                                INVO_LST_RASID_SUB.Items.Refresh();
 
                                                 INVO_LST_RASID_SUB.BeginEdit();
                                             }

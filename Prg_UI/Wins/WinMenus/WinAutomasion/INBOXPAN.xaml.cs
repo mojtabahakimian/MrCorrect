@@ -203,7 +203,7 @@ namespace Wins.WinMenus.WinAutomasion
         private void UpdateMessageStatus()
         {
             timer?.Stop();
-            string query = "UPDATE MESAGEP SET STATUS = 2 WHERE IDNUM = @IDNUM";
+            string query = "UPDATE MESAGEP SET STATUS = 2 , IsNotifyCalled = 1 WHERE IDNUM = @IDNUM";
             dbms.DoExecuteSQL(query, new { IDNUM = IDNUM.Text });
 
             dbms = null; //Kinda Dispose

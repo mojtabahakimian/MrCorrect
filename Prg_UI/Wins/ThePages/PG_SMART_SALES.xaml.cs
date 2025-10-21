@@ -50,5 +50,10 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_GRADE_SHART_FUNC_FORM, default);
         }
+
+        private void Image_PreviewMouseDown_5(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_GRP_FORM_GRUHBANDI_GHEYMATI, default);
+        }
     }
 }

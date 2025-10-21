@@ -9,7 +9,7 @@
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         FontFamily="{StaticResource IRANYEKAN}"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
-        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"        
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Background="{x:Null}"
         AllowsTransparency="True"
@@ -139,7 +139,7 @@
         </Button>
 
         <DataGrid   
-                x:Name="INVO_LST_RASID_SUB"
+                x:Name="INVO_LST_RASID_SUB" 
                 EnableColumnVirtualization="True"
                 EnableRowVirtualization="True"
                 VirtualizingPanel.IsVirtualizing="True"

@@ -22,6 +22,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using static Prg_UI.Functions.CL_LMethods;
 using static Prg_UI.HelperWins.Msgwin;
 
 namespace Wins.WinMenus.Taarif
@@ -109,7 +110,7 @@ namespace Wins.WinMenus.Taarif
         public bool TDETA_HES_SUB_IsFocused { get; private set; }
         public TDETA_HES? CURRENT_ROW_ITEMS { get; private set; }
         public object ENTERED_VALUE_ROW { get; private set; }
-        public TDETA_HES? WAS_ROW_ITEM { get; private set; }
+        public TDETA_HES? WAS_ROW_ITEM { get; private set; } = new();
         public int CURRENT_ROW_INDEX { get; set; }
         public Visual I_AM_TDETA_HES_SHEET { get; private set; }
 
@@ -761,26 +762,18 @@ namespace Wins.WinMenus.Taarif
         {
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
-
-            if (e.Row.Item == null)
-            {
-                return;
-            }
-
-            if (!BodyIsValid(e.Row.Item as TDETA_HES))
-            {
-                TDETA_HES_SUB.CellEditEnding -= TDETA_HES_SUB_CellEditEnding;
-                TDETA_HES_SUB.RowEditEnding -= TDETA_HES_SUB_RowEditEnding;
-
-                e.Cancel = true;
-                TDETA_HES_SUB.CancelEdit(DataGridEditingUnit.Cell);
-
-                TDETA_HES_SUB.RowEditEnding += TDETA_HES_SUB_RowEditEnding;
-                TDETA_HES_SUB.CellEditEnding += TDETA_HES_SUB_CellEditEnding;
-                return;
-            }
+            if (e.Row.Item == null) { return; }
 
             var ROW = e.Row.Item as TDETA_HES;
+            if (ConstructorRowDetector.IsPristine(ROW)) { DG_SUB_CANCEL_EDIT(); return; }
+
+
+            if (!BodyIsValid(ROW))
+            {
+                DG_SUB_CANCEL_EDIT(e);
+                return;
+            }
+
 
 
             int? idd = null;
@@ -829,7 +822,7 @@ namespace Wins.WinMenus.Taarif
                                           WHERE IDD = {ROW.IDD} ");
                 }
 
-                Form_AfterUpdate((int)ROW.TNUMBER, (int)WAS_ROW_ITEM.TNUMBER);
+                Form_AfterUpdate(ROW?.TNUMBER ?? 0, WAS_ROW_ITEM?.TNUMBER ?? 0);
             }
             catch (SqlException ex)
             {
@@ -858,6 +851,26 @@ namespace Wins.WinMenus.Taarif
             ChangeIsHappend = false;
             universControl.PopNotifyShow("اطلاعات ذخیره شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
         }
+
+        private void DG_SUB_CANCEL_EDIT(DataGridRowEditEndingEventArgs e = null)
+        {
+            TDETA_HES_SUB.CellEditEnding -= TDETA_HES_SUB_CellEditEnding;
+            TDETA_HES_SUB.RowEditEnding -= TDETA_HES_SUB_RowEditEnding;
+
+            if (e != null)
+            {
+                e.Cancel = true;
+                TDETA_HES_SUB.CancelEdit(DataGridEditingUnit.Cell);
+            }
+            else
+            {
+                TDETA_HES_SUB.CancelEdit();
+            }
+
+            TDETA_HES_SUB.RowEditEnding += TDETA_HES_SUB_RowEditEnding;
+            TDETA_HES_SUB.CellEditEnding += TDETA_HES_SUB_CellEditEnding;
+        }
+
         private void TDETA_HES_SUB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (NowIsReady && !(e is null))

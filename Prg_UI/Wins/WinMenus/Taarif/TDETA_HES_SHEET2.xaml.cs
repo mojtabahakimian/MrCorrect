@@ -24,6 +24,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using static Prg_UI.Functions.CL_LMethods;
 using static Prg_UI.HelperWins.Msgwin;
 
 namespace Wins.WinMenus.Taarif
@@ -113,7 +114,7 @@ namespace Wins.WinMenus.Taarif
         public bool TDETA_HES2_SUB_IsFocused { get; private set; }
         public TDETA_HES2? CURRENT_ROW_ITEMS { get; private set; }
         public object ENTERED_VALUE_ROW { get; private set; }
-        public TDETA_HES2? WAS_ROW_ITEM { get; private set; }
+        public TDETA_HES2? WAS_ROW_ITEM { get; private set; } = new();
         public int CURRENT_ROW_INDEX { get; set; }
         public Visual I_AM_TDETA_HES2_SHEET { get; private set; }
 
@@ -745,6 +746,9 @@ namespace Wins.WinMenus.Taarif
                 return;
             }
 
+            var ROW = e.Row.Item as TDETA_HES2;
+            if (ConstructorRowDetector.IsPristine(ROW)) { TDETA_HES2_SUB_CANCEL_EDIT(); return; }
+
             if (!BodyIsValid(e.Row.Item as TDETA_HES2))
             {
 
@@ -778,7 +782,6 @@ namespace Wins.WinMenus.Taarif
                 return;
             }
 
-            var ROW = e.Row.Item as TDETA_HES2;
 
             int? idd = null;
             try
@@ -827,7 +830,7 @@ namespace Wins.WinMenus.Taarif
                                   WHERE IDD = {ROW.IDD} ");
                 }
 
-                Form_AfterUpdate((int)ROW.TNUMBER2, (int)WAS_ROW_ITEM.TNUMBER2);
+                Form_AfterUpdate(ROW?.TNUMBER2 ?? 0, WAS_ROW_ITEM?.TNUMBER2 ?? 0);
             }
             catch (SqlException ex)
             {

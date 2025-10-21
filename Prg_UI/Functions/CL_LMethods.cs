@@ -108,8 +108,54 @@ namespace Prg_UI.Functions
         /// 
         public static Visual GetTheWindow(IntPtr windowHandle)
         {
-            var TheWind = System.Windows.Interop.HwndSource.FromHwnd(windowHandle).RootVisual;
-            return TheWind;
+            //if (windowHandle == IntPtr.Zero) return null;
+
+            static Visual ResolveFromWindow(Window window)
+            {
+                var helper = new WindowInteropHelper(window);
+
+                if (helper.Handle == IntPtr.Zero)
+                {
+                    helper.EnsureHandle();
+                }
+
+                var source = HwndSource.FromHwnd(helper.Handle);
+                return source?.RootVisual as Visual ?? window;
+            }
+
+            if (windowHandle == IntPtr.Zero)
+            {
+                var fallbackWindow = Application.Current?.Windows.OfType<Window>()
+                    .FirstOrDefault(w => w.IsActive)
+                    ?? Application.Current?.MainWindow;
+
+                if (fallbackWindow is null)
+                {
+                    throw new ArgumentException("A valid window handle is required.", nameof(windowHandle));
+                }
+
+                return ResolveFromWindow(fallbackWindow);
+            }
+
+            var hwndSource = HwndSource.FromHwnd(windowHandle);
+            if (hwndSource?.RootVisual is Visual visual)
+            {
+                return visual;
+            }
+
+            var knownWindow = Application.Current?.Windows
+                .OfType<Window>()
+                .FirstOrDefault(w => new WindowInteropHelper(w).Handle == windowHandle)
+                ?? Application.Current?.MainWindow;
+
+            if (knownWindow is null)
+            {
+                throw new InvalidOperationException("Unable to resolve window from provided handle.");
+            }
+
+            return ResolveFromWindow(knownWindow);
+
+
         }
         public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
         {
