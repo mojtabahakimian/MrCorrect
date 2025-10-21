@@ -195,12 +195,12 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
 
         private void Commnd5_Click(object sender, RoutedEventArgs e)
         {
-            if (ANBAR.SelectedValue is null)
-            {
-                Msgwin msgwin = new Msgwin(false, "انبار نمیتواند خالی باشد");
-                msgwin.ShowDialog();
-                return;
-            }
+            //if (ANBAR.SelectedValue is null)
+            //{
+            //    Msgwin msgwin = new Msgwin(false, "انبار نمیتواند خالی باشد");
+            //    msgwin.ShowDialog();
+            //    return;
+            //}
 
             string sql;
             string PATH;

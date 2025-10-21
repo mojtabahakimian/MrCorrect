@@ -375,7 +375,7 @@ namespace Functions
             /// <summary>
             /// لیست موجودی کالا ها به تفکیک انبار
             /// </summary>
-            F_MENU_ANBAR,
+            ////F_MENU_ANBAR,
             /// <summary>
             /// درخواست خرید
             /// </summary>
@@ -1879,9 +1879,9 @@ namespace Functions
                     CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_ANBAR_MERG());
                     break;
 
-                case WinNameType.F_MENU_ANBAR: //لیست موجودی کالا ها به تفکیک انبار
-                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_ANBAR((string)_PARAMETERS_.FirstOrDefault()));
-                    break;
+                //case WinNameType.F_MENU_ANBAR: //لیست موجودی کالا ها به تفکیک انبار
+                //    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_ANBAR((string)_PARAMETERS_.FirstOrDefault()));
+                //    break;
 
                 case WinNameType.HEAD_LST_REQUEST_WIN: //درخواست خرید
                     CL_LMethods.OpenWindow(OWNERWIN, new HEAD_LST_REQUEST_WIN((double?)_PARAMETERS_.FirstOrDefault()));

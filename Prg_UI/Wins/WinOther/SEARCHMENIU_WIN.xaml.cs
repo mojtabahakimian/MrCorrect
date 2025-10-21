@@ -220,7 +220,6 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سایر رسید انبار ها", WIN_NAME = CL_MenuManager.WinNameType.HEAD_LST_RASID_OTHER_WIN });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سایر حواله انبار ها", WIN_NAME = CL_MenuManager.WinNameType.HEAD_LST_HAV_OTHER_WIN });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست موجودی کل انبار", WIN_NAME = CL_MenuManager.WinNameType.MOGUDI_ANBARHA_LIST });
-            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش موجودی کالاها به تفکیک انبار", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_ANBAR /* یا مورد مشابه */ });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست تراز موجودی کل انبار ها", WIN_NAME = CL_MenuManager.WinNameType.C_TARAZ_ANBAR_KHAS });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش تراز موجودی کل انبار ها", WIN_NAME = CL_MenuManager.WinNameType.R_TARAZ_ANBARHA });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارشات ساخته شده توسط کاربران ", WIN_NAME = CL_MenuManager.WinNameType.SQLSTATEFORM_CRTL_M });
