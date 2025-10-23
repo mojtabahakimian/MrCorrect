@@ -124,7 +124,7 @@
                                       INNER JOIN OTHER_DTL_SUB ON STUF_DEF_1.CODE=OTHER_DTL_SUB.CODE ON INVO_LST.CODE=OTHER_DTL_SUB.CODE AND INVO_LST.NUMBER=OTHER_DTL_SUB.NUMBER AND INVO_LST.TAG=OTHER_DTL_SUB.TAGG
                       LEFT OUTER JOIN CUST_HESAB ON HEAD_BACK_ANBAR.CUST_NO=CUST_HESAB.hes
                       LEFT OUTER JOIN TCOD_VAHEDS ON INVO_LST.VAHED_K=TCOD_VAHEDS.CODE ON STUF_DEF.CODE=INVO_LST.CODE
-WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
+WHERE HEAD_LST.NUMBER1=8702 AND HTAG=2</SqlCommand>
       </FactorMBA>
       <SAZMAN Ref="4" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>SAZMAN</Alias>
@@ -379,13 +379,13 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
       <Components isList="true" count="28">
         <PageHeaderBand1 Ref="6" type="PageHeaderBand" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,0.2,10.89,3.2</ClientRectangle>
+          <ClientRectangle>0,0.2,11.29,3</ClientRectangle>
           <Components isList="true" count="44">
             <Shape2 Ref="7" type="Shape" isKey="true">
               <BackgroundColor>Transparent</BackgroundColor>
               <BorderColor>Black</BorderColor>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,2,10.9,1</ClientRectangle>
+              <ClientRectangle>0.2,1.8,10.9,1</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>Arial,8</Font>
@@ -401,7 +401,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <BackgroundColor>Transparent</BackgroundColor>
               <BorderColor>Black</BorderColor>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0.8,10.9,1</ClientRectangle>
+              <ClientRectangle>0.2,0.6,10.9,1</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>Arial,8</Font>
@@ -415,7 +415,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Shape1>
             <Text1 Ref="11" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>4.1,0,2.8,0.4</ClientRectangle>
+              <ClientRectangle>4.3,0,2.8,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,11,Bold</Font>
@@ -431,7 +431,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text1>
             <Text11 Ref="12" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.3,0.4,0.5,0.2</ClientRectangle>
+              <ClientRectangle>1.5,0.4,0.5,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
@@ -446,7 +446,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text11>
             <Text10 Ref="13" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.3,0.1,0.9,0.2</ClientRectangle>
+              <ClientRectangle>1.5,0.1,0.9,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
@@ -461,7 +461,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text10>
             <Text12 Ref="14" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>9.2,0.9,1.6,0.2</ClientRectangle>
+              <ClientRectangle>9.4,0.7,1.6,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -477,7 +477,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text12>
             <Text14 Ref="15" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>10.3,1.5,0.5,0.2</ClientRectangle>
+              <ClientRectangle>10.5,1.3,0.5,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -493,7 +493,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text14>
             <Text15 Ref="16" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.6,1.5,1,0.2</ClientRectangle>
+              <ClientRectangle>1.8,1.3,1,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -509,7 +509,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text15>
             <Text2 Ref="17" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.9,1.5,7.4,0.2</ClientRectangle>
+              <ClientRectangle>3.1,1.3,7.4,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -525,7 +525,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text2>
             <Text3 Ref="18" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0.1,1.2,0.2</ClientRectangle>
+              <ClientRectangle>0.2,0.1,1.2,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
@@ -541,7 +541,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text3>
             <Text4 Ref="19" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.1,0.9,4.1,0.2</ClientRectangle>
+              <ClientRectangle>5.3,0.7,4.1,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -557,7 +557,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text4>
             <Text17 Ref="20" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.2,1.5,1.3,0.2</ClientRectangle>
+              <ClientRectangle>0.4,1.3,1.3,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -573,7 +573,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text17>
             <Text37 Ref="21" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.2,0.4,1,0.2</ClientRectangle>
+              <ClientRectangle>0.4,0.4,1,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
@@ -591,7 +591,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text37>
             <Text19 Ref="23" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>4.8,0.6,1.3,0.2</ClientRectangle>
+              <ClientRectangle>5,0.4,1.3,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -607,7 +607,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text19>
             <Text23 Ref="24" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>10.1,1.2,0.7,0.2</ClientRectangle>
+              <ClientRectangle>10.3,1,0.7,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -623,7 +623,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text23>
             <Text24 Ref="25" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>9.6,1.2,0.5,0.2</ClientRectangle>
+              <ClientRectangle>9.8,1,0.5,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -640,7 +640,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text24>
             <Text26 Ref="26" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>7.7,1.2,0.6,0.2</ClientRectangle>
+              <ClientRectangle>7.9,1,0.6,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -657,7 +657,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text26>
             <Text27 Ref="27" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>6.6,1.2,1.1,0.2</ClientRectangle>
+              <ClientRectangle>6.8,1,1.1,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -673,7 +673,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text27>
             <Text28 Ref="28" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>3.9,0.9,0.9,0.2</ClientRectangle>
+              <ClientRectangle>4.1,0.7,0.9,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -689,7 +689,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text28>
             <Text33 Ref="29" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.4,0.9,1.1,0.2</ClientRectangle>
+              <ClientRectangle>1.6,0.7,1.1,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -705,7 +705,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text33>
             <Text35 Ref="30" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>3.9,1.2,1,0.2</ClientRectangle>
+              <ClientRectangle>4.1,1,1,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -721,7 +721,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text35>
             <Text13 Ref="31" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>9.2,2.1,1.6,0.2</ClientRectangle>
+              <ClientRectangle>9.4,1.9,1.6,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -737,7 +737,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text13>
             <Text16 Ref="32" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>10.3,2.7,0.5,0.2</ClientRectangle>
+              <ClientRectangle>10.5,2.5,0.5,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -753,7 +753,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text16>
             <Text36 Ref="33" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.7,2.7,1,0.2</ClientRectangle>
+              <ClientRectangle>1.9,2.5,1,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -769,7 +769,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text36>
             <Text38 Ref="34" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.8,2.7,7.4,0.2</ClientRectangle>
+              <ClientRectangle>3,2.5,7.4,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -784,7 +784,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text38>
             <Text39 Ref="35" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>5,2.1,4.1,0.2</ClientRectangle>
+              <ClientRectangle>5.2,1.9,4.1,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -800,7 +800,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text39>
             <Text40 Ref="36" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.3,2.7,1.3,0.2</ClientRectangle>
+              <ClientRectangle>0.5,2.5,1.3,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -815,7 +815,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text40>
             <Text41 Ref="37" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>10.1,2.4,0.7,0.2</ClientRectangle>
+              <ClientRectangle>10.3,2.2,0.7,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -831,7 +831,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text41>
             <Text42 Ref="38" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>9.6,2.4,0.5,0.2</ClientRectangle>
+              <ClientRectangle>9.8,2.2,0.5,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -847,7 +847,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text42>
             <Text43 Ref="39" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>8.5,2.4,1.1,0.2</ClientRectangle>
+              <ClientRectangle>8.7,2.2,1.1,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -863,7 +863,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text43>
             <Text44 Ref="40" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>7.7,2.4,0.6,0.2</ClientRectangle>
+              <ClientRectangle>7.9,2.2,0.6,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -880,7 +880,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text44>
             <Text45 Ref="41" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>6,2.4,1.7,0.2</ClientRectangle>
+              <ClientRectangle>6.2,2.2,1.7,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -896,7 +896,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text45>
             <Text46 Ref="42" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>4,2.1,0.9,0.2</ClientRectangle>
+              <ClientRectangle>4.2,1.9,0.9,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -912,7 +912,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text46>
             <Text47 Ref="43" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.5,2.1,1.1,0.2</ClientRectangle>
+              <ClientRectangle>1.7,1.9,1.1,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -928,7 +928,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text47>
             <Text48 Ref="44" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>3.9,2.4,1,0.2</ClientRectangle>
+              <ClientRectangle>4.1,2.2,1,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -944,7 +944,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text48>
             <Text49 Ref="45" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>4.8,1.8,1.3,0.2</ClientRectangle>
+              <ClientRectangle>5,1.6,1.3,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -960,7 +960,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text49>
             <Text50 Ref="46" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>4.7,3,1.7,0.2</ClientRectangle>
+              <ClientRectangle>4.9,2.8,1.7,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -976,7 +976,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text50>
             <Text25 Ref="47" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>8.5,1.2,1.1,0.2</ClientRectangle>
+              <ClientRectangle>8.7,1,1.1,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -991,7 +991,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text25>
             <Text68 Ref="48" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.6,0.9,1.3,0.2</ClientRectangle>
+              <ClientRectangle>2.8,0.7,1.3,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -1007,7 +1007,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text68>
             <Text69 Ref="49" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.7,1.2,1.1,0.2</ClientRectangle>
+              <ClientRectangle>2.9,1,1.1,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -1023,7 +1023,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text69>
             <Text70 Ref="50" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.2,0.9,1.2,0.2</ClientRectangle>
+              <ClientRectangle>0.4,0.7,1.2,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -1039,7 +1039,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text70>
             <Text71 Ref="51" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.7,2.1,1.3,0.2</ClientRectangle>
+              <ClientRectangle>2.9,1.9,1.3,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -1055,7 +1055,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text71>
             <Text72 Ref="52" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.6,2.4,1.3,0.2</ClientRectangle>
+              <ClientRectangle>2.8,2.2,1.3,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -1071,7 +1071,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text72>
             <Text73 Ref="53" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.2,2.1,1.3,0.2</ClientRectangle>
+              <ClientRectangle>0.4,1.9,1.3,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,10</Font>
@@ -1094,12 +1094,12 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
         </PageHeaderBand1>
         <HeaderBand1 Ref="54" type="HeaderBand" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,3.8,10.89,0.5</ClientRectangle>
+          <ClientRectangle>0,3.6,11.29,0.5</ClientRectangle>
           <Components isList="true" count="16">
             <HeaderFactorMBA_MABL Ref="55" type="Text" isKey="true">
               <Border>Top, Left, Right;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>4.3,0,0.7,0.3</ClientRectangle>
+              <ClientRectangle>4.5,0,0.7,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,7,Bold</Font>
@@ -1117,7 +1117,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <HeaderFactorMBA_MEGHk Ref="56" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>5,0,0.8,0.5</ClientRectangle>
+              <ClientRectangle>5.2,0,0.8,0.5</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8,Bold</Font>
@@ -1135,7 +1135,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <HeaderFactorMBA_MEGH Ref="57" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>6.5,0,0.6,0.5</ClientRectangle>
+              <ClientRectangle>6.7,0,0.6,0.5</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8,Bold</Font>
@@ -1153,7 +1153,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <HeaderFactorMBA_CODE Ref="58" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>9.6,0,1,0.5</ClientRectangle>
+              <ClientRectangle>9.8,0,1,0.5</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8,Bold</Font>
@@ -1171,7 +1171,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text5 Ref="59" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>10.6,0,0.3,0.5</ClientRectangle>
+              <ClientRectangle>10.8,0,0.3,0.5</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8,Bold</Font>
@@ -1189,7 +1189,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text51 Ref="60" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>7.1,0,2.5,0.5</ClientRectangle>
+              <ClientRectangle>7.3,0,2.5,0.5</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8,Bold</Font>
@@ -1207,7 +1207,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <HeaderFactorMBA_VNAMES Ref="61" type="Text" isKey="true">
               <Border>Top, Left, Right;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.8,0,0.7,0.2</ClientRectangle>
+              <ClientRectangle>6,0,0.7,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8,Bold</Font>
@@ -1225,7 +1225,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text52 Ref="62" type="Text" isKey="true">
               <Border>Left, Right, Bottom;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.8,0.2,0.7,0.3</ClientRectangle>
+              <ClientRectangle>6,0.2,0.7,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8,Bold</Font>
@@ -1243,7 +1243,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text53 Ref="63" type="Text" isKey="true">
               <Border>Left, Right, Bottom;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>4.3,0.3,0.7,0.2</ClientRectangle>
+              <ClientRectangle>4.5,0.3,0.7,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,7,Bold</Font>
@@ -1261,7 +1261,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text54 Ref="64" type="Text" isKey="true">
               <Border>Top, Left, Right;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>3.5,0,0.8,0.2</ClientRectangle>
+              <ClientRectangle>3.7,0,0.8,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,7,Bold</Font>
@@ -1279,7 +1279,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text55 Ref="65" type="Text" isKey="true">
               <Border>Left, Right, Bottom;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>3.5,0.2,0.8,0.3</ClientRectangle>
+              <ClientRectangle>3.7,0.2,0.8,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,7,Bold</Font>
@@ -1297,7 +1297,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text56 Ref="66" type="Text" isKey="true">
               <Border>Top, Left, Right;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.8,0,0.7,0.2</ClientRectangle>
+              <ClientRectangle>3,0,0.7,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,7,Bold</Font>
@@ -1315,7 +1315,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text57 Ref="67" type="Text" isKey="true">
               <Border>Left, Right, Bottom;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.8,0.2,0.7,0.3</ClientRectangle>
+              <ClientRectangle>3,0.2,0.7,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,7,Bold</Font>
@@ -1333,7 +1333,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text60 Ref="68" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>2,0,0.8,0.5</ClientRectangle>
+              <ClientRectangle>2.2,0,0.8,0.5</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,7,Bold</Font>
@@ -1351,7 +1351,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text61 Ref="69" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.2,0,0.8,0.5</ClientRectangle>
+              <ClientRectangle>1.4,0,0.8,0.5</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,7,Bold</Font>
@@ -1369,7 +1369,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text63 Ref="70" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0,1.2,0.5</ClientRectangle>
+              <ClientRectangle>0.2,0,1.2,0.5</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,7,Bold</Font>
@@ -1394,13 +1394,13 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
         <DataBand1 Ref="71" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
-          <ClientRectangle>0,4.7,10.89,0.4</ClientRectangle>
+          <ClientRectangle>0,4.5,11.29,0.4</ClientRectangle>
           <Components isList="true" count="12">
             <DataFactorMBA_MABL_K Ref="72" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <CanGrow>True</CanGrow>
-              <ClientRectangle>3.5,0,0.8,0.4</ClientRectangle>
+              <ClientRectangle>3.7,0,0.8,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1421,7 +1421,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <CanGrow>True</CanGrow>
-              <ClientRectangle>4.3,0,0.7,0.4</ClientRectangle>
+              <ClientRectangle>4.5,0,0.7,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1442,7 +1442,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <CanGrow>True</CanGrow>
-              <ClientRectangle>5,0,0.8,0.4</ClientRectangle>
+              <ClientRectangle>5.2,0,0.8,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1460,7 +1460,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <CanGrow>True</CanGrow>
-              <ClientRectangle>6.5,0,0.6,0.4</ClientRectangle>
+              <ClientRectangle>6.7,0,0.6,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1478,7 +1478,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <CanGrow>True</CanGrow>
-              <ClientRectangle>5.8,0,0.7,0.4</ClientRectangle>
+              <ClientRectangle>6,0,0.7,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1496,7 +1496,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <CanGrow>True</CanGrow>
-              <ClientRectangle>7.1,0,2.5,0.4</ClientRectangle>
+              <ClientRectangle>7.3,0,2.5,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1507,7 +1507,6 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <Parent isRef="71" />
               <Text>{FactorMBA.KALA}</Text>
               <TextBrush>Black</TextBrush>
-              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </DataFactorMBA_CODE>
@@ -1515,7 +1514,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <CanGrow>True</CanGrow>
-              <ClientRectangle>10.6,0,0.3,0.4</ClientRectangle>
+              <ClientRectangle>10.8,0,0.3,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1533,7 +1532,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text18 Ref="81" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>9.6,0,1,0.4</ClientRectangle>
+              <ClientRectangle>9.8,0,1,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1550,7 +1549,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text22 Ref="82" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.8,0,0.7,0.4</ClientRectangle>
+              <ClientRectangle>3,0,0.7,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1572,7 +1571,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text29 Ref="84" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>2,0,0.8,0.4</ClientRectangle>
+              <ClientRectangle>2.2,0,0.8,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1593,7 +1592,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text30 Ref="86" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.2,0,0.8,0.4</ClientRectangle>
+              <ClientRectangle>1.4,0,0.8,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1614,7 +1613,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text31 Ref="88" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0,1.2,0.4</ClientRectangle>
+              <ClientRectangle>0.2,0,1.2,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1645,12 +1644,12 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
         </DataBand1>
         <FooterBand1 Ref="90" type="FooterBand" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,5.5,10.89,1.9</ClientRectangle>
+          <ClientRectangle>0,5.3,11.29,1.8</ClientRectangle>
           <Components isList="true" count="32">
             <Text76 Ref="91" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0.7,5.8,0.3</ClientRectangle>
+              <ClientRectangle>0.2,0.7,5.8,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1665,7 +1664,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text64 Ref="92" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.8,0.7,5.1,0.3</ClientRectangle>
+              <ClientRectangle>6,0.7,5.1,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1680,7 +1679,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text62 Ref="93" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.8,0.5,5.1,0.2</ClientRectangle>
+              <ClientRectangle>6,0.5,5.1,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1695,7 +1694,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text59 Ref="94" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.8,0.3,5.1,0.2</ClientRectangle>
+              <ClientRectangle>6,0.3,5.1,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1710,7 +1709,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text58 Ref="95" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>4.3,0,6.6,0.3</ClientRectangle>
+              <ClientRectangle>4.5,0,6.6,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1724,7 +1723,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text58>
             <Text7 Ref="96" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.8,0,0.7,0.3</ClientRectangle>
+              <ClientRectangle>6,0,0.7,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1740,7 +1739,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text7>
             <Text8 Ref="97" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>4.8,0.7,1,0.3</ClientRectangle>
+              <ClientRectangle>5,0.7,1,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1755,7 +1754,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text8>
             <Text9 Ref="98" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>9.8,0.7,1.1,0.3</ClientRectangle>
+              <ClientRectangle>10,0.7,1.1,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1770,7 +1769,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text9>
             <Text20 Ref="99" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>10.4,0.5,0.5,0.2</ClientRectangle>
+              <ClientRectangle>10.6,0.5,0.5,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1785,7 +1784,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text20>
             <Text21 Ref="100" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>9.9,0.3,1,0.2</ClientRectangle>
+              <ClientRectangle>10.1,0.3,1,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1803,7 +1802,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text32 Ref="101" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>3.5,0,0.8,0.3</ClientRectangle>
+              <ClientRectangle>3.7,0,0.8,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1823,7 +1822,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text34 Ref="103" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.8,0,0.7,0.3</ClientRectangle>
+              <ClientRectangle>3,0,0.7,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1843,7 +1842,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <Text65 Ref="105" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>2,0,0.8,0.3</ClientRectangle>
+              <ClientRectangle>2.2,0,0.8,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1864,7 +1863,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <CanGrow>True</CanGrow>
-              <ClientRectangle>1.2,0,0.8,0.3</ClientRectangle>
+              <ClientRectangle>1.4,0,0.8,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1886,7 +1885,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
               <CanGrow>True</CanGrow>
-              <ClientRectangle>0,0,1.2,0.3</ClientRectangle>
+              <ClientRectangle>0.2,0,1.2,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1906,7 +1905,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text67>
             <Text74 Ref="111" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>4,1.1,0.7,0.2</ClientRectangle>
+              <ClientRectangle>4.2,1.1,0.7,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1923,7 +1922,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text74>
             <Text75 Ref="112" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>4,1.3,0.7,0.2</ClientRectangle>
+              <ClientRectangle>4.2,1.3,0.7,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1940,7 +1939,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text75>
             <DEPNAME Ref="113" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>2,1.1,2,0.2</ClientRectangle>
+              <ClientRectangle>2.2,1.1,2,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1955,7 +1954,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </DEPNAME>
             <Text78 Ref="114" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>9.1,0.3,0.4,0.2</ClientRectangle>
+              <ClientRectangle>9.3,0.3,0.4,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1972,7 +1971,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text78>
             <Text79 Ref="115" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>7.9,0.3,0.5,0.2</ClientRectangle>
+              <ClientRectangle>8.1,0.3,0.5,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1989,7 +1988,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </Text79>
             <DEPART Ref="116" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,1.3,4,0.2</ClientRectangle>
+              <ClientRectangle>0.2,1.3,4,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -2007,7 +2006,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <AspectRatio>True</AspectRatio>
               <Brush>Transparent</Brush>
               <CanShrink>True</CanShrink>
-              <ClientRectangle>9.1,1.1,1.1,0.8</ClientRectangle>
+              <ClientRectangle>9.3,1,1.1,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <DataColumn>FactorMBA.EMZA1</DataColumn>
               <Enabled>False</Enabled>
@@ -2024,7 +2023,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <AspectRatio>True</AspectRatio>
               <Brush>Transparent</Brush>
               <CanShrink>True</CanShrink>
-              <ClientRectangle>7.2,1.1,1.1,0.8</ClientRectangle>
+              <ClientRectangle>7.4,1,1.1,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <DataColumn>FactorMBA.EMZA2</DataColumn>
               <Enabled>False</Enabled>
@@ -2041,7 +2040,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <AspectRatio>True</AspectRatio>
               <Brush>Transparent</Brush>
               <CanShrink>True</CanShrink>
-              <ClientRectangle>5.4,1.1,1.1,0.8</ClientRectangle>
+              <ClientRectangle>5.6,1,1.1,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <DataColumn>FactorMBA.EMZA3</DataColumn>
               <Enabled>False</Enabled>
@@ -2057,7 +2056,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <FU Ref="120" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
-              <ClientRectangle>10,1.7,0.9,0.2</ClientRectangle>
+              <ClientRectangle>10.2,1.6,0.9,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
@@ -2074,7 +2073,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <FS Ref="121" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
-              <ClientRectangle>10,1.4,0.9,0.2</ClientRectangle>
+              <ClientRectangle>10.2,1.3,0.9,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
@@ -2091,7 +2090,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <HU Ref="122" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
-              <ClientRectangle>8.1,1.7,0.9,0.2</ClientRectangle>
+              <ClientRectangle>8.3,1.6,0.9,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
@@ -2108,7 +2107,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <HS Ref="123" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
-              <ClientRectangle>8.1,1.4,0.9,0.2</ClientRectangle>
+              <ClientRectangle>8.3,1.3,0.9,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
@@ -2125,7 +2124,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <MU Ref="124" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
-              <ClientRectangle>6.3,1.7,0.9,0.2</ClientRectangle>
+              <ClientRectangle>6.5,1.6,0.9,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
@@ -2142,7 +2141,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             <MS Ref="125" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
-              <ClientRectangle>6.3,1.4,0.9,0.2</ClientRectangle>
+              <ClientRectangle>6.5,1.3,0.9,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
@@ -2158,7 +2157,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </MS>
             <HR Ref="126" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0.3,5.8,0.4</ClientRectangle>
+              <ClientRectangle>0.2,0.3,5.8,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -2173,7 +2172,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
             </HR>
             <Text77 Ref="127" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>5.8,0.5,4.6,0.2</ClientRectangle>
+              <ClientRectangle>6,0.5,4.6,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -2460,7 +2459,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
       <Conditions isList="true" count="0" />
       <Expressions isList="true" count="0" />
       <Guid>fc1bf1d36568446488cda82eea14a10b</Guid>
-      <Margins>0.4,0.4,0.4,0.4</Margins>
+      <Margins>0.2,0.2,0.2,0.2</Margins>
       <Name>Page1</Name>
       <Orientation>Landscape</Orientation>
       <PageHeight>8.27</PageHeight>
@@ -2480,10 +2479,10 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>10/14/2025 10:35:32 PM</ReportChanged>
+  <ReportChanged>10/24/2025 1:40:28 AM</ReportChanged>
   <ReportCreated>8/21/2025 1:21:32 AM</ReportCreated>
-  <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\Factors\INVOICE_FROOSH_2_MBA.mrt</ReportFile>
-  <ReportGuid>583c5988696c48a5b620ecae6a48a344</ReportGuid>
+  <ReportFile>C:\prg\MC\Prg_UI\Rpts\Factors\INVOICE_FROOSH_2_MBA.mrt</ReportFile>
+  <ReportGuid>5f760cad77ba4e1ba4fba00646cec1a9</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Inches</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>
