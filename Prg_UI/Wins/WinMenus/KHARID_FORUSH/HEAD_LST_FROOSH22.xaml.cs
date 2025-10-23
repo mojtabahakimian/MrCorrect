@@ -10595,6 +10595,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             (report.GetComponentByName("JF") as StiText).Text = Strings.Format(jamf, "#,##0;#,##0-");
             (report.GetComponentByName("HKH") as StiText).Text = Strings.Format(HAZ, "#,##0;#,##0-");
+            string test = Strings.Format(MBA, "#,##0;#,##0-");
             (report.GetComponentByName("MBAA") as StiText).Text = Strings.Format(MBA, "#,##0;#,##0-");
             if (JST?.VAS == 1 || IsNull(JST?.VAS))
             {
@@ -11006,7 +11007,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                 (report.GetComponentByName("JF") as StiText).Text = jamf.ToString("#,##0;#,##0-");
                 (report.GetComponentByName("HKH") as StiText).Text = HAZ.ToString("#,##0;#,##0-");
-                (report.GetComponentByName("MBAA") as StiText).Text = MBA.ToString("#,##0;#,##0-");
+                (report.GetComponentByName("MBAA") as StiText).Text = Strings.Format(MBA, "#,##0;#,##0-");
                 (report.GetComponentByName("GABEL") as StiText).Text = (jamf + HAZ + MBA - taf).ToString("#,##0;#,##0-");
                 (report.GetComponentByName("TF") as StiText).Text = taf.ToString("#,##0;#,##0-");
                 (report.GetComponentByName("JPAY") as StiText).Text = (NAGHD + VAR + HAV + JCHK).ToString("#,##0;#,##0-");

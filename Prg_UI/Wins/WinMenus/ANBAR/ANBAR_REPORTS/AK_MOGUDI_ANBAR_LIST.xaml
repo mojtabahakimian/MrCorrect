@@ -15,6 +15,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
@@ -168,7 +169,7 @@
 
             <syncfusion:SfDataGrid.Columns>
 
-                <syncfusion:GridTemplateColumn HeaderText="کارت انبار کالا" x:Name="ISEND_COLUMN" Width="110" MappingName="IsButtony" IsHidden="True" AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
+                <syncfusion:GridTemplateColumn HeaderText="کارت انبار کالا" x:Name="ISEND_COLUMN" Width="110" MappingName="IsButtony" AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_ISEND" IsTabStop="False" Click="BTN_ISEND_Click" Tag="{Binding}"
