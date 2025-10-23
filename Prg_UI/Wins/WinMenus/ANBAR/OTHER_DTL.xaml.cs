@@ -128,28 +128,71 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         }
         void CAMIUN_NUM_AfterUpdate()
         {
-            if (CAMIUN_NUM.SelectedItem != null && CAMIUN_NUM.SelectedValue != null)
+            CAMIUN_NUM.PreviewLostKeyboardFocus -= CAMIUN_NUM_PreviewLostKeyboardFocus;
+
+            // Safety check
+            if (CAMIUN_NUM.SelectedItem == null || CAMIUN_NUM.SelectedValue == null)
             {
-                var rst = dbms.DoGetDataSQL<QRE_KH_05>("SELECT   TOP 100 PERCENT * FROM OTHER_DTL WHERE CAMIUN_NUM = '" + CAMIUN_NUM.SelectedValue.ToString() + "' ORDER BY NUMBER DESC").ToList();
-                if (rst.Count > 0)
-                {
-                    _ = rst.FirstOrDefault().DRIVER_MOB != null ? DRIVER_MOB.Text = rst.FirstOrDefault().DRIVER_MOB : DRIVER_MOB.Text = "";
-                    _ = rst.FirstOrDefault().CAMIUN != null ? CAMIUN.Text = rst.FirstOrDefault().CAMIUN : CAMIUN.Text = "";
-                    _ = rst.FirstOrDefault().DRIVER != null ? DRIVER.Text = rst.FirstOrDefault().DRIVER : DRIVER.Text = "";
-                    _ = rst.FirstOrDefault().CAM_KHALY > 0 ? CAM_KHALY.Text = rst.FirstOrDefault().CAM_KHALY.ToString() : CAM_KHALY.Text = "";
-                }
-                else
-                {
-                    DRIVER_MOB.Text = "";
-                    CAMIUN_NUM.Text = "";
-                    CAMIUN.Text = "";
-                    CAM_KHALY.Text = "";
-                }
-                //DoCmd.RunCommand(acCmdSaveRecord);
-                INSERTVAZN();
-                //this.OTHER_DTL_SUB_SUB.Requery();
-                //CAMIUN.Focus();
+                return;
             }
+
+            // ✅ استفاده از parameterized query برای جلوگیری از SQL Injection
+            var rst = dbms.DoGetDataSQL<QRE_KH_05>(
+                "SELECT TOP 100 PERCENT * FROM OTHER_DTL WHERE CAMIUN_NUM = @CamiunNum ORDER BY NUMBER DESC",
+                new { CamiunNum = CAMIUN_NUM.SelectedValue.ToString() }
+            ).ToList();
+
+            if (rst.Count > 0)
+            {
+                // ✅ یک‌بار FirstOrDefault صدا زده شود
+                var record = rst.FirstOrDefault();
+
+                // پر کردن فیلدها با بررسی null و empty
+                DRIVER_MOB.Text = !string.IsNullOrEmpty(record.DRIVER_MOB) ? record.DRIVER_MOB : "";
+                CAMIUN.Text = !string.IsNullOrEmpty(record.CAMIUN) ? record.CAMIUN : "";
+
+                // منطق اصلاح‌شده برای DRIVER (بر اساس منطق احتمالی VBA)
+                DRIVER.Text = !string.IsNullOrEmpty(record.DRIVER) ? record.DRIVER : "";
+
+                // بررسی مقدار عددی
+                CAM_KHALY.Text = (record.CAM_KHALY.HasValue && record.CAM_KHALY.Value > 0)
+                    ? record.CAM_KHALY.Value.ToString()
+                    : "";
+            }
+            else
+            {
+                // پاک کردن فیلدها
+                DRIVER_MOB.Text = "";
+                CAMIUN.Text = "";
+                DRIVER.Text = "";
+                CAM_KHALY.Text = "";
+                // ⚠️ CAMIUN_NUM را پاک نکنید چون کاربر انتخاب کرده
+            }
+
+            INSERTVAZN();
+            Dispatcher.BeginInvoke(new Action(() => { CAMIUN.Focus(); }));
+
+            //if (CAMIUN_NUM.SelectedItem != null && CAMIUN_NUM.SelectedValue != null)
+            //{
+            //    var rst = dbms.DoGetDataSQL<QRE_KH_05>("SELECT   TOP 100 PERCENT * FROM OTHER_DTL WHERE CAMIUN_NUM = '" + CAMIUN_NUM.SelectedValue.ToString() + "' ORDER BY NUMBER DESC").ToList();
+            //    if (rst.Count > 0)
+            //    {
+            //        _ = !string.IsNullOrWhiteSpace(rst.FirstOrDefault().DRIVER_MOB) ? DRIVER_MOB.Text = rst.FirstOrDefault().DRIVER_MOB : DRIVER_MOB.Text = "";
+            //        _ = !string.IsNullOrWhiteSpace(rst.FirstOrDefault().CAMIUN) ? CAMIUN.Text = rst.FirstOrDefault().CAMIUN : CAMIUN.Text = "";
+            //        _ = !string.IsNullOrWhiteSpace(rst.FirstOrDefault().DRIVER) ? DRIVER.Text = rst.FirstOrDefault().DRIVER : DRIVER.Text = "";
+            //        _ = rst.FirstOrDefault().CAM_KHALY > 0 ? CAM_KHALY.Text = rst.FirstOrDefault().CAM_KHALY.ToString() : CAM_KHALY.Text = "";
+            //    }
+            //    else
+            //    {
+            //        DRIVER_MOB.Text = "";
+            //        CAMIUN_NUM.Text = "";
+            //        CAMIUN.Text = "";
+            //        CAM_KHALY.Text = "";
+            //    }
+            //    INSERTVAZN();
+             
+            //}
+            CAMIUN_NUM.PreviewLostKeyboardFocus += CAMIUN_NUM_PreviewLostKeyboardFocus;
         }
         void DRIVER_AfterUpdate()
         {
@@ -744,7 +787,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
         private void DRIVER_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-       
+
         }
         private void CAMIUN_NUM_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -1056,7 +1099,19 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
         private void CAMIUN_NUM_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
+            if (CAMIUN_NUM.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
+            TextBox CAMIUN_NUM_TEX = (TextBox)CAMIUN_NUM.Template.FindName("PART_EditableTextBox", CAMIUN_NUM);
+            if (CAMIUN_NUM_TEX is null)
+            {
+                return;
+            }
+
             CAMIUN_NUM_AfterUpdate();
+        }
+
+        private void CAMIUN_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
         }
     }
 }

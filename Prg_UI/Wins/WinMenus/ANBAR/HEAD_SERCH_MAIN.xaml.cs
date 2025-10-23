@@ -553,17 +553,17 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             {
                 if (dateOp?.SelectedValue?.ToString() == BEYN)
                 {
-                    if (string.IsNullOrEmpty(dateToTextBox?.Text?.Replace("/", "").Trim()))
+                    if (string.IsNullOrEmpty(dateToTextBox?.Text?.ToRawTarikh().Trim()))
                     {
                         return;
                     }
                     ChShart();
-                    SHART += $"(DATE_N BETWEEN {dateTextBox.Text} AND {dateToTextBox.Text})";
+                    SHART += $"(DATE_N BETWEEN {dateTextBox.Text.ToRawTarikh()} AND {dateToTextBox.Text.ToRawTarikh()})";
                 }
                 else
                 {
                     ChShart();
-                    SHART += $"(DATE_N {dateOp?.SelectedValue ?? "="} {dateTextBox.Text})";
+                    SHART += $"(DATE_N {dateOp?.SelectedValue ?? "="} {dateTextBox.Text.ToRawTarikh()})";
                 }
             }
 

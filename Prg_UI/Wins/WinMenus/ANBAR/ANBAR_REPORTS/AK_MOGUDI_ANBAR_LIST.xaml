@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:Wins.WinMenus.ANBAR.ANBAR_REPORTS"
         mc:Ignorable="d"
 
-        
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         xmlns:sfusion="clr-namespace:Syncfusion.UI.Xaml.Grid;assembly=Syncfusion.SfGrid.WPF"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:grid="clr-namespace:Syncfusion.UI.Xaml.Grid;assembly=Syncfusion.SfGrid.WPF"
