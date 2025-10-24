@@ -162,8 +162,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(HMOIN, dbms);
             if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
             {
-                universControl.PopNotifyShow($"حساب نمی تواند خالی باشد", Pop1, Pop1Text1, Pop_Border1);
-                e.Handled = true;
+                universControl.PopNotifyShow($"حساب خالی است", Pop1, Pop1Text1, Pop_Border1);
             }
 
             if (HMOIN.SelectedValue is not null)
@@ -199,11 +198,11 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                 }
                 else
                 {
-                    if (!Tarikh.IsSyncedDateNow(dt1, (bool)Baseknow.CTL_DT) || !Tarikh.IsSyncedDateNow(dt2, (bool)Baseknow.CTL_DT))
-                    {
-                        universControl.PopNotifyShow(".تاریخ مربوط به سال جاری نیست", Pop1, Pop1Text1, Pop_Border1);
-                        return;
-                    }
+                    //if (!Tarikh.IsSyncedDateNow(dt1, (bool)Baseknow.CTL_DT) || !Tarikh.IsSyncedDateNow(dt2, (bool)Baseknow.CTL_DT))
+                    //{
+                    //    universControl.PopNotifyShow(".تاریخ مربوط به سال جاری نیست", Pop1, Pop1Text1, Pop_Border1);
+                    //    return;
+                    //}
                 }
             }
             else
@@ -302,11 +301,11 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                         {
                             //OpenReport("INVOICE_FROOSH_3GRP3");
 
-                            if (HMOIN.SelectedValue is null)
-                            {
-                                universControl.PopNotifyShow("لطفا یک حساب را انتخاب کنید.", Pop1, Pop1Text1, Pop_Border1);
-                                return;
-                            }
+                            //if (HMOIN.SelectedValue is null)
+                            //{
+                            //    universControl.PopNotifyShow("لطفا یک حساب را انتخاب کنید.", Pop1, Pop1Text1, Pop_Border1);
+                            //    return;
+                            //}
 
                             var report = new StiReport();
                             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.INVOICE_FROOSH_3GRP3.mrt");
@@ -317,8 +316,14 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
                             report["FDATE_PARM"] = DT1.Text.ToRawTarikh();
                             report["EDATE_PARM"] = DT2.Text.ToRawTarikh();
-                            report["CUST_PARM"] = HMOIN.SelectedValue.ToString();
-
+                            if (HMOIN.SelectedValue is null)
+                            {
+                                report["CUST_PARM"] = "%";
+                            }
+                            else
+                            {
+                                report["CUST_PARM"] = HMOIN.SelectedValue.ToString();
+                            }
                             (report.GetComponentByName("Text73") as StiText).Text = $"تاریخ : {Tarikh.FullCurrentDate}";
                             (report.GetComponentByName("F_SELL_N") as StiText).Text = Baseknow.NAME.ToString();
                             (report.GetComponentByName("F_GLOBALNUMBER_N") as StiText).Text = Baseknow.ECODE.ToString();
@@ -395,7 +400,14 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
             report["FDATE_PARM"] = DT1.Text.ToRawTarikh();
             report["EDATE_PARM"] = DT2.Text.ToRawTarikh();
-            report["CUST_PARM"] = HMOIN.SelectedValue.ToString();
+            if (HMOIN.SelectedValue is null)
+            {
+                report["CUST_PARM"] = "%";
+            }
+            else
+            {
+                report["CUST_PARM"] = HMOIN.SelectedValue.ToString();
+            }
 
             (report.GetComponentByName("SAL_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
 

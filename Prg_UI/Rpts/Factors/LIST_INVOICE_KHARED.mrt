@@ -6,7 +6,7 @@
     <Databases isList="true" count="1">
       <MS_x0020_SQL Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>MS SQL</Alias>
-        <ConnectionStringEncrypted>9Fxlz01KQ835CE29+wCiY9HS+8JIcZOka0zt/eHkYuvf1qEL1gp6QUVGnFjDSbF/hFb7iEVd8k1oXP3M6tgre9FatQnJS9OIak09COSg62fXeMECXkEBdXJauJhimOpe</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9Fz3oe9K88hFYYSB5Byof9Fukc1WX3ukRVu5CGNxL2Lf2LVIxgPD+X999dxpTOFn9MTZCc1Rw4FpTaEYTRjhXulU94rFUaPIa0S5zGdY616AWg==</ConnectionStringEncrypted>
         <Key>e8ff559faa134d2fa7af40cf6d83d737</Key>
         <Name>MS SQL</Name>
       </MS_x0020_SQL>
@@ -1086,10 +1086,10 @@
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>12/2/2024 9:35:12 PM</ReportChanged>
+  <ReportChanged>10/24/2025 8:56:29 PM</ReportChanged>
   <ReportCreated>9/5/2021 1:38:11 PM</ReportCreated>
-  <ReportFile>C:\prg\Made Reports\All\LIST_INVOICE_KHARED.mrt</ReportFile>
-  <ReportGuid>8ec81a22ae794b848e39db1615c0949e</ReportGuid>
+  <ReportFile>C:\prg\MC\Prg_UI\Rpts\Factors\LIST_INVOICE_KHARED.mrt</ReportFile>
+  <ReportGuid>9ed96919cff94e61825bb546a7a575ab</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>
