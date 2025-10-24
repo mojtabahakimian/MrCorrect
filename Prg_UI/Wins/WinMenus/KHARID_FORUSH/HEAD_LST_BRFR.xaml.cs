@@ -4940,11 +4940,33 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (NewRecord)
             {
                 var selected = NUMBER1.SelectedValue;
-                bool alreadyUsed = dbms.DoGetDataSQL<int>($"SELECT COUNT(*) FROM HEAD_LST WHERE TAG = {FTAG} AND NUMBER = {selected}").First() > 0;
-                if (alreadyUsed)
+                // Check if this NUMBER1 is already used and get the NUMBER of the record that uses it.
+                var existingRecordNumber = dbms.DoGetDataSQL<double?>($"SELECT NUMBER FROM HEAD_LST WHERE TAG = {FTAG} AND NUMBER1 = {selected}").FirstOrDefault();
+                if (existingRecordNumber != null)
                 {
-                    new Msgwin(false, $"نمیتوانید {title} که قبلا ثبت کرده ای استفاده کنید").ShowDialog();
-                    NUMBER1.SelectedValue = NUMBER1_TAG; NUMBER1.Items.Refresh();
+                    // A record with this NUMBER1 already exists. Inform the user and navigate to it.
+                    new Msgwin(false, $"این {title} قبلاً برای فاکتور شماره {existingRecordNumber} استفاده شده است. در حال بارگذاری آن برگه...").ShowDialog();
+
+                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.NUMBER == existingRecordNumber);
+                    if (itemfound != null)
+                    {
+                        _navigationManager.IsNewRecord = false;
+                        int idx = _navigationManager.RecordsData.IndexOf(itemfound);
+                        if (idx >= 0)
+                        {
+                            _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+                        }
+                    }
+                    else
+                    {
+                        // The record exists in DB but not in the current navigation list (perhaps due to filters).
+                        new Msgwin(false, $"فاکتور شماره {existingRecordNumber} در لیست فعلی شما یافت نشد، ممکن است به آن دسترسی نداشته باشید.").ShowDialog();
+                    }
+
+                    // Reset the selection to the previous valid one.
+                    NUMBER1.SelectedValue = NUMBER1_TAG;
+                    NUMBER1.Items.Refresh();
+                    e.Handled = true; // Prevent further focus changes as we are navigating away.
                     return;
                 }
             }
@@ -5005,6 +5027,31 @@ namespace Wins.WinMenus.KHARID_FORUSH
             INVO_LST_SUB_ReGetData();
             PAY_GETP_SUB_SUB_ReGetData();
             VISITOR_DTL_SUB_ReGetData();
+        }
+
+        private void NavigateToExistingWarehouseReceipt(object selectedNumber)
+        {
+            if (_navigationManager == null || selectedNumber == null)
+            {
+                return;
+            }
+
+            if (!double.TryParse(selectedNumber.ToString(), out double parsedNumber))
+            {
+                return;
+            }
+
+            var match = _navigationManager.RecordsData
+                .Select((record, index) => new { record, index })
+                .FirstOrDefault(x => x.record != null &&
+                                     (x.record.NUMBER == parsedNumber ||
+                                      (x.record.NUMBER1.HasValue && x.record.NUMBER1.Value == parsedNumber)));
+
+            if (match != null)
+            {
+                _navigationManager.IsNewRecord = false;
+                _navigationManager.MoveReGetData(Jahat.CustomPosition, match.index);
+            }
         }
 
         private void TICMBAA_Click(object sender, RoutedEventArgs e)

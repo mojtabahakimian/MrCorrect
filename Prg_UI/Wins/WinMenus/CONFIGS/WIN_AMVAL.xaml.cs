@@ -23,11 +23,13 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Wins.WinOther;
+using static Interfaces.INavigator;
 using static Syncfusion.XlsIO.Implementation.Collections.RowStorage;
 
 namespace Prg_UI.Wins.WinMenus.CONFIGS
 {
-    public partial class WIN_AMVAL : Window
+    public partial class WIN_AMVAL : Window, ISearchableWindow
     {
         public WIN_AMVAL(double? number_to_open = null)
         {
@@ -162,6 +164,17 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                 CL_LMethods.SendKey_US(Key.Tab);
             }
 
+            if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                e.Handled = true;
+                var searchWindow = new EnhancedSearchWindow(this)
+                {
+                    Owner = this
+                };
+                searchWindow.ShowDialog();
+                return;
+            }
+
             // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
             var nonDataKeys = new[]
             {
@@ -190,6 +203,50 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                 }
             }
         }
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => _navigationManager?.RecordsData ?? Enumerable.Empty<AMVAL_DTL>();
+
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            if (selectedItem is not AMVAL_DTL item)
+                return;
+
+            var records = _navigationManager?.RecordsData;
+            if (records == null || records.Count == 0)
+                return;
+
+            var target = records.FirstOrDefault(x => x.BARCHASB == item.BARCHASB);
+            if (target == null)
+            {
+                new Msgwin(false, "یافت نشد: مورد انتخاب شده در لیست اصلی وجود ندارد").Show();
+                return;
+            }
+
+            _navigationManager.IsNewRecord = false;
+
+            int idx = records.IndexOf(target);
+            if (idx < 0)
+            {
+                new Msgwin(false, "یافت نشد: مورد انتخاب شده در لیست اصلی وجود ندارد").Show();
+                return;
+            }
+
+            _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+        }
+
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+                new SearchableProperty { DisplayName = "کد برچسب", PropertyPath = "BARCHASB", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "نام دارایی", PropertyPath = "ANAME", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "تاریخ خرید", PropertyPath = "KHDATE", PropertyType = typeof(long) },
+                new SearchableProperty { DisplayName = "محل استقرار", PropertyPath = "PLACE", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "کاربر", PropertyPath = "USER_NAME", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "ملاحظات", PropertyPath = "DESCRIPTION", PropertyType = typeof(string) },
+            };
+        }
+        #endregion
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
