@@ -203,6 +203,7 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
             {
                 Msgwin msgwin = new Msgwin(false, "پارامتر ها کافی نیست!");
                 msgwin.ShowDialog();
+                return;
             }
             SHART = "INVO_LST.NUMBER = ";
 
@@ -240,7 +241,7 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         public void Open_Report()
         {
             Process Prc = ProcLoader.Start();
-            
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.ANBAR.LIST_FROOSH_ANBARS_HAVALA.mrt");
             report.Load(pathreport);
@@ -255,8 +256,12 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
 
 
             report["ANBAR_TAG_PARM"] = 2;
-            report["FNUMBER_PARM"] = Convert.ToInt32(F1.Text);
-            report["SNUMBER_PARM"] = Convert.ToInt32(F2.Text);
+            if (!String.IsNullOrEmpty(F1.Text) && !String.IsNullOrEmpty(F2.Text))
+            {
+                report["FNUMBER_PARM"] = Convert.ToInt32(F1.Text);
+                report["SNUMBER_PARM"] = Convert.ToInt32(F2.Text);
+            }
+
             report["TNUMBER_PARM"] = Convert.ToInt32(ANBAR.SelectedValue);
 
             //report.Render(false);
