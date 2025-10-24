@@ -175,132 +175,132 @@
                     </syncfusion:GridTextColumn>
 
                     <!-- Quantity and Financials -->
-                    <syncfusion:GridNumericColumn HeaderText="مقدار کالا" MappingName="MEGH" x:Name="MEGH" TextAlignment="Left"  IsHidden="True">
-                        <!--<syncfusion:GridNumericColumn.DisplayBinding>
+                    <syncfusion:GridTextColumn HeaderText="مقدار کالا" MappingName="MEGH" x:Name="MEGH" TextAlignment="Left"  IsHidden="True">
+                        <!--<syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="MEGH" StringFormat="N2" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>-->
-                    </syncfusion:GridNumericColumn>
-                    <syncfusion:GridNumericColumn HeaderText="مقدار کل کالا" MappingName="MEGHk" x:Name="MEGHk"  TextAlignment="Left"  IsHidden="True">
-                        <!--<syncfusion:GridNumericColumn.DisplayBinding>
+                        </syncfusion:GridTextColumn.DisplayBinding>-->
+                    </syncfusion:GridTextColumn>
+                    <syncfusion:GridTextColumn HeaderText="مقدار کل کالا" MappingName="MEGHk" x:Name="MEGHk"  TextAlignment="Left"  IsHidden="True">
+                        <!--<syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="MEGHk" StringFormat="N2" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>-->
-                    </syncfusion:GridNumericColumn>
+                        </syncfusion:GridTextColumn.DisplayBinding>-->
+                    </syncfusion:GridTextColumn>
 
-                    <syncfusion:GridNumericColumn HeaderText="مقدار مرجوعی" MappingName="MEGH_MAR" x:Name="MEGH_MAR"  TextAlignment="Left"  IsHidden="True">
-                        <!--<syncfusion:GridNumericColumn.DisplayBinding>
+                    <syncfusion:GridTextColumn HeaderText="مقدار مرجوعی" MappingName="MEGH_MAR" x:Name="MEGH_MAR"  TextAlignment="Left"  IsHidden="True">
+                        <!--<syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="MEGH_MAR" StringFormat="N2" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>-->
-                    </syncfusion:GridNumericColumn>
+                        </syncfusion:GridTextColumn.DisplayBinding>-->
+                    </syncfusion:GridTextColumn>
 
-                    <syncfusion:GridNumericColumn HeaderText="مبلغ" MappingName="MABL" x:Name="MABL"  TextAlignment="Left" IsHidden="True" >
-                        <syncfusion:GridNumericColumn.DisplayBinding>
-                            <Binding Path="MABL"  StringFormat="{}{0:#,0}" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
+                    <syncfusion:GridTextColumn HeaderText="مبلغ" MappingName="MABL" x:Name="MABL"  TextAlignment="Left" IsHidden="True" >
+                        <syncfusion:GridTextColumn.DisplayBinding>
+                            <Binding Path="MABL" StringFormat="{}{0:#,0}" />
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                    <syncfusion:GridNumericColumn HeaderText="فی عمده" MappingName="MABL_F" x:Name="MABL_F"  TextAlignment="Left" IsHidden="True" >
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                    <syncfusion:GridTextColumn HeaderText="فی عمده" MappingName="MABL_F" x:Name="MABL_F"  TextAlignment="Left" IsHidden="True" >
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="MABL_F"  StringFormat="{}{0:#,0}" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
-                    <syncfusion:GridNumericColumn HeaderText="مبلغ کل" MappingName="MABL_K" x:Name="MABL_K" TextAlignment="Left" IsHidden="True">
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
+                    <syncfusion:GridTextColumn HeaderText="مبلغ کل" MappingName="MABL_K" x:Name="MABL_K" TextAlignment="Left" IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="MABL_K"  StringFormat="{}{0:#,0}" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
-                    <syncfusion:GridNumericColumn HeaderText="مبلغ خالص" MappingName="KHFR" x:Name="KHFR" TextAlignment="Left"  IsHidden="True">
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
+                    <syncfusion:GridTextColumn HeaderText="مبلغ خالص" MappingName="KHFR" x:Name="KHFR" TextAlignment="Left"  IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="KHFR"  StringFormat="{}{0:#,0}" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
-                    <syncfusion:GridNumericColumn HeaderText="قابل پرداخت" MappingName="GHFR" x:Name="GHFR"  TextAlignment="Left" IsHidden="True">
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
+                    <syncfusion:GridTextColumn HeaderText="قابل پرداخت" MappingName="GHFR" x:Name="GHFR"  TextAlignment="Left" IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="GHFR"  StringFormat="{}{0:#,0}" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
-                    <syncfusion:GridNumericColumn HeaderText="مبلغ تخفیف" MappingName="N_MOIN" x:Name="N_MOIN" TextAlignment="Left"  IsHidden="True">
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
+                    <syncfusion:GridTextColumn HeaderText="مبلغ تخفیف" MappingName="N_MOIN" x:Name="N_MOIN" TextAlignment="Left"  IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="N_MOIN"  StringFormat="{}{0:#,0}" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                    <syncfusion:GridNumericColumn HeaderText="Price" MappingName="N_TAF" x:Name="N_TAF" TextAlignment="Left" IsHidden="True">
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                    <syncfusion:GridTextColumn HeaderText="Price" MappingName="N_TAF" x:Name="N_TAF" TextAlignment="Left" IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="N_TAF"  StringFormat="{}{0:#,0}" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                    <syncfusion:GridNumericColumn HeaderText="Total Price" MappingName="TOTALARZ" x:Name="TOTALARZ" TextAlignment="Left" IsHidden="True">
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                    <syncfusion:GridTextColumn HeaderText="Total Price" MappingName="TOTALARZ" x:Name="TOTALARZ" TextAlignment="Left" IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="TOTALARZ"  StringFormat="{}{0:#,0}" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                    <syncfusion:GridNumericColumn HeaderText="ارزش افزوده" MappingName="IMBAA" x:Name="IMBAA" TextAlignment="Left"  IsHidden="True">
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                    <syncfusion:GridTextColumn HeaderText="ارزش افزوده" MappingName="IMBAA" x:Name="IMBAA" TextAlignment="Left"  IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="IMBAA"  StringFormat="{}{0:#,0}" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                    <syncfusion:GridNumericColumn HeaderText="درصد تخفیف" MappingName="N_KOL" x:Name="N_KOL" TextAlignment="Left"  IsHidden="True">
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                    <syncfusion:GridTextColumn HeaderText="درصد تخفیف" MappingName="N_KOL" x:Name="N_KOL" TextAlignment="Left"  IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="N_KOL" StringFormat="N2" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                    <syncfusion:GridNumericColumn HeaderText="درصد تخفیف نقدی" MappingName="TKHN" x:Name="TKHN" TextAlignment="Left" IsHidden="True">
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                    <syncfusion:GridTextColumn HeaderText="درصد تخفیف نقدی" MappingName="TKHN" x:Name="TKHN" TextAlignment="Left" IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="TKHN" StringFormat="N2" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                    <syncfusion:GridNumericColumn HeaderText="فی میانگین" MappingName="AVRAGE" x:Name="AVRAGE" TextAlignment="Left"  IsHidden="True">
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                    <syncfusion:GridTextColumn HeaderText="فی میانگین" MappingName="AVRAGE" x:Name="AVRAGE" TextAlignment="Left"  IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="AVRAGE"  StringFormat="{}{0:#,0}" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                    <syncfusion:GridNumericColumn HeaderText="مبلغ ریالی" MappingName="mabrial" x:Name="MABRIAL" TextAlignment="Left"  IsHidden="True">
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                    <syncfusion:GridTextColumn HeaderText="مبلغ ریالی" MappingName="mabrial" x:Name="MABRIAL" TextAlignment="Left"  IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="mabrial"  StringFormat="{}{0:#,0}" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                    <syncfusion:GridNumericColumn HeaderText="حداقل موجودی" MappingName="MIN_M" x:Name="MIN_M" TextAlignment="Left"  IsHidden="True">
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                    <syncfusion:GridTextColumn HeaderText="حداقل موجودی" MappingName="MIN_M" x:Name="MIN_M" TextAlignment="Left"  IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="MIN_M" StringFormat="N2" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                    <syncfusion:GridNumericColumn HeaderText="حداکثر موجودی" MappingName="MAX_M" x:Name="MAX_M" TextAlignment="Left" IsHidden="True">
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                    <syncfusion:GridTextColumn HeaderText="حداکثر موجودی" MappingName="MAX_M" x:Name="MAX_M" TextAlignment="Left" IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="MAX_M" StringFormat="N2" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                    <syncfusion:GridNumericColumn HeaderText="نقطه سفارش" MappingName="N_SEF" x:Name="N_SEF" TextAlignment="Left" IsHidden="True">
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                    <syncfusion:GridTextColumn HeaderText="نقطه سفارش" MappingName="N_SEF" x:Name="N_SEF" TextAlignment="Left" IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="N_SEF" StringFormat="N2" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                    <syncfusion:GridNumericColumn HeaderText="بهینه سفارش" MappingName="B_SEF" x:Name="B_SEF" TextAlignment="Left" IsHidden="True">
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                    <syncfusion:GridTextColumn HeaderText="بهینه سفارش" MappingName="B_SEF" x:Name="B_SEF" TextAlignment="Left" IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="B_SEF" StringFormat="N2" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                    <syncfusion:GridNumericColumn HeaderText="مدت" MappingName="MAS" x:Name="MAS" TextAlignment="Left" IsHidden="True">
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                    <syncfusion:GridTextColumn HeaderText="مدت" MappingName="MAS" x:Name="MAS" TextAlignment="Left" IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="MAS" StringFormat="N0" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                    <syncfusion:GridNumericColumn HeaderText="وزن" MappingName="vazn" x:Name="VAZN" TextAlignment="Left"  IsHidden="True">
-                        <syncfusion:GridNumericColumn.DisplayBinding>
+                    <syncfusion:GridTextColumn HeaderText="وزن" MappingName="vazn" x:Name="VAZN" TextAlignment="Left"  IsHidden="True">
+                        <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="vazn" StringFormat="N2" />
-                        </syncfusion:GridNumericColumn.DisplayBinding>
-                    </syncfusion:GridNumericColumn>
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
                     <!-- Customer and Personnel Information -->
                     <syncfusion:GridTextColumn HeaderText="کد شخص" MappingName="hes" x:Name="HES" TextAlignment="Left" IsHidden="True"/>
@@ -380,9 +380,9 @@
                     <syncfusion:GridTextColumn HeaderText="کد محصل مصرف" MappingName="N_RASID"  x:Name="N_RASID" TextAlignment="Left"  IsHidden="True" />
 
                     <!-- Document and Order Details -->
-                    <syncfusion:GridNumericColumn HeaderText="شماره سند" MappingName="N_S"  TextAlignment="Left"  x:Name="N_S" IsHidden="True" />
-                    <syncfusion:GridNumericColumn HeaderText="شماره فاکتور برگشت" MappingName="NUMBER1" x:Name="NUMBER1"   TextAlignment="Left"  IsHidden="True"/>
-                    <syncfusion:GridNumericColumn HeaderText="شماره فاکتور فروشنده" MappingName="FNUMCO" x:Name="FNUMCO"   TextAlignment="Left"  IsHidden="True"/>
+                    <syncfusion:GridTextColumn HeaderText="شماره سند" MappingName="N_S"  TextAlignment="Left"  x:Name="N_S" IsHidden="True" />
+                    <syncfusion:GridTextColumn HeaderText="شماره فاکتور برگشت" MappingName="NUMBER1" x:Name="NUMBER1"   TextAlignment="Left"  IsHidden="True"/>
+                    <syncfusion:GridTextColumn HeaderText="شماره فاکتور فروشنده" MappingName="FNUMCO" x:Name="FNUMCO"   TextAlignment="Left"  IsHidden="True"/>
                     <syncfusion:GridTextColumn HeaderText="ملاحظات سطر" MappingName="MANDAH" Width="200" x:Name="MANDAH" TextAlignment="Left"   IsHidden="True"/>
                     <syncfusion:GridTextColumn HeaderText="توضیحات فاکتور" MappingName="MOLAH"  x:Name="MOLAH" TextAlignment="Left"  Width="250" IsHidden="True" />
                     <syncfusion:GridTextColumn HeaderText="شماره فنی" MappingName="N_FANI" x:Name="N_FANI"  TextAlignment="Left"   IsHidden="True"/>

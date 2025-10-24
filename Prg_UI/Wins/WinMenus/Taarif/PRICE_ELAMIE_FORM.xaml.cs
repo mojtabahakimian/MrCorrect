@@ -1126,6 +1126,12 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 return;
             }
 
+
+            if (e.Key is Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                DataGridExtension.HandleKeyPress(sender, e, DG_SUB);
+            }
+
             string ColumnTarget = "";
             if (e.Key == Key.Add)
             {
