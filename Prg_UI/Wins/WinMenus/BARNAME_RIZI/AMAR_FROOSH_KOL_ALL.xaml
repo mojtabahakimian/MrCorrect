@@ -102,10 +102,24 @@
                 </Border>
             </StackPanel>
         </Popup>
+
+        <Popup x:Name="CustomTooltipPopup"
+           Placement="MousePoint"
+           AllowsTransparency="True">
+            <Border CornerRadius="5" Background="#2C3E50" Padding="10" BorderBrush="#34495E" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="{Binding MN}" FontWeight="Bold" Foreground="White" FontSize="14"/>
+                    <TextBlock Foreground="White" Margin="0,5,0,0" FontSize="12">
+                    <Run Text="مبلغ فروش: "/>
+                    <Run Text="{Binding MABL_K, StringFormat='#,##0 ریال'}" FontWeight="SemiBold"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </Popup>
         <!--Start.......................................................................................-->
 
 
-        <syncfusion:SfChart x:Name="salesChart" Margin="30,48,30,30">
+        <syncfusion:SfChart x:Name="salesChart" Margin="30,48,30,30" MouseMove="salesChart_MouseMove">
             <!-- محور X -->
             <syncfusion:SfChart.PrimaryAxis>
                 <syncfusion:CategoryAxis Header="ماه" 
@@ -127,6 +141,8 @@
                 XBindingPath="MN"
                 YBindingPath="MABL_K"
                 Palette="Custom"
+                EnableAnimation="True"
+                AnimationDuration="0:0:1.5"
                 
                 Label="مبلغ فروش (ریال)">
                 <syncfusion:ColumnSeries.ColorModel>
