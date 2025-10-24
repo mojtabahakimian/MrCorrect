@@ -233,7 +233,7 @@
                     </DataGridComboBoxColumn.CellStyle>
                 </DataGridComboBoxColumn>
 
-                <DataGridTextColumn x:Name="MEGH_COL" Header="مقدار کالا" Binding="{Binding MEGH,UpdateSourceTrigger=PropertyChanged}"   Width="auto"   MinWidth="90">
+                <DataGridTextColumn x:Name="MEGH_COL" Header="مقدار کالا" Binding="{Binding MEGH,UpdateSourceTrigger=LostFocus}"   Width="auto"   MinWidth="90">
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
                             <Setter Property="MaxLength" Value="50" />
@@ -245,7 +245,7 @@
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
-                <DataGridTextColumn x:Name="MEGHk_COL" Header="مقدار کل" Binding="{Binding MEGHk,UpdateSourceTrigger=PropertyChanged}"  Width="auto"   MinWidth="100">
+                <DataGridTextColumn x:Name="MEGHk_COL" Header="مقدار کل" Binding="{Binding MEGHk,UpdateSourceTrigger=LostFocus}"  Width="auto"   MinWidth="100">
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
                             <Setter Property="MaxLength" Value="50" />
