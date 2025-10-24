@@ -124,7 +124,7 @@
                                       INNER JOIN OTHER_DTL_SUB ON STUF_DEF_1.CODE=OTHER_DTL_SUB.CODE ON INVO_LST.CODE=OTHER_DTL_SUB.CODE AND INVO_LST.NUMBER=OTHER_DTL_SUB.NUMBER AND INVO_LST.TAG=OTHER_DTL_SUB.TAGG
                       LEFT OUTER JOIN CUST_HESAB ON HEAD_BACK_ANBAR.CUST_NO=CUST_HESAB.hes
                       LEFT OUTER JOIN TCOD_VAHEDS ON INVO_LST.VAHED_K=TCOD_VAHEDS.CODE ON STUF_DEF.CODE=INVO_LST.CODE
-WHERE HEAD_LST.NUMBER1=8702 AND HTAG=2</SqlCommand>
+WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
       </FactorMBA>
       <SAZMAN Ref="4" type="Stimulsoft.Report.Dictionary.StiSqlSource" isKey="true">
         <Alias>SAZMAN</Alias>
@@ -2479,10 +2479,10 @@ WHERE HEAD_LST.NUMBER1=8702 AND HTAG=2</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>10/24/2025 1:40:28 AM</ReportChanged>
+  <ReportChanged>10/24/2025 3:36:56 PM</ReportChanged>
   <ReportCreated>8/21/2025 1:21:32 AM</ReportCreated>
   <ReportFile>C:\prg\MC\Prg_UI\Rpts\Factors\INVOICE_FROOSH_2_MBA.mrt</ReportFile>
-  <ReportGuid>5f760cad77ba4e1ba4fba00646cec1a9</ReportGuid>
+  <ReportGuid>9c6f51a556c84b9b8d583ef5c997499c</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Inches</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

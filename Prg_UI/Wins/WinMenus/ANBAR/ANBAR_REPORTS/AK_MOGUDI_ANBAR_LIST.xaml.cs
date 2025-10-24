@@ -76,11 +76,15 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         {
             SQL_DATA = _SQL_DATA_;
 
+            DIG = 3;
+
             InitializeComponent();
 
             this.DataContext = this;
         }
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+
+        public int DIG { get; set; }
 
         UniversControl universControl = new UniversControl();
         public ObservableCollection<MDS> AK_MOGUDI_DATA { get; set; } = new ObservableCollection<MDS>();
@@ -128,6 +132,7 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             AK_MOGUDI_DATA?.Clear();
+
 
             var MasterHead = dbms.DoGetDataSQL<MDS>($"{SQL_DATA}").ToList();
 

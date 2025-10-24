@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         xmlns:local="clr-namespace:Wins.WinMenus.ANBAR.ANBAR_REPORTS"
+        xmlns:converters="clr-namespace:Prg_UI.Wins.WinMenus.ANBAR.ANBAR_REPORTS"
         mc:Ignorable="d"
 
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
@@ -18,10 +19,12 @@
         FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
-        Title="" Height="450" Width="1024" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+        Title="" Height="450" Width="1857" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
 
     <Window.Resources>
-        
+
+        <converters:DynamicDecimalFormatter x:Key="DecimalFormatter" />
+
         <ItemsPanelTemplate x:Key="VSP">
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
@@ -196,18 +199,22 @@
                 <syncfusion:GridTextColumn HeaderText="نام کالا" MappingName="NAME" Width="300"/>
                 <syncfusion:GridTextColumn HeaderText="نام واحد" MappingName="NAMES" Width="100"/>
 
-                <syncfusion:GridTextColumn HeaderText="موجودی" MappingName="MAND" Width="130">
+                <syncfusion:GridTextColumn x:Name="MAND_COLUMN" HeaderText="موجودی" MappingName="MAND" Width="130">
                     <syncfusion:GridTextColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding MAND}"   Background="LightSkyBlue"/>
-                            <!-- Change 'LightYellow' to any desired color -->
+                            <TextBlock Background="LightSkyBlue">
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource DecimalFormatter}">
+                                        <Binding Path="MAND" />
+
+                                        <Binding Path="DataContext.DIG" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
                         </DataTemplate>
                     </syncfusion:GridTextColumn.CellTemplate>
-                    <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="MAND"  StringFormat="{}{0:#,0}" />
-                    </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
-
+                
                 <syncfusion:GridTextColumn HeaderText="ضریب" MappingName="NESBAT" Width="100"/>
 
                 <syncfusion:GridTextColumn HeaderText="موجودی ثانویه" MappingName="MANDF" Width="140">
