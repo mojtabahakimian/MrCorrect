@@ -1,4 +1,5 @@
-﻿using Functions;
+﻿using DocumentFormat.OpenXml.Drawing.Charts;
+using Functions;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
 using Prg_Proccessy.FUNCTIONS;
@@ -22,6 +23,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using static Syncfusion.XlsIO.Implementation.Collections.RowStorage;
 
 namespace Prg_UI.Wins.WinMenus.CONFIGS
 {
@@ -304,8 +306,12 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             DESCRIPTION.Clear();
             PIC.Source = null;
             //_navigationManager.CurrentRecord.BARCHASB = null;
+            GetDefaultFocus();
+        }
 
-            ANAME.Focus();
+        private void GetDefaultFocus()
+        {
+            BARCHASB.Focus(); BARCHASB.SelectAll();
         }
 
         private void RefreshAfterUpdate()
@@ -391,19 +397,21 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             if (string.IsNullOrWhiteSpace(ANAME.Text))
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "نام دارایی الزامی است" });
-                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(BARCHASB.Text) || BARCHASB.Text == "0")
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "کد برچست نمیتواند خالی باشد" });
             }
 
             if (CALMETHOD.SelectedValue == null)
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "روش محاسبه استهلاک الزامی است" });
-                return false;
             }
 
             if (string.IsNullOrWhiteSpace(KHDATE.Text.ToRawTarikh()))
             {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ خرید الزامی است" });
-                return false;
+                //ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ خرید الزامی است" });
             }
             else
             {
@@ -432,106 +440,120 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
         private void InsertRecordAsync()
         {
             string sql = @"
-                INSERT INTO dbo.AMVAL 
-                (aname, calmethod, rate, hesab, khdate, price, place, arzesh, astatus, Description, 
-                 USER_NAME, UP_TIME, UP_DATE, UP_USER_NAME, PC_NAME, IPADD)
-                VALUES 
-                (@aname, @calmethod, @rate, @hesab, @khdate, @price, @place, @arzesh, @astatus, @Description,
-                 @USER_NAME, @UP_TIME, @UP_DATE, @UP_USER_NAME, @PC_NAME, @IPADD);
-                
-                SELECT CAST(SCOPE_IDENTITY() AS INT);";
+             INSERT INTO dbo.AMVAL 
+             (barchasb,aname, calmethod, rate, hesab, khdate, price, place, arzesh, astatus, Description, USER_NAME, UID)
+             VALUES 
+             (@barchasb,@aname, @calmethod, @rate, @hesab, @khdate, @price, @place, @arzesh, @astatus, @Description, @USER_NAME, @UID);";
 
             var parameters = new
             {
+                barchasb = BARCHASB.Text.Trim(),
                 aname = ANAME.Text.Trim(),
-                calmethod = CALMETHOD.SelectedValue,
-                rate = decimal.TryParse(RATE.Text.Replace(",", ""), out decimal rate) ? rate : (decimal?)null,
+                calmethod = CALMETHOD.SelectedValue ?? 1,
+                rate = double.TryParse(RATE.Text.Replace(",", ""), out double rate) ? rate : 0.0,
                 hesab = HESAB.SelectedValue?.ToString(),
-                khdate = KHDATE.Text.ToRawTarikh().Trim(),
-                price = decimal.TryParse(PRICE.Text.Replace(",", ""), out decimal price) ? price : (decimal?)null,
+                khdate = string.IsNullOrWhiteSpace(KHDATE.Text.ToRawTarikh()) ? (long?)null : long.Parse(KHDATE.Text.ToRawTarikh().Trim()),
+                price = double.TryParse(PRICE.Text.Replace(",", ""), out double price) ? price : (double?)null,
                 place = PLACE.Text.Trim(),
-                arzesh = decimal.TryParse(ARZESH.Text.Replace(",", ""), out decimal arzesh) ? arzesh : (decimal?)null,
+                arzesh = long.TryParse(ARZESH.Text.Replace(",", ""), out long arzesh) ? arzesh : (long?)null,
                 astatus = ASTATUS.SelectedValue ?? 1,
                 Description = DESCRIPTION.Text.Trim(),
                 USER_NAME = Baseknow.UUSER,
-                UP_TIME = DateTime.Now.TimeOfDay.TotalSeconds,
-                UP_DATE = Tarikh.FullCurrentDate,
-                UP_USER_NAME = Baseknow.UUSER,
-                PC_NAME = Environment.MachineName,
-                IPADD = CL_HESABDARI.GETIPADD()
+                UID = Baseknow.USERCOD
             };
 
-            var result = dbms.DoGetDataSQL<int>(sql, parameters);
-            _navigationManager.CurrentRecord.BARCHASB = result?.FirstOrDefault();
-            BARCHASB.Text = result?.FirstOrDefault().ToString();
+            var result = dbms.DoExecuteSQL(sql, parameters);
+            //var newBarchasb = result?.FirstOrDefault();
+
+            //if (newBarchasb > 0)
+            //{
+            //    _navigationManager.CurrentRecord.BARCHASB = (int?)newBarchasb;
+            //    BARCHASB.Text = newBarchasb.ToString();
+            //}
         }
 
         private void UpdateRecordAsync()
         {
-            // Archive old record if TRANSF enabled
-            if (_navigationManager.CurrentRecord.BARCHASB.HasValue)
+            // بررسی وجود BARCHASB
+            if (!_navigationManager.CurrentRecord.BARCHASB.HasValue)
             {
-                string archiveSql = @"
-                    INSERT INTO dbo.TR_AMVAL 
-                    (barchasb, aname, calmethod, rate, hesab, khdate, price, place, arzesh, 
-                     astatus, Description, USER_NAME, UP_TIME, UP_DATE, UP_USER_NAME, PC_NAME, IPADD)
-                    SELECT barchasb, aname, calmethod, rate, hesab, khdate, price, place, arzesh,
-                           astatus, Description, USER_NAME, @UP_TIME, @UP_DATE, @UP_USER_NAME, @PC_NAME, @IPADD
-                    FROM dbo.AMVAL
-                    WHERE barchasb = @barchasb";
-
-                dbms.DoExecuteSQL(archiveSql, new
-                {
-                    barchasb = _navigationManager.CurrentRecord.BARCHASB.Value,
-                    UP_TIME = DateTime.Now.TimeOfDay.TotalSeconds,
-                    UP_DATE = Tarikh.FullCurrentDate,
-                    UP_USER_NAME = Baseknow.UUSER,
-                    PC_NAME = Environment.MachineName,
-                    IPADD = CL_HESABDARI.GETIPADD()
-                });
+                new Msgwin(false, "شناسه رکورد معتبر نیست").ShowDialog();
+                return;
             }
+
+            // Archive old record if TRANSF enabled (اگر جدول TR_AMVAL وجود دارد)
+            // فرض می‌کنیم ساختار TR_AMVAL مشابه AMVAL است
+            string archiveSql = @"
+            INSERT INTO dbo.TR_AMVAL 
+            (barchasb, aname, calmethod, rate, hesab, khdate, price, place, arzesh, 
+             astatus, Description, USER_NAME, CRT, UID, UP_DATE, UP_TIME, UP_USER_NAME, PC_NAME, IPADD)
+            SELECT 
+                barchasb, 
+                aname, 
+                calmethod, 
+                rate, 
+                hesab, 
+                khdate, 
+                price, 
+                place, 
+                arzesh,
+                astatus, 
+                Description, 
+                USER_NAME, 
+                CRT, 
+                UID,
+                @UP_DATE,           -- تاریخ آرشیو
+                @UP_TIME,           -- زمان آرشیو
+                @UP_USER_NAME,      -- کاربر آرشیو‌کننده
+                @PC_NAME,           -- نام کامپیوتر
+                @IPADD              -- IP Address
+            FROM dbo.AMVAL
+            WHERE barchasb = @barchasb";
+
+            dbms.DoExecuteSQL(archiveSql, new
+            {
+                barchasb = _navigationManager.CurrentRecord.BARCHASB.Value,
+                UP_DATE = Tarikh.FullCurrentDate,                    // تاریخ شمسی فعلی
+                UP_TIME = DateTime.Now.TimeOfDay.TotalSeconds,       // زمان به ثانیه
+                UP_USER_NAME = Baseknow.UUSER,                       // نام کاربر
+                PC_NAME = Environment.MachineName,                   // نام کامپیوتر
+                IPADD = CL_HESABDARI.GETIPADD()                      // IP Address
+            });
 
             // Update current record
             string updateSql = @"
-                UPDATE dbo.AMVAL SET
-                    aname = @aname,
-                    calmethod = @calmethod,
-                    rate = @rate,
-                    hesab = @hesab,
-                    khdate = @khdate,
-                    price = @price,
-                    place = @place,
-                    arzesh = @arzesh,
-                    astatus = @astatus,
-                    Description = @Description,
-                    UP_TIME = @UP_TIME,
-                    UP_DATE = @UP_DATE,
-                    UP_USER_NAME = @UP_USER_NAME,
-                    PC_NAME = @PC_NAME,
-                    IPADD = @IPADD
-                WHERE barchasb = @barchasb";
+            UPDATE dbo.AMVAL SET
+                aname = @aname,
+                calmethod = @calmethod,
+                rate = @rate,
+                hesab = @hesab,
+                khdate = @khdate,
+                price = @price,
+                place = @place,
+                arzesh = @arzesh,
+                astatus = @astatus,
+                Description = @Description,
+                USER_NAME = @USER_NAME
+            WHERE barchasb = @barchasb";
 
             var parameters = new
             {
                 barchasb = _navigationManager.CurrentRecord.BARCHASB.Value,
                 aname = ANAME.Text.Trim(),
-                calmethod = CALMETHOD.SelectedValue,
-                rate = decimal.TryParse(RATE.Text.Replace(",", ""), out decimal rate) ? rate : (decimal?)null,
+                calmethod = CALMETHOD.SelectedValue ?? 1,
+                rate = double.TryParse(RATE.Text.Replace(",", ""), out double rate) ? rate : 0.0,
                 hesab = HESAB.SelectedValue?.ToString(),
-                khdate = KHDATE.Text.ToRawTarikh().Trim(),
-                price = decimal.TryParse(PRICE.Text.Replace(",", ""), out decimal price) ? price : (decimal?)null,
+                khdate = string.IsNullOrWhiteSpace(KHDATE.Text.ToRawTarikh()) ? (long?)null : long.Parse(KHDATE.Text.ToRawTarikh().Trim()),
+                price = double.TryParse(PRICE.Text.Replace(",", ""), out double price) ? price : (double?)null,
                 place = PLACE.Text.Trim(),
-                arzesh = decimal.TryParse(ARZESH.Text.Replace(",", ""), out decimal arzesh) ? arzesh : (decimal?)null,
+                arzesh = long.TryParse(ARZESH.Text.Replace(",", ""), out long arzesh) ? arzesh : (long?)null,
                 astatus = ASTATUS.SelectedValue ?? 1,
                 Description = DESCRIPTION.Text.Trim(),
-                UP_TIME = DateTime.Now.TimeOfDay.TotalSeconds,
-                UP_DATE = Tarikh.FullCurrentDate,
-                UP_USER_NAME = Baseknow.UUSER,
-                PC_NAME = Environment.MachineName,
-                IPADD = CL_HESABDARI.GETIPADD()
+                USER_NAME = Baseknow.UUSER,
             };
 
-            dbms.DoExecuteSQL(updateSql, parameters);
+            var rowsAffected = dbms.DoExecuteSQL(updateSql, parameters);
+
         }
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e)
         {

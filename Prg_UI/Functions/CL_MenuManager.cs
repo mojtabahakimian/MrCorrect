@@ -913,7 +913,7 @@ namespace Functions
             /// <summary>
             /// تعریف شروط گریدهای مشتریان
             /// </summary>
-            WIN_GRADE_SHART_FUNC_FORM ,
+            WIN_GRADE_SHART_FUNC_FORM,
             /// لیست چکهای پرداختی با مبالغ
             /// </summary>
             F_MENU_CHEK_PLISTS,
@@ -927,7 +927,11 @@ namespace Functions
             /// <summary>
             /// چکهای واگذار - برگشت - وصول شده
             /// </summary>
-            CHEKS_BESTANKAR
+            CHEKS_BESTANKAR,
+            /// <summary>
+            /// جمع داری اموال
+            /// </summary>
+            WIN_AMVAL
 
         }
         #endregion
@@ -945,6 +949,8 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+
+                case WinNameType.WIN_AMVAL: /* جمع داری اموال */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_AMVAL(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.PRICE_GRP_FORM_GRUHBANDI_GHEYMATI: /* تعریف گروه بندی قیمتی */ CL_LMethods.OpenWindow(OWNERWIN, new PRICE_GRP_FORM(), isModalDialog: false, allowMultipleInstances: false); break;
 

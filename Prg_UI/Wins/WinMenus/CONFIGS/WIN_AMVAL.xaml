@@ -132,8 +132,7 @@
                                 <TextBox x:Name="BARCHASB"
                                     Width="200"
                                     Text="0"
-                                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                    IsReadOnly="True"/>
+                                    Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
                             </StackPanel>
 
                             <!-- نام -->
@@ -154,7 +153,7 @@
                                 materialDesign:HintAssist.Hint="انتخاب کنید"
                                 Style="{StaticResource MaterialDesignOutlinedComboBox}"
                                 DisplayMemberPath="Value"
-                                SelectedValuePath="Key"/>
+                                SelectedValuePath="Key" IsEditable="True"/>
                             </StackPanel>
 
                             <!-- ضریب محاسبه استهلاک -->
@@ -204,7 +203,7 @@
                             <!-- تاریخ خرید -->
                             <StackPanel Grid.Row="5" Orientation="Horizontal" Margin="0,0,0,10">
                                 <TextBlock Text="تاریخ خرید:" Width="150" VerticalAlignment="Center"/>
-                                <xctk:MaskedTextBox x:Name="KHDATE" Mask="0000/00/00" Style="{StaticResource FuzzyOut}" Padding="3" Margin="0,16,203,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Right" Width="200"/>
+                                <xctk:MaskedTextBox x:Name="KHDATE" Mask="0000/00/00" Style="{StaticResource FuzzyOut}" Padding="3" Margin="0,16,203,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Right" Width="200" FlowDirection="LeftToRight"/>
                             </StackPanel>
 
                             <!-- قیمت خرید -->
@@ -243,7 +242,7 @@
                                     materialDesign:HintAssist.Hint="انتخاب وضعیت"
                                     Style="{StaticResource MaterialDesignOutlinedComboBox}"
                                     DisplayMemberPath="Value"
-                                    SelectedValuePath="Key"/>
+                                    SelectedValuePath="Key" IsEditable="True"/>
                             </StackPanel>
 
                             <!-- شرح -->

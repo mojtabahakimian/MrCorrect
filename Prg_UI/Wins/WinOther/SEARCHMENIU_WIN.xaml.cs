@@ -400,6 +400,8 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مشخصات سیسیتم", WIN_NAME = CL_MenuManager.WinNameType.WIN_SAZMAN_MOSHAKHASAT });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "درباره تهیه کنندگان", WIN_NAME = CL_MenuManager.WinNameType.WIN_About });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف کاربر جدید", WIN_NAME = CL_MenuManager.WinNameType.USERS });
+            
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "جمع داری اموال", WIN_NAME = CL_MenuManager.WinNameType.WIN_AMVAL });
 
             //مدیریت فروش هوشمند
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف شروط گریدهای مشتریان", WIN_NAME = CL_MenuManager.WinNameType.WIN_GRADE_SHART_FUNC_FORM });
