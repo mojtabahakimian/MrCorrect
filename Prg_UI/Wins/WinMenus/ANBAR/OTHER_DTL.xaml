@@ -77,7 +77,7 @@
             </ComboBox.ItemsPanel>
         </ComboBox>
         <Label Content="نوع ماشین :" Margin="228,107,0,0"  FlowDirection="RightToLeft" FontSize="10" Height="28" VerticalAlignment="Top" HorizontalAlignment="Left" Width="60"/>
-        <ComboBox x:Name="CAMIUN" Tag="RD"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="20,107,0,0" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" Grid.Column="0" TabIndex="5" VerticalAlignment="Top" HorizontalAlignment="Left" Width="203">
+        <ComboBox x:Name="CAMIUN" Tag="RD"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="20,107,0,0" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" Grid.Column="0" TabIndex="5" VerticalAlignment="Top" HorizontalAlignment="Left" Width="203" SelectionChanged="CAMIUN_SelectionChanged">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>

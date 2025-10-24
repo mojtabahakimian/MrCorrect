@@ -2,7 +2,6 @@
 using Microsoft.VisualBasic;
 using Prg_Proccessy.CNNMANAGER;
 using Prg_Proccessy.FUNCTIONS;
-using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
@@ -11,7 +10,6 @@ using Prg_UI.Functions.Jostejoo;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Prg_UI.Wins.WinOther;
-using Stimulsoft.Base;
 using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
@@ -34,7 +32,6 @@ using SGN_IMODEL = Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED.SGN_IMODEL;
 using Wins.WinMenus.KHARID_FORUSH;
 using Functions;
 using Microsoft.Data.SqlClient;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Wins.WinMenus.ANBAR
 {
@@ -403,9 +400,8 @@ namespace Wins.WinMenus.ANBAR
             INVO_LST_ENTEGHAL_SUB.IsReadOnly = true;
 
             I_AM_HEAD_ENTEGHAL = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
-
-            DataGrid_On_Current();
             Fill_ComboBoxes();
+            DataGrid_On_Current();
             Form_Load();
             USER_NAME.Text = CL_HESABDARI.UCurrentUser().ToString();
 
@@ -488,9 +484,9 @@ namespace Wins.WinMenus.ANBAR
                     GetSanadsNums(HEADER_FAC.N_S);
 
                     ANBAR.SelectedValue = HEADER_FAC.ANBAR.ToStringNullSafe();//از انبار
-                    ANBARF.ItemsSource = dbms.DoGetDataSQL<HLE_QT>("SELECT TCOD_ANBAR.CODE, TCOD_ANBAR.NAMES, OPANBACCESS.USERCO FROM  dbo.TCOD_ANBAR INNER JOIN  dbo.OPANBACCESS ON dbo.TCOD_ANBAR.CODE = dbo.OPANBACCESS.ANBCO WHERE (OPANBACCESS.USERCO = " + Baseknow.USERCOD + " ) and (TCOD_ANBAR.CODE <> " + ANBAR.SelectedValue + ")  ORDER BY TCOD_ANBAR.CODE").ToList();
-                    ANBARF.SelectedValuePath = "CODE";
-                    ANBARF.DisplayMemberPath = "NAMES";
+                    //ANBARF.ItemsSource = dbms.DoGetDataSQL<HLE_QT>("SELECT TCOD_ANBAR.CODE, TCOD_ANBAR.NAMES, OPANBACCESS.USERCO FROM  dbo.TCOD_ANBAR INNER JOIN  dbo.OPANBACCESS ON dbo.TCOD_ANBAR.CODE = dbo.OPANBACCESS.ANBCO WHERE (OPANBACCESS.USERCO = " + Baseknow.USERCOD + " ) and (TCOD_ANBAR.CODE <> " + ANBAR.SelectedValue + ")  ORDER BY TCOD_ANBAR.CODE").ToList();
+                    //ANBARF.SelectedValuePath = "CODE";
+                    //ANBARF.DisplayMemberPath = "NAMES";
                     ANBARF.SelectedValue = HEADER_FAC.ANBARF.ToStringNullSafe();//از انبار
 
                     TAH.Text = HEADER_FAC.TAH.ToStringNullSafe();//از انبار

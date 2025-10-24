@@ -212,6 +212,7 @@ namespace Wins.WinMenus.ANBAR
                     //case "F": { /*AK_MOGUDI_ANBAR_LIST*/ break; }
             }
 
+            this.Close();
         }
 
         private void OpenReport()

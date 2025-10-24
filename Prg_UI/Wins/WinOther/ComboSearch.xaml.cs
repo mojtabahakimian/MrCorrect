@@ -198,25 +198,38 @@ namespace Prg_UI.Wins.WinOther
         }
 
 
-
-
-
         private void Window_Closed(object sender, EventArgs e)
         {
             PublicVRB.PlusingSearching = false;
+
             if (whocalme == "HEAD_LST_PISHFROOSH2")
             {
-                if ((string.IsNullOrEmpty(TexbSearchCombo.Text) || string.IsNullOrWhiteSpace(TexbSearchCombo.Text)) && searchStarted == false)
+                var searchText = TexbSearchCombo?.Text;
+
+                if (string.IsNullOrWhiteSpace(searchText) && searchStarted == false)
                 {
-                    PublicVRB.Head_LstPish2.CUST_NO.Text = "";
+                    var headWindow = PublicVRB.Head_LstPish2;
+                    var customerCombo = headWindow?.CUST_NO;
 
-                    TestDelegate myDel = () => { PublicVRB.Head_LstPish2.CUST_NO.Focus(); };
-                    Dispatcher.BeginInvoke(myDel, null);
+                    if (customerCombo != null)
+                    {
+                        customerCombo.Text = string.Empty;
 
-                    PublicVRB.Head_LstPish2.CUST_NO.IsDropDownOpen = true;
+                        TestDelegate myDel = () =>
+                        {
+                            if (customerCombo != null)
+                            {
+                                customerCombo.Focus();
+                            }
+                        };
+                        Dispatcher.BeginInvoke(myDel, null);
+
+                        customerCombo.IsDropDownOpen = true;
+                    }
                 }
             }
         }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             PublicVRB.PlusingSearching = true;

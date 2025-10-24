@@ -9739,7 +9739,7 @@ namespace Prg_Proccessy.FUNCTIONS
             }
         }
 
-        public static int? UpdateOrGenerateBAYEG(int BayegBase, int n_s)
+        public static int? UpdateOrGenerateBAYEG_______(int BayegBase, int n_s)
         {
             const int _bayeganbase_ = 100000000;
             if (BayegBase == default || BayegBase == null)
@@ -9758,7 +9758,7 @@ namespace Prg_Proccessy.FUNCTIONS
                 {
                     try
                     {
-                        const int commandTimeoutSeconds = 60;
+                        const int commandTimeoutSeconds = 180;
 
                         //1. Get Exiting BAYEG of Current Row
                         var existingBayegCommand = new CommandDefinition("SELECT BAYEG FROM dbo.DEED_HED WHERE N_S = @N_S",
@@ -9810,6 +9810,80 @@ namespace Prg_Proccessy.FUNCTIONS
 
                         transaction.Commit();
                         return null;
+                    }
+                    catch (Exception ex)
+                    {
+                        try { File.AppendAllText("C:\\CORRECT\\DBMSLOG.txt", $"\n{DateTime.Now} - Error in UpdateOrGenerateBAYEG:\n{ex}\n"); } catch { }
+                        transaction.Rollback();
+                        throw; // Re-throw to handle higher up if necessary
+                    }
+                }
+            }
+        }
+
+
+        public static int? UpdateOrGenerateBAYEG(int BayegBase, int n_s)
+        {
+            const int _bayeganbase_ = 100000000;
+            var baseCandidate = BayegBase <= 0 ? _bayeganbase_ : BayegBase;
+            if (baseCandidate < _bayeganbase_)
+            {
+                baseCandidate = _bayeganbase_;
+            }
+            var assignmentBase = baseCandidate + 1;
+
+            using (var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+            {
+                db.Open();
+                using (var transaction = db.BeginTransaction(IsolationLevel.ReadCommitted))
+                {
+                    try
+                    {
+                        const int commandTimeoutSeconds = 300;
+
+                        //1. Get Exiting BAYEG of Current Row
+                        var existingBayegCommand = new CommandDefinition("SELECT BAYEG FROM dbo.DEED_HED WHERE N_S = @N_S",
+                            new { N_S = n_s }, transaction: transaction, commandTimeout: commandTimeoutSeconds);
+
+                        var existingBayeg = db.QueryFirstOrDefault<int?>(existingBayegCommand);
+                        if (existingBayeg.HasValue && existingBayeg.Value > 0)
+                        {
+                            transaction.Commit();
+                            return existingBayeg.Value;
+                        }
+
+                        const string assignSql = @"
+                            ;WITH NextValue AS (
+                                SELECT NextBayeg = ISNULL(MAX(BAYEG), @AssignmentBase - 1)
+                                FROM dbo.DEED_HED WITH (UPDLOCK, HOLDLOCK)
+                                WHERE BAYEG >= @AssignmentBase - 1
+                            )
+                            UPDATE DH WITH (ROWLOCK)
+                            SET BAYEG = NextValue.NextBayeg + 1
+                            OUTPUT INSERTED.BAYEG
+                            FROM dbo.DEED_HED AS DH
+                            CROSS JOIN NextValue
+                            WHERE DH.N_S = @N_S AND (DH.BAYEG IS NULL OR DH.BAYEG = 0);";
+                        var assignedBayeg = db.QueryFirstOrDefault<int?>(new CommandDefinition(
+                                                  assignSql,
+                                                  new { AssignmentBase = assignmentBase, N_S = n_s },
+                                                  transaction: transaction,
+                                                  commandTimeout: commandTimeoutSeconds));
+                        if (assignedBayeg.HasValue && assignedBayeg.Value > 0)
+                        {
+                            transaction.Commit();
+                            return assignedBayeg.Value;
+                        }
+
+                        // If no assignment happened, fall back to reading whatever exists.
+                        var finalBayeg = db.QueryFirstOrDefault<int?>(new CommandDefinition(
+                            "SELECT BAYEG FROM dbo.DEED_HED WHERE N_S = @N_S",
+                            new { N_S = n_s },
+                            transaction: transaction,
+                            commandTimeout: commandTimeoutSeconds));
+
+                        transaction.Commit();
+                        return finalBayeg;
                     }
                     catch (Exception ex)
                     {

@@ -14,7 +14,7 @@
         AllowDrop="True" WindowStyle="None"
         FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
-        Title="F_MENU_KART" Height="230" Width="505" MinHeight="230" MinWidth="505" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" >
+        Title="گزارش موجودی انبار" Height="230" Width="505" MinHeight="230" MinWidth="505" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" >
     <Grid>
         <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
         <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
