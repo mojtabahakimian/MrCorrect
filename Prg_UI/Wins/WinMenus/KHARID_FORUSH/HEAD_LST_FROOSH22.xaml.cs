@@ -123,6 +123,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             public int? PEID { get; set; }
             public int? PEPID { get; set; }
             public string? USER_NAME { get; set; }
+            public int? CUST_KIND { get; set; }
         }
         public class MG_MODEL3
         {
@@ -3122,8 +3123,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             if (!(e.NewFocus is ComboBox)) return;
 
             //MODAT_PPID_AfterUpdate
-            int modt;
-            modt = CL_HESABDARI.Getmodat(Convert.ToInt32(MODAT_PPID.SelectedValue));
+            GetModatValueDays();
+
+            //MODAT_PPID_Exit
+            GoGheymateUpdator();
+
+        }
+
+        private void GetModatValueDays()
+        {
+            int modt = CL_HESABDARI.Getmodat(Convert.ToInt32(MODAT_PPID.SelectedValue));
             if (modt != Convert.ToInt32(MAS.Text))
             {
                 this.MAS.Text = modt.ToString();
@@ -3138,10 +3147,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 this.MAS.IsReadOnly = true;
             }
-
-            //MODAT_PPID_Exit
-            GoGheymateUpdator();
-
         }
 
         private void MODAT_PPID_Enter()
@@ -6846,7 +6851,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                 if (!IsDirectFactor)
                 {
-                    var rst = dbms.DoGetDataSQL<_FACT_HEAD_HAV_>("SELECT HEAD_LST.CUST_NO,HEAD_LST.MAS,HEAD_LST.DEPATMAN,HEAD_LST.TICMBAA,HEAD_LST.SHARAYET,HEAD_LST.FNUMCO,HEAD_LST.JAY,MODAT_PPID,PEID,PEPID,HEAD_LST.USER_NAME FROM HEAD_LST WHERE (((HEAD_LST.NUMBER) = " + NUMBER.Text + ") And ((HEAD_LST.TAG) = 2)) GROUP BY TICMBAA,HEAD_LST.CUST_NO,HEAD_LST.MAS,HEAD_LST.FNUMCO,HEAD_LST.SHARAYET,HEAD_LST.JAY,HEAD_LST.DEPATMAN,MODAT_PPID,PEID,PEPID,HEAD_LST.USER_NAME").FirstOrDefault();
+                    var rst = dbms.DoGetDataSQL<_FACT_HEAD_HAV_>("SELECT HEAD_LST.CUST_NO,HEAD_LST.CUST_KIND,HEAD_LST.MAS,HEAD_LST.DEPATMAN,HEAD_LST.TICMBAA,HEAD_LST.SHARAYET,HEAD_LST.FNUMCO,HEAD_LST.JAY,MODAT_PPID,PEID,PEPID,HEAD_LST.USER_NAME FROM HEAD_LST WHERE (((HEAD_LST.NUMBER) = " + NUMBER.Text + ") And ((HEAD_LST.TAG) = 2)) GROUP BY TICMBAA,HEAD_LST.CUST_KIND,HEAD_LST.MAS,HEAD_LST.FNUMCO,HEAD_LST.SHARAYET,HEAD_LST.JAY,HEAD_LST.DEPATMAN,MODAT_PPID,PEID,PEPID,HEAD_LST.USER_NAME, CUST_NO").FirstOrDefault();
 
                     if (rst is not null)
                     {
@@ -6871,6 +6876,15 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                             CUST_NO.SelectedValue = thevalue;
                             CUST_NO.Items.Refresh();
                         }
+                        //مدت
+                        if (string.IsNullOrWhiteSpace(MAS.Text) || MAS.Text == "0")
+                        {
+                            MAS.Text = rst.MAS.ToString();
+                        }
+                        if (rst?.CUST_KIND != null)
+                        {
+                            CUST_KIND.SelectedValue = rst.CUST_KIND; CUST_KIND.Items.Refresh();
+                        }
 
                         MOLAH.Text = Strings.Left(rst.SHARAYET.ToStringNullSafe(), 200); //ملاحظات سربرگ حواله تگ 2 => SHARAYET ====== ملاحظات سربرگ فاکتور با تگ 13 => MOLAH
 
@@ -6882,9 +6896,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         TICMBAA.IsChecked = rst.TICMBAA;
                         DEPATMAN.SelectedValue = rst.DEPATMAN; DEPATMAN.Items.Refresh();
 
-                        MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
+                        //MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
                         MODAT_PPID.SelectedValue = rst.MODAT_PPID; MODAT_PPID.Items.Refresh();
-                        MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
+                        //MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
 
                         PEID.SelectedValue = rst.PEID; PEID.Items.Refresh();
                         PEPID.SelectedValue = rst.PEPID; PEPID.Items.Refresh();
@@ -11529,6 +11543,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         universControl.PopNotifyShowUp($"این گزینه قابل انتخاب نیست : {selectedItem?.PPAME}", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
                     }
                 }
+
+                GetModatValueDays();
 
                 IF_AZAD_THENLOCK();
             }
