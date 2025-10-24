@@ -4478,6 +4478,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void Command116_Click(object sender, RoutedEventArgs e)
         {
+            if ((OKF.IsChecked ?? false) || !Command116.IsEnabled)
+            {
+                return;
+            }
+
             if (NewRecord || INVO_LST_PISH2_DATA.Count == 0)
             {
                 new Msgwin(false, "پیش فاکتور با سطر های خالی را نمیتوان تبدیل کرد !").ShowDialog();
@@ -4861,6 +4866,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     SHARH = "حواله شماره: " + num + " مورخ " + Strings.Format(DATE_N.Text.ToRawTarikh(), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(CUST_NO.SelectedValue.ToString()) + " از پيش فاکتور : " + NUMBER.Text;
                     dbms.DoExecuteSQL("insert into tasks(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO)  values (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.UCurrentUser() + "','" + SHARH + "','" + CUST_NO.SelectedValue + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",2," + num + ",2," + td + "," + Baseknow.USERCOD + " )");
                 }
+
+                OKF.IsChecked = true;
             }
             catch (Exception)
             {
@@ -4877,10 +4884,16 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 new HEAD_LST_HAVL(Convert.ToDouble(num)).ShowDialog();
             }
 
+            this.Close();
         }
 
         private void Command113_Click(object sender, RoutedEventArgs e)
         {
+            if ((OKF.IsChecked ?? false) || !Command113.IsEnabled)
+            {
+                return;
+            }
+
             if (SHARAYET.Text.Length > 7999)
             {
                 new Msgwin(false, "شرایط پیش فاکتور بیش از 8000 کاراکتر است , که این مجاز نیست , آنرا اصلاح کنید").ShowDialog();
@@ -5334,6 +5347,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
                             }
                         }
                     }
+
+                    OKF.IsChecked = true;
+
                     dbms.DoExecuteSQL("INSERT INTO dbo.VISITOR_DTL (NUMBER, TAG, CUST_NO, DARSAD, PURSANT, TOZIH,PORID) SELECT     " + num + ", 2, CUST_NO, DARSAD, PURSANT, TOZIH,PORID FROM dbo.VISITOR_DTL WHERE (NUMBER = " + NUMBER.Text + ") And (TAG = 20)");
                     AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.GENSANADFROOSH(Convert.ToInt64(num), Convert.ToInt64(num), false);
                     new Msgwin(false, "پيش فاكتور تبديل به فاكتور شماره :" + num + "  گرديد").ShowDialog();
@@ -5367,6 +5383,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
                       UP_USER_NAME = CL_HESABDARI.UCurrentUser(),
                       UDATEF = CL_HESABDARI.FARSIDATE()
                   }); //rst.update();
+
+
+                this.Close();
             }
         }
 

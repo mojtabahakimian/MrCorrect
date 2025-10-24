@@ -2760,15 +2760,18 @@ namespace Wins.WinMenus.ANBAR
         {
             if (ANBAR.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
 
-            if (ANBAR.SelectedValue is null)
+            if (ANBAR.SelectedValue == null)
             {
                 e.Handled = true;
                 //universControl.PopNotifyShow("از انبار نمیتواند خالی باشد!", Pop1, Pop1Text1, Pop_Border1);
                 return;
             }
-            ANBARF.ItemsSource = dbms.DoGetDataSQL<HLE_QT>("SELECT TCOD_ANBAR.CODE, TCOD_ANBAR.NAMES, OPANBACCESS.USERCO FROM  dbo.TCOD_ANBAR INNER JOIN  dbo.OPANBACCESS ON dbo.TCOD_ANBAR.CODE = dbo.OPANBACCESS.ANBCO WHERE (OPANBACCESS.USERCO = " + Baseknow.USERCOD + " ) and (TCOD_ANBAR.CODE <> " + ANBAR.SelectedValue + ")  ORDER BY TCOD_ANBAR.CODE").ToList();
-            ANBARF.SelectedValuePath = "CODE";
-            ANBARF.DisplayMemberPath = "NAMES";
+            else
+            {
+                ANBARF.ItemsSource = dbms.DoGetDataSQL<HLE_QT>("SELECT TCOD_ANBAR.CODE, TCOD_ANBAR.NAMES, OPANBACCESS.USERCO FROM  dbo.TCOD_ANBAR INNER JOIN  dbo.OPANBACCESS ON dbo.TCOD_ANBAR.CODE = dbo.OPANBACCESS.ANBCO WHERE (OPANBACCESS.USERCO = " + Baseknow.USERCOD + " ) and (TCOD_ANBAR.CODE <> " + ANBAR.SelectedValue + ")  ORDER BY TCOD_ANBAR.CODE").ToList();
+                ANBARF.SelectedValuePath = "CODE";
+                ANBARF.DisplayMemberPath = "NAMES";
+            }
 
             ANBAR_BeforeUpdate();
         }

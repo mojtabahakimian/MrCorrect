@@ -1902,6 +1902,11 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 e.Handled = true;
                 BTN_DELETE_Click(null, null);
             }
+
+            if (e.Key is Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                DataGridExtension.HandleKeyPress(sender, e, DG_SUB);
+            }
         }
 
 

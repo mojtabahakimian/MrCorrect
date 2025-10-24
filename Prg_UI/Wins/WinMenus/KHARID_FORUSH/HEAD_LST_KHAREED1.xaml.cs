@@ -4790,8 +4790,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (report.GetComponentByName("USERNAME") is StiText stiText) stiText.Text = Baseknow.UUSER;
 
 
-            report.Render(false);
-            report.Show();
+            new WINRPT(report, LABEL_HEADER.Content.ToStringNullSafe()).Show();
         }
         private void Command108_Click(object sender, RoutedEventArgs e)
         {
