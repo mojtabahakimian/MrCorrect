@@ -5608,12 +5608,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.PishFactor.INVOICE_PISH_2_MBA.mrt");
             report.Load(pathreport);
 
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
             report["NUMBER_PARAM"] = NUMBER.Text;
-            ((StiSqlSource)report.Dictionary.DataSources["PISHFactorMBA"]).CommandTimeout = 300;
+            ((StiSqlSource)report.Dictionary.DataSources["PISHFactorMBA"]).CommandTimeout = 900;
 
             #region GroupFooter3_Format
             var SUMMABL = (report.GetComponentByName("Text67") as StiText).Text;

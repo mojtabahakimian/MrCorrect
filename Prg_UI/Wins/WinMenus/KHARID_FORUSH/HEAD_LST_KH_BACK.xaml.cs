@@ -3678,12 +3678,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.INVOICE_KH_BACK.mrt");
             report.Load(pathreport);
 
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
             report["NUMBER_PARAM"] = NUMBER.Text;
-            ((StiSqlSource)report.Dictionary.DataSources["FACTOR_DATA"]).CommandTimeout = 300;
+            ((StiSqlSource)report.Dictionary.DataSources["FACTOR_DATA"]).CommandTimeout = 900;
 
             double JCHK = 0, JAMF = 0, HAZ = 0, NAGHD = 0, VAR = 0, HAV = 0, taf = 0, MBAA = 0;
 
@@ -3888,12 +3888,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.HAVLAH_KHBACK.mrt");
             report.Load(pathreport);
 
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
             report["NUMBER_PARAM"] = NUMBER.Text;
-            ((StiSqlSource)report.Dictionary.DataSources["FACTOR_DATA"]).CommandTimeout = 300;
+            ((StiSqlSource)report.Dictionary.DataSources["FACTOR_DATA"]).CommandTimeout = 900;
 
             (report.GetComponentByName("Text90") as StiText).Text = Baseknow.WIDTH_D; // نام شرکت
             (report.GetComponentByName("Text39") as StiText).Text = Baseknow.NAME; // نام فروشنده

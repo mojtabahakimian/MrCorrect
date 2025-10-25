@@ -949,7 +949,6 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
-
                 case WinNameType.WIN_AMVAL: /* جمع داری اموال */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_AMVAL(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.PRICE_GRP_FORM_GRUHBANDI_GHEYMATI: /* تعریف گروه بندی قیمتی */ CL_LMethods.OpenWindow(OWNERWIN, new PRICE_GRP_FORM(), isModalDialog: false, allowMultipleInstances: false); break;
@@ -1143,7 +1142,7 @@ namespace Functions
                         var report = new StiReport();
                         var pathreport = Assembly.GetEntryAssembly()?.GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.R_TARAZ_ANBARHA.mrt");
                         report.Load(pathreport);
-                        string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+                        string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
                         report.Dictionary.Databases.Clear();
                         report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
                         new WINRPT(report, "گزارش تراز موجودی کل انبار ها").Show();
@@ -1159,10 +1158,10 @@ namespace Functions
                         var report = new StiReport();
                         var pathreport = Assembly.GetEntryAssembly()?.GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.R_DAFTAR_KOL_kh.mrt");
                         report.Load(pathreport);
-                        string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+                        string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
                         report.Dictionary.Databases.Clear();
                         report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
-                        //((StiSqlSource)report.Dictionary.DataSources["KART_KALA"]).CommandTimeout = 300;
+                        //((StiSqlSource)report.Dictionary.DataSources["KART_KALA"]).CommandTimeout = 900;
                         new WINRPT(report, "چاپ خلاصه دفتر کل").Show();
 
                         //report.Render();

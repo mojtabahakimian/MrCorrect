@@ -6896,9 +6896,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         TICMBAA.IsChecked = rst.TICMBAA;
                         DEPATMAN.SelectedValue = rst.DEPATMAN; DEPATMAN.Items.Refresh();
 
-                        //MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
+                        ////MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
                         MODAT_PPID.SelectedValue = rst.MODAT_PPID; MODAT_PPID.Items.Refresh();
-                        //MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
+                        ////MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
 
                         PEID.SelectedValue = rst.PEID; PEID.Items.Refresh();
                         PEPID.SelectedValue = rst.PEPID; PEPID.Items.Refresh();
@@ -10457,12 +10457,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.INVOICE_FROOSH_22.mrt");
             report.Load(pathreport);
 
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
             report["NUMBER_PARAM"] = NUMBER1.Text;
-            ((StiSqlSource)report.Dictionary.DataSources["FACTOR_DATA"]).CommandTimeout = 300;
+            ((StiSqlSource)report.Dictionary.DataSources["FACTOR_DATA"]).CommandTimeout = 900;
 
             #region GroupFooter3_Format
             //SELECT TOP 1 TFSAZMAN FROM dbo.SAZMAN
@@ -10829,12 +10829,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.INVOICE_FROOSH_2_1.mrt");
                 report.Load(pathreport);
 
-                string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+                string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
                 report.Dictionary.Databases.Clear();
                 report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
                 report["NUMBER_PARAM"] = NUMBER1.Text;
-                ((StiSqlSource)report.Dictionary.DataSources["SmallFactor"]).CommandTimeout = 300;
+                ((StiSqlSource)report.Dictionary.DataSources["SmallFactor"]).CommandTimeout = 900;
 
                 #region GroupFooter3_Format
                 if (Baseknow.MAND)
@@ -11128,12 +11128,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.INVOICE_FROOSH_2_MBA.mrt");
             report.Load(pathreport);
 
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
             report["NUMBER_PARAM"] = NUMBER1.Text;
-            ((StiSqlSource)report.Dictionary.DataSources["FactorMBA"]).CommandTimeout = 300;
+            ((StiSqlSource)report.Dictionary.DataSources["FactorMBA"]).CommandTimeout = 900;
 
             #region GroupFooter3_Format
 
@@ -11314,12 +11314,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.INVOICE_FROOSH_2_MBA_22.mrt");
             report.Load(pathreport);
 
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
             report["NUMBER_PARAM"] = NUMBER1.Text;
-            ((StiSqlSource)report.Dictionary.DataSources["FactorMBA"]).CommandTimeout = 300;
+            ((StiSqlSource)report.Dictionary.DataSources["FactorMBA"]).CommandTimeout = 900;
 
             #region GroupFooter3_Format
 
@@ -12021,12 +12021,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.InterInvoice.mrt");
             report.Load(pathreport);
 
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
             report["NUMBER_PARAM"] = NUMBER.Text;
-            ((StiSqlSource)report.Dictionary.DataSources["DataSource1"]).CommandTimeout = 300;
+            ((StiSqlSource)report.Dictionary.DataSources["DataSource1"]).CommandTimeout = 900;
 
             //توضیحات
             if (!string.IsNullOrEmpty(MOLAH.Text) && !string.IsNullOrWhiteSpace(MOLAH.Text))

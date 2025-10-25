@@ -236,7 +236,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.LIST_FROOSH_ANBARS.mrt");
             report.Load(pathreport);
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
@@ -260,7 +260,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.LIST_KHAREED_ANBARS.mrt");
             report.Load(pathreport);
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 

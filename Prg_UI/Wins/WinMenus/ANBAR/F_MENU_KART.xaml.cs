@@ -222,7 +222,7 @@ namespace Wins.WinMenus.ANBAR
             //var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.{THE_RPT_NAME}.mrt");
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.{THE_RPT_NAME}.mrt");
             report.Load(pathreport);
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
@@ -234,7 +234,7 @@ namespace Wins.WinMenus.ANBAR
             report["TADATE"] = TaTarikh;
 
             report["KALACODE"] = KALA.SelectedValue.ToString();
-            ((StiSqlSource)report.Dictionary.DataSources["KART_KALA"]).CommandTimeout = 300;
+            ((StiSqlSource)report.Dictionary.DataSources["KART_KALA"]).CommandTimeout = 900;
 
             var decimalPlaces = Baseknow.DIG.HasValue ? (int)Baseknow.DIG.Value : 2;
 

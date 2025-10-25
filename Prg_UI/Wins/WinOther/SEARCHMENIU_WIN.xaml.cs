@@ -321,8 +321,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "صدور برگه خروج سایر مواد از انبار", WIN_NAME = CL_MenuManager.WinNameType.HAVALE_EXIT_SAYER });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مدیریت ارتباط با مشتری | CRM", WIN_NAME = CL_MenuManager.WinNameType.CRMMAIN });
 
-            //گزارشات خرید فروش
-            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "خلاصه فروش روزانه به تفکیک اشخاص", WIN_NAME = CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_FROOSHDAY });
+            //گزارشات خرید و فروش
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش فروش روزانه کاربران", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_GOZARESH_FROOSH_FK });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش فروش به تفکیک واحد ها", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_GOZARESH_FROOSH });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست جمع فروش کالا ها تفکیک کالا", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_DATE_CFRALL });
@@ -400,7 +399,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "مشخصات سیسیتم", WIN_NAME = CL_MenuManager.WinNameType.WIN_SAZMAN_MOSHAKHASAT });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "درباره تهیه کنندگان", WIN_NAME = CL_MenuManager.WinNameType.WIN_About });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف کاربر جدید", WIN_NAME = CL_MenuManager.WinNameType.USERS });
-            
+
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "جمع داری اموال", WIN_NAME = CL_MenuManager.WinNameType.WIN_AMVAL });
 
             //مدیریت فروش هوشمند

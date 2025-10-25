@@ -23,6 +23,9 @@ using System.Diagnostics;
 using System.Windows.Media;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.SQLMODELS;
+using System.Globalization;
+using System.Reflection;
+using System.Threading;
 
 namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
 {
@@ -81,6 +84,9 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
             InitializeComponent();
 
             this.DataContext = this;
+
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
+            GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
         }
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
