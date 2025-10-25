@@ -40,6 +40,8 @@ using System.Threading;
 using Prg_UI.Wins.WinMenus.CRM;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
 using Prg_UI.Wins.WinMenus.Checkha;
+using static Prg_UI.Functions.CL_LMethods;
+using System.Diagnostics;
 
 namespace Functions
 {
@@ -946,6 +948,8 @@ namespace Functions
         //, bool _IsModalDialog_ = false, bool _AlloMultipleInstances_ = true)
         public static void OpenWinMenu(WinNameType _TYPE_, Window? OWNERWIN, params object[] _PARAMETERS_)
         {
+            Process Prc = ProcLoader.Start();
+
             switch (_TYPE_)
             {
                 //Mojtaba{
@@ -1966,8 +1970,10 @@ namespace Functions
                     break;
 
 
-                default: throw new ArgumentException("Invalid WinNameType");
+                default: ProcLoader.Stop(Prc); throw new ArgumentException("Invalid WinNameType");
             }
+
+            ProcLoader.Stop(Prc);
         }
 
         public static void MenuBaseOnKindOpen(Window Thewindowthis, CL_CCNNMANAGER dbms, int kind, object _NUM_, bool SanadMabnaee = true, bool _isCalledFromAutomasion_ = false)

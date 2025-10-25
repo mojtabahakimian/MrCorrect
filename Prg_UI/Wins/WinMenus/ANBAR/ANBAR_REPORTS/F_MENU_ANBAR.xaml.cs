@@ -360,8 +360,6 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
             TextBox CUTSNO_TEX = (TextBox)KALA.Template.FindName("PART_EditableTextBox", KALA);
             if (CUTSNO_TEX.Text is null || CUTSNO_TEX.Text == "")
             {
-                Msgwin msgwin = new Msgwin(false, "کالا نباید خالی باشد");
-                msgwin.ShowDialog();
                 return;
             }
 
@@ -386,7 +384,7 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
 
         private void OpenReport()
         {
-            
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.R_AK_MOGUDI_ANBAR.mrt");
             report.Load(pathreport);
@@ -428,7 +426,7 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
 
         private void OpenReport2()
         {
-            
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.R_AK_MOGUDI_ANBAR_NO_WHERE.mrt");
             report.Load(pathreport);

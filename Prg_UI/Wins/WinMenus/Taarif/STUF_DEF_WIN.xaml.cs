@@ -1617,8 +1617,9 @@ namespace Wins.WinMenus.Taarif
 
                 if (ROW?.IDD is null) //Insert
                 {
+                    //OUTPUT INSERTED.IDD
                     theidd = TM.SqlQueryCtc<int?>($@"INSERT INTO dbo.STUF_FSK(CODE, ANBAR, MOGODI_A, FI_A, MABL_A, MANDAH_A, VAZ, POSITION, B_SEF, N_SEF, MIN_M, MAX_M)
-                                         OUTPUT INSERTED.IDD
+                                         
                                          VALUES(N'{CODE.Text}',
                                          {ROW.ANBAR},
                                          {ROW.MOGODI_A} ,
@@ -1631,6 +1632,8 @@ namespace Wins.WinMenus.Taarif
                                          {(ROW.N_SEF is null ? "NULL" : ROW.N_SEF)} ,
                                          {(ROW.MIN_M is null ? "NULL" : ROW.MIN_M)} ,
                                          {(ROW.MAX_M is null ? "NULL" : ROW.MAX_M)} )").FirstOrDefault();
+
+                    theidd = TM.SqlQueryCtc<int?>("SELECT SCOPE_IDENTITY()").FirstOrDefault();
                 }
                 else //Update
                 {

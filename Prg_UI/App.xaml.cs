@@ -447,6 +447,12 @@ namespace Prg_UI
                                     CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_KOL_FT4, default);
                                 });
                                 break;
+                            case Key.F12:
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_ADVANC_F12, default);
+                                });
+                                break;
                         }
                     }
                     else if (altPressed)
@@ -465,6 +471,12 @@ namespace Prg_UI
                     {
                         switch (pressedKey)
                         {
+                            case Key.M:
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.SQLSTATEFORM_CRTL_M, default);
+                                });
+                                break;
                             case Key.W:
                                 Application.Current.Dispatcher.Invoke(() =>
                                 {
@@ -522,6 +534,12 @@ namespace Prg_UI
                                     CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, default);
                                 });
                                 break;
+                            case Key.F5:
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, default);
+                                });
+                                break;
                             case Key.F6:
                                 Application.Current.Dispatcher.Invoke(() =>
                                 {
@@ -540,10 +558,10 @@ namespace Prg_UI
                                     CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL_TAF, default);
                                 });
                                 break;
-                            case Key.F5:
+                            case Key.F12:
                                 Application.Current.Dispatcher.Invoke(() =>
                                 {
-                                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, default);
+                                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_F12, default);
                                 });
                                 break;
                             default: break;

@@ -225,58 +225,116 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         private void FilterBySelection_Click(object sender, RoutedEventArgs e)
         {
             var selectedText = GetSelectedText();
-            var (columnName, filterValue) = GetSelectedCellDetails(); // Get the details of the selected cell
+            var (columnName, filterValue) = GetSelectedCellDetails();
 
+            if (string.IsNullOrEmpty(columnName))
+            {
+                universControl.PopNotifyShow("لطفاً یک سلول انتخاب کنید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            // حالت 1: بخشی از متن انتخاب شده است
             if (!string.IsNullOrEmpty(selectedText))
             {
-                // Add the Contains filter to the filter service (inclusion filter)
-                filterService.AddFilter(columnName, selectedText, isExclusion: false); // False means it's an inclusion filter
-                ActiveFilters.Add($"{columnName} Contains {selectedText}");
-                // Apply the cumulative filter to the data grid
+                // فیلتر Contains
+                filterService.AddFilter(columnName, selectedText, isExclusion: false, isExactMatch: false);
+                ActiveFilters.Add($"{columnName} Contains \"{selectedText}\"");
+                ApplyCumulativeFilter();
+                return;
+            }
+
+            // حالت 2: کل سلول انتخاب شده است
+            if (filterValue != null)
+            {
+                // فیلتر Exact Match
+                filterService.AddFilter(columnName, filterValue, isExclusion: false, isExactMatch: true);
+
+                string displayValue = FormatValueForDisplay(filterValue);
+                ActiveFilters.Add($"{columnName} = {displayValue}");
+
                 ApplyCumulativeFilter();
             }
             else
             {
-                if (filterValue != null)
-                {
-                    // Add the filter to the filter service
-                    filterService.AddFilter(columnName, filterValue);
-                    // Add the filter to the list of active filters
-                    ActiveFilters.Add($"{columnName} = {filterValue}");
-                    // Apply the cumulative filter to the data grid
-                    ApplyCumulativeFilter();
-                }
+                // فیلتر برای null values
+                filterService.AddFilter(columnName, null, isExclusion: false, isExactMatch: true);
+                ActiveFilters.Add($"{columnName} = NULL");
+                ApplyCumulativeFilter();
             }
         }
         private void FilterExcludingSelection_Click(object sender, RoutedEventArgs e)
         {
             var selectedText = GetSelectedText();
+            var (columnName, filterValue) = GetSelectedCellDetails();
+
+            // اگر ستون یا مقدار معتبر نیست، خروج
+            if (string.IsNullOrEmpty(columnName))
+            {
+                universControl.PopNotifyShow("لطفاً یک سلول انتخاب کنید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            // حالت 1: بخشی از متن انتخاب شده است (partial selection)
             if (!string.IsNullOrEmpty(selectedText))
             {
-                var (columnName, filterValue) = GetSelectedCellDetails(); // Get the details of the selected cell
-                if (filterValue != null)
-                {
-                    // Add the Not Contains filter to the filter service (exclusion filter)
-                    filterService.AddFilter(columnName, selectedText, isExclusion: true); // True means it's an exclusion filter
-                                                                                          // Add the exclusion filter to the list of active filters
-                    ActiveFilters.Add($"{columnName} Does Not Contain {selectedText}");
-                    // Apply the cumulative filter to the data grid
-                    ApplyCumulativeFilter();
-                }
+                // فیلتر "Does Not Contain" - برای متن
+                filterService.AddFilter(columnName, selectedText, isExclusion: true, isExactMatch: false);
+                ActiveFilters.Add($"{columnName} Does Not Contain \"{selectedText}\"");
+                ApplyCumulativeFilter();
+                return;
+            }
+
+            // حالت 2: کل سلول انتخاب شده است (exact value)
+            if (filterValue != null)
+            {
+                // فیلتر Exclusion با Exact Match - برای مقدار دقیق
+                filterService.AddFilter(columnName, filterValue, isExclusion: true, isExactMatch: true);
+
+                // نمایش بهتر در لیست فیلترها
+                string displayValue = FormatValueForDisplay(filterValue);
+                ActiveFilters.Add($"{columnName} != {displayValue}");
+
+                ApplyCumulativeFilter();
             }
             else
             {
-                var (columnName, filterValue) = GetSelectedCellDetails(); // Get the details of the selected cell
-                if (filterValue != null)
+                // اگر مقدار null است
+                filterService.AddFilter(columnName, null, isExclusion: true, isExactMatch: true);
+                ActiveFilters.Add($"{columnName} != NULL");
+                ApplyCumulativeFilter();
+            }
+        }
+        private string FormatValueForDisplay(object value)
+        {
+            if (value == null)
+                return "NULL";
+
+            // برای مقادیر عددی، فرمت هزارگان اعمال می‌شود
+            if (value is double || value is decimal || value is float)
+            {
+                try
                 {
-                    // Add the exclusion filter to the filter service
-                    filterService.AddFilter(columnName, filterValue, isExclusion: true);
-                    // Add the filter to the list of active filters
-                    ActiveFilters.Add($"{columnName} != {filterValue}");
-                    // Apply the cumulative filter to the data grid
-                    ApplyCumulativeFilter();
+                    return Convert.ToDecimal(value).ToString("N" + DIG, System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch
+                {
+                    return value.ToString();
                 }
             }
+
+            if (value is int || value is long || value is short || value is byte)
+            {
+                try
+                {
+                    return Convert.ToInt64(value).ToString("N0", System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch
+                {
+                    return value.ToString();
+                }
+            }
+
+            return value.ToString();
         }
 
         private void RemoveFilterSort_Click(object sender, RoutedEventArgs e) // Event handler to remove all filters and sorting

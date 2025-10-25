@@ -1490,6 +1490,7 @@ namespace Wins.WinMenus.ANBAR
 
         private void Command22_Copy_Click(object sender, RoutedEventArgs e)
         {
+           
             if (!IsNull(this.GRD_HES.SelectedValue))
             {
                 SANAD();
@@ -1502,7 +1503,12 @@ namespace Wins.WinMenus.ANBAR
         }
         private void SANAD()
         {
-            AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.GENSANADANBARGARD(Convert.ToInt64(GRD_NUM.Text), Convert.ToInt64(GRD_NUM.Text), false);
+            var (SanadNumber, IsSuccessy) = AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.GENSANADANBARGARD(Convert.ToInt64(GRD_NUM.Text), Convert.ToInt64(GRD_NUM.Text), false);
+
+            if (SanadNumber != null)
+            {
+                N_S.Text = SanadNumber.ToString();
+            }
         }
 
 

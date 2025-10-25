@@ -222,7 +222,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست موجودی کل انبار", WIN_NAME = CL_MenuManager.WinNameType.MOGUDI_ANBARHA_LIST });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست تراز موجودی کل انبار ها", WIN_NAME = CL_MenuManager.WinNameType.C_TARAZ_ANBAR_KHAS });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش تراز موجودی کل انبار ها", WIN_NAME = CL_MenuManager.WinNameType.R_TARAZ_ANBARHA });
-            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارشات ساخته شده توسط کاربران ", WIN_NAME = CL_MenuManager.WinNameType.SQLSTATEFORM_CRTL_M });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارشات ساخته شده توسط کاربران Ctrl M ", WIN_NAME = CL_MenuManager.WinNameType.SQLSTATEFORM_CRTL_M });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "جستجو در گردش کالا های پیشرفته | F12 پیشرفته ", WIN_NAME = CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_ADVANC_F12 });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "جستجو در گردش کالا ها | F12 عادی ", WIN_NAME = CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_F12 });
 
