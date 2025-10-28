@@ -641,7 +641,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
 
             // HES field
-            var hesTextBox = FindName("HES") as TextBox;
+            var hesTextBox = FindName("hes") as TextBox;
             var hesOp = FindName("hesB") as ComboBox;
             if (!string.IsNullOrEmpty(hesTextBox?.Text))
             {

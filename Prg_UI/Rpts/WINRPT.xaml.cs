@@ -95,12 +95,14 @@ namespace Rpts
             {
                 pathreport = Assembly.GetEntryAssembly()?.GetManifestResourceStream($"Prg_UI.Rpts.{ReportAssebmlyPath}.mrt");
                 MyReport.Load(pathreport);
-                string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+                string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
                 MyReport.Dictionary.Databases.Clear();
                 MyReport.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
                 //report["ANBAR"] = ANBAR.SelectedValue.ToString();
-                //((StiSqlSource)report.Dictionary.DataSources["KART_KALA"]).CommandTimeout = 300;
+                //((StiSqlSource)report.Dictionary.DataSources["KART_KALA"]).CommandTimeout = 900;
+
+              
             }
             else //Already Report Passed
             {
@@ -163,6 +165,14 @@ namespace Rpts
             if (baseDelayMilliseconds < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(baseDelayMilliseconds));
+            }
+
+            foreach (StiDataSource dataSource in MyReport.Dictionary.DataSources)
+            {
+                if (dataSource is StiSqlSource sqlSource)
+                {
+                    sqlSource.CommandTimeout = 900;
+                }
             }
 
             var attempt = 0;

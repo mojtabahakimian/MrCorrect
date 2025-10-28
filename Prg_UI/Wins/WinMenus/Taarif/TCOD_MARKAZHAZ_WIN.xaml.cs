@@ -329,7 +329,7 @@ namespace Wins.WinMenus.Taarif
 
             if (e.Column.SortMemberPath == "MHAZ_NO")
             {
-                if (string.IsNullOrEmpty(CURRENT_ROW_ITEMS?.MHAZ_NO.ToStringNullSafe()))
+                if (string.IsNullOrEmpty(ENTERED_VALUE_ROW.ToStringNullSafe()))
                 {
                     universControl.PopNotifyShow("کد نمی تواند خالی باشد !", Pop1, Pop1Text1, Pop_Border1);
                     CURRENT_ROW_ITEMS.MHAZ_NO = WAS_ROW_ITEM?.MHAZ_NO;
@@ -339,7 +339,7 @@ namespace Wins.WinMenus.Taarif
 
             if (e.Column.SortMemberPath == "MHAZNAME")
             {
-                if (string.IsNullOrEmpty(CURRENT_ROW_ITEMS?.MHAZNAME.ToStringNullSafe()))
+                if (string.IsNullOrEmpty(ENTERED_VALUE_ROW.ToStringNullSafe()))
                 {
                     universControl.PopNotifyShow("نام نمی تواند خالی باشد !", Pop1, Pop1Text1, Pop_Border1);
                     CURRENT_ROW_ITEMS.MHAZNAME = WAS_ROW_ITEM?.MHAZNAME;
@@ -412,7 +412,7 @@ namespace Wins.WinMenus.Taarif
                 new Msgwin(false, "خطا در انجام عملیات حذف!").ShowDialog(); return;
             }
 
-            universControl.PopNotifyShow("اطلاعات با موفقیت ذخیره شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+            universControl.PopNotifyShow("اطلاعات با موفقیت ذخیره شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C", 1);
         }
         private void ReGetData(bool GOTOLAST)
         {
@@ -487,7 +487,7 @@ namespace Wins.WinMenus.Taarif
         }
         private void TCOD_MARKAZHAZ_SUB_CANCEL_EDIT(DataGridEditingUnit? _RC_ = null)
         {
-            TCOD_MARKAZHAZ_SUB.Dispatcher.InvokeAsync(() =>
+            TCOD_MARKAZHAZ_SUB.Dispatcher.Invoke(() =>
             {
                 TCOD_MARKAZHAZ_SUB.CellEditEnding -= TCOD_MARKAZHAZ_SUB_CellEditEnding;
                 TCOD_MARKAZHAZ_SUB.RowEditEnding -= TCOD_MARKAZHAZ_SUB_RowEditEnding;

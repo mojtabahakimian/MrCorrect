@@ -956,12 +956,12 @@ namespace Wins.WinMenus.Checkha
                 {
                     report.Load(pathreport);
 
-                    string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+                    string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
                     report.Dictionary.Databases.Clear();
                     report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
                     report["DATE_PARAM"] = CurrentRow.DATE;
-                    ((StiSqlSource)report.Dictionary.DataSources["DataSource1"]).CommandTimeout = 300;
+                    ((StiSqlSource)report.Dictionary.DataSources["DataSource1"]).CommandTimeout = 900;
 
                     if (report.GetComponentByName("WIDTH_D") is StiText stiText) stiText.Text = Baseknow.WIDTH_D; // نام شرکت
                     //report.Render();

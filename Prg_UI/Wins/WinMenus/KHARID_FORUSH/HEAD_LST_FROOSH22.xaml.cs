@@ -1948,9 +1948,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             //نحوه پرداخت و مدت
             //MODAT_PPID.ItemsSource = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO UNION SELECT 0, 'آزاد', 0").ToList();
-            MODAT_PPID.ItemsSource = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO").ToList();
-            MODAT_PPID.DisplayMemberPath = "PPAME";
-            MODAT_PPID.SelectedValuePath = "PPID";
+            GET_MODAT_PPID_SOURCE();
 
             //اعلامیه قیمت
             PEPID.ItemsSource = dbms.DoGetDataSQL<PRICELIST_CSHARP>("SELECT PEPID, PEPNAME, PEPDATE, PEPDEPART FROM PRICE_ELAMIE ORDER BY PEPNAME DESC").ToList();
@@ -2082,6 +2080,13 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             #endregion
 
 
+        }
+
+        private void GET_MODAT_PPID_SOURCE()
+        {
+            MODAT_PPID.ItemsSource = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO").ToList();
+            MODAT_PPID.DisplayMemberPath = "PPAME";
+            MODAT_PPID.SelectedValuePath = "PPID";
         }
 
         private void GetHavaleh()
@@ -3147,6 +3152,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 this.MAS.IsReadOnly = true;
             }
+
+            IF_AZAD_THENLOCK();
         }
 
         private void MODAT_PPID_Enter()
@@ -3162,69 +3169,62 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             // ۲. بررسی اینکه آیا DEPARTMENT انتخاب شده یا نه
             if (DEPATMAN.SelectedItem == null)
             {
-                universControl.PopNotifyShow(
-                    "واحد نميتواند خالي باشد",
-                    Pop1, Pop1Text1, Pop_Border1
-                );
+                universControl.PopNotifyShow("واحد نميتواند خالي باشد", Pop1, Pop1Text1, Pop_Border1);
                 return;
             }
 
             string tarikhRaw = DATE_N.Text.ToRawTarikh();
             if (!long.TryParse(tarikhRaw, out long tarikhValue))
             {
-                universControl.PopNotifyShow(
-                    "تاریخ نمی‌تواند خالی باشد",
-                    Pop1, Pop1Text1, Pop_Border1
-                );
+                universControl.PopNotifyShow("تاریخ نمی‌تواند خالی باشد", Pop1, Pop1Text1, Pop_Border1);
                 return;
             }
 
-            // ۳. گرفتن PEID آخرین اطلاعیه (براساس تاریخ فاکتور و دپارتمان)
-            string tarikh = DATE_N.Text.ToRawTarikh();
-            int departId = Convert.ToInt32(DEPATMAN.SelectedValue);
-            string sqlGetPEID =
-                "SELECT TOP (1) PEID " +
-                "FROM dbo.PRICE_ELAMIETF " +
-                $"WHERE (PEDATE <= {tarikh}) AND (PEPDEPART = {departId}) " +
-                "ORDER BY PEID DESC";
-
-            int? lastPEID = dbms.DoGetDataSQL<int?>(sqlGetPEID).FirstOrDefault();
-
             // ۴. واکشی لیست فیلترشده از PRICE_PAYNO براساس lastPEID
             List<PRICE_PAYNO_MODATP> filteredList;
-            if (lastPEID != null)
+            if (PEID.SelectedValue != null)
             {
-                string sqlFiltered =
-                    "SELECT P.PPID, P.PPAME, P.MODAT " +
-                    "FROM PRICE_PAYNO P " +
-                    "INNER JOIN PRICE_ELAMIETF_DTL D ON P.PPID = D.PPID " +
-                    $"WHERE D.PEID = {lastPEID} " +
-                    "UNION " +
-                    "SELECT 0, 'آزاد', 0";
-
-                filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>(sqlFiltered).ToList();
+                filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT     PRICE_PAYNO.PPID, PRICE_PAYNO.PPAME, PRICE_PAYNO.MODAT FROM         PRICE_PAYNO INNER JOIN   PRICE_ELAMIETF_DTL ON PRICE_PAYNO.PPID = PRICE_ELAMIETF_DTL.PPID  WHERE     (PRICE_ELAMIETF_DTL.PEID = " + this.PEID.SelectedValue + ")  union  SELECT 0, 'آزاد', 0").ToList();
             }
             else
             {
-                if (PEID.SelectedValue != null)
+                // ۳. گرفتن PEID آخرین اطلاعیه (براساس تاریخ فاکتور و دپارتمان)
+                string tarikh = DATE_N.Text.ToRawTarikh();
+                int departId = Convert.ToInt32(DEPATMAN.SelectedValue);
+                string sqlGetPEID =
+                    "SELECT TOP (1) PEID " +
+                    "FROM dbo.PRICE_ELAMIETF " +
+                    $"WHERE (PEDATE <= {tarikh}) AND (PEPDEPART = {departId}) " +
+                    "ORDER BY PEID DESC";
+
+                int? lastPEID = dbms.DoGetDataSQL<int?>(sqlGetPEID).FirstOrDefault();
+
+                if (lastPEID != null)
                 {
-                    filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT     PRICE_PAYNO.PPID, PRICE_PAYNO.PPAME, PRICE_PAYNO.MODAT FROM         PRICE_PAYNO INNER JOIN   PRICE_ELAMIETF_DTL ON PRICE_PAYNO.PPID = PRICE_ELAMIETF_DTL.PPID  WHERE     (PRICE_ELAMIETF_DTL.PEID = " + this.PEID.SelectedValue + ")  union  SELECT 0, 'آزاد', 0").ToList();
+                    string sqlFiltered =
+                        "SELECT P.PPID, P.PPAME, P.MODAT " +
+                        "FROM PRICE_PAYNO P " +
+                        "INNER JOIN PRICE_ELAMIETF_DTL D ON P.PPID = D.PPID " +
+                        $"WHERE D.PEID = {lastPEID} " +
+                        "UNION " +
+                        "SELECT 0, 'آزاد', 0";
+
+                    filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>(sqlFiltered).ToList();
                 }
                 else
                 {
-                    filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO").ToList();
-                    return;
+                    filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT     PRICE_PAYNO.PPID, PRICE_PAYNO.PPAME, PRICE_PAYNO.MODAT FROM         PRICE_PAYNO INNER JOIN   PRICE_ELAMIETF_DTL ON PRICE_PAYNO.PPID = PRICE_ELAMIETF_DTL.PPID  WHERE     (PRICE_ELAMIETF_DTL.PEID = " + _navigationManager.CurrentRecord.PEID + ")  union  SELECT 0, 'آزاد', 0").ToList();
                 }
+                ////filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO").ToList();
+                return;
             }
 
             // ۵. اگر مقدار ذخیره‌شده (currentSelectedPPID) جزو filteredList نبود:
             if (currentSelectedPPID > -1 && !filteredList.Any(p => p.PPID == currentSelectedPPID))
             {
                 // ۵.۱ واکشی رکورد ذخیره‌شده از جدول اصلی (Full List)
-                string sqlGetSaved =
-                    $"SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO WHERE PPID = {currentSelectedPPID}";
-                PRICE_PAYNO_MODATP savedItem =
-                    dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>(sqlGetSaved).FirstOrDefault();
+                string sqlGetSaved = $"SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO WHERE PPID = {currentSelectedPPID}";
+                PRICE_PAYNO_MODATP savedItem = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>(sqlGetSaved).FirstOrDefault();
 
                 // ۵.۲ اگر آن رکورد اصلاً در جدول اصلی هم وجود داشت، به انتهای filteredList اضافه کن
                 if (savedItem != null)
@@ -3258,6 +3258,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
         }
+
+
 
         private void TICMBAA_Click(object sender, RoutedEventArgs e)
         {
@@ -6876,6 +6878,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                             CUST_NO.SelectedValue = thevalue;
                             CUST_NO.Items.Refresh();
                         }
+
+                        PEID.SelectedValue = rst.PEID; PEID.Items.Refresh();
+                        PEPID.SelectedValue = rst.PEPID; PEPID.Items.Refresh();
+
+                        MODAT_PPID_Enter();
+
                         //مدت
                         if (string.IsNullOrWhiteSpace(MAS.Text) || MAS.Text == "0")
                         {
@@ -6896,12 +6904,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         TICMBAA.IsChecked = rst.TICMBAA;
                         DEPATMAN.SelectedValue = rst.DEPATMAN; DEPATMAN.Items.Refresh();
 
-                        //MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
+                        ////MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
+                        MODAT_PPID.SelectedValue = null;
                         MODAT_PPID.SelectedValue = rst.MODAT_PPID; MODAT_PPID.Items.Refresh();
-                        //MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
+                        //GetModatValueDays();
+                        ////MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
 
-                        PEID.SelectedValue = rst.PEID; PEID.Items.Refresh();
-                        PEPID.SelectedValue = rst.PEPID; PEPID.Items.Refresh();
                         USER_NAME.Text = rst.USER_NAME; //نام کابری از حواله گرفته میشود در فاکتور با حواله یعنی غیر مستقیم
                         CL_HESABDARI.LOGFACT(Convert.ToDouble(NUMBER.Text), 13, Convert.ToDouble(NUMBER1.Text), "UPDATEFACTOR");
                     }
@@ -7050,7 +7058,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 additionalInfo: $@"{this.GetType().Name} , EXE PATH : {System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}");
 
             //if (IsDirectFactor && INVO_LST_sub.Items.Count > 0 && INVO_LST_sub.SelectedItem != null)
-            if (FACTOR22_INVO_DATA.Count > 0)
+            if (IsDirectFactor && FACTOR22_INVO_DATA.Count > 0)
             {
                 if (INVO_LST_sub.SelectedItems.Count > 0 && !(INVO_LST_sub.SelectedItems is null))
                 {
@@ -7127,6 +7135,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
             else
             {
+                Msgwin msgwin = new Msgwin(true, "آیا مایل به حذف هستید ؟"); msgwin.ShowDialog();
+                if (msgwin.DialogResult != true)
+                {
+                    return;
+                }
+
                 if (!string.IsNullOrEmpty(NUMBER.Text) && NUMBER.Text != "0" && !string.IsNullOrEmpty(NUMBER1.Text) && NUMBER1.Text != "0")
                 {
                     try
@@ -9665,6 +9679,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         {
                             item.CUST_NO_NAME = "مشتری یافت نشد";
                         }
+                        if (item.DARSAD != null)
+                        {
+                            item.DARSAD = Math.Round((double)item.DARSAD, 2);
+                        }
+
                         SAYER_VISITOR_DATA.Add(item);
                     }
                 }
@@ -9821,6 +9840,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     if (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text) + Convert.ToDouble(MBAA.Text) != 0)
                     {
                         CURRENT_ROW_VISITOR.DARSAD = CURRENT_ROW_VISITOR.PURSANT / (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * 100;
+
+                        CURRENT_ROW_VISITOR.DARSAD = Math.Round((double)CURRENT_ROW_VISITOR.DARSAD, 2);
                     }
                     else
                     {
@@ -10065,6 +10086,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         if (MBK > 0L & prs > 0L)
                         {
                             FINAL_CROW_ITEM.DARSAD = FINAL_CROW_ITEM.PURSANT / MBK * 100;
+                            FINAL_CROW_ITEM.DARSAD = Math.Round((double)FINAL_CROW_ITEM.DARSAD, 2);
                         }
                         else
                         {
@@ -10077,6 +10099,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     if (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text) + Convert.ToDouble(MBAA.Text) != 0)
                     {
                         FINAL_CROW_ITEM.DARSAD = FINAL_CROW_ITEM.PURSANT / (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * 100;
+                        FINAL_CROW_ITEM.DARSAD = Math.Round((double)FINAL_CROW_ITEM.DARSAD, 2);
                     }
                     else
                     {
@@ -10457,12 +10480,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.INVOICE_FROOSH_22.mrt");
             report.Load(pathreport);
 
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
             report["NUMBER_PARAM"] = NUMBER1.Text;
-            ((StiSqlSource)report.Dictionary.DataSources["FACTOR_DATA"]).CommandTimeout = 300;
+            ((StiSqlSource)report.Dictionary.DataSources["FACTOR_DATA"]).CommandTimeout = 900;
 
             #region GroupFooter3_Format
             //SELECT TOP 1 TFSAZMAN FROM dbo.SAZMAN
@@ -10829,12 +10852,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.INVOICE_FROOSH_2_1.mrt");
                 report.Load(pathreport);
 
-                string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+                string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
                 report.Dictionary.Databases.Clear();
                 report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
                 report["NUMBER_PARAM"] = NUMBER1.Text;
-                ((StiSqlSource)report.Dictionary.DataSources["SmallFactor"]).CommandTimeout = 300;
+                ((StiSqlSource)report.Dictionary.DataSources["SmallFactor"]).CommandTimeout = 900;
 
                 #region GroupFooter3_Format
                 if (Baseknow.MAND)
@@ -11030,7 +11053,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 report.Dictionary.Variables.Add("MABL_TO_WORD", Convert.ToInt64(jamf + HAZ + MBA - taf));
                 //this.HR.CAPTION = ALPHANUM(jamf + HAZ + MBA - taf) + " " + "ريال";
 
-                (report.GetComponentByName("Label224") as StiText).Text = Baseknow.ARSESH + "%ماليات و عوارض:";
+                (report.GetComponentByName("Label224") as StiText).Text = "%ماليات و عوارض:";
                 if (Baseknow.TFCODE_E != "" && !(IsNull(Baseknow.TFCODE_E)))
                 {
                     (report.GetComponentByName("Label179") as StiText).Text = Baseknow.TFCODE_E;
@@ -11128,12 +11151,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.INVOICE_FROOSH_2_MBA.mrt");
             report.Load(pathreport);
 
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
             report["NUMBER_PARAM"] = NUMBER1.Text;
-            ((StiSqlSource)report.Dictionary.DataSources["FactorMBA"]).CommandTimeout = 300;
+            ((StiSqlSource)report.Dictionary.DataSources["FactorMBA"]).CommandTimeout = 900;
 
             #region GroupFooter3_Format
 
@@ -11314,12 +11337,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.INVOICE_FROOSH_2_MBA_22.mrt");
             report.Load(pathreport);
 
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
             report["NUMBER_PARAM"] = NUMBER1.Text;
-            ((StiSqlSource)report.Dictionary.DataSources["FactorMBA"]).CommandTimeout = 300;
+            ((StiSqlSource)report.Dictionary.DataSources["FactorMBA"]).CommandTimeout = 900;
 
             #region GroupFooter3_Format
 
@@ -11530,12 +11553,15 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     {
                         MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
 
-                        e.Handled = true;
-
-                        if (e.RemovedItems.Count > 0)
+                        if (e != null)
                         {
-                            var previousItem = e.RemovedItems[0] as PRICE_PAYNO_MODATP;
-                            MODAT_PPID.SelectedItem = previousItem;
+                            e.Handled = true;
+
+                            if (e.RemovedItems.Count > 0)
+                            {
+                                var previousItem = e.RemovedItems[0] as PRICE_PAYNO_MODATP;
+                                MODAT_PPID.SelectedItem = previousItem;
+                            }
                         }
 
                         MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
@@ -11545,8 +11571,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 }
 
                 GetModatValueDays();
-
-                IF_AZAD_THENLOCK();
             }
         }
 
@@ -11938,6 +11962,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 {
                     ReGetdata();
 
+                    if (!string.IsNullOrWhiteSpace(NUMBER.Text) && NUMBER.Text != "0")
+                    {
+                        var havaleDate = dbms.DoGetDataSQL<string?>($"SELECT TOP 1 DATE_N FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = 2").FirstOrDefault();
+                        if (!string.IsNullOrWhiteSpace(havaleDate))
+                        {
+                            DATE_N.Text = havaleDate;
+                            DATE_N_TAG = DATE_N.Text.ToRawTarikh();
+                        }
+                    }
+
                     BUTTON_SAVE_HAVALE.IsEnabled = true;
                 }
 
@@ -12021,12 +12055,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.InterInvoice.mrt");
             report.Load(pathreport);
 
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
             report["NUMBER_PARAM"] = NUMBER.Text;
-            ((StiSqlSource)report.Dictionary.DataSources["DataSource1"]).CommandTimeout = 300;
+            ((StiSqlSource)report.Dictionary.DataSources["DataSource1"]).CommandTimeout = 900;
 
             //توضیحات
             if (!string.IsNullOrEmpty(MOLAH.Text) && !string.IsNullOrWhiteSpace(MOLAH.Text))

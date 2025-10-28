@@ -837,7 +837,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Visitory.Visit_gol_dtl_REP_print_grp.mrt");
             report.Load(pathreport);
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 

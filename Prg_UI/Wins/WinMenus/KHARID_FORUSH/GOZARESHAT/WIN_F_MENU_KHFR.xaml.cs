@@ -99,20 +99,21 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
-            I_AM_WIN_F_MENU_KHFR = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
+            var WINHANDLE = new WindowInteropHelper(this).Handle;
+            I_AM_WIN_F_MENU_KHFR = CL_LMethods.GetTheWindow(WINHANDLE);
 
             switch (OpenArgs)
             {
                 //case "F":
                 case "FROOSHDAY":
                     WIN_HEADER_NAME.Content = "خلاصه فروش روزانه به تفكيك اشخاص";
-                    CL_HESABDARI.SETSECURITY(this.GetType().Name, "R_FROOSH_DAYLY", new WindowInteropHelper(this).Handle, this.GetType().Name);
+                    CL_HESABDARI.SETSECURITY(this.GetType().Name, "FROOSHDAY", WINHANDLE, this.GetType().Name);
                     break;
 
                 //case "K":
                 case "FKHAREDAY":
                     WIN_HEADER_NAME.Content = "خلاصه خـريد روزانه به تفكيك اشخاص";
-                    CL_HESABDARI.SETSECURITY(this.GetType().Name, "R_KHARED_DAYLY", new WindowInteropHelper(this).Handle, this.GetType().Name);
+                    CL_HESABDARI.SETSECURITY(this.GetType().Name, "FKHAREDAY", WINHANDLE, this.GetType().Name);
                     break;
 
                 default: break;
@@ -162,7 +163,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(HMOIN, dbms);
             if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
             {
-                universControl.PopNotifyShow($"حساب خالی است", Pop1, Pop1Text1, Pop_Border1);
+                //universControl.PopNotifyShow($"حساب خالی است", Pop1, Pop1Text1, Pop_Border1);
             }
 
             if (HMOIN.SelectedValue is not null)
@@ -237,13 +238,13 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                         var report = new StiReport();
                         var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.R_FROOSH_DAYLY_1.mrt");
                         report.Load(pathreport);
-                        string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+                        string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
                         report.Dictionary.Databases.Clear();
                         report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
                         report["AZDATE"] = DT1.Text.ToRawTarikh();
                         report["TADATE"] = DT2.Text.ToRawTarikh();
-                        ((StiSqlSource)report.Dictionary.DataSources["Q_FROOSH_DAYLY1"]).CommandTimeout = 300;
+                        ((StiSqlSource)report.Dictionary.DataSources["Q_FROOSH_DAYLY1"]).CommandTimeout = 900;
 
                         //report.Render();
                         //report.Show();
@@ -266,13 +267,13 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                         var report = new StiReport();
                         var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.R_KHARED_DAYLY_1.mrt");
                         report.Load(pathreport);
-                        string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+                        string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
                         report.Dictionary.Databases.Clear();
                         report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
                         report["AZDATE"] = DT1.Text.ToRawTarikh();
                         report["TADATE"] = DT2.Text.ToRawTarikh();
-                        ((StiSqlSource)report.Dictionary.DataSources["q_khreed_dayly"]).CommandTimeout = 300;
+                        ((StiSqlSource)report.Dictionary.DataSources["q_khreed_dayly"]).CommandTimeout = 900;
 
                         //report.Render();
                         //report.Show();
@@ -310,7 +311,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                             var report = new StiReport();
                             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.INVOICE_FROOSH_3GRP3.mrt");
                             report.Load(pathreport);
-                            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+                            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
                             report.Dictionary.Databases.Clear();
                             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
@@ -334,7 +335,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                             (report.GetComponentByName("F_ADDRESS_N") as StiText).Text = Baseknow.TFADDRESS.ToString();
                             (report.GetComponentByName("F_TEL_N") as StiText).Text = Baseknow.TFTEL.ToString();
 
-                            //((StiSqlSource)report.Dictionary.DataSources["q_khreed_dayly"]).CommandTimeout = 300;
+                            //((StiSqlSource)report.Dictionary.DataSources["q_khreed_dayly"]).CommandTimeout = 900;
 
                             //report.Render();
                             //report.Show();
@@ -394,7 +395,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.Factors.LIST_INVOICE_KHARED.mrt");
             report.Load(pathreport);
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
@@ -411,7 +412,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
             (report.GetComponentByName("SAL_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
 
-            //((StiSqlSource)report.Dictionary.DataSources["q_khreed_dayly"]).CommandTimeout = 300;
+            //((StiSqlSource)report.Dictionary.DataSources["q_khreed_dayly"]).CommandTimeout = 900;
 
             //report.Render();
             //report.Show();

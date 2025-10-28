@@ -38,15 +38,15 @@
 
 
         <Button x:Name="Command5" Width="81" VerticalAlignment="Bottom" TabIndex="5" Margin="0,0,0,27" Height="37" HorizontalAlignment="Center" FontSize="12" Foreground="#DDFFFFFF" Content="تایید" Click="Commnd5_Click"/>
-        <Label Width="auto" VerticalAlignment="Top" Margin="0,69,29,0" HorizontalAlignment="Right" FlowDirection="RightToLeft" Content="انبار :"/>
-        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="99991230" Height="26" Margin="0,147,63,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Right" Width="88" TabIndex="4" />
-        <Label Content="تا تاریخ:" FlowDirection="RightToLeft" HorizontalAlignment="Right" Margin="0,144,12,0" VerticalAlignment="Top" Width="auto"/>
+        <Label Width="auto" VerticalAlignment="Top" Margin="0,65,29,0" HorizontalAlignment="Right" FlowDirection="RightToLeft" Content="انبار :"/>
+        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="99991230" Height="34" Margin="0,149,63,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Right" Width="88" TabIndex="4" />
+        <Label Content="تا تاریخ:" FlowDirection="RightToLeft" HorizontalAlignment="Right" Margin="0,146,12,0" VerticalAlignment="Top" Width="auto"/>
         <ComboBox x:Name="CANBAR"    FlowDirection="RightToLeft"
             Style="{StaticResource FuzzyOutComboBox}"  
             IsEditable="True"
             materialDesign:HintAssist.Hint="کد انبار"
             IsSynchronizedWithCurrentItem="True"
-            Margin="0,71,63,0" Padding="7,0,10,0" Height="27"  TabIndex="1" VerticalAlignment="Top" HorizontalAlignment="Right" Width="137" PreviewLostKeyboardFocus="CANBAR_PreviewLostKeyboardFocus" IsTabStop="True">
+            Margin="0,67,63,0" Padding="7,0,10,0" Height="34"  TabIndex="1" VerticalAlignment="Top" HorizontalAlignment="Right" Width="137" PreviewLostKeyboardFocus="CANBAR_PreviewLostKeyboardFocus" IsTabStop="True">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -58,7 +58,7 @@
             IsEditable="True"
             materialDesign:HintAssist.Hint="نام انبار"
             IsSynchronizedWithCurrentItem="True"
-            Margin="18,71,205,0" Padding="7,0,10,0" Height="27" TabIndex="2"  VerticalAlignment="Top" PreviewLostKeyboardFocus="ANBAR_PreviewLostKeyboardFocus" IsTabStop="True">
+            Margin="18,67,205,0" Padding="7,0,10,0" Height="34" TabIndex="2"  VerticalAlignment="Top" PreviewLostKeyboardFocus="ANBAR_PreviewLostKeyboardFocus" IsTabStop="True">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -71,7 +71,7 @@
             IsEditable="True" CNC:ComboBoxEnterKeyBehavior.IsEnabled="True"
             materialDesign:HintAssist.Hint="نام کالا"
             IsSynchronizedWithCurrentItem="True"
-            Margin="18,108,63,0" Padding="7,0,10,0" Height="27" TabIndex="3" VerticalAlignment="Top" PreviewLostKeyboardFocus="KALA_PreviewLostKeyboardFocus" IsTabStop="True">
+            Margin="18,108,63,0" Padding="7,0,10,0" Height="34" TabIndex="3" VerticalAlignment="Top" PreviewLostKeyboardFocus="KALA_PreviewLostKeyboardFocus" IsTabStop="True">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>

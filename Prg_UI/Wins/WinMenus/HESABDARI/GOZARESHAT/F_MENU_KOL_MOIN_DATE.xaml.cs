@@ -261,7 +261,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.R_DAFTAR_MOIN.mrt");
             report.Load(pathreport);
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
 
@@ -284,7 +284,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             //report["TADATE"] = TaTarikh;
 
             //report["KALACODE"] = KALA.SelectedValue.ToString();
-            //((StiSqlSource)report.Dictionary.DataSources["KART_KALA"]).CommandTimeout = 300;
+            //((StiSqlSource)report.Dictionary.DataSources["KART_KALA"]).CommandTimeout = 900;
 
             //Report_Open:
             //(report.GetComponentByName("Table1_Cell17") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(2, ".", (int)Baseknow.DIG, ",", 3, true, false, ""); //MEG

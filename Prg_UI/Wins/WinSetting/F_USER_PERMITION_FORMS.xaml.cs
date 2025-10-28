@@ -1035,10 +1035,10 @@ namespace Wins.WinSetting
                 var pathreport = Assembly.GetEntryAssembly()?.GetManifestResourceStream("Prg_UI.Rpts.SETPERMIS.userobjectpermision.mrt");
                 report.Load(pathreport);
 
-                string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+                string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
                 report.Dictionary.Databases.Clear();
                 report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
-                ((StiSqlSource)report.Dictionary.DataSources["DataSource1"]).CommandTimeout = 300;
+                ((StiSqlSource)report.Dictionary.DataSources["DataSource1"]).CommandTimeout = 900;
 
                 (report.GetComponentByName("COMPANY_NAME") as StiText).Text = Baseknow.WIDTH_D;
                 (report.GetComponentByName("CAPTION1") as StiText).Text = $@"سطوح دسترسی : {CSelectedPermission.CAPTION}";
@@ -1107,10 +1107,10 @@ namespace Wins.WinSetting
             var pathreport = Assembly.GetEntryAssembly()?.GetManifestResourceStream("Prg_UI.Rpts.SETPERMIS.userobjectpermision.mrt");
             report.Load(pathreport);
 
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
-            ((StiSqlSource)report.Dictionary.DataSources["DataSource1"]).CommandTimeout = 300;
+            ((StiSqlSource)report.Dictionary.DataSources["DataSource1"]).CommandTimeout = 900;
 
             (report.GetComponentByName("COMPANY_NAME") as StiText).Text = Baseknow.WIDTH_D;
             (report.GetComponentByName("CAPTION1") as StiText).Text = $@"کاربر : {SelectedUser.SAL_NAME}";

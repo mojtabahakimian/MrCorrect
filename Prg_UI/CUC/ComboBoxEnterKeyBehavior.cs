@@ -77,7 +77,7 @@ namespace Prg_UI.CUC
                 }
 
                 HandleEnterKey(comboBox);
-                e.Handled = true;
+                //e.Handled = true;
             }
         }
 

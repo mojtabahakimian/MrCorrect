@@ -1545,7 +1545,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Name>Label224</Name>
               <Page isRef="5" />
               <Parent isRef="107" />
-              <Text>مالیات و عوارض %9:</Text>
+              <Text>مالیات و عوارض %:</Text>
               <TextBrush>Black</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
@@ -1707,16 +1707,10 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Page isRef="5" />
               <Parent isRef="107" />
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="132" type="NumberFormat" isKey="true">
-                <DecimalDigits>0</DecimalDigits>
-                <GroupSeparator>,</GroupSeparator>
-                <NegativePattern>3</NegativePattern>
-                <UseLocalSetting>False</UseLocalSetting>
-              </TextFormat>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </JF>
-            <TF Ref="133" type="Text" isKey="true">
+            <TF Ref="132" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.08,0.6,2.86,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1727,16 +1721,10 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Page isRef="5" />
               <Parent isRef="107" />
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="134" type="NumberFormat" isKey="true">
-                <DecimalDigits>0</DecimalDigits>
-                <GroupSeparator>,</GroupSeparator>
-                <NegativePattern>3</NegativePattern>
-                <UseLocalSetting>False</UseLocalSetting>
-              </TextFormat>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </TF>
-            <HKH Ref="135" type="Text" isKey="true">
+            <HKH Ref="133" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.08,1.2,2.86,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1747,16 +1735,10 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Page isRef="5" />
               <Parent isRef="107" />
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="136" type="NumberFormat" isKey="true">
-                <DecimalDigits>0</DecimalDigits>
-                <GroupSeparator>,</GroupSeparator>
-                <NegativePattern>3</NegativePattern>
-                <UseLocalSetting>False</UseLocalSetting>
-              </TextFormat>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </HKH>
-            <MBAA Ref="137" type="Text" isKey="true">
+            <MBAA Ref="134" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.08,1.8,2.86,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1770,7 +1752,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </MBAA>
-            <GABEL Ref="138" type="Text" isKey="true">
+            <GABEL Ref="135" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.08,2.4,2.86,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1781,16 +1763,10 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Page isRef="5" />
               <Parent isRef="107" />
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="139" type="NumberFormat" isKey="true">
-                <DecimalDigits>0</DecimalDigits>
-                <GroupSeparator>,</GroupSeparator>
-                <NegativePattern>3</NegativePattern>
-                <UseLocalSetting>False</UseLocalSetting>
-              </TextFormat>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </GABEL>
-            <JPAY Ref="140" type="Text" isKey="true">
+            <JPAY Ref="136" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.08,3,2.86,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1801,16 +1777,10 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Page isRef="5" />
               <Parent isRef="107" />
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="141" type="NumberFormat" isKey="true">
-                <DecimalDigits>0</DecimalDigits>
-                <GroupSeparator>,</GroupSeparator>
-                <NegativePattern>3</NegativePattern>
-                <UseLocalSetting>False</UseLocalSetting>
-              </TextFormat>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </JPAY>
-            <MAN Ref="142" type="Text" isKey="true">
+            <MAN Ref="137" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.08,3.6,2.86,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1821,16 +1791,10 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Page isRef="5" />
               <Parent isRef="107" />
               <TextBrush>Black</TextBrush>
-              <TextFormat Ref="143" type="NumberFormat" isKey="true">
-                <DecimalDigits>0</DecimalDigits>
-                <GroupSeparator>,</GroupSeparator>
-                <NegativePattern>3</NegativePattern>
-                <UseLocalSetting>False</UseLocalSetting>
-              </TextFormat>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
             </MAN>
-            <Label197 Ref="144" type="Text" isKey="true">
+            <Label197 Ref="138" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>12.64,4.2,6.36,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1847,7 +1811,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Type>Expression</Type>
               <VertAlignment>Bottom</VertAlignment>
             </Label197>
-            <FACTORS Ref="145" type="Text" isKey="true">
+            <FACTORS Ref="139" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>10.04,5.2,8.96,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1863,7 +1827,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </FACTORS>
-            <PAYMENTS Ref="146" type="Text" isKey="true">
+            <PAYMENTS Ref="140" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0.04,5.2,8.96,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1879,7 +1843,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </PAYMENTS>
-            <VAZN Ref="147" type="Text" isKey="true">
+            <VAZN Ref="141" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>6.04,4.2,6.36,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1894,7 +1858,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </VAZN>
-            <FIMG Ref="148" type="Image" isKey="true">
+            <FIMG Ref="142" type="Image" isKey="true">
               <AspectRatio>True</AspectRatio>
               <Brush>Transparent</Brush>
               <CanShrink>True</CanShrink>
@@ -1911,7 +1875,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Parent isRef="107" />
               <Stretch>True</Stretch>
             </FIMG>
-            <HIMG Ref="149" type="Image" isKey="true">
+            <HIMG Ref="143" type="Image" isKey="true">
               <AspectRatio>True</AspectRatio>
               <Brush>Transparent</Brush>
               <CanShrink>True</CanShrink>
@@ -1928,7 +1892,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Parent isRef="107" />
               <Stretch>True</Stretch>
             </HIMG>
-            <MIMG Ref="150" type="Image" isKey="true">
+            <MIMG Ref="144" type="Image" isKey="true">
               <AspectRatio>True</AspectRatio>
               <Brush>Transparent</Brush>
               <CanShrink>True</CanShrink>
@@ -1945,7 +1909,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Parent isRef="107" />
               <Stretch>True</Stretch>
             </MIMG>
-            <FU Ref="151" type="Text" isKey="true">
+            <FU Ref="145" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
               <ClientRectangle>16.8,9.08,2.2,0.6</ClientRectangle>
@@ -1962,7 +1926,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </FU>
-            <MU Ref="152" type="Text" isKey="true">
+            <MU Ref="146" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
               <ClientRectangle>4.2,9.08,2.2,0.6</ClientRectangle>
@@ -1979,7 +1943,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </MU>
-            <FS Ref="153" type="Text" isKey="true">
+            <FS Ref="147" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
               <ClientRectangle>16.8,8.48,2.2,0.6</ClientRectangle>
@@ -1996,7 +1960,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </FS>
-            <HU Ref="154" type="Text" isKey="true">
+            <HU Ref="148" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
               <ClientRectangle>10.6,9.08,2.2,0.6</ClientRectangle>
@@ -2013,7 +1977,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </HU>
-            <HS Ref="155" type="Text" isKey="true">
+            <HS Ref="149" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
               <ClientRectangle>10.6,8.48,2.2,0.6</ClientRectangle>
@@ -2030,7 +1994,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </HS>
-            <MS Ref="156" type="Text" isKey="true">
+            <MS Ref="150" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
               <ClientRectangle>4.2,8.48,2.2,0.6</ClientRectangle>
@@ -2047,7 +2011,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </MS>
-            <StartPointPrimitive17 Ref="157" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive17 Ref="151" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>5.79,-0.03,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -2056,7 +2020,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Parent isRef="107" />
               <ReferenceToGuid>9d1e6520c7bc4442b03421b83393cb8c</ReferenceToGuid>
             </StartPointPrimitive17>
-            <EndPointPrimitive17 Ref="158" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive17 Ref="152" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>5.79,4.21,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -2065,7 +2029,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Parent isRef="107" />
               <ReferenceToGuid>9d1e6520c7bc4442b03421b83393cb8c</ReferenceToGuid>
             </EndPointPrimitive17>
-            <StartPointPrimitive18 Ref="159" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive18 Ref="153" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>2.99,-0.04,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -2074,7 +2038,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Parent isRef="107" />
               <ReferenceToGuid>2d36683b53b44e458e3ec07508b3ede4</ReferenceToGuid>
             </StartPointPrimitive18>
-            <EndPointPrimitive18 Ref="160" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive18 Ref="154" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>2.99,4.2,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -2083,112 +2047,112 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Parent isRef="107" />
               <ReferenceToGuid>2d36683b53b44e458e3ec07508b3ede4</ReferenceToGuid>
             </EndPointPrimitive18>
-            <HorizontalLinePrimitive3 Ref="161" type="HorizontalLinePrimitive" isKey="true">
+            <HorizontalLinePrimitive3 Ref="155" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>0,0.6,5.8,0.0254</ClientRectangle>
               <Color>Black</Color>
               <Conditions isList="true" count="0" />
-              <EndCap Ref="162" type="Cap" isKey="true">
+              <EndCap Ref="156" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Expressions isList="true" count="0" />
               <Name>HorizontalLinePrimitive3</Name>
               <Page isRef="5" />
               <Parent isRef="107" />
-              <StartCap Ref="163" type="Cap" isKey="true">
+              <StartCap Ref="157" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive3>
-            <HorizontalLinePrimitive4 Ref="164" type="HorizontalLinePrimitive" isKey="true">
+            <HorizontalLinePrimitive4 Ref="158" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>0,3,5.8,0.0254</ClientRectangle>
               <Color>Black</Color>
               <Conditions isList="true" count="0" />
-              <EndCap Ref="165" type="Cap" isKey="true">
+              <EndCap Ref="159" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Expressions isList="true" count="0" />
               <Name>HorizontalLinePrimitive4</Name>
               <Page isRef="5" />
               <Parent isRef="107" />
-              <StartCap Ref="166" type="Cap" isKey="true">
+              <StartCap Ref="160" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive4>
-            <HorizontalLinePrimitive5 Ref="167" type="HorizontalLinePrimitive" isKey="true">
+            <HorizontalLinePrimitive5 Ref="161" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>0,1.2,5.8,0.0254</ClientRectangle>
               <Color>Black</Color>
               <Conditions isList="true" count="0" />
-              <EndCap Ref="168" type="Cap" isKey="true">
+              <EndCap Ref="162" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Expressions isList="true" count="0" />
               <Name>HorizontalLinePrimitive5</Name>
               <Page isRef="5" />
               <Parent isRef="107" />
-              <StartCap Ref="169" type="Cap" isKey="true">
+              <StartCap Ref="163" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive5>
-            <HorizontalLinePrimitive6 Ref="170" type="HorizontalLinePrimitive" isKey="true">
+            <HorizontalLinePrimitive6 Ref="164" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>0,1.8,5.8,0.0254</ClientRectangle>
               <Color>Black</Color>
               <Conditions isList="true" count="0" />
-              <EndCap Ref="171" type="Cap" isKey="true">
+              <EndCap Ref="165" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Expressions isList="true" count="0" />
               <Name>HorizontalLinePrimitive6</Name>
               <Page isRef="5" />
               <Parent isRef="107" />
-              <StartCap Ref="172" type="Cap" isKey="true">
+              <StartCap Ref="166" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive6>
-            <HorizontalLinePrimitive7 Ref="173" type="HorizontalLinePrimitive" isKey="true">
+            <HorizontalLinePrimitive7 Ref="167" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>0,2.4,5.8,0.0254</ClientRectangle>
               <Color>Black</Color>
               <Conditions isList="true" count="0" />
-              <EndCap Ref="174" type="Cap" isKey="true">
+              <EndCap Ref="168" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Expressions isList="true" count="0" />
               <Name>HorizontalLinePrimitive7</Name>
               <Page isRef="5" />
               <Parent isRef="107" />
-              <StartCap Ref="175" type="Cap" isKey="true">
+              <StartCap Ref="169" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive7>
-            <HorizontalLinePrimitive8 Ref="176" type="HorizontalLinePrimitive" isKey="true">
+            <HorizontalLinePrimitive8 Ref="170" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>0,3.6,5.8,0.0254</ClientRectangle>
               <Color>Black</Color>
               <Conditions isList="true" count="0" />
-              <EndCap Ref="177" type="Cap" isKey="true">
+              <EndCap Ref="171" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Expressions isList="true" count="0" />
               <Name>HorizontalLinePrimitive8</Name>
               <Page isRef="5" />
               <Parent isRef="107" />
-              <StartCap Ref="178" type="Cap" isKey="true">
+              <StartCap Ref="172" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive8>
-            <HorizontalLinePrimitive9 Ref="179" type="HorizontalLinePrimitive" isKey="true">
+            <HorizontalLinePrimitive9 Ref="173" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>0,4.2,5.8,0.0254</ClientRectangle>
               <Color>Black</Color>
               <Conditions isList="true" count="0" />
-              <EndCap Ref="180" type="Cap" isKey="true">
+              <EndCap Ref="174" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Expressions isList="true" count="0" />
               <Name>HorizontalLinePrimitive9</Name>
               <Page isRef="5" />
               <Parent isRef="107" />
-              <StartCap Ref="181" type="Cap" isKey="true">
+              <StartCap Ref="175" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive9>
-            <StartPointPrimitive19 Ref="182" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive19 Ref="176" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>0.01,-0.04,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -2197,7 +2161,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
               <Parent isRef="107" />
               <ReferenceToGuid>a5c471f7711940adb5343aefcadddf29</ReferenceToGuid>
             </StartPointPrimitive19>
-            <EndPointPrimitive19 Ref="183" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive19 Ref="177" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>0.01,4.21,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -2213,7 +2177,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Page isRef="5" />
           <Parent isRef="5" />
         </FooterBand1>
-        <RectanglePrimitive1 Ref="184" type="RectanglePrimitive" isKey="true">
+        <RectanglePrimitive1 Ref="178" type="RectanglePrimitive" isKey="true">
           <ClientRectangle>0,7.37,19,1.07</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
@@ -2224,11 +2188,11 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Parent isRef="5" />
           <Size>3</Size>
         </RectanglePrimitive1>
-        <VerticalLinePrimitive7 Ref="185" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive7 Ref="179" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>17.97,9.34,0.0254,0.92</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="186" type="Cap" isKey="true">
+          <EndCap Ref="180" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2236,11 +2200,11 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Name>VerticalLinePrimitive7</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="187" type="Cap" isKey="true">
+          <StartCap Ref="181" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive7>
-        <RectanglePrimitive2 Ref="188" type="RectanglePrimitive" isKey="true">
+        <RectanglePrimitive2 Ref="182" type="RectanglePrimitive" isKey="true">
           <ClientRectangle>0,9.33,19,0.94</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
@@ -2250,11 +2214,11 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Page isRef="5" />
           <Parent isRef="5" />
         </RectanglePrimitive2>
-        <VerticalLinePrimitive1 Ref="189" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive1 Ref="183" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>17.97,7.34,0.0254,1.12</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="190" type="Cap" isKey="true">
+          <EndCap Ref="184" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2262,15 +2226,15 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Name>VerticalLinePrimitive1</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="191" type="Cap" isKey="true">
+          <StartCap Ref="185" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive1>
-        <VerticalLinePrimitive2 Ref="192" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive2 Ref="186" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>11.19,7.34,0.0254,1.12</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="193" type="Cap" isKey="true">
+          <EndCap Ref="187" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2278,15 +2242,15 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Name>VerticalLinePrimitive2</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="194" type="Cap" isKey="true">
+          <StartCap Ref="188" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive2>
-        <VerticalLinePrimitive3 Ref="195" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive3 Ref="189" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>9.59,7.34,0.0254,1.12</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="196" type="Cap" isKey="true">
+          <EndCap Ref="190" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2294,15 +2258,15 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Name>VerticalLinePrimitive3</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="197" type="Cap" isKey="true">
+          <StartCap Ref="191" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive3>
-        <VerticalLinePrimitive4 Ref="198" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive4 Ref="192" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>7.79,7.34,0.0254,1.12</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="199" type="Cap" isKey="true">
+          <EndCap Ref="193" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2310,15 +2274,15 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Name>VerticalLinePrimitive4</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="200" type="Cap" isKey="true">
+          <StartCap Ref="194" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive4>
-        <VerticalLinePrimitive5 Ref="201" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive5 Ref="195" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>5.79,7.34,0.0254,1.12</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="202" type="Cap" isKey="true">
+          <EndCap Ref="196" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2326,15 +2290,15 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Name>VerticalLinePrimitive5</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="203" type="Cap" isKey="true">
+          <StartCap Ref="197" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive5>
-        <VerticalLinePrimitive6 Ref="204" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive6 Ref="198" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>3.59,7.34,0.0254,1.12</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="205" type="Cap" isKey="true">
+          <EndCap Ref="199" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2342,15 +2306,15 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Name>VerticalLinePrimitive6</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="206" type="Cap" isKey="true">
+          <StartCap Ref="200" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive6>
-        <VerticalLinePrimitive13 Ref="207" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive13 Ref="201" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>2.68,7.34,0.0254,1.12</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="208" type="Cap" isKey="true">
+          <EndCap Ref="202" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2358,15 +2322,15 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Name>VerticalLinePrimitive13</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="209" type="Cap" isKey="true">
+          <StartCap Ref="203" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive13>
-        <VerticalLinePrimitive8 Ref="210" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive8 Ref="204" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>11.19,9.34,0.0254,0.92</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="211" type="Cap" isKey="true">
+          <EndCap Ref="205" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2374,15 +2338,15 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Name>VerticalLinePrimitive8</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="212" type="Cap" isKey="true">
+          <StartCap Ref="206" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive8>
-        <VerticalLinePrimitive9 Ref="213" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive9 Ref="207" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>9.59,9.34,0.0254,0.92</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="214" type="Cap" isKey="true">
+          <EndCap Ref="208" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2390,15 +2354,15 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Name>VerticalLinePrimitive9</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="215" type="Cap" isKey="true">
+          <StartCap Ref="209" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive9>
-        <VerticalLinePrimitive10 Ref="216" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive10 Ref="210" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>7.79,9.32,0.0254,0.94</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="217" type="Cap" isKey="true">
+          <EndCap Ref="211" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2406,15 +2370,15 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Name>VerticalLinePrimitive10</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="218" type="Cap" isKey="true">
+          <StartCap Ref="212" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive10>
-        <VerticalLinePrimitive11 Ref="219" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive11 Ref="213" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>5.79,9.34,0.0254,0.92</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="220" type="Cap" isKey="true">
+          <EndCap Ref="214" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2422,15 +2386,15 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Name>VerticalLinePrimitive11</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="221" type="Cap" isKey="true">
+          <StartCap Ref="215" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive11>
-        <VerticalLinePrimitive12 Ref="222" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive12 Ref="216" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>3.59,9.34,0.0254,0.92</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="223" type="Cap" isKey="true">
+          <EndCap Ref="217" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2438,15 +2402,15 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Name>VerticalLinePrimitive12</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="224" type="Cap" isKey="true">
+          <StartCap Ref="218" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive12>
-        <VerticalLinePrimitive14 Ref="225" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive14 Ref="219" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>2.68,9.34,0.0254,0.92</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="226" type="Cap" isKey="true">
+          <EndCap Ref="220" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2454,15 +2418,15 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Name>VerticalLinePrimitive14</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="227" type="Cap" isKey="true">
+          <StartCap Ref="221" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive14>
-        <VerticalLinePrimitive15 Ref="228" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive15 Ref="222" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>5.79,11.09,0.0254,4.24</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="229" type="Cap" isKey="true">
+          <EndCap Ref="223" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2470,15 +2434,15 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Name>VerticalLinePrimitive15</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="230" type="Cap" isKey="true">
+          <StartCap Ref="224" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive15>
-        <VerticalLinePrimitive16 Ref="231" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive16 Ref="225" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>2.99,11.08,0.0254,4.24</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="232" type="Cap" isKey="true">
+          <EndCap Ref="226" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2486,15 +2450,15 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Name>VerticalLinePrimitive16</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="233" type="Cap" isKey="true">
+          <StartCap Ref="227" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive16>
-        <VerticalLinePrimitive17 Ref="234" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive17 Ref="228" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>0.01,11.08,0.0254,4.25</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="235" type="Cap" isKey="true">
+          <EndCap Ref="229" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2502,7 +2466,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
           <Name>VerticalLinePrimitive17</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <StartCap Ref="236" type="Cap" isKey="true">
+          <StartCap Ref="230" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive17>
@@ -2528,10 +2492,10 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>10/24/2025 1:57:48 AM</ReportChanged>
+  <ReportChanged>10/27/2025 8:57:42 AM</ReportChanged>
   <ReportCreated>9/5/2021 1:38:11 PM</ReportCreated>
-  <ReportFile>C:\prg\MC\Prg_UI\Rpts\Factors\INVOICE_FROOSH_22.mrt</ReportFile>
-  <ReportGuid>ed3aea6012ab4552bae1fad024207310</ReportGuid>
+  <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\Factors\INVOICE_FROOSH_22.mrt</ReportFile>
+  <ReportGuid>e5ff046e5f1841c1a2afa166d2dead90</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

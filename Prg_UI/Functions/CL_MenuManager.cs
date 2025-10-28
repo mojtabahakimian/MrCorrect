@@ -40,6 +40,8 @@ using System.Threading;
 using Prg_UI.Wins.WinMenus.CRM;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
 using Prg_UI.Wins.WinMenus.Checkha;
+using static Prg_UI.Functions.CL_LMethods;
+using System.Diagnostics;
 
 namespace Functions
 {
@@ -946,10 +948,11 @@ namespace Functions
         //, bool _IsModalDialog_ = false, bool _AlloMultipleInstances_ = true)
         public static void OpenWinMenu(WinNameType _TYPE_, Window? OWNERWIN, params object[] _PARAMETERS_)
         {
+            Process Prc = ProcLoader.Start();
+
             switch (_TYPE_)
             {
                 //Mojtaba{
-
                 case WinNameType.WIN_AMVAL: /* جمع داری اموال */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_AMVAL(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.PRICE_GRP_FORM_GRUHBANDI_GHEYMATI: /* تعریف گروه بندی قیمتی */ CL_LMethods.OpenWindow(OWNERWIN, new PRICE_GRP_FORM(), isModalDialog: false, allowMultipleInstances: false); break;
@@ -1143,7 +1146,7 @@ namespace Functions
                         var report = new StiReport();
                         var pathreport = Assembly.GetEntryAssembly()?.GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.R_TARAZ_ANBARHA.mrt");
                         report.Load(pathreport);
-                        string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+                        string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
                         report.Dictionary.Databases.Clear();
                         report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
                         new WINRPT(report, "گزارش تراز موجودی کل انبار ها").Show();
@@ -1159,10 +1162,10 @@ namespace Functions
                         var report = new StiReport();
                         var pathreport = Assembly.GetEntryAssembly()?.GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.R_DAFTAR_KOL_kh.mrt");
                         report.Load(pathreport);
-                        string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=300";
+                        string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
                         report.Dictionary.Databases.Clear();
                         report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
-                        //((StiSqlSource)report.Dictionary.DataSources["KART_KALA"]).CommandTimeout = 300;
+                        //((StiSqlSource)report.Dictionary.DataSources["KART_KALA"]).CommandTimeout = 900;
                         new WINRPT(report, "چاپ خلاصه دفتر کل").Show();
 
                         //report.Render();
@@ -1967,8 +1970,10 @@ namespace Functions
                     break;
 
 
-                default: throw new ArgumentException("Invalid WinNameType");
+                default: ProcLoader.Stop(Prc); throw new ArgumentException("Invalid WinNameType");
             }
+
+            ProcLoader.Stop(Prc);
         }
 
         public static void MenuBaseOnKindOpen(Window Thewindowthis, CL_CCNNMANAGER dbms, int kind, object _NUM_, bool SanadMabnaee = true, bool _isCalledFromAutomasion_ = false)

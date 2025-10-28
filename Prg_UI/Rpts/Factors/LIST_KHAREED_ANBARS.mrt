@@ -35,10 +35,7 @@
           <value>ANBAR_PARM,,12,20</value>
           <value>KALA_PARM,,12,20</value>
         </Parameters>
-        <SqlCommand>SELECT ANBAR, NAME, MEGHk, MABL, MABL_K, DATE_N, NUMBER, CODE
-	FROM Q_FR_KH_ANBAR(@FDATE_PARM, @EDATE_PARM, '1', @ANBAR_PARM)
-WHERE CODE = @KALA_PARM
-</SqlCommand>
+        <SqlCommand>{Q_PARM}</SqlCommand>
       </DataSource1>
     </DataSources>
     <Relations isList="true" count="0" />
@@ -521,10 +518,10 @@ WHERE CODE = @KALA_PARM
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>11/28/2024 6:21:35 PM</ReportChanged>
+  <ReportChanged>10/27/2025 9:39:02 PM</ReportChanged>
   <ReportCreated>9/5/2021 1:38:11 PM</ReportCreated>
-  <ReportFile>C:\prg\Made Reports\All\LIST_KHAREED_ANBARS.mrt</ReportFile>
-  <ReportGuid>1284910b432048a5951caaedc63a0577</ReportGuid>
+  <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\Factors\LIST_KHAREED_ANBARS.mrt</ReportFile>
+  <ReportGuid>798cfc060bad4324ab018250f73163f2</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

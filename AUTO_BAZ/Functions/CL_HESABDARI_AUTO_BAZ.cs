@@ -10953,11 +10953,13 @@ namespace AUTO_BAZ.Functions
 
         }
 
-        public static void GENSANADANBARGARD(long NUMBER, long NUMBER2, bool InternalCalling = true)
+        public static (double?, bool) GENSANADANBARGARD(long NUMBER, long NUMBER2, bool InternalCalling = true)
         {
+            double? SANAD_NUMBER = null;
+            bool IsSuccessfully = true;
             object a = default, fs;
             //   var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM DEED_HED").ToList();
-            var HEDRST = dbms.DoGetDataSQL<QUERY_MODEL2>("SELECT     GRD_NUM, GRD_DATE, GRD_ANBAR, GRD_HES, N_S, COMMENT, USER_NAME FROM     dbo.ANBGRD_HEAD WHERE ((GRD_NUM >= " + NUMBER + " AND GRD_NUM <=" + NUMBER2 + " ) and NOT (N_S IS NULL))").ToList();
+            var HEDRST = dbms.DoGetDataSQL<QUERY_MODEL2>("SELECT     GRD_NUM, GRD_DATE, GRD_ANBAR, GRD_HES, N_S, COMMENT, USER_NAME FROM     dbo.ANBGRD_HEAD WHERE ((GRD_NUM >= " + NUMBER + " AND GRD_NUM <=" + NUMBER2 + " ) )").ToList();
             double progress = 0;
             MainWindow auto_run = null;
             if (InternalCalling)
@@ -10996,6 +10998,8 @@ namespace AUTO_BAZ.Functions
                 {
                     max_ns = Createsanad((long)HEDRST[HEDRST_EOF].GRD_DATE, SHSH, 0, 17, 1, HEDRST[HEDRST_EOF].USER_NAME);
                     shart = "NO_S = 17 AND N_S = " + max_ns;
+
+                    SANAD_NUMBER = max_ns;
                 }
                 else
                 {
@@ -11009,12 +11013,15 @@ namespace AUTO_BAZ.Functions
                 else
                 {
                     max_ns = SHRST.FirstOrDefault().N_S;
+                    SANAD_NUMBER = max_ns;
                     dbms.DoExecuteSQL($@"UPDATE dbo.DEED_HED SET	DATE_S = {HEDRST[HEDRST_EOF].GRD_DATE} , SHARH_S = N'{SHSH}' , GHATEI = 0 , NO_S = 17 , OKF = 1 , USER_NAME = N'{HEDRST[HEDRST_EOF].USER_NAME}'  WHERE {shart}");
                 }
                 if (IsNull(HEDRST[HEDRST_EOF].N_S) || HEDRST[HEDRST_EOF].N_S != max_ns)
                 {
                     HEDRST[HEDRST_EOF].N_S = max_ns;
                     dbms.DoExecuteSQL($@"UPDATE dbo.DEED_HED SET N_S = {max_ns}  WHERE {shart}");
+
+                    SANAD_NUMBER = max_ns;
 
                 };
                 if (!IsNull(HEDRST[HEDRST_EOF].GRD_HES))
@@ -11089,8 +11096,12 @@ namespace AUTO_BAZ.Functions
                 }
                 JAMF = 0d;
 
+                dbms.DoExecuteSQL($"UPDATE dbo.ANBGRD_HEAD SET N_S = {HEDRST[HEDRST_EOF]?.N_S} WHERE GRD_NUM = {HEDRST[HEDRST_EOF]?.GRD_NUM}");
+
             });
             LogWriter.WriteLog("پایان انبار گردانی" + DateTime.Now.ToString());
+
+            return (SANAD_NUMBER, IsSuccessfully);
         }
 
         public static void GENSANADVD(object fnum, long TNUM, bool InternalCalling = true)

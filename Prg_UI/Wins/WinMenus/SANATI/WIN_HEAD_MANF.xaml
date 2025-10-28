@@ -28,6 +28,23 @@
                     <materialDesign:PackIcon Kind="Warehouse" />
                 </MenuItem.Icon>
             </MenuItem>
+
+            <MenuItem Header="کپـــی | Copy" Click="COPY_CLICK" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="ContentCopy" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="انتقال کپی | Paste" Click="PASTE_CLICK" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="ContentPaste" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Header="خروجی اکسل" Click="EXPORTEXCEL_BTN" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="FileExcelOutline" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
         </ContextMenu>
 
     </Window.Resources>
@@ -110,7 +127,7 @@
                 FlowDirection="RightToLeft" 
                 SelectionUnit="FullRow" 
                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                CanUserResizeColumns="True"
+                CanUserResizeColumns="True" ContextMenuOpening="DG_SUB_ContextMenuOpening" PreviewMouseRightButtonDown="DataGrid_PreviewMouseRightButtonDown"
                 CanUserDeleteRows="False" MouseRightButtonUp="DG_SUB_MouseRightButtonUp"
                 Margin="4,180,4,138" BorderThickness="1" CellEditEnding="DG_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_SUB_SelectionChanged" RowEditEnding="DG_SUB_RowEditEnding" PreviewKeyDown="DG_SUB_PreviewKeyDown" PreparingCellForEdit="DG_SUB_PreparingCellForEdit" BeginningEdit="DG_SUB_BeginningEdit" IsReadOnly="True" >
                 <DataGrid.Style>

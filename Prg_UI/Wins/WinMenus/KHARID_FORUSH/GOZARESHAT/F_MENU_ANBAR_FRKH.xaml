@@ -13,7 +13,7 @@
         FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         Title="F_MENU_KART" Height="263" Width="539" MinHeight="230" MinWidth="505" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" >
-    <Grid>
+    <Grid x:Name="mygrid">
         <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="557,410,462,353"  Width="1"/>
         <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True" Grid.RowSpan="2">
             <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">

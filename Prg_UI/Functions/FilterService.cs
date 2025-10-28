@@ -1,86 +1,194 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Globalization;
 
 namespace Functions
 {
     public class FilterService<T>
     {
-        private readonly List<(string ColumnName, object FilterValue, bool IsExclusion, bool IsExactMatch)> cumulativeFilters = new List<(string ColumnName, object FilterValue, bool IsExclusion, bool IsExactMatch)>();
+        private readonly List<(string ColumnName, object FilterValue, bool IsExclusion, bool IsExactMatch)> cumulativeFilters =
+            new List<(string ColumnName, object FilterValue, bool IsExclusion, bool IsExactMatch)>();
 
-        // Method to add a filter with an optional exclusion and exact match flag
+        /// <summary>
+        /// اضافه کردن فیلتر جدید به لیست فیلترهای فعال
+        /// </summary>
+        /// <param name="columnName">نام ستون</param>
+        /// <param name="filterValue">مقدار فیلتر (می‌تواند string، numeric، یا null باشد)</param>
+        /// <param name="isExclusion">آیا فیلتر exclusion است؟</param>
+        /// <param name="isExactMatch">آیا باید دقیقاً برابر باشد؟ (در غیر این صورت Contains)</param>
         public void AddFilter(string columnName, object filterValue, bool isExclusion = false, bool isExactMatch = false)
         {
             cumulativeFilters.Add((columnName, filterValue, isExclusion, isExactMatch));
         }
 
-        // Clears all filters
+        /// <summary>
+        /// پاک کردن تمام فیلترها
+        /// </summary>
         public void ClearFilters()
         {
             cumulativeFilters.Clear();
         }
 
-        // Applies filters to the given item
+        /// <summary>
+        /// اعمال تمام فیلترها به یک آیتم
+        /// </summary>
         public bool ApplyFilter(T item)
         {
+            if (item == null) return false;
+
             foreach (var (columnName, filterValue, isExclusion, isExactMatch) in cumulativeFilters)
             {
-                var itemValue = GetPropValue(item, columnName)?.ToString() ?? string.Empty; // Safeguard against nulls
+                // دریافت مقدار واقعی property (نه ToString آن)
+                var actualValue = GetPropValue(item, columnName);
 
-                if (filterValue is string stringValue)
+                // اعمال فیلتر
+                bool matchResult = EvaluateFilter(actualValue, filterValue, isExactMatch);
+
+                // اگر exclusion است، نتیجه را برعکس می‌کنیم
+                if (isExclusion)
                 {
-                    stringValue = stringValue.Trim();
-
-                    // Adjust for blank values
-                    if (string.IsNullOrWhiteSpace(stringValue))
-                    {
-                        if (isExclusion && string.IsNullOrWhiteSpace(itemValue)) return false;
-                        else continue;
-                    }
-
-                    // Exact match handling
-                    if (isExactMatch)
-                    {
-                        if (isExclusion)
-                        {
-                            if (string.Equals(itemValue, stringValue, StringComparison.OrdinalIgnoreCase)) return false;
-                        }
-                        else
-                        {
-                            if (!string.Equals(itemValue, stringValue, StringComparison.OrdinalIgnoreCase)) return false;
-                        }
-                    }
-                    else // Contains handling
-                    {
-                        if (isExclusion)
-                        {
-                            if (itemValue.Contains(stringValue, StringComparison.OrdinalIgnoreCase)) return false;
-                        }
-                        else
-                        {
-                            if (!itemValue.Contains(stringValue, StringComparison.OrdinalIgnoreCase)) return false;
-                        }
-                    }
+                    // اگر match شد، باید این آیتم را exclude کنیم
+                    if (matchResult)
+                        return false;
                 }
-                else // Non-string filters
+                else
                 {
-                    if (!CompareValues(itemValue, filterValue)) return false;
+                    // اگر match نشد، این آیتم را رد می‌کنیم
+                    if (!matchResult)
+                        return false;
                 }
             }
 
             return true;
         }
 
-        private bool CompareValues(object dataValue, object filterValue)
+        /// <summary>
+        /// ارزیابی یک فیلتر واحد
+        /// </summary>
+        private bool EvaluateFilter(object actualValue, object filterValue, bool isExactMatch)
         {
-            if (dataValue == null || filterValue == null) return false;
-            return dataValue.Equals(filterValue);
+            // Handle null cases
+            if (filterValue == null)
+            {
+                return actualValue == null;
+            }
+
+            if (actualValue == null)
+            {
+                return false;
+            }
+
+            // اگر filterValue یک string است
+            if (filterValue is string filterString)
+            {
+                filterString = filterString.Trim();
+
+                // چک کردن blank values
+                if (string.IsNullOrWhiteSpace(filterString))
+                {
+                    return string.IsNullOrWhiteSpace(actualValue.ToString());
+                }
+
+                // تبدیل actualValue به string برای مقایسه متنی
+                string actualString = actualValue.ToString()?.Trim() ?? string.Empty;
+
+                if (isExactMatch)
+                {
+                    // مقایسه دقیق (case-insensitive)
+                    return string.Equals(actualString, filterString, StringComparison.OrdinalIgnoreCase);
+                }
+                else
+                {
+                    // مقایسه Contains (case-insensitive)
+                    return actualString.Contains(filterString, StringComparison.OrdinalIgnoreCase);
+                }
+            }
+
+            // اگر هر دو عددی هستند، مقایسه عددی انجام می‌دهیم
+            if (IsNumericType(actualValue.GetType()) && IsNumericType(filterValue.GetType()))
+            {
+                return CompareNumericValues(actualValue, filterValue);
+            }
+
+            // مقایسه معمولی برای سایر type ها
+            return actualValue.Equals(filterValue);
         }
 
+        /// <summary>
+        /// مقایسه دو مقدار عددی
+        /// </summary>
+        private bool CompareNumericValues(object value1, object value2)
+        {
+            try
+            {
+                // تبدیل هر دو به decimal برای مقایسه دقیق
+                decimal decimal1 = Convert.ToDecimal(value1, CultureInfo.InvariantCulture);
+                decimal decimal2 = Convert.ToDecimal(value2, CultureInfo.InvariantCulture);
+
+                return decimal1 == decimal2;
+            }
+            catch
+            {
+                // اگر تبدیل ناموفق بود، از ToString استفاده می‌کنیم
+                return value1.ToString() == value2.ToString();
+            }
+        }
+
+        /// <summary>
+        /// چک کردن اینکه آیا یک Type عددی است
+        /// </summary>
+        private bool IsNumericType(Type type)
+        {
+            if (type == null) return false;
+
+            // Handle Nullable types
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                type = Nullable.GetUnderlyingType(type);
+            }
+
+            // Handle object type
+            if (type == typeof(object))
+            {
+                return false;
+            }
+
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// دریافت مقدار یک property از طریق Reflection
+        /// </summary>
         private object GetPropValue(object obj, string propName)
         {
-            return obj?.GetType().GetProperty(propName)?.GetValue(obj, null);
+            if (obj == null || string.IsNullOrEmpty(propName))
+                return null;
+
+            try
+            {
+                var property = obj.GetType().GetProperty(propName);
+                return property?.GetValue(obj, null);
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
-
 }

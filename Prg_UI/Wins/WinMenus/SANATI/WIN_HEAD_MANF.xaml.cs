@@ -38,6 +38,7 @@ using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
 using DocumentFormat.OpenXml.Spreadsheet;
+using static Functions.DataGridClipboardManager;
 
 namespace Prg_UI.Wins.WinMenus.SANATI
 {
@@ -775,8 +776,27 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
             if (HeaderIsValid() is false) return; //اگر اطلاعات سربرگ صحیح نیست خارج شو
 
-
-            DoCmdHeaderSave();
+            try
+            {
+                DoCmdHeaderSave();
+            }
+            catch (SqlException ex)
+            {
+                DG_SUB_CANCEL_EDIT();
+                if (ex.Number == 2601 || ex.Number == 2627)
+                {
+                    new Msgwin(false, "اطلاعات سربرگ تکراری وارد شده است آنرا اصلاح کنید").ShowDialog();
+                }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام عملیات ذخیره سربرگ!").ShowDialog();
+                }
+                return;
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خطا در انجام عملیات ذخیره سربرگ!").ShowDialog(); return;
+            }
 
             this.DG_SUB.IsReadOnly = false;
 
@@ -1145,6 +1165,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             SUM_TAMAMSHODEH.Text = (SUM_OF_MABL_K + Convert.ToDouble(IMBIBE_MANF.Text) + Convert.ToDouble(IMBIBE_SAR.Text)).ToString(); //قیمت تمام شده استاندارد
         }
 
+        public bool IsPastingRows { get; private set; } = false;
         private void DG_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e == null || DG_SUB == null || DG_SUB.CurrentCell == null)
@@ -1156,11 +1177,11 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 CURRENT_COLUMN_NAME = DG_SUB.CurrentCell.Column?.SortMemberPath;
             }
 
+            var isEditing = ((IEditableCollectionView)DG_SUB.Items).IsEditingItem;
             if (e.Key == Key.Delete)
             {
                 try
                 {
-                    var isEditing = ((IEditableCollectionView)DG_SUB.Items).IsEditingItem;
                     if (isEditing) { return; }
                     // 1) اگر داخل یک TextBox در حالت ویرایش هستیم، کاری نکنیم
                     if (e.OriginalSource is TextBox textBox && !textBox.IsReadOnly)
@@ -1212,7 +1233,191 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                         { RoutedEvent = routedEvent });
                 }
             }
+
+            #region COPYPASTE
+            var isNewEmpty = ((IEditableCollectionView)DG_SUB.Items).IsAddingNew;
+
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.C) //Copy
+            {
+                if (!isEditing && DG_SUB.IsEnabled)
+                {
+                    e.Handled = true;
+
+                    DataGridClipboardManager.CopySelectedItems<DTL_MANF>(DG_SUB);
+                }
+            }
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.V) //Paste
+            {
+                if (!isEditing && !isNewEmpty && !DG_SUB.IsReadOnly && DG_SUB.IsEnabled)
+                {
+                    e.Handled = true;
+                    IsPastingRows = true;
+                    DataGridClipboardManager.PasteItems<DTL_MANF>(DG_SUB, ValidateDataGridRow, AddItemToDataSource);
+                    IsPastingRows = false;
+                }
+            }
+            #endregion
         }
+        private void ValidateDataGridRow(DataGridRowEditEndingEventArgs args, PasteValidationResult validationResult)
+        {
+            // Default to true
+            validationResult.IsRowValid = true;
+
+            if (args.Row.Item is DTL_MANF item)
+            {
+                //Reset id to be sure the new data will insert not update the same row existing before
+                item.UID = null;
+                item.CRT = null;
+                CURRENT_ITEMS_ROW = item;
+
+                //مبلغ استاندارد
+                var _SMABL_ = item.SMABL.ToStringNullSafe();
+                if (!string.IsNullOrEmpty(_SMABL_))
+                {
+                    var MABL_NUMBER = NumberExtractor.ExtractNumbersLine(_SMABL_);
+                    if (!string.IsNullOrEmpty(MABL_NUMBER))
+                    {
+                        item.SMABL = Convert.ToDouble(MABL_NUMBER);
+                    }
+                    else
+                    {
+                        args.Cancel = true;
+                        validationResult.IsRowValid = false;
+                        validationResult.RowMessage = "فیلد مبلغ استاندارد وارد شده صحیح نیست";
+                    }
+                }
+                else
+                {
+                    args.Cancel = true;
+                    validationResult.IsRowValid = false;
+                    validationResult.RowMessage = "فیلد مبلغ استاندارد نمیتواند خالی باشد";
+                }
+
+                //مبلغ کل
+                var _MABLK_ = item.MABLK.ToStringNullSafe();
+                if (!string.IsNullOrEmpty(_MABLK_))
+                {
+                    var MABL_NUMBER = NumberExtractor.ExtractNumbersLine(_MABLK_);
+                    if (!string.IsNullOrEmpty(MABL_NUMBER))
+                    {
+                        item.SMABL = Convert.ToDouble(MABL_NUMBER);
+                    }
+                    else
+                    {
+                        args.Cancel = true;
+                        validationResult.IsRowValid = false;
+                        validationResult.RowMessage = "فیلد مبلغ کل وارد شده صحیح نیست";
+                    }
+                }
+                else
+                {
+                    args.Cancel = true;
+                    validationResult.IsRowValid = false;
+                    validationResult.RowMessage = "فیلد مبلغ کل نمیتواند خالی باشد";
+                }
+
+                //Final Validation
+                if (validationResult.IsRowValid) //Yet
+                {
+                    DG_SUB_RowEditEnding(DG_SUB, args);
+                    validationResult.IsRowValid = IsSaveSuccess;
+                }
+            }
+            else
+            {
+                // If the item is not of type CUSTOM_MODEL, invalidate the row
+                args.Cancel = true;
+                validationResult.IsRowValid = false;
+            }
+        }
+        private void AddItemToDataSource(DTL_MANF item)
+        {
+            // Ensure thread safety if MY_ALL_DATA is accessed from multiple threads
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                SUB_DATA.Add(item);
+            });
+        }
+        private bool IsSubDataNull()
+        {
+            if (DG_SUB != null && DG_SUB?.Items?.Count > 0 && SUB_DATA?.Count > 0)
+            {
+                return false;
+            }
+            return true;
+        }
+        private void COPY_CLICK(object sender, RoutedEventArgs e)
+        {
+            if (IsSubDataNull())
+            {
+                return;
+            }
+
+            var isEditing = ((IEditableCollectionView)DG_SUB.Items).IsEditingItem;
+            if (!isEditing)
+            {
+                e.Handled = true;
+                DataGridClipboardManager.CopySelectedItems<DTL_MANF>(DG_SUB);
+            }
+            else
+            {
+                var editingElement = CL_LMethods.FindChild<TextBox>(DG_SUB);
+                if (editingElement != null)
+                {
+                    if (!string.IsNullOrEmpty(editingElement.SelectedText))
+                    {
+                        Clipboard.SetText(editingElement.SelectedText);
+                    }
+                }
+            }
+        }
+        private void PASTE_CLICK(object sender, RoutedEventArgs e)
+        {
+            if (DG_SUB.SelectedItem != null || DG_SUB.SelectedItems.Count > 0)
+            {
+                var isEditing = ((IEditableCollectionView)DG_SUB.Items).IsEditingItem;
+                if (!isEditing && !DG_SUB.IsReadOnly && DG_SUB.IsEnabled)
+                {
+                    e.Handled = true;
+
+                    IsPastingRows = true;
+                    DataGridClipboardManager.PasteItems<DTL_MANF>(DG_SUB, ValidateDataGridRow, AddItemToDataSource);
+                    IsPastingRows = false;
+
+                    DG_SUB.CommitEdit();
+                }
+                else
+                {
+                    // Execute the Paste command on the currently focused element
+                    if (ApplicationCommands.Paste.CanExecute(null, Keyboard.FocusedElement as IInputElement))
+                    {
+                        ApplicationCommands.Paste.Execute(null, Keyboard.FocusedElement as IInputElement);
+                    }
+                }
+            }
+            else
+            {
+                universControl.PopNotifyShowUp("عمل انتقال کپی را باید با راست کلیک روی یک سطر خالی انجام بدید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
+            }
+        }
+        private async void EXPORTEXCEL_BTN(object sender, RoutedEventArgs e)
+        {
+            if (IsSubDataNull())
+            {
+                return;
+            }
+
+            try
+            {
+                await UniversalExcelExporter.ExportToExcelAsync(DG_SUB, "DGExportedExcel");
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
+            }
+        }
+
+
         private void DG_SUB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (NowIsReady && !(e is null))
@@ -1522,6 +1727,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             CURRENT_ITEMS_ROW.MABLK = ((CURRENT_ITEMS_ROW?.PERT ?? 0) + (CURRENT_ITEMS_ROW?.MEGHk ?? 0)) * (CURRENT_ITEMS_ROW?.SMABL ?? 0);
         }
 
+        bool IsSaveSuccess = true;
         private void DG_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
@@ -1532,10 +1738,12 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
             if (!BodyIsValid(TheRow))
             {
+                IsSaveSuccess = false;
                 DG_SUB_CANCEL_EDIT();
                 return;
             }
 
+            IsSaveSuccess = false;
             #region Re_Validate
             List<MsgModel> ErrosMessages = new List<MsgModel>();
             //انبار خالی نباشد
@@ -1587,7 +1795,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
             try
             {
-                if (e.Row.IsNewItem)
+                if (e.Row.IsNewItem || IsPastingRows)
                 {
                     const string insertSql = @"
                     INSERT INTO dbo.DTL_MANF 
@@ -1621,6 +1829,10 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 if (ex.Number == 2601 || ex.Number == 2627)
                 {
                     new Msgwin(false, "داده تکراری است آنرا اصلاح کنید").ShowDialog();
+                }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام عملیات ذخیره!").ShowDialog();
                 }
                 return;
             }
@@ -1722,6 +1934,8 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             #endregion
 
             Summer();
+
+            IsSaveSuccess = true;
         }
 
         private void ClearFreshAll()
@@ -1780,35 +1994,47 @@ namespace Prg_UI.Wins.WinMenus.SANATI
         private void DG_SUB_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
             DataGrid dataGrid = sender as DataGrid;
+
             if (dataGrid == null) return;
 
-            if (dataGrid.SelectedItems.Count > 0)
+            try
             {
-                return;
+                // اطمینان از فوکوس بودن DataGrid قبل از باز کردن Context Menu
+                if (!dataGrid.IsKeyboardFocusWithin)
+                {
+                    dataGrid.Focus();
+                }
+
+                // Find the row under the mouse
+                DependencyObject dep = (DependencyObject)e.OriginalSource;
+                while (dep != null && !(dep is DataGridRow))
+                {
+                    dep = VisualTreeHelper.GetParent(dep);
+                }
+
+                DataGridRow row = dep as DataGridRow;
+                if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
+                {
+                    // Select the row under the mouse
+                    dataGrid.SelectedItem = row.Item;
+
+                    // تنظیم فوکوس روی سطر
+                    row.Focus();
+
+                    // Show the context menu
+                    dataGrid.ContextMenu.IsOpen = true;
+
+                    // Mark the event as handled to prevent the default context menu behavior
+                    e.Handled = true;
+                }
+                else
+                {
+                    dataGrid.ContextMenu.IsOpen = true;
+                    e.Handled = true;
+                }
             }
-
-            // Find the row under the mouse
-            DependencyObject dep = (DependencyObject)e.OriginalSource;
-            while (dep != null && !(dep is DataGridRow))
+            catch (Exception)
             {
-                dep = VisualTreeHelper.GetParent(dep);
-            }
-
-            DataGridRow row = dep as DataGridRow;
-            if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
-            {
-                // Select the row under the mouse
-                dataGrid.SelectedItem = row.Item;
-
-                // Show the context menu
-                dataGrid.ContextMenu.IsOpen = true;
-
-                // Mark the event as handled to prevent the default context menu behavior
-                e.Handled = true;
-            }
-            else
-            {
-                // No valid row, don't show context menu
                 e.Handled = true;
             }
         }
@@ -2212,6 +2438,73 @@ namespace Prg_UI.Wins.WinMenus.SANATI
         {
             ReCalcAfter();
         }
+        private void DG_SUB_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            DataGrid? dg = sender as DataGrid;
+            if (dg == null) return;
+
+            // اطمینان از فوکوس بودن DataGrid
+            if (!dg.IsKeyboardFocusWithin)
+            {
+                dg.Focus();
+            }
+
+            if (dg.CurrentItem == null || dg.CurrentItem == CollectionView.NewItemPlaceholder)
+            {
+                e.Handled = true; // Cancel opening the menu. Avoids the crash.
+                return;
+            }
+            if (dg?.SelectedItem == null)
+            {
+                e.Handled = true;
+                return;
+            }
+            else if (dg?.ContextMenu == null)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            base.OnContextMenuOpening(e);
+        }
+        private void DataGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var dataGrid = sender as DataGrid;
+            if (dataGrid == null)
+                return;
+
+            // پیدا کردن سطری که روی آن کلیک شده
+            var row = FindVisualParent<DataGridRow>(e.OriginalSource as DependencyObject);
+
+            if (row != null)
+            {
+                // انتخاب سطر
+                if (!row.IsSelected)
+                {
+                    row.IsSelected = true;
+                    dataGrid.SelectedItem = row.Item;
+                }
+
+                // تنظیم فوکوس روی سطر و DataGrid
+                row.Focus();
+
+                // اطمینان از اینکه DataGrid خودش هم فوکوس دارد
+                dataGrid.Focus();
+
+                // اگر سلول خاصی زیر موس است، آن را هم فوکوس کنیم
+                var cell = FindVisualParent<DataGridCell>(e.OriginalSource as DependencyObject);
+                if (cell != null)
+                {
+                    cell.Focus();
+                }
+            }
+            else
+            {
+                // اگر روی header یا جای دیگری کلیک شد، حداقل DataGrid را فوکوس کنیم
+                dataGrid.Focus();
+            }
+        }
+
         private void SA_NHOU_NumericLostFocus(object sender, RoutedEventArgs e)
         {
             ReCalcAfter();

@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
-                xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.SANATI"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.SANATI"
         mc:Ignorable="d"
 
         
@@ -150,7 +150,7 @@
            CurrentCellActivated="SYNCFUSION_DG_CurrentCellActivated"
 		   SelectionChanged="SYNCFUSION_DG_SelectionChanged"
 		   PreviewKeyDown="SYNCFUSION_DG_PreviewKeyDown"
-           Margin="10,49,10,10" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True"  AlternationCount="2" AlternatingRowStyle="{StaticResource AlternatingRowStyle}">
+           Margin="10,49,10,43" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True"  AlternationCount="2" AlternatingRowStyle="{StaticResource AlternatingRowStyle}">
 
             <syncfusion:SfDataGrid.Resources>
                 <ResourceDictionary>
@@ -229,6 +229,9 @@
                 
             </syncfusion:SfDataGrid.Columns>
         </syncfusion:SfDataGrid>
+
+        <Label Content="تعداد رکورد ها:" Margin="0,0,16,11" FlowDirection="RightToLeft" Width="84" HorizontalAlignment="Right" Height="27" VerticalAlignment="Bottom"/>
+        <TextBlock x:Name="ROWCOUNT_TEXTBLK" Text=""  Margin="0,0,100,11"  FlowDirection="RightToLeft" Width="230" HorizontalAlignment="Right" Height="23" VerticalAlignment="Bottom"/>
 
     </Grid>
 </Window>
