@@ -670,5 +670,21 @@ namespace Wins.WinMenus.Taarif
         private void DETA_HES_SUB_AddingNewItem(object sender, AddingNewItemEventArgs e)
         {
         }
+
+        private async void EXPORTEXCEL_BTN(object sender, RoutedEventArgs e)
+        {
+            if (DETA_HES_DATA.Count == 0)
+            {
+                return;
+            }
+            try
+            {
+                await UniversalExcelExporter.ExportToExcelAsync(DETA_HES_DATA, "DGExportedExcel");
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
+            }
+        }
     }
 }

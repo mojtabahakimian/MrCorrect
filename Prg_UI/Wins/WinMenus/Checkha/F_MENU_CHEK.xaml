@@ -84,10 +84,10 @@
         <Label Width="auto" VerticalAlignment="Top" Margin="0,74,26,0" HorizontalAlignment="Right" FlowDirection="RightToLeft" Content="نام شخص:" Visibility="Hidden"/>
         <TextBox x:Name="HHMOIN" Text="" Height="30"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Hidden" MaxLength="48" Margin="33,0,90,126" />
         <Button x:Name="Command5" Width="100" VerticalAlignment="Top" TabIndex="5" Margin="204,162,0,0" Height="37" HorizontalAlignment="Left" FontSize="12" Foreground="#DDFFFFFF" Content="تایید" Click="Command5_Click"/>
-        <xctk:MaskedTextBox x:Name="DT1" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="" Height="30" Margin="275,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center"  BorderThickness="1" FontSize="12" HorizontalAlignment="Left" Width="88" TabIndex="4" />
+        <xctk:MaskedTextBox x:Name="DT1" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="" Height="30" Margin="275,0,0,0" PreviewGotKeyboardFocus="DT1_PreviewGotKeyboardFocus" TextWrapping="Wrap" VerticalAlignment="Center"  BorderThickness="1" FontSize="12" HorizontalAlignment="Left" Width="88" TabIndex="4" />
         <Label Width="auto" VerticalAlignment="Center" Margin="364,0,0,0" HorizontalAlignment="Left" FlowDirection="RightToLeft" Content="از تاریخ:"/>
         <Label Width="auto" VerticalAlignment="Center" Margin="196,0,0,0" HorizontalAlignment="Left" FlowDirection="RightToLeft" Content="تا تاریخ:"/>
-        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="" Height="30" Margin="109,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center"  BorderThickness="1" FontSize="12" HorizontalAlignment="Left" Width="88" TabIndex="4" />
+        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="" Height="30" Margin="109,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center" PreviewGotKeyboardFocus="DT2_PreviewGotKeyboardFocus" BorderThickness="1" FontSize="12" HorizontalAlignment="Left" Width="88" TabIndex="4" />
 
 
     </Grid>

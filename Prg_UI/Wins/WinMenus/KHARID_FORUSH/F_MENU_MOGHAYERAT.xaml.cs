@@ -175,5 +175,15 @@ namespace Wins.WinMenus.KHARID_FORUSH
             dbms.DoExecuteSQL("INSERT INTO dbo.MO_DTL (MONUM, N_S, HES_K, HES_M, HES_T, SHARH, BED, BES, N_SERI, BANK, NUMBER, TAG,ID) SELECT " + MON + " AS MMM, dbo.DEED_DTL.N_S, dbo.DEED_DTL.HES_K, dbo.DEED_DTL.HES_M, dbo.DEED_DTL.HES_T, dbo.DEED_DTL.SHARH, dbo.DEED_DTL.BED , dbo.DEED_DTL.BES, dbo.DEED_DTL.N_SERI, dbo.DEED_DTL.BANK, dbo.DEED_DTL.NUMBER, dbo.DEED_DTL.TAG , dbo.DEED_DTL.ID FROM dbo.DEED_HED INNER JOIN  dbo.DEED_DTL ON dbo.DEED_HED.N_S = dbo.DEED_DTL.N_S AND dbo.DEED_HED.N_S = dbo.DEED_DTL.N_S AND dbo.DEED_HED.N_S = dbo.DEED_DTL.N_S And dbo.DEED_HED.N_S = dbo.DEED_DTL.N_S WHERE (dbo.DEED_DTL.HES_K = " + KOL + ") AND (dbo.DEED_DTL.HES_M = " + MOIN + ") AND (dbo.DEED_DTL.HES_T = " + TAF + ") AND (dbo.DEED_HED.DATE_S BETWEEN " + DT1.Text.ToRawTarikh() + " AND " + DT2.Text.ToRawTarikh() + ")");
             new MOGHAYERAT(i).Show();
         }
+
+        private void DT1_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DT1.SelectAll();
+        }
+
+        private void DT2_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DT2.SelectAll();
+        }
     }
 }

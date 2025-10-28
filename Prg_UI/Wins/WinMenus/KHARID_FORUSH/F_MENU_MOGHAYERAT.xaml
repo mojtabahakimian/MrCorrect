@@ -53,7 +53,7 @@
         </Popup>
         <Button x:Name="BTN_GO" Content="تایید"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="223,154,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Click="BTN_GO_Click" TabIndex="3" />
         <Label Content="حساب:" HorizontalAlignment="Right" Margin="0,67,44,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
-        <xctk:MaskedTextBox x:Name="DT1" TabIndex="1" Text="11111111" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="30" Margin="296,105,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Left" Width="145" />
+        <xctk:MaskedTextBox x:Name="DT1" TabIndex="1" Text="11111111" Style="{StaticResource FuzzyOut}" Padding="3" PreviewGotKeyboardFocus="DT1_PreviewGotKeyboardFocus" Mask="0000/00/00" Height="30" Margin="296,105,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Left" Width="145" />
         <Label Content="از تاریخ:" HorizontalAlignment="Left" Margin="443,106,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
         <Label Content="تا تاریخ:" HorizontalAlignment="Left" Margin="187,106,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
         <ComboBox x:Name="XTAF" SelectedIndex="-1" IsSynchronizedWithCurrentItem="True" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="296,67,89,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" DisplayMemberPath="hes" SelectedValuePath="hes" TabIndex="0">
@@ -70,7 +70,7 @@
                 </ItemsPanelTemplate>
             </ComboBox.ItemsPanel>
         </ComboBox>
-        <xctk:MaskedTextBox x:Name="DT2" TabIndex="2"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="30" Margin="37,105,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Left" Width="145" />
+        <xctk:MaskedTextBox x:Name="DT2" TabIndex="2"  Style="{StaticResource FuzzyOut}" Padding="3" PreviewGotKeyboardFocus="DT2_PreviewGotKeyboardFocus"  Mask="0000/00/00" Height="30" Margin="37,105,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Left" Width="145" />
         <!--HEADER↑-->
 
         <!--Start.......................................................................................-->

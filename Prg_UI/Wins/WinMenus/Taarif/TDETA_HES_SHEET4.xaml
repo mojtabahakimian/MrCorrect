@@ -21,6 +21,14 @@
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
 
+        <ContextMenu x:Key="DataGridContextMenu" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="خروجی اکسل" Click="EXPORTEXCEL_BTN" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="FileExcelOutline" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
+
     </Window.Resources>
 
     <WindowChrome.WindowChrome>
@@ -57,7 +65,7 @@
 
         <Label Content="جستجو نام حساب تفضیلی 4 : " VerticalContentAlignment="Center" Margin="0,50,10,0" FlowDirection="RightToLeft" Height="29" VerticalAlignment="Top" HorizontalAlignment="Right" Width="160" />
         <TextBox x:Name="SearchText" Text="" TextChanged="SearchText_TextChanged" Height="29" Margin="10,50,170,0" Style="{StaticResource FuzzyOut}" Padding="3" TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right" Visibility="Visible"/>
-        <DataGrid x:Name="TDETA_HES4_SUB" ItemsSource="{Binding TDETA_HES4_DATA}" 
+        <DataGrid x:Name="TDETA_HES4_SUB" ItemsSource="{Binding TDETA_HES4_DATA}" ContextMenu="{StaticResource DataGridContextMenu}"
                   ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
                   CellStyle="{StaticResource CellFocusyBorder}"
                   HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
@@ -120,7 +128,7 @@
                 <DataGridTextColumn Header="نام حساب" Binding="{Binding NAME, UpdateSourceTrigger=LostFocus}" MinWidth="200" >
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
-                            <Setter Property="MaxLength" Value="49"/>
+                            <Setter Property="MaxLength" Value="99"/>
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>

@@ -327,5 +327,10 @@ namespace Wins.WinMenus.ANBAR
                 }
             }
         }
+
+        private void DT2_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DT2.SelectAll();
+        }
     }
 }

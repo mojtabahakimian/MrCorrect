@@ -228,7 +228,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 switch (OpenArgs)
                 {
                     case "VISITDLV":
-                        new VISITORS_KOL(DT1.Text.ToRawTarikh(),DT2.Text.ToRawTarikh(),Convert.ToString(CUST_NO.SelectedValue is null ? "%" : CUST_NO.SelectedValue),Condition.ToString()).Show();
+                        new VISITORS_KOL(DT1.Text.ToRawTarikh(), DT2.Text.ToRawTarikh(), Convert.ToString(CUST_NO.SelectedValue is null ? "%" : CUST_NO.SelectedValue), Condition.ToString()).Show();
                         break;
 
                     case "VISITKAL":
@@ -238,7 +238,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                         break;
 
                     case "VISITKALMA":
-                         sql = $"SELECT * FROM VISITOR_DTL_KALA_mara({DT1.Text.ToRawTarikh()},{DT2.Text.ToRawTarikh()},N'{Convert.ToString(CUST_NO.SelectedValue is null ? "%" : CUST_NO.SelectedValue)}') {Condition}";
+                        sql = $"SELECT * FROM VISITOR_DTL_KALA_mara({DT1.Text.ToRawTarikh()},{DT2.Text.ToRawTarikh()},N'{Convert.ToString(CUST_NO.SelectedValue is null ? "%" : CUST_NO.SelectedValue)}') {Condition}";
 
                         new VISITOR_DTL_KALA_mara(sql).Show();
                         break;
@@ -288,6 +288,15 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 // swallow errors as in VBA's On Error Resume Next
                 Debug.WriteLine("Error in Command5_Click: " + ex);
             }
+        }
+
+        private void DT1_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DT1.SelectAll();
+        }
+        private void DT2_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DT2.SelectAll();
         }
     }
 }

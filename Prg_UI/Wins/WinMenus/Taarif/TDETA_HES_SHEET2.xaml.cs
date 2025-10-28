@@ -1085,5 +1085,21 @@ namespace Wins.WinMenus.Taarif
             }
 
         }
+
+        private async void EXPORTEXCEL_BTN(object sender, RoutedEventArgs e)
+        {
+            if (TDETA_HES2_DATA.Count == 0)
+            {
+                return;
+            }
+            try
+            {
+                await UniversalExcelExporter.ExportToExcelAsync(TDETA_HES2_DATA, "DGExportedExcel");
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
+            }
+        }
     }
 }

@@ -45,7 +45,7 @@
 
         <Button x:Name="Command5" Width="81" VerticalAlignment="Top" TabIndex="6" Margin="0,207,0,0" Height="37" HorizontalAlignment="Center" FontSize="12" Foreground="#DDFFFFFF" Content="تایید" Click="Commnd5_Click"/>
         <Label VerticalAlignment="Top" Margin="0,71,25,0" FlowDirection="RightToLeft" Content=" حساب کل :" HorizontalAlignment="Right" Width="71"/>
-        <xctk:MaskedTextBox x:Name="DT1" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="11111111" Height="26" Margin="388,147,95,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" TabIndex="4" />
+        <xctk:MaskedTextBox x:Name="DT1" Style="{StaticResource FuzzyOut}" Padding="3" PreviewGotKeyboardFocus="DT1_PreviewGotKeyboardFocus" Mask="0000/00/00" Text="11111111" Height="26" Margin="388,147,95,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" TabIndex="4" />
         <Label Content="از تاریخ:" FlowDirection="RightToLeft" Margin="0,144,44,0" VerticalAlignment="Top" Width="49" HorizontalAlignment="Right"/>
         <ComboBox x:Name="HKOL"    FlowDirection="RightToLeft"
             Style="{StaticResource FuzzyOutComboBox}"  
@@ -81,7 +81,7 @@
                 </ItemsPanelTemplate>
             </ComboBox.ItemsPanel>
         </ComboBox>
-        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="99991230" Height="26" Margin="18,147,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Left" Width="88" TabIndex="5" />
+        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource FuzzyOut}" PreviewGotKeyboardFocus="DT2_PreviewGotKeyboardFocus" Padding="3"  Mask="0000/00/00" Text="99991230" Height="26" Margin="18,147,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Left" Width="88" TabIndex="5" />
         <Label Content="تا تاریخ:" FlowDirection="RightToLeft" HorizontalAlignment="Left" Margin="108,144,0,0" VerticalAlignment="Top" Width="auto"/>
         <ComboBox x:Name="HHMOIN"    FlowDirection="RightToLeft"
             Style="{StaticResource FuzzyOutComboBox}"  

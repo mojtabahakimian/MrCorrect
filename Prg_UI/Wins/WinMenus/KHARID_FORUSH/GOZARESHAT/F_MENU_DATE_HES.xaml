@@ -73,8 +73,8 @@
         </ComboBox>
         <Label Content="از تاریخ:" HorizontalAlignment="Right" Margin="0,198,18,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
         <Label Content="تا تاریخ:" HorizontalAlignment="Left" Margin="610,198,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
-        <xctk:MaskedTextBox x:Name="DT1" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="28" Margin="0,198,66,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" TabIndex="5" />
-        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="30" Margin="0,197,220,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" TabIndex="6" />
+        <xctk:MaskedTextBox x:Name="DT1" PreviewGotKeyboardFocus="DT1_PreviewGotKeyboardFocus" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="28" Margin="0,198,66,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" TabIndex="5" />
+        <xctk:MaskedTextBox x:Name="DT2" PreviewGotKeyboardFocus="DT2_PreviewGotKeyboardFocus" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="30" Margin="0,197,220,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" TabIndex="6" />
         <Button x:Name="BTN_GO" Click="BTN_GO_Click" Content="تایید"  BorderBrush="{x:Null}" FontSize="11" Foreground="#DDFFFFFF" Margin="383,0,345,10" Height="34" VerticalAlignment="Bottom" Padding="16,2,16,4" TabIndex="7" />
 
 

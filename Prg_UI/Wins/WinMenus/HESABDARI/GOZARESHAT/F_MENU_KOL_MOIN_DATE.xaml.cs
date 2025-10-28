@@ -251,13 +251,13 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
             //DoCmd.OpenReport("R_DAFTAR_MOIN", acViewPreview);
             OpenReport();
-            
+
             this.Close();
         }
 
         private void OpenReport()
         {
-            
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.R_DAFTAR_MOIN.mrt");
             report.Load(pathreport);
@@ -293,6 +293,16 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             //report.Render();
             //report.Show();
             new Rpts.WINRPT(report, "گزارش دفتر معین").Show();
+        }
+
+        private void DT1_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DT1.SelectAll();
+
+        }
+        private void DT2_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DT2.SelectAll();
         }
     }
 }

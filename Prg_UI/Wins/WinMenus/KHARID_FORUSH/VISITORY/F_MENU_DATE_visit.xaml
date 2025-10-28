@@ -70,11 +70,11 @@
         </ComboBox>
         
         <Button x:Name="Command5" Width="80" VerticalAlignment="Top"  Margin="0,277,0,0" Height="37" HorizontalAlignment="Center" FontSize="12" Foreground="#DDFFFFFF" Content="تایید" Click="Commnd5_Click"/>
-        
-        <xctk:MaskedTextBox x:Name="DT1" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="14040101" Height="30" Margin="429,131,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Left" Width="88" TabIndex="1" />
+
+        <xctk:MaskedTextBox x:Name="DT1" Style="{StaticResource FuzzyOut}" Padding="3" PreviewGotKeyboardFocus="DT1_PreviewGotKeyboardFocus" Mask="0000/00/00" Text="14040101" Height="30" Margin="429,131,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Left" Width="88" TabIndex="1" />
         <Label Content="از تاریخ:" FlowDirection="RightToLeft" Margin="519,128,0,0" VerticalAlignment="Top" Width="49" HorizontalAlignment="Left"/>
-        
-        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="14040109" Height="30" Margin="161,131,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Left" Width="88" TabIndex="2" />
+
+        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource FuzzyOut}" Padding="3" PreviewGotKeyboardFocus="DT2_PreviewGotKeyboardFocus" Mask="0000/00/00" Text="14040109" Height="30" Margin="161,131,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Left" Width="88" TabIndex="2" />
         <Label Content="تا تاریخ:" FlowDirection="RightToLeft" HorizontalAlignment="Left" Margin="251,128,0,0" VerticalAlignment="Top" Width="auto"/>
         
 

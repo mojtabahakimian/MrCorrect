@@ -4,6 +4,7 @@ using Prg_UI.HelperWins;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.XlsIO;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -65,6 +66,7 @@ namespace Functions
                 HandleExportError(ex);
             }
         }
+
         private static string GetDisplayMemberPathValue(ComboBox comboBox)
         {
             if (comboBox.SelectedItem != null && !string.IsNullOrWhiteSpace(comboBox.DisplayMemberPath))
@@ -179,6 +181,7 @@ namespace Functions
                 return "";
             }
         }
+
         private static void ExportWpfDataGrid(DataGrid dataGrid, string filePath)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -199,67 +202,68 @@ namespace Functions
                     }
                 }
 
-                // Capture data
+                // Capture data from selected items
                 foreach (var item in dataGrid.SelectedItems)
                 {
                     var rowData = new List<object>();
-                    for (int col = 0; col < dataGrid.Columns.Count; col++)
+                    for (int i = 0; i < dataGrid.Columns.Count; i++)
                     {
-                        var column = dataGrid.Columns[col];
-
-                        if (column.Visibility == Visibility.Visible)
+                        if (dataGrid.Columns[i].Visibility == Visibility.Visible)
                         {
-                            var cellValue = GetCellValue(item, column);
-                            rowData.Add(cellValue);
+                            rowData.Add(GetCellValue(item, dataGrid.Columns[i]));
                         }
                     }
                     data.Add(rowData);
                 }
             });
 
-            try
+            // Create Excel file with captured data (not on UI thread)
+            using (var package = new ExcelPackage())
             {
-                using (var package = new ExcelPackage())
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+
+                // Ensure RTL is applied at the worksheet level
+                worksheet.View.RightToLeft = true;
+
+                // Export headers
+                for (int i = 0; i < headers.Count; i++)
                 {
-                    var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                    worksheet.Cells[1, i + 1].Value = headers[i];
+                    worksheet.Cells[1, i + 1].Style.Font.Bold = true;
+                }
 
-                    // Enable Right-to-Left orientation
-                    worksheet.View.RightToLeft = true;
-
-                    // Write headers
-                    for (int i = 0; i < headers.Count; i++)
+                // Export data
+                for (int rowIndex = 0; rowIndex < data.Count; rowIndex++)
+                {
+                    for (int colIndex = 0; colIndex < data[rowIndex].Count; colIndex++)
                     {
-                        worksheet.Cells[1, i + 1].Value = headers[i];
-                        worksheet.Cells[1, i + 1].Style.Font.Bold = true;
-                    }
+                        var value = data[rowIndex][colIndex];
 
-                    // Write data
-                    for (int row = 0; row < data.Count; row++)
-                    {
-                        for (int col = 0; col < data[row].Count; col++)
+                        // Check if the value is numeric
+                        if (value != null && (value is int || value is long || value is decimal || value is double || value is float))
                         {
-                            worksheet.Cells[row + 2, col + 1].Value = data[row][col];
+                            worksheet.Cells[rowIndex + 2, colIndex + 1].Value = value;
+                        }
+                        else
+                        {
+                            worksheet.Cells[rowIndex + 2, colIndex + 1].Value = value?.ToString() ?? "";
                         }
                     }
-
-                    // Auto-fit columns
-                    worksheet.Cells.AutoFitColumns();
-
-                    // Save
-                    var fileInfo = new FileInfo(filePath);
-                    package.SaveAs(fileInfo);
                 }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Failed to export WPF DataGrid", ex);
+
+                // Auto-fit columns
+                worksheet.Cells.AutoFitColumns();
+
+                // Save the package
+                package.SaveAs(new FileInfo(filePath));
             }
         }
+
         private static void ExportWpfDataGridDisformated(DataGrid dataGrid, string filePath)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-            // Capture the data on the UI thread
+            // Capture the data on the UI thread first
             var headers = new List<string>();
             var data = new List<List<object>>();
 
@@ -267,112 +271,60 @@ namespace Functions
             dataGrid.Dispatcher.Invoke(() =>
             {
                 // Capture headers
-                foreach (var column in dataGrid.Columns)
+                for (int i = 0; i < dataGrid.Columns.Count; i++)
                 {
-                    if (column.Visibility == Visibility.Visible)
+                    if (dataGrid.Columns[i].Visibility == Visibility.Visible)
                     {
-                        headers.Add(column.Header?.ToString() ?? "Unnamed Column");
+                        headers.Add(dataGrid.Columns[i].Header?.ToString() ?? $"Column {i + 1}");
                     }
                 }
 
-                //ItemCollection THE_ITEMS = dataGrid.Items;
-                //if (OnlySelectedRows)
-                //{
-                //    THE_ITEMS = (ItemCollection)dataGrid.SelectedItems;
-                //}
-
-                // Capture row data, including template columns
+                // Capture data from selected items
                 foreach (var item in dataGrid.SelectedItems)
                 {
-                    if (item == null) continue; // Skip null rows
                     var rowData = new List<object>();
-                    foreach (var column in dataGrid.Columns)
+                    for (int i = 0; i < dataGrid.Columns.Count; i++)
                     {
-                        if (column.Visibility == Visibility.Visible)
+                        if (dataGrid.Columns[i].Visibility == Visibility.Visible)
                         {
-                            if (column is DataGridBoundColumn boundColumn)
-                            {
-                                var cellValue = GetBoundColumnValue(item, boundColumn);
-                                rowData.Add(cellValue);
-                            }
-                            else if (column is DataGridTemplateColumn templateColumn)
-                            {
-                                var cellValue = GetTemplateColumnValue(dataGrid, item, templateColumn);
-                                rowData.Add(cellValue);
-                            }
-                            else
-                            {
-                                rowData.Add(""); // Handle unsupported columns
-                            }
+                            rowData.Add(GetCellValue(item, dataGrid.Columns[i]));
                         }
                     }
                     data.Add(rowData);
                 }
             });
 
-            try
+            // Create Excel file with captured data (not on UI thread)
+            using (var package = new ExcelPackage())
             {
-                using (var package = new ExcelPackage())
+                var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+
+                // Ensure RTL is applied at the worksheet level
+                worksheet.View.RightToLeft = true;
+
+                // Export headers
+                for (int i = 0; i < headers.Count; i++)
                 {
-                    var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-
-                    // Enable Right-to-Left orientation
-                    worksheet.View.RightToLeft = true;
-
-                    // Write headers
-                    for (int i = 0; i < headers.Count; i++)
-                    {
-                        worksheet.Cells[1, i + 1].Value = headers[i];
-                        worksheet.Cells[1, i + 1].Style.Font.Bold = true;
-                    }
-
-                    // Write data
-                    for (int row = 0; row < data.Count; row++)
-                    {
-                        for (int col = 0; col < data[row].Count; col++)
-                        {
-                            worksheet.Cells[row + 2, col + 1].Value = data[row][col]?.ToString() ?? "";
-                        }
-                    }
-
-                    // Auto-fit columns
-                    worksheet.Cells.AutoFitColumns();
-
-
-                    // Save
-                    var fileInfo = new FileInfo(filePath);
-                    package.SaveAs(fileInfo);
+                    worksheet.Cells[1, i + 1].Value = headers[i];
+                    worksheet.Cells[1, i + 1].Style.Font.Bold = true;
                 }
+
+                // Export data AS TEXT to avoid formatting issues
+                for (int rowIndex = 0; rowIndex < data.Count; rowIndex++)
+                {
+                    for (int colIndex = 0; colIndex < data[rowIndex].Count; colIndex++)
+                    {
+                        var value = data[rowIndex][colIndex];
+                        worksheet.Cells[rowIndex + 2, colIndex + 1].Value = value?.ToString() ?? "";
+                    }
+                }
+
+                // Auto-fit columns
+                worksheet.Cells.AutoFitColumns();
+
+                // Save the package
+                package.SaveAs(new FileInfo(filePath));
             }
-            catch (Exception ex)
-            {
-                throw new Exception("Failed to export WPF DataGrid", ex);
-            }
-        }
-        private static object GetBoundColumnValue(object item, DataGridBoundColumn column)
-        {
-            var binding = column.Binding as System.Windows.Data.Binding;
-            if (binding == null) return "";
-
-            var property = item.GetType().GetProperty(binding.Path.Path);
-            return property?.GetValue(item) ?? "";
-        }
-        private static object GetTemplateColumnValue(DataGrid dataGrid, object item, DataGridTemplateColumn column)
-        {
-            // Generate the visual tree for the cell to extract the displayed value
-            var content = new ContentPresenter();
-            content.Content = item;
-            content.ContentTemplate = column.CellTemplate;
-
-            content.Dispatcher.Invoke(() =>
-            {
-                // Measure and arrange to properly instantiate the template
-                content.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
-                content.Arrange(new Rect(new System.Windows.Point(0, 0), content.DesiredSize));
-            });
-
-            var textBlock = FindChild<TextBlock>(content);
-            return textBlock?.Text ?? "";
         }
 
         private static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
@@ -380,7 +332,6 @@ namespace Functions
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
             {
                 var child = VisualTreeHelper.GetChild(parent, i);
-
                 if (child is T found)
                     return found;
 
@@ -390,6 +341,7 @@ namespace Functions
             }
             return null;
         }
+
         private static T FindChild<T>(DependencyObject parent) where T : DependencyObject
         {
             if (parent == null) return null;
@@ -409,6 +361,88 @@ namespace Functions
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// متد جدید برای گرفتن مقدار نمایشی از ستون‌های کمبوباکس در SfDataGrid
+        /// </summary>
+        private static object GetSyncfusionCellDisplayValue(object record, GridColumnBase column)
+        {
+            try
+            {
+                // بررسی اینکه آیا ستون از نوع GridComboBoxColumn است
+                if (column is GridComboBoxColumn comboColumn)
+                {
+                    // دریافت مقدار خام از property
+                    var propertyInfo = record.GetType().GetProperty(column.MappingName);
+                    if (propertyInfo != null)
+                    {
+                        var rawValue = propertyInfo.GetValue(record);
+
+                        // اگر ItemsSource تعریف شده و DisplayMemberPath و SelectedValuePath موجود باشند
+                        if (comboColumn.ItemsSource != null &&
+                            !string.IsNullOrWhiteSpace(comboColumn.DisplayMemberPath) &&
+                            !string.IsNullOrWhiteSpace(comboColumn.SelectedValuePath))
+                        {
+                            // جستجو در ItemsSource برای پیدا کردن مقدار نمایشی
+                            foreach (var item in comboColumn.ItemsSource)
+                            {
+                                if (item == null) continue;
+
+                                // دریافت property مربوط به SelectedValuePath
+                                var valueProperty = item.GetType().GetProperty(comboColumn.SelectedValuePath);
+                                if (valueProperty != null)
+                                {
+                                    var itemValue = valueProperty.GetValue(item);
+
+                                    // مقایسه مقدار
+                                    if (itemValue != null && rawValue != null)
+                                    {
+                                        // تبدیل هر دو به string برای مقایسه ایمن
+                                        string itemValueStr = itemValue.ToString();
+                                        string rawValueStr = rawValue.ToString();
+
+                                        if (itemValueStr.Equals(rawValueStr, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            // دریافت مقدار نمایشی
+                                            var displayProperty = item.GetType().GetProperty(comboColumn.DisplayMemberPath);
+                                            if (displayProperty != null)
+                                            {
+                                                var displayValue = displayProperty.GetValue(item);
+                                                return displayValue?.ToString() ?? string.Empty;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // اگر مقدار نمایشی پیدا نشد، مقدار خام را برگردان
+                        return rawValue?.ToString() ?? string.Empty;
+                    }
+                }
+                else
+                {
+                    // برای ستون‌های معمولی، مقدار را به صورت مستقیم برگردان
+                    if (!string.IsNullOrWhiteSpace(column.MappingName))
+                    {
+                        var propertyInfo = record.GetType().GetProperty(column.MappingName);
+                        if (propertyInfo != null)
+                        {
+                            var value = propertyInfo.GetValue(record);
+                            return value?.ToString() ?? string.Empty;
+                        }
+                    }
+                }
+
+                return string.Empty;
+            }
+            catch (Exception ex)
+            {
+                // Log the error if needed
+                Debug.WriteLine($"Error getting cell display value: {ex.Message}");
+                return string.Empty;
+            }
         }
 
         private static void ExportSyncfusionDataGrid(SfDataGrid dataGrid, string filePath)
@@ -436,18 +470,11 @@ namespace Functions
                     for (int colIndex = 0; colIndex < dataGrid.Columns.Count; colIndex++)
                     {
                         var column = dataGrid.Columns[colIndex];
-                        if (!column.IsHidden && !string.IsNullOrWhiteSpace(column.MappingName))
+                        if (!column.IsHidden)
                         {
-                            var propertyInfo = record.GetType().GetProperty(column.MappingName);
-                            if (propertyInfo != null)
-                            {
-                                var value = propertyInfo.GetValue(record);
-                                rowData.Add(value);
-                            }
-                            else
-                            {
-                                rowData.Add(null); // Or some default value
-                            }
+                            // استفاده از متد جدید برای دریافت مقدار نمایشی
+                            var displayValue = GetSyncfusionCellDisplayValue(record, column);
+                            rowData.Add(displayValue);
                         }
                     }
                     data.Add(rowData);
@@ -477,7 +504,7 @@ namespace Functions
                 {
                     for (int colIndex = 0; colIndex < data[rowIndex].Count; colIndex++)
                     {
-                        worksheet.Range[rowIndex + 2, colIndex + 1].Value = data[rowIndex][colIndex]?.ToString() ?? "";
+                        worksheet.Range[rowIndex + 2, colIndex + 1].Text = data[rowIndex][colIndex]?.ToString() ?? "";
                     }
                 }
 
@@ -509,6 +536,7 @@ namespace Functions
                 }
             });
         }
+
         private static string GetUniqueFilePath(string fileName)
         {
             string baseFileName = fileName ?? $"Export_{DateTime.Now:yyyyMMdd_HHmmss}";
@@ -551,6 +579,7 @@ namespace Functions
             GC.Collect();
             GC.WaitForPendingFinalizers();
         }
+
         private static void HandleExportError(Exception ex)
         {
             string message = "Export failed: " + ex.Message;
@@ -567,5 +596,4 @@ namespace Functions
             Debug.WriteLine($"Excel export error: {ex}");
         }
     }
-
 }

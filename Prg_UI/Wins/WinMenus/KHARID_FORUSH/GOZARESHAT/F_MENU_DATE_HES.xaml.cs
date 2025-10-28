@@ -93,7 +93,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
         UniversControl universControl = new UniversControl();
         public FULL_HESAB HESAB_FROM_SEARCH { get; set; } = new();
         public string _sql_query { get; set; }
-        public string OpenArgs { get; set; } 
+        public string OpenArgs { get; set; }
 
 
         private static bool IsNull(object p)
@@ -415,6 +415,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             }
 
             OpenReport();
+        }
+
+        private void DT1_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DT1.SelectAll();
+        }
+
+        private void DT2_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DT2.SelectAll();
         }
     }
 }
