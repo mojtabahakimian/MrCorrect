@@ -179,5 +179,15 @@ namespace Prg_UI.Wins.WinMenus.ANBAR.ANBAR_REPORTS
                 OpenReport();
             }
         }
+
+        private void DT1_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DT1.SelectAll();
+        }
+
+        private void DT2_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DT2.SelectAll();
+        }
     }
 }

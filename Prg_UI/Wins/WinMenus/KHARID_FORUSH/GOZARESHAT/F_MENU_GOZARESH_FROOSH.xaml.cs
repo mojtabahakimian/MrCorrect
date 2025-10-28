@@ -299,5 +299,14 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                 new Msgwin(false, "خطا در انجام عملیات").ShowDialog();
             }
         }
+
+        private void DT1_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DT1.SelectAll();
+        }
+        private void DT2_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DT2.SelectAll();
+        }
     }
 }

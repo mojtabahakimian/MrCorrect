@@ -92,9 +92,9 @@
                 </ItemsPanelTemplate>
             </ComboBox.ItemsPanel>
         </ComboBox>
-        <xctk:MaskedTextBox x:Name="DT1" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="11111111" Height="26" Margin="749,183,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" TabIndex="5" HorizontalAlignment="Left" Width="88" />
+        <xctk:MaskedTextBox x:Name="DT1" PreviewGotKeyboardFocus="DT1_PreviewGotKeyboardFocus"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="11111111" Height="26" Margin="749,183,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" TabIndex="5" HorizontalAlignment="Left" Width="88" />
         <Label Content="از تاریخ:" FlowDirection="RightToLeft" Margin="842,181,0,0" VerticalAlignment="Top" Width="49" HorizontalAlignment="Left"/>
-        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="99991230" Height="26" Margin="515,183,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" TabIndex="6" HorizontalAlignment="Left" Width="88" />
+        <xctk:MaskedTextBox x:Name="DT2" PreviewGotKeyboardFocus="DT2_PreviewGotKeyboardFocus" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="99991230" Height="26" Margin="515,183,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" TabIndex="6" HorizontalAlignment="Left" Width="88" />
         <Label Content="تا تاریخ:" FlowDirection="RightToLeft" Margin="608,180,0,0" VerticalAlignment="Top" Width="49" HorizontalAlignment="Left"/>
 
 

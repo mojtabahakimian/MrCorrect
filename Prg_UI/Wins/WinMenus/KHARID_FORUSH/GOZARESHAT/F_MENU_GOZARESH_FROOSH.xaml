@@ -63,8 +63,8 @@
         <Label Content="واحد ها:" HorizontalAlignment="Right" Margin="0,62,25,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="49"/>
         <Label Content="از تاریخ:" HorizontalAlignment="Right" Margin="0,101,26,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
         <Label Content="تا تاریخ:" HorizontalAlignment="Left" Margin="371,101,0,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Width="auto"/>
-        <xctk:MaskedTextBox x:Name="DT1" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="28" Margin="0,101,74,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" />
-        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="30" Margin="0,100,218,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" />
+        <xctk:MaskedTextBox x:Name="DT1" Style="{StaticResource FuzzyOut}" PreviewGotKeyboardFocus="DT1_PreviewGotKeyboardFocus" Padding="3"  Mask="0000/00/00" Height="28" Margin="0,101,74,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" />
+        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource FuzzyOut}" PreviewGotKeyboardFocus="DT2_PreviewGotKeyboardFocus" Padding="3"  Mask="0000/00/00" Height="30" Margin="0,100,218,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" />
         
         <CheckBox x:Name="DTL" Content="با جزئیات" HorizontalAlignment="Right" Margin="0,0,30,33" VerticalAlignment="Bottom" Padding="4,-2,0,0" Click="DTL_Click"/>
         <ComboBox x:Name="SHIFT" d:Visibility="Visible" SelectedValuePath="SHIFT_ID" DisplayMemberPath="SHNAME" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="281,137,74,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" Visibility="Hidden">

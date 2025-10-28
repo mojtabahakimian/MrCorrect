@@ -39,7 +39,7 @@
 
         <Button x:Name="Command5" Width="81" VerticalAlignment="Bottom" TabIndex="5" Margin="0,0,0,27" Height="37" HorizontalAlignment="Center" FontSize="12" Foreground="#DDFFFFFF" Content="تایید" Click="Commnd5_Click"/>
         <Label Width="auto" VerticalAlignment="Top" Margin="0,65,29,0" HorizontalAlignment="Right" FlowDirection="RightToLeft" Content="انبار :"/>
-        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="99991230" Height="34" Margin="0,149,63,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Right" Width="88" TabIndex="4" />
+        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource FuzzyOut}" Padding="3" PreviewGotKeyboardFocus="DT2_PreviewGotKeyboardFocus"  Mask="0000/00/00" Text="99991230" Height="34" Margin="0,149,63,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Right" Width="88" TabIndex="4" />
         <Label Content="تا تاریخ:" FlowDirection="RightToLeft" HorizontalAlignment="Right" Margin="0,146,12,0" VerticalAlignment="Top" Width="auto"/>
         <ComboBox x:Name="CANBAR"    FlowDirection="RightToLeft"
             Style="{StaticResource FuzzyOutComboBox}"  

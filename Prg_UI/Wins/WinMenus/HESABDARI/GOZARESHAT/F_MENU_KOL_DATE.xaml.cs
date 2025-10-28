@@ -289,5 +289,15 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
             new Rpts.WINRPT(report, "گزارش دفتر کل").Show();
         }
+
+        private void DT1_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DT1.SelectAll();
+        }
+
+        private void DT2_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DT2.SelectAll();
+        }
     }
 }

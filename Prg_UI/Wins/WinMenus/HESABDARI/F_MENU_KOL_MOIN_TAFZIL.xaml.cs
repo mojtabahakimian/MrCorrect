@@ -549,5 +549,24 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             Keyboard.Focus(Combo34);
             Combo34.Focus();
         }
+
+        private void Label_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+
+        }
+
+        private void Label_PreviewGotKeyboardFocus_1(object sender, KeyboardFocusChangedEventArgs e)
+        {
+
+        }
+
+        private void DT1_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DT1.SelectAll();
+        }
+        private void DT2_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            DT2.SelectAll();
+        }
     }
 }

@@ -35,6 +35,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Wins.WinMenus.ANBAR;
 using Wins.WinMenus.ANBAR.ANBAR_REPORTS;
+using Wins.WinMenus.Checkha;
 using Wins.WinMenus.CONFIGS;
 using Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.KHARID_FORUSH;
@@ -375,6 +376,9 @@ namespace Prg_UI.Wins
             //new WinBase().Show();
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ANBAR_F_AK_MOGUDI_ANBAR_LIST, this);
+
+            //new F_MENU_CHEK("chkva", "لیست چکهای دریافتی نزد بانک و صندوق وصول نشده").Show();
+
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_TAKHFIF, this);
 
             //new WIN_F_MENU_KHFR("KLIST").Show();
@@ -388,8 +392,6 @@ namespace Prg_UI.Wins
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this, 8617d);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ANBAR_FRKH_RK, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_ENTEGHAL_WIN, this);
-
-            new F_MENU_ANBAR_FRKH("RK").Show();
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ANBAR_F_AK_MOGUDI_ANBAR_LIST, this);
 

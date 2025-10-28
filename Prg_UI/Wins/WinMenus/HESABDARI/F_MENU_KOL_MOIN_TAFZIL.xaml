@@ -37,14 +37,14 @@
         <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="300,137,204,81"  Width="1"/>
         <Button x:Name="Command5" Content="تایید"  HorizontalAlignment="Left" Margin="250,193,0,0" VerticalAlignment="Top" Width="80" Height="37" Foreground="#DDFFFFFF" FontSize="12" Click="Command5_Click" TabIndex="4"/>
         <Label Content="حساب :" FlowDirection="RightToLeft" HorizontalAlignment="Left" Margin="443,70,0,0" VerticalAlignment="Top" Width="auto"/>
-        <xctk:MaskedTextBox x:Name="DT1" Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3"  Mask="0000/00/00" Height="30" Margin="306,107,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Left" Width="88" TabIndex="2" />
+        <xctk:MaskedTextBox x:Name="DT1" PreviewGotKeyboardFocus="DT1_PreviewGotKeyboardFocus" Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3"  Mask="0000/00/00" Height="30" Margin="306,107,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Left" Width="88" TabIndex="2" />
         <Label Content="از تاریخ:" FlowDirection="RightToLeft" HorizontalAlignment="Left" Margin="395,108,0,0" VerticalAlignment="Top" Width="auto"/>
         <RadioButton x:Name="Option40" GroupName="FrameGRP" Content="شماره سند" FlowDirection="RightToLeft" HorizontalAlignment="Left" Margin="311,149,0,0" VerticalAlignment="Top" Width="78"/>
         <RadioButton x:Name="Option42" GroupName="FrameGRP"  Content="شماره مبنا" FlowDirection="RightToLeft" HorizontalAlignment="Left" Margin="224,149,0,0" VerticalAlignment="Top" Width="82"/>
         <RadioButton x:Name="Option45" GroupName="FrameGRP"  Content="صورت حساب" FlowDirection="RightToLeft" HorizontalAlignment="Left" Margin="129,149,0,0" VerticalAlignment="Top" Width="90" IsChecked="True"/>
         <Label Content="براساس:" FlowDirection="RightToLeft" HorizontalAlignment="Left" Margin="394,147,0,0" VerticalAlignment="Top" Width="auto"/>
         <Button x:Name="Command6" Content="انصراف"  HorizontalAlignment="Left" Margin="165,193,0,0" VerticalAlignment="Top" Width="80" Height="37" Foreground="#DDFFFFFF" FontSize="12" Click="Command6_Click"/>
-        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource MaterialDesignOutlinedTextBox}" Padding="3"  Mask="0000/00/00" Height="30" Margin="161,107,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Left" Width="88" TabIndex="3" />
+        <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource MaterialDesignOutlinedTextBox}" PreviewGotKeyboardFocus="DT2_PreviewGotKeyboardFocus" Padding="3"  Mask="0000/00/00" Height="30" Margin="161,107,0,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" HorizontalAlignment="Left" Width="88" TabIndex="3" />
         <Label Content="تا تاریخ:" FlowDirection="RightToLeft" HorizontalAlignment="Left" Margin="250,108,0,0" VerticalAlignment="Top" Width="auto"/>
 
         <ComboBox x:Name="Combo34"    FlowDirection="RightToLeft"

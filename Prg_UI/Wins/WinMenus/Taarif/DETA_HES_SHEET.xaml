@@ -33,6 +33,15 @@
             </DockPanel>
         </ControlTemplate>
 
+        <ContextMenu x:Key="DataGridContextMenu" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="خروجی اکسل" Click="EXPORTEXCEL_BTN" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="FileExcelOutline" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
+
+
     </Window.Resources>
 
     <WindowChrome.WindowChrome>
@@ -71,7 +80,7 @@
         <TextBox x:Name="SearchText" Text="" TextChanged="SearchText_TextChanged" Height="29" Margin="10,50,112,0" Style="{StaticResource FuzzyOut}" Padding="3" TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right" Visibility="Visible"/>
 
         <DataGrid x:Name="DETA_HES_SUB" ItemsSource="{Binding DETA_HES_DATA}" AddingNewItem="DETA_HES_SUB_AddingNewItem"
-            ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+            ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"   ContextMenu="{StaticResource DataGridContextMenu}"
             CellStyle="{StaticResource CellFocusyBorder}"
             HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
             VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
