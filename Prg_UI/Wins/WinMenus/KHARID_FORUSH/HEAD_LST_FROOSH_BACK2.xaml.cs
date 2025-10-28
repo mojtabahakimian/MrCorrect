@@ -3904,6 +3904,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     {
                         var CUSTDATA = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + item.CUST_NO + "'").FirstOrDefault();
                         item.CUST_NO_NAME = CUSTDATA.NAME;
+
+                        if (item?.DARSAD != null)
+                        {
+                            item.DARSAD = Math.Round((double)item?.DARSAD, 2);
+                        }
+
                         SAYER_VISITOR_DATA.Add(item);
                     }
                 }
@@ -4200,6 +4206,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 if (_JF_ - _TAKHFIF_ != 0)
                 {
                     CURRENT_ROW_VISITOR.DARSAD = Convert.ToDouble(VISITOR_DTL_SUB_ENTERED_VALUE) / (_JF_ - _TAKHFIF_) * 100; //PURSANT
+
+                    CURRENT_ROW_VISITOR.DARSAD = Math.Round((double)CURRENT_ROW_VISITOR.DARSAD, 2);
                 }
                 else
                 {
@@ -4240,6 +4248,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     if (MBK > 0L & prs > 0L)
                     {
                         CURRENT_ROW_VISITOR.DARSAD = CURRENT_ROW_VISITOR.PURSANT / MBK * 100;
+
+                        CURRENT_ROW_VISITOR.DARSAD = Math.Round((double)CURRENT_ROW_VISITOR.DARSAD, 2);
                     }
                     else
                     {
@@ -4415,6 +4425,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 if (MBK > 0L & prs > 0L)
                 {
                     FINAL_CROW_ITEM.DARSAD = FINAL_CROW_ITEM.PURSANT / MBK * 100;
+
+                    FINAL_CROW_ITEM.DARSAD = Math.Round((double)FINAL_CROW_ITEM.DARSAD, 2);
                 }
                 else
                 {
@@ -4427,6 +4439,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text) + Convert.ToDouble(MBAA.Text) != 0)
             {
                 FINAL_CROW_ITEM.DARSAD = FINAL_CROW_ITEM.PURSANT / (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * 100;
+
+                FINAL_CROW_ITEM.DARSAD = Math.Round((double)FINAL_CROW_ITEM.DARSAD, 2);
             }
             else
             {

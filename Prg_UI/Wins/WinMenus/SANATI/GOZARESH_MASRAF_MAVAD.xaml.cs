@@ -139,6 +139,17 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 MASRAF_MAVAD_DATA.Add(item);
             }
 
+            GenerateAutomaticSummary(SYNCFUSION_DG);
+
+            // Ensure the SfDataGrid is not null before subscribing
+            if (SYNCFUSION_DG != null)
+            {
+                SYNCFUSION_DG.FilterChanged += View_FilterChanged;
+                SYNCFUSION_DG.Loaded += (s, e) => UpdateRowCountLabel();
+
+                UpdateRowCountLabel();
+            }
+
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -175,13 +186,36 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             }
         }
 
-        #region _SfDataGrid_
+        #region FilterBy
+        private void View_FilterChanged(object sender, GridFilterEventArgs e)
+        {
+            UpdateRowCountLabel();
+        }
+        private void UpdateRowCountLabel()
+        {
+            // Defensive checks
+            if (ROWCOUNT_TEXTBLK == null) return;
+            if (SYNCFUSION_DG?.View == null) return;
+
+            // Safely retrieve the record count
+            var recordCount = SYNCFUSION_DG.View.Records?.Count ?? 0;
+
+            // Set the label content
+            ROWCOUNT_TEXTBLK.Text = recordCount.ToString();
+        }
+
         private readonly FilterService<VDK> filterService = new FilterService<VDK>();
         public ObservableCollection<string> ActiveFilters { get; set; } = new ObservableCollection<string>();
+
         private string? CurrentCellValue = null;
         private RowColumnIndex CurrentCellIndex;
         private void SYNCFUSION_DG_CurrentCellActivated(object sender, Syncfusion.UI.Xaml.Grid.CurrentCellActivatedEventArgs e) // Event handler for when a cell is activated in the data grid
         {
+            if (e?.CurrentRowColumnIndex == null)
+            {
+                return;
+            }
+
             if (e?.CurrentRowColumnIndex == null) return; UpdateCurrentCellValue(e.CurrentRowColumnIndex);
         }
         private void SYNCFUSION_DG_SelectionChanged(object sender, GridSelectionChangedEventArgs e) // Event handler for when the selection changes in the data grid
@@ -199,6 +233,11 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             CurrentCellIndex = rowColumnIndex; // Update current cell index
             CurrentCellValue = null; // Reset current cell value
 
+            if (this.SYNCFUSION_DG?.Columns == null || this.SYNCFUSION_DG.Columns.Count == 0)
+            {
+                return;
+            }
+
             int rowIndex = rowColumnIndex.RowIndex;
             int columnIndex = this.SYNCFUSION_DG.ResolveToGridVisibleColumnIndex(rowColumnIndex.ColumnIndex);
             if (columnIndex < 0) return;
@@ -208,6 +247,24 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             if (recordIndex < 0) return;
 
             var record = this.SYNCFUSION_DG.View.Records.GetItemAt(recordIndex);
+
+
+            if (record == null)
+            {
+                return;
+            }
+            if (string.IsNullOrEmpty(mappingName))
+            {
+                return;
+            }
+            var property = record.GetType().GetProperty(mappingName);
+            if (property == null)
+            {
+                Console.WriteLine("Property " + mappingName + " not found on type " + record.GetType().Name);
+                return;
+            }
+
+            //CurrentCellValue = property.GetValue(record)?.ToString();
             CurrentCellValue = record?.GetType()?.GetProperty(mappingName ?? string.Empty)?.GetValue(record)?.ToString();
         }
         private void FilterBySelection_Click(object sender, RoutedEventArgs e)
@@ -220,21 +277,23 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 // Add the Contains filter to the filter service (inclusion filter)
                 filterService.AddFilter(columnName, selectedText, isExclusion: false); // False means it's an inclusion filter
                 ActiveFilters.Add($"{columnName} Contains {selectedText}");
-                // Apply the cumulative filter to the data grid
-                ApplyCumulativeFilter();
             }
             else
             {
                 if (filterValue != null)
                 {
+                    //برای اینکه دقیقا همون آیتم رو فیلتر کنه:
+                    //filterService.AddFilter(columnName, filterValue, isExclusion: false, isExactMatch: false);
+
                     // Add the filter to the filter service
                     filterService.AddFilter(columnName, filterValue);
                     // Add the filter to the list of active filters
+
                     ActiveFilters.Add($"{columnName} = {filterValue}");
                     // Apply the cumulative filter to the data grid
-                    ApplyCumulativeFilter();
                 }
             }
+            ApplyCumulativeFilter();
         }
         private void FilterExcludingSelection_Click(object sender, RoutedEventArgs e)
         {
@@ -293,36 +352,16 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as VDK);
             // Refresh the filter to update the view
             SYNCFUSION_DG.View.RefreshFilter();
+
+            UpdateRowCountLabel();
         }
         private void SYNCFUSION_DG_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (!string.IsNullOrEmpty(GetSelectedText()))
+            var element = e.OriginalSource as FrameworkElement;
+            if (element != null)
             {
-                var element = e.OriginalSource as FrameworkElement;
-                if (element != null)
-                {
-                    element.ContextMenu = this.Resources["DataGridContextMenu"] as ContextMenu;
-                }
+                element.ContextMenu = this.Resources["DataGridContextMenu"] as ContextMenu;
             }
-        }
-
-
-        private T FindChildElement<T>(DependencyObject parent) where T : DependencyObject
-        {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-            {
-                var child = VisualTreeHelper.GetChild(parent, i);
-                if (child is T typedChild)
-                {
-                    return typedChild;
-                }
-                var result = FindChildElement<T>(child);
-                if (result != null)
-                {
-                    return result;
-                }
-            }
-            return null;
         }
         private string GetSelectedText()
         {
@@ -335,21 +374,12 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 var editingElement = dataGrid.FindElementOfType<TextBox>();
                 if (editingElement != null)
                 {
-                    if (!string.IsNullOrEmpty(editingElement.SelectedText))
-                    {
-                        return editingElement.SelectedText; // Return the selected text
-                    }
+                    return editingElement.SelectedText; // Return the selected text
                 }
-
-                var editingElement2 = FindChildElement<TextBox>(dataGrid);
-                if (editingElement2 != null)
-                {
-                    return editingElement2.SelectedText;
-                }
-
             }
             return string.Empty;
         }
+
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
             CopySelectedRowsToClipboard();
@@ -362,7 +392,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 if (!string.IsNullOrEmpty(_SelectedTextCell_))
                 {
                     Clipboard.SetText(_SelectedTextCell_);
-                    universControl.PopNotifyShowUp("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
+                    universControl.PopNotifyShow("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                     return;
                 }
             }
@@ -476,8 +506,6 @@ namespace Prg_UI.Wins.WinMenus.SANATI
         }
         public void GenerateAutomaticSummary(SfDataGrid _DG_, bool _ClearAnySummaryBefore_ = false)
         {
-            return; //Temprary Disabled
-
             if (_ClearAnySummaryBefore_)
             {
                 SYNCFUSION_DG.TableSummaryRows.Clear();
@@ -506,20 +534,31 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 if (propertyInfo == null)
                     continue;
 
-                if (column.MappingName == "BED" || column.MappingName == "BES")
+                //var propertyInfo = dataType.GetProperty(column.MappingName);
+                //if (propertyInfo == null)
+                //    continue;
+
+                var IsMably =
+                        column.MappingName.Contains("MEGH") ||
+                        column.MappingName.Contains("MEGHST") ||
+                        column.MappingName.Contains("MOGMAS") ||
+                        column.MappingName.Contains("MABL") ||
+                        column.MappingName.Contains("mabst") ||
+                        column.MappingName.Contains("price") ||
+                        column.MappingName.Contains("MABLST") ||
+                        column.MappingName.Contains("mognerkh");
+
+                if (IsNumericType(propertyInfo.PropertyType) && (IsMably))
                 {
-                    if (IsNumericType(propertyInfo.PropertyType))
+                    var summaryColumn = new GridSummaryColumn
                     {
-                        var summaryColumn = new GridSummaryColumn
-                        {
-                            Name = column.MappingName + "Sum",
-                            MappingName = column.MappingName,
-                            SummaryType = Syncfusion.Data.SummaryType.DoubleAggregate,
-                            //Format = "{Sum:N0}"
-                            Format = "{Sum:N0}"
-                        };
-                        summaryColumns.Add(summaryColumn);
-                    }
+                        Name = column.MappingName + "Sum",
+                        MappingName = column.MappingName,
+                        SummaryType = Syncfusion.Data.SummaryType.DoubleAggregate,
+                        //Format = "{Sum:N0}"
+                        Format = "{Sum:N0}"
+                    };
+                    summaryColumns.Add(summaryColumn);
                 }
             }
 

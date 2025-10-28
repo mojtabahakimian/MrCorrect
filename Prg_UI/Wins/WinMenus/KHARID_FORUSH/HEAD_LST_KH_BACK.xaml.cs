@@ -3898,13 +3898,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
             (report.GetComponentByName("Text90") as StiText).Text = Baseknow.WIDTH_D; // نام شرکت
             (report.GetComponentByName("Text39") as StiText).Text = Baseknow.NAME; // نام فروشنده
                                                                                    //(report.GetComponentByName("Text4") as StiText).Text = Baseknow.TFADDRESS; // آدرس فروشنده
-            (report.GetComponentByName("Text48") as StiText).Text = Baseknow.TFTEL; // تلفن فروشنده
+            //(report.GetComponentByName("Text48") as StiText).Text = Baseknow.TFTEL; // تلفن فروشنده
 
             if (report.GetComponentByName("USERNAME") is StiText stiText) stiText.Text = Baseknow.UUSER;
 
-
-            report.Render(false);
-            report.Show();
+            new WINRPT(report, LABEL_HEADER.Content.ToString()).Show();
+            //report.Render(false);
+            //report.Show();
         }
         private void NUMBER1_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {

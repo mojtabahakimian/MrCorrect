@@ -32,6 +32,7 @@ using SGN_IMODEL = Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED.SGN_IMODEL;
 using Wins.WinMenus.KHARID_FORUSH;
 using Functions;
 using Microsoft.Data.SqlClient;
+using System.ComponentModel;
 
 namespace Wins.WinMenus.ANBAR
 {
@@ -1260,6 +1261,48 @@ namespace Wins.WinMenus.ANBAR
             }
         }
 
+        private void FinalizeActiveGridTransactions()
+        {
+            if (INVO_LST_ENTEGHAL_SUB is null)
+            {
+                return;
+            }
+
+            var editableCollectionView = INVO_LST_ENTEGHAL_SUB.Items as IEditableCollectionView;
+            try
+            {
+                if (editableCollectionView != null)
+                {
+                    if (editableCollectionView.IsEditingItem)
+                    {
+                        editableCollectionView.CancelEdit();
+                    }
+
+                    if (editableCollectionView.IsAddingNew)
+                    {
+                        editableCollectionView.CancelNew();
+                    }
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                if (editableCollectionView != null)
+                {
+                    if (editableCollectionView.IsAddingNew)
+                    {
+                        editableCollectionView.CancelNew();
+                    }
+
+                    if (editableCollectionView.IsEditingItem)
+                    {
+                        editableCollectionView.CancelEdit();
+                    }
+                }
+
+                INVO_LST_ENTEGHAL_SUB.CancelEdit();
+            }
+        }
+
 
         private void INVO_LST_ENTEGHAL_SUB_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
@@ -1869,6 +1912,17 @@ namespace Wins.WinMenus.ANBAR
             if (e.Row.Item == null || ROW is null) { return; }
             if (ConstructorRowDetector.IsPristine(ROW)) { INVO_LST_ENTEGHAL_SUB_CANCEL_EDIT(); return; }
 
+            var errors = (from object i in INVO_LST_ENTEGHAL_SUB.ItemsSource
+                          let c = INVO_LST_ENTEGHAL_SUB.ItemContainerGenerator.ContainerFromItem(i)
+                          where c != null && Validation.GetHasError(c)
+                          select c).Any();
+            if (errors)
+            {
+                INVO_LST_ENTEGHAL_SUB_CANCEL_EDIT();
+                universControl.PopNotifyShow("داده های وارد شده مربوط به سطر ها درست نیست", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
             if (ANBAR.SelectedValue == null || ANBARF.SelectedValue == null)
             {
                 universControl.PopNotifyShow("یکی از فیلد های انبار خالی است", Pop1, Pop1Text1, Pop_Border1);
@@ -1878,12 +1932,12 @@ namespace Wins.WinMenus.ANBAR
 
 
             #region Validation
-            if (CURRENT_ITMES_ROW.CODE is null && CURRENT_ITMES_ROW.VAHED_K is null && CURRENT_ITMES_ROW.MEGH == 0 && CURRENT_ITMES_ROW.MEGHk == 0)
+            if (ROW.CODE is null && ROW.VAHED_K is null && ROW.MEGH == 0 && ROW.MEGHk == 0)
             {
                 INVO_LST_ENTEGHAL_SUB_CANCEL_EDIT();
                 return;
             }
-            if (CURRENT_ITMES_ROW.CODE is null || CURRENT_ITMES_ROW.NAME_CODE is null || CURRENT_ITMES_ROW.VAHED_K is null)
+            if (ROW.CODE is null || ROW.NAME_CODE is null || ROW.VAHED_K is null)
             {
 
                 INVO_LST_ENTEGHAL_SUB_CANCEL_EDIT();
@@ -1918,7 +1972,7 @@ namespace Wins.WinMenus.ANBAR
 
         private void INVO_LST_ENTEGHAL_SUB_CANCEL_EDIT(DataGridEditingUnit? _RC_ = null)
         {
-            INVO_LST_ENTEGHAL_SUB.Dispatcher.InvokeAsync(() =>
+            INVO_LST_ENTEGHAL_SUB.Dispatcher.Invoke(() =>
             {
                 INVO_LST_ENTEGHAL_SUB.CellEditEnding -= INVO_LST_ENTEGHAL_SUB_CellEditEnding;
                 INVO_LST_ENTEGHAL_SUB.RowEditEnding -= INVO_LST_ENTEGHAL_SUB_RowEditEnding;
@@ -2633,6 +2687,8 @@ namespace Wins.WinMenus.ANBAR
             DateTime dt;
             if (!string.IsNullOrEmpty(NUMBER.Text) && Convert.ToDouble(NUMBER.Text) > 0)
             {
+                FinalizeActiveGridTransactions();
+
                 dt = DateTime.Now;
                 CL_HESABDARI.TR("HEAD_LST", "(NUMBER = " + this.NUMBER.Text + " ) and (TAG = 5)", dt, 1);
                 CL_HESABDARI.TR("INVO_LST", "(NUMBER = " + this.NUMBER.Text + " ) and (TAG = 5)", dt, 1);

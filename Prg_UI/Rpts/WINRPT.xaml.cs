@@ -101,6 +101,8 @@ namespace Rpts
 
                 //report["ANBAR"] = ANBAR.SelectedValue.ToString();
                 //((StiSqlSource)report.Dictionary.DataSources["KART_KALA"]).CommandTimeout = 900;
+
+              
             }
             else //Already Report Passed
             {
@@ -163,6 +165,14 @@ namespace Rpts
             if (baseDelayMilliseconds < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(baseDelayMilliseconds));
+            }
+
+            foreach (StiDataSource dataSource in MyReport.Dictionary.DataSources)
+            {
+                if (dataSource is StiSqlSource sqlSource)
+                {
+                    sqlSource.CommandTimeout = 900;
+                }
             }
 
             var attempt = 0;

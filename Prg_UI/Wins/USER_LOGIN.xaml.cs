@@ -383,7 +383,14 @@ namespace Prg_UI.Wins
 
             //new F_MENU_ANBAR("F").Show();
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.STUF_DEF_WIN, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_PAYGETD_LST, this);
+
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this, 8617d);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ANBAR_FRKH_RK, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_ENTEGHAL_WIN, this);
+
+            new F_MENU_ANBAR_FRKH("RK").Show();
+
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ANBAR_F_AK_MOGUDI_ANBAR_LIST, this);
 
             //new WIN_HEAD_MANF().Show();

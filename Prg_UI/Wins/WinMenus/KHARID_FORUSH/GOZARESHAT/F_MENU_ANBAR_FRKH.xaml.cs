@@ -29,6 +29,7 @@ using static Stimulsoft.Base.StiDbType;
 using Prg_UI.Wins.WinOther;
 using Prg_UI.HelperWins;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
+using DocumentFormat.OpenXml.Bibliography;
 
 namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 {
@@ -232,7 +233,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
         private void OpenReport()
         {
-            
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.LIST_FROOSH_ANBARS.mrt");
             report.Load(pathreport);
@@ -256,7 +257,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
         private void OpenReport2()
         {
-            
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.LIST_KHAREED_ANBARS.mrt");
             report.Load(pathreport);
@@ -266,15 +267,24 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
             report["FDATE_PARM"] = DT1.Text.ToRawTarikh().ToString();
             report["EDATE_PARM"] = DT2.Text.ToRawTarikh().ToString();
-            report["ANBAR_PARM"] = ANBAR.SelectedValue.ToString();
-            report["KALA_PARM"] = KALA.SelectedValue.ToString();
+
+            if (ANBAR.SelectedValue != null)
+            {
+                report["ANBAR_PARM"] = ANBAR.SelectedValue.ToString();
+            }
+            else
+            {
+                report["ANBAR_PARM"] = "%";
+            }
+
+            if (KALA.SelectedValue != null)
+            {
+                report["KALA_PARM"] = KALA.SelectedValue.ToString();
+            }
+            var _sql_query = $"SELECT ANBAR, NAME, MEGHk, MABL, MABL_K, DATE_N, NUMBER, CODE FROM dbo.Q_FR_KH_ANBAR(N'{DT1.Text.ToRawTarikh()}', N'{DT2.Text.ToRawTarikh()}', N'{(ANBAR.SelectedValue != null ? ANBAR.SelectedValue.ToString() : "1")}', N'{(KALA.SelectedValue != null ? KALA.SelectedValue.ToString() : "%")}')";
+            report.Dictionary.Variables.Add("Q_PARM", _sql_query);
 
             (report.GetComponentByName("SAL_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
-
-
-            //report.Render();
-            //report.Show();
-
             new Rpts.WINRPT(report, "گزارش خرید فروش از انبار ها").Show();
         }
 
@@ -301,10 +311,10 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                 MANBAR = this.ANBAR.SelectedValue.ToString();
             }
             if (IsNull(this.KALA.SelectedValue))
-            {                
+            {
                 MKALA = "%";
-                universControl.PopNotifyShow("کالا نمیتواند خالی باشد!", Pop1, Pop1Text1, Pop_Border1);
-                return;
+                //universControl.PopNotifyShow("کالا نمیتواند خالی باشد!", Pop1, Pop1Text1, Pop_Border1);
+                //return;
             }
             else
             {
