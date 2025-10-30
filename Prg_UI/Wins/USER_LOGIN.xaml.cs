@@ -373,9 +373,9 @@ namespace Prg_UI.Wins
             CL_Generaly.VAHED_OF_USER = 1;
             Baseknow.UGRP = "1";
 
-            //new WinMenus.HESABDARI.PGET_HED().Show();
+            //new MAIN().Show();
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ANBAR_F_AK_MOGUDI_ANBAR_LIST, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this);
 
             //new F_MENU_CHEK("chkva", "لیست چکهای دریافتی نزد بانک و صندوق وصول نشده").Show();
 
