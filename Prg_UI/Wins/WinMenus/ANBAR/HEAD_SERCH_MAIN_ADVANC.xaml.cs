@@ -936,25 +936,25 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
 
             // ROUTE_NAME field
-            var routeNameTextBox = FindName("ROUTE_NAME") as TextBox;
+            var routeNameComboBox = FindName("ROUTE_NAME") as ComboBox;
             var routeNameOp = FindName("ROUTE_NAMEB") as ComboBox;
-            if (!string.IsNullOrEmpty(routeNameTextBox?.Text))
+            if (routeNameComboBox?.SelectedValue != null)
             {
                 ChShart();
                 string operatorValue = routeNameOp?.SelectedValue?.ToString() ?? "=";
                 switch (operatorValue)
                 {
                     case "=":
-                        SHART += $"(ROUTE_NAME = '{routeNameTextBox.Text}')";
+                        SHART += $"(ROUTE_NAME = '{routeNameComboBox?.SelectedValue}')";
                         break;
                     case "<>":
-                        SHART += $"(ROUTE_NAME <> '{routeNameTextBox.Text}')";
+                        SHART += $"(ROUTE_NAME <> '{routeNameComboBox?.SelectedValue}')";
                         break;
                     case SHAMEL: //شامل
-                        SHART += $"(ROUTE_NAME like '%{routeNameTextBox.Text}%')";
+                        SHART += $"(ROUTE_NAME like '%{routeNameComboBox?.SelectedValue}%')";
                         break;
                     case BEDUNE: //بدون
-                        SHART += $"(ROUTE_NAME not like '%{routeNameTextBox.Text}%')";
+                        SHART += $"(ROUTE_NAME not like '%{routeNameComboBox?.SelectedValue}%')";
                         break;
                 }
             }
@@ -1216,21 +1216,21 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
 
             // VAHCODE field
-            var vahcodeTextBox = FindName("VAHCODE") as NumericTextBox;
+            var vahcodeComboBox = FindName("VAHCODE") as ComboBox;
             var vahcodeOp = FindName("VAHCODEB") as ComboBox;
-            if (!string.IsNullOrEmpty(vahcodeTextBox?.Text))
+            if (vahcodeComboBox?.SelectedValue != null)
             {
                 ChShart();
-                SHART += $"(VAHCODE {vahcodeOp?.SelectedValue ?? "="} {vahcodeTextBox.Text})";
+                SHART += $"(VAHCODE {vahcodeOp?.SelectedValue ?? "="} {vahcodeComboBox?.SelectedValue})";
             }
 
             // GRPCODE field
-            var grpcodeTextBox = FindName("GRPCODE") as NumericTextBox;
+            var grpcodeComboBox = FindName("GRPCODE") as ComboBox;
             var grpcodeOp = FindName("GRPCODEB") as ComboBox;
-            if (!string.IsNullOrEmpty(grpcodeTextBox?.Text))
+            if (grpcodeComboBox?.SelectedValue != null)
             {
                 ChShart();
-                SHART += $"(GRPCODE {grpcodeOp?.SelectedValue ?? "="} {grpcodeTextBox.Text})";
+                SHART += $"(GRPCODE {grpcodeOp?.SelectedValue ?? "="} {grpcodeComboBox?.SelectedValue})";
             }
 
             // MOLAH field
@@ -1330,12 +1330,12 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
 
             // ANBARCODE field
-            var anbarcodeTextBox = FindName("ANBARCODE") as NumericTextBox;
+            var anbarcodeComboBox = FindName("ANBARCODE") as ComboBox;
             var anbarcodeOp = FindName("ANBARCODEB") as ComboBox;
-            if (!string.IsNullOrEmpty(anbarcodeTextBox?.Text))
+            if (anbarcodeComboBox?.SelectedValue != null)
             {
                 ChShart();
-                SHART += $"(ANBARCODE {anbarcodeOp?.SelectedValue ?? "="} {anbarcodeTextBox.Text})";
+                SHART += $"(ANBARCODE {anbarcodeOp?.SelectedValue ?? "="} {anbarcodeComboBox?.SelectedValue})";
             }
 
             // N_S field
@@ -1348,38 +1348,38 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
 
             // USER_NAME field
-            var usernameTextBox = FindName("USER_NAME") as TextBox;
-            if (!string.IsNullOrEmpty(usernameTextBox?.Text))
+            var usernameComboBox = FindName("USER_NAME") as ComboBox;
+            if (usernameComboBox?.SelectedValue != null)
             {
                 ChShart();
-                SHART += $"(USER_NAME = '{usernameTextBox.Text}')";
+                SHART += $"(USER_NAME = '{usernameComboBox?.SelectedValue}')";
             }
 
             // SHIFT_ID field
-            var shiftidTextBox = FindName("SHIFT_ID") as NumericTextBox;
+            var shiftidComboBox = FindName("SHIFT_ID") as ComboBox;
             var shiftidOp = FindName("SHIFT_IDB") as ComboBox;
-            if (!string.IsNullOrEmpty(shiftidTextBox?.Text))
+            if (shiftidComboBox?.SelectedValue != null)
             {
                 ChShart();
-                SHART += $"(SHIFT_ID {shiftidOp?.SelectedValue ?? "="} {shiftidTextBox.Text})";
+                SHART += $"(SHIFT_ID {shiftidOp?.SelectedValue ?? "="} {shiftidComboBox?.SelectedValue})";
             }
 
             // DEPATMAN field
-            var depatmanTextBox = FindName("DEPATMAN") as NumericTextBox;
+            var depatmanComboBox = FindName("DEPATMAN") as ComboBox;
             var depatmanOp = FindName("DEPATMANB") as ComboBox;
-            if (!string.IsNullOrEmpty(depatmanTextBox?.Text))
+            if (depatmanComboBox?.SelectedValue != null)
             {
                 ChShart();
-                SHART += $"(DEPATMAN {depatmanOp?.SelectedValue ?? "="} {depatmanTextBox.Text})";
+                SHART += $"(DEPATMAN {depatmanOp?.SelectedValue ?? "="} {depatmanComboBox?.SelectedValue})";
             }
 
             // CUST_COD field
-            var custcodTextBox = FindName("CUST_COD") as NumericTextBox;
+            var custcodComboBox = FindName("CUST_COD") as ComboBox;
             var custcodOp = FindName("CUST_CODB") as ComboBox;
-            if (!string.IsNullOrEmpty(custcodTextBox?.Text))
+            if (custcodComboBox?.SelectedValue != null)
             {
                 ChShart();
-                SHART += $"(CUST_COD {custcodOp?.SelectedValue ?? "="} {custcodTextBox.Text})";
+                SHART += $"(CUST_COD {custcodOp?.SelectedValue ?? "="} {custcodComboBox?.SelectedValue})";
             }
 
             // MAS field
@@ -1392,12 +1392,12 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
 
             // N_RASID field
-            var nrasidTextBox = FindName("N_RASID") as NumericTextBox;
+            var nrasidComboBox = FindName("N_RASID") as ComboBox;
             var nrasidOp = FindName("N_RASIDB") as ComboBox;
-            if (!string.IsNullOrEmpty(nrasidTextBox?.Text))
+            if (nrasidComboBox?.SelectedValue != null)
             {
                 ChShart();
-                SHART += $"(N_RASID {nrasidOp?.SelectedValue ?? "="} {nrasidTextBox.Text})";
+                SHART += $"(N_RASID {nrasidOp?.SelectedValue ?? "="} {nrasidComboBox?.SelectedValue})";
             }
 
             // N_FANI field
@@ -1424,12 +1424,12 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
 
             // mm field
-            var mmTextBox = FindName("mm") as NumericTextBox;
+            var mmComboBox = FindName("MM") as ComboBox;
             var mmOp = FindName("MMB") as ComboBox;
-            if (!string.IsNullOrEmpty(mmTextBox?.Text))
+            if (mmComboBox?.SelectedValue != null)
             {
                 ChShart();
-                SHART += $"(MM {mmOp?.SelectedValue ?? "="} {mmTextBox.Text})";
+                SHART += $"(MM {mmOp?.SelectedValue ?? "="} {mmComboBox?.SelectedValue})";
             }
 
             // MIN_M field

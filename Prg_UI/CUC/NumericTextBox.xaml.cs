@@ -37,6 +37,8 @@ namespace Prg_UI.CUC
         }
 
         // Dependency Properties
+
+
         public static readonly DependencyProperty LastValueShouldZeroProperty =
            DependencyProperty.Register(nameof(LastValueShouldZero), typeof(bool?), typeof(NumericTextBox), new PropertyMetadata(false));
 
@@ -88,6 +90,9 @@ namespace Prg_UI.CUC
         public static readonly RoutedEvent NumericLostFocusEvent = EventManager.RegisterRoutedEvent(
             nameof(NumericLostFocus), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(NumericTextBox));
 
+        public static readonly DependencyProperty AllowEnterNegativeProperty =
+            DependencyProperty.Register(nameof(AllowEnterNegative), typeof(bool), typeof(NumericTextBox), new PropertyMetadata(false));
+
         // Event Wrapper
         public event RoutedEventHandler NumericLostFocus
         {
@@ -108,7 +113,11 @@ namespace Prg_UI.CUC
                 control.TXB0.TextAlignment = (TextAlignment)e.NewValue;
             }
         }
-
+        public bool AllowEnterNegative
+        {
+            get => (bool)GetValue(AllowEnterNegativeProperty);
+            set => SetValue(AllowEnterNegativeProperty, value);
+        }
         public bool IsPercentageMode
         {
             get => (bool)GetValue(IsPercentageModeProperty);
@@ -490,6 +499,15 @@ namespace Prg_UI.CUC
         }
         private void TXB0_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
+            if (AllowEnterNegative && e.Text == "-")
+            {
+                if (TXB0.Text.Contains("-") || TXB0.CaretIndex != 0)
+                {
+                    e.Handled = true;
+                }
+                return;
+            }
+
             if (!IsValidInput(e.Text))
             {
                 e.Handled = true;
@@ -600,6 +618,12 @@ namespace Prg_UI.CUC
         }
         private void TXB0_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (e.Key == Key.Space)
+            {
+                e.Handled = true;
+                return;
+            }
+
             if (ThreeTwoZero)
             {
                 if (e.Key == Key.Add)

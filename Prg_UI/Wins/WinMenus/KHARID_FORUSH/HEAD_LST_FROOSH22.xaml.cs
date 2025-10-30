@@ -7266,7 +7266,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     this.TAH.IsReadOnly = true;
                     //New Code // this.Page58.IsEnabled = false;
                     //New Code // this.Page155.IsEnabled = false;
-                    this.moadian.IsEnabled = false;
+                    //this.moadian.IsEnabled = false;
 
                     BUTTON_SAVE_HAVALE.IsEnabled = false;
 
@@ -7284,7 +7284,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     this.TAH.IsReadOnly = false;
                     //New Code // this.Page58.IsEnabled = true;
                     //New Code // this.Page155.IsEnabled = true;
-                    this.moadian.IsEnabled = true;
+                    //this.moadian.IsEnabled = true;
 
 
                     if (!CL_HESABDARI.LETSGO("DEFA")) // اپراتور دسترسی به واحد ندارد قفل کن

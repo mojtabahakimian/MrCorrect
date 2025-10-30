@@ -178,7 +178,7 @@
                          Background="{DynamicResource BackgroundBrush}"
                 Foreground="{Binding ElementName=GENERAL_TEXTRANG,Path=Foreground}"-->
 
-            <DataGrid x:Name="PGET_LST_SUB" AutoGenerateColumns="False" Margin="11,147,10,220"   MouseRightButtonUp="PGET_LST_SUB_MouseRightButtonUp"
+            <DataGrid x:Name="PGET_LST_SUB" AutoGenerateColumns="False" Margin="11,147,10,220" MouseRightButtonUp="PGET_LST_SUB_MouseRightButtonUp"
                     FlowDirection="RightToLeft"   
                     d:ItemsSource="{d:SampleData ItemCount=5}"
                     ItemsSource="{Binding KHAZANEH_DATA}" BeginningEdit="PGET_LST_SUB_BeginningEdit" SelectionChanged="PGET_LST_SUB_SelectionChanged" PreviewMouseLeftButtonUp="PGET_LST_SUB_PreviewMouseLeftButtonUp" CellEditEnding="PGET_LST_SUB_CellEditEnding" RowEditEnding="PGET_LST_SUB_RowEditEnding"

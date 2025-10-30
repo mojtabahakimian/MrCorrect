@@ -540,6 +540,15 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     CL_LMethods.SendKey_US(Key.Tab);
                 }
             }
+
+            try
+            {
+                if (e.Key == Key.Escape)
+                {
+                    this?.Close();
+                }
+            }
+            catch { }
             //Command5
         }
         private void Window_ContentRendered(object sender, EventArgs e)

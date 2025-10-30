@@ -41,7 +41,7 @@
         <CNC:NumericTextBox DoesAcceptDouble="False" Text="" x:Name="RADIF" Height="27" Margin="0,54,129,0" IsReadOnly="True" Tag="RD"  VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Right" Width="81" IsHitTestVisible="False" IsEnabled="False" />
         <Label x:Name="Label1_Copy" Content=": ردیف دفتر" HorizontalAlignment="Left" Margin="486,54,0,0" VerticalAlignment="Top" Width="auto"/>
         <Label x:Name="Label1" Content=": شماره سریال" HorizontalAlignment="Left" Margin="486,86,0,0" VerticalAlignment="Top" Width="auto"/>
-        <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="False" x:Name="N_SERI" InnerTabStop="True"  Height="27" Margin="361,87,0,0" IsReadOnly="False" Tag="RD" VerticalAlignment="Top" Text=""  Visibility="Visible"  HorizontalAlignment="Left" Width="120" TabIndex="0" />
+        <CNC:NumericTextBox DoesAcceptDouble="False" AllowEnterNegative="True" IsDigitGroupActive="False" x:Name="N_SERI" InnerTabStop="True"  Height="27" Margin="361,87,0,0" IsReadOnly="False" Tag="RD" VerticalAlignment="Top" Text=""  Visibility="Visible"  HorizontalAlignment="Left" Width="120" TabIndex="0" />
         <ComboBox x:Name="BANK" Tag="RD" Padding="7,0,10,0" IsEnabled="True" Visibility="Visible"  Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="281,119,129,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True" SelectedIndex="0" Background="{x:Null}" BorderThickness="1" LostFocus="BANK_LostFocus" IsTabStop="True" TabIndex="1" Width="200">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>

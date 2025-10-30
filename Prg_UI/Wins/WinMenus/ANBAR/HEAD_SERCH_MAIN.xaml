@@ -136,7 +136,7 @@
 
                     <Label Content="تاريخ برگه :" Grid.Row="2" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
                     <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.ColumnSpan="4" Margin="83,0,0,0">
-                        <xctk:MaskedTextBox x:Name="DATE_N" Style="{StaticResource FuzzyOut}" FlowDirection="LeftToRight" Padding="3" Mask="0000/00/00" Height="30" BorderThickness="1" FontSize="12" Width="150"/>
+                        <xctk:MaskedTextBox x:Name="DATE_N" Style="{StaticResource FuzzyOut}" PreviewGotKeyboardFocus="DATE_N_PreviewGotKeyboardFocus" FlowDirection="LeftToRight" Padding="3" Mask="0000/00/00" Height="30" BorderThickness="1" FontSize="12" Width="150"/>
                         <ComboBox Padding="7,0,10,0" Width="70" x:Name="DATE_NB" Margin="5"
                                   HorizontalContentAlignment="Center"
                                   DisplayMemberPath="OpValue" 
@@ -151,7 +151,7 @@
                         </ComboBox>
                         <StackPanel x:Name="DATE_NT_SP" Visibility="Hidden" d:Visibility="Visible" Orientation="Horizontal" Margin="5,0,0,0">
                             <Label Content="تا تاریخ برگه :" Grid.Row="2" Grid.Column="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
-                            <xctk:MaskedTextBox x:Name="DATE_NT" Style="{StaticResource FuzzyOut}" FlowDirection="LeftToRight" Padding="3" Mask="0000/00/00" Height="30" BorderThickness="1" FontSize="12" Width="100"/>
+                            <xctk:MaskedTextBox x:Name="DATE_NT" Style="{StaticResource FuzzyOut}" PreviewGotKeyboardFocus="DATE_NT_PreviewGotKeyboardFocus"  FlowDirection="LeftToRight" Padding="3" Mask="0000/00/00" Height="30" BorderThickness="1" FontSize="12" Width="100"/>
                         </StackPanel>
                     </StackPanel>
 

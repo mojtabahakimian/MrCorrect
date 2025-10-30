@@ -622,6 +622,16 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 e.Handled = true;
                 CL_LMethods.SendKey_US(Key.Tab);
             }
+
+            if (e.Key is Key.Escape && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                try
+                {
+                    e.Handled = true;
+                    this?.Close();
+                }
+                catch { }
+            }
         }
 
         private void SAYADI_LostFocus(object sender, RoutedEventArgs e)

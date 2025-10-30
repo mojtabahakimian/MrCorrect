@@ -52,7 +52,7 @@
         <Label x:Name="Label64" Content=": ردیف دفتر" HorizontalAlignment="Left" Margin="486,52,0,0" VerticalAlignment="Top" Width="auto"/>
         <TextBox x:Name="RADIF" Height="27" Margin="0,54,129,0" IsReadOnly="True" Tag="RD"  Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="81" IsTabStop="False" IsHitTestVisible="False" IsEnabled="False" />
         <Label x:Name="Label1" Content=": شماره سریال" HorizontalAlignment="Left" Margin="486,86,0,0" VerticalAlignment="Top" Width="auto"/>
-        <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="False" x:Name="N_SERI" Height="27" Margin="361,87,0,0" IsReadOnly="False" Tag="RD" Text="" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="120" TabIndex="1" Focusable="True" IsTabStop="True" />
+        <CNC:NumericTextBox DoesAcceptDouble="False" AllowEnterNegative="True" IsDigitGroupActive="False" x:Name="N_SERI" Height="27" Margin="361,87,0,0" IsReadOnly="False" Tag="RD" Text="" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="120" TabIndex="1" Focusable="True" IsTabStop="True" />
         <Grid>
             <Label x:Name="Label3" Content=": بانک" HorizontalAlignment="Left" Margin="487,119,0,0" VerticalAlignment="Top" Width="auto"/>
             <Label x:Name="Label3_Copy" Content=": نام شعبه" HorizontalAlignment="Left" Margin="487,152,0,0" VerticalAlignment="Top" Width="auto"/>

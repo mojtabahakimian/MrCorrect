@@ -416,13 +416,13 @@ namespace Wins.WinMenus.WinAutomasion
                 {
                     ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار تاریخ صحیح نیست" });
                 }
-                else
-                {
-                    if (!Tarikh.IsSyncedDateNow(date_n_val, (bool)Baseknow.CTL_DT))
-                    {
-                        ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ مربوط به سال جاری نیست" });
-                    }
-                }
+                //else
+                //{
+                //    if (!Tarikh.IsSyncedDateNow(date_n_val, (bool)Baseknow.CTL_DT))
+                //    {
+                //        ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ مربوط به سال جاری نیست" });
+                //    }
+                //}
             }
             else
             {
