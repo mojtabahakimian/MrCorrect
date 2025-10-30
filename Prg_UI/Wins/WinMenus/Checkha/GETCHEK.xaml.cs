@@ -488,7 +488,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                         this.RADIF.Text = Convert.ToString(rst3.FirstOrDefault(0) + 1);
                         this.ANBAR = dfn.ToString();
                     }
-                 
+
                     var KhazanehRow = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST);
                     var CheckExistData = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()}").ToList();
                     var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
@@ -531,7 +531,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     {
                         new Msgwin(false, "اطلاعات تکراری است").ShowDialog(); return;
                     }
-              
+
                     Msgwin msgwin1 = new Msgwin(false, $"شماره دفتر :{this.RADIF.Text}");
                     msgwin1.Show();
 
@@ -649,6 +649,16 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             {
                 e.Handled = true;
                 CL_LMethods.SendKey_US(Key.Tab);
+            }
+
+            if (e.Key is Key.Escape && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                try
+                {
+                    e.Handled = true;
+                    this?.Close();
+                }
+                catch { }
             }
         }
 

@@ -2160,6 +2160,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         private DateTime lastEscapeKeyPressTime;
 
         private DataGridCellInfo? _editingCellInfo;
+        bool JustnowforcheckOpnned = false; //متغیری که برای جلوگیری از باز شدن مجددا پنجره مشخصات چک در ثبت واگذاری چک , چون بعد از حساب پنجره خودکار باز میشه و لازم نیست توی مبلغ که فوکوس میکنه دوباره باز بشه !
         private void PGET_LST_SUB_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
             if (!NowIsReady || PGET_LST_SUB == null || PGET_LST_SUB.Items.Count == 0) return;
@@ -2167,7 +2168,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
             if (e.Row.Item == null) { return; }
-
 
             DataGrid dataGrid = PGET_LST_SUB;
             int row_index = dataGrid?.ItemContainerGenerator.IndexFromContainer(e.Row) ?? -1;
@@ -3108,8 +3108,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     }
                     if (CURRENT_ITMES_ROW.THES is not null && PGET_LST_SUB.SelectedItem != null)
                     {
+
                         FORCHEK fORCHEK = new FORCHEK(I_AM_KHAZANEH, _ServerFilter, CURRENT_ROW_INDEX);
                         fORCHEK.ShowDialog();
+
+                        JustnowforcheckOpnned = true;
                     }
                 }
 
@@ -3324,25 +3327,32 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                                     }
                                 case 4:
                                     {
-                                        if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
+                                        if (JustnowforcheckOpnned)
                                         {
-                                            CURRENT_ITMES_ROW.N_SERI = 0;
-                                            CURRENT_ITMES_ROW.BANK = 0;
+                                            //Get out cuz it has been already open
+                                            JustnowforcheckOpnned = false;
                                         }
-                                        if (Convert.ToString(CURRENT_ITMES_ROW.N_SERI) == "" || Convert.ToString(CURRENT_ITMES_ROW.BANK) == "" || Convert.ToString(CURRENT_ITMES_ROW.MABL) == "")
+                                        else
                                         {
-                                            CURRENT_ITMES_ROW.N_SERI = null;
-                                            CURRENT_ITMES_ROW.BANK = null;
-                                            CURRENT_ITMES_ROW.MABL = null;
-                                        }
-                                        var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
-                                        FORCHEK fORCHEK4 = new FORCHEK(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX);
-                                        fORCHEK4.ShowDialog();
-                                        if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0 || IsNull(CURRENT_ITMES_ROW.N_SERI))
-                                        {
-                                            CURRENT_ITMES_ROW.N_SERI = null;
-                                            CURRENT_ITMES_ROW.BANK = null;
-
+                                            if (IsNull(CURRENT_ITMES_ROW?.N_SERI) || IsNull(CURRENT_ITMES_ROW?.BANK))
+                                            {
+                                                CURRENT_ITMES_ROW.N_SERI = 0;
+                                                CURRENT_ITMES_ROW.BANK = 0;
+                                            }
+                                            if (Convert.ToString(CURRENT_ITMES_ROW.N_SERI) == "" || Convert.ToString(CURRENT_ITMES_ROW.BANK) == "" || Convert.ToString(CURRENT_ITMES_ROW.MABL) == "")
+                                            {
+                                                CURRENT_ITMES_ROW.N_SERI = null;
+                                                CURRENT_ITMES_ROW.BANK = null;
+                                                CURRENT_ITMES_ROW.MABL = null;
+                                            }
+                                            var _serverfilter = "N_SERI = " + CURRENT_ITMES_ROW.N_SERI + " AND BANK = " + CURRENT_ITMES_ROW.BANK + " AND MABL = " + CURRENT_ITMES_ROW.MABL;
+                                            FORCHEK fORCHEK4 = new FORCHEK(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX);
+                                            fORCHEK4.ShowDialog();
+                                            if (CURRENT_ITMES_ROW.N_SERI == 0 || CURRENT_ITMES_ROW.BANK == 0 || IsNull(CURRENT_ITMES_ROW.N_SERI))
+                                            {
+                                                CURRENT_ITMES_ROW.N_SERI = null;
+                                                CURRENT_ITMES_ROW.BANK = null;
+                                            }
                                         }
                                         break;
                                     }
@@ -3416,6 +3426,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             if (ROW is null) { return; }
 
             IsSaveSuccess = false;
+            JustnowforcheckOpnned = false;
 
 
             //Form_BeforeUpdate

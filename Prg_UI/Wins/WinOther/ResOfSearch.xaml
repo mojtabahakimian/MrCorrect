@@ -40,10 +40,11 @@
                 <DataGridTextColumn x:Name="nUMBERColumn" Binding="{Binding NUMBER}" Header="معین" Width="auto"  MinWidth="50"/>
                 <DataGridTextColumn x:Name="nAMEColumn" Binding="{Binding NAME}" Header="نام مشتری" Width="auto"  MinWidth="200"/>
                 <DataGridTextColumn x:Name="tNUMBERColumn" Binding="{Binding TNUMBER}" Header="تفضیلی" Width="auto"  MinWidth="50"/>
+                <DataGridTextColumn x:Name="tNAMEColumn" Binding="{Binding TNAME}" Header="نام حساب تفضیلی های بعد" Width="auto"  MinWidth="150"/>
+                <DataGridTextColumn x:Name="tnumber2Column" Binding="{Binding tnumber2}" Header="تفضیلی های بعد" Width="auto"  MinWidth="100"/>
                 <DataGridTextColumn x:Name="nMOINColumn" Binding="{Binding NMOIN}" Header="نام معین" Width="auto"  MinWidth="150"/>
                 <DataGridTextColumn x:Name="aDDRESSColumn" Binding="{Binding ADDRESS}" Header="آدرس" Width="auto"  MinWidth="150"/>
-                <DataGridTextColumn x:Name="tnumber2Column" Binding="{Binding tnumber2}" Header="تفضیلی های بعد" Width="auto"  MinWidth="100"/>
-                <DataGridTextColumn x:Name="tNAMEColumn" Binding="{Binding TNAME}" Header="نام حساب تفضیلی های بعد" Width="auto"  MinWidth="150"/>
+  
                 <DataGridTextColumn x:Name="cODE_EColumn" Binding="{Binding CODE_E}" Header="CODE E" Width="auto"  Visibility="Collapsed"/>
             </DataGrid.Columns>
         </DataGrid>

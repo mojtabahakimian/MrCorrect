@@ -144,6 +144,8 @@ namespace Wins.WinMenus.Checkha
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
+
+            DT1.SelectAll();
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -163,7 +165,7 @@ namespace Wins.WinMenus.Checkha
             DT1.Text = null;
             DT2.Text = Tarikh.FullCurrentDate;
 
-            DT1.Focus(); DT1.SelectAll();
+            DT1.Focus();
         }
 
         private void Command5_Click(object sender, RoutedEventArgs e)
