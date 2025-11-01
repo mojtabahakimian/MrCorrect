@@ -7991,6 +7991,67 @@ namespace AUTO_BAZ.Functions
             return (SANAD_NUMBER, IsSuccessfully);
         }
 
+        private static bool TryGetDateNumber(object? dateValue, out long result)
+        {
+            result = 0;
+
+            if (dateValue is null)
+            {
+                return false;
+            }
+
+            switch (dateValue)
+            {
+                case long longValue:
+                    result = longValue;
+                    return true;
+                case int intValue:
+                    result = intValue;
+                    return true;
+                case short shortValue:
+                    result = shortValue;
+                    return true;
+                case double doubleValue:
+                    result = Convert.ToInt64(doubleValue);
+                    return true;
+                case decimal decimalValue:
+                    result = Convert.ToInt64(decimalValue);
+                    return true;
+                case float floatValue:
+                    result = Convert.ToInt64(floatValue);
+                    return true;
+                case DateTime dateTimeValue:
+                    var persianCalendar = new PersianCalendar();
+                    var normalizedDate = $"{persianCalendar.GetYear(dateTimeValue):0000}{persianCalendar.GetMonth(dateTimeValue):00}{persianCalendar.GetDayOfMonth(dateTimeValue):00}";
+                    if (long.TryParse(normalizedDate, out result))
+                    {
+                        return true;
+                    }
+
+                    return false;
+                case string stringValue:
+                    if (string.IsNullOrWhiteSpace(stringValue))
+                    {
+                        return false;
+                    }
+
+                    if (long.TryParse(stringValue, out result))
+                    {
+                        return true;
+                    }
+
+                    var digitsOnly = new string(stringValue.Where(char.IsDigit).ToArray());
+                    if (digitsOnly.Length > 0 && long.TryParse(digitsOnly, out result))
+                    {
+                        return true;
+                    }
+
+                    return false;
+            }
+
+            var converted = Convert.ToString(dateValue, CultureInfo.InvariantCulture);
+            return converted != null && long.TryParse(converted, out result);
+        }
 
         public static (double?, bool) SANADENTEGHAL(long NUMBER, long NUMBER2, bool InternalCalling = true)
         {
@@ -8128,7 +8189,7 @@ namespace AUTO_BAZ.Functions
                     }
                     if (JST[EOF].MABL_K != 0)
                     {
-                        bool valdefacc = false;
+                        bool valdefacc = true;
                         if (InternalCalling)
                         {
                             auto_run.Dispatcher.Invoke(new Action(() =>
@@ -8207,6 +8268,15 @@ namespace AUTO_BAZ.Functions
                 object a = default, fs;
                 List<DEED_HED> SHRST = new List<DEED_HED>();
 
+
+                if (!TryGetDateNumber(HEDRST[R].DATE_N, out var normalizedDate))
+                {
+                    LogWriter.WriteLog($"SANADKHORUGMAVAD: تاریخ نامعتبر برای برگ {HEDRST[R].NUMBER} با مقدار '{HEDRST[R].DATE_N}'.");
+                    IsSuccessfully = false;
+                    return;
+                }
+
+                HEDRST[R].DATE_N = normalizedDate;
 
                 if (HEDRST[R]?.N_S == null || HEDRST[R]?.N_S == 0)
                 {

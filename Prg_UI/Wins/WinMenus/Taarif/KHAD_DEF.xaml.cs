@@ -441,6 +441,10 @@ namespace Wins.WinMenus.Taarif
                     new Msgwin(false, "این تخفیف تکراری وارد شده").ShowDialog();
                     return;
                 }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                }
             }
             catch (Exception)
             {

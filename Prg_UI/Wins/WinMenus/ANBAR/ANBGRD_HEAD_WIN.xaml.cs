@@ -941,6 +941,10 @@ namespace Wins.WinMenus.ANBAR
                     new Msgwin(false, " لطفا مقادیر را درست وارد کنید").ShowDialog();
                     return;
                 }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                }
             }
             catch (Exception)
             {
@@ -983,6 +987,10 @@ namespace Wins.WinMenus.ANBAR
                     new Msgwin(false, " لطفا مقادیر را درست وارد کنید").ShowDialog();
                     return;
                 }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                }
             }
             catch (Exception)
             {
@@ -1023,6 +1031,10 @@ namespace Wins.WinMenus.ANBAR
                 {
                     new Msgwin(false, " لطفا مقادیر را درست وارد کنید").ShowDialog();
                     return;
+                }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
                 }
             }
             catch (Exception)
@@ -1070,28 +1082,28 @@ namespace Wins.WinMenus.ANBAR
         }
         public bool VALIDATION()
         {
-            if (IsNull(this.GRD_DATE.Text.ToRawTarikh()))
+            if (string.IsNullOrWhiteSpace(this.GRD_DATE.Text.ToRawTarikh()))
             {
                 Msgwin msgwin = new Msgwin(false, " تاریخ نمی تواند خالی باشد ....!");
                 msgwin.ShowDialog();
                 return false;
             }
 
-            if (IsNull(this.GRD_NUM.Text))
-            {
-                Msgwin msgwin = new Msgwin(false, " شماره نمی تواند خالی باشد ....!");
-                msgwin.ShowDialog();
-                return false;
-            }
+            //if (string.IsNullOrWhiteSpace(this.GRD_NUM.Text))
+            //{
+            //    Msgwin msgwin = new Msgwin(false, " شماره نمی تواند خالی باشد ....!");
+            //    msgwin.ShowDialog();
+            //    return false;
+            //}
 
-            if (IsNull(this.GRD_HES.SelectedValue))
+            if (this.GRD_HES.SelectedValue is null || string.IsNullOrWhiteSpace(this.GRD_HES.SelectedValue?.ToString()))
             {
                 Msgwin msgwin = new Msgwin(false, " حساب کسری و اضافات نمی تواند خالی باشد ....!");
                 msgwin.ShowDialog();
                 return false;
             }
 
-            if (IsNull(this.GRD_ANBAR.SelectedValue))
+            if (this.GRD_ANBAR.SelectedValue is null || string.IsNullOrWhiteSpace(this.GRD_ANBAR.SelectedValue?.ToString()))
             {
                 Msgwin msgwin = new Msgwin(false, " انبار نمی تواند خالی باشد ....!");
                 msgwin.ShowDialog();
@@ -1108,7 +1120,7 @@ namespace Wins.WinMenus.ANBAR
 
             if ((_navigationManager?.IsNewRecord ?? false) || DateChanged)
             {
-                
+
                 if (S_ANBAR_DATE.Count >= 1)
                 {
                     Msgwin msgwin = new Msgwin(false, $"در حال حاضر انبار گردانی ثبت شده به شماره {S_ANBAR_DATE.FirstOrDefault().GRD_NUM} با همین تاریخ و همین انبار وجود دارد ، لطفا تاریخ را تغییر دهید");
@@ -1221,30 +1233,37 @@ namespace Wins.WinMenus.ANBAR
             {
                 return;
             }
-            //Here Save
-            var number = dbms.DoGetDataSQL<double?>("SELECT MAX(GRD_NUM)+1 FROM ANBGRD_HEAD").FirstOrDefault();
-            if (_navigationManager.IsNewRecord)
+            try
             {
-                if (number is null)
+                if (string.IsNullOrEmpty(USER_NAME.Text))
                 {
-                    number = 1;
-                    GRD_NUM.Text = number.ToString();
+                    USER_NAME.Text = Baseknow.UUSER;
+                }
+
+                //Here Save
+                var number = dbms.DoGetDataSQL<double?>("SELECT MAX(GRD_NUM)+1 FROM ANBGRD_HEAD").FirstOrDefault();
+                if (_navigationManager.IsNewRecord)
+                {
+                    if (number is null)
+                    {
+                        number = 1;
+                        GRD_NUM.Text = number.ToString();
+                    }
+                    else
+                    {
+                        GRD_NUM.Text = number.ToString();
+                    }
+
+                    //INSERT
+                    dbms.DoExecuteSQL(@$"INSERT INTO dbo.ANBGRD_HEAD (       GRD_NUM,                     GRD_DATE,                GRD_ANBAR,                    GRD_HES,          COMMENT,           USER_NAME) 
+                                                                   VALUES ({GRD_NUM.Text},{GRD_DATE.Text.ToRawTarikh()},{GRD_ANBAR.SelectedValue}, N'{GRD_HES.SelectedValue}',N'{COMMENT.Text}', N'{USER_NAME.Text}')");
+
+                    RefreshAfterUpdate();
                 }
                 else
                 {
-                    GRD_NUM.Text = number.ToString();
-                }
-
-                //INSERT
-                dbms.DoExecuteSQL(@$"INSERT INTO dbo.ANBGRD_HEAD (       GRD_NUM,                     GRD_DATE,                GRD_ANBAR,                    GRD_HES,          COMMENT,           USER_NAME) 
-                                                                   VALUES ({GRD_NUM.Text},{GRD_DATE.Text.ToRawTarikh()},{GRD_ANBAR.SelectedValue}, N'{GRD_HES.SelectedValue}',N'{COMMENT.Text}', N'{USER_NAME.Text}')");
-
-                RefreshAfterUpdate();
-            }
-            else
-            {
-                //UPDATE
-                dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_HEAD
+                    //UPDATE
+                    dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_HEAD
                                                       SET 
                                                           GRD_DATE = {GRD_DATE.Text.ToRawTarikh()},
                                                           GRD_ANBAR = {GRD_ANBAR.SelectedValue},
@@ -1253,6 +1272,23 @@ namespace Wins.WinMenus.ANBAR
                                                           USER_NAME = N'{USER_NAME.Text}'
                                                       WHERE 
                                                           GRD_NUM = {GRD_NUM.Text}");
+                }
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Number == 2601 || ex.Number == 2627)
+                {
+                    new Msgwin(false, "داده تکراری است آنرا اصلاح کنید").ShowDialog();
+                }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                }
+                return;
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خطا در انجام عملیات ذخیره!").ShowDialog(); return;
             }
 
             universControl.PopNotifyShowUp("ذخیره انجام شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
@@ -1445,6 +1481,7 @@ namespace Wins.WinMenus.ANBAR
             {
                 Msgwin msgwin = new Msgwin(false, "قبل از ذخیره نمی توانید موجودی کالاها را دریافت کنید");
                 msgwin.ShowDialog();
+                return;
             }
             if (Convert.ToInt32(GRD_NUM.Text) > 0 && ANBARGRD_SUB1_MODEL_DATA.Count == 0)
             {
@@ -1490,7 +1527,7 @@ namespace Wins.WinMenus.ANBAR
 
         private void Command22_Copy_Click(object sender, RoutedEventArgs e)
         {
-           
+
             if (!IsNull(this.GRD_HES.SelectedValue))
             {
                 SANAD();

@@ -55,7 +55,7 @@
 
         <TextBox x:Name="NUMBER"  Text="0" IsReadOnly="True" Tag="RD" Height="30" Margin="0,60,71,0"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="114" IsTabStop="False" IsHitTestVisible="False" Focusable="False" />
         <Label x:Name="Label11" Content="شماره برگه : " Margin="0,62,10,0"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right" Width="57"/>
-        <ComboBox x:Name="ANBAR" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Width="320" IsTextSearchEnabled="True" Margin="0,96,71,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" PreviewLostKeyboardFocus="ANBAR_PreviewLostKeyboardFocus" TabIndex="1">
+        <ComboBox x:Name="ANBAR" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Width="320" IsTextSearchEnabled="True" Margin="0,96,71,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" SelectionChanged="ANBAR_SelectionChanged" PreviewLostKeyboardFocus="ANBAR_PreviewLostKeyboardFocus" TabIndex="1">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -63,7 +63,7 @@
             </ComboBox.ItemsPanel>
         </ComboBox>
         <Label x:Name="Label11_Copy" Content="از انبار : " Margin="0,97,28,0"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right" Width="39"/>
-        <ComboBox x:Name="ANBARF" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,131,70,0" VerticalAlignment="Top" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="321" Height="30" IsTabStop="True" PreviewLostKeyboardFocus="ANBARF_PreviewLostKeyboardFocus" TabIndex="2" >
+        <ComboBox x:Name="ANBARF" IsEnabled="False" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,131,70,0" VerticalAlignment="Top" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="321" Height="30" IsTabStop="True" PreviewLostKeyboardFocus="ANBARF_PreviewLostKeyboardFocus" TabIndex="2" >
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -80,7 +80,7 @@
         <TextBox x:Name="TAH"  Text=""  Tag="RD" Height="30" Margin="0,97,475,0"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="246" TabIndex="3"  />
         <Label x:Name="Label11_Copy5" Content="تحویل گیرنده : " Margin="0,98,404,0"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Top" HorizontalAlignment="Right" Width="70"/>
         <TextBox x:Name="MOLAH"  Text="" Tag="RD" Height="30" Margin="0,132,475,0"  Style="{StaticResource FuzzyOut}"   VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="246" TabIndex="4" />
-        <Label x:Name="Label11_Copy6" Content="تحویل دهنده : " Margin="0,132,404,0"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Top" HorizontalAlignment="Right" Width="70"/>
+        <Label x:Name="Label11_Copy6" Content="تحویل دهنده : " Margin="0,132,404,0"  FlowDirection="RightToLeft"  FontSize="10" Height="26" VerticalAlignment="Top" HorizontalAlignment="Right" Width="70"/>
 
         <Button x:Name="ESLAH"  Content="اصلاح برگه"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="199,119,0,0" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Click="ESLAH_Click" />
         <Button x:Name="BTN_INVOCES" Content="لیست انتقالی ها" Margin="15,162,0,0"  Style="{StaticResource GerdC}" BorderBrush="{x:Null}" FontSize="10" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="142" Foreground="#DDFFFFFF" FontWeight="Normal" Click="BTN_INVOCES_Click"/>
@@ -308,7 +308,7 @@
         <xctk:MaskedTextBox x:Name="DATE_N" Tag="RD"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="30" Margin="0,60,475,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="91"  PreviewLostKeyboardFocus="DATE_N_PreviewLostKeyboardFocus" TabIndex="0"/>
         <Button x:Name="DELETE_BTN"  Tag="hazfer"  Content="حذف"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="199,162,0,0" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Click="DELETE_BTN_Click"/>
         <Button x:Name="Command100" IsEnabled="False" Content="چاپ برگه"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="14,119,0,0" Height="32" VerticalAlignment="Top" Click="Command100_Click" HorizontalAlignment="Left" Width="91" />
-        <Button x:Name="custprint" IsEnabled="False" Content="C"  BorderBrush="{x:Null}" FontSize="10" Foreground="White" Margin="110,119,0,0" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="86" />
+        <Button x:Name="custprint" IsEnabled="False" Content="C"  BorderBrush="{x:Null}" FontSize="10" Foreground="White" Margin="110,119,0,0" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="86" Click="custprint_Click" />
         <CheckBox x:Name="OKF" Content="تایید حواله" HorizontalAlignment="Left" Margin="415,125,0,0" VerticalAlignment="Top" Width="71" FontSize="10" IsHitTestVisible="False" IsTabStop="False" IsEnabled="False" />
         <Button x:Name="BTN_NEW_CLEAR" Visibility="Collapsed" Content="برگه جدید" Click="BTN_NEW_CLEAR_Click" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="305,162,0,0" Height="32" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" />
 

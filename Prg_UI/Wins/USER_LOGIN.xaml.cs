@@ -358,7 +358,6 @@ namespace Prg_UI.Wins
 
             Baseknow.mrcorrect = true;
 
-            //Baseknow.USERCOD = 167; Baseknow.UUSER = "Mr nikonahad";
             //Baseknow.USERCOD = 139; Baseknow.UUSER = "negar sadeghi";
             //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
             //Baseknow.USERCOD = 132; Baseknow.UUSER = "Prima Chopan";    
@@ -367,6 +366,7 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 116; Baseknow.UUSER = "Mr.Salmani";
             //Baseknow.USERCOD = 102; Baseknow.UUSER = "mina mehrnia";
             //Baseknow.USERCOD = 108; Baseknow.UUSER = "modir-mali";
+            //Baseknow.USERCOD = 167; Baseknow.UUSER = "Mr nikonahad";
             Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
 
             CL_Generaly.SHIFT_OF_USER = 1;
@@ -374,8 +374,11 @@ namespace Prg_UI.Wins
             Baseknow.UGRP = "1";
 
             //new MAIN().Show();
+            //new HEAD_SERCH_MAIN().Show();
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "8949,8965");
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this);
+
 
             //new F_MENU_CHEK("chkva", "لیست چکهای دریافتی نزد بانک و صندوق وصول نشده").Show();
 

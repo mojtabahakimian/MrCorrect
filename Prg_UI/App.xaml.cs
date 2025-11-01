@@ -31,11 +31,15 @@ using System.Windows.Media.Animation;
 using Stimulsoft.Base;
 using Microsoft.Xaml.Behaviors;
 using System.Threading.Tasks;
+using Prg_UI.Wins.WinSetting;
 
 namespace Prg_UI
 {
     public partial class App : Application
     {
+        private static bool _isHandlingSqlConnectionFailure;
+
+
         #region NEW_ADDED_FOR_FIX
         static App()
         {
@@ -78,6 +82,9 @@ namespace Prg_UI
             // Perform pre-exit cleanup
             CL_LMethods.CleanupBeforeExiting();
 
+            bool shouldAttemptConnectionRecovery = false;
+            bool isRecoveryAlreadyInProgress = false;
+
             try
             {
                 string userMessage = string.Empty;
@@ -97,7 +104,8 @@ namespace Prg_UI
                             break;
 
                         case 233: // Connection issue
-                            userMessage = "وضعیت پایگاه داده تغییر یافته , احتمالا سرویس پایگاه داده متوقف یا وضعیت دیتابیس تغییر کرده است !.";
+                        case 10061: //Connection issue
+                            userMessage = "وضعیت پایگاه داده تغییر یافته , احتمالا سرویس پایگاه داده متوقف یا اتصال به شبکه قطع شده است !.";
                             break;
 
                         case 18456: // Login failed
@@ -118,10 +126,32 @@ namespace Prg_UI
                         default: userMessage = "ارتباط با پایگاه داده دچار مشکل شده است"; break;
                     }
 
+                    bool isConnectionIssue = CL_CCNNMANAGER.IsConnectionRelated(sqlEx);
+
+                    if (isConnectionIssue)
+                    {
+                        CL_CCNNMANAGER.ConnectedToSQLDB = false;
+                    }
+
+
                     // Show the message to the user
                     new Msgwin(false, userMessage).ShowDialog();
 
                     //e.Handled = true; //Prevent application crash // By that error won't stay shown !
+                    if (isConnectionIssue)
+                    {
+                        if (_isHandlingSqlConnectionFailure)
+                        {
+                            e.Handled = true;
+                            isRecoveryAlreadyInProgress = true;
+                        }
+                        else
+                        {
+                            _isHandlingSqlConnectionFailure = true;
+                            e.Handled = true;
+                            shouldAttemptConnectionRecovery = true;
+                        }
+                    }
                 }
                 else
                 {
@@ -135,12 +165,49 @@ namespace Prg_UI
                     //e.Handled = true;
                 }
 
-                LogException(e.Exception);
+                //LogException(e.Exception);
             }
             catch (Exception ex)
             {
                 // Log any failure within the exception handler itself
                 LogException(ex, "Critical error in Unhandled Exception Handler.");
+            }
+
+            LogException(e.Exception);
+
+            if (isRecoveryAlreadyInProgress)
+            {
+                return;
+            }
+
+            if (shouldAttemptConnectionRecovery)
+            {
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        var owner = Application.Current.Windows.Cast<Window>().FirstOrDefault(w => w.IsActive);
+                        var connectionWindow = new WinConnectionChoose();
+                        //if (owner != null && !ReferenceEquals(owner, connectionWindow))
+                        //{
+                        //    connectionWindow.Owner = owner;
+                        //}
+
+                        connectionWindow.ShowDialog();
+                    }
+                    finally
+                    {
+                        _isHandlingSqlConnectionFailure = false;
+
+                        if (!CL_CCNNMANAGER.ConnectedToSQLDB)
+                        {
+                            CL_LMethods.CleanupBeforeExiting();
+                            CL_LMethods.GoExitTheApplication();
+                        }
+                    }
+                }));
+
+                return;
             }
 
             CL_LMethods.GoExitTheApplication();

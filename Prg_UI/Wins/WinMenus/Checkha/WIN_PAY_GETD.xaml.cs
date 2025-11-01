@@ -156,7 +156,8 @@ namespace Wins.WinMenus.Checkha
                 else
                 {
                     // Defer the operation until the window is fully rendered
-                    this.Dispatcher.BeginInvoke(new Action(() => {
+                    this.Dispatcher.BeginInvoke(new Action(() =>
+                    {
                         // Try again after the window is fully initialized
                         IntPtr newHandle = new WindowInteropHelper(this).Handle;
                         if (newHandle != IntPtr.Zero)
@@ -819,6 +820,10 @@ namespace Wins.WinMenus.Checkha
                 {
                     new Msgwin(false, "خطا چک تکراری در ذخیره وضعیت چک").ShowDialog();
                     return false;
+                }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return false;
                 }
             }
             catch (Exception)

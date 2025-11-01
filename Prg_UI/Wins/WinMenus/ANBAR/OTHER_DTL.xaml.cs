@@ -280,18 +280,26 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     NUMBER = Convert.ToDouble(_NUMBER_);
 
                     RecordSource = $"SELECT * FROM OTHER_DTL WHERE TAG = {_TG_} and NUMBER = " + _NUMBER_;
-                    var rst = dbms.DoGetDataSQL<QRE_KH_07>("SELECT  dbo.INVO_LST.CODE ,dbo.INVO_LST.RADIF FROM  dbo.INVO_LST LEFT OUTER JOIN   dbo.OTHER_DTL_SUB ON dbo.INVO_LST.NUMBER = dbo.OTHER_DTL_SUB.NUMBER AND dbo.INVO_LST.TAG = dbo.OTHER_DTL_SUB.TAGG AND   dbo.INVO_LST.CODE = dbo.OTHER_DTL_SUB.CODE WHERE (dbo.INVO_LST.NUMBER = " + _NUMBER_ + $") And (dbo.INVO_LST.TAG = {_TG_}) And (dbo.OTHER_DTL_SUB.NUMBER Is Null)").ToList();
-                    for (int i = 0; i < rst.Count; i++)
-                    {
-                        var _RADIF_ = "NULL";
-                        if (rst[i].RADIF != null)
-                        {
-                            _RADIF_ = rst[i].RADIF.ToString();
-                        }
+                    //var rst = dbms.DoGetDataSQL<QRE_KH_07>("SELECT  dbo.INVO_LST.CODE ,dbo.INVO_LST.RADIF FROM  dbo.INVO_LST LEFT OUTER JOIN   dbo.OTHER_DTL_SUB ON dbo.INVO_LST.NUMBER = dbo.OTHER_DTL_SUB.NUMBER AND dbo.INVO_LST.TAG = dbo.OTHER_DTL_SUB.TAGG AND   dbo.INVO_LST.CODE = dbo.OTHER_DTL_SUB.CODE WHERE (dbo.INVO_LST.NUMBER = " + _NUMBER_ + $") And (dbo.INVO_LST.TAG = {_TG_}) And (dbo.OTHER_DTL_SUB.NUMBER Is Null)").ToList();
+                    //for (int i = 0; i < rst.Count; i++)
+                    //{
+                    //    var _RADIF_ = "NULL";
+                    //    if (rst[i].RADIF != null)
+                    //    {
+                    //        _RADIF_ = rst[i].RADIF.ToString();
+                    //    }
 
-                        dbms.DoExecuteSQL($@"INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF)
-                                                            VALUES({_NUMBER_}, {_TG_}, N'{rst[i].CODE}',{_RADIF_})");
-                    }
+                    //    dbms.DoExecuteSQL($@"INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF)
+                    //                                        VALUES({_NUMBER_}, {_TG_}, N'{rst[i].CODE}',{_RADIF_})");
+                    //}
+
+                         dbms.DoExecuteSQL(
+                        "INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) " +
+                        "SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i " +
+                        "WHERE i.NUMBER = " + _NUMBER_ + $" AND i.TAG = {_TG_} " +
+                        "AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) " +
+                        "GROUP BY i.NUMBER, i.TAG, i.CODE");
+
                     dbms.DoExecuteSQL($"DELETE FROM dbo.OTHER_DTL_SUB WHERE     (TAGG = {_TG_}) AND (NUMBER = " + _NUMBER_ + ") AND (NOT (CODE IN   (SELECT     CODE  FROM dbo.INVO_LST   WHERE     (NUMBER = " + _NUMBER_ + $") AND (TAG = {_TG_}))))");
                     // this.OTHER_DTL_SUB_SUB.Requery();
                 }
@@ -320,18 +328,26 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     NUMBER = Convert.ToDouble(_NUMBER_);
 
                     RecordSource = $"SELECT * FROM OTHER_DTL WHERE TAG = {_TG_} and NUMBER = " + _NUMBER_;
-                    var rst = dbms.DoGetDataSQL<QRE_KH_07>("SELECT  dbo.INVO_LST.CODE ,dbo.INVO_LST.RADIF FROM  dbo.INVO_LST LEFT OUTER JOIN   dbo.OTHER_DTL_SUB ON dbo.INVO_LST.NUMBER = dbo.OTHER_DTL_SUB.NUMBER AND dbo.INVO_LST.TAG = dbo.OTHER_DTL_SUB.TAGG AND   dbo.INVO_LST.CODE = dbo.OTHER_DTL_SUB.CODE WHERE (dbo.INVO_LST.NUMBER = " + _NUMBER_ + $") And (dbo.INVO_LST.TAG = {_TG_}) And (dbo.OTHER_DTL_SUB.NUMBER Is Null)").ToList();
-                    for (int i = 0; i < rst.Count; i++)
-                    {
-                        var _RADIF_ = "NULL";
-                        if (rst[i].RADIF != null)
-                        {
-                            _RADIF_ = rst[i].RADIF.ToString();
-                        }
+                    //var rst = dbms.DoGetDataSQL<QRE_KH_07>("SELECT  dbo.INVO_LST.CODE ,dbo.INVO_LST.RADIF FROM  dbo.INVO_LST LEFT OUTER JOIN   dbo.OTHER_DTL_SUB ON dbo.INVO_LST.NUMBER = dbo.OTHER_DTL_SUB.NUMBER AND dbo.INVO_LST.TAG = dbo.OTHER_DTL_SUB.TAGG AND   dbo.INVO_LST.CODE = dbo.OTHER_DTL_SUB.CODE WHERE (dbo.INVO_LST.NUMBER = " + _NUMBER_ + $") And (dbo.INVO_LST.TAG = {_TG_}) And (dbo.OTHER_DTL_SUB.NUMBER Is Null)").ToList();
+                    //for (int i = 0; i < rst.Count; i++)
+                    //{
+                    //    var _RADIF_ = "NULL";
+                    //    if (rst[i].RADIF != null)
+                    //    {
+                    //        _RADIF_ = rst[i].RADIF.ToString();
+                    //    }
 
-                        dbms.DoExecuteSQL($@"INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF)
-                                                            VALUES({_NUMBER_}, {_TG_}, N'{rst[i].CODE}',{_RADIF_})");
-                    }
+                    //    dbms.DoExecuteSQL($@"INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF)
+                    //                                        VALUES({_NUMBER_}, {_TG_}, N'{rst[i].CODE}',{_RADIF_})");
+                    //}
+
+                    dbms.DoExecuteSQL(
+                               "INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) " +
+                               "SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i " +
+                               "WHERE i.NUMBER = " + _NUMBER_ + $" AND i.TAG = {_TG_} " +
+                               "AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) " +
+                               "GROUP BY i.NUMBER, i.TAG, i.CODE");
+
                     dbms.DoExecuteSQL($"DELETE FROM dbo.OTHER_DTL_SUB WHERE     (TAGG = {_TG_}) AND (NUMBER = " + _NUMBER_ + ") AND (NOT (CODE IN   (SELECT     CODE  FROM dbo.INVO_LST   WHERE     (NUMBER = " + _NUMBER_ + $") AND (TAG = {_TG_}))))");
                     // this.OTHER_DTL_SUB_SUB.Requery();
                 }
@@ -354,18 +370,26 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     NUMBER = Convert.ToDouble(_NUMBER_);
 
                     RecordSource = $"SELECT * FROM OTHER_DTL WHERE TAG = {_TG_} and NUMBER = " + _NUMBER_;
-                    var rst = dbms.DoGetDataSQL<QRE_KH_07>("SELECT  dbo.INVO_LST.CODE ,dbo.INVO_LST.RADIF FROM  dbo.INVO_LST LEFT OUTER JOIN   dbo.OTHER_DTL_SUB ON dbo.INVO_LST.NUMBER = dbo.OTHER_DTL_SUB.NUMBER AND dbo.INVO_LST.TAG = dbo.OTHER_DTL_SUB.TAGG AND   dbo.INVO_LST.CODE = dbo.OTHER_DTL_SUB.CODE WHERE (dbo.INVO_LST.NUMBER = " + _NUMBER_ + $") And (dbo.INVO_LST.TAG = {_TG_}) And (dbo.OTHER_DTL_SUB.NUMBER Is Null)").ToList();
-                    for (int i = 0; i < rst.Count; i++)
-                    {
-                        var _RADIF_ = "NULL";
-                        if (rst[i].RADIF != null)
-                        {
-                            _RADIF_ = rst[i].RADIF.ToString();
-                        }
+                    //var rst = dbms.DoGetDataSQL<QRE_KH_07>("SELECT  dbo.INVO_LST.CODE ,dbo.INVO_LST.RADIF FROM  dbo.INVO_LST LEFT OUTER JOIN   dbo.OTHER_DTL_SUB ON dbo.INVO_LST.NUMBER = dbo.OTHER_DTL_SUB.NUMBER AND dbo.INVO_LST.TAG = dbo.OTHER_DTL_SUB.TAGG AND   dbo.INVO_LST.CODE = dbo.OTHER_DTL_SUB.CODE WHERE (dbo.INVO_LST.NUMBER = " + _NUMBER_ + $") And (dbo.INVO_LST.TAG = {_TG_}) And (dbo.OTHER_DTL_SUB.NUMBER Is Null)").ToList();
+                    //for (int i = 0; i < rst.Count; i++)
+                    //{
+                    //    var _RADIF_ = "NULL";
+                    //    if (rst[i].RADIF != null)
+                    //    {
+                    //        _RADIF_ = rst[i].RADIF.ToString();
+                    //    }
 
-                        dbms.DoExecuteSQL($@"INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF)
-                                                            VALUES({_NUMBER_}, {_TG_}, N'{rst[i].CODE}',{_RADIF_})");
-                    }
+                    //    dbms.DoExecuteSQL($@"INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF)
+                    //                                        VALUES({_NUMBER_}, {_TG_}, N'{rst[i].CODE}',{_RADIF_})");
+                    //}
+
+                    dbms.DoExecuteSQL(
+                      "INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) " +
+                      "SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i " +
+                      "WHERE i.NUMBER = " + _NUMBER_ + $" AND i.TAG = {_TG_} " +
+                      "AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) " +
+                      "GROUP BY i.NUMBER, i.TAG, i.CODE");
+
                     dbms.DoExecuteSQL($"DELETE FROM dbo.OTHER_DTL_SUB WHERE     (TAGG = {_TG_}) AND (NUMBER = " + _NUMBER_ + ") AND (NOT (CODE IN   (SELECT     CODE  FROM dbo.INVO_LST   WHERE     (NUMBER = " + _NUMBER_ + $") AND (TAG = {_TG_}))))");
                     // this.OTHER_DTL_SUB_SUB.Requery();
                 }

@@ -96,5 +96,7 @@ namespace Prg_Proccessy.SQLMODELS
         private int? _yd;
         public int? YD { get => _yd; set { if (_yd == value) return; _yd = value; OnPropertyChanged("YD"); } }
 
+        private string? _SAYADI;
+        public string? SAYADI { get => _SAYADI; set { if (_SAYADI == value) return; _SAYADI = value; OnPropertyChanged("SAYADI"); } }
     }
 }

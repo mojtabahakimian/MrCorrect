@@ -5,6 +5,7 @@ using Microsoft.Win32;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
+using System.ComponentModel;
 using System.Data;
 using System.Text;
 using static Dapper.SqlMapper;
@@ -83,6 +84,51 @@ namespace Prg_SendInvoice.CNNMANAGER
 
             return connectionStringBuilder.ConnectionString + ";";
         }
+        
+        private static readonly int[] ConnectionErrorNumbers =
+        {
+            2,      // The system cannot find the file specified
+            53,     // Network path not found
+            64,     // Named pipe connection broken
+            -2,     // Timeout expired
+            26,     // Error locating server/instance specified
+            121,    // Semaphore timeout period expired
+            232,    // The pipe is being closed
+            233,    // No process on the other end of the pipe
+            4060,   // Cannot open database requested by the login
+            17142,  // The server is paused
+            18456   // Login failed for user
+        };
+        public static bool IsConnectionRelated(SqlException? exception)
+        {
+            if (exception is null)
+            {
+                return false;
+            }
+
+            foreach (SqlError error in exception.Errors)
+            {
+                if (ConnectionErrorNumbers.Contains(error.Number))
+                {
+                    return true;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(exception.Message) &&
+                exception.Message.IndexOf("A network-related", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            }
+
+            if (exception.InnerException is Win32Exception win32 &&
+                (win32.NativeErrorCode == 53 || win32.NativeErrorCode == 64))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public CL_CCNNMANAGER()
         {
             //string path0 = @"C:\correct\CNR.udl";
@@ -134,6 +180,17 @@ namespace Prg_SendInvoice.CNNMANAGER
                     Thread.Sleep(200 * (attempt + 1));
                     continue;
                 }
+                catch (SqlException sqlEx)
+                {
+                    if (IsConnectionRelated(sqlEx))
+                    {
+                        ConnectedToSQLDB = false;
+                    }
+
+                    LogSqlQuery(sql, sqlEx);
+
+                    throw;
+                }
                 catch (Exception er)
                 {
                     LogSqlQuery(sql, er);
@@ -168,6 +225,10 @@ namespace Prg_SendInvoice.CNNMANAGER
                     {
                         System.Threading.Thread.Sleep(200 * (i + 1)); // Wait and retry
                         continue;
+                    }
+                    if (IsConnectionRelated(ex))
+                    {
+                        ConnectedToSQLDB = false;
                     }
                     throw; // Rethrow if not deadlock or max retries reached
                 }
@@ -209,6 +270,15 @@ namespace Prg_SendInvoice.CNNMANAGER
                     await db.OpenAsync();
                     var result = await db.ExecuteAsync(sql, parameters, commandTimeout: 3600);
                     return result;
+                }
+                catch (SqlException sqlEx)
+                {
+                    if (IsConnectionRelated(sqlEx))
+                    {
+                        ConnectedToSQLDB = false;
+                    }
+                    await LogSqlQueryAsync(sql, sqlEx);
+                    throw;
                 }
                 catch (Exception er)
                 {
@@ -342,7 +412,7 @@ namespace Prg_SendInvoice.CNNMANAGER
             }
         }
 
-
+        
         [System.Diagnostics.DebuggerStepThrough]
         public IEnumerable<TEntity> DoGetStoreProcedureSQL<TEntity>(string sql, object parameters = null)
         {
@@ -409,6 +479,15 @@ namespace Prg_SendInvoice.CNNMANAGER
                     var delay = baseDelayMilliseconds * (attempt + 1);
                     await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
                     // Loop continues to next attempt
+                }
+                catch (SqlException sqlEx)
+                {
+                    if (IsConnectionRelated(sqlEx))
+                    {
+                        ConnectedToSQLDB = false;
+                    }
+                    await LogSqlQueryAsync(sql, sqlEx);
+                    throw;
                 }
                 catch (OperationCanceledException)
                 {
@@ -487,6 +566,15 @@ namespace Prg_SendInvoice.CNNMANAGER
                         throw;
                     }
                     // ادامه به تلاش بعدی
+                }
+                catch (SqlException sqlEx)
+                {
+                    if (IsConnectionRelated(sqlEx))
+                    {
+                        ConnectedToSQLDB = false;
+                    }
+                    await LogSqlQueryAsync(sql, sqlEx);
+                    throw;
                 }
                 catch (OperationCanceledException)
                 {

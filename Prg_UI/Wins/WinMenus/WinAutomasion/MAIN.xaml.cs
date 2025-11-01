@@ -1,6 +1,7 @@
 ﻿using Functions;
 using Functions.SMSService;
 using MaterialDesignThemes.Wpf;
+using Microsoft.Data.SqlClient;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
@@ -358,9 +359,14 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             }
             catch (Exception ex)
             {
+                if (ex is SqlException sqlEx && CL_CCNNMANAGER.IsConnectionRelated(sqlEx))
+                {
+                    CL_CCNNMANAGER.ConnectedToSQLDB = false;
+                    throw;
+                }
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    universControl.PopNotifyShow($".خطا در بروز رسانی خودکار: {ex.Message}", Pop1, Pop1Text1, Pop_Border1);
+                    universControl.PopNotifyShow($".خطا در بروز رسانی خودکار", Pop1, Pop1Text1, Pop_Border1);
                 });
             }
             finally
@@ -401,6 +407,11 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             }
             catch (Exception ex)
             {
+                if (ex is SqlException sqlEx && CL_CCNNMANAGER.IsConnectionRelated(sqlEx))
+                {
+                    CL_CCNNMANAGER.ConnectedToSQLDB = false;
+                    throw;
+                }
                 await Dispatcher.InvokeAsync(() =>
                 {
                     universControl.PopNotifyShow($".خطا در بروز رسانی کارتابل خودکار: {ex.Message}", Pop1, Pop1Text1, Pop_Border1);
@@ -677,6 +688,12 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             }
             catch (Exception ex)
             {
+                if (ex is SqlException sqlEx && CL_CCNNMANAGER.IsConnectionRelated(sqlEx))
+                {
+                    CL_CCNNMANAGER.ConnectedToSQLDB = false;
+                    throw;
+                }
+
                 await Dispatcher.InvokeAsync(() => universControl.PopNotifyShow($"خطا در بروز رسانی پیام/یادآوری", Pop1, Pop1Text1, Pop_Border1));
             }
             finally
@@ -756,6 +773,12 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             }
             catch (Exception ex)
             {
+                if (ex is SqlException sqlEx && CL_CCNNMANAGER.IsConnectionRelated(sqlEx))
+                {
+                    CL_CCNNMANAGER.ConnectedToSQLDB = false;
+                    throw;
+                }
+
                 await this.Dispatcher.InvokeAsync(() =>
                 {
                     new Msgwin(false, "بروز رسانی به دلیل خطا کامل انجام نشد!").Show();
@@ -1603,6 +1626,11 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             }
             catch (Exception ex)
             {
+                if (ex is SqlException sqlEx && CL_CCNNMANAGER.IsConnectionRelated(sqlEx))
+                {
+                    CL_CCNNMANAGER.ConnectedToSQLDB = false;
+                    throw;
+                }
                 new Msgwin(false, "خطا در انجام بروز رسانی گروهی").ShowDialog();
             }
             finally

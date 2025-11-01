@@ -120,7 +120,8 @@
 
                 <DataGrid.Style>
                     <!--خط بندی سطر های دیتاگرید-->
-                    <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
+                    <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                        <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
                         <Setter Property="GridLinesVisibility" Value="All"/>
                     </Style>
                 </DataGrid.Style>
@@ -242,11 +243,11 @@
 
             <Button x:Name="BTN_FACTORHA" Content="لیست برگه ورود کالای ساخته شده ها" Margin="98,129,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="203" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_FACTORHA_Click"/>
             <Button x:Name="BTN_NEW_FACTOR" Content="برگه ورود جدید" Margin="307,129,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="129" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_NEW_FACTOR_Click" Padding="16,2,16,4" Visibility="Collapsed"/>
-            <CNC:NumericTextBox x:Name="FNUMCO" DoesAcceptDouble="True" MaxLength="12" Text="0" Height="30" Margin="0,12,612,0" VerticalAlignment="Top" Visibility="Visible" HorizontalAlignment="Right" Width="95"/>
+            <CNC:NumericTextBox x:Name="FNUMCO" DoesAcceptDouble="True" MaxLength="12" Text="0" Height="30" Margin="388,12,0,0" VerticalAlignment="Top" Visibility="Visible" HorizontalAlignment="Left" Width="95"/>
             <Button x:Name="Command106" Content="چاپ 2" Margin="124,8,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="78" Foreground="#DDFFFFFF" FontWeight="Bold" IsEnabled="False" Click="Command106_Click"/>
-            <Label Content="شماره برگه داخلی:" Margin="0,14,530,0" FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="82" Height="26" VerticalAlignment="Top"/>
+            <Label Content="شماره برگه داخلی:" Margin="483,14,0,0" FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="82" Height="26" VerticalAlignment="Top"/>
             <CNC:NumericTextBox x:Name="MOGUDI" RestoreLastValidValue="False" LastValueShouldZero="{x:Null}" DigitGroupOnEnter="True" IsReadOnly="True" IsDigitGroupActive="True" DoesAcceptDouble="True" MaxLength="12" Height="30" Margin="163,0,0,66" VerticalAlignment="Bottom" Visibility="Visible" HorizontalAlignment="Left" Width="159"/>
-            <Label Content="تعداد موجودی کالا:" Margin="0,551,685,0" FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="86" Height="26" VerticalAlignment="Top"/>
+            <Label Content="تعداد موجودی کالا:" Margin="324,0,0,68" FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="86" Height="26" VerticalAlignment="Bottom"/>
         </Grid>
 
         <CNC:RecordNavigatorControl x:Name="navigatorControl" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="459,0,0,47"/>

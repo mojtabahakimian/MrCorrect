@@ -2334,7 +2334,10 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 {
                     new Msgwin(false, "این آیتم گروه تکراری است!").ShowDialog();
                 }
-
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                }
                 return;
             }
             catch (Exception)

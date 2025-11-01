@@ -212,6 +212,7 @@
                     </syncfusion:GridTemplateColumn.CellTemplate>
                 </syncfusion:GridTemplateColumn>
                 <syncfusion:GridComboBoxColumn x:Name="SANDUGH_COLUMN" MappingName="SANDUGH" HeaderText="موقعیت چک*" SelectedValuePath="TNUMBER" DisplayMemberPath="NAME" IsReadOnly="True"  />
+                <syncfusion:GridTextColumn MappingName="SAYADI" HeaderText="شماره صیادی" IsReadOnly="True"  />
                 <syncfusion:GridTextColumn MappingName="ESTELAM" HeaderText="توضیحات" IsReadOnly="True"  />
                 <syncfusion:GridTemplateColumn HeaderText="توضیحات" Width="110" MappingName="IsButtony" AllowSorting="False" AllowFiltering="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>

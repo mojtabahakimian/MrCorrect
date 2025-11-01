@@ -769,6 +769,10 @@ namespace Wins.WinMenus.CONFIGS
                         new Msgwin(false, "این سطر حاوی داده تکراری است , آنرا اصلاح کنید").ShowDialog();
                         return;
                     }
+                    else
+                    {
+                        new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                    }
                 }
 
             }

@@ -252,7 +252,7 @@
                     </DataGridTextColumn>
                     <DataGridTextColumn x:Name="sTATUSColumn" Visibility="Hidden"  Binding="{Binding STATUS,  UpdateSourceTrigger=PropertyChanged}" Header="وضعیت" />
 
-                    <DataGridComboBoxColumn x:Name="STATUS_CMB"  Width="90"  Header=" وضعیت "
+                    <DataGridComboBoxColumn x:Name="STATUS_CMB"  Width="120"  Header=" وضعیت "
                                         SelectedValueBinding="{Binding STATUS,  UpdateSourceTrigger=PropertyChanged}" 
                                         DisplayMemberPath="STATUS_NAME" 
                                         SelectedValuePath="STATUS">

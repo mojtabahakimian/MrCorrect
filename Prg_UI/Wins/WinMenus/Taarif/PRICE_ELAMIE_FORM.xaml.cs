@@ -1548,9 +1548,9 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                                     UPDATE PRICE_ELAMIE_DTL
                                     SET
                                         PEPID = @PEPID,
-                                        PGID = @PGID
+                                        PGID = @PGID,
                                         PRICE1 = @PRICE1,
-                                        USERNAME = @USERNAME,
+                                        USERNAME = @USERNAME
                                     WHERE
                                         PERID = @PERID";
 
@@ -1565,6 +1565,10 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 if (ex.Number == 2601 || ex.Number == 2627)
                 {
                     new Msgwin(false, "آیتم تکراری وارد شده آنرا اصلاح کنید").ShowDialog();
+                }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
                 }
 
                 return;
