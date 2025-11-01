@@ -154,6 +154,7 @@ namespace Wins.WinMenus.CONFIGS
                 BTN_UPIMAGE.IsEnabled = ican;
                 BTN_SAVE_G.IsEnabled = ican;
                 BTN_SAVE.IsEnabled = ican;
+                BTN_MORE.IsEnabled = ican;
                 #endregion
 
                 #region ASNAD_VA_HESAB

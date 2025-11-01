@@ -840,12 +840,15 @@ namespace Wins.WinMenus.Taarif
                 {
                     new Msgwin(false, "نام یا کد حساب تکراری است آنرا اصلاح کنید").ShowDialog();
                 }
-
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                }
                 return;
             }
             catch (Exception)
             {
-                new Msgwin(false, "خطا در انجام عملیات حذف!").ShowDialog(); return;
+                new Msgwin(false, "خطا در انجام عملیات ذخیره!").ShowDialog(); return;
             }
 
             if (idd != null) //So Much Important

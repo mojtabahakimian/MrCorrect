@@ -1117,6 +1117,10 @@ namespace Wins.WinMenus.Taarif
                         {
                             new Msgwin(false, "مشتری تکراری است!").ShowDialog();
                         }
+                        else
+                        {
+                            new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                        }
                         return;
                     }
                     catch (Exception)
@@ -1184,6 +1188,10 @@ namespace Wins.WinMenus.Taarif
                         if (ex.Number == 2601 || ex.Number == 2627)
                         {
                             new Msgwin(false, "مشتری تکراری است!").ShowDialog();
+                        }
+                        else
+                        {
+                            new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
                         }
                         return;
                     }
@@ -1254,6 +1262,10 @@ namespace Wins.WinMenus.Taarif
                         {
                             new Msgwin(false, "مشتری تکراری است!").ShowDialog();
                         }
+                        else
+                        {
+                            new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                        }
                         return;
                     }
                     catch (Exception)
@@ -1323,6 +1335,10 @@ namespace Wins.WinMenus.Taarif
                         if (ex.Number == 2601 || ex.Number == 2627)
                         {
                             new Msgwin(false, "مشتری تکراری است!").ShowDialog();
+                        }
+                        else
+                        {
+                            new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
                         }
                         return;
                     }

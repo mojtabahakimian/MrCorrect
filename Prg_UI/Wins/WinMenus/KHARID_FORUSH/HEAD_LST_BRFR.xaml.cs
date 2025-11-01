@@ -2968,7 +2968,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 string SelectedTextCMB = ((COMBOPERSONEL)PERSONEL.SelectedItem).SAL_NAME.ToStringNullSafe();
 
-                Meidnum = CL_HESABDARI.PERSONELUpdate(HTAG, Convert.ToDouble(NUMBER.Text), Convert.ToInt32(PERSONEL.SelectedValue), "'فاکتور برگشت فروش. آزاد  شماره: " + NUMBER.Text + " مورخ " + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(CUST_NO.SelectedValue.ToString()) + "','" + CUST_NO.SelectedValue + "'");
+                Meidnum = CL_HESABDARI.PERSONELUpdate(FTAG, Convert.ToDouble(NUMBER.Text), Convert.ToInt32(PERSONEL.SelectedValue), "'فاکتور برگشت فروش. آزاد  شماره: " + NUMBER.Text + " مورخ " + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(CUST_NO.SelectedValue.ToString()) + "','" + CUST_NO.SelectedValue + "'");
 
                 universControl.PopNotifyShow($"ارجاع داده به {SelectedTextCMB} شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
             }
@@ -3754,6 +3754,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 if (ex.Number == 2601 || ex.Number == 2627)
                 {
                     new Msgwin(false, " این چک تکراری است!!").ShowDialog();
+                }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog();
                 }
                 //InvokeAsync
                 DG.Dispatcher.Invoke(() =>

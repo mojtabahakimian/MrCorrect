@@ -715,6 +715,10 @@ namespace Prg_UI.Wins.WinSamplesEmpty
                 {
                     new Msgwin(false, "این کد تکراری است !").ShowDialog();
                 }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                }
                 return;
             }
             catch (Exception)

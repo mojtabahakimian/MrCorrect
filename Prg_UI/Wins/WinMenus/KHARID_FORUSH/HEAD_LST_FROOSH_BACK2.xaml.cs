@@ -3749,6 +3749,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 {
                     new Msgwin(false, " این چک تکراری است!!").ShowDialog();
                 }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog();
+                }
                 //InvokeAsync
                 DG.Dispatcher.Invoke(() =>
                 {

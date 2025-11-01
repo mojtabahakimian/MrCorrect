@@ -1614,6 +1614,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 //this.AllowEdits = true;
                 CL_LMethods.AllowDeletions(this.GetType().Name, false, new WindowInteropHelper(this).Handle);
 
+                ApplyDataGridItems();
                 AllowEdits = false;
                 //PGET_LST_SUB.IsReadOnly = false;
                 //this.PGET_LST_SUB.CanUserAddRows = true;
@@ -3403,15 +3404,24 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         private void RestoreFocusCell(DataGridCellEditEndingEventArgs e)
         {
             e.Cancel = true;
-            Dispatcher.BeginInvoke(new Action(() =>
+            try
             {
-                PGET_LST_SUB.CurrentCell = _editingCellInfo.Value;
-                PGET_LST_SUB.BeginEdit();
-                if (e.EditingElement is TextBox tb)
+                Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    tb.SelectAll();
-                }
-            }), DispatcherPriority.Background);
+                    PGET_LST_SUB.CurrentCell = _editingCellInfo.Value;
+                    PGET_LST_SUB.BeginEdit();
+                    if (e.EditingElement is TextBox tb)
+                    {
+                        tb.SelectAll();
+                        tb.Focus();
+                        Keyboard.Focus(tb);
+                    }
+                }));
+                //}), DispatcherPriority.Background);
+            }
+            catch (Exception)
+            {
+            }
         }
 
         bool IsSaveSuccess = true;
@@ -4547,6 +4557,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 return;
             }
 
+            ApplyDataGridItems();
+
             PGET_LST_SUB.CommitEdit();
 
             var dt = DateTime.Now;
@@ -4850,9 +4862,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                                                 break;
                                             } // دریافت برگشت چک
                                     }
-
-
-
 
                                     break;
                                 }

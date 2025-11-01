@@ -768,6 +768,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 {
                     new Msgwin(false, "این اطلاعات تکراری است !").ShowDialog();
                 }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                }
                 return;
             }
             catch (Exception)

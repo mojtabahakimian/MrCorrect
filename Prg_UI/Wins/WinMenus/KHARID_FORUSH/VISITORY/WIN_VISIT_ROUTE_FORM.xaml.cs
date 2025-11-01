@@ -1562,6 +1562,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                     new Msgwin(false, "نام مشتری تکراری است آنرا اصلاح کنید").ShowDialog();
                 }
 
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                }
                 return;
             }
             catch (Exception)

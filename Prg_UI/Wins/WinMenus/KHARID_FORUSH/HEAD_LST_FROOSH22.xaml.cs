@@ -3213,9 +3213,15 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 }
                 else
                 {
-                    filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT     PRICE_PAYNO.PPID, PRICE_PAYNO.PPAME, PRICE_PAYNO.MODAT FROM         PRICE_PAYNO INNER JOIN   PRICE_ELAMIETF_DTL ON PRICE_PAYNO.PPID = PRICE_ELAMIETF_DTL.PPID  WHERE     (PRICE_ELAMIETF_DTL.PEID = " + _navigationManager.CurrentRecord.PEID + ")  union  SELECT 0, 'آزاد', 0").ToList();
+                    if (_navigationManager?.CurrentRecord?.PEID != null)
+                    {
+                        filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT     PRICE_PAYNO.PPID, PRICE_PAYNO.PPAME, PRICE_PAYNO.MODAT FROM         PRICE_PAYNO INNER JOIN   PRICE_ELAMIETF_DTL ON PRICE_PAYNO.PPID = PRICE_ELAMIETF_DTL.PPID  WHERE     (PRICE_ELAMIETF_DTL.PEID = " + _navigationManager.CurrentRecord.PEID + ")  union  SELECT 0, 'آزاد', 0").ToList();
+                    }
+                    else
+                    {
+                        filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO").ToList();
+                    }
                 }
-                ////filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO").ToList();
                 return;
             }
 
@@ -9520,6 +9526,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 {
                     new Msgwin(false, "داده ی تکراری وارد شده است , آنرا اصلاح کنید").ShowDialog();
                 }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                }
                 return;
             }
             catch (Exception ex)
@@ -10126,6 +10136,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 if (ex.Number == 2601 || ex.Number == 2627)
                 {
                     new Msgwin(false, "داده ی تکراری وارد شده است , آنرا اصلاح کنید").ShowDialog();
+                }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
                 }
                 return;
             }
@@ -10828,7 +10842,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     {
                         if (mandResult.mand < 0)
                         {
-                            new Msgwin(false, $"خروج كالاي  {CL_HESABDARI.GETKALANAME(row.CODE)} از انبار موجودي را به مقدار غير مجاز كاهش ميدهد. برگه قابل چاپ نيست").ShowDialog();
+                            //Microsoft.CSharp.RuntimeBinder.RuntimeBinderException: 'The best overloaded method match for 'Prg_Proccessy.FUNCTIONS.CL_HESABDARI.GETKALANAME(double)' has some invalid arguments'
+                            new Msgwin(false, $"خروج كالاي  {CL_HESABDARI.GETKALANAME(Convert.ToDouble(row.CODE))} از انبار موجودي را به مقدار غير مجاز كاهش ميدهد. برگه قابل چاپ نيست").ShowDialog();
                             NOTPR = true;
                         }
                     }

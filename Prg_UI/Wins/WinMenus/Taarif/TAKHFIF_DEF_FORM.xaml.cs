@@ -487,6 +487,10 @@ namespace Wins.WinMenus.Taarif
                     new Msgwin(false, "این سربرگ تخفیف تکراری است").ShowDialog();
                     return;
                 }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                }
             }
             catch (Exception)
             {
@@ -934,6 +938,10 @@ namespace Wins.WinMenus.Taarif
                     new Msgwin(false, "این تخفیف تکراری است!").ShowDialog();
                     return;
                 }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                }
             }
             catch (Exception ex)
             {
@@ -987,6 +995,10 @@ namespace Wins.WinMenus.Taarif
                 {
                     new Msgwin(false, "این گروه مشتری تکراری است!").ShowDialog();
                     return;
+                }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
                 }
             }
             catch (Exception ex)

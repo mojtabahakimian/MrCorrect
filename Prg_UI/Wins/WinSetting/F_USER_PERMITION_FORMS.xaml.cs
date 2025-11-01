@@ -1635,6 +1635,10 @@ namespace Wins.WinSetting
                     new Msgwin(false, " خطا: انباری تکراری انتخاب شده است آنرا اصلاح کنید ").ShowDialog();
                     return;
                 }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                }
             }
             catch (Exception)
             {
@@ -2296,6 +2300,10 @@ namespace Wins.WinSetting
                     new Msgwin(false, " این حساب برای مسدودی تکراری وارد شده!").ShowDialog();
                     return;
                 }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                }
             }
             catch (Exception)
             {
@@ -2658,6 +2666,10 @@ namespace Wins.WinSetting
                 {
                     new Msgwin(false, " این حساب برای حسابهای مجاز تکراری وارد شده!").ShowDialog();
                     return;
+                }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
                 }
             }
             catch (Exception)
@@ -3113,6 +3125,10 @@ namespace Wins.WinSetting
                 {
                     new Msgwin(false, "کاربر تکراری برای زیر مجموعه انتخاب شده !").ShowDialog();
                     return;
+                }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
                 }
             }
             catch

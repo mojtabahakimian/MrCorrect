@@ -570,6 +570,10 @@ namespace Wins.WinMenus.Checkha
                     new Msgwin(false, "خطا چک تکراری در ذخیره وضعیت چک").ShowDialog();
                     return false;
                 }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return false;
+                }
             }
             catch (Exception)
             {
