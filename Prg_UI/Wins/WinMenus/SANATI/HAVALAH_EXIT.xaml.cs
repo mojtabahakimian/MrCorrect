@@ -40,6 +40,7 @@ using System.Windows.Data;
 using System.ComponentModel;
 using static Prg_UI.Functions.CL_LMethods;
 using System.Windows.Controls.Primitives;
+using Prg_Proccessy.Generaly;
 
 namespace Wins.WinMenus.SANATI
 {
@@ -313,6 +314,7 @@ namespace Wins.WinMenus.SANATI
                 CUST_NO.IsEnabled = ican;// نام مشتری
                 CUST_NO2.IsEnabled = ican;// فقط کد مشتری
                 MOLAH.IsEnabled = ican;// ملاحظات سربرگ
+                DEPATMAN.IsEnabled = ican;
 
                 BTN_SAVE.IsEnabled = ican;
 
@@ -426,6 +428,7 @@ namespace Wins.WinMenus.SANATI
                 USER_NAME.Text = HEADER_FAC.USER_NAME.ToStringNullSafe(); //کاربر
 
                 FNUMCO.Text = string.IsNullOrEmpty(HEADER_FAC?.FNUMCO.ToStringNullSafe()) ? "0" : HEADER_FAC?.FNUMCO.ToStringNullSafe(); //شماره داخلی
+                DEPATMAN.SelectedValue = HEADER_FAC.DEPATMAN; DEPATMAN.Items.Refresh(); //واحد
 
                 string thevalue = HEADER_FAC.CUST_NO;
                 var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + thevalue + "'").FirstOrDefault();
@@ -647,6 +650,20 @@ namespace Wins.WinMenus.SANATI
 
             //پر کردن کمبوباکس ستون واحد به طور مقدار اولیه
             VAHED_K_COLUMN.ItemsSource = dbms.DoGetDataSQL<Custom_VAHEDK>("SELECT CODE AS VAHED,NAMES FROM dbo.TCOD_VAHEDS").ToList();
+
+            //واحد ها
+            var RST = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
+            foreach (var item in RST)
+            {
+                item.DEPNAME = item.DEPNAME.NormalizeArabicPersian();
+            }
+            DEPATMAN.ItemsSource = RST;
+
+            DEPATMAN.DisplayMemberPath = "DEPNAME";
+            DEPATMAN.SelectedValuePath = "DEPATMAN";
+            DEPATMAN.SelectedIndex = 0;
+            DEPATMAN.SelectedItem = 0;
+            DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER;
 
             //محل مصرف
             N_RASID_ALL = dbms.DoGetDataSQL<N_RASID_MODEL>(@"SELECT dbo.HEAD_MANF.FNUMB, STUF_DEF.NAME+' '+ISNULL(HEAD_MANF.TOZIH, ' ') AS nam, dbo.HEAD_MANF.FNUMB AS Expr1
@@ -911,7 +928,26 @@ namespace Wins.WinMenus.SANATI
                 }
             }
 
-            DoCmdHeaderSave();
+            try
+            {
+                DoCmdHeaderSave();
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Number == 2601 || ex.Number == 2627)
+                {
+                    new Msgwin(false, "داده تکراری است آنرا اصلاح کنید").ShowDialog();
+                }
+                else
+                {
+                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                }
+                return;
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خطا در انجام عملیات ذخیره!").ShowDialog(); return;
+            }
 
             this.OKF.IsChecked = true;
 
@@ -1103,7 +1139,7 @@ namespace Wins.WinMenus.SANATI
 
             _qre = $@"UPDATE dbo.HEAD_LST
                     SET NUMBER = {NUMBER.Text}, DATE_N = {DATE_N.Text.ToRawTarikh()},
-                    N_S = {_n_s},
+                    N_S = {_n_s}, DEPATMAN={DEPATMAN.SelectedValue ?? "NULL"}, 
                     CUST_NO = N'{CUST_NO.SelectedValue}', MOLAH = N'{MOLAH.Text}',
                     FNUMCO = {(string.IsNullOrEmpty(FNUMCO.Text) ? "0" : FNUMCO.Text)},
                     OKF = {Convert.ToByte(OKF.IsChecked)},

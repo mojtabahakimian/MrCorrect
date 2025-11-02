@@ -91,6 +91,15 @@
                 </ComboBox.ItemsPanel>
             </ComboBox>
 
+            <Label Content="واحد:" Margin="0,123,444,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="32" Height="26" VerticalAlignment="Top"/>
+            <ComboBox x:Name="DEPATMAN"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="388,123,479,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+
             <TextBox x:Name="MOLAH" Text="" Height="30" Margin="388,88,81,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" TabIndex="3" />
             <Button x:Name="ESLAH" Content="اصلاح برگه" Margin="147,16,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="92" Foreground="#DDFFFFFF" FontWeight="Bold" Click="ESLAH_Click"/>
             <CheckBox x:Name="OKF" IsChecked="False"  Content="تایید حواله" HorizontalAlignment="Left" Margin="307,22,0,0" VerticalAlignment="Top" Width="73" FontSize="10" IsHitTestVisible="False" Focusable="False"/>

@@ -3374,6 +3374,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 else
                 {
                     INVO_LST_SUB_ReGetData();
+
+                    //واحد رو از رسید بگیره که فاکتورش هم بشه همون واحد صادر کننده رسید که بتونه بعدا فاکتور رو ببینه
+                    var _DEPATMAN_ = dbms.DoGetDataSQL<string?>($"SELECT TOP 1 DEPATMAN FROM HEAD_LST WHERE NUMBER = {NUMBER.SelectedValue} AND TAG = {HTAG}").FirstOrDefault();
+                    if (_DEPATMAN_ != null)
+                    {
+                        DEPATMAN.SelectedValue = _DEPATMAN_; DEPATMAN.Items.Refresh();
+                    }
                 }
             }
         }

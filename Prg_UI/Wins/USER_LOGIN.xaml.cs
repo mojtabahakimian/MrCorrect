@@ -376,8 +376,8 @@ namespace Prg_UI.Wins
 
             //new MAIN().Show();
             //new HEAD_LST_RASID_OTHER_WIN().Show();
-            new WIN_OPTIONS().Show();
-            //new WIN_SAZMAN().Show();
+            //new WIN_OPTIONS().Show();
+            new HAVALAH_ENTER(355).Show();
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "8949,8965");
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);

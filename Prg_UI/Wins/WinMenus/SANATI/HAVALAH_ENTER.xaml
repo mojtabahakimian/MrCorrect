@@ -240,6 +240,14 @@
             <Button x:Name="BTN_DELETE" Content="حذف" Tag="hazfer" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="6,130,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="84" Click="BTN_DELETE_Click" />
 
             <Button x:Name="BTN_SAVE" Click="BTN_SAVE_Click" Content="ذخیره" BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Foreground="#DDFFFFFF" Height="35" Margin="0,129,4,0" VerticalAlignment="Top" TabIndex="4" HorizontalAlignment="Right" Width="115" />
+            <Label Content="واحد:" Margin="0,123,444,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="32" Height="26" VerticalAlignment="Top"/>
+            <ComboBox x:Name="DEPATMAN"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="388,123,479,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
 
             <Button x:Name="BTN_FACTORHA" Content="لیست برگه ورود کالای ساخته شده ها" Margin="98,129,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="203" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_FACTORHA_Click"/>
             <Button x:Name="BTN_NEW_FACTOR" Content="برگه ورود جدید" Margin="307,129,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="129" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_NEW_FACTOR_Click" Padding="16,2,16,4" Visibility="Collapsed"/>
