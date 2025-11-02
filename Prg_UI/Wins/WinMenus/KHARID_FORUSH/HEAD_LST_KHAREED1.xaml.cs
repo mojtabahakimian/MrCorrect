@@ -488,7 +488,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             _navigationManager.RaiseInitializationEvents();
 
             //Form_Open
-            if (Baseknow.OPTIONSS.Substring(67, 1) == "5" && !IsExporty)
+            // if (Baseknow.OPTIONSS.Substring(67, 1) == "5" && !IsExporty)
+            if (!string.IsNullOrEmpty(Baseknow.OPTIONSS) && Baseknow.OPTIONSS.Length > 67 && Baseknow.OPTIONSS.Substring(67, 1) == "5" && !IsExporty)
             {
                 this.PARAMS.Visibility = Visibility.Visible;
             }
@@ -1381,7 +1382,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                     ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
                                 }
                                 CUST_NO.SelectedValue = thevalue;
-                                CUST_NO.Items.Refresh();                      
+                                CUST_NO.Items.Refresh();
                             }
                         }
                         var RSTDATE = dbms.DoGetDataSQL<string?>($"SELECT TOP 1 DATE_N FROM HEAD_LST WHERE NUMBER = {NUMBER.SelectedValue} AND TAG = {HTAG}").FirstOrDefault();
@@ -3373,6 +3374,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 else
                 {
                     INVO_LST_SUB_ReGetData();
+
+                    //واحد رو از رسید بگیره که فاکتورش هم بشه همون واحد صادر کننده رسید که بتونه بعدا فاکتور رو ببینه
+                    var _DEPATMAN_ = dbms.DoGetDataSQL<string?>($"SELECT TOP 1 DEPATMAN FROM HEAD_LST WHERE NUMBER = {NUMBER.SelectedValue} AND TAG = {HTAG}").FirstOrDefault();
+                    if (_DEPATMAN_ != null)
+                    {
+                        DEPATMAN.SelectedValue = _DEPATMAN_; DEPATMAN.Items.Refresh();
+                    }
                 }
             }
         }

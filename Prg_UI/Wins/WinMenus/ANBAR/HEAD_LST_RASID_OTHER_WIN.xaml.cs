@@ -553,7 +553,7 @@ namespace Wins.WinMenus.ANBAR
         {
             return new[]
             {
-                new SearchableProperty { DisplayName = "شماره فاکتور", PropertyPath = "NUMBER", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "شماره", PropertyPath = "NUMBER", PropertyType = typeof(double) },
                 new SearchableProperty { DisplayName = "تاریخ", PropertyPath = "DATE_N", PropertyType = typeof(long) },
                 new SearchableProperty { DisplayName = "تحویل گیرنده", PropertyPath = "TAH", PropertyType = typeof(string) },
                 new SearchableProperty { DisplayName = "تحویل دهنده", PropertyPath = "MOLAH", PropertyType = typeof(string) },

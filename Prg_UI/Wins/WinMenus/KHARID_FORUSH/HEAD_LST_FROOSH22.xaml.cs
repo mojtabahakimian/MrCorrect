@@ -3163,8 +3163,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             // ۱. بدست آوردن مقدار فعلی انتخاب‌شده (MSI)
             int currentSelectedPPID = -1;
-            if (MODAT_PPID.SelectedValue != null)
-                currentSelectedPPID = Convert.ToInt32(MODAT_PPID.SelectedValue);
+            if (_navigationManager?.CurrentRecord?.MODAT_PPID != null)
+            {
+                currentSelectedPPID = Convert.ToInt32(_navigationManager.CurrentRecord.MODAT_PPID);
+            }
 
             // ۲. بررسی اینکه آیا DEPARTMENT انتخاب شده یا نه
             if (DEPATMAN.SelectedItem == null)

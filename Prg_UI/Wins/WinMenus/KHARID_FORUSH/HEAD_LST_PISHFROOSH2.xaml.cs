@@ -1040,7 +1040,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 }
             }
 
-            if (Strings.Mid(Baseknow.OPTIONSS, 51, 1) == "5")
+            bool HichGHEYM = Baseknow.GHAYM.ToString() == "3"; //پیش فرض قیمت هیچکدام
+            //در زمان تبديل پيش فاكتور به فاكتور مبلغ فروش كنترل گردد كه اگر تغيير كرده اخطار دهد بجز مبالغ صفر
+            if (Strings.Mid(Baseknow.OPTIONSS, 51, 1) == "5" && !CL_Generaly.IsGHAYM_7 && !HichGHEYM)
             {
                 var rst4 = dbms.DoGetDataSQL<PRT1>("SELECT MABL_F , B_SEF FROM STUF_DEF WHERE code = '" + ROW.CODE + "'").ToList();
                 if (rst4.Count == 1)
@@ -3318,10 +3320,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 USER_NAME.Text = HEADER.USER_NAME;
                 DATE_N.Text = HEADER.DATE_N.ToString();
 
+
                 DEPATMAN.SelectionChanged -= DEPATMAN_SelectionChanged;
                 DEPATMAN.SelectedValue = HEADER.DEPATMAN; DEPATMAN.Items.Refresh();
                 DEPATMAN.SelectionChanged += DEPATMAN_SelectionChanged;
-
 
                 CUST_KIND.SelectionChanged -= CUST_KIND_SelectionChanged;
                 CUST_KIND.SelectedValue = HEADER.CUST_KIND; CUST_KIND.Items.Refresh();
@@ -3389,15 +3391,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                 TAMIR.SelectionChanged += TAMIR_SelectionChanged;
 
-                if (CL_Generaly.IsGHAYM_7)
-                {
-                    MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
-                    if (HEADER?.MODAT_PPID != null)
-                    {
-                        MODAT_PPID.SelectedValue = HEADER.MODAT_PPID; MODAT_PPID.Items.Refresh();
-                    }
-                    MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
-                }
 
                 if (HEADER?.PEPID != null)
                 {
@@ -3408,6 +3401,19 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     PEID.SelectedValue = HEADER.PEID; PEID.Items.Refresh();
                 }
 
+                MODAT_PPID_Enter(); //بروز رسانی داده های نحوه پرداخت بر اساس داده ها وارد شده
+
+                if (CL_Generaly.IsGHAYM_7)
+                {
+                    MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
+                    if (HEADER?.MODAT_PPID != null)
+                    {
+                        MODAT_PPID.SelectedValue = HEADER.MODAT_PPID; MODAT_PPID.Items.Refresh();
+                    }
+                    MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
+                }
+
+
                 MOLAH.Text = HEADER.MOLAH;
                 MAS.Text = string.IsNullOrEmpty(HEADER.MAS.ToStringNullSafe()) ? "0" : HEADER.MAS.ToStringNullSafe();
                 TAKHFIF.Text = string.IsNullOrEmpty(HEADER.TAKHFIF.ToStringNullSafe()) ? "0" : HEADER.TAKHFIF.ToStringNullSafe();
@@ -3415,7 +3421,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 MABL_HAZ.Text = string.IsNullOrEmpty(HEADER.MABL_HAZ.ToStringNullSafe()) ? "0" : HEADER.MABL_HAZ.ToStringNullSafe();
                 SHARAYET.Text = HEADER?.SHARAYET?.ToStringNullSafe();
 
-                MODAT_PPID_Enter(); //بروز رسانی داده های نحوه پرداخت بر اساس داده ها وارد شده
 
                 INVO_LST_SUB_ReGetData(); //Load DataGrid's data
 
@@ -3941,75 +3946,80 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             // ۱. بدست آوردن مقدار فعلی انتخاب‌شده (MSI)
             int currentSelectedPPID = -1;
-            if (MODAT_PPID.SelectedValue != null)
-                currentSelectedPPID = Convert.ToInt32(MODAT_PPID.SelectedValue);
+
+            var CurrentRecord = RecordsData.View.CurrentItem as pish_view;
+
+            if (CurrentRecord?.MODAT_PPID != null)
+            {
+                currentSelectedPPID = Convert.ToInt32(CurrentRecord.MODAT_PPID);
+            }
 
             // ۲. بررسی اینکه آیا DEPARTMENT انتخاب شده یا نه
             if (DEPATMAN.SelectedItem == null)
             {
-                universControl.PopNotifyShow(
-                    "واحد نميتواند خالي باشد",
-                    Pop1, Pop1Text1, Pop_Border1
-                );
+                universControl.PopNotifyShow("واحد نميتواند خالي باشد", Pop1, Pop1Text1, Pop_Border1);
                 return;
             }
 
             string tarikhRaw = DATE_N.Text.ToRawTarikh();
             if (!long.TryParse(tarikhRaw, out long tarikhValue))
             {
-                universControl.PopNotifyShow(
-                    "تاریخ نمی‌تواند خالی باشد",
-                    Pop1, Pop1Text1, Pop_Border1
-                );
+                universControl.PopNotifyShow("تاریخ نمی‌تواند خالی باشد", Pop1, Pop1Text1, Pop_Border1);
                 return;
             }
 
-            // ۳. گرفتن PEID آخرین اطلاعیه (براساس تاریخ فاکتور و دپارتمان)
-            string tarikh = DATE_N.Text.ToRawTarikh();
-            int departId = Convert.ToInt32(DEPATMAN.SelectedValue);
-            string sqlGetPEID =
-                "SELECT TOP (1) PEID " +
-                "FROM dbo.PRICE_ELAMIETF " +
-                $"WHERE (PEDATE <= {tarikh}) AND (PEPDEPART = {departId}) " +
-                "ORDER BY PEID DESC";
-
-            int? lastPEID = dbms.DoGetDataSQL<int?>(sqlGetPEID).FirstOrDefault();
-
             // ۴. واکشی لیست فیلترشده از PRICE_PAYNO براساس lastPEID
             List<PRICE_PAYNO_MODATP> filteredList;
-            if (lastPEID != null)
+            if (PEID.SelectedValue != null)
             {
-                string sqlFiltered =
-                    "SELECT P.PPID, P.PPAME, P.MODAT " +
-                    "FROM PRICE_PAYNO P " +
-                    "INNER JOIN PRICE_ELAMIETF_DTL D ON P.PPID = D.PPID " +
-                    $"WHERE D.PEID = {lastPEID} " +
-                    "UNION " +
-                    "SELECT 0, 'آزاد', 0";
-
-                filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>(sqlFiltered).ToList();
+                filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT     PRICE_PAYNO.PPID, PRICE_PAYNO.PPAME, PRICE_PAYNO.MODAT FROM         PRICE_PAYNO INNER JOIN   PRICE_ELAMIETF_DTL ON PRICE_PAYNO.PPID = PRICE_ELAMIETF_DTL.PPID  WHERE     (PRICE_ELAMIETF_DTL.PEID = " + this.PEID.SelectedValue + ")  union  SELECT 0, 'آزاد', 0").ToList();
             }
             else
             {
-                if (PEID.SelectedValue != null)
+                // ۳. گرفتن PEID آخرین اطلاعیه (براساس تاریخ فاکتور و دپارتمان)
+                string tarikh = DATE_N.Text.ToRawTarikh();
+                int departId = Convert.ToInt32(DEPATMAN.SelectedValue);
+                string sqlGetPEID =
+                    "SELECT TOP (1) PEID " +
+                    "FROM dbo.PRICE_ELAMIETF " +
+                    $"WHERE (PEDATE <= {tarikh}) AND (PEPDEPART = {departId}) " +
+                    "ORDER BY PEID DESC";
+
+                int? lastPEID = dbms.DoGetDataSQL<int?>(sqlGetPEID).FirstOrDefault();
+
+                if (lastPEID != null)
                 {
-                    filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT     PRICE_PAYNO.PPID, PRICE_PAYNO.PPAME, PRICE_PAYNO.MODAT FROM         PRICE_PAYNO INNER JOIN   PRICE_ELAMIETF_DTL ON PRICE_PAYNO.PPID = PRICE_ELAMIETF_DTL.PPID  WHERE     (PRICE_ELAMIETF_DTL.PEID = " + this.PEID.SelectedValue + ")  union  SELECT 0, 'آزاد', 0").ToList();
+                    string sqlFiltered =
+                        "SELECT P.PPID, P.PPAME, P.MODAT " +
+                        "FROM PRICE_PAYNO P " +
+                        "INNER JOIN PRICE_ELAMIETF_DTL D ON P.PPID = D.PPID " +
+                        $"WHERE D.PEID = {lastPEID} " +
+                        "UNION " +
+                        "SELECT 0, 'آزاد', 0";
+
+                    filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>(sqlFiltered).ToList();
                 }
                 else
                 {
-                    filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO").ToList();
-                    return;
+
+                    if (CurrentRecord?.PEID != null)
+                    {
+                        filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT     PRICE_PAYNO.PPID, PRICE_PAYNO.PPAME, PRICE_PAYNO.MODAT FROM         PRICE_PAYNO INNER JOIN   PRICE_ELAMIETF_DTL ON PRICE_PAYNO.PPID = PRICE_ELAMIETF_DTL.PPID  WHERE     (PRICE_ELAMIETF_DTL.PEID = " + CurrentRecord.PEID + ")  union  SELECT 0, 'آزاد', 0").ToList();
+                    }
+                    else
+                    {
+                        filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO").ToList();
+                    }
                 }
+                return;
             }
 
             // ۵. اگر مقدار ذخیره‌شده (currentSelectedPPID) جزو filteredList نبود:
             if (currentSelectedPPID > -1 && !filteredList.Any(p => p.PPID == currentSelectedPPID))
             {
                 // ۵.۱ واکشی رکورد ذخیره‌شده از جدول اصلی (Full List)
-                string sqlGetSaved =
-                    $"SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO WHERE PPID = {currentSelectedPPID}";
-                PRICE_PAYNO_MODATP savedItem =
-                    dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>(sqlGetSaved).FirstOrDefault();
+                string sqlGetSaved = $"SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO WHERE PPID = {currentSelectedPPID}";
+                PRICE_PAYNO_MODATP savedItem = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>(sqlGetSaved).FirstOrDefault();
 
                 // ۵.۲ اگر آن رکورد اصلاً در جدول اصلی هم وجود داشت، به انتهای filteredList اضافه کن
                 if (savedItem != null)
@@ -4578,7 +4588,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         takh = (double)(takh + inv_nmoin);
                         dbms.DoExecuteSQL($"UPDATE INVO_LST SET MEGHk = {Convert.ToDouble(RST2_2Fields.MEGH * nesba)}, MABL_K = {Math.Round(RST2_2Fields.MEGH * nesba * RST2_2Fields.MABL)},N_MOIN = {inv_nmoin} {where_conditioninvonumber} AND id = {RST2_2Fields.id} ");
 
-                        if (Strings.Mid(Baseknow.OPTIONSS, 51, 1) == "5")
+                        bool HichGHEYM = Baseknow.GHAYM.ToString() == "3"; //پیش فرض قیمت هیچکدام
+                        //در زمان تبديل پيش فاكتور به فاكتور مبلغ فروش كنترل گردد كه اگر تغيير كرده اخطار دهد بجز مبالغ صفر
+                        if (Strings.Mid(Baseknow.OPTIONSS, 51, 1) == "5" && !CL_Generaly.IsGHAYM_7 && !HichGHEYM)
                         {
                             var rst4 = dbms.DoGetDataSQL<PRT1>("select MABL_F , B_SEF from STUF_DEF where code = '" + RST2_2Fields.CODE + "'").ToList();
                             if (rst4.Count == 1)
@@ -4976,7 +4988,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET MEGHk = {Fields.MEGHk}, MABL_K = {Fields.MABL_K}, N_MOIN = {Fields.N_MOIN} WHERE id = {Fields.id}"); //RST202.update();
                 //Set rst4 = New ADODB.Recordset
 
-                if (Strings.Mid(Baseknow.OPTIONSS, 51, 1) == "5")
+                bool HichGHEYM = Baseknow.GHAYM.ToString() == "3"; //پیش فرض قیمت هیچکدام
+                //در زمان تبديل پيش فاكتور به فاكتور مبلغ فروش كنترل گردد كه اگر تغيير كرده اخطار دهد بجز مبالغ صفر
+                if (Strings.Mid(Baseknow.OPTIONSS, 51, 1) == "5" && !CL_Generaly.IsGHAYM_7 && !HichGHEYM)
                 {
                     //Set rst4 = New ADODB.Recordset
                     var rst4 = dbms.DoGetDataSQL<PISHQ1>("SELECT MABL_F , B_SEF FROM STUF_DEF WHERE CODE = '" + Fields.CODE + "'").ToList();

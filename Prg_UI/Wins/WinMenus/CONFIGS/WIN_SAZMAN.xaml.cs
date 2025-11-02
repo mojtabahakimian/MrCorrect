@@ -148,7 +148,7 @@ namespace Wins.WinMenus.CONFIGS
                 TFADDRESS.IsReadOnly = !ican;
                 TFTEL.IsReadOnly = !ican;
                 SERVERNAM.IsReadOnly = !ican;
-                OPTIONSS.IsReadOnly = !ican;
+                //OPTIONSS.IsReadOnly = !ican;
 
                 EMZA_CANVAS.IsEnabled = ican;
                 BTN_UPIMAGE.IsEnabled = ican;
@@ -160,7 +160,16 @@ namespace Wins.WinMenus.CONFIGS
                 #region ASNAD_VA_HESAB
                 GRP_PERSON.IsEnabled = ican;  //اشخاص مشخص شده در حسابها
 
-                GRP_TKHF.IsEnabled = ican; //تخفیفات فاکتورها
+                var RST = dbms.DoGetDataSQL<int?>("SELECT TOP 1 NUMBER FROM HEAD_LST WHERE TAG = 13").FirstOrDefault();
+                if (RST == null)
+                {
+                    GRP_TKHF.IsEnabled = ican; //تخفیفات فاکتورها
+                }
+                else
+                {
+                    GRP_TKHF.IsEnabled = false; //تخفیفات فاکتورها
+                }
+
                 GRP_SANAD.IsEnabled = ican; //سند زدن
 
                 SIGN.IsEnabled = ican; //گردش كاری و فرمها با امضاء عمل شود

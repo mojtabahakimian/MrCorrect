@@ -2,6 +2,7 @@
 using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Options;
+using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
@@ -194,6 +195,53 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             C2425.ItemsSource = itemsList;
             C2425.DisplayMemberPath = "Display";
             C2425.SelectedValuePath = "Value";
+
+            //ترازو
+            var itemsList2 = new List<ComboBoxItemData>();
+            itemsList2.Add(new ComboBoxItemData { Value = "00", Display = "ويستا" });
+            itemsList2.Add(new ComboBoxItemData { Value = "01", Display = "صدرا" });
+            itemsList2.Add(new ComboBoxItemData { Value = "02", Display = "سي اس2" });
+            itemsList2.Add(new ComboBoxItemData { Value = "03", Display = "پند" });
+            C3536.ItemsSource = itemsList2;
+            C3536.DisplayMemberPath = "Display";
+            C3536.SelectedValuePath = "Value";
+        }
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                e.Handled = true;
+
+                CL_LMethods.SendKey_US(Key.Tab);
+            }
+
+            // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
+            var nonDataKeys = new[]
+            {
+                Key.Enter, Key.Tab, Key.LeftShift, Key.RightShift,
+                Key.CapsLock, Key.Left, Key.Right, Key.Up, Key.Down,
+                Key.LeftAlt, Key.RightAlt, Key.LeftCtrl, Key.RightCtrl,
+                Key.F1, Key.F2, Key.F3, Key.F4, Key.F5, Key.F6,
+                Key.F7, Key.F8, Key.F9, Key.F10, Key.F11, Key.F12,
+                Key.Escape, Key.Insert, Key.Home, Key.End,
+                Key.PageUp, Key.PageDown
+            };
+            if (!nonDataKeys.Contains(e.Key))
+            {
+                var focused = Keyboard.FocusedElement as DependencyObject;
+                if (focused != null && (CL_LMethods.IsInside<TextBoxBase>(focused) || CL_LMethods.IsInside<ComboBox>(focused) || CL_LMethods.IsInside<CheckBox>(focused)))
+                {
+                    ChangeIsHappend = true;
+                }
+                else
+                {
+                    var focusedElement = Keyboard.FocusedElement;
+                    if (focusedElement is Xceed.Wpf.Toolkit.MaskedTextBox)
+                    {
+                        ChangeIsHappend = true;
+                    }
+                }
+            }
         }
         private async void LoadSettings()
         {
@@ -207,7 +255,6 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             }
 
             string tnz = _currentSettings.OPTIONSS ?? "";
-
             // رشته را با '0' پد می‌کنیم تا طول آن حداقل به اندازه تعداد تنظیمات باشد
             tnz = tnz.PadRight(TOOO, '0');
 
@@ -248,6 +295,69 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                 }
             }
 
+            //int i = 0;
+            //string TNZ = null;
+            //for (i = 1; i <= TOOO; i++)
+            //{
+            //    var checkBox = this.FindName("Check" + i) as CheckBox;
+
+            //    if (checkBox?.IsChecked ?? false)
+            //    {
+            //        TNZ = TNZ + "5";
+            //        if (i == 10)
+            //        {
+            //            TNZ = TNZ + Strings.Right("00" + this.C1112.ToString().Trim(' '), 2);
+            //            i = 12;
+            //        }
+            //        if (i == 23)
+            //        {
+            //            TNZ = TNZ + Strings.Right("00" + this.C2425.ToString().Trim(' '), 2);
+            //            i = 25;
+            //        }
+            //        if (i == 26)
+            //        {
+            //            TNZ = TNZ + Strings.Right("00" + this.C2728.ToString().Trim(' '), 2);
+            //            i = 28;
+            //        }
+            //        if (i == 34)
+            //        {
+            //            TNZ = TNZ + Strings.Right("00" + this.C3536.ToString().Trim(' '), 2);
+            //            i = 36;
+            //        }
+
+            //        if (i == 39)
+            //        {
+            //            TNZ = TNZ + Strings.Right("00" + this.C4041.ToString().Trim(' '), 2);
+            //            i = 41;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        TNZ = TNZ + "0";
+            //        if (i == 10)
+            //        {
+            //            TNZ = TNZ + Strings.Right("00" + this.C1112.ToString().Trim(' '), 2);
+            //            i = 12;
+            //        }
+            //        if (i == 23)
+            //        {
+            //            TNZ = TNZ + Strings.Right("00" + this.C2425.ToString().Trim(' '), 2);
+            //            i = 25;
+            //        }
+            //        if (i == 26)
+            //        {
+            //            TNZ = TNZ + Strings.Right("00" + this.C2728.ToString().Trim(' '), 2);
+            //            i = 28;
+            //        }
+            //        if (i == 39)
+            //        {
+            //            TNZ = TNZ + Strings.Right("00" + this.C4041.ToString().Trim(' '), 2);
+            //            i = 41;
+            //        }
+            //    }
+            //}
+
+
             // منطق آخر برای غیرفعال کردن Check13
             string countSql = "SELECT COUNT(NUMBER) FROM HEAD_LST WHERE TAG = 13";
             var count = dbms.DoGetDataSQL<int>(countSql).FirstOrDefault();
@@ -260,44 +370,6 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             }
 
             await LoadGeneralOptionSettingAsync();
-        }
-
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
-            {
-                e.Handled = true;
-
-                CL_LMethods.SendKey_US(Key.Tab);
-            }
-
-            // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
-            var nonDataKeys = new[]
-            {
-                Key.Enter, Key.Tab, Key.LeftShift, Key.RightShift,
-                Key.CapsLock, Key.Left, Key.Right, Key.Up, Key.Down,
-                Key.LeftAlt, Key.RightAlt, Key.LeftCtrl, Key.RightCtrl,
-                Key.F1, Key.F2, Key.F3, Key.F4, Key.F5, Key.F6,
-                Key.F7, Key.F8, Key.F9, Key.F10, Key.F11, Key.F12,
-                Key.Escape, Key.Insert, Key.Home, Key.End,
-                Key.PageUp, Key.PageDown
-            };
-            if (!nonDataKeys.Contains(e.Key))
-            {
-                var focused = Keyboard.FocusedElement as DependencyObject;
-                if (focused != null && (CL_LMethods.IsInside<TextBoxBase>(focused) || CL_LMethods.IsInside<ComboBox>(focused) || CL_LMethods.IsInside<CheckBox>(focused)))
-                {
-                    ChangeIsHappend = true;
-                }
-                else
-                {
-                    var focusedElement = Keyboard.FocusedElement;
-                    if (focusedElement is Xceed.Wpf.Toolkit.MaskedTextBox)
-                    {
-                        ChangeIsHappend = true;
-                    }
-                }
-            }
         }
 
         private async void SaveButton_Click(object sender, RoutedEventArgs e)

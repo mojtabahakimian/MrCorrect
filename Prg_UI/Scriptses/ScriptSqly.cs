@@ -2080,7 +2080,7 @@ END;";
 								       [LastUpdated] DATETIME DEFAULT GETDATE()
 				
 								   );"); } catch { }
-      
+
                 //لیست بدهکاران و بستانکاران F9 : مانده های صفر رو هم نشون بده
                 try { db.Execute(@"ALTER FUNCTION [dbo].[Q_BEDEHBESTANHA_SUB]
 								   (
@@ -2136,12 +2136,32 @@ END;";
 								           (@IncludeZero = 1) OR (SUM(dbo.DEED_DTL.BED - dbo.DEED_DTL.BES) <> 0)
 								   )"); } catch { }
 
-				//اتوماسیون
+                //اتوماسیون
                 try { db.Execute(@"ALTER TABLE MESAGEP ADD SNOOZE_COUNT INT DEFAULT 0 
 								   ALTER TABLE MESAGEP ADD LAST_NOTIFY_TIME DATETIME NULL"); } catch { }
 
                 //مرکز هزینه
-                try { db.Execute($@"ALTER TABLE dbo.TCOD_MARKAZHAZ ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }           
+                try { db.Execute($@"ALTER TABLE dbo.TCOD_MARKAZHAZ ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+
+                ////افزایش سرعت با ایجاد ایندکس : پلن اجرایی به جای Table Scan  به Index Seek تغییر می‌کند.
+                ////ORDER BY dbo.HEAD_LST.NUMBER1,dbo.HEAD_LST.NUMBER DESC با وجود این درست میشود
+                try { db.Execute($@"CREATE NONCLUSTERED INDEX IX_HEAD_LST_TAG_CoveringSort
+									ON dbo.HEAD_LST (
+									    TAG ASC,
+									    NUMBER1 ASC,
+									    NUMBER DESC
+									)
+									INCLUDE (
+									    -- ستون‌های موجود در SELECT
+									    TAH, DATE_N, MAS, N_S, CUST_NO, MOLAH, M_NAGHD, MABL_VAR, MOIN_VAR,
+									    MABL_HAV, MOIN_HAV, MABL_HAZ, MOIN_HAZ, TAKHFIF, MOIN_KHF,
+									    USER_NAME, SHARAYET, MBAA, HMBAA, TICMBAA, TKHF, OKF, JAY,
+									    SGN1, SGN2, SGN3, sgn1usid, sgn2usid, sgn3usid, CRT, UID,
+									    
+									    -- ستون‌های مورد نیاز برای JOIN ها
+									    MODAT_PPID, PEID, CUST_KIND, PEPID, DEPATMAN, SHIFT
+									);"); } catch { }
+
             }
         }
 
