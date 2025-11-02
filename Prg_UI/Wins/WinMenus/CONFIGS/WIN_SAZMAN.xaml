@@ -17,7 +17,7 @@
         AllowDrop="True" WindowStyle="None"
         FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
-        Height="780" Width="1445" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+        Height="628" Width="1031" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -154,7 +154,7 @@
                     <TextBox x:Name="TFTEL" Height="30" Margin="497,0,67,100" Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Bottom"  Visibility="Visible" MaxLength="60" FlowDirection="RightToLeft" />
                     <TextBox x:Name="SERVERNAM" Height="30" Margin="497,0,67,61" Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Bottom"  Visibility="Visible" MaxLength="50" FlowDirection="RightToLeft" TextAlignment="Right" />
                     <Button x:Name="BTN_MORE" IsEnabled="False" Content="تنظيمات بيشتر"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="100" Click="BTN_MORE_Click" Margin="10,0,0,98" />
-                    <TextBox x:Name="OPTIONSS" Height="30" Margin="125,0,0,100" Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Bottom"  Visibility="Visible" MaxLength="48" FlowDirection="RightToLeft" TextAlignment="Center" IsReadOnly="True" HorizontalAlignment="Left" Width="311" />
+                    <TextBox x:Name="OPTIONSS" Height="30" Margin="125,0,0,100" Style="{StaticResource FuzzyOut}" Padding="3" TextWrapping="Wrap" VerticalAlignment="Bottom"  Visibility="Hidden" FlowDirection="RightToLeft" TextAlignment="Center" IsReadOnly="True" HorizontalAlignment="Left" Width="311" />
                     <Button x:Name="BTN_SAVE_G" Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="115" Click="BTN_SAVE_Click" Margin="0,0,8,10" />
                     <Button x:Name="BTN_ESLAH_G" Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="100" Click="BTN_ESLAH_Click" Margin="0,0,140,10" />
 
@@ -198,8 +198,8 @@
                     <CNC:NumericTextBox x:Name="ARSESH" Text="10" DoesAcceptDouble="True" TextAlignment="Center" Margin="0,179,168,0" Height="28" VerticalAlignment="Top" HorizontalAlignment="Right" Width="58"/>
                     <TextBlock FlowDirection="RightToLeft" Margin="0,283,257,0" VerticalAlignment="Top" TextWrapping="Wrap" Height="22" LineHeight="22" Text="فاصله از پائين كاغذ در چاپ سند :" HorizontalAlignment="Right" Width="174"/>
                     <CNC:NumericTextBox x:Name="TFTPAGE" Text="2.5" DoesAcceptDouble="True" TextAlignment="Center" Margin="0,280,435,0" Height="28" VerticalAlignment="Top" HorizontalAlignment="Right" Width="58"/>
-                    <CheckBox x:Name="SAGHF" Content="سقف اعتبار اشخاص بر اساس مانده  حساب  كنترل گردد" Width="306" Height="20" Margin="217,329,0,0" Padding="4,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                    <CheckBox x:Name="SAGHF2" Content="سقف اعتبار اشخاص بر اساس مانده   اسناد   كنترل گردد" Width="306" Height="20" Margin="217,357,0,0" Padding="4,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="SAGHF" Content="سقف اعتبار اشخاص بر اساس مانده  حساب  كنترل گردد" Width="306" Height="20" Margin="217,338,0,0" Padding="4,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="SAGHF2" Content="سقف اعتبار اشخاص بر اساس مانده   اسناد   كنترل گردد" Width="306" Height="20" Margin="217,366,0,0" Padding="4,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                     <Label Content="دفتر اسناد دريافتنی" Margin="77,134,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                     <DataGrid 
                         d:ItemsSource="{d:SampleData}"
@@ -218,7 +218,7 @@
                         AutoGenerateColumns="False"
                         SelectionUnit="FullRow" PreviewKeyDown="DAFT_ASN_SUB_PreviewKeyDown"
                         CanUserDeleteRows="False" RowEditEnding="DAFT_ASN_SUB_RowEditEnding" CellEditEnding="DAFT_ASN_SUB_CellEditEnding"
-                        Margin="17,168,510,340" BorderThickness="1" BeginningEdit="DAFT_ASN_SUB_BeginningEdit">
+                        Margin="17,168,510,0" BorderThickness="1" BeginningEdit="DAFT_ASN_SUB_BeginningEdit" Height="166" VerticalAlignment="Top">
                         <DataGrid.Style>
                             <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                                 <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
@@ -728,8 +728,8 @@
 
                         <GroupBox Header="خروج مواد به کالای در جریان" Margin="0,20,0,0" x:Name="GRP_FINALS" Style="{x:Null}">
                             <StackPanel Margin="10">
-                                <RadioButton Margin="3" GroupName="FINALS" Tag="0" Content="بصورت کلی انجام شود"/>
-                                <RadioButton Margin="3" GroupName="FINALS" Tag="1" Content="به معین کالای ساخته شده منتقل شود"/>
+                                <RadioButton Margin="3" GroupName="FINALS" Tag="1" Content="بصورت کلی انجام شود"/>
+                                <RadioButton Margin="3" GroupName="FINALS" Tag="0" Content="به معین کالای ساخته شده منتقل شود"/>
                             </StackPanel>
                         </GroupBox>
                     </StackPanel>
@@ -790,7 +790,7 @@
                     <RadioButton x:Name="RB_SMSIR" GroupName="SMSGRP" Content="شرکت ایده پردازان SMS.ir" HorizontalAlignment="Left" Margin="303,15,0,0" VerticalAlignment="Top" Width="160" Padding="4,0,0,0" Click="RB_SMSIR_Click"/>
                     <Button x:Name="BTN_SAVE" Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="560,0,0,49" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="148" Click="BTN_SAVE_Click" />
                     <Label Content="سرویس ارائه دهنده پیامک :" HorizontalAlignment="Left" Margin="6,11,0,0" VerticalAlignment="Top" Width="auto"/>
-                    <TextBox x:Name="SMS_USERNAME" Text="" Height="30" Margin="162,53,318,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" FlowDirection="RightToLeft" />
+                    <TextBox x:Name="SMS_USERNAME" Text="" Height="30" Margin="162,53,318,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="49" FlowDirection="RightToLeft" />
                     <CNC:NumericTextBox x:Name="SMS_TSMSHOST" DoesAcceptDouble="False"  LastValueShouldZero="False" Text="" Height="30" Margin="162,136,0,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="214" FlowDirection="RightToLeft"/>
                     <Label Content="Username :" HorizontalAlignment="Left" Margin="89,53,0,0" VerticalAlignment="Top" Width="auto"/>
                     <Label Content="Password :" HorizontalAlignment="Left" Margin="90,94,0,0" VerticalAlignment="Top" Width="auto"/>

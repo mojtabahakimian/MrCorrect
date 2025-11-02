@@ -3111,7 +3111,7 @@ namespace Prg_UI.Functions
         }
         public static void OptimizeForRemoteDesktop(DependencyObject obj)
         {
-            if (SystemParameters.IsRemoteSession && Properties.Settings.Default.IsRDPMode) //System.Windows.Forms.SystemInformation.TerminalServerSession;
+            if (Properties.Settings.Default.IsRDPMode) //System.Windows.Forms.SystemInformation.TerminalServerSession;
             {
                 // Set rendering mode to software to reduce GPU usage
                 if (obj is Visual visual)

@@ -2316,7 +2316,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void ActivateChaps()
         {
-            if (((bool)SGN1.IsChecked && (bool)SGN2.IsChecked) || (bool)SGN3.IsChecked)
+            if (((bool)SGN1.IsChecked || (bool)SGN2.IsChecked) || (bool)SGN3.IsChecked)
             {
                 this.Command100.IsEnabled = true;
                 this.Command108.IsEnabled = true;

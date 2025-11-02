@@ -8,13 +8,13 @@
         xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        Height="768" Width="1024" d:Height="1024"
+        Height="800" Width="1024" d:Height="1024"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         MinHeight="400"
         FontFamily="{StaticResource IRANYEKAN}"
         Background="{x:Null}"
         AllowsTransparency="True" AllowDrop="True"
-        WindowStyle="None"
+        WindowStyle="None" WindowState="Maximized"
         WindowStartupLocation="CenterScreen" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="15"/>
@@ -100,15 +100,15 @@
                             <Label Grid.Column="1" Content="1" Style="{StaticResource SettingNumberLabel}"/>
                         </Grid>
 
-                        <Grid>
+                        <Grid FlowDirection="RightToLeft" HorizontalAlignment="Right">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <CheckBox x:Name="Check10" Grid.Column="0" Content="كد مخصوص چاپ فاكتور خاص اين شركت:" Style="{StaticResource SettingCheckBox}"/>
-                            <TextBox x:Name="C1112" Grid.Column="1" Width="60" FlowDirection="RightToLeft" VerticalAlignment="Center" materialDesign:HintAssist.Hint="کد"/>
-                            <Label Grid.Column="2" Content="2" Style="{StaticResource SettingNumberLabel}"/>
+                            <Label Grid.Column="0" Content="2" Style="{StaticResource SettingNumberLabel}"/>
+                            <CheckBox x:Name="Check10" Grid.Column="1" Content="كد مخصوص چاپ فاكتور خاص اين شركت:" Style="{StaticResource SettingCheckBox}"/>
+                            <TextBox x:Name="C1112" Grid.Column="2" Width="60" FlowDirection="RightToLeft" VerticalAlignment="Center" materialDesign:HintAssist.Hint="کد" Margin="3,0,0,0" />
                         </Grid>
 
                         <Grid>
@@ -173,7 +173,8 @@
                                 <ColumnDefinition/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <ComboBox x:Name="C2425" Grid.Column="0" FlowDirection="RightToLeft" materialDesign:HintAssist.Hint="مثال : کارت ساعت جهانگستر" Style="{StaticResource MaterialDesignFloatingHintComboBox}" IsEditable="False"/>
+                            <CheckBox x:Name="Check23" Content="فعال باشد" Style="{StaticResource SettingCheckBox}" Margin="373,10,-3,0" VerticalAlignment="Top"/>
+                            <ComboBox x:Name="C2425" Grid.Column="0" FlowDirection="RightToLeft" materialDesign:HintAssist.Hint="مثال : کارت ساعت جهانگستر" Style="{StaticResource MaterialDesignFloatingHintComboBox}" IsEditable="False" Margin="0,0,77,0"/>
                             <Label Grid.Column="1" Content="10" Style="{StaticResource SettingNumberLabel}"/>
                         </Grid>
                         <Grid>
@@ -313,6 +314,7 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <CheckBox x:Name="Check34" Grid.Column="0" Content="انتخاب نوع ترازوي ديجيتال" Style="{StaticResource SettingCheckBox}"/>
+                            <ComboBox x:Name="C3536" Grid.Column="0" FlowDirection="RightToLeft" Style="{StaticResource MaterialDesignFloatingHintComboBox}" IsEditable="False" Margin="21,0,161,0"/>
                             <Label Grid.Column="1" Content="25" Style="{StaticResource SettingNumberLabel}"/>
                         </Grid>
                         <Grid>

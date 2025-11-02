@@ -40,6 +40,7 @@ using Wins.WinMenus.CONFIGS;
 using Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.KHARID_FORUSH;
 using Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
+using Wins.WinMenus.SANATI;
 using Wins.WinMenus.Taarif;
 using Wins.WinSamplesEmpty;
 using Wins.WinSetting;
@@ -374,10 +375,13 @@ namespace Prg_UI.Wins
             Baseknow.UGRP = "1";
 
             //new MAIN().Show();
-            //new HEAD_SERCH_MAIN().Show();
+            //new HEAD_LST_RASID_OTHER_WIN().Show();
+            new WIN_OPTIONS().Show();
+            //new WIN_SAZMAN().Show();
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "8949,8965");
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "8949,8965");
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_SAZMAN_MOSHAKHASAT, this);
 
 
             //new F_MENU_CHEK("chkva", "لیست چکهای دریافتی نزد بانک و صندوق وصول نشده").Show();

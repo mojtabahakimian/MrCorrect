@@ -9,7 +9,7 @@ namespace Prg_UI.SplashScreen
             InitializeComponent();
 
             //<Image x:Name="myg" Margin="-9,8,4,5" Visibility="Hidden" gifplayer:AnimationBehavior.RepeatBehavior="2x" gifplayer:AnimationBehavior.AutoStart="True" gifplayer:AnimationBehavior.SourceUri="/UiDrive/IMGS/SplashHandwrite.gif" Stretch="UniformToFill"/>
-            if (SystemParameters.IsRemoteSession)
+            if (Prg_UI.Properties.Settings.Default.IsRDPMode)
             {
                 myg.Visibility = Visibility.Collapsed;
                 myg = null;
