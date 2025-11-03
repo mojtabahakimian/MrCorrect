@@ -60,7 +60,6 @@ using System.Threading.Tasks;
 //1- تایمر و گرفتن تاریخ فارسی
 //2- CHEKDATE توی  Form_BeforeInsert
 //3- SANAD مد محافظت شده تعریف نشده برای سند زدن
-//4- if (Baseknow.GHAYM == 7 && MODAT_PPID != 0)
 namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 {
     public partial class HEAD_LST_FROOSH22 : Window, ISearchableWindow
@@ -364,6 +363,90 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         {
             public int? TNUMBER { get; set; }
             public string? NAME { get; set; }
+        }
+
+        public class FactorFullDetails
+        {
+            public HEAD_LST Header { get; set; }
+            public List<INVO_LST_FACTOR22> InvoiceItems { get; set; } = new List<INVO_LST_FACTOR22>();
+            public List<TAKHFIF_APLAY> AdvancedDiscounts { get; set; } = new List<TAKHFIF_APLAY>();
+            public List<PAY_GETD_SUB22_MODEL> Checks { get; set; } = new List<PAY_GETD_SUB22_MODEL>();
+            public List<VISITOR_DTL> VisitorDetails { get; set; } = new List<VISITOR_DTL>();
+            public OTHER_DTL_CSHARP OtherDetails { get; set; }
+            public HEAD_LST_EXTENDED TaxDetails { get; set; }
+            public Custom_CUST_HESAB Customer { get; set; }
+            public string AccountBalance { get; set; } // MANDAH
+            public string SanadBase { get; set; } // MABNA
+        }
+
+        private async Task<FactorFullDetails> GetFactorFullDetailsAsync(double factorNumber)
+        {
+            var fullDetails = new FactorFullDetails();
+            string sql = $@"
+                -- 1. Header
+                SELECT * FROM dbo.HEAD_LST WHERE NUMBER = @FactorNumber AND TAG = @fTAG;
+
+                -- 2. Invoice Items
+                SELECT il.*, sd.NAME AS NAME_CODE 
+                FROM dbo.INVO_LST il 
+                LEFT JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE 
+                WHERE il.NUMBER = @FactorNumber AND il.TAG = @hTAG;
+
+                -- 3. Advanced Discounts
+                SELECT tad.*, td.TSHARH 
+                FROM dbo.TAKHFIF_APLAY tad
+                JOIN dbo.TAKHFIF_DEF td ON tad.TID = td.TID
+                WHERE tad.NUMBER = @FactorNumber AND tad.KIND = 2; -- Assuming kind=2 is for sales invoices
+
+                -- 4. Checks
+                SELECT * FROM dbo.PAY_GETD WHERE NUMBER = @FactorNumber AND TAG = @hTAG AND (N_KOL IS NULL OR N_KOL <> 911);
+
+                -- 5. Visitor Details
+                SELECT v.*, ch.NAME AS CUST_NO_NAME
+                FROM dbo.VISITOR_DTL v
+                LEFT JOIN CUST_HESAB ch ON v.CUST_NO = ch.hes
+                WHERE v.NUMBER = @FactorNumber AND v.TAG = @hTAG;
+
+                -- 6. Other Details (Ranandeh)
+                SELECT * FROM dbo.OTHER_DTL WHERE NUMBER = @FactorNumber AND TAG = @fTAG;
+
+                -- 7. Moadian/Tax Details
+                SELECT * FROM dbo.HEAD_LST_EXTENDED WHERE NUMBER = @FactorNumber AND tgu = 2;
+
+                -- 8. Customer Details (Fetch based on Header's CUST_NO)
+                SELECT TOP 1 * FROM dbo.CUST_HESAB WHERE hes = (SELECT CUST_NO FROM dbo.HEAD_LST WHERE NUMBER = @FactorNumber AND TAG = @fTAG);
+
+                -- 9. Account Balance (Mandeh)
+                -- This will be executed separately as it's a scalar function call
+
+                -- 10. Sanad Base (Mabna)
+                SELECT TOP 1 BASE FROM dbo.DEED_HED WHERE NO_S = 2 AND N_S = (SELECT N_S FROM dbo.HEAD_LST WHERE NUMBER = @FactorNumber AND TAG = @fTAG);
+            ";
+
+            using var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR);
+
+            using (var multi = await db.QueryMultipleAsync(sql, new { FactorNumber = factorNumber, fTAG = this.fTAG, hTAG = this.hTAG }))
+            {
+                fullDetails.Header = await multi.ReadFirstOrDefaultAsync<HEAD_LST>();
+                if (fullDetails.Header == null) return null; // Factor not found
+
+                fullDetails.InvoiceItems = (await multi.ReadAsync<INVO_LST_FACTOR22>()).ToList();
+                fullDetails.AdvancedDiscounts = (await multi.ReadAsync<TAKHFIF_APLAY>()).ToList();
+                fullDetails.Checks = (await multi.ReadAsync<PAY_GETD_SUB22_MODEL>()).ToList();
+                fullDetails.VisitorDetails = (await multi.ReadAsync<VISITOR_DTL>()).ToList();
+                fullDetails.OtherDetails = await multi.ReadFirstOrDefaultAsync<OTHER_DTL_CSHARP>();
+                fullDetails.TaxDetails = await multi.ReadFirstOrDefaultAsync<HEAD_LST_EXTENDED>();
+                fullDetails.Customer = await multi.ReadFirstOrDefaultAsync<Custom_CUST_HESAB>();
+                fullDetails.SanadBase = await multi.ReadFirstOrDefaultAsync<string>();
+            }
+
+            // Execute scalar function for account balance separately
+            if (fullDetails.Header?.CUST_NO != null)
+            {
+                fullDetails.AccountBalance = CL_HESABDARI.GETMANDAH(fullDetails.Header.CUST_NO);
+            }
+
+            return fullDetails;
         }
         #endregion
 
@@ -718,8 +801,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             MODAT_PPID.SelectedIndex = -1; MODAT_PPID.Items.Refresh(); //نحوه پرداخت
             MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
 
+
             PEPID.SelectedIndex = -1; //اعلامیه قیمت
             PEID.SelectedIndex = -1; //اعلامیه تخفیف
+
+            MODAT_PPID_Enter();
+
             M_NAGHD2.Text = "0"; //مبلغ نقد
             MABL_VAR2.Text = "0"; // کارت بانک
             MABL_HAV2.Text = "0"; // حواله
@@ -1407,366 +1494,196 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
         }
 
-        private void OnCurrentRecordChanged(HEAD_LST HEADER_FAC)
+        private async void OnCurrentRecordChanged(HEAD_LST HEADER_FAC)
         {
             if (_navigationManager.IsNewRecord)
             {
-                ClearFreshAll(); //Form_Current(); //should be in this ClearFreshAll(); method too at the end
+                ClearFreshAll();
+                return;
             }
-            else if (HEADER_FAC == null)
+
+            if (HEADER_FAC == null)
             {
                 if (_navigationManager.NUMBER_TO_OPEN != null)
                 {
                     new Msgwin(false, "چنین شماره ای وجود ندارد").ShowDialog();
-                    return;
                 }
+                return;
             }
-            else
+
+            // Optional: Show a loading indicator here
+
+            try
             {
-                if (HEADER_FAC is null)
+                var fullDetails = await GetFactorFullDetailsAsync(HEADER_FAC.NUMBER);
+
+                if (fullDetails == null || fullDetails.Header == null)
                 {
-                    new Msgwin(false, "این فاکتور خالی است").Show();
+                    new Msgwin(false, "این فاکتور خالی است یا اطلاعات کامل آن یافت نشد.").Show();
                     return;
                 }
 
-                //NewRecord = false; //Currrent Record is not new
+                // --- Begin Populating UI from fullDetails model ---
+                var header = fullDetails.Header;
 
-                NUMBER1.Text = HEADER_FAC.NUMBER1.ToString();
+                NUMBER1.Text = header.NUMBER1.ToString();
+                NUMBER.Text = header.NUMBER.ToString();
 
-                NUMBER.Text = HEADER_FAC.NUMBER.ToString();
+                var numberItemsSource = (List<_MG_MODEL2_>)NUMBER.ItemsSource ?? new List<_MG_MODEL2_>();
+                if (!numberItemsSource.Any(item => item?.NUMBER == header.NUMBER))
                 {
-                    var itemsSource = (List<_MG_MODEL2_>)NUMBER.ItemsSource;
-                    if (itemsSource == null)
-                    {
-                        itemsSource = new List<_MG_MODEL2_>();
-                        NUMBER.ItemsSource = itemsSource; // Set ItemsSource to the new list
-                    }
-                    // Check if the item exists and add it if not
-                    if (!itemsSource.Any(item => item?.NUMBER == HEADER_FAC.NUMBER))
-                    {
-                        itemsSource.Add(new _MG_MODEL2_ { NUMBER = HEADER_FAC.NUMBER });
-                    }
-
-                    NUMBER.SelectedValue = HEADER_FAC.NUMBER;
-                    NUMBER.UpdateLayout();
-                    NUMBER.Items.Refresh();
+                    numberItemsSource.Add(new _MG_MODEL2_ { NUMBER = header.NUMBER });
+                    NUMBER.ItemsSource = numberItemsSource;
                 }
+                NUMBER.SelectedValue = header.NUMBER;
+                NUMBER.Items.Refresh();
 
-
-                DATE_N.Text = HEADER_FAC?.DATE_N.ToStringNullSafe(); //تاریخ فاکتور
-                USER_NAME.Text = HEADER_FAC.USER_NAME.ToStringNullSafe(); //کاربر
-                MAS.Text = HEADER_FAC.MAS.ToStringNullSafe(); //مدت
-                DEPATMAN.SelectedValue = HEADER_FAC.DEPATMAN; //واحد
-                CUST_KIND.SelectedValue = HEADER_FAC.CUST_KIND; //نوع مشتری
-
-                FNUMCO.Text = string.IsNullOrEmpty(HEADER_FAC?.FNUMCO.ToStringNullSafe()) ? "0" : HEADER_FAC?.FNUMCO.ToStringNullSafe(); //شماره داخلی
+                DATE_N.Text = header.DATE_N.ToStringNullSafe();
+                USER_NAME.Text = header.USER_NAME.ToStringNullSafe();
+                MAS.Text = header.MAS.ToStringNullSafe();
+                DEPATMAN.SelectedValue = header.DEPATMAN;
+                CUST_KIND.SelectedValue = header.CUST_KIND;
+                FNUMCO.Text = header.FNUMCO.ToStringNullSafe();
 
                 if (IsExporty)
                 {
-                    if (HEADER_FAC?.ARZD != null) //نرخ ارز
-                    {
-                        ARZD.Text = HEADER_FAC.ARZD.ToStringNullSafe();
-                    }
-
-                    if (HEADER_FAC?.ARZKIND2 != null) //نوع ارز
-                    {
-                        ARZKIND2.SelectedValue = HEADER_FAC.ARZKIND2; ARZKIND2.Items.Refresh();
-                    }
-                    else
-                    {
-                        long? _ISOCODE_ = null;
-                        switch (HEADER_FAC.ARZKIND)
-                        {
-                            case 1: //Dollar
-                                _ISOCODE_ = dbms.DoGetDataSQL<long?>($"SELECT ID FROM dbo.TCOD_ARZ WHERE Code = N'840' AND Title = N'US Dollar' AND CountryName = N'UNITED STATES OF AMERICA (THE)'").FirstOrDefault();
-                                break;
-                            case 2: //Euro
-                                _ISOCODE_ = dbms.DoGetDataSQL<long?>($"SELECT ID FROM dbo.TCOD_ARZ WHERE Code = N'978' AND Title = N'Euro' AND CountryName = N'EUROPEAN UNION'").FirstOrDefault();
-                                break;
-                            case 3: //UAE Dirham
-                                _ISOCODE_ = dbms.DoGetDataSQL<long?>($"SELECT ID FROM dbo.TCOD_ARZ WHERE Code = N'784' AND Title = N'UAE Dirham' AND CountryName = N'UNITED ARAB EMIRATES (THE)'").FirstOrDefault();
-                                break;
-                            case 4: //Pound
-                                _ISOCODE_ = dbms.DoGetDataSQL<long?>($"SELECT ID FROM dbo.TCOD_ARZ WHERE Code = N'826' AND Title = N'Pound Sterling' AND CountryName = N'UNITED KINGDOM OF GREAT BRITAIN AND NORTHERN IRELAND (THE)'").FirstOrDefault();
-                                break;
-                            case 5: //Yen
-                                _ISOCODE_ = dbms.DoGetDataSQL<long?>($"SELECT ID FROM dbo.TCOD_ARZ WHERE Code = N'392' AND Title = N'Yen' AND CountryName = N'JAPAN'").FirstOrDefault();
-                                break;
-
-                            default: break;
-                        }
-
-                        if (_ISOCODE_ != null)
-                        {
-                            ARZKIND2.SelectedValue = _ISOCODE_.ToString(); ARZKIND2.Items.Refresh();
-                        }
-                    }
-
-                    if (HEADER_FAC?.ANBARF != null) //شماره صادراتی
-                    {
-                        ANBARF.Text = HEADER_FAC.ANBARF.ToStringNullSafe();
-                    }
+                    ARZD.Text = header.ARZD.ToStringNullSafe();
+                    ARZKIND2.SelectedValue = header.ARZKIND2;
+                    ANBARF.Text = header.ANBARF.ToStringNullSafe();
                 }
 
-                if (HEADER_FAC?.CUST_NO != null)
+                if (fullDetails.Customer != null)
                 {
-                    string thevalue = HEADER_FAC?.CUST_NO;
-                    var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT TOP 1 hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + thevalue + "'").FirstOrDefault();
-
-                    //if (CUST_NO.ItemsSource == null)
-                    //{
-                    //    CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
-                    //}
-
-                    //if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
-                    //{
-                    //    if (data?.NAME != null)
-                    //    {
-                    //        ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
-                    //    }
-                    //}
-
-                    var itemsSource = CUST_NO.ItemsSource as List<Custom_CUST_HESAB>;
-                    if (itemsSource == null)
+                    var custItemsSource = CUST_NO.ItemsSource as List<Custom_CUST_HESAB> ?? new List<Custom_CUST_HESAB>();
+                    if (!custItemsSource.Any(item => item?.hes == fullDetails.Customer.hes))
                     {
-                        itemsSource = new List<Custom_CUST_HESAB>();
-                        CUST_NO.ItemsSource = itemsSource;
+                        custItemsSource.Add(new Custom_CUST_HESAB { hes = fullDetails.Customer.hes, NAME = fullDetails.Customer.NAME });
+                        CUST_NO.ItemsSource = custItemsSource;
                     }
-
-                    if (data != null && !itemsSource.Any(item => item?.hes == thevalue))
-                    {
-                        itemsSource.Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
-                    }
-
-                    CUST_NO.SelectedValue = HEADER_FAC.CUST_NO; //مشتری
+                    CUST_NO.SelectedValue = fullDetails.Customer.hes;
                     CUST_NO.Items.Refresh();
                 }
 
-
-                SGN1.IsChecked = Convert.ToBoolean(HEADER_FAC?.SGN1);
-                SGN2.IsChecked = Convert.ToBoolean(HEADER_FAC?.SGN2);
-                SGN3.IsChecked = Convert.ToBoolean(HEADER_FAC?.SGN3);
-
-                SGN1usid.Tag = Convert.ToInt32(HEADER_FAC?.sgn1usid);
-                SGN2usid.Tag = Convert.ToInt32(HEADER_FAC?.sgn2usid);
-                SGN3usid.Tag = Convert.ToInt32(HEADER_FAC?.sgn3usid);
+                SGN1.IsChecked = header.SGN1;
+                SGN2.IsChecked = header.SGN2;
+                SGN3.IsChecked = header.SGN3;
+                SGN1usid.Tag = header.sgn1usid;
+                SGN2usid.Tag = header.sgn2usid;
+                SGN3usid.Tag = header.sgn3usid;
 
                 PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
-                PERSONEL.Text = null;
-                PERSONEL.SelectedValue = null; PERSONEL.Items.Refresh();
+                PERSONEL.SelectedValue = null;
                 PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
 
                 if (rst_personel != null)
                 {
-                    SGN1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn1usid)?.SAL_NAME;
-                    SGN2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn2usid)?.SAL_NAME;
-                    SGN3usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn3usid)?.SAL_NAME;
+                    SGN1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == header.sgn1usid)?.SAL_NAME;
+                    SGN2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == header.sgn2usid)?.SAL_NAME;
+                    SGN3usid.Text = rst_personel.FirstOrDefault(x => x.IDD == header.sgn3usid)?.SAL_NAME;
                 }
 
-                ReGetdata(); //پرکردن دیتاگرید ها
-                TAKHFIF_APLAY_ReGetData();
-                PAY_GETD_SUB_ReGetData();
-                VISITOR_DTL_SUB_ReGetData();
+                FACTOR22_INVO_DATA.Clear();
+                fullDetails.InvoiceItems.ForEach(FACTOR22_INVO_DATA.Add);
+                TAKHFIF_APLAY_DATA.Clear();
+                fullDetails.AdvancedDiscounts.ForEach(TAKHFIF_APLAY_DATA.Add);
+                PAY_GETD_SUB22_DATA.Clear();
+                fullDetails.Checks.ForEach(PAY_GETD_SUB22_DATA.Add);
+                SAYER_VISITOR_DATA.Clear();
+                fullDetails.VisitorDetails.ForEach(SAYER_VISITOR_DATA.Add);
 
-                if (HEADER_FAC.OKF == null || HEADER_FAC.OKF == false)
-                {
-                    MakeOKFReady();
-                }
-                else
-                {
-                    OKF.IsChecked = HEADER_FAC.OKF; //تایید فاکتور
-                }
+                OKF.IsChecked = header.OKF ?? false;
+                if (header.OKF == null || header.OKF == false) MakeOKFReady();
 
-                TICMBAA.IsChecked = HEADER_FAC.TICMBAA; //تیک مالیات
-                JAY.IsChecked = HEADER_FAC.JAY; //تیک جایزه
-                MOLAH.Text = HEADER_FAC.MOLAH; //ملاحظات
-                SHIFT.SelectedValue = HEADER_FAC.SHIFT; //شیفت
+                TICMBAA.IsChecked = header.TICMBAA;
+                JAY.IsChecked = header.JAY;
+                MOLAH.Text = header.MOLAH;
+                SHIFT.SelectedValue = header.SHIFT;
 
                 MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
-                MODAT_PPID.SelectedValue = HEADER_FAC.MODAT_PPID; //نحوه پرداخت
+                MODAT_PPID.SelectedValue = header.MODAT_PPID;
                 MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
 
-                MODAT_PPID_Enter(); //بروز رسانی سورس نحوه پرداخت بر اساس اعلامیه ها
+                PEPID.SelectedValue = header.PEPID;
+                PEID.SelectedValue = header.PEID;
 
+                MODAT_PPID_Enter();
 
-                PEPID.SelectedValue = HEADER_FAC.PEPID; //اعلامیه قیمیت
-                PEID.SelectedValue = HEADER_FAC.PEID; //اعلامیه تخفیف
+                M_NAGHD.Text = header.M_NAGHD.ToStringNullSafe();
+                MABL_VAR.Text = header.MABL_VAR.ToStringNullSafe();
+                MABL_HAV.Text = header.MABL_HAV.ToStringNullSafe();
+                TAKHFIF.Text = header.TAKHFIF.ToStringNullSafe();
+                MOIN_VAR.Text = header.MOIN_VAR.ToStringNullSafe();
+                MOIN_HAV.Text = header.MOIN_HAV.ToStringNullSafe();
+                SHARAYET.Text = header.SHARAYET;
 
-                M_NAGHD.Text = HEADER_FAC.M_NAGHD.ToStringNullSafe(); //مبلغ نقد
-                MABL_VAR.Text = (string.IsNullOrEmpty(HEADER_FAC.MABL_VAR.ToStringNullSafe()) ? "0" : HEADER_FAC.MABL_VAR.ToStringNullSafe()); //مبلغ کارت بانک
-                MABL_HAV.Text = (string.IsNullOrEmpty(HEADER_FAC.MABL_HAV.ToStringNullSafe()) ? "0" : HEADER_FAC.MABL_HAV.ToStringNullSafe()); //مبلغ بن یا حواله
-                TAKHFIF.Text = (string.IsNullOrEmpty(HEADER_FAC.TAKHFIF.ToStringNullSafe()) ? "0" : HEADER_FAC.TAKHFIF.ToStringNullSafe()); //مبلغ تخفیف
+                MABL_HAZ.Text = header.MABL_HAZ.ToStringNullSafe();
+                MOIN_HAZ.Text = header.MOIN_HAZ;
+                MBAA.Text = header.MBAA.ToStringNullSafe();
+                HMBAA.Text = header.HMBAA;
 
-                MOIN_VAR.Text = HEADER_FAC.MOIN_VAR.ToStringNullSafe(); //معین کارت
-                MOIN_HAV.Text = HEADER_FAC.MOIN_HAV.ToStringNullSafe(); //معین بن
-                SHARAYET.Text = HEADER_FAC.SHARAYET; //شرایط
-
-                //پشت فاکتور
-                //TAKHFIF.Text; //مبلغ تخفیف
-                MABL_HAZ.Text = (string.IsNullOrEmpty(HEADER_FAC.MABL_HAZ.ToStringNullSafe()) ? "0" : HEADER_FAC.MABL_HAZ.ToStringNullSafe()); //مبلغ خدمات
-                MOIN_HAZ.Text = HEADER_FAC.MOIN_HAZ; //معین خدمات
-                MBAA.Text = (string.IsNullOrEmpty(HEADER_FAC.MBAA.ToStringNullSafe()) ? "0" : HEADER_FAC.MBAA.ToStringNullSafe()); //مالیات و عوارض مبلغ
-                HMBAA.Text = HEADER_FAC.HMBAA; //معین مالیات
-
-                //----------------- سایر
-                var BARNAMEH_FAC = dbms.DoGetDataSQL<OTHER_DTL_CSHARP>($"SELECT * FROM dbo.OTHER_DTL WHERE NUMBER = {NUMBER.Text} AND TAG = {fTAG}").FirstOrDefault();
-
-                REQUEST_NO.Text = BARNAMEH_FAC?.REQUEST_NO; //شماره درخواست کالا
-                DRIVER_MOB.Text = BARNAMEH_FAC?.DRIVER_MOB; //موبایل راننده
-                MAGHSAD.SelectedValue = BARNAMEH_FAC?.MAGHSAD; //مقصد
-                BARNAMEH.Text = BARNAMEH_FAC?.BARNAMEH; //شماره بارنامه
-                CAMIUN_NUM.Text = BARNAMEH_FAC?.CAMIUN_NUM; //شماره ماشین
-                CAM_KHALY.Text = BARNAMEH_FAC?.CAM_KHALY?.ToStringNullSafe(); // وزن خالی ماشین
-                DRIVER.Text = BARNAMEH_FAC?.DRIVER; //نام راننده
-                CAMIUN.Text = BARNAMEH_FAC?.CAMIUN; //نوع ماشین
-                CAM_POOR.Text = BARNAMEH_FAC?.CAM_POOR.ToStringNullSafe(); //وزن ماشین پر
-                TOZIH.Text = BARNAMEH_FAC?.TOZIH; //توضیح
-
-                //جمع ها
-                double sum = SAYER_VISITOR_DATA.Sum(item => item.PURSANT ?? 0.0);
-                Text190.Text = sum.ToString(); //جمع پورسانت
-                JJKOL.Text = SUM_OF_MABL_K.ToString(); //SMABLK //جمع فاکتور :
-                HKH.Text = string.IsNullOrEmpty(MABL_HAZ.Text) ? "0" : MABL_HAZ.Text; // هزینه خدمات
-                NTKHFIF.Text = TAKHFIF.Text; //تخفیفات
-                JF.Text = JJKOL.Text; //جمع کل فاکتور برای فسمت روی فاکتور
-                Text117.Text = SUM_OF_MEGH_K.ToString(); //جمع مقادیر :
-
-
-                {   //avoid Input string format error
-                    if (string.IsNullOrEmpty(JF.Text))
-                        JF.Text = "0";
-
-                    if (string.IsNullOrEmpty(HKH.Text))
-                        HKH.Text = "0";
-
-                    if (string.IsNullOrEmpty(NTKHFIF.Text))
-                        NTKHFIF.Text = "0";
-
-                    if (string.IsNullOrEmpty(MBAA.Text))
-                        MBAA.Text = "0";
-
-                    if (string.IsNullOrEmpty(M_NAGHD.Text))
-                        M_NAGHD.Text = "0";
-
-                    if (string.IsNullOrEmpty(MABL_VAR.Text))
-                        MABL_VAR.Text = "0";
-
-                    if (string.IsNullOrEmpty(MABL_HAV.Text))
-                        MABL_HAV.Text = "0";
-
-                    if (string.IsNullOrEmpty(NCHK.Text))
-                        NCHK.Text = "0";
-
-                    if (string.IsNullOrEmpty(GHABEL.Text))
-                        GHABEL.Text = "0";
-
-                    if (string.IsNullOrEmpty(NPAR.Text))
-                        NPAR.Text = "0";
-                }
-
-                long SafeParse(string? text)
+                if (fullDetails.OtherDetails != null)
                 {
-                    if (string.IsNullOrWhiteSpace(text))
-                        return 0;
-
-                    var digits = new string(text.Where(char.IsDigit).ToArray());
-                    return long.TryParse(digits, out var value) ? value : 0;
+                    var other = fullDetails.OtherDetails;
+                    REQUEST_NO.Text = other.REQUEST_NO;
+                    DRIVER_MOB.Text = other.DRIVER_MOB;
+                    MAGHSAD.SelectedValue = other.MAGHSAD;
+                    BARNAMEH.Text = other.BARNAMEH;
+                    CAMIUN_NUM.Text = other.CAMIUN_NUM;
+                    CAM_KHALY.Text = other.CAM_KHALY.ToStringNullSafe();
+                    DRIVER.Text = other.DRIVER;
+                    CAMIUN.Text = other.CAMIUN;
+                    CAM_POOR.Text = other.CAM_POOR.ToStringNullSafe();
+                    TOZIH.Text = other.TOZIH;
                 }
 
-                //مبلغ قابل پرداخت: //= [JF] + [HKH] - [NTKHFIF] + [MBAA]
-                var rghabel = SafeParse(JF.Text) + SafeParse(HKH.Text) - SafeParse(NTKHFIF.Text) + SafeParse(MBAA.Text);
-                GHABEL.Text = rghabel.ToString();
+                // Recalculate sums and totals
+                MasterSummerAndMandeh();
 
-                //جمع مبالغ پرداختی
-                //=[M_NAGHD]+[MABL_VAR]+[MABL_HAV]+[NCHK]
-                var RMP = SafeParse(M_NAGHD.Text) + SafeParse(MABL_VAR.Text) + SafeParse(MABL_HAV.Text) + SafeParse(NCHK.Text);
-                NPAR.Text = RMP.ToString();
+                MANDAH.Text = fullDetails.AccountBalance;
+                N_S.Text = header.N_S.ToStringNullSafe();
+                MABNA.Text = fullDetails.SanadBase;
 
-                //=[GHABEL]-[NPAR]
-                MAN.Text = (SafeParse(GHABEL.Text) - SafeParse(NPAR.Text)).ToString(); //مانده
-                MN.Text = MAN.Text; // مانده روی فاکتور
-
-                //کادر سبز و سند و مانده حساب
-                if (CUST_NO.SelectedValue != null)
+                if (fullDetails.TaxDetails != null)
                 {
-                    MANDAH.Text = CL_HESABDARI.GETMANDAH(CUST_NO.SelectedValue.ToString());
+                    var moadian = fullDetails.TaxDetails;
+                    inty.SelectedValue = moadian.inty;
+                    inp.SelectedValue = moadian.inp;
+                    ins.SelectedValue = moadian.ins;
+                    sbc.Text = moadian.sbc;
+                    bbc.Text = moadian.bbc;
+                    ft.Text = moadian.ft.ToStringNullSafe();
+                    bpn.Text = moadian.bpn;
+                    scln.Text = moadian.scln;
+                    scc.Text = moadian.scc;
+                    cdcn.Text = moadian.cdcn;
+                    cdcd.Text = moadian.cdcd.ToStringNullSafe();
+                    crn.Text = moadian.crn;
+                    billid.Text = moadian.billid;
+                    todam.Text = moadian.todam.ToStringNullSafe();
+                    tonw.Text = moadian.tonw.ToStringNullSafe();
+                    torv.Text = moadian.torv.ToStringNullSafe();
+                    tocv.Text = moadian.tocv.ToStringNullSafe();
+                    setm.SelectedValue = moadian.setm;
+                    cap.Text = moadian.cap.ToStringNullSafe();
+                    insp.Text = moadian.insp.ToStringNullSafe();
+                    tvop.Text = moadian.tvop.ToStringNullSafe();
+                    tax17.Text = moadian.tax17.ToStringNullSafe();
+                    if (IsExporty) CUT.SelectedValue = moadian.cut;
+                    irtaxid.Text = moadian.irtaxid;
                 }
 
-                if (HEADER_FAC.N_S != null)
-                {
-                    N_S.Text = HEADER_FAC.N_S.ToString();
-                    MABNA.Text = dbms.DoGetDataSQL<string?>($"SELECT TOP (1) BASE FROM dbo.DEED_HED WHERE NO_S  = 2 AND N_S = {HEADER_FAC.N_S}").FirstOrDefault();
-                }
-
-                #region MOADIAN
-                var MoadianHead = dbms.DoGetDataSQL<HEAD_LST_EXTENDED>($"SELECT NUMBER, tgu, inty, inp, ins, tob, sbc, bbc, ft, bpn, scln, scc, cdcn, cdcd, crn, billid, todam, tonw, torv, tocv, setm, cap, insp, tvop, tax17, cut, irtaxid, CRT, UID, exr, sscv FROM dbo.HEAD_LST_EXTENDED WHERE NUMBER = {NUMBER.Text} AND tgu = 2").FirstOrDefault();
-                if (MoadianHead != null)
-                {
-                    inty.SelectedValue = MoadianHead.inty; inty.Items.Refresh();
-                    inp.SelectedValue = MoadianHead.inp; inp.Items.Refresh();
-                    ins.SelectedValue = MoadianHead.ins; ins.Items.Refresh();
-                    sbc.Text = MoadianHead.sbc;
-                    bbc.Text = MoadianHead.bbc;
-                    if (MoadianHead.ft != null)
-                    {
-                        ft.Text = MoadianHead.ft.ToStringNullSafe();
-                    }
-                    bpn.Text = MoadianHead.bpn;
-                    scln.Text = MoadianHead.scln;
-                    scc.Text = MoadianHead.scc;
-                    cdcn.Text = MoadianHead.cdcn;
-                    if (MoadianHead.cdcd != null)
-                    {
-                        cdcd.Text = MoadianHead.cdcd.ToStringNullSafe();
-                    }
-                    crn.Text = MoadianHead.crn;
-                    billid.Text = MoadianHead.billid;
-                    if (MoadianHead.todam != null)
-                    {
-                        todam.Text = MoadianHead.todam.ToStringNullSafe();
-                    }
-                    if (MoadianHead.tonw != null)
-                    {
-                        tonw.Text = MoadianHead.tonw.ToStringNullSafe();
-                    }
-                    if (MoadianHead.torv != null)
-                    {
-                        torv.Text = MoadianHead.torv.ToStringNullSafe();
-                    }
-                    if (MoadianHead.tocv != null)
-                    {
-                        tocv.Text = MoadianHead.tocv.ToStringNullSafe();
-                    }
-                    setm.SelectedValue = MoadianHead.setm; setm.Items.Refresh();
-                    if (MoadianHead.cap != null)
-                    {
-                        cap.Text = MoadianHead.cap.ToStringNullSafe();
-                    }
-                    if (MoadianHead.insp != null)
-                    {
-                        insp.Text = MoadianHead.insp.ToStringNullSafe();
-                    }
-                    if (MoadianHead.tvop != null)
-                    {
-                        tvop.Text = MoadianHead.tvop.ToStringNullSafe();
-                    }
-                    if (MoadianHead.tax17 != null)
-                    {
-                        tax17.Text = MoadianHead.tax17.ToStringNullSafe();
-                    }
-                    if (IsExporty)
-                    {
-                        CUT.SelectedValue = MoadianHead.cut; CUT.Items.Refresh();
-                    }
-                    if (!string.IsNullOrEmpty(MoadianHead.irtaxid))
-                    {
-                        irtaxid.Text = MoadianHead.irtaxid;
-                    }
-
-                }
-                #endregion
+                // --- End Populating UI ---
 
                 Form_Current();
+            }
+            catch (Exception ex)
+            {
+                // Log and show error
+                new Msgwin(false, $"خطا در بارگذاری اطلاعات فاکتور: {ex.Message}").ShowDialog();
+            }
+            finally
+            {
+                // Optional: Hide loading indicator here
             }
         }
         private bool OnInsertRecord(HEAD_LST record)
@@ -2429,6 +2346,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 N_KOL_COLUMN.IsReadOnly = false; //درصد تخفیف
                 N_MOIN_COLUMN.IsReadOnly = false; //مبلغ تخفیف
             }
+
+            AllowEdits = false;
         }
         private void Form_BeforeInsert()
         {
@@ -2665,6 +2584,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             TOZIH.IsReadOnly = !CAN;
 
             //مودیان
+            AllowMoadianTabEdit(CAN);
+        }
+
+        private void AllowMoadianTabEdit(bool CAN)
+        {
             inty.IsEnabled = CAN;
             inp.IsEnabled = CAN;
             ins.IsEnabled = CAN;
@@ -2691,6 +2615,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             tvop.IsReadOnly = !CAN;
             tax17.IsReadOnly = !CAN;
         }
+
         private void SANAD()
         {
             if (string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text == "0")
@@ -3224,7 +3149,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO").ToList();
                     }
                 }
-                return;
             }
 
             // ۵. اگر مقدار ذخیره‌شده (currentSelectedPPID) جزو filteredList نبود:
@@ -7261,6 +7185,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 CL_HESABDARI.TR("OTHER_DTL", "(NUMBER = " + this.NUMBER.Text + ") AND (TAG = 13)", dt, 1);
                 CL_HESABDARI.TR("VISITOR_DTL", "(NUMBER = " + this.NUMBER.Text + ") AND (TAG = 2)", dt, 1);
 
+                if (moadian.IsSelected) //اگر در تب مودیان فوکوس کرده بود
+                {
+                    AllowMoadianTabEdit(true);
+                    return;
+                }
+
                 if ((bool)SGN1.IsChecked || (bool)SGN2.IsChecked || (bool)SGN3.IsChecked)
                 {
                     new Msgwin(false, " اول امضاء را برداريد ...").ShowDialog();
@@ -8329,19 +8259,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             //CL_HESABDARI.APLAYTAKH(Convert.ToInt64(NUMBER.Text), 2, Convert.ToDouble(M_NAGHD.Text), Convert.ToDouble(MABL_VAR.Text), Convert.ToDouble(MABL_HAV.Text), (bool)TICMBAA.IsChecked); //#Check Matter این باید توی حالت دکمه ذخیره فعال بشه
         }
 
-        private void MABL_HAV_AfterUpdate()
-        {
-            if (Convert.ToDouble(MABL_HAV.Text) != 0 && IsNull(this.MOIN_HAV.Text))
-            {
-                new Msgwin(false, "حساب مربوط به حواله مشخص نشده است حتما بايد حساب مربوط به حواله مشخص شود ").ShowDialog();
-                this.MOIN_HAV.Focus();
-            }
-            if (Convert.ToDouble(MABL_HAV.Text) == 0)
-            {
-                this.MOIN_HAV.Text = "";
-            }
-            //CL_HESABDARI.APLAYTAKH(Convert.ToInt64(NUMBER.Text), 2, Convert.ToDouble(M_NAGHD.Text), Convert.ToDouble(MABL_VAR.Text), Convert.ToDouble(MABL_HAV.Text), (bool)TICMBAA.IsChecked); //#CheckMatter
-        }
         private void MABL_HAV2_AfterUpdate()
         {
             if (Convert.ToDouble(MABL_HAV2.Text) != 0 && IsNull(this.MOIN_HAV2.Text))
@@ -8355,15 +8272,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
             //CL_HESABDARI.APLAYTAKH(Convert.ToInt64(NUMBER.Text), 2, Convert.ToDouble(M_NAGHD.Text), Convert.ToDouble(MABL_VAR.Text), Convert.ToDouble(MABL_HAV.Text), (bool)TICMBAA.IsChecked); //#CheckMatter
         }
-        private void MABL_HAZ_AfterUpdate()
-        {
-            if (Convert.ToDouble(MABL_HAZ.Text) != 0 && IsNull(this.MOIN_HAZ.Text))
-            {
-                new Msgwin(false, "حساب مربوط به خدمات مشخص نشده است حتما بايد حساب مربوط به خدمات مشخص شود ").ShowDialog();
-                this.MOIN_HAZ.Focus();
-            }
-        }
-
+     
         private void MABL_VAR2_AfterUpdate()
         {
             if (Convert.ToDouble(MABL_VAR2.Text) != 0 && IsNull(MOIN_VAR2.Text))
@@ -11916,7 +11825,17 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void MABL_HAV_NumericLostFocus(object sender, RoutedEventArgs e)
         {
-            MABL_HAV_AfterUpdate();
+            //MABL_HAV_AfterUpdate
+            if (Convert.ToDouble(MABL_HAV.Text) != 0 && IsNull(this.MOIN_HAV.Text))
+            {
+                //new Msgwin(false, "حساب مربوط به حواله مشخص نشده است حتما بايد حساب مربوط به حواله مشخص شود ").ShowDialog();
+                this.MOIN_HAV.Focus();
+            }
+            if (Convert.ToDouble(MABL_HAV.Text) == 0)
+            {
+                this.MOIN_HAV.Text = "";
+            }
+            //CL_HESABDARI.APLAYTAKH(Convert.ToInt64(NUMBER.Text), 2, Convert.ToDouble(M_NAGHD.Text), Convert.ToDouble(MABL_VAR.Text), Convert.ToDouble(MABL_HAV.Text), (bool)TICMBAA.IsChecked); //#CheckMatter
         }
 
         private void TAKHFIF_NumericLostFocus(object sender, RoutedEventArgs e)
@@ -11926,7 +11845,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void MABL_HAZ_NumericLostFocus(object sender, RoutedEventArgs e)
         {
-            MABL_HAZ_AfterUpdate();
+            //MABL_HAZ_AfterUpdate
+            if (Convert.ToDouble(MABL_HAZ.Text) != 0 && IsNull(this.MOIN_HAZ.Text))
+            {
+                //new Msgwin(false, "حساب مربوط به خدمات مشخص نشده است حتما بايد حساب مربوط به خدمات مشخص شود ").ShowDialog();
+                this.MOIN_HAZ.Focus();
+            }
         }
 
         private void NUMBER_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)

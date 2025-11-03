@@ -62,7 +62,7 @@
         <!-- Search Box -->
         <TextBox x:Name="_searchBox" Margin="10,132,10,0" TextChanged="_searchBox_TextChanged" FlowDirection="RightToLeft" Height="31" VerticalAlignment="Top"/>
         <!-- Results DataGrid -->
-        <DataGrid x:Name="_resultsGrid" Margin="10,174,10,10" AutoGenerateColumns="False" IsReadOnly="True" FlowDirection="RightToLeft"/ ScrollViewer.HorizontalScrollBarVisibility="Auto">
-        
+        <DataGrid x:Name="_resultsGrid" Margin="10,174,10,10" AutoGenerateColumns="False" IsReadOnly="True" FlowDirection="RightToLeft" ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
+
     </Grid>
 </Window>
