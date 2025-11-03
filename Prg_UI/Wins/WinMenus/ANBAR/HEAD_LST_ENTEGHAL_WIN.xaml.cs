@@ -347,7 +347,7 @@ namespace Wins.WinMenus.ANBAR
         {
             NUMBER.IsEnabled = true;
             ANBAR.IsEnabled = true;
-            if (ANBAR.SelectedValue != null)
+            if (ANBAR.SelectedValue == null && _newrecord)
             {
                 ANBARF.IsEnabled = true;
             }
