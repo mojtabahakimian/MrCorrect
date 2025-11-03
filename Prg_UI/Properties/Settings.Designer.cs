@@ -70,17 +70,5 @@ namespace Prg_UI.Properties {
                 this["PrimaryColor"] = value;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool IsRDPMode {
-            get {
-                return ((bool)(this["IsRDPMode"]));
-            }
-            set {
-                this["IsRDPMode"] = value;
-            }
-        }
     }
 }

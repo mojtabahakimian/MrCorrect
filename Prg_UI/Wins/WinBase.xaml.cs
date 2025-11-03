@@ -51,7 +51,8 @@ namespace Prg_UI.Wins
             this.MaxHeight = CL_LMethods.GetWindowSizeLessTaskbaer();
             WindowState = WindowState.Maximized;
 
-            if (Prg_UI.Properties.Settings.Default.IsRDPMode)
+            var optionManager = new GeneralOptionManager();
+            if (optionManager.IsRDPMode)
             {
                 CL_LMethods.OptimizeForRemoteDesktop(this);
 

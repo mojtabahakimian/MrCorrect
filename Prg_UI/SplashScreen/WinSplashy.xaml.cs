@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using Prg_UI.Functions;
+using System.Windows;
 
 namespace Prg_UI.SplashScreen
 {
@@ -9,7 +10,8 @@ namespace Prg_UI.SplashScreen
             InitializeComponent();
 
             //<Image x:Name="myg" Margin="-9,8,4,5" Visibility="Hidden" gifplayer:AnimationBehavior.RepeatBehavior="2x" gifplayer:AnimationBehavior.AutoStart="True" gifplayer:AnimationBehavior.SourceUri="/UiDrive/IMGS/SplashHandwrite.gif" Stretch="UniformToFill"/>
-            if (Prg_UI.Properties.Settings.Default.IsRDPMode)
+            var optionManager = new GeneralOptionManager();
+            if (optionManager.IsRDPMode)
             {
                 myg.Visibility = Visibility.Collapsed;
                 myg = null;
