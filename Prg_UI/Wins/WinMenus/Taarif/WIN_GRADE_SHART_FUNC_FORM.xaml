@@ -74,7 +74,7 @@
              FlowDirection="RightToLeft" 
              SelectionUnit="FullRow" 
              CanUserDeleteRows="False"
-             Margin="14,90,14,60" BorderThickness="1" CellEditEnding="DG_SUB_CellEditEnding" RowEditEnding="DG_SUB_RowEditEnding" PreviewKeyDown="DG_SUB_PreviewKeyDown">
+             Margin="14,90,14,60" BorderThickness="1" CellEditEnding="DG_SUB_CellEditEnding" RowEditEnding="DG_SUB_RowEditEnding" PreviewKeyDown="DG_SUB_PreviewKeyDown" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->

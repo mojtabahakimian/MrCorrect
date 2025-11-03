@@ -55,7 +55,7 @@
                   VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                   FlowDirection="RightToLeft"
                   SelectionUnit="FullRow"
-                  AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" Margin="10,55,10,10" BeginningEdit="DEPART_SUB_BeginningEdit" CellEditEnding="DEPART_SUB_CellEditEnding" RowEditEnding="DEPART_SUB_RowEditEnding" PreviewMouseLeftButtonDown="DEPART_SUB_PreviewMouseLeftButtonDown" PreviewKeyDown="DEPART_SUB_PreviewKeyDown" SelectionChanged="DEPART_SUB_SelectionChanged" >
+                  AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" Margin="10,55,10,10" BeginningEdit="DEPART_SUB_BeginningEdit" CellEditEnding="DEPART_SUB_CellEditEnding" RowEditEnding="DEPART_SUB_RowEditEnding" PreviewMouseLeftButtonDown="DEPART_SUB_PreviewMouseLeftButtonDown" PreviewKeyDown="DEPART_SUB_PreviewKeyDown" SelectionChanged="DEPART_SUB_SelectionChanged"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->

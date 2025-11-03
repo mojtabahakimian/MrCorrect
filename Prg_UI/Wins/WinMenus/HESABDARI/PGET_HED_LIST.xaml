@@ -49,7 +49,7 @@
 
             <!-- DataGrid for the body/detail data (PGET_LST) -->
             <!-- DataGrid for the header/master data (PGET_HED) -->
-            <DataGrid x:Name="MasterDataGrid" AutoGenerateColumns="False" ItemsSource="{Binding PGET_HED_List}" IsReadOnly="True" FlowDirection="RightToLeft" PreviewKeyDown="MasterDataGrid_PreviewKeyDown" IsTabStop="True" TabIndex="2">
+            <DataGrid x:Name="MasterDataGrid" AutoGenerateColumns="False" ItemsSource="{Binding PGET_HED_List}" IsReadOnly="True" FlowDirection="RightToLeft" PreviewKeyDown="MasterDataGrid_PreviewKeyDown" IsTabStop="True" TabIndex="2" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                 <DataGrid.Columns>
                     <DataGridTextColumn x:Name="iDColumn" Binding="{Binding ID}" Header="شماره خزانه" Width="auto"/>
                     <DataGridTextColumn x:Name="dATEColumn" Binding="{Binding DATE, StringFormat=####/##/##}" Header="تاریخ" Width="auto"/>
@@ -62,7 +62,7 @@
                 </DataGrid.Columns>
             </DataGrid>
             <!-- DataGrid for the body/detail data (PGET_LST) -->
-            <DataGrid x:Name="DetailDataGrid" AutoGenerateColumns="False" Visibility="Collapsed" FlowDirection="RightToLeft" ItemsSource="{Binding SelectedItem.Details, ElementName=MasterDataGrid}" IsReadOnly="True" Margin="0,10,0,0">
+            <DataGrid x:Name="DetailDataGrid" AutoGenerateColumns="False" Visibility="Collapsed" FlowDirection="RightToLeft" ItemsSource="{Binding SelectedItem.Details, ElementName=MasterDataGrid}" IsReadOnly="True" Margin="0,10,0,0" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                 <DataGrid.Columns>
                     <DataGridTextColumn x:Name="idcolumn_pget_lst" Binding="{Binding ID}" Header="شماره خزانه" Width="auto"/>
                     <DataGridTextColumn x:Name="datecolumn_pget_lst" Binding="{Binding DATE, StringFormat=####/##/##}" Header="تاریخ" Width="auto"/>

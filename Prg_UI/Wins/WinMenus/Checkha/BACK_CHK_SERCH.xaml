@@ -33,7 +33,7 @@
             </Border>
         </Border>
         
-        <DataGrid x:Name="SUB_BACK_CHK_SERCH" Visibility="Visible" ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" AutoGenerateColumns="False" SelectedIndex="0" SelectionMode="Single" IsReadOnly="True" EnableRowVirtualization="True" Margin="14,50,10,10" FlowDirection="RightToLeft">
+        <DataGrid x:Name="SUB_BACK_CHK_SERCH" Visibility="Visible" ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" AutoGenerateColumns="False" SelectedIndex="0" SelectionMode="Single" IsReadOnly="True" EnableRowVirtualization="True" Margin="14,50,10,10" FlowDirection="RightToLeft" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
                 <DataGridTextColumn x:Name="n_TAFColumn" Binding="{Binding N_TAF}" Header="تفضیلی" Visibility="Hidden" Width="Auto"/>
                 <DataGridTextColumn x:Name="n_MOINColumn" Binding="{Binding N_MOIN}" Header="معین" Visibility="Hidden" Width="Auto"/>

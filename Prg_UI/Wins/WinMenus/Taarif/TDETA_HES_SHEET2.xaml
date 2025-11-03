@@ -84,7 +84,7 @@
               VirtualizingPanel.VirtualizationMode="Recycling"
               ScrollViewer.CanContentScroll="True"
               IsKeyboardFocusWithinChanged="TDETA_HES2_SUB_IsKeyboardFocusWithinChanged"
-              AutoGenerateColumns="False" Margin="10,90,10,55" RowEditEnding="TDETA_HES2_SUB_RowEditEnding" BeginningEdit="TDETA_HES2_SUB_BeginningEdit" CellEditEnding="TDETA_HES2_SUB_CellEditEnding" PreviewKeyDown="TDETA_HES2_SUB_PreviewKeyDown" PreviewMouseLeftButtonUp="TDETA_HES2_SUB_PreviewMouseLeftButtonUp" SelectionChanged="TDETA_HES2_SUB_SelectionChanged" PreparingCellForEdit="TDETA_HES2_SUB_PreparingCellForEdit">
+              AutoGenerateColumns="False" Margin="10,90,10,55" RowEditEnding="TDETA_HES2_SUB_RowEditEnding" BeginningEdit="TDETA_HES2_SUB_BeginningEdit" CellEditEnding="TDETA_HES2_SUB_CellEditEnding" PreviewKeyDown="TDETA_HES2_SUB_PreviewKeyDown" PreviewMouseLeftButtonUp="TDETA_HES2_SUB_PreviewMouseLeftButtonUp" SelectionChanged="TDETA_HES2_SUB_SelectionChanged" PreparingCellForEdit="TDETA_HES2_SUB_PreparingCellForEdit" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->
                 <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>

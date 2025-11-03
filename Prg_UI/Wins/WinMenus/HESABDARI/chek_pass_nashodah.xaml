@@ -33,7 +33,7 @@
             </Border>
         </Border>
 
-        <DataGrid x:Name="none_passecheck" ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" FlowDirection="RightToLeft" AutoGenerateColumns="False" EnableRowVirtualization="True" Margin="5,50,10,20">
+        <DataGrid x:Name="none_passecheck" ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" FlowDirection="RightToLeft" AutoGenerateColumns="False" EnableRowVirtualization="True" Margin="5,50,10,20" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
                 <DataGridTextColumn x:Name="n_SERIColumn" Binding="{Binding N_SERI}" Header="شماره سریال" Width="auto"/>
                 <DataGridTextColumn x:Name="bknColumn" Binding="{Binding bkn}" Header="بانک" Width="auto"/>

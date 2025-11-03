@@ -143,7 +143,7 @@
                             FlowDirection="RightToLeft" 
                             SelectionUnit="FullRow" 
                             CanUserDeleteRows="False" MouseRightButtonUp="INVO_LST_SUB_MouseRightButtonUp"
-                            Margin="4,222,4,120" BorderThickness="1" IsKeyboardFocusWithinChanged="INVO_LST_SUB_IsKeyboardFocusWithinChanged"  CellEditEnding="INVO_LST_SUB_CellEditEnding" PreviewMouseLeftButtonUp="INVO_LST_SUB_PreviewMouseLeftButtonUp" SelectionChanged="INVO_LST_SUB_SelectionChanged" RowEditEnding="INVO_LST_SUB_RowEditEnding" PreviewKeyDown="INVO_LST_SUB_PreviewKeyDown" PreparingCellForEdit="INVO_LST_SUB_PreparingCellForEdit" BeginningEdit="INVO_LST_SUB_BeginningEdit" >
+                            Margin="4,222,4,120" BorderThickness="1" IsKeyboardFocusWithinChanged="INVO_LST_SUB_IsKeyboardFocusWithinChanged"  CellEditEnding="INVO_LST_SUB_CellEditEnding" PreviewMouseLeftButtonUp="INVO_LST_SUB_PreviewMouseLeftButtonUp" SelectionChanged="INVO_LST_SUB_SelectionChanged" RowEditEnding="INVO_LST_SUB_RowEditEnding" PreviewKeyDown="INVO_LST_SUB_PreviewKeyDown" PreparingCellForEdit="INVO_LST_SUB_PreparingCellForEdit" BeginningEdit="INVO_LST_SUB_BeginningEdit"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
@@ -459,7 +459,7 @@
                               
                               KeyboardNavigation.TabNavigation="Contained"
                               SelectedIndex="0"
-                              Margin="5,315,4,47" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" CellEditEnding="PAY_GETP_SUB_CellEditEnding" PreviewKeyDown="PAY_GETP_SUB_PreviewKeyDown" RowEditEnding="PAY_GETP_SUB_RowEditEnding" PreparingCellForEdit="PAY_GETP_SUB_PreparingCellForEdit" BeginningEdit="PAY_GETP_SUB_BeginningEdit">
+                              Margin="5,315,4,47" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" CellEditEnding="PAY_GETP_SUB_CellEditEnding" PreviewKeyDown="PAY_GETP_SUB_PreviewKeyDown" RowEditEnding="PAY_GETP_SUB_RowEditEnding" PreparingCellForEdit="PAY_GETP_SUB_PreparingCellForEdit" BeginningEdit="PAY_GETP_SUB_BeginningEdit" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
                             <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">

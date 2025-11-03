@@ -81,7 +81,7 @@
                   FlowDirection="RightToLeft" 
                   SelectionUnit="FullRow" 
                   CanUserDeleteRows="False"
-                  Margin="4,140,4,5" BorderThickness="1" IsKeyboardFocusWithinChanged="MOGH_DG_IsKeyboardFocusWithinChanged"  CellEditEnding="MOGH_DG_CellEditEnding" PreviewMouseLeftButtonUp="MOGH_DG_PreviewMouseLeftButtonUp" SelectionChanged="MOGH_DG_SelectionChanged" RowEditEnding="MOGH_DG_RowEditEnding" PreviewKeyDown="MOGH_DG_PreviewKeyDown" PreparingCellForEdit="MOGH_DG_PreparingCellForEdit" BeginningEdit="MOGH_DG_BeginningEdit" CanUserAddRows="False" >
+                  Margin="4,140,4,5" BorderThickness="1" IsKeyboardFocusWithinChanged="MOGH_DG_IsKeyboardFocusWithinChanged"  CellEditEnding="MOGH_DG_CellEditEnding" PreviewMouseLeftButtonUp="MOGH_DG_PreviewMouseLeftButtonUp" SelectionChanged="MOGH_DG_SelectionChanged" RowEditEnding="MOGH_DG_RowEditEnding" PreviewKeyDown="MOGH_DG_PreviewKeyDown" PreparingCellForEdit="MOGH_DG_PreparingCellForEdit" BeginningEdit="MOGH_DG_BeginningEdit" CanUserAddRows="False"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->

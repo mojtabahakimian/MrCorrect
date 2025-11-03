@@ -97,7 +97,7 @@
                 FlowDirection="RightToLeft" 
                 SelectionUnit="FullRow"
                 IsKeyboardFocusWithinChanged="TAKHFIF_DTL_SUB_IsKeyboardFocusWithinChanged"
-                BorderThickness="1" Margin="20,31,0,0" Grid.Column="1" PreviewKeyDown="TAKHFIF_DTL_SUB_PreviewKeyDown" RowEditEnding="TAKHFIF_DTL_SUB_RowEditEnding" CellEditEnding="TAKHFIF_DTL_SUB_CellEditEnding" CanUserDeleteRows="False">
+                BorderThickness="1" Margin="20,31,0,0" Grid.Column="1" PreviewKeyDown="TAKHFIF_DTL_SUB_PreviewKeyDown" RowEditEnding="TAKHFIF_DTL_SUB_RowEditEnding" CellEditEnding="TAKHFIF_DTL_SUB_CellEditEnding" CanUserDeleteRows="False" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                 <DataGrid.Style>
                     <!--خط بندی سطر های دیتاگرید-->
@@ -141,7 +141,7 @@
                 FlowDirection="RightToLeft" 
                 SelectionUnit="FullRow" 
                 IsKeyboardFocusWithinChanged="CUSTKIND_TF_SUB_IsKeyboardFocusWithinChanged"
-                BorderThickness="1" Margin="-1,31,21,0" RowEditEnding="CUSTKIND_TF_SUB_RowEditEnding" CellEditEnding="CUSTKIND_TF_SUB_CellEditEnding" CanUserDeleteRows="False">
+                BorderThickness="1" Margin="-1,31,21,0" RowEditEnding="CUSTKIND_TF_SUB_RowEditEnding" CellEditEnding="CUSTKIND_TF_SUB_CellEditEnding" CanUserDeleteRows="False" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                 <DataGrid.Style>
                     <!--خط بندی سطر های دیتاگرید-->

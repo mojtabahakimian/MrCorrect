@@ -110,7 +110,7 @@
                 SelectionUnit="FullRow"
                 IsReadOnly="True"
                 CanUserDeleteRows="False"
-                Margin="4,160,4,145" BorderThickness="1" CellEditEnding="DG_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_SUB_SelectionChanged" RowEditEnding="DG_SUB_RowEditEnding" PreviewKeyDown="DG_SUB_PreviewKeyDown" PreparingCellForEdit="DG_SUB_PreparingCellForEdit" BeginningEdit="DG_SUB_BeginningEdit">
+                Margin="4,160,4,145" BorderThickness="1" CellEditEnding="DG_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_SUB_SelectionChanged" RowEditEnding="DG_SUB_RowEditEnding" PreviewKeyDown="DG_SUB_PreviewKeyDown" PreparingCellForEdit="DG_SUB_PreparingCellForEdit" BeginningEdit="DG_SUB_BeginningEdit" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                 <DataGrid.Style>
                     <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
@@ -213,7 +213,7 @@
                                   SelectionChanged="SUB_EXPTF_SelectionChanged"
                                   CanUserReorderColumns="False" IsKeyboardFocusWithinChanged="SUB_EXPTF_IsKeyboardFocusWithinChanged"
                                   CellEditEnding="SUB_EXPTF_CellEditEnding" PreparingCellForEdit="SUB_EXPTF_PreparingCellForEdit"
-                                  RowEditEnding="SUB_EXPTF_RowEditEnding" PreviewKeyDown="SUB_EXPTF_PreviewKeyDown">
+                                  RowEditEnding="SUB_EXPTF_RowEditEnding" PreviewKeyDown="SUB_EXPTF_PreviewKeyDown" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                             <DataGrid.Style>
                                 <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                                     <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>

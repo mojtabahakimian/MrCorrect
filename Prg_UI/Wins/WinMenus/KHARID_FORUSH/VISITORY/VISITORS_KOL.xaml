@@ -57,7 +57,7 @@
           CellStyle="{StaticResource CellFocusyBorder}"
           HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
           VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
-          LoadingRowDetails="VisitorsGrid_LoadingRowDetails" Margin="0,39,0,0" >
+          LoadingRowDetails="VisitorsGrid_LoadingRowDetails" Margin="0,39,0,0"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->
@@ -136,7 +136,7 @@
                 AutoGenerateColumns="False"
                 FlowDirection="RightToLeft"
                 CanUserAddRows="False"
-                LoadingRowDetails="CustomersGrid_LoadingRowDetails"  Margin="30,0,0,0">
+                LoadingRowDetails="CustomersGrid_LoadingRowDetails"  Margin="30,0,0,0" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
@@ -202,7 +202,7 @@
                         <DataGrid.RowDetailsTemplate>
                             <DataTemplate>
                                 <DataGrid ItemsSource="{Binding Invoices}"
-                                          AutoGenerateColumns="False" FlowDirection="RightToLeft" CanUserAddRows="False"  Margin="78,0,0,0">
+                                          AutoGenerateColumns="False" FlowDirection="RightToLeft" CanUserAddRows="False"  Margin="78,0,0,0" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                                     
                                     <DataGrid.Style>
                                         <!--خط بندی سطر های دیتاگرید-->

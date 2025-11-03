@@ -114,7 +114,7 @@
             AutoGenerateColumns="False"
             CanUserAddRows="True"
             ContextMenu="{StaticResource ContextUtilityMenu1}"
-            FlowDirection="RightToLeft" Margin="17,480,15,14" CellEditEnding="FCODE_CUSTOMER_MORE_SUB_CellEditEnding" RowEditEnding="FCODE_CUSTOMER_MORE_SUB_RowEditEnding" SelectionChanged="FCODE_CUSTOMER_MORE_SUB_SelectionChanged" PreviewMouseLeftButtonDown="FCODE_CUSTOMER_MORE_SUB_PreviewMouseLeftButtonDown" PreviewKeyDown="FCODE_CUSTOMER_MORE_SUB_PreviewKeyDown">
+            FlowDirection="RightToLeft" Margin="17,480,15,14" CellEditEnding="FCODE_CUSTOMER_MORE_SUB_CellEditEnding" RowEditEnding="FCODE_CUSTOMER_MORE_SUB_RowEditEnding" SelectionChanged="FCODE_CUSTOMER_MORE_SUB_SelectionChanged" PreviewMouseLeftButtonDown="FCODE_CUSTOMER_MORE_SUB_PreviewMouseLeftButtonDown" PreviewKeyDown="FCODE_CUSTOMER_MORE_SUB_PreviewKeyDown" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->
                 <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>

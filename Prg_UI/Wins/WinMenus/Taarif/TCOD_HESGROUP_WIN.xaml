@@ -65,7 +65,7 @@
                   ContextMenu="{StaticResource ContextUtilityMenu1}"
                   FlowDirection="RightToLeft"
                   SelectionUnit="FullRow"
-                  AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" Margin="10,55,10,10" BeginningEdit="TCOD_HESGROUP_SUB_BeginningEdit" CellEditEnding="TCOD_HESGROUP_SUB_CellEditEnding" PreviewKeyDown="TCOD_HESGROUP_SUB_PreviewKeyDown" RowEditEnding="TCOD_HESGROUP_SUB_RowEditEnding" SelectionChanged="TCOD_HESGROUP_SUB_SelectionChanged">
+                  AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" Margin="10,55,10,10" BeginningEdit="TCOD_HESGROUP_SUB_BeginningEdit" CellEditEnding="TCOD_HESGROUP_SUB_CellEditEnding" PreviewKeyDown="TCOD_HESGROUP_SUB_PreviewKeyDown" RowEditEnding="TCOD_HESGROUP_SUB_RowEditEnding" SelectionChanged="TCOD_HESGROUP_SUB_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->

@@ -114,7 +114,7 @@
             AutoGenerateColumns="False" 
             FlowDirection="RightToLeft" 
             SelectionUnit="FullRow" 
-            BorderThickness="1" RowEditEnding="INVO_LST_REQUEST_RowEditEnding" BeginningEdit="INVO_LST_REQUEST_BeginningEdit" PreviewMouseLeftButtonUp="INVO_LST_REQUEST_PreviewMouseLeftButtonUp" CellEditEnding="INVO_LST_REQUEST_CellEditEnding" SelectionChanged="INVO_LST_REQUEST_SelectionChanged" PreviewKeyDown="INVO_LST_REQUEST_PreviewKeyDown" PreparingCellForEdit="INVO_LST_REQUEST_PreparingCellForEdit" IsKeyboardFocusWithinChanged="INVO_LST_REQUEST_IsKeyboardFocusWithinChanged" CanUserDeleteRows="False">
+            BorderThickness="1" RowEditEnding="INVO_LST_REQUEST_RowEditEnding" BeginningEdit="INVO_LST_REQUEST_BeginningEdit" PreviewMouseLeftButtonUp="INVO_LST_REQUEST_PreviewMouseLeftButtonUp" CellEditEnding="INVO_LST_REQUEST_CellEditEnding" SelectionChanged="INVO_LST_REQUEST_SelectionChanged" PreviewKeyDown="INVO_LST_REQUEST_PreviewKeyDown" PreparingCellForEdit="INVO_LST_REQUEST_PreparingCellForEdit" IsKeyboardFocusWithinChanged="INVO_LST_REQUEST_IsKeyboardFocusWithinChanged" CanUserDeleteRows="False" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->

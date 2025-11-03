@@ -56,7 +56,7 @@
                   VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                   AutoGenerateColumns="False"
                   
-                  IsReadOnly="True" FlowDirection="RightToLeft" IsTabStop="True" TabIndex="2">
+                  IsReadOnly="True" FlowDirection="RightToLeft" IsTabStop="True" TabIndex="2" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                 <DataGrid.Style>
                     <!--خط بندی سطر های دیتاگرید-->
                     <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">

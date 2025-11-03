@@ -60,7 +60,7 @@
                   ItemsSource="{Binding MasterData}" 
                   Margin="4,235,4,65" AutoGenerateColumns="False"
                   FlowDirection="RightToLeft"
-                  BorderThickness="1" PreviewKeyDown="GRADE_CUST_TAB_SUB_PreviewKeyDown" RowEditEnding="GRADE_CUST_TAB_SUB_RowEditEnding" CellEditEnding="GRADE_CUST_TAB_SUB_CellEditEnding" TabIndex="6" IsTabStop="True">
+                  BorderThickness="1" PreviewKeyDown="GRADE_CUST_TAB_SUB_PreviewKeyDown" RowEditEnding="GRADE_CUST_TAB_SUB_RowEditEnding" CellEditEnding="GRADE_CUST_TAB_SUB_CellEditEnding" TabIndex="6" IsTabStop="True" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->
@@ -115,7 +115,7 @@
                               AutoGenerateColumns="False"
                               CellEditEnding="GRADE_GRP_SUB_CellEditEnding"
                               CanUserReorderColumns="False"
-                              RowEditEnding="GRADE_GRP_SUB_RowEditEnding" RowHeight="50" PreviewKeyDown="GRADE_GRP_SUB_PreviewKeyDown" PreparingCellForEdit="GRADE_GRP_SUB_PreparingCellForEdit">
+                              RowEditEnding="GRADE_GRP_SUB_RowEditEnding" RowHeight="50" PreviewKeyDown="GRADE_GRP_SUB_PreviewKeyDown" PreparingCellForEdit="GRADE_GRP_SUB_PreparingCellForEdit" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
                             <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>

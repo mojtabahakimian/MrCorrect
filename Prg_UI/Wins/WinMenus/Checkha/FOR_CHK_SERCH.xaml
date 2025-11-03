@@ -34,7 +34,7 @@
         </Border>
 
 
-        <DataGrid x:Name="SUB_FOR_CHK_SERCH" AutoGenerateColumns="False" ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" SelectedIndex="0" EnableRowVirtualization="True" SelectionMode="Single" IsReadOnly="True" Margin="7,45,7,5" PreviewKeyDown="SUB_FOR_CHK_SERCH_PreviewKeyDown" FlowDirection="RightToLeft">
+        <DataGrid x:Name="SUB_FOR_CHK_SERCH" AutoGenerateColumns="False" ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" SelectedIndex="0" EnableRowVirtualization="True" SelectionMode="Single" IsReadOnly="True" Margin="7,45,7,5" PreviewKeyDown="SUB_FOR_CHK_SERCH_PreviewKeyDown" FlowDirection="RightToLeft" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
                 <DataGridTextColumn x:Name="rADIFColumn" Binding="{Binding RADIF}" Header="ردیف" Width="Auto"/>
                 <DataGridTextColumn x:Name="n_SERIColumn" Binding="{Binding N_SERI}" Header="شماره سریال" Width="Auto"/>

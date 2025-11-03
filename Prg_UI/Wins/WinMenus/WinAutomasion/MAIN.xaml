@@ -115,7 +115,7 @@
                   VirtualizingPanel.VirtualizationMode="Recycling"
                   VirtualizingPanel.ScrollUnit="Pixel"
                   ScrollViewer.CanContentScroll="True"
-                  FlowDirection="RightToLeft" AutoGenerateColumns="False"  Margin="10,220,3,60" BorderThickness="1"  SelectionChanged="tASKSDataGrid_SelectionChanged" PreviewMouseLeftButtonUp="tASKSDataGrid_PreviewMouseLeftButtonUp" SelectionMode="Single"  PreviewKeyDown="tASKSDataGrid_PreviewKeyDown" IsKeyboardFocusWithinChanged="tASKSDataGrid_IsKeyboardFocusWithinChanged">
+                  FlowDirection="RightToLeft" AutoGenerateColumns="False"  Margin="10,220,3,60" BorderThickness="1"  SelectionChanged="tASKSDataGrid_SelectionChanged" PreviewMouseLeftButtonUp="tASKSDataGrid_PreviewMouseLeftButtonUp" SelectionMode="Single"  PreviewKeyDown="tASKSDataGrid_PreviewKeyDown" IsKeyboardFocusWithinChanged="tASKSDataGrid_IsKeyboardFocusWithinChanged" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                 <DataGrid.ItemsPanel>
                     <ItemsPanelTemplate>

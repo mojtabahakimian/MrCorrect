@@ -89,7 +89,7 @@
                     ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"           
                     HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
 					VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
-                    Margin="10,65,10,45" AutoGenerateColumns="False"  FlowDirection="RightToLeft" Loaded="DGR_ProcessBudget_Loaded" PreviewKeyDown="DGR_ProcessBudget_PreviewKeyDown">
+                    Margin="10,65,10,45" AutoGenerateColumns="False"  FlowDirection="RightToLeft" Loaded="DGR_ProcessBudget_Loaded" PreviewKeyDown="DGR_ProcessBudget_PreviewKeyDown" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="">
                     <DataGridTemplateColumn.CellTemplate>

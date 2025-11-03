@@ -33,7 +33,7 @@
                     Style="{StaticResource DATAGRIDSTYLISH}"
                     ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"           
                     HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
-					VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}" Margin="10,55,10,43" FlowDirection="RightToLeft" PreviewKeyDown="ResDGR1_PreviewKeyDown" AutoGenerateColumns="False" EnableRowVirtualization="True" RowDetailsVisibilityMode="VisibleWhenSelected" SelectedIndex="0" CanUserAddRows="False" IsReadOnly="True" BorderThickness="1">
+					VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}" Margin="10,55,10,43" FlowDirection="RightToLeft" PreviewKeyDown="ResDGR1_PreviewKeyDown" AutoGenerateColumns="False" EnableRowVirtualization="True" RowDetailsVisibilityMode="VisibleWhenSelected" SelectedIndex="0" CanUserAddRows="False" IsReadOnly="True" BorderThickness="1" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
                 <DataGridTextColumn x:Name="n_KOLColumn" Binding="{Binding N_KOL}" Header="کل" Width="auto"  MinWidth="50"/>
                 <DataGridTextColumn x:Name="nKOLColumn" Binding="{Binding NKOL}" Header="نام کل" Width="auto"  MinWidth="150"/>

@@ -121,7 +121,7 @@
                         KeyboardNavigation.TabNavigation="Contained"
                         ItemsSource="{Binding OTHER_DTL_DATA}"
                         Margin="5,275,5,10" d:ItemsSource="{d:SampleData}"
-                        AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" TabIndex="10" CellEditEnding="OTHER_DTL_SUB_SUB_CellEditEnding" PreviewKeyDown="OTHER_DTL_SUB_SUB_PreviewKeyDown" RowEditEnding="OTHER_DTL_SUB_SUB_RowEditEnding" CanUserDeleteRows="False" CanUserAddRows="False"  >
+                        AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" TabIndex="10" CellEditEnding="OTHER_DTL_SUB_SUB_CellEditEnding" PreviewKeyDown="OTHER_DTL_SUB_SUB_PreviewKeyDown" RowEditEnding="OTHER_DTL_SUB_SUB_RowEditEnding" CanUserDeleteRows="False" CanUserAddRows="False"   ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->
                 <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">

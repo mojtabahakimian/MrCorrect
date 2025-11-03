@@ -81,7 +81,7 @@
                   RowEditEnding="DG_MAIN_RowEditEnding"
                   CellEditEnding="DG_MAIN_CellEditEnding"
                   PreviewKeyDown="DG_MAIN_PreviewKeyDown"
-                  SelectionUnit="FullRow">
+                  SelectionUnit="FullRow" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                 
                 <DataGrid.Style>
                     <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">

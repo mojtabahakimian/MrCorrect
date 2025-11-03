@@ -152,7 +152,7 @@
                   SelectionChanged="CRM_MASTER_SUB_SelectionChanged"
                   CellEditEnding="CRM_MASTER_SUB_CellEditEnding"
                   InitializingNewItem="CRM_MASTER_SUB_InitializingNewItem"
-                  RowEditEnding="CRM_MASTER_SUB_RowEditEnding" PreviewKeyDown="CRM_MASTER_SUB_PreviewKeyDown">
+                  RowEditEnding="CRM_MASTER_SUB_RowEditEnding" PreviewKeyDown="CRM_MASTER_SUB_PreviewKeyDown" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Style>
                 <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                     <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>
@@ -264,7 +264,7 @@
                   IsEnabled="False" 
                   RowEditEnding="DETAIL_CRM_SUB_RowEditEnding" 
                   InitializingNewItem="DETAIL_CRM_SUB_InitializingNewItem" 
-                  PreviewKeyDown="DETAIL_CRM_SUB_PreviewKeyDown">
+                  PreviewKeyDown="DETAIL_CRM_SUB_PreviewKeyDown" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Style>
                 <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                     <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>

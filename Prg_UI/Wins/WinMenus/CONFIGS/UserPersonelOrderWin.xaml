@@ -45,7 +45,7 @@
                   PreviewMouseMove="DGPersonnel_PreviewMouseMove" 
                   DragOver="DGPersonnel_DragOver"
                   Loaded="DGPersonnel_Loaded"
-                  Drop="DGPersonnel_Drop" AllowDrop="True">
+                  Drop="DGPersonnel_Drop" AllowDrop="True" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
                     <Setter Property="Background" Value="Transparent"/>

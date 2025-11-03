@@ -45,7 +45,7 @@
                     ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"           
                     HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
 					VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
-                  AutoGenerateColumns="False" EnableRowVirtualization="True"  Margin="10,107,10,8" BorderThickness="1" >
+                  AutoGenerateColumns="False" EnableRowVirtualization="True"  Margin="10,107,10,8" BorderThickness="1"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
                 <DataGridTextColumn x:Name="cODEColumn" Binding="{Binding CODE}" Header="کدکالا" MinWidth="50" Width="auto"/>
                 <DataGridTextColumn x:Name="n_FANIColumn" Binding="{Binding N_FANI}" Header="شماره فنی" Width="auto"/>

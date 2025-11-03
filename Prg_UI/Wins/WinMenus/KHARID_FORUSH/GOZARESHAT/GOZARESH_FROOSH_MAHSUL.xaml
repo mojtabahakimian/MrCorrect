@@ -73,7 +73,7 @@
                                       SelectionUnit="FullRow" 
                                       IsReadOnly="True"
                                       CanUserDeleteRows="False"
-                                      Margin="4,0,4,66" BorderThickness="1" Height="257" VerticalAlignment="Bottom" >
+                                      Margin="4,0,4,66" BorderThickness="1" Height="257" VerticalAlignment="Bottom"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->
@@ -117,7 +117,7 @@
                                       FlowDirection="RightToLeft" 
                                       SelectionUnit="FullRow" 
                                       CanUserDeleteRows="False"
-                                      Margin="-1,51,10,0" BorderThickness="1" SelectionChanged="DEPART_SUB_SelectionChanged" Height="259" VerticalAlignment="Top" >
+                                      Margin="-1,51,10,0" BorderThickness="1" SelectionChanged="DEPART_SUB_SelectionChanged" Height="259" VerticalAlignment="Top"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->

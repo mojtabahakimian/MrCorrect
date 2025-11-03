@@ -64,7 +64,7 @@
                   CanUserDeleteRows="False"
                   KeyboardNavigation.TabNavigation="Contained"
                   IsKeyboardFocusWithinChanged="eVENTSDataGrid_IsKeyboardFocusWithinChanged"
-                  FlowDirection="RightToLeft" Margin="10,50" CellEditEnding="eVENTSDataGrid_CellEditEnding" RowEditEnding="eVENTSDataGrid_RowEditEnding" AddingNewItem="eVENTSDataGrid_AddingNewItem" SelectionChanged="eVENTSDataGrid_SelectionChanged" KeyDown="eVENTSDataGrid_KeyDown">
+                  FlowDirection="RightToLeft" Margin="10,50" CellEditEnding="eVENTSDataGrid_CellEditEnding" RowEditEnding="eVENTSDataGrid_RowEditEnding" AddingNewItem="eVENTSDataGrid_AddingNewItem" SelectionChanged="eVENTSDataGrid_SelectionChanged" KeyDown="eVENTSDataGrid_KeyDown" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->
