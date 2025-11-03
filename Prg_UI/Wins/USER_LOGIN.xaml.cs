@@ -367,8 +367,8 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 116; Baseknow.UUSER = "Mr.Salmani";
             //Baseknow.USERCOD = 102; Baseknow.UUSER = "mina mehrnia";
             //Baseknow.USERCOD = 108; Baseknow.UUSER = "modir-mali";
-            //Baseknow.USERCOD = 167; Baseknow.UUSER = "Mr nikonahad";
-            Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
+            Baseknow.USERCOD = 167; Baseknow.UUSER = "Mr nikonahad";
+            //Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
 
             CL_Generaly.SHIFT_OF_USER = 1;
             CL_Generaly.VAHED_OF_USER = 1;
@@ -377,10 +377,12 @@ namespace Prg_UI.Wins
             //new MAIN().Show();
             //new HEAD_LST_RASID_OTHER_WIN().Show();
             //new WIN_OPTIONS().Show();
-            new HAVALAH_ENTER(355).Show();
+            //new HEAD_LST_ENTEGHAL_WIN().Show();
+
+            //new WinBase().Show();
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "8949,8965");
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.TOTA_HES_SHEET_WIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_SAZMAN_MOSHAKHASAT, this);
 
 

@@ -1074,12 +1074,64 @@ namespace Wins.WinMenus.Taarif
             }
         }
 
+        private void DG_SUB_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            DataGrid dataGrid = sender as DataGrid;
+
+            if (dataGrid == null) return;
+
+            try
+            {
+                // اطمینان از فوکوس بودن DataGrid قبل از باز کردن Context Menu
+                if (!dataGrid.IsKeyboardFocusWithin)
+                {
+                    dataGrid.Focus();
+                }
+
+                // Find the row under the mouse
+                DependencyObject dep = (DependencyObject)e.OriginalSource;
+                while (dep != null && !(dep is DataGridRow))
+                {
+                    dep = VisualTreeHelper.GetParent(dep);
+                }
+
+                DataGridRow row = dep as DataGridRow;
+                if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
+                {
+
+                    if (dataGrid?.SelectedItems.Count <= 1)
+                    {
+                        // Select the row under the mouse
+                        dataGrid.SelectedItem = row.Item;
+                    }
+
+                    // تنظیم فوکوس روی سطر
+                    row.Focus();
+
+                    // Show the context menu
+                    dataGrid.ContextMenu.IsOpen = true;
+
+                    // Mark the event as handled to prevent the default context menu behavior
+                    e.Handled = true;
+                }
+                else
+                {
+                    dataGrid.ContextMenu.IsOpen = true;
+                    e.Handled = true;
+                }
+            }
+            catch (Exception)
+            {
+                e.Handled = true;
+            }
+        }
         private async void EXPORTEXCEL_BTN(object sender, RoutedEventArgs e)
         {
-            if (TDETA_HES3_DATA.Count == 0)
+            if (!TDETA_HES3_DATA.Any())
             {
                 return;
             }
+
             try
             {
                 await UniversalExcelExporter.ExportToExcelAsync(TDETA_HES3_DATA, "DGExportedExcel");
@@ -1088,6 +1140,72 @@ namespace Wins.WinMenus.Taarif
             {
                 new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
             }
+        }
+        private void DataGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var dataGrid = sender as DataGrid;
+            if (dataGrid == null)
+                return;
+
+            // پیدا کردن سطری که روی آن کلیک شده
+            var row = CL_LMethods.FindVisualParent<DataGridRow>(e.OriginalSource as DependencyObject);
+
+            if (row != null)
+            {
+                // انتخاب سطر
+                if (!row.IsSelected)
+                {
+                    row.IsSelected = true;
+                    dataGrid.SelectedItem = row.Item;
+                }
+
+                // تنظیم فوکوس روی سطر و DataGrid
+                row.Focus();
+
+                // اطمینان از اینکه DataGrid خودش هم فوکوس دارد
+                dataGrid.Focus();
+
+                // اگر سلول خاصی زیر موس است، آن را هم فوکوس کنیم
+                var cell = CL_LMethods.FindVisualParent<DataGridCell>(e.OriginalSource as DependencyObject);
+                if (cell != null)
+                {
+                    cell.Focus();
+                }
+            }
+            else
+            {
+                // اگر روی header یا جای دیگری کلیک شد، حداقل DataGrid را فوکوس کنیم
+                dataGrid.Focus();
+            }
+        }
+        private void DG_SUB_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            DataGrid? dg = sender as DataGrid;
+            if (dg == null) return;
+
+            // اطمینان از فوکوس بودن DataGrid
+            if (!dg.IsKeyboardFocusWithin)
+            {
+                dg.Focus();
+            }
+
+            if (dg.CurrentItem == null || dg.CurrentItem == CollectionView.NewItemPlaceholder)
+            {
+                e.Handled = true; // Cancel opening the menu. Avoids the crash.
+                return;
+            }
+            if (dg?.SelectedItem == null)
+            {
+                e.Handled = true;
+                return;
+            }
+            else if (dg?.ContextMenu == null)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            base.OnContextMenuOpening(e);
         }
     }
 }

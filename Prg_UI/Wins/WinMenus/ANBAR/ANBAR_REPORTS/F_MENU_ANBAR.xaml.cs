@@ -433,13 +433,30 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
             string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
+            var rawDate = DT2?.Text?.ToRawTarikh();
+            var anbarParam = string.IsNullOrWhiteSpace(MANBAR) ? "%" : MANBAR;
+            report["DATE_PARM"] = rawDate.ToStringNullSafe();
+            report["ANBAR_PARM"] = anbarParam.ToStringNullSafe();
 
-            report["DATE_PARM"] = DT2.Text.ToRawTarikh().ToString();
-            report["ANBAR_PARM"] = ANBAR.SelectedValue.ToString();
+            var displayedDate = DT2?.Text.ToStringNullSafe();
+            if (report.GetComponentByName("DATE_S") is StiText dateStart)
+            {
+                dateStart.Text = displayedDate;
+            }
+            if (report.GetComponentByName("DATE_F") is StiText dateEnd)
+            {
+                dateEnd.Text = displayedDate;
+            }
 
-            (report.GetComponentByName("DATE_S") as StiText).Text = DT2.Text.ToString();
-            (report.GetComponentByName("DATE_F") as StiText).Text = DT2.Text.ToString();
-            (report.GetComponentByName("ANBAR_F") as StiText).Text = ANBAR.Text.ToString();
+            var anbarDisplayName = ANBAR?.Text.ToStringNullSafe();
+            if (string.IsNullOrWhiteSpace(anbarDisplayName))
+            {
+                anbarDisplayName = "همه انبارها";
+            }
+            if (report.GetComponentByName("ANBAR_F") is StiText anbarText)
+            {
+                anbarText.Text = anbarDisplayName;
+            }
 
             //report["AZDATE"] = Baseknow.YEA + "0101";
             //report["ANBAR"] = ANBAR.SelectedValue.ToString();
@@ -459,6 +476,7 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
             //report.Render();
             //report.Show();
         }
+
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
