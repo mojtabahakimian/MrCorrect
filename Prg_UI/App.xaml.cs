@@ -742,7 +742,8 @@ namespace Prg_UI
 
         private void SetGeneralRdpMode()
         {
-            if (Prg_UI.Properties.Settings.Default.IsRDPMode) //SystemParameters.IsRemoteSession &&
+            var optionManager = new GeneralOptionManager();
+            if (optionManager.IsRDPMode) //SystemParameters.IsRemoteSession &&
             {
                 //// Reduce framerate universally
                 Timeline.DesiredFrameRateProperty.OverrideMetadata(typeof(Timeline), new FrameworkPropertyMetadata { DefaultValue = 15 });

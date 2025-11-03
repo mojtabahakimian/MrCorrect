@@ -9,11 +9,14 @@ namespace Wins.ThePages
 {
     public partial class PG_MYSETTINGS : Page
     {
+        private readonly GeneralOptionManager _optionManager;
+
         public PG_MYSETTINGS()
         {
             InitializeComponent();
 
-            RemoteModeTB.IsChecked = Convert.ToBoolean(Prg_UI.Properties.Settings.Default.IsRDPMode);
+            _optionManager = new GeneralOptionManager();
+            RemoteModeTB.IsChecked = _optionManager.IsRDPMode;
         }
 
         private void BackerBtn_Click(object sender, RoutedEventArgs e)
@@ -51,8 +54,7 @@ namespace Wins.ThePages
 
         private void RemoteModeTB_Click(object sender, RoutedEventArgs e)
         {
-            Prg_UI.Properties.Settings.Default.IsRDPMode = Convert.ToBoolean(RemoteModeTB.IsChecked);
-            Prg_UI.Properties.Settings.Default.Save();
+            _optionManager.IsRDPMode = Convert.ToBoolean(RemoteModeTB.IsChecked);
         }
 
         private void Image_PreviewMouseDown_3(object sender, MouseButtonEventArgs e)

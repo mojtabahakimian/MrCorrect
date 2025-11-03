@@ -12,10 +12,127 @@ namespace Prg_UI.Functions
     public class GeneralOptionManager
     {
         private readonly CL_CCNNMANAGER _dbms;
+        private static bool? _cachedIsRDPMode;
+        private static readonly object _lockObject = new object();
+        private const string RDP_MODE_OPTION_NAME = "IsRDPMode";
 
         public GeneralOptionManager()
         {
             _dbms = new CL_CCNNMANAGER();
+        }
+
+        /// <summary>
+        /// مقدار IsRDPMode را از کش یا دیتابیس دریافت می‌کند.
+        /// </summary>
+        public bool IsRDPMode
+        {
+            get
+            {
+                if (_cachedIsRDPMode.HasValue)
+                {
+                    return _cachedIsRDPMode.Value;
+                }
+
+                // اگر کش نشده باشد، از دیتابیس بخوانیم
+                var task = GetOptionAsync(RDP_MODE_OPTION_NAME);
+                task.Wait();
+                var option = task.Result;
+
+                bool value = false;
+                if (option != null && !string.IsNullOrWhiteSpace(option.OptionValue))
+                {
+                    bool.TryParse(option.OptionValue, out value);
+                }
+
+                lock (_lockObject)
+                {
+                    _cachedIsRDPMode = value;
+                }
+
+                return value;
+            }
+            set
+            {
+                lock (_lockObject)
+                {
+                    _cachedIsRDPMode = value;
+                }
+
+                // ذخیره در دیتابیس به صورت async
+                var option = new GENERAL_OPTIONS
+                {
+                    OptionName = RDP_MODE_OPTION_NAME,
+                    OptionValue = value.ToString(),
+                    Description = "Remote Desktop Performance Mode - حالت بهینه‌سازی عملکرد برای Remote Desktop"
+                };
+
+                var task = SaveOptionAsync(option);
+                task.Wait();
+            }
+        }
+
+        /// <summary>
+        /// مقدار IsRDPMode را به صورت async دریافت می‌کند.
+        /// </summary>
+        public async Task<bool> GetIsRDPModeAsync()
+        {
+            if (_cachedIsRDPMode.HasValue)
+            {
+                return _cachedIsRDPMode.Value;
+            }
+
+            var option = await GetOptionAsync(RDP_MODE_OPTION_NAME);
+            bool value = false;
+            if (option != null && !string.IsNullOrWhiteSpace(option.OptionValue))
+            {
+                bool.TryParse(option.OptionValue, out value);
+            }
+
+            lock (_lockObject)
+            {
+                _cachedIsRDPMode = value;
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// مقدار IsRDPMode را به صورت async ذخیره می‌کند.
+        /// </summary>
+        public async Task<bool> SetIsRDPModeAsync(bool value)
+        {
+            lock (_lockObject)
+            {
+                _cachedIsRDPMode = value;
+            }
+
+            var option = new GENERAL_OPTIONS
+            {
+                OptionName = RDP_MODE_OPTION_NAME,
+                OptionValue = value.ToString(),
+                Description = "Remote Desktop Performance Mode - حالت بهینه‌سازی عملکرد برای Remote Desktop"
+            };
+
+            return await SaveOptionAsync(option);
+        }
+
+        /// <summary>
+        /// تنظیمات کلی را از دیتابیس بارگذاری و کش می‌کند. این متد باید در ابتدای برنامه فراخوانی شود.
+        /// </summary>
+        public async Task InitializeAsync()
+        {
+            await GetIsRDPModeAsync();
+        }
+
+        /// <summary>
+        /// کش تنظیمات را پاک می‌کند.
+        /// </summary>
+        public static void ClearCache()
+        {
+            lock (_lockObject)
+            {
+                _cachedIsRDPMode = null;
+            }
         }
 
         /// <summary>
