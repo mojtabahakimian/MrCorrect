@@ -7,6 +7,7 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Syncfusion.Windows.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -330,7 +331,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         }
 
-        public bool DATE_IS_VALID(string DATE, bool DisplayMsg = false)
+        public bool DATE_IS_VALID(string DATE, bool DisplayMsg = false, bool ForceSynce = true)
         {
             bool Date_Is_Valid = true;
 
@@ -346,7 +347,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 }
                 else
                 {
-                    if (!Tarikh.IsSyncedDateNow(date_n_val, (bool)Baseknow.CTL_DT))
+                    if (ForceSynce && !Tarikh.IsSyncedDateNow(date_n_val, (bool)Baseknow.CTL_DT))
                     {
                         if (DisplayMsg)
                         {
@@ -386,7 +387,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ پرداخت صحیح نیست" });
             }
-            if (!DATE_IS_VALID(DATE_S.Text.ToRawTarikh()))
+            if (!DATE_IS_VALID(DATE_S.Text.ToRawTarikh(), default, false))
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ سررسید صحیح نیست" });
             }
@@ -495,7 +496,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 {
                     new Msgwin(false, "اطلاعات تکراری است").ShowDialog(); return;
                 }
-              
+
 
 
                 (THE_WIN as PGET_HED).CmdSaveRecord(((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST));
@@ -638,10 +639,13 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         {
             if (!IsVisible || !IsLoaded || isClosing) { return; }
 
-            if (SAYADI.Text.Length < 16 && SAYADI.Text != "0")
+            if (!string.IsNullOrWhiteSpace(SAYADI.Text))
             {
-                Msgwin msgwin = new Msgwin(false, "شماره صیادی نباید کمتر از 16 رقم باشد.");
-                msgwin.ShowDialog();
+                if (SAYADI.Text.Length < 16 && SAYADI.Text != "0")
+                {
+                    Msgwin msgwin = new Msgwin(false, "شماره صیادی نباید کمتر از 16 رقم باشد.");
+                    msgwin.ShowDialog();
+                }
             }
         }
 

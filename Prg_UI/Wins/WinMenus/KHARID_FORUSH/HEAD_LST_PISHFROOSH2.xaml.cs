@@ -417,6 +417,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                     if (!CL_HESABDARI.LETSGO("elamghe"))
                     {
+                        //اجازه اصلاح اعلامیه قیمت را ندارد
                         this.PEPID.IsEnabled = false; //Locked = true;
                         this.PEID.IsEnabled = false; //Locked = true;
                     }
@@ -2860,7 +2861,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 this.PEID.Visibility = Visibility.Visible;
                 this.ETAKHF_LABEL.Visibility = Visibility.Visible;
 
-                if (CL_HESABDARI.LETSGO("elamghe"))
+                if (CL_HESABDARI.LETSGO("elamghe")) //بتواند اعلمایه قیمیت را اصلاح کند
                 {
                     this.PEPID.IsEnabled = true; //Locked = true;
                     this.PEID.IsEnabled = true; //Locked = true;

@@ -347,10 +347,7 @@ namespace Wins.WinMenus.ANBAR
         {
             NUMBER.IsEnabled = true;
             ANBAR.IsEnabled = true;
-            if (ANBAR.SelectedValue == null && _newrecord)
-            {
-                ANBARF.IsEnabled = true;
-            }
+            ANBARF.IsEnabled = true;
             FNUMCO.IsEnabled = true;
             DATE_N.IsEnabled = true;
             USER_NAME.IsEnabled = true;
@@ -404,7 +401,7 @@ namespace Wins.WinMenus.ANBAR
             INVO_LST_ENTEGHAL_SUB.IsReadOnly = true;
 
             I_AM_HEAD_ENTEGHAL = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
-            Fill_ComboBoxes();
+            FILL_ALL_COMBOBOXES();
             DataGrid_On_Current();
             Form_Load();
             USER_NAME.Text = CL_HESABDARI.UCurrentUser().ToString();
@@ -453,6 +450,118 @@ namespace Wins.WinMenus.ANBAR
             DATE_N.Focus();
             DATE_N.SelectAll();
         }
+        private void FILL_ALL_COMBOBOXES()
+        {
+            string sql = @"
+               SELECT sd.SAL_NAME, sd.PSAL_NAME, sd.GRSAL, sd.ENABL, sd.IDD
+               FROM SALA_DTL sd
+               LEFT JOIN USER_PERSONEL_ORDER uo 
+                    ON sd.IDD = uo.PERSONEL_ID AND uo.USER_ID = @UserId
+               WHERE sd.ENABL = 0
+               ORDER BY
+                    CASE WHEN uo.SORT_ORDER IS NULL THEN 1 ELSE 0 END,
+                    uo.SORT_ORDER, sd.SAL_NAME";
+            rst_personel = dbms.DoGetDataSQL<COMBOPERSONEL>(sql, new { UserId = Baseknow.USERCOD }).ToList();
+            foreach (var item_person in rst_personel)
+                item_person.SAL_NAME = CL_HESABDARI.DECODEUN(item_person.SAL_NAME);
+
+            PERSONEL.ItemsSource = rst_personel;
+            PERSONEL.DisplayMemberPath = "SAL_NAME";
+            PERSONEL.SelectedValuePath = "IDD";
+
+            //ANBAR.ItemsSource = dbms.DoGetDataSQL<HLE_QT>("SELECT TCOD_ANBAR.CODE, TCOD_ANBAR.NAMES, OPANBACCESS.USERCO FROM  dbo.TCOD_ANBAR INNER JOIN  dbo.OPANBACCESS ON dbo.TCOD_ANBAR.CODE = dbo.OPANBACCESS.ANBCO WHERE (OPANBACCESS.USERCO = " + Baseknow.USERCOD + " ) ORDER BY TCOD_ANBAR.CODE").ToList();
+            //ANBAR.SelectedValuePath = "CODE";
+            //ANBAR.DisplayMemberPath = "NAMES";
+
+            // پر کردن ComboBox از انبار با توجه به انبارهایی که کاربر دسترسی دارد
+            // فقط در حالت New Record
+            LoadAndSetAnbarComboBox(ANBAR, null);
+
+            // ANBARF در ابتدا خالی است تا کاربر ANBAR را انتخاب کند
+            ANBARF.ItemsSource = null;
+            ANBARF.SelectedValuePath = "CODE";
+            ANBARF.DisplayMemberPath = "NAMES";
+
+            VAHED_K_COLUMN.ItemsSource = dbms.DoGetDataSQL<HLE_QT6>("SELECT CODE AS VAHED,NAMES FROM dbo.TCOD_VAHEDS").ToList();
+        }
+
+        #region ANBAR_MANAGEMENT
+        // 1. ابتدا یک متد Helper برای چک کردن دسترسی به انبار اضافه کنید:
+        private bool HasAccessToAnbar(int anbarCode)
+        {
+            var result = dbms.DoGetDataSQL<int?>(
+                $"SELECT COUNT(*) FROM dbo.OPANBACCESS WHERE USERCO = {Baseknow.USERCOD} AND ANBCO = {anbarCode}"
+            ).FirstOrDefault();
+
+            return result.HasValue && result.Value > 0;
+        }
+
+        // 2. متد Helper برای گرفتن اطلاعات انبار از دیتابیس
+        private HLE_QT GetAnbarInfo(int anbarCode)
+        {
+            var anbarInfo = dbms.DoGetDataSQL<HLE_QT>(
+                $"SELECT CODE, NAMES, NULL AS USERCO FROM dbo.TCOD_ANBAR WHERE CODE = {anbarCode}"
+            ).FirstOrDefault();
+
+            return anbarInfo;
+        }
+
+        // 3. متد Helper برای Load کردن و تنظیم ComboBox با توجه به دسترسی
+        private void LoadAndSetAnbarComboBox(ComboBox comboBox, int? savedAnbarCode, int? excludeAnbarCode = null)
+        {
+            // Query اصلی برای انبارهایی که کاربر دسترسی دارد
+            string query = "SELECT TCOD_ANBAR.CODE, TCOD_ANBAR.NAMES, OPANBACCESS.USERCO " +
+                           "FROM dbo.TCOD_ANBAR " +
+                           "INNER JOIN dbo.OPANBACCESS ON dbo.TCOD_ANBAR.CODE = dbo.OPANBACCESS.ANBCO " +
+                           "WHERE OPANBACCESS.USERCO = " + Baseknow.USERCOD;
+
+            // اگر باید انباری را exclude کنیم (مثلاً برای ANBARF که نباید مساوی ANBAR باشد)
+            if (excludeAnbarCode.HasValue)
+            {
+                query += $" AND TCOD_ANBAR.CODE <> {excludeAnbarCode.Value}";
+            }
+
+            query += " ORDER BY TCOD_ANBAR.CODE";
+
+            var anbarList = dbms.DoGetDataSQL<HLE_QT>(query).ToList();
+
+            // بررسی: آیا انبار ذخیره شده در دیتابیس است و کاربر به آن دسترسی ندارد؟
+            if (savedAnbarCode.HasValue && !HasAccessToAnbar(savedAnbarCode.Value))
+            {
+                // انبار را از دیتابیس بگیریم
+                var missingAnbar = GetAnbarInfo(savedAnbarCode.Value);
+
+                if (missingAnbar != null)
+                {
+                    // اضافه کردن علامت "قفل" یا هشدار به نام انبار
+                    missingAnbar.NAMES = "🔒 " + missingAnbar.NAMES; // + " (دسترسی محدود)";
+
+                    // اضافه کردن به ابتدای لیست
+                    anbarList.Insert(0, missingAnbar);
+
+                    // غیرفعال کردن ComboBox تا کاربر نتواند تغییر دهد
+                    comboBox.IsEnabled = false;
+                    comboBox.ToolTip = "شما به این انبار دسترسی ندارید و نمی‌توانید آن را تغییر دهید";
+                }
+            }
+            else
+            {
+                // اگر دسترسی دارد، ComboBox را فعال نگه دارید
+                comboBox.IsEnabled = true;
+                comboBox.ToolTip = null;
+            }
+
+            comboBox.ItemsSource = anbarList;
+            comboBox.SelectedValuePath = "CODE";
+            comboBox.DisplayMemberPath = "NAMES";
+
+            // تنظیم مقدار انتخاب شده
+            if (savedAnbarCode.HasValue)
+            {
+                comboBox.SelectedValue = savedAnbarCode.Value;
+            }
+        }
+        #endregion
 
         private void OnCurrentRecordChanged(HEAD_LST HEADER_FAC)
         {
@@ -487,15 +596,28 @@ namespace Wins.WinMenus.ANBAR
                     //N_S.Text = HEADER_FAC.N_S.ToStringNullSafe();//شماره سند
                     GetSanadsNums(HEADER_FAC.N_S);
 
-                    ANBAR.SelectedValue = HEADER_FAC.ANBAR.ToStringNullSafe();//از انبار
+                    //ANBAR.SelectedValue = HEADER_FAC.ANBAR.ToStringNullSafe();//از انبار
 
+                    //if (ANBAR.SelectedValue != null)
+                    //{
+                    //    ANBARF.ItemsSource = dbms.DoGetDataSQL<HLE_QT>("SELECT TCOD_ANBAR.CODE, TCOD_ANBAR.NAMES, OPANBACCESS.USERCO FROM  dbo.TCOD_ANBAR INNER JOIN  dbo.OPANBACCESS ON dbo.TCOD_ANBAR.CODE = dbo.OPANBACCESS.ANBCO WHERE (OPANBACCESS.USERCO = " + Baseknow.USERCOD + " ) and (TCOD_ANBAR.CODE <> " + ANBAR.SelectedValue + ")  ORDER BY TCOD_ANBAR.CODE").ToList();
+                    //    ANBARF.SelectedValuePath = "CODE";
+                    //    ANBARF.DisplayMemberPath = "NAMES";
+                    //    ANBARF.SelectedValue = HEADER_FAC.ANBARF.ToStringNullSafe();//از انبار
+                    //}
+
+                    // تنظیم انبار مبدا (ANBAR)
+                    int? anbarCode = HEADER_FAC.ANBAR;
+                    LoadAndSetAnbarComboBox(ANBAR, anbarCode);
+
+                    // تنظیم انبار مقصد (ANBARF) - باید غیر از انبار مبدا باشد
                     if (ANBAR.SelectedValue != null)
                     {
-                        ANBARF.ItemsSource = dbms.DoGetDataSQL<HLE_QT>("SELECT TCOD_ANBAR.CODE, TCOD_ANBAR.NAMES, OPANBACCESS.USERCO FROM  dbo.TCOD_ANBAR INNER JOIN  dbo.OPANBACCESS ON dbo.TCOD_ANBAR.CODE = dbo.OPANBACCESS.ANBCO WHERE (OPANBACCESS.USERCO = " + Baseknow.USERCOD + " ) and (TCOD_ANBAR.CODE <> " + ANBAR.SelectedValue + ")  ORDER BY TCOD_ANBAR.CODE").ToList();
-                        ANBARF.SelectedValuePath = "CODE";
-                        ANBARF.DisplayMemberPath = "NAMES";
-                        ANBARF.SelectedValue = HEADER_FAC.ANBARF.ToStringNullSafe();//از انبار
+                        int? anbarfCode = HEADER_FAC.ANBARF;
+                        int excludeCode = Convert.ToInt32(ANBAR.SelectedValue);
+                        LoadAndSetAnbarComboBox(ANBARF, anbarfCode, excludeCode);
                     }
+
 
                     TAH.Text = HEADER_FAC.TAH.ToStringNullSafe();//از انبار
                     MOLAH.Text = HEADER_FAC.MOLAH.ToStringNullSafe();//از انبار
@@ -572,6 +694,7 @@ namespace Wins.WinMenus.ANBAR
             var CURRENT_HEADER = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {TAG}").FirstOrDefault();
             _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
         }
+
 
         public bool DATE_IS_VALID(bool DisplayMsg = false)
         {
@@ -660,7 +783,16 @@ namespace Wins.WinMenus.ANBAR
                 return;
             }
 
-            bool AnbarsAreSame = _navigationManager.CurrentRecord.ANBAR == Convert.ToInt32(ANBAR.SelectedValue) && _navigationManager.CurrentRecord.ANBARF == Convert.ToInt32(ANBARF.SelectedValue);
+            bool AnbarsAreSame = true;
+
+            if (_navigationManager?.CurrentRecord?.ANBAR != null)
+            {
+                AnbarsAreSame = _navigationManager.CurrentRecord.ANBAR == Convert.ToInt32(ANBAR.SelectedValue);
+            }
+            if (_navigationManager?.CurrentRecord?.ANBARF != null)
+            {
+                AnbarsAreSame = _navigationManager.CurrentRecord.ANBARF == Convert.ToInt32(ANBARF.SelectedValue);
+            }
 
             var rst = dbms.DoGetDataSQL<INVO_LST_FACTOR22>("SELECT INVO_LST.NUMBER, INVO_LST.TAG, INVO_LST.ANBAR, INVO_LST.RADIF, INVO_LST.CODE, INVO_LST.MEGH, INVO_LST.MEGHk, INVO_LST.MEGH_MAR, INVO_LST.MANDAH, INVO_LST.MABL, INVO_LST.MABL_K, INVO_LST.FROM_A, INVO_LST.N_RASID, INVO_LST.MEGH_R, INVO_LST.RADAH, INVO_LST.SANAD_NO, INVO_LST.CUST_NO, INVO_LST.ANBARF, INVO_LST.VAHED_K FROM INVO_LST WHERE ((INVO_LST.NUMBER = " + this.NUMBER.Text + ") AND ((INVO_LST.TAG)=5))").ToList();
             if (!AnbarsAreSame)
@@ -765,7 +897,15 @@ namespace Wins.WinMenus.ANBAR
 
             var min = default(double);
 
-            bool AnbarsAreSame = _navigationManager.CurrentRecord.ANBAR == Convert.ToInt32(ANBAR.SelectedValue) && _navigationManager.CurrentRecord.ANBARF == Convert.ToInt32(ANBARF.SelectedValue);
+            bool AnbarsAreSame = true;
+            if (_navigationManager?.CurrentRecord?.ANBAR != null)
+            {
+                AnbarsAreSame = _navigationManager.CurrentRecord.ANBAR == Convert.ToInt32(ANBAR.SelectedValue);
+            }
+            if (_navigationManager?.CurrentRecord?.ANBARF != null)
+            {
+                AnbarsAreSame = _navigationManager.CurrentRecord.ANBARF == Convert.ToInt32(ANBARF.SelectedValue);
+            }
 
             var rst = dbms.DoGetDataSQL<INVO_LST_FACTOR22>("SELECT INVO_LST.NUMBER,INVO_LST.TAG,INVO_LST.ANBAR,INVO_LST.RADIF,INVO_LST.CODE,INVO_LST.MEGH,INVO_LST.MEGHk,INVO_LST.MEGH_MAR,INVO_LST.MANDAH,INVO_LST.MABL,INVO_LST.MABL_K,INVO_LST.FROM_A,INVO_LST.N_RASID,INVO_LST.MEGH_R,INVO_LST.RADAH,INVO_LST.SANAD_NO,INVO_LST.CUST_NO,INVO_LST.ANBARF,INVO_LST.VAHED_K FROM INVO_LST WHERE ((INVO_LST.NUMBER = " + this.NUMBER.Text + ") AND ((INVO_LST.TAG)=5))").ToList();
             if (!AnbarsAreSame && rst.Count > 0)
@@ -853,31 +993,6 @@ namespace Wins.WinMenus.ANBAR
             }
         }
 
-        private void Fill_ComboBoxes()
-        {
-            string sql = @"
-               SELECT sd.SAL_NAME, sd.PSAL_NAME, sd.GRSAL, sd.ENABL, sd.IDD
-               FROM SALA_DTL sd
-               LEFT JOIN USER_PERSONEL_ORDER uo 
-                    ON sd.IDD = uo.PERSONEL_ID AND uo.USER_ID = @UserId
-               WHERE sd.ENABL = 0
-               ORDER BY
-                    CASE WHEN uo.SORT_ORDER IS NULL THEN 1 ELSE 0 END,
-                    uo.SORT_ORDER, sd.SAL_NAME";
-            rst_personel = dbms.DoGetDataSQL<COMBOPERSONEL>(sql, new { UserId = Baseknow.USERCOD }).ToList();
-            foreach (var item_person in rst_personel)
-                item_person.SAL_NAME = CL_HESABDARI.DECODEUN(item_person.SAL_NAME);
-
-            PERSONEL.ItemsSource = rst_personel;
-            PERSONEL.DisplayMemberPath = "SAL_NAME";
-            PERSONEL.SelectedValuePath = "IDD";
-
-            ANBAR.ItemsSource = dbms.DoGetDataSQL<HLE_QT>("SELECT TCOD_ANBAR.CODE, TCOD_ANBAR.NAMES, OPANBACCESS.USERCO FROM  dbo.TCOD_ANBAR INNER JOIN  dbo.OPANBACCESS ON dbo.TCOD_ANBAR.CODE = dbo.OPANBACCESS.ANBCO WHERE (OPANBACCESS.USERCO = " + Baseknow.USERCOD + " ) ORDER BY TCOD_ANBAR.CODE").ToList();
-            ANBAR.SelectedValuePath = "CODE";
-            ANBAR.DisplayMemberPath = "NAMES";
-
-            VAHED_K_COLUMN.ItemsSource = dbms.DoGetDataSQL<HLE_QT6>("SELECT CODE AS VAHED,NAMES FROM dbo.TCOD_VAHEDS").ToList();
-        }
 
         private void SGN1_Click(object sender, RoutedEventArgs e)
         {
@@ -2207,6 +2322,23 @@ namespace Wins.WinMenus.ANBAR
                 msgwin.ShowDialog();
                 return;
             }
+
+            // بررسی دسترسی قبل از ذخیره
+            if (ANBAR.SelectedValue != null && !HasAccessToAnbar(Convert.ToInt32(ANBAR.SelectedValue)))
+            {
+                var selectedAnbar = ANBAR.SelectedItem as HLE_QT;
+                string anbarName = selectedAnbar?.NAMES ?? "";
+                new Msgwin(false, $"شما به انبار مبدا «{anbarName}» دسترسی ندارید").ShowDialog();
+                return;
+            }
+            if (ANBARF.SelectedValue != null && !HasAccessToAnbar(Convert.ToInt32(ANBARF.SelectedValue)))
+            {
+                var selectedAnbar = ANBARF.SelectedItem as HLE_QT;
+                string anbarName = selectedAnbar?.NAMES ?? "";
+                new Msgwin(false, $"شما به انبار مقصد «{anbarName}» دسترسی ندارید").ShowDialog();
+                return;
+            }
+
             Form_BeforeUpdate();
             #endregion
 
@@ -2919,7 +3051,7 @@ namespace Wins.WinMenus.ANBAR
 
             if (ANBARF.SelectedValue is null)
             {
-                universControl.PopNotifyShow("به انبار نمیتواند خالی باشد!", Pop1, Pop1Text1, Pop_Border1);
+                //universControl.PopNotifyShow("به انبار نمیتواند خالی باشد!", Pop1, Pop1Text1, Pop_Border1);
                 return;
             }
 
@@ -3076,8 +3208,20 @@ namespace Wins.WinMenus.ANBAR
 
             USER_NAME.Text = Baseknow.UUSER;
 
-            ANBAR.SelectedValue = null; ANBAR.Items.Refresh();
-            ANBARF.SelectedValue = null; ANBARF.Items.Refresh();
+            //ANBAR.SelectedValue = null; ANBAR.Items.Refresh();
+            //ANBARF.SelectedValue = null; ANBARF.Items.Refresh();
+
+            // فعال کردن مجدد ComboBoxها
+            ANBAR.IsEnabled = true;
+            ANBAR.ToolTip = null;
+            ANBAR.SelectedValue = null;
+            ANBAR.Items.Refresh();
+
+            ANBARF.IsEnabled = true;
+            ANBARF.ToolTip = null;
+            ANBARF.SelectedValue = null;
+            ANBARF.Items.Refresh();
+
             TAH.Text = null;
             MOLAH.Text = null;
 
@@ -3131,15 +3275,5 @@ namespace Wins.WinMenus.ANBAR
 
         }
 
-        private void ANBAR_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (ANBAR.SelectedValue != null)
-            {
-                if (AllowEdits)
-                {
-                    ANBARF.IsEnabled = true;
-                }
-            }
-        }
     }
 }

@@ -7,7 +7,7 @@
       mc:Ignorable="d" 
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       FontFamily="{StaticResource IRANYEKAN}" d:DesignWidth="800"
-      Title="" Height="1219">
+      Title="">
     <Page.Resources>
         <Storyboard x:Key="OnMouseCome">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)">
@@ -123,149 +123,139 @@
 
         <!--HEADER-->
 
-        <ScrollViewer FlowDirection="RightToLeft" Margin="50,35,50,20" VerticalScrollBarVisibility="Auto">
-            <ItemsControl>
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel/>
-                        <!--MotherbasePanel-->
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-
-                <StackPanel FlowDirection="RightToLeft" Orientation="Vertical" >
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+        <ScrollViewer FlowDirection="RightToLeft" Margin="40" VerticalScrollBarVisibility="Auto">
+            <StackPanel FlowDirection="RightToLeft" Orientation="Vertical" Height="auto">
+                <!-- اولین ستاک پنل -->
+                <StackPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorAmalkardReport.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
-                        <Label Content="گزارش عملکرد ویزیتورها" Foreground="#DDFFFFFF" Height="27"/>
+                        <Label Content="گزارش عملکرد ویزیتورها" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_1">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorReturnKalaByMonth.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
-                        <Label Content="گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در ماه فروش)" Foreground="#DDFFFFFF" Height="27"/>
+                        <Label Content="گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در ماه فروش)" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_2">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorKalaAmalkardByMonth.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
-                        <Label Content="گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در تاریخ برگشت)" Foreground="#DDFFFFFF" Height="27"/>
+                        <Label Content="گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در تاریخ برگشت)" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_3">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorsListByFactor.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
-                        <Label Content="لیست ویزیتور ها و پورسانت به تفکیک فاکتور" Foreground="#DDFFFFFF" Height="27"/>
+                        <Label Content="لیست ویزیتور ها و پورسانت به تفکیک فاکتور" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_4">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorSellListByFactor.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
-                        <Label Content="لیست فروش ویزیتور به تفکیک فاکتور" Foreground="#DDFFFFFF" Height="27"/>
+                        <Label Content="لیست فروش ویزیتور به تفکیک فاکتور" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_5">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/KalaListPrint.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
-                        <Label Content="چاپ لیست کالا ها جهت ویزیت" Foreground="#DDFFFFFF" Height="27"/>
+                        <Label Content="چاپ لیست کالا ها جهت ویزیت" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_12" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitWayForCustomers.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
-                        <Label Content="تعریف مسیر ویزیت برای مشتریان" Foreground="#DDFFFFFF" Height="27"/>
+                        <Label Content="تعریف مسیر ویزیت برای مشتریان" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_11" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/DailyVistForVisitor.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
-                        <Label Content="تعریف ویزیت روزانه برای ویزیتور" Foreground="#DDFFFFFF" Height="27"/>
+                        <Label Content="تعریف ویزیت روزانه برای ویزیتور" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </WrapPanel>
-
-
                 </StackPanel>
-
-                <StackPanel FlowDirection="RightToLeft" Orientation="Vertical">
-
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                <!-- دومین ستاک پنل -->
+                <StackPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/PoorsantForVisitor.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
-                        <Label Content="تعریف پورسانت برای ویزیتور ها" Foreground="#DDFFFFFF" Height="27"/>
+                        <Label Content="تعریف پورسانت برای ویزیتور ها" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </WrapPanel>
 
-
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_6">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorAmalkard.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
-                        <TextBlock Text="مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه" TextWrapping="WrapWithOverflow" Foreground="#DDFFFFFF" Height="27"/>
+                        <TextBlock Text="مشاهده عملکرد (اهداف) هر ویزیتور به تفکیک ماه" TextWrapping="WrapWithOverflow" Foreground="#DDFFFFFF" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_9">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorAmalkard.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
-                        <TextBlock Text="مشاهده عملکرد (اهداف) ویزیتور به تفکیک ماه بر اساس گروه  " TextWrapping="WrapWithOverflow" Foreground="#DDFFFFFF" Height="27"/>
+                        <TextBlock Text="مشاهده عملکرد (اهداف) ویزیتور به تفکیک ماه بر اساس گروه" TextWrapping="WrapWithOverflow" Foreground="#DDFFFFFF" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_7">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorAmalkardReturnByMonth.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
-                        <Label Content="مشاهده عملکرد (اهداف) ویزیتور به تفکیک ماه بر اساس گروه (در تاریخ برگشت)" Foreground="#DDFFFFFF" Height="27"/>
+                        <Label Content="مشاهده عملکرد (اهداف) ویزیتور به تفکیک ماه بر اساس گروه (در تاریخ برگشت)" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorOnMap.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
-                        <Label Content="مشاهده مسیر حرکت ویزیتور روی نقشه" Foreground="#DDFFFFFF" Height="27"/>
+                        <Label Content="مشاهده مسیر حرکت ویزیتور روی نقشه" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_8">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/GroupVisitorAmalkardByMonthReturn.png" CacheOption="OnLoad"/>
                             </Image.Source>
                         </Image>
-                        <Label Content="مشاهده عملکرد (اهداف) هرویزیتور به تفکیک ماه (در تاریخ برگشت)" Foreground="#DDFFFFFF" Height="27"/>
+                        <Label Content="مشاهده عملکرد (اهداف) هرویزیتور به تفکیک ماه (در تاریخ برگشت)" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseDown="Image_PreviewMouseDown_10" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/HandList.png" CacheOption="OnLoad"/>
@@ -275,8 +265,7 @@
                     </WrapPanel>
 
                 </StackPanel>
-
-            </ItemsControl>
+            </StackPanel>
         </ScrollViewer>
     </Grid>
 </Page>

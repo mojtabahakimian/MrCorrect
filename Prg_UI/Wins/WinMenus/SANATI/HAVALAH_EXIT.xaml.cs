@@ -428,7 +428,11 @@ namespace Wins.WinMenus.SANATI
                 USER_NAME.Text = HEADER_FAC.USER_NAME.ToStringNullSafe(); //کاربر
 
                 FNUMCO.Text = string.IsNullOrEmpty(HEADER_FAC?.FNUMCO.ToStringNullSafe()) ? "0" : HEADER_FAC?.FNUMCO.ToStringNullSafe(); //شماره داخلی
-                DEPATMAN.SelectedValue = HEADER_FAC.DEPATMAN; DEPATMAN.Items.Refresh(); //واحد
+
+                if (HEADER_FAC.DEPATMAN != null)
+                {
+                    DEPATMAN.SelectedValue = HEADER_FAC.DEPATMAN; DEPATMAN.Items.Refresh(); //واحد
+                }
 
                 string thevalue = HEADER_FAC.CUST_NO;
                 var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + thevalue + "'").FirstOrDefault();

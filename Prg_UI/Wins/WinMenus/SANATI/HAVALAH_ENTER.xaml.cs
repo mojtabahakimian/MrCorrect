@@ -470,7 +470,10 @@ namespace Wins.WinMenus.SANATI
                     CUST_NO.Items.Refresh();
                 }
 
-                DEPATMAN.SelectedValue = HEADER_FAC.DEPATMAN; DEPATMAN.Items.Refresh(); //واحد
+                if (HEADER_FAC.DEPATMAN != null)
+                {
+                    DEPATMAN.SelectedValue = HEADER_FAC.DEPATMAN; DEPATMAN.Items.Refresh(); //واحد
+                }
 
                 OKF.IsChecked = HEADER_FAC.OKF; //تایید فاکتور
                 MOLAH.Text = HEADER_FAC.MOLAH; //ملاحظات
