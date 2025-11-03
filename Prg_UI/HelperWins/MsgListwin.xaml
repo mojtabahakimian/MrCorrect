@@ -57,7 +57,7 @@
 
         <!--JustOKCancelEnd-->
         <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="95,56,0,0"  Width="1"/>
-        <DataGrid x:Name="MSG_DGLISTBOX" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" FlowDirection="RightToLeft" Margin="30,50,20,69">
+        <DataGrid x:Name="MSG_DGLISTBOX" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" FlowDirection="RightToLeft" Margin="30,50,20,69" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="ردیف" Binding="{Binding ROW_U}" Width="auto">
                     <!--<DataGridTextColumn.CellStyle>

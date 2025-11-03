@@ -191,7 +191,7 @@
                     HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                     VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                     ItemsSource = "{Binding SANAD_DATA}"
-                    FlowDirection="RightToLeft" EnableRowVirtualization="True" Margin="9,4,9,45" CanUserDeleteRows="False" PreviewKeyDown="SANAD_DETAIL_PreviewKeyDown">
+                    FlowDirection="RightToLeft" EnableRowVirtualization="True" Margin="9,4,9,45" CanUserDeleteRows="False" PreviewKeyDown="SANAD_DETAIL_PreviewKeyDown" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                 <DataGrid.Style>
                     <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                         <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>

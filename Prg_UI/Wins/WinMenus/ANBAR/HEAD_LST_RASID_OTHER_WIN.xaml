@@ -148,7 +148,7 @@
             FlowDirection="RightToLeft" 
             SelectionUnit="FullRow" 
             BorderThickness="1"
-            RowEditEnding="INVO_LST_RASIDA_SUB_RowEditEnding" BeginningEdit="INVO_LST_RASIDA_SUB_BeginningEdit" CellEditEnding="INVO_LST_RASIDA_SUB_CellEditEnding" PreviewKeyDown="INVO_LST_RASIDA_SUB_PreviewKeyDown" PreviewMouseLeftButtonUp="INVO_LST_RASIDA_SUB_PreviewMouseLeftButtonUp" SelectionChanged="INVO_LST_RASIDA_SUB_SelectionChanged" IsKeyboardFocusWithinChanged="INVO_LST_RASIDA_SUB_IsKeyboardFocusWithinChanged" PreparingCellForEdit="INVO_LST_RASIDA_SUB_PreparingCellForEdit" CanUserDeleteRows="False">
+            RowEditEnding="INVO_LST_RASIDA_SUB_RowEditEnding" BeginningEdit="INVO_LST_RASIDA_SUB_BeginningEdit" CellEditEnding="INVO_LST_RASIDA_SUB_CellEditEnding" PreviewKeyDown="INVO_LST_RASIDA_SUB_PreviewKeyDown" PreviewMouseLeftButtonUp="INVO_LST_RASIDA_SUB_PreviewMouseLeftButtonUp" SelectionChanged="INVO_LST_RASIDA_SUB_SelectionChanged" IsKeyboardFocusWithinChanged="INVO_LST_RASIDA_SUB_IsKeyboardFocusWithinChanged" PreparingCellForEdit="INVO_LST_RASIDA_SUB_PreparingCellForEdit" CanUserDeleteRows="False" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->

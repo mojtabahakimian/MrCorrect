@@ -134,7 +134,7 @@
                 VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                 KeyboardNavigation.TabNavigation="Contained"
                 ItemsSource="{Binding HEAD_ENTEGHAL_DATA}"    
-                Margin="15,207,15,200" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" CellEditEnding="INVO_LST_ENTEGHAL_SUB_CellEditEnding" RowEditEnding="INVO_LST_ENTEGHAL_SUB_RowEditEnding" BeginningEdit="INVO_LST_ENTEGHAL_SUB_BeginningEdit" PreparingCellForEdit="INVO_LST_ENTEGHAL_SUB_PreparingCellForEdit" IsKeyboardFocusWithinChanged="INVO_LST_ENTEGHAL_SUB_IsKeyboardFocusWithinChanged" PreviewKeyDown="INVO_LST_ENTEGHAL_SUB_PreviewKeyDown" PreviewMouseDown="INVO_LST_ENTEGHAL_SUB_PreviewMouseDown" CanUserDeleteRows="False" TabIndex="6">
+                Margin="15,207,15,200" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" CellEditEnding="INVO_LST_ENTEGHAL_SUB_CellEditEnding" RowEditEnding="INVO_LST_ENTEGHAL_SUB_RowEditEnding" BeginningEdit="INVO_LST_ENTEGHAL_SUB_BeginningEdit" PreparingCellForEdit="INVO_LST_ENTEGHAL_SUB_PreparingCellForEdit" IsKeyboardFocusWithinChanged="INVO_LST_ENTEGHAL_SUB_IsKeyboardFocusWithinChanged" PreviewKeyDown="INVO_LST_ENTEGHAL_SUB_PreviewKeyDown" PreviewMouseDown="INVO_LST_ENTEGHAL_SUB_PreviewMouseDown" CanUserDeleteRows="False" TabIndex="6" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->

@@ -37,7 +37,7 @@
                   SelectionChanged="DGR_HEAD_LSTPISHFACTOR2_SelectionChanged"
                   CanUserAddRows="False"
                   IsReadOnly="True"
-                  PreviewMouseLeftButtonUp="DGR_HEAD_LSTPISHFACTOR2_PreviewMouseLeftButtonUp" SelectedIndex="0" PreviewKeyDown="DGR_HEAD_LSTPISHFACTOR2_PreviewKeyDown" SelectionMode="Single" PreviewMouseDoubleClick="DGR_HEAD_LSTPISHFACTOR2_PreviewMouseDoubleClick" BorderThickness="1">
+                  PreviewMouseLeftButtonUp="DGR_HEAD_LSTPISHFACTOR2_PreviewMouseLeftButtonUp" SelectedIndex="0" PreviewKeyDown="DGR_HEAD_LSTPISHFACTOR2_PreviewKeyDown" SelectionMode="Single" PreviewMouseDoubleClick="DGR_HEAD_LSTPISHFACTOR2_PreviewMouseDoubleClick" BorderThickness="1" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Columns >
                 <DataGridTextColumn Header="شماره" Binding="{Binding NUMBER}" MinWidth="80"/>

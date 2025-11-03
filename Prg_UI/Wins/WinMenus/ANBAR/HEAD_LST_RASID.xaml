@@ -160,7 +160,7 @@
                 AutoGenerateColumns="False" 
                 FlowDirection="RightToLeft" 
                 SelectionUnit="FullRow"
-                Margin="15,261,12,130" BorderThickness="1" CanUserDeleteRows="False">
+                Margin="15,261,12,130" BorderThickness="1" CanUserDeleteRows="False" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->

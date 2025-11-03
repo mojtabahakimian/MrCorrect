@@ -119,7 +119,7 @@
                 </Border>
             </StackPanel>
         </Popup>
-        <DataGrid x:Name="mOIN132DataGrid" IsReadOnly="True" Visibility="Hidden" ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" FlowDirection="RightToLeft"  Style="{StaticResource DATAGRIDSTYLISH}" AutoGenerateColumns="False" EnableRowVirtualization="True" Margin="10,45,10,10" HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}" VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}">
+        <DataGrid x:Name="mOIN132DataGrid" IsReadOnly="True" Visibility="Hidden" ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" FlowDirection="RightToLeft"  Style="{StaticResource DATAGRIDSTYLISH}" AutoGenerateColumns="False" EnableRowVirtualization="True" Margin="10,45,10,10" HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}" VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <!--<DataGrid.Columns>
                 <DataGridTextColumn x:Name="n_SColumn" Binding="{Binding N_S}" Header="شماره سند"  MinWidth="50"  Width="auto" />

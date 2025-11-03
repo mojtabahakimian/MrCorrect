@@ -65,7 +65,7 @@
             VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
             ItemsSource="{Binding TCOD_MAP_GRP_DATA}"
             KeyboardNavigation.TabNavigation="Contained"
-            Margin="4,47,4,9" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" BeginningEdit="TCOD_MAP_GRP_SUB_BeginningEdit" CellEditEnding="TCOD_MAP_GRP_SUB_CellEditEnding" RowEditEnding="TCOD_MAP_GRP_SUB_RowEditEnding" PreviewKeyDown="TCOD_MAP_GRP_SUB_PreviewKeyDown">
+            Margin="4,47,4,9" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" BeginningEdit="TCOD_MAP_GRP_SUB_BeginningEdit" CellEditEnding="TCOD_MAP_GRP_SUB_CellEditEnding" RowEditEnding="TCOD_MAP_GRP_SUB_RowEditEnding" PreviewKeyDown="TCOD_MAP_GRP_SUB_PreviewKeyDown" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->

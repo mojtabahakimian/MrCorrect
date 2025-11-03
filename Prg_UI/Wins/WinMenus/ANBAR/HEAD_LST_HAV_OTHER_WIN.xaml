@@ -145,7 +145,7 @@
             AutoGenerateColumns="False" MouseRightButtonUp="INVO_LST_sub_MouseRightButtonUp"
             FlowDirection="RightToLeft" 
             SelectionUnit="FullRow" 
-            BorderThickness="1" CellEditEnding="INVO_LST_HAV_SUB_OTHER_CellEditEnding" RowEditEnding="INVO_LST_HAV_SUB_OTHER_RowEditEnding" IsKeyboardFocusWithinChanged="INVO_LST_HAV_SUB_OTHER_IsKeyboardFocusWithinChanged" BeginningEdit="INVO_LST_HAV_SUB_OTHER_BeginningEdit" PreviewKeyDown="INVO_LST_HAV_SUB_OTHER_PreviewKeyDown" SelectionChanged="INVO_LST_HAV_SUB_OTHER_SelectionChanged" PreparingCellForEdit="INVO_LST_HAV_SUB_OTHER_PreparingCellForEdit" PreviewMouseLeftButtonUp="INVO_LST_HAV_SUB_OTHER_PreviewMouseLeftButtonUp" CanUserDeleteRows="False">
+            BorderThickness="1" CellEditEnding="INVO_LST_HAV_SUB_OTHER_CellEditEnding" RowEditEnding="INVO_LST_HAV_SUB_OTHER_RowEditEnding" IsKeyboardFocusWithinChanged="INVO_LST_HAV_SUB_OTHER_IsKeyboardFocusWithinChanged" BeginningEdit="INVO_LST_HAV_SUB_OTHER_BeginningEdit" PreviewKeyDown="INVO_LST_HAV_SUB_OTHER_PreviewKeyDown" SelectionChanged="INVO_LST_HAV_SUB_OTHER_SelectionChanged" PreparingCellForEdit="INVO_LST_HAV_SUB_OTHER_PreparingCellForEdit" PreviewMouseLeftButtonUp="INVO_LST_HAV_SUB_OTHER_PreviewMouseLeftButtonUp" CanUserDeleteRows="False" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->

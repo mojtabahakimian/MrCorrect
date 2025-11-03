@@ -55,7 +55,7 @@
                     HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
 					VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                     KeyboardNavigation.TabNavigation="Contained"
-                    AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"  SelectedIndex="0" PreviewMouseDoubleClick="DG_PERSONELS_PreviewMouseDoubleClick" Margin="0,38,0,0">
+                    AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"  SelectedIndex="0" PreviewMouseDoubleClick="DG_PERSONELS_PreviewMouseDoubleClick" Margin="0,38,0,0" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Style>
                 <Style TargetType="DataGrid" BasedOn="{StaticResource DATAGRIDSTYLISH}">
                 </Style>

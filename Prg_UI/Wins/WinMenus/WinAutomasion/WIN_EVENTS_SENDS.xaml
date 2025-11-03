@@ -58,7 +58,7 @@
               VirtualizingPanel.ScrollUnit="Pixel"
               ScrollViewer.CanContentScroll="True"
                   
-              FlowDirection="RightToLeft" AutoGenerateColumns="False" Margin="10,50,10,55">
+              FlowDirection="RightToLeft" AutoGenerateColumns="False" Margin="10,50,10,55" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
 
                 <DataGridTextColumn x:Name="IDNUM" Binding="{Binding IDNUM, UpdateSourceTrigger=LostFocus,IsAsync=True}"   Header="شماره" IsReadOnly="True" Width="auto" />

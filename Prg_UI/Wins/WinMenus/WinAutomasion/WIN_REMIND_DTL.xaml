@@ -56,7 +56,7 @@
 
               SelectedIndex="0"
               IsReadOnly="True"
-              FlowDirection="RightToLeft" AutoGenerateColumns="False" Margin="10,50,10,10">
+              FlowDirection="RightToLeft" AutoGenerateColumns="False" Margin="10,50,10,10" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
 
                 <DataGridTextColumn x:Name="IDNUM" Binding="{Binding IDNUM}" Header="شماره" IsReadOnly="True" Width="80"/>

@@ -31,7 +31,7 @@
 
         <DataGrid x:Name="serchkalDGR" Margin="10,50"  Style="{StaticResource DATAGRIDSTYLISH}"
                                                        ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"           
-                                                       HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}" VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"  FlowDirection="RightToLeft" PreviewKeyDown="serchkalDGR_PreviewKeyDown" AutoGenerateColumns="False" EnableRowVirtualization="True" RowDetailsVisibilityMode="VisibleWhenSelected" SelectionMode="Extended" SelectedIndex="0" CanUserAddRows="False" IsReadOnly="True" MouseDoubleClick="serchkalDGR_MouseDoubleClick" BorderThickness="1">
+                                                       HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}" VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"  FlowDirection="RightToLeft" PreviewKeyDown="serchkalDGR_PreviewKeyDown" AutoGenerateColumns="False" EnableRowVirtualization="True" RowDetailsVisibilityMode="VisibleWhenSelected" SelectionMode="Extended" SelectedIndex="0" CanUserAddRows="False" IsReadOnly="True" MouseDoubleClick="serchkalDGR_MouseDoubleClick" BorderThickness="1" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
                 <DataGridTextColumn x:Name="cODEColumn" Binding="{Binding CODE}" Header="کد کالا" Width="auto" MinWidth="80"/>
                 <DataGridTextColumn x:Name="nAMEColumn" Binding="{Binding name}" Header="نام کالا" Width="auto" MinWidth="300" />

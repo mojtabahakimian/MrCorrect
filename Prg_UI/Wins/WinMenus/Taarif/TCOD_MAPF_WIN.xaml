@@ -65,7 +65,7 @@
             VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
             ItemsSource="{Binding TCOD_MAP_DATA}" d:ItemsSource="{d:SampleData}"
             KeyboardNavigation.TabNavigation="Contained"
-            Margin="7,90,8,10" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" BeginningEdit="TCOD_MAP_SUB_BeginningEdit" CellEditEnding="TCOD_MAP_SUB_CellEditEnding" RowEditEnding="TCOD_MAP_SUB_RowEditEnding" PreviewKeyDown="TCOD_MAP_SUB_PreviewKeyDown">
+            Margin="7,90,8,10" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" BeginningEdit="TCOD_MAP_SUB_BeginningEdit" CellEditEnding="TCOD_MAP_SUB_CellEditEnding" RowEditEnding="TCOD_MAP_SUB_RowEditEnding" PreviewKeyDown="TCOD_MAP_SUB_PreviewKeyDown" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.ItemsPanel>
                 <ItemsPanelTemplate>

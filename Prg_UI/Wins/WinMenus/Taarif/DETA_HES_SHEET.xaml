@@ -94,7 +94,7 @@
             VirtualizingPanel.VirtualizationMode="Recycling"
             ScrollViewer.CanContentScroll="True"
           
-            AutoGenerateColumns="False" Margin="10,94,10,10" RowEditEnding="DETA_HES_SUB_RowEditEnding" BeginningEdit="DETA_HES_SUB_BeginningEdit" CellEditEnding="DETA_HES_SUB_CellEditEnding" PreviewKeyDown="DETA_HES_SUB_PreviewKeyDown" PreviewMouseDoubleClick="DETA_HES_PreviewMouseDoubleClick">
+            AutoGenerateColumns="False" Margin="10,94,10,10" RowEditEnding="DETA_HES_SUB_RowEditEnding" BeginningEdit="DETA_HES_SUB_BeginningEdit" CellEditEnding="DETA_HES_SUB_CellEditEnding" PreviewKeyDown="DETA_HES_SUB_PreviewKeyDown" PreviewMouseDoubleClick="DETA_HES_PreviewMouseDoubleClick" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->
                 <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>

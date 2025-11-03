@@ -189,7 +189,7 @@
                                 IsKeyboardFocusWithinChanged="INVO_LST_sub_IsKeyboardFocusWithinChanged"    
                                 ContextMenu="{StaticResource ContextUtilityMenu2}"
                                 CanUserResizeColumns="True"
-                                Margin="3,241,6,5" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" LostFocus="INVO_LST_sub_LostFocus" CellEditEnding="INVO_LST_sub_CellEditEnding" PreviewMouseLeftButtonUp="INVO_LST_sub_PreviewMouseLeftButtonUp" SelectionChanged="INVO_LST_sub_SelectionChanged" PreviewGotKeyboardFocus="INVO_LST_sub_PreviewGotKeyboardFocus" RowEditEnding="INVO_LST_sub_RowEditEnding" PreviewKeyDown="INVO_LST_sub_PreviewKeyDown" PreparingCellForEdit="INVO_LST_sub_PreparingCellForEdit" BeginningEdit="INVO_LST_sub_BeginningEdit" TabIndex="5">
+                                Margin="3,241,6,5" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" LostFocus="INVO_LST_sub_LostFocus" CellEditEnding="INVO_LST_sub_CellEditEnding" PreviewMouseLeftButtonUp="INVO_LST_sub_PreviewMouseLeftButtonUp" SelectionChanged="INVO_LST_sub_SelectionChanged" PreviewGotKeyboardFocus="INVO_LST_sub_PreviewGotKeyboardFocus" RowEditEnding="INVO_LST_sub_RowEditEnding" PreviewKeyDown="INVO_LST_sub_PreviewKeyDown" PreparingCellForEdit="INVO_LST_sub_PreparingCellForEdit" BeginningEdit="INVO_LST_sub_BeginningEdit" TabIndex="5" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
@@ -563,7 +563,7 @@
                         KeyboardNavigation.TabNavigation="Contained"
                         Tag="RD"
                         IsReadOnly="True"
-                        Margin="3,102,0,10" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" HorizontalAlignment="Left" Width="371" Grid.Row="1" CellEditEnding="TAKHFIF_APLAY_SUB_CellEditEnding" RowEditEnding="TAKHFIF_APLAY_SUB_RowEditEnding" PreviewKeyDown="TAKHFIF_APLAY_SUB_PreviewKeyDown">
+                        Margin="3,102,0,10" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" HorizontalAlignment="Left" Width="371" Grid.Row="1" CellEditEnding="TAKHFIF_APLAY_SUB_CellEditEnding" RowEditEnding="TAKHFIF_APLAY_SUB_RowEditEnding" PreviewKeyDown="TAKHFIF_APLAY_SUB_PreviewKeyDown" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Columns>
                             <DataGridTextColumn x:Name="nUMBERColumn" Binding="{Binding NUMBER}" Header="شماره" Visibility="Hidden" Width="SizeToHeader"/>
@@ -718,7 +718,7 @@
                               KeyboardNavigation.TabNavigation="Contained"
                               SelectedIndex="0"
                               LostFocus="PAY_GETD_SUB22_LostFocus"
-                              Margin="5,315,4,162" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" CellEditEnding="PAY_GETD_SUB22_CellEditEnding" PreviewKeyDown="PAY_GETD_SUB22_PreviewKeyDown" RowEditEnding="PAY_GETD_SUB22_RowEditEnding" PreparingCellForEdit="PAY_GETD_SUB22_PreparingCellForEdit" BeginningEdit="PAY_GETD_SUB22_BeginningEdit" CanUserDeleteRows="False">
+                              Margin="5,315,4,162" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" CellEditEnding="PAY_GETD_SUB22_CellEditEnding" PreviewKeyDown="PAY_GETD_SUB22_PreviewKeyDown" RowEditEnding="PAY_GETD_SUB22_RowEditEnding" PreparingCellForEdit="PAY_GETD_SUB22_PreparingCellForEdit" BeginningEdit="PAY_GETD_SUB22_BeginningEdit" CanUserDeleteRows="False" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
                             <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
@@ -1058,7 +1058,7 @@
                         CellStyle="{StaticResource CellFocusyBorder}"
                         KeyboardNavigation.TabNavigation="Contained"
                         LostFocus="VISITOR_DTL_SUB_LostFocus"
-                        Margin="9,76,14,452" AutoGenerateColumns="False" IsEnabled="True" FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" CellEditEnding="VISITOR_DTL_SUB_CellEditEnding" RowEditEnding="VISITOR_DTL_SUB_RowEditEnding" PreviewMouseDoubleClick="VISITOR_DTL_SUB_PreviewMouseDoubleClick" BeginningEdit="VISITOR_DTL_SUB_BeginningEdit" PreviewKeyDown="VISITOR_DTL_SUB_PreviewKeyDown">
+                        Margin="9,76,14,452" AutoGenerateColumns="False" IsEnabled="True" FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" CellEditEnding="VISITOR_DTL_SUB_CellEditEnding" RowEditEnding="VISITOR_DTL_SUB_RowEditEnding" PreviewMouseDoubleClick="VISITOR_DTL_SUB_PreviewMouseDoubleClick" BeginningEdit="VISITOR_DTL_SUB_BeginningEdit" PreviewKeyDown="VISITOR_DTL_SUB_PreviewKeyDown" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                         <DataGrid.Style>
                             <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                                 <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>

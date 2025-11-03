@@ -72,7 +72,7 @@
               VirtualizingPanel.VirtualizationMode="Recycling"
               ScrollViewer.CanContentScroll="True"
               IsKeyboardFocusWithinChanged="TOTA_HES_SUB_IsKeyboardFocusWithinChanged"
-              AutoGenerateColumns="False" Margin="10,92,10,60" RowEditEnding="TOTA_HES_SUB_RowEditEnding" BeginningEdit="TOTA_HES_SUB_BeginningEdit" CellEditEnding="TOTA_HES_SUB_CellEditEnding" PreviewKeyDown="TOTA_HES_SUB_PreviewKeyDown" PreviewMouseDoubleClick="TOTA_HES_SUB_PreviewMouseDoubleClick">
+              AutoGenerateColumns="False" Margin="10,92,10,60" RowEditEnding="TOTA_HES_SUB_RowEditEnding" BeginningEdit="TOTA_HES_SUB_BeginningEdit" CellEditEnding="TOTA_HES_SUB_CellEditEnding" PreviewKeyDown="TOTA_HES_SUB_PreviewKeyDown" PreviewMouseDoubleClick="TOTA_HES_SUB_PreviewMouseDoubleClick" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->
                 <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}"> <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>

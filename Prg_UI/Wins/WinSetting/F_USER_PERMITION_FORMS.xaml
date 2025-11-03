@@ -228,7 +228,7 @@
                               SelectionUnit="FullRow" 
                               CanUserDeleteRows="False"
                               IsEnabled="False"
-                              Margin="319,57,10,10" BorderThickness="1" IsKeyboardFocusWithinChanged="OPANBACCESS_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="OPANBACCESS_SUB_CellEditEnding" PreviewMouseLeftButtonUp="OPANBACCESS_SUB_PreviewMouseLeftButtonUp" SelectionChanged="OPANBACCESS_SUB_SelectionChanged" RowEditEnding="OPANBACCESS_SUB_RowEditEnding" PreviewKeyDown="OPANBACCESS_SUB_PreviewKeyDown" PreparingCellForEdit="OPANBACCESS_SUB_PreparingCellForEdit" BeginningEdit="OPANBACCESS_SUB_BeginningEdit" >
+                              Margin="319,57,10,10" BorderThickness="1" IsKeyboardFocusWithinChanged="OPANBACCESS_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="OPANBACCESS_SUB_CellEditEnding" PreviewMouseLeftButtonUp="OPANBACCESS_SUB_PreviewMouseLeftButtonUp" SelectionChanged="OPANBACCESS_SUB_SelectionChanged" RowEditEnding="OPANBACCESS_SUB_RowEditEnding" PreviewKeyDown="OPANBACCESS_SUB_PreviewKeyDown" PreparingCellForEdit="OPANBACCESS_SUB_PreparingCellForEdit" BeginningEdit="OPANBACCESS_SUB_BeginningEdit"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
@@ -792,7 +792,7 @@
                               FlowDirection="RightToLeft" 
                               SelectionUnit="FullRow" 
                               CanUserDeleteRows="False" MouseRightButtonUp="BLOCKED_SUB_MouseRightButtonUp"
-                              Margin="319,57,13,34" BorderThickness="1" IsKeyboardFocusWithinChanged="BLOCKED_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="BLOCKED_SUB_CellEditEnding" PreviewMouseLeftButtonUp="BLOCKED_SUB_PreviewMouseLeftButtonUp" SelectionChanged="BLOCKED_SUB_SelectionChanged" RowEditEnding="BLOCKED_SUB_RowEditEnding" PreviewKeyDown="BLOCKED_SUB_PreviewKeyDown" BeginningEdit="BLOCKED_SUB_BeginningEdit" IsEnabled="False" >
+                              Margin="319,57,13,34" BorderThickness="1" IsKeyboardFocusWithinChanged="BLOCKED_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="BLOCKED_SUB_CellEditEnding" PreviewMouseLeftButtonUp="BLOCKED_SUB_PreviewMouseLeftButtonUp" SelectionChanged="BLOCKED_SUB_SelectionChanged" RowEditEnding="BLOCKED_SUB_RowEditEnding" PreviewKeyDown="BLOCKED_SUB_PreviewKeyDown" BeginningEdit="BLOCKED_SUB_BeginningEdit" IsEnabled="False"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
@@ -833,7 +833,7 @@
                               FlowDirection="RightToLeft" 
                               SelectionUnit="FullRow" 
                               CanUserDeleteRows="False" MouseRightButtonUp="UNBLOCKED_SUB_MouseRightButtonUp"
-                              Margin="12,57,5,34" BorderThickness="1" IsKeyboardFocusWithinChanged="UNBLOCKED_SUB_IsKeyboardFocusWithinChanged"  CellEditEnding="UNBLOCKED_SUB_CellEditEnding" PreviewMouseLeftButtonUp="UNBLOCKED_SUB_PreviewMouseLeftButtonUp" SelectionChanged="UNBLOCKED_SUB_SelectionChanged" RowEditEnding="UNBLOCKED_SUB_RowEditEnding" PreviewKeyDown="UNBLOCKED_SUB_PreviewKeyDown" PreparingCellForEdit="UNBLOCKED_SUB_PreparingCellForEdit" BeginningEdit="UNBLOCKED_SUB_BeginningEdit" Grid.Column="1" IsEnabled="False" >
+                              Margin="12,57,5,34" BorderThickness="1" IsKeyboardFocusWithinChanged="UNBLOCKED_SUB_IsKeyboardFocusWithinChanged"  CellEditEnding="UNBLOCKED_SUB_CellEditEnding" PreviewMouseLeftButtonUp="UNBLOCKED_SUB_PreviewMouseLeftButtonUp" SelectionChanged="UNBLOCKED_SUB_SelectionChanged" RowEditEnding="UNBLOCKED_SUB_RowEditEnding" PreviewKeyDown="UNBLOCKED_SUB_PreviewKeyDown" PreparingCellForEdit="UNBLOCKED_SUB_PreparingCellForEdit" BeginningEdit="UNBLOCKED_SUB_BeginningEdit" Grid.Column="1" IsEnabled="False"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
@@ -885,7 +885,7 @@
                               FlowDirection="RightToLeft" 
                               SelectionUnit="FullRow" 
                               CanUserDeleteRows="False" MouseRightButtonUp="CHARTSAZMANI_SUB_MouseRightButtonUp"
-                              Margin="319,57,10,50" BorderThickness="1" IsKeyboardFocusWithinChanged="CHARTSAZMANI_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="CHARTSAZMANI_SUB_CellEditEnding" PreviewMouseLeftButtonUp="CHARTSAZMANI_SUB_PreviewMouseLeftButtonUp" SelectionChanged="CHARTSAZMANI_SUB_SelectionChanged" RowEditEnding="CHARTSAZMANI_SUB_RowEditEnding" PreviewKeyDown="CHARTSAZMANI_SUB_PreviewKeyDown" BeginningEdit="CHARTSAZMANI_SUB_BeginningEdit" IsEnabled="False" >
+                              Margin="319,57,10,50" BorderThickness="1" IsKeyboardFocusWithinChanged="CHARTSAZMANI_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="CHARTSAZMANI_SUB_CellEditEnding" PreviewMouseLeftButtonUp="CHARTSAZMANI_SUB_PreviewMouseLeftButtonUp" SelectionChanged="CHARTSAZMANI_SUB_SelectionChanged" RowEditEnding="CHARTSAZMANI_SUB_RowEditEnding" PreviewKeyDown="CHARTSAZMANI_SUB_PreviewKeyDown" BeginningEdit="CHARTSAZMANI_SUB_BeginningEdit" IsEnabled="False"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
@@ -972,7 +972,7 @@
                         FlowDirection="RightToLeft" 
                         SelectionUnit="FullRow" 
                         CanUserDeleteRows="False"
-                        Margin="5,5,5,60" BorderThickness="1" CellEditEnding="BLOCK_CUSTOMER_SUB_CellEditEnding" PreviewMouseLeftButtonUp="BLOCK_CUSTOMER_SUB_PreviewMouseLeftButtonUp" SelectionChanged="BLOCK_CUSTOMER_SUB_SelectionChanged" RowEditEnding="BLOCK_CUSTOMER_SUB_RowEditEnding" PreviewKeyDown="BLOCK_CUSTOMER_SUB_PreviewKeyDown" BeginningEdit="BLOCK_CUSTOMER_SUB_BeginningEdit" >
+                        Margin="5,5,5,60" BorderThickness="1" CellEditEnding="BLOCK_CUSTOMER_SUB_CellEditEnding" PreviewMouseLeftButtonUp="BLOCK_CUSTOMER_SUB_PreviewMouseLeftButtonUp" SelectionChanged="BLOCK_CUSTOMER_SUB_SelectionChanged" RowEditEnding="BLOCK_CUSTOMER_SUB_RowEditEnding" PreviewKeyDown="BLOCK_CUSTOMER_SUB_PreviewKeyDown" BeginningEdit="BLOCK_CUSTOMER_SUB_BeginningEdit"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
                             <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
@@ -1114,7 +1114,7 @@
                             SelectionUnit="FullRow" 
                             CanUserDeleteRows="False"
                             CanUserAddRows="False"
-                            Margin="5,5,5,60" BorderThickness="1" CellEditEnding="USER_ENDN_SUB_CellEditEnding" PreviewMouseLeftButtonUp="USER_ENDN_SUB_PreviewMouseLeftButtonUp" SelectionChanged="USER_ENDN_SUB_SelectionChanged" RowEditEnding="USER_ENDN_SUB_RowEditEnding" PreviewKeyDown="USER_ENDN_SUB_PreviewKeyDown" BeginningEdit="USER_ENDN_SUB_BeginningEdit" >
+                            Margin="5,5,5,60" BorderThickness="1" CellEditEnding="USER_ENDN_SUB_CellEditEnding" PreviewMouseLeftButtonUp="USER_ENDN_SUB_PreviewMouseLeftButtonUp" SelectionChanged="USER_ENDN_SUB_SelectionChanged" RowEditEnding="USER_ENDN_SUB_RowEditEnding" PreviewKeyDown="USER_ENDN_SUB_PreviewKeyDown" BeginningEdit="USER_ENDN_SUB_BeginningEdit"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
                             <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">

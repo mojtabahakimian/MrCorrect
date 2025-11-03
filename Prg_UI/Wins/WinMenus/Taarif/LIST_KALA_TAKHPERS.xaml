@@ -64,7 +64,7 @@
             ItemsSource="{Binding }"
             KeyboardNavigation.TabNavigation="Contained"
             x:Name="LGT_SUB"
-            Margin="10,50,12,10" AutoGenerateColumns="False" IsReadOnly="True" FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1">
+            Margin="10,50,12,10" AutoGenerateColumns="False" IsReadOnly="True" FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->

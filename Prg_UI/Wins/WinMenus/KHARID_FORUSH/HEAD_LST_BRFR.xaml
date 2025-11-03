@@ -125,7 +125,7 @@
                         FlowDirection="RightToLeft" 
                         SelectionUnit="FullRow" 
                         CanUserDeleteRows="False"
-                        Margin="4,201,4,163" BorderThickness="1" IsKeyboardFocusWithinChanged="INVO_LST_SUB_IsKeyboardFocusWithinChanged"  CellEditEnding="INVO_LST_SUB_CellEditEnding" PreviewMouseLeftButtonUp="INVO_LST_SUB_PreviewMouseLeftButtonUp" SelectionChanged="INVO_LST_SUB_SelectionChanged" RowEditEnding="INVO_LST_SUB_RowEditEnding" PreviewKeyDown="INVO_LST_SUB_PreviewKeyDown" PreparingCellForEdit="INVO_LST_SUB_PreparingCellForEdit" BeginningEdit="INVO_LST_SUB_BeginningEdit" CanUserAddRows="False" >
+                        Margin="4,201,4,163" BorderThickness="1" IsKeyboardFocusWithinChanged="INVO_LST_SUB_IsKeyboardFocusWithinChanged"  CellEditEnding="INVO_LST_SUB_CellEditEnding" PreviewMouseLeftButtonUp="INVO_LST_SUB_PreviewMouseLeftButtonUp" SelectionChanged="INVO_LST_SUB_SelectionChanged" RowEditEnding="INVO_LST_SUB_RowEditEnding" PreviewKeyDown="INVO_LST_SUB_PreviewKeyDown" PreparingCellForEdit="INVO_LST_SUB_PreparingCellForEdit" BeginningEdit="INVO_LST_SUB_BeginningEdit" CanUserAddRows="False"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
@@ -372,7 +372,7 @@
                           
                           KeyboardNavigation.TabNavigation="Contained"
                           SelectedIndex="0"
-                          Margin="5,315,4,47" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" CellEditEnding="PAY_GETP_SUB_CellEditEnding" PreviewKeyDown="PAY_GETP_SUB_PreviewKeyDown" RowEditEnding="PAY_GETP_SUB_RowEditEnding" PreparingCellForEdit="PAY_GETP_SUB_PreparingCellForEdit" BeginningEdit="PAY_GETP_SUB_BeginningEdit">
+                          Margin="5,315,4,47" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" CellEditEnding="PAY_GETP_SUB_CellEditEnding" PreviewKeyDown="PAY_GETP_SUB_PreviewKeyDown" RowEditEnding="PAY_GETP_SUB_RowEditEnding" PreparingCellForEdit="PAY_GETP_SUB_PreparingCellForEdit" BeginningEdit="PAY_GETP_SUB_BeginningEdit" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
                             <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
@@ -615,7 +615,7 @@
                         
                         KeyboardNavigation.TabNavigation="Contained"
                         LostFocus="VISITOR_DTL_SUB_LostFocus"
-                        Margin="9,76,14,277" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" CellEditEnding="VISITOR_DTL_SUB_CellEditEnding" RowEditEnding="VISITOR_DTL_SUB_RowEditEnding" PreviewMouseDoubleClick="VISITOR_DTL_SUB_PreviewMouseDoubleClick" BeginningEdit="VISITOR_DTL_SUB_BeginningEdit" PreviewKeyDown="VISITOR_DTL_SUB_PreviewKeyDown">
+                        Margin="9,76,14,277" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" CellEditEnding="VISITOR_DTL_SUB_CellEditEnding" RowEditEnding="VISITOR_DTL_SUB_RowEditEnding" PreviewMouseDoubleClick="VISITOR_DTL_SUB_PreviewMouseDoubleClick" BeginningEdit="VISITOR_DTL_SUB_BeginningEdit" PreviewKeyDown="VISITOR_DTL_SUB_PreviewKeyDown" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                         <DataGrid.Style>
                             <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                                 <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>

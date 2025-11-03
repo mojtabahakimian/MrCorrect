@@ -172,7 +172,7 @@
              FlowDirection="RightToLeft" 
              SelectionUnit="FullRow" 
              CanUserDeleteRows="False"
-             Margin="4,334,4,47" BorderThickness="1" CanUserAddRows="False" IsEnabled="False" SelectionMode="Single" SelectionChanged="DETAIL_VOSUL_SUB_SelectionChanged">
+             Margin="4,334,4,47" BorderThickness="1" CanUserAddRows="False" IsEnabled="False" SelectionMode="Single" SelectionChanged="DETAIL_VOSUL_SUB_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->

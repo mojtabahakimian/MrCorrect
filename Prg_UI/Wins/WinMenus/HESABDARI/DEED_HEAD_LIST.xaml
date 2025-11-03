@@ -55,7 +55,7 @@
                       VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                       AutoGenerateColumns="False"
                       ItemsSource="{Binding PGET_HED_List}" 
-                      IsReadOnly="True" FlowDirection="RightToLeft" PreviewKeyDown="MasterDataGrid_PreviewKeyDown" IsTabStop="True" TabIndex="2">
+                      IsReadOnly="True" FlowDirection="RightToLeft" PreviewKeyDown="MasterDataGrid_PreviewKeyDown" IsTabStop="True" TabIndex="2" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                 <DataGrid.Style>
                     <!--خط بندی سطر های دیتاگرید-->

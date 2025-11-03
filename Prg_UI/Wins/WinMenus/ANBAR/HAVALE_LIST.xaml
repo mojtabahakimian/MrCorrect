@@ -37,7 +37,7 @@
                   FlowDirection="RightToLeft"
                   CanUserAddRows="False"
                   IsReadOnly="True"
-                  BorderThickness="1" PreviewKeyDown="DGR_HEADLST_HAVL_2_PreviewKeyDown" PreviewMouseDoubleClick="DGR_HEADLST_HAVL_2_PreviewMouseDoubleClick">
+                  BorderThickness="1" PreviewKeyDown="DGR_HEADLST_HAVL_2_PreviewKeyDown" PreviewMouseDoubleClick="DGR_HEADLST_HAVL_2_PreviewMouseDoubleClick" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Columns >
                 <DataGridTextColumn Header="شماره" Binding="{Binding NUMBER,IsAsync=True}" Width="auto" MinWidth="80"/>

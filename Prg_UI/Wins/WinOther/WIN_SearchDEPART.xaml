@@ -47,7 +47,7 @@
                   HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                   VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                   FlowDirection="RightToLeft"
-                  PreviewKeyDown="DEPART_SUB_PreviewKeyDown" MouseDoubleClick="DEPART_SUB_MouseDoubleClick" AutoGenerateColumns="False" EnableRowVirtualization="True" RowDetailsVisibilityMode="VisibleWhenSelected" SelectionMode="Single" SelectedIndex="0" CanUserAddRows="False" IsReadOnly="True"  BorderThickness="1">
+                  PreviewKeyDown="DEPART_SUB_PreviewKeyDown" MouseDoubleClick="DEPART_SUB_MouseDoubleClick" AutoGenerateColumns="False" EnableRowVirtualization="True" RowDetailsVisibilityMode="VisibleWhenSelected" SelectionMode="Single" SelectedIndex="0" CanUserAddRows="False" IsReadOnly="True"  BorderThickness="1" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
                 <DataGridTextColumn x:Name="DEPATMAN_COLUMN" Binding="{Binding DEPATMAN,IsAsync=True}" Header="کد واحد" Width="auto" MinWidth="80"/>
                 <DataGridTextColumn x:Name="DEPNAME_COLUMN" Binding="{Binding DEPNAME,IsAsync=True}" Header="نام واحد" Width="*" MinWidth="300" />

@@ -75,7 +75,7 @@
                 CanUserAddRows="True"
                 CanUserDeleteRows="False"
                 SelectionUnit="FullRow" 
-                Margin="4,40,4,10" BorderThickness="1" PreparingCellForEdit="NOTE_SUB_PreparingCellForEdit" PreviewKeyDown="NOTE_SUB_PreviewKeyDown" PreviewMouseLeftButtonUp="NOTE_SUB_PreviewMouseLeftButtonUp" RowEditEnding="NOTE_SUB_RowEditEnding" SelectionChanged="NOTE_SUB_SelectionChanged" BeginningEdit="NOTE_SUB_BeginningEdit" PreviewMouseRightButtonUp="NOTE_SUB_PreviewMouseRightButtonUp" >
+                Margin="4,40,4,10" BorderThickness="1" PreparingCellForEdit="NOTE_SUB_PreparingCellForEdit" PreviewKeyDown="NOTE_SUB_PreviewKeyDown" PreviewMouseLeftButtonUp="NOTE_SUB_PreviewMouseLeftButtonUp" RowEditEnding="NOTE_SUB_RowEditEnding" SelectionChanged="NOTE_SUB_SelectionChanged" BeginningEdit="NOTE_SUB_BeginningEdit" PreviewMouseRightButtonUp="NOTE_SUB_PreviewMouseRightButtonUp"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">

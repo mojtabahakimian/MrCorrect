@@ -90,7 +90,7 @@
                       PreviewKeyDown="RAAS_SUB_PreviewKeyDown"
                       SelectionMode="Extended"
                       SelectionUnit="FullRow"
-                      Margin="0,5,0,5">
+                      Margin="0,5,0,5" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                 
                 <DataGrid.Style>
                     <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">

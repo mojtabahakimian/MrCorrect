@@ -69,7 +69,7 @@
                 KeyboardNavigation.TabNavigation="Contained"
                 ItemsSource="{Binding FSK_DATA}"
                 IsEnabled="False"
-                Margin="9,330,15,312" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" IsKeyboardFocusWithinChanged="STUF_FSK_sub_IsKeyboardFocusWithinChanged" CellEditEnding="STUF_FSK_sub_CellEditEnding" RowEditEnding="STUF_FSK_sub_RowEditEnding" BeginningEdit="STUF_FSK_sub_BeginningEdit" PreviewKeyDown="STUF_FSK_sub_PreviewKeyDown">
+                Margin="9,330,15,312" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" IsKeyboardFocusWithinChanged="STUF_FSK_sub_IsKeyboardFocusWithinChanged" CellEditEnding="STUF_FSK_sub_CellEditEnding" RowEditEnding="STUF_FSK_sub_RowEditEnding" BeginningEdit="STUF_FSK_sub_BeginningEdit" PreviewKeyDown="STUF_FSK_sub_PreviewKeyDown" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->
@@ -228,7 +228,7 @@
                                             VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                                             ItemsSource="{Binding TAKHPERS_DATA}"
                                             KeyboardNavigation.TabNavigation="Contained"
-                                            IsEnabled="False" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow" BorderThickness="1" Height="140" BeginningEdit="TAKHPERS_SUB_BeginningEdit" CellEditEnding="TAKHPERS_SUB_CellEditEnding" RowEditEnding="TAKHPERS_SUB_RowEditEnding" PreviewKeyDown="TAKHPERS_SUB_PreviewKeyDown" Margin="603,6,5,0" VerticalAlignment="Top">
+                                            IsEnabled="False" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow" BorderThickness="1" Height="140" BeginningEdit="TAKHPERS_SUB_BeginningEdit" CellEditEnding="TAKHPERS_SUB_CellEditEnding" RowEditEnding="TAKHPERS_SUB_RowEditEnding" PreviewKeyDown="TAKHPERS_SUB_PreviewKeyDown" Margin="603,6,5,0" VerticalAlignment="Top" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
@@ -277,7 +277,7 @@
                 ItemsSource="{Binding MODULE_D_DATA}"
                 KeyboardNavigation.TabNavigation="Contained"
                 IsEnabled="False"
-                Margin="0,0,0,304" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" Height="140" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="310" BeginningEdit="MODULE_D_SUB_BeginningEdit" CellEditEnding="MODULE_D_SUB_CellEditEnding" RowEditEnding="MODULE_D_SUB_RowEditEnding" PreviewKeyDown="MODULE_D_SUB_PreviewKeyDown">
+                Margin="0,0,0,304" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" Height="140" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="310" BeginningEdit="MODULE_D_SUB_BeginningEdit" CellEditEnding="MODULE_D_SUB_CellEditEnding" RowEditEnding="MODULE_D_SUB_RowEditEnding" PreviewKeyDown="MODULE_D_SUB_PreviewKeyDown" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
@@ -328,7 +328,7 @@
                     FlowDirection="RightToLeft" IsEnabled="False"
                     SelectionUnit="FullRow" BeginningEdit="INVOICE_REWARDS_SUB_BeginningEdit"
                     BorderThickness="1" CellEditEnding="INVOICE_REWARDS_SUB_CellEditEnding" RowEditEnding="INVOICE_REWARDS_SUB_RowEditEnding" PreviewKeyDown="INVOICE_REWARDS_SUB_PreviewKeyDown"
-                    Height="163" Width="auto">
+                    Height="163" Width="auto" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                     <DataGrid.Style>
                         <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                             <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>

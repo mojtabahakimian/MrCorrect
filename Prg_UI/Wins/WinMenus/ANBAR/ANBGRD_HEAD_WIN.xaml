@@ -77,7 +77,7 @@
                               AutoGenerateColumns="False" 
                               FlowDirection="RightToLeft" 
                               SelectionUnit="FullRow" 
-                              CanUserDeleteRows="False" BorderThickness="1" IsKeyboardFocusWithinChanged="ANBARGRD_SUB_IsKeyboardFocusWithinChanged"  CellEditEnding="ANBARGRD_SUB_CellEditEnding" PreviewMouseLeftButtonUp="ANBARGRD_SUB_PreviewMouseLeftButtonUp" SelectionChanged="ANBARGRD_SUB_SelectionChanged" RowEditEnding="ANBARGRD_SUB_RowEditEnding" PreviewKeyDown="ANBARGRD_SUB_PreviewKeyDown" PreparingCellForEdit="ANBARGRD_SUB_PreparingCellForEdit" BeginningEdit="ANBARGRD_SUB_BeginningEdit" Margin="-3,58,-3,10" >
+                              CanUserDeleteRows="False" BorderThickness="1" IsKeyboardFocusWithinChanged="ANBARGRD_SUB_IsKeyboardFocusWithinChanged"  CellEditEnding="ANBARGRD_SUB_CellEditEnding" PreviewMouseLeftButtonUp="ANBARGRD_SUB_PreviewMouseLeftButtonUp" SelectionChanged="ANBARGRD_SUB_SelectionChanged" RowEditEnding="ANBARGRD_SUB_RowEditEnding" PreviewKeyDown="ANBARGRD_SUB_PreviewKeyDown" PreparingCellForEdit="ANBARGRD_SUB_PreparingCellForEdit" BeginningEdit="ANBARGRD_SUB_BeginningEdit" Margin="-3,58,-3,10"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
@@ -139,7 +139,7 @@
                                       AutoGenerateColumns="False" 
                                       FlowDirection="RightToLeft" 
                                       SelectionUnit="FullRow" 
-                                      CanUserDeleteRows="False" BorderThickness="1" Margin="-3,58,-3,40" CellEditEnding="ANBARGRD_SUB2_CellEditEnding" RowEditEnding="ANBARGRD_SUB2_RowEditEnding" >
+                                      CanUserDeleteRows="False" BorderThickness="1" Margin="-3,58,-3,40" CellEditEnding="ANBARGRD_SUB2_CellEditEnding" RowEditEnding="ANBARGRD_SUB2_RowEditEnding"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
@@ -194,7 +194,7 @@
                                       AutoGenerateColumns="False" 
                                       FlowDirection="RightToLeft" 
                                       SelectionUnit="FullRow" 
-                                      CanUserDeleteRows="False" BorderThickness="1" Margin="-3,58,-3,40" CellEditEnding="ANBARGRD_SUB3_CellEditEnding" RowEditEnding="ANBARGRD_SUB3_RowEditEnding" >
+                                      CanUserDeleteRows="False" BorderThickness="1" Margin="-3,58,-3,40" CellEditEnding="ANBARGRD_SUB3_CellEditEnding" RowEditEnding="ANBARGRD_SUB3_RowEditEnding"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->

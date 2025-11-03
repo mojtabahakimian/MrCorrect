@@ -77,7 +77,7 @@
             SelectionUnit="FullRow" 
             CanUserDeleteRows="False"
             CanUserAddRows="False"
-            BorderThickness="1" Margin="0,38,0,55">
+            BorderThickness="1" Margin="0,38,0,55" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.ItemsPanel>
                 <ItemsPanelTemplate>

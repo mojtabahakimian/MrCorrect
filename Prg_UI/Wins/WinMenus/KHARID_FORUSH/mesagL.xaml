@@ -51,7 +51,7 @@
         <Label Content="مانده اسناد پاس نشده:" HorizontalAlignment="Left" Margin="843,0,0,0" VerticalAlignment="Center" FlowDirection="RightToLeft" Height="28"/>
         <TabControl Height="173" Margin="16,388,12,0" FlowDirection="RightToLeft" VerticalAlignment="Top">
             <TabItem Header="پیش فاکتور های مشتری">
-                <DataGrid x:Name="grade_pishDataGrid" AutoGenerateColumns="False" Style="{StaticResource DATAGRIDSTYLISH}" EnableRowVirtualization="True" RowDetailsVisibilityMode="VisibleWhenSelected">
+                <DataGrid x:Name="grade_pishDataGrid" AutoGenerateColumns="False" Style="{StaticResource DATAGRIDSTYLISH}" EnableRowVirtualization="True" RowDetailsVisibilityMode="VisibleWhenSelected" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                     <DataGrid.Columns>
                         <DataGridTextColumn x:Name="gMABColumn" Binding="{Binding GMAB,StringFormat='#,#'}" Header="مبلغ" Width="auto"/>
                         <DataGridTextColumn x:Name="nUMBERColumn" Binding="{Binding NUMBER}" Header=" شماره پیش فاکتور " Width="auto"/>
@@ -100,7 +100,7 @@
                 </DataGrid>
             </TabItem>
             <TabItem Header="حواله های مشتری">
-                <DataGrid x:Name="grade_havalaDataGrid" AutoGenerateColumns="False" EnableRowVirtualization="True" Style="{StaticResource DATAGRIDSTYLISH}" RowDetailsVisibilityMode="VisibleWhenSelected">
+                <DataGrid x:Name="grade_havalaDataGrid" AutoGenerateColumns="False" EnableRowVirtualization="True" Style="{StaticResource DATAGRIDSTYLISH}" RowDetailsVisibilityMode="VisibleWhenSelected" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                     <DataGrid.Columns>
                         <DataGridTextColumn  Binding="{Binding GMAB,StringFormat='#,#'}" Header="مبلغ" Width="auto"/>
                         <DataGridTextColumn  Binding="{Binding NUMBER}" Header="شماره حواله" Width="auto"/>
@@ -149,7 +149,7 @@
                 </DataGrid>
             </TabItem>
             <TabItem Header="پیش فاکتور های کارشناس">
-                <DataGrid x:Name="grade_pish_karshDataGrid" AutoGenerateColumns="False" EnableRowVirtualization="True" Style="{StaticResource DATAGRIDSTYLISH}"  RowDetailsVisibilityMode="VisibleWhenSelected">
+                <DataGrid x:Name="grade_pish_karshDataGrid" AutoGenerateColumns="False" EnableRowVirtualization="True" Style="{StaticResource DATAGRIDSTYLISH}"  RowDetailsVisibilityMode="VisibleWhenSelected" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                     <DataGrid.Columns>
                         <DataGridTextColumn  Binding="{Binding GMAB,StringFormat='#,#'}" Header="مبلغ" Width="auto"/>
                         <DataGridTextColumn  Binding="{Binding NUMBER}" Header="شماره پیش فاکتور" Width="auto"/>
@@ -200,7 +200,7 @@
                 </DataGrid>
             </TabItem>
             <TabItem Header="حواله های کارشناس">
-                <DataGrid x:Name="grade_havala_arshDataGrid" AutoGenerateColumns="False" EnableRowVirtualization="True" Style="{StaticResource DATAGRIDSTYLISH}"  RowDetailsVisibilityMode="VisibleWhenSelected">
+                <DataGrid x:Name="grade_havala_arshDataGrid" AutoGenerateColumns="False" EnableRowVirtualization="True" Style="{StaticResource DATAGRIDSTYLISH}"  RowDetailsVisibilityMode="VisibleWhenSelected" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                     <DataGrid.Columns>
                         <DataGridTextColumn  Binding="{Binding GMAB,StringFormat='#,#'}" Header="مبلغ" Width="auto"/>
                         <DataGridTextColumn  Binding="{Binding NUMBER}" Header="شماره حواله" Width="auto"/>
@@ -250,7 +250,7 @@
                 </DataGrid>
             </TabItem>
             <TabItem Header="چکهای برگشتی">
-                <DataGrid x:Name="grade_chek_bargashtiDataGrid" AutoGenerateColumns="False" EnableRowVirtualization="True" Style="{StaticResource DATAGRIDSTYLISH}" RowDetailsVisibilityMode="VisibleWhenSelected">
+                <DataGrid x:Name="grade_chek_bargashtiDataGrid" AutoGenerateColumns="False" EnableRowVirtualization="True" Style="{StaticResource DATAGRIDSTYLISH}" RowDetailsVisibilityMode="VisibleWhenSelected" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                     <DataGrid.Columns>
                         <DataGridTextColumn  Binding="{Binding N_SERI}" Header="شماره سریال" Width="auto"/>
                         <DataGridTemplateColumn   Header="وضعیت چک" Width="auto">

@@ -57,7 +57,7 @@
                   FlowDirection="RightToLeft"
                   SelectionUnit="FullRow"
                   IsKeyboardFocusWithinChanged="TCOD_MARKAZHAZ_SUB_IsKeyboardFocusWithinChanged"
-                  AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" Margin="10,55,10,10" RowEditEnding="TCOD_MARKAZHAZ_SUB_RowEditEnding" CellEditEnding="TCOD_MARKAZHAZ_SUB_CellEditEnding" PreviewKeyDown="TCOD_MARKAZHAZ_SUB_PreviewKeyDown" BeginningEdit="TCOD_MARKAZHAZ_SUB_BeginningEdit">
+                  AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" Margin="10,55,10,10" RowEditEnding="TCOD_MARKAZHAZ_SUB_RowEditEnding" CellEditEnding="TCOD_MARKAZHAZ_SUB_CellEditEnding" PreviewKeyDown="TCOD_MARKAZHAZ_SUB_PreviewKeyDown" BeginningEdit="TCOD_MARKAZHAZ_SUB_BeginningEdit" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->

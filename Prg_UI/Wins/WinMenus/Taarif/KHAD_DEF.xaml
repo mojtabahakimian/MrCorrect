@@ -84,7 +84,7 @@
                       ItemsSource="{Binding TAKHPERS_DATA}"
                       KeyboardNavigation.TabNavigation="Contained"
                       IsKeyboardFocusWithinChanged="TAKHPERS_SUB_IsKeyboardFocusWithinChanged"
-                      Margin="10,10,8,10" AutoGenerateColumns="False" FlowDirection="RightToLeft" SelectionUnit="FullRow" BorderThickness="1" Grid.Row="1" BeginningEdit="TAKHPERS_SUB_BeginningEdit" CellEditEnding="TAKHPERS_SUB_CellEditEnding" RowEditEnding="TAKHPERS_SUB_RowEditEnding" PreviewMouseLeftButtonDown="TAKHPERS_SUB_PreviewMouseLeftButtonDown" PreviewKeyDown="TAKHPERS_SUB_PreviewKeyDown" SelectionChanged="TAKHPERS_SUB_SelectionChanged">
+                      Margin="10,10,8,10" AutoGenerateColumns="False" FlowDirection="RightToLeft" SelectionUnit="FullRow" BorderThickness="1" Grid.Row="1" BeginningEdit="TAKHPERS_SUB_BeginningEdit" CellEditEnding="TAKHPERS_SUB_CellEditEnding" RowEditEnding="TAKHPERS_SUB_RowEditEnding" PreviewMouseLeftButtonDown="TAKHPERS_SUB_PreviewMouseLeftButtonDown" PreviewKeyDown="TAKHPERS_SUB_PreviewKeyDown" SelectionChanged="TAKHPERS_SUB_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                 <DataGrid.Style>
                     <!--خط بندی سطر های دیتاگرید-->

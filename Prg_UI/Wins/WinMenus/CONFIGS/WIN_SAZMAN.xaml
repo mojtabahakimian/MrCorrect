@@ -218,7 +218,7 @@
                         AutoGenerateColumns="False"
                         SelectionUnit="FullRow" PreviewKeyDown="DAFT_ASN_SUB_PreviewKeyDown"
                         CanUserDeleteRows="False" RowEditEnding="DAFT_ASN_SUB_RowEditEnding" CellEditEnding="DAFT_ASN_SUB_CellEditEnding"
-                        Margin="17,168,510,0" BorderThickness="1" BeginningEdit="DAFT_ASN_SUB_BeginningEdit" Height="166" VerticalAlignment="Top">
+                        Margin="17,168,510,0" BorderThickness="1" BeginningEdit="DAFT_ASN_SUB_BeginningEdit" Height="166" VerticalAlignment="Top" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                         <DataGrid.Style>
                             <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                                 <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>

@@ -64,7 +64,7 @@
                 FlowDirection="RightToLeft" 
                 SelectionUnit="FullRow" 
                   
-                AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" RowEditEnding="TCOD_BANKS_SUB_RowEditEnding" Margin="10,55,10,10" CellEditEnding="TCOD_BANKS_SUB_CellEditEnding" PreviewKeyDown="TCOD_BANKS_SUB_PreviewKeyDown" BeginningEdit="TCOD_BANKS_SUB_BeginningEdit" SelectionChanged="TCOD_BANKS_SUB_SelectionChanged">
+                AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" RowEditEnding="TCOD_BANKS_SUB_RowEditEnding" Margin="10,55,10,10" CellEditEnding="TCOD_BANKS_SUB_CellEditEnding" PreviewKeyDown="TCOD_BANKS_SUB_PreviewKeyDown" BeginningEdit="TCOD_BANKS_SUB_BeginningEdit" SelectionChanged="TCOD_BANKS_SUB_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <!--خط بندی سطر های دیتاگرید-->

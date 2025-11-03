@@ -62,7 +62,7 @@
                   KeyboardNavigation.TabNavigation="Contained"
                   FlowDirection="RightToLeft" 
                   SelectionUnit="FullRow" 
-                  AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" RowEditEnding="TARAZHES_SUB_RowEditEnding" Margin="10,55,10,10" CellEditEnding="TARAZHES_SUB_CellEditEnding" PreviewKeyDown="TARAZHES_SUB_PreviewKeyDown" BeginningEdit="TARAZHES_SUB_BeginningEdit" SelectionChanged="TARAZHES_SUB_SelectionChanged">
+                  AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" RowEditEnding="TARAZHES_SUB_RowEditEnding" Margin="10,55,10,10" CellEditEnding="TARAZHES_SUB_CellEditEnding" PreviewKeyDown="TARAZHES_SUB_PreviewKeyDown" BeginningEdit="TARAZHES_SUB_BeginningEdit" SelectionChanged="TARAZHES_SUB_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
                 <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
