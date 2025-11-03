@@ -195,6 +195,7 @@
                                       FlowDirection="RightToLeft" 
                                       SelectionUnit="FullRow" 
                                       CanUserDeleteRows="False" BorderThickness="1" Margin="-3,58,-3,40" CellEditEnding="ANBARGRD_SUB3_CellEditEnding" RowEditEnding="ANBARGRD_SUB3_RowEditEnding"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                              
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
@@ -206,7 +207,7 @@
 
                         <DataGrid.Columns>
                             <DataGridTextColumn 	x:Name="CODE_Third_COLUMN"           Binding="{Binding CODE, UpdateSourceTrigger=LostFocus}"             Header="کد کالا"             Width="100"  MinWidth="100"  IsReadOnly="True" Visibility="Visible" />
-                            <DataGridTextColumn 	x:Name="nam_Third_COLUMN"            Binding="{Binding nam, UpdateSourceTrigger=LostFocus}"              Header="کالا"                Width="*"    MinWidth="450"  IsReadOnly="True" Visibility="Visible" />
+                            <DataGridTextColumn 	x:Name="nam_Third_COLUMN"            Binding="{Binding nam, UpdateSourceTrigger=LostFocus}"              Header="کالا"                Width="auto"    MinWidth="450"  IsReadOnly="True" Visibility="Visible" />
                             <DataGridTextColumn 	x:Name="NAMES_Third_COLUMN"          Binding="{Binding NAMES, UpdateSourceTrigger=LostFocus}"            Header="واحد"               Width="150"  MinWidth="150"  IsReadOnly="True" Visibility="Visible" />
                             <DataGridTextColumn 	x:Name="MOG_Third_COLUMN"            Binding="{Binding MOG, UpdateSourceTrigger=LostFocus}"              Header="موجودی فعلی"        Width="150"  MinWidth="150"  Visibility="Visible" />
                             <DataGridTextColumn 	x:Name="NUM3_Third_COLUMN"           Binding="{Binding NUM3, UpdateSourceTrigger=LostFocus}"             Header="شمارش سوم"          Width="auto" MinWidth="50"   Visibility="Visible" />

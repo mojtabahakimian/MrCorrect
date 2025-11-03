@@ -66,7 +66,11 @@
         <Label Content="جستجو نام حساب تفضیلی 3 : " VerticalContentAlignment="Center" Margin="0,50,10,0" FlowDirection="RightToLeft" Height="29" VerticalAlignment="Top" HorizontalAlignment="Right" Width="160" />
         <TextBox x:Name="SearchText" Text="" TextChanged="SearchText_TextChanged" Height="29" Margin="10,50,170,0" Style="{StaticResource FuzzyOut}" Padding="3" TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right" Visibility="Visible"/>
         <DataGrid x:Name="TDETA_HES3_SUB" ItemsSource="{Binding TDETA_HES3_DATA}" 
-                  ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}" 		 ContextMenu="{StaticResource DataGridContextMenu}"
+                  ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                  ContextMenu="{StaticResource DataGridContextMenu}"
+              PreviewMouseRightButtonDown="DataGrid_PreviewMouseRightButtonDown"
+              MouseRightButtonUp="DG_SUB_MouseRightButtonUp"
+              ContextMenuOpening="DG_SUB_ContextMenuOpening" 
 
                   CellStyle="{StaticResource CellFocusyBorder}"
                   HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"

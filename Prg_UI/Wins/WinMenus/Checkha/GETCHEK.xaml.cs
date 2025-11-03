@@ -358,7 +358,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ دریافت صحیح نیست" });
             }
-            if (!DATE_IS_VALID(DATE_S.Text.ToRawTarikh()))
+            if (!DATE_IS_VALID(DATE_S.Text.ToRawTarikh(), default, false))
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ سررسید صحیح نیست" });
             }
@@ -584,7 +584,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
         }
 
-        public bool DATE_IS_VALID(string DATE, bool DisplayMsg = false)
+        public bool DATE_IS_VALID(string DATE, bool DisplayMsg = false, bool ForceSync = true)
         {
             bool Date_Is_Valid = true;
 
@@ -601,7 +601,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 }
                 else
                 {
-                    if (!Tarikh.IsSyncedDateNow(date_n_val, (bool)Baseknow.CTL_DT))
+                    if (ForceSync && !Tarikh.IsSyncedDateNow(date_n_val, (bool)Baseknow.CTL_DT))
                     {
                         if (DisplayMsg)
                         {
@@ -666,7 +666,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         {
             if (!IsVisible || !IsLoaded || isClosing) { return; }
 
-            if (!string.IsNullOrEmpty(SAYADI.Text))
+            if (!string.IsNullOrWhiteSpace(SAYADI.Text))
             {
                 if (SAYADI.Text.Length < 16 && SAYADI.Text != "0")
                 {

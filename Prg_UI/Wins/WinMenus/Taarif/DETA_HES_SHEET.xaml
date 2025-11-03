@@ -80,7 +80,7 @@
         <TextBox x:Name="SearchText" Text="" TextChanged="SearchText_TextChanged" Height="29" Margin="10,50,112,0" Style="{StaticResource FuzzyOut}" Padding="3" TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right" Visibility="Visible"/>
 
         <DataGrid x:Name="DETA_HES_SUB" ItemsSource="{Binding DETA_HES_DATA}" AddingNewItem="DETA_HES_SUB_AddingNewItem"
-            ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"   ContextMenu="{StaticResource DataGridContextMenu}"
+            ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
             CellStyle="{StaticResource CellFocusyBorder}"
             HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
             VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
@@ -93,6 +93,11 @@
             VirtualizingPanel.IsVirtualizing="True"
             VirtualizingPanel.VirtualizationMode="Recycling"
             ScrollViewer.CanContentScroll="True"
+                  
+                  ContextMenu="{StaticResource DataGridContextMenu}"
+              PreviewMouseRightButtonDown="DataGrid_PreviewMouseRightButtonDown"
+              MouseRightButtonUp="DG_SUB_MouseRightButtonUp"
+              ContextMenuOpening="DG_SUB_ContextMenuOpening" 
           
             AutoGenerateColumns="False" Margin="10,94,10,10" RowEditEnding="DETA_HES_SUB_RowEditEnding" BeginningEdit="DETA_HES_SUB_BeginningEdit" CellEditEnding="DETA_HES_SUB_CellEditEnding" PreviewKeyDown="DETA_HES_SUB_PreviewKeyDown" PreviewMouseDoubleClick="DETA_HES_PreviewMouseDoubleClick" ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Style>

@@ -47,7 +47,7 @@ namespace Functions
                         }
                         else if (grid is SfDataGrid syncfusionGrid)
                         {
-                            ExportSyncfusionDataGrid(syncfusionGrid, filePath);
+                            ExportSyncfusionDataGrid(syncfusionGrid, filePath, KeepTypeFormat);
                         }
                         else
                         {
@@ -232,21 +232,44 @@ namespace Functions
                     worksheet.Cells[1, i + 1].Style.Font.Bold = true;
                 }
 
-                // Export data
+                // Export data با حفظ فرمت
                 for (int rowIndex = 0; rowIndex < data.Count; rowIndex++)
                 {
                     for (int colIndex = 0; colIndex < data[rowIndex].Count; colIndex++)
                     {
                         var value = data[rowIndex][colIndex];
+                        var cell = worksheet.Cells[rowIndex + 2, colIndex + 1];
 
-                        // Check if the value is numeric
-                        if (value != null && (value is int || value is long || value is decimal || value is double || value is float))
+                        if (value != null)
                         {
-                            worksheet.Cells[rowIndex + 2, colIndex + 1].Value = value;
+                            // حفظ فرمت بر اساس نوع داده
+                            if (value is int || value is long || value is short || value is byte ||
+                                value is uint || value is ulong || value is ushort || value is sbyte ||
+                                value is decimal || value is double || value is float)
+                            {
+                                // اعداد (صحیح و اعشاری)
+                                cell.Value = value;
+                            }
+                            else if (value is DateTime dateTime)
+                            {
+                                // تاریخ و زمان
+                                cell.Value = dateTime;
+                                cell.Style.Numberformat.Format = "yyyy/mm/dd hh:mm:ss";
+                            }
+                            else if (value is bool boolValue)
+                            {
+                                // Boolean - ذخیره به صورت متن
+                                cell.Value = boolValue ? "True" : "False";
+                            }
+                            else
+                            {
+                                // سایر انواع به صورت متن
+                                cell.Value = value.ToString();
+                            }
                         }
                         else
                         {
-                            worksheet.Cells[rowIndex + 2, colIndex + 1].Value = value?.ToString() ?? "";
+                            cell.Value = "";
                         }
                     }
                 }
@@ -364,9 +387,13 @@ namespace Functions
         }
 
         /// <summary>
-        /// متد جدید برای گرفتن مقدار نمایشی از ستون‌های کمبوباکس در SfDataGrid
+        /// متد جدید برای گرفتن مقدار از ستون‌های SfDataGrid
         /// </summary>
-        private static object GetSyncfusionCellDisplayValue(object record, GridColumnBase column)
+        /// <param name="record">رکورد داده</param>
+        /// <param name="column">ستون</param>
+        /// <param name="useDisplayValue">آیا از مقدار نمایشی استفاده شود (برای ComboBox)</param>
+        /// <returns>مقدار سلول به صورت object</returns>
+        private static object GetSyncfusionCellValue(object record, GridColumnBase column, bool useDisplayValue = true)
         {
             try
             {
@@ -379,8 +406,8 @@ namespace Functions
                     {
                         var rawValue = propertyInfo.GetValue(record);
 
-                        // اگر ItemsSource تعریف شده و DisplayMemberPath و SelectedValuePath موجود باشند
-                        if (comboColumn.ItemsSource != null &&
+                        // اگر باید از display value استفاده کنیم
+                        if (useDisplayValue && comboColumn.ItemsSource != null &&
                             !string.IsNullOrWhiteSpace(comboColumn.DisplayMemberPath) &&
                             !string.IsNullOrWhiteSpace(comboColumn.SelectedValuePath))
                         {
@@ -409,7 +436,7 @@ namespace Functions
                                             if (displayProperty != null)
                                             {
                                                 var displayValue = displayProperty.GetValue(item);
-                                                return displayValue?.ToString() ?? string.Empty;
+                                                return displayValue ?? string.Empty;
                                             }
                                         }
                                     }
@@ -417,8 +444,8 @@ namespace Functions
                             }
                         }
 
-                        // اگر مقدار نمایشی پیدا نشد، مقدار خام را برگردان
-                        return rawValue?.ToString() ?? string.Empty;
+                        // اگر مقدار نمایشی پیدا نشد یا نباید استفاده شود، مقدار خام را برگردان
+                        return rawValue ?? string.Empty;
                     }
                 }
                 else
@@ -430,7 +457,7 @@ namespace Functions
                         if (propertyInfo != null)
                         {
                             var value = propertyInfo.GetValue(record);
-                            return value?.ToString() ?? string.Empty;
+                            return value ?? string.Empty;
                         }
                     }
                 }
@@ -440,12 +467,12 @@ namespace Functions
             catch (Exception ex)
             {
                 // Log the error if needed
-                Debug.WriteLine($"Error getting cell display value: {ex.Message}");
+                Debug.WriteLine($"Error getting cell value: {ex.Message}");
                 return string.Empty;
             }
         }
 
-        private static void ExportSyncfusionDataGrid(SfDataGrid dataGrid, string filePath)
+        private static void ExportSyncfusionDataGrid(SfDataGrid dataGrid, string filePath, bool keepTypeFormat = true)
         {
             // Capture data on UI thread first
             var headers = new List<string>();
@@ -472,9 +499,10 @@ namespace Functions
                         var column = dataGrid.Columns[colIndex];
                         if (!column.IsHidden)
                         {
-                            // استفاده از متد جدید برای دریافت مقدار نمایشی
-                            var displayValue = GetSyncfusionCellDisplayValue(record, column);
-                            rowData.Add(displayValue);
+                            // استفاده از متد جدید برای دریافت مقدار
+                            // برای ComboBox از display value استفاده می‌شود
+                            var cellValue = GetSyncfusionCellValue(record, column, useDisplayValue: true);
+                            rowData.Add(cellValue);
                         }
                     }
                     data.Add(rowData);
@@ -499,12 +527,50 @@ namespace Functions
                     worksheet.Range[1, i + 1].CellStyle.Font.Bold = true;
                 }
 
-                // Export data
+                // Export data با حفظ فرمت
                 for (int rowIndex = 0; rowIndex < data.Count; rowIndex++)
                 {
                     for (int colIndex = 0; colIndex < data[rowIndex].Count; colIndex++)
                     {
-                        worksheet.Range[rowIndex + 2, colIndex + 1].Text = data[rowIndex][colIndex]?.ToString() ?? "";
+                        var value = data[rowIndex][colIndex];
+                        var cell = worksheet.Range[rowIndex + 2, colIndex + 1];
+
+                        if (keepTypeFormat && value != null)
+                        {
+                            // حفظ فرمت بر اساس نوع داده
+                            if (value is int || value is long || value is short || value is byte ||
+                                value is uint || value is ulong || value is ushort || value is sbyte)
+                            {
+                                // اعداد صحیح
+                                cell.Number = Convert.ToDouble(value);
+                            }
+                            else if (value is decimal || value is double || value is float)
+                            {
+                                // اعداد اعشاری
+                                cell.Number = Convert.ToDouble(value);
+                            }
+                            else if (value is DateTime dateTime)
+                            {
+                                // تاریخ و زمان
+                                cell.DateTime = dateTime;
+                                cell.NumberFormat = "yyyy/mm/dd hh:mm:ss";
+                            }
+                            else if (value is bool boolValue)
+                            {
+                                // Boolean
+                                cell.Text = boolValue ? "True" : "False";
+                            }
+                            else
+                            {
+                                // سایر انواع به صورت متن
+                                cell.Text = value.ToString();
+                            }
+                        }
+                        else
+                        {
+                            // بدون حفظ فرمت، همه چیز به صورت متن
+                            cell.Text = value?.ToString() ?? "";
+                        }
                     }
                 }
 

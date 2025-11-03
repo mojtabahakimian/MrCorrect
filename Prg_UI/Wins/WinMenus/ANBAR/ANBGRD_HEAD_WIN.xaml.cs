@@ -129,7 +129,7 @@ namespace Wins.WinMenus.ANBAR
         }
         public string? ENTERED_VALUE_ROW { get; private set; }
         public ANBARGRD_SUB1_MODEL? CURRENT_ROW_ITEMS { get; private set; }
-        public ANBARGRD_SUB1_MODEL? WAS_ROW_ITEM { get; private set; }
+        //public ANBARGRD_SUB1_MODEL? WAS_ROW_ITEM { get; private set; } = new ANBARGRD_SUB1_MODEL();
 
         #region SPECIAL_F7
         object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
@@ -174,8 +174,6 @@ namespace Wins.WinMenus.ANBAR
             };
         }
         #endregion
-
-
 
         private bool _bl;
         public bool AllowDeletions
@@ -527,7 +525,7 @@ namespace Wins.WinMenus.ANBAR
                 {
                     if (ANBARGRD_SUB.SelectedItem.ToStringNullSafe() != "{NewItemPlaceholder}")
                     {
-                        WAS_ROW_ITEM = ((ANBARGRD_SUB1_MODEL)ANBARGRD_SUB.SelectedItem).Clone() as ANBARGRD_SUB1_MODEL;
+                        //WAS_ROW_ITEM = ((ANBARGRD_SUB1_MODEL)ANBARGRD_SUB.SelectedItem).Clone() as ANBARGRD_SUB1_MODEL;
                     }
                 }
             }
@@ -609,7 +607,7 @@ namespace Wins.WinMenus.ANBAR
             {
                 if (ANBARGRD_SUB.SelectedItem.ToStringNullSafe() != "{NewItemPlaceholder}")
                 {
-                    WAS_ROW_ITEM = ((ANBARGRD_SUB1_MODEL)ANBARGRD_SUB.SelectedItem).Clone() as ANBARGRD_SUB1_MODEL;
+                    //WAS_ROW_ITEM = ((ANBARGRD_SUB1_MODEL)ANBARGRD_SUB.SelectedItem).Clone() as ANBARGRD_SUB1_MODEL;
                 }
             }
         }
@@ -706,7 +704,7 @@ namespace Wins.WinMenus.ANBAR
                     {
                         universControl.PopNotifyShow("در ستون شمارش اول فقط باید عدد وارد گردد !", Pop1, Pop1Text1, Pop_Border1);
                         ANBARGRD_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                        CURRENT_ROW_ITEMS.NUM1 = WAS_ROW_ITEM.NUM1;
+                        //CURRENT_ROW_ITEMS.NUM1 = WAS_ROW_ITEM.NUM1;
                     }
                     else
                     {
@@ -736,7 +734,7 @@ namespace Wins.WinMenus.ANBAR
                     {
                         universControl.PopNotifyShow("در ستون موجودی فعلی فقط باید عدد وارد گردد !", Pop1, Pop1Text1, Pop_Border1);
                         ANBARGRD_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                        CURRENT_ROW_ITEMS.MOG = WAS_ROW_ITEM.MOG;
+                        //CURRENT_ROW_ITEMS.MOG = WAS_ROW_ITEM.MOG;
                     }
 
                 }
@@ -776,7 +774,7 @@ namespace Wins.WinMenus.ANBAR
                 ENTERED_VALUE_ROW = TexboVal?.Text.Trim();
             }
 
-            CURRENT_ROW_ITEMS = e.Row.Item as ANBARGRD_SUB1_MODEL;
+            var CURRENT_ROW_ITEMS2 = e.Row.Item as ANBARGRD_SUB2_MODEL;
             #endregion
 
             #region NUM1_After_Update
@@ -788,13 +786,13 @@ namespace Wins.WinMenus.ANBAR
                     {
                         universControl.PopNotifyShow("در ستون شمارش دوم فقط باید عدد وارد گردد !", Pop1, Pop1Text1, Pop_Border1);
                         ANBARGRD_SUB2_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                        CURRENT_ROW_ITEMS.NUM2 = WAS_ROW_ITEM.NUM1;
+                        //CURRENT_ROW_ITEMS2.NUM2 = WAS_ROW_ITEM.NUM1;
                     }
                     else
                     {
-                        if (Convert.ToDecimal(ENTERED_VALUE_ROW) - CURRENT_ROW_ITEMS.MOG == 0)
+                        if (Convert.ToDecimal(ENTERED_VALUE_ROW) - CURRENT_ROW_ITEMS2.MOG == 0)
                         {
-                            CURRENT_ROW_ITEMS.NUM3 = Convert.ToDouble(ENTERED_VALUE_ROW);
+                            CURRENT_ROW_ITEMS2.NUM3 = Convert.ToDouble(ENTERED_VALUE_ROW);
                         }
                     }
 
@@ -817,7 +815,7 @@ namespace Wins.WinMenus.ANBAR
                     {
                         universControl.PopNotifyShow("در ستون موجودی فعلی فقط باید عدد وارد گردد !", Pop1, Pop1Text1, Pop_Border1);
                         ANBARGRD_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                        CURRENT_ROW_ITEMS.MOG = WAS_ROW_ITEM.MOG;
+                        //CURRENT_ROW_ITEMS2.MOG = WAS_ROW_ITEM.MOG;
                     }
 
                 }
@@ -855,7 +853,7 @@ namespace Wins.WinMenus.ANBAR
                 ENTERED_VALUE_ROW = TexboVal?.Text.Trim();
             }
 
-            CURRENT_ROW_ITEMS = e.Row.Item as ANBARGRD_SUB1_MODEL;
+            var CURRENT_ROW_ITEMS3 = e.Row.Item as ANBARGRD_SUB1_MODEL;
             #endregion
 
             #region NUM1_After_Update
@@ -892,7 +890,7 @@ namespace Wins.WinMenus.ANBAR
                     {
                         universControl.PopNotifyShow("در ستون موجودی فعلی فقط باید عدد وارد گردد !", Pop1, Pop1Text1, Pop_Border1);
                         ANBARGRD_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                        CURRENT_ROW_ITEMS.MOG = WAS_ROW_ITEM.MOG;
+                        //CURRENT_ROW_ITEMS3.MOG = WAS_ROW_ITEM.MOG;
                     }
 
                 }
@@ -927,9 +925,9 @@ namespace Wins.WinMenus.ANBAR
             {
 
                 dbms.DoExecuteSQL($@"UPDATE ANBGRD_LST
-					                                SET NUM1 = {CURRENT_ROW_ITEMS.NUM1},
-					                                	MOG = {CURRENT_ROW_ITEMS.MOG}
-					                                WHERE GRD_NUM = {GRD_NUM.Text} AND CODE = N'{CURRENT_ROW_ITEMS.CODE}'");
+					                                SET NUM1 = {ROW.NUM1},
+					                                	MOG = {ROW.MOG}
+					                                WHERE GRD_NUM = {GRD_NUM.Text} AND CODE = N'{ROW.CODE}'");
 
             }
             catch (SqlException ex)
@@ -962,7 +960,7 @@ namespace Wins.WinMenus.ANBAR
                 return;
             }
 
-            var ROW = e.Row.Item as ANBARGRD_SUB1_MODEL;
+            var ROW = e.Row.Item as ANBARGRD_SUB2_MODEL;
             if (!BodyIsValid(ROW))
             {
                 return;
@@ -973,9 +971,9 @@ namespace Wins.WinMenus.ANBAR
             {
 
                 dbms.DoExecuteSQL($@"UPDATE ANBGRD_LST
-					                                SET NUM2 = {CURRENT_ROW_ITEMS.NUM2},
-					                                	MOG = {CURRENT_ROW_ITEMS.MOG}
-					                                WHERE GRD_NUM = {GRD_NUM.Text} AND CODE = N'{CURRENT_ROW_ITEMS.CODE}'");
+					                                SET NUM2 = {ROW.NUM2},
+					                                	MOG = {ROW.MOG}
+					                                WHERE GRD_NUM = {GRD_NUM.Text} AND CODE = N'{ROW.CODE}'");
 
             }
             catch (SqlException ex)
@@ -1007,7 +1005,7 @@ namespace Wins.WinMenus.ANBAR
                 return;
             }
 
-            var ROW = e.Row.Item as ANBARGRD_SUB1_MODEL;
+            var ROW = e.Row.Item as ANBARGRD_SUB3_MODEL;
             if (!BodyIsValid(ROW))
             {
                 return;
@@ -1018,9 +1016,9 @@ namespace Wins.WinMenus.ANBAR
             {
 
                 dbms.DoExecuteSQL($@"UPDATE ANBGRD_LST
-					                                SET NUM3 = {CURRENT_ROW_ITEMS.NUM3},
-					                                	MOG = {CURRENT_ROW_ITEMS.MOG}
-					                                WHERE GRD_NUM = {GRD_NUM.Text} AND CODE = N'{CURRENT_ROW_ITEMS.CODE}'");
+					                                SET NUM3 = {ROW.NUM3},
+					                                	MOG = {ROW.MOG}
+					                                WHERE GRD_NUM = {GRD_NUM.Text} AND CODE = N'{ROW.CODE}'");
 
             }
             catch (SqlException ex)
@@ -1043,7 +1041,7 @@ namespace Wins.WinMenus.ANBAR
             }
         }
 
-        private bool BodyIsValid(ANBARGRD_SUB1_MODEL _row)
+        private bool BodyIsValid(object _row)
         {
             var ROW = _row;
 

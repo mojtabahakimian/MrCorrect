@@ -67,7 +67,11 @@
         <TextBox x:Name="SearchText" Text="" TextChanged="SearchText_TextChanged" Height="29" Margin="10,50,169,0" Style="{StaticResource FuzzyOut}" Padding="3" TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right" Visibility="Visible"/>
 
         <DataGrid x:Name="TDETA_HES2_SUB" ItemsSource="{Binding TDETA_HES2_DATA}"
-              ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"  ContextMenu="{StaticResource DataGridContextMenu}"
+              ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"  
+                  ContextMenu="{StaticResource DataGridContextMenu}"
+              PreviewMouseRightButtonDown="DataGrid_PreviewMouseRightButtonDown"
+              MouseRightButtonUp="DG_SUB_MouseRightButtonUp"
+              ContextMenuOpening="DG_SUB_ContextMenuOpening" 
               CellStyle="{StaticResource CellFocusyBorder}"
               HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
               VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
