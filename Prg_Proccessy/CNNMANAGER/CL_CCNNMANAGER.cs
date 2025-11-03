@@ -5,6 +5,7 @@ using Microsoft.Win32;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
+using System;
 using System.ComponentModel;
 using System.Data;
 using System.Text;
@@ -19,7 +20,27 @@ namespace Prg_SendInvoice.CNNMANAGER
         //{
         //    GC.SuppressFinalize(this);
         //}
-        public static string CONNECTION_STR { get; set; } // = @"Data Source=MERCEDES\SQL2008;Initial Catalog=YAZD2024;Integrated Security=True;TrustServerCertificate=True;";
+
+        private static readonly object _lock = new object();
+        private static string _connectionStr;
+        public static string CONNECTION_STR // = @"Data Source=MERCEDES\SQL2008;Initial Catalog=YAZD2024;Integrated Security=True;TrustServerCertificate=True;";
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return _connectionStr;
+                }
+            }
+            set
+            {
+                lock (_lock)
+                {
+                    _connectionStr = value;
+                }
+            }
+        }
+
         public static bool ConnectedToSQLDB { get; set; } = false;
         public static string ExtractConnectionString(string _fullConnectionString)
         {
@@ -84,7 +105,7 @@ namespace Prg_SendInvoice.CNNMANAGER
 
             return connectionStringBuilder.ConnectionString + ";";
         }
-        
+
         private static readonly int[] ConnectionErrorNumbers =
         {
             2,      // The system cannot find the file specified
@@ -164,6 +185,19 @@ namespace Prg_SendInvoice.CNNMANAGER
             //        db?.Close(); db?.Dispose();
             //    }
             //}
+
+            if (string.IsNullOrWhiteSpace(CONNECTION_STR))
+            {
+                // سعی کن دوباره از Registry بخونی
+                var dbms = new CL_CCNNMANAGER();
+                if (!dbms.CheckIsConnectedToSQLDB())
+                {
+                    var ex = new InvalidOperationException("Cannot connect to database");
+                    LogSqlQuery(sql, ex);
+                    throw ex;  // خطای واضح و قابل فهم
+                }
+            }
+
             const int maxRetries = 3;
 
             for (int attempt = 0; attempt <= maxRetries; attempt++)
@@ -208,6 +242,18 @@ namespace Prg_SendInvoice.CNNMANAGER
         [System.Diagnostics.DebuggerStepThrough]
         public int? DoExecuteSQL(string sql, object parameters = null)
         {
+            if (string.IsNullOrWhiteSpace(CONNECTION_STR))
+            {
+                // سعی کن دوباره از Registry بخونی
+                var dbms = new CL_CCNNMANAGER();
+                if (!dbms.CheckIsConnectedToSQLDB())
+                {
+                    var ex = new InvalidOperationException("Cannot connect to database");
+                    LogSqlQuery(sql, ex);
+                    throw ex;  // خطای واضح و قابل فهم
+                }
+            }
+
             using var db = new SqlConnection(CONNECTION_STR);
 
             int maxRetries = 3;
@@ -412,7 +458,7 @@ namespace Prg_SendInvoice.CNNMANAGER
             }
         }
 
-        
+
         [System.Diagnostics.DebuggerStepThrough]
         public IEnumerable<TEntity> DoGetStoreProcedureSQL<TEntity>(string sql, object parameters = null)
         {

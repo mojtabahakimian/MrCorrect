@@ -3228,9 +3228,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
             int RDCount = RecordsData.View != null ? RecordsData.View.Cast<object>().Count() : 0;
             if (jahat == INavigator.Jahat.NewItem || RDCount == 0)
             {
-                ClearFreshNew();
                 NewRecord = true;
                 RecordsData.View.MoveCurrentToLast();
+                ClearFreshNew();
 
                 ////Form_Current();
             }
@@ -3296,6 +3296,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             PEPID.SelectedValue = null; PEPID.Items.Refresh();
             PEID.SelectedValue = null; PEID.Items.Refresh();
+
+            MODAT_PPID_Enter();
 
             MOLAH.Text = null;
             MAS.Text = "0";
@@ -3950,7 +3952,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             var CurrentRecord = RecordsData.View.CurrentItem as pish_view;
 
-            if (CurrentRecord?.MODAT_PPID != null)
+            if (!NewRecord && CurrentRecord?.MODAT_PPID != null)
             {
                 currentSelectedPPID = Convert.ToInt32(CurrentRecord.MODAT_PPID);
             }
@@ -4012,7 +4014,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO").ToList();
                     }
                 }
-                return;
             }
 
             // ۵. اگر مقدار ذخیره‌شده (currentSelectedPPID) جزو filteredList نبود:
