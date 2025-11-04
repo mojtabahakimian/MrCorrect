@@ -69,12 +69,22 @@
         </ComboBox>
         <Label x:Name="Label11_Copy" Content="نوع خرید : " Margin="0,68,684,0"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Top" HorizontalAlignment="Right" Width="52"/>
         <ComboBox x:Name="TAH" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Width="774" IsTextSearchEnabled="True" Margin="0,108,98,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right"  IsTabStop="True">
-            <d:ComboBox.ItemsPanel>
+            <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <VirtualizingStackPanel d:IsVirtualizing="True" d:VirtualizationMode="Recycling"/>
+                    <VirtualizingStackPanel IsVirtualizing="True" VirtualizationMode="Recycling"/>
                 </ItemsPanelTemplate>
-            </d:ComboBox.ItemsPanel>
+            </ComboBox.ItemsPanel>
         </ComboBox>
+
+        <Label Content="واحد:" Margin="0,148,477,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="32" Height="26" VerticalAlignment="Top"/>
+        <ComboBox x:Name="DEPATMAN"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,148,512,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="360">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+
         <Label x:Name="Label11_Copy1" Content="تحویل گیرنده : " Margin="0,110,24,0"  FlowDirection="RightToLeft" FontSize="10" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="71"/>
         <CheckBox x:Name="OKF" Content="تایید برگه" Margin="263,72,0,0" VerticalAlignment="Top" FontSize="10" HorizontalAlignment="Left" Width="64" IsHitTestVisible="False" Focusable="False" />
         <Button x:Name="ESLAH" Content="اصلاح برگه"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="145,66,0,0" HorizontalAlignment="Left" Width="100" Height="34" VerticalAlignment="Top" Click="ESLAH_Click" />
@@ -285,10 +295,11 @@
         </DataGrid>
         <Label x:Name="Label11_Copy8" Content="ارجاع به : " Margin="0,0,356,81"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="47"/>
         <Label x:Name="Label11_Copy9" Content="موجودی : " Margin="0,0,528,114"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="48"/>
-      
+
         <Button x:Name="BTN_FACTORS" Tag="RD" Content="لیست درخواست پرداخت ها" Margin="0,148,15,0" BorderBrush="{x:Null}" RenderTransformOrigin="0.48,0.541"  FontSize="10" Height="34" VerticalAlignment="Top" HorizontalAlignment="Right" Width="171" Foreground="#DDFFFFFF" Click="BTN_FACTORS_Click"/>
 
         <CNC:RecordNavigatorControl x:Name = "navigatorControl" VerticalAlignment = "Bottom" Margin = "10,0,13,16" />
+
 
     </Grid>
 </Window>

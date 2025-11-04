@@ -704,6 +704,8 @@ namespace Prg_UI
             }
             #endregion
 
+        
+
             #region SplashWindowy
 
             // ManualResetEvent acts as a block.  It waits for a signal to be set.
@@ -742,8 +744,7 @@ namespace Prg_UI
 
         private void SetGeneralRdpMode()
         {
-            var optionManager = new GeneralOptionManager();
-            if (optionManager.IsRDPMode) //SystemParameters.IsRemoteSession &&
+            if (GeneralOptionManager.IsRDPMode) //SystemParameters.IsRemoteSession &&
             {
                 //// Reduce framerate universally
                 Timeline.DesiredFrameRateProperty.OverrideMetadata(typeof(Timeline), new FrameworkPropertyMetadata { DefaultValue = 15 });

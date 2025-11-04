@@ -33,6 +33,7 @@ using Wins.WinMenus.KHARID_FORUSH;
 using Functions;
 using Microsoft.Data.SqlClient;
 using System.ComponentModel;
+using Prg_Proccessy.Generaly;
 
 namespace Wins.WinMenus.ANBAR
 {
@@ -243,7 +244,8 @@ namespace Wins.WinMenus.ANBAR
             get { return _ican; }
             set
             {
-                _ican = value;
+                _ican = value;          
+
                 if (_ican is true) // Is Enable and ReadOnly = False
                 {
                     ALL_ITEMS_ENABLE();
@@ -364,6 +366,8 @@ namespace Wins.WinMenus.ANBAR
             INVO_LST_ENTEGHAL_SUB.IsReadOnly = false;
             DELETE_BTN.IsEnabled = true;
             SAVE_BTN.IsEnabled = true;
+
+            DEPATMAN.IsEnabled = true;
         }
 
         private void ALL_ITEMS_DISABLE()
@@ -387,6 +391,8 @@ namespace Wins.WinMenus.ANBAR
             INVO_LST_ENTEGHAL_SUB.IsReadOnly = true;
             DELETE_BTN.IsEnabled = false;
             SAVE_BTN.IsEnabled = false;
+
+            DEPATMAN.IsEnabled = false;
         }
 
         public byte TAG { get; set; } = 5; //تگ انتقال کالا از انبار به انبار
@@ -483,6 +489,21 @@ namespace Wins.WinMenus.ANBAR
             ANBARF.DisplayMemberPath = "NAMES";
 
             VAHED_K_COLUMN.ItemsSource = dbms.DoGetDataSQL<HLE_QT6>("SELECT CODE AS VAHED,NAMES FROM dbo.TCOD_VAHEDS").ToList();
+
+            //واحد ها
+            var RST = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
+            foreach (var item in RST)
+            {
+                item.DEPNAME = item.DEPNAME.NormalizeArabicPersian();
+            }
+            DEPATMAN.ItemsSource = RST;
+
+            DEPATMAN.DisplayMemberPath = "DEPNAME";
+            DEPATMAN.SelectedValuePath = "DEPATMAN";
+            DEPATMAN.SelectedIndex = 0;
+            DEPATMAN.SelectedItem = 0;
+            DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER;
+
         }
 
         #region ANBAR_MANAGEMENT
@@ -658,6 +679,8 @@ namespace Wins.WinMenus.ANBAR
                     {
                         sgn3usid.Text = null;
                     }
+
+                    DEPATMAN.SelectedValue = HEADER_FAC?.DEPATMAN; DEPATMAN.Items.Refresh();
 
                     OKF.IsChecked = HEADER_FAC.OKF; //تایید فاکتور
 
@@ -2366,15 +2389,22 @@ namespace Wins.WinMenus.ANBAR
                     }
 
                     //INSERT
-                    dbms.DoExecuteSQL($@"INSERT INTO HEAD_LST (       NUMBER, TAG,          MOLAH,          TAH,                 ANBAR,                      DATE_N, VAS,                ANBARF,           USER_NAME,                            SGN1,                            SGN2,                            SGN3,                             OKF,                                                                                              FNUMCO , ARZD,                                                           sgn1usid,                                                        sgn2usid,                                                         sgn3usid, ARZKIND,N_S) 
-			                                           VALUES ({NUMBER.Text},   5,N'{MOLAH.Text}',N'{TAH.Text}', {ANBAR.SelectedValue}, {DATE_N.Text.ToRawTarikh()},   0,{ANBARF.SelectedValue}, N'{CL_HESABDARI.UCurrentUser()}',{Convert.ToByte(SGN1.IsChecked)},{Convert.ToByte(SGN2.IsChecked)},{Convert.ToByte(SGN3.IsChecked)},{Convert.ToByte(OKF.IsChecked)}, {(string.IsNullOrEmpty(FNUMCO.Text) ? "NULL" : FNUMCO.Text)},    1,  {(string.IsNullOrEmpty(sgn1usid.Tag.ToStringNullSafe()) ? "NULL" : sgn1usid.Tag.ToStringNullSafe())},{(string.IsNullOrEmpty(sgn2usid.Tag.ToStringNullSafe()) ? "NULL" : sgn2usid.Tag.ToStringNullSafe())}, {(string.IsNullOrEmpty(sgn3usid.Tag.ToStringNullSafe()) ? "NULL" : sgn3usid.Tag.ToStringNullSafe())},       1,{SANAD_NUMBER ?? "NULL"})");
+                    dbms.DoExecuteSQL($@"INSERT INTO HEAD_LST (       NUMBER, TAG, DEPATMAN ,   SHIFT ,       MOLAH,          TAH,                 ANBAR,                      DATE_N, VAS,                ANBARF,           USER_NAME,                            SGN1,                            SGN2,                            SGN3,                             OKF,                                                                                              FNUMCO , ARZD,                                                           sgn1usid,                                                        sgn2usid,                                                         sgn3usid, ARZKIND,N_S) 
+			                                           VALUES ({NUMBER.Text},   5, {DEPATMAN.SelectedValue ?? "NULL"}, {CL_Generaly.SHIFT_OF_USER} ,N'{MOLAH.Text}',N'{TAH.Text}', {ANBAR.SelectedValue}, {DATE_N.Text.ToRawTarikh()},   0,{ANBARF.SelectedValue}, N'{CL_HESABDARI.UCurrentUser()}',{Convert.ToByte(SGN1.IsChecked)},{Convert.ToByte(SGN2.IsChecked)},{Convert.ToByte(SGN3.IsChecked)},{Convert.ToByte(OKF.IsChecked)}, {(string.IsNullOrEmpty(FNUMCO.Text) ? "NULL" : FNUMCO.Text)},    1,  {(string.IsNullOrEmpty(sgn1usid.Tag.ToStringNullSafe()) ? "NULL" : sgn1usid.Tag.ToStringNullSafe())},{(string.IsNullOrEmpty(sgn2usid.Tag.ToStringNullSafe()) ? "NULL" : sgn2usid.Tag.ToStringNullSafe())}, {(string.IsNullOrEmpty(sgn3usid.Tag.ToStringNullSafe()) ? "NULL" : sgn3usid.Tag.ToStringNullSafe())},       1,{SANAD_NUMBER ?? "NULL"})");
 
                     RefreshAfterUpdate();
                 }
                 else
                 {
                     //UPDATE
-                    dbms.DoExecuteSQL($@"UPDATE HEAD_LST SET NUMBER = {NUMBER.Text}, TAG = 5, MOLAH = N'{MOLAH.Text}' , TAH = N'{TAH.Text}', ANBAR = {ANBAR.SelectedValue}, DATE_N = {DATE_N.Text.ToRawTarikh()}, VAS = 0, ANBARF = {ANBARF.SelectedValue}, USER_NAME = N'{CL_HESABDARI.UCurrentUser()}', SGN1 = {Convert.ToByte(SGN1.IsChecked)}, SGN2 = {Convert.ToByte(SGN2.IsChecked)}, SGN3 = {Convert.ToByte(SGN3.IsChecked)}, OKF = {Convert.ToByte(OKF.IsChecked)}, FNUMCO = {(string.IsNullOrEmpty(FNUMCO.Text) ? "NULL" : FNUMCO.Text)} , ARZD = 1, sgn1usid = {(string.IsNullOrEmpty(Tag.ToStringNullSafe()) ? "NULL" : Tag.ToStringNullSafe())}, sgn2usid = {(string.IsNullOrEmpty(sgn2usid.Tag.ToStringNullSafe()) ? "NULL" : sgn2usid.Tag.ToStringNullSafe())}, sgn3usid = {(string.IsNullOrEmpty(sgn3usid.Tag.ToStringNullSafe()) ? "NULL" : sgn3usid.Tag.ToStringNullSafe())}, ARZKIND = 1 , N_S = {SANAD_NUMBER ?? "NULL"}
+                    dbms.DoExecuteSQL($@"UPDATE HEAD_LST SET 
+                                         NUMBER = {NUMBER.Text}, TAG = 5, MOLAH = N'{MOLAH.Text}' , 
+                                         DEPATMAN={DEPATMAN.SelectedValue ?? "NULL"},
+                                         SHIFT = {CL_Generaly.SHIFT_OF_USER},
+                                         TAH = N'{TAH.Text}', ANBAR = {ANBAR.SelectedValue}, DATE_N = {DATE_N.Text.ToRawTarikh()}, 
+                                         VAS = 0, ANBARF = {ANBARF.SelectedValue}, USER_NAME = N'{CL_HESABDARI.UCurrentUser()}',
+                                         SGN1 = {Convert.ToByte(SGN1.IsChecked)}, SGN2 = {Convert.ToByte(SGN2.IsChecked)}, SGN3 = {Convert.ToByte(SGN3.IsChecked)}, OKF = {Convert.ToByte(OKF.IsChecked)},
+                                         FNUMCO = {(string.IsNullOrEmpty(FNUMCO.Text) ? "NULL" : FNUMCO.Text)} , ARZD = 1, sgn1usid = {(string.IsNullOrEmpty(Tag.ToStringNullSafe()) ? "NULL" : Tag.ToStringNullSafe())}, sgn2usid = {(string.IsNullOrEmpty(sgn2usid.Tag.ToStringNullSafe()) ? "NULL" : sgn2usid.Tag.ToStringNullSafe())}, sgn3usid = {(string.IsNullOrEmpty(sgn3usid.Tag.ToStringNullSafe()) ? "NULL" : sgn3usid.Tag.ToStringNullSafe())}, ARZKIND = 1 , N_S = {SANAD_NUMBER ?? "NULL"}
 
                                         WHERE NUMBER = {NUMBER.Text} AND TAG = 5");
                 }
@@ -3244,6 +3274,8 @@ namespace Wins.WinMenus.ANBAR
             PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
             PERSONEL.SelectedIndex = -1; PERSONEL.Items.Refresh();
             PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+
+            DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER; DEPATMAN.Items.Refresh();
 
             MOGU2.Text = null;
             MOGU.Text = null;

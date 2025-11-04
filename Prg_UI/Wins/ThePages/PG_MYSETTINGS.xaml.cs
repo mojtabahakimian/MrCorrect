@@ -1,5 +1,6 @@
 ﻿using Functions;
 using Prg_UI.Functions;
+using Prg_UI.HelperWins;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,14 +10,16 @@ namespace Wins.ThePages
 {
     public partial class PG_MYSETTINGS : Page
     {
-        private readonly GeneralOptionManager _optionManager;
 
         public PG_MYSETTINGS()
         {
             InitializeComponent();
 
-            _optionManager = new GeneralOptionManager();
-            RemoteModeTB.IsChecked = _optionManager.IsRDPMode;
+            // بارگذاری مقدار اولیه به صورت async
+            Loaded += async (s, e) =>
+            {
+                RemoteModeTB.IsChecked = await GeneralOptionManager.GetIsRDPModeAsync();
+            };
         }
 
         private void BackerBtn_Click(object sender, RoutedEventArgs e)
@@ -52,9 +55,21 @@ namespace Wins.ThePages
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.MaterialThemSettingy, null);
         }
 
-        private void RemoteModeTB_Click(object sender, RoutedEventArgs e)
+        //private void RemoteModeTB_Click(object sender, RoutedEventArgs e)
+        //{
+        //    _optionManager.IsRDPMode = Convert.ToBoolean(RemoteModeTB.IsChecked);
+        //}
+        private async void RemoteModeTB_Click(object sender, RoutedEventArgs e)
         {
-            _optionManager.IsRDPMode = Convert.ToBoolean(RemoteModeTB.IsChecked);
+            bool newValue = Convert.ToBoolean(RemoteModeTB.IsChecked);
+            // ذخیره در دیتابیس به صورت async
+            bool success = await GeneralOptionManager.SetIsRDPModeAsync(newValue);
+            if (!success)
+            {
+                // اگر ذخیره نشد، تیک را به حالت قبلی برگردان
+                RemoteModeTB.IsChecked = !newValue;
+                new Msgwin(false, "خطا در ذخیره تنظیمات!").Show();
+            }
         }
 
         private void Image_PreviewMouseDown_3(object sender, MouseButtonEventArgs e)

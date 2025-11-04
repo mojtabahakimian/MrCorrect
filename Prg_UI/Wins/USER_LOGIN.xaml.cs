@@ -255,8 +255,7 @@ namespace Prg_UI.Wins
 
 
 
-            ScriptSqly.LetsGo();
-
+            ScriptSqly.LetsGo();      
 
 #if DEBUG
             return;//Should Remove this lone
@@ -368,7 +367,8 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 102; Baseknow.UUSER = "mina mehrnia";
             //Baseknow.USERCOD = 108; Baseknow.UUSER = "modir-mali";
             //Baseknow.USERCOD = 167; Baseknow.UUSER = "Mr nikonahad";
-            Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
+            //Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
+            Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
 
             CL_Generaly.SHIFT_OF_USER = 1;
             CL_Generaly.VAHED_OF_USER = 1;
@@ -379,11 +379,11 @@ namespace Prg_UI.Wins
             //new WIN_OPTIONS().Show();
             //new HEAD_LST_ENTEGHAL_WIN().Show();
 
-            new WinBase().Show();
+            //new WinBase().Show();
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "8949,8965");
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_SAZMAN_MOSHAKHASAT, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_F12, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_PAYGETD_LST, this);
 
 
             //new F_MENU_CHEK("chkva", "لیست چکهای دریافتی نزد بانک و صندوق وصول نشده").Show();

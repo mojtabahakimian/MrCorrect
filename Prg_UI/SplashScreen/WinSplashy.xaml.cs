@@ -10,8 +10,7 @@ namespace Prg_UI.SplashScreen
             InitializeComponent();
 
             //<Image x:Name="myg" Margin="-9,8,4,5" Visibility="Hidden" gifplayer:AnimationBehavior.RepeatBehavior="2x" gifplayer:AnimationBehavior.AutoStart="True" gifplayer:AnimationBehavior.SourceUri="/UiDrive/IMGS/SplashHandwrite.gif" Stretch="UniformToFill"/>
-            var optionManager = new GeneralOptionManager();
-            if (optionManager.IsRDPMode)
+            if (true) //GeneralOptionManager.IsRDPMode
             {
                 myg.Visibility = Visibility.Collapsed;
                 myg = null;

@@ -36,6 +36,7 @@ using Microsoft.Data.SqlClient;
 using Wins.WinOther;
 using static Interfaces.INavigator;
 using System.Windows.Data;
+using Prg_Proccessy.Generaly;
 
 namespace Wins.WinMenus.ANBAR
 {
@@ -150,6 +151,9 @@ namespace Wins.WinMenus.ANBAR
             set
             {
                 _ican = value;
+
+                DEPATMAN.IsEnabled = _ican;
+
                 if (_ican) // Is Enable and ReadOnly = False
                 {
                     ALL_ITEMS_ENABLE();
@@ -199,7 +203,6 @@ namespace Wins.WinMenus.ANBAR
         private const byte TAG = 26;
 
         public int? CUST_KIND { get; set; }
-        public int? DEPATMAN { get; set; }
         public int? SHIFT { get; set; }
 
         public int CURRENT_ROW_INDEX { get; private set; }
@@ -830,6 +833,8 @@ namespace Wins.WinMenus.ANBAR
                     PERSONEL.SelectedIndex = -1; PERSONEL.Items.Refresh();
                     PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
 
+                    DEPATMAN.SelectedValue = HEADER_FAC?.DEPATMAN; DEPATMAN.Items.Refresh();
+
                     SGN1.IsChecked = Convert.ToBoolean(HEADER_FAC.SGN1);
                     SGN2.IsChecked = Convert.ToBoolean(HEADER_FAC.SGN2);
 
@@ -957,6 +962,19 @@ namespace Wins.WinMenus.ANBAR
             hTAG.DisplayMemberPath = "NAMES";
             hTAG.SelectedValuePath = "CODE";
             hTAG.SelectedIndex = 0; hTAG.Items.Refresh();
+
+            //واحد ها
+            var RST = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
+            foreach (var item in RST)
+            {
+                item.DEPNAME = item.DEPNAME.NormalizeArabicPersian();
+            }
+            DEPATMAN.ItemsSource = RST;
+            DEPATMAN.DisplayMemberPath = "DEPNAME";
+            DEPATMAN.SelectedValuePath = "DEPATMAN";
+            DEPATMAN.SelectedIndex = 0;
+            DEPATMAN.SelectedItem = 0;
+            DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER;
 
             //انبار کالا
             //پر کردن کمبوباکس ستون واحد به طور مقدار اولیه
@@ -2266,7 +2284,7 @@ namespace Wins.WinMenus.ANBAR
 
                 //INSERT
                 dbms.DoExecuteSQL(@$"INSERT INTO HEAD_LST (       NUMBER,TAG,                      DATE_N,      TAH, MAS, VAS,                    CUST_NO,          MOLAH, M_NAGHD, MABL_VAR,MABL_HAV,MABL_HAZ,TAKHFIF,DEPATMAN,SHIFT,CUST_KIND,           USER_NAME,                            SGN1,                            SGN2,MBAA,TICMBAA,TKHF,                              OKF,SADER,ARZD,ARZKIND,JAY) 
-			                                       VALUES ({NUMBER.Text}, 26, {DATE_N.Text.ToRawTarikh()}, N'{TAH.Text}',   0,   0, N'{CUST_NO.SelectedValue}', N'{MOLAH.Text}',       0,        0,       0,       0,      0,       1,    1,     NULL, N'{USER_NAME.Text}',{Convert.ToByte(SGN1.IsChecked)},{Convert.ToByte(SGN2.IsChecked)},   0,      0,   {Convert.ToByte(OKF.IsChecked)},  1,    0,   1,  1,  0);");
+			                                       VALUES ({NUMBER.Text}, 26, {DATE_N.Text.ToRawTarikh()}, N'{TAH.Text}',   0,   0, N'{CUST_NO.SelectedValue}', N'{MOLAH.Text}',       0,        0,       0,       0,  {DEPATMAN.SelectedValue ?? "NULL"}, {CL_Generaly.SHIFT_OF_USER},    1,     NULL, N'{USER_NAME.Text}',{Convert.ToByte(SGN1.IsChecked)},{Convert.ToByte(SGN2.IsChecked)},   0,      0,   {Convert.ToByte(OKF.IsChecked)},  1,    0,   1,  1,  0);");
 
                 RefreshAfterUpdate();
 
@@ -2287,9 +2305,9 @@ namespace Wins.WinMenus.ANBAR
                                          MABL_HAV = 0,
                                          MABL_HAZ = 0,
                                          TAKHFIF = 0,
-                                         DEPATMAN = 1,
-                                         SHIFT = 1,
                                          CUST_KIND = NULL,
+                                         DEPATMAN={DEPATMAN.SelectedValue ?? "NULL"},
+                                         SHIFT = {CL_Generaly.SHIFT_OF_USER},
                                          USER_NAME = N'{USER_NAME.Text}',
                                          SGN1 = {Convert.ToByte(SGN1.IsChecked)},
                                          SGN2 = {Convert.ToByte(SGN2.IsChecked)},
@@ -2575,6 +2593,8 @@ namespace Wins.WinMenus.ANBAR
             PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
             PERSONEL.SelectedIndex = -1; PERSONEL.Items.Refresh();
             PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+
+            DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER; DEPATMAN.Items.Refresh();
 
             MOGU.Text = null;
             Text59.Text = "0";

@@ -40,6 +40,7 @@ using System.ComponentModel;
 using System.Windows.Threading;
 using Wins.WinMenus.ANBAR;
 using System.Windows.Data;
+using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
 {
@@ -158,6 +159,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             set
             {
                 _ican = value;
+                DEPATMAN.IsEnabled = _ican;
                 AllowAdditionEdits(_ican);
             }
         }
@@ -399,6 +401,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 PERSONEL.Text = null;
                 PERSONEL.SelectedValue = null; PERSONEL.Items.Refresh();
                 PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+
+                DEPATMAN.SelectedValue = HEADER_FAC?.DEPATMAN; DEPATMAN.Items.Refresh();
 
                 if (HEADER_FAC?.OKF == null || HEADER_FAC?.OKF == false)
                 {
@@ -1604,6 +1608,22 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 new COMBOYMODEL { ID = 1, NAME = "خارجی" }
             };
             SADER.SelectedValue = 0; SADER.Items.Refresh();
+
+
+
+            //واحد ها
+            var RST = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
+            foreach (var item in RST)
+            {
+                item.DEPNAME = item.DEPNAME.NormalizeArabicPersian();
+            }
+            DEPATMAN.ItemsSource = RST;
+
+            DEPATMAN.DisplayMemberPath = "DEPNAME";
+            DEPATMAN.SelectedValuePath = "DEPATMAN";
+            DEPATMAN.SelectedIndex = 0;
+            DEPATMAN.SelectedItem = 0;
+            DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER;
         }
         private void ReGetdata()
         {
@@ -2839,50 +2859,79 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                                 NUMBER.Text = num.ToString();
                                 NUMBER.UpdateLayout();
                             }
-                            string QRE_HEADINSUP = $@"INSERT INTO dbo.HEAD_LST(NUMBER, TAG, DATE_N, TAH, VAS, CUST_NO, MOLAH, M_NAGHD, MABL_VAR, MOIN_VAR, MABL_HAV, MOIN_HAV, MABL_HAZ, MOIN_HAZ, TAKHFIF, MOIN_KHF, ANBARF, FNUMCO, SHIFT, USER_NAME,  SGN1, SGN2, SGN4, MBAA, HMBAA, TICMBAA, TKHF, OKF, SADER, ARZD, ARZKIND, CDDATE, CDTIME, OKDATE, OKTIME, JAY, PEPID, PEID, sgn1usid, sgn2usid)
-                                                  VALUES({num},
-                                              	  1 ,
-                                              	  {DATE_N.Text.ToRawTarikh()}   ,
-                                              	  N'{tah}' ,
-                                              	  0,
-                                              	  N'{CUST_NO.SelectedValue}',
-                                              	  N'{molah}' ,
-                                              	  0,
-                                              	  0,
-                                              	  N'',
-                                              	  0,
-                                              	  N'',
-                                              	  0,
-                                              	  N'',
-                                              	  0,
-                                              	  N'',
-                                              	  0,
-                                              	  {(string.IsNullOrEmpty(FNUMCO.Text) ? "NULL" : FNUMCO.Text)} ,
-                                              	  {CL_Generaly.SHIFT_OF_USER},
-                                              	  N'{USER_NAME.Text}',
-                                              	  {Convert.ToByte(SGN1.IsChecked)},
-                                              	  {Convert.ToByte(SGN2.IsChecked)},
-                                              	  NULL,
-                                              	  0,
-                                              	  N'',
-                                              	  NULL,
-                                              	  NULL,
-                                              	  {Convert.ToByte(OKF.IsChecked)},
-                                              	  {SADER.SelectedValue},
-                                              	  0,
-                                              	  0,
-                                              	  {Baseknow.dt},
-                                              	  {Tarikh.GET_OADATE_DAO()},
-                                              	  0,
-                                              	  0,
-                                              	  NULL,
-                                              	  NULL ,
-                                              	  NULL   ,
-                                              	  {(SGN1usid.SelectedValue is null ? "NULL" : SGN1usid.SelectedValue)}   ,
-                                              	  {(SGN2usid.SelectedValue is null ? "NULL" : SGN2usid.SelectedValue)}   
-                                                  )";
-                            db.Execute(QRE_HEADINSUP, null, transaction);
 
+                            int? fnumcoValue = null;
+                            if (int.TryParse(FNUMCO.Text, out int fnumcoParsed))
+                            {
+                                fnumcoValue = fnumcoParsed;
+                            }
+                            int? sgn1usidValue = SGN1usid.SelectedValue as int?;
+                            int? sgn2usidValue = SGN2usid.SelectedValue as int?;
+                            int? depatmanValue = DEPATMAN.SelectedValue as int?;
+                            int? saderValue = SADER.SelectedValue as int?;
+                            const string QRE_HEADINSUP_PARAMETRIC = @"
+                            INSERT INTO dbo.HEAD_LST
+                            (
+                                NUMBER, TAG, DATE_N, TAH, VAS, CUST_NO, MOLAH, M_NAGHD, MABL_VAR, 
+                                MOIN_VAR, MABL_HAV, MOIN_HAV, MABL_HAZ, MOIN_HAZ, TAKHFIF, MOIN_KHF, 
+                                ANBARF, FNUMCO, SHIFT, USER_NAME, SGN1, SGN2, SGN4, MBAA, HMBAA, 
+                                TICMBAA, TKHF, OKF, SADER, ARZD, ARZKIND, CDDATE, CDTIME, OKDATE, 
+                                OKTIME, JAY, PEPID, PEID, sgn1usid, sgn2usid, DEPATMAN
+                            )
+                            VALUES
+                            (
+                                @NUMBER, @TAG, @DATE_N, @TAH, @VAS, @CUST_NO, @MOLAH, @M_NAGHD, @MABL_VAR, 
+                                @MOIN_VAR, @MABL_HAV, @MOIN_HAV, @MABL_HAZ, @MOIN_HAZ, @TAKHFIFA, @MOIN_KHF, 
+                                @ANBARF, @FNUMCO, @SHIFT, @USER_NAME, @SGN1, @SGN2, @SGN4, @MBAA, @HMBAA, 
+                                @TICMBAA, @TKHF, @OKF, @SADER, @ARZD, @ARZKIND, @CDDATE, @CDTIME, @OKDATE, 
+                                @OKTIME, @JAY, @PEPID, @PEID, @sgn1usid, @sgn2usid, @DEPATMAN
+                            );";
+                            var parameters = new
+                            {
+                                NUMBER = num,
+                                TAG = 1, // ثابت
+                                DATE_N = DATE_N.Text.ToRawTarikh(),
+                                TAH = tah,
+                                VAS = 0, // ثابت
+                                CUST_NO = CUST_NO.SelectedValue,
+                                MOLAH = molah,
+                                M_NAGHD = 0, // ثابت
+                                MABL_VAR = 0, // ثابت
+                                MOIN_VAR = "", // ثابت
+                                MABL_HAV = 0, // ثابت
+                                MOIN_HAV = "", // ثابت
+                                MABL_HAZ = 0, // ثابت
+                                MOIN_HAZ = "", // ثابت
+                                TAKHFIFA = 0, // ثابت - نام پارامتر تغییر کرد تا با ستون مچ شود (TAKHFIFA)
+                                MOIN_KHF = "", // ثابت
+                                ANBARF = 0, // ثابت
+                                FNUMCO = fnumcoValue, // مقدار عددی و ایمن شده
+                                SHIFT = CL_Generaly.SHIFT_OF_USER,
+                                USER_NAME = USER_NAME.Text,
+                                SGN1 = Convert.ToByte(SGN1.IsChecked),
+                                SGN2 = Convert.ToByte(SGN2.IsChecked),
+                                SGN4 = (byte?)null, // ثابت
+                                MBAA = 0, // ثابت
+                                HMBAA = "", // ثابت
+                                TICMBAA = (decimal?)null, // ثابت
+                                TKHF = (decimal?)null, // ثابت
+                                OKF = Convert.ToByte(OKF.IsChecked),
+                                SADER = saderValue, // مقدار ایمن شده
+                                ARZD = 0, // ثابت
+                                ARZKIND = 0, // ثابت
+                                CDDATE = Baseknow.dt,
+                                CDTIME = Tarikh.GET_OADATE_DAO(),
+                                OKDATE = 0, // ثابت
+                                OKTIME = 0, // ثابت
+                                JAY = (string)null, // ثابت
+                                PEPID = (string)null, // ثابت
+                                PEID = (string)null, // ثابت
+                                sgn1usid = sgn1usidValue, // مقدار ایمن شده
+                                sgn2usid = sgn2usidValue, // مقدار ایمن شده
+                                DEPATMAN = depatmanValue  // فیلد جدید و ایمن شده
+                            };
+
+                            db.Execute(QRE_HEADINSUP_PARAMETRIC, parameters, transaction);
                             transaction.Commit();
                             db?.Close();
 
@@ -2894,6 +2943,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 else //Update Edit
                 {
                     var QRE = $@"UPDATE dbo.HEAD_LST SET DATE_N={DATE_N.Text.ToRawTarikh()}, 
+                                        DEPATMAN={DEPATMAN.SelectedValue ?? "NULL"},
+                                        SHIFT = {CL_Generaly.SHIFT_OF_USER},
                                         FNUMCO={(string.IsNullOrEmpty(FNUMCO.Text) ? "NULL" : FNUMCO.Text)},SADER={(SADER.SelectedValue == null ? "NULL" : SADER.SelectedValue)}, 
                                         TAH=N'{tah}', MOLAH=N'{molah}', CUST_NO=N'{CUST_NO.SelectedValue}',  OKF={Convert.ToInt32(OKF.IsChecked ?? true)},
                                         SGN1usid={(SGN1usid.SelectedValue is null ? "NULL" : SGN1usid.SelectedValue)},SGN2usid={(SGN2usid.SelectedValue is null ? "NULL" : SGN2usid.SelectedValue)}
@@ -3193,6 +3244,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             DATE_N.Text = Tarikh.FullCurrentDate; //تاریخ
             USER_NAME.Text = Baseknow.UUSER; // نام کاربری
+
+            DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER; DEPATMAN.Items.Refresh();
 
             CUST_NO.SelectedIndex = -1; CUST_NO.Items.Refresh();
 

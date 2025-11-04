@@ -2081,6 +2081,16 @@ END;";
 				
 								   );"); } catch { }
 
+                //اضافه کردن ستون CRT (تاریخ ایجاد) به GENERAL_OPTIONS
+                try { db.Execute(@"ALTER TABLE [dbo].[GENERAL_OPTIONS]
+                                   ADD [CRT] DATETIME NULL
+                                   CONSTRAINT [DF__GENERAL_OPT__CRT__2C3B9588] DEFAULT (GETDATE());"); } catch { }
+				//اضافه کردن ستون UID (کد کاربر) به GENERAL_OPTIONS برای تنظیمات per-user
+                try { db.Execute(@"ALTER TABLE [dbo].[GENERAL_OPTIONS]
+                                   ADD [UID] bigint NULL;"); } catch { }
+
+
+
                 //لیست بدهکاران و بستانکاران F9 : مانده های صفر رو هم نشون بده
                 try { db.Execute(@"ALTER FUNCTION [dbo].[Q_BEDEHBESTANHA_SUB]
 								   (
