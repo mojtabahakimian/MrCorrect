@@ -54,6 +54,7 @@ using static Prg_UI.Functions.CL_LMethods;
 using static Wins.WinMenus.KHARID_FORUSH.HEAD_LST_PISHFROOSH2;
 using System.Text;
 using System.Threading.Tasks;
+using Syncfusion.Windows.Shared;
 
 
 //مواردی که باید بعدا در نظر گرفته شود :
@@ -1543,7 +1544,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 MAS.Text = header.MAS.ToStringNullSafe();
                 DEPATMAN.SelectedValue = header.DEPATMAN;
                 CUST_KIND.SelectedValue = header.CUST_KIND;
-                FNUMCO.Text = header.FNUMCO.ToStringNullSafe();
+                if (header.FNUMCO != null)
+                {
+                    FNUMCO.Text = header.FNUMCO.ToStringNullSafe();
+                }
 
                 if (IsExporty)
                 {
@@ -6830,7 +6834,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                         MAS_MAGHSAD_HV = (double)rst.MAS;
 
-                        FNUMCO.Text = string.IsNullOrEmpty(rst.FNUMCO.ToStringNullSafe()) ? "0" : rst.FNUMCO.ToStringNullSafe();
+                        FNUMCO.Text = string.IsNullOrWhiteSpace(rst.FNUMCO.ToStringNullSafe()) ? "0" : rst.FNUMCO.ToStringNullSafe();
 
                         JAY.IsChecked = Convert.ToBoolean(rst.JAY);
                         TICMBAA.IsChecked = rst.TICMBAA;
@@ -8272,7 +8276,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
             //CL_HESABDARI.APLAYTAKH(Convert.ToInt64(NUMBER.Text), 2, Convert.ToDouble(M_NAGHD.Text), Convert.ToDouble(MABL_VAR.Text), Convert.ToDouble(MABL_HAV.Text), (bool)TICMBAA.IsChecked); //#CheckMatter
         }
-     
+
         private void MABL_VAR2_AfterUpdate()
         {
             if (Convert.ToDouble(MABL_VAR2.Text) != 0 && IsNull(MOIN_VAR2.Text))
@@ -10976,7 +10980,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 (report.GetComponentByName("JPAY") as StiText).Text = (NAGHD + VAR + HAV + JCHK).ToString("#,##0;#,##0-");
                 (report.GetComponentByName("MAN") as StiText).Text = (jamf + HAZ + MBA - (NAGHD + VAR + HAV + JCHK + taf)).ToString("#,##0;#,##0-");
 
-                report.Dictionary.Variables.Add("MABL_TO_WORD", Convert.ToInt64(jamf + HAZ + MBA - taf));
+                report.Dictionary.Variables.Add("MABL_TO_WORD", Convert.ToInt64(GHABEL.Text));
                 //this.HR.CAPTION = ALPHANUM(jamf + HAZ + MBA - taf) + " " + "ريال";
 
                 (report.GetComponentByName("Label224") as StiText).Text = "%ماليات و عوارض:";
@@ -11017,10 +11021,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 (report.GetComponentByName("usernamelbl") as StiText).Text = Baseknow.UUSER; //CL_HESABDARI.UCURRENTUSER()
 
 
-
-                //report.Compile();
-                report.Render(false);
-                report.ShowWithWpf();
+                new WINRPT(report, LABEL_HEADER.Content.ToStringNullSafe()).Show();
                 #endregion
 
                 if (!(bool)OKF.IsChecked)

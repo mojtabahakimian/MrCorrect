@@ -1136,7 +1136,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <Name>HR</Name>
               <Page isRef="4" />
               <Parent isRef="84" />
-              <Text>{ToWordsFa(1234567854549)}</Text>
+              <Text>{ToWordsFa(MABL_TO_WORD)}</Text>
               <TextBrush>Black</TextBrush>
               <TextOptions>,,RightToLeft=True,,WordWrap=True,A=0</TextOptions>
               <Type>Expression</Type>
@@ -2111,10 +2111,10 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>11/1/2025 8:36:52 PM</ReportChanged>
+  <ReportChanged>11/5/2025 12:06:20 AM</ReportChanged>
   <ReportCreated>11/22/2023 3:11:09 PM</ReportCreated>
   <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\Factors\INVOICE_FROOSH_2_1.mrt</ReportFile>
-  <ReportGuid>98eb487286284885a4c65d849b42dd57</ReportGuid>
+  <ReportGuid>e671df7d5c684395acea3b3091e9ec8e</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

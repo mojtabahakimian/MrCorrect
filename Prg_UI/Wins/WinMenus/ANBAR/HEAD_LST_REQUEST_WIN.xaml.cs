@@ -33,6 +33,7 @@ using Microsoft.Data.SqlClient;
 using System.ComponentModel;
 using static Interfaces.INavigator;
 using Wins.WinOther;
+using Prg_Proccessy.Generaly;
 
 namespace Wins.WinMenus.ANBAR
 {
@@ -41,7 +42,6 @@ namespace Wins.WinMenus.ANBAR
     /// </summary>
     public partial class HEAD_LST_REQUEST_WIN : Window, ISearchableWindow
     {
-
         public HEAD_LST_REQUEST_WIN(double? _NUMBER_ = null, bool _isAutomasion_ = false)
         {
             InitializeComponent();
@@ -147,6 +147,10 @@ namespace Wins.WinMenus.ANBAR
             set
             {
                 _ican = value;
+
+                DEPATMAN.IsEnabled = _ican;
+
+
                 if (_ican is true) // Is Enable and ReadOnly = False
                 {
                     ALL_ITEMS_ENABLE();
@@ -297,7 +301,6 @@ namespace Wins.WinMenus.ANBAR
 
         public Visual I_AM_INVO_REQUEST { get; set; }
 
-        public int? DEPATMAN { get; set; }
         public int? MOLAH { get; set; }
         public double? N_S { get; set; }
         public byte? hTAG { get; set; }
@@ -605,6 +608,8 @@ namespace Wins.WinMenus.ANBAR
                 PERSONEL.SelectedValue = null; PERSONEL.Items.Refresh();
                 PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
 
+                DEPATMAN.SelectedValue = HEADER_FAC?.DEPATMAN; DEPATMAN.Items.Refresh();
+
                 ReGetData();
 
                 Form_Current();
@@ -645,6 +650,20 @@ namespace Wins.WinMenus.ANBAR
             SADER.DisplayMemberPath = "NAMES";
             SADER.SelectedValuePath = "CODE";
             SADER.SelectedIndex = 0;
+
+            //واحد ها
+            var RST = dbms.DoGetDataSQL<Custom_DEPART>("SELECT DEPATMAN,DEPNAME FROM DEPART ORDER BY DEPNAME").ToList();
+            foreach (var item in RST)
+            {
+                item.DEPNAME = item.DEPNAME.NormalizeArabicPersian();
+            }
+            DEPATMAN.ItemsSource = RST;
+
+            DEPATMAN.DisplayMemberPath = "DEPNAME";
+            DEPATMAN.SelectedValuePath = "DEPATMAN";
+            DEPATMAN.SelectedIndex = 0;
+            DEPATMAN.SelectedItem = 0;
+            DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER;
 
             //انبار کالا
             //پر کردن کمبوباکس ستون واحد به طور مقدار اولیه
@@ -784,6 +803,9 @@ namespace Wins.WinMenus.ANBAR
             {
                 return;
             }
+
+
+
             var number = dbms.DoGetDataSQL<double?>("SELECT MAX(NUMBER)+1 FROM HEAD_LST WHERE TAG = 23").FirstOrDefault();
             if (string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text == "0")
             {
@@ -799,7 +821,7 @@ namespace Wins.WinMenus.ANBAR
 
                 //INSERT
                 dbms.DoExecuteSQL(@$"INSERT INTO HEAD_LST (       NUMBER,TAG,                      DATE_N,                                         TAH, MAS, VAS,                    CUST_NO,                                       MOLAH, M_NAGHD, MABL_VAR,MABL_HAV,MABL_HAZ,TAKHFIF,DEPATMAN,SHIFT,CUST_KIND,           USER_NAME,                            SGN1,                            SGN2,                            SGN3,MBAA,TICMBAA,TKHF,                              OKF,SADER,ARZD,ARZKIND,JAY) 
-			                                       VALUES ({NUMBER.Text}, 23, {DATE_N.Text.ToRawTarikh()}, N'{(TAH.Text is null ? "NULL" : TAH.Text)}',   0,   0,               N'{CUST_NO}',       N'{(MOLAH is null ? "NULL" : MOLAH)}',       0,        0,       0,       0,      0,       1,    1,     NULL, N'{USER_NAME.Text}',{Convert.ToByte(SGN1.IsChecked)},{Convert.ToByte(SGN2.IsChecked)},{Convert.ToByte(SGN3.IsChecked)},   0,      0,   {Convert.ToByte(OKF.IsChecked)},  1,    0,   1,  1,  0);");
+			                                       VALUES ({NUMBER.Text}, 23, {DATE_N.Text.ToRawTarikh()}, N'{(TAH.Text is null ? "NULL" : TAH.Text)}',   0,   0,               N'{CUST_NO}',       N'{(MOLAH is null ? "NULL" : MOLAH)}',       0,        0,       0,       0,      0,{DEPATMAN.SelectedValue ?? "NULL"},{CL_Generaly.SHIFT_OF_USER},     NULL, N'{USER_NAME.Text}',{Convert.ToByte(SGN1.IsChecked)},{Convert.ToByte(SGN2.IsChecked)},{Convert.ToByte(SGN3.IsChecked)},   0,      0,   {Convert.ToByte(OKF.IsChecked)},  1,    0,   1,  1,  0);");
 
                 RefreshAfterUpdate();
             }
@@ -819,8 +841,8 @@ namespace Wins.WinMenus.ANBAR
                                          MABL_HAV = 0,
                                          MABL_HAZ = 0,
                                          TAKHFIF = 0,
-                                         DEPATMAN = 1,
-                                         SHIFT = 1,
+                                         DEPATMAN={DEPATMAN.SelectedValue ?? "NULL"},
+                                         SHIFT = {CL_Generaly.SHIFT_OF_USER},
                                          CUST_KIND = NULL,
                                          USER_NAME = N'{USER_NAME.Text}',
                                          SGN1 = {Convert.ToByte(SGN1.IsChecked)},
@@ -858,6 +880,11 @@ namespace Wins.WinMenus.ANBAR
                     INVO_LST_REQUEST.BeginEdit();
 
                 }), DispatcherPriority.Background);
+            }
+
+            if (e != null)
+            {
+                universControl.PopNotifyShow("اطلاعات سربرگ با موفقیت ذخیره شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
             }
         }
         //ERROR
@@ -1570,7 +1597,7 @@ namespace Wins.WinMenus.ANBAR
                 // If RST.RecordCount > 0 Then
                 // If IsNull(RST.Fields("MIN_M")) Then
                 min = CL_HESABDARI.Getmin((int)CURRENT_ITMES_ROW.ANBAR, CURRENT_ITMES_ROW.CODE);
-               
+
 
                 var RST = dbms.DoGetDataSQL<RLQ5>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + CURRENT_ITMES_ROW.CODE + "' AND ((VAHEDS.VAHED)= " + CURRENT_ITMES_ROW.VAHED_K + ")))").ToList();
                 if (RST.Count == 0)
@@ -1990,6 +2017,8 @@ namespace Wins.WinMenus.ANBAR
             PERSONEL.Text = null;
             PERSONEL.SelectedIndex = -1; PERSONEL.Items.Refresh();
             PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+
+            DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER; DEPATMAN.Items.Refresh();
 
             MOGU.Text = null; //موجودی
 

@@ -205,7 +205,7 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
             string sql;
             string PATH;
             int i;
-            if (IsNull(this.DT2.Text.ToRawTarikh()))
+            if (string.IsNullOrWhiteSpace(this.DT2.Text.ToRawTarikh()))
             {
                 Msgwin msgwin = new Msgwin(false, "تاریخ نباید خالی باشد.");
                 msgwin.ShowDialog();
@@ -256,6 +256,11 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
                 //    }
                 case "F":
                     {
+                        if (string.IsNullOrWhiteSpace(this.DT2.Text.ToRawTarikh()))
+                        {
+                            DT2.Text = "99991230";
+                            return;
+                        }
                         if (this.KALA.SelectedValue is null && ANBAR.SelectedValue is null && CANBAR.SelectedValue is null)
                         {
                             string Query = $"SELECT * FROM mogudi_tafkik({DT2.Text.ToRawTarikh()},N'%')";

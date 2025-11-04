@@ -124,7 +124,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                                                      dbo.SHIFT ON dbo.HEAD_LST.SHIFT = dbo.SHIFT.SHIFT_ID LEFT OUTER JOIN
                                                                      dbo.CUST_HESAB ON dbo.HEAD_LST.CUST_NO = dbo.CUST_HESAB.hes
                                                                      {WhereCondition}
-                                                                     ORDER BY dbo.HEAD_LST.NUMBER1,dbo.HEAD_LST.NUMBER DESC ").ToList();
+                                                                      ").ToList(); //ORDER BY dbo.HEAD_LST.NUMBER1,dbo.HEAD_LST.NUMBER DESC //////For Speed Removed
             foreach (var item in MasterHead)
             {
                 FACTOR_DATA.Add(item);

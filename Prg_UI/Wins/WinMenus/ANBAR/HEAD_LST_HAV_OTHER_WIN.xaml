@@ -86,12 +86,22 @@
         </ComboBox>
         <Label x:Name="Label11_Copy1" Content="تحویل گیرنده : " Margin="0,107,24,0"  FlowDirection="RightToLeft" FontSize="10" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="71"/>
         <ComboBox x:Name="MOLAH" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Width="261" IsTextSearchEnabled="True" Margin="0,105,461,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right"  IsTabStop="True" TabIndex="6">
-            <d:ComboBox.ItemsPanel>
+            <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <VirtualizingStackPanel d:IsVirtualizing="True" d:VirtualizationMode="Recycling"/>
+                    <VirtualizingStackPanel IsVirtualizing="True" VirtualizationMode="Recycling"/>
                 </ItemsPanelTemplate>
-            </d:ComboBox.ItemsPanel>
+            </ComboBox.ItemsPanel>
         </ComboBox>
+
+        <Label Content="واحد:" Margin="0,107,742,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="32" Height="26" VerticalAlignment="Top"/>
+        <ComboBox x:Name="DEPATMAN"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,107,777,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="209">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+
         <Label x:Name="Label11_Copy5" Content="تحویل دهنده : " Margin="0,107,390,0"  FlowDirection="RightToLeft" FontSize="10" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="71"/>
         <ComboBox x:Name="CUST_NO" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Width="448" IsSynchronizedWithCurrentItem="True" IsTextSearchEnabled="True" Margin="0,142,98,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" IsTabStop="True" TabIndex="7" PreviewLostKeyboardFocus="CUST_NO_PreviewLostKeyboardFocus">
             <d:ComboBox.ItemsPanel>

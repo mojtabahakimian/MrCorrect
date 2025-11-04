@@ -269,7 +269,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
-            CL_HESABDARI.SETSECURITY(this.GetType().Name, "SEARCHMO", new WindowInteropHelper(this).Handle, this.GetType().Name); //جستجوگر موجودي کالا
+            CL_HESABDARI.SETSECURITY(this.GetType().Name, "CRREPF", new WindowInteropHelper(this).Handle, this.GetType().Name); //جستجو در گردش کالا ها // این اسمش باید در تی فرمز درست بشه
             if (!this.IsLoaded)
             {
                 this.Close();
