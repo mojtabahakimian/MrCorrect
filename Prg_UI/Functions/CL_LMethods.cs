@@ -1487,7 +1487,7 @@ namespace Prg_UI.Functions
                 {
                     image.Format = MagickFormat.Jpg; // Get or Set the format of the image.
                     //image.Resize(40, 40); // Fit the image into the requested width and height. 
-                    image.Quality = ImageQualityTreshHold; // This is the compression level.
+                    image.Quality = (uint)ImageQualityTreshHold; // This is the compression level.
 
                     using (MemoryStream ms = new MemoryStream())
                     {
@@ -2122,7 +2122,7 @@ namespace Prg_UI.Functions
                 case "3": ErrCode = "خطا شماره 3 -  سرویس قفل را در محل قفل بررسی کنید و شبکه را نیز چک کنید."; break;
                 case "5": ErrCode = "خطا شماره 5 -  معمولا این مشکل زمانی رخ میدهد که از نام کامپیوتر به جای آدرس آی پی استفاده شده باشد و یا آدرس آی پی اشتباه باشد."; break;
                 case "6": ErrCode = @"خطا شماره 6 - احتمالا سرویس قفل غیر فعال است , آنرا بررسی کنید درضمن
-                                      معتبر بودن IP و ارتباط شبکه را بررسی نمایید.(پورت 5090 و 9051 را برای فایروال فعال کنید)."; break;
+                             معتبر بودن IP و ارتباط شبکه را بررسی نمایید.(پورت 5090 و 9051 را برای فایروال فعال کنید). از اتصال قفل به سیستم هم اطمینان حاصل فرمایید."; break;
                 case "106": ErrCode = "معتبر بودن خطا شماره 106 -   IP و ارتباط شبکه را بررسی نمایید.(پورت 5090 و 9051 را برای فایروال فعال کنید)."; break;
                 case "7": ErrCode = "خطا شماره 7 -  تعداد کاربران متصل بیش از حد مجاز است."; break;
                 case "107": ErrCode = "خطا شماره 107 -  تعداد کاربران متصل بیش از حد مجاز است."; break;

@@ -14,7 +14,9 @@ namespace Dbf
 
         public static void Serialize(object value, string path)
         {
+#pragma warning disable SYSLIB0011 // Type or member is obsolete
             BinaryFormatter formatter = new BinaryFormatter();
+#pragma warning restore SYSLIB0011 // Type or member is obsolete
 
             using (Stream fStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None))
             {
@@ -29,7 +31,9 @@ namespace Dbf
                 throw new NotImplementedException();
             }
 
+#pragma warning disable SYSLIB0011 // Type or member is obsolete
             BinaryFormatter formatter = new BinaryFormatter();
+#pragma warning restore SYSLIB0011 // Type or member is obsolete
 
             using (Stream fStream = File.OpenRead(path))
             {
@@ -41,7 +45,9 @@ namespace Dbf
         {
             using (System.IO.MemoryStream stream = new System.IO.MemoryStream())
             {
+#pragma warning disable SYSLIB0011 // Type or member is obsolete
                 BinaryFormatter formatter = new BinaryFormatter();
+#pragma warning restore SYSLIB0011 // Type or member is obsolete
 
                 formatter.Serialize(stream, structure);
 
@@ -53,7 +59,9 @@ namespace Dbf
 
         public static T Deserialize<T>(byte[] buffer)
         {
+#pragma warning disable SYSLIB0011 // Type or member is obsolete
             BinaryFormatter formatter = new BinaryFormatter();
+#pragma warning restore SYSLIB0011 // Type or member is obsolete
 
             using (System.IO.MemoryStream stream = new System.IO.MemoryStream(buffer))
             {

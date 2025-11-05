@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
@@ -24,7 +24,7 @@
     <None Remove="Assets\IranYekanRG.TTF" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!--<ItemGroup>
     <COMReference Include="TINYLib">
       <WrapperTool>tlbimp</WrapperTool>
       <VersionMinor>0</VersionMinor>
@@ -34,7 +34,14 @@
       <Isolated>false</Isolated>
       <EmbedInteropTypes>true</EmbedInteropTypes>
     </COMReference>
-  </ItemGroup>
+  </ItemGroup>-->
+
+	<ItemGroup>
+		<Reference Include="Interop.TINYLib">
+			<HintPath>DLLS\Interop.TINYLib.dll</HintPath>
+			<EmbedInteropTypes>true</EmbedInteropTypes>
+		</Reference>
+	</ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\1.ico" />
