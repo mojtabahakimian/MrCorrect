@@ -52,6 +52,6 @@
 
 برای اجرا و توسعه پروژه به موارد زیر نیاز است:
 
--   **.NET 6 Desktop Runtime**
+-   **.NET 8 Desktop Runtime**
 -   دسترسی به یک نمونه (Instance) از **SQL Server نسخه 2008 R2 یا بالاتر**.
 -   (برای توسعه) Visual Studio 2022
