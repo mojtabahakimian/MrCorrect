@@ -8902,6 +8902,13 @@ namespace Prg_Proccessy.FUNCTIONS
             string[] BNBIST = new string[10], MEGH = new string[4], AAS = new string[5], VA = new string[3];
             int K, i, ALEN, SETAYEE, j, AM2, AM3, AM, ALINK, ALENT;
             AANUMBER = Math.Round(AANUMBER);
+
+            // بررسی محدودیت عدد ورودی - حداکثر 999 تریلیون (15 رقم)
+            if (AANUMBER > 999999999999999)
+            {
+                return "عدد خارج از محدوده مجاز است";
+            }
+
             VA[1] = "";
             VA[2] = " و ";
             AAS[1] = " هزار";

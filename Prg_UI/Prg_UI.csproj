@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net6.0-windows</TargetFramework>
+		<TargetFramework>net8.0-windows7.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>true</UseWindowsForms>
@@ -438,7 +438,7 @@
 		<None Remove="UiDrive\IMGS\Tanzimat.png" />
 	</ItemGroup>
 
-	<ItemGroup>
+	<!--<ItemGroup>
     <COMReference Include="TINYLib">
       <WrapperTool>tlbimp</WrapperTool>
       <VersionMinor>0</VersionMinor>
@@ -448,7 +448,7 @@
       <Isolated>false</Isolated>
       <EmbedInteropTypes>true</EmbedInteropTypes>
     </COMReference>
-  </ItemGroup>
+  </ItemGroup>-->
 
 	<ItemGroup>
 		<Content Include="UiDrive\IMGS\MyMrCorrect.ico" />
@@ -572,7 +572,7 @@
 		<!--<PackageReference Include="Dapper" Version="2.0.143" />-->
 		<PackageReference Include="IPE.SmsIr" Version="1.2.7" />
 		<PackageReference Include="itext7" Version="8.0.3" />
-		<PackageReference Include="Magick.NET-Q16-AnyCPU" Version="13.5.0" />
+		<PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.9.1" />
 		<PackageReference Include="MaterialDesignThemes" Version="5.2.1" />
 		<PackageReference Include="Microsoft.Office.Interop.Excel" Version="15.0.4795.1001" />
 		<PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
@@ -610,8 +610,11 @@
 			<HintPath>DLLS\stimulydlls\Microsoft.CodeAnalysis.VisualBasic.dll</HintPath>
 		</Reference>
 		<Reference Include="Microsoft.Data.SqlClient">
-			<HintPath>DLLS\stimulydlls\Microsoft.Data.SqlClient.dll</HintPath>
+		  <HintPath>DLLS\stimulydlls\Microsoft.Data.SqlClient.dll</HintPath>
 		</Reference>
+		<!--<Reference Include="Microsoft.Data.SqlClient">
+			<HintPath>DLLS\stimulydlls\Microsoft.Data.SqlClient.dll</HintPath>
+		</Reference>-->
 		<Reference Include="Microsoft.SqlServer.Server">
 			<HintPath>DLLS\stimulydlls\Microsoft.SqlServer.Server.dll</HintPath>
 		</Reference>

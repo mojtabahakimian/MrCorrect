@@ -843,6 +843,10 @@ namespace Prg_SendInvoice.CNNMANAGER
                     CONNECTION_STR = CL_CryptionAlgorithem.DecryptTextUsingUTF8(RegConnectionStr) + "TrustServerCertificate=True;";
                     CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
+                    using var db = new SqlConnection(CONNECTION_STR);
+                    db.Open();
+                    var results = db.Query<string>("SELECT SERVERNAM FROM dbo.SAZMAN").FirstOrDefault();
+
                     //dbms.Databasek.CommandTimeout = 100;
                     var TestCnn = dbms.DoGetDataSQL<string>("SELECT SERVERNAM FROM dbo.SAZMAN").FirstOrDefault();
                     CL_CCNNMANAGER.ConnectedToSQLDB = true;

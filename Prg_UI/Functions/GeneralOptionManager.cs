@@ -283,8 +283,13 @@ namespace Prg_UI.Functions
             {
                 throw new ArgumentException("نام تنظیم نمی‌تواند خالی باشد.", nameof(optionName));
             }
-            int currentUserId = userId ?? Baseknow.USERCOD ?? 0;
-            const string sql = "SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName AND UID = @UID;";
+            int? currentUserId = userId;
+            string extra = "";
+            if (currentUserId > 0)
+            {
+                extra = " AND UID = @UID ";
+            }
+            string sql = $"SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName IN @OptionNames {extra}";
             try
             {
                 var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { OptionName = optionName, UID = currentUserId })
@@ -307,8 +312,13 @@ namespace Prg_UI.Functions
             {
                 return new List<GENERAL_OPTIONS>();
             }
-            int currentUserId = userId ?? Baseknow.USERCOD ?? 0;
-            const string sql = "SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName IN @OptionNames AND UID = @UID;";
+            int? currentUserId = userId /*?? Baseknow.USERCOD ?? 0*/;
+            string extra = "";
+            if (currentUserId > 0)
+            {
+                extra = " AND UID = @UID ";
+            }
+            string sql = $"SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName IN @OptionNames {extra}";
             try
             {
                 var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { OptionNames = optionNames, UID = currentUserId })
@@ -332,21 +342,26 @@ namespace Prg_UI.Functions
                 throw new ArgumentException("شیء تنظیم یا نام آن نمی‌تواند خالی باشد.");
             }
 
-            int? currentUserId = userId ?? Baseknow.USERCOD;
-            option.UID = currentUserId;
+            int? currentUserId = userId;
+
+            if (currentUserId > 0)
+            {
+                option.UID = currentUserId;
+            }
 
             const string sql = @"
-            MERGE dbo.GENERAL_OPTIONS AS target
-            USING (SELECT @OptionName AS OptionName, @UID AS UID) AS source
-            ON (target.OptionName = source.OptionName AND target.UID = source.UID)
-            WHEN MATCHED THEN
-                UPDATE SET
-                    OptionValue = @OptionValue,
-                    Description = @Description,
-                    LastUpdated = GETDATE()
-            WHEN NOT MATCHED THEN
-                INSERT (OptionName, OptionValue, Description, UID, CRT)
-                VALUES (@OptionName, @OptionValue, @Description, @UID, GETDATE());";
+                MERGE dbo.GENERAL_OPTIONS AS target
+                USING (SELECT @OptionName AS OptionName, @UID AS UID) AS source
+                ON (target.OptionName = source.OptionName 
+                    AND (target.UID = source.UID OR (target.UID IS NULL AND source.UID IS NULL)))
+                WHEN MATCHED THEN
+                    UPDATE SET
+                        OptionValue = @OptionValue,
+                        Description = @Description,
+                        LastUpdated = GETDATE()
+                WHEN NOT MATCHED THEN
+                    INSERT (OptionName, OptionValue, Description, UID, CRT)
+                    VALUES (@OptionName, @OptionValue, @Description, @UID, GETDATE());";
             try
             {
                 var parameters = new

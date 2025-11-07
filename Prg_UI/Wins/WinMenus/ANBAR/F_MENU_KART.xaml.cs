@@ -113,6 +113,12 @@ namespace Wins.WinMenus.ANBAR
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
             CheckPermistion();
+            if (!this.IsLoaded)
+            {
+                this.Close();
+                return;
+            }
+
             Fill_ComboBoxes();
             DT2.Text = Tarikh.FullCurrentDate;
             CANBAR.Focus();

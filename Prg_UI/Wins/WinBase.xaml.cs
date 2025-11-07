@@ -453,6 +453,10 @@ namespace Prg_UI.Wins
             {
                 CL_Keyboard.ChangeKeyboardLayout("Farsi"); // فارسی
             }
+            else if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.D5))
+            {
+                CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_LIST_KALA_CTRL5, this);
+            }
             else if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.F11)
             {
                 // Verify that the F11 key was pressed.

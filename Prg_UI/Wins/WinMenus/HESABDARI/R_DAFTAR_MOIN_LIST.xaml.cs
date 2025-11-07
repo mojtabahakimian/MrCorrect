@@ -25,6 +25,7 @@ using Prg_Proccessy.FUNCTIONS;
 using System.Reflection;
 using System.Globalization;
 using System.Threading;
+using Stimulsoft.Data.Extensions;
 
 namespace Prg_UI.Wins.WinMenus.HESABDARI
 {
@@ -162,7 +163,27 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                     if (ROW != null && ROW?.NO_S != null)
                     {
-                        CL_MenuManager.MenuBaseOnKindOpen(this, dbms, (ROW?.TAG is null ? (int)ROW.NO_S : Convert.ToInt32(ROW?.TAG)), (ROW?.NUMBER is null ? ROW?.N_S : ROW?.NUMBER), false);
+                        int TAG_TYPE = (ROW?.TAG is null ? (int)ROW.NO_S : Convert.ToInt32(ROW?.TAG));
+                        double? TARGET_NUMBER = (double)(ROW?.NUMBER is null ? ROW?.N_S : ROW?.NUMBER);
+
+                        //if (ROW?.NUMBER != null && !string.IsNullOrWhiteSpace(ROW.SHARH))
+                        //{
+                        //    string normalizedSharh = ROW.SHARH
+                        //        .Replace('ي', 'ی')
+                        //        .Replace('ك', 'ک')
+                        //        .Trim();
+                        //    string targetText = "فاكتور برگشت فروش."; //TAG = 25
+                        //    if (normalizedSharh.IndexOf(targetText, StringComparison.OrdinalIgnoreCase) >= 0) //درست کار نمیکنه!
+                        //    {
+                        //        var FreeFactor = dbms.DoGetDataSQL<int?>($"SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WHERE TAG = 25 AND NUMBER = {ROW.NUMBER}").FirstOrDefault();
+                        //        if (FreeFactor != null)
+                        //        {
+                        //            TAG_TYPE = 25;
+                        //        }
+                        //    }
+                        //}
+
+                        CL_MenuManager.MenuBaseOnKindOpen(this, dbms, TAG_TYPE, TARGET_NUMBER, false);
                     }
                 }
             }
@@ -477,11 +498,16 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             try
             {
+                if (!SYNCFUSION_DG.IsKeyboardFocusWithin)
+                {
+                    return;
+                }
+
                 // NEW: Handle 'Ctrl+1' key for CURRENT ROW balance navigation
                 if (e.Key == Key.D1 && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
                 {
-                    HandleNavigationToBalanceFromCurrentRow();
                     e.Handled = true;
+                    HandleNavigationToBalanceFromCurrentRow();
                     return;
                 }
 
@@ -489,25 +515,25 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 // Handle '1' key for FINAL balance navigation (last row)
                 if (e.Key == Key.D1 && Keyboard.Modifiers == ModifierKeys.None)
                 {
-                    HandleNavigationToBalanceFromLastRow();
                     e.Handled = true;
+                    HandleNavigationToBalanceFromLastRow();
                     return;
                 }
 
                 // Also handle NumPad1 for both cases
-                if (e.Key == Key.NumPad1 && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-                {
-                    HandleNavigationToBalanceFromCurrentRow();
-                    e.Handled = true;
-                    return;
-                }
+                //if (e.Key == Key.NumPad1 && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+                //{
+                //    e.Handled = true;
+                //    HandleNavigationToBalanceFromCurrentRow();
+                //    return;
+                //}
 
-                if (e.Key == Key.NumPad1 && Keyboard.Modifiers == ModifierKeys.None)
-                {
-                    HandleNavigationToBalanceFromLastRow();
-                    e.Handled = true;
-                    return;
-                }
+                //if (e.Key == Key.NumPad1 && Keyboard.Modifiers == ModifierKeys.None)
+                //{
+                //    HandleNavigationToBalanceFromLastRow();
+                //    e.Handled = true;
+                //    return;
+                //}
             }
             catch (Exception ex)
             {

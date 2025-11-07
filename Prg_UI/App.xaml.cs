@@ -575,6 +575,12 @@ namespace Prg_UI
                                     CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KART, default);
                                 });
                                 break;
+                            case Key.D7:
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CHAPCHEK, default);
+                                });
+                                break;
                             default: break;
                         }
                     }
