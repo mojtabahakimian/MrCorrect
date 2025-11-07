@@ -269,7 +269,7 @@
                         </Style>
                     </DataGridTextColumn.CellStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="الگوی جایزه" x:Name="JAYO_COL" Binding="{Binding JAYO,UpdateSourceTrigger=LostFocus}" Visibility="Hidden"  Width="auto"   MinWidth="80"/>
+                <DataGridTextColumn Header="الگوی جایزه" x:Name="JAYO_COL" Binding="{Binding JAYO,UpdateSourceTrigger=LostFocus}" Visibility="Hidden"  Width="auto" IsReadOnly="True"  MinWidth="80"/>
             </DataGrid.Columns>
         </DataGrid>
 

@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <MS_x0020_SQL Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>MS SQL</Alias>
-        <ConnectionStringEncrypted>9Fz3oe9K88hFYYSB5Byof9Fukc1WX3ukRVu5CGNxL2Lf2LVIxgPD+X999dxpTOFn9MTZCc1Rw4FpTaEYTRjhXulU94rFUaPIa0S5zGdY616AWg==</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9Fxlz00NQ4H5CE3UcQDhJ9HW0YJISquk4kztBOHEol7FOqHr0Qj63eJGnJzDSbH/33D7iEYDSrxoXH3Mc/z1f/latQnJA0IN4U3tmPn462fEyMECXkFJIW9N1dxxAbUn4A==</ConnectionStringEncrypted>
         <Key>77c8d983fa174e39b3c352a3a5146ce8</Key>
         <Name>MS SQL</Name>
       </MS_x0020_SQL>
@@ -383,7 +383,7 @@
             </Shape1>
             <Text1 Ref="11" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>4.8,0,1.3,0.4</ClientRectangle>
+              <ClientRectangle>4.8,0.1,1.3,0.4</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,11,Bold</Font>
@@ -399,7 +399,7 @@
             </Text1>
             <Text11 Ref="12" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.3,0.4,0.5,0.2</ClientRectangle>
+              <ClientRectangle>1.3,0.5,0.5,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
@@ -414,7 +414,7 @@
             </Text11>
             <Text10 Ref="13" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.2,0.1,0.9,0.2</ClientRectangle>
+              <ClientRectangle>1.2,0.2,0.9,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
@@ -493,7 +493,7 @@
             </Text2>
             <Text3 Ref="18" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0.1,1.2,0.2</ClientRectangle>
+              <ClientRectangle>0,0.2,1.2,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
@@ -540,7 +540,7 @@
             </Text17>
             <Text37 Ref="21" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.2,0.4,1,0.2</ClientRectangle>
+              <ClientRectangle>0.2,0.5,1,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,9</Font>
@@ -1432,13 +1432,12 @@
         <DataBand1 Ref="75" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
-          <ClientRectangle>0,4.7,10.91,0.4</ClientRectangle>
+          <ClientRectangle>0,4.7,10.91,0.3</ClientRectangle>
           <Components isList="true" count="12">
             <DataQSL_INVOICE_FROOSH_MABL_K Ref="76" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <CanGrow>True</CanGrow>
-              <ClientRectangle>3.6,0,0.8,0.4</ClientRectangle>
+              <ClientRectangle>3.6,0,0.8,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1447,19 +1446,19 @@
               <Name>DataQSL_INVOICE_FROOSH_MABL_K</Name>
               <Page isRef="5" />
               <Parent isRef="75" />
+              <ShrinkFontToFit>True</ShrinkFontToFit>
+              <ShrinkFontToFitMinimumSize>6</ShrinkFontToFitMinimumSize>
               <Text>{QSL_INVOICE_FROOSH.MABL_K}</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="77" type="CustomFormat" isKey="true">
                 <StringFormat>#,###</StringFormat>
               </TextFormat>
-              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <VertAlignment>Center</VertAlignment>
             </DataQSL_INVOICE_FROOSH_MABL_K>
             <DataQSL_INVOICE_FROOSH_MABL Ref="78" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <CanGrow>True</CanGrow>
-              <ClientRectangle>4.4,0,0.7,0.4</ClientRectangle>
+              <ClientRectangle>4.4,0,0.7,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1468,19 +1467,19 @@
               <Name>DataQSL_INVOICE_FROOSH_MABL</Name>
               <Page isRef="5" />
               <Parent isRef="75" />
+              <ShrinkFontToFit>True</ShrinkFontToFit>
+              <ShrinkFontToFitMinimumSize>6</ShrinkFontToFitMinimumSize>
               <Text>{QSL_INVOICE_FROOSH.MABL}</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="79" type="CustomFormat" isKey="true">
                 <StringFormat>#,###</StringFormat>
               </TextFormat>
-              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <VertAlignment>Center</VertAlignment>
             </DataQSL_INVOICE_FROOSH_MABL>
             <DataQSL_INVOICE_FROOSH_MEGHk Ref="80" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <CanGrow>True</CanGrow>
-              <ClientRectangle>5.1,0,0.8,0.4</ClientRectangle>
+              <ClientRectangle>5.1,0,0.8,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1489,16 +1488,16 @@
               <Name>DataQSL_INVOICE_FROOSH_MEGHk</Name>
               <Page isRef="5" />
               <Parent isRef="75" />
+              <ShrinkFontToFit>True</ShrinkFontToFit>
+              <ShrinkFontToFitMinimumSize>6</ShrinkFontToFitMinimumSize>
               <Text>{QSL_INVOICE_FROOSH.MEGHk}</Text>
               <TextBrush>Black</TextBrush>
-              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <VertAlignment>Center</VertAlignment>
             </DataQSL_INVOICE_FROOSH_MEGHk>
             <DataQSL_INVOICE_FROOSH_MEGH Ref="81" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <CanGrow>True</CanGrow>
-              <ClientRectangle>6.5,0,0.6,0.4</ClientRectangle>
+              <ClientRectangle>6.5,0,0.6,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1507,16 +1506,16 @@
               <Name>DataQSL_INVOICE_FROOSH_MEGH</Name>
               <Page isRef="5" />
               <Parent isRef="75" />
+              <ShrinkFontToFit>True</ShrinkFontToFit>
+              <ShrinkFontToFitMinimumSize>6</ShrinkFontToFitMinimumSize>
               <Text>{QSL_INVOICE_FROOSH.MEGH}</Text>
               <TextBrush>Black</TextBrush>
-              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <VertAlignment>Center</VertAlignment>
             </DataQSL_INVOICE_FROOSH_MEGH>
             <DataQSL_INVOICE_FROOSH_VNAMES Ref="82" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <CanGrow>True</CanGrow>
-              <ClientRectangle>5.9,0,0.6,0.4</ClientRectangle>
+              <ClientRectangle>5.9,0,0.6,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1525,16 +1524,16 @@
               <Name>DataQSL_INVOICE_FROOSH_VNAMES</Name>
               <Page isRef="5" />
               <Parent isRef="75" />
+              <ShrinkFontToFit>True</ShrinkFontToFit>
+              <ShrinkFontToFitMinimumSize>6</ShrinkFontToFitMinimumSize>
               <Text>{QSL_INVOICE_FROOSH.VNAMES}</Text>
               <TextBrush>Black</TextBrush>
-              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <VertAlignment>Center</VertAlignment>
             </DataQSL_INVOICE_FROOSH_VNAMES>
             <DataQSL_INVOICE_FROOSH_CODE Ref="83" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <CanGrow>True</CanGrow>
-              <ClientRectangle>7.1,0,2.6,0.4</ClientRectangle>
+              <ClientRectangle>7.1,0,2.6,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1543,17 +1542,17 @@
               <Name>DataQSL_INVOICE_FROOSH_CODE</Name>
               <Page isRef="5" />
               <Parent isRef="75" />
+              <ShrinkFontToFit>True</ShrinkFontToFit>
+              <ShrinkFontToFitMinimumSize>6</ShrinkFontToFitMinimumSize>
               <Text>{QSL_INVOICE_FROOSH.KALA}</Text>
               <TextBrush>Black</TextBrush>
-              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </DataQSL_INVOICE_FROOSH_CODE>
             <Text6 Ref="84" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <CanGrow>True</CanGrow>
-              <ClientRectangle>10.6,0,0.3,0.4</ClientRectangle>
+              <ClientRectangle>10.6,0,0.3,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1562,17 +1561,17 @@
               <Name>Text6</Name>
               <Page isRef="5" />
               <Parent isRef="75" />
+              <ShrinkFontToFit>True</ShrinkFontToFit>
+              <ShrinkFontToFitMinimumSize>6</ShrinkFontToFitMinimumSize>
               <Text>{Line}</Text>
               <TextBrush>Black</TextBrush>
-              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <Type>SystemVariables</Type>
               <VertAlignment>Center</VertAlignment>
             </Text6>
             <Text18 Ref="85" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <CanGrow>True</CanGrow>
-              <ClientRectangle>9.7,0,0.9,0.4</ClientRectangle>
+              <ClientRectangle>9.7,0,0.9,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1581,16 +1580,17 @@
               <Name>Text18</Name>
               <Page isRef="5" />
               <Parent isRef="75" />
+              <ShrinkFontToFit>True</ShrinkFontToFit>
+              <ShrinkFontToFitMinimumSize>6</ShrinkFontToFitMinimumSize>
               <Text>{QSL_INVOICE_FROOSH.N_FANI}</Text>
               <TextBrush>Black</TextBrush>
-              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text18>
             <Text22 Ref="86" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.9,0,0.7,0.4</ClientRectangle>
+              <ClientRectangle>2.9,0,0.7,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1599,19 +1599,20 @@
               <Name>Text22</Name>
               <Page isRef="5" />
               <Parent isRef="75" />
+              <ShrinkFontToFit>True</ShrinkFontToFit>
+              <ShrinkFontToFitMinimumSize>6</ShrinkFontToFitMinimumSize>
               <Text>{QSL_INVOICE_FROOSH.N_MOIN}</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="87" type="CustomFormat" isKey="true">
                 <StringFormat>#,###</StringFormat>
               </TextFormat>
-              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text22>
             <Text29 Ref="88" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>2,0,0.9,0.4</ClientRectangle>
+              <ClientRectangle>2,0,0.9,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1620,19 +1621,20 @@
               <Name>Text29</Name>
               <Page isRef="5" />
               <Parent isRef="75" />
+              <ShrinkFontToFit>True</ShrinkFontToFit>
+              <ShrinkFontToFitMinimumSize>6</ShrinkFontToFitMinimumSize>
               <Text>{QSL_INVOICE_FROOSH.MABKBT}</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="89" type="CustomFormat" isKey="true">
                 <StringFormat>#,###</StringFormat>
               </TextFormat>
-              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text29>
             <Text30 Ref="90" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>1.2,0,0.8,0.4</ClientRectangle>
+              <ClientRectangle>1.2,0,0.8,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1641,19 +1643,20 @@
               <Name>Text30</Name>
               <Page isRef="5" />
               <Parent isRef="75" />
+              <ShrinkFontToFit>True</ShrinkFontToFit>
+              <ShrinkFontToFitMinimumSize>6</ShrinkFontToFitMinimumSize>
               <Text>{QSL_INVOICE_FROOSH.IMBAA}</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="91" type="CustomFormat" isKey="true">
                 <StringFormat>#,###</StringFormat>
               </TextFormat>
-              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </Text30>
             <Text31 Ref="92" type="Text" isKey="true">
               <Border>All;Black;2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0,1.2,0.4</ClientRectangle>
+              <ClientRectangle>0,0,1.2,0.3</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1662,12 +1665,13 @@
               <Name>Text31</Name>
               <Page isRef="5" />
               <Parent isRef="75" />
+              <ShrinkFontToFit>True</ShrinkFontToFit>
+              <ShrinkFontToFitMinimumSize>6</ShrinkFontToFitMinimumSize>
               <Text>{QSL_INVOICE_FROOSH.MABKN}</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="93" type="CustomFormat" isKey="true">
                 <StringFormat>#,###</StringFormat>
               </TextFormat>
-              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text31>
@@ -1684,8 +1688,8 @@
         </DataBand1>
         <GroupFooterBand1 Ref="94" type="GroupFooterBand" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,5.5,10.91,2</ClientRectangle>
-          <Components isList="true" count="32">
+          <ClientRectangle>0,5.4,10.91,1.6</ClientRectangle>
+          <Components isList="true" count="36">
             <Text8 Ref="95" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>0,0.7,4.4,0.3</ClientRectangle>
@@ -1786,7 +1790,7 @@
               <AspectRatio>True</AspectRatio>
               <Brush>Transparent</Brush>
               <CanShrink>True</CanShrink>
-              <ClientRectangle>3.6,1.1,1.1,0.8</ClientRectangle>
+              <ClientRectangle>8,1,1.1,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <DataColumn>QSL_INVOICE_FROOSH.EMZA1</DataColumn>
               <Enabled>False</Enabled>
@@ -1803,7 +1807,7 @@
               <AspectRatio>True</AspectRatio>
               <Brush>Transparent</Brush>
               <CanShrink>True</CanShrink>
-              <ClientRectangle>1.8,1.1,1.1,0.8</ClientRectangle>
+              <ClientRectangle>6.2,1,1.1,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <DataColumn>QSL_INVOICE_FROOSH.EMZA2</DataColumn>
               <Enabled>False</Enabled>
@@ -1820,7 +1824,7 @@
               <AspectRatio>True</AspectRatio>
               <Brush>Transparent</Brush>
               <CanShrink>True</CanShrink>
-              <ClientRectangle>0,1.1,1.1,0.8</ClientRectangle>
+              <ClientRectangle>4.4,1,1.1,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <DataColumn>QSL_INVOICE_FROOSH.EMZA3</DataColumn>
               <Enabled>False</Enabled>
@@ -1836,7 +1840,7 @@
             <FU Ref="104" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
-              <ClientRectangle>4.6,1.6,0.9,0.2</ClientRectangle>
+              <ClientRectangle>8.9,1.4,0.9,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
@@ -1852,7 +1856,7 @@
             <FS Ref="105" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
-              <ClientRectangle>4.6,1.4,0.9,0.2</ClientRectangle>
+              <ClientRectangle>8.9,1.2,0.9,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
@@ -1868,7 +1872,7 @@
             <HU Ref="106" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.7,1.6,0.9,0.2</ClientRectangle>
+              <ClientRectangle>7.1,1.4,0.9,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
@@ -1884,7 +1888,7 @@
             <HS Ref="107" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
-              <ClientRectangle>2.7,1.4,0.9,0.2</ClientRectangle>
+              <ClientRectangle>7.1,1.2,0.9,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
@@ -1900,7 +1904,7 @@
             <MU Ref="108" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.9,1.6,0.9,0.2</ClientRectangle>
+              <ClientRectangle>5.3,1.4,0.9,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
@@ -1916,7 +1920,7 @@
             <MS Ref="109" type="Text" isKey="true">
               <AutoWidth>True</AutoWidth>
               <Brush>Transparent</Brush>
-              <ClientRectangle>0.9,1.4,0.9,0.2</ClientRectangle>
+              <ClientRectangle>5.3,1.2,0.9,0.2</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
@@ -2054,7 +2058,7 @@
             <SHARAYET Ref="121" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <CanShrink>True</CanShrink>
-              <ClientRectangle>5.5,1.1,5.4,0.8</ClientRectangle>
+              <ClientRectangle>5.5,1,5.4,0.5</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -2068,7 +2072,81 @@
               <TextOptions>,,RightToLeft=True,,WordWrap=True,A=0</TextOptions>
               <Type>Expression</Type>
             </SHARAYET>
-            <EndPointPrimitive9 Ref="122" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <Text74 Ref="122" type="Text" isKey="true">
+              <AutoWidth>True</AutoWidth>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>3.7,1,0.4,0.2</ClientRectangle>
+              <Conditions isList="true" count="1">
+                <value>QSL_INVOICE_FROOSH.DEPNAME,IsNull,,,String,[0:0:0],Transparent,IRANYekanFN_x002C_8,False,False,,,None</value>
+              </Conditions>
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text74</Name>
+              <Page isRef="5" />
+              <Parent isRef="94" />
+              <Text>شعبه:</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text74>
+            <Text75 Ref="123" type="Text" isKey="true">
+              <AutoWidth>True</AutoWidth>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>1.8,1,1.9,0.2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text75</Name>
+              <Page isRef="5" />
+              <Parent isRef="94" />
+              <Text>{QSL_INVOICE_FROOSH.DEPNAME}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text75>
+            <Text76 Ref="124" type="Text" isKey="true">
+              <AutoWidth>True</AutoWidth>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>3.7,1.2,0.7,0.2</ClientRectangle>
+              <Conditions isList="true" count="1">
+                <value>QSL_INVOICE_FROOSH.DEPART,IsNull,,,String,[0:0:0],Transparent,IRANYekanFN_x002C_8,False,False,,,None</value>
+              </Conditions>
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text76</Name>
+              <Page isRef="5" />
+              <Parent isRef="94" />
+              <Text>نشانی تحویل:</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text76>
+            <Text77 Ref="125" type="Text" isKey="true">
+              <AutoWidth>True</AutoWidth>
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,1.2,3.7,0.2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,8</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text77</Name>
+              <Page isRef="5" />
+              <Parent isRef="94" />
+              <ShrinkFontToFit>True</ShrinkFontToFit>
+              <ShrinkFontToFitMinimumSize>6</ShrinkFontToFitMinimumSize>
+              <Text>{QSL_INVOICE_FROOSH.DEPART}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text77>
+            <EndPointPrimitive9 Ref="126" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>10.9,0.3,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -2077,7 +2155,7 @@
               <Parent isRef="94" />
               <ReferenceToGuid>d64d420c63314c4a8c912b1133dafa80</ReferenceToGuid>
             </EndPointPrimitive9>
-            <StartPointPrimitive9 Ref="123" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive9 Ref="127" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>0,0,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -2086,7 +2164,7 @@
               <Parent isRef="94" />
               <ReferenceToGuid>d64d420c63314c4a8c912b1133dafa80</ReferenceToGuid>
             </StartPointPrimitive9>
-            <StartPointPrimitive10 Ref="124" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive10 Ref="128" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>4.4,0.3,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -2095,7 +2173,7 @@
               <Parent isRef="94" />
               <ReferenceToGuid>393b5cb220b5415dad66234c4acb6928</ReferenceToGuid>
             </StartPointPrimitive10>
-            <EndPointPrimitive10 Ref="125" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive10 Ref="129" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>10.9,0.5,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -2104,7 +2182,7 @@
               <Parent isRef="94" />
               <ReferenceToGuid>393b5cb220b5415dad66234c4acb6928</ReferenceToGuid>
             </EndPointPrimitive10>
-            <StartPointPrimitive11 Ref="126" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive11 Ref="130" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>4.4,0.5,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -2113,7 +2191,7 @@
               <Parent isRef="94" />
               <ReferenceToGuid>6302d04cfe3f4415a4c155402a458d35</ReferenceToGuid>
             </StartPointPrimitive11>
-            <EndPointPrimitive11 Ref="127" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive11 Ref="131" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>10.9,0.7,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -2122,7 +2200,7 @@
               <Parent isRef="94" />
               <ReferenceToGuid>6302d04cfe3f4415a4c155402a458d35</ReferenceToGuid>
             </EndPointPrimitive11>
-            <StartPointPrimitive12 Ref="128" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive12 Ref="132" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>4.4,0.7,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -2131,7 +2209,7 @@
               <Parent isRef="94" />
               <ReferenceToGuid>b8c0e029f38948f8940841fd37994594</ReferenceToGuid>
             </StartPointPrimitive12>
-            <EndPointPrimitive12 Ref="129" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive12 Ref="133" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>10.9,1,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -2140,7 +2218,7 @@
               <Parent isRef="94" />
               <ReferenceToGuid>b8c0e029f38948f8940841fd37994594</ReferenceToGuid>
             </EndPointPrimitive12>
-            <StartPointPrimitive13 Ref="130" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive13 Ref="134" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>0,0.7,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -2149,7 +2227,7 @@
               <Parent isRef="94" />
               <ReferenceToGuid>176872ef7c0441498f5cd2957e5c4422</ReferenceToGuid>
             </StartPointPrimitive13>
-            <EndPointPrimitive13 Ref="131" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive13 Ref="135" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>4.4,1,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -2165,7 +2243,7 @@
           <Page isRef="5" />
           <Parent isRef="5" />
         </GroupFooterBand1>
-        <RectanglePrimitive2 Ref="132" type="RectanglePrimitive" isKey="true">
+        <RectanglePrimitive2 Ref="136" type="RectanglePrimitive" isKey="true">
           <ClientRectangle>12.9,14,14.8,2.2</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
@@ -2176,11 +2254,11 @@
           <Parent isRef="5" />
           <Size>2</Size>
         </RectanglePrimitive2>
-        <VerticalLinePrimitive5 Ref="133" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive5 Ref="137" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>3.1,13.3,0.01,0.6</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="134" type="Cap" isKey="true">
+          <EndCap Ref="138" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2189,15 +2267,15 @@
           <Page isRef="5" />
           <Parent isRef="5" />
           <Size>2</Size>
-          <StartCap Ref="135" type="Cap" isKey="true">
+          <StartCap Ref="139" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive5>
-        <VerticalLinePrimitive4 Ref="136" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive4 Ref="140" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>5.1,13.3,0.01,0.7</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="137" type="Cap" isKey="true">
+          <EndCap Ref="141" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2206,15 +2284,15 @@
           <Page isRef="5" />
           <Parent isRef="5" />
           <Size>2</Size>
-          <StartCap Ref="138" type="Cap" isKey="true">
+          <StartCap Ref="142" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive4>
-        <VerticalLinePrimitive3 Ref="139" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive3 Ref="143" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>7.3,13.4,0.01,0.6</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="140" type="Cap" isKey="true">
+          <EndCap Ref="144" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2223,15 +2301,15 @@
           <Page isRef="5" />
           <Parent isRef="5" />
           <Size>2</Size>
-          <StartCap Ref="141" type="Cap" isKey="true">
+          <StartCap Ref="145" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive3>
-        <VerticalLinePrimitive1 Ref="142" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive1 Ref="146" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>9.1,13.4,0.01,0.6</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="143" type="Cap" isKey="true">
+          <EndCap Ref="147" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2240,15 +2318,15 @@
           <Page isRef="5" />
           <Parent isRef="5" />
           <Size>2</Size>
-          <StartCap Ref="144" type="Cap" isKey="true">
+          <StartCap Ref="148" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive1>
-        <VerticalLinePrimitive2 Ref="145" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive2 Ref="149" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>11.1,13.3,0.01,0.7</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="146" type="Cap" isKey="true">
+          <EndCap Ref="150" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2257,11 +2335,11 @@
           <Page isRef="5" />
           <Parent isRef="5" />
           <Size>2</Size>
-          <StartCap Ref="147" type="Cap" isKey="true">
+          <StartCap Ref="151" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive2>
-        <RectanglePrimitive1 Ref="148" type="RectanglePrimitive" isKey="true">
+        <RectanglePrimitive1 Ref="152" type="RectanglePrimitive" isKey="true">
           <ClientRectangle>0,13.3,27.6,0.6</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
@@ -2272,7 +2350,7 @@
           <Parent isRef="5" />
           <Size>2</Size>
         </RectanglePrimitive1>
-        <RectanglePrimitive3 Ref="149" type="RectanglePrimitive" isKey="true">
+        <RectanglePrimitive3 Ref="153" type="RectanglePrimitive" isKey="true">
           <ClientRectangle>0,15.4,12.9,0.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
@@ -2283,7 +2361,7 @@
           <Parent isRef="5" />
           <Size>2</Size>
         </RectanglePrimitive3>
-        <StartPointPrimitive1 Ref="150" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+        <StartPointPrimitive1 Ref="154" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
           <ClientRectangle>12.9,14,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2292,7 +2370,7 @@
           <Parent isRef="5" />
           <ReferenceToGuid>e2592212f2e543659437b6a5b5c9ee5c</ReferenceToGuid>
         </StartPointPrimitive1>
-        <EndPointPrimitive1 Ref="151" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+        <EndPointPrimitive1 Ref="155" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
           <ClientRectangle>27.7,16.2,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2301,7 +2379,7 @@
           <Parent isRef="5" />
           <ReferenceToGuid>e2592212f2e543659437b6a5b5c9ee5c</ReferenceToGuid>
         </EndPointPrimitive1>
-        <StartPointPrimitive2 Ref="152" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+        <StartPointPrimitive2 Ref="156" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
           <ClientRectangle>3.1,13.3,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2310,7 +2388,7 @@
           <Parent isRef="5" />
           <ReferenceToGuid>2ec17fe8bdfc438986c1a03af4a55777</ReferenceToGuid>
         </StartPointPrimitive2>
-        <EndPointPrimitive2 Ref="153" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+        <EndPointPrimitive2 Ref="157" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
           <ClientRectangle>3.1,13.9,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2319,7 +2397,7 @@
           <Parent isRef="5" />
           <ReferenceToGuid>2ec17fe8bdfc438986c1a03af4a55777</ReferenceToGuid>
         </EndPointPrimitive2>
-        <StartPointPrimitive3 Ref="154" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+        <StartPointPrimitive3 Ref="158" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
           <ClientRectangle>5.1,13.3,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2328,7 +2406,7 @@
           <Parent isRef="5" />
           <ReferenceToGuid>1fbfce4dddd34708a58d75ee314148c3</ReferenceToGuid>
         </StartPointPrimitive3>
-        <EndPointPrimitive3 Ref="155" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+        <EndPointPrimitive3 Ref="159" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
           <ClientRectangle>5.1,14,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2337,7 +2415,7 @@
           <Parent isRef="5" />
           <ReferenceToGuid>1fbfce4dddd34708a58d75ee314148c3</ReferenceToGuid>
         </EndPointPrimitive3>
-        <StartPointPrimitive4 Ref="156" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+        <StartPointPrimitive4 Ref="160" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
           <ClientRectangle>7.3,13.4,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2346,7 +2424,7 @@
           <Parent isRef="5" />
           <ReferenceToGuid>91f36bc6bb004f828999d3b19f8259de</ReferenceToGuid>
         </StartPointPrimitive4>
-        <EndPointPrimitive4 Ref="157" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+        <EndPointPrimitive4 Ref="161" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
           <ClientRectangle>7.3,14,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2355,7 +2433,7 @@
           <Parent isRef="5" />
           <ReferenceToGuid>91f36bc6bb004f828999d3b19f8259de</ReferenceToGuid>
         </EndPointPrimitive4>
-        <StartPointPrimitive5 Ref="158" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+        <StartPointPrimitive5 Ref="162" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
           <ClientRectangle>9.1,13.4,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2364,7 +2442,7 @@
           <Parent isRef="5" />
           <ReferenceToGuid>787d4c0659e0486f890d8726277acdc2</ReferenceToGuid>
         </StartPointPrimitive5>
-        <EndPointPrimitive5 Ref="159" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+        <EndPointPrimitive5 Ref="163" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
           <ClientRectangle>9.1,14,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2373,7 +2451,7 @@
           <Parent isRef="5" />
           <ReferenceToGuid>787d4c0659e0486f890d8726277acdc2</ReferenceToGuid>
         </EndPointPrimitive5>
-        <StartPointPrimitive6 Ref="160" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+        <StartPointPrimitive6 Ref="164" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
           <ClientRectangle>11.1,13.3,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2382,7 +2460,7 @@
           <Parent isRef="5" />
           <ReferenceToGuid>e2fbdb31b15d42088f65765b0e377f4b</ReferenceToGuid>
         </StartPointPrimitive6>
-        <EndPointPrimitive6 Ref="161" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+        <EndPointPrimitive6 Ref="165" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
           <ClientRectangle>11.1,14,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2391,7 +2469,7 @@
           <Parent isRef="5" />
           <ReferenceToGuid>e2fbdb31b15d42088f65765b0e377f4b</ReferenceToGuid>
         </EndPointPrimitive6>
-        <StartPointPrimitive7 Ref="162" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+        <StartPointPrimitive7 Ref="166" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
           <ClientRectangle>0,13.3,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2400,7 +2478,7 @@
           <Parent isRef="5" />
           <ReferenceToGuid>9de53b0ebe3f460b88185883110be5ac</ReferenceToGuid>
         </StartPointPrimitive7>
-        <EndPointPrimitive7 Ref="163" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+        <EndPointPrimitive7 Ref="167" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
           <ClientRectangle>27.6,13.9,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2409,7 +2487,7 @@
           <Parent isRef="5" />
           <ReferenceToGuid>9de53b0ebe3f460b88185883110be5ac</ReferenceToGuid>
         </EndPointPrimitive7>
-        <StartPointPrimitive8 Ref="164" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+        <StartPointPrimitive8 Ref="168" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
           <ClientRectangle>0,15.4,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2418,7 +2496,7 @@
           <Parent isRef="5" />
           <ReferenceToGuid>0ff0ccf43a3246549f855cb4616f5187</ReferenceToGuid>
         </StartPointPrimitive8>
-        <EndPointPrimitive8 Ref="165" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+        <EndPointPrimitive8 Ref="169" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
           <ClientRectangle>12.9,16.2,0,0</ClientRectangle>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2427,8 +2505,8 @@
           <Parent isRef="5" />
           <ReferenceToGuid>0ff0ccf43a3246549f855cb4616f5187</ReferenceToGuid>
         </EndPointPrimitive8>
-        <RectanglePrimitive4 Ref="166" type="RectanglePrimitive" isKey="true">
-          <ClientRectangle>0,5.5,10.9,0.3</ClientRectangle>
+        <RectanglePrimitive4 Ref="170" type="RectanglePrimitive" isKey="true">
+          <ClientRectangle>0,5.4,10.9,0.3</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2438,8 +2516,8 @@
           <Parent isRef="5" />
           <Size>2</Size>
         </RectanglePrimitive4>
-        <RectanglePrimitive5 Ref="167" type="RectanglePrimitive" isKey="true">
-          <ClientRectangle>4.4,5.8,6.5,0.2</ClientRectangle>
+        <RectanglePrimitive5 Ref="171" type="RectanglePrimitive" isKey="true">
+          <ClientRectangle>4.4,5.7,6.5,0.2</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2449,8 +2527,8 @@
           <Parent isRef="5" />
           <Size>2</Size>
         </RectanglePrimitive5>
-        <RectanglePrimitive6 Ref="168" type="RectanglePrimitive" isKey="true">
-          <ClientRectangle>4.4,6,6.5,0.2</ClientRectangle>
+        <RectanglePrimitive6 Ref="172" type="RectanglePrimitive" isKey="true">
+          <ClientRectangle>4.4,5.9,6.5,0.2</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2460,8 +2538,8 @@
           <Parent isRef="5" />
           <Size>2</Size>
         </RectanglePrimitive6>
-        <RectanglePrimitive7 Ref="169" type="RectanglePrimitive" isKey="true">
-          <ClientRectangle>4.4,6.2,6.5,0.3</ClientRectangle>
+        <RectanglePrimitive7 Ref="173" type="RectanglePrimitive" isKey="true">
+          <ClientRectangle>4.4,6.1,6.5,0.3</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2471,8 +2549,8 @@
           <Parent isRef="5" />
           <Size>2</Size>
         </RectanglePrimitive7>
-        <RectanglePrimitive8 Ref="170" type="RectanglePrimitive" isKey="true">
-          <ClientRectangle>0,6.2,4.4,0.3</ClientRectangle>
+        <RectanglePrimitive8 Ref="174" type="RectanglePrimitive" isKey="true">
+          <ClientRectangle>0,6.1,4.4,0.3</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
@@ -2506,10 +2584,10 @@
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>9/16/2025 7:15:31 PM</ReportChanged>
+  <ReportChanged>11/6/2025 2:50:04 AM</ReportChanged>
   <ReportCreated>9/13/2025 3:29:02 PM</ReportCreated>
   <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\INVOICE_PISH_2_MBA.mrt</ReportFile>
-  <ReportGuid>a1ec4f06302e4a7e98de0a060ece52ad</ReportGuid>
+  <ReportGuid>6c52545751b44301ad09376e24ed5b9f</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Inches</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

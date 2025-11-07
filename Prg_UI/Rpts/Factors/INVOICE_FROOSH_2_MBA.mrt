@@ -2006,7 +2006,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <AspectRatio>True</AspectRatio>
               <Brush>Transparent</Brush>
               <CanShrink>True</CanShrink>
-              <ClientRectangle>9.3,1,1.1,0.8</ClientRectangle>
+              <ClientRectangle>9.3,1.1,1.1,0.7</ClientRectangle>
               <Conditions isList="true" count="0" />
               <DataColumn>FactorMBA.EMZA1</DataColumn>
               <Enabled>False</Enabled>
@@ -2023,7 +2023,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <AspectRatio>True</AspectRatio>
               <Brush>Transparent</Brush>
               <CanShrink>True</CanShrink>
-              <ClientRectangle>7.4,1,1.1,0.8</ClientRectangle>
+              <ClientRectangle>7.4,1.1,1.1,0.7</ClientRectangle>
               <Conditions isList="true" count="0" />
               <DataColumn>FactorMBA.EMZA2</DataColumn>
               <Enabled>False</Enabled>
@@ -2040,7 +2040,7 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
               <AspectRatio>True</AspectRatio>
               <Brush>Transparent</Brush>
               <CanShrink>True</CanShrink>
-              <ClientRectangle>5.6,1,1.1,0.8</ClientRectangle>
+              <ClientRectangle>5.6,1.1,1.1,0.7</ClientRectangle>
               <Conditions isList="true" count="0" />
               <DataColumn>FactorMBA.EMZA3</DataColumn>
               <Enabled>False</Enabled>
@@ -2479,10 +2479,10 @@ WHERE HEAD_LST.NUMBER1=@NUMBER_PARAM AND HTAG=2</SqlCommand>
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>10/24/2025 3:36:56 PM</ReportChanged>
+  <ReportChanged>11/7/2025 10:52:56 AM</ReportChanged>
   <ReportCreated>8/21/2025 1:21:32 AM</ReportCreated>
-  <ReportFile>C:\prg\MC\Prg_UI\Rpts\Factors\INVOICE_FROOSH_2_MBA.mrt</ReportFile>
-  <ReportGuid>9c6f51a556c84b9b8d583ef5c997499c</ReportGuid>
+  <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\Factors\INVOICE_FROOSH_2_MBA.mrt</ReportFile>
+  <ReportGuid>43f23915b4054af3a442153adf42c447</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Inches</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

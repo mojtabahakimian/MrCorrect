@@ -520,7 +520,6 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             }
 
             string currentCode = CODE.SelectedValue?.ToString();
-            int FnumbCode = Convert.ToInt32(FNUMB.Text);
 
 
             if (string.IsNullOrWhiteSpace(currentCode))
@@ -531,18 +530,6 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             else
             {
                 DG_SUB.IsReadOnly = false;
-            }
-
-            string sql = "SELECT FNUMB FROM HEAD_MANF WHERE CODE = @CODE";
-            var parameters = new { CODE = currentCode };
-            var existingFormula = dbms.DoGetDataSQL<HEAD_MANF_MODEL>(sql, parameters).FirstOrDefault();
-            if (existingFormula != null)
-            {
-                if (FnumbCode != existingFormula.FNUMB)
-                {
-                    string message = "کاربر گرامی برای این کالا قبلا فرمول تعریف شده است. دقت کنید که عملیات را بصورت صحیح انجام داده باشید.";
-                    new Msgwin(false, message).ShowDialog();
-                }
             }
         }
         private void DATE_N_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -673,6 +660,26 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             if (!CL_LMethods.IsNumeric(IMBIBE_SAR.Text)) //جذب هزینه سربار
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار جذب هزینه سربار معتبر نیست" });
+            }
+
+            int FnumbCode = Convert.ToInt32(FNUMB.Text);
+            string sql = "SELECT FNUMB FROM HEAD_MANF WHERE CODE = @CODE";
+            var parameters = new { CODE = CODE.SelectedValue };
+            var existingFormula = dbms.DoGetDataSQL<HEAD_MANF_MODEL>(sql, parameters).FirstOrDefault();
+            if (existingFormula != null)
+            {
+                if (_navigationManager.IsNewRecord)
+                {
+                    if (existingFormula.FNUMB != null)
+                    {
+                        ErrosMessages.Add(new MsgModel { MessageText_U = "کاربر گرامی برای این کالا قبلا فرمول تعریف شده است. دقت کنید که عملیات را بصورت صحیح انجام داده باشید." });
+                    }
+                }
+                else if (FnumbCode != existingFormula.FNUMB)
+                {
+                    ErrosMessages.Add(new MsgModel { MessageText_U = "کاربر گرامی برای این کالا قبلا فرمول تعریف شده است. دقت کنید که عملیات را بصورت صحیح انجام داده باشید." });
+                }
+
             }
 
             if (ErrosMessages.Any())

@@ -80,5 +80,10 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.ADAMTARAZ, null);
         }
+
+        private void WrapPanel_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_AMVAL, null);
+        }
     }
 }

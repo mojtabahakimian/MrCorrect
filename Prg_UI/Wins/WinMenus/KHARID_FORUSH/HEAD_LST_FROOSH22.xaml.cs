@@ -54,7 +54,6 @@ using static Prg_UI.Functions.CL_LMethods;
 using static Wins.WinMenus.KHARID_FORUSH.HEAD_LST_PISHFROOSH2;
 using System.Text;
 using System.Threading.Tasks;
-using Syncfusion.Windows.Shared;
 
 
 //مواردی که باید بعدا در نظر گرفته شود :
@@ -3218,6 +3217,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             //بروز رسانی مانده حساب مشتری
             MasterSummerAndMandeh();
+
         }
         private void JAY_Click(object sender, RoutedEventArgs e)
         {
@@ -3254,10 +3254,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 }
                 bool isRewardSystemActive = JAY.IsChecked ?? false; // CheckBox named JAY
 
-                if (!isRewardSystemActive)
-                {
-                    return; //اگر تیک جایزه را نزده برگرد
-                }
+                //if (!isRewardSystemActive)
+                //{
+                //    return; //اگر تیک جایزه را نزده برگرد
+                //}
 
                 short invoiceTag = hTAG; // مقدار ثابت
                 int performingUserId = (int)Baseknow.USERCOD; // فرض بر اینکه UID اینجاست
@@ -3276,7 +3276,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                 if (_DisplayMsg_)
                 {
-                    universControl.PopNotifyShow($".وضعیت جایزه بروز شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+                    universControl.PopNotifyShow($".وضعیت جایزه بروز شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C", 1);
                 }
             }
             catch (Exception ex)
@@ -4067,7 +4067,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         }
                     }
                 }
-            };
+            }
+            ;
             min = CL_HESABDARI.Getmin((int)ROW?.ANBAR, ROW?.CODE);
             if (ROW?.ANBAR != 0)
             {
@@ -7602,6 +7603,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             //    new Msgwin(false, $"خطا در محاسبه پورسانت: {ex.Message}").ShowDialog();
             //}
 
+            if (!DoCmdHeaderSaveUpdate())  //ذخیره کامل سربرگ Update مجدد
+            {
+                return;
+            }
+
             //سند زدن
             SANAD();
 
@@ -7646,6 +7652,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             // 2. Determine state and fetch invoice rows
             var invoiceList = dbms.DoGetDataSQL<INVO_LST_CSHARP>("SELECT * FROM INVO_LST WHERE NUMBER = @NUMBER AND TAG = @TAG", new { NUMBER = number, TAG = tag }).ToList();
+
             if (TICMBAA.IsChecked == true)
             {
                 // Pre-fetch all needed codes to reduce SQL round-trips
@@ -7666,12 +7673,20 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     {
                         row.IMBAA = 0;
                     }
+
+                    // بروزرسانی آیتم در ObservableCollection بر اساس id
+                    var itemInCollection = FACTOR22_INVO_DATA.FirstOrDefault(x => x.id == row.id);
+                    if (itemInCollection != null)
+                    {
+                        itemInCollection.IMBAA = row.IMBAA;
+                    }
                 }
 
-                // Batch Update all at once for better performance (optional, for large updates use a transaction)
+                // Batch Update all at once for better performance
                 foreach (var row in invoiceList)
                 {
-                    dbms.DoExecuteSQL("UPDATE dbo.INVO_LST SET IMBAA = @IMBAA WHERE NUMBER = @NUMBER AND TAG = @TAG AND id = @ID", new { IMBAA = row.IMBAA, NUMBER = number, TAG = tag, ID = row.id });
+                    dbms.DoExecuteSQL("UPDATE dbo.INVO_LST SET IMBAA = @IMBAA WHERE NUMBER = @NUMBER AND TAG = @TAG AND id = @ID",
+                        new { IMBAA = row.IMBAA, NUMBER = number, TAG = tag, ID = row.id });
                 }
 
                 if (smbaa != Convert.ToDouble(MBAA.Text) && smbaa > 0d)
@@ -7686,7 +7701,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 foreach (var row in invoiceList)
                 {
                     row.IMBAA = 0;
-                    dbms.DoExecuteSQL("UPDATE dbo.INVO_LST SET IMBAA = 0 WHERE NUMBER = @NUMBER AND TAG = @TAG AND id = @ID", new { NUMBER = number, TAG = tag, ID = row.id });
+
+                    // بروزرسانی آیتم در ObservableCollection
+                    var itemInCollection = FACTOR22_INVO_DATA.FirstOrDefault(x => x.id == row.id);
+                    if (itemInCollection != null)
+                    {
+                        itemInCollection.IMBAA = 0;
+                    }
+
+                    dbms.DoExecuteSQL("UPDATE dbo.INVO_LST SET IMBAA = 0 WHERE NUMBER = @NUMBER AND TAG = @TAG AND id = @ID",
+                        new { NUMBER = number, TAG = tag, ID = row.id });
                 }
 
                 if (Convert.ToDouble(MBAA.Text) > 0)
@@ -10473,7 +10497,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     if (Information.IsNumeric(TAMIR))
                     {
                         TAMIR = Baseknow.BEDEHKAR + "-1-" + TAMIR;
-                    };
+                    }
+                    ;
                     if (Strings.Mid(Baseknow.OPTIONSS, 26, 1) == "5")
                     {
                         //EXEC dbo.GETKOL ,EXEC dbo.GETMOIN ,EXEC dbo.GETTAF
@@ -11124,8 +11149,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
 
             //report.Compile();
-            report.Render(false);
-            report.ShowWithWpf();
+            new WINRPT(report, LABEL_HEADER.Content.ToStringNullSafe()).Show();
 
             EMZAPARAM.IsRasmi = false;
             #endregion

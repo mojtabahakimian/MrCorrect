@@ -933,8 +933,11 @@ namespace Functions
             /// <summary>
             /// جمع داری اموال
             /// </summary>
-            WIN_AMVAL
-
+            WIN_AMVAL,
+            /// <summary>
+            /// لیست کالا ها کنترل 5
+            /// </summary>
+            WIN_LIST_KALA_CTRL5
         }
         #endregion
 
@@ -953,6 +956,8 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+                case WinNameType.WIN_LIST_KALA_CTRL5: /* لیست کالا ها کنترل 5 */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_LIST_KALA(), isModalDialog: false, allowMultipleInstances: false); break;
+
                 case WinNameType.WIN_AMVAL: /* جمع داری اموال */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_AMVAL(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.PRICE_GRP_FORM_GRUHBANDI_GHEYMATI: /* تعریف گروه بندی قیمتی */ CL_LMethods.OpenWindow(OWNERWIN, new PRICE_GRP_FORM(), isModalDialog: false, allowMultipleInstances: false); break;

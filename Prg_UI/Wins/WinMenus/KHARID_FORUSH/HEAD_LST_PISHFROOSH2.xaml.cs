@@ -1243,7 +1243,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
             if (CL_HESABDARI.LETSGO("JAYO"))
             {
-                this.JAYO_COL.IsReadOnly = false;
+                //فعال غیر فعال شده ولی بعدا اگر خواستند باید اول تبدیل به کمبوباکس بشه بعدش
+                //this.JAYO_COL.IsReadOnly = false;
             }
             else
             {
@@ -4116,7 +4117,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                     {
                                         universControl.PopNotifyShow(" خروج كالای  " + item.CODE + " : " + CL_HESABDARI.GETKALANAME(Convert.ToDouble(item.CODE)) + " از انبار موجودی را به مقدار غیر مجاز كاهش میدهد.برگه قابل تبدیل نیست" + " حداقل موجودی لازم  :" + (min - RST_mand), Pop1, Pop1Text1, Pop_Border1);
                                     }
-                                };
+                                }
+                                ;
                             }
                         }
                     }
@@ -4241,13 +4243,15 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     {
                         if (rst2.CMBAA ?? false)
                         {
-                            dbms.DoExecuteSQL($"UPDATE INVO_LST SET IMBAA = {Math.Round((double)((item.MABL_K - item.N_MOIN) * Convert.ToDouble(CL_HESABDARI.GetArzesh(item.CODE)) / 100))} " +
+                            double MaliatKala = Math.Round((double)((item.MABL_K - item.N_MOIN) * Convert.ToDouble(CL_HESABDARI.GetArzesh(item.CODE)) / 100));
+
+                            dbms.DoExecuteSQL($"UPDATE INVO_LST SET IMBAA = {MaliatKala} " +
                                 $" {where} AND CODE = N'{rst2.CODE}' ");
-                            SMBAA = SMBAA + Math.Round((double)((item.MABL_K - item.N_MOIN) * Convert.ToDouble(CL_HESABDARI.GetArzesh(item.CODE)) / 100));
+                            SMBAA = SMBAA + MaliatKala;
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($"UPDATE INVO_LST SET IMBAA = 0 {where} ");
+                            dbms.DoExecuteSQL($"UPDATE INVO_LST SET IMBAA = 0 {where} AND CODE = N'{rst2.CODE}' ");
                         }
                     }
                 }
@@ -4422,7 +4426,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 JAMF = Convert.ToDouble(jst.Select(x => x.JAMF).FirstOrDefault());
                 TF = Convert.ToDouble(jst.Select(x => x.TF).FirstOrDefault());
                 BAA = Convert.ToDouble(jst.Select(x => x.BAA).FirstOrDefault());
-            };
+            }
+            ;
 
             var jst2 = dbms.DoGetDataSQL<jst_KH>("SELECT     SUM(MABL_HAZ) AS KH FROM dbo.HEAD_LST WHERE (NUMBER = " + NUMBER_Pas + ") And (TAG = 20)").ToList();
 
@@ -4555,7 +4560,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                             ProcLoader.Stop(Prc);
                             return;
                         }
-                    };
+                    }
+                    ;
                     if (CL_HESABDARI.BLOCKEDCUST(CUST_NO.SelectedValue.ToString()))
                     {
                         dbms.DoExecuteSQL("UPDATE    dbo.sazman SET   pishpross = 0");
@@ -4619,7 +4625,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                             if (CMABL != RST2_2Fields.MABL && RST2_2Fields.MABL != 0)
                             {
                                 Msgwin msgwin = new Msgwin(false, " قيمت كالاي " + RST2_2Fields.CODE + " : " + CL_HESABDARI.GETKALANAME(Convert.ToDouble(RST2_2Fields.CODE)) + " با قيمت سيستم منطبق نيست"); msgwin.ShowDialog();
-                            };
+                            }
+                            ;
                             var rst44 = dbms.DoGetDataSQL<PRT2>("SELECT TOP 100 PERCENT dbo.INVO_LST.MABL, dbo.HEAD_LST.DATE_N FROM         dbo.HEAD_LST INNER JOIN dbo.INVO_LST ON dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG AND dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER WHERE     (dbo.INVO_LST.TAG = 1) AND (dbo.INVO_LST.CODE = N'" + RST2_2Fields.CODE + "') ORDER BY dbo.HEAD_LST.DATE_N DESC").ToList();
                             if (rst44.Count > 0)
                             {
@@ -4629,7 +4636,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                     msgwin.ShowDialog();
                                 }
                             }
-                        };
+                        }
+                        ;
                     }
                     TAKHFIF.Text = takh.ToString();
                     if (Strings.Mid(Baseknow.OPTIONSS, 59, 1) == "5")
@@ -4668,7 +4676,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                     Msgwin msgwin = new Msgwin(false, " خروج كالاي  " + RST2_5Fields.CODE + " : " + CL_HESABDARI.GETKALANAME(Convert.ToDouble(RST2_5Fields.CODE)) + " از انبار موجودي را به مقدار غير مجاز كاهش ميدهد.برگه قابل تبديل نيست" + " حداقل موجودي لازم  :" + (min - rst_1)); msgwin.ShowDialog();
                                     NOTPR = true;
                                 }
-                            };
+                            }
+                            ;
                         }
                     }
                     if (NOTPR)
@@ -4857,7 +4866,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                     db?.Close();
                                 }
                             }
-                        };
+                        }
+                        ;
                         dbms.DoExecuteSQL($@"INSERT INTO	dbo.head_lst_log (UP_DATE,NUMBER,TAGG,RESERVED,UP_USER_NAME,fieldname,UDATEF)
                                                        VALUES
                                                        (   GETDATE(),
@@ -5474,7 +5484,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(NUMBER.Text), 20);
             if (mid > 0d)
             {
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), " :امضا شد2 ", " :امضا برداشته شد2:") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + NUMBER.Text + ",20 )");
+                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN2.IsChecked), " :امضا شد2 ", " :امضا برداشته شد2:") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + NUMBER.Text + ",20 )");
                 dbms.DoExecuteSQL("UPDATE TASKS SET PERSONEL = " + CL_HESABDARI.GETUSERTASK(mid) + ",STATUS = 1 WHERE IDNUM = " + mid);
             }
             else
@@ -5483,7 +5493,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 SHARH = "'پيش فاکتور  شماره: " + NUMBER.Text + " مورخ " + Strings.Format(Convert.ToInt32(DATE_N.Text.ToRawTarikh()), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToString()) + "','" + this.CUST_NO.SelectedValue + "'";
                 dbms.DoExecuteSQL("insert into tasks(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO)  values (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.UCurrentUser() + "'," + SHARH + "," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20, GETDATE() ," + Baseknow.USERCOD + " )");
                 mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(NUMBER.Text), 20);
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), " : امضا شد2 ", " :امضا برداشته شد2 ") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20 )");
+                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN2.IsChecked), " : امضا شد2 ", " :امضا برداشته شد2 ") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20 )");
             }
 
             SGN2usid.Tag = Baseknow.USERCOD;
@@ -5517,7 +5527,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(NUMBER.Text), 20);
             if (mid > 0d)
             {
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), " :امضا شد3 ", " :امضا برداشته شد3:") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + NUMBER.Text + ",20 )");
+                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN3.IsChecked), " :امضا شد3 ", " :امضا برداشته شد3:") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + NUMBER.Text + ",20 )");
                 dbms.DoExecuteSQL("UPDATE TASKS SET PERSONEL = " + CL_HESABDARI.GETUSERTASK(mid) + ",STATUS = 1 WHERE IDNUM = " + mid);
             }
             else
@@ -5526,7 +5536,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 SHARH = "'پيش فاکتور  شماره: " + NUMBER.Text + " مورخ " + Strings.Format(Convert.ToInt32(DATE_N.Text.ToRawTarikh()), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToString()) + "','" + this.CUST_NO.SelectedValue + "'";
                 dbms.DoExecuteSQL("insert into tasks(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO)  values (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.UCurrentUser() + "'," + SHARH + "," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20, GETDATE() ," + Baseknow.USERCOD + " )");
                 mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(NUMBER.Text), 20);
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), " : امضا شد3 ", " :امضا برداشته شد3 ") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20 )");
+                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN3.IsChecked), " : امضا شد3 ", " :امضا برداشته شد3 ") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20 )");
             }
 
             SGN3usid.Tag = Baseknow.USERCOD;
@@ -5930,9 +5940,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         }
 
                         ChangeIsHappend = true;
-                        universControl.PopNotifyShowUp("قیمت بروز شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
-
-
+                        universControl.PopNotifyShowUp("قیمت بروز شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green, 1);
 
                         IF_NOT_IS_AZAD_Then_Lock();
                     }

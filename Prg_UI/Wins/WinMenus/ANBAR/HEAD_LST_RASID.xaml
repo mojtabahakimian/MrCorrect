@@ -128,7 +128,7 @@
             </ComboBox.ItemsPanel>
         </ComboBox>
         <CheckBox x:Name="OKF" Content="تایید رسید" IsChecked="False" HorizontalAlignment="Left" Margin="20,160,0,0" Width="90" Height="28" IsHitTestVisible="False" Focusable="False" VerticalAlignment="Top"/>
-        <Button x:Name="ESLAH"      Content="اصلاح برگه"       Margin="0,211,126,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Click="ESLAH_Click" IsEnabled="False"/>
+        <Button x:Name="ESLAH"      Content="اصلاح برگه"       Margin="0,211,126,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Click="ESLAH_Click"/>
         <Button x:Name="Command113" Content="قبض باسکول"     Margin="132,211,0,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Click="Command113_Click" IsEnabled="False"/>
         <Button x:Name="Command106" Content="چاپ رسید انبار" Margin="132,156,0,0"    BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Click="Command106_Click" IsEnabled="False"/>
         <Button x:Name="BUTTON_SAVE_RASID"  Click="BUTTON_SAVE_RASID_Click" Margin="0,211,12,0"  Content="ذخیره" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Height="36" VerticalAlignment="Top" HorizontalAlignment="Right" Width="106"/>
