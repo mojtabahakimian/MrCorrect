@@ -508,6 +508,11 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 }
             }
 
+            if (string.IsNullOrWhiteSpace(CODE_TEX.Text))
+            {
+                return;
+            }
+
             var RST_KALA = CL_LMethods.GetKalaBySearch(dbms, default, CODE_TEX.Text);
             if (RST_KALA != null)
             {
@@ -519,18 +524,16 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 return;
             }
 
-            string currentCode = CODE.SelectedValue?.ToString();
-
-
-            if (string.IsNullOrWhiteSpace(currentCode))
-            {
-                DG_SUB.IsReadOnly = true;
-                return;
-            }
-            else
-            {
-                DG_SUB.IsReadOnly = false;
-            }
+            //string currentCode = CODE.SelectedValue?.ToString();
+            //if (string.IsNullOrWhiteSpace(currentCode))
+            //{
+            //    DG_SUB.IsReadOnly = true;
+            //    return;
+            //}
+            //else
+            //{
+            //    DG_SUB.IsReadOnly = false;
+            //}
         }
         private void DATE_N_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
@@ -668,18 +671,27 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             var existingFormula = dbms.DoGetDataSQL<HEAD_MANF_MODEL>(sql, parameters).FirstOrDefault();
             if (existingFormula != null)
             {
-                if (_navigationManager.IsNewRecord)
+                bool AllowedToMultipleFormula = false;
+                if (!string.IsNullOrEmpty(Baseknow.OPTIONSS) && Baseknow.OPTIONSS.Length > 55 && Baseknow.OPTIONSS.Substring(55, 1) == "5") //چند فرموله عمل کند تیک شماره 36 Check56
                 {
-                    if (existingFormula.FNUMB != null)
-                    {
-                        ErrosMessages.Add(new MsgModel { MessageText_U = "کاربر گرامی برای این کالا قبلا فرمول تعریف شده است. دقت کنید که عملیات را بصورت صحیح انجام داده باشید." });
-                    }
-                }
-                else if (FnumbCode != existingFormula.FNUMB)
-                {
-                    ErrosMessages.Add(new MsgModel { MessageText_U = "کاربر گرامی برای این کالا قبلا فرمول تعریف شده است. دقت کنید که عملیات را بصورت صحیح انجام داده باشید." });
+                    AllowedToMultipleFormula = true;
                 }
 
+                if (!AllowedToMultipleFormula)
+                {
+                    if (_navigationManager.IsNewRecord)
+                    {
+                        if (existingFormula.FNUMB != null)
+                        {
+                            ErrosMessages.Add(new MsgModel { MessageText_U = "کاربر گرامی برای این کالا قبلا فرمول تعریف شده است. دقت کنید که عملیات را بصورت صحیح انجام داده باشید , \"چند فرموله عمل کند\" برای سیستم فعال نیست" });
+                        }
+                    }
+                    else if (FnumbCode != existingFormula.FNUMB)
+                    {
+                        ErrosMessages.Add(new MsgModel { MessageText_U = "کاربر گرامی برای این کالا قبلا فرمول تعریف شده است. دقت کنید که عملیات را بصورت صحیح انجام داده باشید , \"چند فرموله عمل کند\" برای سیستم فعال نیست" });
+                        //universControl.PopNotifyShowUp("کاربر گرامی برای این کالا قبلا فرمول تعریف شده است. دقت کنید که عملیات را بصورت صحیح انجام داده باشید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow, 1);
+                    }
+                }
             }
 
             if (ErrosMessages.Any())
@@ -782,6 +794,8 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             }
 
             if (HeaderIsValid() is false) return; //اگر اطلاعات سربرگ صحیح نیست خارج شو
+
+
 
             try
             {
@@ -1069,6 +1083,11 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                             FNUMB.UpdateLayout();
                         }
 
+                        if (string.IsNullOrWhiteSpace(FNUMB.Text) || FNUMB.Text == "0")
+                        {
+                            throw new Exception("خطایی رخ داده , شماره فرمول صفر است !");
+                        }
+
                         const string insertSql = @"
                             INSERT INTO dbo.HEAD_MANF (
                                 FNUMB, CODE, DATE_ACTIV, IMBIBE_MANF, IMBIBE_SAR, GHEYMAT, NAMES, 
@@ -1097,6 +1116,11 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                         RefreshAfterUpdate();
                     }
                 }
+            }
+
+            if (string.IsNullOrWhiteSpace(FNUMB.Text) || FNUMB.Text == "0")
+            {
+                throw new Exception("خطایی رخ داده , شماره فرمول صفر است !");
             }
 
             const string updateQuery = @"
@@ -1748,6 +1772,11 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 IsSaveSuccess = false;
                 DG_SUB_CANCEL_EDIT();
                 return;
+            }
+
+            if (string.IsNullOrWhiteSpace(FNUMB.Text) || FNUMB.Text == "0")
+            {
+                throw new Exception("خطایی رخ داده , شماره فرمول صفر است !");
             }
 
             IsSaveSuccess = false;

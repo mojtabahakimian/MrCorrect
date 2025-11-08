@@ -1848,14 +1848,16 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         private void ApplyDataGridItems()
         {
-            var editableCollectionView = PGET_LST_SUB.Items as IEditableCollectionView;
-            if (editableCollectionView != null && editableCollectionView.IsAddingNew)
+            if (PGET_LST_SUB.Items is IEditableCollectionView editableCollectionView)
             {
-                editableCollectionView.CancelNew(); // to discard the new item
-            }
-            if (editableCollectionView != null && editableCollectionView.IsEditingItem)
-            {
-                editableCollectionView.CommitNew(); // to commit the new item
+                if (editableCollectionView.IsAddingNew)
+                {
+                    editableCollectionView.CancelNew(); // discard the new item
+                }
+                if (editableCollectionView.IsEditingItem)
+                {
+                    editableCollectionView.CommitEdit(); // commit the edit transaction
+                }
             }
         }
 

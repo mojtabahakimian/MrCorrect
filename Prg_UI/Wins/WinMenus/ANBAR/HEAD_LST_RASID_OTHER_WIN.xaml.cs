@@ -648,7 +648,7 @@ namespace Wins.WinMenus.ANBAR
                 PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
 
                 DEPATMAN.SelectedValue = HEADER_FAC?.DEPATMAN; DEPATMAN.Items.Refresh();
-
+                USER_NAME.Text = HEADER_FAC?.USER_NAME;
                 OKF.IsChecked = HEADER_FAC.OKF; //تایید فاکتور
                 ReGetData();
 
@@ -2422,7 +2422,7 @@ namespace Wins.WinMenus.ANBAR
                                                 ANBAR = {TheRow.ANBAR},
                                                 RADIF = {(TheRow.RADIF is null ? "NULL" : TheRow.RADIF)},
                                                 CODE = N'{TheRow.CODE}',
-                                                MANDAH = N'{(TheRow.MANDAH is null ? "NULL" : TheRow.MANDAH)}',
+                                                MANDAH = N'{(TheRow.MANDAH is null ? "" : TheRow.MANDAH)}',
                                                 MEGH = {TheRow.MEGH},
                                                 MEGHk = {TheRow.MEGHk},
                                                 MEGH_MAR = {(TheRow.MEGH_MAR is null ? "NULL" : TheRow.MEGH_MAR)},

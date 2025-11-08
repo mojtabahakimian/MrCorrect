@@ -83,8 +83,8 @@
         </Popup>
         <!--HEADER↑-->
         <Grid Margin="5,40,5,5">
-            <TextBox x:Name="FNUMB" Text="0" Height="30" Margin="0,12,74,0" IsReadOnly="True" Style="{StaticResource FuzzyOut}" Padding="3" TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="90" Tag="RD" IsTabStop="False" />
-            <xctk:MaskedTextBox x:Name="DATE_ACTIV" TabIndex="0"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="30" Margin="0,90,74,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" PreviewLostKeyboardFocus="DATE_N_PreviewLostKeyboardFocus" />
+            <TextBox x:Name="FNUMB" Text="0" Height="30" Margin="0,12,74,0" IsReadOnly="True" IsHitTestVisible="False" Style="{StaticResource FuzzyOut}" Padding="3" TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="90" Tag="RD" IsTabStop="False" />
+            <xctk:MaskedTextBox x:Name="DATE_ACTIV" TabIndex="0" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="30" Margin="0,90,74,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" PreviewLostKeyboardFocus="DATE_N_PreviewLostKeyboardFocus" />
             <Label Content="شماره فرمول:" Margin="0,14,12,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="62" Height="26" VerticalAlignment="Top"/>
             <Label Content="تاریخ برگه:" Margin="0,91,21,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="52" Height="28" VerticalAlignment="Top"/>
             <Label Content="کالا:" Margin="0,54,49,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="24" Height="24" VerticalAlignment="Top"/>

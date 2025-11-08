@@ -1682,7 +1682,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             catch (Exception ex)
             {
                 // Log and show error
-                new Msgwin(false, $"خطا در بارگذاری اطلاعات فاکتور: {ex.Message}").ShowDialog();
+                new Msgwin(false, $"خطا در بارگذاری اطلاعات فاکتور").ShowDialog();
             }
             finally
             {
@@ -6554,9 +6554,15 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 universControl.PopNotifyShowUp(WarningMessages?.FirstOrDefault()?.MessageText_U, Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
             }
 
+            Summer();
+
+            UpdateVisitorCommissions(); //بروز رسانی 
+
             SANAD();
 
             MasterSummerAndMandeh();
+
+            ChangeIsHappend = true;
         }
 
         private bool RowValuesCheck(INVO_LST_FACTOR22? CurrentRow)
@@ -6837,8 +6843,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                         FNUMCO.Text = string.IsNullOrWhiteSpace(rst.FNUMCO.ToStringNullSafe()) ? "0" : rst.FNUMCO.ToStringNullSafe();
 
-                        JAY.IsChecked = Convert.ToBoolean(rst.JAY);
-                        TICMBAA.IsChecked = rst.TICMBAA;
+                        JAY.IsChecked = rst.JAY ?? false;
+                        TICMBAA.IsChecked = rst.TICMBAA ?? false;
+
                         DEPATMAN.SelectedValue = rst.DEPATMAN; DEPATMAN.Items.Refresh();
 
                         ////MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
@@ -7266,6 +7273,40 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
         }
 
+        /// <summary>
+        /// بروزرسانی پورسانت ویزیتور بعد از تغییر مبلغ کالا
+        /// فقط برای آیتم‌هایی که تیک "مبلغ ثابت" ندارند
+        /// </summary>
+        private void UpdateVisitorCommissions()
+        {
+            if (SAYER_VISITOR_DATA == null || SAYER_VISITOR_DATA.Count == 0)
+                return;
+
+            // اگر JF یا TAKHFIF خالی یا نامعتبر باشند، از محاسبه خارج شویم
+            if (!double.TryParse(JF.Text, out double jfValue) || !double.TryParse(TAKHFIF.Text, out double takhfifValue))
+                return;
+
+            // برای هر ویزیتور که مبلغش ثابت نیست، پورسانت را بروز کنیم
+            foreach (var visitor in SAYER_VISITOR_DATA)
+            {
+                // فقط آیتم‌هایی که STAT = false (مبلغ ثابت نیست)
+                if (visitor.STAT == false && visitor.DARSAD.HasValue)
+                {
+                    // فرمول: PURSANT = (JF - TAKHFIF) * DARSAD / 100
+                    visitor.PURSANT = Math.Round((jfValue - takhfifValue) * visitor.DARSAD.Value / 100);
+
+                    dbms.DoExecuteSQL($@"UPDATE dbo.VISITOR_DTL SET 
+                            NUMBER = {NUMBER.Text}, CUST_NO = N'{visitor.CUST_NO}' , DARSAD = {visitor?.DARSAD} ,
+                            PURSANT = {visitor?.PURSANT} , TOZIH = N'{visitor.TOZIH}' , STAT = {Convert.ToByte(visitor.STAT ?? false)},
+                            PORID = {(string.IsNullOrEmpty(visitor?.PORID.ToStringNullSafe()) ? "NULL" : visitor?.PORID)}
+                            WHERE ID = {visitor?.ID}");
+                }
+            }
+
+            double sum = SAYER_VISITOR_DATA.Sum(item => item.PURSANT ?? 0.0);
+            Text190.Text = sum.ToString();
+        }
+
         private bool IsRowValid(INVO_LST_FACTOR22 TheRow)
         {
             List<MsgModel> ErrosMessages = new List<MsgModel>();
@@ -7608,6 +7649,67 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 return;
             }
 
+            Summer();
+
+            //باز محاسبه پورسانت ها چون ممکنه مبالغ فاکتور تغییر کرده باشه
+            #region SAYER_PURSANT
+            //Validations
+            foreach (var FINAL_CROW_ITEM in SAYER_VISITOR_DATA)
+            {
+                #region Validations
+                List<MsgModel> ErrosMessages_Sayer = new List<MsgModel>();
+                if (string.IsNullOrEmpty(FINAL_CROW_ITEM.CUST_NO))
+                {
+                    ErrosMessages_Sayer.Add(new MsgModel { MessageText_U = "نام شخص خالی است" });
+                }
+                if (!double.TryParse(FINAL_CROW_ITEM.DARSAD?.ToString(), out double _) || string.IsNullOrEmpty(FINAL_CROW_ITEM?.DARSAD?.ToString()))
+                {
+                    ErrosMessages_Sayer.Add(new MsgModel { MessageText_U = "درصد خالی است!" });
+                }
+                if (FINAL_CROW_ITEM.DARSAD < 0 || FINAL_CROW_ITEM.DARSAD > 100)
+                {
+                    ErrosMessages_Sayer.Add(new MsgModel { MessageText_U = "درصد باید بین 0 تا 100 باشد." });
+                }
+                if (!IsValidPercentage(FINAL_CROW_ITEM.DARSAD.ToStringNullSafe()))
+                {
+                    ErrosMessages_Sayer.Add(new MsgModel { MessageText_U = "درصد صحیح نیست !." });
+                }
+                if (!double.TryParse(FINAL_CROW_ITEM.PURSANT?.ToString(), out double _) || string.IsNullOrEmpty(FINAL_CROW_ITEM?.PURSANT?.ToString()))
+                {
+                    ErrosMessages_Sayer.Add(new MsgModel { MessageText_U = "مبلغ پورسانت صحیح نیست!" });
+                }
+                if (FINAL_CROW_ITEM.PURSANT < 0)
+                {
+                    ErrosMessages_Sayer.Add(new MsgModel { MessageText_U = "مبلغ پورسانت منقی نمیتواند باشد!" });
+                }
+
+                if (FINAL_CROW_ITEM.TOZIH?.Length > 50)
+                {
+                    ErrosMessages_Sayer.Add(new MsgModel { MessageText_U = "طول توضیح بیش از اندازه است!" });
+                }
+                if (FINAL_CROW_ITEM.STAT == null)
+                {
+                    ErrosMessages_Sayer.Add(new MsgModel { MessageText_U = "تیک مبلغ ثابت خالی است!" });
+                }
+                if (FINAL_CROW_ITEM.PORID is not null)
+                {
+                    if (!double.TryParse(FINAL_CROW_ITEM.PORID?.ToString(), out double _) || string.IsNullOrEmpty(FINAL_CROW_ITEM?.PORID?.ToString()))
+                    {
+                        ErrosMessages_Sayer.Add(new MsgModel { MessageText_U = "الگوي پرداخت پورسانت خالی است!" });
+                    }
+                }
+                if (ErrosMessages_Sayer.Count > 0)
+                {
+                    ErrosMessages_Sayer = ErrosMessages_Sayer.Select(x => x.MessageText_U).Distinct()
+                    .Select(message => new MsgModel { MessageText_U = message }).ToList();
+                    new MsgListwin(false, ErrosMessages_Sayer).ShowDialog();
+                    return;
+                }
+                #endregion
+            }
+            UpdateVisitorCommissions();
+            #endregion
+
             //سند زدن
             SANAD();
 
@@ -7737,27 +7839,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         {
             if (string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text == "0") { return; }
 
-            NCHK.Text = PAY_GETD_SUB22_DATA?.Sum(x => x?.MABL ?? 0).ToString();
-
-            JJKOL.Text = SUM_OF_MABL_K.ToString(); //SMABLK //جمع فاکتور :
-            HKH.Text = MABL_HAZ.Text; // هزینه خدمات
-            NTKHFIF.Text = TAKHFIF.Text; //تخفیفات
-            JF.Text = JJKOL.Text; //جمع کل فاکتور برای فسمت روی فاکتور
-            Text117.Text = SUM_OF_MEGH_K.ToString(); //جمع مقادیر :
-
-            //مبلغ قابل پرداخت: //= [JF] + [HKH] - [NTKHFIF] + [MBAA]
-            var rghabel = Convert.ToInt64(JF.Text) + Convert.ToInt64(HKH.Text) - Convert.ToInt64(NTKHFIF.Text) + Convert.ToInt64(MBAA.Text);
-            GHABEL.Text = rghabel.ToString();
-
-            //جمع مبالغ پرداختی
-            //=[M_NAGHD]+[MABL_VAR]+[MABL_HAV]+[NCHK]
-            var RMP = Convert.ToInt64(M_NAGHD.Text) + Convert.ToInt64(MABL_VAR.Text) + Convert.ToInt64(MABL_HAV.Text) + Convert.ToInt64(NCHK.Text);
-            NPAR.Text = RMP.ToString();
-
-
-            //=[GHABEL]-[NPAR]
-            MAN.Text = Convert.ToString(Convert.ToInt64(GHABEL.Text) - Convert.ToInt64(NPAR.Text)); //مانده
-            MN.Text = MAN.Text; // مانده روی فاکتور
+            Summer();
 
             //if (TAKHFIF.Text != "0" && !string.IsNullOrEmpty(TAKHFIF.Text) && this.JJKOL.Text != "0")
             //{
@@ -7789,6 +7871,34 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 MABNA.Text = dbms.DoGetDataSQL<string?>($"SELECT TOP (1) BASE FROM dbo.DEED_HED WHERE NO_S  = 2 AND N_S = {SANAD_NUMBER}").FirstOrDefault();
             }
         }
+
+        private void Summer()
+        {
+            if (string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text == "0") { return; }
+
+            NCHK.Text = PAY_GETD_SUB22_DATA?.Sum(x => x?.MABL ?? 0).ToString();
+
+            JJKOL.Text = SUM_OF_MABL_K.ToString(); //SMABLK //جمع فاکتور :
+            HKH.Text = MABL_HAZ.Text; // هزینه خدمات
+            NTKHFIF.Text = TAKHFIF.Text; //تخفیفات
+            JF.Text = JJKOL.Text; //جمع کل فاکتور برای فسمت روی فاکتور
+            Text117.Text = SUM_OF_MEGH_K.ToString(); //جمع مقادیر :
+
+            //مبلغ قابل پرداخت: //= [JF] + [HKH] - [NTKHFIF] + [MBAA]
+            var rghabel = Convert.ToInt64(JF.Text) + Convert.ToInt64(HKH.Text) - Convert.ToInt64(NTKHFIF.Text) + Convert.ToInt64(MBAA.Text);
+            GHABEL.Text = rghabel.ToString();
+
+            //جمع مبالغ پرداختی
+            //=[M_NAGHD]+[MABL_VAR]+[MABL_HAV]+[NCHK]
+            var RMP = Convert.ToInt64(M_NAGHD.Text) + Convert.ToInt64(MABL_VAR.Text) + Convert.ToInt64(MABL_HAV.Text) + Convert.ToInt64(NCHK.Text);
+            NPAR.Text = RMP.ToString();
+
+
+            //=[GHABEL]-[NPAR]
+            MAN.Text = Convert.ToString(Convert.ToInt64(GHABEL.Text) - Convert.ToInt64(NPAR.Text)); //مانده
+            MN.Text = MAN.Text; // مانده روی فاکتور
+        }
+
         private bool DoCmdHeaderSaveUpdate()
         {
             try
@@ -9630,7 +9740,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         }
                         if (item.DARSAD != null)
                         {
-                            item.DARSAD = Math.Round((double)item.DARSAD, 2);
+                            item.DARSAD = (double)item.DARSAD;
                         }
 
                         SAYER_VISITOR_DATA.Add(item);
@@ -9725,7 +9835,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         if (Information.IsNumeric(tozihdata.FirstOrDefault()))
                         {
                             CURRENT_ROW_VISITOR.DARSAD = Convert.ToDouble(tozihdata.FirstOrDefault().Replace("%", ""));
-                            CURRENT_ROW_VISITOR.PURSANT = Math.Round((double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * CURRENT_ROW_VISITOR.DARSAD / 100));
+                            CURRENT_ROW_VISITOR.PURSANT = (double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * CURRENT_ROW_VISITOR.DARSAD / 100);
                             if ((bool)CURRENT_ROW_VISITOR.STAT)
                             {
                                 CURRENT_ROW_VISITOR.STAT = false;
@@ -9742,7 +9852,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     if (!string.IsNullOrEmpty(rst?.FirstOrDefault()) && Information.IsNumeric(rst.FirstOrDefault()))
                     {
                         CURRENT_ROW_VISITOR.DARSAD = Convert.ToDouble(rst.FirstOrDefault());
-                        CURRENT_ROW_VISITOR.PURSANT = Math.Round((double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * CURRENT_ROW_VISITOR.DARSAD / 100));
+                        CURRENT_ROW_VISITOR.PURSANT = (double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * CURRENT_ROW_VISITOR.DARSAD / 100);
                         if ((bool)CURRENT_ROW_VISITOR.STAT)
                         {
                             CURRENT_ROW_VISITOR.STAT = false;
@@ -9763,7 +9873,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 else
                 {
                     //DARSAD_AfterUpdate
-                    CURRENT_ROW_VISITOR.PURSANT = Math.Round((double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * CURRENT_ROW_VISITOR.DARSAD / 100));
+                    CURRENT_ROW_VISITOR.PURSANT = (double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * CURRENT_ROW_VISITOR.DARSAD / 100);
                     if (Convert.ToBoolean(CURRENT_ROW_VISITOR.STAT))
                     {
                         CURRENT_ROW_VISITOR.STAT = false;
@@ -9790,16 +9900,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     {
                         CURRENT_ROW_VISITOR.DARSAD = CURRENT_ROW_VISITOR.PURSANT / (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * 100;
 
-                        CURRENT_ROW_VISITOR.DARSAD = Math.Round((double)CURRENT_ROW_VISITOR.DARSAD, 2);
+                        CURRENT_ROW_VISITOR.DARSAD = (double)CURRENT_ROW_VISITOR.DARSAD;
                     }
                     else
                     {
                         CURRENT_ROW_VISITOR.DARSAD = 0;
                     }
-                    if (!Convert.ToBoolean(CURRENT_ROW_VISITOR.STAT))
-                    {
-                        CURRENT_ROW_VISITOR.STAT = true;
-                    }
+                    //if (!Convert.ToBoolean(CURRENT_ROW_VISITOR.STAT))
+                    //{
+                    //    CURRENT_ROW_VISITOR.STAT = true;
+                    //}
                 }
 
                 #region PURSANT_BeforeUpdate
@@ -9948,15 +10058,15 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             try
             {
-                var IsThereCrossHavaleh = dbms.DoGetDataSQL<double?>($"SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {hTAG}").FirstOrDefault();
-                if (IsThereCrossHavaleh != null)
+                long? _id_ = null;
+
+                FINAL_CROW_ITEM.PURSANT = Math.Round((double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * Convert.ToDouble(FINAL_CROW_ITEM.DARSAD) / 100));
+
+                try
                 {
-                    long? _id_ = null;
-                    try
+                    if (FINAL_CROW_ITEM?.ID is null)
                     {
-                        if (FINAL_CROW_ITEM?.ID is null)
-                        {
-                            _id_ = dbms.DoGetDataSQL<long?>($@"INSERT INTO dbo.VISITOR_DTL(NUMBER, TAG, CUST_NO, DARSAD, PURSANT, TOZIH, STAT, PORID)
+                        _id_ = dbms.DoGetDataSQL<long?>($@"INSERT INTO dbo.VISITOR_DTL(NUMBER, TAG, CUST_NO, DARSAD, PURSANT, TOZIH, STAT, PORID)
                             OUTPUT INSERTED.ID
                             VALUES({NUMBER.Text},
                             {hTAG} ,
@@ -9966,109 +10076,96 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                             N'{FINAL_CROW_ITEM?.TOZIH}' ,
                             {Convert.ToByte(FINAL_CROW_ITEM.STAT)},
                             {(string.IsNullOrEmpty(FINAL_CROW_ITEM?.PORID?.ToStringNullSafe()) ? "NULL" : FINAL_CROW_ITEM?.PORID)})").FirstOrDefault();
-                        }
-                        else
-                        {
-                            dbms.DoExecuteSQL($@"UPDATE dbo.VISITOR_DTL SET 
+                    }
+                    else
+                    {
+                        dbms.DoExecuteSQL($@"UPDATE dbo.VISITOR_DTL SET 
                                          NUMBER = {NUMBER.Text}, CUST_NO = N'{FINAL_CROW_ITEM.CUST_NO}' , DARSAD = {FINAL_CROW_ITEM?.DARSAD} ,
                                          PURSANT = {FINAL_CROW_ITEM?.PURSANT} , TOZIH = N'{FINAL_CROW_ITEM.TOZIH}' , STAT = {Convert.ToByte(FINAL_CROW_ITEM.STAT)},
                                          PORID = {(string.IsNullOrEmpty(FINAL_CROW_ITEM?.PORID.ToStringNullSafe()) ? "NULL" : FINAL_CROW_ITEM?.PORID)}
                                          WHERE ID = {FINAL_CROW_ITEM?.ID}");
-                        }
                     }
-                    catch (SqlException ex)
+                }
+                catch (SqlException ex)
+                {
+                    VISITOR_DTL_SUB.Dispatcher.Invoke(() =>
                     {
-                        VISITOR_DTL_SUB.Dispatcher.Invoke(() =>
-                        {
-                            VISITOR_DTL_SUB.CellEditEnding -= VISITOR_DTL_SUB_CellEditEnding;
-                            VISITOR_DTL_SUB.CancelEdit();
-                            VISITOR_DTL_SUB.CellEditEnding += VISITOR_DTL_SUB_CellEditEnding;
-                        });
+                        VISITOR_DTL_SUB.CellEditEnding -= VISITOR_DTL_SUB_CellEditEnding;
+                        VISITOR_DTL_SUB.CancelEdit();
+                        VISITOR_DTL_SUB.CellEditEnding += VISITOR_DTL_SUB_CellEditEnding;
+                    });
 
-                        if (ex.Number == 2627)
-                        {
-                            new Msgwin(false, "سطر تکراری است آنرا اصلاح کنید").ShowDialog();
-                            return;
-                        }
+                    if (ex.Number == 2627)
+                    {
+                        new Msgwin(false, "سطر تکراری است آنرا اصلاح کنید").ShowDialog();
+                        return;
                     }
+                }
 
-                    if (_id_ != null)
+                if (_id_ != null)
+                {
+                    FINAL_CROW_ITEM.ID = _id_;
+                }
+
+                #region Form_AfterUpdate
+                var rst = dbms.DoGetDataSQL<double?>("SELECT NUMBER1  FROM HEAD_LST WHERE NUMBER1 = " + this.NUMBER.Text + " AND TAG = 4").ToList();
+                if (rst.Count > 0)
+                {
+                    new Msgwin(false, "توجه  ! توجه  : براي اين فاكتور مرجوعي ثبت شده است اگر ويزيتور آنرا تغيير ميدهيد لازم است در فاكتور برگشت فروش هم ويزيتور آنرا اصلاح كنيد ").ShowDialog();
+                }
+                #endregion
+
+                #region PORID_AfterUpdate
+                long prs;
+                var MBK = default(long);
+                prs = 0L;
+                if (!IsNull(FINAL_CROW_ITEM?.PORID))
+                {
+                    var ROWS = dbms.DoGetDataSQL<QRE_VISIT1>("SELECT CODE ,MABL_K - N_MOIN AS MABLK FROM INVO_LST WHERE TAG = 2 AND NUMBER = " + this.NUMBER.Text).ToList();
+                    for (int I = 0; I < ROWS.Count; I++)//while (!ROWS.EOF)
                     {
-                        FINAL_CROW_ITEM.ID = _id_;
-                    }
-
-
-                    #region DARSAD_AfterUpdate
-                    FINAL_CROW_ITEM.PURSANT = Math.Round((double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * Convert.ToDouble(FINAL_CROW_ITEM.DARSAD) / 100));
-
-                    #endregion
-
-                    #region Form_AfterUpdate
-                    var rst = dbms.DoGetDataSQL<double?>("SELECT NUMBER1  FROM HEAD_LST WHERE NUMBER1 = " + this.NUMBER.Text + " AND TAG = 4").ToList();
-                    if (rst.Count > 0)
-                    {
-                        new Msgwin(false, "توجه  ! توجه  : براي اين فاكتور مرجوعي ثبت شده است اگر ويزيتور آنرا تغيير ميدهيد لازم است در فاكتور برگشت فروش هم ويزيتور آنرا اصلاح كنيد ").ShowDialog();
-                    }
-                    #endregion
-
-                    #region PORID_AfterUpdate
-                    long prs;
-                    var MBK = default(long);
-                    prs = 0L;
-                    if (!IsNull(FINAL_CROW_ITEM?.PORID))
-                    {
-                        var ROWS = dbms.DoGetDataSQL<QRE_VISIT1>("SELECT CODE ,MABL_K - N_MOIN AS MABLK FROM INVO_LST WHERE TAG = 2 AND NUMBER = " + this.NUMBER.Text).ToList();
-                        for (int I = 0; I < ROWS.Count; I++)//while (!ROWS.EOF)
+                        var RST2 = dbms.DoGetDataSQL<double?>("SELECT     PORSANT FROM dbo.VISITORS_PORSANT_KALA WHERE     (PORID = " + FINAL_CROW_ITEM.PORID + ") and (code = '" + ROWS[I].CODE + "')").ToList();
+                        if (RST2.Count == 1)
                         {
-                            var RST2 = dbms.DoGetDataSQL<double?>("SELECT     PORSANT FROM dbo.VISITORS_PORSANT_KALA WHERE     (PORID = " + FINAL_CROW_ITEM.PORID + ") and (code = '" + ROWS[I].CODE + "')").ToList();
-                            if (RST2.Count == 1)
-                            {
-                                prs = (long)(prs + Math.Round((double)(ROWS[I].MABLK * RST2.FirstOrDefault() / 100)));
-                                MBK = (long)(MBK + ROWS[I].MABLK);
-                            }
-                            else
-                            {
-                                new Msgwin(false, "تذكر مهم :اين كالا فاقد الگو براي اين ويزيتور است و پورسانت محاسبه نشد.درصورت لزوم براي آن تعريف كنيد و همينجا مجددا الگو را انتخاب كنيد  : " + CL_HESABDARI.GETKALANAME(Convert.ToDouble(ROWS[I].CODE))).ShowDialog();
-                            }
-                        }
-                        FINAL_CROW_ITEM.PURSANT = Math.Round((double)(prs));
-                        if (MBK > 0L & prs > 0L)
-                        {
-                            FINAL_CROW_ITEM.DARSAD = FINAL_CROW_ITEM.PURSANT / MBK * 100;
-                            FINAL_CROW_ITEM.DARSAD = Math.Round((double)FINAL_CROW_ITEM.DARSAD, 2);
+                            prs = (long)(prs + Math.Round((double)(ROWS[I].MABLK * RST2.FirstOrDefault() / 100)));
+                            MBK = (long)(MBK + ROWS[I].MABLK);
                         }
                         else
                         {
-                            FINAL_CROW_ITEM.DARSAD = 0;
+                            new Msgwin(false, "تذكر مهم :اين كالا فاقد الگو براي اين ويزيتور است و پورسانت محاسبه نشد.درصورت لزوم براي آن تعريف كنيد و همينجا مجددا الگو را انتخاب كنيد  : " + CL_HESABDARI.GETKALANAME(Convert.ToDouble(ROWS[I].CODE))).ShowDialog();
                         }
                     }
-                    #endregion
-
-                    //PURSANT
-                    if (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text) + Convert.ToDouble(MBAA.Text) != 0)
+                    FINAL_CROW_ITEM.PURSANT = Math.Round((double)(prs));
+                    if (MBK > 0L & prs > 0L)
                     {
-                        FINAL_CROW_ITEM.DARSAD = FINAL_CROW_ITEM.PURSANT / (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * 100;
-                        FINAL_CROW_ITEM.DARSAD = Math.Round((double)FINAL_CROW_ITEM.DARSAD, 2);
+                        FINAL_CROW_ITEM.DARSAD = FINAL_CROW_ITEM.PURSANT / MBK * 100;
+                        FINAL_CROW_ITEM.DARSAD = (double)FINAL_CROW_ITEM.DARSAD;
                     }
                     else
                     {
                         FINAL_CROW_ITEM.DARSAD = 0;
                     }
+                }
+                #endregion
 
-                    if (FINAL_CROW_ITEM?.STAT is null)
-                    {
-                        FINAL_CROW_ITEM.STAT = false;
-                    }
-
-                    double sum = SAYER_VISITOR_DATA.Sum(item => item.PURSANT ?? 0.0);
-                    Text190.Text = sum.ToString();
-
-                    SANAD();
+                //PURSANT
+                if (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text) + Convert.ToDouble(MBAA.Text) != 0)
+                {
+                    FINAL_CROW_ITEM.DARSAD = FINAL_CROW_ITEM.PURSANT / (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * 100;
+                    FINAL_CROW_ITEM.DARSAD = (double)FINAL_CROW_ITEM.DARSAD;
                 }
                 else
                 {
-                    new Msgwin(false, "حواله متناظر این فاکتور موجود نیست بنا بر این ذخیره تب سایر انجام نشد ! , ابتدا این موضوع را بررسی کنید").ShowDialog();
+                    FINAL_CROW_ITEM.DARSAD = 0;
                 }
+
+                if (FINAL_CROW_ITEM?.STAT is null)
+                {
+                    FINAL_CROW_ITEM.STAT = false;
+                }
+
+                double sum = SAYER_VISITOR_DATA.Sum(item => item.PURSANT ?? 0.0);
+                Text190.Text = sum.ToString();
             }
             catch (SqlException ex)
             {
