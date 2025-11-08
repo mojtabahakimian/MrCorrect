@@ -683,7 +683,7 @@
                         <DataGrid.Columns >
                             <DataGridTextColumn x:Name="CUST_NO_NAME_COLUMN" Binding="{Binding CUST_NO_NAME, UpdateSourceTrigger=LostFocus}" Header="نام شخص" Width="auto"/>
                             <DataGridTextColumn x:Name="cUST_NOColumn" IsReadOnly="True" Visibility="Hidden" Binding="{Binding CUST_NO, UpdateSourceTrigger=LostFocus}" Header="کد شخص" Width="SizeToHeader"/>
-                            <DataGridTextColumn x:Name="dARSADColumn" Binding="{Binding DARSAD, UpdateSourceTrigger=LostFocus}" Header="درصد*" Width="auto">
+                            <DataGridTextColumn x:Name="dARSADColumn" Binding="{Binding DARSAD, StringFormat={}{0:N2}, UpdateSourceTrigger=LostFocus}" Header="درصد*" Width="auto">
                                 <DataGridTextColumn.EditingElementStyle>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                                         <Setter Property="MaxLength" Value="5" />

@@ -304,7 +304,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             //    }
             //}
             //USER_NAME.ItemsSource = RST_PERSONEL;
-            
+
             //واحد فروش
             DEPATMAN.ItemsSource = dbms.DoGetDataSQL<DEPARTEMAN_MODEL>("SELECT DEPATMAN,DEPNAME FROM dbo.DEPART ORDER BY DEPNAME").ToList(); //Custom_DEPART
 
@@ -329,6 +329,26 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
                 var currentRow = SYNCFUSION_DG.SelectedItem as KALAS;
 
+                if (currentRow != null && currentRow?.TAGCODE != null)
+                {
+                    int TAG_TYPE = (int)(currentRow?.TAGCODE);
+                    double? TARGET_NUMBER = currentRow?.NUMBER ?? currentRow.NUMBER1;
+
+                    //فاکتوری ها : 13 و 4 و 25 و27 و12 و 3
+                    //چون kalas_sub ترتیب NUMBER1 , NUMBER درست نیست و جابهجا داره توی این ویو میاره , ما فعلا سمت سی شارپ میام جابه جا میدیم , تا فاکتور درست رو باز کنه
+                    if (TAG_TYPE == 3 || TAG_TYPE == 12 || TAG_TYPE == 27 || TAG_TYPE == 25 || TAG_TYPE == 4 || TAG_TYPE == 13)
+                    {
+                        TARGET_NUMBER = currentRow.NUMBER1;
+                    }
+                    else
+                    {
+                        TARGET_NUMBER = currentRow.NUMBER;
+                    }
+
+                    CL_MenuManager.MenuBaseOnKindOpen(this, dbms, TAG_TYPE, TARGET_NUMBER, false);
+                }
+
+                return;
                 switch (currentRow?.TAGCODE)
                 {
                     case 1: // رسید خرید

@@ -71,7 +71,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <TextBox x:Name="NUMBER" Text="0" Height="28" Margin="0,13,135,0" IsReadOnly="True"   Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="90" Tag="RD" IsTabStop="False" />
+                    <TextBox x:Name="NUMBER1" Text="0" Height="28" Margin="0,13,135,0" IsReadOnly="True"   Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="90" Tag="RD" IsTabStop="False" />
                     <xctk:MaskedTextBox x:Name="DATE_N" TabIndex="0"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="28" Margin="0,13,581,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"   HorizontalAlignment="Right" Width="88" PreviewLostKeyboardFocus="DATE_N_PreviewLostKeyboardFocus" PreviewGotKeyboardFocus="DATE_N_PreviewGotKeyboardFocus" />
                     <Label Content="شماره فاکتور برگشت فروش:" Margin="0,13,10,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="125" Height="28" VerticalAlignment="Top"/>
                     <TextBox x:Name="USER_NAME" IsReadOnly="True" Text="نام کاربر" Height="28" Margin="584,380,333,0"   Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" IsTabStop="False" />
@@ -105,7 +105,7 @@
 
                     <TextBox x:Name="MOLAH"   Text="" Height="27" Margin="667,119,59,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" TabIndex="3" />
                     <Button x:Name="ESLAH" Content="اصلاح فاکتور" Margin="206,9,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="92" Foreground="#DDFFFFFF" FontWeight="Bold" Click="ESLAH_Click"/>
-                    <CheckBox x:Name="OKF" IsChecked="False"  Content="تایید فاکتور" HorizontalAlignment="Left" Margin="547,17,0,0" VerticalAlignment="Top" Width="80" FontSize="10" IsHitTestVisible="False" Focusable="False"/>
+                    <CheckBox x:Name="OKF" IsChecked="False"  Content="تایید فاکتور" HorizontalAlignment="Right" Margin="0,17,458,0" VerticalAlignment="Top" Width="80" FontSize="10" IsHitTestVisible="False" Focusable="False"/>
 
                     <DataGrid   
                         x:Name="INVO_LST_SUB" ContextMenu="{StaticResource ContextUtilityMenu1}"
@@ -236,7 +236,7 @@
                                     </Style>
                                 </DataGridTextColumn.EditingElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn 	x:Name="N_MOIN_COLUMN" 	      Binding="{Binding N_MOIN,UpdateSourceTrigger=LostFocus,StringFormat=\{0:N0\}}"           Header="مبلغ تخفیف"          Width="120" MinWidth="100" Visibility="Visible" >
+                            <DataGridTextColumn 	x:Name="N_MOIN_COLUMN" 	      Binding="{Binding N_MOIN,UpdateSourceTrigger=LostFocus,StringFormat=\{0:N0\}}"           Header="مبلغ تخفیف"          Width="auto" MinWidth="100" Visibility="Visible" >
                                 <DataGridTextColumn.EditingElementStyle>
                                     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
                                     </Style>
@@ -249,7 +249,7 @@
                                     </Style>
                                 </DataGridTextColumn.CellStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn 	x:Name="MANDAH_COLUMN" 	      Binding="{Binding MANDAH,UpdateSourceTrigger=LostFocus}"           Header="ملاحظات"     IsReadOnly="True"         Width="*"  Visibility="Visible" >
+                            <DataGridTextColumn 	x:Name="MANDAH_COLUMN" 	      Binding="{Binding MANDAH,UpdateSourceTrigger=LostFocus}"           Header="ملاحظات"     IsReadOnly="True"         Width="auto"  Visibility="Visible" >
                                 <DataGridTextColumn.EditingElementStyle>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                                         <Setter Property="MaxLength" Value="48" />
@@ -318,7 +318,7 @@
 
                     <!--<CNC:NumericTextBox DoesAcceptDouble="False" x:Name="NUMBER"  Text="0" Height="27" Margin="265,9,0,0"  VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Left" Width="110" NumericLostFocus="NUMBER_NumericLostFocus" IsReadOnly="True" PreviewMouseDoubleClick="NUMBER_PreviewMouseDoubleClick" />-->
 
-                    <ComboBox x:Name="NUMBER1"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" DisplayMemberPath="NUMBER" SelectedValuePath="NUMBER" IsTextSearchEnabled="True" Margin="0,13,335,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="110" PreviewLostKeyboardFocus="NUMBER1_PreviewLostKeyboardFocus" IsTabStop="True">
+                    <ComboBox x:Name="NUMBER" Text="0" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" DisplayMemberPath="NUMBER" SelectedValuePath="NUMBER" IsTextSearchEnabled="True" Margin="0,13,335,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="110" PreviewLostKeyboardFocus="NUMBER_PreviewLostKeyboardFocus" IsTabStop="True">
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -338,12 +338,12 @@
                     <Button x:Name="BTN_SAVE" Click="BTN_SAVE_Click"  Content="ذخیره"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Foreground="#DDFFFFFF" Height="35" Margin="0,157,4,0" VerticalAlignment="Top" TabIndex="4" HorizontalAlignment="Right" Width="115" />
 
 
-                    <Label x:Name="LABEL_FNUMCO_" Content="شماره داخلی:" Margin="0,121,417,0" Visibility="Visible"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="62" Height="25" VerticalAlignment="Top"/>
+                    <Label x:Name="LABEL_FNUMCO_" Content="شماره داخلی:" Margin="606,121,0,0" Visibility="Visible"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="62" Height="25" VerticalAlignment="Top"/>
                     <Button x:Name="BTN_FACTORHA" Content="لیست فاکتور ها" Margin="123,157,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="118" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_FACTORHA_Click"/>
                     <Button x:Name="Command108" Content="چاپ فاکتور 1" Margin="107,8,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="92" Foreground="#DDFFFFFF" FontWeight="Bold" Click="Command108_Click" IsEnabled="False"/>
-                    <TextBox x:Name="FNUMCO" Height="26" Margin="0,120,481,0" IsReadOnly="True"   Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="90" Tag="RD" IsTabStop="False" />
-                    <Label Content="مدت:" Margin="0,120,575,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="30" Height="25" VerticalAlignment="Top"/>
-                    <CNC:NumericTextBox DoesAcceptDouble="False"  x:Name="MAS" Text="0" Height="27" Margin="0,119,606,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Right" Width="63"  />
+                    <TextBox x:Name="FNUMCO" Height="26" Margin="514,120,0,0" IsReadOnly="True"   Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Left" Width="90" Tag="RD" IsTabStop="False" />
+                    <Label Content="مدت:" Margin="478,120,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="30" Height="25" VerticalAlignment="Top"/>
+                    <CNC:NumericTextBox DoesAcceptDouble="False"  x:Name="MAS" Text="0" Height="27" Margin="410,119,0,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="63"  />
                     <CheckBox x:Name="TICMBAA" IsChecked="False" Content="مالیات.ب.ا.ا" HorizontalAlignment="Left" Margin="316,17,0,0" VerticalAlignment="Top" Width="78" FontSize="10" Click="TICMBAA_Click"/>
 
                     <Button x:Name="BTN_NEW_FACTOR" Visibility="Collapsed" Content="فاکتور جدید" Margin="251,157,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_NEW_FACTOR_Click" Padding="16,2,16,4"/>
@@ -633,7 +633,7 @@
                         <DataGrid.Columns >
                             <DataGridTextColumn x:Name="CUST_NO_NAME_COLUMN" Binding="{Binding CUST_NO_NAME, UpdateSourceTrigger=LostFocus}" Header="نام شخص" Width="auto"/>
                             <DataGridTextColumn x:Name="cUST_NOColumn" IsReadOnly="True" Visibility="Hidden" Binding="{Binding CUST_NO, UpdateSourceTrigger=LostFocus}" Header="کد شخص" Width="SizeToHeader"/>
-                            <DataGridTextColumn x:Name="dARSADColumn" Binding="{Binding DARSAD, UpdateSourceTrigger=LostFocus}" Header="درصد*" Width="auto">
+                            <DataGridTextColumn x:Name="dARSADColumn" Binding="{Binding DARSAD, StringFormat={}{0:N2}, UpdateSourceTrigger=LostFocus}" Header="درصد*" Width="auto">
                                 <DataGridTextColumn.EditingElementStyle>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                                         <Setter Property="MaxLength" Value="5" />

@@ -834,7 +834,7 @@ namespace Wins.WinMenus.ANBAR
                     PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
 
                     DEPATMAN.SelectedValue = HEADER_FAC?.DEPATMAN; DEPATMAN.Items.Refresh();
-
+                    USER_NAME.Text = HEADER_FAC?.USER_NAME;
                     SGN1.IsChecked = Convert.ToBoolean(HEADER_FAC.SGN1);
                     SGN2.IsChecked = Convert.ToBoolean(HEADER_FAC.SGN2);
 

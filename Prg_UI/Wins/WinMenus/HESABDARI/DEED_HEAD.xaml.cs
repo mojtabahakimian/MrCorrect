@@ -1806,11 +1806,15 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                 if (!IsNull(this.N_S.Text) && Convert.ToInt32(N_S.Text) > 0)
                 {
-                    if (Convert.ToBoolean(Baseknow.TRANSF))
+                    if (!string.IsNullOrWhiteSpace(NO_S.Text) && NO_S.Text != "0")
                     {
-                        CL_HESABDARI.TR("DEED_HED", $"(N_S = {N_S.Text})", DateTime.Now, 1);
-                        CL_HESABDARI.TR("DEED_DTL", $"(N_S = {N_S.Text})", DateTime.Now, 1);
+                        Msgwin msgwin = new Msgwin(false, "سند اتوماتیک است و قابل اصلاح نیست");
+                        msgwin.ShowDialog();
+                        return;
                     }
+
+                    CL_HESABDARI.TR("DEED_HED", $"(N_S = {N_S.Text})", DateTime.Now, 1);
+                    CL_HESABDARI.TR("DEED_DTL", $"(N_S = {N_S.Text})", DateTime.Now, 1);
 
                     CL_HESABDARI.LetSigneTick(GetType().Name, 0, Convert.ToInt32(Baseknow.USERCOD), new WindowInteropHelper(this).Handle);
 

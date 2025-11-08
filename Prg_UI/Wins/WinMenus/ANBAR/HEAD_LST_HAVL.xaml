@@ -27,7 +27,7 @@
         <ItemsPanelTemplate x:Key="VSP">
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"  VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
-        
+
         <ContextMenu x:Key="ContextUtilityMenu1" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
             <MenuItem Header="کارت انبار این کالا"  Click="MenuItem_Click_1">
                 <MenuItem.Icon>
@@ -358,7 +358,7 @@
 
             <Button x:Name="DELETE_HAVALE" Click="DELETE_HAVALE_Click"  Content="حذف"  Margin="12,185,0,0"  Tag="hazfer"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5" FontSize="10" Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" IsEnabled="False"/>
 
-            <Button x:Name="BUTTON_SAVE_HAVALE"  Margin="180,185,15,0"   Click="BUTTON_SAVE_HAVALE_Click" Content="ذخیره" BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Foreground="#DDFFFFFF" Height="36" Grid.Column="2" VerticalAlignment="Top"/>
+            <Button x:Name="BUTTON_SAVE_HAVALE"  Margin="0,185,15,0"   Click="BUTTON_SAVE_HAVALE_Click" Content="ذخیره" BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Foreground="#DDFFFFFF" Height="36" Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Right" Width="119"/>
 
             <Label Content="نحوه پرداخت:" Margin="38,-97,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="65" Height="26" VerticalAlignment="Top" Visibility="Collapsed" Grid.Column="1"/>
 

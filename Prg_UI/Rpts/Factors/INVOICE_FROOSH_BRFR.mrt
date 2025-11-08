@@ -422,7 +422,7 @@ WHERE         (HEAD_LST.NUMBER = @NUMBER_PARAM) AND HEAD_LST.TAG = 25</SqlComman
               <Name>Text39</Name>
               <Page isRef="5" />
               <Parent isRef="6" />
-              <Text>{FACTOR_DATA.NAME}</Text>
+              <Text>{FACTOR_DATA.HESAB}</Text>
               <TextBrush>Black</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>DataColumn</Type>
@@ -2104,10 +2104,10 @@ WHERE         (HEAD_LST.NUMBER = @NUMBER_PARAM) AND HEAD_LST.TAG = 25</SqlComman
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>5/25/2025 5:38:01 PM</ReportChanged>
+  <ReportChanged>11/8/2025 10:06:17 PM</ReportChanged>
   <ReportCreated>9/5/2021 1:38:11 PM</ReportCreated>
-  <ReportFile>E:\prg\MrCorrect403\Prg_UI\Rpts\Factors\INVOICE_FROOSH_BRFR.mrt</ReportFile>
-  <ReportGuid>0e0c5555dfa8489492bb613f531e895e</ReportGuid>
+  <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\Factors\INVOICE_FROOSH_BRFR.mrt</ReportFile>
+  <ReportGuid>f84667c2d5844b7dbbec6afb1ae6f53b</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>
