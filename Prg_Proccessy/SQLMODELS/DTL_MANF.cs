@@ -1,6 +1,7 @@
 ﻿using Prg_Proccessy.MODELS;
 using System;
 using System.ComponentModel;
+using System.Security.Cryptography;
 
 namespace Prg_Proccessy.SQLMODELS
 {
@@ -25,6 +26,7 @@ namespace Prg_Proccessy.SQLMODELS
         private string _tozih;
         private DateTime? _crt;
         private int? _uid;
+        private int? _ID;
 
         // An extra property that was in your refactoring request to hold the item's name from a JOIN
         private string _name_code;
@@ -111,6 +113,14 @@ namespace Prg_Proccessy.SQLMODELS
             set { if (_uid == value) return; _uid = value; OnPropertyChanged(nameof(UID)); }
         }
 
+
+        public int? ID
+        {
+            get => _ID;
+            set { if (_ID == value) return; _ID = value; OnPropertyChanged(nameof(ID)); }
+        }
+
+
         public string NAME_CODE
         {
             get => _name_code;
@@ -149,6 +159,7 @@ namespace Prg_Proccessy.SQLMODELS
             this.TOZIH = _backupCopy.TOZIH;
             this.CRT = _backupCopy.CRT;
             this.UID = _backupCopy.UID;
+            this._ID = _backupCopy._ID;
             this.NAME_CODE = _backupCopy.NAME_CODE; // Also restore non-table properties if they can be edited
 
             _inEdit = false;

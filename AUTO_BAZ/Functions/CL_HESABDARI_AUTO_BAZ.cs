@@ -10029,7 +10029,7 @@ namespace AUTO_BAZ.Functions
 
 
             var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM DEED_HED").ToList();
-            var HFRST = dbms.DoGetDataSQL<HEAD_LST>("SELECT     * FROM dbo.HEAD_LST WHERE     (NUMBER BETWEEN " + fnum + " AND " + TNUM + ") AND (TAG = 25)").ToList();
+            var HFRST = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM dbo.HEAD_LST WHERE (NUMBER BETWEEN " + fnum + " AND " + TNUM + ") AND (TAG = 25)").ToList();
 
             LogWriter.WriteLog("شروع باز سازي از برگشت فروش 2 شماره : " + fnum + " تا فاكتور شماره :" + TNUM + DateTime.Now);
             //Parallel.For(0, HFRST.Count, HFRST_EOF =>
@@ -10141,6 +10141,7 @@ namespace AUTO_BAZ.Functions
                     HFRST[HFRST_EOF].N_S = max_ns;
                     dbms.DoExecuteSQL($"UPDATE HEAD_LST set n_s = {max_ns} WHERE     (NUMBER = {HFRST[HFRST_EOF].NUMBER} AND (TAG = 25)) ");
                 }
+
 
                 var JST_0 = dbms.DoGetDataSQL<double?>("SELECT Sum(INVO_LST.MABL_K) AS SumOfMABL_K FROM INVO_LST WHERE ((INVO_LST.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + ") AND (TAG = 24) AND (ANBAR <> 0)").ToList();
                 if (JST_0.Count > 0 && !IsNull(JST_0.FirstOrDefault()))
@@ -10616,6 +10617,8 @@ namespace AUTO_BAZ.Functions
                                         ,25)");
 
                 };
+
+             
 
                 //});
             }

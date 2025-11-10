@@ -149,8 +149,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             if (number_to_open != null)
             {
-                NUMBER1.Text = number_to_open.ToString(); //شماره رسید
-                //NUMBER1.UpdateLayout();
+                NUMBER.Text = number_to_open.ToString(); //شماره رسید
                 IsOpenedFromAutomation = _isAutomasion_;
             }
 
@@ -413,15 +412,15 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
             {
-                WhereCondition = $" WHERE NUMBER1 = {NUMBER1.Text} AND TAG = {FTAG} ";
+                WhereCondition = $" WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG} ";
             }
 
             _navigationManager = new NavigationManager<HEAD_LST>(
                 dbms,
-                x => x.NUMBER1.ToString(), // property selector (used to find a record by its CODE)
+                x => x.NUMBER.ToString(), // property selector (used to find a record by its CODE)
                 $"SELECT * FROM HEAD_LST {WhereCondition} ORDER BY NUMBER", //All Record of The Table
-                x => $"SELECT * FROM HEAD_LST WHERE NUMBER1 = {x?.NUMBER1} AND TAG = {FTAG}", //On Change for One Record
-                Convert.ToDouble(NUMBER1.Text)
+                x => $"SELECT * FROM HEAD_LST WHERE NUMBER = {x?.NUMBER} AND TAG = {FTAG}", //On Change for One Record
+                Convert.ToDouble(NUMBER.Text)
                 );
 
             if (!IsOpenedFromAutomation && !string.IsNullOrEmpty(NUMBER1_TAG?.ToStringNullSafe()) && _navigationManager.NUMBER_TO_OPEN != null) //Had a paramter passed
@@ -442,7 +441,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             // Now raise the initialization events to update the UI
             _navigationManager.RaiseInitializationEvents();
 
-            NUMBER.Focus();
+            //NUMBER.Focus();
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -693,9 +692,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 }
 
                 NUMBER1.Text = HEADER_FAC.NUMBER1.ToString();
-
                 NUMBER.Text = HEADER_FAC.NUMBER.ToString();
-                NUMBER.SelectedValue = HEADER_FAC.NUMBER.ToString();
 
                 if (!string.IsNullOrEmpty(NUMBER1.Text.ToStringNullSafe()))
                 {
@@ -730,7 +727,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             try
             {
-                var itemtoadd = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 * FROM HEAD_LST  WHERE NUMBER1 = {NUMBER1.Text} AND TAG = {FTAG}").FirstOrDefault();
+                var itemtoadd = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 * FROM HEAD_LST  WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG}").FirstOrDefault();
                 record = itemtoadd;
 
                 return true;
@@ -742,7 +739,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void RefreshAfterUpdate()
         {
-            var CURRENT_HEADER = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE NUMBER1 = {NUMBER1.Text} AND TAG = {FTAG}").FirstOrDefault();
+            var CURRENT_HEADER = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG}").FirstOrDefault();
             _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
         }
 
@@ -914,7 +911,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             //DATE_N_AfterUpdate
             if (!IsNumberSelectedNow) //Is Not IsNumberSelectedNow
             {
-                var HEADER = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER1 = " + NUMBER1.Text + $" AND TAG = {FTAG}").FirstOrDefault();
+                var HEADER = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER = " + NUMBER.Text + $" AND TAG = {FTAG}").FirstOrDefault();
 
                 //فاکتور : NUMBER1
                 //رسید : NUMBER
@@ -923,7 +920,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     ((List<QRE_LST_BARGASHT>)NUMBER.ItemsSource).Add(new QRE_LST_BARGASHT { NUMBER = HEADER.NUMBER });
                 }
                 NUMBER.SelectedValue = HEADER.NUMBER; NUMBER.Items.Refresh();
-
+                NUMBER.Text = HEADER.NUMBER.ToString();
 
                 if (HEADER?.TICMBAA != null)
                 {
@@ -979,13 +976,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 SHIFT.SelectedValue = HEADER.SHIFT; //شیفت
             }
 
-            if (NUMBER.SelectedValue == null)
+            if (NUMBER.Text == null)
             {
                 return;
             }
 
             //-- TAG => 24 ---
-            var HEADER_HAV = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER = " + NUMBER.SelectedValue + $" AND TAG = {HTAG}").FirstOrDefault();
+            var HEADER_HAV = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER = " + NUMBER.Text + $" AND TAG = {HTAG}").FirstOrDefault();
             if (HEADER_HAV != null)
             {
                 DATE_N.Text = HEADER_HAV.DATE_N.ToStringNullSafe(); //تاریخ فاکتور
@@ -1015,7 +1012,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
 
-            NUMBER1_TAG = Convert.ToDouble(NUMBER1.Text); //Save Last Valid Number
+            NUMBER1_TAG = Convert.ToDouble(NUMBER.Text); //Save Last Valid Number
 
         }
         private void DataGridActivation()
@@ -1278,7 +1275,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
         public void INVO_LST_SUB_ReGetData()
         {
-            if (NUMBER.SelectedValue != null)
+            if (NUMBER.Text != null)
             {
                 var QRE_LST = dbms.DoGetDataSQL<INVO_LST_FACTOR22>($@"SELECT dbo.INVO_LST.NUMBER, dbo.INVO_LST.TAG, dbo.INVO_LST.ANBAR, dbo.INVO_LST.RADIF, dbo.INVO_LST.CODE, dbo.STUF_DEF.NAME AS NAME_CODE, dbo.INVO_LST.MEGH, dbo.INVO_LST.MEGHk, 
 	                 dbo.INVO_LST.MEGH_MAR, dbo.INVO_LST.MANDAH, dbo.INVO_LST.MABL, dbo.INVO_LST.MABL_K,dbo.INVO_LST.MABL * dbo.INVO_LST.MEGH_MAR AS MABMAR, dbo.INVO_LST.FROM_A, 
@@ -1289,7 +1286,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 	                 dbo.STUF_DEF ON dbo.INVO_LST.CODE = dbo.STUF_DEF.CODE LEFT OUTER JOIN
 	                 dbo.TCOD_ANBAR ON dbo.INVO_LST.ANBAR = dbo.TCOD_ANBAR.CODE LEFT OUTER JOIN
 	                 dbo.TCOD_VAHEDS ON dbo.INVO_LST.VAHED_K = dbo.TCOD_VAHEDS.CODE
-	                 WHERE	(dbo.INVO_LST.TAG = {HTAG}) AND (dbo.INVO_LST.NUMBER={NUMBER.SelectedValue}) ").ToList(); //-- NUMBER1
+	                 WHERE	(dbo.INVO_LST.TAG = {HTAG}) AND (dbo.INVO_LST.NUMBER={NUMBER.Text}) ").ToList(); //-- NUMBER1
 
                 INVO_LST_FACTOR22_DATA?.Clear();
                 foreach (var item in QRE_LST)
@@ -2411,7 +2408,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ نمی تواند خالی باشد" });
             }
 
-            if (NUMBER.SelectedValue == null)
+            if (NUMBER.Text == null)
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "شماره فاکتور نميتواند  خالي باشد." });
             }
@@ -2419,7 +2416,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 if (_navigationManager.IsNewRecord)
                 {
-                    var RST = dbms.DoGetDataSQL<double?>($"SELECT HEAD_LST.NUMBER1 FROM HEAD_LST WHERE (((HEAD_LST.TAG) = {HTAG})) GROUP BY HEAD_LST.NUMBER1 HAVING (((HEAD_LST.NUMBER1)= " + NUMBER.SelectedValue + "))").FirstOrDefault();
+                    var RST = dbms.DoGetDataSQL<double?>($"SELECT HEAD_LST.NUMBER1 FROM HEAD_LST WHERE (((HEAD_LST.TAG) = {HTAG})) GROUP BY HEAD_LST.NUMBER1 HAVING (((HEAD_LST.NUMBER1)= " + NUMBER.Text + "))").FirstOrDefault();
                     if (RST != null)
                     {
                         ErrosMessages.Add(new MsgModel { MessageText_U = "براي اين فاكتور قبلا فاكتور مرجوعي صادر گرديده است . آن را جستجو نموده و مقدار مرجوعي را در همانجا ثبت نمائيد و در فيلد توضيحات تاريخ مرجوع دوم را درج نمائيد" });
@@ -2675,7 +2672,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                             }
 
                             db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER1,  NUMBER   ,    TAG,     DATE_N,  MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF)
-                                                        VALUES ({NUMBER1.Text}, {NUMBER.SelectedValue} , {FTAG},    0,    0,   0,       0,        0,        0,        0,    0   )", null, transaction);
+                                                        VALUES ({NUMBER1.Text}, {NUMBER.Text} , {FTAG},    0,    0,   0,       0,        0,        0,        0,    0   )", null, transaction);
 
                             transaction.Commit();
                             db?.Close();
@@ -2795,7 +2792,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
             _qre = $@"UPDATE dbo.HEAD_LST
-                    SET NUMBER = {NUMBER.SelectedValue}, NUMBER1 = {NUMBER1.Text}, DATE_N = {DATE_N.Text.ToRawTarikh()}, TICMBAA = {Convert.ToByte(TICMBAA.IsChecked)}, 
+                    SET NUMBER = {NUMBER.Text}, NUMBER1 = {NUMBER1.Text}, DATE_N = {DATE_N.Text.ToRawTarikh()}, TICMBAA = {Convert.ToByte(TICMBAA.IsChecked)}, 
                     N_S = {_n_s}, CUST_NO = N'{CUST_NO.SelectedValue}', MOLAH = N'{MOLAH.Text}',
                     MABL_HAZ = {MABL_HAZ.Text}, MOIN_HAZ = N'{CMB_MOIN_HAZ.SelectedValue}', 
                     M_NAGHD = {M_NAGHD.Text},TAKHFIF = {TAKHFIF.Text},
@@ -3251,7 +3248,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             //throw new Exception();
             try
             {
-                AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.gensanadbargashfroosh2(Convert.ToInt64(NUMBER.SelectedValue), Convert.ToInt64(NUMBER.SelectedValue), false);
+                AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.gensanadbargashfroosh2(Convert.ToInt64(NUMBER.Text), Convert.ToInt64(NUMBER.Text), false);
             }
             catch (Exception)
             {
@@ -4703,7 +4700,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             report["NUMBER_PARAM"] = NUMBER.Text;
             ((StiSqlSource)report.Dictionary.DataSources["FACTOR_DATA"]).CommandTimeout = 900;
 
-            var THEHEADERNUM = NUMBER.SelectedValue;
+            var THEHEADERNUM = NUMBER.Text;
             double JCHK = 0, JAMF = 0, HAZ = 0, NAGHD = 0, VAR = 0, HAV = 0, taf = 0, MBAA = 0;
             // Fetch check data
             var rst = dbms.DoGetDataSQL<CheckData>($@"
@@ -4984,7 +4981,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             if (NUMBER.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
 
-            if (NUMBER.SelectedValue == null)
+            if (NUMBER.Text == null)
             {
                 e.Handled = true;
                 universControl.PopNotifyShow("چنین شماره وجود ندارد!", Pop1, Pop1Text1, Pop_Border1);
@@ -4994,7 +4991,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             string title = "سایر رسید انبار";
             if (_navigationManager.IsNewRecord)
             {
-                var selected = NUMBER.SelectedValue;
+                var selected = NUMBER.Text;
                 // Check if this NUMBER1 is already used and get the NUMBER of the record that uses it.
                 var existingRecordNumber = dbms.DoGetDataSQL<double?>($"SELECT NUMBER FROM HEAD_LST WHERE TAG = {HTAG} AND NUMBER1 = {selected}").FirstOrDefault(); //HTAG
                 if (existingRecordNumber != null)
@@ -5020,6 +5017,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                     // Reset the selection to the previous valid one.
                     NUMBER.SelectedValue = NUMBER1_TAG;
+                    NUMBER.Text = NUMBER1_TAG.ToString();
                     NUMBER.Items.Refresh();
                     e.Handled = true; // Prevent further focus changes as we are navigating away.
                     return;
@@ -5027,10 +5025,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
             else
             {
-                if (Convert.ToDouble(NUMBER.SelectedValue) != NUMBER1_TAG)
+                if (Convert.ToDouble(NUMBER.Text) != NUMBER1_TAG)
                 {
                     new Msgwin(false, $"نمیتوانید {title} ی که قبلا ثبت کرده اید را تغییر دهید , تنها میتوانید این فاکتور را حذف نمایید , انتخاب سایر رسید انبار تنها در فاکتور جدید ممکن است").ShowDialog();
                     NUMBER.SelectedValue = NUMBER1_TAG; NUMBER.Items.Refresh();
+                    NUMBER.Text = NUMBER1_TAG.ToString();
                     return;
                 }
             }
@@ -5038,9 +5037,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
             double? SumOfMEGH_MAR = null;
             bool BargashtExistBefore = false;
 
-            SumOfMEGH_MAR = dbms.DoGetDataSQL<double?>("SELECT Sum(INVO_LST.MEGH_MAR) AS SumOfMEGH_MAR FROM INVO_LST WHERE (((INVO_LST.NUMBER)= " + NUMBER.SelectedValue + $" ) AND ((INVO_LST.TAG)={HTAG}))").FirstOrDefault();
-            //NUMBER =" + NUMBER.SelectedValue این درسته , اینجا توی سی شارپ اشتباه شده اسم NUMBER1 در واقع باید باشه NUMBER ولی خب مشکلی نیست صرفا ظاهر اسم با اکسس فرق داره
-            var _NUMBER_ = dbms.DoGetDataSQL<double?>($"SELECT NUMBER FROM HEAD_LST WHERE TAG = {FTAG} AND NUMBER =" + NUMBER.SelectedValue).FirstOrDefault();  //این خط اوکیه
+            SumOfMEGH_MAR = dbms.DoGetDataSQL<double?>("SELECT Sum(INVO_LST.MEGH_MAR) AS SumOfMEGH_MAR FROM INVO_LST WHERE (((INVO_LST.NUMBER)= " + NUMBER.Text + $" ) AND ((INVO_LST.TAG)={HTAG}))").FirstOrDefault();
+            //NUMBER =" + NUMBER.Text این درسته , اینجا توی سی شارپ اشتباه شده اسم NUMBER1 در واقع باید باشه NUMBER ولی خب مشکلی نیست صرفا ظاهر اسم با اکسس فرق داره
+            var _NUMBER_ = dbms.DoGetDataSQL<double?>($"SELECT NUMBER FROM HEAD_LST WHERE TAG = {FTAG} AND NUMBER =" + NUMBER.Text).FirstOrDefault();  //این خط اوکیه
             if (_NUMBER_ > 0)
             {
                 BargashtExistBefore = true;
@@ -5051,7 +5050,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 Msgwin msgwin = new Msgwin(true, "آیا از تغییر شماره حواله انبار مطمئن هستید"); msgwin.ShowDialog();
                 if (msgwin.DialogResult == false) //NO
                 {
-                    NUMBER.SelectedValue = NUMBER1_TAG; NUMBER.Items.Refresh(); return;
+                    NUMBER.SelectedValue = NUMBER1_TAG; NUMBER.Items.Refresh();
+                    NUMBER.Text = NUMBER1_TAG.ToString(); return;
                 }
             }
 
@@ -5059,17 +5059,19 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 new Msgwin(false, "اين فاكتور داراي اطلاعات مي باشديا اينكه قبلا مرجوعي آن ثبت شده. براي حذف فاكتور بايد كليه رديفهاي ستونهاي تعداد مرجوعي صفر باشد").ShowDialog();
                 NUMBER.SelectedValue = NUMBER1_TAG; NUMBER.Items.Refresh();
+                NUMBER.Text = NUMBER1_TAG.ToString();
                 return;
             }
             else if (_NUMBER_ != NUMBER1_TAG) //آیا شماره فاکتور مرجع تغییر کرده ؟!
             {
                 new Msgwin(false, "اين فاكتور داراي اطلاعات مي باشديا اينكه قبلا مرجوعي آن ثبت شده. براي حذف فاكتور بايد كليه رديفهاي ستونهاي تعداد مرجوعي صفر باشد").ShowDialog();
                 NUMBER.SelectedValue = NUMBER1_TAG; NUMBER.Items.Refresh();
+                NUMBER.Text = NUMBER1_TAG.ToString();
                 return;
             }
             else //IsSuccessfully
             {
-                NUMBER1_TAG = (double)NUMBER.SelectedValue;
+                NUMBER1_TAG = Convert.ToDouble(NUMBER.Text);
                 ReGetDataMaster(true);
                 ReGetDataAll();
 
@@ -5249,6 +5251,15 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 // No valid row, don't show context menu
                 e.Handled = true;
+            }
+        }
+
+
+        private void N_S_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(N_S.Text) && N_S.Text != "0")
+            {
+                CL_MenuManager.MenuBaseOnKindOpen(this, dbms, 0, Convert.ToDouble(N_S.Text), false);
             }
         }
     }

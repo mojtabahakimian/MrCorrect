@@ -1166,6 +1166,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                         D.TOZIH,
                         D.PERT,
                         D.SMABL, D.MABLK ,
+                        D.ID, 
                         D.CRT, 
                         D.UID
                     FROM dbo.DTL_MANF D
@@ -1850,11 +1851,12 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                         MEGH = @MEGH,
                         MEGHk = @MEGHk,
                         PERT = @PERT,
+                        CODE = @CODE,
                         SMABL = @SMABL,
                         MABLK = @MABLK,
                         TOZIH = @TOZIH,
                         UID = @UID
-                    WHERE FNUMB = @FNUMB AND CODE = @CODE";
+                    WHERE FNUMB = @FNUMB AND ID = @ID";
 
                     dbms.DoExecuteSQL(updateSql, TheRow);
                 }
