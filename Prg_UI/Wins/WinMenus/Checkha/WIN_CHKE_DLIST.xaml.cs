@@ -29,7 +29,6 @@ namespace Wins.WinMenus.Checkha
 {
     public partial class WIN_CHKE_DLIST : Window
     {
-
         public WIN_CHKE_DLIST(string? openargs = null)
         {
             InitializeComponent();
@@ -479,21 +478,39 @@ namespace Wins.WinMenus.Checkha
                 element.ContextMenu = this.Resources["DataGridContextMenu"] as ContextMenu;
             }
         }
-
         private string GetSelectedText()
         {
             var dataGrid = SFDATAGRID_SUB;
-            var currentCell = dataGrid.SelectionController.CurrentCellManager.CurrentCell;
+            var currentCell = dataGrid.SelectionController?.CurrentCellManager?.CurrentCell;
 
-            if (currentCell != null && currentCell.IsEditing)
+            if (currentCell == null)
+                return string.Empty;
+
+            // حالت 1: Edit Mode
+            if (currentCell.IsEditing)
             {
-                // Find the editing element (which will be a TextBox in edit mode)
                 var editingElement = dataGrid.FindElementOfType<TextBox>();
-                if (editingElement != null)
+                if (editingElement != null && !string.IsNullOrEmpty(editingElement.SelectedText))
                 {
-                    return editingElement.SelectedText; // Return the selected text
+                    return editingElement.SelectedText;
                 }
             }
+
+            // حالت 2: جستجوی ساده - بدون GetCellElement
+            try
+            {
+                var gridCellElement = currentCell?.ColumnElement;
+                if (gridCellElement != null)
+                {
+                    var textBox = FindVisualChild<TextBox>(gridCellElement);
+                    if (textBox != null && !string.IsNullOrWhiteSpace(textBox.SelectedText))
+                    {
+                        return textBox.SelectedText;
+                    }
+                }
+            }
+            catch { }
+
             return string.Empty;
         }
 
@@ -510,7 +527,7 @@ namespace Wins.WinMenus.Checkha
                 if (!string.IsNullOrEmpty(_SelectedTextCell_))
                 {
                     Clipboard.SetText(_SelectedTextCell_);
-                    universControl.PopNotifyShowUp("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1,UniversControl.RangPop.Blue,1);
+                    universControl.PopNotifyShowUp("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 1);
                     return;
                 }
             }
@@ -523,14 +540,14 @@ namespace Wins.WinMenus.Checkha
                 return;
             }
 
-            var dataGrid = SFDATAGRID_SUB;
-            var currentCell = dataGrid.SelectionController.CurrentCellManager.CurrentCell;
-            if (currentCell != null && currentCell.IsEditing)
-            {
-                System.Windows.Forms.SendKeys.SendWait("^(c)"); //Fire Send Keys : Ctrl + C
-                universControl.PopNotifyShowUp("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 1);
-                return;
-            }
+            //var dataGrid = SFDATAGRID_SUB;
+            //var currentCell = dataGrid.SelectionController.CurrentCellManager.CurrentCell;
+            //if (currentCell != null && currentCell.IsEditing)
+            //{
+            //    System.Windows.Forms.SendKeys.SendWait("^(c)"); //Fire Send Keys : Ctrl + C
+            //    universControl.PopNotifyShowUp("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 1);
+            //    return;
+            //}
 
             var sb = new StringBuilder();
 
@@ -728,17 +745,7 @@ namespace Wins.WinMenus.Checkha
                 new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
             }
         }
-
         #endregion
-
-        private void SFDATAGRID_SUB_CurrentCellEndEdit(object sender, CurrentCellEndEditEventArgs e)
-        {
-
-        }
-        private void SFDATAGRID_SUB_CurrentCellValidating(object sender, CurrentCellValidatingEventArgs e)
-        {
-
-        }
 
         public Visual I_AM_CHEK_VLISTALL { get; private set; }
         public string? OpenArgs { get; }
