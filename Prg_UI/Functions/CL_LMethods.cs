@@ -1258,7 +1258,7 @@ namespace Prg_UI.Functions
                     if (_runningProcesses.TryRemove(process.Id, out var removedProcess))
                     {
                         removedProcess.Kill();
-                        removedProcess.WaitForExit();
+                        removedProcess.WaitForExit(500); // Set a 500ms timeout
                         removedProcess.Dispose();
 
                         // Clean up temporary file

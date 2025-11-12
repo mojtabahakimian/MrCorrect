@@ -1200,8 +1200,8 @@ namespace Wins.WinMenus.ANBAR
                         }
                         else
                         {
-                            CL_KALA_SEARCH.Go_Search_Kala(ENTERED_VALUE_ROW.ToString(), CURRENT_ITMES_ROW.ANBAR.ToString(), I_AM_INVO_RASID);
-                            if (FROM_SAERCH_KAL.CODE is null)
+                            var FoundKala = CL_KALA_SEARCH.Go_Search_Kala(ENTERED_VALUE_ROW.ToString(), CURRENT_ITMES_ROW.ANBAR.ToString(), I_AM_INVO_RASID);
+                            if (FoundKala?.CODE is null)
                             {
                                 INVO_LST_RASIDA_SUB_CANCEL_EDIT();
 
@@ -1213,8 +1213,8 @@ namespace Wins.WinMenus.ANBAR
                             }
                             else
                             {
-                                CURRENT_ITMES_ROW.CODE = FROM_SAERCH_KAL.CODE;
-                                CURRENT_ITMES_ROW.NAME_CODE = FROM_SAERCH_KAL.NAME_CODE;
+                                CURRENT_ITMES_ROW.CODE = FoundKala.CODE;
+                                CURRENT_ITMES_ROW.NAME_CODE = FoundKala.NAME_CODE;
 
                                 CURRENT_ITMES_ROW.VAHED_K = CL_LMethods.TOP_VAHED_K(dbms, CURRENT_ITMES_ROW.CODE);
 
@@ -2119,8 +2119,9 @@ namespace Wins.WinMenus.ANBAR
                     bool AnyCrossAzadInvoiced = dbms.DoGetDataSQL<int?>($"SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WHERE TAG = 25 AND NUMBER = {NUMBER.Text} ").Any();
                     if (AnyCrossAzadInvoiced)
                     {
+                        universControl.PopNotifyShowUp("این برگه دارای مرجوعی (برگشت فروش آزاد) است و نمیتوان سطر های آنرا تغییر داد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
+                        this.AllowEdits = true;
                         INVO_LST_RASIDA_SUB.IsReadOnly = true;
-                        universControl.PopNotifyShowUp("این برگه دارای مرجوعی (برگشت فروش آزاد) است و نمیتوان آنرا تغییر داد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
                     }
                     else
                     {

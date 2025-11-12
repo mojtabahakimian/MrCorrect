@@ -930,7 +930,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         //برای ردیابی اینکه آیا دیتاگرید رو سیو نکرده داره میبنده ؟ پیفرض فعاله
         public bool IS_SAVED { get; set; } = true;
-
+        public nint WINDOW_ID { get; private set; }
         public Visual I_AM_FOROOSH22 { get; set; }
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
@@ -1081,7 +1081,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            I_AM_FOROOSH22 = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
+            WINDOW_ID = new WindowInteropHelper(this).Handle;
+            I_AM_FOROOSH22 = CL_LMethods.GetTheWindow(WINDOW_ID);
 
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
@@ -1436,7 +1437,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                         if (SavedSuccessBtn)
                         {
-                            OTHER_DTL win = new OTHER_DTL(1, CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle));
+                            OTHER_DTL win = new OTHER_DTL(1, CL_LMethods.GetTheWindow(WINDOW_ID));
                             win.NUMBER = Convert.ToInt64(NUMBER.Text);
                             win.Show();
                         }
@@ -1730,14 +1731,14 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         {
             if (IsDirectFactor)
             {
-                CL_HESABDARI.SETSECURITY(this.GetType().Name, "FACTFRMO", new WindowInteropHelper(this).Handle, this.GetType().Name);
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, "FACTFRMO", WINDOW_ID, this.GetType().Name);
 
                 CL_HESABDARI.SETSECURITYSUB(INVO_LST_sub, "FACTFRMO");
             }
             else
             {
                 //فاکتور غیر مستقیم
-                CL_HESABDARI.SETSECURITY(this.GetType().Name, "FACTFR", new WindowInteropHelper(this).Handle, this.GetType().Name);
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, "FACTFR", WINDOW_ID, this.GetType().Name);
                 CL_HESABDARI.SETSECURITYSUB(INVO_LST_sub, "FACTFR");
             }
 
@@ -6918,7 +6919,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                         if (SavedSuccessBtn)
                         {
-                            OTHER_DTL win = new OTHER_DTL(2, CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle));
+                            OTHER_DTL win = new OTHER_DTL(2, CL_LMethods.GetTheWindow(WINDOW_ID));
                             win.NUMBER = Convert.ToInt64(NUMBER.Text);
                             win.Show();
                         }
@@ -7263,7 +7264,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             if (!string.IsNullOrEmpty(NUMBER.Text) && Convert.ToDouble(NUMBER.Text) > 0)
             {
-                CL_HESABDARI.LetSigneTick(this.GetType().Name, 13, Convert.ToInt32(Baseknow.USERCOD), new WindowInteropHelper(this).Handle);
+                CL_HESABDARI.LetSigneTick(this.GetType().Name, 13, Convert.ToInt32(Baseknow.USERCOD), WINDOW_ID);
             }
             else
             {
@@ -7724,7 +7725,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             if (Convert.ToDouble(NUMBER.Text) > 0)
             {
-                CL_HESABDARI.LetSigneTick(this.GetType().Name, 13, Convert.ToInt32(Baseknow.USERCOD), new WindowInteropHelper(this).Handle);
+                CL_HESABDARI.LetSigneTick(this.GetType().Name, 13, Convert.ToInt32(Baseknow.USERCOD), WINDOW_ID);
             }
             else
             {

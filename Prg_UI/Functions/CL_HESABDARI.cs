@@ -138,6 +138,14 @@ namespace Prg_Proccessy.FUNCTIONS
             public int TAG { get; set; }
             public bool CMBAA { get; set; }
         }
+        public class LSQ8
+        {
+            public Int32? USERCO { get; set; }
+            public Boolean? SGN0126 { get; set; }
+            public Boolean? SGN0226 { get; set; }
+            public Boolean? SGN0326 { get; set; }
+        }
+
         public class LSQ7
         {
             public int? USERCO { get; set; }
@@ -5396,11 +5404,11 @@ namespace Prg_Proccessy.FUNCTIONS
                         rst = dbms.DoGetDataSQL<LSQ3>("SELECT   USERCO, SGN0124 , SGN0224,SGN0324 FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
                         break;
                     }
-                //case 26:
-                //    {
-                //        rst.Open("SELECT   USERCO, SGN0126 , SGN0226,SGN0326 FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
-                //        break;
-                //    }
+                case 26:
+                    {
+                        rst = dbms.DoGetDataSQL<LSQ8>("SELECT   USERCO, SGN0126 , SGN0226,SGN0326 FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();
+                        break;
+                    }
                 case 0:
                     {
                         rst = dbms.DoGetDataSQL<CL_QT>("SELECT   USERCO, SND_TAHI,SND_MALI,SND_MODIR FROM dbo.SIGN WHERE     USERCO = " + USERCO).FirstOrDefault();

@@ -746,6 +746,19 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 }
                 NUMBER1.SelectedValue = HEADER.NUMBER1; NUMBER1.Items.Refresh();
 
+                string? TheCustomer = HEADER?.CUST_NO;
+                var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + TheCustomer + "'").FirstOrDefault();
+                if (CUST_NO.ItemsSource == null)
+                {
+                    CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
+                }
+                if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == TheCustomer))
+                {
+                    ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = TheCustomer, NAME = data.NAME });
+                }
+                CUST_NO.SelectedValue = HEADER?.CUST_NO; CUST_NO.Items.Refresh();
+                //نوع مشتری
+                CUST_KIND.SelectedValue = HEADER?.CUST_KIND; CUST_KIND.Items.Refresh();
 
                 DATE_N.Text = HEADER.DATE_N.ToStringNullSafe(); //تاریخ فاکتور
                 USER_NAME.Text = HEADER.USER_NAME.ToStringNullSafe(); //کاربر
@@ -803,26 +816,28 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 return;
             }
 
-            var HEADER_FAC = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER = " + NUMBER1.SelectedValue + $" AND TAG = {HTAG26}").FirstOrDefault();
-            //مشتری
-            string thevalue = HEADER_FAC.CUST_NO;
-            if (!string.IsNullOrEmpty(thevalue))
+            if (NewRecord) //مقدار جدیدی انتخاب شده یا وارد شده
             {
-                var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + thevalue + "'").FirstOrDefault();
-
-                if (CUST_NO.ItemsSource == null)
+                var HEADER_FAC = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER = " + NUMBER1.SelectedValue + $" AND TAG = {HTAG26}").FirstOrDefault(); //HTAG26
+                string thevalue = HEADER_FAC?.CUST_NO;
+                if (!string.IsNullOrEmpty(thevalue))
                 {
-                    CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
-                }
+                    var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + thevalue + "'").FirstOrDefault();
 
-                if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
-                {
-                    ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
-                }
-                CUST_NO.SelectedValue = HEADER_FAC.CUST_NO; CUST_NO.Items.Refresh();
+                    if (CUST_NO.ItemsSource == null)
+                    {
+                        CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
+                    }
 
-                //نوع مشتری
-                CUST_KIND.SelectedValue = HEADER_FAC.CUST_KIND; CUST_KIND.Items.Refresh();
+                    if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                    {
+                        ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
+                    }
+                    CUST_NO.SelectedValue = HEADER_FAC.CUST_NO; CUST_NO.Items.Refresh();
+
+                    //نوع مشتری
+                    CUST_KIND.SelectedValue = HEADER_FAC.CUST_KIND; CUST_KIND.Items.Refresh();
+                }
             }
 
 

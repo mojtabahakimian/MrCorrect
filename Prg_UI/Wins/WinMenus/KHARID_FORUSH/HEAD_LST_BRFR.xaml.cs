@@ -387,6 +387,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         public double Meidnum { get; private set; }
         public double? NUMBER1_TAG { get; private set; } = null;
         public int ANBARDefaultValue { get; private set; }
+        public nint WINDOW_ID { get; private set; }
         public Visual I_AM_BARGASHT_NORMAL { get; private set; }
 
         private void Window_ContentRendered(object sender, EventArgs e)
@@ -398,7 +399,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
-            I_AM_BARGASHT_NORMAL = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
+            WINDOW_ID = new WindowInteropHelper(this).Handle;
+            I_AM_BARGASHT_NORMAL = CL_LMethods.GetTheWindow(WINDOW_ID);
 
             DATE_N.Text = Tarikh.FullCurrentDate;
             USER_NAME.Text = (string)CL_HESABDARI.UCurrentUser();
@@ -656,7 +658,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             if (Convert.ToDouble(NUMBER.Text) > 0)
             {
-                CL_HESABDARI.LetSigneTick(this.GetType().Name, HTAG, Convert.ToInt32(Baseknow.USERCOD), new WindowInteropHelper(this).Handle);
+                CL_HESABDARI.LetSigneTick(this.GetType().Name, 4, Convert.ToInt32(Baseknow.USERCOD), WINDOW_ID); //مثل برگشت فروش عادی معمولی نرمال استاندارد
             }
             else
             {
@@ -856,8 +858,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             return new[]
             {
-                new SearchableProperty { DisplayName = "شماره (سایر) رسید انبار", PropertyPath = "NUMBER1", PropertyType = typeof(double) },
-                new SearchableProperty { DisplayName = "شماره فاکتور برگشت فروش", PropertyPath = "NUMBER", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "شماره فاکتور برگشت فروش", PropertyPath = "NUMBER1", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "شماره (سایر) رسید انبار", PropertyPath = "NUMBER", PropertyType = typeof(double) },
                 new SearchableProperty { DisplayName = "تاریخ", PropertyPath = "DATE_N", PropertyType = typeof(long) },
                 new SearchableProperty { DisplayName = "کد مشتری", PropertyPath = "CUST_NO", PropertyType = typeof(string) },
                 new SearchableProperty { DisplayName = "کاربر", PropertyPath = "USER_NAME", PropertyType = typeof(string) },
@@ -981,8 +983,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 return;
             }
 
-            //-- TAG => 24 ---
-            var HEADER_HAV = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER = " + NUMBER.Text + $" AND TAG = {HTAG}").FirstOrDefault();
+            byte TAG_TARGET = FTAG;
+            if (_navigationManager.IsNewRecord) //مقدار جدیدی انتخاب شده یا وارد شده
+            {
+                TAG_TARGET = HTAG;
+            }
+
+            var HEADER_HAV = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER = " + NUMBER.Text + $" AND TAG = {TAG_TARGET}").FirstOrDefault();
             if (HEADER_HAV != null)
             {
                 DATE_N.Text = HEADER_HAV.DATE_N.ToStringNullSafe(); //تاریخ فاکتور
@@ -1008,9 +1015,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 {
                     FNUMCO.Text = HEADER_HAV.FNUMCO.ToStringNullSafe();
                 }
-
             }
-
 
             NUMBER1_TAG = Convert.ToDouble(NUMBER.Text); //Save Last Valid Number
 
@@ -2384,6 +2389,15 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             List<MsgModel> ErrosMessages = new List<MsgModel>();
 
+            if (string.IsNullOrWhiteSpace(NUMBER.Text.Trim()))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "شماره رسید نمیتواند خالی باشد!" });
+            }
+            else if (CL_LMethods.IsNumeric(NUMBER.Text) && Convert.ToDouble(NUMBER.Text) <= 0)
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "شماره رسید انتخاب شده معتبر نیست!" });
+            }
+
             //Validation
             string date_n_val = DATE_N.Text.ToRawTarikh();
             if (!string.IsNullOrEmpty(date_n_val))
@@ -2737,7 +2751,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             if (Convert.ToDouble(NUMBER.Text) > 0)
             {
-                CL_HESABDARI.LetSigneTick(this.GetType().Name, HTAG, Convert.ToInt32(Baseknow.USERCOD), new WindowInteropHelper(this).Handle);
+                CL_HESABDARI.LetSigneTick(this.GetType().Name, 4, Convert.ToInt32(Baseknow.USERCOD), WINDOW_ID);
             }
             else
             {
@@ -4981,9 +4995,10 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             if (NUMBER.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
 
-            if (NUMBER.Text == null)
+            if (string.IsNullOrWhiteSpace(NUMBER.Text.Trim()))
             {
                 e.Handled = true;
+                NUMBER.Text = NUMBER1_TAG?.ToString();
                 universControl.PopNotifyShow("چنین شماره وجود ندارد!", Pop1, Pop1Text1, Pop_Border1);
                 return;
             }
