@@ -818,6 +818,21 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                 //NUMBER.Text = HEADER.NUMBER.ToStringNullSafe();
 
+                string? TheCustomer = HEADER?.CUST_NO;
+                var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + TheCustomer + "'").FirstOrDefault();
+                if (CUST_NO.ItemsSource == null)
+                {
+                    CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
+                }
+                if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == TheCustomer))
+                {
+                    ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = TheCustomer, NAME = data.NAME });
+                }
+                CUST_NO.SelectedValue = HEADER?.CUST_NO; CUST_NO.Items.Refresh();
+
+                //نوع مشتری
+                CUST_KIND.SelectedValue = HEADER?.CUST_KIND; CUST_KIND.Items.Refresh();
+
                 DATE_N.Text = HEADER.DATE_N.ToStringNullSafe(); //تاریخ فاکتور
                 USER_NAME.Text = HEADER.USER_NAME.ToStringNullSafe(); //کاربر
                 DEPATMAN.SelectedValue = HEADER.DEPATMAN; DEPATMAN.Items.Refresh(); //واحد
@@ -847,37 +862,32 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 MBAA.Text = HEADER.MBAA.ToStringNullSafe(); //مالیات و عوارض مبلغ
                 HMBAA.Text = HEADER.HMBAA; //معین مالیات
             }
-            else
-            {
-
-            }
 
             if (NUMBER1.SelectedValue == null)
             {
                 return;
             }
 
-            var HEADER_FAC = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER = " + NUMBER1.SelectedValue + $" AND TAG = {FAC2TAG}").FirstOrDefault();
-            //مشتری
-            string thevalue = HEADER_FAC.CUST_NO;
-
-            if (!string.IsNullOrEmpty(thevalue))
+            if (_navigationManager.IsNewRecord) //مقدار جدیدی انتخاب شده یا وارد شده
             {
-                var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + thevalue + "'").FirstOrDefault();
-
-                if (CUST_NO.ItemsSource == null)
+                var HEADER_FAC = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER = " + NUMBER1.SelectedValue + $" AND TAG = {FAC2TAG}").FirstOrDefault(); //FAC2TAG
+                //مشتری
+                string? thevalue = HEADER_FAC?.CUST_NO;
+                if (!string.IsNullOrEmpty(thevalue))
                 {
-                    CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
+                    var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + thevalue + "'").FirstOrDefault();
+                    if (CUST_NO.ItemsSource == null)
+                    {
+                        CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
+                    }
+                    if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                    {
+                        ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
+                    }
+                    CUST_NO.SelectedValue = HEADER_FAC.CUST_NO; CUST_NO.Items.Refresh();
+                    //نوع مشتری
+                    CUST_KIND.SelectedValue = HEADER_FAC.CUST_KIND; CUST_KIND.Items.Refresh();
                 }
-
-                if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
-                {
-                    ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
-                }
-                CUST_NO.SelectedValue = HEADER_FAC.CUST_NO; CUST_NO.Items.Refresh();
-
-                //نوع مشتری
-                CUST_KIND.SelectedValue = HEADER_FAC.CUST_KIND; CUST_KIND.Items.Refresh();
             }
 
             NUMBER1_TAG = Convert.ToDouble(NUMBER1.Text); //Save Last Valid Number
@@ -2635,7 +2645,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             try
             {
-                if (NUMBER.Text == "0")
+                if (string.IsNullOrWhiteSpace(NUMBER.Text) || NUMBER.Text == "0")
                 {
                     //Max Of Number TAG -----4
                     using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))

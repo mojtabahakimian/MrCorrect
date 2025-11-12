@@ -575,6 +575,12 @@ namespace Prg_UI
                                     CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KART, default);
                                 });
                                 break;
+                            case Key.F9:
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN_LIMITED, default);
+                                });
+                                break;
                             case Key.D7:
                                 Application.Current.Dispatcher.Invoke(() =>
                                 {
@@ -617,6 +623,12 @@ namespace Prg_UI
                                 Application.Current.Dispatcher.Invoke(() =>
                                 {
                                     CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FCODE_CUSTOMER, default);
+                                });
+                                break;
+                            case Key.F9:
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN, default);
                                 });
                                 break;
                             case Key.F10:

@@ -455,14 +455,14 @@ namespace Wins.WinMenus.Taarif
                                             var _hes = item.GetType().GetProperty("HESAB").GetValue(item);
 
 
-                                            var RST = dbms.DoGetDataSQL<string?>("SELECT HES FROM DEED_DTL WHERE HES LIKE '" + N_KOL + "-" + NUMBER + "-" + TNUMBER + "-" + _tnumber2 + "-" + _tnumber3 + "%'").ToList();
-                                            if (RST.Count > 0)
-                                            {
-                                                e.Handled = true;
+                                            //var RST = dbms.DoGetDataSQL<string?>("SELECT HES FROM DEED_DTL WHERE HES LIKE '" + N_KOL + "-" + NUMBER + "-" + TNUMBER + "-" + _tnumber2 + "-" + _tnumber3 + "%'").ToList();
+                                            //if (RST.Count > 0)
+                                            //{
+                                            //    e.Handled = true;
 
-                                                ErrosMessages.Add(new MsgModel { MessageText_U = $"حساب داراي گردش مي باشد قابل حذف نيست {_hes}" });
-                                            }
-                                            else
+                                            //    ErrosMessages.Add(new MsgModel { MessageText_U = $"حساب داراي گردش مي باشد قابل حذف نيست {_hes}" });
+                                            //}
+                                            //else
                                             {
                                                 try
                                                 {

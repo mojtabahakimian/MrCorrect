@@ -237,6 +237,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
         List<COMBOPERSONEL> rst_personel = null;
 
+        public nint WINDOW_ID { get; private set; }
+
         /// <summary>
         /// یک فیلد استاتیک برای اینکه بتونم آیدی این پنجره رو در دسترس قرار بدم
         /// </summary>
@@ -413,8 +415,9 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
-            I_AM_HEAD_LST_HAVLAH = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
-            CL_HESABDARI.SETSECURITY(this.GetType().Name, "HAVL", new WindowInteropHelper(this).Handle, this.GetType().Name);
+            WINDOW_ID = new WindowInteropHelper(this).Handle;
+            I_AM_HEAD_LST_HAVLAH = CL_LMethods.GetTheWindow(WINDOW_ID);
+            CL_HESABDARI.SETSECURITY(this.GetType().Name, "HAVL", WINDOW_ID, this.GetType().Name);
             if (!this.IsLoaded)
             {
                 this.Close();
@@ -570,7 +573,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
                             if (!_navigationManager.IsNewRecord)
                             {
-                                OTHER_DTL win = new OTHER_DTL(2, CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle));
+                                OTHER_DTL win = new OTHER_DTL(2, CL_LMethods.GetTheWindow(WINDOW_ID));
                                 win.NUMBER = Convert.ToInt64(NUMBER.Text);
                                 win.Show();
                             }
@@ -993,7 +996,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             if (CL_LMethods.IsNumeric(NUMBER.Text) && NUMBER.Text != "0") //NUMBER > 0
             {
-                CL_HESABDARI.LetSigneTick(this.GetType().Name, 2, Convert.ToInt32(Baseknow.USERCOD), new WindowInteropHelper(this).Handle);
+                CL_HESABDARI.LetSigneTick(this.GetType().Name, 2, Convert.ToInt32(Baseknow.USERCOD), WINDOW_ID);
             }
 
             this.esl.IsChecked = false;
@@ -1098,7 +1101,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
             if (Convert.ToDouble(this.NUMBER.Text) > 0)
             {
-                CL_HESABDARI.LetSigneTick(this.GetType().Name, 2, Convert.ToInt32(Baseknow.USERCOD), new WindowInteropHelper(this).Handle);
+                CL_HESABDARI.LetSigneTick(this.GetType().Name, 2, Convert.ToInt32(Baseknow.USERCOD), WINDOW_ID);
             }
             else
             {
@@ -1166,7 +1169,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 else
                 {
                     //DoCmd.OpenForm("SelectUser", acFormDS, default, "sal_name like N'%" + CODESAL(NewData) + "%' or sal_name like N'%" + CODESAL(Fixp(NewData)) + "%' or sal_name like N'%" + CODESAL(Fixpi(NewData)) + "%'", default, acDialog, 3);
-                    SelectUser selectUser = new SelectUser("sal_name like N'%" + CL_HESABDARI.CODESAL(personel_tex) + "%' or sal_name like N'%" + CL_HESABDARI.CODESAL(CL_HESABDARI.Fixp(personel_tex)) + "%' or sal_name like N'%" + CL_HESABDARI.CODESAL(CL_HESABDARI.Fixpi(personel_tex)) + "%'", new WindowInteropHelper(this).Handle);
+                    SelectUser selectUser = new SelectUser("sal_name like N'%" + CL_HESABDARI.CODESAL(personel_tex) + "%' or sal_name like N'%" + CL_HESABDARI.CODESAL(CL_HESABDARI.Fixp(personel_tex)) + "%' or sal_name like N'%" + CL_HESABDARI.CODESAL(CL_HESABDARI.Fixpi(personel_tex)) + "%'", WINDOW_ID);
                     selectUser.ShowDialog();
                 }
             }
@@ -2125,7 +2128,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
                         if (!_navigationManager.IsNewRecord)
                         {
-                            OTHER_DTL win = new OTHER_DTL(2, CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle));
+                            OTHER_DTL win = new OTHER_DTL(2, CL_LMethods.GetTheWindow(WINDOW_ID));
                             win.NUMBER = Convert.ToInt64(NUMBER.Text);
                             win.Show();
                         }

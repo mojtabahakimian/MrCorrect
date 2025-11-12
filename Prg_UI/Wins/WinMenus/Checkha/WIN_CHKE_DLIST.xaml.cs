@@ -29,7 +29,6 @@ namespace Wins.WinMenus.Checkha
 {
     public partial class WIN_CHKE_DLIST : Window
     {
-
         public WIN_CHKE_DLIST(string? openargs = null)
         {
             InitializeComponent();
@@ -317,59 +316,116 @@ namespace Wins.WinMenus.Checkha
         private void FilterBySelection_Click(object sender, RoutedEventArgs e)
         {
             var selectedText = GetSelectedText();
-            var (columnName, filterValue) = GetSelectedCellDetails(); // Get the details of the selected cell
+            var (columnName, filterValue) = GetSelectedCellDetails();
 
+            if (string.IsNullOrEmpty(columnName))
+            {
+                universControl.PopNotifyShow("لطفاً یک سلول انتخاب کنید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            // حالت 1: بخشی از متن انتخاب شده است
             if (!string.IsNullOrEmpty(selectedText))
             {
-                // Add the Contains filter to the filter service (inclusion filter)
-                filterService.AddFilter(columnName, selectedText, isExclusion: false); // False means it's an inclusion filter
-                ActiveFilters.Add($"{columnName} Contains {selectedText}");
-                // Apply the cumulative filter to the data grid
+                // فیلتر Contains
+                filterService.AddFilter(columnName, selectedText, isExclusion: false, isExactMatch: false);
+                ActiveFilters.Add($"{columnName} Contains \"{selectedText}\"");
+                ApplyCumulativeFilter();
+                return;
+            }
+
+            // حالت 2: کل سلول انتخاب شده است
+            if (filterValue != null)
+            {
+                // فیلتر Exact Match
+                filterService.AddFilter(columnName, filterValue, isExclusion: false, isExactMatch: true);
+
+                string displayValue = FormatValueForDisplay(filterValue);
+                ActiveFilters.Add($"{columnName} = {displayValue}");
+
                 ApplyCumulativeFilter();
             }
             else
             {
-                if (filterValue != null)
-                {
-                    // Add the filter to the filter service
-                    filterService.AddFilter(columnName, filterValue);
-                    // Add the filter to the list of active filters
-                    ActiveFilters.Add($"{columnName} = {filterValue}");
-                    // Apply the cumulative filter to the data grid
-                    ApplyCumulativeFilter();
-                }
+                // فیلتر برای null values
+                filterService.AddFilter(columnName, null, isExclusion: false, isExactMatch: true);
+                ActiveFilters.Add($"{columnName} = NULL");
+                ApplyCumulativeFilter();
             }
-
         }
         private void FilterExcludingSelection_Click(object sender, RoutedEventArgs e)
         {
             var selectedText = GetSelectedText();
+            var (columnName, filterValue) = GetSelectedCellDetails();
+
+            // اگر ستون یا مقدار معتبر نیست، خروج
+            if (string.IsNullOrEmpty(columnName))
+            {
+                universControl.PopNotifyShow("لطفاً یک سلول انتخاب کنید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            // حالت 1: بخشی از متن انتخاب شده است (partial selection)
             if (!string.IsNullOrEmpty(selectedText))
             {
-                var (columnName, filterValue) = GetSelectedCellDetails(); // Get the details of the selected cell
-                if (filterValue != null)
-                {
-                    // Add the Not Contains filter to the filter service (exclusion filter)
-                    filterService.AddFilter(columnName, selectedText, isExclusion: true); // True means it's an exclusion filter
-                                                                                          // Add the exclusion filter to the list of active filters
-                    ActiveFilters.Add($"{columnName} Does Not Contain {selectedText}");
-                    // Apply the cumulative filter to the data grid
-                    ApplyCumulativeFilter();
-                }
+                // فیلتر "Does Not Contain" - برای متن
+                filterService.AddFilter(columnName, selectedText, isExclusion: true, isExactMatch: false);
+                ActiveFilters.Add($"{columnName} Does Not Contain \"{selectedText}\"");
+                ApplyCumulativeFilter();
+                return;
+            }
+
+            // حالت 2: کل سلول انتخاب شده است (exact value)
+            if (filterValue != null)
+            {
+                // فیلتر Exclusion با Exact Match - برای مقدار دقیق
+                filterService.AddFilter(columnName, filterValue, isExclusion: true, isExactMatch: true);
+
+                // نمایش بهتر در لیست فیلترها
+                string displayValue = FormatValueForDisplay(filterValue);
+                ActiveFilters.Add($"{columnName} != {displayValue}");
+
+                ApplyCumulativeFilter();
             }
             else
             {
-                var (columnName, filterValue) = GetSelectedCellDetails(); // Get the details of the selected cell
-                if (filterValue != null)
+                // اگر مقدار null است
+                filterService.AddFilter(columnName, null, isExclusion: true, isExactMatch: true);
+                ActiveFilters.Add($"{columnName} != NULL");
+                ApplyCumulativeFilter();
+            }
+        }
+        private string FormatValueForDisplay(object value)
+        {
+            if (value == null)
+                return "NULL";
+
+            // برای مقادیر عددی، فرمت هزارگان اعمال می‌شود
+            if (value is double || value is decimal || value is float)
+            {
+                try
                 {
-                    // Add the exclusion filter to the filter service
-                    filterService.AddFilter(columnName, filterValue, isExclusion: true);
-                    // Add the filter to the list of active filters
-                    ActiveFilters.Add($"{columnName} != {filterValue}");
-                    // Apply the cumulative filter to the data grid
-                    ApplyCumulativeFilter();
+                    return Convert.ToDecimal(value).ToString("N", System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch
+                {
+                    return value.ToString();
                 }
             }
+
+            if (value is int || value is long || value is short || value is byte)
+            {
+                try
+                {
+                    return Convert.ToInt64(value).ToString("N0", System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch
+                {
+                    return value.ToString();
+                }
+            }
+
+            return value.ToString();
         }
         private void RemoveFilterSort_Click(object sender, RoutedEventArgs e)
         {
@@ -425,17 +481,36 @@ namespace Wins.WinMenus.Checkha
         private string GetSelectedText()
         {
             var dataGrid = SFDATAGRID_SUB;
-            var currentCell = dataGrid.SelectionController.CurrentCellManager.CurrentCell;
+            var currentCell = dataGrid.SelectionController?.CurrentCellManager?.CurrentCell;
 
-            if (currentCell != null && currentCell.IsEditing)
+            if (currentCell == null)
+                return string.Empty;
+
+            // حالت 1: Edit Mode
+            if (currentCell.IsEditing)
             {
-                // Find the editing element (which will be a TextBox in edit mode)
                 var editingElement = dataGrid.FindElementOfType<TextBox>();
-                if (editingElement != null)
+                if (editingElement != null && !string.IsNullOrEmpty(editingElement.SelectedText))
                 {
-                    return editingElement.SelectedText; // Return the selected text
+                    return editingElement.SelectedText;
                 }
             }
+
+            // حالت 2: جستجوی ساده - بدون GetCellElement
+            try
+            {
+                var gridCellElement = currentCell?.ColumnElement;
+                if (gridCellElement != null)
+                {
+                    var textBox = FindVisualChild<TextBox>(gridCellElement);
+                    if (textBox != null && !string.IsNullOrWhiteSpace(textBox.SelectedText))
+                    {
+                        return textBox.SelectedText;
+                    }
+                }
+            }
+            catch { }
+
             return string.Empty;
         }
 
@@ -447,11 +522,12 @@ namespace Wins.WinMenus.Checkha
         {
             try
             {
+                //این توی حالتی که کاربر از فیلتر SfDataGrid Filter استفاده کرده باشه درست کار نمیکنه !
                 var _SelectedTextCell_ = GetSelectedText();
                 if (!string.IsNullOrEmpty(_SelectedTextCell_))
                 {
                     Clipboard.SetText(_SelectedTextCell_);
-                    universControl.PopNotifyShow("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                    universControl.PopNotifyShowUp("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 1);
                     return;
                 }
             }
@@ -463,6 +539,15 @@ namespace Wins.WinMenus.Checkha
                 universControl.PopNotifyShow("چیزی برای کپی انتخاب نشده !", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                 return;
             }
+
+            //var dataGrid = SFDATAGRID_SUB;
+            //var currentCell = dataGrid.SelectionController.CurrentCellManager.CurrentCell;
+            //if (currentCell != null && currentCell.IsEditing)
+            //{
+            //    System.Windows.Forms.SendKeys.SendWait("^(c)"); //Fire Send Keys : Ctrl + C
+            //    universControl.PopNotifyShowUp("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 1);
+            //    return;
+            //}
 
             var sb = new StringBuilder();
 
@@ -662,15 +747,6 @@ namespace Wins.WinMenus.Checkha
         }
         #endregion
 
-        private void SFDATAGRID_SUB_CurrentCellEndEdit(object sender, CurrentCellEndEditEventArgs e)
-        {
-
-        }
-        private void SFDATAGRID_SUB_CurrentCellValidating(object sender, CurrentCellValidatingEventArgs e)
-        {
-
-        }
-
         public Visual I_AM_CHEK_VLISTALL { get; private set; }
         public string? OpenArgs { get; }
 
@@ -771,5 +847,6 @@ namespace Wins.WinMenus.Checkha
             }
             ESTELAM_Popup.IsOpen = false;
         }
+
     }
 }

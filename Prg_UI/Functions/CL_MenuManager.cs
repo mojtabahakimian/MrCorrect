@@ -2102,7 +2102,7 @@ namespace Functions
                     CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID_OTHER_WIN, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
                     break;
 
-                case 25: //اینجا NUMBER : شماره فاکتور ------ NUMBER1 : رسید
+                case 25:
                     CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_BRFR, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
                     break;
 

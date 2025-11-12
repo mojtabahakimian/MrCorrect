@@ -298,7 +298,7 @@ namespace Wins.WinMenus.ANBAR
         public bool INVO_LST_HAV_SUB_OTHER_IsFocused { get; private set; }
 
         public int ANBARDefaultValue { get; set; }
-
+        public nint WINDOW_ID { get; private set; }
         public Visual I_AM_INVO_RASID { get; set; }
         public string OpenArgs { get; }
 
@@ -662,7 +662,7 @@ namespace Wins.WinMenus.ANBAR
             //this.PERSONEL.Visible = true;
             if (Convert.ToInt32(this.NUMBER.Text) > 0)
             {
-                CL_HESABDARI.LetSigneTick(this.GetType().Name, 26, Convert.ToInt32(Baseknow.USERCOD), new WindowInteropHelper(this).Handle);
+                CL_HESABDARI.LetSigneTick(this.GetType().Name, 26, Convert.ToInt32(Baseknow.USERCOD), WINDOW_ID);
             }
             else
             {
@@ -721,9 +721,10 @@ namespace Wins.WinMenus.ANBAR
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
-            I_AM_INVO_RASID = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
+            WINDOW_ID = new WindowInteropHelper(this).Handle;
+            I_AM_INVO_RASID = CL_LMethods.GetTheWindow(WINDOW_ID);
 
-            CL_HESABDARI.SETSECURITY(this.GetType().Name, "SAYERHAV", new WindowInteropHelper(this).Handle);
+            CL_HESABDARI.SETSECURITY(this.GetType().Name, "SAYERHAV", WINDOW_ID);
             if (!this.IsLoaded)
             {
                 this.Close();
@@ -1088,8 +1089,9 @@ namespace Wins.WinMenus.ANBAR
                     bool AnyCrossAzadInvoiced = dbms.DoGetDataSQL<int?>($"SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WHERE TAG = 27 AND NUMBER = {NUMBER.Text} ").Any();
                     if (AnyCrossAzadInvoiced)
                     {
+                        universControl.PopNotifyShowUp("این برگه دارای مرجوعی (برگشت خرید آزاد) است و نمیتوان سطر های آنرا تغییر داد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
+                        this.AllowEdits = true;
                         INVO_LST_HAV_SUB_OTHER.IsReadOnly = true;
-                        universControl.PopNotifyShowUp("این برگه دارای مرجوعی (برگشت خرید آزاد) است و نمیتوان آنرا تغییر داد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
                     }
                     else
                     {
@@ -1100,7 +1102,7 @@ namespace Wins.WinMenus.ANBAR
                     }
                 }
             }
-            CL_HESABDARI.SETSECURITY(this.GetType().Name, "RBRFR", new WindowInteropHelper(this).Handle);
+            CL_HESABDARI.SETSECURITY(this.GetType().Name, "RBRFR", WINDOW_ID);
         }
 
         private void SGN1_Click(object sender, RoutedEventArgs e)
@@ -2361,9 +2363,9 @@ namespace Wins.WinMenus.ANBAR
 
             if (TheRow.id is null || TheRow.id <= 0) //INSERT
             {
-                _qre = $@"INSERT INTO INVO_LST (       NUMBER, TAG,         ANBAR,                                           RADIF,             CODE,         MEGH,         MEGHk,                                              MEGH_MAR,                                          MABL,                                            MABL_K,                         FROM_A,                                            MEGH_R,         VAHED_K,                                           N_KOL,                                            N_MOIN,                                            AVRAGE,                                             AVRAGE2,                                           IMBAA,                                              TOTALARZ,                                          TKHN,                                      JAY) 
+                _qre = $@"INSERT INTO INVO_LST (       NUMBER, TAG,         ANBAR,                                           RADIF,             CODE,         MEGH,         MEGHk,                                              MEGH_MAR,                                          MABL,                                            MABL_K,                         FROM_A,                                            MEGH_R,         VAHED_K,                                           N_KOL,                                            N_MOIN,                                            AVRAGE,                                             AVRAGE2,                                           IMBAA,                                              TOTALARZ,                                          TKHN,                                      JAY , MANDAH) 
                           OUTPUT INSERTED.id
-			                                                       VALUES ({NUMBER.Text},  26,{TheRow.ANBAR},{(TheRow.RADIF is null ? "NULL" : TheRow.RADIF)}, N'{TheRow.CODE}',{TheRow.MEGH},{TheRow.MEGHk},{(TheRow.MEGH_MAR is null ? "NULL" : TheRow.MEGH_MAR)},{(TheRow.MABL is null ? "NULL" : TheRow.MABL)},{(TheRow.MABL_K is null ? "NULL" : TheRow.MABL_K)},{Convert.ToByte(TheRow.FROM_A)},{(TheRow.MEGH_R is null ? "NULL" : TheRow.MEGH_R)},{TheRow.VAHED_K},{(TheRow.N_KOL is null ? "NULL" : TheRow.N_KOL)},{(TheRow.N_MOIN is null ? "NULL" : TheRow.N_MOIN)},{(TheRow.AVRAGE is null ? "NULL" : TheRow.AVRAGE)},{(TheRow.AVRAGE2 is null ? "NULL" : TheRow.AVRAGE2)},{(TheRow.IMBAA is null ? "NULL" : TheRow.IMBAA)},{(TheRow.TOTALARZ is null ? "NULL" : TheRow.TOTALARZ)},{(TheRow.TKHN is null ? "NULL" : TheRow.TKHN)},{(TheRow.JAY is null ? "0" : TheRow.JAY)})";
+			                                                       VALUES ({NUMBER.Text},  26,{TheRow.ANBAR},{(TheRow.RADIF is null ? "NULL" : TheRow.RADIF)}, N'{TheRow.CODE}',{TheRow.MEGH},{TheRow.MEGHk},{(TheRow.MEGH_MAR is null ? "NULL" : TheRow.MEGH_MAR)},{(TheRow.MABL is null ? "NULL" : TheRow.MABL)},{(TheRow.MABL_K is null ? "NULL" : TheRow.MABL_K)},{Convert.ToByte(TheRow.FROM_A)},{(TheRow.MEGH_R is null ? "NULL" : TheRow.MEGH_R)},{TheRow.VAHED_K},{(TheRow.N_KOL is null ? "NULL" : TheRow.N_KOL)},{(TheRow.N_MOIN is null ? "NULL" : TheRow.N_MOIN)},{(TheRow.AVRAGE is null ? "NULL" : TheRow.AVRAGE)},{(TheRow.AVRAGE2 is null ? "NULL" : TheRow.AVRAGE2)},{(TheRow.IMBAA is null ? "NULL" : TheRow.IMBAA)},{(TheRow.TOTALARZ is null ? "NULL" : TheRow.TOTALARZ)},{(TheRow.TKHN is null ? "NULL" : TheRow.TKHN)},{(TheRow.JAY is null ? "0" : TheRow.JAY)},N'{(TheRow.MANDAH is null ? "NULL" : TheRow.MANDAH)}')";
 
                 var (errorMsgs, _, _, queryOutputs) = IVM.CheckInventoryAndExecuteQuery<long>(new List<object> { TheRow }, _qre, null, false);
                 ErrosMessages.AddRange(errorMsgs);
@@ -2383,6 +2385,7 @@ namespace Wins.WinMenus.ANBAR
                                             SET 
                                                 ANBAR = {TheRow.ANBAR},
                                                 RADIF = {(TheRow.RADIF is null ? "NULL" : TheRow.RADIF)},
+                                                MANDAH = N'{(TheRow.MANDAH is null ? "" : TheRow.MANDAH)}',
                                                 CODE = N'{TheRow.CODE}',
                                                 MEGH = {TheRow.MEGH},
                                                 MEGHk = {TheRow.MEGHk},

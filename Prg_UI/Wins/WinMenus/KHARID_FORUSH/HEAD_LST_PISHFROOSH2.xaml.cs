@@ -1217,11 +1217,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
             if (Strings.Mid(Baseknow.OPTIONSS, 47, 1) == "5")
             {
-                this.TKHN_COL.Visibility = Visibility.Hidden;
+                this.TKHN_COL.Visibility = Visibility.Visible;
             }
             else
             {
-                this.TKHN_COL.Visibility = Visibility.Visible;
+                this.TKHN_COL.Visibility = Visibility.Hidden;
             }
             if (Strings.Mid(Baseknow.OPTIONSS, 52, 1) == "5")
             {
@@ -1232,14 +1232,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 this.JAY_COL.Visibility = Visibility.Hidden;
                 this.JAYO_COL.Visibility = Visibility.Hidden;
-            }
-            if (Strings.Mid(Baseknow.OPTIONSS, 47, 1) == "5")
-            {
-                this.TKHN_COL.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                this.TKHN_COL.Visibility = Visibility.Visible;
             }
             if (CL_HESABDARI.LETSGO("JAYO"))
             {
@@ -2273,9 +2265,17 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 else
                 {
                     #region N_MOIN_AfterUpdate
+                    // ✅ اگر کاربر مبلغ تخفیف را مستقیم وارد کرده، درصد را محاسبه کن
                     if (CURRENT_ROW_ITEMS.MABL_K > 0)
                     {
-                        CURRENT_ROW_ITEMS.N_KOL = CURRENT_ROW_ITEMS.N_KOL * 100 / CURRENT_ROW_ITEMS.MABL_K;
+                        // محاسبه درصد تخفیف از روی مبلغ تخفیف وارد شده
+                        double calculatedNKOL = (Convert.ToDouble(CURRENT_ROW_ITEMS.N_MOIN) * 100) / Convert.ToDouble(CURRENT_ROW_ITEMS.MABL_K);
+
+                        // ✅ فقط در صورتی که تفاوت معناداری وجود داشته باشد، N_KOL را آپدیت کن
+                        if (Math.Abs(Convert.ToDouble(CURRENT_ROW_ITEMS.N_KOL) - calculatedNKOL) > 0.01)
+                        {
+                            CURRENT_ROW_ITEMS.N_KOL = calculatedNKOL;
+                        }
                     }
                     else
                     {

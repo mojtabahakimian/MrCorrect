@@ -308,7 +308,7 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Label x:Name="lsanad" Width="auto" BorderThickness="0,1,0,0" Opacity="0.8" Foreground="White">ثبت در شماره سند :</Label>
-                                <TextBox x:Name="N_S" Width="88" Style="{x:Null}" HorizontalContentAlignment="Center" Text="0"  Background="{x:Null}" BorderBrush="{x:Null}" BorderThickness="1,5,1,1" Opacity="0.8" Foreground="White"/>
+                                <TextBox x:Name="N_S" PreviewMouseDoubleClick="N_S_PreviewMouseDoubleClick"  Width="88" Style="{x:Null}" HorizontalContentAlignment="Center" Text="0"  Background="{x:Null}" BorderBrush="{x:Null}" BorderThickness="1,5,1,1" Opacity="0.8" Foreground="White"/>
                                 <TextBox x:Name="MABNA" Width="84" Style="{x:Null}" HorizontalContentAlignment="Center" Text="0" Background="{x:Null}" BorderBrush="{x:Null}" BorderThickness="1,5,1,1" Opacity="0.8" Foreground="White"/>
                             </StackPanel>
                         </StackPanel>

@@ -2085,7 +2085,7 @@ END;";
                 try { db.Execute(@"ALTER TABLE [dbo].[GENERAL_OPTIONS]
                                    ADD [CRT] DATETIME NULL
                                    CONSTRAINT [DF__GENERAL_OPT__CRT__2C3B9588] DEFAULT (GETDATE());"); } catch { }
-				//اضافه کردن ستون UID (کد کاربر) به GENERAL_OPTIONS برای تنظیمات per-user
+                //اضافه کردن ستون UID (کد کاربر) به GENERAL_OPTIONS برای تنظیمات per-user
                 try { db.Execute(@"ALTER TABLE [dbo].[GENERAL_OPTIONS]
                                    ADD [UID] bigint NULL;"); } catch { }
 
@@ -2152,6 +2152,9 @@ END;";
 
                 //مرکز هزینه
                 try { db.Execute($@"ALTER TABLE dbo.TCOD_MARKAZHAZ ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+
+                //ایجاد فرمول ساخت سطر
+                try { db.Execute($@"ALTER TABLE dbo.DTL_MANF ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
 
             }
