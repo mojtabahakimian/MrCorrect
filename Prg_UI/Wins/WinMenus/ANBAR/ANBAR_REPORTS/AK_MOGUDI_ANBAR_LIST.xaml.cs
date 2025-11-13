@@ -397,29 +397,39 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         private string GetSelectedText()
         {
             var dataGrid = SYNCFUSION_DG;
-            var currentCell = dataGrid.SelectionController.CurrentCellManager.CurrentCell;
+            var currentCell = dataGrid.SelectionController?.CurrentCellManager?.CurrentCell;
 
-            if (currentCell != null && currentCell.IsEditing)
+            if (currentCell == null)
+                return string.Empty;
+
+            // حالت 1: Edit Mode
+            if (currentCell.IsEditing)
             {
-                // Find the editing element (which will be a TextBox in edit mode)
                 var editingElement = dataGrid.FindElementOfType<TextBox>();
-                if (editingElement != null)
+                if (editingElement != null && !string.IsNullOrEmpty(editingElement.SelectedText))
                 {
-                    if (!string.IsNullOrEmpty(editingElement.SelectedText))
+                    return editingElement.SelectedText;
+                }
+            }
+
+            // حالت 2: جستجوی ساده - بدون GetCellElement
+            try
+            {
+                var gridCellElement = currentCell?.ColumnElement;
+                if (gridCellElement != null)
+                {
+                    var textBox = FindVisualChild<TextBox>(gridCellElement);
+                    if (textBox != null && !string.IsNullOrWhiteSpace(textBox.SelectedText))
                     {
-                        return editingElement.SelectedText; // Return the selected text
+                        return textBox.SelectedText;
                     }
                 }
-
-                var editingElement2 = FindChildElement<TextBox>(dataGrid);
-                if (editingElement2 != null)
-                {
-                    return editingElement2.SelectedText;
-                }
-
             }
+            catch { }
+
             return string.Empty;
         }
+
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
             CopySelectedRowsToClipboard();

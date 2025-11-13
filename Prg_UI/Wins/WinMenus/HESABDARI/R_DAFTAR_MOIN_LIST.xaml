@@ -153,7 +153,7 @@
         </DataGrid>
 
         <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" ContextMenu="{StaticResource DataGridContextMenu}"
-                ItemsSource="{Binding DAFTAR_DATA}" 
+                ItemsSource="{Binding DAFTAR_DATA}" FilterRowPosition="Top"
                 AutoGenerateColumns="False"
                 AllowEditing="True"
                 EnableDataVirtualization="True"

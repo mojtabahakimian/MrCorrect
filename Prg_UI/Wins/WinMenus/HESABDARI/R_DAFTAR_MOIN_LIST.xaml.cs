@@ -208,6 +208,41 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             CurrentCellValue = record?.GetType()?.GetProperty(mappingName ?? string.Empty)?.GetValue(record)?.ToString();
         }
 
+        private string GetSelectedText()
+        {
+            var dataGrid = SYNCFUSION_DG;
+            var currentCell = dataGrid.SelectionController?.CurrentCellManager?.CurrentCell;
+
+            if (currentCell == null)
+                return string.Empty;
+
+            // حالت 1: Edit Mode
+            if (currentCell.IsEditing)
+            {
+                var editingElement = dataGrid.FindElementOfType<TextBox>();
+                if (editingElement != null && !string.IsNullOrEmpty(editingElement.SelectedText))
+                {
+                    return editingElement.SelectedText;
+                }
+            }
+
+            // حالت 2: جستجوی ساده - بدون GetCellElement
+            try
+            {
+                var gridCellElement = currentCell?.ColumnElement;
+                if (gridCellElement != null)
+                {
+                    var textBox = FindVisualChild<TextBox>(gridCellElement);
+                    if (textBox != null && !string.IsNullOrWhiteSpace(textBox.SelectedText))
+                    {
+                        return textBox.SelectedText;
+                    }
+                }
+            }
+            catch { }
+
+            return string.Empty;
+        }
         private void FilterBySelection_Click(object sender, RoutedEventArgs e)
         {
             var selectedText = GetSelectedText();
@@ -290,6 +325,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 ApplyCumulativeFilter();
             }
         }
+
         private string FormatValueForDisplay(object value)
         {
             if (value == null)
@@ -321,6 +357,87 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
 
             return value.ToString();
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            CopySelectedRowsToClipboard();
+        }
+        private void CopySelectedRowsToClipboard()
+        {
+            try
+            {
+                //این توی حالتی که کاربر از فیلتر SfDataGrid Filter استفاده کرده باشه درست کار نمیکنه !
+                var _SelectedTextCell_ = GetSelectedText();
+                if (!string.IsNullOrEmpty(_SelectedTextCell_))
+                {
+                    Clipboard.SetText(_SelectedTextCell_);
+                    universControl.PopNotifyShowUp("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 1);
+                    return;
+                }
+            }
+            catch { return; }
+
+            // Check if there are selected rows
+            if (SYNCFUSION_DG.SelectedItems == null || !SYNCFUSION_DG.SelectedItems.Any())
+            {
+                universControl.PopNotifyShow("چیزی برای کپی انتخاب نشده !", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            //var dataGrid = SYNCFUSION_DG;
+            //var currentCell = dataGrid.SelectionController.CurrentCellManager.CurrentCell;
+            //if (currentCell != null && currentCell.IsEditing)
+            //{
+            //    System.Windows.Forms.SendKeys.SendWait("^(c)"); //Fire Send Keys : Ctrl + C
+            //    universControl.PopNotifyShowUp("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 1);
+            //    return;
+            //}
+
+            var sb = new StringBuilder();
+
+            try
+            {
+                // Add headers
+                foreach (var column in SYNCFUSION_DG.Columns)
+                {
+                    if (!column.IsHidden) // Include only columns that are not hidden
+                        sb.Append(column.HeaderText + "\t");
+                }
+                sb.AppendLine();
+
+                // Add selected rows
+                foreach (var item in SYNCFUSION_DG.SelectedItems)
+                {
+                    foreach (var column in SYNCFUSION_DG.Columns)
+                    {
+                        if (!column.IsHidden) // Include only columns that are not hidden
+                        {
+                            var propertyValue = item.GetType().GetProperty(column.MappingName)?.GetValue(item, null);
+                            sb.Append(propertyValue?.ToString() + "\t");
+                        }
+                    }
+                    sb.AppendLine();
+                }
+
+                // Copy to clipboard
+                Clipboard.SetText(sb.ToString());
+                universControl.PopNotifyShow($"{SYNCFUSION_DG.SelectedItems.Count} تعداد رکورد در حافظه کپی شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+            }
+            catch { }
+
+        }
+
+        private async void EXPORTEXCEL_BTN(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "ExportedExcel");
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
+            }
         }
 
         private void RemoveFilterSort_Click(object sender, RoutedEventArgs e) // Event handler to remove all filters and sorting
@@ -380,90 +497,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
             return null;
         }
-        private string GetSelectedText()
-        {
-            var dataGrid = SYNCFUSION_DG;
-            var currentCell = dataGrid.SelectionController.CurrentCellManager.CurrentCell;
 
-            if (currentCell != null && currentCell.IsEditing)
-            {
-                // Find the editing element (which will be a TextBox in edit mode)
-                var editingElement = dataGrid.FindElementOfType<TextBox>();
-                if (editingElement != null)
-                {
-                    if (!string.IsNullOrEmpty(editingElement.SelectedText))
-                    {
-                        return editingElement.SelectedText; // Return the selected text
-                    }
-                }
-
-                var editingElement2 = FindChildElement<TextBox>(dataGrid);
-                if (editingElement2 != null)
-                {
-                    return editingElement2.SelectedText;
-                }
-
-            }
-            return string.Empty;
-        }
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            CopySelectedRowsToClipboard();
-        }
-        private void CopySelectedRowsToClipboard()
-        {
-            try
-            {
-                var _SelectedTextCell_ = GetSelectedText();
-                if (!string.IsNullOrEmpty(_SelectedTextCell_))
-                {
-                    Clipboard.SetText(_SelectedTextCell_);
-                    universControl.PopNotifyShowUp("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
-                    return;
-                }
-            }
-            catch { return; }
-
-            // Check if there are selected rows
-            if (SYNCFUSION_DG.SelectedItems == null || !SYNCFUSION_DG.SelectedItems.Any())
-            {
-                universControl.PopNotifyShow("چیزی برای کپی انتخاب نشده !", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
-                return;
-            }
-
-            var sb = new StringBuilder();
-
-            try
-            {
-                // Add headers
-                foreach (var column in SYNCFUSION_DG.Columns)
-                {
-                    if (!column.IsHidden) // Include only columns that are not hidden
-                        sb.Append(column.HeaderText + "\t");
-                }
-                sb.AppendLine();
-
-                // Add selected rows
-                foreach (var item in SYNCFUSION_DG.SelectedItems)
-                {
-                    foreach (var column in SYNCFUSION_DG.Columns)
-                    {
-                        if (!column.IsHidden) // Include only columns that are not hidden
-                        {
-                            var propertyValue = item.GetType().GetProperty(column.MappingName)?.GetValue(item, null);
-                            sb.Append(propertyValue?.ToString() + "\t");
-                        }
-                    }
-                    sb.AppendLine();
-                }
-
-                // Copy to clipboard
-                Clipboard.SetText(sb.ToString());
-                universControl.PopNotifyShow($"{SYNCFUSION_DG.SelectedItems.Count} تعداد رکورد در حافظه کپی شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
-            }
-            catch { }
-
-        }
         private void SYNCFUSION_DG_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.L)
@@ -667,17 +701,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     return true;
                 default:
                     return false;
-            }
-        }
-        private async void EXPORTEXCEL_BTN(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "ExportedExcel");
-            }
-            catch (Exception)
-            {
-                new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
             }
         }
 
