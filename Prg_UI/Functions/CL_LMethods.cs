@@ -48,6 +48,105 @@ namespace Prg_UI.Functions
 {
     public static class CL_LMethods
     {
+        /// <summary>
+        /// دریافت موجودی فعلی کالا در انبار با قابلیت بررسی کفایت موجودی
+        /// </summary>
+        /// <param name="code">کد کالا</param>
+        /// <param name="anbarId">شناسه انبار</param>
+        /// <param name="requestedQuantity">مقدار درخواستی (اختیاری)</param>
+        /// <param name="minStock">حداقل موجودی مجاز (اختیاری - اگر null باشد از تنظیمات سیستم استفاده می‌شود)</param>
+        /// <param name="showWarning">نمایش پیام هشدار در صورت عدم کفایت موجودی</param>
+        /// <param name="checkMinStock">بررسی حداقل موجودی مجاز</param>
+        /// <returns>موجودی فعلی کالا - در صورت خطا null برمی‌گرداند</returns>
+        public static double? GetInventoryStock(
+            int anbarId,
+            string code,
+            double? requestedQuantity = null,
+            double? minStock = null,
+            bool showWarning = true,
+            bool checkMinStock = true)
+        {
+            // Validation: Input parameters
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                if (showWarning)
+                    new Msgwin(false, "کد کالا نامعتبر است.").ShowDialog();
+                return null;
+            }
+
+            if (anbarId <= 0)
+            {
+                if (showWarning)
+                    new Msgwin(false, "انبار انتخاب نشده است.").ShowDialog();
+                return null;
+            }
+
+            try
+            {
+                var dbms = new CL_CCNNMANAGER();
+
+                // دریافت موجودی فعلی با استفاده از پارامترهای امن
+                string queryMand = @"
+                    SELECT ROUND(ISNULL(AK_MOGO_AVL_KOL.SMEGH, 0) - ISNULL(AK_MOGO_FR.MEG, 0), 2) AS mand  
+                    FROM dbo.AK_MOGO_AVL_KOL(99999999, @AnbarId) AK_MOGO_AVL_KOL 
+                    RIGHT OUTER JOIN dbo.STUF_FSK ON AK_MOGO_AVL_KOL.CODE = dbo.STUF_FSK.CODE 
+                        AND AK_MOGO_AVL_KOL.ANBAR = dbo.STUF_FSK.ANBAR 
+                    LEFT OUTER JOIN dbo.AK_MOGO_FR(99999999, @AnbarId) AK_MOGO_FR 
+                        ON dbo.STUF_FSK.CODE = AK_MOGO_FR.CODE 
+                        AND dbo.STUF_FSK.ANBAR = AK_MOGO_FR.ANBAR 
+                    WHERE dbo.STUF_FSK.CODE = @Code 
+                        AND dbo.STUF_FSK.ANBAR = @AnbarId";
+
+                var parameters = new { Code = code, AnbarId = anbarId };
+                var mandResult = dbms.DoGetDataSQL<double?>(queryMand, parameters).FirstOrDefault();
+
+                // بررسی نتیجه دریافت موجودی
+                if (mandResult == null || !mandResult.HasValue)
+                {
+                    if (showWarning)
+                        new Msgwin(false, $"اطلاعات موجودی برای کالا '{code}' در انبار '{anbarId}' یافت نشد.").ShowDialog();
+                    return null;
+                }
+
+                double currentStock = mandResult.Value;
+
+                // بررسی مقدار درخواستی در صورت ارسال
+                if (requestedQuantity.HasValue && requestedQuantity.Value > 0)
+                {
+                    double remainingStock = currentStock - requestedQuantity.Value;
+                    int decimalPlaces = Convert.ToInt32(Baseknow.DIG ?? 2);
+
+                    // دریافت حداقل موجودی مجاز
+                    double minimumStock = 0;
+                    if (checkMinStock)
+                    {
+                        minimumStock = minStock ?? Convert.ToDouble(CL_HESABDARI.Getmin(Convert.ToInt32(anbarId), code.ToString()));
+                    }
+                    // بررسی کفایت موجودی
+                    if (Math.Round(remainingStock, decimalPlaces) < Math.Round(minimumStock, decimalPlaces))
+                    {
+                        if (showWarning && Convert.ToBoolean(Baseknow.MOJU))
+                        {
+                            string message = $"موجودی کالا کافی نیست!" +
+                                           $"موجودی فعلی: {currentStock.ToString("N" + decimalPlaces)}\n" +
+                                           $"مقدار درخواستی: {requestedQuantity.Value.ToString("N" + decimalPlaces)}\n" +
+                                           $"موجودی باقیمانده: {remainingStock.ToString("N" + decimalPlaces)}\n" +
+                                           $"حداقل موجودی مجاز: {minimumStock.ToString("N" + decimalPlaces)}";
+
+                            new Msgwin(false, message).ShowDialog();
+                        }
+                        return null; // عدم کفایت موجودی
+                    }
+                }
+                return currentStock;
+            }
+            catch (Exception ex)
+            {
+                if (showWarning)
+                    new Msgwin(false, $"خطا در دریافت موجودی کالا:\n{ex.Message}").ShowDialog();
+                return null;
+            }
+        }
         public static class ConstructorRowDetector
         {
             // Cache property lists per type برای کارایی و جلوگیری از Reflection مکرر

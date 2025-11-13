@@ -2756,7 +2756,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                         dbms.DoExecuteSQL($@"DELETE FROM dbo.HEAD_LST WHERE NUMBER = {NUMBER.Text} AND NUMBER1 = {NUMBER1.Text} AND TAG = {FTAG}");
 
-                        _navigationManager.DeleteCurrentRecord(); //Refresh Record Source //ClearFreshNew();
+                        _navigationManager?.DeleteCurrentRecord(); //Refresh Record Source //ClearFreshNew();
                     }
                     catch (SqlException ex)
                     {

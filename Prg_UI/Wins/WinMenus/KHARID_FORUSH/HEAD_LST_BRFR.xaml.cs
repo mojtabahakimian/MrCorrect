@@ -2962,7 +2962,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                         SANAD();
 
-                        _navigationManager.DeleteCurrentRecord(); //Refresh Record Source
+                        _navigationManager?.DeleteCurrentRecord(); //Refresh Record Source
                     }
                     catch (SqlException ex)
                     {

@@ -1078,7 +1078,18 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
             //set { _name_code_index_col = value; }
         }
+        private void Window_ContentRendered(object sender, EventArgs e)
+        {
+            ChangeIsHappend = false;
 
+            if (IsFromPishFactorConverted) //اگر از طریق دکمه تبدیل به فاکتوراز پیش فاکتور آمده
+            {
+                //جهت اطمینان از اضافه شدن حساب مالیات به پشت فاکتور
+                CalculateIMBAA();
+                JAYEHZAH(false);
+                IsFromPishFactorConverted = false; //Reset to avoid ferther conflict
+            }
+        }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             WINDOW_ID = new WindowInteropHelper(this).Handle;
@@ -1273,13 +1284,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             // Now raise the initialization events to update the UI
             _navigationManager.RaiseInitializationEvents();
-
-            if (IsFromPishFactorConverted) //اگر از طریق دکمه تبدیل به فاکتوراز پیش فاکتور آمده
-            {
-                //جهت اطمینان از اضافه شدن حساب مالیات به پشت فاکتور
-                CalculateIMBAA();
-                IsFromPishFactorConverted = false; //Reset to avoid ferther conflict
-            }
+                  
 
             Form_Current();
 
@@ -7094,7 +7099,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                         SANAD();
 
-                        _navigationManager.DeleteCurrentRecord(); //Refresh Record Source
+                        _navigationManager?.DeleteCurrentRecord(); //Refresh Record Source
                     }
                     catch (SqlException ex)
                     {
@@ -12662,10 +12667,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
         }
 
-        private void Window_ContentRendered(object sender, EventArgs e)
-        {
-            ChangeIsHappend = false;
-        }
+     
 
 
     }

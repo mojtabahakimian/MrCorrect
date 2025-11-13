@@ -920,7 +920,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                             dbms.DoExecuteSQL($@"DELETE FROM dbo.Visit_route WHERE ROUTE_NAME = N'{ROUTE_NAME.Text}' ");
 
                             //ClearFreshAll();
-                            _navigationManager.DeleteCurrentRecord(); //Refresh Record Source
+                            _navigationManager?.DeleteCurrentRecord(); //Refresh Record Source
                         }
                         catch (SqlException ex)
                         {

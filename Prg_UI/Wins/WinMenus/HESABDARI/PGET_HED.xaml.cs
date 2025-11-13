@@ -112,7 +112,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         {
             get
             {
-                _sum_of_mabl = Convert.ToDouble(KHAZANEH_DATA.Sum(row => row.MABL));
+                _sum_of_mabl = Convert.ToDouble(KHAZANEH_DATA.Sum(row => row.MABL ?? 0));
                 return _sum_of_mabl;
             }
             set { _sum_of_mabl = value; OnPropertyChanged("SUM_OF_MABL"); }
@@ -728,7 +728,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
 
 
-
+            this.MABL.Text = SUM_OF_MABL.ToString();
         }
         private void MoveReGetData(Jahat jahat, int? custom_postiion = null)
         {
@@ -4966,6 +4966,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
 
             //ProcLoader.Stop(Prc);
+
+            this.MABL.Text = SUM_OF_MABL.ToString();
 
             universControl.PopNotifyShow("داده ها ذخیره شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
 

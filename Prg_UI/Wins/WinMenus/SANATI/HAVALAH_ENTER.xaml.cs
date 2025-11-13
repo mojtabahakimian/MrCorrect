@@ -1076,7 +1076,7 @@ namespace Wins.WinMenus.SANATI
                             SANAD();
 
                             //ClearFreshAll();
-                            _navigationManager.DeleteCurrentRecord(); //Refresh Record Source
+                            _navigationManager?.DeleteCurrentRecord(); //Refresh Record Source
                         }
                         catch (SqlException ex)
                         {

@@ -2831,7 +2831,9 @@ namespace Wins.WinMenus.ANBAR
 
                                 if (CL_LMethods.IsNewPlaceHolder(INVO_LST_ENTEGHAL_SUB, item)) { continue; }
 
-                                var _id_ = item.GetType().GetProperty("id").GetValue(item);
+                                var idProperty = item.GetType().GetProperty("id");
+                                if (idProperty is null) continue;
+                                var _id_ = idProperty.GetValue(item);
 
                                 if (_id_ != null)
                                 {
@@ -2872,7 +2874,10 @@ namespace Wins.WinMenus.ANBAR
                         }
                         else
                         {
-                            e.Handled = true; //اجازه نده از دیتاگرید چیزی حذف بشه
+                            if (e != null)
+                            {
+                                e.Handled = true; //اجازه نده از دیتاگرید چیزی حذف بشه
+                            }
                         }
                     }
                 }
@@ -2886,7 +2891,7 @@ namespace Wins.WinMenus.ANBAR
 
                             SANAD();
 
-                            _navigationManager.DeleteCurrentRecord(); //Refresh Record Source
+                            _navigationManager?.DeleteCurrentRecord(); //Refresh Record Source
                         }
                         catch (SqlException ex)
                         {

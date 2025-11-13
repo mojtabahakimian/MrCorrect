@@ -3157,7 +3157,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     {
                         dbms.DoExecuteSQL($@"DELETE FROM dbo.HEAD_LST WHERE NUMBER = {NUMBER.Text} AND NUMBER = {NUMBER.Text} AND TAG = {HTAG}");
 
-                        _navigationManager.DeleteCurrentRecord(); //Refresh Record Source
+                        _navigationManager?.DeleteCurrentRecord(); //Refresh Record Source
                     }
                     catch (SqlException ex)
                     {
