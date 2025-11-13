@@ -861,7 +861,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                                 new { HES = HES.SelectedValue, VDATE = Convert.ToInt64(VDATE.Text.ToRawTarikh()) });
 
                             //ClearFreshAll();
-                            _navigationManager.DeleteCurrentRecord(); //Refresh Record Source
+                            _navigationManager?.DeleteCurrentRecord(); //Refresh Record Source
                         }
                         catch (SqlException ex)
                         {

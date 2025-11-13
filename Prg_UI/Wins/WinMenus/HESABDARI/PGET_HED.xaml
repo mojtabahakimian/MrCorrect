@@ -171,7 +171,7 @@
             </ComboBox>
             <TextBox x:Name="MANDS" IsReadOnly="True" Tag="RD"  Height="25" Margin="0,0,478,181"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="171" />
             <TextBox x:Name="MANDB" IsReadOnly="True" Tag="RD"  Text="" Height="25" Margin="0,0,478,151"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="171" />
-            <CNC:NumericTextBox DoesAcceptDouble="False" x:Name="MABL" IsReadOnly="True" Tag="RD"  Text="{Binding SUM_OF_MABL, UpdateSourceTrigger=PropertyChanged}" Height="25" Margin="57,0,0,181" DigitGroupOnEnter="True" IsDigitGroupActive="True"  VerticalAlignment="Bottom"   Visibility="Visible" HorizontalAlignment="Left" Width="128" />
+            <CNC:NumericTextBox DoesAcceptDouble="False" x:Name="MABL" IsReadOnly="True" Tag="RD"  Text="{Binding SUM_OF_MABL, UpdateSourceTrigger=PropertyChanged}" Height="31" Margin="57,0,0,176" DigitGroupOnEnter="True" IsDigitGroupActive="True"  VerticalAlignment="Bottom"   Visibility="Visible" HorizontalAlignment="Left" Width="128" />
             <Label x:Name="Label19" Content="جمع مبالغ:" Margin="186,0,0,180"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="54"/>
 
             <!--For Manually Dark/Ligh
@@ -196,7 +196,7 @@
                     HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
 					VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}" GotFocus="PGET_LST_SUB_GotFocus" TabIndex="3" PreviewKeyDown="PGET_LST_SUB_PreviewKeyDown" PreviewMouseDoubleClick="PGET_LST_SUB_PreviewMouseDoubleClick" CanUserDeleteRows="False"                     
                      ScrollViewer.HorizontalScrollBarVisibility="Auto">
-         
+
                 <DataGrid.Style>
                     <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
                         <Setter Property="materialDesign:DataGridAssist.EnableEditBoxAssist" Value="False"/>

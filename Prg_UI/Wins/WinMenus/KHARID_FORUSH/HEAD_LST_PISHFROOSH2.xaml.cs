@@ -440,6 +440,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
         /// </summary>
         const byte TAG = 20; //پیش فاکتور
         public double Meidnum { get; private set; }
+        public bool CalledTabdil { get; private set; } = false;
+
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
@@ -643,7 +645,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             CDOKDATE_AND_TIME();
 
-            if (ChangeIsHappend)
+            if (ChangeIsHappend && !CalledTabdil)
             {
                 var MSGCAP = new MSGCAPTIONMODEL() { YES_CAPTION = "برگرد", NO_CAPTION = "خارج شو" };
                 Msgwin msgwin = new Msgwin(true, "اطلاعات را ذخیره نکرده اید آیا مایل به بازگشت هستید ؟", default, default, MSGCAP); msgwin.ShowDialog();
@@ -1794,6 +1796,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         {
                             CURRENT_ROW_ITEMS.IMBAA = 0;
                         }
+
+                        CheckMogudiCurrentRowKala();
                     }
                     #endregion
                 }
@@ -1883,6 +1887,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         #endregion
                     }
                     #endregion
+
+                    CheckMogudiCurrentRowKala();
                 }
             }
             //مقدارکل
@@ -2313,6 +2319,21 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
         }
+
+        private void CheckMogudiCurrentRowKala()
+        {
+            if (CURRENT_ROW_ITEMS?.ANBAR > 0 && CURRENT_ROW_ITEMS?.CODE != null && CURRENT_ROW_ITEMS?.MEGHk > 0)
+            {
+                var stock = GetInventoryStock(anbarId: Convert.ToInt32(CURRENT_ROW_ITEMS.ANBAR), code: CURRENT_ROW_ITEMS.CODE,
+                    requestedQuantity: CURRENT_ROW_ITEMS.MEGHk, showWarning: true, checkMinStock: true);
+                if (!stock.HasValue)
+                {
+                    //عدم موجودی
+                    ////INVO_LST_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                }
+            }
+        }
+
         private void INVO_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
@@ -4519,12 +4540,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
             // نمایش Loading Bar
             Process Prc = ProcLoader.Start();
 
+            dbms.DoExecuteSQL("UPDATE dbo.sazman SET pishpross = 0");
+
             // تعریف متغیرها
             long num = 0;
             double takh = 0;
             double min = 0;
             bool NOTPR = false;
-            var dbms = new CL_CCNNMANAGER();
 
             try
             {
@@ -5008,7 +5030,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     }
 
                     // ذخیره نهایی
-                    BTN_SAVE_Click(null, null);
+                    DoCmdSaveHeader();
 
                     ProcLoader.Stop(Prc);
 
@@ -5018,6 +5040,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         new HEAD_LST_HAVL(Convert.ToDouble(num)).ShowDialog();
                     }
 
+                    CalledTabdil = true;
                     // بستن فرم
                     this.Close();
                 }
@@ -5061,6 +5084,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             // نمایش Loading Bar
             Process Prc = ProcLoader.Start();
 
+            dbms.DoExecuteSQL("UPDATE dbo.sazman SET pishpross = 0");
+
             // تعریف متغیرهای اصلی
             long num = 0;
             long num1 = 0;
@@ -5068,7 +5093,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             double min = 0;
             bool NOTPR = false;
             long CMABL = 0;
-            var dbms = new CL_CCNNMANAGER();
+
 
             // ثبت لاگ عملیات
             CL_LMethods.DoWriteMyLog($"Username : {Baseknow.UUSER} , Number : {NUMBER.Text} , DateTime : {DateTime.Now} , Goal : تبدیل به فاکتور , Form : پیش فاکتور", default);
@@ -5197,7 +5222,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     TAKHFIF.Text = takh.ToString();
 
                     // کنترل موجودی انبار (اگر فعال باشد)
-                    if (Strings.Mid(Baseknow.OPTIONSS, 59, 1) == "5")
+                    if (Strings.Mid(Baseknow.OPTIONSS, 59, 1) == "5") //تیک شماره 39 Check59 : در زمان تبديل پيش فاكتور به فاكتور موجودي كنترل گردد
                     {
                         var groupedItems = dbms.DoGetDataSQL<dynamic>(@"
                     SELECT ANBAR, CODE, SUM(MEGHk) AS MEGHk 
@@ -5601,7 +5626,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                           N'TABDILFACTOR', {Tarikh.FullCurrentDate})");
 
                     // ذخیره نهایی
-                    BTN_SAVE_Click(null, null);
+                    DoCmdSaveHeader();
 
                     ProcLoader.Stop(Prc);
 
@@ -5616,6 +5641,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         }
                     }
 
+                    CalledTabdil = true;
                     // بستن فرم
                     this.Close();
                 }

@@ -1354,7 +1354,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                             dbms.DoExecuteSQL($@"DELETE FROM dbo.PRICE_ELAMIETF WHERE PEID = {PEID.Text} ");
 
                             //ClearFreshAll();
-                            _navigationManager.DeleteCurrentRecord(); //Refresh Record Source
+                            _navigationManager?.DeleteCurrentRecord(); //Refresh Record Source
                         }
                         catch (SqlException ex)
                         {

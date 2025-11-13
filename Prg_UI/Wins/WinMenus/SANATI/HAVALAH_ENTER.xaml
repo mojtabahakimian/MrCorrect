@@ -143,7 +143,17 @@
                         </DataGridComboBoxColumn.ElementStyle>
                     </DataGridComboBoxColumn>
 
-                    <DataGridTextColumn x:Name="NAME_CODE_COLUMN" Binding="{Binding NAME_CODE,UpdateSourceTrigger=LostFocus}" Header="نام کالا" Width="auto" MinWidth="100">
+                    <DataGridTextColumn Header="کد کالا" Width="80" MinWidth="80" Binding="{Binding CODE}" IsReadOnly="True">
+                        <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                <Setter Property="Focusable" Value="False"/>
+                                <Setter Property="KeyboardNavigation.IsTabStop" Value="False"/>
+                                <Setter Property="IsTabStop"  Value="False"/>
+                            </Style>
+                        </DataGridTextColumn.CellStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn x:Name="NAME_CODE_COLUMN" Binding="{Binding NAME_CODE,UpdateSourceTrigger=LostFocus}" Header="نام کالا" Width="auto" MinWidth="200">
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
                             </Style>
@@ -193,7 +203,7 @@
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridComboBoxColumn x:Name="N_KOL_COLUMN" Width="*" Header="فرمول ساخت" SelectedValueBinding="{Binding N_KOL,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="Expr1" SelectedValuePath="FNUMB">
+                    <DataGridComboBoxColumn x:Name="N_KOL_COLUMN" Width="auto" MinWidth="250" Header="فرمول ساخت" SelectedValueBinding="{Binding N_KOL,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="Expr1" SelectedValuePath="FNUMB">
                         <DataGridComboBoxColumn.EditingElementStyle>
                             <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
                                 <Setter Property="IsEditable" Value="True"/>
@@ -209,7 +219,7 @@
                         </DataGridComboBoxColumn.ElementStyle>
                     </DataGridComboBoxColumn>
 
-                    <DataGridTextColumn x:Name="MANDAH_COLUMN" Binding="{Binding MANDAH,UpdateSourceTrigger=LostFocus}" Header="ملاحظات" MinWidth="80" Width="auto" Visibility="Visible">
+                    <DataGridTextColumn x:Name="MANDAH_COLUMN" Binding="{Binding MANDAH,UpdateSourceTrigger=LostFocus}" Header="ملاحظات" MinWidth="150" Width="auto" Visibility="Visible">
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                                 <Setter Property="MaxLength" Value="48" />

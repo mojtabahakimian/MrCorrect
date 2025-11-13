@@ -974,7 +974,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                             dbms.DoExecuteSQL($@"DELETE FROM dbo.PRICE_ELAMIE WHERE PEPID = {PEPID.Text} ");
 
                             //ClearFreshAll();
-                            _navigationManager.DeleteCurrentRecord(); //Refresh Record Source
+                            _navigationManager?.DeleteCurrentRecord(); //Refresh Record Source
                         }
                         catch (SqlException ex)
                         {

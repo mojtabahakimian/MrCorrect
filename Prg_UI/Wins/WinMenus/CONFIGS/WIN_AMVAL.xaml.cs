@@ -708,7 +708,7 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                 {
                     string sql = "DELETE FROM dbo.AMVAL WHERE barchasb = @barchasb";
                     dbms.DoExecuteSQL(sql, new { barchasb = Convert.ToDouble(BARCHASB.Text) });
-                    _navigationManager.DeleteCurrentRecord(); //Refresh Record Source
+                    _navigationManager?.DeleteCurrentRecord(); //Refresh Record Source
                 }
                 catch (SqlException ex)
                 {

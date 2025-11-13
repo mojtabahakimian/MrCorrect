@@ -2362,7 +2362,7 @@ namespace Wins.WinMenus.ANBAR
 
                             SANAD();
 
-                            _navigationManager.DeleteCurrentRecord(); //Refresh Record Source
+                            _navigationManager?.DeleteCurrentRecord(); //Refresh Record Source
                         }
                         catch (SqlException ex)
                         {
@@ -2403,7 +2403,8 @@ namespace Wins.WinMenus.ANBAR
             {
                 _qre = $@"INSERT INTO INVO_LST (       NUMBER, TAG,         ANBAR,                                           RADIF,             CODE,         MEGH,         MEGHk,                                              MEGH_MAR,                                          MABL,                                            MABL_K,                         FROM_A,                                            MEGH_R,         VAHED_K,                                           N_KOL,                                            N_MOIN,                                            AVRAGE,                                             AVRAGE2,                                           IMBAA,                                              TOTALARZ,                                          TKHN,                                      JAY , MANDAH) 
                           OUTPUT INSERTED.id
-			                                                       VALUES ({NUMBER.Text},  24,{TheRow.ANBAR},{(TheRow.RADIF is null ? "NULL" : TheRow.RADIF)}, N'{TheRow.CODE}',{TheRow.MEGH},{TheRow.MEGHk},{(TheRow.MEGH_MAR is null ? "NULL" : TheRow.MEGH_MAR)},{(TheRow.MABL is null ? "NULL" : TheRow.MABL)},{(TheRow.MABL_K is null ? "NULL" : TheRow.MABL_K)},{Convert.ToByte(TheRow.FROM_A)},{(TheRow.MEGH_R is null ? "NULL" : TheRow.MEGH_R)},{TheRow.VAHED_K},{(TheRow.N_KOL is null ? "NULL" : TheRow.N_KOL)},{(TheRow.N_MOIN is null ? "NULL" : TheRow.N_MOIN)},{(TheRow.AVRAGE is null ? "NULL" : TheRow.AVRAGE)},{(TheRow.AVRAGE2 is null ? "NULL" : TheRow.AVRAGE2)},{(TheRow.IMBAA is null ? "NULL" : TheRow.IMBAA)},{(TheRow.TOTALARZ is null ? "NULL" : TheRow.TOTALARZ)},{(TheRow.TKHN is null ? "NULL" : TheRow.TKHN)},{(TheRow.JAY is null ? "0" : TheRow.JAY)},N'{(TheRow.MANDAH is null ? "NULL" : TheRow.MANDAH)}')";
+			                                                       VALUES ({NUMBER.Text},  24,{TheRow.ANBAR},{(TheRow.RADIF is null ? "NULL" : TheRow.RADIF)}, N'{TheRow.CODE}',{TheRow.MEGH},{TheRow.MEGHk},{(TheRow.MEGH_MAR is null ? "NULL" : TheRow.MEGH_MAR)},{(TheRow.MABL is null ? "NULL" : TheRow.MABL)},{(TheRow.MABL_K is null ? "NULL" : TheRow.MABL_K)},{Convert.ToByte(TheRow.FROM_A)},{(TheRow.MEGH_R is null ? "NULL" : TheRow.MEGH_R)},{TheRow.VAHED_K},{(TheRow.N_KOL is null ? "NULL" : TheRow.N_KOL)},{(TheRow.N_MOIN is null ? "NULL" : TheRow.N_MOIN)},{(TheRow.AVRAGE is null ? "NULL" : TheRow.AVRAGE)},{(TheRow.AVRAGE2 is null ? "NULL" : TheRow.AVRAGE2)},{(TheRow.IMBAA is null ? "NULL" : TheRow.IMBAA)},{(TheRow.TOTALARZ is null ? "NULL" : TheRow.TOTALARZ)},{(TheRow.TKHN is null ? "NULL" : TheRow.TKHN)},{(TheRow.JAY is null ? "0" : TheRow.JAY)},N'{(TheRow.MANDAH is null ? "" : TheRow.MANDAH)}')";
+
 
                 var (errorMsgs, _, _, queryOutputs) = IVM.CheckInventoryAndExecuteQuery<long>(new List<object> { TheRow }, _qre, null, false);
                 ErrosMessages.AddRange(errorMsgs);
@@ -2462,21 +2463,23 @@ namespace Wins.WinMenus.ANBAR
             }
 
             //بررسی صحیح بودن واحد کالا نسبت به خود کالا
-            var RSTV1 = IVM.TM.SqlQueryCtc<VAHED_K_NESBAT_2>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + TheRow.CODE + "' AND ((VAHEDS.VAHED)= " + TheRow.VAHED_K + ")))").ToList();
-            if (RSTV1.Count == 0)
+            if (!IsNull(TheRow.CODE) && TheRow.VAHED_K != null)
             {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "واحد تعريف شده ناقص ميباشد نسبت آن مشخص نگرديده است.در بخش تعريف كالا آن را اصلاح كنيد." });
-                TheRow.VAHED_K = null;
-            }
-            //واحد کالا بررسی مقدار کل باتوجه به نسبت
-            else
-            {
-                var NesbatMegh = RSTV1.FirstOrDefault()?.NESBAT * TheRow.MEGH;
-                if (NesbatMegh != TheRow.MEGHk)
+                var RSTV1 = IVM.TM.SqlQueryCtc<VAHED_K_NESBAT_2>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + TheRow.CODE + "' AND ((VAHEDS.VAHED)= " + TheRow.VAHED_K + ")))").ToList();
+                if (RSTV1.Count == 0)
                 {
-
-                    TheRow.MEGHk = NesbatMegh;
-                    ErrosMessages.Add(new MsgModel { MessageText_U = $"مقدار کل این سطر کالا با این مشخصات : کد کالا {TheRow.CODE} به مقدار کل {TheRow.MEGHk} با مبلغ {TheRow.MABL} مغایرت داشت و من آنرا به مقدار کل {NesbatMegh} اصلاح کردم , درصورتی که مورد تایید است جهت ذخیره آن مجددا دکمه ذخیره را بزنید" });
+                    ErrosMessages.Add(new MsgModel { MessageText_U = "واحد تعريف شده ناقص ميباشد نسبت آن مشخص نگرديده است.در بخش تعريف كالا آن را اصلاح كنيد." });
+                    TheRow.VAHED_K = null;
+                }
+                //واحد کالا بررسی مقدار کل باتوجه به نسبت
+                else
+                {
+                    var NesbatMegh = RSTV1.FirstOrDefault()?.NESBAT * TheRow.MEGH;
+                    if (NesbatMegh != TheRow.MEGHk)
+                    {
+                        TheRow.MEGHk = NesbatMegh;
+                        ErrosMessages.Add(new MsgModel { MessageText_U = $"مقدار کل این سطر کالا با این مشخصات : کد کالا {TheRow.CODE} به مقدار کل {TheRow.MEGHk} با مبلغ {TheRow.MABL} مغایرت داشت و من آنرا به مقدار کل {NesbatMegh} اصلاح کردم , درصورتی که مورد تایید است جهت ذخیره آن مجددا دکمه ذخیره را بزنید" });
+                    }
                 }
             }
             ////بررسی صحیحی بودن مبلغ

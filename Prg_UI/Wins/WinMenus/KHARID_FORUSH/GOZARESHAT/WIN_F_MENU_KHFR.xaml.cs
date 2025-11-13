@@ -329,9 +329,9 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                             (report.GetComponentByName("F_SELL_N") as StiText).Text = Baseknow.NAME.ToString();
                             (report.GetComponentByName("F_GLOBALNUMBER_N") as StiText).Text = Baseknow.ECODE.ToString();
                             (report.GetComponentByName("F_CODE_N") as StiText).Text = Baseknow.MCODEM.ToString();
-                            //(report.GetComponentByName("F_OSTAN_N") as StiText).Text = Baseknow.IYALAT.ToString();
-                            //(report.GetComponentByName("F_SHAHR_N") as StiText).Text = Baseknow.CITY.ToString();
-                            //(report.GetComponentByName("F_POSTAL_N") as StiText).Text = Baseknow.PCODE.ToString();
+                            (report.GetComponentByName("F_OSTAN_N") as StiText).Text = Baseknow.IYALAT.ToString();
+                            (report.GetComponentByName("F_SHAHR_N") as StiText).Text = Baseknow.CITY.ToString();
+                            (report.GetComponentByName("F_POSTAL_N") as StiText).Text = Baseknow.PCODE.ToString();
                             (report.GetComponentByName("F_ADDRESS_N") as StiText).Text = Baseknow.TFADDRESS.ToString();
                             (report.GetComponentByName("F_TEL_N") as StiText).Text = Baseknow.TFTEL.ToString();
 

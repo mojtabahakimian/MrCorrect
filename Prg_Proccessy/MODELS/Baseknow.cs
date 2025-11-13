@@ -184,6 +184,9 @@ namespace Prg_Proccessy.MODELS
         public static string? IT7 { get; private set; }
         public static string? IT8 { get; private set; }
         public static string? IT9 { get; private set; }
+        public static string IYALAT { get; private set; }
+        public static string CITY { get; private set; }
+        public static string PCODE { get; private set; }
         #endregion
         public static void GetInitTheApp()
         {
@@ -463,6 +466,9 @@ namespace Prg_Proccessy.MODELS
                     if (item.IT9 != null) IT9 = item.IT9;
 
 
+                    if (item.IYALAT != null) IYALAT = item.IYALAT;
+                    if (item.CITY != null) CITY = item.CITY;
+                    if (item.PCODE != null) PCODE = item.PCODE;
 
                     HKHA = item.HKHA;
                     HSHI = item.HSHI;
