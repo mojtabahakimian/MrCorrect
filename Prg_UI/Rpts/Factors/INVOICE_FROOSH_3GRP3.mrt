@@ -6,7 +6,7 @@
     <Databases isList="true" count="1">
       <MS_x0020_SQL Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>MS SQL</Alias>
-        <ConnectionStringEncrypted>9Fxlz01KQ835CE29+wCiY9HS+8JIcZOka0zt/eHkYuvf1qEL1gp6QUVGnFjDSbF/hFb7iEVd8k1oXP3M6tgre9FatQnJS9OIak09COSg62fXeMECXkEBdXJauJhimOpe</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9Fz3oe9K88hFYYSB5Byof9Fukc1WX3ukRVu5CGNxL2Lf2LVIxgPD+X999dxpTOFn9MTZCc1Rw4FpTaEYTRjhXulU94rFUaPIa0S5zGdY616AWg==</ConnectionStringEncrypted>
         <Key>e8ff559faa134d2fa7af40cf6d83d737</Key>
         <Name>MS SQL</Name>
       </MS_x0020_SQL>
@@ -16,7 +16,7 @@
         <Alias>DataSource1</Alias>
         <Columns isList="true" count="84">
           <value>NUMBER1,System.Double</value>
-          <value>NUMBER,System.Double</value>
+          <value>ORIGINAL,NUMBER,NUMBER,NUMBER,System.Double,e546427568fa4344ae0e05824e330ca6</value>
           <value>DATE_N,System.Int64</value>
           <value>INUMBER,System.Double</value>
           <value>HTAG,System.Double</value>
@@ -47,7 +47,7 @@
           <value>HESAB,System.String</value>
           <value>ADDRESS,System.String</value>
           <value>TEL,System.String</value>
-          <value>KALA,System.String</value>
+          <value>ORIGINAL,KALA,KALA,KALA,System.String,_x0037_784ca0898da40b6871413a9324fe67f</value>
           <value>CUST_NO,System.String</value>
           <value>N_KOL,System.Double</value>
           <value>N_MOIN,System.Double</value>
@@ -108,9 +108,16 @@
         <Parameters isList="true" count="3">
           <value>FDATE_PARM,,6,20</value>
           <value>EDATE_PARM,,6,20</value>
-          <value>CUST_PARM,,22,20</value>
+          <value>CUST_PARM,,12,20</value>
         </Parameters>
-        <SqlCommand>SELECT HEAD_BACK_ANBAR.NUMBER1, HEAD_BACK_ANBAR.NUMBER, HEAD_BACK_ANBAR.DATE_N, INVO_LST.NUMBER AS INUMBER, HEAD_BACK_ANBAR.HTAG, INVO_LST.ANBAR, INVO_LST.RADIF, INVO_LST.CODE, INVO_LST.MEGH, INVO_LST.MEGHk, INVO_LST.MEGH_MAR, INVO_LST.MANDAH, INVO_LST.MABL, INVO_LST.MABL_K, INVO_LST.FROM_A, INVO_LST.N_RASID, INVO_LST.MEGH_R, INVO_LST.RADAH, INVO_LST.SANAD_NO, INVO_LST.ANBARF, INVO_LST.VAHED_K, STUF_DEF.NAME, TCOD_ANBAR.NAMES, TCOD_VAHEDS.NAMES AS VNAMES, HEAD_BACK_ANBAR.TAH, HEAD_BACK_ANBAR.MOLAH, CUSTKIND.CUSTKNAME, DEPART.DEPNAME, SHIFT.SHNAME, CUST_HESAB.NAME AS HESAB, CUST_HESAB.ADDRESS, CUST_HESAB.TEL, ISNULL(STUF_DEF.NAME, N' ') + N' ' + ISNULL(INVO_LST.MANDAH, N' ') AS KALA, HEAD_BACK_ANBAR.CUST_NO, INVO_LST.N_KOL, INVO_LST.N_MOIN, HEAD_BACK_ANBAR.FNUMCO, CUST_HESAB.ECODE, CUST_HESAB.PCODE, CUST_HESAB.IYALAT, CUST_HESAB.MCODEM, CUST_HESAB.CITY, INVO_LST.MABL_K - INVO_LST.N_MOIN AS mabkbt, INVO_LST.IMBAA, INVO_LST.MABL_K - INVO_LST.N_MOIN + INVO_LST.IMBAA AS mabkn, CUST_HESAB.CODE_E, HEAD_BACK_ANBAR.TAKHFIF, HEAD_BACK_ANBAR.MBAA, STUF_DEF.N_FANI, HEAD_BACK_ANBAR.SADER, HEAD_BACK_ANBAR.ANBARF AS ANBARFF, OTHER_DTL.REQUEST_NO, OTHER_DTL.BARNAMEH, OTHER_DTL.DRIVER, OTHER_DTL.DRIVER_MOB, OTHER_DTL.CAMIUN_NUM, OTHER_DTL.MAGHSAD, OTHER_DTL.CAM_KHALY, OTHER_DTL.CAM_POOR, OTHER_DTL.TOZIH, OTHER_DTL.CAMIUN, OTHER_DTL_SUB.CODE AS CODEG, OTHER_DTL_SUB.CAM_KHALY AS CAM_KHALYG, OTHER_DTL_SUB.CAM_POOR AS CAM_POORG, OTHER_DTL_SUB.MEGHk AS MEGHkG, OTHER_DTL_SUB.TOZIH AS TOZIHG, OTHER_DTL_SUB.VAZNH, STUF_DEF_1.NAME AS NAMEG, HEAD_BACK_ANBAR.SHARAYET, DEPART.DEPART, INVO_LST.TKHN, HEAD_BACK_ANBAR.MAS, HEAD_BACK_ANBAR.HTAG AS TAG, SALA_DTL.EMZA AS EMZA1, SALA_DTL_1.EMZA AS EMZA2, SALA_DTL_2.EMZA AS EMZA3, HEAD_BACK_ANBAR.SGN1usid, HEAD_BACK_ANBAR.sgn2usid, HEAD_BACK_ANBAR.sgn3usid, HEAD_LST.SGN1, HEAD_LST.SGN2, HEAD_LST.SGN3, HEAD_LST.SGN4, STUF_DEF.BARCODE FROM STUF_DEF RIGHT OUTER JOIN SHIFT RIGHT OUTER JOIN DEPART RIGHT OUTER JOIN HEAD_LST INNER JOIN INVO_LST INNER JOIN TCOD_ANBAR ON INVO_LST.ANBAR = TCOD_ANBAR.CODE INNER JOIN HEAD_BACK_ANBAR ON INVO_LST.NUMBER = HEAD_BACK_ANBAR.NUMBER AND INVO_LST.TAG = HEAD_BACK_ANBAR.HTAG ON HEAD_LST.NUMBER = HEAD_BACK_ANBAR.NUMBER AND HEAD_LST.TAG = HEAD_BACK_ANBAR.TAG ON DEPART.DEPATMAN = HEAD_BACK_ANBAR.DEPATMAN LEFT OUTER JOIN CUSTKIND ON HEAD_BACK_ANBAR.CUST_KIND = CUSTKIND.CUST_COD ON SHIFT.SHIFT_ID = HEAD_BACK_ANBAR.SHIFT LEFT OUTER JOIN OTHER_DTL ON HEAD_BACK_ANBAR.NUMBER = OTHER_DTL.NUMBER AND HEAD_BACK_ANBAR.HTAG = OTHER_DTL.TAG LEFT OUTER JOIN SALA_DTL SALA_DTL_2 ON HEAD_BACK_ANBAR.sgn3usid = SALA_DTL_2.IDD LEFT OUTER JOIN SALA_DTL SALA_DTL_1 ON HEAD_BACK_ANBAR.sgn2usid = SALA_DTL_1.IDD LEFT OUTER JOIN SALA_DTL ON HEAD_BACK_ANBAR.SGN1usid = SALA_DTL.IDD LEFT OUTER JOIN STUF_DEF STUF_DEF_1 INNER JOIN OTHER_DTL_SUB ON STUF_DEF_1.CODE = OTHER_DTL_SUB.CODE ON INVO_LST.CODE = OTHER_DTL_SUB.CODE AND INVO_LST.NUMBER = OTHER_DTL_SUB.NUMBER AND INVO_LST.TAG = OTHER_DTL_SUB.TAGG LEFT OUTER JOIN CUST_HESAB ON HEAD_BACK_ANBAR.CUST_NO = CUST_HESAB.hes LEFT OUTER JOIN TCOD_VAHEDS ON INVO_LST.VAHED_K = TCOD_VAHEDS.CODE ON STUF_DEF.CODE = INVO_LST.CODE WHERE (HEAD_LST.SADER = 0 AND htag = 2 and  HEAD_LST.date_n &gt;= @FDATE_PARM  AND HEAD_LST.date_n &lt;= @EDATE_PARM and HEAD_LST.cust_no like @CUST_PARM)</SqlCommand>
+        <SqlCommand>SELECT DATE_N, NUMBER1, HESAB, ADDRESS, TEL, HTAG, CODE, ECODE, MCODEM, PCODE, IYALAT, CITY, KALA, MEGH, MABL, MABL_K, VNAMES, N_MOIN, mabkbt, IMBAA, mabkn, BARCODE, MEGHk, MOLAH, DEPART, DEPNAME, SGN1usid, 
+	sgn2usid, sgn3usid, EMZA1, EMZA2, EMZA3, SGN1, SGN2, SGN3, NUMBER, RADIF FROM (SELECT HEAD_BACK_ANBAR.NUMBER1, HEAD_BACK_ANBAR.NUMBER, HEAD_BACK_ANBAR.DATE_N, INVO_LST.NUMBER AS INUMBER, HEAD_BACK_ANBAR.HTAG, INVO_LST.ANBAR, INVO_LST.RADIF, 
+	INVO_LST.CODE, INVO_LST.MEGH, INVO_LST.MEGHk, INVO_LST.MEGH_MAR, INVO_LST.MANDAH, INVO_LST.MABL, INVO_LST.MABL_K, INVO_LST.FROM_A, INVO_LST.N_RASID, INVO_LST.MEGH_R, INVO_LST.RADAH, INVO_LST.SANAD_NO, INVO_LST.ANBARF, INVO_LST.VAHED_K, STUF_DEF.NAME, TCOD_ANBAR.NAMES, 
+	TCOD_VAHEDS.NAMES AS VNAMES, HEAD_BACK_ANBAR.TAH, HEAD_BACK_ANBAR.MOLAH, CUSTKIND.CUSTKNAME, DEPART.DEPNAME, SHIFT.SHNAME, CUST_HESAB.NAME AS HESAB, CUST_HESAB.ADDRESS, CUST_HESAB.TEL, ISNULL(STUF_DEF.NAME, N' ') + N' ' + ISNULL(INVO_LST.MANDAH, N' ') AS KALA, 
+	HEAD_BACK_ANBAR.CUST_NO, INVO_LST.N_KOL, INVO_LST.N_MOIN, HEAD_BACK_ANBAR.FNUMCO, CUST_HESAB.ECODE, CUST_HESAB.PCODE, CUST_HESAB.IYALAT, CUST_HESAB.MCODEM, CUST_HESAB.CITY, INVO_LST.MABL_K - INVO_LST.N_MOIN AS mabkbt, INVO_LST.IMBAA, INVO_LST.MABL_K - INVO_LST.N_MOIN + 
+	INVO_LST.IMBAA AS mabkn, CUST_HESAB.CODE_E, HEAD_BACK_ANBAR.TAKHFIF, HEAD_BACK_ANBAR.MBAA, STUF_DEF.N_FANI, HEAD_BACK_ANBAR.SADER, HEAD_BACK_ANBAR.ANBARF AS ANBARFF, OTHER_DTL.REQUEST_NO, OTHER_DTL.BARNAMEH, OTHER_DTL.DRIVER, OTHER_DTL.DRIVER_MOB, OTHER_DTL.CAMIUN_NUM, 
+	OTHER_DTL.MAGHSAD, OTHER_DTL.CAM_KHALY, OTHER_DTL.CAM_POOR, OTHER_DTL.TOZIH, OTHER_DTL.CAMIUN, OTHER_DTL_SUB.CODE AS CODEG, OTHER_DTL_SUB.CAM_KHALY AS CAM_KHALYG, OTHER_DTL_SUB.CAM_POOR AS CAM_POORG, OTHER_DTL_SUB.MEGHk AS MEGHkG, OTHER_DTL_SUB.TOZIH AS TOZIHG, OTHER_DTL_SUB.VAZNH, STUF_DEF_1.NAME AS NAMEG, HEAD_BACK_ANBAR.SHARAYET, DEPART.DEPART, INVO_LST.TKHN, HEAD_BACK_ANBAR.MAS, HEAD_BACK_ANBAR.HTAG AS TAG, SALA_DTL.EMZA AS EMZA1, SALA_DTL_1.EMZA AS EMZA2, SALA_DTL_2.EMZA AS EMZA3, HEAD_BACK_ANBAR.SGN1usid, HEAD_BACK_ANBAR.sgn2usid, HEAD_BACK_ANBAR.sgn3usid, HEAD_LST.SGN1, HEAD_LST.SGN2, HEAD_LST.SGN3, HEAD_LST.SGN4, STUF_DEF.BARCODE FROM STUF_DEF RIGHT OUTER JOIN SHIFT RIGHT OUTER JOIN DEPART RIGHT OUTER JOIN HEAD_LST INNER JOIN INVO_LST INNER JOIN TCOD_ANBAR ON INVO_LST.ANBAR = TCOD_ANBAR.CODE INNER JOIN HEAD_BACK_ANBAR ON INVO_LST.NUMBER = HEAD_BACK_ANBAR.NUMBER AND INVO_LST.TAG = HEAD_BACK_ANBAR.HTAG ON HEAD_LST.NUMBER = HEAD_BACK_ANBAR.NUMBER AND HEAD_LST.TAG = HEAD_BACK_ANBAR.TAG ON DEPART.DEPATMAN = HEAD_BACK_ANBAR.DEPATMAN LEFT OUTER JOIN CUSTKIND ON HEAD_BACK_ANBAR.CUST_KIND = CUSTKIND.CUST_COD ON SHIFT.SHIFT_ID = HEAD_BACK_ANBAR.SHIFT LEFT OUTER JOIN OTHER_DTL ON HEAD_BACK_ANBAR.NUMBER = OTHER_DTL.NUMBER AND HEAD_BACK_ANBAR.HTAG = OTHER_DTL.TAG LEFT OUTER JOIN SALA_DTL SALA_DTL_2 ON HEAD_BACK_ANBAR.sgn3usid = SALA_DTL_2.IDD LEFT OUTER JOIN SALA_DTL SALA_DTL_1 ON HEAD_BACK_ANBAR.sgn2usid = SALA_DTL_1.IDD LEFT OUTER JOIN SALA_DTL ON HEAD_BACK_ANBAR.SGN1usid = SALA_DTL.IDD LEFT OUTER JOIN STUF_DEF STUF_DEF_1 INNER JOIN OTHER_DTL_SUB ON STUF_DEF_1.CODE = OTHER_DTL_SUB.CODE ON INVO_LST.CODE = OTHER_DTL_SUB.CODE AND INVO_LST.NUMBER = OTHER_DTL_SUB.NUMBER AND INVO_LST.TAG = OTHER_DTL_SUB.TAGG LEFT OUTER JOIN CUST_HESAB ON HEAD_BACK_ANBAR.CUST_NO = CUST_HESAB.hes LEFT OUTER JOIN TCOD_VAHEDS ON INVO_LST.VAHED_K = TCOD_VAHEDS.CODE ON STUF_DEF.CODE = INVO_LST.CODE) AS DRVD_TBL WHERE (SADER = 0 AND htag = 2 and  date_n &gt;= @FDATE_PARM  AND date_n &lt;= @EDATE_PARM and cust_no like @CUST_PARM)
+</SqlCommand>
       </DataSource1>
     </DataSources>
     <Relations isList="true" count="0" />
@@ -257,7 +264,7 @@
             <Text68 Ref="14" type="Text" isKey="true">
               <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>25.6,3.8,2,0.6</ClientRectangle>
+              <ClientRectangle>26.8,3.8,0.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,7</Font>
@@ -274,7 +281,7 @@
             <Text70 Ref="15" type="Text" isKey="true">
               <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>25.4,3.8,0.2,0.6</ClientRectangle>
+              <ClientRectangle>26.6,3.8,0.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -393,7 +400,7 @@
             <F_ADDRESS_N Ref="22" type="Text" isKey="true">
               <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>11.4,3.8,14,0.6</ClientRectangle>
+              <ClientRectangle>12.6,3.8,14,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
@@ -402,7 +409,6 @@
               <Name>F_ADDRESS_N</Name>
               <Page isRef="5" />
               <Parent isRef="6" />
-              <Text>تحویل گیرنده </Text>
               <TextBrush>[0:0:0]</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
@@ -419,7 +425,6 @@
               <Name>F_SELL_N</Name>
               <Page isRef="5" />
               <Parent isRef="6" />
-              <Text>فروشنده</Text>
               <TextBrush>[0:0:0]</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
@@ -469,7 +474,6 @@
               <Name>F_TEL_N</Name>
               <Page isRef="5" />
               <Parent isRef="6" />
-              <Text>کاربر</Text>
               <TextBrush>[0:0:0]</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
@@ -553,7 +557,6 @@
               <Name>F_OSTAN_N</Name>
               <Page isRef="5" />
               <Parent isRef="6" />
-              <Text>فروشنده</Text>
               <TextBrush>[0:0:0]</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
@@ -604,7 +607,6 @@
               <Name>F_SHAHR_N</Name>
               <Page isRef="5" />
               <Parent isRef="6" />
-              <Text>فروشنده</Text>
               <TextBrush>[0:0:0]</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
@@ -679,7 +681,7 @@
             <Text107 Ref="39" type="Text" isKey="true">
               <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>25.6,7,2,0.6</ClientRectangle>
+              <ClientRectangle>26.6,7,1,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,7</Font>
@@ -781,7 +783,7 @@
             <Text113 Ref="45" type="Text" isKey="true">
               <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>11.4,7,14,0.6</ClientRectangle>
+              <ClientRectangle>12.4,7,14,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
@@ -1037,7 +1039,7 @@
             <Text130 Ref="60" type="Text" isKey="true">
               <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
               <Brush>Transparent</Brush>
-              <ClientRectangle>25.4,7,0.2,0.6</ClientRectangle>
+              <ClientRectangle>26.4,7,0.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,8</Font>
@@ -1193,9 +1195,8 @@
           <Name>PageHeaderBand2</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <PrintOn>OnlyFirstPage</PrintOn>
         </PageHeaderBand2>
-        <HeaderBand1 Ref="81" type="HeaderBand" isKey="true">
+        <GroupHeaderBand1 Ref="81" type="GroupHeaderBand" isKey="true">
           <Brush>Transparent</Brush>
           <ClientRectangle>0,9.6,27.7,1</ClientRectangle>
           <Components isList="true" count="12">
@@ -1415,12 +1416,13 @@
               <VertAlignment>Center</VertAlignment>
             </Text44>
           </Components>
+          <Condition>{DataSource1.NUMBER}</Condition>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
-          <Name>HeaderBand1</Name>
+          <Name>GroupHeaderBand1</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-        </HeaderBand1>
+        </GroupHeaderBand1>
         <DataBand2 Ref="94" type="DataBand" isKey="true">
           <Brush>EmptyBrush</Brush>
           <BusinessObjectGuid isNull="true" />
@@ -1473,9 +1475,9 @@
               <Name>KALA_N</Name>
               <Page isRef="5" />
               <Parent isRef="94" />
-              <Text>{Line}</Text>
+              <Text>{DataSource1.KALA}</Text>
               <TextBrush>[0:0:0]</TextBrush>
-              <Type>SystemVariables</Type>
+              <Type>DataColumn</Type>
               <VertAlignment>Center</VertAlignment>
             </KALA_N>
             <Text47 Ref="98" type="Text" isKey="true">
@@ -1687,7 +1689,7 @@
             </Text55>
           </Components>
           <Conditions isList="true" count="0" />
-          <DataRelationName>Relation</DataRelationName>
+          <DataRelationName isNull="true" />
           <DataSourceName>DataSource1</DataSourceName>
           <EvenStyle>Blue_Data1_Even Style</EvenStyle>
           <Expressions isList="true" count="0" />
@@ -1696,12 +1698,17 @@
           <OddStyle>Blue_Data1_Odd Style</OddStyle>
           <Page isRef="5" />
           <Parent isRef="5" />
-          <Sort isList="true" count="0" />
+          <Sort isList="true" count="4">
+            <value>ASC</value>
+            <value>NUMBER</value>
+            <value>ASC</value>
+            <value>RADIF</value>
+          </Sort>
         </DataBand2>
-        <FooterBand1 Ref="116" type="FooterBand" isKey="true">
+        <GroupFooterBand1 Ref="116" type="GroupFooterBand" isKey="true">
           <Brush>Transparent</Brush>
           <ClientRectangle>0,13,27.7,5.4</ClientRectangle>
-          <Components isList="true" count="24">
+          <Components isList="true" count="26">
             <Text56 Ref="117" type="Text" isKey="true">
               <Border>All;[0:0:0];2;Solid;False;4;Black</Border>
               <Brush>[255:255:255]</Brush>
@@ -1929,7 +1936,6 @@
               <Name>nemz1</Name>
               <Page isRef="5" />
               <Parent isRef="116" />
-              <Text>: مهر و امضاء فروشنده</Text>
               <TextBrush>[0:0:0]</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
@@ -1946,7 +1952,6 @@
               <Name>semat1</Name>
               <Page isRef="5" />
               <Parent isRef="116" />
-              <Text>: مهر و امضاء فروشنده</Text>
               <TextBrush>[0:0:0]</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
@@ -1963,7 +1968,6 @@
               <Name>nemz2</Name>
               <Page isRef="5" />
               <Parent isRef="116" />
-              <Text>: مهر و امضاء فروشنده</Text>
               <TextBrush>[0:0:0]</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
@@ -1980,7 +1984,6 @@
               <Name>semat2</Name>
               <Page isRef="5" />
               <Parent isRef="116" />
-              <Text>: مهر و امضاء فروشنده</Text>
               <TextBrush>[0:0:0]</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
@@ -1997,7 +2000,6 @@
               <Name>nemz3</Name>
               <Page isRef="5" />
               <Parent isRef="116" />
-              <Text>: مهر و امضاء فروشنده</Text>
               <TextBrush>[0:0:0]</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
@@ -2014,7 +2016,6 @@
               <Name>semat3</Name>
               <Page isRef="5" />
               <Parent isRef="116" />
-              <Text>: مهر و امضاء فروشنده</Text>
               <TextBrush>[0:0:0]</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
@@ -2024,8 +2025,10 @@
               <Brush>[255:255:255]</Brush>
               <ClientRectangle>12,3.2,1.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
+              <Enabled>False</Enabled>
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
+              <HideZeros>True</HideZeros>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text69</Name>
@@ -2041,8 +2044,10 @@
               <Brush>[255:255:255]</Brush>
               <ClientRectangle>12,3.8,1.8,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
+              <Enabled>False</Enabled>
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
+              <HideZeros>True</HideZeros>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text3</Name>
@@ -2058,8 +2063,10 @@
               <Brush>[255:255:255]</Brush>
               <ClientRectangle>0,3.8,12,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
+              <Enabled>False</Enabled>
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
+              <HideZeros>True</HideZeros>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>SHOBEH</Name>
@@ -2074,8 +2081,10 @@
               <Brush>[255:255:255]</Brush>
               <ClientRectangle>0,3.2,12,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
+              <Enabled>False</Enabled>
               <Expressions isList="true" count="0" />
               <Font>IRANYekanFN,6</Font>
+              <HideZeros>True</HideZeros>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>TAL_ADDRESS</Name>
@@ -2124,18 +2133,52 @@
               <Parent isRef="116" />
               <VertAlignment>Center</VertAlignment>
             </EMZA3>
+            <Text1 Ref="146" type="Text" isKey="true">
+              <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>[255:255:255]</Brush>
+              <ClientRectangle>22.8,1,1.8,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,6</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text1</Name>
+              <Page isRef="5" />
+              <Parent isRef="116" />
+              <Text>نقدی</Text>
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text1>
+            <Text2 Ref="147" type="Text" isKey="true">
+              <Border>None;[0:0:0];2;Solid;False;4;Black</Border>
+              <Brush>[255:255:255]</Brush>
+              <ClientRectangle>18.2,1,1.8,0.4</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,6</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text2</Name>
+              <Page isRef="5" />
+              <Parent isRef="116" />
+              <Text>غیر نقدی</Text>
+              <TextBrush>[0:0:0]</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text2>
           </Components>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
-          <Name>FooterBand1</Name>
+          <Name>GroupFooterBand1</Name>
           <Page isRef="5" />
           <Parent isRef="5" />
-        </FooterBand1>
-        <VerticalLinePrimitive5 Ref="146" type="VerticalLinePrimitive" isKey="true">
+        </GroupFooterBand1>
+        <VerticalLinePrimitive5 Ref="148" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>27.6,2.4,0.0254,2.6</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="147" type="Cap" isKey="true">
+          <EndCap Ref="149" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2144,15 +2187,15 @@
           <Page isRef="5" />
           <Parent isRef="5" />
           <Size>2</Size>
-          <StartCap Ref="148" type="Cap" isKey="true">
+          <StartCap Ref="150" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive5>
-        <VerticalLinePrimitive6 Ref="149" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive6 Ref="151" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>0,2.4,0.0254,2.6</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="150" type="Cap" isKey="true">
+          <EndCap Ref="152" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2161,15 +2204,15 @@
           <Page isRef="5" />
           <Parent isRef="5" />
           <Size>2</Size>
-          <StartCap Ref="151" type="Cap" isKey="true">
+          <StartCap Ref="153" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive6>
-        <VerticalLinePrimitive7 Ref="152" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive7 Ref="154" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>0,5.6,0.0254,2.6</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="153" type="Cap" isKey="true">
+          <EndCap Ref="155" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2178,15 +2221,15 @@
           <Page isRef="5" />
           <Parent isRef="5" />
           <Size>2</Size>
-          <StartCap Ref="154" type="Cap" isKey="true">
+          <StartCap Ref="156" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive7>
-        <VerticalLinePrimitive8 Ref="155" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive8 Ref="157" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>27.6,5.6,0.0254,2.6</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="156" type="Cap" isKey="true">
+          <EndCap Ref="158" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -2195,7 +2238,7 @@
           <Page isRef="5" />
           <Parent isRef="5" />
           <Size>2</Size>
-          <StartCap Ref="157" type="Cap" isKey="true">
+          <StartCap Ref="159" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive8>
@@ -2223,10 +2266,10 @@
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>12/1/2024 6:23:55 PM</ReportChanged>
+  <ReportChanged>11/13/2025 8:27:17 PM</ReportChanged>
   <ReportCreated>9/5/2021 1:38:11 PM</ReportCreated>
-  <ReportFile>C:\prg\Made Reports\All\INVOICE_FROOSH_3GRP3.mrt</ReportFile>
-  <ReportGuid>6b675ac4bf8f4de0914d26840688d987</ReportGuid>
+  <ReportFile>C:\prg\MC\Prg_UI\Rpts\Factors\INVOICE_FROOSH_3GRP3.mrt</ReportFile>
+  <ReportGuid>caf9c7086e4e4c33a2bedaf6948f2696</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>
@@ -2255,203 +2298,203 @@ namespace Reports
 </Script>
   <ScriptLanguage>CSharp</ScriptLanguage>
   <Styles isList="true" count="13">
-    <Blue_Data1 Ref="158" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Blue_Data1 Ref="160" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:41:112];1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Blue</CollectionName>
       <Conditions isList="true" count="1">
-        <Item128 Ref="159" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item130 Ref="161" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>Data</Placement>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item128>
+        </Item130>
       </Conditions>
       <Font>Arial,8</Font>
       <Name>Blue_Data1</Name>
       <NegativeTextBrush>Red</NegativeTextBrush>
       <TextBrush>[0:0:12]</TextBrush>
     </Blue_Data1>
-    <Blue_Data1_Odd_x0020_Style Ref="160" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Blue_Data1_Odd_x0020_Style Ref="162" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:41:112];1;Solid;False;4;Black</Border>
       <Brush>[234:255:255]</Brush>
       <CollectionName>Blue</CollectionName>
       <Conditions isList="true" count="1">
-        <Item130 Ref="161" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item132 Ref="163" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <Placement>DataOddStyle</Placement>
           <Type>Placement, PlacementNestedLevel</Type>
-        </Item130>
+        </Item132>
       </Conditions>
       <Font>Arial,8</Font>
       <Name>Blue_Data1_Odd Style</Name>
       <NegativeTextBrush>Red</NegativeTextBrush>
       <TextBrush>[0:0:12]</TextBrush>
     </Blue_Data1_Odd_x0020_Style>
-    <Blue_Data1_Even_x0020_Style Ref="162" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Blue_Data1_Even_x0020_Style Ref="164" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:41:112];1;Solid;False;4;Black</Border>
       <Brush>[159:216:255]</Brush>
       <CollectionName>Blue</CollectionName>
       <Conditions isList="true" count="1">
-        <Item132 Ref="163" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item134 Ref="165" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <Placement>DataEvenStyle</Placement>
           <Type>Placement, PlacementNestedLevel</Type>
-        </Item132>
+        </Item134>
       </Conditions>
       <Font>Arial,8</Font>
       <Name>Blue_Data1_Even Style</Name>
       <NegativeTextBrush>Red</NegativeTextBrush>
       <TextBrush>[0:0:12]</TextBrush>
     </Blue_Data1_Even_x0020_Style>
-    <Blue_Data2 Ref="164" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Blue_Data2 Ref="166" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:41:112];1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Blue</CollectionName>
       <Conditions isList="true" count="1">
-        <Item134 Ref="165" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item136 Ref="167" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>Data</Placement>
           <PlacementNestedLevel>2</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item134>
+        </Item136>
       </Conditions>
       <Font>Arial,8</Font>
       <Name>Blue_Data2</Name>
       <NegativeTextBrush>Red</NegativeTextBrush>
       <TextBrush>[0:0:12]</TextBrush>
     </Blue_Data2>
-    <Blue_Data2_Odd_x0020_Style Ref="166" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Blue_Data2_Odd_x0020_Style Ref="168" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:41:112];1;Solid;False;4;Black</Border>
       <Brush>[249:255:255]</Brush>
       <CollectionName>Blue</CollectionName>
       <Conditions isList="true" count="1">
-        <Item136 Ref="167" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item138 Ref="169" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <Placement>DataOddStyle</Placement>
           <PlacementNestedLevel>2</PlacementNestedLevel>
           <Type>Placement, PlacementNestedLevel</Type>
-        </Item136>
+        </Item138>
       </Conditions>
       <Font>Arial,8</Font>
       <Name>Blue_Data2_Odd Style</Name>
       <NegativeTextBrush>Red</NegativeTextBrush>
       <TextBrush>[0:0:12]</TextBrush>
     </Blue_Data2_Odd_x0020_Style>
-    <Blue_Data2_Even_x0020_Style Ref="168" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Blue_Data2_Even_x0020_Style Ref="170" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:41:112];1;Solid;False;4;Black</Border>
       <Brush>[166:223:255]</Brush>
       <CollectionName>Blue</CollectionName>
       <Conditions isList="true" count="1">
-        <Item138 Ref="169" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item140 Ref="171" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <Placement>DataEvenStyle</Placement>
           <PlacementNestedLevel>2</PlacementNestedLevel>
           <Type>Placement, PlacementNestedLevel</Type>
-        </Item138>
+        </Item140>
       </Conditions>
       <Font>Arial,8</Font>
       <Name>Blue_Data2_Even Style</Name>
       <NegativeTextBrush>Red</NegativeTextBrush>
       <TextBrush>[0:0:12]</TextBrush>
     </Blue_Data2_Even_x0020_Style>
-    <Blue_Data3 Ref="170" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Blue_Data3 Ref="172" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:41:112];1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Blue</CollectionName>
       <Conditions isList="true" count="1">
-        <Item140 Ref="171" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item142 Ref="173" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <Placement>Data</Placement>
           <PlacementNestedLevel>3</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item140>
+        </Item142>
       </Conditions>
       <Font>Arial,8</Font>
       <Name>Blue_Data3</Name>
       <NegativeTextBrush>Red</NegativeTextBrush>
       <TextBrush>[0:0:12]</TextBrush>
     </Blue_Data3>
-    <Blue_Data3_Odd_x0020_Style Ref="172" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Blue_Data3_Odd_x0020_Style Ref="174" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:41:112];1;Solid;False;4;Black</Border>
       <Brush>[255:255:255]</Brush>
       <CollectionName>Blue</CollectionName>
       <Conditions isList="true" count="1">
-        <Item142 Ref="173" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item144 Ref="175" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <Placement>DataOddStyle</Placement>
           <PlacementNestedLevel>3</PlacementNestedLevel>
           <Type>Placement, PlacementNestedLevel</Type>
-        </Item142>
+        </Item144>
       </Conditions>
       <Font>Arial,8</Font>
       <Name>Blue_Data3_Odd Style</Name>
       <NegativeTextBrush>Red</NegativeTextBrush>
       <TextBrush>[0:0:12]</TextBrush>
     </Blue_Data3_Odd_x0020_Style>
-    <Blue_Data3_Even_x0020_Style Ref="174" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Blue_Data3_Even_x0020_Style Ref="176" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:41:112];1;Solid;False;4;Black</Border>
       <Brush>[174:231:255]</Brush>
       <CollectionName>Blue</CollectionName>
       <Conditions isList="true" count="1">
-        <Item144 Ref="175" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item146 Ref="177" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <Placement>DataEvenStyle</Placement>
           <PlacementNestedLevel>3</PlacementNestedLevel>
           <Type>Placement, PlacementNestedLevel</Type>
-        </Item144>
+        </Item146>
       </Conditions>
       <Font>Arial,8</Font>
       <Name>Blue_Data3_Even Style</Name>
       <NegativeTextBrush>Red</NegativeTextBrush>
       <TextBrush>[0:0:12]</TextBrush>
     </Blue_Data3_Even_x0020_Style>
-    <Blue_Data4 Ref="176" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Blue_Data4 Ref="178" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:41:112];1;Solid;False;4;Black</Border>
       <Brush>Transparent</Brush>
       <CollectionName>Blue</CollectionName>
       <Conditions isList="true" count="1">
-        <Item146 Ref="177" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item148 Ref="179" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <ComponentType>Text, Primitive, Image, CheckBox</ComponentType>
           <OperationPlacementNestedLevel>GreaterThanOrEqualTo</OperationPlacementNestedLevel>
           <Placement>Data</Placement>
           <PlacementNestedLevel>4</PlacementNestedLevel>
           <Type>ComponentType, Placement, PlacementNestedLevel</Type>
-        </Item146>
+        </Item148>
       </Conditions>
       <Font>Arial,8</Font>
       <Name>Blue_Data4</Name>
       <NegativeTextBrush>Red</NegativeTextBrush>
       <TextBrush>[0:0:12]</TextBrush>
     </Blue_Data4>
-    <Blue_Data4_Odd_x0020_Style Ref="178" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Blue_Data4_Odd_x0020_Style Ref="180" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:41:112];1;Solid;False;4;Black</Border>
       <Brush>[255:255:255]</Brush>
       <CollectionName>Blue</CollectionName>
       <Conditions isList="true" count="1">
-        <Item148 Ref="179" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item150 Ref="181" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <OperationPlacementNestedLevel>GreaterThanOrEqualTo</OperationPlacementNestedLevel>
           <Placement>DataOddStyle</Placement>
           <PlacementNestedLevel>4</PlacementNestedLevel>
           <Type>Placement, PlacementNestedLevel</Type>
-        </Item148>
+        </Item150>
       </Conditions>
       <Font>Arial,8</Font>
       <Name>Blue_Data4_Odd Style</Name>
       <NegativeTextBrush>Red</NegativeTextBrush>
       <TextBrush>[0:0:12]</TextBrush>
     </Blue_Data4_Odd_x0020_Style>
-    <Blue_Data4_Even_x0020_Style Ref="180" type="Stimulsoft.Report.StiStyle" isKey="true">
+    <Blue_Data4_Even_x0020_Style Ref="182" type="Stimulsoft.Report.StiStyle" isKey="true">
       <Border>None;[0:41:112];1;Solid;False;4;Black</Border>
       <Brush>[181:238:255]</Brush>
       <CollectionName>Blue</CollectionName>
       <Conditions isList="true" count="1">
-        <Item150 Ref="181" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
+        <Item152 Ref="183" type="Stimulsoft.Report.StiStyleCondition" isKey="true">
           <OperationPlacementNestedLevel>GreaterThanOrEqualTo</OperationPlacementNestedLevel>
           <Placement>DataEvenStyle</Placement>
           <PlacementNestedLevel>4</PlacementNestedLevel>
           <Type>Placement, PlacementNestedLevel</Type>
-        </Item150>
+        </Item152>
       </Conditions>
       <Font>Arial,8</Font>
       <Name>Blue_Data4_Even Style</Name>
       <NegativeTextBrush>Red</NegativeTextBrush>
       <TextBrush>[0:0:12]</TextBrush>
     </Blue_Data4_Even_x0020_Style>
-    <Style2 Ref="182" type="Stimulsoft.Report.StiDialogStyle" isKey="true">
+    <Style2 Ref="184" type="Stimulsoft.Report.StiDialogStyle" isKey="true">
       <BackColor>White</BackColor>
       <CollectionName>Blue</CollectionName>
       <Conditions isList="true" count="0" />
