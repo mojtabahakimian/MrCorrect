@@ -88,14 +88,14 @@
                             </ItemsPanelTemplate>
                         </ComboBox.ItemsPanel>
                     </ComboBox>
-                    <ComboBox x:Name="CUST_NO" IsSynchronizedWithCurrentItem="True" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="561,84,59,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" PreviewLostKeyboardFocus="CUST_NO_PreviewLostKeyboardFocus" TabIndex="1" IsHitTestVisible="False" Focusable="False">
+                    <ComboBox x:Name="CUST_NO" IsSynchronizedWithCurrentItem="True" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="561,84,59,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" PreviewLostKeyboardFocus="CUST_NO_PreviewLostKeyboardFocus" TabIndex="1">
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                             </ItemsPanelTemplate>
                         </ComboBox.ItemsPanel>
                     </ComboBox>
-                    <ComboBox x:Name="CUST_NO2"  IsSynchronizedWithCurrentItem="True" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="410,84,0,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="146" IsHitTestVisible="False" Focusable="False">
+                    <ComboBox x:Name="CUST_NO2"  IsSynchronizedWithCurrentItem="True" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="410,84,0,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="146">
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>

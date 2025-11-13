@@ -63,7 +63,7 @@
         <!--HEADER↑-->
 
         <!--Start.......................................................................................-->
-        <TabControl Margin="10,46,10,10" Style="{x:Null}">
+        <TabControl Margin="10,46,10,55" Style="{x:Null}">
             <TabItem Header="فاکتور" x:Name="Page57">
                 <Grid x:Name="FACTOR_GRID">
                     <Grid.RowDefinitions>
@@ -72,9 +72,9 @@
                     <TextBox x:Name="NUMBER"  Text="0" Height="28" Margin="0,6,109,0"   Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="90" Tag="RD" IsTabStop="False" IsReadOnly="True" />
                     <xctk:MaskedTextBox x:Name="DATE_N" TabIndex="0"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="28" Margin="0,6,581,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="88" PreviewLostKeyboardFocus="DATE_N_PreviewLostKeyboardFocus" PreviewGotKeyboardFocus="DATE_N_PreviewGotKeyboardFocus" />
                     <Label Content="شماره فاكتور برگشت:" Margin="0,6,10,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="97" Height="28" VerticalAlignment="Top"/>
-                    <TextBox x:Name="USER_NAME" IsReadOnly="True" Text="نام کاربر" Height="28" Margin="588,472,329,0"   Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" IsTabStop="False" />
+                    <TextBox x:Name="USER_NAME" IsReadOnly="True" Text="نام کاربر" Height="28" Margin="588,0,329,78"   Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  Padding="3" IsTabStop="False" />
                     <Label Content="تاریخ:" Margin="0,6,546,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="34" Height="28" VerticalAlignment="Top"/>
-                    <Label Content="کاربر:" Margin="0,472,297,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="30" Height="28" VerticalAlignment="Top"/>
+                    <Label Content="کاربر:" Margin="0,0,297,78"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="30" Height="28" VerticalAlignment="Bottom"/>
                     <Label Content="شماره (سایر) حواله انبار:" Margin="0,8,207,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="108" Height="24" VerticalAlignment="Top"/>
                     <Label Content="مشتری:" Margin="0,77,11,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="46" Height="25" VerticalAlignment="Top"/>
                     <Label Content="ملاحظات :" Margin="0,112,6,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="50" Height="25" VerticalAlignment="Top"/>
@@ -353,7 +353,7 @@
                     <Button x:Name="BTN_FACTORHA" Content="لیست فاکتور ها" Margin="123,150,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="118" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_FACTORHA_Click"/>
                     <Button x:Name="Command106" Content="چاپ حواله انبار" Margin="102,8,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="101" Foreground="#DDFFFFFF" FontWeight="Bold" Click="Command106_Click" IsEnabled="False"/>
                     <Label Content="شماره فاكتور فروشنده:" Margin="519,113,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="102" Height="28" VerticalAlignment="Top"/>
-                    <CNC:NumericTextBox Text="0" DoesAcceptDouble="False" x:Name="FNUMCO" Height="28" Margin="410,0,0,438"  IsReadOnly="True" IsHitTestVisible="False"  VerticalAlignment="Bottom"  Visibility="Visible"  HorizontalAlignment="Left" Width="106"  />
+                    <CNC:NumericTextBox Text="0" DoesAcceptDouble="False" x:Name="FNUMCO" Height="28" Margin="410,112,0,0"  IsReadOnly="True" IsHitTestVisible="False"  VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Left" Width="106"  />
 
                     <Button x:Name="BTN_NEW_FACTOR" Content="فاکتور جدید" Margin="252,150,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_NEW_FACTOR_Click" Padding="16,2,16,4"/>
 
@@ -702,6 +702,8 @@
                 </Grid>
             </TabItem>
         </TabControl>
+
+        <CNC:RecordNavigatorControl x:Name = "navigatorControl" HorizontalAlignment = "Right" VerticalAlignment = "Bottom" Margin = "0,0,374,9" />
 
     </Grid>
 </Window>

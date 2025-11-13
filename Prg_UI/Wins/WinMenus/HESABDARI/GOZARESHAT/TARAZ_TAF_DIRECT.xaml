@@ -558,7 +558,7 @@
 
             <syncfusion:SfDataGrid.Columns>
 
-                <syncfusion:GridTemplateColumn HeaderText="" x:Name="ISEND_COLUMN" Width="60" MappingName="IsButtony" IsHidden="False" AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
+                <syncfusion:GridTemplateColumn HeaderText="" x:Name="ISEND_COLUMN" Width="50" MappingName="IsButtony" IsHidden="False" AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_OPEN_SUB" IsTabStop="False" Click="BTN_OPEN_SUB_Click" Tag="{Binding}"
@@ -573,7 +573,7 @@
                     </syncfusion:GridTemplateColumn.CellTemplate>
                 </syncfusion:GridTemplateColumn>
 
-                <syncfusion:GridTemplateColumn IsReadOnly="True" AllowResizing="False" Width="60">
+                <syncfusion:GridTemplateColumn IsReadOnly="True" AllowResizing="False" Width="50">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button 
@@ -598,9 +598,9 @@
                     </syncfusion:GridTemplateColumn.CellStyle>
                 </syncfusion:GridTemplateColumn>
 
-                <syncfusion:GridTextColumn  HeaderText="کل" MappingName="N_KOL" Width="90" />
-                <syncfusion:GridTextColumn  HeaderText="معین" MappingName="NUMBER" Width="100" />
-                <syncfusion:GridTextColumn  HeaderText="تفضیلی" MappingName="TNUMBER" Width="110" />
+                <syncfusion:GridTextColumn  HeaderText="کل" MappingName="N_KOL" Width="70" />
+                <syncfusion:GridTextColumn  HeaderText="معین" MappingName="NUMBER" Width="80" />
+                <syncfusion:GridTextColumn  HeaderText="تفضیلی" MappingName="TNUMBER" Width="100" />
                 <syncfusion:GridTextColumn  HeaderText="نام حساب تفضیلی" MappingName="TAFZIL" Width="400" />
 
                 <syncfusion:GridTextColumn  HeaderText="جمع بدهکار" MappingName="SumOfBED" Width="150" >

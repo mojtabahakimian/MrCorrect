@@ -2821,9 +2821,38 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     sgn3usid = {(SGN3usid.Tag is null ? "NULL" : SGN3usid.Tag)}
                     WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG} ";
 
-
             _ = dbms.DoExecuteSQL(_qre);
 
+            var originalRecord = _navigationManager?.CurrentRecord;
+            if (originalRecord != null)
+            {
+                int? currentKind = (int?)CUST_KIND.SelectedValue;
+                string? currentCustomer = (string?)CUST_NO.SelectedValue; // This is safe even if null
+
+                bool isDifferent = (currentKind != originalRecord.CUST_KIND) || (currentCustomer != originalRecord.CUST_NO);
+
+                if (isDifferent)
+                {
+                    try
+                    {
+                        var sqlParams = new
+                        {
+                            CUST_NO = currentCustomer,
+                            CUST_KIND = currentKind,
+                            NUMBER = Convert.ToDouble(NUMBER.Text),
+                            TAG = HTAG //24
+                        };
+                        dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET CUST_NO = @CUST_NO, CUST_KIND = @CUST_KIND " +
+                                                     $"WHERE NUMBER = @NUMBER AND TAG = @TAG", sqlParams);
+
+                        universControl.PopNotifyShow("مشتری و نوع آن در رسید انبار متناظر بروز شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C", 3);
+                    }
+                    catch (Exception ex)
+                    {
+                        new Msgwin(false, "خطا در بروزرسانی رسید انبار متناظر.").ShowDialog();
+                    }
+                }
+            }
 
             return true;
         }
@@ -3162,80 +3191,25 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
         private void CUST_NO_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            return;
-
             if (CUST_NO.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
             TextBox CUTSNO_TEX = (TextBox)CUST_NO.Template.FindName("PART_EditableTextBox", CUST_NO);
+            if (CUTSNO_TEX is null) { return; }
 
             if (CUST_NO.SelectedValue is not null)
             {
-                if ((CUST_NO.SelectedItem as Custom_CUST_HESAB).NAME == CUTSNO_TEX.Text)
+                if ((CUST_NO.SelectedItem as Custom_CUST_HESAB)?.NAME == CUTSNO_TEX.Text) //Text Really Not Changed
                 {
                     return;
                 }
             }
 
-            if (CUTSNO_TEX.Text == "+" || CUTSNO_TEX.Text == "++")
+            var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(CUST_NO, dbms);
+            if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
             {
-                ComboSearch CMBSearch = new ComboSearch("HEAD_LST_KHAREED1", I_AM_BARGASHT_NORMAL);//Search Plusy Form Specialy for Customers
-                CMBSearch.ShowDialog();
-                if (CUST_NO.SelectedValue is null)
-                {
-                    return;
-                }
-            }
-            else if (Information.IsNumeric(CUTSNO_TEX.Text))
-            {
-                try
-                {
-                    var rst = dbms.DoGetDataSQL<SQL1_FACTOR>("SELECT N_KOL , NUMBER,TNUMBER FROM TDETA_HES WHERE N_KOL = " + Baseknow.BEDEHKAR + " AND NUMBER = 1 and TNUMBER = " + CUTSNO_TEX.Text).ToList();
-                    if (rst.Count == 1)
-                    {
-                        var _data_hes = rst.FirstOrDefault()?.n_kol + "-" + rst.FirstOrDefault()?.NUMBER + "-" + rst.FirstOrDefault()?.tNUMBER;
-                        var _data_name = dbms.DoGetDataSQL<string>($"SELECT TOP 1 NAME FROM CUST_HESAB WHERE hes = N'{_data_hes}'").FirstOrDefault();
-                        if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == _data_hes))
-                        {
-                            ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = _data_hes, NAME = _data_name });
-                        }
-                        CUST_NO.Items.Refresh();
-                        CUST_NO.SelectedValue = null;
-                        this.CUST_NO2.SelectedValue = _data_hes;
-                        //CUST_NO_AfterUpdate();
-                    }
-                    else
-                    {
-                        CUST_NO.SelectedValue = null;
-                        CUST_NO.Text = null;
-                        CUST_NO.Items.Refresh();
-                        return;
-                    }
-                }
-                catch (Exception) { }
-            }
-            else
-            {
-                var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + CUTSNO_TEX.Text + "'").FirstOrDefault();
-                if (data is not null && !string.IsNullOrEmpty(data.hes))
-                {
-                    string thevalue = data.hes;
-                    if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
-                    {
-                        ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
-                    }
-                    CUST_NO.SelectedValue = null;
-                    CUST_NO.SelectedValue = thevalue;
-                    CUST_NO.Items.Refresh();
-                }
-                else
-                {
-                    CUST_NO.SelectedValue = null;
-                    CUST_NO.Text = null;
-                    CUST_NO.Items.Refresh();
-                    return;
-                }
+                universControl.PopNotifyShow($"مشتری نمی تواند خالی باشد", Pop1, Pop1Text1, Pop_Border1);
+                e.Handled = true;
             }
 
-            #region CUST_NO_Exit
             if (CUST_NO.SelectedValue is not null)
             {
                 if (CL_HESABDARI.ISTAF(CUST_NO.SelectedValue.ToString()))
@@ -3244,17 +3218,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     msgwin.ShowDialog();
                     CUST_NO.SelectedValue = null;
                 }
-                if (Convert.ToBoolean(Baseknow.SAGHF) || Convert.ToBoolean(Baseknow.SAGHF2))
+                if (CL_HESABDARI.BLOCKEDCUST(CUST_NO.SelectedValue.ToString()))
                 {
-                    if (Convert.ToBoolean(CL_HESABDARI.Checketebar(CUST_NO.SelectedValue.ToString())) == false || Convert.ToBoolean(CL_HESABDARI.ChecketebarMEG(this.CUST_NO.SelectedValue.ToString())) == false)
-                    {
-                        Msgwin msgwin = new Msgwin(false, "اعتبار اين مشتري تمام شده است و نمي تواند خريد نمايد...!");
-                        msgwin.ShowDialog();
-                        CUST_NO.SelectedValue = null;
-                    }
+                    CUST_NO.SelectedItem = null;
+                    universControl.PopNotifyShow(" حساب مسدود گرديده است لطفا با مديريت مالي تماس بگيريد", Pop1, Pop1Text1, Pop_Border1);
+                    return;
                 }
             }
-            #endregion
 
         }
         private void SANAD()

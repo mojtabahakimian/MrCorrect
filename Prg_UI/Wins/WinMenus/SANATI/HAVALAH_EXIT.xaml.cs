@@ -2046,7 +2046,7 @@ namespace Wins.WinMenus.SANATI
             }
             if (CUST_NO.SelectedValue is not null)
             {
-                if ((CUST_NO.SelectedItem as Custom_CUST_HESAB).NAME == CUTSNO_TEX.Text)
+                if ((CUST_NO.SelectedItem as Custom_CUST_HESAB)?.NAME == CUTSNO_TEX.Text)
                 {
                     return;
                 }
@@ -2067,15 +2067,15 @@ namespace Wins.WinMenus.SANATI
                     msgwin.ShowDialog();
                     CUST_NO.SelectedValue = null;
                 }
-                if (Convert.ToBoolean(Baseknow.SAGHF) || Convert.ToBoolean(Baseknow.SAGHF2))
-                {
-                    if (Convert.ToBoolean(CL_HESABDARI.Checketebar(CUST_NO.SelectedValue.ToString())) == false || Convert.ToBoolean(CL_HESABDARI.ChecketebarMEG(this.CUST_NO.SelectedValue.ToString())) == false)
-                    {
-                        Msgwin msgwin = new Msgwin(false, "اعتبار اين مشتري تمام شده است و نمي تواند خريد نمايد...!");
-                        msgwin.ShowDialog();
-                        CUST_NO.SelectedValue = null;
-                    }
-                }
+                //if (Convert.ToBoolean(Baseknow.SAGHF) || Convert.ToBoolean(Baseknow.SAGHF2))
+                //{
+                //    if (Convert.ToBoolean(CL_HESABDARI.Checketebar(CUST_NO.SelectedValue.ToString())) == false || Convert.ToBoolean(CL_HESABDARI.ChecketebarMEG(this.CUST_NO.SelectedValue.ToString())) == false)
+                //    {
+                //        Msgwin msgwin = new Msgwin(false, "اعتبار اين مشتري تمام شده است و نمي تواند خريد نمايد...!");
+                //        msgwin.ShowDialog();
+                //        CUST_NO.SelectedValue = null;
+                //    }
+                //}
                 if (CL_HESABDARI.BLOCKEDCUST(CUST_NO.SelectedValue.ToString()))
                 {
                     CUST_NO.SelectedItem = null;
