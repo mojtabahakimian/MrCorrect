@@ -600,20 +600,20 @@ CornerRadius="2" />
                     </syncfusion:GridTemplateColumn.CellTemplate>
                 </syncfusion:GridTemplateColumn>
 
-                <syncfusion:GridTextColumn HeaderText="انبار" MappingName="ANBARN" Width="200"/>
-                <syncfusion:GridTextColumn HeaderText="کد انبار" MappingName="ANBAR" Width="100"/>
-                <syncfusion:GridTextColumn HeaderText="کدکالا" MappingName="CODE" Width="100" />
-                <syncfusion:GridTextColumn HeaderText="فی" MappingName="FII" Width="130"/>
-                <syncfusion:GridTextColumn HeaderText=" مبلغ موجودی" MappingName="MABLK" Width="190">
+                <syncfusion:GridTextColumn HeaderText="انبار" MappingName="ANBARN" Width="100"/>
+                <syncfusion:GridTextColumn HeaderText="کد انبار" MappingName="ANBAR" Width="80"/>
+                <syncfusion:GridTextColumn HeaderText="کدکالا" MappingName="CODE" Width="80" />
+                <syncfusion:GridTextColumn HeaderText="فی" MappingName="FII" Width="110"/>
+                <syncfusion:GridTextColumn HeaderText=" مبلغ موجودی" MappingName="MABLK" Width="120">
                     <syncfusion:GridTextColumn.DisplayBinding>
                         <Binding Path="MABLK"  StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
-                <syncfusion:GridTextColumn HeaderText="شماره فنی" MappingName="N_FANI" Width="300"/>
-                <syncfusion:GridTextColumn HeaderText="نام کالا" MappingName="NAME" Width="300"/>
+                <syncfusion:GridTextColumn HeaderText="شماره فنی" MappingName="N_FANI" Width="100"/>
+                <syncfusion:GridTextColumn HeaderText="نام کالا" MappingName="NAME" Width="250"/>
                 <syncfusion:GridTextColumn HeaderText="نام واحد" MappingName="NAMES" Width="100"/>
 
-                <syncfusion:GridTextColumn x:Name="MAND_COLUMN" HeaderText="موجودی" MappingName="MAND" Width="130">
+                <syncfusion:GridTextColumn x:Name="MAND_COLUMN" HeaderText="موجودی" MappingName="MAND" Width="110">
                     <syncfusion:GridTextColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Background="LightSkyBlue">
@@ -629,15 +629,15 @@ CornerRadius="2" />
                     </syncfusion:GridTextColumn.CellTemplate>
                 </syncfusion:GridTextColumn>
                 
-                <syncfusion:GridTextColumn HeaderText="ضریب" MappingName="NESBAT" Width="100"/>
+                <syncfusion:GridTextColumn HeaderText="ضریب" MappingName="NESBAT" Width="80"/>
 
-                <syncfusion:GridTextColumn HeaderText="موجودی ثانویه" MappingName="MANDF" Width="140">
+                <syncfusion:GridTextColumn HeaderText="موجودی ثانویه" MappingName="MANDF" Width="120">
                     <syncfusion:GridTextColumn.DisplayBinding>
                         <Binding Path="MANDF"  StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 
-                <syncfusion:GridTextColumn HeaderText="رزرو شده" MappingName="MEGHRES" Width="100">
+                <syncfusion:GridTextColumn HeaderText="رزرو شده" MappingName="MEGHRES" Width="90">
                     <syncfusion:GridTextColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding MEGHRES}" Background="LightBlue"/>
@@ -646,7 +646,7 @@ CornerRadius="2" />
                     </syncfusion:GridTextColumn.CellTemplate>
                 </syncfusion:GridTextColumn>
 
-                <syncfusion:GridTextColumn HeaderText="بارگیری نشده" MappingName="MEGHBAR" Width="150"/>
+                <syncfusion:GridTextColumn HeaderText="بارگیری نشده" MappingName="MEGHBAR" Width="130"/>
 
                 <syncfusion:GridTextColumn HeaderText="موجودی فیزیکی" MappingName="fisiclymand" Width="150">
                     <syncfusion:GridTextColumn.CellTemplate>

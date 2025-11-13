@@ -166,6 +166,16 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         int TAG_TYPE = (ROW?.TAG is null ? (int)ROW.NO_S : Convert.ToInt32(ROW?.TAG));
                         double? TARGET_NUMBER = (double)(ROW?.NUMBER is null ? ROW?.N_S : ROW?.NUMBER);
 
+                        if (currentCell?.GridColumn != null && currentCell.GridColumn?.MappingName == "N_S") //اگر فوکوس روی سند بود
+                        {
+                            // اگر شماره سند مقدار ندارد → عبور
+                            if (ROW?.N_S != null || ROW?.N_S > 0)
+                            {
+                                TAG_TYPE = 0; //سند
+                                TARGET_NUMBER = ROW.N_S;
+                            }
+                        }
+
                         CL_MenuManager.MenuBaseOnKindOpen(this, dbms, TAG_TYPE, TARGET_NUMBER, false);
                     }
                 }

@@ -1,9 +1,19 @@
 ﻿using AUTO_BAZ.HelperWins;
 using Functions;
 using MaterialDesignThemes.Wpf;
+using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.Generaly;
+using Prg_Proccessy.MODELS;
+using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.Wins.WinSetting;
+using Rpts;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Dictionary;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Runtime;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,16 +21,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using Wins.ThePages;
-using Prg_Proccessy.Generaly;
-using Prg_Proccessy.FUNCTIONS;
-using System.Linq;
-using Prg_Proccessy.MODELS;
-using Prg_SendInvoice.CNNMANAGER;
 using static Wins.WinOther.SEARCHMENIU_WIN;
-using Stimulsoft.Report.Dictionary;
-using Stimulsoft.Report;
-using System.Reflection;
-using Rpts;
 
 namespace Prg_UI.Wins
 {
@@ -127,6 +128,8 @@ namespace Prg_UI.Wins
             CL_Generaly.IsMrCorrectLoadedWinBase = true;
 
             CL_Keyboard.ChangeKeyboardLayout("Farsi");
+
+            this.Title = Baseknow.YEA + " " + Baseknow.WIDTH_D;
         }
 
         private void FreeMemory()
@@ -467,6 +470,15 @@ namespace Prg_UI.Wins
                     WinConnectionChoose choosing_Connection = new WinConnectionChoose();
                     choosing_Connection.ShowDialog();
                 }
+            }
+            else if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Control && e.Key == Key.F12)
+            {
+                e.Handled = true;
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_ADVANC_F12, default);
+                });
             }
 
 
@@ -1357,5 +1369,126 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_AMVAL, null);
         }
+
+        private void Button_Click_135(object sender, RoutedEventArgs e)
+        {
+            // نمایش پیام تأیید به کاربر
+            Msgwin msgwin = new Msgwin(true, "آیا از ری استارت برنامه و خروج از حساب کاربری فعلی مطمئن هستید؟");
+            msgwin.ShowDialog();
+
+            if (msgwin.DialogResult == true)
+            {
+                // مرحله 1: بررسی اینکه آیا پنجره دیگری باز است یا خیر
+                List<Window> openChildWindows = new List<Window>();
+                string mainWinName = "Prg_UI.Wins.WinBase"; // نام کامل پنجره اصلی شما
+                foreach (Window window in Application.Current.Windows)
+                {
+                    // پنجره‌هایی را پیدا کن که پنجره اصلی نیستند
+                    if (window.GetType().FullName != mainWinName)
+                    {
+                        openChildWindows.Add(window);
+                    }
+                }
+                if (openChildWindows.Any())
+                {
+                    // اگر پنجره‌های دیگری باز هستند، به کاربر هشدار بده و خارج شو
+                    string openWindowsList = string.Join("\n- ", openChildWindows.Select(w => w.Title));
+                    new Msgwin(false, "امکان راه‌اندازی مجدد وجود ندارد.\nلطفاً ابتدا تمام پنجره‌های باز زیر را ببندید:\n\n- " + openWindowsList).ShowDialog();
+                    return;
+                }
+
+                // 1. بستن همه پنجره‌های باز به جز WinBase (که خودش بسته خواهد شد)
+                CloseAllChildWindows();
+
+                // 2. پاک کردن PageManagement و navigation stack
+                ClearPageManagement();
+
+                // 3. پاک کردن اطلاعات جلسه کاربری
+                Baseknow.USERCOD = 0;
+                Baseknow.UUSER = string.Empty;
+                Baseknow.UGRP = string.Empty;
+                // 4. پاک کردن تنظیمات واحد و شیفت
+                CL_Generaly.SHIFT_OF_USER = 0;
+                CL_Generaly.VAHED_OF_USER = 0;
+                CL_Generaly.IsMrCorrectLoadedWinBase = false;
+
+                // 6. اجرای Garbage Collection برای آزادسازی حافظه
+                try
+                {
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true);
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect();
+                }
+                catch { }
+
+                // 7. ایجاد پنجره لاگین جدید
+                USER_LOGIN loginWindow = new USER_LOGIN();
+                // 8. بستن پنجره فعلی
+                this.Close();
+                // 9. نمایش پنجره لاگین
+                loginWindow.ShowDialog();
+            }
+        }     
+        /// <summary>
+        /// بستن تمام پنجره‌های باز به جز WinBase
+        /// </summary>
+        private void CloseAllChildWindows()
+        {
+            try
+            {
+                // لیست پنجره‌هایی که باید بسته شوند
+                var windowsToClose = Application.Current.Windows
+                    .OfType<Window>()
+                    .Where(w => w != this && !(w is USER_LOGIN))
+                    .ToList();
+
+                // بستن تمام پنجره‌ها
+                foreach (var window in windowsToClose)
+                {
+                    try
+                    {
+                        window.Close();
+                    }
+                    catch
+                    {
+                        // اگر پنجره‌ای نتوانست بسته شود، ادامه بده
+                    }
+                }
+            }
+            catch
+            {
+                // در صورت هر گونه خطا، ادامه بده
+            }
+        }
+        /// <summary>
+        /// پاک کردن PageManagement و navigation stack
+        /// </summary>
+        private void ClearPageManagement()
+        {
+            try
+            {
+                // پاک کردن Frame
+                if (PageManagement.TheMainFame != null)
+                {
+                    PageManagement.TheMainFame.Content = null;
+                    PageManagement.TheMainFame = null;
+                }
+
+                // پاک کردن navigation stack با استفاده از reflection
+                var stackField = typeof(PageManagement).GetField("navigationStack",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+                if (stackField != null)
+                {
+                    var stack = stackField.GetValue(null) as System.Collections.Generic.Stack<Page>;
+                    stack?.Clear();
+                }
+            }
+            catch
+            {
+                // در صورت هر گونه خطا، ادامه بده
+            }
+        }
+    
+
     }
 }

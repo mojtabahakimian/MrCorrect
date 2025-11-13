@@ -12,16 +12,12 @@ using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.Scriptses;
 using Prg_UI.Wins.WinMenus.ANBAR;
-using Prg_UI.Wins.WinMenus.CONFIGS;
 using Prg_UI.Wins.WinMenus.HESABDARI;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
-using Prg_UI.Wins.WinMenus.SANATI;
-using Prg_UI.Wins.WinMenus.Taarif;
 using Prg_UI.Wins.WinMenus.WinAutomasion;
 using Prg_UI.Wins.WinMenus.WinDEFAULT;
 using Prg_UI.Wins.WinSetting;
-using Stimulsoft.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,18 +30,11 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Wins.WinMenus.ANBAR;
-using Wins.WinMenus.ANBAR.ANBAR_REPORTS;
-using Wins.WinMenus.Checkha;
-using Wins.WinMenus.CONFIGS;
 using Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.KHARID_FORUSH;
-using Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
-using Wins.WinMenus.SANATI;
 using Wins.WinMenus.Taarif;
-using Wins.WinSamplesEmpty;
 using Wins.WinSetting;
 using static Functions.SMSService.SmsServiceFactory;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
 
 namespace Prg_UI.Wins
 {
@@ -310,6 +299,8 @@ namespace Prg_UI.Wins
 
             SD_Status.Content = $"SERVER : {CL_Generaly.General_Servername} | DATABASE : {CL_Generaly.General_DBname}";
             LBL_VERSION.Content = CL_VERSION.MrCorrectFullVersion;
+
+            this.Title = Baseknow.YEA + " " + Baseknow.WIDTH_D;
         }
         private void Window_ContentRendered(object sender, EventArgs e) //-----------------------------------------------------------------------------------------
         {
@@ -317,10 +308,15 @@ namespace Prg_UI.Wins
 
             NowIsReady = true;
 
-            if (App.splashScreen is not null)
+            try
             {
-                App.splashScreen.LoadComplete();
+                if (App.splashScreen is not null)
+                {
+                    App.splashScreen.LoadComplete();
+                }
             }
+            catch { }
+
 
             if (CL_Generaly.IsCalledExternally)
             {
@@ -388,12 +384,12 @@ namespace Prg_UI.Wins
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "9547,9536");
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "9520,9509"); //اتکا
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHKE_DLIST_KOLCHECKD, this);
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.SQLSTATEFORM_CRTL_M, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.SQLSTATEFORM_CRTL_M, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID_OTHER_WIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAV_OTHER_WIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAVL, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK_AZAD, this);
 
             //new F_MENU_CHEK("chkva", "لیست چکهای دریافتی نزد بانک و صندوق وصول نشده").Show();
 

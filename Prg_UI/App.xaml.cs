@@ -513,13 +513,7 @@ namespace Prg_UI
                                 {
                                     CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_KOL_FT4, default);
                                 });
-                                break;
-                            case Key.F12:
-                                Application.Current.Dispatcher.Invoke(() =>
-                                {
-                                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_ADVANC_F12, default);
-                                });
-                                break;
+                                break;                      
                         }
                     }
                     else if (altPressed)
