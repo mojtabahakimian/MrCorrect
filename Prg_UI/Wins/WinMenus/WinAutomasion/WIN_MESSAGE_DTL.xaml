@@ -106,8 +106,8 @@
                 </Border>
             </StackPanel>
         </Popup>
-        
-        <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" 
+
+        <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" FilterRowPosition="Top"
             ContextMenu="{StaticResource DataGridContextMenu}"
             ItemsSource="{Binding MESSAGE_DATA}" 
             AutoGenerateColumns="False"

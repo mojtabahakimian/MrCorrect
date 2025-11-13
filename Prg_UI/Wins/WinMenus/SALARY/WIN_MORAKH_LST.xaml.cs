@@ -1,30 +1,33 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using DocumentFormat.OpenXml.InkML;
+using Functions;
+using MaterialDesignThemes.Wpf;
+using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
-using System.Linq;
-using System.Windows;
-using System.Windows.Input;
-using static Prg_UI.Functions.CL_LMethods;
-using Functions;
+using Prg_UI.HelperWins;
+using Prg_UI.UiTools;
+using Syncfusion.Data;
 using Syncfusion.Data.Extensions;
+using Syncfusion.UI.Xaml.BulletGraph;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
 using System;
-using System.Collections.ObjectModel;
-using Syncfusion.UI.Xaml.BulletGraph;
-using System.Windows.Controls;
-using Prg_UI.UiTools;
-using System.Text;
-using Syncfusion.Data;
-using Prg_UI.HelperWins;
-using System.Windows.Media;
-using Prg_Proccessy.FUNCTIONS;
-using System.Windows.Interop;
-using Prg_Proccessy.SQLMODELS;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
-using DocumentFormat.OpenXml.InkML;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
+using System.Windows.Interop;
+using System.Windows.Media;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
+using static Prg_UI.Functions.CL_LMethods;
 
 namespace Wins.WinMenus.SALARY
 {
@@ -78,6 +81,9 @@ namespace Wins.WinMenus.SALARY
             CODE_PARAM = _CODE_;
 
             this.DataContext = this;
+
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
+            GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
         }
 
         public string CODE_PARAM { get; set; }
@@ -245,60 +251,235 @@ namespace Wins.WinMenus.SALARY
             var record = this.SYNCFUSION_DG.View.Records.GetItemAt(recordIndex);
             CurrentCellValue = record?.GetType()?.GetProperty(mappingName ?? string.Empty)?.GetValue(record)?.ToString();
         }
+        private string GetSelectedText()
+        {
+            var dataGrid = SYNCFUSION_DG;
+            var currentCell = dataGrid.SelectionController?.CurrentCellManager?.CurrentCell;
+
+            if (currentCell == null)
+                return string.Empty;
+
+            // حالت 1: Edit Mode
+            if (currentCell.IsEditing)
+            {
+                var editingElement = dataGrid.FindElementOfType<TextBox>();
+                if (editingElement != null && !string.IsNullOrEmpty(editingElement.SelectedText))
+                {
+                    return editingElement.SelectedText;
+                }
+            }
+
+            // حالت 2: جستجوی ساده - بدون GetCellElement
+            try
+            {
+                var gridCellElement = currentCell?.ColumnElement;
+                if (gridCellElement != null)
+                {
+                    var textBox = FindVisualChild<TextBox>(gridCellElement);
+                    if (textBox != null && !string.IsNullOrWhiteSpace(textBox.SelectedText))
+                    {
+                        return textBox.SelectedText;
+                    }
+                }
+            }
+            catch { }
+
+            return string.Empty;
+        }
         private void FilterBySelection_Click(object sender, RoutedEventArgs e)
         {
             var selectedText = GetSelectedText();
-            var (columnName, filterValue) = GetSelectedCellDetails(); // Get the details of the selected cell
+            var (columnName, filterValue) = GetSelectedCellDetails();
 
+            if (string.IsNullOrEmpty(columnName))
+            {
+                universControl.PopNotifyShow("لطفاً یک سلول انتخاب کنید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            // حالت 1: بخشی از متن انتخاب شده است
             if (!string.IsNullOrEmpty(selectedText))
             {
-                // Add the Contains filter to the filter service (inclusion filter)
-                filterService.AddFilter(columnName, selectedText, isExclusion: false); // False means it's an inclusion filter
-                ActiveFilters.Add($"{columnName} Contains {selectedText}");
-                // Apply the cumulative filter to the data grid
+                // فیلتر Contains
+                filterService.AddFilter(columnName, selectedText, isExclusion: false, isExactMatch: false);
+                ActiveFilters.Add($"{columnName} Contains \"{selectedText}\"");
+                ApplyCumulativeFilter();
+                return;
+            }
+
+            // حالت 2: کل سلول انتخاب شده است
+            if (filterValue != null)
+            {
+                // فیلتر Exact Match
+                filterService.AddFilter(columnName, filterValue, isExclusion: false, isExactMatch: true);
+
+                string displayValue = FormatValueForDisplay(filterValue);
+                ActiveFilters.Add($"{columnName} = {displayValue}");
+
                 ApplyCumulativeFilter();
             }
             else
             {
-                if (filterValue != null)
-                {
-                    // Add the filter to the filter service
-                    filterService.AddFilter(columnName, filterValue);
-                    // Add the filter to the list of active filters
-                    ActiveFilters.Add($"{columnName} = {filterValue}");
-                    // Apply the cumulative filter to the data grid
-                    ApplyCumulativeFilter();
-                }
+                // فیلتر برای null values
+                filterService.AddFilter(columnName, null, isExclusion: false, isExactMatch: true);
+                ActiveFilters.Add($"{columnName} = NULL");
+                ApplyCumulativeFilter();
             }
         }
         private void FilterExcludingSelection_Click(object sender, RoutedEventArgs e)
         {
             var selectedText = GetSelectedText();
+            var (columnName, filterValue) = GetSelectedCellDetails();
+
+            // اگر ستون یا مقدار معتبر نیست، خروج
+            if (string.IsNullOrEmpty(columnName))
+            {
+                universControl.PopNotifyShow("لطفاً یک سلول انتخاب کنید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            // حالت 1: بخشی از متن انتخاب شده است (partial selection)
             if (!string.IsNullOrEmpty(selectedText))
             {
-                var (columnName, filterValue) = GetSelectedCellDetails(); // Get the details of the selected cell
-                if (filterValue != null)
-                {
-                    // Add the Not Contains filter to the filter service (exclusion filter)
-                    filterService.AddFilter(columnName, selectedText, isExclusion: true); // True means it's an exclusion filter
-                                                                                          // Add the exclusion filter to the list of active filters
-                    ActiveFilters.Add($"{columnName} Does Not Contain {selectedText}");
-                    // Apply the cumulative filter to the data grid
-                    ApplyCumulativeFilter();
-                }
+                // فیلتر "Does Not Contain" - برای متن
+                filterService.AddFilter(columnName, selectedText, isExclusion: true, isExactMatch: false);
+                ActiveFilters.Add($"{columnName} Does Not Contain \"{selectedText}\"");
+                ApplyCumulativeFilter();
+                return;
+            }
+
+            // حالت 2: کل سلول انتخاب شده است (exact value)
+            if (filterValue != null)
+            {
+                // فیلتر Exclusion با Exact Match - برای مقدار دقیق
+                filterService.AddFilter(columnName, filterValue, isExclusion: true, isExactMatch: true);
+
+                // نمایش بهتر در لیست فیلترها
+                string displayValue = FormatValueForDisplay(filterValue);
+                ActiveFilters.Add($"{columnName} != {displayValue}");
+
+                ApplyCumulativeFilter();
             }
             else
             {
-                var (columnName, filterValue) = GetSelectedCellDetails(); // Get the details of the selected cell
-                if (filterValue != null)
+                // اگر مقدار null است
+                filterService.AddFilter(columnName, null, isExclusion: true, isExactMatch: true);
+                ActiveFilters.Add($"{columnName} != NULL");
+                ApplyCumulativeFilter();
+            }
+        }
+
+        private string FormatValueForDisplay(object value)
+        {
+            if (value == null)
+                return "NULL";
+
+            // برای مقادیر عددی، فرمت هزارگان اعمال می‌شود
+            if (value is double || value is decimal || value is float)
+            {
+                try
                 {
-                    // Add the exclusion filter to the filter service
-                    filterService.AddFilter(columnName, filterValue, isExclusion: true);
-                    // Add the filter to the list of active filters
-                    ActiveFilters.Add($"{columnName} != {filterValue}");
-                    // Apply the cumulative filter to the data grid
-                    ApplyCumulativeFilter();
+                    return Convert.ToDecimal(value).ToString("N", System.Globalization.CultureInfo.InvariantCulture);
                 }
+                catch
+                {
+                    return value.ToString();
+                }
+            }
+
+            if (value is int || value is long || value is short || value is byte)
+            {
+                try
+                {
+                    return Convert.ToInt64(value).ToString("N0", System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch
+                {
+                    return value.ToString();
+                }
+            }
+
+            return value.ToString();
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            CopySelectedRowsToClipboard();
+        }
+        private void CopySelectedRowsToClipboard()
+        {
+            try
+            {
+                //این توی حالتی که کاربر از فیلتر SfDataGrid Filter استفاده کرده باشه درست کار نمیکنه !
+                var _SelectedTextCell_ = GetSelectedText();
+                if (!string.IsNullOrEmpty(_SelectedTextCell_))
+                {
+                    Clipboard.SetText(_SelectedTextCell_);
+                    universControl.PopNotifyShowUp("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 1);
+                    return;
+                }
+            }
+            catch { return; }
+
+            // Check if there are selected rows
+            if (SYNCFUSION_DG.SelectedItems == null || !SYNCFUSION_DG.SelectedItems.Any())
+            {
+                universControl.PopNotifyShow("چیزی برای کپی انتخاب نشده !", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            //var dataGrid = SYNCFUSION_DG;
+            //var currentCell = dataGrid.SelectionController.CurrentCellManager.CurrentCell;
+            //if (currentCell != null && currentCell.IsEditing)
+            //{
+            //    System.Windows.Forms.SendKeys.SendWait("^(c)"); //Fire Send Keys : Ctrl + C
+            //    universControl.PopNotifyShowUp("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 1);
+            //    return;
+            //}
+
+            var sb = new StringBuilder();
+
+            try
+            {
+                // Add headers
+                foreach (var column in SYNCFUSION_DG.Columns)
+                {
+                    if (!column.IsHidden) // Include only columns that are not hidden
+                        sb.Append(column.HeaderText + "\t");
+                }
+                sb.AppendLine();
+
+                // Add selected rows
+                foreach (var item in SYNCFUSION_DG.SelectedItems)
+                {
+                    foreach (var column in SYNCFUSION_DG.Columns)
+                    {
+                        if (!column.IsHidden) // Include only columns that are not hidden
+                        {
+                            var propertyValue = item.GetType().GetProperty(column.MappingName)?.GetValue(item, null);
+                            sb.Append(propertyValue?.ToString() + "\t");
+                        }
+                    }
+                    sb.AppendLine();
+                }
+
+                // Copy to clipboard
+                Clipboard.SetText(sb.ToString());
+                universControl.PopNotifyShow($"{SYNCFUSION_DG.SelectedItems.Count} تعداد رکورد در حافظه کپی شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+            }
+            catch { }
+
+        }
+
+        private async void EXPORTEXCEL_BTN(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "ExportedExcel");
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
             }
         }
 
@@ -358,90 +539,6 @@ namespace Wins.WinMenus.SALARY
                 }
             }
             return null;
-        }
-        private string GetSelectedText()
-        {
-            var dataGrid = SYNCFUSION_DG;
-            var currentCell = dataGrid.SelectionController.CurrentCellManager.CurrentCell;
-
-            if (currentCell != null && currentCell.IsEditing)
-            {
-                // Find the editing element (which will be a TextBox in edit mode)
-                var editingElement = dataGrid.FindElementOfType<TextBox>();
-                if (editingElement != null)
-                {
-                    if (!string.IsNullOrEmpty(editingElement.SelectedText))
-                    {
-                        return editingElement.SelectedText; // Return the selected text
-                    }
-                }
-
-                var editingElement2 = FindChildElement<TextBox>(dataGrid);
-                if (editingElement2 != null)
-                {
-                    return editingElement2.SelectedText;
-                }
-
-            }
-            return string.Empty;
-        }
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            CopySelectedRowsToClipboard();
-        }
-        private void CopySelectedRowsToClipboard()
-        {
-            try
-            {
-                var _SelectedTextCell_ = GetSelectedText();
-                if (!string.IsNullOrEmpty(_SelectedTextCell_))
-                {
-                    Clipboard.SetText(_SelectedTextCell_);
-                    universControl.PopNotifyShowUp("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
-                    return;
-                }
-            }
-            catch { return; }
-
-            // Check if there are selected rows
-            if (SYNCFUSION_DG.SelectedItems == null || !SYNCFUSION_DG.SelectedItems.Any())
-            {
-                universControl.PopNotifyShow("چیزی برای کپی انتخاب نشده !", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
-                return;
-            }
-
-            var sb = new StringBuilder();
-
-            try
-            {
-                // Add headers
-                foreach (var column in SYNCFUSION_DG.Columns)
-                {
-                    if (!column.IsHidden) // Include only columns that are not hidden
-                        sb.Append(column.HeaderText + "\t");
-                }
-                sb.AppendLine();
-
-                // Add selected rows
-                foreach (var item in SYNCFUSION_DG.SelectedItems)
-                {
-                    foreach (var column in SYNCFUSION_DG.Columns)
-                    {
-                        if (!column.IsHidden) // Include only columns that are not hidden
-                        {
-                            var propertyValue = item.GetType().GetProperty(column.MappingName)?.GetValue(item, null);
-                            sb.Append(propertyValue?.ToString() + "\t");
-                        }
-                    }
-                    sb.AppendLine();
-                }
-
-                // Copy to clipboard
-                Clipboard.SetText(sb.ToString());
-                universControl.PopNotifyShow($"{SYNCFUSION_DG.SelectedItems.Count} تعداد رکورد در حافظه کپی شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
-            }
-            catch { }
-
         }
         private void SYNCFUSION_DG_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -593,17 +690,6 @@ namespace Wins.WinMenus.SALARY
                     return true;
                 default:
                     return false;
-            }
-        }
-        private async void EXPORTEXCEL_BTN(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "ExportedExcel");
-            }
-            catch (Exception)
-            {
-                new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
             }
         }
 

@@ -529,7 +529,7 @@
         <!--Start.......................................................................................-->
 
         <syncfusion:SfDataGrid x:Name="SFDATAGRID_SUB" 
-                ItemsSource="{Binding SFDATAGRID_DATA}" 
+                ItemsSource="{Binding SFDATAGRID_DATA}"
                 AutoGenerateColumns="False"     
                 EnableDataVirtualization="True"
                 SelectionUnit="Row"
@@ -545,7 +545,8 @@
                 Style="{StaticResource KDG}"
                 HeaderStyle="{StaticResource KDGHeader}"
                 AllowEditing="True"
-                               
+                
+                FilterRowPosition="Top"
                 ContextMenu="{StaticResource DataGridContextMenu}"
                 PreviewMouseRightButtonDown="SFDATAGRID_SUB_PreviewMouseRightButtonDown"
                 CurrentCellActivated="SFDATAGRID_SUB_CurrentCellActivated"
