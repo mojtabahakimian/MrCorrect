@@ -273,6 +273,15 @@ namespace Functions
                     MoveReGetData(Jahat.CustomPosition, CurrentRecordIndex);
                     return;
                 }
+                else
+                {
+                    CurrentRecordIndex = -1;
+                    CurrentRecord = null;
+                    OnCurrentRecordIndexChanged(CurrentRecordIndex);
+                    OnRecordsDataCountChanged(RecordsData.Count);
+                    MoveReGetData(Jahat.NewItem);
+                    return;
+                }
             }
             MoveReGetData(Jahat.LastItem);
         }
@@ -391,7 +400,10 @@ namespace Functions
                 CurrentRecord = null;
             }
         }
-
+        public void ClearNumberToOpen()
+        {
+            NUMBER_TO_OPEN = null;
+        }
 
         private void UiDataUpdate()
         {

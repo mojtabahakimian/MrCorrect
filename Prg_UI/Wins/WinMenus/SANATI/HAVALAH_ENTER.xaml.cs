@@ -4,6 +4,7 @@ using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
@@ -12,34 +13,37 @@ using Prg_UI.Functions.Jostejoo;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Prg_UI.Wins.WinOther;
+using Rpts;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Components;
+using Stimulsoft.Report.Dictionary;
+using Syncfusion.Data.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
-using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
+using System.Windows.Threading;
 using Wins.WinMenus.ANBAR;
-using Syncfusion.Data.Extensions;
-using Rpts;
-using Stimulsoft.Report.Dictionary;
-using Stimulsoft.Report;
-using Stimulsoft.Report.Components;
-using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
-using System.Windows.Data;
-using System.Threading.Tasks;
 using Wins.WinOther;
 using static Interfaces.INavigator;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
-using System.Windows.Controls.Primitives;
-using Prg_Proccessy.Generaly;
-using System.Diagnostics;
+using static Prg_UI.HelperWins.Msgwin;
+using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
+using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
 
 namespace Wins.WinMenus.SANATI
 {
@@ -324,9 +328,194 @@ namespace Wins.WinMenus.SANATI
         }
         #endregion
 
+        private int _saveErrorCount = 0;
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            // اگر هیچ تغییری انجام نشده، نیازی به دیالوگ نیست
+            if (!ChangeIsHappend)
+            {
+                return;
+            }
+
+            var MSGCAP = new MSGCAPTIONMODEL()
+            {
+                YES_CAPTION = "ذخـیره و خروج",
+                NO_CAPTION = "صرفا خارج شو"
+            };
+
+            string message = "تغییرات شما ذخیره نشده است. آیا مایل به ذخیره کردن هستید؟";
+
+            Msgwin msgwin = new Msgwin(true, message, default, default, MSGCAP);
+            bool? dialogResult = msgwin.ShowDialog();
+
+            if (dialogResult == true)
+            {
+                // کاربر درخواست ذخیره کرده است
+                try
+                {
+
+                    // اگر BTN_SAVE_Click از sender استفاده می‌کند،
+                    // اینجا "this" را می‌فرستیم نه default تا NullReferenceException نگیریم.
+                    BTN_SAVE_Click(this, new RoutedEventArgs());
+
+                    // اگر ذخیره موفق بود، فلگ تغییرات را پاک می‌کنیم
+                    ChangeIsHappend = false;
+
+                    _saveErrorCount = 0; // ریست شمارنده خطا برای دفعات بعدی
+                    // نکته مهم:
+                    // در اینجا e.Cancel را دست نمی‌زنیم → بستن فرم ادامه پیدا می‌کند.
+                    // اگر ذخیره داخل BTN_SAVE_Click شکست بخورد و Exception بدهد،
+                    // catch زیر مانع خروج می‌شود.
+                }
+                catch (Exception ex)
+                {
+                    // 1. شمارنده‌ی خطا را افزایش بده
+                    _saveErrorCount++;
+
+                    new Msgwin(false, "در هنگام ذخیره‌سازی خطایی رخ داد و عملیات بستن پنجره لغو شد.\n").Show();
+                    if (_saveErrorCount < 2)
+                    {
+                        // در اولین خطا اجازه‌ی بسته شدن پنجره را نمی‌دهیم
+                        e.Cancel = true;
+                        // ChangeIsHappend را دست نمی‌زنیم تا کاربر بداند هنوز ذخیره نشده
+                        return;
+                    }
+                    else
+                    {
+                        // در این مرحله، کاربر عملاً می‌خواهد از این خطا خلاص شود
+                        // و ما می‌پذیریم که بدون ذخیره پنجره بسته شود.
+                        ChangeIsHappend = false;
+
+                        // نکته‌ی مهم:
+                        // این‌جا e.Cancel را true نمی‌کنیم.
+                        // مقدار پیش‌فرض e.Cancel = false است، پس پنجره بسته می‌شود.
+                        return;
+                    }
+                }
+            }
+            else if (dialogResult == false)
+            {
+                // کاربر "صرفا خارج شو" را زده → خروج بدون ذخیره
+                ChangeIsHappend = false;
+                _saveErrorCount = 0;
+            }
+            else // dialogResult == null
+            {
+                // کاربر دیالوگ را بسته (ضربدر، ESC، Alt+F4 روی دیالوگ و ...)
+                // این یعنی می‌خواهد از عملیات بستن "انصراف" بدهد.
+                e.Cancel = true;
+            }
+        }
+
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
+        }
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            DataGrid DG = INVO_LST_SUB;
+
+            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                e.Handled = true;
+
+                if (INVO_LST_SUB_IsFocused)
+                {
+                    try
+                    {
+                        if (DG.CurrentColumn != null)
+                        {
+                            int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                            bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                            bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+                            if (isLastColumn)
+                            {
+                                if (isLastRow) // If it's the last column, move focus to the first cell of next row
+                                {
+                                    // Add focus to new row if needed
+                                    DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
+
+                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[INVO_LST_SUB_DEF_INDEX_COL]);
+
+                                    Dispatcher.BeginInvoke(new Action(() =>
+                                    {
+                                        DG.BeginEdit();
+                                    }) /*, DispatcherPriority.Background*/ );
+
+                                    //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
+                                    var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                                    if (focusedWindow != null)
+                                    {
+                                        Dispatcher.BeginInvoke(new Action(() =>
+                                        {
+                                            focusedWindow.Activate();
+                                            focusedWindow.Focus();
+                                        }), DispatcherPriority.Background);
+                                    }
+
+                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                }
+                            }
+                        }
+                    }
+                    catch { /*ignore*/ }
+
+                }
+                else if (BTN_SAVE.IsFocused)
+                {
+                    BTN_SAVE.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                    return;
+                }
+
+                CL_LMethods.SendKey_US(Key.Tab);
+            }
+            else
+            {
+                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && (e.Key == Key.S || e.SystemKey == Key.S))
+                {
+                    e.Handled = true;
+                    BTN_SAVE_Click(null, null);
+                }
+            }
+
+            if (!INVO_LST_SUB.IsKeyboardFocusWithin && !INVO_LST_SUB.IsFocused) //Only On Form F7 Pressed Not DataGrid
+            {
+                if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+                    var searchWindow = new EnhancedSearchWindow(this);
+                    searchWindow.Owner = this;
+                    searchWindow.ShowDialog();
+                }
+            }
+
+            // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
+            var nonDataKeys = new[]
+            {
+                Key.Enter, Key.Tab, Key.LeftShift, Key.RightShift,
+                Key.CapsLock, Key.Left, Key.Right, Key.Up, Key.Down,
+                Key.LeftAlt, Key.RightAlt, Key.LeftCtrl, Key.RightCtrl,
+                Key.F1, Key.F2, Key.F3, Key.F4, Key.F5, Key.F6,
+                Key.F7, Key.F8, Key.F9, Key.F10, Key.F11, Key.F12,
+                Key.Escape, Key.Insert, Key.Home, Key.End,
+                Key.PageUp, Key.PageDown
+            };
+            if (!nonDataKeys.Contains(e.Key))
+            {
+                var focused = Keyboard.FocusedElement as DependencyObject;
+                if (focused != null && (CL_LMethods.IsInside<TextBoxBase>(focused) || CL_LMethods.IsInside<ComboBox>(focused) || CL_LMethods.IsInside<CheckBox>(focused)))
+                {
+                    ChangeIsHappend = true;
+                }
+                else
+                {
+                    var focusedElement = Keyboard.FocusedElement;
+                    if (focusedElement is Xceed.Wpf.Toolkit.MaskedTextBox)
+                    {
+                        ChangeIsHappend = true;
+                    }
+                }
+            }
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -510,104 +699,6 @@ namespace Wins.WinMenus.SANATI
             }
 
             //SecurityAllCheck();
-        }
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            DataGrid DG = INVO_LST_SUB;
-            UIElement uie = e.OriginalSource as UIElement;
-
-            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
-            {
-                e.Handled = true;
-
-                if (INVO_LST_SUB_IsFocused)
-                {
-                    try
-                    {
-                        if (DG.CurrentColumn != null)
-                        {
-                            int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                            bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
-                            bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
-
-                            if (isLastColumn)
-                            {
-                                // If it's the last column, move focus to the first cell of next row
-                                if (isLastRow)
-                                {
-                                    // Add focus to new row if needed
-                                    DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
-
-                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[INVO_LST_SUB_DEF_INDEX_COL]);
-
-                                    //Dispatcher.BeginInvoke(new Action(() =>
-                                    //{
-                                    //    DG.BeginEdit();
-                                    //}), DispatcherPriority.Background);
-
-                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
-                                }
-                            }
-                        }
-                    }
-                    catch { /*ignore*/ }
-
-                }
-                else if (BTN_SAVE.IsFocused)
-                {
-                    BTN_SAVE.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                    return;
-                }
-
-                CL_LMethods.SendKey_US(Key.Tab);
-            }
-            else
-            {
-                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && (e.Key == Key.S || e.SystemKey == Key.S))
-                {
-                    e.Handled = true;
-                    BTN_SAVE_Click(null, null);
-                }
-            }
-
-            if (!INVO_LST_SUB.IsKeyboardFocusWithin && !INVO_LST_SUB.IsFocused) //Only On Form F7 Pressed Not DataGrid
-            {
-                if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
-                {
-                    e.Handled = true;
-                    var searchWindow = new EnhancedSearchWindow(this);
-                    searchWindow.Owner = this;
-                    searchWindow.ShowDialog();
-                }
-            }
-
-            // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
-            var nonDataKeys = new[]
-            {
-                Key.Enter, Key.Tab, Key.LeftShift, Key.RightShift,
-                Key.CapsLock, Key.Left, Key.Right, Key.Up, Key.Down,
-                Key.LeftAlt, Key.RightAlt, Key.LeftCtrl, Key.RightCtrl,
-                Key.F1, Key.F2, Key.F3, Key.F4, Key.F5, Key.F6,
-                Key.F7, Key.F8, Key.F9, Key.F10, Key.F11, Key.F12,
-                Key.Escape, Key.Insert, Key.Home, Key.End,
-                Key.PageUp, Key.PageDown
-            };
-            if (!nonDataKeys.Contains(e.Key))
-            {
-                var focused = Keyboard.FocusedElement as DependencyObject;
-                if (focused != null && (CL_LMethods.IsInside<TextBoxBase>(focused) || CL_LMethods.IsInside<ComboBox>(focused) || CL_LMethods.IsInside<CheckBox>(focused)))
-                {
-                    ChangeIsHappend = true;
-                }
-                else
-                {
-                    var focusedElement = Keyboard.FocusedElement;
-                    if (focusedElement is Xceed.Wpf.Toolkit.MaskedTextBox)
-                    {
-                        ChangeIsHappend = true;
-                    }
-                }
-            }
         }
 
         private void GetFocusOnDefaultCell()
@@ -857,7 +948,7 @@ namespace Wins.WinMenus.SANATI
         public bool ItwasNewFirstTime { get; set; } = false;
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e) //**********************************************************************************************
         {
-            if (!BTN_SAVE.IsEnabled) { return; }
+            if (!BTN_SAVE.IsEnabled || BTN_SAVE.Visibility != Visibility.Visible || !BTN_SAVE.IsHitTestVisible) { return; }
 
             var errors = (from object i in INVO_LST_SUB.ItemsSource
                           let c = INVO_LST_SUB.ItemContainerGenerator.ContainerFromItem(i)
@@ -954,6 +1045,361 @@ namespace Wins.WinMenus.SANATI
 
             ChangeIsHappend = false;
         }
+        private void SANAD()
+        {
+            // --- ایمنی: Parse و Validation ورودی‌ها ---
+            if (!long.TryParse(NUMBER.Text, out long numberVal))
+            {
+                return;
+            }
+
+            long.TryParse(NUMBER1.Text, out long number1Val); // اگر ناموفق باشد، 0 می‌شود
+
+            if (!long.TryParse(DATE_N.Text.ToRawTarikh(), out long dateNVal))
+            {
+                return;
+            }
+
+            Process Prc = ProcLoader.Start();
+
+            try
+            {
+
+                var (SanadNumber, IsSuccessy) = AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADVORUDSAKHT(numberVal, numberVal, false);
+
+                if (SanadNumber != null)
+                {
+                    N_S.Text = SanadNumber.ToString();
+                }
+
+                if (Baseknow.ECONM ?? false)
+                {
+                    double num = 0;
+                    long MABLTMP = 0;
+
+                    // --- شرط اصلی: بررسی کاراکتر 56 از OPTIONSS ---
+                    if (Strings.Mid(Baseknow.OPTIONSS, 56, 1) != "5")
+                    {
+                        // ========================================
+                        // بلوک A: OPTIONSS != "5"
+                        // ========================================
+                        if (number1Val != 0)
+                        {
+                            // --- بلوک A.1: NUMBER1 موجود است (UPDATE) ---
+
+                            var rst = (dbms.DoGetDataSQL<HEAD_LST>(
+                                "SELECT * FROM HEAD_LST WHERE NUMBER = @Num AND TAG = 10",
+                                new { Num = number1Val })).ToList();
+
+                            if (rst.Count == 1)
+                            {
+                                // --- حذف رکوردهای قبلی ---
+                                dbms.DoExecuteSQL(
+                                   "DELETE FROM INVO_LST WHERE NUMBER = @Num AND TAG = 10",
+                                   new { Num = number1Val });
+
+                                // --- بارگذاری رکوردهای منبع (TAG=9) ---
+                                var RSTK = (dbms.DoGetDataSQL<INVO_LST>(
+                                    "SELECT * FROM INVO_LST WHERE NUMBER = @Num AND TAG = 9",
+                                    new { Num = numberVal })).ToList();
+
+                                var newInvoListItems = new List<INVO_LST>();
+
+                                for (int i = 0; i < RSTK.Count; i++)
+                                {
+                                    // --- بارگذاری جزئیات ساخت بر اساس CODE ---
+                                    var rstf = (dbms.DoGetDataSQL<VKSQRE2>(
+                                        @"SELECT dbo.HEAD_MANF.CODE, dbo.DTL_MANF.FNUMB, dbo.DTL_MANF.CODE AS CODB, 
+                                        dbo.DTL_MANF.ANBAR, dbo.DTL_MANF.MEGHk, dbo.DTL_MANF.VAHED_K, 
+                                        dbo.DTL_MANF.MEGH, dbo.DTL_MANF.PERT, dbo.DTL_MANF.smabl, dbo.DTL_MANF.MABLK 
+                                 FROM dbo.DTL_MANF 
+                                 INNER JOIN dbo.HEAD_MANF ON dbo.DTL_MANF.FNUMB = dbo.HEAD_MANF.FNUMB 
+                                 WHERE (dbo.HEAD_MANF.CODE = @Code)",
+                                        new { Code = RSTK[i].CODE })).ToList();
+
+                                    for (int j = 0; j < rstf.Count; j++)
+                                    {
+                                        MABLTMP = (long)CL_HESABDARI.LASTAVRAGE(rstf[j].CODB, Convert.ToInt64(rstf[j].ANBAR), dateNVal);
+
+                                        var newItem = new INVO_LST
+                                        {
+                                            NUMBER = number1Val,
+                                            TAG = 10,
+                                            ANBAR = (int)rstf[j].ANBAR,
+                                            CODE = rstf[j].CODB,
+                                            VAHED_K = rstf[j].VAHED_K,
+                                            MEGH = (double)((rstf[j].MEGH + rstf[j].PERT) * RSTK[i].MEGHk),
+                                            MEGHk = (double)((rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk),
+                                            N_RASID = rstf[j].FNUMB?.ToString(),
+                                            MABL = MABLTMP,
+                                            AVRAGE = MABLTMP,
+                                            MABL_K = (double)(MABLTMP * (rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk)
+                                        };
+                                        newInvoListItems.Add(newItem);
+                                    }
+                                }
+
+                                // --- درج رکوردهای جدید ---
+                                string insertQuery = @"INSERT INTO dbo.INVO_LST(NUMBER,TAG,ANBAR,CODE,VAHED_K,MEGH,MEGHk,N_RASID,MABL,AVRAGE,MABL_K) 
+                                               VALUES (@NUMBER,@TAG,@ANBAR,@CODE,@VAHED_K,@MEGH,@MEGHk,@N_RASID,@MABL,@AVRAGE,@MABL_K)";
+                                if (newInvoListItems.Any())
+                                {
+                                    dbms.DoExecuteSQL(insertQuery, newInvoListItems);
+                                }
+
+                                AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGMAVAD(number1Val, number1Val, false);
+                            }
+                        }
+                        else
+                        {
+                            // --- بلوک A.2: NUMBER1 موجود نیست (INSERT جدید) ---
+
+                            var rstq = (dbms.DoGetDataSQL<double?>(
+                                "SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)=10))"
+                                )).FirstOrDefault();
+
+                            num = (rstq == null || rstq == 0) ? 1L : (double)(rstq + 1);
+
+                            // --- درج رکورد جدید در HEAD_LST ---
+                            string insertHeadSql = @"INSERT INTO dbo.HEAD_LST(NUMBER,TAG,USER_NAME,DATE_N,FNUMCO,CUST_NO,DEPATMAN,MOLAH,OKF)
+                                             VALUES(@NUMBER,@TAG,@USER_NAME,@DATE_N,@FNUMCO,@CUST_NO,@DEPATMAN,@MOLAH,1)";
+                            dbms.DoExecuteSQL(insertHeadSql, new
+                            {
+                                NUMBER = num,
+                                TAG = 10,
+                                USER_NAME = CL_HESABDARI.UCurrentUser(),
+                                DATE_N = dateNVal,
+                                FNUMCO = numberVal,
+                                CUST_NO = CUST_NO.SelectedValue,
+                                DEPATMAN = DEPATMAN.SelectedValue,
+                                MOLAH = "بر اساس توليد"
+                            });
+
+                            // --- بارگذاری رکوردهای منبع (TAG=9) ---
+                            var RSTK = (dbms.DoGetDataSQL<INVO_LST>(
+                                "SELECT * FROM INVO_LST WHERE NUMBER = @Num AND TAG = 9",
+                                new { Num = numberVal })).ToList();
+
+                            var newInvoListItems = new List<INVO_LST>();
+
+                            for (int i = 0; i < RSTK.Count; i++)
+                            {
+                                // --- بارگذاری جزئیات ساخت بر اساس CODE ---
+                                var rstf = (dbms.DoGetDataSQL<VKSQRE2>(
+                                    @"SELECT dbo.HEAD_MANF.CODE, dbo.DTL_MANF.FNUMB, dbo.DTL_MANF.CODE AS CODB, 
+                                    dbo.DTL_MANF.ANBAR, dbo.DTL_MANF.MEGHk, dbo.DTL_MANF.VAHED_K, 
+                                    dbo.DTL_MANF.MEGH, dbo.DTL_MANF.PERT, dbo.DTL_MANF.smabl, dbo.DTL_MANF.MABLK 
+                             FROM dbo.DTL_MANF 
+                             INNER JOIN dbo.HEAD_MANF ON dbo.DTL_MANF.FNUMB = dbo.HEAD_MANF.FNUMB 
+                             WHERE (dbo.HEAD_MANF.CODE = @Code)",
+                                    new { Code = RSTK[i].CODE })).ToList();
+
+                                for (int j = 0; j < rstf.Count; j++)
+                                {
+                                    MABLTMP = (long)CL_HESABDARI.LASTAVRAGE(rstf[j].CODB, Convert.ToInt64(rstf[j].ANBAR), dateNVal);
+
+                                    var newItem = new INVO_LST
+                                    {
+                                        NUMBER = num,
+                                        TAG = 10,
+                                        ANBAR = (int)rstf[j].ANBAR,
+                                        CODE = rstf[j].CODB,
+                                        VAHED_K = rstf[j].VAHED_K,
+                                        MEGH = (double)((rstf[j].MEGH + rstf[j].PERT) * RSTK[i].MEGHk),
+                                        MEGHk = (double)((rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk),
+                                        N_RASID = rstf[j].FNUMB?.ToString(),
+                                        MABL = MABLTMP,
+                                        AVRAGE = MABLTMP,
+                                        MABL_K = (double)(MABLTMP * (rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk)
+                                    };
+                                    newInvoListItems.Add(newItem);
+                                }
+                            }
+
+                            // --- درج رکوردهای جدید ---
+                            string insertQuery = @"INSERT INTO dbo.INVO_LST(NUMBER,TAG,ANBAR,CODE,VAHED_K,MEGH,MEGHk,N_RASID,MABL,AVRAGE,MABL_K) 
+                                           VALUES (@NUMBER,@TAG,@ANBAR,@CODE,@VAHED_K,@MEGH,@MEGHk,@N_RASID,@MABL,@AVRAGE,@MABL_K)";
+                            if (newInvoListItems.Any())
+                            {
+                                dbms.DoExecuteSQL(insertQuery, newInvoListItems);
+                            }
+
+                            this.NUMBER1.Text = num.ToString();
+                            AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGMAVAD(Convert.ToInt64(num), Convert.ToInt64(num), false);
+                        }
+                    }
+                    else
+                    {
+                        // ========================================
+                        // بلوک B: OPTIONSS == "5"
+                        // ========================================
+                        if (number1Val != 0)
+                        {
+                            // --- بلوک B.1: NUMBER1 موجود است (UPDATE) ---
+
+                            var rst = (dbms.DoGetDataSQL<HEAD_LST>(
+                                "SELECT * FROM HEAD_LST WHERE NUMBER = @Num AND TAG = 10",
+                                new { Num = number1Val })).ToList();
+
+                            if (rst.Count == 1)
+                            {
+                                // --- حذف رکوردهای قبلی ---
+                                dbms.DoExecuteSQL(
+                                   "DELETE FROM INVO_LST WHERE NUMBER = @Num AND TAG = 10",
+                                   new { Num = number1Val });
+
+                                // --- بارگذاری رکوردهای منبع (TAG=9) ---
+                                var RSTK = (dbms.DoGetDataSQL<INVO_LST>(
+                                    "SELECT * FROM INVO_LST WHERE NUMBER = @Num AND TAG = 9",
+                                    new { Num = numberVal })).ToList();
+
+                                var newInvoListItems = new List<INVO_LST>();
+
+                                for (int i = 0; i < RSTK.Count; i++)
+                                {
+                                    // --- مدیریت NULL برای N_KOL ---
+                                    var nKolParam = (RSTK[i].N_KOL == null || RSTK[i].N_KOL == 0) ? "0" : RSTK[i].N_KOL.ToString();
+
+                                    // --- بارگذاری جزئیات ساخت بر اساس FNUMB ---
+                                    var rstf = (dbms.DoGetDataSQL<VKSQRE2>(
+                                        @"SELECT dbo.HEAD_MANF.CODE, dbo.DTL_MANF.FNUMB, dbo.DTL_MANF.CODE AS CODB, 
+                                        dbo.DTL_MANF.ANBAR, dbo.DTL_MANF.MEGHk, dbo.DTL_MANF.VAHED_K, 
+                                        dbo.DTL_MANF.MEGH, dbo.DTL_MANF.PERT, dbo.DTL_MANF.smabl, dbo.DTL_MANF.MABLK 
+                                 FROM dbo.DTL_MANF 
+                                 INNER JOIN dbo.HEAD_MANF ON dbo.DTL_MANF.FNUMB = dbo.HEAD_MANF.FNUMB 
+                                 WHERE (dbo.HEAD_MANF.FNUMB = @FNUMB)",
+                                        new { FNUMB = nKolParam })).ToList();
+
+                                    for (int j = 0; j < rstf.Count; j++)
+                                    {
+                                        MABLTMP = (long)CL_HESABDARI.LASTAVRAGE(rstf[j].CODB, Convert.ToInt64(rstf[j].ANBAR), dateNVal);
+
+                                        var newItem = new INVO_LST
+                                        {
+                                            NUMBER = number1Val,
+                                            TAG = 10,
+                                            ANBAR = (int)rstf[j].ANBAR,
+                                            CODE = rstf[j].CODB,
+                                            VAHED_K = rstf[j].VAHED_K,
+                                            MEGH = (double)((rstf[j].MEGH + rstf[j].PERT) * RSTK[i].MEGHk),
+                                            MEGHk = (double)((rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk),
+                                            N_RASID = rstf[j].FNUMB?.ToString(),
+                                            MABL = MABLTMP,
+                                            AVRAGE = MABLTMP,
+                                            MABL_K = (double)(MABLTMP * (rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk)
+                                        };
+                                        newInvoListItems.Add(newItem);
+                                    }
+                                }
+
+                                // --- درج رکوردهای جدید ---
+                                string insertQuery = @"INSERT INTO dbo.INVO_LST(NUMBER,TAG,ANBAR,CODE,VAHED_K,MEGH,MEGHk,N_RASID,MABL,AVRAGE,MABL_K) 
+                                               VALUES (@NUMBER,@TAG,@ANBAR,@CODE,@VAHED_K,@MEGH,@MEGHk,@N_RASID,@MABL,@AVRAGE,@MABL_K)";
+                                if (newInvoListItems.Any())
+                                {
+                                    dbms.DoExecuteSQL(insertQuery, newInvoListItems);
+                                }
+
+                                AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGMAVAD(number1Val, number1Val, false);
+                            }
+                        }
+                        else
+                        {
+                            // --- بلوک B.2: NUMBER1 موجود نیست (INSERT جدید) ---
+
+                            var rst0 = (dbms.DoGetDataSQL<double?>(
+                                "SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)=10))"
+                                )).FirstOrDefault();
+
+                            num = (rst0 == null || rst0 == 0) ? 1L : (double)(rst0 + 1);
+
+                            // --- درج رکورد جدید در HEAD_LST ---
+                            string insertHeadSql = @"INSERT INTO dbo.HEAD_LST(NUMBER,TAG,USER_NAME,DATE_N,FNUMCO,CUST_NO,DEPATMAN,MOLAH,OKF)
+                                             VALUES(@NUMBER,@TAG,@USER_NAME,@DATE_N,@FNUMCO,@CUST_NO,@DEPATMAN,@MOLAH,1)";
+                            dbms.DoExecuteSQL(insertHeadSql, new
+                            {
+                                NUMBER = num,
+                                TAG = 10,
+                                USER_NAME = CL_HESABDARI.UCurrentUser(),
+                                DATE_N = dateNVal,
+                                FNUMCO = numberVal,
+                                CUST_NO = CUST_NO.SelectedValue,
+                                DEPATMAN = DEPATMAN.SelectedValue,
+                                MOLAH = "بر اساس توليد"
+                            });
+
+                            // --- بارگذاری رکوردهای منبع (TAG=9) ---
+                            var RSTK = (dbms.DoGetDataSQL<INVO_LST>(
+                                "SELECT * FROM INVO_LST WHERE NUMBER = @Num AND TAG = 9",
+                                new { Num = numberVal })).ToList();
+
+                            var newInvoListItems = new List<INVO_LST>();
+
+                            for (int i = 0; i < RSTK.Count; i++)
+                            {
+                                // --- استفاده از N_KOL بدون بررسی NULL (مطابق VBA اصلی) ---
+                                var nKolParam = RSTK[i].N_KOL;
+
+                                // --- بارگذاری جزئیات ساخت بر اساس FNUMB ---
+                                var rstf = (dbms.DoGetDataSQL<VKSQRE2>(
+                                    @"SELECT dbo.HEAD_MANF.CODE, dbo.DTL_MANF.FNUMB, dbo.DTL_MANF.CODE AS CODB, 
+                                    dbo.DTL_MANF.ANBAR, dbo.DTL_MANF.MEGHk, dbo.DTL_MANF.VAHED_K, 
+                                    dbo.DTL_MANF.MEGH, dbo.DTL_MANF.PERT, dbo.DTL_MANF.smabl, dbo.DTL_MANF.MABLK 
+                             FROM dbo.DTL_MANF 
+                             INNER JOIN dbo.HEAD_MANF ON dbo.DTL_MANF.FNUMB = dbo.HEAD_MANF.FNUMB 
+                             WHERE (dbo.HEAD_MANF.FNUMB = @FNUMB)",
+                                    new { FNUMB = nKolParam })).ToList();
+
+                                for (int j = 0; j < rstf.Count; j++)
+                                {
+                                    MABLTMP = (long)CL_HESABDARI.LASTAVRAGE(rstf[j].CODB, Convert.ToInt64(rstf[j].ANBAR), dateNVal);
+
+                                    var newItem = new INVO_LST
+                                    {
+                                        NUMBER = num,
+                                        TAG = 10,
+                                        ANBAR = (int)rstf[j].ANBAR,
+                                        CODE = rstf[j].CODB,
+                                        VAHED_K = rstf[j].VAHED_K,
+                                        MEGH = (double)((rstf[j].MEGH + rstf[j].PERT) * RSTK[i].MEGHk),
+                                        MEGHk = (double)((rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk),
+                                        N_RASID = rstf[j].FNUMB?.ToString(),
+                                        MABL = MABLTMP,
+                                        AVRAGE = MABLTMP,
+                                        MABL_K = (double)(MABLTMP * (rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk)
+                                    };
+                                    newInvoListItems.Add(newItem);
+                                }
+                            }
+
+                            // --- درج رکوردهای جدید ---
+                            string insertQuery = @"INSERT INTO dbo.INVO_LST(NUMBER,TAG,ANBAR,CODE,VAHED_K,MEGH,MEGHk,N_RASID,MABL,AVRAGE,MABL_K) 
+                                           VALUES (@NUMBER,@TAG,@ANBAR,@CODE,@VAHED_K,@MEGH,@MEGHk,@N_RASID,@MABL,@AVRAGE,@MABL_K)";
+                            if (newInvoListItems.Any())
+                            {
+                                dbms.DoExecuteSQL(insertQuery, newInvoListItems);
+                            }
+
+                            NUMBER1.Text = num.ToString();
+                            AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGMAVAD(Convert.ToInt64(num), Convert.ToInt64(num), false);
+                        }
+                    }
+                }
+
+                DoCmdHeaderSave();
+                GetBalanceInfo();
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, "خطا در عملیات سند").Show();
+                return;
+            }
+            finally
+            {
+                ProcLoader.Stop(Prc);
+            }
+        }
+
         private void ESLAH_Click(object sender, RoutedEventArgs e)
         {
             if (!ESLAH.IsEnabled) { return; }
@@ -1212,6 +1658,48 @@ namespace Wins.WinMenus.SANATI
                         { RoutedEvent = routedEvent });
                 }
             }
+        }
+
+        private bool IsFocusLeavingDataGrid()
+        {
+            // Check current focused element is not part of DataGrid or its children
+            var currentFocus = Keyboard.FocusedElement as FrameworkElement;
+            if (currentFocus == null || INVO_LST_SUB.IsAncestorOf(currentFocus))
+            {
+                return false;
+            }
+            // Additional check: if focus is on a known external element (e.g., save button), confirm leave
+            return !INVO_LST_SUB.IsKeyboardFocusWithin;
+        }
+        private void INVO_LST_SUB_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+        }
+        private void INVO_LST_SUB_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if ((bool)e.NewValue == false) // Focus is LEAVING the DataGrid
+            {
+                INVO_LST_SUB_IsFocused = false;
+
+                // Check if the DataGrid is enabled and not read-only
+                if (!INVO_LST_SUB.IsEnabled || INVO_LST_SUB.IsReadOnly)
+                {
+                    return;
+                }
+
+                // Only run SANAD() if changes have been registered.
+                if (ChangeIsHappend)
+                {
+                    SANAD();
+
+                    // Reset the flag after the operation is complete.
+                    ChangeIsHappend = false;
+                }
+            }
+            else // Focus is ENTERING the DataGrid
+            {
+                INVO_LST_SUB_IsFocused = true;
+            }
+
         }
 
         private void INVO_LST_SUB_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -1736,14 +2224,14 @@ namespace Wins.WinMenus.SANATI
             #endregion
 
             //فرمول ساخت
-            #region N_TAF
+            #region N_KOL
             if (e.Column.SortMemberPath == "N_KOL")
             {
                 if (string.IsNullOrEmpty(ENTERED_VALUE_ROW?.ToStringNullSafe()))
                 {
-                    CURRENT_ITEMS_ROW.N_KOL = WAS_ROW_ITEM.N_KOL;
-                    universControl.PopNotifyShow("فرمول ساخت نمی تواند خالی باشد !", Pop1, Pop1Text1, Pop_Border1);
-                    INVO_LST_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                    //CURRENT_ITEMS_ROW.N_KOL = WAS_ROW_ITEM.N_KOL;
+                    //universControl.PopNotifyShow("فرمول ساخت نمی تواند خالی باشد !", Pop1, Pop1Text1, Pop_Border1);
+                    //INVO_LST_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
                     return;
                 }
                 else
@@ -1755,7 +2243,6 @@ namespace Wins.WinMenus.SANATI
             #endregion
 
         }
-
         private void INVO_LST_SUB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Cancel) { return; }
@@ -1775,6 +2262,7 @@ namespace Wins.WinMenus.SANATI
                 return;
             }
 
+            ChangeIsHappend = true;
 
             string _qre = null;
             var MasterTopErrorMessages = new List<MsgModel>();
@@ -1894,7 +2382,7 @@ namespace Wins.WinMenus.SANATI
             MasterTopErrorMessages.AddRange(ErrosMessages);
 
 
-            SANAD();
+            ////SANAD();
 
             if (MasterTopErrorMessages.Any())
             {
@@ -2029,7 +2517,6 @@ namespace Wins.WinMenus.SANATI
 
         }
 
-
         private void CUST_NO_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (CUST_NO.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
@@ -2131,575 +2618,6 @@ namespace Wins.WinMenus.SANATI
                 }
             }
 
-        }
-        private void SANAD0()
-        {
-            Process Prc = ProcLoader.Start();
-
-            var (SanadNumber, IsSuccessy) = AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADVORUDSAKHT(Convert.ToInt64(NUMBER.Text), Convert.ToInt64(NUMBER.Text), false);
-
-            if (SanadNumber != null)
-            {
-                N_S.Text = SanadNumber.ToString();
-            }
-
-            if (Baseknow.ECONM ?? false)
-            {
-                double num = 0;
-                long MABLTMP = 0;
-
-                if (Strings.Mid(Baseknow.OPTIONSS, 56, 1) != "5")
-                {
-                    if (!IsNull(NUMBER1.Text) && NUMBER1.Text != "0")
-                    {
-                        var rst = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER = " + NUMBER1.Text + " AND TAG = 10").ToList();
-                        if (rst.Count == 1)
-                        {
-                            dbms.DoExecuteSQL("DELETE FROM INVO_LST WHERE NUMBER = " + this.NUMBER1.Text + " AND TAG = 10");
-                            var RSTK = dbms.DoGetDataSQL<INVO_LST>("SELECT * FROM INVO_LST WHERE NUMBER =" + this.NUMBER.Text + " AND TAG = 9").ToList();
-                            for (int i = 0; i < RSTK.Count; i++) //while (!RSTK.EOF())
-                            {
-                                var rstf = dbms.DoGetDataSQL<VKSQRE2>("SELECT dbo.HEAD_MANF.CODE, dbo.DTL_MANF.FNUMB, dbo.DTL_MANF.CODE AS CODB, dbo.DTL_MANF.ANBAR, dbo.DTL_MANF.MEGHk,  dbo.DTL_MANF.VAHED_K , dbo.DTL_MANF.MEGH, dbo.DTL_MANF.PERT, dbo.DTL_MANF.smabl, dbo.DTL_MANF.MABLK FROM  dbo.DTL_MANF INNER JOIN  dbo.HEAD_MANF ON dbo.DTL_MANF.FNUMB = dbo.HEAD_MANF.FNUMB WHERE  (dbo.HEAD_MANF.CODE = '" + RSTK[i].CODE + "')").ToList();
-                                for (int S = 0; S < rstf.Count; S++) //while (!rstf.EOF())
-                                {
-                                    //RSTM.AddNew();
-                                    var _NUMBER_ = this.NUMBER1.Text;
-                                    var _TAG_ = 10;
-                                    var _ANBAR_ = rstf[S].ANBAR;
-                                    var _CODE_ = rstf[S].CODB; //N''
-                                    var _VAHED_K_ = rstf[S].VAHED_K;
-                                    var _MEGH_ = (rstf[S].MEGH + rstf[S].PERT) * RSTK[i].MEGHk;
-                                    var _MEGHk_ = (rstf[S].MEGHk + rstf[S].PERT) * RSTK[i].MEGHk;
-                                    var _N_RASID_ = rstf[S].FNUMB; //N''
-                                    MABLTMP = (long)CL_HESABDARI.LASTAVRAGE(rstf[S].CODB, Convert.ToInt64(rstf[S].ANBAR), Convert.ToInt64(DATE_N.Text.ToRawTarikh()));
-                                    var _MABL_ = MABLTMP;
-                                    var _AVRAGE_ = MABLTMP;
-                                    var _MABL_K_ = MABLTMP * (rstf[S].MEGHk + rstf[S].PERT) * RSTK[i].MEGHk;
-                                    //RSTM.update();
-                                    dbms.DoExecuteSQL(@$"INSERT INTO dbo.INVO_LST(NUMBER,TAG,ANBAR,CODE,VAHED_K,MEGH,MEGHk,N_RASID,MABL,AVRAGE,MABL_K) 
-                                      VALUES ({_NUMBER_},{_TAG_},{_ANBAR_},N'{_CODE_}',{_VAHED_K_},{_MEGH_},{_MEGHk_},N'{_N_RASID_}',{_MABL_},{_AVRAGE_},{_MABL_K_})");
-                                }
-                            }
-                            AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGMAVAD(Convert.ToInt64(NUMBER1.Text), Convert.ToInt64(NUMBER1.Text), false);
-                        }
-                    }
-                    else
-                    {
-                        var rstq = dbms.DoGetDataSQL<double?>("SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)=10))").FirstOrDefault();
-                        if (rstq == null || rstq == 0)
-                        {
-                            num = 1L;
-                        }
-                        else
-                        {
-                            num = (double)(rstq + 1);
-                        }
-
-                        {
-                            //rst.AddNew();
-                            var _NUMBER_ = num;
-                            var _TAG_ = 10;
-                            var _USER_NAME_ = CL_HESABDARI.UCurrentUser();
-                            var _DATE_N_ = DATE_N.Text.ToRawTarikh();
-                            var _FNUMCO_ = NUMBER.Text;
-                            var _CUST_NO_ = CUST_NO.SelectedValue;
-                            var _MOLAH_ = "بر اساس توليد";
-                            var _OKF_ = true;
-                            //rst.update();
-
-                            dbms.DoExecuteSQL($@"INSERT INTO dbo.HEAD_LST(NUMBER,TAG,USER_NAME,DATE_N,FNUMCO,CUST_NO,MOLAH,OKF)
-                                             VALUES({_NUMBER_},{_TAG_},N'{_USER_NAME_}',{_DATE_N_},{_FNUMCO_},N'{_CUST_NO_}',N'{_MOLAH_}',1)");
-                        }
-
-                        //RSTM.Open("INVO_LST", CurrentProject.Connection, adOpenKeyset, adLockOptimistic);
-
-                        var RSTK = dbms.DoGetDataSQL<INVO_LST>("SELECT * FROM INVO_LST WHERE NUMBER =" + NUMBER.Text + " AND TAG = 9").ToList();
-                        for (int i = 0; i < RSTK.Count; i++) //while (!RSTK.EOF())
-                        {
-                            var rstf = dbms.DoGetDataSQL<VKSQRE2>("SELECT dbo.HEAD_MANF.CODE, dbo.DTL_MANF.FNUMB, dbo.DTL_MANF.CODE AS CODB, dbo.DTL_MANF.ANBAR, dbo.DTL_MANF.MEGHk,  dbo.DTL_MANF.VAHED_K , dbo.DTL_MANF.MEGH, dbo.DTL_MANF.PERT, dbo.DTL_MANF.smabl, dbo.DTL_MANF.MABLK FROM  dbo.DTL_MANF INNER JOIN  dbo.HEAD_MANF ON dbo.DTL_MANF.FNUMB = dbo.HEAD_MANF.FNUMB WHERE  (dbo.HEAD_MANF.CODE = '" + RSTK[i].CODE + "')").ToList();
-                            for (int S = 0; S < rstf.Count; S++) //while (!rstf.EOF())
-                            {
-                                //RSTM.AddNew();
-                                var _NUMBER_ = num;
-                                var _TAG_ = 10;
-                                var _ANBAR_ = rstf[S].ANBAR;
-                                var _CODE_ = rstf[S].CODB;
-                                var _VAHED_K_ = rstf[S].VAHED_K;
-                                var _MEGH_ = (rstf[S].MEGH + rstf[S].PERT) * RSTK[i].MEGHk;
-                                var _MEGHk_ = (rstf[S].MEGHk + rstf[S].PERT) * RSTK[i].MEGHk;
-                                var _N_RASID_ = rstf[S].FNUMB;
-                                MABLTMP = (long)CL_HESABDARI.LASTAVRAGE(rstf[S].CODB, Convert.ToInt64(rstf[S].ANBAR), Convert.ToInt64(DATE_N.Text.ToRawTarikh()));
-                                var _MABL_ = MABLTMP;
-                                var _AVRAGE_ = MABLTMP;
-                                var _MABL_K_ = MABLTMP * (rstf[S].MEGHk + rstf[S].PERT) * RSTK[i].MEGHk;
-                                //RSTM.update();
-
-                                dbms.DoExecuteSQL(@$"INSERT INTO dbo.INVO_LST(NUMBER,TAG,ANBAR,CODE,VAHED_K,MEGH,MEGHk,N_RASID,MABL,AVRAGE,MABL_K) 
-                                      VALUES ({_NUMBER_},{_TAG_},{_ANBAR_},N'{_CODE_}',{_VAHED_K_},{_MEGH_},{_MEGHk_},N'{_N_RASID_}',{_MABL_},{_AVRAGE_},{_MABL_K_})");
-                            }
-                        }
-
-                        this.NUMBER1.Text = num.ToString();
-
-                        AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGMAVAD(Convert.ToInt64(NUMBER1.Text), Convert.ToInt64(NUMBER1.Text), false);
-                    }
-                }
-                else if (!IsNull(NUMBER1.Text) && NUMBER1.Text != "0")
-                {
-                    var rst = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER = " + NUMBER1.Text + " AND TAG = 10").ToList();
-                    if (rst.Count == 1)
-                    {
-                        dbms.DoExecuteSQL("DELETE FROM INVO_LST WHERE NUMBER = " + NUMBER1.Text + " AND TAG = 10");
-                        //RSTM.Open("INVO_LST", CurrentProject.Connection, adOpenKeyset, adLockOptimistic);
-
-                        var RSTK = dbms.DoGetDataSQL<INVO_LST>("SELECT * FROM INVO_LST WHERE NUMBER =" + NUMBER.Text + " AND TAG = 9").ToList();
-                        for (int i = 0; i < RSTK.Count; i++) //while (!RSTK.EOF())
-                        {
-                            var rstf = dbms.DoGetDataSQL<VKSQRE2>("SELECT dbo.HEAD_MANF.CODE, dbo.DTL_MANF.FNUMB, dbo.DTL_MANF.CODE AS CODB, dbo.DTL_MANF.ANBAR, dbo.DTL_MANF.MEGHk,  dbo.DTL_MANF.VAHED_K , dbo.DTL_MANF.MEGH, dbo.DTL_MANF.PERT, dbo.DTL_MANF.smabl, dbo.DTL_MANF.MABLK FROM  dbo.DTL_MANF INNER JOIN  dbo.HEAD_MANF ON dbo.DTL_MANF.FNUMB = dbo.HEAD_MANF.FNUMB WHERE  (dbo.HEAD_MANF.FNUMB = '" + (IsNull(RSTK[i].N_KOL) ? 0 : RSTK[i].N_KOL) + "')").ToList();
-                            for (int O = 0; O < rstf.Count; O++) //while (!rstf.EOF())
-                            {
-                                //RSTM.AddNew();
-                                var _NUMBER_ = NUMBER1.Text;
-                                var _TAG_ = 10;
-                                var _ANBAR_ = rstf[O].ANBAR;
-                                var _CODE_ = rstf[O].CODB;
-                                var _VAHED_K_ = rstf[O].VAHED_K;
-                                var _MEGH_ = (rstf[O].MEGH + rstf[O].PERT * RSTK[i].MEGHk);
-                                var _MEGHk_ = (rstf[O].MEGHk + rstf[O].PERT) * RSTK[i].MEGHk;
-                                var _N_RASID_ = rstf[O].FNUMB;
-                                MABLTMP = (long)CL_HESABDARI.LASTAVRAGE(rstf[O].CODB, Convert.ToInt64(rstf[O].ANBAR), Convert.ToInt64(DATE_N.Text.ToRawTarikh()));
-                                var _MABL_ = MABLTMP;
-                                var _AVRAGE_ = MABLTMP;
-                                var _MABL_K_ = MABLTMP * (rstf[O].MEGHk + rstf[O].PERT) * RSTK[i].MEGHk;
-                                //RSTM.update();
-
-                                dbms.DoExecuteSQL(@$"INSERT INTO dbo.INVO_LST(NUMBER,TAG,ANBAR,CODE,VAHED_K,MEGH,MEGHk,N_RASID,MABL,AVRAGE,MABL_K) 
-                                      VALUES ({_NUMBER_},{_TAG_},{_ANBAR_},N'{_CODE_}',{_VAHED_K_},{_MEGH_},{_MEGHk_},N'{_N_RASID_}',{_MABL_},{_AVRAGE_},{_MABL_K_})");
-                            }
-                        }
-                        AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGMAVAD(Convert.ToInt64(NUMBER1.Text), Convert.ToInt64(NUMBER1.Text), false);
-                    }
-                }
-                else
-                {
-                    var rst0 = dbms.DoGetDataSQL<double?>("SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)=10))").FirstOrDefault();
-                    if (rst0 == null || rst0 == 0)
-                    {
-                        num = 1L;
-                    }
-                    else
-                    {
-                        num = (double)(rst0 + 1);
-                    }
-
-                    //rst.Open("HEAD_LST", CurrentProject.Connection, adOpenKeyset, adLockOptimistic);
-                    //rst.AddNew();
-                    {
-                        var _NUMBER_ = num;
-                        var _TAG_ = 10;
-                        var _USER_NAME_ = CL_HESABDARI.UCurrentUser();
-                        var _DATE_N_ = DATE_N.Text.ToRawTarikh();
-                        var _FNUMCO_ = NUMBER.Text;
-                        var _CUST_NO_ = CUST_NO.SelectedValue;
-                        var _MOLAH_ = "بر اساس توليد";
-                        var _OKF_ = true;
-                        //rst.update();
-
-                        dbms.DoExecuteSQL($@"INSERT INTO dbo.HEAD_LST(NUMBER,TAG,USER_NAME,DATE_N,FNUMCO,CUST_NO,MOLAH,OKF)
-                                             VALUES({_NUMBER_},{_TAG_},N'{_USER_NAME_}',{_DATE_N_},{_FNUMCO_},N'{_CUST_NO_}',N'{_MOLAH_}',1)");
-                    }
-
-                    var RSTK = dbms.DoGetDataSQL<INVO_LST>("SELECT * FROM INVO_LST WHERE NUMBER =" + NUMBER.Text + " AND TAG = 9").ToList();
-                    for (int E = 0; E < RSTK.Count; E++) //while (!RSTK.EOF())
-                    {
-                        var rstf = dbms.DoGetDataSQL<VKSQRE2>("SELECT dbo.HEAD_MANF.CODE, dbo.DTL_MANF.FNUMB, dbo.DTL_MANF.CODE AS CODB, dbo.DTL_MANF.ANBAR, dbo.DTL_MANF.MEGHk,  dbo.DTL_MANF.VAHED_K , dbo.DTL_MANF.MEGH, dbo.DTL_MANF.PERT, dbo.DTL_MANF.smabl, dbo.DTL_MANF.MABLK FROM  dbo.DTL_MANF INNER JOIN  dbo.HEAD_MANF ON dbo.DTL_MANF.FNUMB = dbo.HEAD_MANF.FNUMB WHERE  (dbo.HEAD_MANF.FNUMB = '" + RSTK[E].N_KOL + "')").ToList();
-                        for (int i = 0; i < rstf.Count; i++) //while (!rstf.EOF())
-                        {
-                            //RSTM.AddNew();
-                            var _NUMBER_ = num;
-                            var _TAG_ = 10;
-                            var _ANBAR_ = rstf[i].ANBAR;
-                            var _CODE_ = rstf[i].CODB;
-                            var _VAHED_K_ = rstf[i].VAHED_K;
-                            var _MEGH_ = (rstf[i].MEGH + rstf[i].PERT) * RSTK[E].MEGHk;
-                            var _MEGHk_ = (rstf[i].MEGHk + rstf[i].PERT) * RSTK[E].MEGHk;
-                            var _N_RASID_ = rstf[i].FNUMB;
-                            MABLTMP = (long)CL_HESABDARI.LASTAVRAGE(rstf[i].CODB, Convert.ToInt64(rstf[i].ANBAR), Convert.ToInt64(DATE_N.Text.ToRawTarikh()));
-                            var _MABL_ = MABLTMP;
-                            var _AVRAGE_ = MABLTMP;
-                            var _MABL_K_ = MABLTMP * (rstf[i].MEGHk + rstf[i].PERT) * RSTK[E].MEGHk;
-                            //RSTM.update();
-                            dbms.DoExecuteSQL(@$"INSERT INTO dbo.INVO_LST(NUMBER,TAG,ANBAR,CODE,VAHED_K,MEGH,MEGHk,N_RASID,MABL,AVRAGE,MABL_K) 
-                                      VALUES ({_NUMBER_},{_TAG_},{_ANBAR_},N'{_CODE_}',{_VAHED_K_},{_MEGH_},{_MEGHk_},N'{_N_RASID_}',{_MABL_},{_AVRAGE_},{_MABL_K_})");
-                        }
-                    }
-
-                    NUMBER1.Text = num.ToString();
-                    AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGMAVAD(Convert.ToInt64(num), Convert.ToInt64(num), false);
-
-                }
-            }
-
-            DoCmdHeaderSave();
-
-            GetBalanceInfo();
-
-            ProcLoader.Stop(Prc);
-        }
-
-        private void SANAD()
-        {
-            // --- ایمنی: Parse و Validation ورودی‌ها ---
-            if (!long.TryParse(NUMBER.Text, out long numberVal))
-            {
-                return;
-            }
-
-            long.TryParse(NUMBER1.Text, out long number1Val); // اگر ناموفق باشد، 0 می‌شود
-
-            if (!long.TryParse(DATE_N.Text.ToRawTarikh(), out long dateNVal))
-            {
-                return;
-            }
-
-            Process Prc = ProcLoader.Start();
-
-            try
-            {
-
-                var (SanadNumber, IsSuccessy) = AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADVORUDSAKHT(numberVal, numberVal, false);
-
-                if (SanadNumber != null)
-                {
-                    N_S.Text = SanadNumber.ToString();
-                }
-
-                if (Baseknow.ECONM ?? false)
-                {
-                    double num = 0;
-                    long MABLTMP = 0;
-
-                    // --- شرط اصلی: بررسی کاراکتر 56 از OPTIONSS ---
-                    if (Strings.Mid(Baseknow.OPTIONSS, 56, 1) != "5")
-                    {
-                        // ========================================
-                        // بلوک A: OPTIONSS != "5"
-                        // ========================================
-                        if (number1Val != 0)
-                        {
-                            // --- بلوک A.1: NUMBER1 موجود است (UPDATE) ---
-
-                            var rst = (dbms.DoGetDataSQL<HEAD_LST>(
-                                "SELECT * FROM HEAD_LST WHERE NUMBER = @Num AND TAG = 10",
-                                new { Num = number1Val })).ToList();
-
-                            if (rst.Count == 1)
-                            {
-                                // --- حذف رکوردهای قبلی ---
-                                dbms.DoExecuteSQL(
-                                   "DELETE FROM INVO_LST WHERE NUMBER = @Num AND TAG = 10",
-                                   new { Num = number1Val });
-
-                                // --- بارگذاری رکوردهای منبع (TAG=9) ---
-                                var RSTK = (dbms.DoGetDataSQL<INVO_LST>(
-                                    "SELECT * FROM INVO_LST WHERE NUMBER = @Num AND TAG = 9",
-                                    new { Num = numberVal })).ToList();
-
-                                var newInvoListItems = new List<INVO_LST>();
-
-                                for (int i = 0; i < RSTK.Count; i++)
-                                {
-                                    // --- بارگذاری جزئیات ساخت بر اساس CODE ---
-                                    var rstf = (dbms.DoGetDataSQL<VKSQRE2>(
-                                        @"SELECT dbo.HEAD_MANF.CODE, dbo.DTL_MANF.FNUMB, dbo.DTL_MANF.CODE AS CODB, 
-                                        dbo.DTL_MANF.ANBAR, dbo.DTL_MANF.MEGHk, dbo.DTL_MANF.VAHED_K, 
-                                        dbo.DTL_MANF.MEGH, dbo.DTL_MANF.PERT, dbo.DTL_MANF.smabl, dbo.DTL_MANF.MABLK 
-                                 FROM dbo.DTL_MANF 
-                                 INNER JOIN dbo.HEAD_MANF ON dbo.DTL_MANF.FNUMB = dbo.HEAD_MANF.FNUMB 
-                                 WHERE (dbo.HEAD_MANF.CODE = @Code)",
-                                        new { Code = RSTK[i].CODE })).ToList();
-
-                                    for (int j = 0; j < rstf.Count; j++)
-                                    {
-                                        MABLTMP = (long)CL_HESABDARI.LASTAVRAGE(rstf[j].CODB, Convert.ToInt64(rstf[j].ANBAR), dateNVal);
-
-                                        var newItem = new INVO_LST
-                                        {
-                                            NUMBER = number1Val,
-                                            TAG = 10,
-                                            ANBAR = (int)rstf[j].ANBAR,
-                                            CODE = rstf[j].CODB,
-                                            VAHED_K = rstf[j].VAHED_K,
-                                            MEGH = (double)((rstf[j].MEGH + rstf[j].PERT) * RSTK[i].MEGHk),
-                                            MEGHk = (double)((rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk),
-                                            N_RASID = rstf[j].FNUMB?.ToString(),
-                                            MABL = MABLTMP,
-                                            AVRAGE = MABLTMP,
-                                            MABL_K = (double)(MABLTMP * (rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk)
-                                        };
-                                        newInvoListItems.Add(newItem);
-                                    }
-                                }
-
-                                // --- درج رکوردهای جدید ---
-                                string insertQuery = @"INSERT INTO dbo.INVO_LST(NUMBER,TAG,ANBAR,CODE,VAHED_K,MEGH,MEGHk,N_RASID,MABL,AVRAGE,MABL_K) 
-                                               VALUES (@NUMBER,@TAG,@ANBAR,@CODE,@VAHED_K,@MEGH,@MEGHk,@N_RASID,@MABL,@AVRAGE,@MABL_K)";
-                                if (newInvoListItems.Any())
-                                {
-                                    dbms.DoExecuteSQL(insertQuery, newInvoListItems);
-                                }
-
-                                AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGMAVAD(number1Val, number1Val, false);
-                            }
-                        }
-                        else
-                        {
-                            // --- بلوک A.2: NUMBER1 موجود نیست (INSERT جدید) ---
-
-                            var rstq = (dbms.DoGetDataSQL<double?>(
-                                "SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)=10))"
-                                )).FirstOrDefault();
-
-                            num = (rstq == null || rstq == 0) ? 1L : (double)(rstq + 1);
-
-                            // --- درج رکورد جدید در HEAD_LST ---
-                            string insertHeadSql = @"INSERT INTO dbo.HEAD_LST(NUMBER,TAG,USER_NAME,DATE_N,FNUMCO,CUST_NO,DEPATMAN,MOLAH,OKF)
-                                             VALUES(@NUMBER,@TAG,@USER_NAME,@DATE_N,@FNUMCO,@CUST_NO,@DEPATMAN,@MOLAH,1)";
-                            dbms.DoExecuteSQL(insertHeadSql, new
-                            {
-                                NUMBER = num,
-                                TAG = 10,
-                                USER_NAME = CL_HESABDARI.UCurrentUser(),
-                                DATE_N = dateNVal,
-                                FNUMCO = numberVal,
-                                CUST_NO = CUST_NO.SelectedValue,
-                                DEPATMAN = DEPATMAN.SelectedValue,
-                                MOLAH = "بر اساس توليد"
-                            });
-
-                            // --- بارگذاری رکوردهای منبع (TAG=9) ---
-                            var RSTK = (dbms.DoGetDataSQL<INVO_LST>(
-                                "SELECT * FROM INVO_LST WHERE NUMBER = @Num AND TAG = 9",
-                                new { Num = numberVal })).ToList();
-
-                            var newInvoListItems = new List<INVO_LST>();
-
-                            for (int i = 0; i < RSTK.Count; i++)
-                            {
-                                // --- بارگذاری جزئیات ساخت بر اساس CODE ---
-                                var rstf = (dbms.DoGetDataSQL<VKSQRE2>(
-                                    @"SELECT dbo.HEAD_MANF.CODE, dbo.DTL_MANF.FNUMB, dbo.DTL_MANF.CODE AS CODB, 
-                                    dbo.DTL_MANF.ANBAR, dbo.DTL_MANF.MEGHk, dbo.DTL_MANF.VAHED_K, 
-                                    dbo.DTL_MANF.MEGH, dbo.DTL_MANF.PERT, dbo.DTL_MANF.smabl, dbo.DTL_MANF.MABLK 
-                             FROM dbo.DTL_MANF 
-                             INNER JOIN dbo.HEAD_MANF ON dbo.DTL_MANF.FNUMB = dbo.HEAD_MANF.FNUMB 
-                             WHERE (dbo.HEAD_MANF.CODE = @Code)",
-                                    new { Code = RSTK[i].CODE })).ToList();
-
-                                for (int j = 0; j < rstf.Count; j++)
-                                {
-                                    MABLTMP = (long)CL_HESABDARI.LASTAVRAGE(rstf[j].CODB, Convert.ToInt64(rstf[j].ANBAR), dateNVal);
-
-                                    var newItem = new INVO_LST
-                                    {
-                                        NUMBER = num,
-                                        TAG = 10,
-                                        ANBAR = (int)rstf[j].ANBAR,
-                                        CODE = rstf[j].CODB,
-                                        VAHED_K = rstf[j].VAHED_K,
-                                        MEGH = (double)((rstf[j].MEGH + rstf[j].PERT) * RSTK[i].MEGHk),
-                                        MEGHk = (double)((rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk),
-                                        N_RASID = rstf[j].FNUMB?.ToString(),
-                                        MABL = MABLTMP,
-                                        AVRAGE = MABLTMP,
-                                        MABL_K = (double)(MABLTMP * (rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk)
-                                    };
-                                    newInvoListItems.Add(newItem);
-                                }
-                            }
-
-                            // --- درج رکوردهای جدید ---
-                            string insertQuery = @"INSERT INTO dbo.INVO_LST(NUMBER,TAG,ANBAR,CODE,VAHED_K,MEGH,MEGHk,N_RASID,MABL,AVRAGE,MABL_K) 
-                                           VALUES (@NUMBER,@TAG,@ANBAR,@CODE,@VAHED_K,@MEGH,@MEGHk,@N_RASID,@MABL,@AVRAGE,@MABL_K)";
-                            if (newInvoListItems.Any())
-                            {
-                                dbms.DoExecuteSQL(insertQuery, newInvoListItems);
-                            }
-
-                            this.NUMBER1.Text = num.ToString();
-                            AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGMAVAD(Convert.ToInt64(num), Convert.ToInt64(num), false);
-                        }
-                    }
-                    else
-                    {
-                        // ========================================
-                        // بلوک B: OPTIONSS == "5"
-                        // ========================================
-                        if (number1Val != 0)
-                        {
-                            // --- بلوک B.1: NUMBER1 موجود است (UPDATE) ---
-
-                            var rst = (dbms.DoGetDataSQL<HEAD_LST>(
-                                "SELECT * FROM HEAD_LST WHERE NUMBER = @Num AND TAG = 10",
-                                new { Num = number1Val })).ToList();
-
-                            if (rst.Count == 1)
-                            {
-                                // --- حذف رکوردهای قبلی ---
-                                dbms.DoExecuteSQL(
-                                   "DELETE FROM INVO_LST WHERE NUMBER = @Num AND TAG = 10",
-                                   new { Num = number1Val });
-
-                                // --- بارگذاری رکوردهای منبع (TAG=9) ---
-                                var RSTK = (dbms.DoGetDataSQL<INVO_LST>(
-                                    "SELECT * FROM INVO_LST WHERE NUMBER = @Num AND TAG = 9",
-                                    new { Num = numberVal })).ToList();
-
-                                var newInvoListItems = new List<INVO_LST>();
-
-                                for (int i = 0; i < RSTK.Count; i++)
-                                {
-                                    // --- مدیریت NULL برای N_KOL ---
-                                    var nKolParam = (RSTK[i].N_KOL == null || RSTK[i].N_KOL == 0) ? "0" : RSTK[i].N_KOL.ToString();
-
-                                    // --- بارگذاری جزئیات ساخت بر اساس FNUMB ---
-                                    var rstf = (dbms.DoGetDataSQL<VKSQRE2>(
-                                        @"SELECT dbo.HEAD_MANF.CODE, dbo.DTL_MANF.FNUMB, dbo.DTL_MANF.CODE AS CODB, 
-                                        dbo.DTL_MANF.ANBAR, dbo.DTL_MANF.MEGHk, dbo.DTL_MANF.VAHED_K, 
-                                        dbo.DTL_MANF.MEGH, dbo.DTL_MANF.PERT, dbo.DTL_MANF.smabl, dbo.DTL_MANF.MABLK 
-                                 FROM dbo.DTL_MANF 
-                                 INNER JOIN dbo.HEAD_MANF ON dbo.DTL_MANF.FNUMB = dbo.HEAD_MANF.FNUMB 
-                                 WHERE (dbo.HEAD_MANF.FNUMB = @FNUMB)",
-                                        new { FNUMB = nKolParam })).ToList();
-
-                                    for (int j = 0; j < rstf.Count; j++)
-                                    {
-                                        MABLTMP = (long)CL_HESABDARI.LASTAVRAGE(rstf[j].CODB, Convert.ToInt64(rstf[j].ANBAR), dateNVal);
-
-                                        var newItem = new INVO_LST
-                                        {
-                                            NUMBER = number1Val,
-                                            TAG = 10,
-                                            ANBAR = (int)rstf[j].ANBAR,
-                                            CODE = rstf[j].CODB,
-                                            VAHED_K = rstf[j].VAHED_K,
-                                            MEGH = (double)((rstf[j].MEGH + rstf[j].PERT) * RSTK[i].MEGHk),
-                                            MEGHk = (double)((rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk),
-                                            N_RASID = rstf[j].FNUMB?.ToString(),
-                                            MABL = MABLTMP,
-                                            AVRAGE = MABLTMP,
-                                            MABL_K = (double)(MABLTMP * (rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk)
-                                        };
-                                        newInvoListItems.Add(newItem);
-                                    }
-                                }
-
-                                // --- درج رکوردهای جدید ---
-                                string insertQuery = @"INSERT INTO dbo.INVO_LST(NUMBER,TAG,ANBAR,CODE,VAHED_K,MEGH,MEGHk,N_RASID,MABL,AVRAGE,MABL_K) 
-                                               VALUES (@NUMBER,@TAG,@ANBAR,@CODE,@VAHED_K,@MEGH,@MEGHk,@N_RASID,@MABL,@AVRAGE,@MABL_K)";
-                                if (newInvoListItems.Any())
-                                {
-                                    dbms.DoExecuteSQL(insertQuery, newInvoListItems);
-                                }
-
-                                AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGMAVAD(number1Val, number1Val, false);
-                            }
-                        }
-                        else
-                        {
-                            // --- بلوک B.2: NUMBER1 موجود نیست (INSERT جدید) ---
-
-                            var rst0 = (dbms.DoGetDataSQL<double?>(
-                                "SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)=10))"
-                                )).FirstOrDefault();
-
-                            num = (rst0 == null || rst0 == 0) ? 1L : (double)(rst0 + 1);
-
-                            // --- درج رکورد جدید در HEAD_LST ---
-                            string insertHeadSql = @"INSERT INTO dbo.HEAD_LST(NUMBER,TAG,USER_NAME,DATE_N,FNUMCO,CUST_NO,DEPATMAN,MOLAH,OKF)
-                                             VALUES(@NUMBER,@TAG,@USER_NAME,@DATE_N,@FNUMCO,@CUST_NO,@DEPATMAN,@MOLAH,1)";
-                            dbms.DoExecuteSQL(insertHeadSql, new
-                            {
-                                NUMBER = num,
-                                TAG = 10,
-                                USER_NAME = CL_HESABDARI.UCurrentUser(),
-                                DATE_N = dateNVal,
-                                FNUMCO = numberVal,
-                                CUST_NO = CUST_NO.SelectedValue,
-                                DEPATMAN = DEPATMAN.SelectedValue,
-                                MOLAH = "بر اساس توليد"
-                            });
-
-                            // --- بارگذاری رکوردهای منبع (TAG=9) ---
-                            var RSTK = (dbms.DoGetDataSQL<INVO_LST>(
-                                "SELECT * FROM INVO_LST WHERE NUMBER = @Num AND TAG = 9",
-                                new { Num = numberVal })).ToList();
-
-                            var newInvoListItems = new List<INVO_LST>();
-
-                            for (int i = 0; i < RSTK.Count; i++)
-                            {
-                                // --- استفاده از N_KOL بدون بررسی NULL (مطابق VBA اصلی) ---
-                                var nKolParam = RSTK[i].N_KOL;
-
-                                // --- بارگذاری جزئیات ساخت بر اساس FNUMB ---
-                                var rstf = (dbms.DoGetDataSQL<VKSQRE2>(
-                                    @"SELECT dbo.HEAD_MANF.CODE, dbo.DTL_MANF.FNUMB, dbo.DTL_MANF.CODE AS CODB, 
-                                    dbo.DTL_MANF.ANBAR, dbo.DTL_MANF.MEGHk, dbo.DTL_MANF.VAHED_K, 
-                                    dbo.DTL_MANF.MEGH, dbo.DTL_MANF.PERT, dbo.DTL_MANF.smabl, dbo.DTL_MANF.MABLK 
-                             FROM dbo.DTL_MANF 
-                             INNER JOIN dbo.HEAD_MANF ON dbo.DTL_MANF.FNUMB = dbo.HEAD_MANF.FNUMB 
-                             WHERE (dbo.HEAD_MANF.FNUMB = @FNUMB)",
-                                    new { FNUMB = nKolParam })).ToList();
-
-                                for (int j = 0; j < rstf.Count; j++)
-                                {
-                                    MABLTMP = (long)CL_HESABDARI.LASTAVRAGE(rstf[j].CODB, Convert.ToInt64(rstf[j].ANBAR), dateNVal);
-
-                                    var newItem = new INVO_LST
-                                    {
-                                        NUMBER = num,
-                                        TAG = 10,
-                                        ANBAR = (int)rstf[j].ANBAR,
-                                        CODE = rstf[j].CODB,
-                                        VAHED_K = rstf[j].VAHED_K,
-                                        MEGH = (double)((rstf[j].MEGH + rstf[j].PERT) * RSTK[i].MEGHk),
-                                        MEGHk = (double)((rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk),
-                                        N_RASID = rstf[j].FNUMB?.ToString(),
-                                        MABL = MABLTMP,
-                                        AVRAGE = MABLTMP,
-                                        MABL_K = (double)(MABLTMP * (rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk)
-                                    };
-                                    newInvoListItems.Add(newItem);
-                                }
-                            }
-
-                            // --- درج رکوردهای جدید ---
-                            string insertQuery = @"INSERT INTO dbo.INVO_LST(NUMBER,TAG,ANBAR,CODE,VAHED_K,MEGH,MEGHk,N_RASID,MABL,AVRAGE,MABL_K) 
-                                           VALUES (@NUMBER,@TAG,@ANBAR,@CODE,@VAHED_K,@MEGH,@MEGHk,@N_RASID,@MABL,@AVRAGE,@MABL_K)";
-                            if (newInvoListItems.Any())
-                            {
-                                dbms.DoExecuteSQL(insertQuery, newInvoListItems);
-                            }
-
-                            NUMBER1.Text = num.ToString();
-                            AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGMAVAD(Convert.ToInt64(num), Convert.ToInt64(num), false);
-                        }
-                    }
-                }
-
-                DoCmdHeaderSave();
-                GetBalanceInfo();
-            }
-            catch (Exception ex)
-            {
-                new Msgwin(false, "خطا در عملیات سند").Show();
-                return;
-            }
-            finally
-            {
-                ProcLoader.Stop(Prc);
-            }
         }
 
 
@@ -2869,18 +2787,6 @@ namespace Wins.WinMenus.SANATI
                         f_MENU_KART.Close();
                     }
                 }
-            }
-        }
-
-        private void INVO_LST_SUB_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if ((bool)e.NewValue == false)
-            {
-                INVO_LST_SUB_IsFocused = false;
-            }
-            else
-            {
-                INVO_LST_SUB_IsFocused = true;
             }
         }
 
@@ -3087,5 +2993,7 @@ namespace Wins.WinMenus.SANATI
                 }
             });
         }
+
+
     }
 }

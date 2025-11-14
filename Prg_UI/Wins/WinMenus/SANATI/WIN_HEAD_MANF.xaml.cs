@@ -541,7 +541,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
             if (!DATE_IS_VALID())
             {
-                e.Handled = true;
+                //e.Handled = true;
             }
         }
 
@@ -631,10 +631,17 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 }
                 else
                 {
-                    if (!Tarikh.IsSyncedDateNow(date_n_val, (bool)Baseknow.CTL_DT))
+                    if (_navigationManager.IsNewRecord)
                     {
-                        DATE_ACTIV.Text = _navigationManager.CurrentRecord?.DATE_ACTIV?.ToStringNullSafe();
-                        ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ مربوط به سال جاری نیست" });
+                        if (!Tarikh.IsSyncedDateNow(date_n_val, (bool)Baseknow.CTL_DT))
+                        {
+                            DATE_ACTIV.Text = _navigationManager.CurrentRecord?.DATE_ACTIV?.ToStringNullSafe();
+                            ErrosMessages.Add(new MsgModel { MessageText_U = "تاریخ مربوط به سال جاری نیست" });
+                        }
+                    }
+                    else
+                    {
+                        universControl.PopNotifyShowUp("هشدار : تاریخ مربوط به سال جاری نیست", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
                     }
                 }
             }

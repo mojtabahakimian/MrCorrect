@@ -365,10 +365,12 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 167; Baseknow.UUSER = "Mr nikonahad";
             //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
             //Baseknow.USERCOD = 86; Baseknow.UUSER = "آقاي سجاد راستي";
+            //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
             Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
 
-            CL_Generaly.SHIFT_OF_USER = 1;
-            CL_Generaly.VAHED_OF_USER = 1;
+            //CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
+            CL_Generaly.SHIFT_OF_USER = 1; //شیفت صبح
+            CL_Generaly.VAHED_OF_USER = 1; //دپارتمان DEPARTEMAN اداری
             Baseknow.UGRP = "1";
 
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
@@ -385,7 +387,7 @@ namespace Prg_UI.Wins
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "9520,9509"); //اتکا
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHKE_DLIST_KOLCHECKD, this);
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.STUF_DEF_WIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID_OTHER_WIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAV_OTHER_WIN, this);
