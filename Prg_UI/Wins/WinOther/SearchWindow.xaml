@@ -51,11 +51,29 @@
         </Popup>
         <!--HEADER↑-->
 
-        <Label x:Name="ColumnLabel" Content="روی یک سطر برای جستجو کلیک کنید" HorizontalContentAlignment="Center" FontWeight="Bold" VerticalAlignment="Top" Margin="5,51,5,0"/>
-        <TextBox x:Name="SearchTextBox" Margin="10,145,12,143" KeyUp="SearchTextBox_KeyUp" FlowDirection="RightToLeft" PreviewGotKeyboardFocus="SearchTextBox_PreviewGotKeyboardFocus" TextChanged="SearchTextBox_TextChanged"/>
-        <Button Content="پاک سازی جستجو و ریست به حالت اولیه" Style="{StaticResource MaterialDesignFlatButton}" Margin="10,0,10,80" Click="ClearSearchButton_Click" Height="49" VerticalAlignment="Bottom" FontSize="12"/>
-        <Button Content="بستن" Margin="10,0,10,16" Style="{StaticResource MaterialDesignFlatButton}"  Click="CloseButton_Click" Height="49" VerticalAlignment="Bottom" FontSize="12"/>
-        <ComboBox x:Name="ColumnComboBox" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" SelectionChanged="ColumnComboBox_SelectionChanged" Margin="10,93,10,0" VerticalAlignment="Top" Height="35" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1">
+        <Label x:Name="ColumnLabel" Content="روی یک سطر برای جستجو کلیک کنید" HorizontalContentAlignment="Center" FontWeight="Bold" VerticalAlignment="Top" Margin="5,41,5,0"/>
+        <TextBox x:Name="SearchTextBox" Margin="10,115,12,178" KeyUp="SearchTextBox_KeyUp" FlowDirection="RightToLeft" PreviewGotKeyboardFocus="SearchTextBox_PreviewGotKeyboardFocus" TextChanged="SearchTextBox_TextChanged"/>
+
+
+        <!-- CheckBox for Navigation Mode -->
+        <CheckBox x:Name="NavigationModeCheckBox" Content="لیست ثابت (ناوبری به جای فیلتر)" Margin="0,0,12,138" VerticalAlignment="Bottom" Height="25"
+                  FlowDirection="RightToLeft" IsChecked="True" Checked="NavigationModeCheckBox_Changed" Unchecked="NavigationModeCheckBox_Changed" HorizontalAlignment="Right" Width="196"/>
+        <!-- Navigation Buttons -->
+        <StackPanel x:Name="NavigationButtonsPanel" Orientation="Horizontal" Margin="0,0,210,133" VerticalAlignment="Bottom" Height="35" HorizontalAlignment="Right" Width="400">
+            <Button x:Name="FindFirstButton" Content="اولین ⏮" Width="90" Margin="5,0" Click="FindFirstButton_Click" Style="{StaticResource MaterialDesignFlatButton}"/>
+
+            <Button x:Name="FindBackButton" Content="قبلی ◀" Width="90" Margin="5,0" Click="FindBackButton_Click" Style="{StaticResource MaterialDesignFlatButton}"/>
+
+            <Button x:Name="FindNextButton" Content="بعدی ▶" Width="90" Margin="5,0" Click="FindNextButton_Click" Style="{StaticResource MaterialDesignFlatButton}"/>
+
+            <Button x:Name="FindLastButton" Content="آخرین ⏭" Width="90" Margin="5,0" Click="FindLastButton_Click" Style="{StaticResource MaterialDesignFlatButton}"/>
+        </StackPanel>
+        <!-- Status Label -->
+
+        <Label x:Name="StatusLabel" Content="" HorizontalContentAlignment="Center" Margin="11,188,11,0" VerticalAlignment="Top" Height="25" Foreground="Gray" FontSize="11"/>
+        <Button Content="پاک سازی جستجو و ریست به حالت اولیه" Style="{StaticResource MaterialDesignFlatButton}" Margin="10,0,10,56" Click="ClearSearchButton_Click" Height="49" VerticalAlignment="Bottom" FontSize="12"/>
+        <Button Content="بستن" Margin="10,280,10,0" Style="{StaticResource MaterialDesignFlatButton}"  Click="CloseButton_Click" Height="36" VerticalAlignment="Top" FontSize="12"/>
+        <ComboBox x:Name="ColumnComboBox" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" SelectionChanged="ColumnComboBox_SelectionChanged" Margin="10,75,10,0" VerticalAlignment="Top" Height="35" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>

@@ -138,7 +138,7 @@
                                       KeyboardNavigation.TabNavigation="Contained"
                                       AutoGenerateColumns="False" 
                                       FlowDirection="RightToLeft" 
-                                      SelectionUnit="FullRow" 
+                                      SelectionUnit="FullRow" PreviewKeyDown="ANBARGRD_SUB2_PreviewKeyDown"
                                       CanUserDeleteRows="False" BorderThickness="1" Margin="-3,58,-3,40" CellEditEnding="ANBARGRD_SUB2_CellEditEnding" RowEditEnding="ANBARGRD_SUB2_RowEditEnding"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
@@ -193,7 +193,7 @@
                                       KeyboardNavigation.TabNavigation="Contained"
                                       AutoGenerateColumns="False" 
                                       FlowDirection="RightToLeft" 
-                                      SelectionUnit="FullRow" 
+                                      SelectionUnit="FullRow" PreviewKeyDown="ANBARGRD_SUB3_PreviewKeyDown"
                                       CanUserDeleteRows="False" BorderThickness="1" Margin="-3,58,-3,40" CellEditEnding="ANBARGRD_SUB3_CellEditEnding" RowEditEnding="ANBARGRD_SUB3_RowEditEnding"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
                               
 

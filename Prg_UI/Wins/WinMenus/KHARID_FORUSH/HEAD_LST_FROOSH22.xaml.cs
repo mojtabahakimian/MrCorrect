@@ -8294,81 +8294,88 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             #endregion
             return true;
         }
+
         private bool SaveMasterNewNumberINSERT()
         {
             try
             {
-                if (NUMBER1.Text == "0")
+                if (NUMBER1.Text == "0") // Only run for new records
                 {
-                    //Max Of Number1 TAG -----13
+                    double newNumber1;
+                    double newNumber;
+
                     using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
                     {
                         db.Open();
+                        // Use Serializable isolation level to prevent other users from reading MAX or inserting 
                         using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
                         {
-                            //Fake Query for Lock Table
-                            db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
-                            //Fake Query for Lock Table
-
-                            var rst_11 = db.Query<double?>("SELECT Max(HEAD_LST.NUMBER1) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)=13))", null, transaction).FirstOrDefault();
-                            if (rst_11 == 0 || ReferenceEquals(rst_11, null))
+                            try
                             {
-                                NUMBER1.Text = Baseknow.STHFR.ToString();
-                                NUMBER1.UpdateLayout();
-                            }
-                            else
-                            {
-                                NUMBER1.Text = Convert.ToDouble(rst_11 + 1).ToString();
-                                NUMBER1.UpdateLayout();
-                            }
+                                db.Execute("SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WITH (TABLOCKX, HOLDLOCK)", null, transaction);
 
-                            transaction.Commit();
-                            db?.Close();
-                        }
-                    }
-
-                    //Max Of Number TAG ------2
-                    using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
-                    {
-                        db.Open();
-                        using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
-                        {
-                            //Fake Query for Lock Table
-                            db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
-                            //Fake Query for Lock Table
-
-                            if (IsDirectFactor)
-                            {
-                                var rst_11 = db.Query<double?>("SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)=2))", null, transaction).FirstOrDefault();
-                                if (rst_11 == 0 || ReferenceEquals(rst_11, null))
+                                // 2. Get MAX(NUMBER1) for Invoice (fTAG = 13)
+                                var rst_11 = db.Query<double?>("SELECT Max(HEAD_LST.NUMBER1) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)=13))", null, transaction).FirstOrDefault();
+                                if (rst_11 == 0 || rst_11 == null)
                                 {
-                                    NUMBER.Text = Baseknow.STHFR.ToString();
-                                    NUMBER.UpdateLayout();
+                                    newNumber1 = Baseknow.STHFR; // Start number
                                 }
                                 else
                                 {
-                                    NUMBER.Text = Convert.ToDouble(rst_11 + 1).ToString();
-                                    NUMBER.UpdateLayout();
+                                    newNumber1 = Convert.ToDouble(rst_11 + 1);
                                 }
+
+                                // 3. Get MAX(NUMBER) for Dispatch (hTAG = 2) if it's a direct factor
+                                if (IsDirectFactor)
+                                {
+                                    var rst_12 = db.Query<double?>("SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)=2))", null, transaction).FirstOrDefault();
+                                    if (rst_12 == 0 || rst_12 == null)
+                                    {
+                                        newNumber = Baseknow.STHFR; // Start number
+                                    }
+                                    else
+                                    {
+                                        newNumber = Convert.ToDouble(rst_12 + 1);
+                                    }
+                                }
+                                else
+                                {
+                                    // If not direct, we use the existing NUMBER from the ComboBox
+                                    newNumber = Convert.ToDouble(NUMBER.Text);
+                                }
+
+                                // 4. Insert Invoice record (fTAG = 13)
+                                db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER, NUMBER1, TAG, DATE_N, MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF, UID)
+                                    VALUES ({newNumber}, {newNumber1}, {fTAG}, 0, 0, 0, 0, 0, 0, 0, 0, {Baseknow.USERCOD})", null, transaction);
+
+                                // 5. Insert Dispatch record (hTAG = 2) if direct
+                                if (IsDirectFactor)
+                                {
+                                    db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER, NUMBER1, TAG, DATE_N, MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF, UID)
+                                    VALUES ({newNumber}, {newNumber1}, {hTAG}, 0, 0, 0, 0, 0, 0, 0, 0, {Baseknow.USERCOD})", null, transaction);
+                                }
+
+                                // 6. If all inserts are successful, commit the transaction
+                                transaction.Commit();
+
+                                // 7. NOW update the UI
+                                NUMBER1.Text = newNumber1.ToString();
+                                NUMBER.Text = newNumber.ToString();
+                                NUMBER1.UpdateLayout();
+                                NUMBER.UpdateLayout();
                             }
-
-                            db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER,         NUMBER1,           TAG,     DATE_N,  MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF ,     UID)
-                                                        VALUES ({NUMBER.Text}, {NUMBER1.Text}    ,{fTAG},        0,    0,   0,       0,        0,        0,        0,    0  , {Baseknow.USERCOD}   )", null, transaction);
-
-
-                            if (IsDirectFactor)
+                            catch (Exception)
                             {
-                                db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER,         NUMBER1,           TAG,     DATE_N,  MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF , UID)
-                                                        VALUES ({NUMBER.Text}, {NUMBER1.Text}    ,{hTAG},        0,    0,   0,       0,        0,        0,        0,    0  ,{Baseknow.USERCOD} )", null, transaction);
+                                // If anything fails, roll back the entire operation
+                                transaction.Rollback();
+                                throw; // Re-throw the exception to be caught by the outer try-catch
                             }
+                        } // Transaction disposes
+                    } // Connection disposes
 
-                            transaction.Commit();
-                            db?.Close();
-
-                            _navigationManager.IsNewRecord = false;
-                            RefreshAfterUpdate();
-                        }
-                    }
+                    // Update navigation manager and state
+                    _navigationManager.IsNewRecord = false;
+                    RefreshAfterUpdate();
 
                     this.CDDATE = CL_HESABDARI.FARSIDATE();
                     this.CDTIME = CL_HESABDARI.GTFS();
@@ -8378,13 +8385,13 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
             catch (SqlException ex)
             {
-                if (ex.Number == 2627)
+                if (ex.Number == 2627) // Unique key violation (if you add one)
                 {
-                    new Msgwin(false, $"در حال حاضر شماره حواله {NUMBER.Text} توسط کاربر دیگری ثبت شده , شماره حواله دیگری انتخاب کنید").Show();
+                    new Msgwin(false, $"شماره فاکتور {NUMBER1.Text} یا شماره حواله {NUMBER.Text} تکراری است و توسط کاربر دیگری ثبت شده. لطفا دوباره تلاش کنید.").Show();
                 }
                 else
                 {
-                    new Msgwin(false, $"خطا در انجام عملیات دخیره , لطفا مجددا امتحان کنید").Show();
+                    new Msgwin(false, $"خطا در انجام عملیات ذخیره , لطفا مجددا امتحان کنید").Show();
                 }
                 return false;
             }

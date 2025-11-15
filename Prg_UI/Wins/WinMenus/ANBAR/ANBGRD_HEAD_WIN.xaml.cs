@@ -514,48 +514,6 @@ namespace Wins.WinMenus.ANBAR
             }
         }
 
-        private void ANBARGRD_SUB_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (NowIsReady && ANBARGRD_SUB.SelectedItem != null)
-            {
-                if (ANBARGRD_SUB.Items.Count > 0)
-                    CURRENT_ROW_ANBARGRD_SUB1_MODEL_INDEX = ANBARGRD_SUB.SelectedIndex;
-
-                if (!(e is null) && ANBARGRD_SUB.SelectedItem is not null)
-                {
-                    if (ANBARGRD_SUB.SelectedItem.ToStringNullSafe() != "{NewItemPlaceholder}")
-                    {
-                        //WAS_ROW_ITEM = ((ANBARGRD_SUB1_MODEL)ANBARGRD_SUB.SelectedItem).Clone() as ANBARGRD_SUB1_MODEL;
-                    }
-                }
-            }
-        }
-        private void ANBARGRD_SUB_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (NowIsReady && !(e is null))
-            {
-                //IF IS NOT NULL
-                if (!(ANBARGRD_SUB.Items.Count < 1) && !(ANBARGRD_SUB.SelectedItem is null))
-                {
-                    CURRENT_ROW_ANBARGRD_SUB1_MODEL_INDEX = ANBARGRD_SUB.SelectedIndex;
-                }
-            }
-        }
-        private void ANBARGRD_SUB_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
-        {
-
-        }
-        private void ANBARGRD_SUB_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if ((bool)e.NewValue == false)
-            {
-                ANBARGRD_SUB_IsFocused = false;
-            }
-            else
-            {
-                ANBARGRD_SUB_IsFocused = true;
-            }
-        }
         private void ANBARGRD_SUB_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             string CURRENT_COLUMN_NAME = "";
@@ -599,6 +557,81 @@ namespace Wins.WinMenus.ANBAR
                         new TextComposition(InputManager.Current, target, text))
                         { RoutedEvent = routedEvent });
                 }
+            }
+
+            var TheDataGrid = ANBARGRD_SUB;
+            if (TheDataGrid.IsEnabled && TheDataGrid.IsKeyboardFocusWithin)
+            {
+                if (e.Key is Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    DataGridExtension.HandleKeyPress(sender, e, TheDataGrid);
+                }
+            }
+        }
+
+        private void ANBARGRD_SUB2_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            var TheDataGrid = ANBARGRD_SUB2;
+            if (TheDataGrid.IsEnabled && TheDataGrid.IsKeyboardFocusWithin)
+            {
+                if (e.Key is Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    DataGridExtension.HandleKeyPress(sender, e, TheDataGrid);
+                }
+            }
+        }
+        private void ANBARGRD_SUB3_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            var TheDataGrid = ANBARGRD_SUB3;
+            if (TheDataGrid.IsEnabled && TheDataGrid.IsKeyboardFocusWithin)
+            {
+                if (e.Key is Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    DataGridExtension.HandleKeyPress(sender, e, TheDataGrid);
+                }
+            }
+        }
+
+        private void ANBARGRD_SUB_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (NowIsReady && ANBARGRD_SUB.SelectedItem != null)
+            {
+                if (ANBARGRD_SUB.Items.Count > 0)
+                    CURRENT_ROW_ANBARGRD_SUB1_MODEL_INDEX = ANBARGRD_SUB.SelectedIndex;
+
+                if (!(e is null) && ANBARGRD_SUB.SelectedItem is not null)
+                {
+                    if (ANBARGRD_SUB.SelectedItem.ToStringNullSafe() != "{NewItemPlaceholder}")
+                    {
+                        //WAS_ROW_ITEM = ((ANBARGRD_SUB1_MODEL)ANBARGRD_SUB.SelectedItem).Clone() as ANBARGRD_SUB1_MODEL;
+                    }
+                }
+            }
+        }
+        private void ANBARGRD_SUB_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (NowIsReady && !(e is null))
+            {
+                //IF IS NOT NULL
+                if (!(ANBARGRD_SUB.Items.Count < 1) && !(ANBARGRD_SUB.SelectedItem is null))
+                {
+                    CURRENT_ROW_ANBARGRD_SUB1_MODEL_INDEX = ANBARGRD_SUB.SelectedIndex;
+                }
+            }
+        }
+        private void ANBARGRD_SUB_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
+        {
+
+        }
+        private void ANBARGRD_SUB_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if ((bool)e.NewValue == false)
+            {
+                ANBARGRD_SUB_IsFocused = false;
+            }
+            else
+            {
+                ANBARGRD_SUB_IsFocused = true;
             }
         }
         private void ANBARGRD_SUB_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
@@ -1695,5 +1728,7 @@ namespace Wins.WinMenus.ANBAR
 
             GetDefaultFocus();
         }
+
+     
     }
 }
