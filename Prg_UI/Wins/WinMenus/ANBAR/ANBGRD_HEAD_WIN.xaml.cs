@@ -1,4 +1,6 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using Dapper;
+using Functions;
+using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
@@ -8,13 +10,15 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
-using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
+using Stimulsoft.Report.Dictionary;
 using Syncfusion.Data.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -23,12 +27,10 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
-using static AUTO_BAZ.LocalModles;
-using static Prg_UI.Functions.CL_LMethods;
-using System.Diagnostics;
-using Functions;
 using Wins.WinOther;
+using static AUTO_BAZ.LocalModles;
 using static Interfaces.INavigator;
+using static Prg_UI.Functions.CL_LMethods;
 
 namespace Wins.WinMenus.ANBAR
 {
@@ -1272,24 +1274,57 @@ namespace Wins.WinMenus.ANBAR
                 }
 
                 //Here Save
-                var number = dbms.DoGetDataSQL<double?>("SELECT MAX(GRD_NUM)+1 FROM ANBGRD_HEAD").FirstOrDefault();
                 if (_navigationManager.IsNewRecord)
                 {
-                    if (number is null)
+                    try
                     {
-                        number = 1;
-                        GRD_NUM.Text = number.ToString();
+
+                        using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+                        {
+                            db.Open();
+                            using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
+                            {
+                                // Fake Query for Lock Table
+                                db.Execute("UPDATE TOP(1) ANBGRD_HEAD SET COMMENT = COMMENT", null, transaction);
+
+                                // محاسبه شماره گردش انبار
+                                var maxNumber = db.Query<double?>("SELECT Max(GRD_NUM) FROM ANBGRD_HEAD", null, transaction).FirstOrDefault();
+                                if (maxNumber == null || maxNumber == 0)
+                                {
+                                    GRD_NUM.Text = "1";
+                                }
+                                else
+                                {
+                                    GRD_NUM.Text = (maxNumber + 1).ToString();
+                                }
+
+                                // INSERT رکورد
+                                db.Execute(@$"INSERT INTO dbo.ANBGRD_HEAD (       GRD_NUM,                     GRD_DATE,                GRD_ANBAR,                    GRD_HES,          COMMENT,           USER_NAME)
+                                                                   VALUES ({GRD_NUM.Text},{GRD_DATE.Text.ToRawTarikh()},{GRD_ANBAR.SelectedValue}, N'{GRD_HES.SelectedValue}',N'{COMMENT.Text}', N'{USER_NAME.Text}')", null, transaction);
+
+                                transaction.Commit();
+                            }
+                        }
+                        RefreshAfterUpdate();
                     }
-                    else
+                    catch (SqlException ex)
                     {
-                        GRD_NUM.Text = number.ToString();
+                        if (ex.Number == 2627)
+                        {
+                            new Msgwin(false, "در حال حاضر شماره توسط کاربر دیگری ثبت شده است. لطفا مجددا تلاش کنید تا شماره جدید تخصیص داده شود.").ShowDialog();
+                        }
+                        else
+                        {
+                            new Msgwin(false, "خطا در انجام عملیات ذخیره، لطفا مجددا امتحان کنید").ShowDialog();
+                        }
+                        return;
                     }
-
-                    //INSERT
-                    dbms.DoExecuteSQL(@$"INSERT INTO dbo.ANBGRD_HEAD (       GRD_NUM,                     GRD_DATE,                GRD_ANBAR,                    GRD_HES,          COMMENT,           USER_NAME) 
-                                                                   VALUES ({GRD_NUM.Text},{GRD_DATE.Text.ToRawTarikh()},{GRD_ANBAR.SelectedValue}, N'{GRD_HES.SelectedValue}',N'{COMMENT.Text}', N'{USER_NAME.Text}')");
-
-                    RefreshAfterUpdate();
+                    catch (Exception ex)
+                    {
+                        CL_LMethods.DoWriteMyLog("خطا در ذخیره ANBGRD_HEAD_WIN", ex);
+                        new Msgwin(false, "خطا در انجام عملیات").ShowDialog();
+                        return;
+                    }
                 }
                 else
                 {

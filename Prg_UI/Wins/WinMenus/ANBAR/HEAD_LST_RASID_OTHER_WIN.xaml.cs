@@ -1,4 +1,7 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using Dapper;
+using Functions;
+using MaterialDesignThemes.Wpf;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.CNNMANAGER;
 using Prg_Proccessy.FUNCTIONS;
@@ -6,38 +9,37 @@ using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
+using Prg_UI.CUC;
 using Prg_UI.Functions;
 using Prg_UI.Functions.Jostejoo;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Prg_UI.Wins.WinOther;
 using Stimulsoft.Base;
-using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
+using Stimulsoft.Report.Dictionary;
 using Syncfusion.Data.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Wins.WinOther;
+using static Interfaces.INavigator;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
 using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
-using System.Diagnostics;
-using Functions;
-using Microsoft.Data.SqlClient;
-using Wins.WinOther;
-using static Interfaces.INavigator;
-using System.Windows.Data;
-using Prg_UI.CUC;
 using VisualTreeHelper = System.Windows.Media.VisualTreeHelper;
-using System.Windows.Controls.Primitives;
 
 namespace Wins.WinMenus.ANBAR
 {
@@ -332,6 +334,7 @@ namespace Wins.WinMenus.ANBAR
         public FULL_HESAB HESAB_FROM_SEARCH { get; set; } = new();
         public string OpenArgs { get; }
         public bool ChangeIsHappend { get; private set; } = false;
+        public bool AnyCrossAzadInvoiced { get; private set; } = false;
 
         private bool PERSONEL_First_Open = true;
         private bool chek;
@@ -586,7 +589,7 @@ namespace Wins.WinMenus.ANBAR
                     new Msgwin(false, "این فاکتور خالی است").Show();
                     return;
                 }
-
+                AnyCrossAzadInvoiced = false;
                 //NewRecord = false; //Currrent Record is not new
                 NUMBER.Text = HEADER_FAC.NUMBER.ToString();
 
@@ -963,24 +966,54 @@ namespace Wins.WinMenus.ANBAR
                 return;
             }
 
-            var number = dbms.DoGetDataSQL<double?>("SELECT MAX(NUMBER)+1 FROM HEAD_LST WHERE TAG = 24").FirstOrDefault();
             if (string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text == "0")
             {
-                if (number is null)
+                try
                 {
-                    number = 1;
-                    NUMBER.Text = number.ToString();
+                    using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+                    {
+                        db.Open();
+                        using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
+                        {
+                            // Fake Query for Lock Table
+                            db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
+                            // محاسبه NUMBER (شماره رسید سایر) TAG=24
+                            var maxNumber = db.Query<double?>("SELECT Max(NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE TAG = 24", null, transaction).FirstOrDefault();
+                            if (maxNumber == null || maxNumber == 0)
+                            {
+                                NUMBER.Text = "1";
+                            }
+                            else
+                            {
+                                NUMBER.Text = (maxNumber + 1).ToString();
+                            }
+                            // INSERT رکورد
+                            db.Execute($@"INSERT INTO HEAD_LST (NUMBER, TAG, DATE_N,MAS,VAS, CUST_NO, M_NAGHD,MABL_VAR,MABL_HAV,MABL_HAZ,TAKHFIF,DEPATMAN,SHIFT,CUST_KIND, USER_NAME, SGN1, SGN2,MBAA,TICMBAA,TKHF, OKF,SADER,ARZD,ARZKIND,JAY, TAH, MOLAH, FNUMCO)
+                                                   VALUES ({NUMBER.Text}, 24,{DATE_N.Text.ToRawTarikh()}, 0, 0, N'{CUST_NO.SelectedValue}', 0, 0, 0, 0, 0,{DEPATMAN.SelectedValue ?? "NULL"},{CL_Generaly.SHIFT_OF_USER}, NULL,N'{USER_NAME.Text}', {Convert.ToByte(SGN1.IsChecked)}, {Convert.ToByte(SGN2.IsChecked)}, 0, 0, 1, {Convert.ToByte(OKF.IsChecked)}, 0, 1, 1, 0, N'{TAH.SelectedValue}', N'{MOLAH.SelectedValue}', {(string.IsNullOrEmpty(FNUMCO.Text) ? "NULL" : FNUMCO.Text)})", null, transaction);
+
+                            transaction.Commit();
+                        }
+                    }
+                    RefreshAfterUpdate();
                 }
-                else
+                catch (SqlException ex)
                 {
-                    NUMBER.Text = number.ToString();
+                    if (ex.Number == 2627)
+                    {
+                        new Msgwin(false, "در حال حاضر شماره رسید توسط کاربر دیگری ثبت شده است. لطفا مجددا تلاش کنید تا شماره جدید تخصیص داده شود.").Show();
+                    }
+                    else
+                    {
+                        new Msgwin(false, "خطا در انجام عملیات ذخیره، لطفا مجددا امتحان کنید").Show();
+                    }
+                    return;
                 }
-
-                //INSERT
-                dbms.DoExecuteSQL($@"INSERT INTO HEAD_LST (   NUMBER,    TAG,                     DATE_N,MAS,VAS,                     CUST_NO, M_NAGHD,MABL_VAR,MABL_HAV,MABL_HAZ,TAKHFIF,DEPATMAN,SHIFT,CUST_KIND,          USER_NAME,                               SGN1,                               SGN2,MBAA,TICMBAA,TKHF,                              OKF,SADER,ARZD,ARZKIND,JAY ,                 TAH ,                 MOLAH , FNUMCO) 
-                                                   VALUES ({NUMBER.Text}, 24,{DATE_N.Text.ToRawTarikh()},  0,  0,  N'{CUST_NO.SelectedValue}',       0,       0,       0,       0,      0,{DEPATMAN.SelectedValue ?? "NULL"},{CL_Generaly.SHIFT_OF_USER},     NULL,N'{USER_NAME.Text}',   {Convert.ToByte(SGN1.IsChecked)},   {Convert.ToByte(SGN2.IsChecked)},   0,      0,   1,  {Convert.ToByte(OKF.IsChecked)},    0,   1,      1,  0 , N'{TAH.SelectedValue}' , N'{MOLAH.SelectedValue}' , {(string.IsNullOrEmpty(FNUMCO.Text) ? "NULL" : FNUMCO.Text)})");
-
-                RefreshAfterUpdate();
+                catch (Exception ex)
+                {
+                    CL_LMethods.DoWriteMyLog("خطا در ذخیره HEAD_LST_RASID_OTHER_WIN", ex);
+                    new Msgwin(false, "خطا در انجام عملیات").Show();
+                    return;
+                }
             }
             else
             {
@@ -1022,8 +1055,12 @@ namespace Wins.WinMenus.ANBAR
                 SGN2.IsEnabled = true;
             }
 
-            INVO_LST_RASIDA_SUB.IsReadOnly = false;
-            INVO_LST_RASIDA_SUB.IsReadOnly = false;
+            if (!AnyCrossAzadInvoiced)
+            {
+                INVO_LST_RASIDA_SUB.IsReadOnly = false;
+                INVO_LST_RASIDA_SUB.IsReadOnly = false;
+            }
+
 
             DATA_GRID_On_Open();
 
@@ -1032,7 +1069,7 @@ namespace Wins.WinMenus.ANBAR
             INVO_LST_RASIDA_SUB.CurrentCell = new DataGridCellInfo(INVO_LST_RASIDA_SUB.SelectedItem, INVO_LST_RASIDA_SUB.Columns[col_index]);
 
 
-            if (number != null)
+            if (!string.IsNullOrEmpty(NUMBER.Text))
             {
                 if (INVO_RASIDA_DATA.Count == 0)
                 {
@@ -2116,7 +2153,7 @@ namespace Wins.WinMenus.ANBAR
                 else
                 {
                     //فاکتور برگشت فروش آزاد از سایر رسید انبار ها
-                    bool AnyCrossAzadInvoiced = dbms.DoGetDataSQL<int?>($"SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WHERE TAG = 25 AND NUMBER = {NUMBER.Text} ").Any();
+                    AnyCrossAzadInvoiced = dbms.DoGetDataSQL<int?>($"SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WHERE TAG = 25 AND NUMBER = {NUMBER.Text} ").Any();
                     if (AnyCrossAzadInvoiced)
                     {
                         universControl.PopNotifyShowUp("این برگه دارای مرجوعی (برگشت فروش آزاد) است و نمیتوان سطر های آنرا تغییر داد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
@@ -2635,6 +2672,8 @@ namespace Wins.WinMenus.ANBAR
 
         private void ClearFreshAll()
         {
+            AnyCrossAzadInvoiced = false;
+
             NUMBER.Text = "0";
 
             FNUMCO.Text = "0";

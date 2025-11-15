@@ -1,7 +1,11 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using Dapper;
+using Functions;
+using MaterialDesignThemes.Wpf;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.CNNMANAGER;
 using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
@@ -10,12 +14,15 @@ using Prg_UI.Functions.Jostejoo;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Prg_UI.Wins.WinOther;
+using Stimulsoft.Report;
 using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
-using Stimulsoft.Report;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -24,16 +31,11 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Wins.WinMenus.KHARID_FORUSH;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
 using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
-using System.Diagnostics;
 using SGN_IMODEL = Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED.SGN_IMODEL;
-using Wins.WinMenus.KHARID_FORUSH;
-using Functions;
-using Microsoft.Data.SqlClient;
-using System.ComponentModel;
-using Prg_Proccessy.Generaly;
 
 namespace Wins.WinMenus.ANBAR
 {
@@ -2365,7 +2367,6 @@ namespace Wins.WinMenus.ANBAR
             Form_BeforeUpdate();
             #endregion
 
-            var number = dbms.DoGetDataSQL<double?>("SELECT MAX(NUMBER)+1 FROM HEAD_LST WHERE TAG = 5").FirstOrDefault();
 
             string? SANAD_NUMBER = null;
 
@@ -2378,21 +2379,46 @@ namespace Wins.WinMenus.ANBAR
             {
                 if (_navigationManager.IsNewRecord)
                 {
-                    if (number is null)
+                    try
                     {
-                        number = 1;
-                        NUMBER.Text = number.ToString();
+                        using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+                        {
+                            db.Open();
+                            using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
+                            {
+                                // Fake Query for Lock Table
+                                db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
+                                // محاسبه شماره حواله انتقال (TAG=5)
+                                var maxNumber = db.Query<double?>("SELECT Max(NUMBER) FROM HEAD_LST WHERE TAG = 5", null, transaction).FirstOrDefault();
+                                if (maxNumber == null || maxNumber == 0)
+                                {
+                                    NUMBER.Text = "1";
+                                }
+                                else
+                                {
+                                    NUMBER.Text = (maxNumber + 1).ToString();
+                                }
+
+                                // INSERT رکورد
+                                db.Execute($@"INSERT INTO HEAD_LST (       NUMBER, TAG, DEPATMAN ,   SHIFT ,       MOLAH,          TAH,                 ANBAR,                      DATE_N, VAS,                ANBARF,           USER_NAME,                            SGN1,                            SGN2,                            SGN3,                             OKF,                                                                                              FNUMCO , ARZD,                                                           sgn1usid,                                                        sgn2usid,                                                         sgn3usid, ARZKIND,N_S)
+			                                           VALUES ({NUMBER.Text},   5, {DEPATMAN.SelectedValue ?? "NULL"}, {CL_Generaly.SHIFT_OF_USER} ,N'{MOLAH.Text}',N'{TAH.Text}', {ANBAR.SelectedValue}, {DATE_N.Text.ToRawTarikh()},   0,{ANBARF.SelectedValue}, N'{CL_HESABDARI.UCurrentUser()}',{Convert.ToByte(SGN1.IsChecked)},{Convert.ToByte(SGN2.IsChecked)},{Convert.ToByte(SGN3.IsChecked)},{Convert.ToByte(OKF.IsChecked)}, {(string.IsNullOrEmpty(FNUMCO.Text) ? "NULL" : FNUMCO.Text)},    1,  {(string.IsNullOrEmpty(sgn1usid.Tag.ToStringNullSafe()) ? "NULL" : sgn1usid.Tag.ToStringNullSafe())},{(string.IsNullOrEmpty(sgn2usid.Tag.ToStringNullSafe()) ? "NULL" : sgn2usid.Tag.ToStringNullSafe())}, {(string.IsNullOrEmpty(sgn3usid.Tag.ToStringNullSafe()) ? "NULL" : sgn3usid.Tag.ToStringNullSafe())},       1,{SANAD_NUMBER ?? "NULL"})", null, transaction);
+                                transaction.Commit();
+                            }
+                        }
+                        RefreshAfterUpdate();
                     }
-                    else
+                    catch (SqlException ex)
                     {
-                        NUMBER.Text = number.ToString();
+                        if (ex.Number == 2627)
+                        {
+                            new Msgwin(false, "در حال حاضر شماره توسط کاربر دیگری ثبت شده است. لطفا مجددا تلاش کنید تا شماره جدید تخصیص داده شود.").Show();
+                        }
+                        else
+                        {
+                            new Msgwin(false, "خطا در انجام عملیات ذخیره، لطفا مجددا امتحان کنید").Show();
+                        }
+                        return;
                     }
-
-                    //INSERT
-                    dbms.DoExecuteSQL($@"INSERT INTO HEAD_LST (       NUMBER, TAG, DEPATMAN ,   SHIFT ,       MOLAH,          TAH,                 ANBAR,                      DATE_N, VAS,                ANBARF,           USER_NAME,                            SGN1,                            SGN2,                            SGN3,                             OKF,                                                                                              FNUMCO , ARZD,                                                           sgn1usid,                                                        sgn2usid,                                                         sgn3usid, ARZKIND,N_S) 
-			                                           VALUES ({NUMBER.Text},   5, {DEPATMAN.SelectedValue ?? "NULL"}, {CL_Generaly.SHIFT_OF_USER} ,N'{MOLAH.Text}',N'{TAH.Text}', {ANBAR.SelectedValue}, {DATE_N.Text.ToRawTarikh()},   0,{ANBARF.SelectedValue}, N'{CL_HESABDARI.UCurrentUser()}',{Convert.ToByte(SGN1.IsChecked)},{Convert.ToByte(SGN2.IsChecked)},{Convert.ToByte(SGN3.IsChecked)},{Convert.ToByte(OKF.IsChecked)}, {(string.IsNullOrEmpty(FNUMCO.Text) ? "NULL" : FNUMCO.Text)},    1,  {(string.IsNullOrEmpty(sgn1usid.Tag.ToStringNullSafe()) ? "NULL" : sgn1usid.Tag.ToStringNullSafe())},{(string.IsNullOrEmpty(sgn2usid.Tag.ToStringNullSafe()) ? "NULL" : sgn2usid.Tag.ToStringNullSafe())}, {(string.IsNullOrEmpty(sgn3usid.Tag.ToStringNullSafe()) ? "NULL" : sgn3usid.Tag.ToStringNullSafe())},       1,{SANAD_NUMBER ?? "NULL"})");
-
-                    RefreshAfterUpdate();
                 }
                 else
                 {
@@ -2446,7 +2472,7 @@ namespace Wins.WinMenus.ANBAR
 
             universControl.PopNotifyShowUp(".ذخیره انجام شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
 
-            if (number != null && HEAD_ENTEGHAL_DATA.Count == 0 && !INVO_LST_ENTEGHAL_SUB.IsReadOnly && INVO_LST_ENTEGHAL_SUB.IsEnabled)
+            if (!string.IsNullOrEmpty(NUMBER.Text) && HEAD_ENTEGHAL_DATA.Count == 0 && !INVO_LST_ENTEGHAL_SUB.IsReadOnly && INVO_LST_ENTEGHAL_SUB.IsEnabled)
             {
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
