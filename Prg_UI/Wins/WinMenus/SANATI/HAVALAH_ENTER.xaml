@@ -15,7 +15,7 @@
         FontFamily="{StaticResource IRANYEKAN}"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         WindowStartupLocation="CenterScreen"
-        Title="" Height="690" Width="710" MinHeight="690" MinWidth="1105" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+        Title="" Height="690" Width="710" MinHeight="690" MinWidth="1105" Closing="Window_Closing" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -114,8 +114,7 @@
                   AutoGenerateColumns="False" 
                   FlowDirection="RightToLeft" 
                   SelectionUnit="FullRow" 
-                  CanUserDeleteRows="False" MouseRightButtonUp="INVO_LST_SUB_MouseRightButtonUp"
-                
+                  CanUserDeleteRows="False" MouseRightButtonUp="INVO_LST_SUB_MouseRightButtonUp" PreviewLostKeyboardFocus="INVO_LST_SUB_PreviewLostKeyboardFocus"
                   Margin="4,176,4,111" BorderThickness="1" IsKeyboardFocusWithinChanged="INVO_LST_SUB_IsKeyboardFocusWithinChanged" CellEditEnding="INVO_LST_SUB_CellEditEnding" PreviewMouseLeftButtonUp="INVO_LST_SUB_PreviewMouseLeftButtonUp" SelectionChanged="INVO_LST_SUB_SelectionChanged" RowEditEnding="INVO_LST_SUB_RowEditEnding" PreviewKeyDown="INVO_LST_SUB_PreviewKeyDown" PreparingCellForEdit="INVO_LST_SUB_PreparingCellForEdit" BeginningEdit="INVO_LST_SUB_BeginningEdit"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                 <DataGrid.Style>
@@ -127,7 +126,7 @@
                 </DataGrid.Style>
 
                 <DataGrid.Columns>
-                    <DataGridComboBoxColumn x:Name="ANBAR_COLUMN" MinWidth="100" Width="auto" Header=" انبار " SelectedValueBinding="{Binding ANBAR,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAMES" SelectedValuePath="CODE">
+                    <DataGridComboBoxColumn x:Name="ANBAR_COLUMN" MinWidth="130" Width="auto" Header=" انبار " SelectedValueBinding="{Binding ANBAR,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="NAMES" SelectedValuePath="CODE">
                         <DataGridComboBoxColumn.EditingElementStyle>
                             <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
                                 <Setter Property="IsEditable" Value="True"/>

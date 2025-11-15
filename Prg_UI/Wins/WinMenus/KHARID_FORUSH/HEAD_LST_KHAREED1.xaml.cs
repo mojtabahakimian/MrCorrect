@@ -462,7 +462,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             FILL_ALL_COMBOBOXES();
 
             string WhereCondition = FTAG > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {FTAG}) " : "  ";
-            WhereCondition = CL_LMethods.GetRestrictedSqlQuery(FTAG, WhereCondition);
+            _restrictionInfo = CL_LMethods.GetRestrictedSqlQueryWithDetails(FTAG, WhereCondition);
+            WhereCondition = _restrictionInfo.WhereClause;
 
             if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
             {
@@ -520,12 +521,18 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (_navigationManager.IsNewRecord)
             {
                 ClearFreshAll(); //Form_Current(); //should be in this ClearFreshAll(); method too at the end
+                if (_navigationManager.NUMBER_TO_OPEN != null)
+                {
+                    ShowMissingOrRestrictedMessage();
+                    return;
+                }
             }
             else if (HEADER_FAC == null)
             {
                 if (_navigationManager.NUMBER_TO_OPEN != null)
                 {
-                    new Msgwin(false, "چنین شماره ای وجود ندارد").ShowDialog();
+                    //new Msgwin(false, "چنین شماره ای وجود ندارد").ShowDialog();
+                    ShowMissingOrRestrictedMessage();
                     return;
                 }
             }
@@ -704,6 +711,34 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
 
 
+        private CL_LMethods.RestrictionInfo _restrictionInfo;
+        private string GetAccessDeniedMessage()
+        {
+            if (_restrictionInfo?.RestrictionMessages?.Any() == true)
+            {
+                // ایجاد لیست محدودیت‌ها
+                var restrictions = string.Join("، ", _restrictionInfo.RestrictionMessages);
+
+                return $"دسترسی به شماره «{_navigationManager.NUMBER_TO_OPEN}» امکان‌پذیر نیست. " +
+                    $"به آخرین شماره مجاز هدایت خواهید شد. (محدودیت: {restrictions})";
+            }
+
+            return $"دسترسی به شماره «{_navigationManager.NUMBER_TO_OPEN}» امکان‌پذیر نیست. " +
+                $"شما به آخرین شماره مجاز هدایت خواهید شد.";
+        }
+        private void ShowMissingOrRestrictedMessage()
+        {
+            if (_navigationManager?.NUMBER_TO_OPEN == null)
+            {
+                return;
+            }
+
+            double requestedNumber = Convert.ToDouble(_navigationManager.NUMBER_TO_OPEN);
+            bool recordExists = dbms.DoGetDataSQL<double?>($"SELECT TOP 1 NUMBER FROM HEAD_LST WHERE NUMBER = {requestedNumber} AND TAG = {HTAG}").FirstOrDefault() != null;
+            string message = recordExists ? GetAccessDeniedMessage() : "چنین شماره ای وجود ندارد";
+            new Msgwin(false, message).ShowDialog();
+            _navigationManager.ClearNumberToOpen();
+        }
         private void MakeDefaultFocuseReady()
         {
             if (IsDirectFactor)
@@ -2850,78 +2885,85 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             try
             {
-                if (NUMBER1.Text == "0")
+                if (NUMBER1.Text == "0") // فقط برای رکوردهای جدید اجرا شود
                 {
-                    //Max Of Number1 TAG -----12
+                    double newNumber1;
+                    double newNumber;
+
+                    // تمام عملیات باید در یک اتصال و یک تراکنش واحد انجام شود
                     using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
                     {
                         db.Open();
+                        // استفاده از Serializable برای قفل کردن جدول تا پایان تراکنش
                         using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
                         {
-                            //Fake Query for Lock Table
-                            db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
-                            //Fake Query for Lock Table
-
-                            var rst_11 = db.Query<double?>($"SELECT Max(HEAD_LST.NUMBER1) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)={FTAG}))", null, transaction).FirstOrDefault();
-                            if (rst_11 == 0 || ReferenceEquals(rst_11, null))
+                            try
                             {
-                                NUMBER1.Text = Baseknow.STHFR.ToString();
-                                NUMBER1.UpdateLayout();
-                            }
-                            else
-                            {
-                                NUMBER1.Text = Convert.ToDouble(rst_11 + 1).ToString();
-                                NUMBER1.UpdateLayout();
-                            }
+                                // 1. قفل گذاری روی جدول برای اطمینان از خواندن صحیح MAX
+                                db.Execute("SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WITH (TABLOCKX, HOLDLOCK)", null, transaction);
 
-                            transaction.Commit();
-                            db?.Close();
-                        }
-                    }
-
-                    //Max Of Number TAG ------1
-                    using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
-                    {
-                        db.Open();
-                        using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
-                        {
-                            //Fake Query for Lock Table
-                            db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
-                            //Fake Query for Lock Table
-
-                            if (IsDirectFactor)
-                            {
-                                var rst_11 = db.Query<double?>($"SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)={HTAG}))", null, transaction).FirstOrDefault();
-                                if (rst_11 == 0 || ReferenceEquals(rst_11, null))
+                                // 2. دریافت حداکثر شماره فاکتور (TAG = 12)
+                                var rst_11 = db.Query<double?>($"SELECT Max(HEAD_LST.NUMBER1) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)={FTAG}))", null, transaction).FirstOrDefault();
+                                if (rst_11 == 0 || rst_11 == null)
                                 {
-                                    NUMBER.Text = Baseknow.STHFR.ToString();
-                                    NUMBER.UpdateLayout();
+                                    newNumber1 = Baseknow.STHFR; // شماره شروع
                                 }
                                 else
                                 {
-                                    NUMBER.Text = Convert.ToDouble(rst_11 + 1).ToString();
-                                    NUMBER.UpdateLayout();
+                                    newNumber1 = Convert.ToDouble(rst_11 + 1);
                                 }
+
+                                // 3. دریافت حداکثر شماره رسید انبار (TAG = 1) (اگر فاکتور مستقیم است)
+                                if (IsDirectFactor)
+                                {
+                                    var rst_12 = db.Query<double?>($"SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)={HTAG}))", null, transaction).FirstOrDefault();
+                                    if (rst_12 == 0 || rst_12 == null)
+                                    {
+                                        newNumber = Baseknow.STHFR; // شماره شروع
+                                    }
+                                    else
+                                    {
+                                        newNumber = Convert.ToDouble(rst_12 + 1);
+                                    }
+                                }
+                                else
+                                {
+                                    // اگر مستقیم نیست، از شماره رسید انبار موجود در کمبوباکس استفاده می‌شود
+                                    newNumber = Convert.ToDouble(NUMBER.Text);
+                                }
+
+                                // 4. درج رکورد فاکتور خرید (FTAG = 12)
+                                db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER, NUMBER1, TAG, DATE_N, MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF, UID)
+                                      VALUES ({newNumber}, {newNumber1}, {FTAG}, 0, 0, 0, 0, 0, 0, 0, 0, {Baseknow.USERCOD})", null, transaction);
+
+                                // 5. درج رکورد رسید انبار (HTAG = 1) (اگر فاکتور مستقیم است)
+                                if (IsDirectFactor)
+                                {
+                                    db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER, NUMBER1, TAG, DATE_N, MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF, UID)
+                                      VALUES ({newNumber}, {newNumber1}, {HTAG}, 0, 0, 0, 0, 0, 0, 0, 0, {Baseknow.USERCOD})", null, transaction);
+                                }
+
+                                // 6. ثبت نهایی تراکنش
+                                transaction.Commit();
+
+                                // 7. به‌روزرسانی UI *بعد* از ثبت موفقیت‌آمیز
+                                NUMBER1.Text = newNumber1.ToString();
+                                NUMBER.Text = newNumber.ToString();
+                                NUMBER1.UpdateLayout();
+                                NUMBER.UpdateLayout();
                             }
-
-
-                            db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER,         NUMBER1,           TAG,     DATE_N,  MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF,     UID)
-                                               VALUES ({NUMBER.Text}, {NUMBER1.Text}    ,{FTAG},        0,    0,   0,       0,        0,        0,        0,    0    , {Baseknow.USERCOD})", null, transaction);
-
-
-                            if (IsDirectFactor)
+                            catch (Exception)
                             {
-                                db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER,         NUMBER1,           TAG,     DATE_N,  MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF,     UID)
-                                               VALUES ({NUMBER.Text}, {NUMBER1.Text}    ,{HTAG},        0,    0,   0,       0,        0,        0,        0,    0    , {Baseknow.USERCOD})", null, transaction);
+                                // در صورت بروز هرگونه خطا، کل عملیات لغو می‌شود
+                                transaction.Rollback();
+                                throw; // ارسال مجدد خطا به بلاک catch بیرونی
                             }
+                        } // پایان تراکنش
+                    } // پایان اتصال
 
-                            transaction.Commit();
-                            db?.Close();
-
-                            _navigationManager.IsNewRecord = false;
-                            RefreshAfterUpdate();
-                        }
-                    }
+                    // به‌روزرسانی وضعیت فرم و لاگ‌ها
+                    _navigationManager.IsNewRecord = false;
+                    RefreshAfterUpdate(); // این متد باید رکوردهای جدید را در ناوبری بارگذاری کند
                 }
             }
             catch (SqlException ex)

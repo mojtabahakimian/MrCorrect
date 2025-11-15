@@ -1,7 +1,11 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using Dapper;
+using Functions;
+using MaterialDesignThemes.Wpf;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.CNNMANAGER;
 using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
@@ -10,12 +14,15 @@ using Prg_UI.Functions.Jostejoo;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Prg_UI.Wins.WinOther;
-using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
+using Stimulsoft.Report.Dictionary;
 using Syncfusion.Data.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -24,16 +31,11 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Wins.WinOther;
+using static Interfaces.INavigator;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
 using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
-using System.Diagnostics;
-using Functions;
-using Microsoft.Data.SqlClient;
-using System.ComponentModel;
-using static Interfaces.INavigator;
-using Wins.WinOther;
-using Prg_Proccessy.Generaly;
 
 namespace Wins.WinMenus.ANBAR
 {
@@ -804,26 +806,54 @@ namespace Wins.WinMenus.ANBAR
                 return;
             }
 
-
-
-            var number = dbms.DoGetDataSQL<double?>("SELECT MAX(NUMBER)+1 FROM HEAD_LST WHERE TAG = 23").FirstOrDefault();
             if (string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text == "0")
             {
-                if (number is null)
+                try
                 {
-                    number = 1;
-                    NUMBER.Text = number.ToString();
+                    using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+                    {
+                        db.Open();
+                        using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
+                        {
+                            // Fake Query for Lock Table
+                            db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
+                            // محاسبه NUMBER (شماره درخواست) TAG=23
+                            var maxNumber = db.Query<double?>("SELECT Max(NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE TAG = 23", null, transaction).FirstOrDefault();
+                            if (maxNumber == null || maxNumber == 0)
+                            {
+                                NUMBER.Text = "1";
+                            }
+                            else
+                            {
+                                NUMBER.Text = (maxNumber + 1).ToString();
+                            }
+
+                            // INSERT رکورد
+                            db.Execute(@$"INSERT INTO HEAD_LST (NUMBER,TAG, DATE_N, TAH, MAS, VAS, CUST_NO, MOLAH, M_NAGHD, MABL_VAR,MABL_HAV,MABL_HAZ,TAKHFIF,DEPATMAN,SHIFT,CUST_KIND, USER_NAME, SGN1, SGN2, SGN3,MBAA,TICMBAA,TKHF, OKF,SADER,ARZD,ARZKIND,JAY)
+			                                       VALUES ({NUMBER.Text}, 23, {DATE_N.Text.ToRawTarikh()}, N'{(TAH.Text is null ? "NULL" : TAH.Text)}', 0, 0, N'{CUST_NO}', N'{(MOLAH is null ? "NULL" : MOLAH)}', 0, 0, 0, 0, 0,{DEPATMAN.SelectedValue ?? "NULL"},{CL_Generaly.SHIFT_OF_USER}, NULL, N'{USER_NAME.Text}',{Convert.ToByte(SGN1.IsChecked)},{Convert.ToByte(SGN2.IsChecked)},{Convert.ToByte(SGN3.IsChecked)}, 0, 0, {Convert.ToByte(OKF.IsChecked)}, 1, 0, 1, 1, 0)", null, transaction);
+                            transaction.Commit();
+                        }
+                    }
+                    RefreshAfterUpdate();
                 }
-                else
+                catch (SqlException ex)
                 {
-                    NUMBER.Text = number.ToString();
+                    if (ex.Number == 2627)
+                    {
+                        new Msgwin(false, "در حال حاضر شماره درخواست توسط کاربر دیگری ثبت شده است. لطفا مجددا تلاش کنید تا شماره جدید تخصیص داده شود.").Show();
+                    }
+                    else
+                    {
+                        new Msgwin(false, "خطا در انجام عملیات ذخیره، لطفا مجددا امتحان کنید").Show();
+                    }
+                    return;
                 }
-
-                //INSERT
-                dbms.DoExecuteSQL(@$"INSERT INTO HEAD_LST (       NUMBER,TAG,                      DATE_N,                                         TAH, MAS, VAS,                    CUST_NO,                                       MOLAH, M_NAGHD, MABL_VAR,MABL_HAV,MABL_HAZ,TAKHFIF,DEPATMAN,SHIFT,CUST_KIND,           USER_NAME,                            SGN1,                            SGN2,                            SGN3,MBAA,TICMBAA,TKHF,                              OKF,SADER,ARZD,ARZKIND,JAY) 
-			                                       VALUES ({NUMBER.Text}, 23, {DATE_N.Text.ToRawTarikh()}, N'{(TAH.Text is null ? "NULL" : TAH.Text)}',   0,   0,               N'{CUST_NO}',       N'{(MOLAH is null ? "NULL" : MOLAH)}',       0,        0,       0,       0,      0,{DEPATMAN.SelectedValue ?? "NULL"},{CL_Generaly.SHIFT_OF_USER},     NULL, N'{USER_NAME.Text}',{Convert.ToByte(SGN1.IsChecked)},{Convert.ToByte(SGN2.IsChecked)},{Convert.ToByte(SGN3.IsChecked)},   0,      0,   {Convert.ToByte(OKF.IsChecked)},  1,    0,   1,  1,  0);");
-
-                RefreshAfterUpdate();
+                catch (Exception ex)
+                {
+                    CL_LMethods.DoWriteMyLog("خطا در ذخیره HEAD_LST_REQUEST_WIN", ex);
+                    new Msgwin(false, "خطا در انجام عملیات").Show();
+                    return;
+                }
             }
             else
             {
@@ -873,7 +903,7 @@ namespace Wins.WinMenus.ANBAR
             INVO_LST_REQUEST.SelectedIndex = INVO_LST_REQUEST.Items.Count - 1;
             INVO_LST_REQUEST.CurrentCell = new DataGridCellInfo(INVO_LST_REQUEST.SelectedItem, INVO_LST_REQUEST.Columns[col_index]);
 
-            if (number != null && INVO_REQUEST_DATA.Count == 0)
+            if (!string.IsNullOrEmpty(NUMBER.Text) && INVO_REQUEST_DATA.Count == 0)
             {
                 Dispatcher.BeginInvoke(new Action(() =>
                 {

@@ -33,6 +33,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Wins.WinOther;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
 using static Prg_UI.HelperWins.Msgwin;
@@ -40,7 +41,7 @@ using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
 
 namespace Wins.WinMenus.Taarif
 {
-    public partial class STUF_DEF_WIN : Window, INavigator
+    public partial class STUF_DEF_WIN : Window, INavigator, ISearchableWindow
     {
         #region Header Window Begin
         //Header Window Begin
@@ -354,6 +355,51 @@ namespace Wins.WinMenus.Taarif
 
         public TAKHPERS? TAKHPERS_CURRENT_ROW { get; private set; }
 
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => RecordsData;
+
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            if (selectedItem is not STUF_DEF target || RecordsData?.View is null)
+            {
+                return;
+            }
+
+            var itemfound = RecordsData.View.Cast<STUF_DEF>()
+                .FirstOrDefault(x => string.Equals(x.CODE, target.CODE, StringComparison.OrdinalIgnoreCase));
+
+            if (itemfound != null)
+            {
+                RecordsData.View.MoveCurrentTo(itemfound);
+                MoveReGetData(INavigator.Jahat.CustomPosition, RecordsData.View?.CurrentPosition);
+            }
+            else
+            {
+                MoveReGetData(INavigator.Jahat.LastItem);
+            }
+        }
+
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+                new SearchableProperty { DisplayName = "کد کالا", PropertyPath = nameof(STUF_DEF.CODE), PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "نام کالا", PropertyPath = nameof(STUF_DEF.NAME), PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "توضیحات", PropertyPath = nameof(STUF_DEF.TOZIH), PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "واحد", PropertyPath = nameof(STUF_DEF.VAHED), PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "حداقل موجودی", PropertyPath = nameof(STUF_DEF.MIN_M), PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "حداکثر موجودی", PropertyPath = nameof(STUF_DEF.MAX_M), PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "بارکد", PropertyPath = nameof(STUF_DEF.BARCODE), PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "نوع", PropertyPath = nameof(STUF_DEF.KINDK), PropertyType = typeof(short?) },
+                new SearchableProperty { DisplayName = "فی عمده", PropertyPath = nameof(STUF_DEF.MABL_F), PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "فی خرده", PropertyPath = nameof(STUF_DEF.B_SEF), PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "گروه قیمت", PropertyPath = nameof(STUF_DEF.PGID), PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "شناسه مودیان", PropertyPath = nameof(STUF_DEF.sstid), PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "کد فنی", PropertyPath = nameof(STUF_DEF.N_FANI), PropertyType = typeof(string) },
+            };
+        }
+        #endregion
+
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
@@ -486,6 +532,19 @@ namespace Wins.WinMenus.Taarif
             }
             catch { /*ignore*/ }
 
+            bool isDataGridFocused =
+              (STUF_FSK_sub?.IsKeyboardFocusWithin ?? false) || (STUF_FSK_sub?.IsFocused ?? false) ||
+              (MODULE_D_SUB?.IsKeyboardFocusWithin ?? false) || (MODULE_D_SUB?.IsFocused ?? false) ||
+              (TAKHPERS_SUB?.IsKeyboardFocusWithin ?? false) || (TAKHPERS_SUB?.IsFocused ?? false) ||
+              (INVOICE_REWARDS_SUB?.IsKeyboardFocusWithin ?? false) || (INVOICE_REWARDS_SUB?.IsFocused ?? false);
+
+            if (!isDataGridFocused && e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                e.Handled = true;
+                var searchWindow = new EnhancedSearchWindow(this);
+                searchWindow.Owner = this;
+                searchWindow.ShowDialog();
+            }
 
             // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
             var nonDataKeys = new[]

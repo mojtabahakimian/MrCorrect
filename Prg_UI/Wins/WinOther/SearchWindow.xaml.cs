@@ -59,6 +59,8 @@ namespace Wins.WinOther
         private DataGrid _dataGrid;
         private DataGridColumn _selectedColumn;
 
+        private System.Collections.Generic.List<object> _matchedItems = new System.Collections.Generic.List<object>();
+        private int _currentMatchIndex = -1;
         public SearchWindow(DataGrid dataGrid)
         {
             InitializeComponent();
@@ -74,6 +76,8 @@ namespace Wins.WinOther
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
+
+            UpdateNavigationButtonsVisibility();
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -149,7 +153,24 @@ namespace Wins.WinOther
                 if (!cts.IsCancellationRequested)
                 {
                     var searchText = SearchTextBox.Text;
-                    ApplySearch(searchText);
+                    if (NavigationModeCheckBox.IsChecked == true)
+                    {
+                        // Navigation mode
+                        BuildMatchedItemsList(searchText);
+                        if (_matchedItems.Count > 0)
+                        {
+                            FindFirst();
+                        }
+                        else
+                        {
+                            UpdateStatusLabel();
+                        }
+                    }
+                    else
+                    {
+                        // Filter mode (original behavior)
+                        ApplySearch(searchText);
+                    }
                 }
             }
             catch (OperationCanceledException) { /* نادیده بگیر */ }
@@ -260,7 +281,13 @@ namespace Wins.WinOther
         private void ClearSearchButton_Click(object sender, RoutedEventArgs e)
         {
             SearchTextBox.Clear();
-            ApplySearch(string.Empty);
+            _matchedItems.Clear();
+            _currentMatchIndex = -1;
+            UpdateStatusLabel();
+            if (NavigationModeCheckBox.IsChecked == false)
+            {
+                ApplySearch(string.Empty);
+            }
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -324,6 +351,220 @@ namespace Wins.WinOther
             _typingCts?.Cancel();
         }
 
+
+        #region Navigation Mode Methods
+        private void NavigationModeCheckBox_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!NowIsReady) { return; }
+
+            UpdateNavigationButtonsVisibility();
+
+            // Clear any existing filters when switching modes
+            if (NavigationModeCheckBox.IsChecked == false)
+            {
+                // Switching to filter mode
+
+                _matchedItems.Clear();
+
+                _currentMatchIndex = -1;
+
+                UpdateStatusLabel();
+
+                // Apply filter if there's search text
+                if (!string.IsNullOrEmpty(SearchTextBox.Text))
+                {
+                    ApplySearch(SearchTextBox.Text);
+                }
+            }
+            else
+            {
+                // Switching to navigation mode
+                var collectionView = CollectionViewSource.GetDefaultView(_dataGrid.ItemsSource);
+
+                if (collectionView != null)
+                {
+                    collectionView.Filter = null;
+
+                    collectionView.Refresh();
+                }
+
+                // Build matches if there's search text
+                if (!string.IsNullOrEmpty(SearchTextBox.Text))
+                {
+                    BuildMatchedItemsList(SearchTextBox.Text);
+
+                    if (_matchedItems.Count > 0)
+                    {
+
+                        FindFirst();
+                    }
+                }
+            }
+        }
+        private void UpdateNavigationButtonsVisibility()
+        {
+            // Check if UI elements are initialized
+            if (NavigationModeCheckBox == null || NavigationButtonsPanel == null || StatusLabel == null)
+                return;
+
+            bool isNavigationMode = NavigationModeCheckBox.IsChecked == true;
+
+            NavigationButtonsPanel.Visibility = isNavigationMode ? Visibility.Visible : Visibility.Collapsed;
+
+            StatusLabel.Visibility = isNavigationMode ? Visibility.Visible : Visibility.Collapsed;
+        }
+        private void BuildMatchedItemsList(string searchText)
+        {
+            _matchedItems.Clear();
+
+            _currentMatchIndex = -1;
+
+            if (string.IsNullOrEmpty(searchText) || _selectedColumn == null)
+            {
+                UpdateStatusLabel();
+                return;
+            }
+
+            searchText = CL_LMethods.NormalizeArabicPersian(searchText).Trim();
+
+            var collectionView = CollectionViewSource.GetDefaultView(_dataGrid.ItemsSource);
+
+            if (collectionView == null)
+                return;
+
+            foreach (var item in collectionView.SourceCollection)
+            {
+                string displayValue = GetDisplayValue(item, _selectedColumn);
+
+                if (string.IsNullOrEmpty(displayValue))
+                    continue;
+
+                displayValue = CL_LMethods.NormalizeArabicPersian(displayValue).Trim();
+
+                if (displayValue.IndexOf(searchText, StringComparison.CurrentCultureIgnoreCase) >= 0)
+                {
+                    _matchedItems.Add(item);
+                }
+            }
+            UpdateStatusLabel();
+        }
+        private void UpdateStatusLabel()
+        {
+            if (StatusLabel == null)
+                return;
+
+            if (_matchedItems.Count == 0)
+            {
+                StatusLabel.Content = "موردی یافت نشد";
+            }
+            else
+            {
+                StatusLabel.Content = $"مورد {_currentMatchIndex + 1} از {_matchedItems.Count}";
+            }
+        }
+        private void NavigateToItem(object item)
+        {
+            if (item == null)
+                return;
+
+            // Select the item in DataGrid
+            _dataGrid.SelectedItem = item;
+            _dataGrid.CurrentItem = item;
+
+            // Scroll to the item
+            _dataGrid.UpdateLayout();
+            _dataGrid.ScrollIntoView(item);
+
+            // Try to focus the row
+            var row = _dataGrid.ItemContainerGenerator.ContainerFromItem(item) as DataGridRow;
+            if (row != null)
+            {
+                row.Focus();
+                row.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+            }
+            else
+            {
+                // If row is not generated yet (due to virtualization), update layout and try again
+                _dataGrid.UpdateLayout();
+                row = _dataGrid.ItemContainerGenerator.ContainerFromItem(item) as DataGridRow;
+                if (row != null)
+                {
+                    row.Focus();
+                }
+            }
+            UpdateStatusLabel();
+        }
+        private void FindFirst()
+        {
+            if (_matchedItems.Count == 0)
+            {
+                UpdateStatusLabel();
+
+                return;
+            }
+            _currentMatchIndex = 0;
+
+            NavigateToItem(_matchedItems[_currentMatchIndex]);
+        }
+        private void FindNext()
+        {
+            if (_matchedItems.Count == 0)
+            {
+                UpdateStatusLabel();
+                return;
+            }
+
+            _currentMatchIndex++;
+
+            if (_currentMatchIndex >= _matchedItems.Count)
+            {
+                _currentMatchIndex = 0; // Wrap around to first
+            }
+            NavigateToItem(_matchedItems[_currentMatchIndex]);
+        }
+        private void FindBack()
+        {
+            if (_matchedItems.Count == 0)
+            {
+                UpdateStatusLabel();
+                return;
+            }
+
+            _currentMatchIndex--;
+            if (_currentMatchIndex < 0)
+            {
+                _currentMatchIndex = _matchedItems.Count - 1; // Wrap around to last
+            }
+            NavigateToItem(_matchedItems[_currentMatchIndex]);
+        }
+        private void FindLast()
+        {
+            if (_matchedItems.Count == 0)
+            {
+                UpdateStatusLabel();
+                return;
+            }
+            _currentMatchIndex = _matchedItems.Count - 1;
+
+            NavigateToItem(_matchedItems[_currentMatchIndex]);
+        }
+        private void FindFirstButton_Click(object sender, RoutedEventArgs e)
+        {
+            FindFirst();
+        }
+        private void FindNextButton_Click(object sender, RoutedEventArgs e)
+        {
+            FindNext();
+        }
+        private void FindBackButton_Click(object sender, RoutedEventArgs e)
+        {
+            FindBack();
+        }
+        private void FindLastButton_Click(object sender, RoutedEventArgs e)
+        {
+            FindLast();
+        }
+        #endregion
 
     }
 }
