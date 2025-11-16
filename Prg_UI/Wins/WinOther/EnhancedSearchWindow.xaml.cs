@@ -121,6 +121,8 @@ namespace Wins.WinOther
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
+
+            _searchBox?.Focus(); _searchBox?.SelectAll();
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {

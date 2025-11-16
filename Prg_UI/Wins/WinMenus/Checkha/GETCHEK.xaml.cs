@@ -126,13 +126,14 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
+            Fill_ComboBoxes();
+
             // On Open here ...
-            if (!IsNull(this.N_KOL))
+            if (!string.IsNullOrWhiteSpace(this.N_KOL))
             {
                 this.HES.SelectedValue = this.N_KOL + "-" + this.N_MOIN + "-" + this.N_TAF;
             }
 
-            Fill_ComboBoxes();
             MABL.Text = MABL_CHEK_ARG;
             mabup = false;
             SANDUGH.SelectedValue = 1;

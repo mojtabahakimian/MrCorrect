@@ -955,7 +955,6 @@ namespace Wins.WinMenus.SANATI
                           where c != null && Validation.GetHasError(c)
                           select c).Any();
 
-
             if (errors)
             {
                 universControl.PopNotifyShow("داده های وارد شده مربوط به سطر ها درست نیست", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");

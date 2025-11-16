@@ -622,12 +622,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         /// <summary>
         /// تگ فاکتور فروش 13 | HEAD_LST | OTHER_DTL | DEED_DTL
         /// </summary>
-        public byte fTAG { get; set; } = 13;
+        public byte fTAG { get; } = 13;
 
         /// <summary>
         /// تگ  حواله 2 | HEAD_LST | INVO_LST | PAY_GETD | VISITOR_DTL
         /// </summary>
-        public byte hTAG { get; set; } = 2;
+        public byte hTAG { get; } = 2;
 
         public class SGN_IMODEL
         {
@@ -1284,7 +1284,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             // Now raise the initialization events to update the UI
             _navigationManager.RaiseInitializationEvents();
-                  
+
 
             Form_Current();
 
@@ -2655,16 +2655,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         }
         private void Form_Timer(object sender, EventArgs e)
         {
-            if (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) == 0 && this.runone)
-            {
-                this.runone = false;
-                Baseknow.dt = CL_HESABDARI.FARSIDATE2();
-                this.DATE_N.Text = Baseknow.dt.ToString();
-            }
-            else if (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) == 12)
-            {
-                this.runone = true;
-            }
+            //if (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) == 0 && this.runone)
+            //{
+            //    this.runone = false;
+            //    Baseknow.dt = CL_HESABDARI.FARSIDATE2();
+            //    this.DATE_N.Text = Baseknow.dt.ToString();
+            //}
+            //else if (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) == 12)
+            //{
+            //    this.runone = true;
+            //}
         }
 
         private void DEPATMAN_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -7479,6 +7479,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 return;
             }
 
+            GoGheymateUpdator();
+
             //پشت فاکتور
             #region PoshteFactor
             //M_NAGHD_AfterUpdate //MABL_HAV_AfterUpdate //TAKHFIF_AfterUpdate //MABL_HAZ_AfterUpdate //MOIN_HAV_Click //TAKH_AfterUpdate
@@ -8122,11 +8124,14 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     ErrosMessages.Add(new MsgModel { MessageText_U = "شما اجازه قيمت گذاري آزاد  نداريد" });
                 }
 
-                if (MODAT_PPID.SelectedIndex == 1)
+                if (MODAT_PPID.SelectedItem is PRICE_PAYNO_MODATP ModatValue)
                 {
-                    if (Convert.ToInt32(MAS.Text) <= 0)
+                    if (ModatValue?.PPAME.Trim().FixPersianChars() != "نقدی")
                     {
-                        ErrosMessages.Add(new MsgModel { MessageText_U = "مدت را وارد کنید " });
+                        if (Convert.ToInt32(MAS.Text) <= 0)
+                        {
+                            ErrosMessages.Add(new MsgModel { MessageText_U = "مدت را وارد کنید " });
+                        }
                     }
                 }
             }
@@ -12040,10 +12045,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                     if (!string.IsNullOrWhiteSpace(NUMBER.Text) && NUMBER.Text != "0")
                     {
-                        var havaleDate = dbms.DoGetDataSQL<string?>($"SELECT TOP 1 DATE_N FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = 2").FirstOrDefault();
+                        var havaleDate = dbms.DoGetDataSQL<string?>($"SELECT TOP 1 DATE_N FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {hTAG /*2*/}").FirstOrDefault();
                         if (!string.IsNullOrWhiteSpace(havaleDate))
                         {
-                            DATE_N.Text = havaleDate;
+                            DATE_N.Text = havaleDate; //تاریخ فاکتور طبق حواله انبار فروش آن باشد.
                             DATE_N_TAG = DATE_N.Text.ToRawTarikh();
                         }
                     }
@@ -12674,7 +12679,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
         }
 
-     
+
 
 
     }

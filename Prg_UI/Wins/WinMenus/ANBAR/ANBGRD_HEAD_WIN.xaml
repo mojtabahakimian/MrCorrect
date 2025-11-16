@@ -53,7 +53,7 @@
         <!--HEADER↑-->
         <!--CENTER⬇️-->
 
-        <TabControl Margin="4,160,4,69">
+        <TabControl Margin="4,160,4,69" SelectionChanged="TabControl_SelectionChanged">
             <TabItem Header="شمارش اول" x:Name="Count1" Margin="3,-2,2,2">
 
                 <Grid x:Name="FirstCount">
@@ -75,7 +75,7 @@
                               ItemsSource="{Binding ANBARGRD_SUB1_MODEL_DATA}"
                               KeyboardNavigation.TabNavigation="Contained"
                               AutoGenerateColumns="False" 
-                              FlowDirection="RightToLeft" 
+                              FlowDirection="RightToLeft" d:ItemsSource="{d:SampleData}"
                               SelectionUnit="FullRow" 
                               CanUserDeleteRows="False" BorderThickness="1" IsKeyboardFocusWithinChanged="ANBARGRD_SUB_IsKeyboardFocusWithinChanged"  CellEditEnding="ANBARGRD_SUB_CellEditEnding" PreviewMouseLeftButtonUp="ANBARGRD_SUB_PreviewMouseLeftButtonUp" SelectionChanged="ANBARGRD_SUB_SelectionChanged" RowEditEnding="ANBARGRD_SUB_RowEditEnding" PreviewKeyDown="ANBARGRD_SUB_PreviewKeyDown" PreparingCellForEdit="ANBARGRD_SUB_PreparingCellForEdit" BeginningEdit="ANBARGRD_SUB_BeginningEdit" Margin="-3,58,-3,10"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
@@ -92,11 +92,11 @@
                             <DataGridTextColumn 	x:Name="nam_COLUMN"            Binding="{Binding nam, UpdateSourceTrigger=LostFocus}"              Header="کالا"                Width="*"    MinWidth="450"  IsReadOnly="True" Visibility="Visible" />
                             <DataGridTextColumn 	x:Name="NAMES_COLUMN"          Binding="{Binding NAMES, UpdateSourceTrigger=LostFocus}"            Header="واحد"               Width="150"  MinWidth="150"  IsReadOnly="True" Visibility="Visible" />
                             <DataGridTextColumn 	x:Name="MOG_COLUMN"            Binding="{Binding MOG, UpdateSourceTrigger=LostFocus, StringFormat={}{0:0.##}}"                 Header="موجودی فعلی"        Width="150"  MinWidth="150"  Visibility="Visible" />
-                            
-                            <DataGridTextColumn 	            Binding="{Binding MOG, UpdateSourceTrigger=LostFocus, StringFormat={}{0:0.##}}"                 Header="موجودی فعلی"        Width="150"  MinWidth="150"  Visibility="Visible" />
+
+                            <!--<DataGridTextColumn 	            Binding="{Binding MOG, UpdateSourceTrigger=LostFocus, StringFormat={}{0:0.##}}"                 Header="موجودی فعلی"        Width="150"  MinWidth="150"  Visibility="Visible" />
                             <DataGridTextColumn 	            Binding="{Binding MOG, StringFormat=\{0:F\}}"                 Header="موجودی فعلی1"        Width="150"  MinWidth="150"  Visibility="Visible" />
-                            <DataGridTextColumn 	            Binding="{Binding MOG, StringFormat=\{0:N\}}"                 Header="موجودی فعلی2"        Width="150"  MinWidth="150"  Visibility="Visible" />
-                            
+                            <DataGridTextColumn 	            Binding="{Binding MOG, StringFormat=\{0:N\}}"                 Header="موجودی فعلی2"        Width="150"  MinWidth="150"  Visibility="Visible" />-->
+
                             <DataGridTextColumn 	x:Name="NUM1_COLUMN"           Binding="{Binding NUM1, UpdateSourceTrigger=LostFocus}"             Header="شمارش اول"          Width="150"  MinWidth="150"  Visibility="Visible" />
                             <DataGridTextColumn 	x:Name="EKH_COLUMN"            Binding="{Binding EKH, UpdateSourceTrigger=LostFocus}"              Header="اختلاف"              Width="100"  MinWidth="100"  IsReadOnly="True" Visibility="Visible" />
                             <DataGridTextColumn 	x:Name="grp_COLUMN"            Binding="{Binding grp, UpdateSourceTrigger=LostFocus}"              Header="گروه"               Width="200"  MinWidth="200"  IsReadOnly="True" Visibility="Visible" />
@@ -124,7 +124,7 @@
                     </Grid.RowDefinitions>
 
                     <DataGrid   
-                                      x:Name="ANBARGRD_SUB2"
+                                      x:Name="ANBARGRD_SUB2" d:ItemsSource="{d:SampleData}"
                                       EnableColumnVirtualization="True"
                                       EnableRowVirtualization="True"
                                       VirtualizingPanel.IsVirtualizing="True"
@@ -179,7 +179,7 @@
                     </Grid.RowDefinitions>
 
                     <DataGrid   
-                                      x:Name="ANBARGRD_SUB3"
+                                      x:Name="ANBARGRD_SUB3" d:ItemsSource="{d:SampleData}"
                                       EnableColumnVirtualization="True"
                                       EnableRowVirtualization="True"
                                       VirtualizingPanel.IsVirtualizing="True"
@@ -195,7 +195,7 @@
                                       FlowDirection="RightToLeft" 
                                       SelectionUnit="FullRow" PreviewKeyDown="ANBARGRD_SUB3_PreviewKeyDown"
                                       CanUserDeleteRows="False" BorderThickness="1" Margin="-3,58,-3,40" CellEditEnding="ANBARGRD_SUB3_CellEditEnding" RowEditEnding="ANBARGRD_SUB3_RowEditEnding"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
-                              
+
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
@@ -229,6 +229,8 @@
 
             </TabItem>
         </TabControl>
+
+        <TextBlock x:Name="COUNTERS_TB" Margin="0,0,17,29" Text="تعداد سطر های شمارش اول :	  شمارش دوم :	  شمارش سوم :" FlowDirection="RightToLeft" TextAlignment="Left" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="565"/>
 
         <CNC:RecordNavigatorControl x:Name = "navigatorControl" VerticalAlignment = "Top" Margin = "10,836,10,0" />
         <!--Start.......................................................................................-->
