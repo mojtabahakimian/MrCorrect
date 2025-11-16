@@ -791,6 +791,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             if (errors)
             {
                 universControl.PopNotifyShow("داده های وارد شده مربوط به سطر ها درست نیست", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                DG_SUB_CANCEL_EDIT(); ApplyDataGridItems(); DG_SUB.Items.Refresh();
                 return;
             }
 
@@ -869,17 +870,23 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             {
                 if (DG_SUB.IsReadOnly) { return; }
 
+                var errors = (from object i in DG_SUB.ItemsSource
+                              let c = DG_SUB.ItemContainerGenerator.ContainerFromItem(i)
+                              where c != null && Validation.GetHasError(c)
+                              select c).Any();
+                if (errors) { return; }
+
                 try
                 {
                     var view = (IEditableCollectionView)CollectionViewSource.GetDefaultView(DG_SUB.ItemsSource);
                     if (view.IsAddingNew && view.CanCancelEdit)
                     {
-                        //view.CancelNew();
+                        view.CancelNew();
                         return; //Get out to avoid delete for deleting part of text inside the cell in DataGrid to conflict with Delete Row !
                     }
                     else if (view.IsEditingItem && view.CanCancelEdit)
                     {
-                        //view.CancelEdit();
+                        view.CancelEdit();
                         return; //Get out to avoid delete for deleting part of text inside the cell in DataGrid to conflict with Delete Row !
                     }
                     else
@@ -920,9 +927,15 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                     {
                         var item = DG_SUB.SelectedItems[i];
 
+                        if (item is not PRICE_ELAMIE_DTL dtlItem)
+                        {
+                            // It's the placeholder, skip it.
+                            continue;
+                        }
+
                         if (CL_LMethods.IsNewPlaceHolder(DG_SUB, item))
                         {
-                            PRICE_ELAMIE_DTL_DATA.Remove((PRICE_ELAMIE_DTL)item);
+                            PRICE_ELAMIE_DTL_DATA.Remove(dtlItem);
                             continue; // Skip deletion for new placeholder items
                         }
 
@@ -1111,6 +1124,21 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 DG_SUB.RowEditEnding += DG_SUB_RowEditEnding;
                 DG_SUB.CellEditEnding += DG_SUB_CellEditEnding;
             });
+        }
+
+        private void ApplyDataGridItems()
+        {
+            if (DG_SUB.Items is IEditableCollectionView editableCollectionView)
+            {
+                if (editableCollectionView.IsAddingNew)
+                {
+                    editableCollectionView.CancelNew(); // discard the new item
+                }
+                if (editableCollectionView.IsEditingItem)
+                {
+                    editableCollectionView.CommitEdit(); // commit the edit transaction
+                }
+            }
         }
 
         public bool IsPastingRows { get; private set; } = false;
@@ -1466,7 +1494,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             {
                 IsSaveSuccess = false;
                 DG_SUB_CANCEL_EDIT();
-                return; 
+                return;
             }
 
             var ROW = e.Row.Item as PRICE_ELAMIE_DTL;
@@ -1622,15 +1650,17 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         }
         private void DG_SUB_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (NowIsReady && DG_SUB.SelectedItem != null)
+            if (!NowIsReady || (e is null))
+                return;
+
+            var selectedItem = DG_SUB.SelectedItem;
+
+            if (selectedItem == null || Equals(selectedItem, CollectionView.NewItemPlaceholder))
+                return;
+
+            if (selectedItem is PRICE_ELAMIE_DTL detailRow)
             {
-                if (!(e is null) && DG_SUB.SelectedItem is not null)
-                {
-                    if (DG_SUB.SelectedItem.ToStringNullSafe() != "{NewItemPlaceholder}")
-                    {
-                        WAS_ROW_ITEM = ((PRICE_ELAMIE_DTL)DG_SUB.SelectedItem).Clone() as PRICE_ELAMIE_DTL;
-                    }
-                }
+                WAS_ROW_ITEM = detailRow.Clone() as PRICE_ELAMIE_DTL;
             }
         }
         private void DG_SUB_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1728,6 +1758,9 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         }
         private void PERSONEL_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (_navigationManager.IsNewRecord) { return; }
+
+
             //After Update
             if (PERSONEL.SelectedItem != null && !NewRecord && PEPID.Text != "0")
             {
@@ -1755,6 +1788,6 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
         }
 
-     
+
     }
 }

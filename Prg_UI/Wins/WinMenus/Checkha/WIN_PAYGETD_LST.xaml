@@ -531,7 +531,7 @@
 
         <syncfusion:SfDataGrid x:Name="PAY_GETD_SUB" ContextMenu="{StaticResource DataGridContextMenu}"
                 ItemsSource="{Binding PAY_GETD_DATA}" FilterRowPosition="Top"
-                AutoGenerateColumns="False"     
+                AutoGenerateColumns="False"     SelectedIndex="0"
                 EnableDataVirtualization="True"
                 SelectionUnit="Row"
                 AllowDraggingRows="True"
@@ -555,7 +555,7 @@
 
             <syncfusion:SfDataGrid.Columns>
 
-                <syncfusion:GridTemplateColumn MappingName="IsButtony" HeaderText="سند" IsReadOnly="True" AllowResizing="False" Width="50" AllowFiltering="False" AllowSorting="False">
+                <syncfusion:GridTemplateColumn MappingName="IsButtony" HeaderText="سند" IsReadOnly="True" AllowResizing="False" Width="50" AllowFiltering="False" AllowSorting="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button 

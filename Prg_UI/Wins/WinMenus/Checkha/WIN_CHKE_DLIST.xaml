@@ -530,7 +530,7 @@
 
         <syncfusion:SfDataGrid x:Name="SFDATAGRID_SUB" 
                 ItemsSource="{Binding SFDATAGRID_DATA}"
-                AutoGenerateColumns="False"     
+                AutoGenerateColumns="False" SelectedIndex="0"
                 EnableDataVirtualization="True"
                 SelectionUnit="Row"
                 AllowDraggingColumns="True"
@@ -558,7 +558,7 @@
             <syncfusion:SfDataGrid.Columns>
 
                 <syncfusion:GridTextColumn MappingName="RADIF" HeaderText="شماره" MinimumWidth="90" IsReadOnly="True" />
-                <syncfusion:GridTemplateColumn HeaderText="سوابق تغییر وضعیت چک" Width="180" MappingName="IsButtony" AllowSorting="False" AllowFiltering="False">
+                <syncfusion:GridTemplateColumn HeaderText="سوابق تغییر وضعیت چک" Width="180" MappingName="IsButtony" AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button IsTabStop="False" Click="BTN_RECORD_Click" Tag="{Binding}"

@@ -363,6 +363,11 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
             if (KALA.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
 
             TextBox CUTSNO_TEX = (TextBox)KALA.Template.FindName("PART_EditableTextBox", KALA);
+            if (CUTSNO_TEX is null)
+            {
+                return;
+            }
+
             if (CUTSNO_TEX.Text is null || CUTSNO_TEX.Text == "")
             {
                 return;
@@ -370,6 +375,12 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
 
             if (CUTSNO_TEX.Text == "+" || CUTSNO_TEX.Text == "++")
             {
+                if (ANBAR.SelectedValue is null)
+                {
+                    new Msgwin(false, "ابتدا انبار را انتخاب کنید").ShowDialog();
+                    return;
+                }
+
                 SERCHK sERCHK = new SERCHK(I_AM_MENU_ANBAR, ANBAR.SelectedValue.ToString());
                 sERCHK.ShowDialog();
 

@@ -526,7 +526,7 @@
         <sf:SfDataGrid x:Name="SYNCFUSION_DG" Visibility="Visible"
                        AutoGenerateColumns="False" d:ItemsSource="{d:SampleData ItemCount=4}"
                        ItemsSource="{Binding MASTER_GRADE_DATA}" Style="{StaticResource KDG}"
-                       Margin="10,50,10,10"
+                       Margin="10,50,10,10" SelectedIndex="0"
                        FlowDirection="RightToLeft"
                        HeaderStyle="{StaticResource KDGHeader}"
                        AutoGenerateRelations="False" 
@@ -595,7 +595,7 @@
                         <Binding Path="GFDATE" StringFormat="####/##/##" />
                     </sf:GridTextColumn.DisplayBinding>
                 </sf:GridTextColumn>
-                <syncfusion:GridTemplateColumn HeaderText="چاپ" Width="70" MappingName="IsButtony" AllowSorting="False" AllowFiltering="False" AllowFocus="False">
+                <syncfusion:GridTemplateColumn HeaderText="چاپ" Width="70" MappingName="IsButtony" AllowSorting="False" AllowFiltering="False" AllowFocus="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_ISEND" IsTabStop="False" Click="BTN_ISEND_Click" Tag="{Binding}"

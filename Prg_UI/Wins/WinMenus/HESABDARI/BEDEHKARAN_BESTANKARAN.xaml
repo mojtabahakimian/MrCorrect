@@ -527,7 +527,7 @@
         <!--HEADER↑-->
 
         <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" ContextMenu="{StaticResource DataGridContextMenu}" 
-            ItemsSource="{Binding FACTOR_DATA}" FilterRowPosition="Top"
+            ItemsSource="{Binding FACTOR_DATA}" FilterRowPosition="Top" SelectedIndex="0"
             AutoGenerateColumns="False"     
             EnableDataVirtualization="True"
             SelectionUnit="Row"
@@ -558,7 +558,7 @@
 
             <syncfusion:SfDataGrid.Columns>
 
-                <syncfusion:GridTemplateColumn MappingName="IsButtony" HeaderText="" IsReadOnly="True" AllowResizing="False" ColumnSizer="Auto" AllowFiltering="False" AllowSorting="False">
+                <syncfusion:GridTemplateColumn MappingName="IsButtony" HeaderText="" IsReadOnly="True" AllowResizing="False" ColumnSizer="Auto" AllowFiltering="False" AllowSorting="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button 

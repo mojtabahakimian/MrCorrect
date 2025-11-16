@@ -521,7 +521,7 @@
         </Popup>
 
         <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" FilterRowPosition="Top" ContextMenu="{StaticResource DataGridContextMenu}"
-                               FlowDirection="RightToLeft"
+                               FlowDirection="RightToLeft" SelectedIndex="0"
                                d:ItemsSource="{d:SampleData ItemCount=5}"
                                Margin="10,49,10,10"
                                Style="{StaticResource KDG}"

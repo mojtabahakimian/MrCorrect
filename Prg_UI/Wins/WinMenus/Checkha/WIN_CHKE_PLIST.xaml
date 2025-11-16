@@ -532,7 +532,7 @@
 
         <syncfusion:SfDataGrid x:Name="SFDATAGRID_SUB" ContextMenu="{StaticResource DataGridContextMenu}"
                 ItemsSource="{Binding SFDATAGRID_DATA}" FilterRowPosition="Top"
-                AutoGenerateColumns="False"     
+                AutoGenerateColumns="False"     SelectedIndex="0"
                 EnableDataVirtualization="True"
                 SelectionUnit="Row"
                 AllowDraggingColumns="True"
@@ -590,8 +590,8 @@
                 <syncfusion:GridTextColumn MappingName="N_KOL3" HeaderText="وصول از حساب کل" MinimumWidth="180" IsReadOnly="True"  />
                 <syncfusion:GridTextColumn MappingName="N_MOIN3" HeaderText="وصول از حساب معین" MinimumWidth="180"  IsReadOnly="True" />
                 <syncfusion:GridTextColumn MappingName="N_TAF3" HeaderText="وصول از حساب تفضیلی" MinimumWidth="180" IsReadOnly="True"  />
-                
-                <syncfusion:GridTemplateColumn HeaderText="وضعیت چک" Width="110" MappingName="IsButtony" AllowSorting="False" AllowFiltering="False">
+
+                <syncfusion:GridTemplateColumn HeaderText="وضعیت چک" Width="110" MappingName="IsButtony" AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button IsTabStop="False" Click="Button_Click" Tag="{Binding}"

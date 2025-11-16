@@ -526,7 +526,7 @@
 
         <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" ContextMenu="{StaticResource DataGridContextMenu}"
             ItemsSource="{Binding TARAZ_DATA}" FilterRowPosition="Top"
-            AutoGenerateColumns="False"
+            AutoGenerateColumns="False" SelectedIndex="0"
             AllowEditing="True"
             EnableDataVirtualization="True"
             SelectionUnit="Row"
@@ -559,7 +559,7 @@
 
             <syncfusion:SfDataGrid.Columns>
 
-                <syncfusion:GridTemplateColumn HeaderText="" x:Name="ISEND_COLUMN" Width="50" MappingName="IsButtony" IsHidden="False" AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
+                <syncfusion:GridTemplateColumn HeaderText="" x:Name="ISEND_COLUMN" Width="50" MappingName="IsButtony" IsHidden="False" AllowSorting="False" AllowFiltering="False"  AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_OPEN_SUB" IsTabStop="False" Click="BTN_OPEN_SUB_Click" Tag="{Binding}"

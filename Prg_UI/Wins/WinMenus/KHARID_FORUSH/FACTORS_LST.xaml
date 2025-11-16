@@ -536,7 +536,7 @@
         <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" 
            ContextMenu="{StaticResource DataGridContextMenu}"
            ItemsSource="{Binding FACTOR_DATA}" 
-           AutoGenerateColumns="False"
+           AutoGenerateColumns="False" SelectedIndex="0"
            EnableDataVirtualization="True"
            SelectionUnit="Row"
            AllowEditing="True"
@@ -561,7 +561,7 @@
 
             <syncfusion:SfDataGrid.Columns>
 
-                <syncfusion:GridTemplateColumn HeaderText="سامانه مودیان" x:Name="ISEND_COLUMN" Width="110" MappingName="IsButtony" IsHidden="True" AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
+                <syncfusion:GridTemplateColumn HeaderText="سامانه مودیان" x:Name="ISEND_COLUMN" Width="110" MappingName="IsButtony" IsHidden="True" AllowSorting="False" AllowFiltering="False"  AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_ISEND" IsTabStop="False" Click="BTN_ISEND_Click" Tag="{Binding}"
