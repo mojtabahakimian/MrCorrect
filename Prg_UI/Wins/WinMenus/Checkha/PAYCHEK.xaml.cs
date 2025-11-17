@@ -472,6 +472,22 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).BANK = Convert.ToInt32(this.BANK.SelectedValue);
                 ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).SHARH = Strings.Left("چك " + N_SERI.Text + "بانك " + CL_HESABDARI.GETBANK(Convert.ToDouble(this.BANK.SelectedValue)) + " " + SHOBEH.SelectedValue + " مورخ " + Strings.Format(Convert.ToInt32(DATE_S.Text.ToRawTarikh()), "####/##/##") + "-" + NAME_TAH.Text, 255);
 
+                if (!string.IsNullOrWhiteSpace(HES1.SelectedValue?.ToString()))
+                {
+                    if (HES1.SelectedValue.ToString().Trim() != "911-1-1")
+                    {
+                        this.N_KOL = Convert.ToString(CL_HESABDARI.GETKOL(this.HES1.SelectedValue.ToString()));
+                        this.N_MOIN = Convert.ToString(CL_HESABDARI.GETMOIN(this.HES1.SelectedValue.ToString()));
+                        this.N_TAF = Convert.ToString(CL_HESABDARI.GETTAF(this.HES1.SelectedValue.ToString()));
+                    }
+                }
+                else
+                {
+                    this.N_KOL = null;
+                    this.N_MOIN = null;
+                    this.N_TAF = null;
+                }
+
                 var KhazanehRow = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST);
                 var CheckExistData = dbms.DoGetDataSQL<PAY_GETP>($"SELECT * FROM PAY_GETP WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()}").ToList();
 

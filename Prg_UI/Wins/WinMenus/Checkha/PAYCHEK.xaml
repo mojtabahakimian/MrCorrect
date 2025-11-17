@@ -85,7 +85,7 @@
         <Label x:Name="Label3_Copy3" Content=": پرداخت از حساب" HorizontalAlignment="Left" Margin="487,337,0,0" VerticalAlignment="Top" Width="auto"/>
         <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="False" DigitGroupOnEnter="False" MaxLength="16" x:Name="SAYADI" InnerTabStop="True" Height="27" Margin="0,370,129,0" Text="" IsReadOnly="False" Tag="RD" LastValueShouldZero="False" VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="161" TabIndex="7" LostFocus="SAYADI_LostFocus" />
         <Label x:Name="Label1_Copy1" Content=": شماره صیادی" HorizontalAlignment="Left" Margin="486,368,0,0" VerticalAlignment="Top" Width="auto"/>
-        <Button x:Name="_SaveExit" Content="تصویب و خروج" Margin="176,445,0,0" TabIndex="8"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="11" Height="38" VerticalAlignment="Top" HorizontalAlignment="Left" Width="122" Foreground="#DDFFFFFF" FontWeight="Bold" Click="_SaveExit_Click" PreviewKeyDown="_SaveExit_PreviewKeyDown">
+        <Button x:Name="_SaveExit" Content="تصویب و خروج" Margin="176,0,0,17" TabIndex="8"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="11" Height="38" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="122" Foreground="#DDFFFFFF" FontWeight="Bold" Click="_SaveExit_Click" PreviewKeyDown="_SaveExit_PreviewKeyDown">
             <Button.Style>
                 <Style TargetType="Button" BasedOn="{StaticResource GerdC}">
                     <Style.Triggers>
