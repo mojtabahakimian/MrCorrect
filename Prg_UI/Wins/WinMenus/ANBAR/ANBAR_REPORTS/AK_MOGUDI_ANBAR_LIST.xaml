@@ -585,7 +585,7 @@ CornerRadius="2" />
 
             <syncfusion:SfDataGrid.Columns>
 
-                <syncfusion:GridTemplateColumn HeaderText="کارت انبار کالا" x:Name="ISEND_COLUMN"  Width="110" MappingName="IsButtony" AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
+                <syncfusion:GridTemplateColumn HeaderText="کارت انبار کالا" x:Name="ISEND_COLUMN"  Width="110"  FilterRowEditorType="None"  AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_ISEND" IsTabStop="False" Click="BTN_ISEND_Click" Tag="{Binding}"

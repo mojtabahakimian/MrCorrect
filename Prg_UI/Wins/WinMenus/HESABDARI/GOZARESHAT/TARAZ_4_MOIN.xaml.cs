@@ -206,7 +206,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             }
 
             GenerateAutomaticSummary(SYNCFUSION_DG);
-
+            //SYNCFUSION_DG.SelectedIndex = 0;
             //ProcLoader.Stop(Prc);
         }
 
@@ -739,6 +739,10 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         {
             var CurrentRow = SYNCFUSION_DG.SelectedItem as TARAZ4_MOIN_MODEL;
 
+            //if (sender is Button selectedrow)
+            //{
+            //    var CurrentRow0 = selectedrow.Tag as TARAZ4_MOIN_MODEL; //یه روش دیگه برای تشخیص SelectedItem
+            //}
             if (CurrentRow != null && CurrentRow?.NUMBER != null)
             {
                 if (BEDEHBESTANMOIN)

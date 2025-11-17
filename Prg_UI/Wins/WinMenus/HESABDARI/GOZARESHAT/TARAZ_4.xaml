@@ -560,7 +560,7 @@
 
             <syncfusion:SfDataGrid.Columns>
 
-                <syncfusion:GridTemplateColumn HeaderText=" " x:Name="ISEND_COLUMN" Width="60" MappingName="IsButtony" AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False" >
+                <syncfusion:GridTemplateColumn HeaderText=" " x:Name="ISEND_COLUMN" Width="60"  FilterRowEditorType="None"  AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False" >
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_OPEN_SUB" IsTabStop="False" Click="BTN_OPEN_SUB_Click" Tag="{Binding}"

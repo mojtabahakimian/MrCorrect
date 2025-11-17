@@ -8,7 +8,6 @@ using System.Text;
 namespace Functions
 {
     public static class CL_DATAGRID_FUNCS
-
     {
 
         //var THES_INDEX = PGET_LST_SUB.Columns.FirstOrDefault(c => c.SortMemberPath == "THES").DisplayIndex;

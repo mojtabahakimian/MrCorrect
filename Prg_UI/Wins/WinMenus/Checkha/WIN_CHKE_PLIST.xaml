@@ -591,7 +591,7 @@
                 <syncfusion:GridTextColumn MappingName="N_MOIN3" HeaderText="وصول از حساب معین" MinimumWidth="180"  IsReadOnly="True" />
                 <syncfusion:GridTextColumn MappingName="N_TAF3" HeaderText="وصول از حساب تفضیلی" MinimumWidth="180" IsReadOnly="True"  />
 
-                <syncfusion:GridTemplateColumn HeaderText="وضعیت چک" Width="110" MappingName="IsButtony" AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
+                <syncfusion:GridTemplateColumn HeaderText="وضعیت چک" Width="110"  FilterRowEditorType="None"  AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button IsTabStop="False" Click="Button_Click" Tag="{Binding}"

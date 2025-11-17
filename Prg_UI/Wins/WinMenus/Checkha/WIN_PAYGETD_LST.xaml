@@ -555,7 +555,7 @@
 
             <syncfusion:SfDataGrid.Columns>
 
-                <syncfusion:GridTemplateColumn MappingName="IsButtony" HeaderText="سند" IsReadOnly="True" AllowResizing="False" Width="50" AllowFiltering="False" AllowSorting="False" AllowEditing="False" AllowGrouping="False">
+                <syncfusion:GridTemplateColumn  FilterRowEditorType="None"  HeaderText="سند" IsReadOnly="True" AllowResizing="False" Width="50" AllowFiltering="False" AllowSorting="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button 
@@ -608,7 +608,7 @@
                 <syncfusion:GridTextColumn MappingName="VAZ" HeaderText="صندوق" ColumnSizer="Auto" />
                 <syncfusion:GridTextColumn MappingName="SAYADI" HeaderText="شماره صیادی" ColumnSizer="Auto" />
 
-                <syncfusion:GridTemplateColumn HeaderText="حذف" MinimumWidth="90" MappingName="IsButtony" AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
+                <syncfusion:GridTemplateColumn HeaderText="حذف" MinimumWidth="90"  FilterRowEditorType="None"  AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_DELETE_PAYCH" IsTabStop="False" Click="BTN_DELETE_PAYCH_Click" Tag="{Binding}"
@@ -748,7 +748,7 @@
                 </syncfusion:GridTextColumn>
 
                 <!--وصول به حساب-->
-                <syncfusion:GridTemplateColumn HeaderText="پاک کردن وضعیت" MinimumWidth="90" MappingName="IsButtony" AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
+                <syncfusion:GridTemplateColumn HeaderText="پاک کردن وضعیت" MinimumWidth="90"  FilterRowEditorType="None"  AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_CLEAR_VOSUL" IsTabStop="False" Click="BTN_CLEAR_VOSUL_Click" Tag="{Binding}"
