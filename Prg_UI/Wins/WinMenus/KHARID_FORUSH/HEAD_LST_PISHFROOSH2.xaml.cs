@@ -4780,7 +4780,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                 var masMaghsad = db.Query<int?>($"SELECT SHAHRID FROM dbo.CUST_HESAB WHERE hes = N'{CUST_NO.SelectedValue}'", null, transaction).FirstOrDefault();
 
                                 // قفل جدول برای جلوگیری از تداخل
-                                db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
+                                //db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
+                                db.Execute("SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WITH (TABLOCKX, HOLDLOCK)", null, transaction);
 
                                 // دریافت شماره حواله جدید
                                 var maxNumber = db.Query<double?>("SELECT MAX(NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE TAG = 2", null, transaction).FirstOrDefault();
@@ -5329,7 +5330,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
                             try
                             {
                                 // قفل جداول برای جلوگیری از تداخل
-                                db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
+                                //db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
+                                db.Execute("SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WITH (TABLOCKX, HOLDLOCK)", null, transaction);
+
 
                                 // دریافت شماره فاکتور جدید (TAG = 2)
                                 var maxNumber = db.Query<double?>("SELECT MAX(NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE TAG = 2", null, transaction).FirstOrDefault();

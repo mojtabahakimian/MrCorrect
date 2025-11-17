@@ -249,7 +249,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
 
             //After_Update
-            var rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue).ToList();
+            var rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND (ISNULL(N_KOL,'') <> 911) ").ToList();
             if (rst.Count == 0)
             {
             }
@@ -272,7 +272,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         {
             if (!IsVisible || !IsLoaded || isClosing) { return; }
 
-            var rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh()).ToList();
+            var rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh() + " AND (ISNULL(N_KOL,'') <> 911) ").ToList();
             if (rst.Count == 0)
             {
             }

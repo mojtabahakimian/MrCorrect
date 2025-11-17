@@ -8,6 +8,7 @@
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
         FontFamily="{StaticResource IRANYEKAN}"
         Title="F7" Height="385" Width="768" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded">
 

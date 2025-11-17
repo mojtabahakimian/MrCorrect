@@ -82,6 +82,10 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         {
             InitializeComponent();
 
+            // Ensure all grid columns have valid MappingName to prevent filtering errors
+
+            //CL_DATAGRID_FUNCS.EnsureGridColumnsHaveMappingName(SYNCFUSION_DG); //این هم جلوی خطا Column NULL رو میگیره برای ستون هایی از نوع دکمه ولی نیازی نیست بهش چون توی xaml با غیر فقاعل کردن یه گزینه درستش کردم
+
             this.DataContext = this;
 
             DT1 = _DT1_;
