@@ -13,32 +13,33 @@ using Prg_UI.Functions.Jostejoo;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Prg_UI.Wins.WinOther;
+using Rpts;
+using Stimulsoft.Report;
 using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
-using Stimulsoft.Report;
+using Syncfusion.Data.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
-using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
-using System.ComponentModel;
-using Syncfusion.Data.Extensions;
-using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
-using Rpts;
+using Wins.WinMenus.ANBAR;
 using Wins.WinOther;
 using static Interfaces.INavigator;
-using Wins.WinMenus.ANBAR;
-using System.Windows.Data;
-using System.Windows.Controls.Primitives;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
+using static Prg_UI.Functions.CL_LMethods;
+using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
+using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
 
 namespace Wins.WinMenus.KHARID_FORUSH
 {
@@ -432,7 +433,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
 
             string WhereCondition = FTAG > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {FTAG}) " : "  ";
-            WhereCondition = CL_LMethods.GetRestrictedSqlQuery(FTAG, WhereCondition);
+
+            _restrictionInfo = CL_LMethods.GetRestrictedSqlQueryWithDetails(FTAG, WhereCondition);
+            WhereCondition = _restrictionInfo.WhereClause;
 
             if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
             {
@@ -699,17 +702,51 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         #endregion
 
+        private CL_LMethods.RestrictionInfo _restrictionInfo;
+        private string GetAccessDeniedMessage()
+        {
+            if (_restrictionInfo?.RestrictionMessages?.Any() == true)
+            {
+                // ایجاد لیست محدودیت‌ها
+                var restrictions = string.Join("، ", _restrictionInfo.RestrictionMessages);
+
+                return $"دسترسی به شماره «{_navigationManager.NUMBER_TO_OPEN}» امکان‌پذیر نیست. " +
+                    $"به آخرین شماره مجاز هدایت خواهید شد. (محدودیت: {restrictions})";
+            }
+
+            return $"دسترسی به شماره «{_navigationManager.NUMBER_TO_OPEN}» امکان‌پذیر نیست. " +
+                $"شما به آخرین شماره مجاز هدایت خواهید شد.";
+        }
+        private void ShowMissingOrRestrictedMessage()
+        {
+            if (_navigationManager?.NUMBER_TO_OPEN == null)
+            {
+                return;
+            }
+
+            double requestedNumber = Convert.ToDouble(_navigationManager.NUMBER_TO_OPEN);
+            bool recordExists = dbms.DoGetDataSQL<double?>($"SELECT TOP 1 NUMBER FROM HEAD_LST WHERE NUMBER = {requestedNumber} AND TAG = {FTAG}").FirstOrDefault() != null;
+            string message = recordExists ? GetAccessDeniedMessage() : "چنین شماره ای وجود ندارد";
+            new Msgwin(false, message).ShowDialog();
+            _navigationManager.ClearNumberToOpen();
+        }
         private void OnCurrentRecordChanged(HEAD_LST HEADER_FAC)
         {
             if (_navigationManager.IsNewRecord)
             {
                 ClearFreshNew(); //Form_Current(); //should be in this ClearFreshAll(); method too at the end
+                if (_navigationManager.NUMBER_TO_OPEN != null)
+                {
+                    ShowMissingOrRestrictedMessage();
+                    return;
+                }
             }
             else if (HEADER_FAC == null)
             {
                 if (_navigationManager.NUMBER_TO_OPEN != null)
                 {
-                    new Msgwin(false, "چنین شماره ای وجود ندارد").ShowDialog();
+                    //new Msgwin(false, "چنین شماره ای وجود ندارد").ShowDialog();
+                    ShowMissingOrRestrictedMessage();
                     return;
                 }
             }

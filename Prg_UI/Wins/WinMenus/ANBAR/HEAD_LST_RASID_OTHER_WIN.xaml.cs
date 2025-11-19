@@ -361,8 +361,8 @@ namespace Wins.WinMenus.ANBAR
             #region LOADING...
 
             string WhereCondition = TAG > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {TAG}) " : "  ";
-            WhereCondition = CL_LMethods.GetRestrictedSqlQuery(TAG, WhereCondition);
-
+            _restrictionInfo = CL_LMethods.GetRestrictedSqlQueryWithDetails(TAG, WhereCondition);
+            WhereCondition = _restrictionInfo.WhereClause;
 
             if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
             {
@@ -568,17 +568,51 @@ namespace Wins.WinMenus.ANBAR
         }
 
         #endregion
+        private CL_LMethods.RestrictionInfo _restrictionInfo;
+        private string GetAccessDeniedMessage()
+        {
+            if (_restrictionInfo?.RestrictionMessages?.Any() == true)
+            {
+                // ایجاد لیست محدودیت‌ها
+                var restrictions = string.Join("، ", _restrictionInfo.RestrictionMessages);
+
+                return $"دسترسی به شماره «{_navigationManager.NUMBER_TO_OPEN}» امکان‌پذیر نیست. " +
+                    $"به آخرین شماره مجاز هدایت خواهید شد. (محدودیت: {restrictions})";
+            }
+
+            return $"دسترسی به شماره «{_navigationManager.NUMBER_TO_OPEN}» امکان‌پذیر نیست. " +
+                $"شما به آخرین شماره مجاز هدایت خواهید شد.";
+        }
+        private void ShowMissingOrRestrictedMessage()
+        {
+            if (_navigationManager?.NUMBER_TO_OPEN == null)
+            {
+                return;
+            }
+
+            double requestedNumber = Convert.ToDouble(_navigationManager.NUMBER_TO_OPEN);
+            bool recordExists = dbms.DoGetDataSQL<double?>($"SELECT TOP 1 NUMBER FROM HEAD_LST WHERE NUMBER = {requestedNumber} AND TAG = {TAG}").FirstOrDefault() != null;
+            string message = recordExists ? GetAccessDeniedMessage() : "چنین شماره ای وجود ندارد";
+            new Msgwin(false, message).ShowDialog();
+            _navigationManager.ClearNumberToOpen();
+        }
         private void OnCurrentRecordChanged(HEAD_LST HEADER_FAC)
         {
             if (_navigationManager.IsNewRecord)
             {
                 ClearFreshAll(); //Form_Current(); //should be in this ClearFreshAll(); method too at the end
+                if (_navigationManager.NUMBER_TO_OPEN != null)
+                {
+                    ShowMissingOrRestrictedMessage();
+                    return;
+                }
             }
             else if (HEADER_FAC == null)
             {
                 if (_navigationManager.NUMBER_TO_OPEN != null)
                 {
-                    new Msgwin(false, "چنین شماره ای وجود ندارد").ShowDialog();
+                    //new Msgwin(false, "چنین شماره ای وجود ندارد").ShowDialog();
+                    ShowMissingOrRestrictedMessage();
                     return;
                 }
             }

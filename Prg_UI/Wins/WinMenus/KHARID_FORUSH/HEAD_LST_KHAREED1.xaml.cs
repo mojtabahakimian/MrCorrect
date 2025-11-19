@@ -734,7 +734,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
             double requestedNumber = Convert.ToDouble(_navigationManager.NUMBER_TO_OPEN);
-            bool recordExists = dbms.DoGetDataSQL<double?>($"SELECT TOP 1 NUMBER FROM HEAD_LST WHERE NUMBER = {requestedNumber} AND TAG = {HTAG}").FirstOrDefault() != null;
+            bool recordExists = dbms.DoGetDataSQL<double?>($"SELECT TOP 1 NUMBER FROM HEAD_LST WHERE NUMBER = {requestedNumber} AND TAG = {FTAG}").FirstOrDefault() != null;
             string message = recordExists ? GetAccessDeniedMessage() : "چنین شماره ای وجود ندارد";
             new Msgwin(false, message).ShowDialog();
             _navigationManager.ClearNumberToOpen();
