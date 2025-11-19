@@ -1549,181 +1549,185 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     return;
                 }
             }
-            try
+            else
             {
-                var fullDetails = await GetFactorFullDetailsAsync(HEADER_FAC.NUMBER);
-
-                if (fullDetails == null || fullDetails.Header == null)
+                try
                 {
-                    new Msgwin(false, "این فاکتور خالی است یا اطلاعات کامل آن یافت نشد.").Show();
-                    return;
-                }
+                    var fullDetails = await GetFactorFullDetailsAsync(HEADER_FAC.NUMBER);
 
-                // --- Begin Populating UI from fullDetails model ---
-                var header = fullDetails.Header;
-
-                NUMBER1.Text = header.NUMBER1.ToString();
-                NUMBER.Text = header.NUMBER.ToString();
-
-                var numberItemsSource = (List<_MG_MODEL2_>)NUMBER.ItemsSource ?? new List<_MG_MODEL2_>();
-                if (!numberItemsSource.Any(item => item?.NUMBER == header.NUMBER))
-                {
-                    numberItemsSource.Add(new _MG_MODEL2_ { NUMBER = header.NUMBER });
-                    NUMBER.ItemsSource = numberItemsSource;
-                }
-                NUMBER.SelectedValue = header.NUMBER;
-                NUMBER.Items.Refresh();
-
-                DATE_N.Text = header.DATE_N.ToStringNullSafe();
-                USER_NAME.Text = header.USER_NAME.ToStringNullSafe();
-                MAS.Text = header.MAS.ToStringNullSafe();
-                DEPATMAN.SelectedValue = header.DEPATMAN;
-                CUST_KIND.SelectedValue = header.CUST_KIND;
-                if (header.FNUMCO != null)
-                {
-                    FNUMCO.Text = header.FNUMCO.ToStringNullSafe();
-                }
-
-                if (IsExporty)
-                {
-                    ARZD.Text = header.ARZD.ToStringNullSafe();
-                    ARZKIND2.SelectedValue = header.ARZKIND2;
-                    ANBARF.Text = header.ANBARF.ToStringNullSafe();
-                }
-
-                if (fullDetails.Customer != null)
-                {
-                    var custItemsSource = CUST_NO.ItemsSource as List<Custom_CUST_HESAB> ?? new List<Custom_CUST_HESAB>();
-                    if (!custItemsSource.Any(item => item?.hes == fullDetails.Customer.hes))
+                    if (fullDetails == null || fullDetails.Header == null)
                     {
-                        custItemsSource.Add(new Custom_CUST_HESAB { hes = fullDetails.Customer.hes, NAME = fullDetails.Customer.NAME });
-                        CUST_NO.ItemsSource = custItemsSource;
+                        new Msgwin(false, "این فاکتور خالی است یا اطلاعات کامل آن یافت نشد.").Show();
+                        return;
                     }
-                    CUST_NO.SelectedValue = fullDetails.Customer.hes;
-                    CUST_NO.Items.Refresh();
+
+                    // --- Begin Populating UI from fullDetails model ---
+                    var header = fullDetails.Header;
+
+                    NUMBER1.Text = header.NUMBER1.ToString();
+                    NUMBER.Text = header.NUMBER.ToString();
+
+                    var numberItemsSource = (List<_MG_MODEL2_>)NUMBER.ItemsSource ?? new List<_MG_MODEL2_>();
+                    if (!numberItemsSource.Any(item => item?.NUMBER == header.NUMBER))
+                    {
+                        numberItemsSource.Add(new _MG_MODEL2_ { NUMBER = header.NUMBER });
+                        NUMBER.ItemsSource = numberItemsSource;
+                    }
+                    NUMBER.SelectedValue = header.NUMBER;
+                    NUMBER.Items.Refresh();
+
+                    DATE_N.Text = header.DATE_N.ToStringNullSafe();
+                    USER_NAME.Text = header.USER_NAME.ToStringNullSafe();
+                    MAS.Text = header.MAS.ToStringNullSafe();
+                    DEPATMAN.SelectedValue = header.DEPATMAN;
+                    CUST_KIND.SelectedValue = header.CUST_KIND;
+                    if (header.FNUMCO != null)
+                    {
+                        FNUMCO.Text = header.FNUMCO.ToStringNullSafe();
+                    }
+
+                    if (IsExporty)
+                    {
+                        ARZD.Text = header.ARZD.ToStringNullSafe();
+                        ARZKIND2.SelectedValue = header.ARZKIND2;
+                        ANBARF.Text = header.ANBARF.ToStringNullSafe();
+                    }
+
+                    if (fullDetails.Customer != null)
+                    {
+                        var custItemsSource = CUST_NO.ItemsSource as List<Custom_CUST_HESAB> ?? new List<Custom_CUST_HESAB>();
+                        if (!custItemsSource.Any(item => item?.hes == fullDetails.Customer.hes))
+                        {
+                            custItemsSource.Add(new Custom_CUST_HESAB { hes = fullDetails.Customer.hes, NAME = fullDetails.Customer.NAME });
+                            CUST_NO.ItemsSource = custItemsSource;
+                        }
+                        CUST_NO.SelectedValue = fullDetails.Customer.hes;
+                        CUST_NO.Items.Refresh();
+                    }
+
+                    SGN1.IsChecked = header.SGN1;
+                    SGN2.IsChecked = header.SGN2;
+                    SGN3.IsChecked = header.SGN3;
+                    SGN1usid.Tag = header.sgn1usid;
+                    SGN2usid.Tag = header.sgn2usid;
+                    SGN3usid.Tag = header.sgn3usid;
+
+                    PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
+                    PERSONEL.SelectedValue = null;
+                    PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+
+                    if (rst_personel != null)
+                    {
+                        SGN1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == header.sgn1usid)?.SAL_NAME;
+                        SGN2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == header.sgn2usid)?.SAL_NAME;
+                        SGN3usid.Text = rst_personel.FirstOrDefault(x => x.IDD == header.sgn3usid)?.SAL_NAME;
+                    }
+
+                    FACTOR22_INVO_DATA.Clear();
+                    fullDetails.InvoiceItems.ForEach(FACTOR22_INVO_DATA.Add);
+                    TAKHFIF_APLAY_DATA.Clear();
+                    fullDetails.AdvancedDiscounts.ForEach(TAKHFIF_APLAY_DATA.Add);
+                    PAY_GETD_SUB22_DATA.Clear();
+                    fullDetails.Checks.ForEach(PAY_GETD_SUB22_DATA.Add);
+                    SAYER_VISITOR_DATA.Clear();
+                    fullDetails.VisitorDetails.ForEach(SAYER_VISITOR_DATA.Add);
+
+                    OKF.IsChecked = header.OKF ?? false;
+                    if (header.OKF == null || header.OKF == false) MakeOKFReady();
+
+                    TICMBAA.IsChecked = header.TICMBAA;
+                    JAY.IsChecked = header.JAY;
+                    MOLAH.Text = header.MOLAH;
+                    SHIFT.SelectedValue = header.SHIFT;
+
+                    MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
+                    MODAT_PPID.SelectedValue = header.MODAT_PPID;
+                    MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
+
+                    PEPID.SelectedValue = header.PEPID;
+                    PEID.SelectedValue = header.PEID;
+
+                    MODAT_PPID_Enter();
+
+                    M_NAGHD.Text = header.M_NAGHD.ToStringNullSafe();
+                    MABL_VAR.Text = header.MABL_VAR.ToStringNullSafe();
+                    MABL_HAV.Text = header.MABL_HAV.ToStringNullSafe();
+                    TAKHFIF.Text = header.TAKHFIF.ToStringNullSafe();
+                    MOIN_VAR.Text = header.MOIN_VAR.ToStringNullSafe();
+                    MOIN_HAV.Text = header.MOIN_HAV.ToStringNullSafe();
+                    SHARAYET.Text = header.SHARAYET;
+
+                    MABL_HAZ.Text = header.MABL_HAZ.ToStringNullSafe();
+                    MOIN_HAZ.Text = header.MOIN_HAZ;
+                    MBAA.Text = header.MBAA.ToStringNullSafe();
+                    HMBAA.Text = header.HMBAA;
+
+                    if (fullDetails.OtherDetails != null)
+                    {
+                        var other = fullDetails.OtherDetails;
+                        REQUEST_NO.Text = other.REQUEST_NO;
+                        DRIVER_MOB.Text = other.DRIVER_MOB;
+                        MAGHSAD.SelectedValue = other.MAGHSAD;
+                        BARNAMEH.Text = other.BARNAMEH;
+                        CAMIUN_NUM.Text = other.CAMIUN_NUM;
+                        CAM_KHALY.Text = other.CAM_KHALY.ToStringNullSafe();
+                        DRIVER.Text = other.DRIVER;
+                        CAMIUN.Text = other.CAMIUN;
+                        CAM_POOR.Text = other.CAM_POOR.ToStringNullSafe();
+                        TOZIH.Text = other.TOZIH;
+                    }
+
+                    // Recalculate sums and totals
+                    MasterSummerAndMandeh();
+
+                    MANDAH.Text = fullDetails.AccountBalance;
+                    N_S.Text = header.N_S.ToStringNullSafe();
+                    MABNA.Text = fullDetails.SanadBase;
+
+                    if (fullDetails.TaxDetails != null)
+                    {
+                        var moadian = fullDetails.TaxDetails;
+                        inty.SelectedValue = moadian.inty;
+                        inp.SelectedValue = moadian.inp;
+                        ins.SelectedValue = moadian.ins;
+                        sbc.Text = moadian.sbc;
+                        bbc.Text = moadian.bbc;
+                        ft.Text = moadian.ft.ToStringNullSafe();
+                        bpn.Text = moadian.bpn;
+                        scln.Text = moadian.scln;
+                        scc.Text = moadian.scc;
+                        cdcn.Text = moadian.cdcn;
+                        cdcd.Text = moadian.cdcd.ToStringNullSafe();
+                        crn.Text = moadian.crn;
+                        billid.Text = moadian.billid;
+                        todam.Text = moadian.todam.ToStringNullSafe();
+                        tonw.Text = moadian.tonw.ToStringNullSafe();
+                        torv.Text = moadian.torv.ToStringNullSafe();
+                        tocv.Text = moadian.tocv.ToStringNullSafe();
+                        setm.SelectedValue = moadian.setm;
+                        cap.Text = moadian.cap.ToStringNullSafe();
+                        insp.Text = moadian.insp.ToStringNullSafe();
+                        tvop.Text = moadian.tvop.ToStringNullSafe();
+                        tax17.Text = moadian.tax17.ToStringNullSafe();
+                        if (IsExporty) CUT.SelectedValue = moadian.cut;
+                        irtaxid.Text = moadian.irtaxid;
+                    }
+
+                    // --- End Populating UI ---
+
+                    Form_Current();
                 }
-
-                SGN1.IsChecked = header.SGN1;
-                SGN2.IsChecked = header.SGN2;
-                SGN3.IsChecked = header.SGN3;
-                SGN1usid.Tag = header.sgn1usid;
-                SGN2usid.Tag = header.sgn2usid;
-                SGN3usid.Tag = header.sgn3usid;
-
-                PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
-                PERSONEL.SelectedValue = null;
-                PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
-
-                if (rst_personel != null)
+                catch (Exception ex)
                 {
-                    SGN1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == header.sgn1usid)?.SAL_NAME;
-                    SGN2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == header.sgn2usid)?.SAL_NAME;
-                    SGN3usid.Text = rst_personel.FirstOrDefault(x => x.IDD == header.sgn3usid)?.SAL_NAME;
+                    // Log and show error
+                    new Msgwin(false, $"خطا در بارگذاری اطلاعات فاکتور").ShowDialog();
                 }
-
-                FACTOR22_INVO_DATA.Clear();
-                fullDetails.InvoiceItems.ForEach(FACTOR22_INVO_DATA.Add);
-                TAKHFIF_APLAY_DATA.Clear();
-                fullDetails.AdvancedDiscounts.ForEach(TAKHFIF_APLAY_DATA.Add);
-                PAY_GETD_SUB22_DATA.Clear();
-                fullDetails.Checks.ForEach(PAY_GETD_SUB22_DATA.Add);
-                SAYER_VISITOR_DATA.Clear();
-                fullDetails.VisitorDetails.ForEach(SAYER_VISITOR_DATA.Add);
-
-                OKF.IsChecked = header.OKF ?? false;
-                if (header.OKF == null || header.OKF == false) MakeOKFReady();
-
-                TICMBAA.IsChecked = header.TICMBAA;
-                JAY.IsChecked = header.JAY;
-                MOLAH.Text = header.MOLAH;
-                SHIFT.SelectedValue = header.SHIFT;
-
-                MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
-                MODAT_PPID.SelectedValue = header.MODAT_PPID;
-                MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
-
-                PEPID.SelectedValue = header.PEPID;
-                PEID.SelectedValue = header.PEID;
-
-                MODAT_PPID_Enter();
-
-                M_NAGHD.Text = header.M_NAGHD.ToStringNullSafe();
-                MABL_VAR.Text = header.MABL_VAR.ToStringNullSafe();
-                MABL_HAV.Text = header.MABL_HAV.ToStringNullSafe();
-                TAKHFIF.Text = header.TAKHFIF.ToStringNullSafe();
-                MOIN_VAR.Text = header.MOIN_VAR.ToStringNullSafe();
-                MOIN_HAV.Text = header.MOIN_HAV.ToStringNullSafe();
-                SHARAYET.Text = header.SHARAYET;
-
-                MABL_HAZ.Text = header.MABL_HAZ.ToStringNullSafe();
-                MOIN_HAZ.Text = header.MOIN_HAZ;
-                MBAA.Text = header.MBAA.ToStringNullSafe();
-                HMBAA.Text = header.HMBAA;
-
-                if (fullDetails.OtherDetails != null)
+                finally
                 {
-                    var other = fullDetails.OtherDetails;
-                    REQUEST_NO.Text = other.REQUEST_NO;
-                    DRIVER_MOB.Text = other.DRIVER_MOB;
-                    MAGHSAD.SelectedValue = other.MAGHSAD;
-                    BARNAMEH.Text = other.BARNAMEH;
-                    CAMIUN_NUM.Text = other.CAMIUN_NUM;
-                    CAM_KHALY.Text = other.CAM_KHALY.ToStringNullSafe();
-                    DRIVER.Text = other.DRIVER;
-                    CAMIUN.Text = other.CAMIUN;
-                    CAM_POOR.Text = other.CAM_POOR.ToStringNullSafe();
-                    TOZIH.Text = other.TOZIH;
+                    // Optional: Hide loading indicator here
                 }
-
-                // Recalculate sums and totals
-                MasterSummerAndMandeh();
-
-                MANDAH.Text = fullDetails.AccountBalance;
-                N_S.Text = header.N_S.ToStringNullSafe();
-                MABNA.Text = fullDetails.SanadBase;
-
-                if (fullDetails.TaxDetails != null)
-                {
-                    var moadian = fullDetails.TaxDetails;
-                    inty.SelectedValue = moadian.inty;
-                    inp.SelectedValue = moadian.inp;
-                    ins.SelectedValue = moadian.ins;
-                    sbc.Text = moadian.sbc;
-                    bbc.Text = moadian.bbc;
-                    ft.Text = moadian.ft.ToStringNullSafe();
-                    bpn.Text = moadian.bpn;
-                    scln.Text = moadian.scln;
-                    scc.Text = moadian.scc;
-                    cdcn.Text = moadian.cdcn;
-                    cdcd.Text = moadian.cdcd.ToStringNullSafe();
-                    crn.Text = moadian.crn;
-                    billid.Text = moadian.billid;
-                    todam.Text = moadian.todam.ToStringNullSafe();
-                    tonw.Text = moadian.tonw.ToStringNullSafe();
-                    torv.Text = moadian.torv.ToStringNullSafe();
-                    tocv.Text = moadian.tocv.ToStringNullSafe();
-                    setm.SelectedValue = moadian.setm;
-                    cap.Text = moadian.cap.ToStringNullSafe();
-                    insp.Text = moadian.insp.ToStringNullSafe();
-                    tvop.Text = moadian.tvop.ToStringNullSafe();
-                    tax17.Text = moadian.tax17.ToStringNullSafe();
-                    if (IsExporty) CUT.SelectedValue = moadian.cut;
-                    irtaxid.Text = moadian.irtaxid;
-                }
-
-                // --- End Populating UI ---
-
-                Form_Current();
             }
-            catch (Exception ex)
-            {
-                // Log and show error
-                new Msgwin(false, $"خطا در بارگذاری اطلاعات فاکتور").ShowDialog();
-            }
-            finally
-            {
-                // Optional: Hide loading indicator here
-            }
+       
         }
         private bool OnInsertRecord(HEAD_LST record)
         {
@@ -8054,6 +8058,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 }
                 #endregion
 
+
+
                 _qre = $@"UPDATE dbo.HEAD_LST
                     SET NUMBER = {NUMBER.Text}, DATE_N = {DATE_N.Text.ToRawTarikh()}, 
                     TAH = N'{TAH.Text}', MAS = {MAS.Text}, VAS = {VAS}, N_S = {_n_s}, CUST_NO = N'{CUST_NO.SelectedValue}', MOLAH = N'{MOLAH.Text}',
@@ -12123,11 +12129,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                     if (!string.IsNullOrWhiteSpace(NUMBER.Text) && NUMBER.Text != "0")
                     {
-                        var havaleDate = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 DATE_N FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {hTAG /*2*/}").FirstOrDefault();
+                        var havaleDate = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 DATE_N,MODAT_PPID FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {hTAG /*2*/}").FirstOrDefault();
                         if (!string.IsNullOrWhiteSpace(havaleDate?.DATE_N.ToString()))
                         {
                             DATE_N.Text = havaleDate?.DATE_N.ToString(); //تاریخ فاکتور طبق حواله انبار فروش آن باشد.
-                            DATE_N_TAG = DATE_N.Text.ToRawTarikh();
+                            DATE_N_TAG = havaleDate?.DATE_N.ToString();
                         }
                         if (havaleDate?.MODAT_PPID != null)
                         {

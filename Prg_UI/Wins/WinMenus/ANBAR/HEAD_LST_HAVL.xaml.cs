@@ -698,7 +698,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     return;
                 }
             }
-            else if (HEADER_FAC == null)
+            else if (QRE_HED == null)
             {
                 if (_navigationManager.NUMBER_TO_OPEN != null)
                 {
