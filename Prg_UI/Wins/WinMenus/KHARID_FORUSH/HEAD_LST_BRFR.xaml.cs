@@ -372,12 +372,16 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 CMB_HMBAA.IsEnabled = ican;
                 M_NAGHD.IsReadOnly = !ican; //مبلغ نقد
                 HMBAA.IsReadOnly = !ican; //مبلغ نقد
-                TAKHFIF.IsReadOnly = !ican; //مبلغ تخفیف
-                TAKHFIF_PERCENT.IsReadOnly = !ican; //درصد تخفیف
+
+                //TAKHFIF.IsReadOnly = !ican; //مبلغ تخفیف
+                //TAKHFIF_PERCENT.IsReadOnly = !ican; //درصد تخفیف
+
                 MABL_HAZ.IsReadOnly = !ican; //خدمات
                 MOIN_HAZ.IsReadOnly = !ican; //معین خدمت
                 PAY_GETP_SUB.IsReadOnly = !ican; //چک ها
                 VISITOR_DTL_SUB.IsReadOnly = !ican; //چک ها
+                INVO_LST_SUB.IsReadOnly = !ican;
+
 
                 BTN_SAVE.IsEnabled = ican;
 
@@ -668,7 +672,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
             AllowEdits = false;
-
         }
 
         private void OnCurrentRecordChanged(HEAD_LST HEADER_FAC)
@@ -708,7 +711,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                         GetBalancePerson();
 
-                        TAKHFIF_MABL_PRICE();
+                        GetUpdateTakhfif();
+                        //TAKHFIF_MABL_PRICE();
 
                         ActivateChaps();
 
@@ -820,6 +824,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             AllowEdits = true;
 
             GetDefaultFocus();
+
+            INVO_LST_SUB.IsReadOnly = true;
         }
 
 
@@ -2171,8 +2177,14 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
             Summer();
+            // After a row edit, the header discount should be the sum of the line item discounts.
+            GetUpdateTakhfif();
+            // Call Summer() again to update totals like "GHABEL" (payable amount) based on the new header discount.
+            Summer();
 
-            TAKHFIF_MABL_PRICE();
+            //// از بازتوزیع خودکار تخفیف زمانی که کاربر مستقیماً مقدار سطر را تغییر داده جلوگیری می‌کنیم
+            //TAKHFIF_MABL_PRICE(isTakhfifFocus: true, shouldDistributeToRows: false);
+
             UpdateVisitorCommissions();
 
             MasterTopErrorMessages.AddRange(ErrosMessages);
@@ -2189,6 +2201,24 @@ namespace Wins.WinMenus.KHARID_FORUSH
             PAY_GETP_SUB_SUB_ReGetData();
             VISITOR_DTL_SUB_ReGetData();
         }
+
+        private void GetUpdateTakhfif()
+        {
+            double total_line_discount = INVO_LST_FACTOR22_DATA.Sum(r => r.N_MOIN ?? 0);
+            TAKHFIF.Text = total_line_discount.ToString();
+            // Recalculate the percentage based on the new total discount
+            if (SUM_OF_MABL_K > 0)
+            {
+                // Note: SUM_OF_MABL_K is a property that calculates the sum on the fly.
+                double percentage = (total_line_discount / SUM_OF_MABL_K) * 100;
+                TAKHFIF_PERCENT.Text = Math.Round(percentage, 2).ToString();
+            }
+            else
+            {
+                TAKHFIF_PERCENT.Text = "0";
+            }
+        }
+
         public void AVRAGE_UPDATE()
         {
             //CODE_AfterUpdate
@@ -2931,6 +2961,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (SUM_OF_MABL_K > 0)
             {
                 new Msgwin(false, "ابتدا باید مبالغ رو صفر کنید سپس مجددا اقدام به حذف کنید..").ShowDialog();
+                return;
+            }
+            var TAKHF_MABL = (double)INVO_LST_FACTOR22_DATA.Sum(r => r.N_MOIN ?? 0);
+            var TAKHF_DARSAD = (double)INVO_LST_FACTOR22_DATA.Sum(r => r.N_KOL ?? 0);
+            if (TAKHF_MABL > 0 || TAKHF_DARSAD > 0)
+            {
+                new Msgwin(false, "ابتدا باید تخفیفات رو صفر کنید سپس مجددا اقدام به حذف کنید..").ShowDialog();
                 return;
             }
 
@@ -4535,6 +4572,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void TAKHFIF_PERCENT_NumericLostFocus(object sender, RoutedEventArgs e)
         {
+            return;
             if (!string.IsNullOrEmpty(TAKHFIF_PERCENT.Text))
             {
                 var (isvalid, msg) = CL_LMethods.IsValidPercentage(TAKHFIF_PERCENT.Text);
@@ -4550,12 +4588,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void TAKHFIF_NumericLostFocus(object sender, RoutedEventArgs e)
         {
+            return;
             TAKHFIF_MABL_PRICE(true);
         }
-        private void TAKHFIF_MABL_PRICE(bool isTakhfifFocus = true)
+        private void TAKHFIF_MABL_PRICE(bool isTakhfifFocus = true, bool shouldDistributeToRows = true)
         {
             Summer();
-
 
             if (!string.IsNullOrEmpty(TAKHFIF.Text) && TAKHFIF.Text != "0" && JF.Text != "0" && isTakhfifFocus) //درصد تخفیف
             {
@@ -4572,7 +4610,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 TAKHFIF.Text = Math.Round(JF_TXT * DARSAD_TXT / 100).ToString();
             }
 
-            if (Convert.ToDouble(TAKHFIF.Text) > 0 && NowIsReady)
+            if (Convert.ToDouble(TAKHFIF.Text) > 0 && NowIsReady && shouldDistributeToRows)
             {
                 double jamf;
                 int i = 0;

@@ -549,7 +549,7 @@
             Margin="10,49,10,10" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged">
 
             <syncfusion:SfDataGrid.Columns>
-                <syncfusion:GridTemplateColumn HeaderText=" "  FilterRowEditorType="None"  AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False" IsReadOnly="True" AllowResizing="False" ColumnSizer="Auto">
+                <syncfusion:GridTemplateColumn HeaderText=" "   MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False" IsReadOnly="True" AllowResizing="False" ColumnSizer="Auto">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button 

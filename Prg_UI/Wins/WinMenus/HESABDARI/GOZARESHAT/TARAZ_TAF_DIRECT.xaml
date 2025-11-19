@@ -558,7 +558,7 @@
 
             <syncfusion:SfDataGrid.Columns>
 
-                <syncfusion:GridTemplateColumn HeaderText="" x:Name="ISEND_COLUMN" Width="50"  FilterRowEditorType="None"  IsHidden="False" AllowSorting="False" AllowFiltering="False" d:IsHidden="False" AllowEditing="False" AllowGrouping="False">
+                <syncfusion:GridTemplateColumn HeaderText="" x:Name="ISEND_COLUMN" Width="50" MappingName="IsButtony" FilterRowEditorType="None"  AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False" >
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_OPEN_SUB" IsTabStop="False" Click="BTN_OPEN_SUB_Click" Tag="{Binding}"
@@ -573,7 +573,7 @@
                     </syncfusion:GridTemplateColumn.CellTemplate>
                 </syncfusion:GridTemplateColumn>
 
-                <syncfusion:GridTemplateColumn IsReadOnly="True" AllowResizing="False" Width="50">
+                <syncfusion:GridTemplateColumn HeaderText="" IsReadOnly="True" AllowResizing="False" Width="50"   MappingName="IsButtony" FilterRowEditorType="None"  AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False" >
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button 

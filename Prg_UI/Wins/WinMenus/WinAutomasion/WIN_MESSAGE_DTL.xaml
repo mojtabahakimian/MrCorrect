@@ -180,7 +180,7 @@
 
 
                 <!-- پاسخ Button -->
-                <syncfusion:GridTemplateColumn HeaderText="پاسخ"  FilterRowEditorType="None"  AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
+                <syncfusion:GridTemplateColumn HeaderText="پاسخ"   MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button Tag="{Binding}" Click="Button_Click_1"
@@ -192,7 +192,7 @@
                 </syncfusion:GridTemplateColumn>
 
                 <!-- ارجاع به دیگری Button -->
-                <syncfusion:GridTemplateColumn HeaderText="ارجاع به دیگری"  FilterRowEditorType="None"  AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
+                <syncfusion:GridTemplateColumn HeaderText="ارجاع به دیگری"   MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button Tag="{Binding}" Click="Button_Click_2"

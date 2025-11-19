@@ -558,7 +558,7 @@
 
             <syncfusion:SfDataGrid.Columns>
 
-                <syncfusion:GridTemplateColumn  FilterRowEditorType="None"  HeaderText="" IsReadOnly="True" AllowResizing="False" ColumnSizer="Auto" AllowFiltering="False" AllowSorting="False" AllowEditing="False" AllowGrouping="False">
+                <syncfusion:GridTemplateColumn   MappingName="IsButtony" FilterRowEditorType="None"   HeaderText="" IsReadOnly="True" AllowResizing="False" ColumnSizer="Auto" AllowFiltering="False" AllowSorting="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button 
@@ -583,7 +583,7 @@
                     </syncfusion:GridTemplateColumn.CellStyle>
                 </syncfusion:GridTemplateColumn>
                 
-                <syncfusion:GridTemplateColumn  FilterRowEditorType="None"  HeaderText="" IsReadOnly="True" AllowResizing="False" Width="60" AllowFiltering="False" AllowSorting="False">
+                <syncfusion:GridTemplateColumn   MappingName="IsButtony" FilterRowEditorType="None"   HeaderText="" IsReadOnly="True" AllowResizing="False" Width="60" AllowFiltering="False" AllowSorting="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button 

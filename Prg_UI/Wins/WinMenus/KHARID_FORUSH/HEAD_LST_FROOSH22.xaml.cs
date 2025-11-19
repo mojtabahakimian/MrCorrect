@@ -3071,10 +3071,21 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void GetModatValueDays()
         {
-            int modt = CL_HESABDARI.Getmodat(Convert.ToInt32(MODAT_PPID.SelectedValue));
-            if (modt != Convert.ToInt32(MAS.Text))
+            if (MODAT_PPID.SelectedItem is PRICE_PAYNO_MODATP SelectedModatItem)
             {
-                this.MAS.Text = modt.ToString();
+                if ((bool)(SelectedModatItem?.PPAME?.Trim().Equals("آزاد")))
+                {
+                    //Skip
+                }
+                else
+                {
+                    int modt = CL_HESABDARI.Getmodat(Convert.ToInt32(MODAT_PPID.SelectedValue));
+                    if (modt != Convert.ToInt32(MAS.Text))
+                    {
+                        this.MAS.Text = modt.ToString();
+                    }
+                }
+
             }
             if (Convert.ToInt32(MODAT_PPID.SelectedValue) == 0)
             {
@@ -7095,6 +7106,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 {
                     try
                     {
+
                         dbms.DoExecuteSQL($@"DELETE FROM dbo.HEAD_LST WHERE NUMBER = {NUMBER.Text} AND NUMBER1 = {NUMBER1.Text} AND TAG = 13");
 
                         SANAD();
@@ -7110,8 +7122,37 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                         if (ex.Number == 547)
                         {
-                            new Msgwin(false, "این فاکتور دارای اطلاعات وابسته است , ابتدا آنرا حذف کنید").ShowDialog();
-                            return;
+                            if (ex.Message.Contains("FK_DEED_DTL_HEAD_LST"))
+                            {
+                                try
+                                {
+                                    // تشخیص دادیم که خطا بخاطر سند است.
+                                    // حالا سند را حذف می‌کنیم (اگر شماره سند در فرم موجود است)
+                                    if (!string.IsNullOrEmpty(N_S.Text) && N_S.Text != "0")
+                                    {
+                                        dbms.DoExecuteSQL($@"DELETE FROM dbo.DEED_DTL WHERE N_S = {N_S.Text} AND NUMBER = {NUMBER.Text} AND TAG = 13"); //حذف سند
+
+                                        dbms.DoExecuteSQL($@"DELETE FROM dbo.HEAD_LST WHERE NUMBER = {NUMBER.Text} AND NUMBER1 = {NUMBER1.Text} AND TAG = 13");
+
+                                        SANAD();
+                                        _navigationManager?.DeleteCurrentRecord(); //Refresh Record Source
+                                    }
+                                    else
+                                    {
+                                        // حالتی که خطا میدهد اما شماره سند در تکست باکس نیست (بسیار نادر)
+                                        new Msgwin(false, "وابستگی به سند وجود دارد اما شماره سند مشخص نیست.").Show();
+                                    }
+                                }
+                                catch (Exception ex2)
+                                {
+                                    new Msgwin(false, $"عملیات حذف سند و فاکتور با شکست مواجه شد").Show();
+                                }
+                            }
+                            else
+                            {
+                                new Msgwin(false, "این فاکتور دارای اطلاعات وابسته است , ابتدا آنرا حذف کنید").ShowDialog();
+                                return;
+                            }
                         }
                         else
                         {
@@ -8116,13 +8157,13 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     Page57.IsSelected = true;
                     MODAT_PPID.Focus();
                 }
-                else if (!CL_HESABDARI.LETSGO("AZADPAY") && MODAT_PPID.SelectedIndex == 0)
-                {
-                    MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
-                    MODAT_PPID.SelectedIndex = -1;
-                    MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
-                    ErrosMessages.Add(new MsgModel { MessageText_U = "شما اجازه قيمت گذاري آزاد  نداريد" });
-                }
+                //else if (!CL_HESABDARI.LETSGO("AZADPAY") && MODAT_PPID.SelectedIndex == 0)
+                //{
+                //    MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
+                //    MODAT_PPID.SelectedIndex = -1;
+                //    MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
+                //    ErrosMessages.Add(new MsgModel { MessageText_U = "شما اجازه قيمت گذاري آزاد  نداريد" });
+                //}
 
                 if (MODAT_PPID.SelectedItem is PRICE_PAYNO_MODATP ModatValue)
                 {
@@ -11607,7 +11648,14 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 if (!CL_HESABDARI.LETSGO("AZADPAY") && Convert.ToInt32(MODAT_PPID.SelectedValue) == 0)
                 {
                     MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
-                    MODAT_PPID.SelectedIndex = -1;
+                    if (!_navigationManager.IsNewRecord)
+                    {
+                        MODAT_PPID.SelectedValue = _navigationManager?.CurrentRecord?.MODAT_PPID;
+                    }
+                    else
+                    {
+                        MODAT_PPID.SelectedIndex = -1;
+                    }
                     MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
                     universControl.PopNotifyShow($"شما اجازه قيمت گذاري آزاد  نداريد", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                 }
@@ -12045,11 +12093,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                     if (!string.IsNullOrWhiteSpace(NUMBER.Text) && NUMBER.Text != "0")
                     {
-                        var havaleDate = dbms.DoGetDataSQL<string?>($"SELECT TOP 1 DATE_N FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {hTAG /*2*/}").FirstOrDefault();
-                        if (!string.IsNullOrWhiteSpace(havaleDate))
+                        var havaleDate = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 DATE_N FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {hTAG /*2*/}").FirstOrDefault();
+                        if (!string.IsNullOrWhiteSpace(havaleDate?.DATE_N.ToString()))
                         {
-                            DATE_N.Text = havaleDate; //تاریخ فاکتور طبق حواله انبار فروش آن باشد.
+                            DATE_N.Text = havaleDate?.DATE_N.ToString(); //تاریخ فاکتور طبق حواله انبار فروش آن باشد.
                             DATE_N_TAG = DATE_N.Text.ToRawTarikh();
+                        }
+                        if (havaleDate?.MODAT_PPID != null)
+                        {
+                            MODAT_PPID.SelectedValue = havaleDate?.MODAT_PPID; MODAT_PPID.Items.Refresh();
+                            GetModatValueDays();
                         }
                     }
 

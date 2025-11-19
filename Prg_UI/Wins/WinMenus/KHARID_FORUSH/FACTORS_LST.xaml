@@ -561,7 +561,7 @@
 
             <syncfusion:SfDataGrid.Columns>
 
-                <syncfusion:GridTemplateColumn HeaderText="سامانه مودیان" x:Name="ISEND_COLUMN" Width="110"  FilterRowEditorType="None"  IsHidden="True" AllowSorting="False" AllowFiltering="False"  AllowEditing="False" AllowGrouping="False">
+                <syncfusion:GridTemplateColumn HeaderText="سامانه مودیان" x:Name="ISEND_COLUMN" Width="110"   MappingName="IsButtony" FilterRowEditorType="None"   IsHidden="True" AllowSorting="False" AllowFiltering="False"  AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_ISEND" IsTabStop="False" Click="BTN_ISEND_Click" Tag="{Binding}"

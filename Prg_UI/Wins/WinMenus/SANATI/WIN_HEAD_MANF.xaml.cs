@@ -1131,7 +1131,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                     using (var transaction = db.BeginTransaction(System.Data.IsolationLevel.Serializable))
                     {
                         //Fake Query for Lock Table
-                        db.Execute("UPDATE TOP(1) HEAD_MANF SET TOZIH = TOZIH", null, transaction);
+                        db.Execute("SELECT TOP 1 FNUMB FROM dbo.HEAD_MANF WITH (TABLOCKX, HOLDLOCK)", null, transaction);
                         //Fake Query for Lock Table
 
                         var rst_11 = db.Query<double?>($"SELECT Max(HEAD_MANF.FNUMB) AS MaxOfFNUMB FROM HEAD_MANF", null, transaction).FirstOrDefault();

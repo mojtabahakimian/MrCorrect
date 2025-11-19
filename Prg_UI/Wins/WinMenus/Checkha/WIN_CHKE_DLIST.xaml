@@ -558,7 +558,7 @@
             <syncfusion:SfDataGrid.Columns>
 
                 <syncfusion:GridTextColumn MappingName="RADIF" HeaderText="شماره" MinimumWidth="90" IsReadOnly="True" />
-                <syncfusion:GridTemplateColumn HeaderText="سوابق تغییر وضعیت چک" Width="180"  FilterRowEditorType="None"  AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
+                <syncfusion:GridTemplateColumn HeaderText="سوابق تغییر وضعیت چک" Width="180"   MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button IsTabStop="False" Click="BTN_RECORD_Click" Tag="{Binding}"
@@ -599,7 +599,7 @@
                 <syncfusion:GridTextColumn MappingName="NAME_TAH" HeaderText="نام پرداخت کننده*" IsReadOnly="True" MinimumWidth="350" />
                 <syncfusion:GridTextColumn MappingName="N_HESAB" HeaderText="شماره حساب" IsReadOnly="True"  />
 
-                <syncfusion:GridTemplateColumn HeaderText="وضعیت چک" Width="110"  FilterRowEditorType="None"  AllowSorting="False" AllowFiltering="False">
+                <syncfusion:GridTemplateColumn HeaderText="وضعیت چک" Width="110"   MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button IsTabStop="False" Click="Button_Click" Tag="{Binding}"
@@ -615,7 +615,7 @@
                 </syncfusion:GridTemplateColumn>
                 <syncfusion:GridComboBoxColumn x:Name="VAZ_COLUMN" HeaderText="وضعیت چک" AllowEditing="False" IsReadOnly="True" MappingName="VAZ" SelectedValuePath="ID" DisplayMemberPath="NAME" />
 
-                <syncfusion:GridTemplateColumn HeaderText="موقعیت چک" Width="110"  FilterRowEditorType="None"  AllowSorting="False" AllowFiltering="False">
+                <syncfusion:GridTemplateColumn HeaderText="موقعیت چک" Width="110"   MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button IsTabStop="False" Click="Button_Click_1" Tag="{Binding}"
@@ -632,7 +632,7 @@
                 <syncfusion:GridComboBoxColumn x:Name="SANDUGH_COLUMN" MappingName="SANDUGH" HeaderText="موقعیت چک*" SelectedValuePath="TNUMBER" DisplayMemberPath="NAME" IsReadOnly="True"  />
                 <syncfusion:GridTextColumn MappingName="SAYADI" HeaderText="شماره صیادی" IsReadOnly="True"  />
                 <syncfusion:GridTextColumn MappingName="ESTELAM" HeaderText="توضیحات" IsReadOnly="True"  />
-                <syncfusion:GridTemplateColumn HeaderText="توضیحات" Width="110"  FilterRowEditorType="None"  AllowSorting="False" AllowFiltering="False">
+                <syncfusion:GridTemplateColumn HeaderText="توضیحات" Width="110"   MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button IsTabStop="False" Click="Button_Click_2" Tag="{Binding}"

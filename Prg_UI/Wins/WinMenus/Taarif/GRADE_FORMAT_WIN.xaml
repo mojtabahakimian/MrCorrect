@@ -595,7 +595,7 @@
                         <Binding Path="GFDATE" StringFormat="####/##/##" />
                     </sf:GridTextColumn.DisplayBinding>
                 </sf:GridTextColumn>
-                <syncfusion:GridTemplateColumn HeaderText="چاپ" Width="70"  FilterRowEditorType="None"  AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
+                <syncfusion:GridTemplateColumn HeaderText="چاپ" Width="70"   MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_ISEND" IsTabStop="False" Click="BTN_ISEND_Click" Tag="{Binding}"

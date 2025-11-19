@@ -2293,6 +2293,7 @@ namespace Prg_UI.Functions
             {
                 if (!isOthery && IsDateLimited) //تاریخ قابل برگشت اعمال شود همراه با محدود به کاربری خودش
                 {
+                    //تاریخ محدود (تاریخ قابل برگشت) اعمال میشود ...↓
                     info.RestrictionMessages.Add("محدود به تاریخ برگشت فاکتور");
                     var sqlQuery = $"SELECT TOP 100 PERCENT DATE_N FROM dbo.HEAD_LST WHERE (TAG = {TAGCODE}) AND (DEPATMAN = {CL_Generaly.VAHED_OF_USER}) AND (dbo.HEAD_LST.USER_NAME = N'{CL_HESABDARI.UCurrentUser()}') GROUP BY DATE_N ORDER BY DATE_N DESC";
                     var result = dbms.DoGetDataSQL<long>(sqlQuery).ToList(); //Get Last New Bigest Date
