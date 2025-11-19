@@ -10,39 +10,40 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Rpts;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Components;
+using Stimulsoft.Report.Dictionary;
+using Syncfusion.Data.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
-using Wins.WinMenus.ANBAR;
-using Syncfusion.Data.Extensions;
 using System.Windows.Threading;
-using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
-using System.Windows.Data;
-using System.ComponentModel;
-using static Prg_UI.Functions.CL_LMethods;
-using System.Windows.Controls.Primitives;
-using System.Globalization;
-using System.Text;
-using System.Diagnostics;
-using Rpts;
-using Stimulsoft.Report.Components;
-using Stimulsoft.Report.Dictionary;
-using Stimulsoft.Report;
-using DocumentFormat.OpenXml.Spreadsheet;
+using Wins.WinMenus.ANBAR;
+using Wins.WinOther;
 using static Functions.DataGridClipboardManager;
+using static Interfaces.INavigator;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
+using static Prg_UI.Functions.CL_LMethods;
+using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
 
 namespace Prg_UI.Wins.WinMenus.SANATI
 {
-    public partial class WIN_HEAD_MANF : Window
+    public partial class WIN_HEAD_MANF : Window, ISearchableWindow
     {
         #region Header Window Begin
         //Header Window Begin
@@ -241,6 +242,50 @@ namespace Prg_UI.Wins.WinMenus.SANATI
         public Visual IAM_HEAD_MANF { get; private set; }
 
         private NavigationManager<HEAD_MANF_MODEL> _navigationManager;
+
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            // Handle the selected item
+            if (selectedItem is HEAD_MANF_MODEL item)
+            {
+                if (item != null)
+                {
+                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.FNUMB.Equals(item.FNUMB));
+                    if (itemfound != null)
+                    {
+                        _navigationManager.IsNewRecord = false;
+                        // Find its index in the master list
+                        int idx = _navigationManager.RecordsData.IndexOf(itemfound);
+                        if (idx < 0)
+                        {
+                            // not found (perhaps filtered out?), bail out
+                            new Msgwin(false, "یافت نشد: مورد انتخاب شده در لیست اصلی وجود ندارد").Show();
+                            return;
+                        }
+                        // Tell the navigation manager to move to that position
+                        _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+                    }
+                }
+            }
+        }
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+                new SearchableProperty { DisplayName = "شماره فرمول", PropertyPath = "FNUMB", PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "کد کالا", PropertyPath = "CODE", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "نام کالا", PropertyPath = "NAME_CODE", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "تاریخ فعال", PropertyPath = "DATE_ACTIV", PropertyType = typeof(long?) },
+                new SearchableProperty { DisplayName = "ضریب ساخت", PropertyPath = "IMBIBE_MANF", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "ضریب سربار", PropertyPath = "IMBIBE_SAR", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "قیمت", PropertyPath = "GHEYMAT", PropertyType = typeof(double?) },
+                new SearchableProperty { DisplayName = "توضیحات", PropertyPath = "TOZIH", PropertyType = typeof(string) },
+            };
+        }
+        #endregion
+
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
@@ -462,6 +507,17 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 }
             }
 
+            // F7 Search Dialog - Only when DataGrid is not focused
+            if (DG_SUB != null && !DG_SUB.IsKeyboardFocusWithin && !DG_SUB.IsFocused)
+            {
+                if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+                    var searchWindow = new EnhancedSearchWindow(this);
+                    searchWindow.Owner = this;
+                    searchWindow.ShowDialog();
+                }
+            }
 
             // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
             var nonDataKeys = new[]
@@ -1075,7 +1131,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                     using (var transaction = db.BeginTransaction(System.Data.IsolationLevel.Serializable))
                     {
                         //Fake Query for Lock Table
-                        db.Execute("UPDATE TOP(1) HEAD_MANF SET TOZIH = TOZIH", null, transaction);
+                        db.Execute("SELECT TOP 1 FNUMB FROM dbo.HEAD_MANF WITH (TABLOCKX, HOLDLOCK)", null, transaction);
                         //Fake Query for Lock Table
 
                         var rst_11 = db.Query<double?>($"SELECT Max(HEAD_MANF.FNUMB) AS MaxOfFNUMB FROM HEAD_MANF", null, transaction).FirstOrDefault();
@@ -1773,6 +1829,8 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             if (Keyboard.IsKeyDown(Key.Escape)) { return; }
             if (e.Row.Item == null) { return; }
             var TheRow = e.Row.Item as DTL_MANF;
+            if (TheRow == null) { return; }
+
             if (ConstructorRowDetector.IsPristine(TheRow)) { DG_SUB_CANCEL_EDIT(); return; }
 
             if (!BodyIsValid(TheRow))
@@ -1832,7 +1890,11 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             }
 
             //Re Calculate Just In Case
-            CURRENT_ITEMS_ROW.MABLK = ((CURRENT_ITEMS_ROW?.PERT ?? 0) + (CURRENT_ITEMS_ROW?.MEGHk ?? 0)) * (CURRENT_ITEMS_ROW?.SMABL ?? 0);
+            if (CURRENT_ITEMS_ROW != null)
+            {
+                CURRENT_ITEMS_ROW.MABLK = ((CURRENT_ITEMS_ROW?.PERT ?? 0) + (CURRENT_ITEMS_ROW?.MEGHk ?? 0)) * (CURRENT_ITEMS_ROW?.SMABL ?? 0);
+            }
+            TheRow.MABLK = ((TheRow?.PERT ?? 0) + (TheRow?.MEGHk ?? 0)) * (TheRow?.SMABL ?? 0);
             #endregion
 
             TheRow.FNUMB = Convert.ToInt32(FNUMB.Text); //Get Master Into Detail Value

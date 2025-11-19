@@ -126,13 +126,14 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
+            Fill_ComboBoxes();
+
             // On Open here ...
-            if (!IsNull(this.N_KOL))
+            if (!string.IsNullOrWhiteSpace(this.N_KOL))
             {
                 this.HES.SelectedValue = this.N_KOL + "-" + this.N_MOIN + "-" + this.N_TAF;
             }
 
-            Fill_ComboBoxes();
             MABL.Text = MABL_CHEK_ARG;
             mabup = false;
             SANDUGH.SelectedValue = 1;
@@ -151,7 +152,10 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     DATE_S.Text = CheckExistData.FirstOrDefault()?.DATE_S.ToString();
                     DATE.Text = CheckExistData.FirstOrDefault()?.DATE.ToString();
                     MABL.Text = CheckExistData.FirstOrDefault()?.MABL.ToString();
-                    HES.SelectedValue = CheckExistData.FirstOrDefault()?.HES1?.ToString();
+                    if (!string.IsNullOrWhiteSpace(N_KOL))
+                    {
+                        HES.SelectedValue = CheckExistData.FirstOrDefault()?.HES1?.ToString();
+                    }
                     NAME_TAH.SelectedValue = CheckExistData.FirstOrDefault()?.NAME_TAH?.ToString();
                     N_HESAB.Text = CheckExistData.FirstOrDefault()?.N_HESAB?.ToString();
                     SANDUGH.SelectedValue = CheckExistData.FirstOrDefault()?.SANDUGH?.ToString();
@@ -260,11 +264,23 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     N_HESAB.Text = first.N_HESAB?.ToString();
                     MABL.Text = first.MABL?.ToString();
                     MABL.IsReadOnly = false;
-                    N_KOL = first.N_KOL?.ToString();
-                    N_MOIN = first.N_MOIN?.ToString();
-                    N_TAF = first.N_TAF?.ToString();
-                    KIND.SelectedValue = first.KIND?.ToString();
-                    HES.SelectedValue = first.HES1?.ToString();
+
+                    if (first.N_KOL?.ToString() == "911" && first.N_MOIN?.ToString() == "1" && first.N_TAF?.ToString() == "1") //911-1-1
+                    {
+                        //NOT
+                    }
+                    else
+                    {
+                        N_KOL = first.N_KOL?.ToString();
+                        N_MOIN = first.N_MOIN?.ToString();
+                        N_TAF = first.N_TAF?.ToString();
+                        KIND.SelectedValue = first.KIND?.ToString();
+                        if (!string.IsNullOrWhiteSpace(N_KOL))
+                        {
+                            HES.SelectedValue = first.HES1?.ToString();
+                        }
+                    }
+
                     SANDUGH.SelectedValue = first.SANDUGH?.ToString();
                     SAYADI.Text = first.SAYADI?.ToString();
                 }
@@ -499,15 +515,25 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     string selected = HES?.SelectedValue?.ToString();
                     if (!string.IsNullOrEmpty(selected))
                     {
-                        if (CL_HESABDARI.GETKOL(selected) != Baseknow.BANKHA)
+                        if (selected.Trim() == "911-1-1") //حذف شده انتظامی
                         {
-                            new Msgwin(false, "چک در این بخش فقط به بانک قابل واگذاری می‌باشد").ShowDialog();
-                            CANCEL = true;
+                            N_KOL = N_MOIN = N_TAF = null;
+                            if (HES?.SelectedValue != null)
+                            {
+                                HES.SelectedValue = null;
+                            }
                         }
-
-                        N_KOL = CL_HESABDARI.GETKOL(selected).ToString();
-                        N_MOIN = CL_HESABDARI.GETMOIN(selected).ToString();
-                        N_TAF = CL_HESABDARI.GETTAF(selected).ToString();
+                        else
+                        {
+                            if (CL_HESABDARI.GETKOL(selected) != Baseknow.BANKHA)
+                            {
+                                new Msgwin(false, "چک در این بخش فقط به بانک قابل واگذاری می‌باشد").ShowDialog();
+                                CANCEL = true;
+                            }
+                            N_KOL = CL_HESABDARI.GETKOL(selected).ToString();
+                            N_MOIN = CL_HESABDARI.GETMOIN(selected).ToString();
+                            N_TAF = CL_HESABDARI.GETTAF(selected).ToString();
+                        }
                     }
                     else
                     {
@@ -516,15 +542,69 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
                     try
                     {
+                        // آماده‌سازی پارامترها
+                        var parameters = new
+                        {
+                            N_SERI = N_SERI.Text,
+                            BANK = BANK.SelectedValue,
+                            DATE_S = DATE_S.Text.ToRawTarikh(),
+                            DATE = DATE.Text.ToRawTarikh(),
+                            SHOBEH = _SHOBEH_,
+                            MABL = MABL.Text,
+                            NAME_TAH = _NAME_TAH_,
+                            ANBAR = ANBAR,
+                            RADIF = RADIF.Text,
+                            CUST_NO = CUST_NO,
+                            VAZ = 1,
+                            LIST_NO = LIST_NO.SelectedValue,
+                            KIND = KIND.SelectedValue,
+                            SANDUGH = SANDUGH.SelectedValue,
+                            SAYADI = _SAYADI_,
+                            N_HESAB = string.IsNullOrEmpty(N_HESAB.Text) ? (object)DBNull.Value : N_HESAB.Text,
+                            N_KOL = string.IsNullOrEmpty(N_KOL) ? (object)DBNull.Value : N_KOL,
+                            N_MOIN = string.IsNullOrEmpty(N_MOIN) ? (object)DBNull.Value : N_MOIN,
+                            N_TAF = string.IsNullOrEmpty(N_TAF) ? (object)DBNull.Value : N_TAF
+                        };
+
                         if (CheckExistData.Count > 0)
                         {
-                            dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD SET N_SERI = {N_SERI.Text}, BANK = {BANK.SelectedValue}, DATE_S = {DATE_S.Text.ToRawTarikh()}, DATE = {DATE.Text.ToRawTarikh()}, SHOBEH = N'{_SHOBEH_}', MABL = {MABL.Text}, NAME_TAH = N'{_NAME_TAH_}', ANBAR = {ANBAR}, RADIF = {RADIF.Text}, CUST_NO = N'{CUST_NO}', VAZ = 1, LIST_NO = {LIST_NO.SelectedValue}, KIND = {KIND.SelectedValue}, SANDUGH = {SANDUGH.SelectedValue} , SAYADI = N'{_SAYADI_}' , N_HESAB = {(string.IsNullOrEmpty(N_HESAB.Text) ? "NULL" : N_HESAB.Text)} , N_KOL = {(string.IsNullOrEmpty(N_KOL) ? "NULL" : N_KOL)} , N_MOIN = {(string.IsNullOrEmpty(N_MOIN) ? "NULL" : N_MOIN)} , N_TAF = {(string.IsNullOrEmpty(N_TAF) ? "NULL" : N_TAF)}
-                                                             WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()} ");
+                            var updateSql = @"UPDATE dbo.PAY_GETD 
+                                SET N_SERI = @N_SERI, 
+                                    BANK = @BANK, 
+                                    DATE_S = @DATE_S, 
+                                    DATE = @DATE, 
+                                    SHOBEH = @SHOBEH, 
+                                    MABL = @MABL, 
+                                    NAME_TAH = @NAME_TAH, 
+                                    ANBAR = @ANBAR, 
+                                    RADIF = @RADIF, 
+                                    CUST_NO = @CUST_NO, 
+                                    VAZ = @VAZ, 
+                                    LIST_NO = @LIST_NO, 
+                                    KIND = @KIND, 
+                                    SANDUGH = @SANDUGH, 
+                                    SAYADI = @SAYADI, 
+                                    N_HESAB = @N_HESAB, 
+                                    N_KOL = @N_KOL, 
+                                    N_MOIN = @N_MOIN, 
+                                    N_TAF = @N_TAF 
+                                WHERE N_SERI = @N_SERI 
+                                  AND BANK = @BANK 
+                                  AND DATE_S = @DATE_S";
+                            dbms.DoExecuteSQL(updateSql, parameters);
                         }
                         else
                         {
-                            dbms.DoExecuteSQL($@"INSERT INTO dbo.PAY_GETD(N_SERI,                BANK,                     DATE_S,                     DATE,                   SHOBEH,       MABL,          NAME_TAH,  ANBAR,       RADIF,     CUST_NO,VAZ,                LIST_NO,                KIND,                SANDUGH,                                                       N_HESAB ,            SAYADI,                                            N_KOL,                                             N_MOIN,                                            N_TAF)
-				                                        VALUES({N_SERI.Text},{BANK.SelectedValue},{DATE_S.Text.ToRawTarikh()},{DATE.Text.ToRawTarikh()},N'{_SHOBEH_}',{MABL.Text},N'{_NAME_TAH_}',{ANBAR},{RADIF.Text},N'{CUST_NO}',  1,{LIST_NO.SelectedValue},{KIND.SelectedValue},{SANDUGH.SelectedValue},{(string.IsNullOrEmpty(N_HESAB.Text) ? "NULL" : N_HESAB.Text)} , N'{_SAYADI_}' , {(string.IsNullOrEmpty(N_KOL) ? "NULL" : N_KOL)}, {(string.IsNullOrEmpty(N_MOIN) ? "NULL" : N_MOIN)}, {(string.IsNullOrEmpty(N_TAF) ? "NULL" : N_TAF)})");
+                            var insertSql = @"INSERT INTO dbo.PAY_GETD(
+                                     N_SERI, BANK, DATE_S, DATE, SHOBEH, MABL, NAME_TAH, 
+                                     ANBAR, RADIF, CUST_NO, VAZ, LIST_NO, KIND, SANDUGH, 
+                                     N_HESAB, SAYADI, N_KOL, N_MOIN, N_TAF)
+                                 VALUES(
+                                     @N_SERI, @BANK, @DATE_S, @DATE, @SHOBEH, @MABL, @NAME_TAH, 
+                                     @ANBAR, @RADIF, @CUST_NO, @VAZ, @LIST_NO, @KIND, @SANDUGH, 
+                                     @N_HESAB, @SAYADI, @N_KOL, @N_MOIN, @N_TAF)";
+
+                            dbms.DoExecuteSQL(insertSql, parameters);
                         }
                     }
                     catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 2627)

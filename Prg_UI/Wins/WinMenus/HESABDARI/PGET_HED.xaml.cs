@@ -4798,23 +4798,25 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                                                         }
                                                         else
                                                         {
+                                                            var test = rst.FirstOrDefault();
                                                             if ((rst.FirstOrDefault().N_KOL == Baseknow.BANKHA || rst.FirstOrDefault().N_KOL == 911) || IsNull(rst.FirstOrDefault().N_KOL))
                                                             {
-                                                                string _where = " where  N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK;
-
-                                                                // rst.Fields("N_KOL2") = 911
-                                                                rst.FirstOrDefault().N_KOL = 911;
-                                                                // rst.Fields("N_moin2") = 1
-                                                                rst.FirstOrDefault().N_MOIN = 1;
-                                                                // rst.Fields("N_taf2") = 1
-                                                                rst.FirstOrDefault().N_TAF = 1;
-                                                                rst.FirstOrDefault().HES1 = "911-1-1";
-                                                                //rst.update();
-
-                                                                dbms.DoExecuteSQL($@"UPDATE PAY_GETD SET N_KOL = 911 , N_MOIN = 1 , N_TAF = 1 , HES1 = N'911-1-1' {_where} ");
-                                                                KHAZANE_Row_Deleter(item);
-
+                                                                //were here
                                                             }
+
+                                                            string _where = " where  N_SERI=" + item.N_SERI + " AND BANK = " + item.BANK;
+
+                                                            // rst.Fields("N_KOL2") = 911
+                                                            rst.FirstOrDefault().N_KOL = 911;
+                                                            // rst.Fields("N_moin2") = 1
+                                                            rst.FirstOrDefault().N_MOIN = 1;
+                                                            // rst.Fields("N_taf2") = 1
+                                                            rst.FirstOrDefault().N_TAF = 1;
+                                                            rst.FirstOrDefault().HES1 = "911-1-1";
+                                                            //rst.update();
+
+                                                            dbms.DoExecuteSQL($@"UPDATE PAY_GETD SET N_KOL = 911 , N_MOIN = 1 , N_TAF = 1 , HES1 = N'911-1-1' {_where} ");
+                                                            KHAZANE_Row_Deleter(item);
 
                                                         }
                                                     }

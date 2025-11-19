@@ -312,8 +312,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             return new[]
             {
-           new SearchableProperty { DisplayName = "شماره فاکتور برگشت", PropertyPath = "NUMBER1", PropertyType = typeof(double) },
-           new SearchableProperty { DisplayName = "شماره حواله", PropertyPath = "NUMBER", PropertyType = typeof(double) },
+           new SearchableProperty { DisplayName = "شماره فاکتور برگشت", PropertyPath = "NUMBER", PropertyType = typeof(double) },
+           new SearchableProperty { DisplayName = "شماره حواله", PropertyPath = "NUMBER1", PropertyType = typeof(double) },
            new SearchableProperty { DisplayName = "تاریخ", PropertyPath = "DATE_N", PropertyType = typeof(long) },
            new SearchableProperty { DisplayName = "کد مشتری", PropertyPath = "CUST_NO", PropertyType = typeof(string) },
            new SearchableProperty { DisplayName = "کاربر", PropertyPath = "USER_NAME", PropertyType = typeof(string) },
@@ -556,6 +556,19 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 }
             }
             catch { /*ignore*/ }
+
+
+            if (!INVO_LST_SUB.IsKeyboardFocusWithin && !INVO_LST_SUB.IsFocused) //Only On Form F7 Pressed Not DataGrid
+            {
+                if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+                    var searchWindow = new EnhancedSearchWindow(this);
+                    searchWindow.Owner = this;
+                    searchWindow.ShowDialog();
+                }
+            }
+
 
             // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
             var nonDataKeys = new[]

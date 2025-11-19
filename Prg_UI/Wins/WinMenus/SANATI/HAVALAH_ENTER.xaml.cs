@@ -955,7 +955,6 @@ namespace Wins.WinMenus.SANATI
                           where c != null && Validation.GetHasError(c)
                           select c).Any();
 
-
             if (errors)
             {
                 universControl.PopNotifyShow("داده های وارد شده مربوط به سطر ها درست نیست", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
@@ -972,7 +971,7 @@ namespace Wins.WinMenus.SANATI
                     using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
                     {
                         //Fake Query for Lock Table
-                        db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
+                        db.Execute("SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WITH (TABLOCKX, HOLDLOCK)", null, transaction);
                         //Fake Query for Lock Table
 
                         var rst_11 = db.Query<double?>($"SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)={FTAG}))", null, transaction).FirstOrDefault();

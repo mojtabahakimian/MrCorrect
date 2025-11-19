@@ -245,7 +245,8 @@
                         </Style>
                     </DataGridTextColumn.CellStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn x:Name="sTTIMEColumn" Binding="{Binding STTIME,UpdateSourceTrigger=LostFocus}" IsReadOnly="True" Header="زمان ارجاع" Width="auto" >
+
+                <DataGridTextColumn x:Name="sTTIMEColumn" Binding="{Binding STTIME,  StringFormat=##:##,UpdateSourceTrigger=LostFocus}" IsReadOnly="True" Header="زمان ارجاع" Width="auto" >
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
                             <Setter Property = "IsTabStop" Value = "False" />

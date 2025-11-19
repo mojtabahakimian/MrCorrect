@@ -28,7 +28,7 @@
         <ItemsPanelTemplate x:Key="VSP">
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
-        
+
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
 
         <!-- Style for SfDataGrid NOW -->
@@ -513,7 +513,7 @@ CornerRadius="2" />
                 </MenuItem.Icon>
             </MenuItem>
         </ContextMenu>
-        
+
     </Window.Resources>
 
     <WindowChrome.WindowChrome>
@@ -550,7 +550,7 @@ CornerRadius="2" />
 
         <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" ContextMenu="{StaticResource DataGridContextMenu}"
            ItemsSource="{Binding AK_MOGUDI_DATA}" 
-           AutoGenerateColumns="False"
+           AutoGenerateColumns="False" SelectedIndex="0"
            FilterRowPosition="Top"
            EnableDataVirtualization="True"
            SelectionUnit="Row"
@@ -585,7 +585,7 @@ CornerRadius="2" />
 
             <syncfusion:SfDataGrid.Columns>
 
-                <syncfusion:GridTemplateColumn HeaderText="کارت انبار کالا" x:Name="ISEND_COLUMN" Width="110" MappingName="IsButtony" AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
+                <syncfusion:GridTemplateColumn HeaderText="کارت انبار کالا" x:Name="ISEND_COLUMN"  Width="110"   MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_ISEND" IsTabStop="False" Click="BTN_ISEND_Click" Tag="{Binding}"
@@ -628,7 +628,7 @@ CornerRadius="2" />
                         </DataTemplate>
                     </syncfusion:GridTextColumn.CellTemplate>
                 </syncfusion:GridTextColumn>
-                
+
                 <syncfusion:GridTextColumn HeaderText="ضریب" MappingName="NESBAT" Width="80"/>
 
                 <syncfusion:GridTextColumn HeaderText="موجودی ثانویه" MappingName="MANDF" Width="120">

@@ -32,6 +32,7 @@ using System.Windows.Threading;
 using UiTools;
 using Wins.WinMenus.WinAutomasion;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace Prg_UI.Wins.WinMenus.WinAutomasion
 {
@@ -947,11 +948,77 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
 
             if (task != null)
             {
+                //بروز رسانی رویداد ها بابت ارجاع به پرسنل : مجری
+                #region PERSONEL_AfterUpdate
+                try
+                {
+                    string selectedPersonName = "";
+                    if (PERSONEL.SelectedItem is COMBOPERSONEL PersonelValue)
+                    {
+                        selectedPersonName = PersonelValue?.SAL_NAME ?? "";
+                    }
+                    string currentUser = Baseknow.UUSER ?? "Unknown";
+                    string eventDescription = $"ارجاع شد به : {selectedPersonName}";
+                    string sql = @"
+                    INSERT INTO events 
+                    (IDNUM, USERNAME, EVENTS, STDATE, STTIME, SKID, NUM, TG) 
+                    VALUES 
+                    (@IdNum, @UserName, @EventDesc, @StDate, @StTime, @SkId, @Num, @Tg)";
+                    var parameters = new
+                    {
+                        IdNum = task?.IDNUM,
+                        UserName = currentUser,
+                        EventDesc = eventDescription,
+                        StDate = Convert.ToInt32(Tarikh.GoGetPersianDate(true)),
+                        StTime = Convert.ToInt32(DateTime.Now.ToString("HHmm")),
+                        SkId = task?.skid,
+                        Num = task?.num,
+                        Tg = task?.tg
+                    };
+                    dbms.DoExecuteSQL(sql, parameters);
+                }
+                catch { }
+                #endregion
+
                 MyQuerySql = $"UPDATE dbo.TASKS SET PERSONEL = {PERSONEL.SelectedValue}, PERIORITY = {PERIORITY.SelectedValue}, STATUS = {STATUS.SelectedValue} WHERE IDNUM = {task.IDNUM}";
                 ESLAH_SATR(Convert.ToInt32(task.IDNUM));
             }
             else
             {
+                //بروز رسانی رویداد ها بابت ارجاع به پرسنل : مجری
+                #region PERSONEL_AfterUpdate
+                try
+                {
+                    string selectedPersonName = "";
+                    if (PERSONEL.SelectedItem is COMBOPERSONEL PersonelValue)
+                    {
+                        selectedPersonName = PersonelValue?.SAL_NAME ?? "";
+                    }
+
+                    var SelectedTask = tASKSDataGrid.SelectedItem as TASKS;
+                    string currentUser = Baseknow.UUSER ?? "Unknown";
+                    string eventDescription = $"ارجاع شد به : {selectedPersonName}";
+                    string sql = @"
+                    INSERT INTO events 
+                    (IDNUM, USERNAME, EVENTS, STDATE, STTIME, SKID, NUM, TG) 
+                    VALUES 
+                    (@IdNum, @UserName, @EventDesc, @StDate, @StTime, @SkId, @Num, @Tg)";
+                    var parameters = new
+                    {
+                        IdNum = Convert.ToInt64(IDNUM1.Text),
+                        UserName = currentUser,
+                        EventDesc = eventDescription,
+                        StDate = Convert.ToInt32(Tarikh.GoGetPersianDate(true)),
+                        StTime = Convert.ToInt32(DateTime.Now.ToString("HHmm")),
+                        SkId = SelectedTask?.skid,
+                        Num = SelectedTask?.num,
+                        Tg = SelectedTask?.tg
+                    };
+                    dbms.DoExecuteSQL(sql, parameters);
+                }
+                catch { }
+                #endregion
+
                 MyQuerySql = $"UPDATE dbo.TASKS SET TASK = N'{TASK.Text.Trim()}', PERSONEL = {PERSONEL.SelectedValue}, PERIORITY = {PERIORITY.SelectedValue}, STATUS = {STATUS.SelectedValue}, COMP_COD = N'{COMP_COD.SelectedValue}' WHERE IDNUM = {IDNUM1.Text}";
 
                 ESLAH_SATR(Convert.ToInt32(IDNUM1.Text));
@@ -1129,6 +1196,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
 
 
             bool AnyChangeHappend = false;
+
 
             if (string.IsNullOrEmpty(IDNUM1.Text) || IDNUM1.Text == "0")
             {

@@ -19,6 +19,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -984,6 +985,7 @@ namespace Wins.WinMenus.ANBAR
                 throw;
             }
 
+            UpdateCounters();
         }
         private void ANBARGRD_SUB2_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
@@ -1029,6 +1031,8 @@ namespace Wins.WinMenus.ANBAR
             {
                 throw;
             }
+
+            UpdateCounters();
         }
         private void ANBARGRD_SUB3_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
@@ -1074,6 +1078,8 @@ namespace Wins.WinMenus.ANBAR
             {
                 throw;
             }
+
+            UpdateCounters();
         }
 
         private bool BodyIsValid(object _row)
@@ -1200,8 +1206,18 @@ namespace Wins.WinMenus.ANBAR
                 return;
             }
         }
+
+        private const decimal CountDifferenceTolerance = 0.000001m;
+        private string BuildCountMismatchPredicate(string countColumn)
+        {
+            var tolerance = CountDifferenceTolerance.ToString(CultureInfo.InvariantCulture);
+
+            return $"((MOG IS NULL AND {countColumn} IS NOT NULL) OR (MOG IS NOT NULL AND {countColumn} IS NULL) OR (MOG IS NOT NULL AND {countColumn} IS NOT NULL AND ABS(CAST(MOG AS DECIMAL(28, 6)) - CAST({countColumn} AS DECIMAL(28, 6))) > {tolerance}))";
+        }
+
         public void ReGetData()
         {
+            UpdateCounters();
             ANBARGRD_SUB1_MODEL_DATA?.Clear();
             if (GRD_NUM.Text is not null && GRD_NUM.Text != "")
             {
@@ -1211,8 +1227,10 @@ namespace Wins.WinMenus.ANBAR
 
                 foreach (var item in ANBARGRD_SUB1_MODEL_DATA_TEMP)
                 {
-                    ANBARGRD_SUB1_MODEL_DATA.Add(item);
+                    ANBARGRD_SUB1_MODEL_DATA?.Add(item);
                 }
+
+                UpdateCounters();
             }
             else
             {
@@ -1221,17 +1239,21 @@ namespace Wins.WinMenus.ANBAR
         }
         public void ReGetData2()
         {
+            UpdateCounters();
             ANBARGRD_SUB2_MODEL_DATA?.Clear();
             if (GRD_NUM.Text is not null && GRD_NUM.Text != "")
             {
-                var ANBARGRD_SUB2_MODEL_DATA_TEMP = dbms.DoGetDataSQL<ANBARGRD_SUB2_MODEL>($@"SELECT EKH, GRD_NUM, CODE, nam, MOG, NUM1, NUM2, NUM3, MABL, NAMES, N_FANI, grp FROM ANBARGRD_SUB2 WHERE GRD_NUM = {GRD_NUM.Text}").ToList();
+                //var mismatchFilter = BuildCountMismatchPredicate("NUM1");
+                //var query = $@"SELECT EKH, GRD_NUM, CODE, nam, MOG, NUM1, NUM2, NUM3, MABL, NAMES, N_FANI, grp FROM ANBARGRD_SUB2 WHERE GRD_NUM = {GRD_NUM.Text} AND {mismatchFilter}";
+                //var ANBARGRD_SUB2_MODEL_DATA_TEMP = dbms.DoGetDataSQL<ANBARGRD_SUB2_MODEL>(query).ToList();
 
-                // INVO_RASIDA_DATA?.Clear();
+                var ANBARGRD_SUB2_MODEL_DATA_TEMP = dbms.DoGetDataSQL<ANBARGRD_SUB2_MODEL>($@"SELECT EKH, GRD_NUM, CODE, nam, MOG, NUM1, NUM2, NUM3, MABL, NAMES, N_FANI, grp FROM ANBARGRD_SUB2 WHERE GRD_NUM = {GRD_NUM.Text} AND MOG <> NUM1").ToList();
 
                 foreach (var item in ANBARGRD_SUB2_MODEL_DATA_TEMP)
                 {
-                    ANBARGRD_SUB2_MODEL_DATA.Add(item);
+                    ANBARGRD_SUB2_MODEL_DATA?.Add(item);
                 }
+                UpdateCounters();
             }
             else
             {
@@ -1240,22 +1262,34 @@ namespace Wins.WinMenus.ANBAR
         }
         public void ReGetData3()
         {
+            UpdateCounters();
             ANBARGRD_SUB3_MODEL_DATA?.Clear();
             if (GRD_NUM.Text is not null && GRD_NUM.Text != "")
             {
-                var ANBARGRD_SUB3_MODEL_DATA_TEMP = dbms.DoGetDataSQL<ANBARGRD_SUB3_MODEL>($@"SELECT EKH, GRD_NUM, CODE, nam, MOG, NUM1, NUM2, NUM3, MABL, NAMES, N_FANI, grp FROM ANBARGRD_SUB3 WHERE GRD_NUM = {GRD_NUM.Text}").ToList();
+                //var mismatchFilter = BuildCountMismatchPredicate("NUM2");
+                //var query = $@"SELECT EKH, GRD_NUM, CODE, nam, MOG, NUM1, NUM2, NUM3, MABL, NAMES, N_FANI, grp FROM ANBARGRD_SUB3 WHERE GRD_NUM = {GRD_NUM.Text} AND {mismatchFilter}";
+                //var ANBARGRD_SUB3_MODEL_DATA_TEMP = dbms.DoGetDataSQL<ANBARGRD_SUB3_MODEL>(query).ToList();
 
-                // INVO_RASIDA_DATA?.Clear();
-
+                var ANBARGRD_SUB3_MODEL_DATA_TEMP = dbms.DoGetDataSQL<ANBARGRD_SUB3_MODEL>($@"SELECT EKH, GRD_NUM, CODE, nam, MOG, NUM1, NUM2, NUM3, MABL, NAMES, N_FANI, grp FROM ANBARGRD_SUB3 WHERE GRD_NUM = {GRD_NUM.Text} AND MOG <> NUM2").ToList();
                 foreach (var item in ANBARGRD_SUB3_MODEL_DATA_TEMP)
                 {
-                    ANBARGRD_SUB3_MODEL_DATA.Add(item);
+                    ANBARGRD_SUB3_MODEL_DATA?.Add(item);
                 }
+                UpdateCounters();
             }
             else
             {
                 return;
             }
+        }
+
+        private void UpdateCounters()
+        {
+            //COUNTERS_TB.Text = $"شمارش اول: {ANBARGRD_SUB.Items.Count} | شمارش دوم: {ANBARGRD_SUB2.Items.Count} | شمارش سوم: {ANBARGRD_SUB3.Items.Count}";
+            if (COUNTERS_TB == null) { return; }
+
+            var text = $"تعداد سطرها : شمارش اول: {ANBARGRD_SUB1_MODEL_DATA?.Count ?? 0}   شمارش دوم: {ANBARGRD_SUB2_MODEL_DATA?.Count ?? 0}   شمارش سوم: {ANBARGRD_SUB3_MODEL_DATA?.Count ?? 0}";
+            COUNTERS_TB.Text = text;
         }
 
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e)
@@ -1764,6 +1798,27 @@ namespace Wins.WinMenus.ANBAR
             GetDefaultFocus();
         }
 
-     
+        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.Source is TabControl)
+            {
+                var tabControl = sender as TabControl;
+                if (tabControl?.SelectedItem == null || !NowIsReady)
+                    return;
+
+                // بررسی اینکه کدام تب انتخاب شده است
+                if (tabControl.SelectedItem == Count2)
+                {
+                    // تب شمارش دوم: فقط کالاهایی که موجودی فعلی با شمارش اول متفاوت است
+                    ReGetData2();
+                }
+                else if (tabControl.SelectedItem == Count3)
+                {
+                    // تب شمارش سوم: فقط کالاهایی که موجودی فعلی با شمارش دوم متفاوت است
+                    ReGetData3();
+                }
+            }
+        }
+
     }
 }

@@ -492,7 +492,7 @@
                 </MenuItem.Icon>
             </MenuItem>
         </ContextMenu>
-        
+
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
@@ -532,7 +532,7 @@
             EnableDataVirtualization="True"
             SelectionUnit="Row"
             IsReadOnly="True"
-                          
+            SelectedIndex="0"              
             SelectionMode="Extended"
             AllowDraggingColumns="True"
             AllowResizingColumns="True"
@@ -560,7 +560,7 @@
 
             <syncfusion:SfDataGrid.Columns>
 
-                <syncfusion:GridTemplateColumn HeaderText="" x:Name="ISEND_COLUMN" Width="60" MappingName="IsButtony" IsHidden="False" AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
+                <syncfusion:GridTemplateColumn HeaderText=" " x:Name="ISEND_COLUMN" Width="60"    MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False" >
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_OPEN_SUB" IsTabStop="False" Click="BTN_OPEN_SUB_Click" Tag="{Binding}"

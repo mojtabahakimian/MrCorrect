@@ -532,7 +532,7 @@
         <Button x:Name="BTN_UI_DELETE" Tag="hazfer" Visibility="Hidden" Margin="643,410,328,158"  Width="1"/>
 
         <syncfusion:SfDataGrid x:Name="VOSULMASTER_SUB" ContextMenu="{StaticResource DataGridContextMenu}"
-                ItemsSource="{Binding VOSULMASTER_DATA}" FilterRowPosition="Top"
+                ItemsSource="{Binding VOSULMASTER_DATA}" FilterRowPosition="Top" SelectedIndex="0"
                 AutoGenerateColumns="False"     
                 EnableDataVirtualization="True"
                 SelectionUnit="Row"
@@ -560,7 +560,7 @@
                 </syncfusion:GridTextColumn>
                 <syncfusion:GridTextColumn MappingName="MOLAH" HeaderText="ملاحظات" ColumnSizer="Star" />
                 <syncfusion:GridTextColumn MappingName="N_S" HeaderText="شماره سند" ColumnSizer="Auto" IsReadOnly="True" />
-                <syncfusion:GridTemplateColumn HeaderText="باز کردن سند" x:Name="N_SCOLUMNBTN" Width="110" MappingName="IsButtony" IsHidden="False" AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
+                <syncfusion:GridTemplateColumn HeaderText="باز کردن سند" x:Name="N_SCOLUMNBTN" Width="110"   MappingName="IsButtony" FilterRowEditorType="None"   IsHidden="False" AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_N_S_OPEN" IsTabStop="False" Click="BTN_N_S_OPEN_Click" Tag="{Binding}"
@@ -574,7 +574,7 @@
                         </DataTemplate>
                     </syncfusion:GridTemplateColumn.CellTemplate>
                 </syncfusion:GridTemplateColumn>
-                <syncfusion:GridTemplateColumn HeaderText="صدور سند" Width="110" MappingName="IsButtony" IsHidden="False" AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
+                <syncfusion:GridTemplateColumn HeaderText="صدور سند" Width="110"   MappingName="IsButtony" FilterRowEditorType="None"   IsHidden="False" AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_N_SCHECK" IsTabStop="False" Click="BTN_N_SCHECK_Click" Tag="{Binding}"

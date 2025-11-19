@@ -82,6 +82,10 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         {
             InitializeComponent();
 
+            // Ensure all grid columns have valid MappingName to prevent filtering errors
+
+            //CL_DATAGRID_FUNCS.EnsureGridColumnsHaveMappingName(SYNCFUSION_DG); //این هم جلوی خطا Column NULL رو میگیره برای ستون هایی از نوع دکمه ولی نیازی نیست بهش چون توی xaml با غیر فقاعل کردن یه گزینه درستش کردم
+
             this.DataContext = this;
 
             DT1 = _DT1_;
@@ -202,7 +206,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             }
 
             GenerateAutomaticSummary(SYNCFUSION_DG);
-
+            //SYNCFUSION_DG.SelectedIndex = 0;
             //ProcLoader.Stop(Prc);
         }
 
@@ -735,6 +739,10 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         {
             var CurrentRow = SYNCFUSION_DG.SelectedItem as TARAZ4_MOIN_MODEL;
 
+            //if (sender is Button selectedrow)
+            //{
+            //    var CurrentRow0 = selectedrow.Tag as TARAZ4_MOIN_MODEL; //یه روش دیگه برای تشخیص SelectedItem
+            //}
             if (CurrentRow != null && CurrentRow?.NUMBER != null)
             {
                 if (BEDEHBESTANMOIN)

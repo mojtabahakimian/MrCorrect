@@ -109,7 +109,7 @@
 
         <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" FilterRowPosition="Top"
             ContextMenu="{StaticResource DataGridContextMenu}"
-            ItemsSource="{Binding MESSAGE_DATA}" 
+            ItemsSource="{Binding MESSAGE_DATA}"  SelectedIndex="0"
             AutoGenerateColumns="False"
             EnableDataVirtualization="True"
             SelectionUnit="Row"
@@ -180,7 +180,7 @@
 
 
                 <!-- پاسخ Button -->
-                <syncfusion:GridTemplateColumn HeaderText="پاسخ" MappingName="IsButtony" AllowSorting="False" AllowFiltering="False">
+                <syncfusion:GridTemplateColumn HeaderText="پاسخ"   MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button Tag="{Binding}" Click="Button_Click_1"
@@ -192,7 +192,7 @@
                 </syncfusion:GridTemplateColumn>
 
                 <!-- ارجاع به دیگری Button -->
-                <syncfusion:GridTemplateColumn HeaderText="ارجاع به دیگری" MappingName="IsButtony" AllowSorting="False" AllowFiltering="False">
+                <syncfusion:GridTemplateColumn HeaderText="ارجاع به دیگری"   MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button Tag="{Binding}" Click="Button_Click_2"

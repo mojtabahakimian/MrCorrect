@@ -1383,7 +1383,9 @@ namespace Wins.WinMenus.SALARY
                 this.AllowEdits = false;
             }
 
-            if (!NewRecord && Convert.ToInt64(IDNUM.Text) > 0)
+            var hasValidId = !string.IsNullOrWhiteSpace(IDNUM.Text) && long.TryParse(IDNUM.Text, out var currentId) && currentId > 0;
+
+            if (!NewRecord && hasValidId)
             {
                 Update_Day_Hour_Minut();
 

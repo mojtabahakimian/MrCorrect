@@ -1673,6 +1673,14 @@ namespace Prg_UI.Functions
         /// <returns></returns>
         public static bool IsNewPlaceHolder(DataGrid dg, object item)
         {
+            // Early exit for null DataGrid
+            if (dg == null)
+                return false;
+
+            // Early exit for null item - this is a common placeholder scenario
+            if (item == null)
+                return true;
+
             // Check if the DataGrid's collection view is in the process of adding a new item
             var collectionView = dg.Items as IEditableCollectionView;
             bool isAddingNewItem = collectionView?.IsAddingNew ?? false;
@@ -1681,7 +1689,7 @@ namespace Prg_UI.Functions
             bool isNewItemPlaceholder = item is null || item.ToStringNullSafe() == "{NewItemPlaceholder}";
 
             // Check if the item is the internal "NamedObject", used as placeholders in some cases
-            bool isInternalNamedObject = item?.GetType().FullName == "MS.Internal.NamedObject";
+            bool isInternalNamedObject = item?.GetType()?.FullName == "MS.Internal.NamedObject";
 
             bool CV_NewItemPlaceholder = item == CollectionView.NewItemPlaceholder;
 
@@ -2285,6 +2293,7 @@ namespace Prg_UI.Functions
             {
                 if (!isOthery && IsDateLimited) //تاریخ قابل برگشت اعمال شود همراه با محدود به کاربری خودش
                 {
+                    //تاریخ محدود (تاریخ قابل برگشت) اعمال میشود ...↓
                     info.RestrictionMessages.Add("محدود به تاریخ برگشت فاکتور");
                     var sqlQuery = $"SELECT TOP 100 PERCENT DATE_N FROM dbo.HEAD_LST WHERE (TAG = {TAGCODE}) AND (DEPATMAN = {CL_Generaly.VAHED_OF_USER}) AND (dbo.HEAD_LST.USER_NAME = N'{CL_HESABDARI.UCurrentUser()}') GROUP BY DATE_N ORDER BY DATE_N DESC";
                     var result = dbms.DoGetDataSQL<long>(sqlQuery).ToList(); //Get Last New Bigest Date
