@@ -1134,6 +1134,7 @@ namespace Wins.WinMenus.Taarif
 
             try
             {
+                universControl.PopNotifyShowUp($" ... در حال آماده سازی فایل اکسل این عملیات مدتی طول خواهد کشید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 4);
                 await UniversalExcelExporter.ExportToExcelAsync(TDETA_HES3_DATA, "DGExportedExcel");
             }
             catch (Exception)

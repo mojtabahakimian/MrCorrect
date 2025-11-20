@@ -627,6 +627,7 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         {
             try
             {
+                universControl.PopNotifyShowUp($" ... در حال اماده سازی فایل اکسل این عملیات مدتی طول خواهد کشید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 4);
                 await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "ExportedExcel");
             }
             catch (Exception)
