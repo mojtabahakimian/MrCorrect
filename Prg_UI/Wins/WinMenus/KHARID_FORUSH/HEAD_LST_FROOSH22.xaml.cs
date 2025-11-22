@@ -3162,7 +3162,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         }
 
-        private void GetModatValueDays()
+        private void GetModatValueDays(bool FocusonMAS = true)
         {
             if (MODAT_PPID.SelectedItem is PRICE_PAYNO_MODATP SelectedModatItem)
             {
@@ -3184,7 +3184,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 this.MAS.IsReadOnly = false;
 
-                Dispatcher.BeginInvoke(new Action(() => { this.MAS.Focus(); }));
+                if (FocusonMAS)
+                {
+                    Dispatcher.BeginInvoke(new Action(() => { this.MAS.Focus(); }));
+                }
             }
             else
             {
@@ -3585,7 +3588,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
             else
             {
-                AllowEdits = true;
+                //AllowEdits = true;
             }
         }
         private void PERSONEL_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -6935,7 +6938,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         PEID.SelectedValue = rst.PEID; PEID.Items.Refresh();
                         PEPID.SelectedValue = rst.PEPID; PEPID.Items.Refresh();
 
-                        MODAT_PPID_Enter();
+                        MODAT_PPID_Enter();                    
 
                         //مدت
                         if (string.IsNullOrWhiteSpace(MAS.Text) || MAS.Text == "0")
@@ -12273,7 +12276,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         if (havaleDate?.MODAT_PPID != null)
                         {
                             MODAT_PPID.SelectedValue = havaleDate?.MODAT_PPID; MODAT_PPID.Items.Refresh();
-                            GetModatValueDays();
+                            GetModatValueDays(FocusonMAS: false);
                         }
                     }
 
