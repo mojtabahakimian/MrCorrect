@@ -1881,6 +1881,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             this.PERSONEL.Visibility = Visibility.Visible;
             Meidnum = MID;
 
+            sgn1usid.Tag = Baseknow.USERCOD;
+            sgn1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == Baseknow.USERCOD)?.SAL_NAME;
+
             if (!(bool)OKF.IsChecked || SGN1.IsChecked == true)
             {
                 this.OKF.IsChecked = true;
@@ -1904,9 +1907,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 //sgn3usid.IsEnabled = false;
 
                 Child14.IsReadOnly = true;
-                sgn1usid.Tag = Baseknow.USERCOD;
-                sgn1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == Baseknow.USERCOD).SAL_NAME;
+           
             }
+        
 
             if ((bool)SGN1.IsChecked || (bool)SGN2.IsChecked || (bool)SGN3.IsChecked)
             {
@@ -1948,6 +1951,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
             this.PERSONEL.Visibility = Visibility.Visible;
             Meidnum = MID;
+
+            sgn2usid.Tag = Baseknow.USERCOD;
+            sgn2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == Baseknow.USERCOD)?.SAL_NAME;
+
             if (!(bool)this.OKF.IsChecked || SGN2.IsChecked == true)
             {
                 this.OKF.IsChecked = true;
@@ -1971,8 +1978,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 //sgn3usid.IsEnabled = false;
 
                 Child14.IsReadOnly = true;
-                sgn2usid.Tag = Baseknow.USERCOD;
-                sgn2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == Baseknow.USERCOD).SAL_NAME;
+
             }
 
             if ((bool)SGN1.IsChecked || (bool)SGN2.IsChecked || (bool)SGN3.IsChecked)
@@ -2011,6 +2017,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             this.PERSONEL.Visibility = Visibility.Visible;
             Meidnum = MID;
 
+            sgn3usid.Tag = Baseknow.USERCOD;
+            sgn3usid.Text = rst_personel.FirstOrDefault(x => x.IDD == Baseknow.USERCOD)?.SAL_NAME;
+
             if (!(bool)OKF.IsChecked || SGN3.IsChecked == true)
             {
                 this.OKF.IsChecked = true;
@@ -2034,8 +2043,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 //sgn3usid.IsEnabled = false;
 
                 Child14.IsReadOnly = true;
-                sgn3usid.Tag = Baseknow.USERCOD;
-                sgn3usid.Text = rst_personel.FirstOrDefault(x => x.IDD == Baseknow.USERCOD).SAL_NAME;
             }
 
             if ((bool)SGN1.IsChecked || (bool)SGN2.IsChecked || (bool)SGN3.IsChecked)

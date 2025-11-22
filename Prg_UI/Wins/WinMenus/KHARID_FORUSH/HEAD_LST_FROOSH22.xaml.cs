@@ -12657,6 +12657,24 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 BTN_SAVE_HEXTENDED_Click(null, null);
             }
 
+            #region SecondTryToAvoidNullHEAD_LST_EXTENDED
+            //رفع خطای : سربرگ مودیان مربوط به فاکتور خالی است , ابتدا یکباره دیگر نوع صورت حساب را انتخاب کرده و سپس روی مانده حساب دابل کلیک کنید و دوباره امتحان کنید.
+            var _HEAD_EXTENDED = dbms.DoGetDataSQL<HEAD_LST_EXTENDED>($"SELECT * FROM dbo.HEAD_LST_EXTENDED WHERE NUMBER = {NUMBER.Text} AND TGU = 2").FirstOrDefault();
+            if (_HEAD_EXTENDED is null)
+            {
+                dbms.DoExecuteSQL(@$"INSERT INTO dbo.HEAD_LST_EXTENDED(NUMBER, tgu, inty, inp, ins, sbc, Bbc, ft, bpn, scln, scc, cdcn, cdcd, crn, billid, todam, tonw, torv, tocv, setm, cap, insp, tvop, tax17, cut, irtaxid)
+                                VALUES({NUMBER.Text}, 2, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, '2', DEFAULT);");
+                _HEAD_EXTENDED = dbms.DoGetDataSQL<HEAD_LST_EXTENDED>($"SELECT * FROM dbo.HEAD_LST_EXTENDED WHERE NUMBER = {NUMBER.Text} AND TGU = 2").FirstOrDefault();
+            }
+            if (_HEAD_EXTENDED != null && _HEAD_EXTENDED.inty is null)
+            {
+                dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST_EXTENDED SET inty = 1 WHERE NUMBER = {NUMBER.Text} AND TGU = 2");
+                _HEAD_EXTENDED.inty = 1;
+            }
+            #endregion
+
+
+
             if (MoadianHeaderIsOk)
             {
                 try
@@ -12739,8 +12757,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         }
 
         #endregion
-
-
 
         private void INVO_LST_sub_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
