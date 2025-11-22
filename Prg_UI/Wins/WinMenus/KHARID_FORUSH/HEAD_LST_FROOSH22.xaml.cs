@@ -1064,7 +1064,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 if (INVO_LST_sub.Columns.Count > 0)
                 {
-                    int? defaultcolumnindex = INVO_LST_sub.Columns.FirstOrDefault(c => c.SortMemberPath is not null && c.SortMemberPath == "NAME_CODE")?.DisplayIndex;
+                    int? defaultcolumnindex = INVO_LST_sub.Columns.FirstOrDefault(c => c.SortMemberPath is not null && c.SortMemberPath == "ANBAR")?.DisplayIndex;
                     if (defaultcolumnindex is null || defaultcolumnindex < 0)
                     {
                         _name_code_index = 0;
@@ -1089,6 +1089,20 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 JAYEHZAH(false);
                 IsFromPishFactorConverted = false; //Reset to avoid ferther conflict
             }
+        }
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (ChangeIsHappend)
+            {
+                var MSGCAP = new MSGCAPTIONMODEL() { YES_CAPTION = "برگرد", NO_CAPTION = "خارج شو" };
+                Msgwin msgwin = new Msgwin(true, "اطلاعات را ذخیره نکرده اید آیا مایل به بازگشت هستید ؟", default, default, MSGCAP); msgwin.ShowDialog();
+                if (msgwin.DialogResult is true)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
+            //MeTimer.IsEnabled = false;
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -1289,8 +1303,52 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             Form_Current();
 
+            if (IsDirectFactor) //مستقیم : حواله فاکتور سینک
+            {
+                CL_LMethods.SetTabIndexes(
+                   CUST_NO,
+                   CUST_KIND,
+                   DEPATMAN,
+                   MOLAH,
+                   PEPID, /*اعلامیه قیمت*/
+                   PEID, /*اعلامیه تخفیف*/
+                   MODAT_PPID, /*نحوع پرداخت*/
+                   INVO_LST_sub,
+                   MABL_VAR2,
+                   CMB_MOIN_VAR2,
+                   MABL_HAV2,
+                   CMB_MOIN_HAV2,
+                   M_NAGHD,
+                   MABL_VAR,
+                   CMB_MOIN_VAR, MABL_HAV,
+                   CMB_MOIN_HAV
+                   );
+            }
+            else
+            {
+                CL_LMethods.SetTabIndexes(
+                   NUMBER,
+                   CUST_KIND,
+                   MOLAH,
+                   PEPID, /*اعلامیه قیمت*/
+                   PEID, /*اعلامیه تخفیف*/
+                   MODAT_PPID, /*نحوع پرداخت*/
+                   INVO_LST_sub,
+                   MABL_VAR2,
+                   CMB_MOIN_VAR2,
+                   MABL_HAV2,
+                   CMB_MOIN_HAV2,
+                   M_NAGHD,
+                   MABL_VAR,
+                   CMB_MOIN_VAR, MABL_HAV,
+                   CMB_MOIN_HAV
+                   );
+            }
+
+
             GetDefaultFocus();
         }
+
         #region SPECIAL_F7
         object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
         public void OnSearchResultSelected(object selectedItem)
@@ -1727,7 +1785,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     // Optional: Hide loading indicator here
                 }
             }
-       
+
         }
         private bool OnInsertRecord(HEAD_LST record)
         {
@@ -1749,21 +1807,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             var CURRENT_HEADER = dbms.DoGetDataSQL<HEAD_LST>($"SELECT * FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {fTAG}").FirstOrDefault();
             _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
-        }
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            if (ChangeIsHappend)
-            {
-                var MSGCAP = new MSGCAPTIONMODEL() { YES_CAPTION = "برگرد", NO_CAPTION = "خارج شو" };
-                Msgwin msgwin = new Msgwin(true, "اطلاعات را ذخیره نکرده اید آیا مایل به بازگشت هستید ؟", default, default, MSGCAP); msgwin.ShowDialog();
-                if (msgwin.DialogResult is true)
-                {
-                    e.Cancel = true;
-                    return;
-                }
-            }
-            //MeTimer.IsEnabled = false;
         }
 
         private void SecurityAllCheck()
@@ -2703,6 +2746,22 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void DEPATMAN_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
+
+            if (DEPATMAN.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
+            TextBox DEPATMAN_TEX = (TextBox)DEPATMAN.Template.FindName("PART_EditableTextBox", DEPATMAN);
+
+            string _SelectedItem_ = "";
+            if (DEPATMAN.SelectedItem != null)
+            {
+                _SelectedItem_ = ((Prg_Proccessy.SQLMODELS.CTABLES.Custom_DEPART)DEPATMAN.SelectedItem).DEPNAME;
+            }
+
+            if (DEPATMAN_TEX.Text != _SelectedItem_)
+            {
+                e.Handled = true;
+                new WIN_SearchDEPART(DEPATMAN_TEX.Text.Trim(), I_AM_FOROOSH22).ShowDialog();
+            }
+
             if (DEPATMAN.SelectedValue is null)
             {
                 DEPATMAN.SelectedValue = CL_Generaly.VAHED_OF_USER;
@@ -2714,7 +2773,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
 
             #region DEPATMAN_AfterUpdate
-            if (!NewRecord)
+            if (!_navigationManager.IsNewRecord)
             {
                 var rst = dbms.DoGetDataSQL<int?>("SELECT     DEPATMAN FROM dbo.HEAD_LST WHERE     (NUMBER = " + this.NUMBER.Text + ") AND (TAG = 2)").ToList();
                 var where = " WHERE     (NUMBER = " + this.NUMBER.Text + ") AND (TAG = 2)";
@@ -4262,16 +4321,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 JAYO_COLUMN.IsReadOnly = true;
             }
-            if (Strings.Mid(Baseknow.OPTIONSS, 43, 1) == "5")
-            {
-                //this.CODEh.ColumnHidden = false;
-                this.CODEh_COLUMN.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                //this.CODEh.ColumnHidden = true;
-                this.CODEh_COLUMN.Visibility = Visibility.Hidden;
-            }
+            //if (Strings.Mid(Baseknow.OPTIONSS, 43, 1) == "5")
+            //{
+            //    //this.CODEh.ColumnHidden = false;
+            //    this.CODEh_COLUMN.Visibility = Visibility.Visible;
+            //}
+            //else
+            //{
+            //    //this.CODEh.ColumnHidden = true;
+            //    this.CODEh_COLUMN.Visibility = Visibility.Hidden;
+            //}
             if (Strings.Mid(Baseknow.OPTIONSS, 50, 1) == "5")
             {
                 //Change the Validation state
@@ -6976,6 +7035,68 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     }
                 }
             }
+            else
+            {
+                if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.OemQuotes)
+                {
+                    try
+                    {
+                        if (INVO_LST_sub.IsEnabled && !INVO_LST_sub.IsReadOnly && INVO_LST_sub.CurrentCell != null)
+                        {
+                            // Get the current cell
+                            DataGridCellInfo currentCell = INVO_LST_sub.CurrentCell;
+                            if (currentCell != null)
+                            {
+                                // Get the row index and column index of the current cell
+                                int rowIndex = INVO_LST_sub.Items.IndexOf(currentCell.Item);
+                                int columnIndex = INVO_LST_sub.Columns.IndexOf(currentCell.Column);
+
+                                // Check if it's not the first row
+                                if (rowIndex > 0)
+                                {
+                                    // Get the value from the cell above
+                                    object valueAbove = INVO_LST_sub.Items[rowIndex - 1];
+
+                                    // Ensure that the column index is within bounds
+                                    if (valueAbove != null && columnIndex >= 0 && columnIndex < INVO_LST_sub.Columns.Count)
+                                    {
+                                        // Get the column information
+                                        var column = INVO_LST_sub.Columns[columnIndex];
+
+                                        // Ensure that the column has a valid SortMemberPath
+                                        if (!string.IsNullOrEmpty(column.SortMemberPath))
+                                        {
+                                            // Use reflection to get and set the property values
+                                            var propertyInfo = valueAbove.GetType().GetProperty(column.SortMemberPath);
+
+                                            // Ensure that the property exists and is not null
+                                            if (propertyInfo != null)
+                                            {
+                                                // Get the value from the above cell
+                                                object valueAboveCellValue = propertyInfo.GetValue(valueAbove);
+
+                                                // Cast currentCell.Item to the actual data type
+                                                var currentItem = currentCell.Item;
+
+                                                // Use reflection to set the value on the current item
+                                                if (currentItem.GetType().GetProperty(column.SortMemberPath) is PropertyInfo currentCellProperty)
+                                                {
+                                                    // Set the value on the current cell's item
+                                                    currentCellProperty.SetValue(currentItem, valueAboveCellValue);
+
+                                                    INVO_LST_sub.BeginEdit();
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            e.Handled = true;
+                        }
+                    }
+                    catch { }
+                }
+            }
         }
         /// <summary>
         /// تغییر تب ایدنکس ستون ها
@@ -7267,8 +7388,13 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void ESLAH_Click(object sender, RoutedEventArgs e)
         {
+            if (!ESLAH.IsEnabled || ESLAH.Visibility != Visibility.Visible || !ESLAH.IsHitTestVisible) { return; }
+
+            if (!string.IsNullOrWhiteSpace(NUMBER.Text) && NUMBER.Text == "0") { return; }
+            if (_navigationManager.IsNewRecord) { return; }
+
             DateTime dt;
-            if (!IsNull(this.NUMBER.Text))
+            if (!string.IsNullOrWhiteSpace(NUMBER.Text) && NUMBER.Text != "0")
             {
                 dt = DateTime.Now;
                 CL_HESABDARI.TR("HEAD_LST", "(NUMBER = " + this.NUMBER.Text + ") AND (TAG = 13)", dt, 1);
@@ -7512,6 +7638,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         public bool DisplayError { get; set; } = true;
         public void BUTTON_SAVE_HAVALE_Click(object sender, RoutedEventArgs e)
         {
+            if (!BUTTON_SAVE_HAVALE.IsEnabled || BUTTON_SAVE_HAVALE.Visibility != Visibility.Visible || !BUTTON_SAVE_HAVALE.IsHitTestVisible) { return; }
+
             SavedSuccessBtn = false;
 
             SGN1.IsChecked = SGN1.IsChecked ?? false;
@@ -7821,6 +7949,13 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             SavedSuccessBtn = true; //ذخیره با موفقیت انجام شده
 
             universControl.PopNotifyShow(".اطلاعات با موفقیت ذخیره شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C", 1);
+
+            if (FACTOR22_INVO_DATA.Count == 0 && IsDirectFactor)
+            {
+                var DG = INVO_LST_sub;
+                var DEFINDX = (DG.SelectedIndex < 0) ? 0 : DG.SelectedIndex;
+                CL_LMethods.FocusCellReadyToEdit(DG, "ANBAR", DEFINDX, true);
+            }
         } //SAVE -------------------------------------------------------------------------
 
         public void CalculateIMBAA()
@@ -12719,7 +12854,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                             return;
                         }
 
-                        universControl.PopNotifyShowUp("قیمت بروز شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
+                        universControl.PopNotifyShowUp("قیمت بروز شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green, 1);
 
                         IF_AZAD_THENLOCK();
                     }

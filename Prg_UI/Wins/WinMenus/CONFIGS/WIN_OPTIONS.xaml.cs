@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_SendInvoice.SQLMODELS;
@@ -452,6 +453,8 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
                     new Msgwin(false, "خطا: حداقل یکی از تنظیمات ذخیره نشد").ShowDialog();
                 }
                 #endregion
+
+                try { Baseknow.GetInitTheApp(); } catch { } //Refresh Baseknow Data
             }
             catch (Exception ex)
             {

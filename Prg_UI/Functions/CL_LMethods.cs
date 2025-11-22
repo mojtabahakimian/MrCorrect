@@ -3261,6 +3261,8 @@ namespace Prg_UI.Functions
                 }
 
                 Traverse(obj);
+
+                RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
             }
         }
     }

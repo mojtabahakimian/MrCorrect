@@ -417,7 +417,7 @@ namespace Prg_UI.Wins.WinOther
             }
             else
             {
-                if (DefaultSelectSearch != null)
+                if (DefaultSelectSearch != null && PublicVRB.Head_LstPish2 != null && PublicVRB.Head_LstPish2?.FROM_SEARCH_KAL != null)
                 {
                     PublicVRB.Head_LstPish2.FROM_SEARCH_KAL.CODE = DefaultSelectSearch.CODEKALA;
                     PublicVRB.Head_LstPish2.FROM_SEARCH_KAL.NAME_CODE = DefaultSelectSearch.NAME;

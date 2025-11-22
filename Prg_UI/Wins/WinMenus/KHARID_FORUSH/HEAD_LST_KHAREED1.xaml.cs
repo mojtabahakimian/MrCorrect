@@ -2863,7 +2863,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e) //**********************************************************************************************
         {
-            if (!BTN_SAVE.IsEnabled) { return; }
+            if (!BTN_SAVE.IsEnabled || BTN_SAVE.Visibility != Visibility.Visible || !BTN_SAVE.IsHitTestVisible) { return; }
 
             var errors = (from object i in INVO_LST_SUB.ItemsSource
                           let c = INVO_LST_SUB.ItemContainerGenerator.ContainerFromItem(i)

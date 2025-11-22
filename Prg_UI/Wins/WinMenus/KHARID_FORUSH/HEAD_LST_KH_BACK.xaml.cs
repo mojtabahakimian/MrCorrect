@@ -654,6 +654,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 this.SGN3.IsEnabled = false;
             }
 
+            AllowEdits = false;
         }
 
         #region SPECIAL_F7
@@ -994,7 +995,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 }
             }
 
-          
+
 
 
             NUMBER1_TAG = Convert.ToDouble(NUMBER1.SelectedValue); //Save Last Valid Number
@@ -3952,7 +3953,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             (report.GetComponentByName("Text90") as StiText).Text = Baseknow.WIDTH_D; // نام شرکت
             (report.GetComponentByName("Text39") as StiText).Text = Baseknow.NAME; // نام فروشنده
                                                                                    //(report.GetComponentByName("Text4") as StiText).Text = Baseknow.TFADDRESS; // آدرس فروشنده
-            //(report.GetComponentByName("Text48") as StiText).Text = Baseknow.TFTEL; // تلفن فروشنده
+                                                                                   //(report.GetComponentByName("Text48") as StiText).Text = Baseknow.TFTEL; // تلفن فروشنده
 
             if (report.GetComponentByName("USERNAME") is StiText stiText) stiText.Text = Baseknow.UUSER;
 

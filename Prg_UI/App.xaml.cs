@@ -41,41 +41,41 @@ namespace Prg_UI
 
 
         #region NEW_ADDED_FOR_FIX
-        static App()
-        {
-            AppDomain.CurrentDomain.AssemblyResolve += ResolveAssemblies;
-        }
-        private static System.Reflection.Assembly? ResolveAssemblies(object? sender, ResolveEventArgs args)
-        {
-            var requested = new AssemblyName(args.Name);
-            if (requested.Name == "Microsoft.Xaml.Behaviors")
-            {
-                return typeof(Behavior).Assembly;
-            }
-            try
-            {
-                if (requested.Name.StartsWith("Stimulsoft.", StringComparison.OrdinalIgnoreCase))
-                {
-                    try
-                    {
-                        string searchRoot = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DLLS");
-                        if (System.IO.Directory.Exists(searchRoot))
-                        {
-                            string[] matches = System.IO.Directory.GetFiles(searchRoot, requested.Name + ".dll", System.IO.SearchOption.AllDirectories);
-                            if (matches.Length > 0 && System.IO.File.Exists(matches[0]))
-                            {
-                                return System.Reflection.Assembly.LoadFrom(matches[0]);
-                            }
-                        }
-                    }
-                    catch { }
-                }
-                var _ = typeof(Stimulsoft.Report.StiReport).Assembly.FullName; // Just in case
-            }
-            catch { }
+        //static App()
+        //{
+        //    AppDomain.CurrentDomain.AssemblyResolve += ResolveAssemblies;
+        //}
+        //private static System.Reflection.Assembly? ResolveAssemblies(object? sender, ResolveEventArgs args)
+        //{
+        //    var requested = new AssemblyName(args.Name);
+        //    if (requested.Name == "Microsoft.Xaml.Behaviors")
+        //    {
+        //        return typeof(Behavior).Assembly;
+        //    }
+        //    try
+        //    {
+        //        if (requested.Name.StartsWith("Stimulsoft.", StringComparison.OrdinalIgnoreCase))
+        //        {
+        //            try
+        //            {
+        //                string searchRoot = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DLLS");
+        //                if (System.IO.Directory.Exists(searchRoot))
+        //                {
+        //                    string[] matches = System.IO.Directory.GetFiles(searchRoot, requested.Name + ".dll", System.IO.SearchOption.AllDirectories);
+        //                    if (matches.Length > 0 && System.IO.File.Exists(matches[0]))
+        //                    {
+        //                        return System.Reflection.Assembly.LoadFrom(matches[0]);
+        //                    }
+        //                }
+        //            }
+        //            catch { }
+        //        }
+        //        var _ = typeof(Stimulsoft.Report.StiReport).Assembly.FullName; // Just in case
+        //    }
+        //    catch { }
 
-            return null;
-        }
+        //    return null;
+        //}
         #endregion
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
