@@ -16,7 +16,7 @@
         FontFamily="{StaticResource IRANYEKAN}"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
-        Title="" Height="825" Width="1080" d:Width="1024" MinHeight="795" MinWidth="1020" Loaded="Window_Loaded" Closing="Window_Closing" Activated="Window_Activated" ContentRendered="Window_ContentRendered" PreviewKeyDown="Window_PreviewKeyDown">
+        Title="" Height="825" Width="1405"  MinHeight="795" MinWidth="1020" Loaded="Window_Loaded" Closing="Window_Closing" Activated="Window_Activated" ContentRendered="Window_ContentRendered" PreviewKeyDown="Window_PreviewKeyDown">
 
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">
@@ -1236,13 +1236,13 @@
                     <Label Content="کد شعبه فروشنده:" Margin="0,196,111,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="26" VerticalAlignment="Top"/>
                     <TextBox x:Name="sbc"   Text="0" Height="28" Margin="0,195,200,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="300" HorizontalAlignment="Right" />
                     <Label Content="کد شعبه خریدار:" Margin="0,229,120,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="26" VerticalAlignment="Top"/>
-                    <TextBox x:Name="bbc"   Text="0" Height="28" Margin="0,228,200,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="300" HorizontalAlignment="Right" />
+                    <TextBox x:Name="bbc"   Text="0" Height="28" Margin="0,228,200,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Right"  Visibility="Visible" MaxLength="48" Width="300"  />
                     <Label Content="نوع پرواز:" Margin="0,262,151,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="26" VerticalAlignment="Top"/>
                     <TextBox x:Name="ft"   Text="0" Height="28" Margin="0,261,200,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="300" HorizontalAlignment="Right" AutomationProperties.HelpText="0" />
                     <Label Content="شماره گذرنامه خریدار:" Margin="0,295,100,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="26" VerticalAlignment="Top"/>
                     <TextBox x:Name="bpn"   Text="0" Height="28" Margin="0,294,200,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="300" HorizontalAlignment="Right" />
-                    <Label Content="شماره پروانه گمرکی:" Margin="866,0,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Height="26" VerticalAlignment="Center"/>
-                    <TextBox x:Name="scln"   Text="0" Height="28" Margin="560,0,0,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Center" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="300" HorizontalAlignment="Left" />
+                    <Label Content="شماره پروانه گمرکی:" Margin="1188,328,106,0"  FlowDirection="RightToLeft" FontSize="10" Height="26" VerticalAlignment="Top"/>
+                    <TextBox x:Name="scln"   Text="0" Height="28"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Right"  Style="{StaticResource FuzzyOut}" Padding="3"    Visibility="Visible" MaxLength="48"  Width="300"  Margin="0,328,200,0" />
                     <Label Content="کد گمرک محل اظهار فروشنده:" Margin="0,361,66,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="26" VerticalAlignment="Top"/>
                     <TextBox x:Name="scc"   Text="0" Height="28" Margin="0,360,200,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48" Width="300" HorizontalAlignment="Right" />
                     <Label Content="شماره کوتاژ اظهارنامه گمرکی:" Margin="0,394,71,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Height="26" VerticalAlignment="Top"/>

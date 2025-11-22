@@ -1695,7 +1695,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                     TICMBAA.IsChecked = header.TICMBAA;
                     JAY.IsChecked = header.JAY;
-                    MOLAH.Text = header.MOLAH;
+                    if (!string.IsNullOrWhiteSpace(header.MOLAH))
+                    {
+                        MOLAH.Text = header.MOLAH;
+                    }
                     SHIFT.SelectedValue = header.SHIFT;
 
                     MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
@@ -6938,7 +6941,26 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         PEID.SelectedValue = rst.PEID; PEID.Items.Refresh();
                         PEPID.SelectedValue = rst.PEPID; PEPID.Items.Refresh();
 
-                        MODAT_PPID_Enter();                    
+                        MODAT_PPID_Enter();
+
+                        var currentList = MODAT_PPID.ItemsSource as List<PRICE_PAYNO_MODATP>;
+                        if (currentList != null && !currentList.Any(x => x.PPID == rst.MODAT_PPID))
+                        {
+                            if (rst.MODAT_PPID == 0)
+                            {
+                                currentList.Add(new PRICE_PAYNO_MODATP { PPID = 0, PPAME = "آزاد", MODAT = 0, IsTempyDisplay = false });
+                            }
+                            else
+                            {
+                                var extraItem = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>($"SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO WHERE PPID = {rst.MODAT_PPID}").FirstOrDefault();
+                                if (extraItem != null)
+                                {
+                                    extraItem.IsTempyDisplay = true;
+                                    currentList.Add(extraItem);
+                                }
+                            }
+                            MODAT_PPID.Items.Refresh();
+                        }
 
                         //مدت
                         if (string.IsNullOrWhiteSpace(MAS.Text) || MAS.Text == "0")
@@ -6950,7 +6972,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                             CUST_KIND.SelectedValue = rst.CUST_KIND; CUST_KIND.Items.Refresh();
                         }
 
-                        MOLAH.Text = Strings.Left(rst.SHARAYET.ToStringNullSafe(), 200); //ملاحظات سربرگ حواله تگ 2 => SHARAYET ====== ملاحظات سربرگ فاکتور با تگ 13 => MOLAH
+                        if (!string.IsNullOrWhiteSpace(rst?.SHARAYET))
+                        {
+                            MOLAH.Text = Strings.Left(rst.SHARAYET.ToStringNullSafe(), 200); //ملاحظات سربرگ حواله تگ 2 => SHARAYET ====== ملاحظات سربرگ فاکتور با تگ 13 => MOLAH
+                        }
+
 
                         MAS_MAGHSAD_HV = (double)rst.MAS;
 
@@ -6961,11 +6987,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                         DEPATMAN.SelectedValue = rst.DEPATMAN; DEPATMAN.Items.Refresh();
 
-                        ////MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
+                        MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
                         MODAT_PPID.SelectedValue = null;
                         MODAT_PPID.SelectedValue = rst.MODAT_PPID; MODAT_PPID.Items.Refresh();
                         //GetModatValueDays();
-                        ////MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
+                        MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
 
                         USER_NAME.Text = rst.USER_NAME; //نام کابری از حواله گرفته میشود در فاکتور با حواله یعنی غیر مستقیم
                         CL_HESABDARI.LOGFACT(Convert.ToDouble(NUMBER.Text), 13, Convert.ToDouble(NUMBER1.Text), "UPDATEFACTOR");
@@ -11829,6 +11855,20 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     else
                     {
                         MODAT_PPID.SelectedIndex = -1;
+
+                        //باز گردانی به نحوه پرداختی که در پیش فاکتور انتخاب شده بود
+                        if (!string.IsNullOrWhiteSpace(NUMBER.Text) && NUMBER.Text != "0")
+                        {
+                            var havaleDate = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 DATE_N,MODAT_PPID FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {hTAG /*2*/}").FirstOrDefault();
+                            if (havaleDate?.MODAT_PPID != null)
+                            {
+                                MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
+                                MODAT_PPID.SelectedValue = havaleDate?.MODAT_PPID; MODAT_PPID.Items.Refresh();
+                                GetModatValueDays(FocusonMAS: false);
+                                MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
+                            }
+                        }
+
                     }
                     MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
                     universControl.PopNotifyShow($"شما اجازه قيمت گذاري آزاد  نداريد", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
@@ -12267,6 +12307,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                     if (!string.IsNullOrWhiteSpace(NUMBER.Text) && NUMBER.Text != "0")
                     {
+
                         var havaleDate = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TOP 1 DATE_N,MODAT_PPID FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {hTAG /*2*/}").FirstOrDefault();
                         if (!string.IsNullOrWhiteSpace(havaleDate?.DATE_N.ToString()))
                         {
@@ -12275,8 +12316,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         }
                         if (havaleDate?.MODAT_PPID != null)
                         {
+                            MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
+
                             MODAT_PPID.SelectedValue = havaleDate?.MODAT_PPID; MODAT_PPID.Items.Refresh();
                             GetModatValueDays(FocusonMAS: false);
+
+                            MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
                         }
                     }
 

@@ -1096,14 +1096,11 @@ namespace Wins.WinMenus.Taarif
                             {
                                 var _HES_ = Row.N_KOL + "-" + Row.NUMBER + "-" + Row.TNUMBER;
 
-                                if (CL_HESABDARI.ISTAF(_HES_))
+                                var RST = dbms.DoGetDataSQL<string?>("SELECT HES FROM DEED_DTL WHERE HES = '" + _HES_ + "'").ToList();
+                                if (RST.Count > 0)
                                 {
-                                    var RST = dbms.DoGetDataSQL<string?>("SELECT HES FROM DEED_DTL WHERE HES = '" + _HES_ + "'").ToList();
-                                    if (RST.Count > 0)
-                                    {
-                                        new Msgwin(false, " اين تفصيلي داراي گردش ميباشد و شما نميتوانيد براي آن تفصيلي بالاتر تعريف كنيد در صورت لزوم ابتدا گردشهاي اين حساب را به يك حساب موقت منتقل كنيد و سپس تفصيلي تعريف كنيد").ShowDialog();
-                                        return;
-                                    }
+                                    new Msgwin(false, " اين تفصيلي داراي گردش ميباشد و شما نميتوانيد براي آن تفصيلي بالاتر تعريف كنيد در صورت لزوم ابتدا گردشهاي اين حساب را به يك حساب موقت منتقل كنيد و سپس تفصيلي تعريف كنيد").ShowDialog();
+                                    return;
                                 }
 
                                 new TDETA_HES_SHEET2((int)Row.N_KOL, (int)Row.NUMBER, (int)Row.TNUMBER).Show(); //تفضیلی سطح 2
