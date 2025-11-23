@@ -832,7 +832,7 @@ namespace AUTO_BAZ.Functions
             {
                 foreach (var item in rst3)
                 {
-                    GETTAF3(rst3.Select(x => x.HES).FirstOrDefault(), ref TKOL, ref TMOIN, ref TTAF, ref TTAF2, ref TTAF3, ref TTAF4);
+                    GETTAF3(item.HES, ref TKOL, ref TMOIN, ref TTAF, ref TTAF2, ref TTAF3, ref TTAF4);
                     GETTAF3(HES, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
                     if (TKOL == HKOL)
                     {
@@ -884,7 +884,7 @@ namespace AUTO_BAZ.Functions
             {
                 foreach (var item in RST2)
                 {
-                    GETTAF3(RST2.Select(x => x.HES).FirstOrDefault(), ref TKOL, ref TMOIN, ref TTAF, ref TTAF2, ref TTAF3, ref TTAF4);
+                    GETTAF3(item.HES, ref TKOL, ref TMOIN, ref TTAF, ref TTAF2, ref TTAF3, ref TTAF4);
                     // TKOL = MGETKOL(rst2.Fields("HES"))
                     // TMOIN = MGETMOIN(rst2.Fields("HES"))
                     // TTAF = MGETTAF(rst2.Fields("HES"))
@@ -3833,7 +3833,8 @@ namespace AUTO_BAZ.Functions
                 if (!Convert.ToBoolean(Baseknow.SAGHF))
                 {
                     MAND = 0d;
-                };////////////
+                }
+                ;////////////
                 var RSTOpen = dbms.DoGetDataSQL<double?>(" SELECT     SUM(MABL) AS smab FROM         dbo.PAY_GETD WHERE     (N_KOL3 IS NULL) AND (N_KOL2 IS NULL) AND (CUST_NO = N'" + HES + "') AND (N_KOL = " + Baseknow.BANKHA + " OR  N_KOL IS NULL)").FirstOrDefault();
                 if (ReferenceEquals(RSTOpen, null))
                 {
@@ -5178,7 +5179,8 @@ namespace AUTO_BAZ.Functions
                     else
                     {
                         max_ns = Convert.ToInt64(rss) + 1;
-                    };
+                    }
+                    ;
                     //Forms["BUN"].Form.Refresh();
                     CreatesanadRet = max_ns;
                     #endregion
@@ -5354,7 +5356,8 @@ namespace AUTO_BAZ.Functions
                     else
                     {
                         JAMF = 0d;
-                    };
+                    }
+                    ;
 
 
                     var jstOpen = dbms.DoGetDataSQL<double?>("SELECT Sum(PAY_GETD.MABL) AS SumOfMABL FROM PAY_GETD WHERE (((PAY_GETD.TAG)=2) AND ((PAY_GETD.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + " ))").ToList();
@@ -5365,7 +5368,8 @@ namespace AUTO_BAZ.Functions
                     else
                     {
                         JAMCH = 0d;
-                    };
+                    }
+                    ;
                     dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE (((DEED_DTL.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + ") AND ((DEED_DTL.TAG)= 13))");
                     if (JAMF + HFRST[HFRST_EOF].MABL_HAZ + HFRST[HFRST_EOF].MBAA - HFRST[HFRST_EOF].TAKHFIF != 0)
                     {
@@ -5487,7 +5491,8 @@ namespace AUTO_BAZ.Functions
 
                         }
                         //jst_sec.MoveNext();
-                    };
+                    }
+                    ;
 
                     //if (Baseknow.SANAT == true || IsNull(Baseknow.SANAT) || Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
                     if (Baseknow.SANAT == true || IsNull(Baseknow.SANAT) || Baseknow.tindata == null || SafeToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
@@ -5666,7 +5671,8 @@ namespace AUTO_BAZ.Functions
                             }
                             //jst_thr.MoveNext();
                         }
-                    };
+                    }
+                    ;
                     if (HFRST[HFRST_EOF].MABL_HAZ != 0)
                     {
                         if (IsNull(HFRST[HFRST_EOF]?.MOIN_HAZ))
@@ -6303,7 +6309,8 @@ namespace AUTO_BAZ.Functions
                                 //SDRST.update();
                             }
                         }
-                    };
+                    }
+                    ;
 
                 });
                 //}
@@ -7561,7 +7568,8 @@ namespace AUTO_BAZ.Functions
                                               نوع : {TAG}");
                     }
 
-                };
+                }
+                ;
 
             });
             //DoCmd.Close(acForm, "GUG");
@@ -8444,7 +8452,8 @@ namespace AUTO_BAZ.Functions
                         //Forms["GUG"]["Text2"] = Forms["GUG"]["Text2"] + "n";
                         //Forms["GUG"].Form.Repaint();
                         //JST.MoveNext();
-                    };
+                    }
+                    ;
                 }
                 else
                 {
@@ -8547,7 +8556,8 @@ namespace AUTO_BAZ.Functions
                         }
 
                     }
-                };
+                }
+                ;
                 var JST2 = dbms.DoGetDataSQL<QRE_BAZ_4>("SELECT  SUM(BED) AS SBED, SUM(BES) AS SBES FROM dbo.DEED_DTL WHERE (N_S = " + max_ns + ") ").ToList();
                 if (JST2.Count > 0)
                 {
@@ -8590,7 +8600,8 @@ namespace AUTO_BAZ.Functions
 			                                                    VALUES ({max_ns}, {Baseknow.AMALKARD} , 99999	,       99999, N'{SHARH_}', N'{hes_}',{B_VAL},{HEDRST[R].NUMBER}, 10)");
                         }
                     }
-                };
+                }
+                ;
                 if (InternalCalling)
                 {
                     auto_run.Dispatcher.Invoke(new Action(() =>
@@ -8686,7 +8697,8 @@ namespace AUTO_BAZ.Functions
                                 dbms.DoExecuteSQL($@"INSERT INTO DEED_DTL(N_S,      HES_K,            HES_M,            HES_T,   hes,     BES,     SHARH,      NUMBER,             MHAZ_NO ,      TAG)
                                                          VALUES ({max_ns},{Baseknow.MOGODIA},{JST[q].ANBAR},{JST[q].CODE},N'{hes_}',{BES_},N'{SHARH_}',{HEDRST[EOF].NUMBER}, {SANAD_NO_VAL} ,11)");
                             }
-                        };
+                        }
+                        ;
                     }
                     else
                     {
@@ -8749,7 +8761,8 @@ namespace AUTO_BAZ.Functions
                             }
                         }
                     }
-                };
+                }
+                ;
 
                 SANAD_NUMBER = max_ns;
 
@@ -9075,7 +9088,8 @@ namespace AUTO_BAZ.Functions
                                                              VALUES ({max_ns}, {Baseknow.CONKAL}, {JST_1[O].COM},{JST_1[O].CODE},N'{_hes}',N'{_SHARH}',{_BES},{HEDRST[ROW].NUMBER} ,9)");
                                 }
 
-                            };
+                            }
+                            ;
 
                             //var JST = dbms.DoGetDataSQL<QRE_BAZ_14>(Operators.ConcatenateObject(Operators.ConcatenateObject("SELECT     IMBIBE_MANF, IMBIBE_SAR, CODE FROM dbo.HEAD_MANF WHERE     (FNUMB = ", Interaction.IIf(IsNull(CHRST[satr].N_KOL), 0, CHRST[satr].N_KOL)), ")"));
                             var JST = dbms.DoGetDataSQL<QRE_BAZ_14>($"SELECT     IMBIBE_MANF, IMBIBE_SAR, CODE FROM dbo.HEAD_MANF WHERE     (FNUMB = {Interaction.IIf(IsNull(CHRST[satr].N_KOL), 0, CHRST[satr].N_KOL)})").ToList();
@@ -9298,7 +9312,8 @@ namespace AUTO_BAZ.Functions
                 else
                 {
                     JAMFKH = 0d;
-                };
+                }
+                ;
                 var JST_2 = dbms.DoGetDataSQL<double?>("SELECT Sum(PAY_GETD.MABL) AS SumOfMABL FROM PAY_GETD WHERE (((PAY_GETD.TAG)=4) AND ((PAY_GETD.NUMBER)= " + HFRST[ROW].NUMBER + " ))").ToList();
                 if (JST_2.Count > 0 && !IsNull(JST_2.FirstOrDefault()))
                 {
@@ -9974,7 +9989,8 @@ namespace AUTO_BAZ.Functions
                 //i = i + 1L;
                 //Forms["GUG"]["Text2"] = "";
                 //});
-            };
+            }
+            ;
             LogWriter.WriteLog("پایان فاکتور برگشت فروش" + DateTime.Now.ToString());
             //DoCmd.Close(acForm, "GUG");
             // DoCmd.Close acForm, "GENSANADFROOSH"
@@ -10032,8 +10048,8 @@ namespace AUTO_BAZ.Functions
             var HFRST = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM dbo.HEAD_LST WHERE (NUMBER BETWEEN " + fnum + " AND " + TNUM + ") AND (TAG = 25)").ToList();
 
             LogWriter.WriteLog("شروع باز سازي از برگشت فروش 2 شماره : " + fnum + " تا فاكتور شماره :" + TNUM + DateTime.Now);
-            //Parallel.For(0, HFRST.Count, HFRST_EOF =>
-            for (int HFRST_EOF = 0; HFRST_EOF < HFRST.Count; HFRST_EOF++) //while (!HFRST.EOF)
+            //for (int HFRST_EOF = 0; HFRST_EOF < HFRST.Count; HFRST_EOF++) //while (!HFRST.EOF) ////Normal loop for i
+            Parallel.For(0, HFRST.Count, HFRST_EOF =>
             {
                 if (InternalCalling)
                 {
@@ -10151,7 +10167,8 @@ namespace AUTO_BAZ.Functions
                 else
                 {
                     JAMF = 0d;
-                };
+                }
+                ;
                 var JST_1 = dbms.DoGetDataSQL<double?>("SELECT Sum(INVO_LST.MABL_K) AS SumOfMABL_K FROM INVO_LST WHERE ((INVO_LST.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + ") AND (TAG = 24) AND (ANBAR = 0)").ToList();
                 if (JST_1.Count > 0 && !IsNull(JST_1.FirstOrDefault()))
                 {
@@ -10160,7 +10177,8 @@ namespace AUTO_BAZ.Functions
                 else
                 {
                     JAMFKH = 0d;
-                };
+                }
+                ;
                 var JST_2 = dbms.DoGetDataSQL<double?>("SELECT Sum(PAY_GETP.MABL) AS SumOfMABL FROM PAY_GETP WHERE (((PAY_GETP.TAG)=24) AND ((PAY_GETP.NUMBER)= " + HFRST[HFRST_EOF].NUMBER + " ))").ToList();
                 if (JST_2.Count > 0 && !IsNull(JST_2.FirstOrDefault()))
                 {
@@ -10169,7 +10187,8 @@ namespace AUTO_BAZ.Functions
                 else
                 {
                     JAMCH = 0d;
-                };
+                }
+                ;
                 TAKHF = 0d;
                 dbms.DoExecuteSQL("DELETE  FROM DEED_DTL WHERE (DEED_DTL.NUMBER = " + HFRST[HFRST_EOF].NUMBER + ") AND (DEED_DTL.TAG= 25 or DEED_DTL.TAG= 25)");
                 //JST.Open("SELECT INVO_LST.MABL_K, INVO_LST.MEGHk, INVO_LST.CODE, INVO_LST.ANBAR, STUF_DEF.NAME, INVO_LST.avrage FROM STUF_DEF INNER JOIN INVO_LST ON (STUF_DEF.CODE = INVO_LST.CODE) AND (STUF_DEF.CODE = INVO_LST.CODE) WHERE (((INVO_LST.NUMBER)=" + HFRST[HFRST_EOF].NUMBER + ") AND ((INVO_LST.TAG)=24)) ", CurrentProject.Connection, adOpenKeyset, adLockOptimistic);
@@ -10616,12 +10635,9 @@ namespace AUTO_BAZ.Functions
                                         ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
                                         ,25)");
 
-                };
-
-             
-
-                //});
-            }
+                }
+            });
+            //} ////normal loop for i
 
             LogWriter.WriteLog("پایان برگشت فروش 2" + DateTime.Now.ToString());
 
@@ -10693,7 +10709,8 @@ namespace AUTO_BAZ.Functions
                 else
                 {
                     JAMF = 0d;
-                };
+                }
+                ;
                 var JST_1 = dbms.DoGetDataSQL<double?>("SELECT Sum(PAY_GETD.MABL) AS SumOfMABL FROM PAY_GETD WHERE (((PAY_GETD.TAG)=14) AND ((PAY_GETD.NUMBER)= " + HEDRST[ROW].NUMBER + " ))").ToList();
                 if (JST_1.Count > 0 && !IsNull(JST_1.FirstOrDefault()))
                 {
@@ -11096,7 +11113,8 @@ namespace AUTO_BAZ.Functions
 
                     SANAD_NUMBER = max_ns;
 
-                };
+                }
+                ;
                 if (!IsNull(HEDRST[HEDRST_EOF].GRD_HES))
                 {
                     double? CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null;
@@ -11243,7 +11261,8 @@ namespace AUTO_BAZ.Functions
                 if (!IsNull(HFRST[ROW].N_S))
                 {
                     dbms.DoExecuteSQL("DELETE FROM DEED_DTL WHERE (((DEED_DTL.N_S)= " + HFRST[ROW].N_S + " ))");
-                };
+                }
+                ;
                 var rst = dbms.DoGetDataSQL<QUERY_MODEL6>(@"SELECT        dbo.CHKREC_H.IDH, dbo.CHRE_LST.N_SERI, dbo.CHRE_LST.BANK, dbo.CHRE_LST.DATE_S, dbo.CHRE_LST.DATE, dbo.CHRE_LST.RADIF, dbo.CHRE_LST.N_MOIN, dbo.CHRE_LST.N_TAF, dbo.CHRE_LST.CRT, 
                                                         dbo.CHRE_LST.UID, dbo.TCOD_BANKS.NAMES, dbo.PAY_GETD.SHOBEH, dbo.PAY_GETD.N_S, dbo.PAY_GETD.MABL, dbo.PAY_GETD.N_KOL, dbo.PAY_GETD.N_MOIN AS N_MOIN_PGD, dbo.PAY_GETD.N_TAF AS N_TAF_PGD, 
                                                         dbo.PAY_GETD.KIND, dbo.PAY_GETD.HES1

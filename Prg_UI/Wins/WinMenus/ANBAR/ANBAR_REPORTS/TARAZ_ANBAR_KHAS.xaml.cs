@@ -1,10 +1,14 @@
 ﻿using Functions;
 using MaterialDesignThemes.Wpf;
+using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Syncfusion.Data;
+using Syncfusion.Data.Extensions;
+using Syncfusion.UI.Xaml.BulletGraph;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
 using System;
@@ -20,13 +24,11 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using static Prg_UI.Functions.CL_LMethods;
-using Syncfusion.Data.Extensions;
-using Syncfusion.UI.Xaml.BulletGraph;
-using Syncfusion.Data;
 
 namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
 {
@@ -132,6 +134,20 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            #region SecuritCheck
+            try
+            {
+                string Formname = "LSTRAZA";
+                var helper = new WindowInteropHelper(this);
+                helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                                       // 2. Run Security:
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            #endregion
+
             TARAZ_KHAS_DATA?.Clear();
 
             var MasterHead = dbms.DoGetDataSQL<MDS>($"{SQL_DATA}").ToList();
