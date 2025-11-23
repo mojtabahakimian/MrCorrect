@@ -3217,6 +3217,9 @@ namespace Prg_UI.Functions
                 Traverse(child);
             }
         }
+        
+        // Flag برای جلوگیری از فراخوانی مجدد OverrideMetadata
+        private static bool _isScrollViewerMetadataOverridden = false;
         public static void OptimizeForRemoteDesktop(DependencyObject obj)
         {
             if (GeneralOptionManager.IsRDPMode) //System.Windows.Forms.SystemInformation.TerminalServerSession;
@@ -3240,18 +3243,29 @@ namespace Prg_UI.Functions
                 // Use a faster text rendering mode
                 TextOptions.SetTextFormattingMode(obj, TextFormattingMode.Display);
 
-                // Apply to all ScrollViewer instances
-                ScrollViewer.CanContentScrollProperty.OverrideMetadata(
-                    typeof(ScrollViewer), new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.Inherits,
-                        (d, e) =>
-                        {
-                            if (d is ScrollViewer scrollViewer)
+                // Apply to all ScrollViewer instances (فقط یک بار)
+                if (!_isScrollViewerMetadataOverridden)
+                {
+                    ScrollViewer.CanContentScrollProperty.OverrideMetadata(
+
+                        typeof(ScrollViewer), new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.Inherits,
+
+                            (d, e) =>
                             {
-                                scrollViewer.IsDeferredScrollingEnabled = true;
-                                scrollViewer.CanContentScroll = true;
-                                scrollViewer.PanningMode = PanningMode.VerticalOnly;
-                            }
-                        }));
+                                if (d is ScrollViewer scrollViewer)
+                                {
+
+                                    scrollViewer.IsDeferredScrollingEnabled = true;
+
+                                    scrollViewer.CanContentScroll = true;
+
+                                    scrollViewer.PanningMode = PanningMode.VerticalOnly;
+                                }
+
+                            }));
+
+                    _isScrollViewerMetadataOverridden = true;
+                }
 
                 if (obj is Window THEWIN)
                 {
@@ -3261,6 +3275,8 @@ namespace Prg_UI.Functions
                 }
 
                 Traverse(obj);
+
+                RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
             }
         }
     }

@@ -1,39 +1,40 @@
 ﻿using Functions;
 using MaterialDesignThemes.Wpf;
 using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.Generaly;
+using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Syncfusion.Data;
+using Syncfusion.Data.Extensions;
+using Syncfusion.UI.Xaml.BulletGraph;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Wins.WinMenus.ANBAR;
-using static Prg_UI.Functions.CL_LMethods;
-using Syncfusion.Data.Extensions;
-using Syncfusion.UI.Xaml.BulletGraph;
-using Prg_Proccessy.MODELS;
-using Syncfusion.Data;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
-using System.Diagnostics;
-using System.Globalization;
-using System.Reflection;
-using System.Threading;
-using Prg_Proccessy.Generaly;
+using static Prg_UI.Functions.CL_LMethods;
 namespace Prg_UI.Wins.WinMenus.Checkha
 {
 
@@ -166,9 +167,24 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            FILL_ALL_COMBOBOXES();
+            #region SecuritCheck
+            try
+            {
+                //
+                string Formname = "CHKPLIST";
+                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                // 2. Run Security:
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            if (!this.IsLoaded) { this.Close(); return; }
+            #endregion
 
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
+            
+            FILL_ALL_COMBOBOXES();
 
             CHRE_PLISTS_DATA?.Clear();
 
@@ -476,6 +492,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         {
             try
             {
+                universControl.PopNotifyShowUp($" ... در حال آماده سازی فایل اکسل این عملیات مدتی طول خواهد کشید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 4);
                 await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "ExportedExcel");
             }
             catch (Exception)

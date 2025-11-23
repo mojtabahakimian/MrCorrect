@@ -33,6 +33,7 @@ using Wins.WinMenus.ANBAR;
 using Wins.WinMenus.Checkha;
 using Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.KHARID_FORUSH;
+using Wins.WinMenus.SANATI;
 using Wins.WinMenus.Taarif;
 using Wins.WinSetting;
 using static Functions.SMSService.SmsServiceFactory;
@@ -356,18 +357,18 @@ namespace Prg_UI.Wins
             Baseknow.mrcorrect = true;
 
             //Baseknow.USERCOD = 139; Baseknow.UUSER = "negar sadeghi";
-            //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
             //Baseknow.USERCOD = 132; Baseknow.UUSER = "Prima Chopan";    
             //Baseknow.USERCOD = 112; Baseknow.UUSER = "Mr.Tashakori";
             //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
             //Baseknow.USERCOD = 116; Baseknow.UUSER = "Mr.Salmani";
             //Baseknow.USERCOD = 102; Baseknow.UUSER = "mina mehrnia";
-            //Baseknow.USERCOD = 108; Baseknow.UUSER = "modir-mali";
             //Baseknow.USERCOD = 167; Baseknow.UUSER = "Mr nikonahad";
             //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
             //Baseknow.USERCOD = 86; Baseknow.UUSER = "آقاي سجاد راستي";
-            //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
             //Baseknow.USERCOD = 174; Baseknow.UUSER = "Miss yeganeh Karbakhsh";
+            //Baseknow.USERCOD = 108; Baseknow.UUSER = "modir-mali";
+            //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
+            //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
             Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
 
             //CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
@@ -377,8 +378,7 @@ namespace Prg_UI.Wins
 
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
 
-            new WinBase().Show();
-
+            //new WinBase().Show();
             //new HEAD_LST_BRFR(2030d).Show();
 
             //new WIN_OPTIONS().Show();
@@ -386,9 +386,8 @@ namespace Prg_UI.Wins
 
             //new WIN_OPTIONS().Show();
             //new HEAD_LST_PISHFROOSH2().Show();
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "2426,2439");
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "9520,9509"); //اتکا
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHKE_DLIST_KOLCHECKD, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT, this);

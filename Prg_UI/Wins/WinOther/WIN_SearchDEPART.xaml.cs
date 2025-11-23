@@ -2,6 +2,7 @@
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
+using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -107,7 +108,7 @@ namespace Wins.WinOther
             //var RST = dbms.DoGetDataSQL<DEPART_MODEL>($"SELECT * FROM dbo.DEPART WHERE (({shart}) OR ({shart2})) ").ToList();
 
             DEPART_SUB.ItemsSource = RST;
-            
+
             DEPART_SUB.Focus();
             DEPART_SUB.SelectedIndex = 0;
         }
@@ -138,10 +139,20 @@ namespace Wins.WinOther
                 switch (THEWIN)
                 {
                     case HEAD_LST_PISHFROOSH2:
-                        (THEWIN as HEAD_LST_PISHFROOSH2).DEPATMAN.SelectedValue = ROW.DEPATMAN;
-                        (THEWIN as HEAD_LST_PISHFROOSH2).DEPATMAN.Items.Refresh();
+                        if (THEWIN is HEAD_LST_PISHFROOSH2 Pishfactor)
+                        {
+                            Pishfactor.DEPATMAN.SelectedValue = ROW.DEPATMAN;
+                            Pishfactor.DEPATMAN.Items.Refresh();
+                        }
                         break;
 
+                    case HEAD_LST_FROOSH22:
+                        if (THEWIN is HEAD_LST_FROOSH22 FactorForoush)
+                        {
+                            FactorForoush.DEPATMAN.SelectedValue = ROW.DEPATMAN;
+                            FactorForoush.DEPATMAN.Items.Refresh();
+                        }
+                        break;
                     default: break;
                 }
                 this.Close();

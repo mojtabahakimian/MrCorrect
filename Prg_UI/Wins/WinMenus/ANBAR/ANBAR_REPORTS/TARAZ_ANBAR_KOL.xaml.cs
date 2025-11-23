@@ -1,11 +1,14 @@
 ﻿using Functions;
 using MaterialDesignThemes.Wpf;
+using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Syncfusion.Data;
+using Syncfusion.Data;
+using Syncfusion.UI.Xaml.BulletGraph;
 using Syncfusion.UI.Xaml.BulletGraph;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
@@ -22,12 +25,11 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using static Prg_UI.Functions.CL_LMethods;
-using Syncfusion.UI.Xaml.BulletGraph;
-using Syncfusion.Data;
 
 namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
 {
@@ -121,6 +123,21 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            #region SecuritCheck
+            try
+            {   
+                //لیست تراز موجودی کل انبارها
+                string Formname = "LSTRAZ";
+                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                // 2. Run Security:
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            if (!this.IsLoaded) { this.Close(); return; }
+            #endregion
+
             TARAZ_KOL_DATA?.Clear();
 
             var MasterHead = dbms.DoGetDataSQL<MDS>($"SELECT * FROM TARAZ_ANBAR_KOL").ToList();
@@ -454,6 +471,7 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         {
             try
             {
+                universControl.PopNotifyShowUp($" ... در حال اماده سازی فایل اکسل این عملیات مدتی طول خواهد کشید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 4);
                 await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "ExportedExcel");
             }
             catch (Exception)

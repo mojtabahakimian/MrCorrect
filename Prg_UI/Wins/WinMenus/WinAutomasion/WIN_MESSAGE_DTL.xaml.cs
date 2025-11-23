@@ -444,6 +444,7 @@ namespace Wins.WinMenus.WinAutomasion
         {
             try
             {
+                universControl.PopNotifyShowUp($" ... در حال آماده سازی فایل اکسل این عملیات مدتی طول خواهد کشید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 4);
                 await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "ExportedExcel");
             }
             catch (Exception)
@@ -688,40 +689,69 @@ namespace Wins.WinMenus.WinAutomasion
         [Obsolete]
         private void SYNCFUSION_DG_QueryRowHeight(object sender, QueryRowHeightEventArgs e)
         {
+            if (sender is not SfDataGrid dataGrid || dataGrid.View == null)
+            {
+                return;
+            }
+
             var args = e;
 
-            if (args.RowIndex > 0) // Avoid header row
+            try
             {
-                //if (this.SYNCFUSION_DG.GridColumnSizer.GetAutoRowHeight(e.RowIndex, gridRowResizingOptions, out double height))
-                //{
-                //    if (height < SYNCFUSION_DG.RowHeight)
-                //    {
-                //        height = SYNCFUSION_DG.RowHeight + 10;
-                //    }
-                //    e.Height = height;
-                //    e.Handled = true;
-                //}
-                //return;
-                var dataRow = SYNCFUSION_DG.View.Records[args.RowIndex - 1].Data;
-                if (dataRow is MESAGEP model)
+                if (args.RowIndex > 0) // Avoid header row
                 {
-                    var text = model.PAYAM; // Replace 'PAYAM' with the property name
-                    if (!string.IsNullOrEmpty(text))
-                    {
-                        // Measure the height based on text size
-                        var formattedText = new FormattedText(
-                            text,
-                            CultureInfo.CurrentCulture,
-                            FlowDirection.RightToLeft,
-                            new Typeface("IRANYekanFN"),  // Replace with your font
-                            12, // Replace with your font size
-                            Brushes.Black);
+                    //if (this.SYNCFUSION_DG.GridColumnSizer.GetAutoRowHeight(e.RowIndex, gridRowResizingOptions, out double height))
+                    //{
+                    //    if (height < SYNCFUSION_DG.RowHeight)
+                    //    {
+                    //        height = SYNCFUSION_DG.RowHeight + 10;
+                    //    }
+                    //    e.Height = height;
+                    //    e.Handled = true;
+                    //}
+                    //return;
+                    // Safely resolve the record index           
 
-                        args.Height = Math.Max(args.Height, formattedText.Height + 20); // Add padding
-                        args.Handled = true;
+                    // Add null and bounds checks to prevent NullReferenceException
+                    if (SYNCFUSION_DG?.View?.Records == null || args.RowIndex - 1 >= SYNCFUSION_DG.View.Records.Count || args.RowIndex - 1 < 0)
+                    {
+                        return;
+                    }
+
+                    var recordIndex = dataGrid.ResolveToRecordIndex(args.RowIndex);
+                    if (recordIndex < 0 || recordIndex >= dataGrid.View.Records.Count)
+                    {
+                        return;
+                    }
+
+                    var recordEntry = dataGrid.View.Records.GetItemAt(recordIndex);
+                    if (recordEntry == null)
+                    {
+                        return;
+                    }
+
+                    var dataRow = SYNCFUSION_DG.View.Records[args.RowIndex - 1].Data;
+                    if (dataRow is MESAGEP model)
+                    {
+                        var text = model.PAYAM; // Replace 'PAYAM' with the property name
+                        if (!string.IsNullOrEmpty(text))
+                        {
+                            // Measure the height based on text size
+                            var formattedText = new FormattedText(
+                                text,
+                                CultureInfo.CurrentCulture,
+                                FlowDirection.RightToLeft,
+                                new Typeface("IRANYekanFN"),  // Replace with your font
+                                12, // Replace with your font size
+                                Brushes.Black);
+
+                            args.Height = Math.Max(args.Height, formattedText.Height + 20); // Add padding
+                            args.Handled = true;
+                        }
                     }
                 }
             }
+            catch { }
         }
     }
 }

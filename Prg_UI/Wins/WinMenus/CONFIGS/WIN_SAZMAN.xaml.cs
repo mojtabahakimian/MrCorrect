@@ -990,6 +990,9 @@ namespace Wins.WinMenus.CONFIGS
                                  MEMORYID = @MEMORYID, MEMORYIDsand = @MEMORYIDsand";
                 dbms.DoExecuteSQL(sqlmoadian, moadianparameters);
                 #endregion
+
+
+                try { Baseknow.GetInitTheApp(); } catch { } //Refresh Baseknow Data
             }
             catch (Exception ex)
             {

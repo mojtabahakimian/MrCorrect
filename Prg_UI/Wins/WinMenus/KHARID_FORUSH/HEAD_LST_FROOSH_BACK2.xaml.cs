@@ -322,9 +322,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
        };
         }
         #endregion
-
-
-
         public long? CURRENT_ROW_INDEX { get; set; } = 0;
         public bool ChangeIsHappend { get; private set; } = false;
 
@@ -427,7 +424,17 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 MABL_HAZ.IsReadOnly = !ican; //خدمات
                 MBAA.IsReadOnly = !ican; //مبلغ مالیات
                 PAY_GETP_SUB.IsReadOnly = !ican; //ثبت چک پشت فاکتور
-                VISITOR_DTL_SUB.IsReadOnly = !ican; //پورسانت پشت فاکتور
+
+                //پورسانت پشت فاکتور
+                bool AllowedToSavePursantVisitor = CL_HESABDARI.LETSGO("FRMOST"); //ثبت پورسانت ویزیتور
+                if (AllowedToSavePursantVisitor)
+                {
+                    VISITOR_DTL_SUB.IsReadOnly = !ican;
+                }
+                else
+                {
+                    VISITOR_DTL_SUB.IsReadOnly = true;
+                }
 
                 MOIN_HAZ.IsEnabled = ican; CMB_MOIN_HAZ.IsEnabled = ican; //معین خدمات
                 HMBAA.IsEnabled = ican; CMB_HMBAA.IsEnabled = ican; //معین مالیات
@@ -464,7 +471,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             FILL_ALL_COMBOBOXES();
 
             string WhereCondition = FTAG > 0 ? $" WHERE (dbo.HEAD_LST.TAG = {FTAG}) " : "  ";
-            WhereCondition = CL_LMethods.GetRestrictedSqlQuery(FTAG, WhereCondition);
+            _restrictionInfo = CL_LMethods.GetRestrictedSqlQueryWithDetails(FTAG, WhereCondition);
+            WhereCondition = _restrictionInfo.WhereClause;
 
             if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
             {
@@ -920,17 +928,51 @@ namespace Wins.WinMenus.KHARID_FORUSH
             SecurityAllCheck();
         }
 
+        private CL_LMethods.RestrictionInfo _restrictionInfo;
+        private string GetAccessDeniedMessage()
+        {
+            if (_restrictionInfo?.RestrictionMessages?.Any() == true)
+            {
+                // ایجاد لیست محدودیت‌ها
+                var restrictions = string.Join("، ", _restrictionInfo.RestrictionMessages);
+
+                return $"دسترسی به شماره «{_navigationManager.NUMBER_TO_OPEN}» امکان‌پذیر نیست. " +
+                    $"به آخرین شماره مجاز هدایت خواهید شد. (محدودیت: {restrictions})";
+            }
+
+            return $"دسترسی به شماره «{_navigationManager.NUMBER_TO_OPEN}» امکان‌پذیر نیست. " +
+                $"شما به آخرین شماره مجاز هدایت خواهید شد.";
+        }
+        private void ShowMissingOrRestrictedMessage()
+        {
+            if (_navigationManager?.NUMBER_TO_OPEN == null)
+            {
+                return;
+            }
+
+            double requestedNumber = Convert.ToDouble(_navigationManager.NUMBER_TO_OPEN);
+            bool recordExists = dbms.DoGetDataSQL<double?>($"SELECT TOP 1 NUMBER FROM HEAD_LST WHERE NUMBER = {requestedNumber} AND TAG = {FTAG}").FirstOrDefault() != null;
+            string message = recordExists ? GetAccessDeniedMessage() : "چنین شماره ای وجود ندارد";
+            new Msgwin(false, message).ShowDialog();
+            _navigationManager.ClearNumberToOpen();
+        }
         private void OnCurrentRecordChanged(HEAD_LST HEADER_FAC)
         {
             if (_navigationManager.IsNewRecord)
             {
                 ClearFreshNew(); //Form_Current(); //should be in this ClearFreshAll(); method too at the end
+                if (_navigationManager.NUMBER_TO_OPEN != null)
+                {
+                    ShowMissingOrRestrictedMessage();
+                    return;
+                }
             }
             else if (HEADER_FAC == null)
             {
                 if (_navigationManager.NUMBER_TO_OPEN != null)
                 {
-                    new Msgwin(false, "چنین شماره ای وجود ندارد").ShowDialog();
+                    //new Msgwin(false, "چنین شماره ای وجود ندارد").ShowDialog();
+                    ShowMissingOrRestrictedMessage();
                     return;
                 }
             }

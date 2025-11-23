@@ -1,17 +1,19 @@
 ﻿using MaterialDesignThemes.Wpf;
+using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.Generaly;
+using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
+using Prg_UI.Functions;
 using Prg_UI.UiTools;
 using Stimulsoft.Base;
+using Stimulsoft.Report;
 using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
-using Stimulsoft.Report;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
-using Prg_Proccessy.MODELS;
-using Prg_UI.Functions;
-using System.Linq;
+using System.Windows.Interop;
 
 namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 {
@@ -134,6 +136,21 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            #region SecuritCheck
+            try
+            {
+                //
+                string Formname = "FGROO";
+                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                // 2. Run Security:
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            if (!this.IsLoaded) { this.Close(); return; }
+            #endregion
+
             Fill_ComboBoxes();
             SNDNUM1.Focus();
 

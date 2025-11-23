@@ -1,5 +1,6 @@
 ﻿using Functions;
 using MaterialDesignThemes.Wpf;
+using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
@@ -23,6 +24,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using static Prg_UI.Functions.CL_LMethods;
 
 namespace Wins.WinMenus.HESABDARI
@@ -100,6 +102,25 @@ namespace Wins.WinMenus.HESABDARI
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            #region SecuritCheck
+            try
+            {
+                string Formname = "BEDBES";  //لیست بدهکاران و بستانکاران              
+                if (IsCTRLF9) //BEDBESM	لیست بدهکاران و بستانکاران محدود شده 
+                {
+                    Formname = "BEDBESM";
+                }
+                //
+                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                // 2. Run Security:
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            if (!this.IsLoaded) { this.Close(); return; }
+            #endregion
+
             FACTOR_DATA?.Clear();
             System.Collections.Generic.List<Q_BEDEHBESTANH_MAIN> MasterHead;
 
@@ -450,6 +471,7 @@ namespace Wins.WinMenus.HESABDARI
         {
             try
             {
+                universControl.PopNotifyShowUp($" ... در حال اماده سازی فایل اکسل این عملیات مدتی طول خواهد کشید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 4);
                 await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "ExportedExcel");
             }
             catch (Exception)

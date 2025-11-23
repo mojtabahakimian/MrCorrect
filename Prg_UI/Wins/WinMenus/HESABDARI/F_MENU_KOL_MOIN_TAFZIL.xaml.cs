@@ -107,6 +107,24 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 return;
             }
 
+            if (CL_HESABDARI.ISTAF(Combo34.SelectedValue.ToString()))
+            {
+                Msgwin msgwin = new Msgwin(false, "حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!");
+                msgwin.ShowDialog();
+                return;
+            }
+
+            if (CL_HESABDARI.BLOCKEDMK(this.Combo34.SelectedValue.ToString()))
+            {
+                Msgwin msgwin = new Msgwin(false, "حساب مورد نظر مسدود مي باشد!");
+                msgwin.ShowDialog();
+                if (sender is null)
+                {
+                    this.Close();
+                }
+                return;
+            }
+
             //double KOL = default, MOIN = default, taf = default, TAF2 = default, taf3 = default, taf4 = default;
             double? KOL = null, MOIN = null, taf = null, TAF2 = null, taf3 = null, taf4 = null;
             if (!string.IsNullOrEmpty(this.Combo34.SelectedValue.ToStringNullSafe()))
@@ -182,16 +200,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         break;
                     }
             }
-            if (CL_HESABDARI.BLOCKEDMK(this.Combo34.SelectedValue.ToString()))
-            {
-                Msgwin msgwin = new Msgwin(false, "حساب مورد نظر مسدود مي باشد!");
-                msgwin.ShowDialog();
-                if (sender is null)
-                {
-                    this.Close();
-                }
-                return;
-            }
+        
 
             try
             {

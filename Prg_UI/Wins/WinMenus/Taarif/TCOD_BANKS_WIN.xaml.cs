@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 
 namespace Wins.WinMenus.Taarif
 {
@@ -78,6 +79,21 @@ namespace Wins.WinMenus.Taarif
         UniversControl universControl = new UniversControl();
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            #region SecuritCheck
+            try
+            {
+                //
+                string Formname = "BANKS";
+                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                // 2. Run Security:
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            if (!this.IsLoaded) { this.Close(); return; }
+            #endregion
+
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
             ReGetData();
         }

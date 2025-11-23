@@ -2939,7 +2939,6 @@ namespace Wins.WinMenus.SANATI
             }
         }
 
-
         private void GetCurrentMogudi()
         {
             _ = Task.Run(() =>
@@ -2965,20 +2964,21 @@ namespace Wins.WinMenus.SANATI
                 }
 
                 var (_ErrMsg_, _Msg_, _KalaInfo_) = IVM.GetKalaMogudi(dbms,
-                 new List<INVO_LST_FACTOR22>
-                 {
-                       new INVO_LST_FACTOR22
-                       {
-                           ANBAR = currentRow.ANBAR,
-                           CODE = currentRow.CODE,
-                           MEGHk = currentRow.MEGHk
-                       }
-                 });
+                new List<INVO_LST_FACTOR22>
+                {
+                      new INVO_LST_FACTOR22
+                      {
+                          ANBAR = currentRow.ANBAR,
+                          CODE = currentRow.CODE,
+                          MEGHk = currentRow.MEGHk
+                      }
+                });
 
                 this.Dispatcher.Invoke(new Action(() =>
                 {
                     MOGUDI.Text = _KalaInfo_?.FirstOrDefault()?.CURRENT_MOGUDI.ToStringNullSafe();
                 }));
+
                 try
                 {
                 }
@@ -2993,6 +2993,68 @@ namespace Wins.WinMenus.SANATI
             });
         }
 
+        private void CUST_NO_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            // بررسی کلید میانبر: Ctrl + '
+            if ((e.Key == Key.OemQuotes || e.Key == Key.Oem7) && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                if (_navigationManager == null)
+                {
+                    return;
+                }
 
+                if (_navigationManager.CurrentRecordIndex > 0)
+                {
+                    // اگر مقداری از قبل انتخاب شده، تاییدیه بگیرید
+                    if (CUST_NO.SelectedValue != null)
+                    {
+                        Msgwin msgwin = new Msgwin(true, "آیا از اعمال نام مشتری قبلی برای این رکورد قبلی مطمئن هستید؟");
+                        msgwin.ShowDialog();
+                        if (msgwin.DialogResult == false)
+                        {
+                            e.Handled = true;
+                            return;
+                        }
+                    }
+
+                    var previousRecord = _navigationManager.RecordsData[_navigationManager.CurrentRecordIndex - 1];
+                    if (previousRecord != null && !string.IsNullOrEmpty(previousRecord.CUST_NO))
+                    {
+                        string sql = "SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = @Hes";
+                        var data = dbms.DoGetDataSQL<CUST_HESAB>(sql, new { Hes = previousRecord.CUST_NO }).FirstOrDefault();
+
+                        if (data != null && !string.IsNullOrEmpty(data.hes))
+                        {
+                            string thevalue = data.hes;
+
+                            if (CUST_NO.ItemsSource == null)
+                            {
+                                CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
+                            }
+
+                            // کست کردن ایمن به لیست جنریک
+                            var currentList = CUST_NO.ItemsSource as IList<Custom_CUST_HESAB>;
+
+                            if (currentList != null)
+                            {
+                                // اگر آیتم در لیست دراپ‌داون وجود ندارد، آن را اضافه کن
+                                if (!currentList.Any(item => item?.hes == thevalue))
+                                {
+                                    currentList.Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
+
+                                    CUST_NO.Items.Refresh();
+                                }
+
+                                // انتخاب آیتم
+                                CUST_NO.SelectedValue = null; // ریست کردن برای اطمینان از تغییر (در برخی موارد خاص WPF)
+                                CUST_NO.SelectedValue = thevalue;
+                            }
+                        }
+                    }
+                }
+                // جلوگیری از تایپ شدن کاراکتر ' در تکست باکس
+                e.Handled = true;
+            }
+        }
     }
 }

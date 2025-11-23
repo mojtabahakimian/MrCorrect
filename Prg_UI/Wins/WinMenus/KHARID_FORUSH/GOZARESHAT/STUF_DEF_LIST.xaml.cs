@@ -23,6 +23,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
@@ -124,6 +125,21 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            #region SecuritCheck
+            try
+            {
+                //
+                string Formname = "STUFLIST";
+                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                // 2. Run Security:
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            if (!this.IsLoaded) { this.Close(); return; }
+            #endregion
+
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
             STUF_DEF_DATA_MODEL?.Clear();
@@ -431,6 +447,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
         {
             try
             {
+                universControl.PopNotifyShowUp($" ... در حال آماده سازی فایل اکسل این عملیات مدتی طول خواهد کشید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 4);
                 await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "ExportedExcel");
             }
             catch (Exception)

@@ -1052,10 +1052,10 @@ namespace Wins.WinMenus.Taarif
                         var Row = btn.Tag as TDETA_HES3;
                         if (Row != null && Row?.IDD > 0)
                         {
-                            if (Row?.NUMBER != null)
+                            if (Row?.NUMBER != null && Row.TNUMBER3 != null)
                             {
                                 var _HES_ = Row.N_KOL + "-" + Row.NUMBER + "-" + Row.TNUMBER + "-" + Row.TNUMBER2 + "-" + Row.TNUMBER3;
-                                if (CL_HESABDARI.ISTAF(_HES_))
+                                if (!string.IsNullOrWhiteSpace(_HES_))
                                 {
                                     var RST = dbms.DoGetDataSQL<string?>("SELECT HES FROM DEED_DTL WHERE HES = '" + _HES_ + "'").ToList();
                                     if (RST.Count > 0)
@@ -1134,6 +1134,7 @@ namespace Wins.WinMenus.Taarif
 
             try
             {
+                universControl.PopNotifyShowUp($" ... در حال آماده سازی فایل اکسل این عملیات مدتی طول خواهد کشید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 4);
                 await UniversalExcelExporter.ExportToExcelAsync(TDETA_HES3_DATA, "DGExportedExcel");
             }
             catch (Exception)

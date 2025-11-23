@@ -19,6 +19,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 using Wins.ThePages;
 using static Wins.WinOther.SEARCHMENIU_WIN;
@@ -56,6 +57,7 @@ namespace Prg_UI.Wins
 
             if (GeneralOptionManager.IsRDPMode)
             {
+                RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
                 CL_LMethods.OptimizeForRemoteDesktop(this);
 
                 BTN_INFO.Text = Baseknow.YEA.ToString() + " " + "RDP";
@@ -1428,7 +1430,7 @@ namespace Prg_UI.Wins
                 // 9. نمایش پنجره لاگین
                 loginWindow.ShowDialog();
             }
-        }     
+        }
         /// <summary>
         /// بستن تمام پنجره‌های باز به جز WinBase
         /// </summary>
@@ -1488,7 +1490,7 @@ namespace Prg_UI.Wins
                 // در صورت هر گونه خطا، ادامه بده
             }
         }
-    
+
 
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Functions;
 using MaterialDesignThemes.Wpf;
+using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
@@ -22,6 +23,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
@@ -107,6 +109,22 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            #region SecuritCheck
+            try
+            {
+                //لیست اسنادی که تراز نیستند
+                string Formname = "MOGH";
+                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                // 2. Run Security:
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            if (!this.IsLoaded) { this.Close(); return; }
+            #endregion
+
+
             ADAMTARAZ_DATA_MODEL?.Clear();
 
             var MasterHead = dbms.DoGetDataSQL<AD>(@$"SELECT * FROM ADAMTARAZ").ToList();
@@ -412,6 +430,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         {
             try
             {
+                universControl.PopNotifyShowUp($" ... در حال آماده سازی فایل اکسل این عملیات مدتی طول خواهد کشید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 4);
                 await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "ExportedExcel");
             }
             catch (Exception)

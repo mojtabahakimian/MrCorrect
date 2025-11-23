@@ -1,47 +1,48 @@
 ﻿using Microsoft.VisualBasic;
+using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.Wins.WinMenus.ANBAR;
+using Prg_UI.Wins.WinMenus.BARNAME_RIZI;
+using Prg_UI.Wins.WinMenus.Checkha;
+using Prg_UI.Wins.WinMenus.CONFIGS;
+using Prg_UI.Wins.WinMenus.CRM;
 using Prg_UI.Wins.WinMenus.HESABDARI;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
+using Prg_UI.Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
+using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
+using Prg_UI.Wins.WinMenus.SANATI;
+using Prg_UI.Wins.WinMenus.Taarif;
 using Prg_UI.Wins.WinMenus.WinAutomasion;
 using Prg_UI.Wins.WinMenus.WinDEFAULT;
 using Prg_UI.Wins.WinSetting;
+using Rpts;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Dictionary;
 using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
 using System.Windows;
+using System.Windows.Interop;
 using Wins.WinMenus.ANBAR;
 using Wins.WinMenus.ANBAR.ANBAR_REPORTS;
 using Wins.WinMenus.Checkha;
+using Wins.WinMenus.CONFIGS;
 using Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.HESABDARI.GOZARESHAT;
 using Wins.WinMenus.KHARID_FORUSH;
 using Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
 using Wins.WinMenus.SALARY;
-using Wins.WinMenus.Taarif;
-using Wins.WinMenus.CONFIGS;
 using Wins.WinMenus.SANATI;
-using Stimulsoft.Report.Dictionary;
-using Stimulsoft.Report;
-using System.Reflection;
+using Wins.WinMenus.Taarif;
 using Wins.WinSetting;
-using Rpts;
-using Prg_Proccessy.FUNCTIONS;
-using Prg_UI.Wins.WinMenus.CONFIGS;
-using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
-using Prg_UI.Wins.WinMenus.BARNAME_RIZI;
-using Prg_UI.Wins.WinMenus.SANATI;
-using Prg_UI.Wins.WinMenus.Taarif;
-using System.Threading;
-using Prg_UI.Wins.WinMenus.CRM;
-using Prg_UI.Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
-using Prg_UI.Wins.WinMenus.Checkha;
 using static Prg_UI.Functions.CL_LMethods;
-using System.Diagnostics;
 
 namespace Functions
 {
@@ -1148,13 +1149,22 @@ namespace Functions
 
                 case WinNameType.R_TARAZ_ANBARHA: //گزارش تراز موجودی کل انبار ها
                     {
-                        var report = new StiReport();
-                        var pathreport = Assembly.GetEntryAssembly()?.GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.R_TARAZ_ANBARHA.mrt");
-                        report.Load(pathreport);
-                        string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
-                        report.Dictionary.Databases.Clear();
-                        report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
-                        new WINRPT(report, "گزارش تراز موجودی کل انبار ها").Show();
+                        #region SecuritCheck
+
+                        string Formname = "TARAZ4";
+                        bool AllowedToOpen = CL_HESABDARI.SETSECURITY(default, Formname, default, default, IsNotWindow: true);
+
+                        #endregion
+                        if (AllowedToOpen)
+                        {
+                            var report = new StiReport();
+                            var pathreport = Assembly.GetEntryAssembly()?.GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.R_TARAZ_ANBARHA.mrt");
+                            report.Load(pathreport);
+                            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
+                            report.Dictionary.Databases.Clear();
+                            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
+                            new WINRPT(report, "گزارش تراز موجودی کل انبار ها").Show();
+                        }
                     }
                     break;
 
@@ -1609,8 +1619,21 @@ namespace Functions
 
                 case WinNameType.HEAD_LST_FROOSH_AUTO_DETECT: // فاکتور فروش (Auto-Detect)
                     {
-                        var MostaghimDastrasi = CL_HESABDARI.LETSGO("FRMOST");                // دسترسی فاکتور مستقیم
-                        var MostaghimAmalShavad = Strings.Mid(Baseknow.OPTIONSS, 53, 1) == "5"; // گزینه "فروش مستقیم" در تنظیمات
+                        //فاکتور فروش مستقیم : نیازی به انتخاب حواله نیست , حواله خودکار توسط فاکتور سینک میشود : IsDirectFactor
+                        //فاکتور غیر مستقیم : کاربر باید حتما حواله ثبت شده را انتخاب
+
+                        var IsDirectFactorActiveatall = false; // فاكتور فروش مستقيم عمل شود : تنظیمات کلی
+                        if (Strings.Mid(Baseknow.OPTIONSS, 18, 1) == "5")
+                        {
+                            // Check18 تیک خورده است
+                            //تیک شماره 8 در تنظیمات بیشتر
+                            IsDirectFactorActiveatall = true;
+                        }
+                        var MostaghimAmalShavad = Strings.Mid(Baseknow.OPTIONSS, 53, 1) == "5"; //فاكتور فروش مستقيم براي هركاربر از تعيين دسترسي انتخاب شود : تنظیمات کلی
+
+                        var MostaghimDastrasi = CL_HESABDARI.LETSGO("FRMOST"); //فاکتور فروش مستقیم فعال شود : دسترسی کاربری
+
+                        var MostaghimHasAccess = CL_HESABDARI.LETSGO("FACTFRMO"); //فاکتور فروش مستقیم : اصلا به این مدل فاکتور دسترسی داشته باشد : دسترسی کاربری
 
                         // Get Parameters: NumbersPair > IsDirect > IsExport > IsFromAutomation
                         string? numbersPair = (_PARAMETERS_.Length > 0) ? _PARAMETERS_[0]?.ToString() : null;
@@ -1620,47 +1643,81 @@ namespace Functions
 
                         bool IsFromPishfactor = (_PARAMETERS_.Length > 4) && Convert.ToBoolean(_PARAMETERS_[4]);
 
-                        if (MostaghimAmalShavad && MostaghimDastrasi) // مستقیم
+                        if (IsDirectFactorActiveatall) //تنظیمات کل : فاکتور فروش مستقیم به طور کلی فعال است
                         {
-                            CL_MenuManager.OpenWinMenu(
-                                CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_DIRECT,
-                                OWNERWIN,
-                                numbersPair,
-                                true,           // 👈 مستقیم
-                                isExporty,      // صادراتی بودن طبق ورودی
-                                fromAutomation,
-                                IsFromPishfactor
-                            );
-                        }
-                        else if (Strings.Mid(Baseknow.OPTIONSS, 18, 1) != "5") // غیر مستقیم
-                        {
-                            if (Baseknow.TKHF >= 2)
+                            if (MostaghimAmalShavad) //حتما از تعیین سطح دسترسی وضعیت فعال بودن و دسترسی آن برای کاربر تعیین شد : دسترسی کاربری
+                            {
+                                if (MostaghimDastrasi) //در تعیین سطح دسترسی فاکتور مستقیم برای این کاربر فعال است : دسترسی کاربری
+                                {
+                                    if (MostaghimHasAccess) //اصلا میتواند فاکتور فروش مستقیم را باز کند : دسترسی کاربری
+                                    {
+                                        CL_MenuManager.OpenWinMenu(
+                                            CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_DIRECT,
+                                            OWNERWIN,
+                                            numbersPair,
+                                            true,
+                                            isExporty,
+                                            fromAutomation,
+                                            IsFromPishfactor
+                                            );
+                                    }
+                                    else
+                                    {
+                                        CL_MenuManager.OpenWinMenu(
+                                            CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE,
+                                            OWNERWIN,
+                                            numbersPair,
+                                            false,          // 👈 غیر مستقیم
+                                            isExporty,
+                                            fromAutomation,
+                                            IsFromPishfactor
+                                        );
+                                    }
+                                }
+                                else
+                                {
+                                    CL_MenuManager.OpenWinMenu(
+                                        CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE,
+                                        OWNERWIN,
+                                        numbersPair,
+                                        false,          // 👈 غیر مستقیم
+                                        isExporty,
+                                        fromAutomation,
+                                        IsFromPishfactor
+                                    );
+                                }
+                            }
+                            else //چون به طور کلی تعیین شده فاکتور فروش غیر مستقیم
                             {
                                 CL_MenuManager.OpenWinMenu(
-                                    CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE,
+                                    CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_DIRECT,
                                     OWNERWIN,
                                     numbersPair,
-                                    false,          // 👈 غیر مستقیم
+                                    true,
                                     isExporty,
                                     fromAutomation,
                                     IsFromPishfactor
-                                );
+                                    );
                             }
-                            // else: هیچ کاری نکن (همان منطق قبلی‌ات)
                         }
                         else
                         {
-                            // پیش‌فرض: مستقیم
                             CL_MenuManager.OpenWinMenu(
-                                CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_DIRECT,
+                                CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE,
                                 OWNERWIN,
                                 numbersPair,
-                                true,
+                                false,          // 👈 غیر مستقیم
                                 isExporty,
                                 fromAutomation,
                                 IsFromPishfactor
                             );
                         }
+
+                        if (Baseknow.TKHF >= 2) //مشخصات سیستم > اسناد و حساب > تخفیفات فاکتور ها >  به ریز کالا یا مصوب عمل شود
+                        {
+                            //Nothing yet to do
+                        }
+
                         break;
                     }
 

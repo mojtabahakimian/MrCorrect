@@ -9,6 +9,7 @@ using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Prg_UI.Wins.WinMenus.HESABDARI;
+using Stimulsoft.Data.Extensions;
 using Syncfusion.Data;
 using Syncfusion.Data.Extensions;
 using Syncfusion.UI.Xaml.BulletGraph;
@@ -22,6 +23,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -112,6 +114,25 @@ namespace Wins.WinMenus.HESABDARI
         UniversControl universControl = new UniversControl();
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+        public string ExtractTreasuryNumber(string description)
+        {
+            if (string.IsNullOrWhiteSpace(description)) return "";
+
+            // تعریف الگو: به دنبال کلمه "شماره" و سپس ارقام بعد از آن می‌گردد
+            // \s+ یعنی یک یا چند فاصله خالی
+            // (\d+) یعنی ارقام را گروه بندی و استخراج کن
+            string pattern = @"شماره\s+(\d+)";
+
+            var match = Regex.Match(description, pattern);
+
+            if (match.Success)
+            {
+                // گروه 1 همان عددی است که در پرانتز (\d+) قرار دارد
+                return match.Groups[1].Value;
+            }
+
+            return ""; // اگر پیدا نشد
+        }
 
         public string WHERE_CONDITION { get; set; } = "";
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -122,10 +143,10 @@ namespace Wins.WinMenus.HESABDARI
 
             HEADSANAD_DATA?.Clear();
             var MasterHead = dbms.DoGetDataSQL<DEED_HED>($"SELECT N_S, DATE_S, SHARH_S, NO_S, ANBAR, N_FACTOR, GHATEI, USER_NAME, base, SGN1, SGN2, SGN3, SGN4, OKF, sgn1usid, sgn2usid, sgn3usid, CRT, UID, BAYEG " +
-                $" FROM dbo.DEED_HED {WHERE_CONDITION}" + $" ORDER BY N_S").ToList();
+                $" FROM dbo.DEED_HED {WHERE_CONDITION}" + $"").ToList(); //ORDER BY N_S
             foreach (var item in MasterHead)
             {
-                HEADSANAD_DATA.Add(item);
+                HEADSANAD_DATA?.Add(item);
             }
 
             CL_LMethods.FocusLastSfDataGridRow(SYNCFUSION_DG);
@@ -145,7 +166,31 @@ namespace Wins.WinMenus.HESABDARI
 
                         if (ROW != null && ROW?.N_S != null)
                         {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this, Convert.ToDouble(ROW.N_S));
+                            if (currentCell?.GridColumn != null && currentCell.GridColumn?.MappingName == "N_S") //اگر فوکوس روی سند بود
+                            {
+                                // اگر شماره سند مقدار ندارد → عبور
+                                if (ROW?.N_S != null || ROW?.N_S > 0)
+                                {
+                                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this, Convert.ToDouble(ROW.N_S));
+                                    return;
+                                }
+                            }
+                            else if (ROW?.NO_S == 5d) //نوع خزانه است
+                            {
+                                var Khazaneh = dbms.DoGetDataSQL<double?>($"SELECT TOP 3 ID FROM dbo.PGET_HED WHERE N_S = {ROW.N_S}").ToList();
+                                if (Khazaneh.Count > 1)
+                                {
+                                    string? KhazanehID = ExtractTreasuryNumber(ROW.SHARH_S.FixPersianChars().Trim());
+                                    if (!string.IsNullOrWhiteSpace(KhazanehID))
+                                    {
+                                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this, Convert.ToDouble(KhazanehID)); //ID
+                                    }
+                                }
+                                else
+                                {
+                                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this, Convert.ToDouble(Khazaneh?.FirstOrDefault().Value)); //ID
+                                }
+                            }
                         }
                     }
                 }
@@ -422,6 +467,7 @@ namespace Wins.WinMenus.HESABDARI
         {
             try
             {
+                universControl.PopNotifyShowUp($" ... در حال آماده سازی فایل اکسل این عملیات مدتی طول خواهد کشید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 4);
                 await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "ExportedExcel");
             }
             catch (Exception)
@@ -668,6 +714,7 @@ namespace Wins.WinMenus.HESABDARI
             }
             try
             {
+                universControl.PopNotifyShowUp($" ... در حال آماده سازی فایل اکسل این عملیات مدتی طول خواهد کشید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 4);
                 await UniversalExcelExporter.ExportToExcelAsync(SANAD_DETAIL, "DGExportedExcel");
             }
             catch (Exception)

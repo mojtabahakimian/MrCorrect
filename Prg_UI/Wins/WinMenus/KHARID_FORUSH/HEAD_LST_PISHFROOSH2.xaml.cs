@@ -6019,7 +6019,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
         private void DEPATMAN_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            GoGheymateUpdator();
+            //GoGheymateUpdator();
         }
 
         private void CUST_NO_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -6065,10 +6065,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         }
                     }
                 }
-
                 e.Handled = true;
             }
-
         }
 
         private void DEPATMAN_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -6091,6 +6089,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (NowIsReady && Baseknow.GHAYM.ToString() == "7")
             {
                 MODAT_PPID_Enter(); //بروز رسانی سورس نحوه پرداخت بر اساس اعلامیه ها
+                GoGheymateUpdator();
             }
         }
 

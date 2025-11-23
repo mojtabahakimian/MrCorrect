@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using MaterialDesignThemes.Wpf;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualBasic;
+using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
@@ -11,9 +12,9 @@ using Prg_UI.Functions;
 using Prg_UI.UiTools;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD;
 using Stimulsoft.Base;
+using Stimulsoft.Report;
 using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
-using Stimulsoft.Report;
 using Syncfusion.Data.Extensions;
 using System;
 using System.Collections.Generic;
@@ -29,8 +30,8 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 {
@@ -133,6 +134,22 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            #region SecuritCheck
+            try
+            {
+                //
+                string Formname = "RDFTTFKMOIN";
+                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                // 2. Run Security:
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            if (!this.IsLoaded) { this.Close(); return; }
+            #endregion
+
+
             I_AM_KOL_MOIN_TAFKIK = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
 
             Fill_ComboBoxes();

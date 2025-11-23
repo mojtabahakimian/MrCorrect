@@ -76,7 +76,7 @@
             <Label Content="کاربر:" Margin="0,14,314,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="30" Height="28" VerticalAlignment="Top"/>
             <Label Content="مسئول شیفت:" Margin="0,51,10,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="70" Height="25" VerticalAlignment="Top"/>
             <Label Content="ملاحظات :" Margin="0,89,31,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="50" Height="25" VerticalAlignment="Top"/>
-            <ComboBox x:Name="CUST_NO" IsSynchronizedWithCurrentItem="True" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="540,50,81,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" PreviewLostKeyboardFocus="CUST_NO_PreviewLostKeyboardFocus" TabIndex="1">
+            <ComboBox x:Name="CUST_NO" IsSynchronizedWithCurrentItem="True" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="540,50,81,0" VerticalAlignment="Top" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" PreviewKeyDown="CUST_NO_PreviewKeyDown" PreviewLostKeyboardFocus="CUST_NO_PreviewLostKeyboardFocus" TabIndex="1">
                 <ComboBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
