@@ -1,34 +1,35 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using AUTO_BAZ.HelperWins;
+using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Functions;
+using MaterialDesignThemes.Wpf;
+using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
+using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.UiTools;
+using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
+using Stimulsoft.Base;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Components;
+using Stimulsoft.Report.Dictionary;
 using Syncfusion.Data.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using System.Linq;
-using AUTO_BAZ.HelperWins;
-using System.Windows.Interop;
-using Prg_Proccessy.SQLMODELS;
-using Prg_Proccessy.Generaly;
-using Stimulsoft.Base;
-using Stimulsoft.Report.Components;
-using Stimulsoft.Report.Dictionary;
-using Stimulsoft.Report;
-using System.Reflection;
-using Functions;
-using DocumentFormat.OpenXml.Drawing;
-using DocumentFormat.OpenXml.Wordprocessing;
-using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
 
 namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 {
@@ -363,6 +364,21 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
         private void OpenReport()
         {
+            //گزارش تراز آزمایشی حسابهای معین
+            #region SecuritCheck
+            try
+            {
+                string Formname = "TARAZ4M2";
+                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                // 2. Run Security:
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            if (!this.IsLoaded) { this.Close(); return; }
+            #endregion
+
 
             _sql_query = $"EXEC dbo.TARAZ4_MOIN '{DT1.Text.ToRawTarikh()}', '{DT2.Text.ToRawTarikh()}', '{SNDNUM1.Text}', '{SNDNUM2.Text}', '{HHHS.SelectedValue}';";
 
@@ -417,9 +433,24 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
         private void OpenReport3()
         {
+            //گزارش تراز آزمایشی  چهار ستونی تفصیلی
+            //گزارش تراز کل ، معین ، تفضیلی و بالاتر
+            #region SecuritCheck
+            try
+            {
+                string Formname = "RTARAZ4T2";
+                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                // 2. Run Security:
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            if (!this.IsLoaded) { this.Close(); return; }
+            #endregion
+
             _sql_query = $"SELECT KOLNAM, MOINAME, TAFNAME, SumOfBED, SumOfBES, bed, bes, N_KOL, NUMBER, TNUMBER, MOINJAM, KOLjam FROM dbo.TARAZ4_TAFZ('{DT1.Text.ToRawTarikh()}', '{DT2.Text.ToRawTarikh()}', '{SNDNUM1.Text}', '{SNDNUM2.Text}', '{HHHS.SelectedValue}', '{HHHM.Text}') OPTION (HASH JOIN, QUERYTRACEON 2312);";
 
-            
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.TARAZ4_TAFZIL_other.mrt");
             report.Load(pathreport);
@@ -441,6 +472,20 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
         private void OpenReport4()
         {
+            //گزارش تراز آزمایشی چهار ستونی کل
+            #region SecuritCheck
+            try
+            {
+                string Formname = "RTARAZ4";
+                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                if (!this.IsLoaded) { this.Close(); return; }//Final State Check
+            }
+            catch { try { this.Close(); } catch { } }
+            if (!this.IsLoaded) { this.Close(); return; }
+            #endregion
+
+
             _sql_query = $"EXEC dbo.TARAZ_4 '{DT1.Text.ToRawTarikh()}', '{DT2.Text.ToRawTarikh()}', '{SNDNUM1.Text}', '{SNDNUM2.Text}';";
 
             
@@ -465,6 +510,22 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
         private void OpenReport5()
         {
+            //گزارش تراز آزمایشی حسابهای  کل-معین-تفصیلی
+            #region SecuritCheck
+            try
+            {
+                string Formname = "RTARAZ4T";
+                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                // 2. Run Security:
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            if (!this.IsLoaded) { this.Close(); return; }
+            #endregion
+
+
             _sql_query = $"SELECT KOLNAM, MOINAME, TAFNAME, SumOfBED, SumOfBES, bed, bes, MOINJAM, KOLjam, N_KOL, NUMBER, TNUMBER FROM dbo.TARAZ4_TAFZ('{DT1.Text.ToRawTarikh()}','{DT2.Text.ToRawTarikh()}','{SNDNUM1.Text}','{SNDNUM2.Text}','{HHHS.SelectedValue}','{HHHM.Text}') OPTION (HASH JOIN, QUERYTRACEON 2312);";
 
             

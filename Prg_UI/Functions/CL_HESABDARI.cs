@@ -903,59 +903,43 @@ namespace Prg_Proccessy.FUNCTIONS
                 return false;
             }
 
-            bool BLOCKEDMKRet = default;
             double? TKOL = null, TMOIN = null, TTAF = null, TTAF2 = null, TTAF3 = null, TTAF4 = null;
             double? HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null;
-
-            string name = Baseknow.USERCOD.ToStringNullSafe();
 
             var rst3 = dbms.DoGetDataSQL<CHECKBLOCKCUST>("SELECT USERCO,HES FROM BLOCKNON_HES WHERE USERCO = " + Baseknow.USERCOD).ToList();
             if (rst3.Count > 0)
             {
                 foreach (var item in rst3)
                 {
-                    GETTAF3(rst3.Select(x => x.HES).FirstOrDefault(), ref TKOL, ref TMOIN, ref TTAF, ref TTAF2, ref TTAF3, ref TTAF4);
+                    // اشکال اینجا بود - باید item.HES استفاده شود نه FirstOrDefault
+                    GETTAF3(item.HES, ref TKOL, ref TMOIN, ref TTAF, ref TTAF2, ref TTAF3, ref TTAF4);
                     GETTAF3(HES, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+
                     if (TKOL == HKOL)
                     {
-                        if (TKOL == HKOL && ReferenceEquals(TMOIN, null))
+                        if (TKOL == HKOL && TMOIN == null)
                         {
                             return false;
                         }
-                        else
+                        else if (TKOL == HKOL && TMOIN == HMOIN && TTAF == null)
                         {
-                            if (TKOL == HKOL && TMOIN == HMOIN && ReferenceEquals(TTAF, null))
-                            {
-                                return false;
-                            }
-                            else
-                            {
-                                if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && ReferenceEquals(TTAF2, null))
-                                {
-                                    return false;
-                                }
-                                else
-                                {
-                                    if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && ReferenceEquals(TTAF3, null))
-                                    {
-                                        return false;
-                                    }
-                                    else
-                                    {
-                                        if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && TTAF3 == HTAF3 && ReferenceEquals(TTAF4, null))
-                                        {
-                                            return false;
-                                        }
-                                        else
-                                        {
-                                            if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && TTAF3 == HTAF3 && TTAF4 == HTAF4)
-                                            {
-                                                return false;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            return false;
+                        }
+                        else if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == null)
+                        {
+                            return false;
+                        }
+                        else if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && TTAF3 == null)
+                        {
+                            return false;
+                        }
+                        else if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && TTAF3 == HTAF3 && TTAF4 == null)
+                        {
+                            return false;
+                        }
+                        else if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && TTAF3 == HTAF3 && TTAF4 == HTAF4)
+                        {
+                            return false;
                         }
                     }
                 }
@@ -966,2062 +950,471 @@ namespace Prg_Proccessy.FUNCTIONS
             {
                 foreach (var item in RST2)
                 {
-                    GETTAF3(RST2.Select(x => x.HES).FirstOrDefault(), ref TKOL, ref TMOIN, ref TTAF, ref TTAF2, ref TTAF3, ref TTAF4);
-                    // TKOL = MGETKOL(rst2.Fields("HES"))
-                    // TMOIN = MGETMOIN(rst2.Fields("HES"))
-                    // TTAF = MGETTAF(rst2.Fields("HES"))
+                    // اشکال اینجا بود - باید item.HES استفاده شود نه FirstOrDefault
+                    GETTAF3(item.HES, ref TKOL, ref TMOIN, ref TTAF, ref TTAF2, ref TTAF3, ref TTAF4);
                     GETTAF3(HES, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
-                    // HKOL = MGETKOL(HES)
-                    // HMOIN = MGETMOIN(HES)
-                    // HTAF = MGETTAF(HES)
+
                     if (TKOL == HKOL)
                     {
-                        if (TKOL == HKOL && ReferenceEquals(TMOIN, null))
+                        if (TKOL == HKOL && TMOIN == null)
                         {
                             return true;
                         }
-                        else
+                        else if (TKOL == HKOL && TMOIN == HMOIN && TTAF == null)
                         {
-                            if (TKOL == HKOL && TMOIN == HMOIN && ReferenceEquals(TTAF, null))
-                            {
-                                return true;
-                            }
-                            else
-                            {
-                                if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && ReferenceEquals(TTAF2, null))
-                                {
-                                    return true;
-                                }
-                                else
-                                {
-                                    if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && ReferenceEquals(TTAF3, null))
-                                    {
-                                        return true;
-                                    }
-                                    else
-                                    {
-                                        if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && TTAF3 == HTAF3 && ReferenceEquals(TTAF4, null))
-                                        {
-                                            return true;
-                                        }
-                                        else
-                                        {
-                                            if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && TTAF3 == HTAF3 && TTAF4 == HTAF4)
-                                            {
-                                                return true;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            return true;
+                        }
+                        else if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == null)
+                        {
+                            return true;
+                        }
+                        else if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && TTAF3 == null)
+                        {
+                            return true;
+                        }
+                        else if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && TTAF3 == HTAF3 && TTAF4 == null)
+                        {
+                            return true;
+                        }
+                        else if (TKOL == HKOL && TMOIN == HMOIN && TTAF == HTAF && TTAF2 == HTAF2 && TTAF3 == HTAF3 && TTAF4 == HTAF4)
+                        {
+                            return true;
                         }
                     }
                 }
             }
 
-            BLOCKEDMKRet = false;
-            return BLOCKEDMKRet;
+            return false;
         }
         public static string WANTEDFORM(string frm)
         {
             string WANTEDFORMRet = default;
+
+            // Cleaned switch statement: Removed duplicates and 'when' clauses
             switch (frm ?? "")
             {
                 // منوي تعاريف--------------------------------------------------------------
-                case "BANKS":
-                    {
-                        WANTEDFORMRet = "TCOD_BANKS";
-                        break;
-                    }
-                case "ANBAR":
-                    {
-                        WANTEDFORMRet = "TCOD_ANBAR";
-                        break;
-                    }
-                case "KALA":
-                    {
-                        WANTEDFORMRet = "STUF_DEF";
-                        break;
-                    }
-                case "GROUP":
-                    {
-                        WANTEDFORMRet = "TCOD_STUFGROUP";
-                        break;
-                    }
-                case "VAHED":
-                    {
-                        WANTEDFORMRet = "TCOD_VAHEDS";
-                        break;
-                    }
-                case "ANBARIN":
-                    {
-                        WANTEDFORMRet = "TCOD_ANBARINI";
-                        break;
-                    }
-                case "HESDEF":
-                    {
-                        WANTEDFORMRet = "TOTA_HES";
-                        break;
-                    }
-                case "AUTO":
-                    {
-                        WANTEDFORMRet = "AUTOMATIC";
-                        break;
-                    }
-                case "MOSHTARI":
-                    {
-                        WANTEDFORMRet = "FCODE_CUSTOMER";
-                        break;
-                    }
-                case "GHES":
-                    {
-                        WANTEDFORMRet = "TCOD_HESGROUP";
-                        break;
-                    }
-                case "CUST":
-                    {
-                        WANTEDFORMRet = "CUSTKIND";
-                        break;
-                    }
-                case "DEPART":
-                    {
-                        WANTEDFORMRet = "DEPART";
-                        break;
-                    }
-                case "SHIFT":
-                    {
-                        WANTEDFORMRet = "SHIFT";
-                        break;
-                    }
-                case "KHAD":
-                    {
-                        WANTEDFORMRet = "KHAD_DEF";
-                        break;
-                    }
-                case "AZAE":
-                    {
-                        WANTEDFORMRet = "AZAE";
-                        break;
-                    }
-                case "TMHAZ":
-                    {
-                        WANTEDFORMRet = "TMHAZ";
-                        break;
-                    }
-                case "MENUIT":
-                    {
-                        WANTEDFORMRet = "MENUIT";
-                        break;
-                    }
-                case "TAKHDEF":
-                    {
-                        WANTEDFORMRet = "TAKHDEF";
-                        break;
-                    }
-                case "CUSTDEF":
-                    {
-                        WANTEDFORMRet = "CUSTDEF";
-                        break;
-                    }
-                case "TKHESL":
-                    {
-                        WANTEDFORMRet = "TKHESL";
-                        break;
-                    }
-                case "AZADPAY":
-                    {
-                        WANTEDFORMRet = "AZADPAY";
-                        break;
-                    }
+                case "BANKS": WANTEDFORMRet = "TCOD_BANKS"; break;
+                case "ANBAR": WANTEDFORMRet = "TCOD_ANBAR"; break;
+                case "KALA": WANTEDFORMRet = "STUF_DEF"; break;
+                case "GROUP": WANTEDFORMRet = "TCOD_STUFGROUP"; break;
+                case "VAHED": WANTEDFORMRet = "TCOD_VAHEDS"; break;
+                case "ANBARIN": WANTEDFORMRet = "TCOD_ANBARINI"; break;
+                case "HESDEF": WANTEDFORMRet = "TOTA_HES"; break;
+                case "AUTO": WANTEDFORMRet = "AUTOMATIC"; break;
+                case "MOSHTARI": WANTEDFORMRet = "FCODE_CUSTOMER"; break;
+                case "GHES": WANTEDFORMRet = "TCOD_HESGROUP"; break;
+                case "CUST": WANTEDFORMRet = "CUSTKIND"; break;
+                case "DEPART": WANTEDFORMRet = "DEPART"; break;
+                case "SHIFT": WANTEDFORMRet = "SHIFT"; break;
+                case "KHAD": WANTEDFORMRet = "KHAD_DEF"; break;
+                case "AZAE": WANTEDFORMRet = "AZAE"; break;
+                case "TMHAZ": WANTEDFORMRet = "TMHAZ"; break;
+                case "MENUIT": WANTEDFORMRet = "MENUIT"; break;
+                case "TAKHDEF": WANTEDFORMRet = "TAKHDEF"; break;
+                case "CUSTDEF": WANTEDFORMRet = "CUSTDEF"; break;
+                case "TKHESL": WANTEDFORMRet = "TKHESL"; break;
+                case "AZADPAY": WANTEDFORMRet = "AZADPAY"; break;
 
-                case "JOST1":
-                    {
-                        WANTEDFORMRet = "JOST1";
-                        break;
-                    }
-                case "JOST2":
-                    {
-                        WANTEDFORMRet = "JOST2";
-                        break;
-                    }
-                case "JOST3":
-                    {
-                        WANTEDFORMRet = "JOST3";
-                        break;
-                    }
-                case "GRFORMAT":
-                    {
-                        WANTEDFORMRet = "GRFORMAT";
-                        break;
-                    }
-                case "GSCALE":
-                    {
-                        WANTEDFORMRet = "GSCALE";
-                        break;
-                    }
-                case "GGRAD":
-                    {
-                        WANTEDFORMRet = "GGRAD";
-                        break;
-                    }
-                case "GGRSH":
-                    {
-                        WANTEDFORMRet = "GGRSH";
-                        break;
-                    }
-                case "okpish":
-                    {
-                        WANTEDFORMRet = "okpish";
-                        break;
-                    }
-                case "PRGRP":
-                    {
-                        WANTEDFORMRet = "PRGRP";
-                        break;
-                    }
-                case "PRPAYNO":
-                    {
-                        WANTEDFORMRet = "PRPAYNO";
-                        break;
-                    }
-                case "PRELMTF":
-                    {
-                        WANTEDFORMRet = "PRELMTF";
-                        break;
-                    }
-                case "PRELMPR":
-                    {
-                        WANTEDFORMRet = "PRELMPR";
-                        break;
-                    }
-                case "TEL":
-                    {
-                        WANTEDFORMRet = "TEL";
-                        break;
-                    }
-                case "BGU":
-                    {
-                        WANTEDFORMRet = "BGU";
-                        break;
-                    }
-                case "BGLIST":
-                    {
-                        WANTEDFORMRet = "BGLIST";
-                        break;
-                    }
-                case "BGLISTTL":
-                    {
-                        WANTEDFORMRet = "BGLISTTL";
-                        break;
-                    }
-                case "moreinfo":
-                    {
-                        WANTEDFORMRet = "moreinfo";
-                        break;
-                    }
+                case "JOST1": WANTEDFORMRet = "JOST1"; break;
+                case "JOST2": WANTEDFORMRet = "JOST2"; break;
+                case "JOST3": WANTEDFORMRet = "JOST3"; break;
+                case "GRFORMAT": WANTEDFORMRet = "GRFORMAT"; break;
+                case "GSCALE": WANTEDFORMRet = "GSCALE"; break;
+                case "GGRAD": WANTEDFORMRet = "GGRAD"; break;
+                case "GGRSH": WANTEDFORMRet = "GGRSH"; break;
+                case "okpish": WANTEDFORMRet = "okpish"; break;
+                case "PRGRP": WANTEDFORMRet = "PRGRP"; break;
+                case "PRPAYNO": WANTEDFORMRet = "PRPAYNO"; break;
+                case "PRELMTF": WANTEDFORMRet = "PRELMTF"; break;
+                case "PRELMPR": WANTEDFORMRet = "PRELMPR"; break;
+                case "TEL": WANTEDFORMRet = "TEL"; break;
+                case "BGU": WANTEDFORMRet = "BGU"; break;
+                case "BGLIST": WANTEDFORMRet = "BGLIST"; break;
+                case "BGLISTTL": WANTEDFORMRet = "BGLISTTL"; break;
+                case "moreinfo": WANTEDFORMRet = "moreinfo"; break;
+
                 // منوي حسابداري-----------------------------------------------------------
-                case "SANAD":
-                    {
-                        WANTEDFORMRet = "DEED_HEAD";
-                        break;
-                    }
-                case "PGETD":
-                    {
-                        WANTEDFORMRet = "PGET_HED";
-                        break;
-                    }
-                case "OFDP":
-                    {
-                        WANTEDFORMRet = "OPGET_HED";
-                        break;
-                    }
-                case "OFDPSN":
-                    {
-                        WANTEDFORMRet = "ENTEGHAL_DARYAFT_PARDAKHT";
-                        break;
-                    }
-                case "TAEED":
-                    {
-                        WANTEDFORMRet = "F_MENU_ASNAD";
-                        break;
-                    }
-                case "EFTE":
-                    {
-                        WANTEDFORMRet = "SANAD_EFTETAHIYAH";
-                        break;
-                    }
-                case "EKHTE":
-                    {
-                        WANTEDFORMRet = "SANAD_EKHTETAMIYAH";
-                        break;
-                    }
-                case "RDFTMOIN":
-                    {
-                        WANTEDFORMRet = "R_DAFTAR_MOIN";
-                        break;
-                    }
-                case "HTAF":
-                    {
-                        WANTEDFORMRet = "R_DAFTAR_TAFZILY";
-                        break;
-                    }
-                case "RDFTTFKMOIN":
-                    {
-                        WANTEDFORMRet = "F_MENU_DATE_KOL_MOIN_TAFKIK";
-                        break;
-                    }
-                case "DFTROOS":
-                    {
-                        WANTEDFORMRet = "DAFTAR_ROOZNAMEH";
-                        break;
-                    }
-                case "DFTKOL":
-                    {
-                        WANTEDFORMRet = "R_DAFTAR_KOL";
-                        break;
-                    }
-                case "DPDAY":
-                    {
-                        WANTEDFORMRet = "R_DP_DAYLY";
-                        break;
-                    }
-                case "NEWYEAR":
-                    {
-                        WANTEDFORMRet = "F_NEWYEAR";
-                        break;
-                    }
-                case "SELYEAR":
-                    {
-                        WANTEDFORMRet = "F_SELECTYEAR";
-                        break;
-                    }
-                case "DPDAYASH":
-                    {
-                        WANTEDFORMRet = "R_DP_DAYLY_ASHKHAS";
-                        break;
-                    }
-                case "TARAZ4":
-                    {
-                        WANTEDFORMRet = "TARAZ_4";
-                        break;
-                    }
-                case "RTARAZ4":
-                    {
-                        WANTEDFORMRet = "R_TARAZ_4";
-                        break;
-                    }
-                case "TARAZ4M":
-                    {
-                        WANTEDFORMRet = "TARAZ_4_MOIN";
-                        break;
-                    }
-                case "TARAZ4M2":
-                    {
-                        WANTEDFORMRet = "TARAZ4_MOIN2";
-                        break;
-                    }
-                case "TARAZ4T":
-                    {
-                        WANTEDFORMRet = "TARAZ_4_TAFZ";
-                        break;
-                    }
-                case "RTARAZ4T":
-                    {
-                        WANTEDFORMRet = "TARAZ4_TAFZIL";
-                        break;
-                    }
-                case "RTARAZ4T2":
-                    {
-                        WANTEDFORMRet = "TARAZ4_TAFZIL2";
-                        break;
-                    }
-                case "OTHER":
-                    {
-                        WANTEDFORMRet = "OTHER";
-                        break;
-                    }
-                case "SNDHES":
-                    {
-                        WANTEDFORMRet = "DEED_SEARCH";
-                        break;
-                    }
-                case "BEDBES":
-                    {
-                        WANTEDFORMRet = "BEDEHKARAN_BESTANKARAN";
-                        break;
-                    }
-                case "GETS":
-                    {
-                        WANTEDFORMRet = "PGET_LST_SEARCH";
-                        break;
-                    }
-                case "ASNDSO":
-                    {
-                        WANTEDFORMRet = "SORTASNAD";
-                        break;
-                    }
-                case "SUDZIAN":
-                    {
-                        WANTEDFORMRet = "SOUDVAZIAN";
-                        break;
-                    }
+                case "SANAD": WANTEDFORMRet = "DEED_HEAD"; break;
+                case "PGETD": WANTEDFORMRet = "PGET_HED"; break;
+                case "OFDP": WANTEDFORMRet = "OPGET_HED"; break;
+                case "OFDPSN": WANTEDFORMRet = "ENTEGHAL_DARYAFT_PARDAKHT"; break;
+                case "TAEED": WANTEDFORMRet = "F_MENU_ASNAD"; break;
+                case "EFTE": WANTEDFORMRet = "SANAD_EFTETAHIYAH"; break;
+                case "EKHTE": WANTEDFORMRet = "SANAD_EKHTETAMIYAH"; break;
+                case "RDFTMOIN": WANTEDFORMRet = "R_DAFTAR_MOIN"; break;
+                case "HTAF": WANTEDFORMRet = "R_DAFTAR_TAFZILY"; break;
+                case "RDFTTFKMOIN": WANTEDFORMRet = "F_MENU_DATE_KOL_MOIN_TAFKIK"; break;
+                case "DFTROOS": WANTEDFORMRet = "DAFTAR_ROOZNAMEH"; break;
+                case "DFTKOL": WANTEDFORMRet = "R_DAFTAR_KOL"; break;
+                case "DPDAY": WANTEDFORMRet = "R_DP_DAYLY"; break;
+                case "NEWYEAR": WANTEDFORMRet = "F_NEWYEAR"; break;
+                case "SELYEAR": WANTEDFORMRet = "F_SELECTYEAR"; break;
+                case "DPDAYASH": WANTEDFORMRet = "R_DP_DAYLY_ASHKHAS"; break;
+                case "TARAZ4": WANTEDFORMRet = "TARAZ_4"; break;
+                case "RTARAZ4": WANTEDFORMRet = "R_TARAZ_4"; break;
+                case "TARAZ4M": WANTEDFORMRet = "TARAZ_4_MOIN"; break;
+                case "TARAZ4M2": WANTEDFORMRet = "TARAZ4_MOIN2"; break;
+                case "TARAZ4T": WANTEDFORMRet = "TARAZ_4_TAFZ"; break;
+                case "RTARAZ4T": WANTEDFORMRet = "TARAZ4_TAFZIL"; break;
+                case "RTARAZ4T2": WANTEDFORMRet = "TARAZ4_TAFZIL2"; break;
+                case "OTHER": WANTEDFORMRet = "OTHER"; break;
+                case "SNDHES": WANTEDFORMRet = "DEED_SEARCH"; break;
+                case "BEDBES": WANTEDFORMRet = "BEDEHKARAN_BESTANKARAN"; break;
+                case "GETS": WANTEDFORMRet = "PGET_LST_SEARCH"; break;
+                case "ASNDSO": WANTEDFORMRet = "SORTASNAD"; break;
+                case "SUDZIAN": WANTEDFORMRet = "SOUDVAZIAN"; break;
                 case "SMOGH":
-                    {
-                        WANTEDFORMRet = "F_MENU_SANAD_MOGHA";
-                        break;
-                    }
-                case "SMOGHFR":
-                    {
-                        WANTEDFORMRet = "F_MENU_SANAD_MOGHA";
-                        break;
-                    }
-                case "TKHARED":
-                    {
-                        WANTEDFORMRet = "HEAD_LST_KHAREED_SND";
-                        break;
-                    }
-                case "TFRSND":
-                    {
-                        WANTEDFORMRet = "HEAD_LST_FROOSH_SND";
-                        break;
-                    }
-                case "SNDPR":
-                    {
-                        WANTEDFORMRet = "F_MENU_ASNAD_PRINT";
-                        break;
-                    }
-                case "SPRIN":
-                    {
-                        WANTEDFORMRet = "F_MENU_PRINTHES";
-                        break;
-                    }
-                case "MOGH":
-                    {
-                        WANTEDFORMRet = "ADAMTARAZ";
-                        break;
-                    }
-                case "SKOL":
-                    {
-                        WANTEDFORMRet = "TOTA_HES_SHEET";
-                        break;
-                    }
-                case "FKHAD":
-                    {
-                        WANTEDFORMRet = "HEAD_LST_KHADAMAT";
-                        break;
-                    }
-                case "MOS":
-                    {
-                        WANTEDFORMRet = "HEAD_LST_MOSTAGHIM";
-                        break;
-                    }
-                case "MOGHA":
-                    {
-                        WANTEDFORMRet = "F_MENU_MOGHAYERAT";
-                        break;
-                    }
-                case "SMOGHA":
-                    {
-                        WANTEDFORMRet = "MOGHAYERAT";
-                        break;
-                    }
-                case "OSND":
-                    {
-                        WANTEDFORMRet = "ODEED_HEAD";
-                        break;
-                    }
-                case "OSNDSER":
-                    {
-                        WANTEDFORMRet = "ENTEGHAL_ASNAD_HESABDARY";
-                        break;
-                    }
-                case "GRFRO":
-                    {
-                        WANTEDFORMRet = "GENSANADFROOSH";
-                        break;
-                    }
-                case "GRKHO":
-                    {
-                        WANTEDFORMRet = "GENSANADFROOSHGRKHO";
-                        break;
-                    }
-                case "GRKHS":
-                    {
-                        WANTEDFORMRet = "GENSANADFROOSHGRKHS";
-                        break;
-                    }
-                case "GRVRO":
-                    {
-                        WANTEDFORMRet = "GENSANADFROOSHGRVRO";
-                        break;
-                    }
-                case "GRENT":
-                    {
-                        WANTEDFORMRet = "GENSANADFROOSHGRENT";
-                        break;
-                    }
-                case "GRKHA":
-                    {
-                        WANTEDFORMRet = "GENSANADFROOSHGRKHA";
-                        break;
-                    }
-                case "GRKHR":
-                    {
-                        WANTEDFORMRet = "GRKHR";
-                        break;
-                    }
-                case "GRKHZ":
-                    {
-                        WANTEDFORMRet = "GRKHZ";
-                        break;
-                    }
-                case "GRVDS":
-                    {
-                        WANTEDFORMRet = "GRVDS";
-                        break;
-                    }
-                case "GRANB":
-                    {
-                        WANTEDFORMRet = "GRANB";
-                        break;
-                    }
-                case "GENFRBR":
-                    {
-                        WANTEDFORMRet = "GENFRBR";
-                        break;
-                    }
-                case "BAZAV":
-                    {
-                        WANTEDFORMRet = "BAZ_AVRAGE";
-                        break;
-                    }
-                case "SKHOA":
-                    {
-                        WANTEDFORMRet = "SNADKHOLASAHAMALIAT";
-                        break;
-                    }
-                case "RMOIN":
-                    {
-                        WANTEDFORMRet = "R_DAFTAR_MOIN_LIST";
-                        break;
-                    }
-                case "TNAM":
-                    {
-                        WANTEDFORMRet = "TARAZNAMAH2";
-                        break;
-                    }
-                case "TNAMH":
-                    {
-                        WANTEDFORMRet = "TARAZHES";
-                        break;
-                    }
-                case "SERP":
-                    {
-                        WANTEDFORMRet = "DEED_SEARCH_MAIN";
-                        break;
-                    }
-                case "DMSGH":
-                    {
-                        WANTEDFORMRet = "DMSGH";
-                        break;
-                    }
-                case "SUDP":
-                    {
-                        WANTEDFORMRet = "SUDP";
-                        break;
-                    }
-                case "HBGHB":
-                    {
-                        WANTEDFORMRet = "HBGHB";
-                        break;
-                    }
-                case "PFKEY":
-                    {
-                        WANTEDFORMRet = "PFKEY";
-                        break;
-                    }
-                case "PFHKEY":
-                    {
-                        WANTEDFORMRet = "PFHKEY";
-                        break;
-                    }
-                case "MARKAZ":
-                    {
-                        WANTEDFORMRet = "MARKAZ";
-                        break;
-                    }
-                case "BEDBESM":
-                    {
-                        WANTEDFORMRet = "BEDBESM";
-                        break;
-                    }
-                case "DKOLKH":
-                    {
-                        WANTEDFORMRet = "DKOLKH";
-                        break;
-                    }
-                case "HESMAI":
-                    {
-                        WANTEDFORMRet = "F_MENU_KOL_MOIN_DATE_AI";
-                        break;
-                    }
-                case "MANABE":
-                    {
-                        WANTEDFORMRet = "MANABE";
-                        break;
-                    }
-                case "FACTFRMO":
-                    {
-                        WANTEDFORMRet = "FACTFRMO";
-                        break;
-                    }
-                case "FRSKB":
-                    {
-                        WANTEDFORMRet = "FRSKB";
-                        break;
-                    }
-                case "KHSKB":
-                    {
-                        WANTEDFORMRet = "KHSKB";
-                        break;
-                    }
-                case var @case when @case == "BEDBESM":
-                    {
-                        WANTEDFORMRet = "BEDBESM";
-                        break;
-                    }
-                case "FONAR":
-                    {
-                        WANTEDFORMRet = "FONAR";
-                        break;
-                    }
-                case "FONARP":
-                    {
-                        WANTEDFORMRet = "FONARP";
-                        break;
-                    }
-                case "VISIT_POR":
-                    {
-                        WANTEDFORMRet = "VISIT_POR";
-                        break;
-                    }
-                case "moj":
-                    {
-                        WANTEDFORMRet = "moj";
-                        break;
-                    }
-                case "LVBF":
-                    {
-                        WANTEDFORMRet = "LVBF";
-                        break;
-                    }
-                case "DRIVERH":
-                    {
-                        WANTEDFORMRet = "DRIVERH";
-                        break;
-                    }
-                case "KHLS":
-                    {
-                        WANTEDFORMRet = "KHLS";
-                        break;
-                    }
-                case "DPSEE":
-                    {
-                        WANTEDFORMRet = "DPSEE";
-                        break;
-                    }
-                case "DECD":
-                    {
-                        WANTEDFORMRet = "DECD";
-                        break;
-                    }
-                case "DPDEED":
-                    {
-                        WANTEDFORMRet = "DPDEED";
-                        break;
-                    }
-                case "PAYORD":
-                    {
-                        WANTEDFORMRet = "PAYORD";
-                        break;
-                    }
-                case "PAYORDL":
-                    {
-                        WANTEDFORMRet = "PAYORDL";
-                        break;
-                    }
-                case "SMS":
-                    {
-                        WANTEDFORMRet = "SMS";
-                        break;
-                    }
-                case "SUD":
-                    {
-                        WANTEDFORMRet = "SUD";
-                        break;
-                    }
-                case "NABZMOSH":
-                    {
-                        WANTEDFORMRet = "NABZMOSH";
-                        break;
-                    }
-                case "NABZKAR":
-                    {
-                        WANTEDFORMRet = "NABZKAR";
-                        break;
-                    }
-                case "JAYGOZIN":
-                    {
-                        WANTEDFORMRet = "JAYGOZIN";
-                        break;
-                    }
-                case "KHAZANEH":
-                    {
-                        WANTEDFORMRet = "KHAZANEH";
-                        break;
-                    }
-                case "CUSANAD":
-                    {
-                        WANTEDFORMRet = "CUSANAD";
-                        break;
-                    }
+                case "SMOGHFR": WANTEDFORMRet = "F_MENU_SANAD_MOGHA"; break;
+                case "TKHARED": WANTEDFORMRet = "HEAD_LST_KHAREED_SND"; break;
+                case "TFRSND": WANTEDFORMRet = "HEAD_LST_FROOSH_SND"; break;
+                case "SNDPR": WANTEDFORMRet = "F_MENU_ASNAD_PRINT"; break;
+                case "SPRIN": WANTEDFORMRet = "F_MENU_PRINTHES"; break;
+                case "MOGH": WANTEDFORMRet = "ADAMTARAZ"; break;
+                case "SKOL": WANTEDFORMRet = "TOTA_HES_SHEET"; break;
+                case "FKHAD": WANTEDFORMRet = "HEAD_LST_KHADAMAT"; break;
+                case "MOS": WANTEDFORMRet = "HEAD_LST_MOSTAGHIM"; break;
+                case "MOGHA": WANTEDFORMRet = "F_MENU_MOGHAYERAT"; break;
+                case "SMOGHA": WANTEDFORMRet = "MOGHAYERAT"; break;
+                case "OSND": WANTEDFORMRet = "ODEED_HEAD"; break;
+                case "OSNDSER": WANTEDFORMRet = "ENTEGHAL_ASNAD_HESABDARY"; break;
+                case "GRFRO": WANTEDFORMRet = "GENSANADFROOSH"; break;
+                case "GRKHO": WANTEDFORMRet = "GENSANADFROOSHGRKHO"; break;
+                case "GRKHS": WANTEDFORMRet = "GENSANADFROOSHGRKHS"; break;
+                case "GRVRO": WANTEDFORMRet = "GENSANADFROOSHGRVRO"; break;
+                case "GRENT": WANTEDFORMRet = "GENSANADFROOSHGRENT"; break;
+                case "GRKHA": WANTEDFORMRet = "GENSANADFROOSHGRKHA"; break;
+                case "GRKHR": WANTEDFORMRet = "GRKHR"; break;
+                case "GRKHZ": WANTEDFORMRet = "GRKHZ"; break;
+                case "GRVDS": WANTEDFORMRet = "GRVDS"; break;
+                case "GRANB": WANTEDFORMRet = "GRANB"; break;
+                case "GENFRBR": WANTEDFORMRet = "GENFRBR"; break;
+                case "BAZAV": WANTEDFORMRet = "BAZ_AVRAGE"; break;
+                case "SKHOA": WANTEDFORMRet = "SNADKHOLASAHAMALIAT"; break;
+                case "RMOIN": WANTEDFORMRet = "R_DAFTAR_MOIN_LIST"; break;
+                case "TNAM": WANTEDFORMRet = "TARAZNAMAH2"; break;
+                case "TNAMH": WANTEDFORMRet = "TARAZHES"; break;
+                case "SERP": WANTEDFORMRet = "DEED_SEARCH_MAIN"; break;
+                case "DMSGH": WANTEDFORMRet = "DMSGH"; break;
+                case "SUDP": WANTEDFORMRet = "SUDP"; break;
+                case "HBGHB": WANTEDFORMRet = "HBGHB"; break;
+                case "PFKEY": WANTEDFORMRet = "PFKEY"; break;
+                case "PFHKEY": WANTEDFORMRet = "PFHKEY"; break;
+                case "MARKAZ": WANTEDFORMRet = "MARKAZ"; break;
+                case "BEDBESM": WANTEDFORMRet = "BEDBESM"; break;
+                case "DKOLKH": WANTEDFORMRet = "DKOLKH"; break;
+                case "HESMAI": WANTEDFORMRet = "F_MENU_KOL_MOIN_DATE_AI"; break;
+                case "MANABE": WANTEDFORMRet = "MANABE"; break;
+                case "FACTFRMO": WANTEDFORMRet = "FACTFRMO"; break;
+                case "FRSKB": WANTEDFORMRet = "FRSKB"; break;
+                case "KHSKB": WANTEDFORMRet = "KHSKB"; break;
+                case "FONAR": WANTEDFORMRet = "FONAR"; break;
+                case "FONARP": WANTEDFORMRet = "FONARP"; break;
+                case "VISIT_POR": WANTEDFORMRet = "VISIT_POR"; break;
+                case "moj": WANTEDFORMRet = "moj"; break;
+                case "LVBF": WANTEDFORMRet = "LVBF"; break;
+                case "DRIVERH": WANTEDFORMRet = "DRIVERH"; break;
+                case "KHLS": WANTEDFORMRet = "KHLS"; break;
+                case "DPSEE": WANTEDFORMRet = "DPSEE"; break;
+                case "DECD": WANTEDFORMRet = "DECD"; break;
+                case "DPDEED": WANTEDFORMRet = "DPDEED"; break;
+                case "PAYORD": WANTEDFORMRet = "PAYORD"; break;
+                case "PAYORDL": WANTEDFORMRet = "PAYORDL"; break;
+                case "SMS": WANTEDFORMRet = "SMS"; break;
+                case "SUD": WANTEDFORMRet = "SUD"; break;
+                case "NABZMOSH": WANTEDFORMRet = "NABZMOSH"; break;
+                case "NABZKAR": WANTEDFORMRet = "NABZKAR"; break;
+                case "JAYGOZIN": WANTEDFORMRet = "JAYGOZIN"; break;
+                case "KHAZANEH": WANTEDFORMRet = "KHAZANEH"; break;
+                case "CUSANAD": WANTEDFORMRet = "CUSANAD"; break;
+
                 // منوي توليد-----------------------------------------------------------
-                case "TOLID":
-                    {
-                        WANTEDFORMRet = "HEAD_MAN";
-                        break;
-                    }
-                case "FORMOL":
-                    {
-                        WANTEDFORMRet = "HEAD_MANF";
-                        break;
-                    }
-                case "HAVT":
-                    {
-                        WANTEDFORMRet = "HAVLAH_KHORUG";
-                        break;
-                    }
-                case "HEXIT":
-                    {
-                        WANTEDFORMRet = "HAVALAH_EXIT";
-                        break;
-                    }
-                case "HENTER":
-                    {
-                        WANTEDFORMRet = "HAVALAH_ENTER";
-                        break;
-                    }
-                case "MARM":
-                    {
-                        WANTEDFORMRet = "MASRAF_CENTER";
-                        break;
-                    }
-                case "HSAYER":
-                    {
-                        WANTEDFORMRet = "HAVALAH_EXIT_SAYER";
-                        break;
-                    }
-                case "JAZBD":
-                    {
-                        WANTEDFORMRet = "AONE_SALARY";
-                        break;
-                    }
-                case "KARB":
-                    {
-                        WANTEDFORMRet = "KAR_HEAD";
-                        break;
-                    }
-                case "AMTOL":
-                    {
-                        WANTEDFORMRet = "F_MENU_DATEAMTOL";
-                        break;
-                    }
-                case "AMMAS":
-                    {
-                        WANTEDFORMRet = "AMMAS";
-                        break;
-                    }
-                case "MOFGH":
-                    {
-                        WANTEDFORMRet = "SUDZIANGHEMAT";
-                        break;
-                    }
-                case "AMA2":
-                    {
-                        WANTEDFORMRet = "SANADPAYANDORAH";
-                        break;
-                    }
+                case "TOLID": WANTEDFORMRet = "HEAD_MAN"; break;
+                case "FORMOL": WANTEDFORMRet = "HEAD_MANF"; break;
+                case "HAVT": WANTEDFORMRet = "HAVLAH_KHORUG"; break;
+                case "HEXIT": WANTEDFORMRet = "HAVALAH_EXIT"; break;
+                case "HENTER": WANTEDFORMRet = "HAVALAH_ENTER"; break;
+                case "MARM": WANTEDFORMRet = "MASRAF_CENTER"; break;
+                case "HSAYER": WANTEDFORMRet = "HAVALAH_EXIT_SAYER"; break;
+                case "JAZBD": WANTEDFORMRet = "AONE_SALARY"; break;
+                case "KARB": WANTEDFORMRet = "KAR_HEAD"; break;
+                case "AMTOL": WANTEDFORMRet = "F_MENU_DATEAMTOL"; break;
+                case "AMMAS": WANTEDFORMRet = "AMMAS"; break;
+                case "MOFGH": WANTEDFORMRet = "SUDZIANGHEMAT"; break;
+                case "AMA2": WANTEDFORMRet = "SANADPAYANDORAH"; break;
+
                 // منوي خريد فروش-----------------------------------------------------------
-                case "VISITOR":
-                    {
-                        WANTEDFORMRet = "VISITOR";
-                        break;
-                    }
-                case "CROSS":
-                    {
-                        WANTEDFORMRet = "GOZARESH_FROOSH_MAHSUL";
-                        break;
-                    }
-                case "MFACTFR":
-                    {
-                        WANTEDFORMRet = "MHEAD_LST_FROOSH";
-                        break;
-                    }
-                case "CFRALL":
-                    {
-                        WANTEDFORMRet = "FROOSH_COUNTALL";
-                        break;
-                    }
-                case "FACTFRSA":
-                    {
-                        WANTEDFORMRet = "FACTFRSA";
-                        break;
-                    }
-                case "FACTFR":
-                    {
-                        WANTEDFORMRet = "HEAD_LST_FROOSH";
-                        break;
-                    }
-                case "FACTKH":
-                    {
-                        WANTEDFORMRet = "HEAD_LST_KHAREED";
-                        break;
-                    }
-                case "FACTKHSA":
-                    {
-                        WANTEDFORMRet = "FACTKHSA";
-                        break;
-                    }
-                case "PFACTFR":
-                    {
-                        WANTEDFORMRet = "HEAD_LST_PISHFROOSH";
-                        break;
-                    }
-                case "FACTBFR":
-                    {
-                        WANTEDFORMRet = "HEAD_LST_FROOSH_BACK";
-                        break;
-                    }
-                case "FACTBKH":
-                    {
-                        WANTEDFORMRet = "HEAD_LST_KH_BACK";
-                        break;
-                    }
-                case "SEFARESH":
-                    {
-                        WANTEDFORMRet = "ORDR_HED";
-                        break;
-                    }
-                case "FROOSHDAY":
-                    {
-                        WANTEDFORMRet = "R_FROOSH_DAYLY";
-                        break;
-                    }
-                case "FROOSHDAY2":
-                    {
-                        WANTEDFORMRet = "R_FROOSH_DAYLY2";
-                        break;
-                    }
-                case "FKHAREDAY":
-                    {
-                        WANTEDFORMRet = "R_KHARED_DAYLY";
-                        break;
-                    }
-                case "GARDESH":
-                    {
-                        WANTEDFORMRet = "KALAS";
-                        break;
-                    }
-                case "STUFLIST":
-                    {
-                        WANTEDFORMRet = "STUF_DEF_LIST";
-                        break;
-                    }
-                case "FLIST":
-                    {
-                        WANTEDFORMRet = "LIST_INVOICE_FROOSH";
-                        break;
-                    }
-                case "KLIST":
-                    {
-                        WANTEDFORMRet = "LIST_INVOICE_KHARED";
-                        break;
-                    }
-                case "LFRAN":
-                    {
-                        WANTEDFORMRet = "LIST_FROOSH_ANBARS";
-                        break;
-                    }
-                case "LKHAN":
-                    {
-                        WANTEDFORMRet = "LIST_KHAREED_ANBARS";
-                        break;
-                    }
-                case "LPF":
-                    {
-                        WANTEDFORMRet = "LASTPRICE";
-                        break;
-                    }
-                case "VAZ":
-                    {
-                        WANTEDFORMRet = "R_GARDESH_KHFR_DAFTAR";
-                        break;
-                    }
-                case "FRROOZU":
-                    {
-                        WANTEDFORMRet = "GOZARESH_FROOSH_USER";
-                        break;
-                    }
-                case "LFACT":
-                    {
-                        WANTEDFORMRet = "Q_LIST_DALY";
-                        break;
-                    }
-                case "FGROO":
-                    {
-                        WANTEDFORMRet = "F_MENU_FROOSH";
-                        break;
-                    }
-                case "RAAS":
-                    {
-                        WANTEDFORMRet = "RAAS";
-                        break;
-                    }
-                case "OFACT":
-                    {
-                        WANTEDFORMRet = "OHEAD_LST_FROOSH";
-                        break;
-                    }
-                case "OFACTKH":
-                    {
-                        WANTEDFORMRet = "OHEAD_LST_KHADAMAT";
-                        break;
-                    }
-                case "CRREPF":
-                    {
-                        WANTEDFORMRet = "HEAD_SERCH_MAIN";
-                        break;
-                    }
-                case "AMFDAY":
-                    {
-                        WANTEDFORMRet = "AMFDAY";
-                        break;
-                    }
-                case "FPDESIGN":
-                    {
-                        WANTEDFORMRet = "FPFORMAT";
-                        break;
-                    }
-                case "RORD":
-                    {
-                        WANTEDFORMRet = "RORD";
-                        break;
-                    }
-                case "BFAC":
-                    {
-                        WANTEDFORMRet = "BFAC";
-                        break;
-                    }
-                case "ESLAH":
-                    {
-                        WANTEDFORMRet = "ESLAH";
-                        break;
-                    }
-                case "FRCUST":
-                    {
-                        WANTEDFORMRet = "FRCUST";
-                        break;
-                    }
-                case "TFTMLOCK":
-                    {
-                        WANTEDFORMRet = "TFTMLOCK";
-                        break;
-                    }
-                case "CRREPFA":
-                    {
-                        WANTEDFORMRet = "CRREPFA";
-                        break;
-                    }
-                case "SAVEREP":
-                    {
-                        WANTEDFORMRet = "SAVEREP";
-                        break;
-                    }
-                case "DARKHR":
-                    {
-                        WANTEDFORMRet = "DARKHR";
-                        break;
-                    }
-                case "DARKHRLIS":
-                    {
-                        WANTEDFORMRet = "DARKHRLIS";
-                        break;
-                    }
-                case "BRFR":
-                    {
-                        WANTEDFORMRet = "BRFR";
-                        break;
-                    }
-                case "BARGI":
-                    {
-                        WANTEDFORMRet = "BARGI";
-                        break;
-                    }
-                case "RDFTKHFRA4":
-                    {
-                        WANTEDFORMRet = "FRKMA4";
-                        break;
-                    }
-                case "LFKBTF":
-                    {
-                        WANTEDFORMRet = "LFKBTF";
-                        break;
-                    }
-                case "LISTKHG":
-                    {
-                        WANTEDFORMRet = "LISTKHG";
-                        break;
-                    }
-                case "LISTFRG":
-                    {
-                        WANTEDFORMRet = "LISTFRG";
-                        break;
-                    }
-                case "VISITORS":
-                    {
-                        WANTEDFORMRet = "VISITORS";
-                        break;
-                    }
-                case "CHVBV":
-                    {
-                        WANTEDFORMRet = "CHVBV";
-                        break;
-                    }
-                case "FRRDTL":
-                    {
-                        WANTEDFORMRet = "FRRDTL";
-                        break;
-                    }
-                case "USERFR":
-                    {
-                        WANTEDFORMRet = "USERFR";
-                        break;
-                    }
-                case "KHCUST":
-                    {
-                        WANTEDFORMRet = "KHCUST";
-                        break;
-                    }
-                case "SMS_VIP":
-                    {
-                        WANTEDFORMRet = "SMS_VIP";
-                        break;
-                    }
-                case var case1 when case1 == "VISITORS":
-                    {
-                        WANTEDFORMRet = "VISITORS";
-                        break;
-                    }
-                case var case2 when case2 == "BARGI":
-                    {
-                        WANTEDFORMRet = "BARGI";
-                        break;
-                    }
-                case var case3 when case3 == "FRRDTL":
-                    {
-                        WANTEDFORMRet = "FRRDTL";
-                        break;
-                    }
-                case "VISITDLV":
-                    {
-                        WANTEDFORMRet = "VISITDLV";
-                        break;
-                    }
-                // Case "FAM":        WANTEDFORM = "FAM"
-                case "VISITKAL":
-                    {
-                        WANTEDFORMRet = "VISITKAL";
-                        break;
-                    }
-                case "VISITKALMA":
-                    {
-                        WANTEDFORMRet = "VISITKALMA";
-                        break;
-                    }
-                case "VISITROUT":
-                    {
-                        WANTEDFORMRet = "VISITROUT";
-                        break;
-                    }
-                case "VISITGOL":
-                    {
-                        WANTEDFORMRet = "VISITGOL";
-                        break;
-                    }
-                case "VISITGOLMON":
-                    {
-                        WANTEDFORMRet = "VISITGOLMON";
-                        break;
-                    }
-                case "VISITGOLMONR":
-                    {
-                        WANTEDFORMRet = "VISITGOLMONR";
-                        break;
-                    }
-                case "VISITGOLG":
-                    {
-                        WANTEDFORMRet = "VISITGOLG";
-                        break;
-                    }
-                case "VISITGOLMONG":
-                    {
-                        WANTEDFORMRet = "VISITGOLMONG";
-                        break;
-                    }
-                case "VISITGOLMONGR":
-                    {
-                        WANTEDFORMRet = "VISITGOLMONGR";
-                        break;
-                    }
-                case var case4 when case4 == "FRCUST":
-                    {
-                        WANTEDFORMRet = "FRCUST";
-                        break;
-                    }
-                case var case5 when case5 == "KHCUST":
-                    {
-                        WANTEDFORMRet = "KHCUST";
-                        break;
-                    }
-                case var case6 when case6 == "SMS_VIP":
-                    {
-                        WANTEDFORMRet = "SMS_VIP";
-                        break;
-                    }
-                case "VISIT_DAY":
-                    {
-                        WANTEDFORMRet = "VISIT_DAY";
-                        break;
-                    }
-                case "ESLAHRF":
-                    {
-                        WANTEDFORMRet = "ESLAHRF";
-                        break;
-                    }
-                case "ESLAHR":
-                    {
-                        WANTEDFORMRet = "ESLAHR";
-                        break;
-                    }
-                case "ESLAHH":
-                    {
-                        WANTEDFORMRet = "ESLAHH";
-                        break;
-                    }
-                case "ESLAHV":
-                    {
-                        WANTEDFORMRet = "ESLAHV";
-                        break;
-                    }
-                case "ESLAHE":
-                    {
-                        WANTEDFORMRet = "ESLAHE";
-                        break;
-                    }
-                case "ESLAHS":
-                    {
-                        WANTEDFORMRet = "ESLAHS";
-                        break;
-                    }
-                case "ESLAHM":
-                    {
-                        WANTEDFORMRet = "ESLAHM";
-                        break;
-                    }
-                case "ESLAHA":
-                    {
-                        WANTEDFORMRet = "ESLAHA";
-                        break;
-                    }
-                case "ESLAHK":
-                    {
-                        WANTEDFORMRet = "ESLAHK";
-                        break;
-                    }
-                case var case7 when case7 == "VISIT_POR":
-                    {
-                        WANTEDFORMRet = "VISIT_POR";
-                        break;
-                    }
-                case "VISIT_MAS":
-                    {
-                        WANTEDFORMRet = "VISIT_MAS";
-                        break;
-                    }
-                case var case8 when case8 == "FONAR":
-                    {
-                        WANTEDFORMRet = "FONAR";
-                        break;
-                    }
-                case var case9 when case9 == "FONARP":
-                    {
-                        WANTEDFORMRet = "FONARP";
-                        break;
-                    }
-                case "FRBKA":
-                    {
-                        WANTEDFORMRet = "FRBKA";
-                        break;
-                    }
-                case "CHAPM":
-                    {
-                        WANTEDFORMRet = "CHAPM";
-                        break;
-                    }
-                case "LVBP":
-                    {
-                        WANTEDFORMRet = "LVBP";
-                        break;
-                    }
-                case "CUSTNP":
-                    {
-                        WANTEDFORMRet = "CUSTNP";
-                        break;
-                    }
-                case "CUSTEN":
-                    {
-                        WANTEDFORMRet = "CUSTEN";
-                        break;
-                    }
-                case var case10 when case10 == "DPSEE":
-                    {
-                        WANTEDFORMRet = "DPSEE";
-                        break;
-                    }
-                case "FRMOST":
-                    {
-                        WANTEDFORMRet = "FRMOST";
-                        break;
-                    }
-                case "TKHPISH":
-                    {
-                        WANTEDFORMRet = "TKHPISH";
-                        break;
-                    }
-                case "ESLAHKHAD":
-                    {
-                        WANTEDFORMRet = "ESLAHKHAD";
-                        break;
-                    }
-                case "FASLIBR":
-                    {
-                        WANTEDFORMRet = "FASLIBR";
-                        break;
-                    }
-                case "CKRALL":
-                    {
-                        WANTEDFORMRet = "CKRALL";
-                        break;
-                    }
-                case "RESERV":
-                    {
-                        WANTEDFORMRet = "RESERV";
-                        break;
-                    }
-                case "VISITONE":
-                    {
-                        WANTEDFORMRet = "VISITONE";
-                        break;
-                    }
-                case "FASLIKHBR":
-                    {
-                        WANTEDFORMRet = "FASLIKHBR";
-                        break;
-                    }
-                case "KEYTPF":
-                    {
-                        WANTEDFORMRet = "KEYTPF";
-                        break;
-                    }
-                case "CRMMAIN":
-                    {
-                        WANTEDFORMRet = "CRMMAIN";
-                        break;
-                    }
-                case "ENHESAR":
-                    {
-                        WANTEDFORMRet = "ENHESAR";
-                        break;
-                    }
-                case "tozied":
-                    {
-                        WANTEDFORMRet = "tozied";
-                        break;
-                    }
-                case "NOTE":
-                    {
-                        WANTEDFORMRet = "NOTE";
-                        break;
-                    }
+                case "VISITOR": WANTEDFORMRet = "VISITOR"; break;
+                case "CROSS": WANTEDFORMRet = "GOZARESH_FROOSH_MAHSUL"; break;
+                case "MFACTFR": WANTEDFORMRet = "MHEAD_LST_FROOSH"; break;
+                case "CFRALL": WANTEDFORMRet = "FROOSH_COUNTALL"; break;
+                case "FACTFRSA": WANTEDFORMRet = "FACTFRSA"; break;
+                case "FACTFR": WANTEDFORMRet = "HEAD_LST_FROOSH"; break;
+                case "FACTKH": WANTEDFORMRet = "HEAD_LST_KHAREED"; break;
+                case "FACTKHSA": WANTEDFORMRet = "FACTKHSA"; break;
+                case "PFACTFR": WANTEDFORMRet = "HEAD_LST_PISHFROOSH"; break;
+                case "FACTBFR": WANTEDFORMRet = "HEAD_LST_FROOSH_BACK"; break;
+                case "FACTBKH": WANTEDFORMRet = "HEAD_LST_KH_BACK"; break;
+                case "SEFARESH": WANTEDFORMRet = "ORDR_HED"; break;
+                case "FROOSHDAY": WANTEDFORMRet = "R_FROOSH_DAYLY"; break;
+                case "FROOSHDAY2": WANTEDFORMRet = "R_FROOSH_DAYLY2"; break;
+                case "FKHAREDAY": WANTEDFORMRet = "R_KHARED_DAYLY"; break;
+                case "GARDESH": WANTEDFORMRet = "KALAS"; break;
+                case "STUFLIST": WANTEDFORMRet = "STUF_DEF_LIST"; break;
+                case "FLIST": WANTEDFORMRet = "LIST_INVOICE_FROOSH"; break;
+                case "KLIST": WANTEDFORMRet = "LIST_INVOICE_KHARED"; break;
+                case "LFRAN": WANTEDFORMRet = "LIST_FROOSH_ANBARS"; break;
+                case "LKHAN": WANTEDFORMRet = "LIST_KHAREED_ANBARS"; break;
+                case "LPF": WANTEDFORMRet = "LASTPRICE"; break;
+                case "VAZ": WANTEDFORMRet = "R_GARDESH_KHFR_DAFTAR"; break;
+                case "FRROOZU": WANTEDFORMRet = "GOZARESH_FROOSH_USER"; break;
+                case "LFACT": WANTEDFORMRet = "Q_LIST_DALY"; break;
+                case "FGROO": WANTEDFORMRet = "F_MENU_FROOSH"; break;
+                case "RAAS": WANTEDFORMRet = "RAAS"; break;
+                case "OFACT": WANTEDFORMRet = "OHEAD_LST_FROOSH"; break;
+                case "OFACTKH": WANTEDFORMRet = "OHEAD_LST_KHADAMAT"; break;
+                case "CRREPF": WANTEDFORMRet = "HEAD_SERCH_MAIN"; break;
+                case "AMFDAY": WANTEDFORMRet = "AMFDAY"; break;
+                case "FPDESIGN": WANTEDFORMRet = "FPFORMAT"; break;
+                case "RORD": WANTEDFORMRet = "RORD"; break;
+                case "BFAC": WANTEDFORMRet = "BFAC"; break;
+                case "ESLAH": WANTEDFORMRet = "ESLAH"; break;
+                case "FRCUST": WANTEDFORMRet = "FRCUST"; break;
+                case "TFTMLOCK": WANTEDFORMRet = "TFTMLOCK"; break;
+                case "CRREPFA": WANTEDFORMRet = "CRREPFA"; break;
+                case "SAVEREP": WANTEDFORMRet = "SAVEREP"; break;
+                case "DARKHR": WANTEDFORMRet = "DARKHR"; break;
+                case "DARKHRLIS": WANTEDFORMRet = "DARKHRLIS"; break;
+                case "BRFR": WANTEDFORMRet = "BRFR"; break;
+                case "BARGI": WANTEDFORMRet = "BARGI"; break;
+                case "RDFTKHFRA4": WANTEDFORMRet = "FRKMA4"; break;
+                case "LFKBTF": WANTEDFORMRet = "LFKBTF"; break;
+                case "LISTKHG": WANTEDFORMRet = "LISTKHG"; break;
+                case "LISTFRG": WANTEDFORMRet = "LISTFRG"; break;
+                case "VISITORS": WANTEDFORMRet = "VISITORS"; break;
+                case "CHVBV": WANTEDFORMRet = "CHVBV"; break;
+                case "FRRDTL": WANTEDFORMRet = "FRRDTL"; break;
+                case "USERFR": WANTEDFORMRet = "USERFR"; break;
+                case "KHCUST": WANTEDFORMRet = "KHCUST"; break;
+                case "SMS_VIP": WANTEDFORMRet = "SMS_VIP"; break;
+                case "VISITDLV": WANTEDFORMRet = "VISITDLV"; break;
+                case "VISITKAL": WANTEDFORMRet = "VISITKAL"; break;
+                case "VISITKALMA": WANTEDFORMRet = "VISITKALMA"; break;
+                case "VISITROUT": WANTEDFORMRet = "VISITROUT"; break;
+                case "VISITGOL": WANTEDFORMRet = "VISITGOL"; break;
+                case "VISITGOLMON": WANTEDFORMRet = "VISITGOLMON"; break;
+                case "VISITGOLMONR": WANTEDFORMRet = "VISITGOLMONR"; break;
+                case "VISITGOLG": WANTEDFORMRet = "VISITGOLG"; break;
+                case "VISITGOLMONG": WANTEDFORMRet = "VISITGOLMONG"; break;
+                case "VISITGOLMONGR": WANTEDFORMRet = "VISITGOLMONGR"; break;
+                case "VISIT_DAY": WANTEDFORMRet = "VISIT_DAY"; break;
+                case "ESLAHRF": WANTEDFORMRet = "ESLAHRF"; break;
+                case "ESLAHR": WANTEDFORMRet = "ESLAHR"; break;
+                case "ESLAHH": WANTEDFORMRet = "ESLAHH"; break;
+                case "ESLAHV": WANTEDFORMRet = "ESLAHV"; break;
+                case "ESLAHE": WANTEDFORMRet = "ESLAHE"; break;
+                case "ESLAHS": WANTEDFORMRet = "ESLAHS"; break;
+                case "ESLAHM": WANTEDFORMRet = "ESLAHM"; break;
+                case "ESLAHA": WANTEDFORMRet = "ESLAHA"; break;
+                case "ESLAHK": WANTEDFORMRet = "ESLAHK"; break;
+                case "VISIT_MAS": WANTEDFORMRet = "VISIT_MAS"; break;
+                case "FRBKA": WANTEDFORMRet = "FRBKA"; break;
+                case "CHAPM": WANTEDFORMRet = "CHAPM"; break;
+                case "LVBP": WANTEDFORMRet = "LVBP"; break;
+                case "CUSTNP": WANTEDFORMRet = "CUSTNP"; break;
+                case "CUSTEN": WANTEDFORMRet = "CUSTEN"; break;
+                case "FRMOST": WANTEDFORMRet = "FRMOST"; break;
+                case "TKHPISH": WANTEDFORMRet = "TKHPISH"; break;
+                case "ESLAHKHAD": WANTEDFORMRet = "ESLAHKHAD"; break;
+                case "FASLIBR": WANTEDFORMRet = "FASLIBR"; break;
+                case "CKRALL": WANTEDFORMRet = "CKRALL"; break;
+                case "RESERV": WANTEDFORMRet = "RESERV"; break;
+                case "VISITONE": WANTEDFORMRet = "VISITONE"; break;
+                case "FASLIKHBR": WANTEDFORMRet = "FASLIKHBR"; break;
+                case "KEYTPF": WANTEDFORMRet = "KEYTPF"; break;
+                case "CRMMAIN": WANTEDFORMRet = "CRMMAIN"; break;
+                case "ENHESAR": WANTEDFORMRet = "ENHESAR"; break;
+                case "tozied": WANTEDFORMRet = "tozied"; break;
+                case "NOTE": WANTEDFORMRet = "NOTE"; break;
+
                 // منوي  چك---------------------------------------------------------
-                case "CHEKD":
-                    {
-                        WANTEDFORMRet = "PAY_GETD";
-                        break;
-                    }
-                case "CHEKP":
-                    {
-                        WANTEDFORMRet = "PAY_GETP";
-                        break;
-                    }
-                case "VCHD":
-                    {
-                        WANTEDFORMRet = "CHKREC_H";
-                        break;
-                    }
-                case "VCHP":
-                    {
-                        WANTEDFORMRet = "CHREC_HP";
-                        break;
-                    }
-                case "CHKDLIST":
-                    {
-                        WANTEDFORMRet = "CHKE_DLIST";
-                        break;
-                    }
-                case "CHKPLIST":
-                    {
-                        WANTEDFORMRet = "CHEK_PLIST";
-                        break;
-                    }
-                case "SERIAL":
-                    {
-                        WANTEDFORMRet = "F_MENU_SERILA";
-                        break;
-                    }
-                case "TCHEK":
-                    {
-                        WANTEDFORMRet = "COD_HESAB";
-                        break;
-                    }
-                case "FORMAT":
-                    {
-                        WANTEDFORMRet = "FORMAT";
-                        break;
-                    }
-                case "CHPRN":
-                    {
-                        WANTEDFORMRet = "HED_SODUR";
-                        break;
-                    }
-                case "PCHS":
-                    {
-                        WANTEDFORMRet = "CHEK_PLISTS";
-                        break;
-                    }
-                case "DCHS":
-                    {
-                        WANTEDFORMRet = "CHEK_DLISTS";
-                        break;
-                    }
-                case "PCHSS":
-                    {
-                        WANTEDFORMRet = "CHEK_PLISTS";
-                        break;
-                    }
-                case "DCHSS":
-                    {
-                        WANTEDFORMRet = "DCHSS";
-                        break;
-                    }
-                case "CHKM":
-                    {
-                        WANTEDFORMRet = "CHEK_MOGUD";
-                        break;
-                    }
-                case "CHKB":
-                    {
-                        WANTEDFORMRet = "CHEK_BARGASHTI_MAIN";
-                        break;
-                    }
-                case "CHKV":
-                    {
-                        WANTEDFORMRet = "CHEK_VOSUL_LES";
-                        break;
-                    }
-                case "CHKVA":
-                    {
-                        WANTEDFORMRet = "CHEK_VLISTALL";
-                        break;
-                    }
-                case "CHKP":
-                    {
-                        WANTEDFORMRet = "CHK_V_PRINT";
-                        break;
-                    }
-                case "FVP":
-                    {
-                        WANTEDFORMRet = "FORMAT_HESAB";
-                        break;
-                    }
-                case "FPV":
-                    {
-                        WANTEDFORMRet = "CHECK_PVLIST";
-                        break;
-                    }
-                case "MONCH":
-                    {
-                        WANTEDFORMRet = "CHEK_MON";
-                        break;
-                    }
-                case "BEHESAB":
-                    {
-                        WANTEDFORMRet = "CHKREC_HES";
-                        break;
-                    }
-                case "GBEHESAB":
-                    {
-                        WANTEDFORMRet = "CHRE_LSPH";
-                        break;
-                    }
-                case "RCHEKD":
-                    {
-                        WANTEDFORMRet = "F_MENU_CHEKRCHEKD";
-                        break;
-                    }
-                case "RCHEKP":
-                    {
-                        WANTEDFORMRet = "F_MENU_CHEKRCHEKP";
-                        break;
-                    }
-                case "CHAPCHEK":
-                    {
-                        WANTEDFORMRet = "CHAPCHEK";
-                        break;
-                    }
-                case "CHKPSS":
-                    {
-                        WANTEDFORMRet = "CHKPSS";
-                        break;
-                    }
-                case var case11 when case11 == "CHVBV":
-                    {
-                        WANTEDFORMRet = "CHVBV";
-                        break;
-                    }
-                case "CHVBVP":
-                    {
-                        WANTEDFORMRet = "CHVBVP";
-                        break;
-                    }
-                case "MONCHP":
-                    {
-                        WANTEDFORMRet = "MONCHP";
-                        break;
-                    }
-                case "CHVZ":
-                    {
-                        WANTEDFORMRet = "CHVZ";
-                        break;
-                    }
-                case var case12 when case12 == "RCHEKD":
-                    {
-                        WANTEDFORMRet = "F_MENU_CHEKRCHEKD";
-                        break;
-                    }
-                case var case13 when case13 == "RCHEKP":
-                    {
-                        WANTEDFORMRet = "F_MENU_CHEKRCHEKP";
-                        break;
-                    }
+                case "CHEKD": WANTEDFORMRet = "PAY_GETD"; break;
+                case "CHEKP": WANTEDFORMRet = "PAY_GETP"; break;
+                case "VCHD": WANTEDFORMRet = "CHKREC_H"; break;
+                case "VCHP": WANTEDFORMRet = "CHREC_HP"; break;
+                case "CHKDLIST": WANTEDFORMRet = "CHKE_DLIST"; break;
+                case "CHKPLIST": WANTEDFORMRet = "CHEK_PLIST"; break;
+                case "SERIAL": WANTEDFORMRet = "F_MENU_SERILA"; break;
+                case "TCHEK": WANTEDFORMRet = "COD_HESAB"; break;
+                case "FORMAT": WANTEDFORMRet = "FORMAT"; break;
+                case "CHPRN": WANTEDFORMRet = "HED_SODUR"; break;
+                case "PCHS": WANTEDFORMRet = "CHEK_PLISTS"; break;
+                case "DCHS": WANTEDFORMRet = "CHEK_DLISTS"; break;
+                case "PCHSS": WANTEDFORMRet = "CHEK_PLISTS"; break;
+                case "DCHSS": WANTEDFORMRet = "DCHSS"; break;
+                case "CHKM": WANTEDFORMRet = "CHEK_MOGUD"; break;
+                case "CHKB": WANTEDFORMRet = "CHEK_BARGASHTI_MAIN"; break;
+                case "CHKV": WANTEDFORMRet = "CHEK_VOSUL_LES"; break;
+                case "CHKVA": WANTEDFORMRet = "CHEK_VLISTALL"; break;
+                case "CHKP": WANTEDFORMRet = "CHK_V_PRINT"; break;
+                case "FVP": WANTEDFORMRet = "FORMAT_HESAB"; break;
+                case "FPV": WANTEDFORMRet = "CHECK_PVLIST"; break;
+                case "MONCH": WANTEDFORMRet = "CHEK_MON"; break;
+                case "BEHESAB": WANTEDFORMRet = "CHKREC_HES"; break;
+                case "GBEHESAB": WANTEDFORMRet = "CHRE_LSPH"; break;
+                case "RCHEKD": WANTEDFORMRet = "F_MENU_CHEKRCHEKD"; break;
+                case "RCHEKP": WANTEDFORMRet = "F_MENU_CHEKRCHEKP"; break;
+                case "CHAPCHEK": WANTEDFORMRet = "CHAPCHEK"; break;
+                case "CHKPSS": WANTEDFORMRet = "CHKPSS"; break;
+                case "CHVBVP": WANTEDFORMRet = "CHVBVP"; break;
+                case "MONCHP": WANTEDFORMRet = "MONCHP"; break;
+                case "CHVZ": WANTEDFORMRet = "CHVZ"; break;
+
                 // منوي انبار-----------------------------------------------------------
-                case "ESWAP":
-                    {
-                        WANTEDFORMRet = "HEAD_LST_ENTEGHAL";
-                        break;
-                    }
-                case "MOGUKOL":
-                    {
-                        WANTEDFORMRet = "R_MOGUDI_ANBARHA";
-                        break;
-                    }
-                case "MOGUKOLLIST":
-                    {
-                        WANTEDFORMRet = "MOGUDI_ANBARHA_LIST";
-                        break;
-                    }
-                case "BAZANB":
-                    {
-                        WANTEDFORMRet = "BAZ_ANBAR";
-                        break;
-                    }
-                case "AKMOGO":
-                    {
-                        WANTEDFORMRet = "AK_MOGUDI_ANBAR_LIST";
-                        break;
-                    }
-                case "AKMOGOR":
-                    {
-                        WANTEDFORMRet = "R_AK_MOGUDI_ANBAR";
-                        break;
-                    }
-                case "AKMOGO2":
-                    {
-                        WANTEDFORMRet = "AK_MOGUDI_ANBAR_LIST";
-                        break;
-                    }
-                case "AKMOGOR2":
-                    {
-                        WANTEDFORMRet = "R_AK_MOGUDI_ANBAR";
-                        break;
-                    }
-                case "KARTR":
-                    {
-                        WANTEDFORMRet = "R_KA_KALA";
-                        break;
-                    }
-                case "KARTR2":
-                    {
-                        WANTEDFORMRet = "KARTR2";
-                        break;
-                    }
-                case "LSTRAZ":
-                    {
-                        WANTEDFORMRet = "TARAZ_ANBAR_KOL";
-                        break;
-                    }
-                case "RSTRAZ":
-                    {
-                        WANTEDFORMRet = "R_TARAZ_ANBARHA";
-                        break;
-                    }
-                case "LSTRAZA":
-                    {
-                        WANTEDFORMRet = "TARAZ_ANBAR_KHAS";
-                        break;
-                    }
-                case "RSTRAZA":
-                    {
-                        WANTEDFORMRet = "R_TARAZ_ANBAR_KHAS";
-                        break;
-                    }
-                case "RASID":
-                    {
-                        WANTEDFORMRet = "HEAD_LST_RASID";
-                        break;
-                    }
-                case "HAVL":
-                    {
-                        WANTEDFORMRet = "HEAD_LST_HAVL";
-                        break;
-                    }
-                case "ANGD":
-                    {
-                        WANTEDFORMRet = "ANBGRD_HEAD";
-                        break;
-                    }
-                case "RTARDTL":
-                    {
-                        WANTEDFORMRet = "RTARDTL";
-                        break;
-                    }
-                case "RBRFR":
-                    {
-                        WANTEDFORMRet = "RBRFR";
-                        break;
-                    }
-                case "ANBBAZ":
-                    {
-                        WANTEDFORMRet = "ANBBAZ";
-                        break;
-                    }
-                case "TANBGRP":
-                    {
-                        WANTEDFORMRet = "TANBGRP";
-                        break;
-                    }
-                case "HAG":
-                    {
-                        WANTEDFORMRet = "HAG";
-                        break;
-                    }
-                case "SEEENT":
-                    {
-                        WANTEDFORMRet = "SEEENT";
-                        break;
-                    }
-                case "SAYERHAV":
-                    {
-                        WANTEDFORMRet = "SAYERHAV";
-                        break;
-                    }
-                case "ANBMERG":
-                    {
-                        WANTEDFORMRet = "ANBMERG";
-                        break;
-                    }
-                case "TDBARG":
-                    {
-                        WANTEDFORMRet = "TDBARG";
-                        break;
-                    }
-                case "VBP":
-                    {
-                        WANTEDFORMRet = "VBP_CHECK";
-                        break;
-                    }
-                case "TICBARGILES":
-                    {
-                        WANTEDFORMRet = "TICBARGILES";
-                        break;
-                    }
-                case "SEARCHMO":
-                    {
-                        WANTEDFORMRet = "SEARCHMO";
-                        break;
-                    }
-                case "MOGDT":
-                    {
-                        WANTEDFORMRet = "MOGDT";
-                        break;
-                    }
+                case "ESWAP": WANTEDFORMRet = "HEAD_LST_ENTEGHAL"; break;
+                case "MOGUKOL": WANTEDFORMRet = "R_MOGUDI_ANBARHA"; break;
+                case "MOGUKOLLIST": WANTEDFORMRet = "MOGUDI_ANBARHA_LIST"; break;
+                case "BAZANB": WANTEDFORMRet = "BAZ_ANBAR"; break;
+                case "AKMOGO": WANTEDFORMRet = "AK_MOGUDI_ANBAR_LIST"; break;
+                case "AKMOGOR": WANTEDFORMRet = "R_AK_MOGUDI_ANBAR"; break;
+                case "AKMOGO2": WANTEDFORMRet = "AK_MOGUDI_ANBAR_LIST"; break;
+                case "AKMOGOR2": WANTEDFORMRet = "R_AK_MOGUDI_ANBAR"; break;
+                case "KARTR": WANTEDFORMRet = "R_KA_KALA"; break;
+                case "KARTR2": WANTEDFORMRet = "KARTR2"; break;
+                case "LSTRAZ": WANTEDFORMRet = "TARAZ_ANBAR_KOL"; break;
+                case "RSTRAZ": WANTEDFORMRet = "R_TARAZ_ANBARHA"; break;
+                case "LSTRAZA": WANTEDFORMRet = "TARAZ_ANBAR_KHAS"; break;
+                case "RSTRAZA": WANTEDFORMRet = "R_TARAZ_ANBAR_KHAS"; break;
+                case "RASID": WANTEDFORMRet = "HEAD_LST_RASID"; break;
+                case "HAVL": WANTEDFORMRet = "HEAD_LST_HAVL"; break;
+                case "ANGD": WANTEDFORMRet = "ANBGRD_HEAD"; break;
+                case "RTARDTL": WANTEDFORMRet = "RTARDTL"; break;
+                case "RBRFR": WANTEDFORMRet = "RBRFR"; break;
+                case "ANBBAZ": WANTEDFORMRet = "ANBBAZ"; break;
+                case "TANBGRP": WANTEDFORMRet = "TANBGRP"; break;
+                case "HAG": WANTEDFORMRet = "HAG"; break;
+                case "SEEENT": WANTEDFORMRet = "SEEENT"; break;
+                case "SAYERHAV": WANTEDFORMRet = "SAYERHAV"; break;
+                case "ANBMERG": WANTEDFORMRet = "ANBMERG"; break;
+                case "TDBARG": WANTEDFORMRet = "TDBARG"; break;
+                case "VBP": WANTEDFORMRet = "VBP_CHECK"; break;
+                case "TICBARGILES": WANTEDFORMRet = "TICBARGILES"; break;
+                case "SEARCHMO": WANTEDFORMRet = "SEARCHMO"; break;
+                case "MOGDT": WANTEDFORMRet = "MOGDT"; break;
 
                 // منوي حقوق-----------------------------------------------------------
-                case "PERS":
-                    {
-                        WANTEDFORMRet = "PERSON";
-                        break;
-                    }
-                case "WORK":
-                    {
-                        WANTEDFORMRet = "WORKHEAD";
-                        break;
-                    }
-                case "WOKPER":
-                    {
-                        WANTEDFORMRet = "WORKING";
-                        break;
-                    }
-                case "LISTWOR":
-                    {
-                        WANTEDFORMRet = "list_salary";
-                        break;
-                    }
-                case "LISTWOR2":
-                    {
-                        WANTEDFORMRet = "list_salary2";
-                        break;
-                    }
-                case "LISTBIM":
-                    {
-                        WANTEDFORMRet = "R_LIST_BIMEH";
-                        break;
-                    }
-                case "LISTMAL":
-                    {
-                        WANTEDFORMRet = "R_LIST_maliat";
-                        break;
-                    }
-                case "FISH1":
-                    {
-                        WANTEDFORMRet = "FISH_HOGHUGH";
-                        break;
-                    }
-                case "FISH2":
-                    {
-                        WANTEDFORMRet = "FISH2";
-                        break;
-                    }
-                case "SALAR":
-                    {
-                        WANTEDFORMRet = "R_LIST_salary";
-                        break;
-                    }
-                case "DISK":
-                    {
-                        WANTEDFORMRet = "ERSAL_SANAD";
-                        break;
-                    }
-                case "HOKM":
-                    {
-                        WANTEDFORMRet = "PHOKM";
-                        break;
-                    }
-                case "MORAKH":
-                    {
-                        WANTEDFORMRet = "PMORAKH";
-                        break;
-                    }
-                case "GHARA":
-                    {
-                        WANTEDFORMRet = "PGHARAR";
-                        break;
-                    }
-                case "SAND":
-                    {
-                        WANTEDFORMRet = "SAND";
-                        break;
-                    }
-                case "VAM":
-                    {
-                        WANTEDFORMRet = "VAM";
-                        break;
-                    }
-                case "TASV":
-                    {
-                        WANTEDFORMRet = "PENDJOB";
-                        break;
-                    }
-                case "EP":
-                    {
-                        WANTEDFORMRet = "EYDY_PADASH";
-                        break;
-                    }
-                case "DISKM":
-                    {
-                        WANTEDFORMRet = "DISKM";
-                        break;
-                    }
+                case "PERS": WANTEDFORMRet = "PERSON"; break;
+                case "WORK": WANTEDFORMRet = "WORKHEAD"; break;
+                case "WOKPER": WANTEDFORMRet = "WORKING"; break;
+                case "LISTWOR": WANTEDFORMRet = "list_salary"; break;
+                case "LISTWOR2": WANTEDFORMRet = "list_salary2"; break;
+                case "LISTBIM": WANTEDFORMRet = "R_LIST_BIMEH"; break;
+                case "LISTMAL": WANTEDFORMRet = "R_LIST_maliat"; break;
+                case "FISH1": WANTEDFORMRet = "FISH_HOGHUGH"; break;
+                case "FISH2": WANTEDFORMRet = "FISH2"; break;
+                case "SALAR": WANTEDFORMRet = "R_LIST_salary"; break;
+                case "DISK": WANTEDFORMRet = "ERSAL_SANAD"; break;
+                case "HOKM": WANTEDFORMRet = "PHOKM"; break;
+                case "MORAKH": WANTEDFORMRet = "PMORAKH"; break;
+                case "GHARA": WANTEDFORMRet = "PGHARAR"; break;
+                case "SAND": WANTEDFORMRet = "SAND"; break;
+                case "VAM": WANTEDFORMRet = "VAM"; break;
+                case "TASV": WANTEDFORMRet = "PENDJOB"; break;
+                case "EP": WANTEDFORMRet = "EYDY_PADASH"; break;
+                case "DISKM": WANTEDFORMRet = "DISKM"; break;
+
                 // منوي برنامه ريزي-----------------------------------------------------------
-                case "PROG":
-                    {
-                        WANTEDFORMRet = "PRGHEAD";
-                        break;
-                    }
-                case "CH1":
-                    {
-                        WANTEDFORMRet = "CHRT_HES_KOL";
-                        break;
-                    }
-                case "CT1":
-                    {
-                        WANTEDFORMRet = "F_MENU_MON";
-                        break;
-                    }
-                case "CT2":
-                    {
-                        WANTEDFORMRet = "CAMAT";
-                        break;
-                    }
-                case "CT3":
-                    {
-                        WANTEDFORMRet = "CT3";
-                        break;
-                    }
+                case "PROG": WANTEDFORMRet = "PRGHEAD"; break;
+                case "CH1": WANTEDFORMRet = "CHRT_HES_KOL"; break;
+                case "CT1": WANTEDFORMRet = "F_MENU_MON"; break;
+                case "CT2": WANTEDFORMRet = "CAMAT"; break;
+                case "CT3": WANTEDFORMRet = "CT3"; break;
                 case "CT4":
-                    {
-                        WANTEDFORMRet = "CT4";
-                        break;
-                    }
-                case "CT5":
-                    {
-                        WANTEDFORMRet = "CT4";
-                        break;
-                    }
+                case "CT5": WANTEDFORMRet = "CT4"; break;
+
                 // منوي هتلي-----------------------------------------------------------
-                case "MEH":
-                    {
-                        WANTEDFORMRet = "R_LIST_MEHMAN";
-                        break;
-                    }
-                case "HOT":
-                    {
-                        WANTEDFORMRet = "MEHMAN";
-                        break;
-                    }
-                case "ROM":
-                    {
-                        WANTEDFORMRet = "ROOM";
-                        break;
-                    }
-                case "RACK":
-                    {
-                        WANTEDFORMRet = "RACKROOM";
-                        break;
-                    }
+                case "MEH": WANTEDFORMRet = "R_LIST_MEHMAN"; break;
+                case "HOT": WANTEDFORMRet = "MEHMAN"; break;
+                case "ROM": WANTEDFORMRet = "ROOM"; break;
+                case "RACK": WANTEDFORMRet = "RACKROOM"; break;
+
                 // منوي سيستم-----------------------------------------------------------
-                case "ABOUT":
-                    {
-                        WANTEDFORMRet = "ABOUT";
-                        break;
-                    }
-                case "SYS":
-                    {
-                        WANTEDFORMRet = "SAZMAN";
-                        break;
-                    }
-                case "nuser":
-                    {
-                        WANTEDFORMRet = "users";
-                        break;
-                    }
+                case "ABOUT": WANTEDFORMRet = "ABOUT"; break;
+                case "SYS": WANTEDFORMRet = "SAZMAN"; break;
+                case "nuser": WANTEDFORMRet = "users"; break;
                 case "NEWPASSWORD":
-                case "npass":
-                    {
-                        WANTEDFORMRet = "NEWPASSWORD";
-                        break;
-                    }
-                case "nname":
-                    {
-                        WANTEDFORMRet = "USER_CHANGE";
-                        break;
-                    }
-                case "permi":
-                    {
-                        WANTEDFORMRet = "F_USER_PERMITION FORMS";
-                        break;
-                    }
-                case "ersal":
-                    {
-                        WANTEDFORMRet = "F_ERSAL";
-                        break;
-                    }
-                case "dar":
-                    {
-                        WANTEDFORMRet = "F_DARYAFT";
-                        break;
-                    }
-                case "KONT":
-                    {
-                        WANTEDFORMRet = "FORM11";
-                        break;
-                    }
-                case "DEFA":
-                    {
-                        WANTEDFORMRet = "DEFAULT";
-                        break;
-                    }
-                case "TR_FR":
-                    {
-                        WANTEDFORMRet = "TR_FR";
-                        break;
-                    }
-                case "TR_KH":
-                    {
-                        WANTEDFORMRet = "TR_KH";
-                        break;
-                    }
-                case "TR_KHB":
-                    {
-                        WANTEDFORMRet = "TR_KHB";
-                        break;
-                    }
-                case "TR_FRB":
-                    {
-                        WANTEDFORMRet = "TR_FRB";
-                        break;
-                    }
-                case "TR_PFRB":
-                    {
-                        WANTEDFORMRet = "TR_PFRB";
-                        break;
-                    }
-                case "TR_PGL":
-                    {
-                        WANTEDFORMRet = "TR_PGL";
-                        break;
-                    }
-                case "TR_KHAD":
-                    {
-                        WANTEDFORMRet = "TR_KHAD";
-                        break;
-                    }
-                case "TR_MAVA":
-                    {
-                        WANTEDFORMRet = "TR_MAVA";
-                        break;
-                    }
-                case "TR_SMAVA":
-                    {
-                        WANTEDFORMRet = "TR_SMAVA";
-                        break;
-                    }
-                case "TR_TOL":
-                    {
-                        WANTEDFORMRet = "TR_TOL";
-                        break;
-                    }
-                case "TR_HOT":
-                    {
-                        WANTEDFORMRet = "TR_HOT";
-                        break;
-                    }
-                case "TR_FRH":
-                    {
-                        WANTEDFORMRet = "TR_FRH";
-                        break;
-                    }
-                case "TR_KHH":
-                    {
-                        WANTEDFORMRet = "TR_KHH";
-                        break;
-                    }
-                case "TR_ENT":
-                    {
-                        WANTEDFORMRet = "TR_ENT";
-                        break;
-                    }
-                case "TR_DED":
-                    {
-                        WANTEDFORMRet = "TR_DED";
-                        break;
-                    }
-                case "TR_STU":
-                    {
-                        WANTEDFORMRet = "TR_STU";
-                        break;
-                    }
-                case "TR_SAZ":
-                    {
-                        WANTEDFORMRet = "TR_SAZ";
-                        break;
-                    }
-                case "TR_HOK":
-                    {
-                        WANTEDFORMRet = "TR_HOK";
-                        break;
-                    }
-                case "TR_MOR":
-                    {
-                        WANTEDFORMRet = "TR_MOR";
-                        break;
-                    }
-                case "ERSOF":
-                    {
-                        WANTEDFORMRet = "ERSOF";
-                        break;
-                    }
-                case "DAROF":
-                    {
-                        WANTEDFORMRet = "DAROF";
-                        break;
-                    }
-                case "chartfilter":
-                    {
-                        WANTEDFORMRet = "chartfilter";
-                        break;
-                    }
-                case "BLACK":
-                    {
-                        WANTEDFORMRet = "BLACK";
-                        break;
-                    }
+                case "npass": WANTEDFORMRet = "NEWPASSWORD"; break;
+                case "nname": WANTEDFORMRet = "USER_CHANGE"; break;
+                case "permi": WANTEDFORMRet = "F_USER_PERMITION FORMS"; break;
+                case "ersal": WANTEDFORMRet = "F_ERSAL"; break;
+                case "dar": WANTEDFORMRet = "F_DARYAFT"; break;
+                case "KONT": WANTEDFORMRet = "FORM11"; break;
+                case "DEFA": WANTEDFORMRet = "DEFAULT"; break;
+                case "TR_FR": WANTEDFORMRet = "TR_FR"; break;
+                case "TR_KH": WANTEDFORMRet = "TR_KH"; break;
+                case "TR_KHB": WANTEDFORMRet = "TR_KHB"; break;
+                case "TR_FRB": WANTEDFORMRet = "TR_FRB"; break;
+                case "TR_PFRB": WANTEDFORMRet = "TR_PFRB"; break;
+                case "TR_PGL": WANTEDFORMRet = "TR_PGL"; break;
+                case "TR_KHAD": WANTEDFORMRet = "TR_KHAD"; break;
+                case "TR_MAVA": WANTEDFORMRet = "TR_MAVA"; break;
+                case "TR_SMAVA": WANTEDFORMRet = "TR_SMAVA"; break;
+                case "TR_TOL": WANTEDFORMRet = "TR_TOL"; break;
+                case "TR_HOT": WANTEDFORMRet = "TR_HOT"; break;
+                case "TR_FRH": WANTEDFORMRet = "TR_FRH"; break;
+                case "TR_KHH": WANTEDFORMRet = "TR_KHH"; break;
+                case "TR_ENT": WANTEDFORMRet = "TR_ENT"; break;
+                case "TR_DED": WANTEDFORMRet = "TR_DED"; break;
+                case "TR_STU": WANTEDFORMRet = "TR_STU"; break;
+                case "TR_SAZ": WANTEDFORMRet = "TR_SAZ"; break;
+                case "TR_HOK": WANTEDFORMRet = "TR_HOK"; break;
+                case "TR_MOR": WANTEDFORMRet = "TR_MOR"; break;
+                case "ERSOF": WANTEDFORMRet = "ERSOF"; break;
+                case "DAROF": WANTEDFORMRet = "DAROF"; break;
+                case "chartfilter": WANTEDFORMRet = "chartfilter"; break;
+                case "BLACK": WANTEDFORMRet = "BLACK"; break;
+
                 // منوي تالار-----------------------------------------------------------
-                case "PAZ":
-                    {
-                        WANTEDFORMRet = "PAZIRESHTALAR";
-                        break;
-                    }
-                case "PRAK":
-                    {
-                        WANTEDFORMRet = "RACKTALAR";
-                        break;
-                    }
-                case "TAL":
-                    {
-                        WANTEDFORMRet = "TALARS_TARIF";
-                        break;
-                    }
+                case "PAZ": WANTEDFORMRet = "PAZIRESHTALAR"; break;
+                case "PRAK": WANTEDFORMRet = "RACKTALAR"; break;
+                case "TAL": WANTEDFORMRet = "TALARS_TARIF"; break;
+
                 // پذيرش تعميرگاه-----------------------------------------------------------
-                case "PTM":
-                    {
-                        WANTEDFORMRet = "PTAM";
-                        break;
-                    }
-                case "PKINCO":
-                    {
-                        WANTEDFORMRet = "PKINCO";
-                        break;
-                    }
-                case "AMVAL":
-                    {
-                        WANTEDFORMRet = "AMVAL";
-                        break;
-                    }
-                case "ESASSET":
-                    {
-                        WANTEDFORMRet = "ESASSET";
-                        break;
-                    }
-                case "MDKAR":
-                    {
-                        WANTEDFORMRet = "MDKAR";
-                        break;
-                    }
-                case "PMASSETS":
-                    {
-                        WANTEDFORMRet = "PMASSETS";
-                        break;
-                    }
-                case "PMLOCATION":
-                    {
-                        WANTEDFORMRet = "PMLOCATION";
-                        break;
-                    }
-                case "PMPMEM":
-                    {
-                        WANTEDFORMRet = "PMPMEM";
-                        break;
-                    }
-                case "PMKIND":
-                    {
-                        WANTEDFORMRet = "PMKIND";
-                        break;
-                    }
-                case "PMCALEN":
-                    {
-                        WANTEDFORMRet = "PMCALEN";
-                        break;
-                    }
-                case "PMWORKOR":
-                    {
-                        WANTEDFORMRet = "PMWORKOR";
-                        break;
-                    }
-                case "PMDARKH":
-                    {
-                        WANTEDFORMRet = "PMDARKH";
-                        break;
-                    }
-                case "PMFAILDEF":
-                    {
-                        WANTEDFORMRet = "PMFAILDEF";
-                        break;
-                    }
+                case "PTM": WANTEDFORMRet = "PTAM"; break;
+                case "PKINCO": WANTEDFORMRet = "PKINCO"; break;
+                case "AMVAL": WANTEDFORMRet = "AMVAL"; break;
+                case "ESASSET": WANTEDFORMRet = "ESASSET"; break;
+                case "MDKAR": WANTEDFORMRet = "MDKAR"; break;
+                case "PMASSETS": WANTEDFORMRet = "PMASSETS"; break;
+                case "PMLOCATION": WANTEDFORMRet = "PMLOCATION"; break;
+                case "PMPMEM": WANTEDFORMRet = "PMPMEM"; break;
+                case "PMKIND": WANTEDFORMRet = "PMKIND"; break;
+                case "PMCALEN": WANTEDFORMRet = "PMCALEN"; break;
+                case "PMWORKOR": WANTEDFORMRet = "PMWORKOR"; break;
+                case "PMDARKH": WANTEDFORMRet = "PMDARKH"; break;
+                case "PMFAILDEF": WANTEDFORMRet = "PMFAILDEF"; break;
+
                 // بودجه-----------------------------------------------------------
-                case "MMTAKH":
-                    {
-                        WANTEDFORMRet = "MMTAKH";
-                        break;
-                    }
-                case "ssmt":
-                    {
-                        WANTEDFORMRet = "ssmt";
-                        break;
-                    }
-                case "crmt":
-                    {
-                        WANTEDFORMRet = "crmt";
-                        break;
-                    }
-                case "TGUSER":
-                    {
-                        WANTEDFORMRet = "TGUSER";
-                        break;
-                    }
-                case "DEPEMAL":
-                    {
-                        WANTEDFORMRet = "DEPEMAL";
-                        break;
-                    }
-                case "USERS":
-                    {
-                        WANTEDFORMRet = "USERS";
-                        break;
-                    }
+                case "MMTAKH": WANTEDFORMRet = "MMTAKH"; break;
+                case "ssmt": WANTEDFORMRet = "ssmt"; break;
+                case "crmt": WANTEDFORMRet = "crmt"; break;
+                case "TGUSER": WANTEDFORMRet = "TGUSER"; break;
+                case "DEPEMAL": WANTEDFORMRet = "DEPEMAL"; break;
+                case "USERS": WANTEDFORMRet = "USERS"; break;
             }
+
+            try
+            {
+                var dbm = new CL_CCNNMANAGER();
+                dbm.DoExecuteSQL("INSERT INTO AMALIAT (USERID, USERNAME, ADATE, AMALID) VALUES (@UserId, @UserName, GETDATE(), @FormName)",
+                    new { UserId = Baseknow.USERCOD, UserName = Baseknow.UUSER, FormName = frm });
+            }
+            catch { }
+
+
             return WANTEDFORMRet;
         }
+
         public static bool LETSGO(string frm, string? WIN_NAME = null)
         {
             bool returnValue = false;
@@ -3046,7 +1439,7 @@ namespace Prg_Proccessy.FUNCTIONS
                     "   (dbo.TFORMS.FORMNAME = '" + THEFRM + "') AND (dbo.SAL_CHEK.USERCO = " + Baseknow.USERCOD + " )").FirstOrDefault();
                 if (RST != null)
                 {
-                    if ((bool)RST.RUN)
+                    if (RST.RUN ?? false)
                     {
                         returnValue = true;
                     }
@@ -3899,7 +2292,8 @@ namespace Prg_Proccessy.FUNCTIONS
                 if (!Convert.ToBoolean(Baseknow.SAGHF))
                 {
                     MAND = 0d;
-                };////////////
+                }
+                ;////////////
                 var RSTOpen = dbms.DoGetDataSQL<double?>(" SELECT     SUM(MABL) AS smab FROM         dbo.PAY_GETD WHERE     (N_KOL3 IS NULL) AND (N_KOL2 IS NULL) AND (CUST_NO = N'" + HES + "') AND (N_KOL = " + Baseknow.BANKHA + " OR  N_KOL IS NULL)").FirstOrDefault();
                 if (ReferenceEquals(RSTOpen, null))
                 {
@@ -4168,32 +2562,30 @@ namespace Prg_Proccessy.FUNCTIONS
         /// </summary>
         /// <param name="frm">Short Name of Form for Security Query</param>
         /// <param name="obj">Right and Full Name Form</param>
-        public static void SETSECURITY(string obj, string frm, IntPtr windowHandle, string? WIN_NAME = null)
+        public static bool SETSECURITY(string obj, string frm, IntPtr windowHandle, string? WIN_NAME = null, bool IsNotWindow = false)
         {
-            if (windowHandle == null || windowHandle == IntPtr.Zero)
+            if (!IsNotWindow) //It is window
             {
-                // Handle the case where windowHandle is zero, possibly logging or notifying the user.
-                return;
+                if (windowHandle == null || windowHandle == IntPtr.Zero)
+                {
+                    // Handle the case where windowHandle is zero, possibly logging or notifying the user.
+                    return false;
+                }
             }
 
-            //var hwndSource = System.Windows.Interop.HwndSource.FromHwnd(windowHandle);
-            //if (hwndSource == null)
-            //{
-            //    // Handle the case where hwndSource could not be obtained.
-            //    return;
-            //}
-
-            //Window.GetWindow(windowHandle) //IF NEEDS LATER
-
-            var TheWind = (Window)System.Windows.Interop.HwndSource.FromHwnd(windowHandle).RootVisual;
+            Window? TheWind = null;
+            if (!IsNotWindow) //It is window
+            {
+                TheWind = (Window)System.Windows.Interop.HwndSource.FromHwnd(windowHandle).RootVisual;
+            }
 
             if (!string.IsNullOrEmpty(WIN_NAME) && File.Exists(CL_Generaly.FILEACCESSPATH)) //Filey
             {
                 if (!CL_LMethods.IsAllowedOpen(Baseknow.USERCOD.ToString(), WIN_NAME)) //Not Allowed to open
                 {
-                    TheWind.Close();
+                    TheWind?.Close();
                     Msgwin msgwin = new Msgwin(false, "شماره اجازه دسترسی به این بخش را ندارید !"); msgwin.ShowDialog();
-                    return;
+                    return false;
                 }
             }
             else //SQLY
@@ -4206,18 +2598,24 @@ namespace Prg_Proccessy.FUNCTIONS
                 {
                     if (RST.SEE != true) //SEE : دیدن | مشاهده داده
                     {
-                        TheWind.Close();
+                        TheWind?.Close();
                         Msgwin msgwin = new Msgwin(false, "شماره اجازه دسترسی به این بخش را ندارید !"); msgwin.ShowDialog();
-                        return;
+                        return false;
                     }
                     else if (RST.INP != true) //INP : اضافه کردن | ورود داده
                     {
-                        //TheWind.IsEnabled = false;
-                        CL_HELPER.SetInsertButtonSecurity(TheWind, TheWind.Name, isInsertAllowed: false);
+                        if (TheWind != null)
+                        {
+                            //TheWind.IsEnabled = false;
+                            CL_HELPER.SetInsertButtonSecurity(TheWind, TheWind.Name, isInsertAllowed: false);
+                        }
                     }
                     else if (RST.UPD != true) //UPD : بهنگام سازی | ویرایش
                     {
-                        CL_HELPER.SetEditButtonSecurity(TheWind, TheWind.Name, isEditAllowed: false);
+                        if (TheWind != null)
+                        {
+                            CL_HELPER.SetEditButtonSecurity(TheWind, TheWind.Name, isEditAllowed: false);
+                        }
                     }
                     else if (RST.DEL != true) //DEL : حذف کردن
                     {
@@ -4228,14 +2626,17 @@ namespace Prg_Proccessy.FUNCTIONS
                         //    item.IsEnabled = false;
                         //    item.Visibility = Visibility.Hidden;
                         //}
-                        CL_HELPER.SetDeleteButtonSecurity(TheWind, TheWind.Name, isDeleteAllowed: false);
+                        if (TheWind != null)
+                        {
+                            CL_HELPER.SetDeleteButtonSecurity(TheWind, TheWind.Name, isDeleteAllowed: false);
+                        }
                     }
                 }
                 else
                 {
-                    TheWind.Close();
+                    TheWind?.Close();
                     Msgwin msgwin = new Msgwin(false, "تنظیم پیاده سازی مربوط به دسترسی انجام نشده با پشتیبانی در ارتباط باشید"); msgwin.ShowDialog();
-                    return;
+                    return false;
                 }
 
             }
@@ -4257,6 +2658,8 @@ namespace Prg_Proccessy.FUNCTIONS
             //    (TheWind as Anbar.HAVALE_LIST).MAY_OPEN_LST_HAVALEHA = false;
             //}
             #endregion
+
+            return false;
         }
 
         /// <summary>
@@ -6661,7 +5064,8 @@ namespace Prg_Proccessy.FUNCTIONS
                     else
                     {
                         JAMF = 0d;
-                    };
+                    }
+                    ;
                     var JST = dbms.DoGetDataSQL<double?>("SELECT Sum(PAY_GETD.MABL) AS SumOfMABL FROM PAY_GETD WHERE (PAY_GETD.DATE >= PAY_GETD.DATE_S AND PAY_GETD.TAG = " + KIND + " AND PAY_GETD.NUMBER= " + NUMBER + " )").FirstOrDefault();
                     if (!(JST is null))
                     {
@@ -6706,7 +5110,8 @@ namespace Prg_Proccessy.FUNCTIONS
                                 }
                             }
                             //RST2.MoveNext();
-                        };
+                        }
+                        ;
                         //rst.MoveNext();
                     }
                     if (JAMF > 0d)

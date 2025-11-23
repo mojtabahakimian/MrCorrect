@@ -1,31 +1,32 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using Functions;
+using MaterialDesignThemes.Wpf;
+using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
-using System.Linq;
-using System.Windows;
-using System.Windows.Input;
-using static Prg_UI.Functions.CL_LMethods;
-using Functions;
+using Prg_UI.HelperWins;
+using Prg_UI.UiTools;
+using Stimulsoft.Data.Extensions;
+using Syncfusion.Data;
 using Syncfusion.Data.Extensions;
+using Syncfusion.UI.Xaml.BulletGraph;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
 using System;
 using System.Collections.ObjectModel;
-using Syncfusion.UI.Xaml.BulletGraph;
-using System.Windows.Controls;
-using Prg_UI.UiTools;
-using Prg_Proccessy.MODELS;
-using System.Text;
-using Syncfusion.Data;
-using Prg_UI.HelperWins;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
 using System.Diagnostics;
-using System.Windows.Media;
-using Prg_Proccessy.FUNCTIONS;
-using System.Reflection;
 using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Threading;
-using Stimulsoft.Data.Extensions;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Interop;
+using System.Windows.Media;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
+using static Prg_UI.Functions.CL_LMethods;
 
 namespace Prg_UI.Wins.WinMenus.HESABDARI
 {
@@ -109,6 +110,21 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            #region SecuritCheck
+            try
+            {
+                //
+                string Formname = "RMOIN"; //لیست دفتر تفصیلی
+                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                // 2. Run Security:
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            if (!this.IsLoaded) { this.Close(); return; }
+            #endregion
+
             Process Prc = ProcLoader.Start();
             Label_hesab.Content = $"نتیجه لیست دفتر تفضیلی {FULLHESAB_NAME}";
 

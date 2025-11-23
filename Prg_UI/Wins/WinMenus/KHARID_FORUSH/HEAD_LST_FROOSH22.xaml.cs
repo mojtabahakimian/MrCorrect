@@ -2661,7 +2661,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             DELETE_SAYER.IsEnabled = CAN;
             MAGHSAD.IsEnabled = CAN;
 
-            VISITOR_DTL_SUB.IsReadOnly = !CAN;
+            bool AllowedToSavePursantVisitor = CL_HESABDARI.LETSGO("FRMOST"); //ثبت پورسانت ویزیتور
+            if (AllowedToSavePursantVisitor)
+            {
+                VISITOR_DTL_SUB.IsReadOnly = !CAN;
+            }
+            else
+            {
+                VISITOR_DTL_SUB.IsReadOnly = true;
+            }
+
             REQUEST_NO.IsReadOnly = !CAN;
             BARNAMEH.IsReadOnly = !CAN;
             DRIVER.IsReadOnly = !CAN;

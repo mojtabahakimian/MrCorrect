@@ -227,6 +227,22 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
                     }
                 case "F":
                     {
+                        //لیست تراز موجودی انبار خاص
+                        #region SecuritCheck
+                        try
+                        {
+                            //
+                            string Formname = "LSTRAZA";
+                            var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                                                                                               // 2. Run Security:
+                            CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                            // 3. Final State Check:
+                            if (!this.IsLoaded) { this.Close(); return; }
+                        }
+                        catch { try { this.Close(); } catch { } }
+                        if (!this.IsLoaded) { this.Close(); return; }
+                        #endregion
+
                         new TARAZ_ANBAR_KHAS(sql_data).ShowDialog();
                         break;
                     }
@@ -246,7 +262,23 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
 
         private void OpenReport()
         {
-            
+
+            #region SecuritCheck
+            try
+            {
+                //گزارش تراز موجودی انبار خاص
+                string Formname = "RSTRAZA";
+                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                // 2. Run Security:
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            if (!this.IsLoaded) { this.Close(); return; }
+            #endregion
+
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.R_TARAZ_ANBARHA_KHAS.mrt");
             report.Load(pathreport);

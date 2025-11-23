@@ -1,47 +1,48 @@
 ﻿using Microsoft.VisualBasic;
+using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.Wins.WinMenus.ANBAR;
+using Prg_UI.Wins.WinMenus.BARNAME_RIZI;
+using Prg_UI.Wins.WinMenus.Checkha;
+using Prg_UI.Wins.WinMenus.CONFIGS;
+using Prg_UI.Wins.WinMenus.CRM;
 using Prg_UI.Wins.WinMenus.HESABDARI;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
+using Prg_UI.Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
+using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
+using Prg_UI.Wins.WinMenus.SANATI;
+using Prg_UI.Wins.WinMenus.Taarif;
 using Prg_UI.Wins.WinMenus.WinAutomasion;
 using Prg_UI.Wins.WinMenus.WinDEFAULT;
 using Prg_UI.Wins.WinSetting;
+using Rpts;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Dictionary;
 using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
 using System.Windows;
+using System.Windows.Interop;
 using Wins.WinMenus.ANBAR;
 using Wins.WinMenus.ANBAR.ANBAR_REPORTS;
 using Wins.WinMenus.Checkha;
+using Wins.WinMenus.CONFIGS;
 using Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.HESABDARI.GOZARESHAT;
 using Wins.WinMenus.KHARID_FORUSH;
 using Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
 using Wins.WinMenus.SALARY;
-using Wins.WinMenus.Taarif;
-using Wins.WinMenus.CONFIGS;
 using Wins.WinMenus.SANATI;
-using Stimulsoft.Report.Dictionary;
-using Stimulsoft.Report;
-using System.Reflection;
+using Wins.WinMenus.Taarif;
 using Wins.WinSetting;
-using Rpts;
-using Prg_Proccessy.FUNCTIONS;
-using Prg_UI.Wins.WinMenus.CONFIGS;
-using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
-using Prg_UI.Wins.WinMenus.BARNAME_RIZI;
-using Prg_UI.Wins.WinMenus.SANATI;
-using Prg_UI.Wins.WinMenus.Taarif;
-using System.Threading;
-using Prg_UI.Wins.WinMenus.CRM;
-using Prg_UI.Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
-using Prg_UI.Wins.WinMenus.Checkha;
 using static Prg_UI.Functions.CL_LMethods;
-using System.Diagnostics;
 
 namespace Functions
 {
@@ -1148,13 +1149,22 @@ namespace Functions
 
                 case WinNameType.R_TARAZ_ANBARHA: //گزارش تراز موجودی کل انبار ها
                     {
-                        var report = new StiReport();
-                        var pathreport = Assembly.GetEntryAssembly()?.GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.R_TARAZ_ANBARHA.mrt");
-                        report.Load(pathreport);
-                        string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
-                        report.Dictionary.Databases.Clear();
-                        report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
-                        new WINRPT(report, "گزارش تراز موجودی کل انبار ها").Show();
+                        #region SecuritCheck
+
+                        string Formname = "TARAZ4";
+                        bool AllowedToOpen = CL_HESABDARI.SETSECURITY(default, Formname, default, default, IsNotWindow: true);
+
+                        #endregion
+                        if (AllowedToOpen)
+                        {
+                            var report = new StiReport();
+                            var pathreport = Assembly.GetEntryAssembly()?.GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.R_TARAZ_ANBARHA.mrt");
+                            report.Load(pathreport);
+                            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
+                            report.Dictionary.Databases.Clear();
+                            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
+                            new WINRPT(report, "گزارش تراز موجودی کل انبار ها").Show();
+                        }
                     }
                     break;
 

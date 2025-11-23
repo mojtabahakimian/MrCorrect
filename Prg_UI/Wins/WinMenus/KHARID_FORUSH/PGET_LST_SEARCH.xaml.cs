@@ -1,5 +1,6 @@
 ﻿using Functions;
 using MaterialDesignThemes.Wpf;
+using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
@@ -21,6 +22,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using static Prg_UI.Functions.CL_LMethods;
 
 namespace Wins.WinMenus.KHARID_FORUSH
@@ -83,6 +85,21 @@ namespace Wins.WinMenus.KHARID_FORUSH
         public ObservableCollection<PGET_JOTEJU> PGET_JOTEJU_DATA { get; set; } = new ObservableCollection<PGET_JOTEJU>();
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            #region SecuritCheck
+            try
+            {
+                //
+                string Formname = "GETS";
+                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                // 2. Run Security:
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            if (!this.IsLoaded) { this.Close(); return; }
+            #endregion
+
             var inv = CL_LMethods.GetRestrictedSqlQueryWithDetails(0, default, true); // HEAD_LST-oriented
             var pgetWhere = inv.WhereClause.Replace("dbo.HEAD_LST.", "dbo.PGET_HED.").Replace("DATE_N", "DATE");
 

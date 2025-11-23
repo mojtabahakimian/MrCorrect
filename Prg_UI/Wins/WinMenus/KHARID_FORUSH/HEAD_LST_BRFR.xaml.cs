@@ -379,9 +379,17 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 MABL_HAZ.IsReadOnly = !ican; //خدمات
                 MOIN_HAZ.IsReadOnly = !ican; //معین خدمت
                 PAY_GETP_SUB.IsReadOnly = !ican; //چک ها
-                VISITOR_DTL_SUB.IsReadOnly = !ican; //چک ها
                 INVO_LST_SUB.IsReadOnly = !ican;
 
+                bool AllowedToSavePursantVisitor = CL_HESABDARI.LETSGO("FRMOST"); //ثبت پورسانت ویزیتور
+                if (AllowedToSavePursantVisitor)
+                {
+                    VISITOR_DTL_SUB.IsReadOnly = !ican;
+                }
+                else
+                {
+                    VISITOR_DTL_SUB.IsReadOnly = true;
+                }
 
                 BTN_SAVE.IsEnabled = ican;
 

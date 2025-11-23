@@ -424,7 +424,17 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 MABL_HAZ.IsReadOnly = !ican; //خدمات
                 MBAA.IsReadOnly = !ican; //مبلغ مالیات
                 PAY_GETP_SUB.IsReadOnly = !ican; //ثبت چک پشت فاکتور
-                VISITOR_DTL_SUB.IsReadOnly = !ican; //پورسانت پشت فاکتور
+
+                //پورسانت پشت فاکتور
+                bool AllowedToSavePursantVisitor = CL_HESABDARI.LETSGO("FRMOST"); //ثبت پورسانت ویزیتور
+                if (AllowedToSavePursantVisitor)
+                {
+                    VISITOR_DTL_SUB.IsReadOnly = !ican;
+                }
+                else
+                {
+                    VISITOR_DTL_SUB.IsReadOnly = true;
+                }
 
                 MOIN_HAZ.IsEnabled = ican; CMB_MOIN_HAZ.IsEnabled = ican; //معین خدمات
                 HMBAA.IsEnabled = ican; CMB_HMBAA.IsEnabled = ican; //معین مالیات
