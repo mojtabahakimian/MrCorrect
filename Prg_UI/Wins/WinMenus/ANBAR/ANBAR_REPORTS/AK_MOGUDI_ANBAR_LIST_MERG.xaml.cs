@@ -22,6 +22,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
@@ -120,6 +121,20 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            #region SecuritCheck
+            try
+            {
+                string Formname = "ANBMERG";
+                var helper = new WindowInteropHelper(this);
+                helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                                       // 2. Run Security:
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            #endregion
+
             AK_MOGUDI_MERG_DATA?.Clear();
 
             var MasterHead = dbms.DoGetDataSQL<MDS>($"{SQL_DATA}").ToList();

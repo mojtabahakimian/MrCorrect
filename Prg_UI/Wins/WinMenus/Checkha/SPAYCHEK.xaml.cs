@@ -442,7 +442,7 @@ namespace Wins.WinMenus.Checkha
                 if (CheckExistData.Count > 0)
                 {
                     dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETP SET N_SERI = {N_SERI.Text}, BANK = {BANK.SelectedValue}, DATE_S = {DATE_S.Text.ToRawTarikh()}, DATE = {DATE.Text.ToRawTarikh()}, SHOBEH = N'{SHOBEH.SelectedValue}', MABL = {MABL.Text}, NAME_TAH = N'{_NAME_TAH_}', N_HESAB = N'{N_HESAB.Text}', N_S = NULL, N_KOL = {N_KOL}, N_MOIN = {N_MOIN}, N_TAF = {N_TAF}, N_KOL2 = NULL, N_MOIN2 = NULL, N_TAF2 = NULL, N_KOL3 = NULL, N_MOIN3 = NULL, N_TAF3 = NULL, NUMBER = NULL, TAG = NULL, ANBAR = NULL, RADIF = NULL, CUST_NO = DEFAULT, KIND = {KIND.SelectedValue}, VAZ = NULL, HES1 = N'{HES1.SelectedValue}', HES2 = NULL, HES3 = NULL, SAYADI = N'{SAYADI.Text}'
-                                                           WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue}");
+                                                           WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()}");
                 }
                 else
                 {
