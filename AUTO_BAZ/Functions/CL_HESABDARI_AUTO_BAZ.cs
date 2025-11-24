@@ -6491,7 +6491,7 @@ namespace AUTO_BAZ.Functions
         private static readonly object _creatHesLock = new object();
 
         [System.Diagnostics.DebuggerStepThrough]
-        public static void CREATHES(double? KOL, double? MOIN, double? taf, string nam)
+        public static void CREATHES_SAFE(double? KOL, double? MOIN, double? taf, string nam)
         {
             if (KOL == null || MOIN == null || taf == null) return;
 
@@ -6587,6 +6587,52 @@ namespace AUTO_BAZ.Functions
                             {
                                 LogWriter.WriteLog($"Error in CREATHES TDETA_HES merge retry: {ex2.Message}");
                             }
+                        }
+                    }
+                }
+            }
+        }
+
+        [System.Diagnostics.DebuggerStepThrough]
+        public static void CREATHES(double? KOL, double? MOIN, double? taf, string nam)
+        {
+            // First check (optimization)
+            if (!ISHESAB(KOL, MOIN, taf))
+            {
+                lock (_creatHesLock)
+                {
+                    // Double check locking
+                    if (!ISHESAB(KOL, MOIN, taf))
+                    {
+                        // Ensure parent record exists in DETA_HES
+                        try
+                        {
+                            var rst = dbms.DoGetDataSQL<DETA_HES_MODEL1>("SELECT * FROM DETA_HES WHERE N_KOL = " + KOL.ToString() + " AND NUMBER = " + MOIN.ToString()).ToList();
+                            if (rst.Count == 0)
+                            {
+                                // Use IF NOT EXISTS for safety
+                                dbms.DoExecuteSQL($"IF NOT EXISTS (SELECT * FROM DETA_HES WHERE N_KOL = {KOL} AND NUMBER = {MOIN}) INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME) VALUES({KOL},{MOIN},N'{nam}')");
+                            }
+                        }
+                        catch (Exception) { /* Log or ignore if DETA_HES already exists or fails, we proceed to TDETA_HES */ }
+
+                        // Insert into TDETA_HES
+                        try
+                        {
+                            // Use IF NOT EXISTS to prevent race conditions at SQL level
+                            string sql = $"IF NOT EXISTS (SELECT * FROM TDETA_HES WHERE N_KOL = {KOL} AND NUMBER = {MOIN} AND TNUMBER = {taf}) INSERT INTO dbo.TDETA_HES(N_KOL, NUMBER, TNUMBER, NAME) VALUES({KOL},{MOIN},{taf},N'{nam}')";
+                            dbms.DoExecuteSQL(sql);
+                        }
+                        catch (SqlException ex)
+                        {
+                            // 2627 = Violation of PRIMARY KEY constraint (Duplicate Key)
+                            // If duplicate key, it means record exists (created by another thread/process), so we are good.
+                            // Rethrow other SQL errors.
+                            //if (ex.Number != 2627 && ex.Number != 2601)
+                            //{
+                            //   throw;
+                            //}
+                            dbms.DoExecuteSQL($"INSERT INTO dbo.TDETA_HES(N_KOL, NUMBER, TNUMBER, NAME) VALUES({KOL},{MOIN},{taf},N'{nam + " " + taf}')");
                         }
                     }
                 }
