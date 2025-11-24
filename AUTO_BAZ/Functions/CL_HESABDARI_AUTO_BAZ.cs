@@ -19,6 +19,7 @@ using static AUTO_BAZ.Functions.CL_LMethods;
 using Dapper;
 using System.IO;
 using Prg_Proccessy.CNNMANAGER;
+using System.Threading;
 
 namespace AUTO_BAZ.Functions
 {
@@ -9293,33 +9294,39 @@ namespace AUTO_BAZ.Functions
             bool isDefaccChecked = Generaly.defacc;
 
             long CON, i;
-            object a = default, fs;
-            double? max_ns, MABL_CHK = null, JAMF, JAMCH, CKOL = null, JAMFKH;
-            double MBL;
-            double? CMOIN = null, CTAF = null, takh;
-            string shart;
-            int ii;
-            string CH;
-            double JAMP;
-            string TAMIR;
-            string per;
-            long permab;
-            double TAKHF;
-            double? CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null, MAVAD;
-            double DAST;
-            double SAR;
+
             var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM DEED_HED").ToList();
             var HFRST = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM dbo.HEAD_LST WHERE     (NUMBER BETWEEN " + fnum + " AND " + TNUM + ") AND (TAG = 4)").ToList();
 
+            var progressCounter = 0;
+
             LogWriter.WriteLog("شروع باز سازي از فاکتور برشگت فروش شماره : " + fnum + " تا فاكتور شماره :" + TNUM + DateTime.Now);
-            //Parallel.For(0, HFRST.Count, ROW =>
-            for (int ROW = 0; ROW < HFRST.Count; ROW++) //while (!HFRST.EOF)
+            Parallel.For(0, HFRST.Count, ROW =>
+            //for (int ROW = 0; ROW < HFRST.Count; ROW++) //while (!HFRST.EOF)
             {
+                object a = default, fs;
+                double? max_ns, MABL_CHK = null, JAMF, JAMCH, CKOL = null, JAMFKH;
+                double MBL;
+                double? CMOIN = null, CTAF = null, takh;
+                string shart;
+                int ii;
+                string CH;
+                double JAMP;
+                string TAMIR;
+                string per;
+                long permab;
+                double TAKHF;
+                double? CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null, MAVAD;
+                double DAST;
+                double SAR;
+
+                var processed = Interlocked.Increment(ref progressCounter);
+
                 if (InternalCalling)
                 {
                     auto_run.Dispatcher.Invoke(new Action(() =>
                     {
-                        double progress = (ROW + 1) / ((double)HFRST.Count) * 100.0; // Calculate the progress percentage
+                        double progress = processed / ((double)HFRST.Count) * 100.0; // Calculate the progress percentage
                         auto_run.PRGR_C8.Value = progress; // Update the progress bar
                                                            // auto_run.LBL_C8.Content = $"{progress:F2}%";
                         auto_run.UpdateOverallProgressBar();
@@ -10122,8 +10129,9 @@ namespace AUTO_BAZ.Functions
                 //i = i + 1L;
                 //Forms["GUG"]["Text2"] = "";
                 //});
-            }
-            ;
+
+                //} ////For loop normal
+            }); // Parallel.For
             LogWriter.WriteLog("پایان فاکتور برگشت فروش" + DateTime.Now.ToString());
             //DoCmd.Close(acForm, "GUG");
             // DoCmd.Close acForm, "GENSANADFROOSH"
@@ -10145,26 +10153,26 @@ namespace AUTO_BAZ.Functions
                 }));
             }
             bool isDefaccChecked = Generaly.defacc;
-            long CON, i;
-            object a = default, fs;
-            double? max_ns, MABL_CHK = 0, JAMF, JAMCH, CKOL = null, JAMFKH;
-            double MBL;
-            double? CMOIN = null, CTAF = null, takh;
-            string shart;
-            int ii;
-            string CH;
-            double JAMP;
-            string TAMIR;
-            string per;
-            long permab;
-            double TAKHF;
-            double? CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null, MAVAD;
-            double DAST;
-            double SAR;
-            double HES_M;
-            double HES_T;
-            string HES;
-            string visitorn = "";
+            //long CON, i;
+            //object a = default, fs;
+            //double? max_ns, MABL_CHK = 0, JAMF, JAMCH, CKOL = null, JAMFKH;
+            //double MBL;
+            //double? CMOIN = null, CTAF = null, takh;
+            //string shart;
+            //int ii;
+            //string CH;
+            //double JAMP;
+            //string TAMIR;
+            //string per;
+            //long permab;
+            //double TAKHF;
+            //double? CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null, MAVAD;
+            //double DAST;
+            //double SAR;
+            //double HES_M;
+            //double HES_T;
+            //string HES;
+            //string visitorn = "";
 
             double? tindataFlag = null;
             if (!string.IsNullOrEmpty(Baseknow.tindata))
@@ -10176,6 +10184,7 @@ namespace AUTO_BAZ.Functions
                 }
             }
 
+            var progressCounter = 0;
 
             var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM DEED_HED").ToList();
             var HFRST = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM dbo.HEAD_LST WHERE (NUMBER BETWEEN " + fnum + " AND " + TNUM + ") AND (TAG = 25)").ToList();
@@ -10183,14 +10192,33 @@ namespace AUTO_BAZ.Functions
             LogWriter.WriteLog("شروع باز سازي از برگشت فروش 2 شماره : " + fnum + " تا فاكتور شماره :" + TNUM + DateTime.Now);
 
             //اینجا قبلا For بوده حالا شده Parallel یعنی برگشت آزاد
-            //Parallel.For(0, HFRST.Count, HFRST_EOF =>
-            for (int HFRST_EOF = 0; HFRST_EOF < HFRST.Count; HFRST_EOF++) //while (!HFRST.EOF) ////Normal loop for i
+            Parallel.For(0, HFRST.Count, HFRST_EOF =>
+            //for (int HFRST_EOF = 0; HFRST_EOF < HFRST.Count; HFRST_EOF++) //while (!HFRST.EOF) ////Normal loop for i
             {
+                object a = default, fs = null;
+                double? max_ns = null, MABL_CHK = 0, JAMF = 0, JAMCH = 0, CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null, JAMFKH;
+                double MBL = 0d;
+                string CH = string.Empty;
+                double JAMP = 0d;
+                string TAMIR = string.Empty;
+                string per = string.Empty;
+                long permab = 0;
+                double TAKHF = 0d;
+                double MAVAD = 0d;
+                double DAST = 0d;
+                double SAR = 0d;
+                double HES_M = 0d;
+                double HES_T = 0d;
+                string HES = string.Empty;
+                string visitorn = "";
+
+                var processed = Interlocked.Increment(ref progressCounter);
+
                 if (InternalCalling)
                 {
                     auto_run.Dispatcher.Invoke(new Action(() =>
                     {
-                        double progress = (HFRST_EOF + 1) / ((double)HFRST.Count) * 100.0; // Calculate the progress percentage
+                        double progress = processed / ((double)HFRST.Count) * 100.0; // Calculate the progress percentage
                         auto_run.PRGR_C8.Value = progress; // Update the progress bar
                                                            //                    auto_run.UpdateOverallProgressBar();
                         auto_run.UpdateOverallProgressBar();
@@ -10805,8 +10833,8 @@ namespace AUTO_BAZ.Functions
                                         ,25)");
 
                 }
-                //}); ////Parallel For
-            } ////normal loop for i
+            }); ////Parallel For
+            //} ////normal loop for i
 
             LogWriter.WriteLog("پایان برگشت فروش 2" + DateTime.Now.ToString());
 
