@@ -6486,34 +6486,114 @@ namespace AUTO_BAZ.Functions
             }
             return tempGETSTANDARDPRICE_MAVAD;
         }
+
+
+        private static readonly object _creatHesLock = new object();
+
         [System.Diagnostics.DebuggerStepThrough]
         public static void CREATHES(double? KOL, double? MOIN, double? taf, string nam)
         {
+            if (KOL == null || MOIN == null || taf == null) return;
+
+            // First check (optimization)
             if (!ISHESAB(KOL, MOIN, taf))
             {
-                var rst = dbms.DoGetDataSQL<DETA_HES_MODEL1>("SELECT * FROM DETA_HES WHERE N_KOL = " + KOL.ToString() + " AND NUMBER = " + MOIN.ToString()).ToList();
-                if (rst.Count == 0)
+                lock (_creatHesLock)
                 {
+                    // Double check locking
+                    if (!ISHESAB(KOL, MOIN, taf))
+                    {
+                        // 1. MERGE DETA_HES (Parent) - Use atomic MERGE with HOLDLOCK to avoid race conditions
+                        try
+                        {
+                            string mergeDetaHes = @"
+                                MERGE dbo.DETA_HES WITH (HOLDLOCK) AS target
+                                USING (SELECT @KOL AS N_KOL, @MOIN AS NUMBER, @NAM AS NAME) AS source
+                                ON (target.N_KOL = source.N_KOL AND target.NUMBER = source.NUMBER)
+                                WHEN NOT MATCHED THEN
+                                    INSERT (N_KOL, NUMBER, NAME)
+                                    VALUES (source.N_KOL, source.NUMBER, source.NAME);";
 
-                    string Test = $@"INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME) VALUES({KOL},{MOIN},N'{nam}')";
+                            dbms.DoExecuteSQL(mergeDetaHes, new { KOL, MOIN, NAM = nam });
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log but allow to proceed, child insert might succeed or trigger FK error which we handle
+                            LogWriter.WriteLog($"Error in CREATHES DETA_HES merge: {ex.Message}");
+                        }
 
-                    dbms.DoExecuteSQL($"INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME) VALUES({KOL},{MOIN},N'{nam}')");
-                }
+                        // 2. MERGE TDETA_HES (Child) - Use atomic MERGE with HOLDLOCK
+                        try
+                        {
+                            string mergeTdetaHes = @"
+                                MERGE dbo.TDETA_HES WITH (HOLDLOCK) AS target
+                                USING (SELECT @KOL AS N_KOL, @MOIN AS NUMBER, @TAF AS TNUMBER, @NAM AS NAME) AS source
+                                ON (target.N_KOL = source.N_KOL AND target.NUMBER = source.NUMBER AND target.TNUMBER = source.TNUMBER)
+                                WHEN NOT MATCHED THEN
+                                    INSERT (N_KOL, NUMBER, TNUMBER, NAME)
+                                    VALUES (source.N_KOL, source.NUMBER, source.TNUMBER, source.NAME);";
 
-                try
-                {
-                    string testtrace3 = nam;
-                    string testtrace33 = $"INSERT INTO dbo.TDETA_HES(N_KOL, NUMBER, TNUMBER, NAME) VALUES({KOL},{MOIN},{taf},N'{nam}')";
-                    dbms.DoExecuteSQL($"INSERT INTO dbo.TDETA_HES(N_KOL, NUMBER, TNUMBER, NAME) VALUES({KOL},{MOIN},{taf},N'{nam}')");
-                }
-                catch (Exception)
-                {
+                            dbms.DoExecuteSQL(mergeTdetaHes, new { KOL, MOIN, TAF = taf, NAM = nam });
+                        }
+                        catch (SqlException ex)
+                        {
+                            if (ex.Number == 2627 || ex.Number == 2601) // Primary key violation / Unique index
+                            {
+                                // Ignore duplicate key errors - record already exists.
+                                // This can happen in rare race condition scenarios or if MERGE logic hits constraints.
+                                LogWriter.WriteLog($"Duplicate key in TDETA_HES for KOL={KOL}, MOIN={MOIN}, TAF={taf} - ignoring");
+                            }
+                            else if (ex.Number == 547) // Foreign Key Violation (Parent DETA_HES Missing)
+                            {
+                                // Self-healing: Retry creating Parent explicitly, then Child
+                                try
+                                {
+                                    string sqlParent = "INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME) VALUES(@KOL, @MOIN, @NAM)";
+                                    dbms.DoExecuteSQL(sqlParent, new { KOL, MOIN, NAM = nam });
+                                }
+                                catch { } // Ignore parent creation errors (likely already exists)
 
-                    string testtrace3334 = $"INSERT INTO dbo.TDETA_HES(N_KOL, NUMBER, TNUMBER, NAME) VALUES({KOL},{MOIN},{taf},N'{nam + " " + taf}'";
-                    dbms.DoExecuteSQL($"INSERT INTO dbo.TDETA_HES(N_KOL, NUMBER, TNUMBER, NAME) VALUES({KOL},{MOIN},{taf},N'{nam + " " + taf}')");
+                                try
+                                {
+                                    string sqlChild = "INSERT INTO dbo.TDETA_HES(N_KOL, NUMBER, TNUMBER, NAME) VALUES(@KOL, @MOIN, @TAF, @NAM)";
+                                    dbms.DoExecuteSQL(sqlChild, new { KOL, MOIN, TAF = taf, NAM = nam });
+                                }
+                                catch (SqlException ex2)
+                                {
+                                    if (ex2.Number != 2627 && ex2.Number != 2601) throw;
+                                }
+                            }
+                            else
+                            {
+                                throw; // Re-throw unknown SQL exceptions
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // Retry with modified name if generic error occurs (User's logic)
+                            try
+                            {
+                                string mergeTdetaHesRetry = @"
+                                    MERGE dbo.TDETA_HES WITH (HOLDLOCK) AS target
+                                    USING (SELECT @KOL AS N_KOL, @MOIN AS NUMBER, @TAF AS TNUMBER, @NAM AS NAME) AS source
+                                    ON (target.N_KOL = source.N_KOL AND target.NUMBER = source.NUMBER AND target.TNUMBER = source.TNUMBER)
+                                    WHEN NOT MATCHED THEN
+                                        INSERT (N_KOL, NUMBER, TNUMBER, NAME)
+                                        VALUES (source.N_KOL, source.NUMBER, source.TNUMBER, source.NAME);";
+
+                                dbms.DoExecuteSQL(mergeTdetaHesRetry, new { KOL, MOIN, TAF = taf, NAM = nam + " " + taf });
+                            }
+                            catch (Exception ex2)
+                            {
+                                LogWriter.WriteLog($"Error in CREATHES TDETA_HES merge retry: {ex2.Message}");
+                            }
+                        }
+                    }
                 }
             }
         }
+
+
         [System.Diagnostics.DebuggerStepThrough]
         public static bool ISHESAB(double? KOL, double? MOIN, double? taf)
         {
@@ -9206,6 +9286,13 @@ namespace AUTO_BAZ.Functions
                 {
                     GETTAF3(HFRST[ROW].CUST_NO, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
                 }
+
+                //if (IsNull(HFRST[ROW].CUST_NO))
+                //{
+                //    LogWriter.WriteLog($"برگشت فروش شماره {HFRST[ROW].NUMBER} : کد مشتری : [{HFRST[ROW].CUST_NO}] خالی است.");
+                //    continue;
+                //}               
+
                 string SHSH = Strings.Right("فاكتور برگشت فروش شماره " + HFRST[ROW].NUMBER + " مورخ " + Strings.Format(HFRST[ROW].DATE_N, "####/##/##"), 100);
                 if ((bool)Baseknow.SNDKH) // سند روزانه است
                 {
@@ -9677,7 +9764,7 @@ namespace AUTO_BAZ.Functions
                             //SDRST.Fields("NUMBER") = HFRST[ROW].NUMBER;
                             //SDRST.Fields("TAG") = 4;
                             dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S, HES_K,                        HES_M,                         HES_T,          hes,         SHARH,                 BES,               N_SERI,          BANK,                 NUMBER,  		   TAG)
-		                                                        VALUES ({max_ns}, {GETKOL(Baseknow.APA)}, {GETMOIN(Baseknow.APA)},     {GETTAF(Baseknow.APA)},    N'{hes_}',	N'{SHARH_}',	 {CHRST[Q].MABL},	{CHRST[Q].N_SERI}	 {CHRST[Q].BANK}       {HFRST[ROW].NUMBER}  ,4)");
+		                                                        VALUES ({max_ns}, {GETKOL(Baseknow.APA)}, {GETMOIN(Baseknow.APA)},     {GETTAF(Baseknow.APA)},    N'{hes_}',	N'{SHARH_}',	 {CHRST[Q].MABL},	{CHRST[Q].N_SERI}	, {CHRST[Q].BANK}  ,     {HFRST[ROW].NUMBER}  ,4)");
                             //SDRST.update();
 
                             //SDRST.AddNew(); // چكهاي پرداختي
@@ -9700,7 +9787,7 @@ namespace AUTO_BAZ.Functions
                             string CTAF4T = (Convert.ToDouble(CTAF4) == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
 
                             dbms.DoExecuteSQL($@"		INSERT INTO dbo.DEED_DTL (N_S, HES_K,   HES_M,    HES_T, HES_T2,  HES_T3,   HES_T4,       hes,                   SHARH,                 BED,            NUMBER,  		   TAG)
-		                                                        VALUES ({max_ns},      {CKOL}, {CMOIN},  {CTAF}, {CTAF2T},{CTAF3T},{CTAF4T} N'{HFRST[ROW].CUST_NO}',	N'{SHARH_}',	 {CHRST[Q].MABL},   {HFRST[ROW].NUMBER}  ,4)");
+		                                                        VALUES ({max_ns},      {CKOL}, {CMOIN},  {CTAF}, {CTAF2T},{CTAF3T},{CTAF4T}, N'{HFRST[ROW].CUST_NO}',	N'{SHARH_}',	 {CHRST[Q].MABL},   {HFRST[ROW].NUMBER}  ,4)");
 
                         }
                     }
@@ -10048,8 +10135,10 @@ namespace AUTO_BAZ.Functions
             var HFRST = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM dbo.HEAD_LST WHERE (NUMBER BETWEEN " + fnum + " AND " + TNUM + ") AND (TAG = 25)").ToList();
 
             LogWriter.WriteLog("شروع باز سازي از برگشت فروش 2 شماره : " + fnum + " تا فاكتور شماره :" + TNUM + DateTime.Now);
-            //for (int HFRST_EOF = 0; HFRST_EOF < HFRST.Count; HFRST_EOF++) //while (!HFRST.EOF) ////Normal loop for i
-            Parallel.For(0, HFRST.Count, HFRST_EOF =>
+
+            //اینجا قبلا For بوده حالا شده Parallel یعنی برگشت آزاد
+            //Parallel.For(0, HFRST.Count, HFRST_EOF =>
+            for (int HFRST_EOF = 0; HFRST_EOF < HFRST.Count; HFRST_EOF++) //while (!HFRST.EOF) ////Normal loop for i
             {
                 if (InternalCalling)
                 {
@@ -10067,6 +10156,7 @@ namespace AUTO_BAZ.Functions
                 {
                     GETTAF3(HFRST[HFRST_EOF].CUST_NO, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
                 }
+
                 string SHSH;
                 SHSH = Strings.Right("فاكتور برگشت فروش شماره " + HFRST[HFRST_EOF].NUMBER + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 100);
                 if ((bool)Baseknow.SNDKH) // سند روزانه است
@@ -10286,8 +10376,7 @@ namespace AUTO_BAZ.Functions
                             }
                             if (MAVAD > 0d)
                             {
-
-                                //if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
+                                // if (Baseknow.tindata == null || Conversions.ToDouble(Strings.Mid(Baseknow.tindata, 9, 1)) == 1d)
                                 if (tindataFlag is null || tindataFlag == 1d)
                                 {
                                     HES_M = 1;
@@ -10300,14 +10389,31 @@ namespace AUTO_BAZ.Functions
                                     HES_T = Convert.ToInt64(jst_sec[jst_sec_EOF].CODE);
                                     HES = Baseknow.GHEYMAT + "-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE) + "-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE);
                                 }
-                                dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
-                                            VALUES({max_ns},{Baseknow.GHEYMAT},{HES_M},{HES_T}
-                                        ,N'{HES}'
-                                        ,N'{Strings.Left("برگشت فروش.  فاكتور شماره " + HFRST[HFRST_EOF].NUMBER + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " برگشت فروش. " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
-                                        ,{MAVAD},
-                                        {HFRST[HFRST_EOF].NUMBER}
-                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
-                                        ,25)");
+
+                                // *** FIX: Ensure account exists in TDETA_HES before DEED_DTL insert
+                                try
+                                {
+                                    CREATHES(Baseknow.GHEYMAT, (double)HES_M, (double)HES_T, "مواد " + jst_sec[jst_sec_EOF].NAME);
+                                }
+                                catch (Exception ex)
+                                {
+                                    ExpectionLogWriter.WriteLog(ex, "سند برگشت فروش : ساخت حساب مواد");
+                                }
+
+                                // درج سند (همان منطق خودتان)
+                                dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL
+                                    (N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
+                                    VALUES
+                                    ({max_ns},{Baseknow.GHEYMAT},{HES_M},{HES_T}
+                                    ,N'{HES}'
+                                    ,N'{Strings.Left("برگشت فروش.  فاكتور شماره " + HFRST[HFRST_EOF].NUMBER + " مورخ " +
+                                                                     Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" +
+                                                                     jst_sec[jst_sec_EOF].MEGHk + " برگشت فروش. " +
+                                                                     Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                    ,{MAVAD}
+                                    ,{HFRST[HFRST_EOF].NUMBER}
+                                    ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                    ,25)");
                             }
                             if (DAST != 0d)
                             {
@@ -10334,9 +10440,10 @@ namespace AUTO_BAZ.Functions
                                         ,25)");
 
                             }
+
                             if (SAR != 0d)
                             {
-                                CREATHES(Baseknow.GHEYMAT, Convert.ToInt64(jst_sec[jst_sec_EOF].CODE), 9999999, "دستمزد " + jst_sec[jst_sec_EOF].NAME);
+                                // تعیین HES_M و HES_T و رشته HES مطابق منطق فعلی
                                 if (tindataFlag is null || tindataFlag == 1d)
                                 {
                                     HES_M = 1;
@@ -10349,15 +10456,28 @@ namespace AUTO_BAZ.Functions
                                     HES_T = 9999998;
                                     HES = Baseknow.GHEYMAT + "-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE) + "-9999998";
                                 }
+
+                                // ساخت حساب دقیقاً با همان (HES_K, HES_M, HES_T) که قرار است در DEED_DTL درج شود
+                                try
+                                {
+                                    CREATHES(Baseknow.GHEYMAT, (long)HES_M, (long)HES_T, "سربار " + jst_sec[jst_sec_EOF].NAME);
+                                }
+                                catch (Exception ex)
+                                {
+                                    ExpectionLogWriter.WriteLog(ex, "سند برگشت فروش : ساخت حساب سربار");
+                                }
+
+                                // درج سند
                                 dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
-                                            VALUES({max_ns},{Baseknow.GHEYMAT},{HES_M},{HES_T}
-                                        ,N'{HES}'
-                                        ,N'{Strings.Left("برگشت فروش.  فاكتور شماره " + HFRST[HFRST_EOF].NUMBER + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " برگشت فروش. " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
-                                        ,{SAR},
-                                        {HFRST[HFRST_EOF].NUMBER}
-                                        ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
-                                        ,25)");
+                                                     VALUES({max_ns},{Baseknow.GHEYMAT},{HES_M},{HES_T}
+                                                 ,N'{HES}'
+                                                 ,N'{Strings.Left("برگشت فروش.  فاكتور شماره " + HFRST[HFRST_EOF].NUMBER + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_sec[jst_sec_EOF].MEGHk + " برگشت فروش. " + Strings.Trim(jst_sec[jst_sec_EOF].NAME), 255)}'
+                                                 ,{SAR},
+                                                 {HFRST[HFRST_EOF].NUMBER}
+                                                 ,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 4, HFRST[HFRST_EOF].ARZD)}
+                                                 ,25)");
                             }
+
                         }
                         else if (jst_sec[jst_sec_EOF].AVRAGE > 0)
                         {
@@ -10383,6 +10503,9 @@ namespace AUTO_BAZ.Functions
                                 HES = Baseknow.GHEYMAT + "-" + Convert.ToDouble(jst_sec[jst_sec_EOF].CODE) + '-' + Convert.ToInt64(jst_sec[jst_sec_EOF].CODE);
                                 CREATHES(Baseknow.GHEYMAT, HES_M, (long)HES_T, "قیمت تمام شده  " + jst_sec[jst_sec_EOF].NAME);
                             }
+                            string test = HFRST[HFRST_EOF].NUMBER.ToString();
+                            string test2 = HES.ToString();
+
                             dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S,HES_K,HES_M,HES_T,hes,SHARH,BES,NUMBER,ARZD,TAG)
                                             VALUES({max_ns},{Baseknow.GHEYMAT},{HES_M},{HES_T}
                                         ,N'{HES}'
@@ -10636,8 +10759,8 @@ namespace AUTO_BAZ.Functions
                                         ,25)");
 
                 }
-            });
-            //} ////normal loop for i
+                //}); ////Parallel For
+            } ////normal loop for i
 
             LogWriter.WriteLog("پایان برگشت فروش 2" + DateTime.Now.ToString());
 
