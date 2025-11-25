@@ -465,5 +465,10 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             // Refresh the filter to update the view
             SYNCFUSION_DG.View.RefreshFilter();
         }
+
+        private void SYNCFUSION_DG_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+
+        }
     }
 }

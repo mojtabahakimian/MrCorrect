@@ -5,20 +5,21 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Prg_UI.Wins.WinMenus.SANATI;
+using Rpts;
+using Stimulsoft.Report;
 using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
-using Stimulsoft.Report;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
-using Rpts;
-using static Prg_UI.Functions.CL_LMethods;
-using System.Diagnostics;
+using System.Windows.Interop;
 using Wins.WinMenus.HESABDARI.GOZARESHAT;
-using Prg_UI.Wins.WinMenus.SANATI;
+using static Prg_UI.Functions.CL_LMethods;
 
 namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 {
@@ -305,6 +306,21 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
         }
         private void ProcessBEDBESM()
         {
+            #region SecuritCheck
+            try
+            {
+                string Formname = "BEDBESM"; //لیست بدهکاران وبستانکاران محدوده شده و نمایش آن تراز چهار ستونی کل
+                bool HasAccess = CL_HESABDARI.SETSECURITY(default, Formname, default, default, true);
+                if (!HasAccess)
+                {
+                    new Msgwin(false, "شا به این گزینه دسترسی ندارید").Show();
+                    this?.Close(); return;
+                }
+            }
+            catch { try { this?.Close(); } catch { } }
+            #endregion
+
+
             var userCod = Baseknow.USERCOD.ToString();
             //var blockHesRecords = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCK_HES WHERE USERCO = {userCod}");
             //var blockNonHesRecords = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCKNON_HES WHERE USERCO = {userCod}");
@@ -318,6 +334,13 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             CreateTempTableData();
             new TARAZ_4("0", DT2.Text.ToRawTarikh(), true).Show();
         }
+        public class TMP_MODEL1
+        {
+            public int? USERCO { get; set; }
+            public string? HES { get; set; }
+        }
+
+        List<string> blockedConditions = new List<string>();
 
         private void CreateTempTableData()
         {
@@ -326,7 +349,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
             string shCondition = "";
 
-            var rst2 = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCK_HES WHERE USERCO = {userCod}").ToList();
+            var rst2 = dbms.DoGetDataSQL<TMP_MODEL1>($"SELECT USERCO, HES FROM BLOCK_HES WHERE USERCO = {userCod}").ToList();
             if (rst2.Count > 0)
             {
                 string hes = rst2[0].HES;
@@ -343,7 +366,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                 }
             }
 
-            var rst3 = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCKNON_HES WHERE USERCO = {userCod}").ToList();
+            var rst3 = dbms.DoGetDataSQL<TMP_MODEL1>($"SELECT USERCO, HES FROM BLOCKNON_HES WHERE USERCO = {userCod}").ToList();
             if (rst3.Count > 0)
             {
                 string nonCondition = "";

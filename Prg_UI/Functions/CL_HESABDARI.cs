@@ -2659,7 +2659,7 @@ namespace Prg_Proccessy.FUNCTIONS
             //}
             #endregion
 
-            return false;
+            return true;
         }
 
         /// <summary>

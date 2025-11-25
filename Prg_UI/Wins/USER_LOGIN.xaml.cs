@@ -371,10 +371,10 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
             Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
 
-            //CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
             CL_Generaly.SHIFT_OF_USER = 1; //شیفت صبح
             CL_Generaly.VAHED_OF_USER = 1; //دپارتمان DEPARTEMAN اداری
             Baseknow.UGRP = "1";
+            CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
 
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
 
@@ -386,7 +386,7 @@ namespace Prg_UI.Wins
 
             //new WIN_OPTIONS().Show();
             //new HEAD_LST_PISHFROOSH2().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALAH_ENTER, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN_LIMITED, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_CHEK_VOSUL_LES, this);
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this);

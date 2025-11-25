@@ -6236,15 +6236,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void INVO_LST_sub_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
-            DataGrid dataGrid = sender as DataGrid;
-            if (dataGrid == null) return;
-
-            if (dataGrid.SelectedItems.Count > 0)
-            {
-                return;
-            }
-
-            // Find the row under the mouse
             DependencyObject dep = (DependencyObject)e.OriginalSource;
             while (dep != null && !(dep is DataGridRow))
             {
@@ -6252,21 +6243,48 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
             DataGridRow row = dep as DataGridRow;
-            if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
+            DataGrid dataGrid = sender as DataGrid;
+
+            if (row == null || dataGrid == null || row.Item == null || row.Item == CollectionView.NewItemPlaceholder)
             {
-                // Select the row under the mouse
-                dataGrid.SelectedItem = row.Item;
-
-                // Show the context menu
-                dataGrid.ContextMenu.IsOpen = true;
-
-                // Mark the event as handled to prevent the default context menu behavior
+                // Clicked on empty space, header, or the new item placeholder.
+                // Prevent the context menu from showing to avoid the crash.
                 e.Handled = true;
             }
             else
             {
-                // No valid row, don't show context menu
+                // This is a valid data row.
+                // If it's not already selected, select it now.
+                if (!row.IsSelected)
+                {
+                    dataGrid.SelectedItem = row.Item;
+                }
+                // Let WPF handle the rest of the event to show the context menu.
+                // Do not set e.Handled = true here.
+            }
+        }
+        private void INVO_LST_SUB_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            if (sender is not DataGrid dataGrid)
+            {
+                return;
+            }
+
+            DependencyObject dep = e.OriginalSource as DependencyObject;
+            while (dep != null && dep is not DataGridRow)
+            {
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+
+            if (dep is not DataGridRow row || row.Item is null || row.Item == CollectionView.NewItemPlaceholder)
+            {
                 e.Handled = true;
+                return;
+            }
+
+            if (!Equals(dataGrid.SelectedItem, row.Item))
+            {
+                dataGrid.SelectedItem = row.Item;
             }
         }
     }
