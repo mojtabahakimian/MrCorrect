@@ -340,7 +340,11 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             public string? HES { get; set; }
         }
 
-        List<string> blockedConditions = new List<string>();
+        private string BuildLikeCondition(string columnName, string hes)
+        {
+            string likePattern = $"{hes}%";
+            return $"{columnName} LIKE '{likePattern}'";
+        }
 
         private void CreateTempTableData()
         {
@@ -349,42 +353,34 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
             string shCondition = "";
 
-            var rst2 = dbms.DoGetDataSQL<TMP_MODEL1>($"SELECT USERCO, HES FROM BLOCK_HES WHERE USERCO = {userCod}").ToList();
-            if (rst2.Count > 0)
+            List<string> blockedConditions = new List<string>();
+            var rst2 = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCK_HES WHERE USERCO = {userCod}").ToList();
+            foreach (var row in rst2)
             {
-                string hes = rst2[0].HES;
-                shCondition = CL_HESABDARI.ISHESAB3(hes)
-                    ? $"HES NOT LIKE '{hes}'"
-                    : $"HES NOT LIKE '{hes}-%'";
-
-                for (int i = 1; i < rst2.Count; i++)
-                {
-                    hes = rst2[i].HES;
-                    shCondition += CL_HESABDARI.ISHESAB3(hes)
-                        ? $" AND HES NOT LIKE '{hes}'"
-                        : $" AND HES NOT LIKE '{hes}-%'";
-                }
+                blockedConditions.Add(BuildLikeCondition("HES", row.HES));
+            }
+            List<string> allowedConditions = new List<string>();
+            var rst3 = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCKNON_HES WHERE USERCO = {userCod}").ToList();
+            foreach (var row in rst3)
+            {
+                allowedConditions.Add(BuildLikeCondition("HES", row.HES));
             }
 
-            var rst3 = dbms.DoGetDataSQL<TMP_MODEL1>($"SELECT USERCO, HES FROM BLOCKNON_HES WHERE USERCO = {userCod}").ToList();
-            if (rst3.Count > 0)
+            if (blockedConditions.Count > 0)
             {
-                string nonCondition = "";
-                foreach (var row in rst3)
+                string blockedCondition = string.Join(" OR ", blockedConditions);
+                if (allowedConditions.Count > 0)
                 {
-                    string hes = row.HES;
-                    nonCondition += nonCondition == ""
-                        ? (CL_HESABDARI.ISHESAB3(hes) ? $"HES LIKE '{hes}'" : $"HES LIKE '{hes}-%'")
-                        : (CL_HESABDARI.ISHESAB3(hes) ? $" OR HES LIKE '{hes}'" : $" OR HES LIKE '{hes}-%'");
-                }
-                if (!string.IsNullOrEmpty(shCondition))
-                {
-                    shCondition = $"({shCondition}) OR ({nonCondition})";
+                    shCondition = $"(NOT ({blockedCondition})) OR ({string.Join(" OR ", allowedConditions)})";
                 }
                 else
                 {
-                    shCondition = $"({nonCondition})";
+                    shCondition = $"NOT ({blockedCondition})";
                 }
+            }
+            else if (allowedConditions.Count > 0)
+            {
+                shCondition = string.Join(" OR ", allowedConditions);
             }
 
             string tableName = $"BEDBESMAH{userCod}";
@@ -415,6 +411,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
             dbms.DoExecuteSQL(finalSql);
         }
+
 
         private string BuildShString(IEnumerable<dynamic> blockHesRecords, IEnumerable<dynamic> blockNonHesRecords)
         {

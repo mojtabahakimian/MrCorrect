@@ -2661,14 +2661,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             DELETE_SAYER.IsEnabled = CAN;
             MAGHSAD.IsEnabled = CAN;
 
-            bool AllowedToSavePursantVisitor = CL_HESABDARI.LETSGO("FRMOST"); //ثبت پورسانت ویزیتور
+            bool AllowedToSavePursantVisitor = CL_HESABDARI.LETSGO("VISITORS"); //ثبت پورسانت ویزیتور
             if (AllowedToSavePursantVisitor)
             {
                 VISITOR_DTL_SUB.IsReadOnly = !CAN;
+                //VISITOR_DTL_SUB.CanUserAddRows = true;
             }
             else
             {
                 VISITOR_DTL_SUB.IsReadOnly = true;
+                //VISITOR_DTL_SUB.CanUserAddRows = false;
             }
 
             REQUEST_NO.IsReadOnly = !CAN;
@@ -6961,11 +6963,14 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                             }
                             else
                             {
-                                var extraItem = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>($"SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO WHERE PPID = {rst.MODAT_PPID}").FirstOrDefault();
-                                if (extraItem != null)
+                                if (rst.MODAT_PPID != null)
                                 {
-                                    extraItem.IsTempyDisplay = true;
-                                    currentList.Add(extraItem);
+                                    var extraItem = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>($"SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO WHERE PPID = {rst.MODAT_PPID}").FirstOrDefault();
+                                    if (extraItem != null)
+                                    {
+                                        extraItem.IsTempyDisplay = true;
+                                        currentList.Add(extraItem);
+                                    }
                                 }
                             }
                             MODAT_PPID.Items.Refresh();
