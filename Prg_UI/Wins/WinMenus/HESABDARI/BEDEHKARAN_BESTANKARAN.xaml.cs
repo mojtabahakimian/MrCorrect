@@ -113,12 +113,16 @@ namespace Wins.WinMenus.HESABDARI
                 //
                 var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
                 // 2. Run Security:
-                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                bool HasAccess = CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                if (!HasAccess)
+                {
+                    this?.Close();
+                }
                 // 3. Final State Check:
-                if (!this.IsLoaded) { this.Close(); return; }
+                if (!this.IsLoaded) { this?.Close(); return; }
             }
-            catch { try { this.Close(); } catch { } }
-            if (!this.IsLoaded) { this.Close(); return; }
+            catch { try { this?.Close(); } catch { } }
+            if (!this.IsLoaded) { this?.Close(); return; }
             #endregion
 
             FACTOR_DATA?.Clear();

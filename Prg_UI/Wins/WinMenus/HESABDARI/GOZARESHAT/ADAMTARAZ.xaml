@@ -549,7 +549,7 @@
            HeaderStyle="{StaticResource KDGHeader}"
            BorderBrush="{StaticResource GENERAL_Grlicom}"
            CurrentCellActivated="SYNCFUSION_DG_CurrentCellActivated"
-           Margin="10,49,10,10" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged">
+           Margin="10,49,10,10" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" PreviewKeyDown="SYNCFUSION_DG_PreviewKeyDown" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged">
 
             <syncfusion:SfDataGrid.Columns>
                 <syncfusion:GridTextColumn HeaderText="شماره سند" MappingName="N_S" Width="120" />

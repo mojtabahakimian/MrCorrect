@@ -606,6 +606,22 @@
                 <syncfusion:GridTextColumn MappingName="N_HESAB" HeaderText="جاری چک" ColumnSizer="Auto" />
                 <syncfusion:GridTextColumn MappingName="RADIF" HeaderText="ردیف" ColumnSizer="Auto" />
                 <syncfusion:GridTextColumn MappingName="VAZ" HeaderText="صندوق" ColumnSizer="Auto" />
+                <!--وصول به حساب-->
+                <syncfusion:GridTemplateColumn HeaderText="پاک کردن وضعیت" MinimumWidth="90"   MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
+                    <syncfusion:GridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button x:Name="BTN_CLEAR_VOSUL" IsTabStop="False" Click="BTN_CLEAR_VOSUL_Click" Tag="{Binding}"
+                          materialDesign:ButtonAssist.CornerRadius="2"
+                          Style="{StaticResource MaterialDesignFlatButton}"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                          HorizontalContentAlignment="Center">
+                                <materialDesign:PackIcon Kind="ClearCircle"/>
+                            </Button>
+
+                        </DataTemplate>
+                    </syncfusion:GridTemplateColumn.CellTemplate>
+                </syncfusion:GridTemplateColumn>
+
                 <syncfusion:GridTextColumn MappingName="SAYADI" HeaderText="شماره صیادی" ColumnSizer="Auto" />
 
                 <syncfusion:GridTemplateColumn HeaderText="حذف" MinimumWidth="90"   MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
@@ -747,22 +763,7 @@
                     </syncfusion:GridTextColumn.HeaderTemplate>
                 </syncfusion:GridTextColumn>
 
-                <!--وصول به حساب-->
-                <syncfusion:GridTemplateColumn HeaderText="پاک کردن وضعیت" MinimumWidth="90"   MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False" d:IsHidden="False">
-                    <syncfusion:GridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Button x:Name="BTN_CLEAR_VOSUL" IsTabStop="False" Click="BTN_CLEAR_VOSUL_Click" Tag="{Binding}"
-                                    materialDesign:ButtonAssist.CornerRadius="2"
-                                    Style="{StaticResource MaterialDesignFlatButton}"
-                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
-                                    HorizontalContentAlignment="Center">
-                                <materialDesign:PackIcon Kind="ClearCircle"/>
-                            </Button>
-
-                        </DataTemplate>
-                    </syncfusion:GridTemplateColumn.CellTemplate>
-                </syncfusion:GridTemplateColumn>
-
+          
                 <syncfusion:GridTextColumn MappingName="N_KOL3" ColumnSizer="Auto" >
                     <syncfusion:GridTextColumn.HeaderTemplate>
                         <DataTemplate>

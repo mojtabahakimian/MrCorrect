@@ -5,20 +5,21 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Prg_UI.Wins.WinMenus.SANATI;
+using Rpts;
+using Stimulsoft.Report;
 using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
-using Stimulsoft.Report;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
-using Rpts;
-using static Prg_UI.Functions.CL_LMethods;
-using System.Diagnostics;
+using System.Windows.Interop;
 using Wins.WinMenus.HESABDARI.GOZARESHAT;
-using Prg_UI.Wins.WinMenus.SANATI;
+using static Prg_UI.Functions.CL_LMethods;
 
 namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 {
@@ -305,6 +306,21 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
         }
         private void ProcessBEDBESM()
         {
+            #region SecuritCheck
+            try
+            {
+                string Formname = "BEDBESM"; //لیست بدهکاران وبستانکاران محدوده شده و نمایش آن تراز چهار ستونی کل
+                bool HasAccess = CL_HESABDARI.SETSECURITY(default, Formname, default, default, true);
+                if (!HasAccess)
+                {
+                    new Msgwin(false, "شا به این گزینه دسترسی ندارید").Show();
+                    this?.Close(); return;
+                }
+            }
+            catch { try { this?.Close(); } catch { } }
+            #endregion
+
+
             var userCod = Baseknow.USERCOD.ToString();
             //var blockHesRecords = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCK_HES WHERE USERCO = {userCod}");
             //var blockNonHesRecords = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCKNON_HES WHERE USERCO = {userCod}");
@@ -318,6 +334,17 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             CreateTempTableData();
             new TARAZ_4("0", DT2.Text.ToRawTarikh(), true).Show();
         }
+        public class TMP_MODEL1
+        {
+            public int? USERCO { get; set; }
+            public string? HES { get; set; }
+        }
+
+        private string BuildLikeCondition(string columnName, string hes)
+        {
+            string likePattern = $"{hes}%";
+            return $"{columnName} LIKE '{likePattern}'";
+        }
 
         private void CreateTempTableData()
         {
@@ -326,42 +353,34 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
             string shCondition = "";
 
+            List<string> blockedConditions = new List<string>();
             var rst2 = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCK_HES WHERE USERCO = {userCod}").ToList();
-            if (rst2.Count > 0)
+            foreach (var row in rst2)
             {
-                string hes = rst2[0].HES;
-                shCondition = CL_HESABDARI.ISHESAB3(hes)
-                    ? $"HES NOT LIKE '{hes}'"
-                    : $"HES NOT LIKE '{hes}-%'";
-
-                for (int i = 1; i < rst2.Count; i++)
-                {
-                    hes = rst2[i].HES;
-                    shCondition += CL_HESABDARI.ISHESAB3(hes)
-                        ? $" AND HES NOT LIKE '{hes}'"
-                        : $" AND HES NOT LIKE '{hes}-%'";
-                }
+                blockedConditions.Add(BuildLikeCondition("HES", row.HES));
+            }
+            List<string> allowedConditions = new List<string>();
+            var rst3 = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCKNON_HES WHERE USERCO = {userCod}").ToList();
+            foreach (var row in rst3)
+            {
+                allowedConditions.Add(BuildLikeCondition("HES", row.HES));
             }
 
-            var rst3 = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCKNON_HES WHERE USERCO = {userCod}").ToList();
-            if (rst3.Count > 0)
+            if (blockedConditions.Count > 0)
             {
-                string nonCondition = "";
-                foreach (var row in rst3)
+                string blockedCondition = string.Join(" OR ", blockedConditions);
+                if (allowedConditions.Count > 0)
                 {
-                    string hes = row.HES;
-                    nonCondition += nonCondition == ""
-                        ? (CL_HESABDARI.ISHESAB3(hes) ? $"HES LIKE '{hes}'" : $"HES LIKE '{hes}-%'")
-                        : (CL_HESABDARI.ISHESAB3(hes) ? $" OR HES LIKE '{hes}'" : $" OR HES LIKE '{hes}-%'");
-                }
-                if (!string.IsNullOrEmpty(shCondition))
-                {
-                    shCondition = $"({shCondition}) OR ({nonCondition})";
+                    shCondition = $"(NOT ({blockedCondition})) OR ({string.Join(" OR ", allowedConditions)})";
                 }
                 else
                 {
-                    shCondition = $"({nonCondition})";
+                    shCondition = $"NOT ({blockedCondition})";
                 }
+            }
+            else if (allowedConditions.Count > 0)
+            {
+                shCondition = string.Join(" OR ", allowedConditions);
             }
 
             string tableName = $"BEDBESMAH{userCod}";
@@ -392,6 +411,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
             dbms.DoExecuteSQL(finalSql);
         }
+
 
         private string BuildShString(IEnumerable<dynamic> blockHesRecords, IEnumerable<dynamic> blockNonHesRecords)
         {

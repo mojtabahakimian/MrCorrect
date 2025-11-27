@@ -152,28 +152,35 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            string callername = (this.GetType().Name);
+            string Formname = "TARAZ4";
+
+            if (BEDBESKOL) //لیست بدهکاران و بستانکاران محدود شده در تراز چهار ستونی کل
+            {
+                LABEL_HEADER.Content = "ليست حسابهای كل محدود شده";
+                callername = (this.GetType().Name + LABEL_HEADER.Content.ToString());
+                Formname = "BEDBESM";
+            }
             #region SecuritCheck
             try
             {
-                string Formname = "TARAZ4";
                 var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
-                // 2. Run Security:
-                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
-                // 3. Final State Check:
-                if (!this.IsLoaded) { this.Close(); return; }
+                bool HasAccess = CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                if (!HasAccess)
+                {
+                    this?.Close(); return;
+                }
             }
             catch { try { this.Close(); } catch { } }
-            if (!this.IsLoaded) { this.Close(); return; }
+            if (!BEDBESKOL)
+            {
+                if (!this.IsLoaded) { this.Close(); return; }
+                //اگر بدهکاران و بستانکاران محدود نبوده و تراز بوده و دسترسی هم نداشته و به هر دلیلی بسته نشده ببندش
+            }
             #endregion
 
             Process Prc = ProcLoader.Start();
 
-            string callername = (this.GetType().Name);
-            if (BEDBESKOL)
-            {
-                LABEL_HEADER.Content = "ليست حسابهای كل محدود شده";
-                callername = (this.GetType().Name + LABEL_HEADER.Content.ToString());
-            }
             CL_HESABDARI.AMALIYAT_USER(callername);
 
             double SNDNUM1 = 0; // Assuming these are float values.

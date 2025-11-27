@@ -83,6 +83,8 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         {
             InitializeComponent();
 
+            CL_DATAGRID_FUNCS.EnsureGridColumnsHaveMappingName(SYNCFUSION_DG);
+
             this.DataContext = this;
 
             DT1 = _DT1_;

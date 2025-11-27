@@ -75,7 +75,7 @@
 
         <DataGrid   
                 d:ItemsSource="{d:SampleData}" ContextMenu="{StaticResource ContextUtilityMenu1}"
-                x:Name="INVO_LST_SUB"  MouseRightButtonUp="INVO_LST_sub_MouseRightButtonUp"
+                x:Name="INVO_LST_SUB"  MouseRightButtonUp="INVO_LST_sub_MouseRightButtonUp" ContextMenuOpening="INVO_LST_SUB_ContextMenuOpening"
                 EnableColumnVirtualization="True"
                 EnableRowVirtualization="True"
                 VirtualizingPanel.IsVirtualizing="True"

@@ -850,6 +850,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         }
         private void UiDataUpdate(Jahat jahat)
         {
+            ApplyDataGridItems();
+
             if (RecordsData.View?.CurrentItem is not null && jahat != Jahat.NewItem) //Load Master data
             {
                 var HEADER = RecordsData.View.CurrentItem as Prg_Proccessy.SQLMODELS.PGET_HED;
@@ -1039,6 +1041,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         private void Form_Current()
         {
+            ApplyDataGridItems();
             if (IsNull(this.ID.Text) || this.ID.Text == "0")
             {
                 PGET_LST_SUB.IsReadOnly = true;
@@ -1848,17 +1851,22 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         private void ApplyDataGridItems()
         {
-            if (PGET_LST_SUB.Items is IEditableCollectionView editableCollectionView)
+            try
             {
-                if (editableCollectionView.IsAddingNew)
+                if (PGET_LST_SUB.Items is IEditableCollectionView editableCollectionView)
                 {
-                    editableCollectionView.CancelNew(); // discard the new item
-                }
-                if (editableCollectionView.IsEditingItem)
-                {
-                    editableCollectionView.CommitEdit(); // commit the edit transaction
+                    if (editableCollectionView.IsAddingNew)
+                    {
+                        editableCollectionView.CancelNew(); // discard the new item
+                    }
+                    if (editableCollectionView.IsEditingItem)
+                    {
+                        editableCollectionView.CommitEdit(); // commit the edit transaction
+                    }
                 }
             }
+            catch { }
+
         }
 
         private void SGN3_Click(object sender, RoutedEventArgs e)
