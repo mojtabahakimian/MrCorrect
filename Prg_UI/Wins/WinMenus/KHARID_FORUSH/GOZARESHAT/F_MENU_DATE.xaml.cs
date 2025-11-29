@@ -346,41 +346,49 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             return $"{columnName} LIKE '{likePattern}'";
         }
 
-        private void CreateTempTableData()
+        private void CreateTempTableDataMiney()
         {
             int userCod = int.Parse(Baseknow.USERCOD.ToString());
             string dateVal = DT2.Text.ToRawTarikh();
 
             string shCondition = "";
 
-            List<string> blockedConditions = new List<string>();
             var rst2 = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCK_HES WHERE USERCO = {userCod}").ToList();
-            foreach (var row in rst2)
+            if (rst2.Count > 0)
             {
-                blockedConditions.Add(BuildLikeCondition("HES", row.HES));
-            }
-            List<string> allowedConditions = new List<string>();
-            var rst3 = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCKNON_HES WHERE USERCO = {userCod}").ToList();
-            foreach (var row in rst3)
-            {
-                allowedConditions.Add(BuildLikeCondition("HES", row.HES));
+                string hes = rst2[0].HES;
+                shCondition = CL_HESABDARI.ISHESAB3(hes)
+                    ? $"HES NOT LIKE '{hes}'"
+                    : $"HES NOT LIKE '{hes}-%'";
+
+                for (int i = 1; i < rst2.Count; i++)
+                {
+                    hes = rst2[i].HES;
+                    shCondition += CL_HESABDARI.ISHESAB3(hes)
+                        ? $" AND HES NOT LIKE '{hes}'"
+                        : $" AND HES NOT LIKE '{hes}-%'";
+                }
             }
 
-            if (blockedConditions.Count > 0)
+            var rst3 = dbms.DoGetDataSQL<dynamic>($"SELECT USERCO, HES FROM BLOCKNON_HES WHERE USERCO = {userCod}").ToList();
+            if (rst3.Count > 0)
             {
-                string blockedCondition = string.Join(" OR ", blockedConditions);
-                if (allowedConditions.Count > 0)
+                string nonCondition = "";
+                foreach (var row in rst3)
                 {
-                    shCondition = $"(NOT ({blockedCondition})) OR ({string.Join(" OR ", allowedConditions)})";
+                    string hes = row.HES;
+                    nonCondition += nonCondition == ""
+                        ? (CL_HESABDARI.ISHESAB3(hes) ? $"HES LIKE '{hes}'" : $"HES LIKE '{hes}-%'")
+                        : (CL_HESABDARI.ISHESAB3(hes) ? $" OR HES LIKE '{hes}'" : $" OR HES LIKE '{hes}-%'");
+                }
+                if (!string.IsNullOrEmpty(shCondition))
+                {
+                    shCondition = $"({shCondition}) OR ({nonCondition})";
                 }
                 else
                 {
-                    shCondition = $"NOT ({blockedCondition})";
+                    shCondition = $"({nonCondition})";
                 }
-            }
-            else if (allowedConditions.Count > 0)
-            {
-                shCondition = string.Join(" OR ", allowedConditions);
             }
 
             string tableName = $"BEDBESMAH{userCod}";
@@ -400,7 +408,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                                            Q.HES_T2, Q.HES_T3, Q.HES_T4, CUST_HESAB_1.NAME AS tafname
                                   INTO     {tableName}
                                   FROM     dbo.CUST_HESAB CUST_HESAB_1
-                                  INNER JOIN dbo.Q_BEDEHBESTANHA_SUB({dateVal},1) Q ON CUST_HESAB_1.hes = Q.HES
+                                  INNER JOIN dbo.Q_BEDEHBESTANHA_FULL({dateVal},1) Q ON CUST_HESAB_1.hes = Q.HES
                                   LEFT OUTER JOIN dbo.CUST_HESAB
                                       INNER JOIN dbo.Visit_route ON dbo.CUST_HESAB.hes = dbo.Visit_route.HES
                                       ON Q.ROUTE_NAME = dbo.Visit_route.ROUTE_NAME";
@@ -410,6 +418,160 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                 : sqlCommon;
 
             dbms.DoExecuteSQL(finalSql);
+        }
+
+        private void CreateTempTableData()
+        {
+            int userCod = int.Parse(Baseknow.USERCOD.ToString());
+            string dateVal = DT2.Text.ToRawTarikh();
+
+            // ==========================================================================
+            // مرحله 1: خواندن BLOCK_HES (حساب‌هایی که باید حذف شوند)
+            // ==========================================================================
+            string blockCondition = "";
+
+            var blockHesRecords = dbms.DoGetDataSQL<TMP_MODEL1>(
+                "SELECT USERCO, HES FROM BLOCK_HES WHERE USERCO = @UserCod",
+                new { UserCod = userCod }).ToList();
+
+            if (blockHesRecords.Count > 0)
+            {
+                List<string> blockConditions = new List<string>();
+
+                foreach (var row in blockHesRecords)
+                {
+                    string hes = row.HES?.ToString() ?? "";
+                    if (string.IsNullOrEmpty(hes)) continue;
+
+                    // اگر ISHESAB3 باشد (3 سطحی کامل) → فقط همان حساب
+                    // اگر نباشد → تمام زیرمجموعه‌ها
+                    if (CL_HESABDARI.ISHESAB3(hes))
+                    {
+                        blockConditions.Add($"Q.HES NOT LIKE '{hes}'");
+                    }
+                    else
+                    {
+                        blockConditions.Add($"Q.HES NOT LIKE '{hes}-%'");
+                    }
+                }
+
+                if (blockConditions.Count > 0)
+                {
+                    // شرط‌های حذف با AND ترکیب می‌شوند
+                    blockCondition = string.Join(" AND ", blockConditions);
+                }
+            }
+
+            // ==========================================================================
+            // مرحله 2: خواندن BLOCKNON_HES (حساب‌های استثناء که باید نگه داشته شوند)
+            // ==========================================================================
+            string nonBlockCondition = "";
+
+            var nonBlockHesRecords = dbms.DoGetDataSQL<TMP_MODEL1>(
+                "SELECT USERCO, HES FROM BLOCKNON_HES WHERE USERCO = @UserCod",
+                new { UserCod = userCod }).ToList();
+
+            if (nonBlockHesRecords.Count > 0)
+            {
+                List<string> nonBlockConditions = new List<string>();
+
+                foreach (var row in nonBlockHesRecords)
+                {
+                    string hes = row.HES?.ToString() ?? "";
+                    if (string.IsNullOrEmpty(hes)) continue;
+
+                    // اگر ISHESAB3 باشد → فقط همان حساب (بدون -%‌)
+                    // اگر نباشد → تمام زیرمجموعه‌ها (با -%)
+                    if (CL_HESABDARI.ISHESAB3(hes))
+                    {
+                        nonBlockConditions.Add($"Q.HES LIKE '{hes}'");
+                    }
+                    else
+                    {
+                        nonBlockConditions.Add($"Q.HES LIKE '{hes}-%'");
+                    }
+                }
+
+                if (nonBlockConditions.Count > 0)
+                {
+                    // شرط‌های استثناء با OR ترکیب می‌شوند
+                    nonBlockCondition = string.Join(" OR ", nonBlockConditions);
+                }
+            }
+
+            // ==========================================================================
+            // مرحله 3: ترکیب شرط‌ها به روش VBA اصلی
+            // ==========================================================================
+            string finalWhereCondition = "";
+
+            if (!string.IsNullOrEmpty(blockCondition) && !string.IsNullOrEmpty(nonBlockCondition))
+            {
+                // هر دو شرط وجود دارند: (شرط‌های حذف) OR (شرط‌های استثناء)
+                finalWhereCondition = $"(({blockCondition}) OR ({nonBlockCondition}))";
+            }
+            else if (!string.IsNullOrEmpty(blockCondition))
+            {
+                // فقط شرط‌های حذف
+                finalWhereCondition = $"({blockCondition})";
+            }
+            else if (!string.IsNullOrEmpty(nonBlockCondition))
+            {
+                // فقط شرط‌های استثناء
+                finalWhereCondition = $"({nonBlockCondition})";
+            }
+
+            // ==========================================================================
+            // مرحله 4: ساخت و اجرای کوئری اصلی
+            // ==========================================================================
+            string tableName = $"BEDBESMAH{userCod}";
+            // حذف جدول موقت اگر وجود داشته باشد
+            string dropTableSql = @"IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @TableName) DROP TABLE " + tableName;
+
+            dbms.DoExecuteSQL(dropTableSql, new { TableName = tableName });
+
+            // کوئری اصلی SELECT INTO
+            string selectIntoSql = $@"
+                SELECT Q.TAFZIL, 
+                       Q.HES_K, 
+                       Q.HES_M, 
+                       Q.SumOfBED, 
+                       Q.SumOfBES, 
+                       Q.BEDBES, 
+                       Q.NAME, 
+                       Q.MOIN,
+                       dbo.UIIF(Q.BEDBES, '>', 0, Q.BEDBES, 0) AS BEDM,
+                       dbo.UIIF(Q.BEDBES, '<', 0, Q.BEDBES * -1, 0) AS BESM,
+                       Q.HES_T, 
+                       Q.ADDRESS, 
+                       Q.TEL, 
+                       Q.CODE_E, 
+                       Q.TOZIH, 
+                       Q.HES, 
+                       Q.ECODE, 
+                       Q.CUST_COD, 
+                       Q.ROUTE_NAME,
+                       dbo.Visit_route.HES AS VCOD, 
+                       dbo.CUST_HESAB.NAME AS VNAME,
+                       Q.HES_T2, 
+                       Q.HES_T3, 
+                       Q.HES_T4, 
+                       CUST_HESAB_1.NAME AS tafname
+                INTO   {tableName}
+                FROM   dbo.CUST_HESAB CUST_HESAB_1
+                INNER JOIN dbo.Q_BEDEHBESTANHA_FULL({dateVal}, 1) Q 
+                       ON CUST_HESAB_1.hes = Q.HES
+                LEFT OUTER JOIN dbo.CUST_HESAB
+                       INNER JOIN dbo.Visit_route 
+                              ON dbo.CUST_HESAB.hes = dbo.Visit_route.HES
+                       ON Q.ROUTE_NAME = dbo.Visit_route.ROUTE_NAME";
+
+            // اضافه کردن WHERE اگر شرطی وجود داشته باشد
+            if (!string.IsNullOrEmpty(finalWhereCondition))
+            {
+                selectIntoSql += $"\nWHERE {finalWhereCondition} ";
+            }
+
+            dbms.DoExecuteSQL(selectIntoSql);
         }
 
 

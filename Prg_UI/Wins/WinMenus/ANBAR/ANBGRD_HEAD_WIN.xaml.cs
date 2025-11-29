@@ -13,6 +13,7 @@ using Prg_UI.UiTools;
 using Stimulsoft.Report;
 using Stimulsoft.Report.Dictionary;
 using Syncfusion.Data.Extensions;
+using Syncfusion.Windows.Shared;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -1627,8 +1628,7 @@ namespace Wins.WinMenus.ANBAR
 
         private void Command22_Copy_Click(object sender, RoutedEventArgs e)
         {
-
-            if (!IsNull(this.GRD_HES.SelectedValue))
+            if (!string.IsNullOrWhiteSpace(GRD_HES.SelectedValue?.ToString()))
             {
                 SANAD();
             }

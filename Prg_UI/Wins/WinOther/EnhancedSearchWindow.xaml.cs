@@ -290,6 +290,33 @@ namespace Wins.WinOther
             _recordsView.Refresh();
             _parentWindow.OnSearchResultSelected(_resultsGrid.SelectedItem);
         }
+
+        private void _searchBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                e.Handled = true;
+                try
+                {
+                    _resultsGrid.Focus();
+                    Thread.Sleep(250);
+                    _resultsGrid.SelectedIndex = (_resultsGrid.SelectedIndex == -1 ? 0 : ++_resultsGrid.SelectedIndex);
+                    if (_resultsGrid.SelectedItem != null)
+                    {
+                        _parentWindow.OnSearchResultSelected(_resultsGrid.SelectedItem);
+                    }
+                }
+                catch { }
+            }
+        }
+
+        private void _propertySelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_propertySelector.SelectedValue != null)
+            {
+                ApplySearchDebounced();
+            }
+        }
     }
 
     // Helper class for fast property access.

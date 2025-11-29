@@ -97,17 +97,22 @@ namespace Prg_UI.Wins.WinMenus.WinDEFAULT
             SHIFT_CMB.SelectedIndex = 0;
             SHIFT_CMB.SelectedItem = 0;
 
-
-
             var RecordSource = dbms.DoGetDataSQL<DEFAULTDEP>($"SELECT TFSAZMAN, SHIFT, USERID FROM [DEFAULTDEP] WHERE USERID = {Baseknow.USERCOD}").ToList();
             if (RecordSource.Count == 0)
             {
                 dbms.DoExecuteSQL("insert into [DEFAULTDEP](USERID,TFSAZMAN,SHIFT)  values (" + Baseknow.USERCOD + ",1,1)");
+                RecordSource = dbms.DoGetDataSQL<DEFAULTDEP>($"SELECT TFSAZMAN, SHIFT, USERID FROM [DEFAULTDEP] WHERE USERID = {Baseknow.USERCOD}").ToList();
                 //this.Refresh;
             }
 
-            TFSAZMAN_CMB.SelectedValue = vahedy.TFSAZMAN;
-            SHIFT_CMB.SelectedValue = shifty.SHIFT;
+            if (vahedy?.TFSAZMAN != null)
+            {
+                TFSAZMAN_CMB.SelectedValue = vahedy.TFSAZMAN;
+            }
+            if (shifty?.SHIFT != null)
+            {
+                SHIFT_CMB.SelectedValue = shifty.SHIFT;
+            }
 
             if (!CL_HESABDARI.LETSGO("DEFA")) // اپراتور دسترسی ندارد قفل کن
             {
