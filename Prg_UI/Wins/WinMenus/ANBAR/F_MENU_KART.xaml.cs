@@ -251,6 +251,7 @@ namespace Wins.WinMenus.ANBAR
                 if (_ONE_ != null)
                 {
                     //(report.GetComponentByName("Table1_Cell8") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(2, ".", (int)Baseknow.DIG, ",", 3, true, false, ""); //MEGK
+                    (report.GetComponentByName("Table1_Cell17") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(decimalPlaces, ".", decimalPlaces, ",", 3, true, false, ""); //مقدار
                     (report.GetComponentByName("Table1_Cell8") as StiTableCell).TextFormat = new Stimulsoft.Report.Components.TextFormats.StiNumberFormatService(decimalPlaces, ".", decimalPlaces, ",", 3, true, false, ""); //MEGK
                 }
                 var _SECOND_ = (report.GetComponentByName("Table1_Cell9") as StiTableCell); //موجودی

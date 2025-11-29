@@ -56,12 +56,12 @@
             <TextBlock VerticalAlignment="Center">
                 <Run FlowDirection="RightToLeft" Language="fa-ir" Text="جستجو در بخش:"/>
             </TextBlock>
-            <ComboBox x:Name="_propertySelector" Width="auto" MinWidth="200" Margin="5,0,0,0"/>
+            <ComboBox x:Name="_propertySelector" Width="auto" MinWidth="200" Margin="5,0,0,0" SelectionChanged="_propertySelector_SelectionChanged"/>
             <CheckBox x:Name="CHB_MachCase" IsChecked="False" Content="تمام متن" FlowDirection="RightToLeft" Margin="8,0,0,0"/>
             <Button Content="ریست کردن فیلتر" Click="ResetFilterButton_Click" Style="{StaticResource MaterialDesignFlatButton}" Margin="10,0,0,0" FontSize="12"/>
         </StackPanel>
         <!-- Search Box -->
-        <TextBox x:Name="_searchBox" Margin="10,132,10,0" TextChanged="_searchBox_TextChanged" FlowDirection="RightToLeft" Height="31" VerticalAlignment="Top"/>
+        <TextBox x:Name="_searchBox" Margin="10,132,10,0" TextChanged="_searchBox_TextChanged" PreviewKeyDown="_searchBox_PreviewKeyDown" FlowDirection="RightToLeft" Height="31" VerticalAlignment="Top"/>
         <!-- Results DataGrid -->
         <DataGrid x:Name="_resultsGrid" Margin="10,174,10,10" AutoGenerateColumns="False" IsReadOnly="True" FlowDirection="RightToLeft" ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
 

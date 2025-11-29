@@ -145,6 +145,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 var CheckExistData = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE N_SERI = {KhazanehRow.N_SERI} AND BANK = {KhazanehRow.BANK} AND MABL = {KhazanehRow.MABL}").ToList();
                 if (CheckExistData.Count > 0)
                 {
+                    RADIF.Text = CheckExistData.FirstOrDefault()?.RADIF.ToString();
                     N_SERI.Text = CheckExistData.FirstOrDefault()?.N_SERI.ToString();
                     BANK.SelectedValue = CheckExistData.FirstOrDefault()?.BANK.ToString();
                     SHOBEH.SelectedValue = CheckExistData.FirstOrDefault()?.SHOBEH?.ToString();
@@ -475,24 +476,28 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 {
                     this.KIND.SelectedValue = 0;
                 }
-                if (IsNull(this.RADIF.Text) || this.RADIF.Text == "")
+                var rst2 = dbms.DoGetDataSQL<int?>("SELECT     TOP 100 PERCENT FIRSTNUM, BOOKNUM FROM dbo.DAFT_ASN ORDER BY BOOKNUM DESC").ToList();
+                if (rst2.Count > 0)
                 {
-                    var rst2 = dbms.DoGetDataSQL<int?>("SELECT     TOP 100 PERCENT FIRSTNUM, BOOKNUM FROM dbo.DAFT_ASN ORDER BY BOOKNUM DESC").ToList();
-                    if (rst2.Count > 0)
-                    {
-                        rdn = Convert.ToInt32(rst2.FirstOrDefault(0));
-                        dfn = Convert.ToInt32(rst2.FirstOrDefault(1));
-                    }
-                    else
-                    {
-                        Msgwin msgwin = new Msgwin(false, "اطلاعات پايه مربوط به دفتر اسناد دريافتني در مشخصات سيستم تعريف نشده است - شماره شروع دفتر اسناد دريافتني و شماره دفتر بايد مشخص شود براي ثبت چك جاري خودم آن را ايجاد مي نمايم شماره شروع: 1 شماره دفتر: 1");
-                        msgwin.Show();
-                        dbms.DoExecuteSQL($@"INSERT INTO dbo.DAFT_ASN(FIRSTNUM, BOOKNUM)
+                    rdn = Convert.ToInt32(rst2.FirstOrDefault(0));
+                    dfn = Convert.ToInt32(rst2.FirstOrDefault(1));
+                }
+                else
+                {
+                    Msgwin msgwin = new Msgwin(false, "اطلاعات پايه مربوط به دفتر اسناد دريافتني در مشخصات سيستم تعريف نشده است - شماره شروع دفتر اسناد دريافتني و شماره دفتر بايد مشخص شود براي ثبت چك جاري خودم آن را ايجاد مي نمايم شماره شروع: 1 شماره دفتر: 1");
+                    msgwin.Show();
+                    dbms.DoExecuteSQL($@"INSERT INTO dbo.DAFT_ASN(FIRSTNUM, BOOKNUM)
                                                                VALUES(1        ,1)");
 
-                        rdn = 1L;
-                        dfn = 1L;
-                    }
+                    rdn = 1L;
+                    dfn = 1L;
+                }
+
+                bool isNewRadif = false;
+
+                if (string.IsNullOrWhiteSpace(RADIF.Text) || RADIF.Text == "0")
+                {
+                    isNewRadif = true;
                     var rst3 = dbms.DoGetDataSQL<double?>("SELECT Max(PAY_GETD.RADIF) AS MaxOfRADIF  FROM PAY_GETD WHERE ANBAR = " + dfn).ToList();
                     if (rst3.Count == 0 || IsNull(rst3?.FirstOrDefault()))
                     {
@@ -504,71 +509,73 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                         this.RADIF.Text = Convert.ToString(rst3.FirstOrDefault(0) + 1);
                         this.ANBAR = dfn.ToString();
                     }
+                }
 
-                    var KhazanehRow = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST);
-                    var CheckExistData = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()}").ToList();
-                    var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
-                    var _SHOBEH_ = SHOBEH.SelectedValue.ToStringNullSafe().Length > 20 ? SHOBEH.SelectedValue.ToStringNullSafe().Substring(0, 19) : SHOBEH.SelectedValue.ToStringNullSafe();
 
-                    var _SAYADI_ = SAYADI.Text.Length > 16 ? SAYADI.Text.Substring(0, 16) : SAYADI.Text;
+                var KhazanehRow = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST);
+                var CheckExistData = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()}").ToList();
+                var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
+                var _SHOBEH_ = SHOBEH.SelectedValue.ToStringNullSafe().Length > 20 ? SHOBEH.SelectedValue.ToStringNullSafe().Substring(0, 19) : SHOBEH.SelectedValue.ToStringNullSafe();
 
-                    string selected = HES?.SelectedValue?.ToString();
-                    if (!string.IsNullOrEmpty(selected))
+                var _SAYADI_ = SAYADI.Text.Length > 16 ? SAYADI.Text.Substring(0, 16) : SAYADI.Text;
+
+                string selected = HES?.SelectedValue?.ToString();
+                if (!string.IsNullOrEmpty(selected))
+                {
+                    if (selected.Trim() == "911-1-1") //حذف شده انتظامی
                     {
-                        if (selected.Trim() == "911-1-1") //حذف شده انتظامی
+                        N_KOL = N_MOIN = N_TAF = null;
+                        if (HES?.SelectedValue != null)
                         {
-                            N_KOL = N_MOIN = N_TAF = null;
-                            if (HES?.SelectedValue != null)
-                            {
-                                HES.SelectedValue = null;
-                            }
-                        }
-                        else
-                        {
-                            if (CL_HESABDARI.GETKOL(selected) != Baseknow.BANKHA)
-                            {
-                                new Msgwin(false, "چک در این بخش فقط به بانک قابل واگذاری می‌باشد").ShowDialog();
-                                CANCEL = true;
-                            }
-                            N_KOL = CL_HESABDARI.GETKOL(selected).ToString();
-                            N_MOIN = CL_HESABDARI.GETMOIN(selected).ToString();
-                            N_TAF = CL_HESABDARI.GETTAF(selected).ToString();
+                            HES.SelectedValue = null;
                         }
                     }
                     else
                     {
-                        N_KOL = N_MOIN = N_TAF = null;
+                        if (CL_HESABDARI.GETKOL(selected) != Baseknow.BANKHA)
+                        {
+                            new Msgwin(false, "چک در این بخش فقط به بانک قابل واگذاری می‌باشد").ShowDialog();
+                            CANCEL = true;
+                        }
+                        N_KOL = CL_HESABDARI.GETKOL(selected).ToString();
+                        N_MOIN = CL_HESABDARI.GETMOIN(selected).ToString();
+                        N_TAF = CL_HESABDARI.GETTAF(selected).ToString();
                     }
+                }
+                else
+                {
+                    N_KOL = N_MOIN = N_TAF = null;
+                }
 
-                    try
+                try
+                {
+                    // آماده‌سازی پارامترها
+                    var parameters = new
                     {
-                        // آماده‌سازی پارامترها
-                        var parameters = new
-                        {
-                            N_SERI = N_SERI.Text,
-                            BANK = BANK.SelectedValue,
-                            DATE_S = DATE_S.Text.ToRawTarikh(),
-                            DATE = DATE.Text.ToRawTarikh(),
-                            SHOBEH = _SHOBEH_,
-                            MABL = MABL.Text,
-                            NAME_TAH = _NAME_TAH_,
-                            ANBAR = ANBAR,
-                            RADIF = RADIF.Text,
-                            CUST_NO = CUST_NO,
-                            VAZ = 1,
-                            LIST_NO = LIST_NO.SelectedValue,
-                            KIND = KIND.SelectedValue,
-                            SANDUGH = SANDUGH.SelectedValue,
-                            SAYADI = _SAYADI_,
-                            N_HESAB = string.IsNullOrEmpty(N_HESAB.Text) ? (object)DBNull.Value : N_HESAB.Text,
-                            N_KOL = string.IsNullOrEmpty(N_KOL) ? (object)DBNull.Value : N_KOL,
-                            N_MOIN = string.IsNullOrEmpty(N_MOIN) ? (object)DBNull.Value : N_MOIN,
-                            N_TAF = string.IsNullOrEmpty(N_TAF) ? (object)DBNull.Value : N_TAF
-                        };
+                        N_SERI = N_SERI.Text,
+                        BANK = BANK.SelectedValue,
+                        DATE_S = DATE_S.Text.ToRawTarikh(),
+                        DATE = DATE.Text.ToRawTarikh(),
+                        SHOBEH = _SHOBEH_,
+                        MABL = MABL.Text,
+                        NAME_TAH = _NAME_TAH_,
+                        ANBAR = ANBAR,
+                        RADIF = RADIF.Text,
+                        CUST_NO = CUST_NO,
+                        VAZ = 1,
+                        LIST_NO = LIST_NO.SelectedValue,
+                        KIND = KIND.SelectedValue,
+                        SANDUGH = SANDUGH.SelectedValue,
+                        SAYADI = _SAYADI_,
+                        N_HESAB = string.IsNullOrEmpty(N_HESAB.Text) ? (object)DBNull.Value : N_HESAB.Text,
+                        N_KOL = string.IsNullOrEmpty(N_KOL) ? (object)DBNull.Value : N_KOL,
+                        N_MOIN = string.IsNullOrEmpty(N_MOIN) ? (object)DBNull.Value : N_MOIN,
+                        N_TAF = string.IsNullOrEmpty(N_TAF) ? (object)DBNull.Value : N_TAF
+                    };
 
-                        if (CheckExistData.Count > 0)
-                        {
-                            var updateSql = @"UPDATE dbo.PAY_GETD 
+                    if (CheckExistData.Count > 0)
+                    {
+                        var updateSql = @"UPDATE dbo.PAY_GETD 
                                 SET N_SERI = @N_SERI, 
                                     BANK = @BANK, 
                                     DATE_S = @DATE_S, 
@@ -591,11 +598,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                                 WHERE N_SERI = @N_SERI 
                                   AND BANK = @BANK 
                                   AND DATE_S = @DATE_S";
-                            dbms.DoExecuteSQL(updateSql, parameters);
-                        }
-                        else
-                        {
-                            var insertSql = @"INSERT INTO dbo.PAY_GETD(
+                        dbms.DoExecuteSQL(updateSql, parameters);
+                    }
+                    else
+                    {
+                        var insertSql = @"INSERT INTO dbo.PAY_GETD(
                                      N_SERI, BANK, DATE_S, DATE, SHOBEH, MABL, NAME_TAH, 
                                      ANBAR, RADIF, CUST_NO, VAZ, LIST_NO, KIND, SANDUGH, 
                                      N_HESAB, SAYADI, N_KOL, N_MOIN, N_TAF)
@@ -604,22 +611,26 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                                      @ANBAR, @RADIF, @CUST_NO, @VAZ, @LIST_NO, @KIND, @SANDUGH, 
                                      @N_HESAB, @SAYADI, @N_KOL, @N_MOIN, @N_TAF)";
 
-                            dbms.DoExecuteSQL(insertSql, parameters);
-                        }
+                        dbms.DoExecuteSQL(insertSql, parameters);
                     }
-                    catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 2627)
-                    {
-                        new Msgwin(false, "اطلاعات تکراری است").ShowDialog(); return;
-                    }
+                }
+                catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 2627)
+                {
+                    new Msgwin(false, "اطلاعات تکراری است").ShowDialog(); return;
+                }
 
+                if (isNewRadif)
+                {
                     Msgwin msgwin1 = new Msgwin(false, $"شماره دفتر :{this.RADIF.Text}");
                     msgwin1.Show();
-
-                    (THE_WIN as PGET_HED).CmdSaveRecord(((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST));
-                    (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();
-
-                    this.Close();
                 }
+       
+
+                (THE_WIN as PGET_HED).CmdSaveRecord(((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST));
+                (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();
+
+                this.Close();
+
             }
         }
 
