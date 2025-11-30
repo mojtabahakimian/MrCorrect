@@ -4,12 +4,14 @@ using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
+using Prg_UI.HelperWins;
 using Prg_UI.Wins.WinMenus.ANBAR;
 using Prg_UI.Wins.WinMenus.BARNAME_RIZI;
 using Prg_UI.Wins.WinMenus.Checkha;
 using Prg_UI.Wins.WinMenus.CONFIGS;
 using Prg_UI.Wins.WinMenus.CRM;
 using Prg_UI.Wins.WinMenus.HESABDARI;
+using Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
@@ -938,7 +940,11 @@ namespace Functions
             /// <summary>
             /// لیست کالا ها کنترل 5
             /// </summary>
-            WIN_LIST_KALA_CTRL5
+            WIN_LIST_KALA_CTRL5,
+            /// <summary>
+            /// کنترل اسناد و دفاتر چک
+            /// </summary>
+            CONTROL_ASNAD_DAFATERCHECK_FORM11
         }
         #endregion
 
@@ -957,6 +963,10 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+                case WinNameType.CONTROL_ASNAD_DAFATERCHECK_FORM11: /* کنترل اسناد و دفاتر چک */
+                    CL_CONTORL_ASNAD.StartIntegrityChecks();
+                    break;
+
                 case WinNameType.WIN_LIST_KALA_CTRL5: /* لیست کالا ها کنترل 5 */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_LIST_KALA(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_AMVAL: /* جمع داری اموال */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_AMVAL(), isModalDialog: false, allowMultipleInstances: false); break;
@@ -1164,6 +1174,10 @@ namespace Functions
                             report.Dictionary.Databases.Clear();
                             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
                             new WINRPT(report, "گزارش تراز موجودی کل انبار ها").Show();
+                        }
+                        else
+                        {
+                            new Msgwin(false, "شما به این گزینه دسترسی ندارید").Show();
                         }
                     }
                     break;

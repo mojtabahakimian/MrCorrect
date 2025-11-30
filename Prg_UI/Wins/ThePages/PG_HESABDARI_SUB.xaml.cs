@@ -85,5 +85,10 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_AMVAL, null);
         }
+
+        private void WrapPanel_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CONTROL_ASNAD_DAFATERCHECK_FORM11, default);
+        }
     }
 }

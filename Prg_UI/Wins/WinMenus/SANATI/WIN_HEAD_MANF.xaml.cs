@@ -39,6 +39,7 @@ using static Functions.DataGridClipboardManager;
 using static Interfaces.INavigator;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
+using static Prg_UI.HelperWins.Msgwin;
 using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
 
 namespace Prg_UI.Wins.WinMenus.SANATI
@@ -317,11 +318,13 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             Convert.ToDouble(FNUMB.Text)
             );
 
+            _navigationManager.CanChangeRecord = CheckForUnsavedChanges;
 
 
             // Hook up the OnInsertRecord event
             _navigationManager.CurrentRecordChanged += OnCurrentRecordChanged;
             _navigationManager.OnInsertRecord += OnInsertRecord;
+
 
             // Link the navigation manager to the universal control
             navigatorControl.NavigationManager = _navigationManager;
@@ -430,6 +433,138 @@ namespace Prg_UI.Wins.WinMenus.SANATI
         {
             var CURRENT_HEADER = dbms.DoGetDataSQL<HEAD_MANF_MODEL>($"SELECT TOP 1 * FROM HEAD_MANF WHERE FNUMB = {FNUMB.Text} ").FirstOrDefault();
             _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
+        }
+
+        private int _saveErrorCount = 0;
+        private bool CheckForUnsavedChanges()
+        {
+            if (!ChangeIsHappend)
+            {
+                return true;
+            }
+
+            var MSGCAP = new MSGCAPTIONMODEL()
+            {
+                YES_CAPTION = "ذخـیره و ادامه",
+                NO_CAPTION = "بدون ذخیره ادامه بده"
+            };
+
+            string message = "تغییرات شما ذخیره نشده است. آیا مایل به ذخیره کردن هستید؟";
+
+            Msgwin msgwin = new Msgwin(true, message, default, default, MSGCAP);
+            bool? dialogResult = msgwin.ShowDialog();
+
+            if (dialogResult == true)
+            {
+                // کاربر درخواست ذخیره کرده است
+                try
+                {
+                    // اگر BTN_SAVE_Click از sender استفاده می‌کند،
+                    // اینجا "this" را می‌فرستیم نه default تا NullReferenceException نگیریم.
+                    BTN_SAVE_Click(this, new RoutedEventArgs());
+
+                    // اگر ذخیره موفق بود، فلگ تغییرات را پاک می‌کنیم
+                    ChangeIsHappend = false;
+                    _saveErrorCount = 0; // ریست شمارنده خطا
+
+                    return true; // ذخیره موفق بود، اجازه ادامه عملیات
+                }
+                catch (Exception ex)
+                {
+                    _saveErrorCount++;
+                    new Msgwin(false, "در هنگام ذخیره‌سازی خطایی رخ داد.\n").Show();
+                    return false; // ذخیره ناموفق، جلوگیری از ادامه
+                }
+            }
+            else if (dialogResult == false)
+            {
+                // کاربر "بدون ذخیره ادامه بده" را زده
+                ChangeIsHappend = false;
+                _saveErrorCount = 0;
+                return true;
+            }
+            else // dialogResult == null
+            {
+                // کاربر دیالوگ را بسته (انصراف)
+                return false;
+            }
+        }
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            // اگر هیچ تغییری انجام نشده، نیازی به دیالوگ نیست
+            if (!ChangeIsHappend)
+            {
+                return;
+            }
+
+            var MSGCAP = new MSGCAPTIONMODEL()
+            {
+                YES_CAPTION = "ذخـیره و خروج",
+                NO_CAPTION = "صرفا خارج شو"
+            };
+
+            string message = "تغییرات شما ذخیره نشده است. آیا مایل به ذخیره کردن هستید؟";
+
+            Msgwin msgwin = new Msgwin(true, message, default, default, MSGCAP);
+            bool? dialogResult = msgwin.ShowDialog();
+
+            if (dialogResult == true)
+            {
+                // کاربر درخواست ذخیره کرده است
+                try
+                {
+
+                    // اگر BTN_SAVE_Click از sender استفاده می‌کند،
+                    // اینجا "this" را می‌فرستیم نه default تا NullReferenceException نگیریم.
+                    BTN_SAVE_Click(this, new RoutedEventArgs());
+
+                    // اگر ذخیره موفق بود، فلگ تغییرات را پاک می‌کنیم
+                    ChangeIsHappend = false;
+
+                    _saveErrorCount = 0; // ریست شمارنده خطا برای دفعات بعدی
+                    // نکته مهم:
+                    // در اینجا e.Cancel را دست نمی‌زنیم → بستن فرم ادامه پیدا می‌کند.
+                    // اگر ذخیره داخل BTN_SAVE_Click شکست بخورد و Exception بدهد،
+                    // catch زیر مانع خروج می‌شود.
+                }
+                catch (Exception ex)
+                {
+                    // 1. شمارنده‌ی خطا را افزایش بده
+                    _saveErrorCount++;
+
+                    new Msgwin(false, "در هنگام ذخیره‌سازی خطایی رخ داد و عملیات بستن پنجره لغو شد.\n").Show();
+                    if (_saveErrorCount < 2)
+                    {
+                        // در اولین خطا اجازه‌ی بسته شدن پنجره را نمی‌دهیم
+                        e.Cancel = true;
+                        // ChangeIsHappend را دست نمی‌زنیم تا کاربر بداند هنوز ذخیره نشده
+                        return;
+                    }
+                    else
+                    {
+                        // در این مرحله، کاربر عملاً می‌خواهد از این خطا خلاص شود
+                        // و ما می‌پذیریم که بدون ذخیره پنجره بسته شود.
+                        ChangeIsHappend = false;
+
+                        // نکته‌ی مهم:
+                        // این‌جا e.Cancel را true نمی‌کنیم.
+                        // مقدار پیش‌فرض e.Cancel = false است، پس پنجره بسته می‌شود.
+                        return;
+                    }
+                }
+            }
+            else if (dialogResult == false)
+            {
+                // کاربر "صرفا خارج شو" را زده → خروج بدون ذخیره
+                ChangeIsHappend = false;
+                _saveErrorCount = 0;
+            }
+            else // dialogResult == null
+            {
+                // کاربر دیالوگ را بسته (ضربدر، ESC، Alt+F4 روی دیالوگ و ...)
+                // این یعنی می‌خواهد از عملیات بستن "انصراف" بدهد.
+                e.Cancel = true;
+            }
         }
 
         private void MakeDefaultFocuseReady()
@@ -2612,6 +2747,8 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 dataGrid.Focus();
             }
         }
+
+   
 
         private void SA_NHOU_NumericLostFocus(object sender, RoutedEventArgs e)
         {

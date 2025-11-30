@@ -190,7 +190,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             //        CAM_KHALY.Text = "";
             //    }
             //    INSERTVAZN();
-             
+
             //}
             CAMIUN_NUM.PreviewLostKeyboardFocus += CAMIUN_NUM_PreviewLostKeyboardFocus;
         }
@@ -293,12 +293,12 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     //                                        VALUES({_NUMBER_}, {_TG_}, N'{rst[i].CODE}',{_RADIF_})");
                     //}
 
-                         dbms.DoExecuteSQL(
-                        "INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) " +
-                        "SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i " +
-                        "WHERE i.NUMBER = " + _NUMBER_ + $" AND i.TAG = {_TG_} " +
-                        "AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) " +
-                        "GROUP BY i.NUMBER, i.TAG, i.CODE");
+                    dbms.DoExecuteSQL(
+                   "INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) " +
+                   "SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i " +
+                   "WHERE i.NUMBER = " + _NUMBER_ + $" AND i.TAG = {_TG_} " +
+                   "AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) " +
+                   "GROUP BY i.NUMBER, i.TAG, i.CODE");
 
                     dbms.DoExecuteSQL($"DELETE FROM dbo.OTHER_DTL_SUB WHERE     (TAGG = {_TG_}) AND (NUMBER = " + _NUMBER_ + ") AND (NOT (CODE IN   (SELECT     CODE  FROM dbo.INVO_LST   WHERE     (NUMBER = " + _NUMBER_ + $") AND (TAG = {_TG_}))))");
                     // this.OTHER_DTL_SUB_SUB.Requery();
@@ -802,7 +802,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
             catch (Exception ex)
             {
-                new Msgwin(false, "خطایی وجود دارد و امکان ذخیره نیست").Show();
+                CL_LMethods.DoWriteMyLog("Error In SaveAllSuccess() Method In Other_Dtl_CSharp", ex);
+                new Msgwin(false, "خطایی وجود دارد و امکان ذخیره نیست مجددا تلاش کنید").Show();
                 return false;
             }
 

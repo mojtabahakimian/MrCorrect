@@ -386,7 +386,7 @@ namespace Prg_UI.Wins
 
             //new WIN_OPTIONS().Show();
             //new HEAD_LST_PISHFROOSH2().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CONTROL_ASNAD_DAFATERCHECK_FORM11, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KART, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this, "10410,10391");
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_CHEK_VOSUL_LES, this);

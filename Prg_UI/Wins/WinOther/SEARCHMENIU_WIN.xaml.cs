@@ -365,7 +365,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "چکهای واگذار - برگشت - وصول شده", WIN_NAME = CL_MenuManager.WinNameType.CHEKS_BESTANKAR });
 
             //حسابداری
-            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "کنترل اسناد و دفاتر چک", WIN_NAME = CL_MenuManager.WinNameType.ADAMTARAZ });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "کنترل اسناد و دفاتر چک", WIN_NAME = CL_MenuManager.WinNameType.CONTROL_ASNAD_DAFATERCHECK_FORM11 });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "حسابهای ترازنامه", WIN_NAME = CL_MenuManager.WinNameType.TARAZHES_WIN });
 
 

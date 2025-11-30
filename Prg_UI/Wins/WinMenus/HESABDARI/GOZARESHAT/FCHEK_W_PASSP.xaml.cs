@@ -1,18 +1,21 @@
 ﻿using Functions;
 using MaterialDesignThemes.Wpf;
 using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Stimulsoft.Data.Extensions;
 using Syncfusion.Data;
+using Syncfusion.Data.Extensions;
 using Syncfusion.UI.Xaml.BulletGraph;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -20,23 +23,27 @@ using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
 
-namespace Wins.WinMenus.HESABDARI.GOZARESHAT
+namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
 {
     /// <summary>
-    /// Interaction logic for ADAMTARAZ.xaml
+    /// Interaction logic for FCHEK_W_PASSP.xaml
     /// </summary>
-    public partial class ADAMTARAZ : Window
+    public partial class FCHEK_W_PASSP : Window
     {
+        public FCHEK_W_PASSP()
+        {
+            InitializeComponent();
+
+            this.DataContext = this;
+        }
+
         #region Header Window Begin
         //Header Window Begin
         private void Btn_Close_Click(object sender, RoutedEventArgs e)
@@ -45,19 +52,19 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         }
         private void Btn_Max_Click(object sender, RoutedEventArgs e)
         {
-            PackIcon packIcon = new PackIcon();
+            PackIcon? packIcon = Btn_Max.Content as PackIcon;
+
             switch (WindowState)
             {
                 case WindowState.Maximized:
-                    //🗖,🗗
                     WindowState = WindowState.Normal;
-                    packIcon.Kind = PackIconKind.WindowMaximize;
-                    Btn_Max.Content = packIcon;
+                    if (packIcon != null)
+                        packIcon.Kind = PackIconKind.WindowMaximize;
                     break;
                 case WindowState.Normal:
                     WindowState = WindowState.Maximized;
-                    packIcon.Kind = PackIconKind.WindowRestore;
-                    Btn_Max.Content = packIcon;
+                    if (packIcon != null)
+                        packIcon.Kind = PackIconKind.WindowRestore;
                     break;
             }
         }
@@ -78,76 +85,88 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         }
         //Header Window End;
         #endregion
-        public ADAMTARAZ()
-        {
-            InitializeComponent();
 
-            this.DataContext = this;
-
-            Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
-            GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
-        }
-
-        public class AD
-        {
-            public double? N_S { get; set; }
-            public double? MAND { get; set; }
-            public long? DATE_S { get; set; }
-            public string? SHARH_S { get; set; }
-            public double? NO_S { get; set; }
-            public string? USER_NAME { get; set; }
-        }
-
-        CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+        private readonly CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
         UniversControl universControl = new UniversControl();
-        public ObservableCollection<AD> ADAMTARAZ_DATA_MODEL { get; set; } = new ObservableCollection<AD>();
-        public bool NowIsReady { get; private set; }
 
+        public class FCHEK_W_PASSP_MODEL
+        {
+            public string N_SERI { get; set; }
+            public string SHARH { get; set; }
+            public long? N_S { get; set; }
+            public double? BES { get; set; }
+            public int? BANK { get; set; } // Foreign Key
+            public string BankName { get; set; } // Display Name
+        }
+
+        public ObservableCollection<FCHEK_W_PASSP_MODEL> SFDATA { get; set; } = new ObservableCollection<FCHEK_W_PASSP_MODEL>();
+
+        public bool NowIsReady { get; private set; }
+        public double? NUMBER_TO_OPEN { get; set; }
+        public bool ChangeIsHappend { get; private set; }
+
+        private bool _bl;
+        public bool AllowDeletions
+        {
+            get { return _bl; }
+            set
+            {
+
+                _bl = value;
+
+                // Get the window handle
+                IntPtr handle = new WindowInteropHelper(this).Handle;
+
+                // Only proceed if the handle is valid
+                if (handle != IntPtr.Zero)
+                {
+                    CL_LMethods.AllowDeletions(this.GetType().Name, _bl, handle);
+                }
+                else
+                {
+                    // Defer the operation until the window is fully rendered
+                    this.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        // Try again after the window is fully initialized
+                        IntPtr newHandle = new WindowInteropHelper(this).Handle;
+                        if (newHandle != IntPtr.Zero)
+                        {
+                            CL_LMethods.AllowDeletions(this.GetType().Name, _bl, newHandle);
+                        }
+                    }), System.Windows.Threading.DispatcherPriority.Loaded);
+                }
+            }
+        }
+        private bool ican;
+        public bool AllowEdits
+        {
+            get { return ican; }
+            set
+            {
+                ican = value;
+
+                //TextBox.IsReadOnly = !ican;
+                //ComboBox.IsEnabled = ican;
+            }
+        }
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
         }
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            #region SecuritCheck
-            try
-            {
-                //لیست اسنادی که تراز نیستند
-                string Formname = "MOGH";
-                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
-                // 2. Run Security:
-                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
-                // 3. Final State Check:
-                if (!this.IsLoaded) { this.Close(); return; }
-            }
-            catch { try { this.Close(); } catch { } }
-            if (!this.IsLoaded) { this.Close(); return; }
-            #endregion
-
-
-            ADAMTARAZ_DATA_MODEL?.Clear();
-
-            var MasterHead = dbms.DoGetDataSQL<AD>(@$"SELECT * FROM ADAMTARAZ").ToList();
-
-            foreach (var item in MasterHead)
-            {
-                ADAMTARAZ_DATA_MODEL.Add(item);
-            }
-
-        }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None && SYNCFUSION_DG.SelectedItem != null)
+            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
             {
                 e.Handled = true;
+                CL_LMethods.SendKey_US(Key.Tab);
 
                 var currentCell = SYNCFUSION_DG.SelectionController.CurrentCellManager.CurrentCell;
                 if (currentCell != null && !currentCell.IsEditing)
                 {
-                    var ROW = SYNCFUSION_DG.SelectedItem as AD;
+                    var ROW = SYNCFUSION_DG.SelectedItem as FCHEK_W_PASSP_MODEL;
 
-                    if (ROW != null && ROW?.NO_S != null)
+                    if (ROW != null)
                     {
                         if (currentCell?.GridColumn != null && currentCell.GridColumn?.MappingName == "N_S") //اگر فوکوس روی سند بود
                         {
@@ -160,13 +179,86 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                     }
                 }
             }
+
+            // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
+            var nonDataKeys = new[]
+            {
+              Key.Enter, Key.Tab, Key.LeftShift, Key.RightShift,
+              Key.CapsLock, Key.Left, Key.Right, Key.Up, Key.Down,
+              Key.LeftAlt, Key.RightAlt, Key.LeftCtrl, Key.RightCtrl,
+              Key.F1, Key.F2, Key.F3, Key.F4, Key.F5, Key.F6,
+              Key.F7, Key.F8, Key.F9, Key.F10, Key.F11, Key.F12,
+              Key.Escape, Key.Insert, Key.Home, Key.End,
+              Key.PageUp, Key.PageDown
+          };
+            if (!nonDataKeys.Contains(e.Key))
+            {
+                var focused = Keyboard.FocusedElement as DependencyObject;
+                if (focused != null && (CL_LMethods.IsInside<TextBoxBase>(focused) || CL_LMethods.IsInside<ComboBox>(focused) || CL_LMethods.IsInside<CheckBox>(focused)))
+                {
+                    ChangeIsHappend = true;
+                }
+                else
+                {
+                    var focusedElement = Keyboard.FocusedElement;
+                    if (focusedElement is Xceed.Wpf.Toolkit.MaskedTextBox)
+                    {
+                        ChangeIsHappend = true;
+                    }
+                }
+            }
+        }
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
+
+            FILL_ALL_COMBOBOXES();
+
+            // 1. Get Bank Map
+            var banks = dbms.DoGetDataSQL<TCOD_BANKS>("SELECT CODE, NAMES FROM TCOD_BANKS").ToDictionary(k => k.CODE, v => v.NAMES);
+
+            // 2. Get Procedure Data
+            string sql = "CHEK_W_PASSPW";
+            var parameters = new
+            {
+                Forms___Baseknow___ADA = Baseknow.ADA,
+                Forms___Baseknow___ADV = Baseknow.ADV,
+                Forms___Baseknow___BANKHA = Baseknow.BANKHA
+            };
+
+            var RST = dbms.DoGetStoreProcedureSQL<FCHEK_W_PASSP_MODEL>(sql, parameters).ToList();
+
+            if (RST.Count == 0)
+            {
+                this?.Close();
+            }
+
+            SFDATA?.Clear();
+            foreach (var item in RST)
+            {
+                // Map Bank Name
+                if (item.BANK.HasValue && banks.ContainsKey(item.BANK.Value))
+                {
+                    item.BankName = banks[item.BANK.Value];
+                }
+                else
+                {
+                    item.BankName = item.BANK?.ToString();
+                }
+
+                SFDATA?.Add(item);
+            }
+
+        }
+        private void FILL_ALL_COMBOBOXES()
+        {
+            //COMBOHESAB.ItemsSource = dbms.DoGetDataSQL<HESAB_CMB_MODEL>($"SELECT hes, NAME FROM CUST_HESAB ORDER BY hes").ToList();
         }
 
-        private readonly FilterService<HEAD_LST> filterService = new FilterService<HEAD_LST>();
+        #region _SfDataGrid_
+        private readonly FilterService<FCHEK_W_PASSP_MODEL> filterService = new FilterService<FCHEK_W_PASSP_MODEL>();
         public ObservableCollection<string> ActiveFilters { get; set; } = new ObservableCollection<string>();
-
         private string? CurrentCellValue = null;
-
         private RowColumnIndex CurrentCellIndex;
         private void SYNCFUSION_DG_CurrentCellActivated(object sender, Syncfusion.UI.Xaml.Grid.CurrentCellActivatedEventArgs e) // Event handler for when a cell is activated in the data grid
         {
@@ -198,6 +290,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             var record = this.SYNCFUSION_DG.View.Records.GetItemAt(recordIndex);
             CurrentCellValue = record?.GetType()?.GetProperty(mappingName ?? string.Empty)?.GetValue(record)?.ToString();
         }
+
         private string GetSelectedText()
         {
             var dataGrid = SYNCFUSION_DG;
@@ -430,6 +523,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                 new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
             }
         }
+
         private void RemoveFilterSort_Click(object sender, RoutedEventArgs e) // Event handler to remove all filters and sorting
         {
             // Clear all filters in the filter service
@@ -453,14 +547,204 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         private void ApplyCumulativeFilter() // Method to apply all cumulative filters to the data grid
         {
             // Set the filter for the data grid view using the filter service
-            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as HEAD_LST);
+            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as FCHEK_W_PASSP_MODEL);
             // Refresh the filter to update the view
             SYNCFUSION_DG.View.RefreshFilter();
+        }
+        private void SYNCFUSION_DG_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(GetSelectedText()))
+            {
+                var element = e.OriginalSource as FrameworkElement;
+                if (element != null)
+                {
+                    element.ContextMenu = this.Resources["DataGridContextMenu"] as ContextMenu;
+                }
+            }
+        }
+
+
+        private T FindChildElement<T>(DependencyObject parent) where T : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T typedChild)
+                {
+                    return typedChild;
+                }
+                var result = FindChildElement<T>(child);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+            return null;
         }
 
         private void SYNCFUSION_DG_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.L)
+            {
+                CalculateSumForCurrentColumn(SYNCFUSION_DG);
+                e.Handled = true; // Mark event as handled
+            }
+
+            //if (e.Key == Key.D1 && Keyboard.Modifiers == ModifierKeys.None)
+            //{
+            //    HandleNavigationToBalance();
+            //    e.Handled = true;
+            //    return;
+            //}
+        }
+
+        private void CalculateSumForCurrentColumn(SfDataGrid _DG_)
+        {
+            // Ensure rows are selected
+            if (_DG_.SelectedItems == null || _DG_.SelectedItems.Count == 0)
+            {
+                return;
+            }
+
+            // Detect the current column
+            var currentColumn = _DG_.CurrentColumn;
+            if (currentColumn == null)
+            {
+                return;
+            }
+
+            string columnName = currentColumn.MappingName; // Get the column name
+            if (string.IsNullOrEmpty(columnName))
+            {
+                return;
+            }
+
+            decimal sum = 0;
+            bool isNumericColumn = false;
+
+            // Iterate through the selected rows
+            foreach (var selectedItem in _DG_.SelectedItems)
+            {
+                // Get the cell value for the detected column
+                var cellValue = GetCellValue(selectedItem, columnName);
+
+                if (cellValue != null && decimal.TryParse(cellValue.ToStringNullSafe(), out decimal numericValue))
+                {
+                    sum += numericValue;
+                    isNumericColumn = true;
+                }
+            }
+
+            if (isNumericColumn)
+            {
+                string formattedSum = sum.ToString("N0", System.Globalization.CultureInfo.InvariantCulture);
+
+                new Msgwin(false, $"جمع سطر های انتخاب شده در ستون [{currentColumn.HeaderText}] برار است با : {formattedSum}").ShowDialog();
+
+            }
+        }
+        private object GetCellValue(object record, string columnName)
+        {
+            try
+            {
+                // Use reflection to get the property value from the record
+                var property = record.GetType().GetProperty(columnName);
+                return property?.GetValue(record);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+        public void GenerateAutomaticSummary(SfDataGrid _DG_, bool _ClearAnySummaryBefore_ = false)
+        {
+            if (_ClearAnySummaryBefore_)
+            {
+                SYNCFUSION_DG.TableSummaryRows.Clear();
+            }
+            else
+            {
+                // Check if a summary row already exists
+                if (_DG_.TableSummaryRows.Count > 0)
+                {
+                    return; // Exit the method if a summary row already exists
+                }
+            }
+
+            var summaryRow = new GridTableSummaryRow();
+            summaryRow.ShowSummaryInRow = false;
+            summaryRow.Position = TableSummaryRowPosition.Bottom;
+
+            var summaryColumns = new ObservableCollection<ISummaryColumn>();
+
+            var dataType = typeof(FCHEK_W_PASSP_MODEL);
+
+            //foreach (var column in SYNCFUSION_DG.Columns)
+            foreach (var column in _DG_.Columns.OfType<GridTextColumn>())
+            {
+                var propertyInfo = typeof(FCHEK_W_PASSP_MODEL).GetProperty(column.MappingName);
+                if (propertyInfo == null)
+                    continue;
+
+                if (column.MappingName == "BED" || column.MappingName == "BES")
+                {
+                    if (IsNumericType(propertyInfo.PropertyType))
+                    {
+                        var summaryColumn = new GridSummaryColumn
+                        {
+                            Name = column.MappingName + "Sum",
+                            MappingName = column.MappingName,
+                            SummaryType = Syncfusion.Data.SummaryType.DoubleAggregate,
+                            //Format = "{Sum:N0}"
+                            Format = "{Sum:N0}"
+                        };
+                        summaryColumns.Add(summaryColumn);
+                    }
+                }
+            }
+
+            summaryRow.SummaryColumns = summaryColumns;
+
+            _DG_.TableSummaryRows.Add(summaryRow);
+
 
         }
+        private bool IsNumericType(Type type)
+        {
+            if (type == null)
+                return false;
+
+            // Handle nullable types
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                type = Nullable.GetUnderlyingType(type);
+            }
+
+            // Handle object type that might represent a number
+            if (type == typeof(object))
+            {
+                return true; // Assume it might be numeric
+            }
+
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        #endregion
     }
 }

@@ -180,7 +180,7 @@
                         <Label Content="صدور اسناد و روی داد های مالی گروهی" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" PreviewKeyDown="WrapPanel_PreviewKeyDown">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_10">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/HESABDARI_SUB/AsnadControl.png" CacheOption="OnLoad"/>
