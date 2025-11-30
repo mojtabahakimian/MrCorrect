@@ -142,7 +142,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
             if (KhazanehRow?.N_SERI is not null && KhazanehRow.BANK is not null && KhazanehRow.MABL is not null)
             {
-                var CheckExistData = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE N_SERI = {KhazanehRow.N_SERI} AND BANK = {KhazanehRow.BANK} AND MABL = {KhazanehRow.MABL}").ToList();
+                var CheckExistData = dbms.DoGetDataSQL<PAY_GETD>($"SELECT TOP 1 * FROM PAY_GETD WHERE N_SERI = {KhazanehRow.N_SERI} AND BANK = {KhazanehRow.BANK} AND MABL = {KhazanehRow.MABL} ORDER BY RADIF").ToList();
                 if (CheckExistData.Count > 0)
                 {
                     RADIF.Text = CheckExistData.FirstOrDefault()?.RADIF.ToString();
@@ -153,10 +153,21 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     DATE_S.Text = CheckExistData.FirstOrDefault()?.DATE_S.ToString();
                     DATE.Text = CheckExistData.FirstOrDefault()?.DATE.ToString();
                     MABL.Text = CheckExistData.FirstOrDefault()?.MABL.ToString();
+
                     if (!string.IsNullOrWhiteSpace(N_KOL))
                     {
                         HES.SelectedValue = CheckExistData.FirstOrDefault()?.HES1?.ToString();
                     }
+
+                    N_KOL = CheckExistData.FirstOrDefault()?.N_KOL.ToString();
+                    N_MOIN = CheckExistData.FirstOrDefault()?.N_MOIN.ToString();
+                    N_TAF = CheckExistData.FirstOrDefault()?.N_TAF.ToString();
+
+                    if (!string.IsNullOrWhiteSpace(this.N_KOL))
+                    {
+                        this.HES.SelectedValue = this.N_KOL + "-" + this.N_MOIN + "-" + this.N_TAF;
+                    }
+
                     NAME_TAH.SelectedValue = CheckExistData.FirstOrDefault()?.NAME_TAH?.ToString();
                     N_HESAB.Text = CheckExistData.FirstOrDefault()?.N_HESAB?.ToString();
                     SANDUGH.SelectedValue = CheckExistData.FirstOrDefault()?.SANDUGH?.ToString();
@@ -349,6 +360,47 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 }
             }
         }
+
+        /// <summary>
+        /// متد جدید برای بروزرسانی HES1 در PAY_GETD هنگام تغییر مشتری در دریافت چک
+        /// این متد از مغایرت بین خزانه و دفتر چک جلوگیری می‌کند
+        /// </summary>
+        /// <param name="n_seri">شماره سریال چک</param>
+        /// <param name="bank">کد بانک</param>
+        /// <param name="date_s">تاریخ سررسید</param>
+        /// <param name="newCustNo">شناسه حساب جدید مشتری (CUST_NO)</param>
+        private void UpdateCheckHES1WhenCustomerChanges(string n_seri, string bank, string date_s, string newCustNo)
+        {
+            if (string.IsNullOrWhiteSpace(n_seri) || string.IsNullOrWhiteSpace(bank) || string.IsNullOrWhiteSpace(date_s))
+            {
+                return;
+            }
+
+            try
+            {
+                // بروزرسانی HES1 در PAY_GETD 
+                // HES1 نشان‌دهنده حساب شخصی است که چک از او دریافت شده
+                // این فیلد باید همیشه با CUST_NO همگام باشد تا مغایرت ایجاد نشود
+                dbms.DoExecuteSQL(@"
+                    UPDATE dbo.PAY_GETD 
+                    SET HES1 = @HES1
+                    WHERE N_SERI = @N_SERI 
+                      AND BANK = @BANK 
+                      AND DATE_S = @DATE_S",
+                    new
+                    {
+                        HES1 = newCustNo,
+                        N_SERI = n_seri,
+                        BANK = bank,
+                        DATE_S = date_s
+                    });
+            }
+            catch (Exception ex)
+            {
+                //System.Diagnostics.Debug.WriteLine($"Error in UpdateCheckHES1WhenCustomerChanges: {ex.Message}");
+            }
+        }
+
         private void _SaveExit_Click(object sender, RoutedEventArgs e)
         {
             List<MsgModel> ErrosMessages = new List<MsgModel>();
@@ -476,7 +528,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 {
                     this.KIND.SelectedValue = 0;
                 }
-                var rst2 = dbms.DoGetDataSQL<int?>("SELECT     TOP 100 PERCENT FIRSTNUM, BOOKNUM FROM dbo.DAFT_ASN ORDER BY BOOKNUM DESC").ToList();
+                var rst2 = dbms.DoGetDataSQL<int?>("SELECT TOP 100 PERCENT FIRSTNUM, BOOKNUM FROM dbo.DAFT_ASN ORDER BY BOOKNUM DESC").ToList();
                 if (rst2.Count > 0)
                 {
                     rdn = Convert.ToInt32(rst2.FirstOrDefault(0));
@@ -513,13 +565,34 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
 
                 var KhazanehRow = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST);
-                var CheckExistData = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()}").ToList();
+                var CheckExistData = dbms.DoGetDataSQL<PAY_GETD>($"SELECT TOP 1 * FROM PAY_GETD WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()} ORDER BY RADIF").ToList();
                 var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
                 var _SHOBEH_ = SHOBEH.SelectedValue.ToStringNullSafe().Length > 20 ? SHOBEH.SelectedValue.ToStringNullSafe().Substring(0, 19) : SHOBEH.SelectedValue.ToStringNullSafe();
 
                 var _SAYADI_ = SAYADI.Text.Length > 16 ? SAYADI.Text.Substring(0, 16) : SAYADI.Text;
 
-                string selected = HES?.SelectedValue?.ToString();
+                string selected = HES?.SelectedValue?.ToString(); //به حساب
+                bool isVagozarShodeh = CheckExistData.FirstOrDefault()?.VAZ == 4; //وضعیت این چک واگذار شده
+                string oldCustNo = null;
+                if (CheckExistData.Count > 0)
+                {
+                    oldCustNo = CheckExistData.FirstOrDefault()?.CUST_NO;
+                }
+                // بررسی آیا مشتری تغییر کرده است
+                bool customerChanged = !string.IsNullOrWhiteSpace(oldCustNo) &&
+                                       !string.IsNullOrWhiteSpace(CUST_NO) &&
+                                       oldCustNo.Trim() != "911-1-1" && //حذف شده انتظامی نباشه
+                                       oldCustNo != CUST_NO;
+
+                if (customerChanged)
+                {
+                    selected = CUST_NO;
+                }
+                // =====================================================================
+                // *** بررسی تغییر مشتری برای بروزرسانی HES1 ***
+                // =====================================================================
+                // ذخیره مقدار قدیمی CUST_NO قبل از بروزرسانی برای مقایسه
+                // =====================================================================
                 if (!string.IsNullOrEmpty(selected))
                 {
                     if (selected.Trim() == "911-1-1") //حذف شده انتظامی
@@ -532,10 +605,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     }
                     else
                     {
-                        if (CL_HESABDARI.GETKOL(selected) != Baseknow.BANKHA)
+                        if (!isVagozarShodeh && !string.IsNullOrWhiteSpace(HES?.SelectedValue?.ToString()) && CL_HESABDARI.GETKOL(selected) != Baseknow.BANKHA)
                         {
                             new Msgwin(false, "چک در این بخش فقط به بانک قابل واگذاری می‌باشد").ShowDialog();
                             CANCEL = true;
+                            return;
                         }
                         N_KOL = CL_HESABDARI.GETKOL(selected).ToString();
                         N_MOIN = CL_HESABDARI.GETMOIN(selected).ToString();
@@ -562,7 +636,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                         ANBAR = ANBAR,
                         RADIF = RADIF.Text,
                         CUST_NO = CUST_NO,
-                        VAZ = 1,
+                        VAZ = CheckExistData.Count > 0 ? (CheckExistData.FirstOrDefault().VAZ ?? 1) : 1,
                         LIST_NO = LIST_NO.SelectedValue,
                         KIND = KIND.SelectedValue,
                         SANDUGH = SANDUGH.SelectedValue,
@@ -575,7 +649,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
                     if (CheckExistData.Count > 0)
                     {
-                        var updateSql = @"UPDATE dbo.PAY_GETD 
+                        string HESUPDATE_SQL = $"{(isVagozarShodeh ? " ,HES1 = @CUST_NO" : "")}";
+                        var updateSql = $@"UPDATE dbo.PAY_GETD 
                                 SET N_SERI = @N_SERI, 
                                     BANK = @BANK, 
                                     DATE_S = @DATE_S, 
@@ -594,11 +669,26 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                                     N_HESAB = @N_HESAB, 
                                     N_KOL = @N_KOL, 
                                     N_MOIN = @N_MOIN, 
-                                    N_TAF = @N_TAF 
+                                    N_TAF = @N_TAF
+                                    {HESUPDATE_SQL}
                                 WHERE N_SERI = @N_SERI 
                                   AND BANK = @BANK 
                                   AND DATE_S = @DATE_S";
                         dbms.DoExecuteSQL(updateSql, parameters);
+
+                        // =====================================================================
+                        // *** بروزرسانی HES1 اگر مشتری تغییر کرده باشد ***
+                        // این کار برای اطمینان از همگام بودن HES1 با CUST_NO انجام می‌شود
+                        // =====================================================================
+                        if (customerChanged)
+                        {
+                            UpdateCheckHES1WhenCustomerChanges(
+                                N_SERI.Text,
+                                BANK.SelectedValue?.ToString(),
+                                DATE_S.Text.ToRawTarikh(),
+                                CUST_NO);
+                        }
+                        // =====================================================================
                     }
                     else
                     {
@@ -624,7 +714,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     Msgwin msgwin1 = new Msgwin(false, $"شماره دفتر :{this.RADIF.Text}");
                     msgwin1.Show();
                 }
-       
+
 
                 (THE_WIN as PGET_HED).CmdSaveRecord(((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST));
                 (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();

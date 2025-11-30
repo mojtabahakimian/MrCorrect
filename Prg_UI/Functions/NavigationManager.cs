@@ -91,6 +91,12 @@ namespace Functions
         public event Func<T, bool> OnInsertRecord; //Insert as add New data
         public event Func<T, bool> OnDeleteRecord; //Delete Current
 
+        /// <summary>
+        /// A callback to check if the current record can be changed (e.g., checking for unsaved changes).
+        /// Returns true if navigation is allowed, false to cancel.
+        /// </summary>
+        public Func<bool> CanChangeRecord { get; set; } = () => true;
+
         // Use a single public event for CurrentRecordIndexChanged.
         public event Action<T> CurrentRecordChanged;
         public event Action<int> CurrentRecordIndexChanged;
@@ -294,6 +300,12 @@ namespace Functions
             IEnumerable<System.Windows.Controls.CheckBox> checkBoxes = null,
             params IEnumerable[] observableCollections)
         {
+            // Check if navigation is allowed by the host (e.g. unsaved changes check)
+            if (CanChangeRecord != null && !CanChangeRecord())
+            {
+                return;
+            }
+
             int recordCount = RecordsData.Count;
 
             if (IsNewRecord && !ConfirmExitWithoutSaving())

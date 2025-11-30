@@ -83,6 +83,15 @@ namespace Wins.WinMenus.Checkha
             GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
         }
 
+        private string? _filterNSeri;
+        private int? _filterBank;
+        public WIN_PAYGETD_LST(string n_seri, int? bank) : this()
+        {
+            _filterNSeri = n_seri;
+            _filterBank = bank;
+
+            LABEL_HEADER.Content = LABEL_HEADER.Content + $" - فیلتر شده بر اساس شماره سری {n_seri} و بانک {bank}";
+        }
         public ObservableCollection<PAY_GETD_MODEL> PAY_GETD_DATA { get; set; } = new ObservableCollection<PAY_GETD_MODEL>();
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         UniversControl universControl = new UniversControl();
@@ -120,6 +129,12 @@ namespace Wins.WinMenus.Checkha
         {
             PAY_GETD_DATA?.Clear();
 
+            string whereClause = "";
+            if (!string.IsNullOrEmpty(_filterNSeri) && _filterBank.HasValue)
+            {
+                whereClause = $" WHERE dbo.PAY_GETD.N_SERI = '{_filterNSeri}' AND dbo.PAY_GETD.BANK = {_filterBank} ";
+            }
+
             var MasterHead = dbms.DoGetDataSQL<PAY_GETD_MODEL>(@$"SELECT dbo.PAY_GETD.N_SERI, dbo.PAY_GETD.BANK, dbo.PAY_GETD.DATE_S, dbo.PAY_GETD.DATE, dbo.PAY_GETD.SHOBEH, dbo.PAY_GETD.MABL, dbo.PAY_GETD.NAME_TAH, dbo.PAY_GETD.N_HESAB, 
                                                                      dbo.PAY_GETD.N_S, dbo.PAY_GETD.N_KOL, dbo.PAY_GETD.N_MOIN, dbo.PAY_GETD.N_TAF, dbo.PAY_GETD.N_KOL2, dbo.PAY_GETD.N_MOIN2, dbo.PAY_GETD.N_TAF2, dbo.PAY_GETD.N_KOL3, dbo.PAY_GETD.N_MOIN3, 
                                                                      dbo.PAY_GETD.N_TAF3, dbo.PAY_GETD.NUMBER, dbo.PAY_GETD.TAG, dbo.PAY_GETD.ANBAR, dbo.PAY_GETD.RADIF, dbo.PAY_GETD.CUST_NO, dbo.PAY_GETD.VAZ, dbo.PAY_GETD.LIST_NO, dbo.PAY_GETD.KIND, 
@@ -135,6 +150,7 @@ namespace Wins.WinMenus.Checkha
                                                                          (SELECT NAME FROM dbo.TDETA_HES AS TDETA_HES_1 WHERE (N_KOL = dbo.PAY_GETD.N_KOL3) AND (NUMBER = dbo.PAY_GETD.N_MOIN3) AND (TNUMBER = dbo.PAY_GETD.N_TAF3)) AS N_TAF3_NAME, dbo.TCOD_BANKS.NAMES AS BANK_NAME
                                                                   FROM dbo.PAY_GETD LEFT OUTER JOIN
                                                                      dbo.TCOD_BANKS ON dbo.PAY_GETD.BANK = dbo.TCOD_BANKS.CODE
+                                                                  {whereClause}
                                                                   ORDER BY dbo.PAY_GETD.N_SERI").ToList();
             foreach (var item in MasterHead)
             {

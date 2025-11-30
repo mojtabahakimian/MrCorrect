@@ -165,121 +165,45 @@ namespace Functions
             List<T> queryOutputs = new List<T>();
 
             bool internalTransactionStarted = false;
+            int maxRetries = autoManageTransaction ? 3 : 0;
 
-            if (autoManageTransaction)
+            for (int attempt = 0; attempt <= maxRetries; attempt++)
             {
-                TM = new TransactionManagement(CL_CCNNMANAGER.CONNECTION_STR);
-                internalTransactionStarted = true;
-            }
-            else if (TM == null)
-            {
-                throw new InvalidOperationException("Transaction not started. Call StartTransaction() before performing operations.");
-            }
+                errorMessages.Clear();
+                infoMessages.Clear();
+                inventoryDetails.Clear();
+                queryOutputs.Clear();
 
-            try
-            {
-                foreach (var item in items)
+                try
                 {
-                    var meghMarProperty = item.GetType().GetProperty("MEGH_MAR");
-                    double MEGH_MAR = meghMarProperty != null ? (double)(meghMarProperty.GetValue(item) ?? 0) : 0;
-
-
-                    string CODE = Convert.ToString(item.GetType().GetProperty("CODE").GetValue(item)); // Commodity CODE
-                    int ANBAR = Convert.ToInt32(item.GetType().GetProperty("ANBAR").GetValue(item)); // Warehouse (Stock) Amount CODE
-                    double MEGHk = Convert.ToDouble(item.GetType().GetProperty("MEGHk").GetValue(item));
-                    bool HaveNotMarguee = MEGH_MAR == 0; // Has some of this invoice been returned? (return value)
-                    string ANBAR_NAME = TM.SqlQueryCtc<string>("SELECT TOP 1 NAMES FROM dbo.TCOD_ANBAR WHERE CODE = @ANBAR", new { ANBAR }).FirstOrDefault(); // Warehouse (Stock) Name
-                    string NAME_CODE = TM.SqlQueryCtc<string>("SELECT NAME FROM dbo.STUF_DEF WHERE CODE = @CODE", new { CODE }).FirstOrDefault(); // Commodity Name
-
-                    if (isBarGashti) //فاکتور/انبار برگشت فروش
+                    if (autoManageTransaction)
                     {
-                        var RST = TM.SqlQueryCtc<STUF_STK_CSHARP>("SELECT * FROM dbo.STUF_STK WHERE CODE = @CODE AND ANBAR = @ANBAR",
-                           new { CODE, ANBAR }).FirstOrDefault();
-
-                        if (RST == null)
-                        {
-                            errorMessages.Add(new MsgModel
-                            {
-                                MessageText_U = $"اطلاعات این کالا با کد {CODE} از انبار {ANBAR_NAME} ناقص مي باشد , با پشتیبانی در ارتباط باشید."
-                            });
-                            continue;
-                        }
-
-                        // Execute query if provided and not in check-only mode
-                        if (performQuery && !string.IsNullOrEmpty(query))
-                        {
-                            queryOutputs = TM.SqlQueryCtc<T>(query, queryParams).ToList(); //Main INVO_LST Query
-                        }
-
-                        //محاسبه موجودی واقعی این کالا
-                        double min = CL_HESABDARI.Getmin(ANBAR, CODE);
-                        double? MAND = TM.SqlQueryCtc<double?>("SELECT ROUND(ISNULL(AK_MOGO_AVL_KOL.SMEGH, 0) - ISNULL(AK_MOGO_FR.MEG, 0), 2) AS mand FROM dbo.AK_MOGO_AVL_KOL(99999999, @ANBAR) AK_MOGO_AVL_KOL " +
-                            "RIGHT OUTER JOIN dbo.STUF_FSK ON AK_MOGO_AVL_KOL.CODE = dbo.STUF_FSK.CODE AND AK_MOGO_AVL_KOL.ANBAR = dbo.STUF_FSK.ANBAR " +
-                            "LEFT OUTER JOIN dbo.AK_MOGO_FR(99999999, @ANBAR) AK_MOGO_FR ON dbo.STUF_FSK.CODE = AK_MOGO_FR.CODE AND dbo.STUF_FSK.ANBAR = @ANBAR " +
-                            "WHERE dbo.STUF_FSK.CODE = @CODE AND dbo.STUF_FSK.ANBAR = @ANBAR",
-                            new { ANBAR, CODE }).FirstOrDefault();
-
-                        // Update inventory quantity in STUF_STK table if not in check-only mode
-                        if (!checkOnly && ANBAR != 0) //انبار خدمات نباشه
-                        {
-                            if (MAND.HasValue)
-                            {
-                                //بروز رسانی جدول برای موجودی موقت
-                                TM.ExecuteSqlCommandCtc("UPDATE dbo.STUF_STK SET MOGODI = @MOGODI WHERE CODE = @CODE AND ANBAR = @ANBAR",
-                                    new { MOGODI = MAND.HasValue, CODE, ANBAR });
-
-                            }
-                        }
-
-                        if ((bool)Baseknow.RMOG || Baseknow.MOJU)
-                        {
-                            inventoryDetails.Add(new KALA
-                            {
-                                CODE = CODE,
-                                NAME = NAME_CODE,
-                                ANBAR_CODE = ANBAR,
-                                ANBAR_NAME = ANBAR_NAME,
-                                CURRENT_MOGUDI = MAND ?? 0
-                            });
-
-                            infoMessages.Add(new MsgModel
-                            {
-                                MessageText_U = $"کالا با کد {CODE} در انبار {ANBAR_NAME} دارای موجودی {MAND ?? 0} می‌باشد."
-                            });
-
-
-                            #region MyRegion
-                            if (Math.Round(MEGH_MAR - MEGHk, 5) > 0)
-                            {
-                                errorMessages.Add(new MsgModel { MessageText_U = $"کالا با کد {CODE} از انبار  \"{ANBAR_NAME}\" با مقدار {MEGHk} ، مقدار مرجوعی از مقدار فروش بیشتر است" });
-                            }
-
-                            if (RST.MOGODI + RST.MOGODI_A - MEGH_MAR < min)
-                            {
-                                //DoCmd.OpenForm "mesag", acNormal,,, acFormReadOnly, acDialog, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد." + "حداقل موجودي تعريف شده در اف دو :" + min;
-                            }
-                            #endregion
-
-                            if (MAND.HasValue)
-                            {
-                                //double remainingQty = MAND.Value - (MEGHk - (MEGHk - MEGH_MAR));
-                                double remainingQty = MAND.Value - (MEGHk - MEGH_MAR);
-                                if (Math.Round(remainingQty, (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && ANBAR != 0) //انبار خدمات نباشه
-                                {
-                                    errorMessages.Add(new MsgModel
-                                    {
-                                        MessageText_U = $"کالا با کد {CODE} از انبار  \"{ANBAR_NAME}\" با مقدار {MEGHk} ، خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد"
-                                    });
-                                }
-                            }
-                        }
+                        TM = new TransactionManagement(CL_CCNNMANAGER.CONNECTION_STR);
+                        internalTransactionStarted = true;
                     }
-                    else //فاکتور/انبار معمولی
+                    else if (TM == null)
                     {
-                        if (HaveNotMarguee) // If no returns
+                        throw new InvalidOperationException("Transaction not started. Call StartTransaction() before performing operations.");
+                    }
+
+                    foreach (var item in items)
+                    {
+                        var meghMarProperty = item.GetType().GetProperty("MEGH_MAR");
+                        double MEGH_MAR = meghMarProperty != null ? (double)(meghMarProperty.GetValue(item) ?? 0) : 0;
+
+
+                        string CODE = Convert.ToString(item.GetType().GetProperty("CODE").GetValue(item)); // Commodity CODE
+                        int ANBAR = Convert.ToInt32(item.GetType().GetProperty("ANBAR").GetValue(item)); // Warehouse (Stock) Amount CODE
+                        double MEGHk = Convert.ToDouble(item.GetType().GetProperty("MEGHk").GetValue(item));
+                        bool HaveNotMarguee = MEGH_MAR == 0; // Has some of this invoice been returned? (return value)
+                        string ANBAR_NAME = TM.SqlQueryCtc<string>("SELECT TOP 1 NAMES FROM dbo.TCOD_ANBAR WITH (NOLOCK) WHERE CODE = @ANBAR", new { ANBAR }).FirstOrDefault(); // Warehouse (Stock) Name
+                        string NAME_CODE = TM.SqlQueryCtc<string>("SELECT NAME FROM dbo.STUF_DEF WITH (NOLOCK) WHERE CODE = @CODE", new { CODE }).FirstOrDefault(); // Commodity Name
+
+
+                        if (isBarGashti) //فاکتور/انبار برگشت فروش
                         {
-                            var RST = TM.SqlQueryCtc<STUF_STK_CSHARP>("SELECT MOGODI FROM dbo.STUF_STK WHERE CODE = @CODE AND ANBAR = @ANBAR",
-                                new { CODE, ANBAR }).FirstOrDefault();
+                            var RST = TM.SqlQueryCtc<STUF_STK_CSHARP>("SELECT * FROM dbo.STUF_STK WHERE CODE = @CODE AND ANBAR = @ANBAR",
+                               new { CODE, ANBAR }).FirstOrDefault();
 
                             if (RST == null)
                             {
@@ -304,7 +228,6 @@ namespace Functions
                                 "WHERE dbo.STUF_FSK.CODE = @CODE AND dbo.STUF_FSK.ANBAR = @ANBAR",
                                 new { ANBAR, CODE }).FirstOrDefault();
 
-
                             // Update inventory quantity in STUF_STK table if not in check-only mode
                             if (!checkOnly && ANBAR != 0) //انبار خدمات نباشه
                             {
@@ -317,7 +240,7 @@ namespace Functions
                                 }
                             }
 
-                            if ((bool)Baseknow.RMOG || Baseknow.MOJU)
+                            if ((Baseknow.RMOG ?? false) || Baseknow.MOJU)
                             {
                                 inventoryDetails.Add(new KALA
                                 {
@@ -333,9 +256,23 @@ namespace Functions
                                     MessageText_U = $"کالا با کد {CODE} در انبار {ANBAR_NAME} دارای موجودی {MAND ?? 0} می‌باشد."
                                 });
 
+
+                                #region MyRegion
+                                if (Math.Round(MEGH_MAR - MEGHk, 5) > 0)
+                                {
+                                    errorMessages.Add(new MsgModel { MessageText_U = $"کالا با کد {CODE} از انبار  \"{ANBAR_NAME}\" با مقدار {MEGHk} ، مقدار مرجوعی از مقدار فروش بیشتر است" });
+                                }
+
+                                if (RST.MOGODI + RST.MOGODI_A - MEGH_MAR < min)
+                                {
+                                    //DoCmd.OpenForm "mesag", acNormal,,, acFormReadOnly, acDialog, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد." + "حداقل موجودي تعريف شده در اف دو :" + min;
+                                }
+                                #endregion
+
                                 if (MAND.HasValue)
                                 {
-                                    double remainingQty = MAND.Value - (MEGHk - (MEGHk - MEGH_MAR));
+                                    //double remainingQty = MAND.Value - (MEGHk - (MEGHk - MEGH_MAR));
+                                    double remainingQty = MAND.Value - (MEGHk - MEGH_MAR);
                                     if (Math.Round(remainingQty, (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && ANBAR != 0) //انبار خدمات نباشه
                                     {
                                         errorMessages.Add(new MsgModel
@@ -346,37 +283,121 @@ namespace Functions
                                 }
                             }
                         }
+                        else //فاکتور/انبار معمولی
+                        {
+                            if (HaveNotMarguee) // If no returns
+                            {
+                                var RST = TM.SqlQueryCtc<STUF_STK_CSHARP>("SELECT MOGODI FROM dbo.STUF_STK WHERE CODE = @CODE AND ANBAR = @ANBAR",
+                                    new { CODE, ANBAR }).FirstOrDefault();
+
+                                if (RST == null)
+                                {
+                                    errorMessages.Add(new MsgModel
+                                    {
+                                        MessageText_U = $"اطلاعات این کالا با کد {CODE} از انبار {ANBAR_NAME} ناقص مي باشد , با پشتیبانی در ارتباط باشید."
+                                    });
+                                    continue;
+                                }
+
+                                // Execute query if provided and not in check-only mode
+                                if (performQuery && !string.IsNullOrEmpty(query))
+                                {
+                                    queryOutputs = TM.SqlQueryCtc<T>(query, queryParams).ToList(); //Main INVO_LST Query
+                                }
+
+                                //محاسبه موجودی واقعی این کالا
+                                double min = CL_HESABDARI.Getmin(ANBAR, CODE);
+                                double? MAND = TM.SqlQueryCtc<double?>("SELECT ROUND(ISNULL(AK_MOGO_AVL_KOL.SMEGH, 0) - ISNULL(AK_MOGO_FR.MEG, 0), 2) AS mand FROM dbo.AK_MOGO_AVL_KOL(99999999, @ANBAR) AK_MOGO_AVL_KOL " +
+                                    "RIGHT OUTER JOIN dbo.STUF_FSK ON AK_MOGO_AVL_KOL.CODE = dbo.STUF_FSK.CODE AND AK_MOGO_AVL_KOL.ANBAR = dbo.STUF_FSK.ANBAR " +
+                                    "LEFT OUTER JOIN dbo.AK_MOGO_FR(99999999, @ANBAR) AK_MOGO_FR ON dbo.STUF_FSK.CODE = AK_MOGO_FR.CODE AND dbo.STUF_FSK.ANBAR = @ANBAR " +
+                                    "WHERE dbo.STUF_FSK.CODE = @CODE AND dbo.STUF_FSK.ANBAR = @ANBAR",
+                                    new { ANBAR, CODE }).FirstOrDefault();
+
+
+                                // Update inventory quantity in STUF_STK table if not in check-only mode
+                                if (!checkOnly && ANBAR != 0) //انبار خدمات نباشه
+                                {
+                                    if (MAND.HasValue)
+                                    {
+                                        //بروز رسانی جدول برای موجودی موقت
+                                        TM.ExecuteSqlCommandCtc("UPDATE dbo.STUF_STK SET MOGODI = @MOGODI WHERE CODE = @CODE AND ANBAR = @ANBAR",
+                                            new { MOGODI = MAND.HasValue, CODE, ANBAR });
+
+                                    }
+                                }
+
+                                if ((bool)Baseknow.RMOG || Baseknow.MOJU)
+                                {
+                                    inventoryDetails.Add(new KALA
+                                    {
+                                        CODE = CODE,
+                                        NAME = NAME_CODE,
+                                        ANBAR_CODE = ANBAR,
+                                        ANBAR_NAME = ANBAR_NAME,
+                                        CURRENT_MOGUDI = MAND ?? 0
+                                    });
+
+                                    infoMessages.Add(new MsgModel
+                                    {
+                                        MessageText_U = $"کالا با کد {CODE} در انبار {ANBAR_NAME} دارای موجودی {MAND ?? 0} می‌باشد."
+                                    });
+
+                                    if (MAND.HasValue)
+                                    {
+                                        double remainingQty = MAND.Value - (MEGHk - (MEGHk - MEGH_MAR));
+                                        if (Math.Round(remainingQty, (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && ANBAR != 0) //انبار خدمات نباشه
+                                        {
+                                            errorMessages.Add(new MsgModel
+                                            {
+                                                MessageText_U = $"کالا با کد {CODE} از انبار  \"{ANBAR_NAME}\" با مقدار {MEGHk} ، خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد"
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                errorMessages.Add(new MsgModel
+                                {
+                                    MessageText_U = "این فاکتور دارای مرجوعی است و نمیتوانید آنرا حذف کنید"
+                                });
+                                break; // Get out regardless of whole loop items
+                            }
+                        }
+
+                    }
+
+                    if (internalTransactionStarted)
+                    {
+                        if (errorMessages.Count == 0)
+                        {
+                            CommitTransaction();
+                        }
                         else
                         {
-                            errorMessages.Add(new MsgModel
-                            {
-                                MessageText_U = "این فاکتور دارای مرجوعی است و نمیتوانید آنرا حذف کنید"
-                            });
-                            break; // Get out regardless of whole loop items
+                            RollbackTransaction();
                         }
                     }
 
+                    return (errorMessages, infoMessages, inventoryDetails, queryOutputs);
                 }
-
-                if (internalTransactionStarted)
+                catch (Microsoft.Data.SqlClient.SqlException ex) when (internalTransactionStarted && ex.Number == 1205 && attempt < maxRetries)
                 {
-                    if (errorMessages.Count == 0)
-                    {
-                        CommitTransaction();
-                    }
-                    else
+                    if (internalTransactionStarted)
                     {
                         RollbackTransaction();
                     }
+                    System.Threading.Thread.Sleep(200 * (attempt + 1));
+                    // loop continues
                 }
-            }
-            catch (Exception)
-            {
-                if (internalTransactionStarted)
+                catch (Exception)
                 {
-                    RollbackTransaction();
+                    if (internalTransactionStarted)
+                    {
+                        RollbackTransaction();
+                    }
+                    throw;
                 }
-                throw;
             }
 
             return (errorMessages, infoMessages, inventoryDetails, queryOutputs);

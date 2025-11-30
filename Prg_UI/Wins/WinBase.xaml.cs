@@ -1227,7 +1227,7 @@ namespace Prg_UI.Wins
 
         private void Button_Click_106(object sender, RoutedEventArgs e)
         {
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.ADAMTARAZ, null);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CONTROL_ASNAD_DAFATERCHECK_FORM11, default);
         }
 
         private void Button_Click_107(object sender, RoutedEventArgs e)
