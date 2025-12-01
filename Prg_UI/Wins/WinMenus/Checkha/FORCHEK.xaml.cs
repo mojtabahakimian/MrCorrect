@@ -7,6 +7,7 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Prg_UI.Wins.WinMenus.HESABDARI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -294,14 +295,30 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         private void _SaveExit_Click(object sender, RoutedEventArgs e)
         {
             can = false;
-            if (IsNull(this.N_SERI.SelectedValue) || IsNull(this.BANK.SelectedValue))
+
+            if (IsNull(this.SANDUGH.SelectedValue))
+            {
+                Msgwin msgwin = new Msgwin(false, "صندوق نمیتواند خالی باشد");
+                msgwin.Show();
+                return;
+            }
+
+            if (IsNull(this.N_SERI.SelectedValue) || IsNull(this.BANK.SelectedValue) || IsNull(this.SANDUGH.SelectedValue))
             {
                 Msgwin msgwin = new Msgwin(false, "اطلاعات وارد نشده است و قابل ذخيره شدن نيست");
                 msgwin.Show();
                 return;
             }
 
-            (THE_WIN as PGET_HED).CmdSaveRecord((THE_WIN as PGET_HED).CURRENT_ITMES_ROW);
+            ////(THE_WIN as PGET_HED).CmdSaveRecord((THE_WIN as PGET_HED).CURRENT_ITMES_ROW);
+            var pgetHed = THE_WIN as PGET_HED;
+
+            if (pgetHed != null)
+            {
+                pgetHed.CmdSaveRecord(pgetHed.CURRENT_ITMES_ROW);
+            }
+
+
             SE_N_SERI = N_SERI.SelectedValue.ToString();
             SE_DATE_S = DATE_S.Text.ToRawTarikh();
             SE_SANDUGH = SANDUGH.SelectedValue.ToString();
@@ -325,45 +342,55 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             {
                 //ON_Close
                 var rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh()).ToList();
-                if (rst.Count > 0)
+                if (rst.Count > 0 && pgetHed != null)
                 {
-                    rst.FirstOrDefault().N_KOL = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_K;
-                    rst.FirstOrDefault().N_MOIN = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_M;
-                    rst.FirstOrDefault().N_TAF = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_T;
-                    rst.FirstOrDefault().HES1 = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES;
+                    rst.FirstOrDefault().N_KOL = (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_K;
+                    rst.FirstOrDefault().N_MOIN = (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_M;
+                    rst.FirstOrDefault().N_TAF = (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_T;
+                    rst.FirstOrDefault().HES1 = (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES;
                     rst.FirstOrDefault().VAZ = 4;
                     rst.FirstOrDefault().SANDUGH = Convert.ToInt32(this.SANDUGH.SelectedValue);
 
                     string _WHERE_ = " WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh();
                     dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD SET N_MOIN = {rst.FirstOrDefault().N_MOIN}, VAZ = {rst.FirstOrDefault().VAZ}, SANDUGH = {rst.FirstOrDefault().SANDUGH} , N_KOL = {rst.FirstOrDefault().N_KOL} , N_TAF = {rst.FirstOrDefault().N_TAF} , HES1 = N'{rst.FirstOrDefault().HES1}' {_WHERE_}");
-                }
-                if (rst.FirstOrDefault().KIND == 0)
-                {
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_K = Convert.ToInt32(CL_HESABDARI.GETKOL(Baseknow.ADV));
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_M = Convert.ToInt32(CL_HESABDARI.GETMOIN(Baseknow.ADV));
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T = Convert.ToInt32(CL_HESABDARI.GETTAF(Baseknow.ADV));
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES = Baseknow.ADV;
-                }
-                ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).MABL = Convert.ToDouble(this.MABL.Text);
-                ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).N_SERI = Convert.ToDouble(this.N_SERI.SelectedValue);
-                ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).BANK = Convert.ToInt32(this.BANK.SelectedValue);
 
-                ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).SHARH = Strings.Right("چك " + N_SERI.SelectedValue + "بانك " + CL_HESABDARI.GETBANK(Convert.ToDouble(BANK.SelectedValue)) + " " + SHOBEH.Text + " مورخ " + Strings.Format(Convert.ToDouble(DATE_S.Text.ToRawTarikh()), "####/##/##"), 255);
+                    if (rst.FirstOrDefault().KIND == 0)
+                    {
+                        (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_K = Convert.ToInt32(CL_HESABDARI.GETKOL(Baseknow.ADV));
+                        (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_M = Convert.ToInt32(CL_HESABDARI.GETMOIN(Baseknow.ADV));
+                        (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T = Convert.ToInt32(CL_HESABDARI.GETTAF(Baseknow.ADV));
+                        (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES = Baseknow.ADV;
+                    }
+                }
+
+                if (pgetHed != null)
+                {
+                    (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).MABL = Convert.ToDouble(this.MABL.Text);
+                    (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).N_SERI = Convert.ToDouble(this.N_SERI.SelectedValue);
+                    (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).BANK = Convert.ToInt32(this.BANK.SelectedValue);
+
+                    (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).SHARH = Strings.Right("چك " + N_SERI.SelectedValue + "بانك " + CL_HESABDARI.GETBANK(Convert.ToDouble(BANK.SelectedValue)) + " " + SHOBEH.Text + " مورخ " + Strings.Format(Convert.ToDouble(DATE_S.Text.ToRawTarikh()), "####/##/##"), 255);
+                }
                 CL_HESABDARI.GETDLOG(4, this.N_SERI.Text.ToString(), Convert.ToInt32(this.BANK.SelectedValue), Convert.ToInt64(DATE_S.Text.ToRawTarikh()), Convert.ToInt32(this.SANDUGH.SelectedValue));
             }
 
             //Finally Save and Sand as Ensure Oprate
-            _ = (THE_WIN as PGET_HED).CmdSaveRecord((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST);
-            (THE_WIN as PGET_HED).SANAD();
-
-            this.Close();
+            if (pgetHed != null)
+            {
+                _ = pgetHed.CmdSaveRecord(pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST);
+                pgetHed.SANAD();
+            }
         }
 
         private void _Exit_Click(object sender, RoutedEventArgs e)
         {
             #region Click
             can = true;
-            (THE_WIN as PGET_HED).FORCHEK_EXIT_BTN = true;
+            var pgetHed = THE_WIN as PGET_HED;
+            if (pgetHed != null)
+            {
+                pgetHed.FORCHEK_EXIT_BTN = true;
+            }
             this.Close();
             #endregion
         }
@@ -378,7 +405,15 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 if (!Tarikh.IsValidedDate(date_n_val))
                 {
                     DATE_S.Text = BEFOREDATEN;
-                    universControl.PopNotifyShow("مقدار تاریخ صحیح نیست.", (THE_WIN as HESABDARI.PGET_HED).Pop1, (THE_WIN as HESABDARI.PGET_HED).Pop1Text1, (THE_WIN as HESABDARI.PGET_HED).Pop_Border1);
+                    var pgetHed = THE_WIN as HESABDARI.PGET_HED;
+                    if (pgetHed != null)
+                    {
+                        universControl.PopNotifyShow("مقدار تاریخ صحیح نیست.", pgetHed.Pop1, pgetHed.Pop1Text1, pgetHed.Pop_Border1);
+                    }
+                    else
+                    {
+                        new Msgwin(false, "مقدار تاریخ صحیح نیست").Show();
+                    }
                     return;
                 }
             }

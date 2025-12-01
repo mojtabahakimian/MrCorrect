@@ -1633,102 +1633,96 @@ namespace Functions
 
                 case WinNameType.HEAD_LST_FROOSH_AUTO_DETECT: // فاکتور فروش (Auto-Detect)
                     {
-                        //فاکتور فروش مستقیم : نیازی به انتخاب حواله نیست , حواله خودکار توسط فاکتور سینک میشود : IsDirectFactor
-                        //فاکتور غیر مستقیم : کاربر باید حتما حواله ثبت شده را انتخاب
+                        // ---------------------------------------------------------
+                        // Step 1: Define Settings Variables
+                        // ---------------------------------------------------------
 
-                        var IsDirectFactorActiveatall = false; // فاكتور فروش مستقيم عمل شود : تنظیمات کلی
-                        if (Strings.Mid(Baseknow.OPTIONSS, 18, 1) == "5")
-                        {
-                            // Check18 تیک خورده است
-                            //تیک شماره 8 در تنظیمات بیشتر
-                            IsDirectFactorActiveatall = true;
-                        }
+                        // تنظیمات کلی: آیا فاکتور فروش مستقیم اصلا فعال است؟ (تیک شماره 8)
+                        var IsDirectFactorActiveatall = Strings.Mid(Baseknow.OPTIONSS, 18, 1) == "5"; //فاكتور فروش مستقيم عمل شود : تنظیمات کلی
+
+                        // تنظیمات کلی: آیا نوع فاکتور (مستقیم/غیرمستقیم) باید بر اساس سطح دسترسی کاربر تعیین شود؟
                         var MostaghimAmalShavad = Strings.Mid(Baseknow.OPTIONSS, 53, 1) == "5"; //فاكتور فروش مستقيم براي هركاربر از تعيين دسترسي انتخاب شود : تنظیمات کلی
 
-                        var MostaghimDastrasi = CL_HESABDARI.LETSGO("FRMOST"); //فاکتور فروش مستقیم فعال شود : دسترسی کاربری
+                        // دسترسی کاربر: آیا این کاربر خاص اجازه صدور فاکتور مستقیم را دارد؟ (FRMOST)
+                        var UserHasDirectPermission = CL_HESABDARI.LETSGO("FRMOST"); //فاکتور فروش مستقیم فعال شود
 
-                        var MostaghimHasAccess = CL_HESABDARI.LETSGO("FACTFRMO"); //فاکتور فروش مستقیم : اصلا به این مدل فاکتور دسترسی داشته باشد : دسترسی کاربری
-
-                        // Get Parameters: NumbersPair > IsDirect > IsExport > IsFromAutomation
+                        // Get Parameters safely
                         string? numbersPair = (_PARAMETERS_.Length > 0) ? _PARAMETERS_[0]?.ToString() : null;
-                        bool isDirect = (_PARAMETERS_.Length > 1) && Convert.ToBoolean(_PARAMETERS_[1]);
+                        bool isDirectParam = (_PARAMETERS_.Length > 1) && Convert.ToBoolean(_PARAMETERS_[1]);
                         bool isExporty = (_PARAMETERS_.Length > 2) && Convert.ToBoolean(_PARAMETERS_[2]);
                         bool fromAutomation = (_PARAMETERS_.Length > 3) && Convert.ToBoolean(_PARAMETERS_[3]);
-
                         bool IsFromPishfactor = (_PARAMETERS_.Length > 4) && Convert.ToBoolean(_PARAMETERS_[4]);
 
-                        if (IsDirectFactorActiveatall) //تنظیمات کل : فاکتور فروش مستقیم به طور کلی فعال است
+                        // ---------------------------------------------------------
+                        // Step 2: Determine Mode (Direct vs Indirect)
+                        // ---------------------------------------------------------
+
+                        bool finalModeIsDirect = false;
+
+                        if (IsDirectFactorActiveatall)
                         {
-                            if (MostaghimAmalShavad) //حتما از تعیین سطح دسترسی وضعیت فعال بودن و دسترسی آن برای کاربر تعیین شد : دسترسی کاربری
+                            // حالت کلی مستقیم فعال است
+                            if (MostaghimAmalShavad)
                             {
-                                if (MostaghimDastrasi) //در تعیین سطح دسترسی فاکتور مستقیم برای این کاربر فعال است : دسترسی کاربری
+                                // تعیین شده که باید سطح دسترسی کاربر چک شود
+                                if (UserHasDirectPermission)
                                 {
-                                    if (MostaghimHasAccess) //اصلا میتواند فاکتور فروش مستقیم را باز کند : دسترسی کاربری
-                                    {
-                                        CL_MenuManager.OpenWinMenu(
-                                            CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_DIRECT,
-                                            OWNERWIN,
-                                            numbersPair,
-                                            true,
-                                            isExporty,
-                                            fromAutomation,
-                                            IsFromPishfactor
-                                            );
-                                    }
-                                    else
-                                    {
-                                        CL_MenuManager.OpenWinMenu(
-                                            CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE,
-                                            OWNERWIN,
-                                            numbersPair,
-                                            false,          // 👈 غیر مستقیم
-                                            isExporty,
-                                            fromAutomation,
-                                            IsFromPishfactor
-                                        );
-                                    }
+                                    // کاربر دسترسی مستقیم دارد
+                                    finalModeIsDirect = true;
                                 }
                                 else
                                 {
-                                    CL_MenuManager.OpenWinMenu(
-                                        CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE,
-                                        OWNERWIN,
-                                        numbersPair,
-                                        false,          // 👈 غیر مستقیم
-                                        isExporty,
-                                        fromAutomation,
-                                        IsFromPishfactor
-                                    );
+                                    // کاربر دسترسی مستقیم ندارد -> هدایت به غیر مستقیم
+                                    finalModeIsDirect = false;
                                 }
                             }
-                            else //چون به طور کلی تعیین شده فاکتور فروش غیر مستقیم
+                            else
                             {
-                                CL_MenuManager.OpenWinMenu(
-                                    CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_DIRECT,
-                                    OWNERWIN,
-                                    numbersPair,
-                                    true,
-                                    isExporty,
-                                    fromAutomation,
-                                    IsFromPishfactor
-                                    );
+                                // تعیین سطح دسترسی کاربر مهم نیست، همه مستقیم باز می کنند
+                                finalModeIsDirect = true;
                             }
                         }
                         else
                         {
+                            // کلا فاکتور مستقیم در سیستم غیرفعال است
+                            finalModeIsDirect = false;
+                        }
+
+                        // ---------------------------------------------------------
+                        // Step 3: Open Window Based on Determination
+                        // ---------------------------------------------------------
+
+                        if (finalModeIsDirect)
+                        {
+                            // باز کردن فاکتور فروش مستقیم (Direct)
+                            CL_MenuManager.OpenWinMenu(
+                                CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_DIRECT,
+                                OWNERWIN,
+                                numbersPair,
+                                true, // IsDirect //مستقیم
+                                isExporty,
+                                fromAutomation,
+                                IsFromPishfactor
+                            );
+                        }
+                        else
+                        {
+                            // باز کردن فاکتور فروش حواله ای (Indirect)
                             CL_MenuManager.OpenWinMenu(
                                 CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE,
                                 OWNERWIN,
                                 numbersPair,
-                                false,          // 👈 غیر مستقیم
+                                false, // IsDirect //غیر مستقیم : حواله ای
                                 isExporty,
                                 fromAutomation,
                                 IsFromPishfactor
                             );
                         }
 
-                        if (Baseknow.TKHF >= 2) //مشخصات سیستم > اسناد و حساب > تخفیفات فاکتور ها >  به ریز کالا یا مصوب عمل شود
+                        // Extra Check (Legacy Logic preserved)
+                        if (Baseknow.TKHF >= 2)
                         {
+                            // تخفیفات ریز کالا یا مصوب
                             //Nothing yet to do
                         }
 

@@ -1388,7 +1388,8 @@ namespace Prg_UI.Wins
                     // پنجره‌هایی را پیدا کن که پنجره اصلی نیستند
                     if (window.GetType().FullName != mainWinName)
                     {
-                        openChildWindows.Add(window);
+                        try { window?.Close(); } catch (Exception) { }
+                        //openChildWindows.Add(window);
                     }
                 }
                 if (openChildWindows.Any())
