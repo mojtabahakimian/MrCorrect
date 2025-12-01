@@ -211,7 +211,7 @@
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridComboBoxColumn x:Name="N_RASID_COLUMN" Width="*" Header="محل مصرف" SelectedValueBinding="{Binding N_RASID,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="nam" SelectedValuePath="FNUMB">
+                    <DataGridComboBoxColumn x:Name="N_RASID_COLUMN" Width="300" Header="محل مصرف" SelectedValueBinding="{Binding N_RASID,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="nam" SelectedValuePath="FNUMB">
                         <DataGridComboBoxColumn.EditingElementStyle>
                             <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
                                 <Setter Property="IsEditable" Value="True"/>
@@ -228,7 +228,7 @@
                     </DataGridComboBoxColumn>
 
 
-                    <DataGridComboBoxColumn x:Name="SANAD_NO_COLUMN" Width="*" Header="مرکز هزینه"
+                    <DataGridComboBoxColumn x:Name="SANAD_NO_COLUMN" Width="300" Header="مرکز هزینه"
                                             SelectedValueBinding="{Binding SANAD_NO,UpdateSourceTrigger=LostFocus}"
                                             DisplayMemberPath="MHAZNAME" SelectedValuePath="MHAZ_NO">
                         <DataGridComboBoxColumn.EditingElementStyle>

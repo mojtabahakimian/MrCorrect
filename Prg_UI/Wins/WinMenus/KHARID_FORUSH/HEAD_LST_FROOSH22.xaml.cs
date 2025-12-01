@@ -7294,73 +7294,91 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
             else
             {
-                Msgwin msgwin = new Msgwin(true, "آیا مایل به حذف هستید ؟"); msgwin.ShowDialog();
+                Msgwin msgwin = new Msgwin(true, "آیا مایل به حذف هستید ؟ فقط اطلاعات سربرگ مربوط به این فاکتور فروش و سند حسابداری آن حذف خواهد شد");
+                msgwin.ShowDialog();
                 if (msgwin.DialogResult != true)
                 {
                     return;
                 }
 
-                if (!string.IsNullOrEmpty(NUMBER.Text) && NUMBER.Text != "0" && !string.IsNullOrEmpty(NUMBER1.Text) && NUMBER1.Text != "0")
+                // 2. اعتبارسنجی اولیه ورودی‌ها
+                // استفاده از TryParse برای اطمینان از عددی بودن مقادیر ایمن‌تر است
+                if (!long.TryParse(NUMBER.Text, out long num) || num == 0 || !long.TryParse(NUMBER1.Text, out long num1) || num1 == 0)
                 {
-                    try
+                    new Msgwin(false, "شماره فاکتور معتبر برای حذف انتخاب نشده است.").ShowDialog();
+                    return;
+                }
+
+                // پارامترهای مشترک برای کوئری‌ها (جلوگیری از SQL Injection)
+                var deleteParams = new { Num = num, Num1 = num1, Tag = 13 };
+
+                try
+                {
+                    // 3. تلاش اولیه برای حذف سربرگ فاکتور (Happy Path)
+                    // ✅ استفاده از پارامتر بجای چسباندن رشته - امن
+                    dbms.DoExecuteSQL("DELETE FROM dbo.HEAD_LST WHERE NUMBER = @Num AND NUMBER1 = @Num1 AND TAG = @Tag", deleteParams);
+
+                    // عملیات موفقیت آمیز بوده
+                    SANAD();
+                    _navigationManager?.DeleteCurrentRecord(); //Refresh Record Source
+                }
+                catch (SqlException ex)
+                {
+                    // هندل کردن ایونت در صورت وجود (مربوط به کامپوننت‌های UI)
+                    if (e != null) e.Handled = true;
+
+                    // 4. بررسی خطای Constraint کلید خارجی (FK)
+                    if (ex.Number == 547)
                     {
-
-                        dbms.DoExecuteSQL($@"DELETE FROM dbo.HEAD_LST WHERE NUMBER = {NUMBER.Text} AND NUMBER1 = {NUMBER1.Text} AND TAG = 13");
-
-                        SANAD();
-
-                        _navigationManager?.DeleteCurrentRecord(); //Refresh Record Source
-                    }
-                    catch (SqlException ex)
-                    {
-                        if (e != null)
+                        // آیا خطا مربوط به وابستگی به سند حسابداری (DEED_DTL) است؟
+                        if (ex.Message.Contains("FK_DEED_DTL_HEAD_LST"))
                         {
-                            e.Handled = true;
-                        }
-
-                        if (ex.Number == 547)
-                        {
-                            if (ex.Message.Contains("FK_DEED_DTL_HEAD_LST"))
+                            try
                             {
-                                try
+                                // تشخیص دادیم که خطا بخاطر سند است.
+                                // حالا تلاش برای حذف زنجیره‌ای (اول فرزند، بعد والد)
+                                if (!long.TryParse(N_S.Text, out long sanadNum) || sanadNum == 0)
                                 {
-                                    // تشخیص دادیم که خطا بخاطر سند است.
-                                    // حالا سند را حذف می‌کنیم (اگر شماره سند در فرم موجود است)
-                                    if (!string.IsNullOrEmpty(N_S.Text) && N_S.Text != "0")
-                                    {
-                                        dbms.DoExecuteSQL($@"DELETE FROM dbo.DEED_DTL WHERE N_S = {N_S.Text} AND NUMBER = {NUMBER.Text} AND TAG = 13"); //حذف سند
-
-                                        dbms.DoExecuteSQL($@"DELETE FROM dbo.HEAD_LST WHERE NUMBER = {NUMBER.Text} AND NUMBER1 = {NUMBER1.Text} AND TAG = 13");
-
-                                        SANAD();
-                                        _navigationManager?.DeleteCurrentRecord(); //Refresh Record Source
-                                    }
-                                    else
-                                    {
-                                        // حالتی که خطا میدهد اما شماره سند در تکست باکس نیست (بسیار نادر)
-                                        new Msgwin(false, "وابستگی به سند وجود دارد اما شماره سند مشخص نیست.").Show();
-                                    }
+                                    // حالتی که خطا میدهد اما شماره سند در تکست باکس نیست (بسیار نادر)
+                                    new Msgwin(false, "وابستگی به سند وجود دارد اما شماره سند مشخص نیست.").Show();
+                                    return;
                                 }
-                                catch (Exception ex2)
-                                {
-                                    new Msgwin(false, $"عملیات حذف سند و فاکتور با شکست مواجه شد").Show();
-                                }
+
+                                // الف) حذف سند وابسته (DEED_DTL)
+                                // ✅ استفاده از پارامتر - امن
+                                dbms.DoExecuteSQL("DELETE FROM dbo.DEED_DTL WHERE N_S = @NS AND NUMBER = @Num AND TAG = @Tag",
+                                    new { NS = sanadNum, Num = num, Tag = 13 });
+
+                                // ب) تلاش مجدد برای حذف سربرگ فاکتور (HEAD_LST)
+                                dbms.DoExecuteSQL("DELETE FROM dbo.HEAD_LST WHERE NUMBER = @Num AND NUMBER1 = @Num1 AND TAG = @Tag", deleteParams);
+
+                                // عملیات حذف زنجیره‌ای موفقیت آمیز بود
+                                SANAD();
+                                _navigationManager?.DeleteCurrentRecord();
                             }
-                            else
+                            catch (Exception ex2)
                             {
-                                new Msgwin(false, "این فاکتور دارای اطلاعات وابسته است , ابتدا آنرا حذف کنید").ShowDialog();
-                                return;
+                                // خطای غیرمنتظره در حین عملیات حذف زنجیره‌ای
+                                // پیام خطا (ex2.Message) را نگه داشتم چون برای دیباگ حیاتی است، اما شماره کد فنی ندارد
+                                new Msgwin(false, $"عملیات حذف خودکار سند و فاکتور با شکست مواجه شد.").Show();
                             }
                         }
                         else
                         {
-                            new Msgwin(false, "حذف به دلیل خطا در بروز پایگاه داده انجام نشد!").ShowDialog(); return;
+                            // خطای FK دیگری وجود دارد که مربوط به سند نیست
+                            new Msgwin(false, "این فاکتور دارای اطلاعات وابسته دیگری است (غیر از سند) و قابل حذف نیست.").ShowDialog();
                         }
                     }
-                    catch (Exception)
+                    else
                     {
-                        new Msgwin(false, "خطا در انجام عملیات حذف!").ShowDialog(); return;
+                        // 👈 تغییر انجام شد: حذف نمایش کد خطا به کاربر
+                        new Msgwin(false, "حذف به دلیل خطا در پایگاه داده انجام نشد!").ShowDialog();
                     }
+                }
+                catch (Exception ex)
+                {
+                    // خطای عمومی غیر SQL
+                    new Msgwin(false, $"خطای سیستمی در انجام عملیات حذف!").ShowDialog();
                 }
             }
         }

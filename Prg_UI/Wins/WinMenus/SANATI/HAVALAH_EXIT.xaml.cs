@@ -4,6 +4,7 @@ using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
@@ -12,39 +13,40 @@ using Prg_UI.Functions.Jostejoo;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Prg_UI.Wins.WinOther;
+using Rpts;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Components;
+using Stimulsoft.Report.Dictionary;
+using Syncfusion.Data.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
-using Wins.WinMenus.ANBAR;
-using Syncfusion.Data.Extensions;
-using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
-using Rpts;
-using Stimulsoft.Report.Components;
-using Stimulsoft.Report.Dictionary;
-using Stimulsoft.Report;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using System.Threading;
 using System.Windows.Threading;
-using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
-using System.Windows.Data;
-using System.ComponentModel;
+using Wins.WinMenus.ANBAR;
+using Wins.WinOther;
+using static Interfaces.INavigator;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
-using System.Windows.Controls.Primitives;
-using Prg_Proccessy.Generaly;
+using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
+using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
 
 namespace Wins.WinMenus.SANATI
 {
-    public partial class HAVALAH_EXIT : Window
+    public partial class HAVALAH_EXIT : Window, ISearchableWindow
     {
         #region Header Window Begin
         //Header Window Begin
@@ -566,6 +568,23 @@ namespace Wins.WinMenus.SANATI
                 }
             }
 
+            if (!INVO_LST_SUB.IsKeyboardFocusWithin && !INVO_LST_SUB.IsFocused)
+            {
+                if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+                    var searchWindow = new EnhancedSearchWindow(this);
+                    searchWindow.Owner = this;
+                    searchWindow.ShowDialog();
+                }
+            }
+            else
+            {
+                if (e.Key is Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    DataGridExtension.HandleKeyPress(sender, e, INVO_LST_SUB);
+                }
+            }
 
             // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
             var nonDataKeys = new[]
@@ -595,6 +614,60 @@ namespace Wins.WinMenus.SANATI
                 }
             }
         }
+
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
+
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            // Handle the selected item
+            if (selectedItem is HEAD_LST item)
+            {
+                if (item != null)
+                {
+                    // Find the item in the loaded records data
+                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.NUMBER.Equals(Convert.ToDouble(item.NUMBER)));
+
+                    if (itemfound != null)
+                    {
+                        _navigationManager.IsNewRecord = false;
+
+                        // 1) Find its index in the master list
+                        int idx = _navigationManager.RecordsData.IndexOf(itemfound);
+
+                        if (idx < 0)
+                        {
+                            // not found (perhaps filtered out?), bail out
+                            new Msgwin(false, "یافت نشد: مورد انتخاب شده در لیست اصلی وجود ندارد").Show();
+                            return;
+                        }
+
+                        // 2) Tell the navigation manager to move to that position
+                        _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+                    }
+                    else
+                    {
+                        // Optional: Handle case where item is not in current filtered list
+                        // For now, just refreshing to the specific number might be an alternative, 
+                        // but finding the index is the standard way in your app.
+                        new Msgwin(false, "رکورد مورد نظر در لیست بارگذاری شده یافت نشد.").Show();
+                    }
+                }
+            }
+        }
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+                new SearchableProperty { DisplayName = "شماره برگه", PropertyPath = "NUMBER", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "تاریخ", PropertyPath = "DATE_N", PropertyType = typeof(long) },
+                new SearchableProperty { DisplayName = "کد مسئول شیفت", PropertyPath = "CUST_NO", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "کاربر", PropertyPath = "USER_NAME", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "ملاحظات", PropertyPath = "MOLAH", PropertyType = typeof(string) },
+                // Add other searchable properties here if needed
+            };
+        }
+        #endregion
 
         private void GetFocusOnDefaultCell()
         {
