@@ -27,8 +27,9 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using Wins.WinMenus.Checkha.NAZDESANDOGH;
-using static Wins.WinMenus.Checkha.NAZDESANDOGH.VOSULDIALOG;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
+using static Wins.WinMenus.Checkha.NAZDESANDOGH.VOSULDIALOG;
 
 namespace Wins.WinMenus.Checkha
 {
@@ -166,25 +167,40 @@ namespace Wins.WinMenus.Checkha
             }
             else
             {
-                //اعلام وصول تک سطر
-                if ((e.Key is Key.OemComma && Keyboard.Modifiers == ModifierKeys.None) || (e.Key is Key.Oem5 && Keyboard.Modifiers == ModifierKeys.None)) //پ
+
+                var currentCell = SFDATAGRID_SUB.SelectionController.CurrentCellManager.CurrentCell;
+                if (currentCell != null && !currentCell.IsEditing)
                 {
-                    DCheckManagement(BTN_SINGLE_PASS_CHECK);
-                }
-                //انتقال چک به صندوق
-                if (e.Key is Key.E && Keyboard.Modifiers == ModifierKeys.None) //ث
-                {
-                    DCheckManagement(BTN_TRANSFER_SANDOGH);
-                }
-                //اعلام وصول گروهی
-                if (e.Key is Key.G && Keyboard.Modifiers == ModifierKeys.None) //ل
-                {
-                    DCheckManagement(BTN_GROUP_PASS);
-                }
-                //به حساب گذاشتن
-                if (e.Key is Key.F && Keyboard.Modifiers == ModifierKeys.None) //ب
-                {
-                    DCheckManagement(BTN_BEHESAB);
+                    var ROW = SFDATAGRID_SUB.SelectedItem as NAZDBANK_D_MODEL;
+
+                    if (Keyboard.FocusedElement is TextBox || Keyboard.FocusedElement is PasswordBox) return; //Focused on PopupFilter
+
+                    if (ROW != null && ROW?.N_SERI != null)
+                    {
+                        if (currentCell?.GridColumn != null && currentCell.GridColumn?.MappingName == "N_SERI") //اگر فوکوس روی سند بود
+                        {
+                            //اعلام وصول تک سطر
+                            if ((e.Key is Key.OemComma && Keyboard.Modifiers == ModifierKeys.None) || (e.Key is Key.Oem5 && Keyboard.Modifiers == ModifierKeys.None)) //پ
+                            {
+                                DCheckManagement(BTN_SINGLE_PASS_CHECK);
+                            }
+                            //انتقال چک به صندوق
+                            if (e.Key is Key.E && Keyboard.Modifiers == ModifierKeys.None) //ث
+                            {
+                                DCheckManagement(BTN_TRANSFER_SANDOGH);
+                            }
+                            //اعلام وصول گروهی
+                            if (e.Key is Key.G && Keyboard.Modifiers == ModifierKeys.None) //ل
+                            {
+                                DCheckManagement(BTN_GROUP_PASS);
+                            }
+                            //به حساب گذاشتن
+                            if (e.Key is Key.F && Keyboard.Modifiers == ModifierKeys.None) //ب
+                            {
+                                DCheckManagement(BTN_BEHESAB);
+                            }
+                        }
+                    }
                 }
             }
         }

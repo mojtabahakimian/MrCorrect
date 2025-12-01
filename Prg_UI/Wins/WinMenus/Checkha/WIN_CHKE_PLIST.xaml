@@ -460,7 +460,7 @@
 
         <!-- Improve filter performance by using AdvancedFilter without generating unique items -->
         <Style TargetType="{x:Type sfusion:AdvancedFilterControl}">
-            <Setter Property="CanGenerateUniqueItems" Value="False" />
+            <Setter Property="CanGenerateUniqueItems" Value="True" />
         </Style>
         <Style x:Key="filterControlStyle" TargetType="{x:Type sfusion:GridFilterControl}">
             <Setter Property="FilterMode" Value="AdvancedFilter" />

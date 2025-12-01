@@ -256,31 +256,38 @@ namespace Functions
                                     MessageText_U = $"کالا با کد {CODE} در انبار {ANBAR_NAME} دارای موجودی {MAND ?? 0} می‌باشد."
                                 });
 
-
-                                #region MyRegion
+                                //مقدار مرجوعی بیش از فروش نباشد
                                 if (Math.Round(MEGH_MAR - MEGHk, 5) > 0)
                                 {
                                     errorMessages.Add(new MsgModel { MessageText_U = $"کالا با کد {CODE} از انبار  \"{ANBAR_NAME}\" با مقدار {MEGHk} ، مقدار مرجوعی از مقدار فروش بیشتر است" });
                                 }
 
-                                if (RST.MOGODI + RST.MOGODI_A - MEGH_MAR < min)
-                                {
-                                    //DoCmd.OpenForm "mesag", acNormal,,, acFormReadOnly, acDialog, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد." + "حداقل موجودي تعريف شده در اف دو :" + min;
-                                }
-                                #endregion
-
                                 if (MAND.HasValue)
                                 {
-                                    //double remainingQty = MAND.Value - (MEGHk - (MEGHk - MEGH_MAR));
-                                    double remainingQty = MAND.Value - (MEGHk - MEGH_MAR);
-                                    if (Math.Round(remainingQty, (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && ANBAR != 0) //انبار خدمات نباشه
+                                    // اصلاحیه: موجودی فعلی (MAND) چون بعد از آپدیت دیتابیس خوانده شده، خودش مقدار نهایی است
+                                    // بنابراین کسر کردن دوباره (MEGHk - MEGH_MAR) اشتباه است.
+                                    double remainingQty = MAND.Value; // تغییر از: MAND.Value - (MEGHk - MEGH_MAR);
+
+                                    if (Math.Round(remainingQty, (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && ANBAR != 0)
                                     {
                                         errorMessages.Add(new MsgModel
                                         {
-                                            MessageText_U = $"کالا با کد {CODE} از انبار  \"{ANBAR_NAME}\" با مقدار {MEGHk} ، خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد"
+                                            MessageText_U = $"کالا با کد {CODE} از انبار \"{ANBAR_NAME}\" با مقدار {MEGHk}، خروج کالا از انبار موجودی را به مقدار غیر مجاز کاهش میدهد"
                                         });
                                     }
                                 }
+
+                                //if (MAND.HasValue)
+                                //{
+                                //    double remainingQty = MAND.Value - (MEGHk - MEGH_MAR); //این خط غلطه چون ما توی حالت ایزوله اجازه ثبت و مانده رو میگیریم این منطقی نیست
+                                //    if (Math.Round(remainingQty, (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && ANBAR != 0) //انبار خدمات نباشه
+                                //    {
+                                //        errorMessages.Add(new MsgModel
+                                //        {
+                                //            MessageText_U = $"کالا با کد {CODE} از انبار  \"{ANBAR_NAME}\" با مقدار {MEGHk} ، خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد"
+                                //        });
+                                //    }
+                                //}
                             }
                         }
                         else //فاکتور/انبار معمولی

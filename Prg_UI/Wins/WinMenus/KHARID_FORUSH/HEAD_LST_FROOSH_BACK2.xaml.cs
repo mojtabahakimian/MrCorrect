@@ -4073,7 +4073,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 if (cellContent is TextBlock textBlock) _CELL_VALUE_ = textBlock.Text;
                 else if (cellContent is TextBox textBox) _CELL_VALUE_ = textBox.Text;
 
-                var CurrentData = VISITOR_DTL_SUB.Items[VISITOR_DTL_SUB.SelectedIndex] as VISITOR_DTL;
+                var CurrentData = grid.CurrentCell.Item as VISITOR_DTL;
+                if (CurrentData == null) return;
+
 
                 if (grid.CurrentCell.Column.SortMemberPath == "DARSAD")
                 {
@@ -5033,11 +5035,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (report.GetComponentByName("USERNAME") is StiText stiText) stiText.Text = Baseknow.UUSER;
 
 
-
-            //report.Render();
-            //report.Show();
-
             new WINRPT(report, LABEL_HEADER.Content.ToStringNullSafe()).Show();
+
         }
         private void Command106_Click(object sender, RoutedEventArgs e)
         {
@@ -5076,8 +5075,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (report.GetComponentByName("USERNAME") is StiText stiText) stiText.Text = Baseknow.UUSER;
 
 
-            report.Render(false);
-            report.Show();
+            new WINRPT(report, LABEL_HEADER.Content.ToStringNullSafe()).Show();
         }
         private void Command108_Click(object sender, RoutedEventArgs e)
         {

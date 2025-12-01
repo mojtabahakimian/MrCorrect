@@ -9046,9 +9046,10 @@ namespace AUTO_BAZ.Functions
 
                 if (Baseknow.SANAT == true || IsNull(Baseknow.SANAT))
                 {
+                    string _SHARH_S = Strings.Left(" برگه ورود كالا به انبار شماره " + HEDRST[ROW].NUMBER + "-" + HEDRST[ROW].FNUMCO + "مورخ " + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 100);
                     if (HEDRST[ROW]?.N_S == null)
                     {
-                        var _SHARH_S = Strings.Left(" برگه ورود كالا به انبار شماره " + HEDRST[ROW].NUMBER + "-" + HEDRST[ROW].FNUMCO + "مورخ " + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 100);
+                        _SHARH_S = Strings.Left(" برگه ورود كالا به انبار شماره " + HEDRST[ROW].NUMBER + "-" + HEDRST[ROW].FNUMCO + "مورخ " + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 100);
                         max_ns = Createsanad(Convert.ToInt64(HEDRST[ROW].DATE_N), _SHARH_S, 0, 9, Convert.ToByte(true), HEDRST[ROW].USER_NAME);
                         shart = "NO_S = 9 AND N_S =" + max_ns;
                     }
@@ -9060,12 +9061,17 @@ namespace AUTO_BAZ.Functions
                     SHRST = dbms.DoGetDataSQL<DEED_HED>($"SELECT * FROM DEED_HED WHERE {shart} ").ToList();
                     if (SHRST.Count == 0)
                     {
-                        var _SHARH_S = Strings.Left(" برگه ورود كالا به انبار شماره " + HEDRST[ROW].NUMBER + "-" + HEDRST[ROW].FNUMCO + "مورخ " + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 100);
+                        _SHARH_S = Strings.Left(" برگه ورود كالا به انبار شماره " + HEDRST[ROW].NUMBER + "-" + HEDRST[ROW].FNUMCO + "مورخ " + Strings.Format(HEDRST[ROW].DATE_N, "####/##/##"), 100);
                         max_ns = Createsanad(Convert.ToInt64(HEDRST[ROW].DATE_N), _SHARH_S, 0, 9, Convert.ToByte(true), HEDRST[ROW].USER_NAME);
                     }
                     else
                     {
+                        //بروز رسانی تاریخ سند در صورت تغییر تاریخ برگه ورود
                         max_ns = SHRST.FirstOrDefault().N_S;
+                        if (SHRST.FirstOrDefault()?.DATE_S != HEDRST[ROW].DATE_N)
+                        {
+                            dbms.DoExecuteSQL($"UPDATE DEED_HED SET DATE_S = {HEDRST[ROW].DATE_N},SHARH_S = N'{_SHARH_S}' WHERE N_S ={max_ns}");
+                        }
                     }
                     if (IsNull(HEDRST[ROW].N_S) || HEDRST[ROW].N_S != max_ns)
                     {

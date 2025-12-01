@@ -478,7 +478,7 @@ namespace Wins.WinMenus.SANATI
                 }
             }
 
-            if (!INVO_LST_SUB.IsKeyboardFocusWithin && !INVO_LST_SUB.IsFocused) //Only On Form F7 Pressed Not DataGrid
+            if (!INVO_LST_SUB.IsKeyboardFocusWithin && !INVO_LST_SUB.IsFocused)
             {
                 if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
                 {
@@ -486,6 +486,13 @@ namespace Wins.WinMenus.SANATI
                     var searchWindow = new EnhancedSearchWindow(this);
                     searchWindow.Owner = this;
                     searchWindow.ShowDialog();
+                }
+            }
+            else
+            {
+                if (e.Key is Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    DataGridExtension.HandleKeyPress(sender, e, INVO_LST_SUB);
                 }
             }
 

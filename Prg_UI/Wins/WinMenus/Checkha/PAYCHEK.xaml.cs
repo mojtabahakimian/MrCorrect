@@ -492,6 +492,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 var CheckExistData = dbms.DoGetDataSQL<PAY_GETP>($"SELECT TOP 1 * FROM PAY_GETP WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()} ORDER BY RADIF").ToList();
 
                 var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
+                var _N_HESAB_ = N_HESAB.Text.Length > 198 ? N_HESAB.Text.Substring(0, 198) : N_HESAB.Text;
 
                 var _SHOBEH_ = SHOBEH.SelectedValue.ToStringNullSafe().Length > 20 ? SHOBEH.SelectedValue.ToStringNullSafe().Substring(0, 19) : SHOBEH.SelectedValue.ToStringNullSafe();
 
@@ -499,13 +500,13 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 {
                     if (CheckExistData.Count > 0)
                     {
-                        dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETP SET N_SERI = {N_SERI.Text}, BANK = {BANK.SelectedValue}, DATE_S = {DATE_S.Text.ToRawTarikh()}, DATE = {DATE.Text.ToRawTarikh()}, SHOBEH = N'{_SHOBEH_}', MABL = {MABL.Text}, NAME_TAH = N'{_NAME_TAH_}', N_HESAB = N'{N_HESAB.Text}', N_S = NULL, N_KOL = {(N_KOL is null ? "NULL" : N_KOL)}, N_MOIN = {(N_MOIN is null ? "NULL" : N_MOIN)}, N_TAF = {(N_TAF is null ? "NULL" : N_TAF)}, N_KOL2 = NULL, N_MOIN2 = NULL, N_TAF2 = NULL, N_KOL3 = NULL, N_MOIN3 = NULL, N_TAF3 = NULL, NUMBER = NULL, TAG = NULL, ANBAR = NULL, RADIF = NULL, CUST_NO = DEFAULT, KIND = {KIND.SelectedValue}, VAZ = NULL, HES1 = N'{HES1.SelectedValue}', HES2 = NULL, HES3 = NULL, SAYADI = N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}'
+                        dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETP SET N_SERI = {N_SERI.Text}, BANK = {BANK.SelectedValue}, DATE_S = {DATE_S.Text.ToRawTarikh()}, DATE = {DATE.Text.ToRawTarikh()}, SHOBEH = N'{_SHOBEH_}', MABL = {MABL.Text}, NAME_TAH = N'{_NAME_TAH_}', N_HESAB = N'{_N_HESAB_}', N_S = NULL, N_KOL = {(N_KOL is null ? "NULL" : N_KOL)}, N_MOIN = {(N_MOIN is null ? "NULL" : N_MOIN)}, N_TAF = {(N_TAF is null ? "NULL" : N_TAF)}, N_KOL2 = NULL, N_MOIN2 = NULL, N_TAF2 = NULL, N_KOL3 = NULL, N_MOIN3 = NULL, N_TAF3 = NULL, NUMBER = NULL, TAG = NULL, ANBAR = NULL, RADIF = NULL, CUST_NO = DEFAULT, KIND = {KIND.SelectedValue}, VAZ = NULL, HES1 = N'{HES1.SelectedValue}', HES2 = NULL, HES3 = NULL, SAYADI = N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}'
                                                            WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()}");
                     }
                     else
                     {
                         dbms.DoExecuteSQL($@"INSERT INTO dbo.PAY_GETP       (N_SERI,                BANK,                     DATE_S,                     DATE,                   SHOBEH,       MABL,          NAME_TAH,          N_HESAB, N_S,  N_KOL,  N_MOIN,  N_TAF, N_KOL2, N_MOIN2, N_TAF2, N_KOL3, N_MOIN3, N_TAF3, NUMBER, TAG, ANBAR, RADIF, CUST_NO,                KIND, VAZ,                   HES1, HES2, HES3, SAYADI)
-				                                           VALUES({N_SERI.Text},{BANK.SelectedValue},{DATE_S.Text.ToRawTarikh()},{DATE.Text.ToRawTarikh()},N'{_SHOBEH_}',{MABL.Text},N'{_NAME_TAH_}',N'{N_HESAB.Text}',NULL,{N_KOL},{N_MOIN},{N_TAF},   NULL,    NULL,   NULL,   NULL,    NULL,   NULL,   NULL,NULL,  NULL,  NULL,       0,{KIND.SelectedValue},NULL,N'{HES1.SelectedValue}', NULL, NULL, N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}')");
+				                                           VALUES({N_SERI.Text},{BANK.SelectedValue},{DATE_S.Text.ToRawTarikh()},{DATE.Text.ToRawTarikh()},N'{_SHOBEH_}',{MABL.Text},N'{_NAME_TAH_}',N'{_N_HESAB_}',NULL,{N_KOL},{N_MOIN},{N_TAF},   NULL,    NULL,   NULL,   NULL,    NULL,   NULL,   NULL,NULL,  NULL,  NULL,       0,{KIND.SelectedValue},NULL,N'{HES1.SelectedValue}', NULL, NULL, N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}')");
                     }
                 }
                 catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 2627)

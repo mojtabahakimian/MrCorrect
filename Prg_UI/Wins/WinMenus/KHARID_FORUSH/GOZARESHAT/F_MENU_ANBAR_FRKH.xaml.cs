@@ -243,8 +243,28 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
             report["FDATE_PARM"] = DT1.Text.ToRawTarikh().ToString();
             report["EDATE_PARM"] = DT2.Text.ToRawTarikh().ToString();
-            report["ANBAR_PARM"] = ANBAR.SelectedValue.ToString();
-            report["KALA_PARM"] = KALA.SelectedValue.ToString();
+            if (ANBAR.SelectedValue != null)
+            {
+                report["ANBAR_PARM"] = ANBAR.SelectedValue.ToString();
+            }
+            else
+            {
+                report["ANBAR_PARM"] = "%";
+            }
+            if (KALA.SelectedValue != null)
+            {
+                report["KALA_PARM"] = KALA.SelectedValue.ToString();
+            }
+            else
+            {
+                report["KALA_PARM"] = "%";
+            }
+
+            var salN = report.GetComponentByName("SAL_N") as StiText;
+            if (salN != null)
+            {
+                salN.Text = Baseknow.WIDTH_D ?? "";
+            }
 
             (report.GetComponentByName("SAL_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
 
@@ -283,8 +303,11 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             }
             var _sql_query = $"SELECT ANBAR, NAME, MEGHk, MABL, MABL_K, DATE_N, NUMBER, CODE FROM dbo.Q_FR_KH_ANBAR(N'{DT1.Text.ToRawTarikh()}', N'{DT2.Text.ToRawTarikh()}', N'{(ANBAR.SelectedValue != null ? ANBAR.SelectedValue.ToString() : "1")}', N'{(KALA.SelectedValue != null ? KALA.SelectedValue.ToString() : "%")}')";
             report.Dictionary.Variables.Add("Q_PARM", _sql_query);
-
-            (report.GetComponentByName("SAL_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
+            var salN = report.GetComponentByName("SAL_N") as StiText;
+            if (salN != null)
+            {
+                salN.Text = Baseknow.WIDTH_D ?? "";
+            }
             new Rpts.WINRPT(report, "گزارش خرید فروش از انبار ها").Show();
         }
 
