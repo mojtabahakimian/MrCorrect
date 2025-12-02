@@ -370,7 +370,7 @@ namespace Wins.WinMenus.ANBAR
             }
             catch { /*ignore*/ }
 
-            if (!ANBARGRD_SUB_IsFocused) //Only On Form F7 Pressed Not DataGrid
+            if (!ANBARGRD_SUB.IsKeyboardFocusWithin) //Only On Form F7 Pressed Not DataGrid
             {
                 if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
                 {

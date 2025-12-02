@@ -313,7 +313,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             ////(THE_WIN as PGET_HED).CmdSaveRecord((THE_WIN as PGET_HED).CURRENT_ITMES_ROW);
             var pgetHed = THE_WIN as PGET_HED;
 
-            if (pgetHed != null)
+            if (pgetHed != null && pgetHed.CURRENT_ITMES_ROW != null)
             {
                 pgetHed.CmdSaveRecord(pgetHed.CURRENT_ITMES_ROW);
             }
@@ -344,32 +344,40 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 var rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh()).ToList();
                 if (rst.Count > 0 && pgetHed != null)
                 {
-                    rst.FirstOrDefault().N_KOL = (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_K;
-                    rst.FirstOrDefault().N_MOIN = (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_M;
-                    rst.FirstOrDefault().N_TAF = (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES_T;
-                    rst.FirstOrDefault().HES1 = (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).THES;
-                    rst.FirstOrDefault().VAZ = 4;
-                    rst.FirstOrDefault().SANDUGH = Convert.ToInt32(this.SANDUGH.SelectedValue);
-
-                    string _WHERE_ = " WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh();
-                    dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD SET N_MOIN = {rst.FirstOrDefault().N_MOIN}, VAZ = {rst.FirstOrDefault().VAZ}, SANDUGH = {rst.FirstOrDefault().SANDUGH} , N_KOL = {rst.FirstOrDefault().N_KOL} , N_TAF = {rst.FirstOrDefault().N_TAF} , HES1 = N'{rst.FirstOrDefault().HES1}' {_WHERE_}");
-
-                    if (rst.FirstOrDefault().KIND == 0)
+                    var parentItem = pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST;
+                    if (parentItem != null)
                     {
-                        (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_K = Convert.ToInt32(CL_HESABDARI.GETKOL(Baseknow.ADV));
-                        (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_M = Convert.ToInt32(CL_HESABDARI.GETMOIN(Baseknow.ADV));
-                        (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES_T = Convert.ToInt32(CL_HESABDARI.GETTAF(Baseknow.ADV));
-                        (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES = Baseknow.ADV;
+                        rst.FirstOrDefault().N_KOL = parentItem.THES_K;
+                        rst.FirstOrDefault().N_MOIN = parentItem.THES_M;
+                        rst.FirstOrDefault().N_TAF = parentItem.THES_T;
+                        rst.FirstOrDefault().HES1 = parentItem.THES;
+                        rst.FirstOrDefault().VAZ = 4;
+                        rst.FirstOrDefault().SANDUGH = Convert.ToInt32(this.SANDUGH.SelectedValue);
+
+                        string _WHERE_ = " WHERE N_SERI=" + this.N_SERI.SelectedValue + " AND BANK = " + this.BANK.SelectedValue + " AND DATE_S = " + this.DATE_S.Text.ToRawTarikh();
+                        dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD SET N_MOIN = {rst.FirstOrDefault().N_MOIN}, VAZ = {rst.FirstOrDefault().VAZ}, SANDUGH = {rst.FirstOrDefault().SANDUGH} , N_KOL = {rst.FirstOrDefault().N_KOL} , N_TAF = {rst.FirstOrDefault().N_TAF} , HES1 = N'{rst.FirstOrDefault().HES1}' {_WHERE_}");
+
+                        if (rst.FirstOrDefault().KIND == 0)
+                        {
+                            parentItem.FHES_K = Convert.ToInt32(CL_HESABDARI.GETKOL(Baseknow.ADV));
+                            parentItem.FHES_M = Convert.ToInt32(CL_HESABDARI.GETMOIN(Baseknow.ADV));
+                            parentItem.FHES_T = Convert.ToInt32(CL_HESABDARI.GETTAF(Baseknow.ADV));
+                            parentItem.FHES = Baseknow.ADV;
+                        }
                     }
                 }
 
                 if (pgetHed != null)
                 {
-                    (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).MABL = Convert.ToDouble(this.MABL.Text);
-                    (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).N_SERI = Convert.ToDouble(this.N_SERI.SelectedValue);
-                    (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).BANK = Convert.ToInt32(this.BANK.SelectedValue);
+                    var parentItem = pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST;
+                    if (parentItem != null)
+                    {
+                        parentItem.MABL = Convert.ToDouble(this.MABL.Text);
+                        parentItem.N_SERI = Convert.ToDouble(this.N_SERI.SelectedValue);
+                        parentItem.BANK = Convert.ToInt32(this.BANK.SelectedValue);
 
-                    (pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).SHARH = Strings.Right("چك " + N_SERI.SelectedValue + "بانك " + CL_HESABDARI.GETBANK(Convert.ToDouble(BANK.SelectedValue)) + " " + SHOBEH.Text + " مورخ " + Strings.Format(Convert.ToDouble(DATE_S.Text.ToRawTarikh()), "####/##/##"), 255);
+                        parentItem.SHARH = Strings.Right("چك " + N_SERI.SelectedValue + "بانك " + CL_HESABDARI.GETBANK(Convert.ToDouble(BANK.SelectedValue)) + " " + SHOBEH.Text + " مورخ " + Strings.Format(Convert.ToDouble(DATE_S.Text.ToRawTarikh()), "####/##/##"), 255);
+                    }
                 }
                 CL_HESABDARI.GETDLOG(4, this.N_SERI.Text.ToString(), Convert.ToInt32(this.BANK.SelectedValue), Convert.ToInt64(DATE_S.Text.ToRawTarikh()), Convert.ToInt32(this.SANDUGH.SelectedValue));
             }
@@ -377,7 +385,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             //Finally Save and Sand as Ensure Oprate
             if (pgetHed != null)
             {
-                _ = pgetHed.CmdSaveRecord(pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST);
+                var parentItem = pgetHed.PGET_LST_SUB.Items[INDEX_DG] as PGET_LST;
+                if (parentItem != null)
+                {
+                    _ = pgetHed.CmdSaveRecord(parentItem);
+                }
                 pgetHed.SANAD();
             }
         }

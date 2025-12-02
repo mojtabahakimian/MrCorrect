@@ -494,7 +494,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
                 var _N_HESAB_ = N_HESAB.Text.Length > 198 ? N_HESAB.Text.Substring(0, 198) : N_HESAB.Text;
 
-                var _SHOBEH_ = SHOBEH.SelectedValue.ToStringNullSafe().Length > 20 ? SHOBEH.SelectedValue.ToStringNullSafe().Substring(0, 19) : SHOBEH.SelectedValue.ToStringNullSafe();
+                var _SHOBEH_ = SHOBEH.SelectedValue.ToStringNullSafe().Length > 50 ? SHOBEH.SelectedValue.ToStringNullSafe().Substring(0, 50) : SHOBEH.SelectedValue.ToStringNullSafe();
 
                 try
                 {

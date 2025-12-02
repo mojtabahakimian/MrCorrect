@@ -385,8 +385,8 @@ namespace Prg_UI.Wins
             //new WIN_OPTIONS().Show();
             //new HEAD_LST_ENTEGHAL_WIN().Show();
 
-            //new HEAD_LST_PISHFROOSH2().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_KOL_FT4, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KART, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.ANBGRD_HEAD_WIN, this ,560);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
             //new WIN_OPTIONS().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KART, this);

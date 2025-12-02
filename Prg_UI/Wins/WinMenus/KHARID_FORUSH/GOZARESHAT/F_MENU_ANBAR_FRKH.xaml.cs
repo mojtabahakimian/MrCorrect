@@ -212,9 +212,21 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                 return;
             }
 
+            if (CUTSNO_TEX is null)
+            {
+                return;
+            }
+
             if (CUTSNO_TEX.Text == "+" || CUTSNO_TEX.Text == "++")
             {
-                SERCHK sERCHK = new SERCHK(I_AM_F_MENU_ANBAR_FRKH, KALA.SelectedValue.ToString());
+                if (ANBAR.SelectedValue is null)
+                {
+                    new Msgwin(false, "ابتدا انبار را انتخاب کنید").ShowDialog();
+                    return;
+                }
+
+                var selectedAnbar = ANBAR.SelectedValue.ToString();
+                SERCHK sERCHK = new SERCHK(I_AM_F_MENU_ANBAR_FRKH, selectedAnbar);
                 sERCHK.ShowDialog();
 
                 if (FROM_SAERCH_KAL.CODE is null)
@@ -243,22 +255,9 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
             report["FDATE_PARM"] = DT1.Text.ToRawTarikh().ToString();
             report["EDATE_PARM"] = DT2.Text.ToRawTarikh().ToString();
-            if (ANBAR.SelectedValue != null)
-            {
-                report["ANBAR_PARM"] = ANBAR.SelectedValue.ToString();
-            }
-            else
-            {
-                report["ANBAR_PARM"] = "%";
-            }
-            if (KALA.SelectedValue != null)
-            {
-                report["KALA_PARM"] = KALA.SelectedValue.ToString();
-            }
-            else
-            {
-                report["KALA_PARM"] = "%";
-            }
+
+            report["ANBAR_PARM"] = MANBAR;
+            report["KALA_PARM"] = MKALA;
 
             var salN = report.GetComponentByName("SAL_N") as StiText;
             if (salN != null)
@@ -266,7 +265,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                 salN.Text = Baseknow.WIDTH_D ?? "";
             }
 
-            (report.GetComponentByName("SAL_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
+
 
 
             //report.Render();

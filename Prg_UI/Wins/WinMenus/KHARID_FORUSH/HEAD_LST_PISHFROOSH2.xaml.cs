@@ -5334,26 +5334,44 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                 db.Execute("SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WITH (TABLOCKX, HOLDLOCK)", null, transaction);
 
 
-                                // دریافت شماره فاکتور جدید (TAG = 2)
-                                var maxNumber = db.Query<double?>("SELECT MAX(NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE TAG = 2", null, transaction).FirstOrDefault();
-                                if (maxNumber == null || maxNumber == 0)
+                                // **************************************************************************
+                                // FIX 1: محاسبه شماره داخلی (Internal ID)
+                                // بررسی ماکسیمم هم در تگ 2 (حواله) و هم تگ 13 (فاکتور) برای جلوگیری از تداخل
+                                // **************************************************************************
+                                var maxInternal = db.Query<double?>("SELECT MAX(NUMBER) FROM HEAD_LST WHERE TAG IN (2, 13)", null, transaction).FirstOrDefault();
+                                if (maxInternal == null || maxInternal == 0)
                                 {
-                                    num = Baseknow.STHFR;
+                                    num = Baseknow.STHFR; // مقدار اولیه از تنظیمات
                                 }
                                 else
                                 {
-                                    num = Convert.ToInt64(maxNumber + 1);
+                                    num = Convert.ToInt64(maxInternal + 1);
                                 }
 
-                                // دریافت شماره فاکتور امانی جدید (TAG = 13)
-                                var maxNumber13 = db.Query<double?>("SELECT MAX(NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE TAG = 13", null, transaction).FirstOrDefault();
-                                if (maxNumber13 == null || maxNumber13 == 0)
+                                // چک نهایی برای اطمینان از یونیک بودن شماره داخلی
+                                while (db.Query<int>("SELECT COUNT(*) FROM HEAD_LST WHERE NUMBER = @Num AND TAG IN (2, 13)", new { Num = num }, transaction).FirstOrDefault() > 0)
+                                {
+                                    num++;
+                                }
+
+                                // **************************************************************************
+                                // FIX 2: محاسبه شماره فاکتور چاپی (Printed Invoice Number)
+                                // اصلاح کوئری: خواندن MAX(NUMBER1) به جای MAX(NUMBER)
+                                // **************************************************************************
+                                var maxPrinted = db.Query<double?>("SELECT MAX(NUMBER1) FROM HEAD_LST WHERE TAG = 13", null, transaction).FirstOrDefault();
+                                if (maxPrinted == null || maxPrinted == 0)
                                 {
                                     num1 = 1;
                                 }
                                 else
                                 {
-                                    num1 = Convert.ToInt64(maxNumber13 + 1);
+                                    num1 = Convert.ToInt64(maxPrinted + 1);
+                                }
+
+                                // چک نهایی برای اطمینان از یونیک بودن شماره فاکتور (جلوگیری از خطای تکراری بودن)
+                                while (db.Query<int>("SELECT COUNT(*) FROM HEAD_LST WHERE NUMBER1 = @Num1 AND TAG = 13", new { Num1 = num1 }, transaction).FirstOrDefault() > 0)
+                                {
+                                    num1++;
                                 }
 
                                 // آماده‌سازی شرایط
@@ -5904,8 +5922,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
 
             //report.Compile();
-            report.Render(false);
-            report.Show();
+            new WINRPT(report, "پیش فاکتور").Show();
+
             #endregion
         }
 

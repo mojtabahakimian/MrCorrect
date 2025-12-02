@@ -382,39 +382,37 @@
                                                 </Path>
 
 
-                                                <syncfusion:SfTreeGrid x:Name="PART_ItemsControl" Margin="0 ,30 , 0 ,0"
-                                                ColumnSizer="SizeToCells"
-                                              Height="{TemplateBinding Height}"
-                                              HorizontalAlignment="Stretch"
-                                              VerticalAlignment="Stretch"
-                                              GridLinesVisibility="None"   
-                                              BorderThickness="0"
-                                              IsTabStop="false"
-                                              ShowCheckBox="True"
-                                              SelectionMode="None"
-                                                      AllowEditing="True"
-                                                    RowHeight="30"   
-                                                          FontFamily="{TemplateBinding FontFamily}"
-                                          FontSize="{TemplateBinding FontSize}"
-                                          FontStretch="{TemplateBinding FontWeight}"
-                                          FontStyle="{TemplateBinding FontStyle}"
-                                          FontWeight="{TemplateBinding FontWeight}"
-                                          Foreground="{TemplateBinding Foreground}"
-                                               AutoExpandMode="AllNodesExpanded"                                                                         
-                                              CheckBoxMappingName="IsSelected"
-                                              HorizontalContentAlignment="Stretch"
-                                              VerticalContentAlignment="Stretch" 
-                                              EnableRecursiveChecking="False"
-                                              ItemsSource="{TemplateBinding ItemsSource}"
-                                                           AutoGenerateColumns="False"
-                                                           HeaderRowHeight="0"
-                                                  ParentPropertyName="DisplayText"
-                                                 ChildPropertyName="ActualValue"
-			                                   SelfRelationRootValue="Variable"
-                                              KeyboardNavigation.TabNavigation="Continue"
-                                              Visibility="{Binding IsItemSourceLoaded,
-                                                                   RelativeSource={RelativeSource TemplatedParent},
-                                                                   Converter={StaticResource ResourceKey=boolToVisiblityConverter}}">
+                                                <syncfusion:SfTreeGrid x:Name="PART_ItemsControl" 
+                                                                       Margin="0,30,0,0"
+                                                                       ColumnSizer="SizeToCells"
+                                                                       Height="{TemplateBinding Height}"
+                                                                       HorizontalAlignment="Stretch"
+                                                                       VerticalAlignment="Stretch"
+                                                                       GridLinesVisibility="None"
+                                                                       BorderThickness="0"
+                                                                       IsTabStop="false"
+                                                                       ShowCheckBox="True"
+                                                                       SelectionMode="None"
+                                                                       AllowEditing="True"
+                                                                       RowHeight="30"
+                                                                       FontFamily="{TemplateBinding FontFamily}"
+                                                                       FontSize="{TemplateBinding FontSize}"
+                                                                       FontStretch="{TemplateBinding FontWeight}"
+                                                                       FontStyle="{TemplateBinding FontStyle}"
+                                                                       FontWeight="{TemplateBinding FontWeight}"
+                                                                       Foreground="{TemplateBinding Foreground}"
+                                                                       AutoExpandMode="AllNodesExpanded"
+                                                                       CheckBoxMappingName="IsSelected"
+                                                                       HorizontalContentAlignment="Stretch"
+                                                                       VerticalContentAlignment="Stretch"
+                                                                       EnableRecursiveChecking="False"
+                                                                       ItemsSource="{TemplateBinding ItemsSource}"
+                                                                       AutoGenerateColumns="False"
+                                                                       HeaderRowHeight="0"
+                                                                       KeyboardNavigation.TabNavigation="Continue"
+                                                                       Visibility="{Binding IsItemSourceLoaded,
+                                                    RelativeSource={RelativeSource TemplatedParent},
+                                                    Converter={StaticResource ResourceKey=boolToVisiblityConverter}}">
                                                     <syncfusion:SfTreeGrid.Columns>
                                                         <syncfusion:TreeGridTextColumn HeaderText="DisplayText" MappingName="DisplayText" ColumnSizer="Auto" />
                                                     </syncfusion:SfTreeGrid.Columns>
@@ -573,11 +571,19 @@
                     </syncfusion:GridTemplateColumn.CellTemplate>
                 </syncfusion:GridTemplateColumn>
                 <syncfusion:GridTextColumn MappingName="N_SERI" HeaderText="شماره سریال" MinimumWidth="90" IsReadOnly="True" />
-                <syncfusion:GridTextColumn HeaderText="مبلغ" MappingName="MABL" IsReadOnly="True" >
+                <!--<syncfusion:GridTextColumn HeaderText="مبلغ" MappingName="MABL" IsReadOnly="True" >
                     <syncfusion:GridTextColumn.DisplayBinding>
                         <Binding Path="MABL" StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
-                </syncfusion:GridTextColumn>
+                </syncfusion:GridTextColumn>-->
+
+                <syncfusion:GridNumericColumn HeaderText="مبلغ" MappingName="MABL" IsReadOnly="True" >
+                    <syncfusion:GridNumericColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding MABL, StringFormat='{}{0:N0}'}" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                        </DataTemplate>
+                    </syncfusion:GridNumericColumn.CellTemplate>
+                </syncfusion:GridNumericColumn>
 
                 <syncfusion:GridTextColumn HeaderText="تاریخ سررسید" MappingName="DATE_S" IsReadOnly="True" >
                     <syncfusion:GridTextColumn.DisplayBinding>
