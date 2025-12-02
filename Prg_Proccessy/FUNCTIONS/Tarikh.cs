@@ -238,5 +238,27 @@ namespace Prg_Proccessy.FUNCTIONS
 
             return DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.GetCultureInfo("en-US"));
         }
+
+        /// <summary>
+        /// تاریخ آخرین روز ماه قبل به صورت رشته ای "yyyy/MM/dd"
+        /// </summary>
+        public static string LastDayOfPreviousMonth
+        {
+            get
+            {
+                var now = DateTime.Now;
+                int year = persianCalendar.GetYear(now);
+                int month = persianCalendar.GetMonth(now) - 1;
+
+                if (month == 0)
+                {
+                    month = 12;
+                    year--;
+                }
+
+                int lastDay = persianCalendar.GetDaysInMonth(year, month);
+                return string.Format(CultureInfo.InvariantCulture, "{0:0000}/{1:00}/{2:00}", year, month, lastDay);
+            }
+        }
     }
 }
