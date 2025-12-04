@@ -120,7 +120,29 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            I_AM_DATE_VISIT = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
+            var WINDOW_ID = new WindowInteropHelper(this).Handle;
+            I_AM_DATE_VISIT = CL_LMethods.GetTheWindow(WINDOW_ID);
+
+            #region SecuritCheck
+            try
+            {
+                string Formname = "VISITDLV";
+
+                if (Formname == "VISITDLV") //"VISITDLV" //گزارش عملکرد ویزیتور ها
+                {
+                    // 2. Run Security:
+                    bool HasAccess = CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, WINDOW_ID, this.GetType().Name);
+                    if (!HasAccess)
+                    {
+                        this?.Close();
+                    }
+                    // 3. Final State Check:
+                    if (!this.IsLoaded) { this?.Close(); return; }
+                }
+            }
+            catch { try { this?.Close(); } catch { } }
+            if (!this.IsLoaded) { this?.Close(); return; }
+            #endregion
 
             FILL_ALL_COMBOBOXES();
 
@@ -134,7 +156,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 {
                     Condition = Condition + " AND  (DEPATMAN = " + CL_Generaly.VAHED_OF_USER + ")";
                 }
-
             }
 
             if (OpenArgs == "VISITONE")
