@@ -4918,8 +4918,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (report.GetComponentByName("USERNAME") is StiText stiText) stiText.Text = Baseknow.UUSER;
 
 
-            report.Render(false);
-            report.Show();
+            new Rpts.WINRPT(report, "رسید انبار برگشت از فروش (آزاد)").Show();
+
         }
         private void Command108_Click(object sender, RoutedEventArgs e)
         {

@@ -4043,11 +4043,16 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
         private void VISITOR_DTL_SUB_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            var grid = sender as DataGrid;
+            if (sender is not DataGrid grid) return;
+            if (grid.SelectedIndex < 0) return;
             if (grid.CurrentCell.Column is null) return;
+            if (grid.SelectedItem == CollectionView.NewItemPlaceholder) return;
+            if (grid.SelectedItem is not VISITOR_DTL currentData) return;
 
-            if (grid != null && grid?.CurrentCell != null && grid.CurrentCell.Column != null)
+            try
             {
+                if (grid is null || grid.CurrentCell.Column is null || !grid.CurrentCell.IsValid) return;
+
                 if (grid.CurrentCell.Item is VISITOR_DTL VisitorRow && VisitorRow != null)
                 {
                     var Hes = VisitorRow.CUST_NO;
@@ -4064,106 +4069,110 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                     new F_MENU_KOL_MOIN_TAFZIL(Hes);
                 }
-            }
-
-            if (grid != null && grid?.CurrentCell != null && grid.CurrentCell.Column != null)
-            {
-                var cellContent = grid.CurrentCell.Column.GetCellContent(grid.CurrentCell.Item);
-                string _CELL_VALUE_ = null;
-                if (cellContent is TextBlock textBlock) _CELL_VALUE_ = textBlock.Text;
-                else if (cellContent is TextBox textBox) _CELL_VALUE_ = textBox.Text;
 
                 var CurrentData = grid.CurrentCell.Item as VISITOR_DTL;
                 if (CurrentData == null) return;
 
-
-                if (grid.CurrentCell.Column.SortMemberPath == "DARSAD")
+                if (grid.CurrentCell.Column != null)
                 {
-                    var opn = dbms.DoGetDataSQL<VISITOR_DARSAD>("SELECT TOP 100 PERCENT dbo.VISITOR_DTL.CUST_NO, dbo.VISITOR_DTL.DARSAD, dbo.VISITOR_DTL.PURSANT, dbo.VISITOR_DTL.TOZIH, dbo.VISITOR_DTL.STAT FROM dbo.HEAD_LST INNER JOIN   dbo.VISITOR_DTL ON dbo.HEAD_LST.NUMBER = dbo.VISITOR_DTL.NUMBER AND dbo.HEAD_LST.TAG = dbo.VISITOR_DTL.TAG WHERE (dbo.HEAD_LST.CUST_NO = N'" + CUST_NO.SelectedValue + $"') AND (dbo.HEAD_LST.TAG = {FTAG}) AND (dbo.HEAD_LST.NUMBER <> " + NUMBER.Text + ")GROUP BY dbo.VISITOR_DTL.CUST_NO, dbo.VISITOR_DTL.DARSAD, dbo.VISITOR_DTL.PURSANT, dbo.VISITOR_DTL.TOZIH, dbo.VISITOR_DTL.STAT,  dbo.HEAD_LST.NUMBER ORDER BY dbo.HEAD_LST.NUMBER DESC").ToList();
-                    if (opn.Count > 0)
+                    try
                     {
-                        CurrentData.CUST_NO = opn.FirstOrDefault().CUST_NO;
-                        CurrentData.DARSAD = opn.FirstOrDefault().DARSAD;
-                        CurrentData.PURSANT = Math.Round((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * Convert.ToDouble(opn.FirstOrDefault().DARSAD) / 100);
-                        CurrentData.STAT = false;
-                        CurrentData.TOZIH = opn.FirstOrDefault().TOZIH;
+                        var cellContent = grid.CurrentCell.Column.GetCellContent(grid.CurrentCell.Item);
+                        string _CELL_VALUE_ = null;
+                        if (cellContent is TextBlock textBlock) _CELL_VALUE_ = textBlock.Text;
+                        else if (cellContent is TextBox textBox) _CELL_VALUE_ = textBox.Text;
                     }
-                }
+                    catch { }
 
-                if (grid.CurrentCell.Column.SortMemberPath == "PORID")
-                {
-                    var rst = dbms.DoGetDataSQL<VISITOR_DARSAD>("SELECT TOP 100 PERCENT dbo.VISITOR_DTL.CUST_NO, dbo.VISITOR_DTL.DARSAD, dbo.VISITOR_DTL.PURSANT, dbo.VISITOR_DTL.TOZIH, dbo.VISITOR_DTL.STAT, dbo.VISITOR_DTL.PORID FROM dbo.HEAD_LST INNER JOIN dbo.VISITOR_DTL ON dbo.HEAD_LST.NUMBER = dbo.VISITOR_DTL.NUMBER AND dbo.HEAD_LST.TAG = dbo.VISITOR_DTL.TAG WHERE (dbo.HEAD_LST.CUST_NO = N'" + CUST_NO.SelectedValue + $"') AND (dbo.HEAD_LST.TAG = {FTAG}) AND (dbo.HEAD_LST.NUMBER <> " + NUMBER.Text + ")GROUP BY dbo.VISITOR_DTL.CUST_NO, dbo.VISITOR_DTL.DARSAD, dbo.VISITOR_DTL.PURSANT, dbo.VISITOR_DTL.TOZIH, dbo.VISITOR_DTL.STAT,  dbo.HEAD_LST.NUMBER, dbo.VISITOR_DTL.PORID ORDER BY dbo.HEAD_LST.NUMBER DESC").ToList();
-                    if (rst.Count > 0 & !IsNull(rst.FirstOrDefault().PORID))
+                    if (grid.CurrentCell.Column.SortMemberPath == "DARSAD")
                     {
-                        CurrentData.CUST_NO = rst.FirstOrDefault().CUST_NO;
-                        CurrentData.STAT = true;
-                        CurrentData.TOZIH = rst.FirstOrDefault().TOZIH;
-                        CurrentData.PORID = rst.FirstOrDefault().PORID;
-
-
-                        #region PORID_AfterUpdate
-                        long prs;
-                        var MBK = default(long);
-                        prs = 0L;
-                        if (!IsNull(CurrentData.PORID))
+                        var opn = dbms.DoGetDataSQL<VISITOR_DARSAD>("SELECT TOP 100 PERCENT dbo.VISITOR_DTL.CUST_NO, dbo.VISITOR_DTL.DARSAD, dbo.VISITOR_DTL.PURSANT, dbo.VISITOR_DTL.TOZIH, dbo.VISITOR_DTL.STAT FROM dbo.HEAD_LST INNER JOIN   dbo.VISITOR_DTL ON dbo.HEAD_LST.NUMBER = dbo.VISITOR_DTL.NUMBER AND dbo.HEAD_LST.TAG = dbo.VISITOR_DTL.TAG WHERE (dbo.HEAD_LST.CUST_NO = N'" + CUST_NO.SelectedValue + $"') AND (dbo.HEAD_LST.TAG = {FTAG}) AND (dbo.HEAD_LST.NUMBER <> " + NUMBER.Text + ")GROUP BY dbo.VISITOR_DTL.CUST_NO, dbo.VISITOR_DTL.DARSAD, dbo.VISITOR_DTL.PURSANT, dbo.VISITOR_DTL.TOZIH, dbo.VISITOR_DTL.STAT,  dbo.HEAD_LST.NUMBER ORDER BY dbo.HEAD_LST.NUMBER DESC").ToList();
+                        if (opn.Count > 0)
                         {
-                            var ROWS = dbms.DoGetDataSQL<QRE_VISIT1>($"SELECT CODE ,MEGH_MAR * MABL + (MEGH_MAR/MEGH)*(IMBAA - N_MOIN) AS MABLK FROM INVO_LST WHERE TAG = {FAC2TAG} AND NUMBER = " + this.NUMBER.Text).ToList();
-                            for (int I = 0; I < ROWS.Count; I++)//while (!ROWS.EOF)
+                            CurrentData.CUST_NO = opn.FirstOrDefault().CUST_NO;
+                            CurrentData.DARSAD = opn.FirstOrDefault().DARSAD;
+                            CurrentData.PURSANT = Math.Round((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * Convert.ToDouble(opn.FirstOrDefault().DARSAD) / 100);
+                            CurrentData.STAT = false;
+                            CurrentData.TOZIH = opn.FirstOrDefault().TOZIH;
+                        }
+                    }
+
+                    if (grid.CurrentCell.Column.SortMemberPath == "PORID")
+                    {
+                        var rst = dbms.DoGetDataSQL<VISITOR_DARSAD>("SELECT TOP 100 PERCENT dbo.VISITOR_DTL.CUST_NO, dbo.VISITOR_DTL.DARSAD, dbo.VISITOR_DTL.PURSANT, dbo.VISITOR_DTL.TOZIH, dbo.VISITOR_DTL.STAT, dbo.VISITOR_DTL.PORID FROM dbo.HEAD_LST INNER JOIN dbo.VISITOR_DTL ON dbo.HEAD_LST.NUMBER = dbo.VISITOR_DTL.NUMBER AND dbo.HEAD_LST.TAG = dbo.VISITOR_DTL.TAG WHERE (dbo.HEAD_LST.CUST_NO = N'" + CUST_NO.SelectedValue + $"') AND (dbo.HEAD_LST.TAG = {FTAG}) AND (dbo.HEAD_LST.NUMBER <> " + NUMBER.Text + ")GROUP BY dbo.VISITOR_DTL.CUST_NO, dbo.VISITOR_DTL.DARSAD, dbo.VISITOR_DTL.PURSANT, dbo.VISITOR_DTL.TOZIH, dbo.VISITOR_DTL.STAT,  dbo.HEAD_LST.NUMBER, dbo.VISITOR_DTL.PORID ORDER BY dbo.HEAD_LST.NUMBER DESC").ToList();
+                        if (rst.Count > 0 & !IsNull(rst.FirstOrDefault().PORID))
+                        {
+                            CurrentData.CUST_NO = rst.FirstOrDefault().CUST_NO;
+                            CurrentData.STAT = true;
+                            CurrentData.TOZIH = rst.FirstOrDefault().TOZIH;
+                            CurrentData.PORID = rst.FirstOrDefault().PORID;
+
+
+                            #region PORID_AfterUpdate
+                            long prs;
+                            var MBK = default(long);
+                            prs = 0L;
+                            if (!IsNull(CurrentData.PORID))
                             {
-                                var RST2 = dbms.DoGetDataSQL<double?>("SELECT PORSANT FROM dbo.VISITORS_PORSANT_KALA WHERE (PORID = " + CurrentData.PORID + ") and (code = '" + ROWS[I].CODE + "')").ToList();
-                                if (RST2.Count == 1)
+                                var ROWS = dbms.DoGetDataSQL<QRE_VISIT1>($"SELECT CODE ,MEGH_MAR * MABL + (MEGH_MAR/MEGH)*(IMBAA - N_MOIN) AS MABLK FROM INVO_LST WHERE TAG = {FAC2TAG} AND NUMBER = " + this.NUMBER.Text).ToList();
+                                for (int I = 0; I < ROWS.Count; I++)//while (!ROWS.EOF)
                                 {
-                                    prs = (long)(prs + Math.Round((double)(ROWS[I].MABLK * RST2.FirstOrDefault() / 100)));
-                                    MBK = (long)(MBK + ROWS[I].MABLK);
+                                    var RST2 = dbms.DoGetDataSQL<double?>("SELECT PORSANT FROM dbo.VISITORS_PORSANT_KALA WHERE (PORID = " + CurrentData.PORID + ") and (code = '" + ROWS[I].CODE + "')").ToList();
+                                    if (RST2.Count == 1)
+                                    {
+                                        prs = (long)(prs + Math.Round((double)(ROWS[I].MABLK * RST2.FirstOrDefault() / 100)));
+                                        MBK = (long)(MBK + ROWS[I].MABLK);
+                                    }
+                                    else
+                                    {
+                                        new Msgwin(false, "تذكر مهم :اين كالا فاقد الگو براي اين ويزيتور است و پورسانت محاسبه نشد.درصورت لزوم براي آن تعريف كنيد و همينجا مجددا الگو را انتخاب كنيد  : " + CL_HESABDARI.GETKALANAME(Convert.ToDouble(ROWS[I].CODE))).ShowDialog();
+                                    }
+                                    // ROWS.MoveNext();
+                                    //RST2.Close();
+                                }
+                                CurrentData.PURSANT = Math.Round((double)(prs));
+                                if (MBK > 0L & prs > 0L)
+                                {
+                                    CurrentData.DARSAD = CurrentData.PURSANT / MBK * 100;
                                 }
                                 else
                                 {
-                                    new Msgwin(false, "تذكر مهم :اين كالا فاقد الگو براي اين ويزيتور است و پورسانت محاسبه نشد.درصورت لزوم براي آن تعريف كنيد و همينجا مجددا الگو را انتخاب كنيد  : " + CL_HESABDARI.GETKALANAME(Convert.ToDouble(ROWS[I].CODE))).ShowDialog();
+                                    CurrentData.DARSAD = 0;
                                 }
-                                // ROWS.MoveNext();
-                                //RST2.Close();
                             }
-                            CurrentData.PURSANT = Math.Round((double)(prs));
-                            if (MBK > 0L & prs > 0L)
+                            else
                             {
-                                CurrentData.DARSAD = CurrentData.PURSANT / MBK * 100;
+                            }
+                            #endregion
+
+                        }
+                    }
+
+                    if (grid.CurrentCell.Column.SortMemberPath == "PURSANT")
+                    {
+                        var rst = dbms.DoGetDataSQL<VISITOR_DARSAD>("SELECT TOP 100 PERCENT dbo.VISITOR_DTL.CUST_NO, dbo.VISITOR_DTL.DARSAD, dbo.VISITOR_DTL.PURSANT, dbo.VISITOR_DTL.TOZIH, dbo.VISITOR_DTL.STAT FROM dbo.HEAD_LST INNER JOIN dbo.VISITOR_DTL ON dbo.HEAD_LST.NUMBER = dbo.VISITOR_DTL.NUMBER AND dbo.HEAD_LST.TAG = dbo.VISITOR_DTL.TAG WHERE (dbo.HEAD_LST.CUST_NO = N'" + CUST_NO.SelectedValue + $"') AND (dbo.HEAD_LST.TAG = {FTAG}) AND (dbo.HEAD_LST.NUMBER <> " + NUMBER.Text + ")GROUP BY dbo.VISITOR_DTL.CUST_NO, dbo.VISITOR_DTL.DARSAD, dbo.VISITOR_DTL.PURSANT, dbo.VISITOR_DTL.TOZIH, dbo.VISITOR_DTL.STAT,  dbo.HEAD_LST.NUMBER ORDER BY dbo.HEAD_LST.NUMBER DESC").ToList();
+                        if (rst.Count > 0)
+                        {
+                            CurrentData.CUST_NO = rst.FirstOrDefault().CUST_NO;
+                            if (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text) != 0)
+                            {
+                                CurrentData.DARSAD = rst.FirstOrDefault().PURSANT / (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * 100;
                             }
                             else
                             {
                                 CurrentData.DARSAD = 0;
                             }
+                            CurrentData.PURSANT = rst.FirstOrDefault().PURSANT;
+                            CurrentData.STAT = true;
+                            CurrentData.TOZIH = rst.FirstOrDefault().TOZIH;
                         }
-                        else
-                        {
-                        }
-                        #endregion
-
                     }
+                    //VISITOR_DTL_SUB.Items.Refresh();
+                    double sum = SAYER_VISITOR_DATA.Sum(item => item.PURSANT ?? 0.0);
+                    Text190.Text = sum.ToString();
                 }
-
-                if (grid.CurrentCell.Column.SortMemberPath == "PURSANT")
-                {
-                    var rst = dbms.DoGetDataSQL<VISITOR_DARSAD>("SELECT TOP 100 PERCENT dbo.VISITOR_DTL.CUST_NO, dbo.VISITOR_DTL.DARSAD, dbo.VISITOR_DTL.PURSANT, dbo.VISITOR_DTL.TOZIH, dbo.VISITOR_DTL.STAT FROM dbo.HEAD_LST INNER JOIN dbo.VISITOR_DTL ON dbo.HEAD_LST.NUMBER = dbo.VISITOR_DTL.NUMBER AND dbo.HEAD_LST.TAG = dbo.VISITOR_DTL.TAG WHERE (dbo.HEAD_LST.CUST_NO = N'" + CUST_NO.SelectedValue + $"') AND (dbo.HEAD_LST.TAG = {FTAG}) AND (dbo.HEAD_LST.NUMBER <> " + NUMBER.Text + ")GROUP BY dbo.VISITOR_DTL.CUST_NO, dbo.VISITOR_DTL.DARSAD, dbo.VISITOR_DTL.PURSANT, dbo.VISITOR_DTL.TOZIH, dbo.VISITOR_DTL.STAT,  dbo.HEAD_LST.NUMBER ORDER BY dbo.HEAD_LST.NUMBER DESC").ToList();
-                    if (rst.Count > 0)
-                    {
-                        CurrentData.CUST_NO = rst.FirstOrDefault().CUST_NO;
-                        if (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text) != 0)
-                        {
-                            CurrentData.DARSAD = rst.FirstOrDefault().PURSANT / (Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text)) * 100;
-                        }
-                        else
-                        {
-                            CurrentData.DARSAD = 0;
-                        }
-                        CurrentData.PURSANT = rst.FirstOrDefault().PURSANT;
-                        CurrentData.STAT = true;
-                        CurrentData.TOZIH = rst.FirstOrDefault().TOZIH;
-                    }
-                }
-                //VISITOR_DTL_SUB.Items.Refresh();
-                double sum = SAYER_VISITOR_DATA.Sum(item => item.PURSANT ?? 0.0);
-                Text190.Text = sum.ToString();
             }
+            catch { }
         }
         private void VISITOR_DTL_SUB_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {

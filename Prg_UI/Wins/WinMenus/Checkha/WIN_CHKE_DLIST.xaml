@@ -382,6 +382,7 @@
                                                 </Path>
 
 
+
                                                 <syncfusion:SfTreeGrid x:Name="PART_ItemsControl" Margin="0,30,0,0"
                                                 ColumnSizer="SizeToCells"
                                               Height="{TemplateBinding Height}"
@@ -570,11 +571,19 @@
                     </syncfusion:GridTemplateColumn.CellTemplate>
                 </syncfusion:GridTemplateColumn>
                 <syncfusion:GridTextColumn MappingName="N_SERI" HeaderText="شماره سریال" MinimumWidth="90" IsReadOnly="True" />
-                <syncfusion:GridTextColumn HeaderText="مبلغ" MappingName="MABL" IsReadOnly="True" >
+                <!--<syncfusion:GridTextColumn HeaderText="مبلغ" MappingName="MABL" IsReadOnly="True" >
                     <syncfusion:GridTextColumn.DisplayBinding>
                         <Binding Path="MABL" StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
-                </syncfusion:GridTextColumn>
+                </syncfusion:GridTextColumn>-->
+
+                <syncfusion:GridNumericColumn HeaderText="مبلغ" MappingName="MABL" IsReadOnly="True" >
+                    <syncfusion:GridNumericColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding MABL, StringFormat='{}{0:N0}'}" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                        </DataTemplate>
+                    </syncfusion:GridNumericColumn.CellTemplate>
+                </syncfusion:GridNumericColumn>
 
                 <syncfusion:GridTextColumn HeaderText="تاریخ سررسید" MappingName="DATE_S" IsReadOnly="True" >
                     <syncfusion:GridTextColumn.DisplayBinding>

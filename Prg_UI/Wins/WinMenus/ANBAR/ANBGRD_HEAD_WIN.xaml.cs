@@ -13,7 +13,6 @@ using Prg_UI.UiTools;
 using Stimulsoft.Report;
 using Stimulsoft.Report.Dictionary;
 using Syncfusion.Data.Extensions;
-using Syncfusion.Windows.Shared;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -25,12 +24,12 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Wins.WinOther;
-using static AUTO_BAZ.LocalModles;
 using static Interfaces.INavigator;
 using static Prg_UI.Functions.CL_LMethods;
 
@@ -370,7 +369,7 @@ namespace Wins.WinMenus.ANBAR
             }
             catch { /*ignore*/ }
 
-            if (!ANBARGRD_SUB_IsFocused) //Only On Form F7 Pressed Not DataGrid
+            if (!ANBARGRD_SUB.IsKeyboardFocusWithin && !ANBARGRD_SUB2.IsKeyboardFocusWithin && !ANBARGRD_SUB3.IsKeyboardFocusWithin) //Only On Form F7 Pressed Not DataGrid
             {
                 if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
                 {
@@ -811,10 +810,14 @@ namespace Wins.WinMenus.ANBAR
                 ENTERED_VALUE_ROW = TexboVal?.Text.Trim();
             }
 
-            var CURRENT_ROW_ITEMS2 = e.Row.Item as ANBARGRD_SUB2_MODEL;
+            if (e.Row.Item is not ANBARGRD_SUB2_MODEL CURRENT_ROW_ITEMS2)
+            {
+                return;
+            }
+
             #endregion
 
-            #region NUM1_After_Update
+            #region NUM2_After_Update
             if (e.Column.SortMemberPath == "NUM2")
             {
                 if (!string.IsNullOrEmpty(ENTERED_VALUE_ROW.ToStringNullSafe()))
@@ -827,10 +830,7 @@ namespace Wins.WinMenus.ANBAR
                     }
                     else
                     {
-                        if (Convert.ToDecimal(ENTERED_VALUE_ROW) - CURRENT_ROW_ITEMS2.MOG == 0)
-                        {
-                            CURRENT_ROW_ITEMS2.NUM3 = Convert.ToDouble(ENTERED_VALUE_ROW);
-                        }
+                        CURRENT_ROW_ITEMS2.NUM3 = Convert.ToDouble(ENTERED_VALUE_ROW);
                     }
 
                 }
@@ -851,16 +851,13 @@ namespace Wins.WinMenus.ANBAR
                     if (!double.TryParse(ENTERED_VALUE_ROW, out double _))
                     {
                         universControl.PopNotifyShow("در ستون موجودی فعلی فقط باید عدد وارد گردد !", Pop1, Pop1Text1, Pop_Border1);
-                        ANBARGRD_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                        //CURRENT_ROW_ITEMS2.MOG = WAS_ROW_ITEM.MOG;
+                        ANBARGRD_SUB2_CANCEL_EDIT(DataGridEditingUnit.Cell);
                     }
-
                 }
                 else
                 {
-                    universControl.PopNotifyShow("شمارش اول نمی تواند خالی باشد !", Pop1, Pop1Text1, Pop_Border1);
-                    ANBARGRD_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                    //ANBARGRD_SUB1_MODEL_CURRENT_ROW_ITEMS.MOGODI_A = ANBARGRD_SUB1_MODEL_WAS_ROW_ITEM?.MOGODI_A;
+                    universControl.PopNotifyShow("موجودی فعلی نمی تواند خالی باشد !", Pop1, Pop1Text1, Pop_Border1);
+                    ANBARGRD_SUB2_CANCEL_EDIT(DataGridEditingUnit.Cell);
                 }
             }
             #endregion
@@ -890,11 +887,14 @@ namespace Wins.WinMenus.ANBAR
                 ENTERED_VALUE_ROW = TexboVal?.Text.Trim();
             }
 
-            var CURRENT_ROW_ITEMS3 = e.Row.Item as ANBARGRD_SUB1_MODEL;
+            if (e.Row.Item is not ANBARGRD_SUB3_MODEL CURRENT_ROW_ITEMS3)
+            {
+                return;
+            }
             #endregion
 
-            #region NUM1_After_Update
-            if (e.Column.SortMemberPath == "NUM2")
+            #region NUM3_After_Update
+            if (e.Column.SortMemberPath == "NUM3")
             {
                 if (!string.IsNullOrEmpty(ENTERED_VALUE_ROW.ToStringNullSafe()))
                 {
@@ -918,6 +918,7 @@ namespace Wins.WinMenus.ANBAR
             }
             #endregion
 
+
             #region MOG_After_Update
             if (e.Column.SortMemberPath == "MOG")
             {
@@ -926,16 +927,13 @@ namespace Wins.WinMenus.ANBAR
                     if (!double.TryParse(ENTERED_VALUE_ROW, out double _))
                     {
                         universControl.PopNotifyShow("در ستون موجودی فعلی فقط باید عدد وارد گردد !", Pop1, Pop1Text1, Pop_Border1);
-                        ANBARGRD_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                        //CURRENT_ROW_ITEMS3.MOG = WAS_ROW_ITEM.MOG;
+                        ANBARGRD_SUB3_CANCEL_EDIT(DataGridEditingUnit.Cell);
                     }
-
                 }
                 else
                 {
-                    universControl.PopNotifyShow("شمارش سوم نمی تواند خالی باشد !", Pop1, Pop1Text1, Pop_Border1);
-                    ANBARGRD_SUB_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                    //ANBARGRD_SUB1_MODEL_CURRENT_ROW_ITEMS.MOGODI_A = ANBARGRD_SUB1_MODEL_WAS_ROW_ITEM?.MOGODI_A;
+                    universControl.PopNotifyShow("موجودی فعلی نمی تواند خالی باشد !", Pop1, Pop1Text1, Pop_Border1);
+                    ANBARGRD_SUB3_CANCEL_EDIT(DataGridEditingUnit.Cell);
                 }
             }
             #endregion
@@ -962,7 +960,7 @@ namespace Wins.WinMenus.ANBAR
             {
 
                 dbms.DoExecuteSQL($@"UPDATE ANBGRD_LST
-					                                SET NUM1 = {ROW.NUM1},
+					                                SET NUM1 = {ROW.NUM1},NUM2 = {ROW.NUM2}, NUM3 = {ROW.NUM3},
 					                                	MOG = {ROW.MOG}
 					                                WHERE GRD_NUM = {GRD_NUM.Text} AND CODE = N'{ROW.CODE}'");
 
@@ -1009,7 +1007,7 @@ namespace Wins.WinMenus.ANBAR
             {
 
                 dbms.DoExecuteSQL($@"UPDATE ANBGRD_LST
-					                                SET NUM2 = {ROW.NUM2},
+					                                SET NUM2 = {ROW.NUM2},NUM3 = {ROW.NUM3},
 					                                	MOG = {ROW.MOG}
 					                                WHERE GRD_NUM = {GRD_NUM.Text} AND CODE = N'{ROW.CODE}'");
 
@@ -1208,80 +1206,124 @@ namespace Wins.WinMenus.ANBAR
             }
         }
 
-        private const decimal CountDifferenceTolerance = 0.000001m;
-        private string BuildCountMismatchPredicate(string countColumn)
-        {
-            var tolerance = CountDifferenceTolerance.ToString(CultureInfo.InvariantCulture);
+        #region Floating-Point Safe Comparison
 
-            return $"((MOG IS NULL AND {countColumn} IS NOT NULL) OR (MOG IS NOT NULL AND {countColumn} IS NULL) OR (MOG IS NOT NULL AND {countColumn} IS NOT NULL AND ABS(CAST(MOG AS DECIMAL(28, 6)) - CAST({countColumn} AS DECIMAL(28, 6))) > {tolerance}))";
+        /// <summary>
+        /// حداقل تفاوت معنادار در موجودی انبار
+        /// برای کالاهای وزنی: 0.001 (یک گرم)
+        /// برای کالاهای عددی: عملاً 0
+        /// </summary>
+        private const decimal InventoryTolerance = 0.001m;
+
+        /// <summary>
+        /// ساخت شرط مقایسه امن برای اعداد اعشاری با مدیریت NULL
+        /// </summary>
+        /// <param name="column1">ستون اول (معمولاً MOG)</param>
+        /// <param name="column2">ستون دوم (NUM1, NUM2, NUM3)</param>
+        /// <returns>شرط SQL برای WHERE</returns>
+        private string BuildSafeMismatchPredicate(string column1, string column2)
+        {
+            var tolerance = InventoryTolerance.ToString(CultureInfo.InvariantCulture);
+
+            // سه حالت که باید نشون داده بشن:
+            // 1. اولی NULL و دومی مقدار داره
+            // 2. اولی مقدار داره و دومی NULL
+            // 3. هر دو مقدار دارن ولی تفاوتشون بیشتر از tolerance هست
+
+            return $@"(
+                          ({column1} IS NULL AND {column2} IS NOT NULL) 
+                          OR 
+                          ({column1} IS NOT NULL AND {column2} IS NULL) 
+                          OR 
+                          (
+                              {column1} IS NOT NULL 
+                              AND {column2} IS NOT NULL 
+                              AND ABS(CAST({column1} AS DECIMAL(18,4)) - CAST({column2} AS DECIMAL(18,4))) > {tolerance}
+                          )
+                      )";
         }
+
+        #endregion
 
         public void ReGetData()
         {
             UpdateCounters();
             ANBARGRD_SUB1_MODEL_DATA?.Clear();
-            if (GRD_NUM.Text is not null && GRD_NUM.Text != "")
-            {
-                var ANBARGRD_SUB1_MODEL_DATA_TEMP = dbms.DoGetDataSQL<ANBARGRD_SUB1_MODEL>($@"SELECT EKH, GRD_NUM, CODE, MOG, NUM1, NUM2, NUM3, MABL, NAMES, nam, N_FANI, grp FROM ANBARGRD_SUB1 WHERE GRD_NUM = {GRD_NUM.Text}").ToList();
 
-                // INVO_RASIDA_DATA?.Clear();
-
-                foreach (var item in ANBARGRD_SUB1_MODEL_DATA_TEMP)
-                {
-                    ANBARGRD_SUB1_MODEL_DATA?.Add(item);
-                }
-
-                UpdateCounters();
-            }
-            else
+            if (string.IsNullOrEmpty(GRD_NUM.Text))
             {
                 return;
             }
+
+            // شمارش اول: همه کالاها نشون داده میشن (بدون فیلتر اختلاف)
+            var query = $@"SELECT EKH, GRD_NUM, CODE, MOG, NUM1, NUM2, NUM3, MABL, NAMES, nam, N_FANI, grp 
+                   FROM ANBARGRD_SUB1 
+                   WHERE GRD_NUM = {GRD_NUM.Text}";
+
+            var data = dbms.DoGetDataSQL<ANBARGRD_SUB1_MODEL>(query).ToList();
+
+            foreach (var item in data)
+            {
+                ANBARGRD_SUB1_MODEL_DATA?.Add(item);
+            }
+
+            UpdateCounters();
         }
+
         public void ReGetData2()
         {
             UpdateCounters();
             ANBARGRD_SUB2_MODEL_DATA?.Clear();
-            if (GRD_NUM.Text is not null && GRD_NUM.Text != "")
-            {
-                //var mismatchFilter = BuildCountMismatchPredicate("NUM1");
-                //var query = $@"SELECT EKH, GRD_NUM, CODE, nam, MOG, NUM1, NUM2, NUM3, MABL, NAMES, N_FANI, grp FROM ANBARGRD_SUB2 WHERE GRD_NUM = {GRD_NUM.Text} AND {mismatchFilter}";
-                //var ANBARGRD_SUB2_MODEL_DATA_TEMP = dbms.DoGetDataSQL<ANBARGRD_SUB2_MODEL>(query).ToList();
 
-                var ANBARGRD_SUB2_MODEL_DATA_TEMP = dbms.DoGetDataSQL<ANBARGRD_SUB2_MODEL>($@"SELECT EKH, GRD_NUM, CODE, nam, MOG, NUM1, NUM2, NUM3, MABL, NAMES, N_FANI, grp FROM ANBARGRD_SUB2 WHERE GRD_NUM = {GRD_NUM.Text} AND MOG <> NUM1").ToList();
-
-                foreach (var item in ANBARGRD_SUB2_MODEL_DATA_TEMP)
-                {
-                    ANBARGRD_SUB2_MODEL_DATA?.Add(item);
-                }
-                UpdateCounters();
-            }
-            else
+            if (string.IsNullOrEmpty(GRD_NUM.Text))
             {
                 return;
             }
+
+            // شمارش دوم: فقط کالاهایی که MOG با NUM1 اختلاف دارن
+            var mismatchFilter = BuildSafeMismatchPredicate("MOG", "NUM1");
+
+            var query = $@"SELECT EKH, GRD_NUM, CODE, nam, MOG, NUM1, NUM2, NUM3, MABL, NAMES, N_FANI, grp 
+                   FROM ANBARGRD_SUB2 
+                   WHERE GRD_NUM = {GRD_NUM.Text} 
+                   AND {mismatchFilter}";
+
+            var data = dbms.DoGetDataSQL<ANBARGRD_SUB2_MODEL>(query).ToList();
+
+            foreach (var item in data)
+            {
+                ANBARGRD_SUB2_MODEL_DATA?.Add(item);
+            }
+
+            UpdateCounters();
         }
+
         public void ReGetData3()
         {
             UpdateCounters();
             ANBARGRD_SUB3_MODEL_DATA?.Clear();
-            if (GRD_NUM.Text is not null && GRD_NUM.Text != "")
-            {
-                //var mismatchFilter = BuildCountMismatchPredicate("NUM2");
-                //var query = $@"SELECT EKH, GRD_NUM, CODE, nam, MOG, NUM1, NUM2, NUM3, MABL, NAMES, N_FANI, grp FROM ANBARGRD_SUB3 WHERE GRD_NUM = {GRD_NUM.Text} AND {mismatchFilter}";
-                //var ANBARGRD_SUB3_MODEL_DATA_TEMP = dbms.DoGetDataSQL<ANBARGRD_SUB3_MODEL>(query).ToList();
 
-                var ANBARGRD_SUB3_MODEL_DATA_TEMP = dbms.DoGetDataSQL<ANBARGRD_SUB3_MODEL>($@"SELECT EKH, GRD_NUM, CODE, nam, MOG, NUM1, NUM2, NUM3, MABL, NAMES, N_FANI, grp FROM ANBARGRD_SUB3 WHERE GRD_NUM = {GRD_NUM.Text} AND MOG <> NUM2").ToList();
-                foreach (var item in ANBARGRD_SUB3_MODEL_DATA_TEMP)
-                {
-                    ANBARGRD_SUB3_MODEL_DATA?.Add(item);
-                }
-                UpdateCounters();
-            }
-            else
+            if (string.IsNullOrEmpty(GRD_NUM.Text))
             {
                 return;
             }
+
+            // شمارش سوم: فقط کالاهایی که MOG با NUM2 اختلاف دارن
+            var mismatchFilter = BuildSafeMismatchPredicate("MOG", "NUM2");
+
+            var query = $@"SELECT EKH, GRD_NUM, CODE, nam, MOG, NUM1, NUM2, NUM3, MABL, NAMES, N_FANI, grp 
+                   FROM ANBARGRD_SUB3 
+                   WHERE GRD_NUM = {GRD_NUM.Text} 
+                   AND {mismatchFilter}";
+
+            var data = dbms.DoGetDataSQL<ANBARGRD_SUB3_MODEL>(query).ToList();
+
+            foreach (var item in data)
+            {
+                ANBARGRD_SUB3_MODEL_DATA?.Add(item);
+            }
+
+            UpdateCounters();
         }
 
         private void UpdateCounters()
@@ -1426,13 +1468,14 @@ namespace Wins.WinMenus.ANBAR
                 return;
             }
 
-            Msgwin msgwin = new Msgwin(true, "آیا از حذف اطمینان دارید ؟");
+            string Captiony = $"{((ANBARGRD_SUB1_MODEL_DATA.Count > 0 && ANBARGRD_SUB_IsFocused && ANBARGRD_SUB.SelectedItems.Count > 0) ? "حذف سطر های انتخاب شده" : "حذف کامل")} ";
+            Msgwin msgwin = new Msgwin(true, $"آیا از {Captiony} اطمینان دارید ؟");
             msgwin.ShowDialog();
             if (msgwin.DialogResult == true)
             {
                 _ = AuditLogger.LogActionAsync(
                     actionType: "DELETE",
-                    tableName: "انبار گردانی",
+                    tableName: $" {Captiony} انبار گردانی",
                     recordId: GRD_NUM.Text,
                     oldValue: null,
                     newValue: null,
@@ -1515,9 +1558,23 @@ namespace Wins.WinMenus.ANBAR
                     {
                         try
                         {
-                            dbms.DoExecuteSQL($@"DELETE FROM ANBGRD_HEAD WHERE GRD_NUM = {GRD_NUM.Text}");
+                            // 1) حذف ردیف‌های انبارگردانی
+                            dbms.DoExecuteSQL(
+                                "DELETE FROM ANBGRD_LST WHERE GRD_NUM = @GrdNum",
+                                new { GrdNum = Convert.ToInt32(GRD_NUM.Text) });
 
-                            SANAD();
+                            dbms.DoExecuteSQL(
+                                "DELETE FROM ANBGRD_HEAD WHERE GRD_NUM = @GrdNum",
+                                new { GrdNum = Convert.ToInt32(GRD_NUM.Text) });
+
+                            // 2) حذف ردیف‌های سند حسابداری متناظر (معادل Form_Delete در Access)
+                            if (!string.IsNullOrEmpty(N_S.Text) && N_S.Text != "0")
+                            {
+                                dbms.DoExecuteSQL($"DELETE FROM DEED_DTL WHERE N_S = {N_S.Text}");
+                                dbms.DoExecuteSQL($"DELETE FROM DEED_HED WHERE N_S = {N_S.Text}");
+                            }
+
+                            //SANAD();
 
                             _navigationManager?.DeleteCurrentRecord(); //Refresh Record Source
                         }
@@ -1550,30 +1607,43 @@ namespace Wins.WinMenus.ANBAR
 
         private void COMMENT_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            string co;
+            if (COMMENT == null) return;
+
             COMMENT.Text = Strings.Trim(COMMENT.Text);
-            //ERROR
-            if (COMMENT.Text.StartsWith("#"))
+
+            if (!COMMENT.Text.StartsWith("#"))
+                return;
+
+            if (string.IsNullOrEmpty(GRD_NUM.Text))
             {
-                co = COMMENT.Text.Substring(1);
-
-                var RST = dbms.DoGetDataSQL<ANB1>("SELECT CODE FROM STUF_DEF WHERE CODE = '" + co + "'").ToList();
-                if (RST.Count > 0)
-                {
-                    var RST2 = dbms.DoGetDataSQL<ANBGRD_LST>("SELECT * FROM ANBGRD_LST").ToList();
-                    //RST2.AddNew();
-                    RST2.FirstOrDefault().CODE = co;
-                    RST2.FirstOrDefault().GRD_NUM = Convert.ToInt32(this.GRD_NUM.Text);
-
-                    dbms.DoExecuteSQL(@$"INSERT INTO ANBGRD_LST (code , GRD_NUM) 
-				                                         VALUES({RST2.FirstOrDefault().CODE} ,{RST2.FirstOrDefault().GRD_NUM}) ");
-                    //RST2.update();
-                }
-                //this.ANBGRD_LST_SUB.Requery();
-                //this.ANBGRD_LST_SUB2.Requery();
-                //this.ANBGRD_LST_SUB3.Requery();
-                COMMENT.Text = "";
+                new Msgwin(false, "ابتدا برگه را ذخیره کنید تا شماره انبارگردانی تعیین شود.").ShowDialog();
+                COMMENT.Text = string.Empty;
+                return;
             }
+
+            var co = COMMENT.Text.Substring(1);
+
+            // وجود کالا در STUF_DEF؟
+            var rst = dbms.DoGetDataSQL<ANB1>("SELECT CODE FROM STUF_DEF WHERE CODE = @Code", new { Code = co }).ToList();
+
+            if (rst.Count > 0)
+            {
+                // معادل AddNew در Access: مستقیم Insert می‌کنیم
+                dbms.DoExecuteSQL("INSERT INTO ANBGRD_LST (CODE, GRD_NUM) VALUES (@Code, @GrdNum)",
+                    new
+                    {
+                        Code = co,
+                        GrdNum = Convert.ToInt32(GRD_NUM.Text)
+                    }
+                );
+
+                // معادل Requery ساب‌فرم‌ها
+                ReGetData();
+                ReGetData2();
+                ReGetData3();
+            }
+
+            COMMENT.Text = string.Empty;
         }
 
         private void Command19_Click(object sender, RoutedEventArgs e)
@@ -1816,6 +1886,70 @@ namespace Wins.WinMenus.ANBAR
                 {
                     // تب شمارش سوم: فقط کالاهایی که موجودی فعلی با شمارش دوم متفاوت است
                     ReGetData3();
+                }
+            }
+        }
+
+        private void INVO_LST_sub_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            var dataGrid = sender as DataGrid;
+            if (dataGrid?.SelectedItem == null || dataGrid?.SelectedItem == CollectionView.NewItemPlaceholder || dataGrid?.SelectedItem?.ToString() == "{NewItemPlaceholder}")
+            {
+                e.Handled = true;
+                return;
+            }
+            //base.OnContextMenuOpening(e);
+        }
+        private void INVO_LST_sub_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is not DataGrid dataGrid)
+            {
+                return;
+            }
+
+            if (dataGrid.SelectedItems.Count > 0)
+            {
+                return;
+            }
+
+            // Find the row under the mouse
+            DependencyObject dep = (DependencyObject)e.OriginalSource;
+            while (dep != null && !(dep is DataGridRow))
+            {
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+
+            DataGridRow row = dep as DataGridRow;
+            if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
+            {
+                // Select the row under the mouse
+                dataGrid.SelectedItem = row.Item;
+
+                // Show the context menu
+                dataGrid.ContextMenu.IsOpen = true;
+
+                // Mark the event as handled to prevent the default context menu behavior
+                e.Handled = true;
+            }
+            else
+            {
+                // No valid row, don't show context menu
+                e.Handled = true;
+            }
+        }
+        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        {
+            if (ANBARGRD_SUB.Items.Count > 0)
+            {
+                if (ANBARGRD_SUB.SelectedItem is not null)
+                {
+                    var Row = ANBARGRD_SUB.SelectedItem as ANBARGRD_SUB1_MODEL;
+                    if (GRD_ANBAR.SelectedValue != null && !string.IsNullOrEmpty(Row.CODE))
+                    {
+                        F_MENU_KART f_MENU_KART = new F_MENU_KART("R", GRD_ANBAR.SelectedValue.ToString(), Row.CODE);
+                        f_MENU_KART.ExternalCallShowReport();
+                        f_MENU_KART.Close();
+                    }
                 }
             }
         }

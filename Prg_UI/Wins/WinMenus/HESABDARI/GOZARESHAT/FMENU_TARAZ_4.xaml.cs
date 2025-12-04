@@ -356,7 +356,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                         OpenReport2();
                         //DoCmd.OpenReport("SURATMABEVAMASAREF", acViewPreview);
                         break;
-                    }        
+                    }
             }
 
             this.Close();
@@ -382,7 +382,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
             _sql_query = $"EXEC dbo.TARAZ4_MOIN '{DT1.Text.ToRawTarikh()}', '{DT2.Text.ToRawTarikh()}', '{SNDNUM1.Text}', '{SNDNUM2.Text}', '{HHHS.SelectedValue}';";
 
-            
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.TARAZ_moin2.mrt");
             report.Load(pathreport);
@@ -410,7 +410,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             _sql_query = $"SELECT NUMBER, NAM, CODE, NAMES, daraee, grp, GR, DARAEECH, daraeeE, BEDEHECH, DARAEECH + BEDEHECH * - 1 AS change FROM SURATMANABE({SNDNUM1.Text}, {DT1.Text.ToRawTarikh()}, {SNDNUM2.Text}, {DT2.Text.ToRawTarikh()}) SURATMANABE WHERE (GR = 1) AND (DARAEECH >= 0) OR (GR = 2) AND (BEDEHECH < 0) ORDER BY CODE";
             _sql_query_2 = $"SELECT NUMBER, NAM, CODE, NAMES, BEDEHE, grp, GR, BEDEHECH, BEDEHEE, DARAEECH, BEDEHECH + DARAEECH * - 1 AS change FROM SURATMANABE({SNDNUM1.Text}, {DT1.Text.ToRawTarikh()}, {SNDNUM2.Text}, {DT2.Text.ToRawTarikh()}) SURATMANABE WHERE     (GR = 2) AND (BEDEHECH >= 0) OR  (GR = 1) AND (DARAEECH < 0)";
 
-            
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.SURATMABEVAMASAREF.mrt");
             report.Load(pathreport);
@@ -488,7 +488,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
             _sql_query = $"EXEC dbo.TARAZ_4 '{DT1.Text.ToRawTarikh()}', '{DT2.Text.ToRawTarikh()}', '{SNDNUM1.Text}', '{SNDNUM2.Text}';";
 
-            
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.R_TARAZ_4.mrt");
             report.Load(pathreport);
@@ -528,7 +528,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
             _sql_query = $"SELECT KOLNAM, MOINAME, TAFNAME, SumOfBED, SumOfBES, bed, bes, MOINJAM, KOLjam, N_KOL, NUMBER, TNUMBER FROM dbo.TARAZ4_TAFZ('{DT1.Text.ToRawTarikh()}','{DT2.Text.ToRawTarikh()}','{SNDNUM1.Text}','{SNDNUM2.Text}','{HHHS.SelectedValue}','{HHHM.Text}') OPTION (HASH JOIN, QUERYTRACEON 2312);";
 
-            
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.TARAZ4_TAFZIL.mrt");
             report.Load(pathreport);
@@ -555,7 +555,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         {
             _sql_query = $"SELECT KOLNAM, MOINAME, TAFNAME, SumOfBED, SumOfBES, bed, bes, MOINJAM, KOLjam, N_KOL, NUMBER, TNUMBER FROM dbo.TARAZ4_TAFZ('{DT1.Text.ToRawTarikh()}','{DT2.Text.ToRawTarikh()}','{SNDNUM1.Text}','{SNDNUM2.Text}','{HHHS.SelectedValue}','{HHHM.Text}') OPTION (HASH JOIN, QUERYTRACEON 2312);";
 
-            
+
             var report = new StiReport();
             var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.TARAZ4_TAFZIL2.mrt");
             report.Load(pathreport);
@@ -573,6 +573,47 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             (report.GetComponentByName("DT2_N") as StiText).Text = dt2.ToString();
 
             new Rpts.WINRPT(report, "تراز").Show();
+        }
+
+        private void DT1_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            var farsidate = Tarikh.FullCurrentDate;
+
+            if (string.IsNullOrEmpty(farsidate) || farsidate.Length < 6)
+            {
+                return;
+            }
+
+            var currentYearMonth = farsidate.Substring(0, 6);
+
+            DT1.Text = string.Concat(currentYearMonth, "01");
+            DT2.Text = string.Concat(currentYearMonth, "31");
+        }
+        private void DT2_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            var farsidate = Tarikh.FullCurrentDate;
+
+            if (string.IsNullOrEmpty(farsidate) || farsidate.Length < 6)
+            {
+                return;
+            }
+
+            var currentYear = int.Parse(farsidate.Substring(0, 4));
+            var currentMonth = int.Parse(farsidate.Substring(4, 2));
+
+            currentMonth--;
+
+            if (currentMonth == 0)
+            {
+                currentMonth = 12;
+                currentYear--;
+            }
+
+            var previousMonth = currentMonth.ToString("00");
+            var previousYear = currentYear.ToString("0000");
+
+            DT1.Text = string.Concat(previousYear, previousMonth, "01");
+            DT2.Text = string.Concat(previousYear, previousMonth, "31");
         }
     }
 }

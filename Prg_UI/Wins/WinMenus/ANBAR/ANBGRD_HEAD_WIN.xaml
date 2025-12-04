@@ -19,6 +19,16 @@
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+
+        <ContextMenu x:Key="ContextUtilityMenu1" IsEnabled="{Binding ElementName=INVO_LST_sub,Path=IsEnabled}" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="کارت انبار این کالا"  Click="MenuItem_Click_1">
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="Warehouse" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
+
+
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
@@ -62,7 +72,7 @@
                     </Grid.RowDefinitions>
 
                     <DataGrid   
-                              x:Name="ANBARGRD_SUB"
+                              x:Name="ANBARGRD_SUB" ContextMenu="{StaticResource ContextUtilityMenu1}" ContextMenuOpening="INVO_LST_sub_ContextMenuOpening" MouseRightButtonUp="INVO_LST_sub_MouseRightButtonUp"  
                               EnableColumnVirtualization="True"
                               EnableRowVirtualization="True"
                               VirtualizingPanel.IsVirtualizing="True"
