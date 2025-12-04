@@ -375,7 +375,7 @@
                                                 </Path>
 
 
-                                                <syncfusion:SfTreeGrid x:Name="PART_ItemsControl" Margin="0 ,30 , 0 ,0"
+                                                <syncfusion:SfTreeGrid x:Name="PART_ItemsControl" Margin="0,30,0,0"
                                                 ColumnSizer="SizeToCells"
                                               Height="{TemplateBinding Height}"
                                               HorizontalAlignment="Stretch"
@@ -401,9 +401,6 @@
                                               ItemsSource="{TemplateBinding ItemsSource}"
                                                            AutoGenerateColumns="False"
                                                            HeaderRowHeight="0"
-                                                  ParentPropertyName="DisplayText"
-                                                 ChildPropertyName="ActualValue"
-			                                   SelfRelationRootValue="Variable"
                                               KeyboardNavigation.TabNavigation="Continue"
                                               Visibility="{Binding IsItemSourceLoaded,
                                                                    RelativeSource={RelativeSource TemplatedParent},
