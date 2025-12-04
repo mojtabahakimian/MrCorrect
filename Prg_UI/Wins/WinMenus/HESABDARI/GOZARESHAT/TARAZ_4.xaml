@@ -491,6 +491,12 @@
                     <materialDesign:PackIcon Kind="FileExcelOutline" FontSize="14" />
                 </MenuItem.Icon>
             </MenuItem>
+            <Separator/>
+            <MenuItem Header="نمایش در محدوده تاریخی" Click="DATERNAV" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="DateRange" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
         </ContextMenu>
 
     </Window.Resources>
@@ -525,7 +531,9 @@
         </Popup>
         <!--HEADER↑-->
 
-        <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" ContextMenu="{StaticResource DataGridContextMenu}"
+        <StackPanel Margin="0,40,0,0">
+            <CNC:DateNavigator x:Name="dateNavigator" HorizontalAlignment="Center" Margin="0,10,0,10" Visibility="Collapsed" ShowDayName="True"/>
+            <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" ContextMenu="{StaticResource DataGridContextMenu}"
             ItemsSource="{Binding TARAZ_DATA}" FilterRowPosition="Top"
             AutoGenerateColumns="False"
             AllowEditing="True"
@@ -546,66 +554,69 @@
             HeaderStyle="{StaticResource KDGHeader}"
             PreviewMouseRightButtonDown="SYNCFUSION_DG_PreviewMouseRightButtonDown"
             CurrentCellActivated="SYNCFUSION_DG_CurrentCellActivated"
-                               ColumnSizer="Star"
-            Margin="10,49,10,10" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged" PreviewKeyDown="SYNCFUSION_DG_PreviewKeyDown">
+            ColumnSizer="Star"
+            AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged" PreviewKeyDown="SYNCFUSION_DG_PreviewKeyDown">
 
-            <syncfusion:SfDataGrid.Resources>
-                <ResourceDictionary>
-                    <Style TargetType="TextBox">
-                        <Setter Property="AcceptsReturn" Value="True" />
-                        <Setter Property="Height" Value="40" />
-                    </Style>
-                </ResourceDictionary>
-            </syncfusion:SfDataGrid.Resources>
+                <syncfusion:SfDataGrid.Resources>
+                    <ResourceDictionary>
+                        <Style TargetType="TextBox">
+                            <Setter Property="AcceptsReturn" Value="True" />
+                            <Setter Property="Height" Value="40" />
+                        </Style>
+                    </ResourceDictionary>
+                </syncfusion:SfDataGrid.Resources>
 
-            <syncfusion:SfDataGrid.Columns>
+                <syncfusion:SfDataGrid.Columns>
 
-                <syncfusion:GridTemplateColumn HeaderText=" " x:Name="ISEND_COLUMN" Width="60"    MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False" >
-                    <syncfusion:GridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Button x:Name="BTN_OPEN_SUB" IsTabStop="False" Click="BTN_OPEN_SUB_Click" Tag="{Binding}"
+                    <syncfusion:GridTemplateColumn HeaderText=" " x:Name="ISEND_COLUMN" Width="60"    MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False" >
+                        <syncfusion:GridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button x:Name="BTN_OPEN_SUB" IsTabStop="False" Click="BTN_OPEN_SUB_Click" Tag="{Binding}"
                                     materialDesign:ButtonAssist.CornerRadius="2"
                                     Style="{StaticResource MaterialDesignFlatButton}"
                                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
                                     HorizontalContentAlignment="Center" Padding="18,4,16,4">
-                                <materialDesign:PackIcon Kind="SubdirectoryArrowLeft"/>
-                            </Button>
+                                    <materialDesign:PackIcon Kind="SubdirectoryArrowLeft"/>
+                                </Button>
 
-                        </DataTemplate>
-                    </syncfusion:GridTemplateColumn.CellTemplate>
-                </syncfusion:GridTemplateColumn>
+                            </DataTemplate>
+                        </syncfusion:GridTemplateColumn.CellTemplate>
+                    </syncfusion:GridTemplateColumn>
 
-                <syncfusion:GridTextColumn  HeaderText="شماره" MappingName="NUMBER" Width="100" />
-                <syncfusion:GridTextColumn  HeaderText="نام" MappingName="NAME" Width="300" />
+                    <syncfusion:GridTextColumn  HeaderText="شماره" MappingName="NUMBER" Width="100" />
+                    <syncfusion:GridTextColumn  HeaderText="نام" MappingName="NAME" Width="300" />
 
-                <syncfusion:GridTextColumn  HeaderText="گردش بدهکار" MappingName="SumOfBED" Width="150" >
-                    <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="SumOfBED" StringFormat="{}{0:#,0}" />
-                    </syncfusion:GridTextColumn.DisplayBinding>
-                </syncfusion:GridTextColumn>
+                    <syncfusion:GridTextColumn  HeaderText="گردش بدهکار" MappingName="SumOfBED" Width="150" >
+                        <syncfusion:GridTextColumn.DisplayBinding>
+                            <Binding Path="SumOfBED" StringFormat="{}{0:#,0}" />
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                <syncfusion:GridTextColumn  HeaderText="گردش بستانکار" MappingName="SumOfBES" Width="150" >
-                    <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="SumOfBES" StringFormat="{}{0:#,0}" />
-                    </syncfusion:GridTextColumn.DisplayBinding>
-                </syncfusion:GridTextColumn>
+                    <syncfusion:GridTextColumn  HeaderText="گردش بستانکار" MappingName="SumOfBES" Width="150" >
+                        <syncfusion:GridTextColumn.DisplayBinding>
+                            <Binding Path="SumOfBES" StringFormat="{}{0:#,0}" />
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                <syncfusion:GridTextColumn  HeaderText="مانده بدهکار" MappingName="bed" Width="150" >
-                    <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="bed" StringFormat="{}{0:#,0}" />
-                    </syncfusion:GridTextColumn.DisplayBinding>
-                </syncfusion:GridTextColumn>
+                    <syncfusion:GridTextColumn  HeaderText="مانده بدهکار" MappingName="bed" Width="150" >
+                        <syncfusion:GridTextColumn.DisplayBinding>
+                            <Binding Path="bed" StringFormat="{}{0:#,0}" />
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
-                <syncfusion:GridTextColumn  HeaderText="مانده بستانکار" MappingName="bes" Width="150" >
-                    <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="bes" StringFormat="{}{0:#,0}" />
-                    </syncfusion:GridTextColumn.DisplayBinding>
-                </syncfusion:GridTextColumn>
+                    <syncfusion:GridTextColumn  HeaderText="مانده بستانکار" MappingName="bes" Width="150" >
+                        <syncfusion:GridTextColumn.DisplayBinding>
+                            <Binding Path="bes" StringFormat="{}{0:#,0}" />
+                        </syncfusion:GridTextColumn.DisplayBinding>
+                    </syncfusion:GridTextColumn>
 
 
-            </syncfusion:SfDataGrid.Columns>
+                </syncfusion:SfDataGrid.Columns>
 
-        </syncfusion:SfDataGrid>
+            </syncfusion:SfDataGrid>
+
+        </StackPanel>
+
 
     </Grid>
 </Window>

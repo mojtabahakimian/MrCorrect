@@ -127,26 +127,26 @@
                     <Label Content="کاربر:" Margin="0,9,292,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="30" Height="27" VerticalAlignment="Top"/>
                     <Label Content="مدت:" Margin="508,10,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="30" Height="25" VerticalAlignment="Top"/>
                     <Label Content="شماره حواله :" Margin="375,13,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="65" Height="25" VerticalAlignment="Top"/>
-                    <Label Content="مشتری :" Margin="0,79,26,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="43" Height="25" VerticalAlignment="Top"/>
-                    <Label Content="ملاحظات :" Margin="0,114,19,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="50" Height="25" VerticalAlignment="Top"/>
-                    <Label Content="واحد :" Margin="0,45,34,0"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right" Width="36"/>
+                    <Label Content="مشتری :" Margin="0,44,26,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="43" Height="25" VerticalAlignment="Top"/>
+                    <Label Content="ملاحظات :" Margin="0,117,19,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="50" Height="25" VerticalAlignment="Top"/>
+                    <Label Content="واحد :" Margin="0,82,34,0"  FlowDirection="RightToLeft" FontSize="10" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="36"/>
 
                     <CNC:NumericTextBox DoesAcceptDouble="False"  x:Name="MAS" Text="0" Height="26" Margin="444,9,0,0" VerticalAlignment="Top" Visibility="Visible"  HorizontalAlignment="Left" Width="63"  />
-                    <ComboBox x:Name="DEPATMAN"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="595,43,74,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" PreviewLostKeyboardFocus="DEPATMAN_PreviewLostKeyboardFocus">
+                    <ComboBox x:Name="DEPATMAN"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="595,80,74,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" PreviewLostKeyboardFocus="DEPATMAN_PreviewLostKeyboardFocus">
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                             </ItemsPanelTemplate>
                         </ComboBox.ItemsPanel>
                     </ComboBox>
-                    <ComboBox x:Name="CUST_NO" IsSynchronizedWithCurrentItem="True" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="594,79,74,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" PreviewKeyDown="CUST_NO_PreviewKeyDown" PreviewLostKeyboardFocus="CUST_NO_PreviewLostKeyboardFocus">
+                    <ComboBox x:Name="CUST_NO" IsSynchronizedWithCurrentItem="True" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="594,44,74,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" PreviewKeyDown="CUST_NO_PreviewKeyDown" PreviewLostKeyboardFocus="CUST_NO_PreviewLostKeyboardFocus">
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                             </ItemsPanelTemplate>
                         </ComboBox.ItemsPanel>
                     </ComboBox>
-                    <ComboBox x:Name="CUST_NO2"  IsSynchronizedWithCurrentItem="True" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="444,79,0,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" PreviewLostKeyboardFocus="CUST_NO2_PreviewLostKeyboardFocus" HorizontalAlignment="Left" Width="146">
+                    <ComboBox x:Name="CUST_NO2"  IsSynchronizedWithCurrentItem="True" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="444,44,0,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" PreviewLostKeyboardFocus="CUST_NO2_PreviewLostKeyboardFocus" HorizontalAlignment="Left" Width="146">
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -154,7 +154,7 @@
                         </ComboBox.ItemsPanel>
                     </ComboBox>
 
-                    <TextBox x:Name="MOLAH"   Text="" Height="33" Margin="620,114,74,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="200" PreviewLostKeyboardFocus="MOLAH_PreviewLostKeyboardFocus" />
+                    <TextBox x:Name="MOLAH"   Text="" Height="33" Margin="620,116,74,0"    Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="200" PreviewLostKeyboardFocus="MOLAH_PreviewLostKeyboardFocus" />
                     <Button x:Name="ESLAH" Content="اصلاح برگه" Margin="167,6,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="92" Foreground="#DDFFFFFF" FontWeight="Bold" Click="ESLAH_Click"/>
                     <CheckBox x:Name="OKF" Content="تایید فاکتور" HorizontalAlignment="Left" Margin="359,79,0,0" VerticalAlignment="Top" Width="79" FontSize="10" IsHitTestVisible="False" IsChecked="False" Focusable="False"/>
                     <CheckBox x:Name="TICMBAA" Content="مالیات.ب.ا.ا" HorizontalAlignment="Left" Margin="359,102,0,0" VerticalAlignment="Top" Width="79" FontSize="10" Click="TICMBAA_Click" IsChecked="False">
@@ -453,8 +453,8 @@
                             </ItemsPanelTemplate>
                         </ComboBox.ItemsPanel>
                     </ComboBox>
-                    <Label Content="نوع مشتری:" Margin="379,46,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="57" Height="25" VerticalAlignment="Top"/>
-                    <ComboBox x:Name="CUST_KIND"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="265,46,0,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="110" PreviewLostKeyboardFocus="CUST_KIND_PreviewLostKeyboardFocus">
+                    <Label Content="نوع مشتری:" Margin="379,44,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="57" Height="25" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="CUST_KIND"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="265,44,0,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="110" PreviewLostKeyboardFocus="CUST_KIND_PreviewLostKeyboardFocus">
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -470,30 +470,30 @@
                     <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" x:Name="JJKOL" IsReadOnly="True" Height="27" Margin="3,7,0,0"    VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Left" Width="166"  Grid.Row="1" Text="0" />
                     <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True"  x:Name="MN" IsReadOnly="True" Height="27" Margin="3,39,0,0"     VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Left" Width="166"  Grid.Row="1" Text="0"/>
                     <TextBox x:Name="SHARAYET"   Text="" Height="93" Margin="381,68,358,0"  AcceptsReturn="True"  Style="{StaticResource FuzzyOut}" Padding="3"    TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible" MaxLength="48"  Grid.Row="1" />
-                    <ComboBox x:Name="MODAT_PPID"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}"  IsTextSearchEnabled="True" Margin="0,163,75,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="177" PreviewLostKeyboardFocus="MODAT_PPID_PreviewLostKeyboardFocus" SelectionChanged="MODAT_PPID_SelectionChanged" LostFocus="MODAT_PPID_LostFocus">
+                    <ComboBox x:Name="MODAT_PPID"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}"  IsTextSearchEnabled="True" Margin="0,161,744,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="198" PreviewLostKeyboardFocus="MODAT_PPID_PreviewLostKeyboardFocus" SelectionChanged="MODAT_PPID_SelectionChanged" LostFocus="MODAT_PPID_LostFocus">
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                             </ItemsPanelTemplate>
                         </ComboBox.ItemsPanel>
                     </ComboBox>
-                    <ComboBox x:Name="PEPID"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,163,343,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="240" DropDownOpened="PEPID_DropDownOpened" PreviewLostKeyboardFocus="PEPID_PreviewLostKeyboardFocus" IsEditable="True">
+                    <ComboBox x:Name="PEPID"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,161,74,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="240" DropDownOpened="PEPID_DropDownOpened" PreviewLostKeyboardFocus="PEPID_PreviewLostKeyboardFocus" IsEditable="True">
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                             </ItemsPanelTemplate>
                         </ComboBox.ItemsPanel>
                     </ComboBox>
-                    <ComboBox x:Name="PEID"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,163,676,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="244" DropDownOpened="PEID_DropDownOpened" PreviewLostKeyboardFocus="PEID_PreviewLostKeyboardFocus" IsEditable="True">
+                    <ComboBox x:Name="PEID"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,161,414,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="244" DropDownOpened="PEID_DropDownOpened" PreviewLostKeyboardFocus="PEID_PreviewLostKeyboardFocus" IsEditable="True">
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                             </ItemsPanelTemplate>
                         </ComboBox.ItemsPanel>
                     </ComboBox>
-                    <Label Content="نحوه پرداخت :" Visibility="{Binding ElementName=MODAT_PPID,Path=Visibility}" Margin="0,164,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="24" VerticalAlignment="Top"/>
-                    <Label Content="اعلامیه قیمت :" Visibility="{Binding ElementName=PEPID,Path=Visibility}" Margin="0,164,267,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="24" VerticalAlignment="Top"/>
-                    <Label Content="اعلامیه تخفیف :" Visibility="{Binding ElementName=PEID,Path=Visibility}" Margin="0,163,589,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="24" VerticalAlignment="Top"/>
+                    <Label Content="نحوه پرداخت :" Visibility="{Binding ElementName=MODAT_PPID,Path=Visibility}" Margin="0,163,673,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="24" VerticalAlignment="Top"/>
+                    <Label Content="اعلامیه قیمت :" Visibility="{Binding ElementName=PEPID,Path=Visibility}" Margin="0,161,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="24" VerticalAlignment="Top"/>
+                    <Label Content="اعلامیه تخفیف :" Visibility="{Binding ElementName=PEID,Path=Visibility}" Margin="0,161,329,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="24" VerticalAlignment="Top"/>
                     <Label Content="مبلغ نقد :" Margin="0,5,96,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top" Grid.Row="1"/>
                     <CNC:NumericTextBox x:Name="M_NAGHD2" DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True"   Text="{Binding ElementName=M_NAGHD,Path=Text,UpdateSourceTrigger=LostFocus,Mode=TwoWay}" Height="27" Margin="0,4,151,0"   VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123" Grid.Row="1" PreviewKeyDown="M_NAGHD2_PreviewKeyDown" MaxLength="16" />
                     <Label Content="مبلغ کارت بانک :" Margin="0,37,69,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top" Grid.Row="1"/>
@@ -543,8 +543,8 @@
                             </Style>
                         </CheckBox.Style>
                     </CheckBox>
-                    <Label Content="شیفت:" Margin="574,118,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="39" Height="25" VerticalAlignment="Top"/>
-                    <ComboBox x:Name="SHIFT"   Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="443,117,0,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="127" PreviewLostKeyboardFocus="SHIFT_PreviewLostKeyboardFocus">
+                    <Label Content="شیفت:" Margin="574,119,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="39" Height="25" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="SHIFT"   Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="443,118,0,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="127" PreviewLostKeyboardFocus="SHIFT_PreviewLostKeyboardFocus">
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>

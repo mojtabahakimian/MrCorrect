@@ -150,6 +150,43 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         {
             NowIsReady = true;
         }
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                e.Handled = true;
+
+                CL_LMethods.SendKey_US(Key.Tab);
+            }
+
+            // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
+            var nonDataKeys = new[]
+            {
+                Key.Enter, Key.Tab, Key.LeftShift, Key.RightShift,
+                Key.CapsLock, Key.Left, Key.Right, Key.Up, Key.Down,
+                Key.LeftAlt, Key.RightAlt, Key.LeftCtrl, Key.RightCtrl,
+                Key.F1, Key.F2, Key.F3, Key.F4, Key.F5, Key.F6,
+                Key.F7, Key.F8, Key.F9, Key.F10, Key.F11, Key.F12,
+                Key.Escape, Key.Insert, Key.Home, Key.End,
+                Key.PageUp, Key.PageDown
+            };
+            if (!nonDataKeys.Contains(e.Key))
+            {
+                var focused = Keyboard.FocusedElement as DependencyObject;
+                if (focused != null && (CL_LMethods.IsInside<TextBoxBase>(focused) || CL_LMethods.IsInside<ComboBox>(focused) || CL_LMethods.IsInside<CheckBox>(focused)))
+                {
+                    ChangeIsHappend = true;
+                }
+                else
+                {
+                    var focusedElement = Keyboard.FocusedElement;
+                    if (focusedElement is Xceed.Wpf.Toolkit.MaskedTextBox)
+                    {
+                        ChangeIsHappend = true;
+                    }
+                }
+            }
+        }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             string callername = (this.GetType().Name);
@@ -177,11 +214,20 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                 if (!this.IsLoaded) { this.Close(); return; }
                 //اگر بدهکاران و بستانکاران محدود نبوده و تراز بوده و دسترسی هم نداشته و به هر دلیلی بسته نشده ببندش
             }
-            #endregion
+            #endregion         
 
+            LoadData();
+        }
+
+        private void DateNavigator_DateChanged(object sender, string e)
+        {
+            DT1 = e.ToRawTarikh();
+            DT2 = e.ToRawTarikh();
+            LoadData();
+        }
+        private void LoadData()
+        {
             Process Prc = ProcLoader.Start();
-
-            CL_HESABDARI.AMALIYAT_USER(callername);
 
             double SNDNUM1 = 0; // Assuming these are float values.
             double SNDNUM2 = 929292929;
@@ -219,12 +265,13 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
             ProcLoader.Stop(Prc);
         }
+        public string DT1 { get; set; }
+        public string DT2 { get; set; }
 
         #region _SfDataGrid_
         private readonly FilterService<TARAZ_4_MODEL> filterService = new FilterService<TARAZ_4_MODEL>();
         public ObservableCollection<string> ActiveFilters { get; set; } = new ObservableCollection<string>();
-        public string DT1 { get; }
-        public string DT2 { get; }
+
 
         private string? CurrentCellValue = null;
         private RowColumnIndex CurrentCellIndex;
@@ -706,43 +753,6 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
 
         #endregion
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
-            {
-                e.Handled = true;
-
-                CL_LMethods.SendKey_US(Key.Tab);
-            }
-
-            // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
-            var nonDataKeys = new[]
-            {
-                Key.Enter, Key.Tab, Key.LeftShift, Key.RightShift,
-                Key.CapsLock, Key.Left, Key.Right, Key.Up, Key.Down,
-                Key.LeftAlt, Key.RightAlt, Key.LeftCtrl, Key.RightCtrl,
-                Key.F1, Key.F2, Key.F3, Key.F4, Key.F5, Key.F6,
-                Key.F7, Key.F8, Key.F9, Key.F10, Key.F11, Key.F12,
-                Key.Escape, Key.Insert, Key.Home, Key.End,
-                Key.PageUp, Key.PageDown
-            };
-            if (!nonDataKeys.Contains(e.Key))
-            {
-                var focused = Keyboard.FocusedElement as DependencyObject;
-                if (focused != null && (CL_LMethods.IsInside<TextBoxBase>(focused) || CL_LMethods.IsInside<ComboBox>(focused) || CL_LMethods.IsInside<CheckBox>(focused)))
-                {
-                    ChangeIsHappend = true;
-                }
-                else
-                {
-                    var focusedElement = Keyboard.FocusedElement;
-                    if (focusedElement is Xceed.Wpf.Toolkit.MaskedTextBox)
-                    {
-                        ChangeIsHappend = true;
-                    }
-                }
-            }
-        }
 
         private void BTN_OPEN_SUB_Click(object sender, RoutedEventArgs e)
         {
@@ -751,6 +761,16 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
             if (CurrentRow != null && CurrentRow?.NUMBER != null)
             {
                 new TARAZ_4_MOIN(DT1, DT2, CurrentRow?.NUMBER.ToString(), BEDBESKOL).Show();
+            }
+        }
+        private void DATERNAV(object sender, RoutedEventArgs e)
+        {
+            if (!BEDBESKOL)
+            {
+                dateNavigator.Visibility = Visibility.Visible;
+                //dateNavigator.CurrentDate = DT1.ToString().Insert(4, "/").Insert(7, "/");
+                dateNavigator.CurrentDate = "99991230"; //Tarikh.FullCurrentDate;
+                dateNavigator.DateChanged += DateNavigator_DateChanged;
             }
         }
     }

@@ -1,0 +1,56 @@
+﻿<UserControl x:Class="Prg_UI.CUC.DateNavigator"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Prg_UI.CUC"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="50" d:DesignWidth="400" FlowDirection="RightToLeft">
+    <Grid>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            
+            <Button x:Name="Btn_SyncDate" Click="Btn_SyncDate_Click" ToolTip="مشاهده تراز همین روز (تک روز)" Style="{StaticResource MaterialDesignIconButton}" Height="25" Width="25" Margin="10,0,0,0">
+                <materialDesign:PackIcon Kind="CalendarSync" />
+            </Button>
+            
+            <!-- Month Navigation -->
+            <Button x:Name="BtnNextMonth" Click="BtnNextMonth_Click" ToolTip="ماه بعد" Margin="2" Padding="2" Width="30" Height="30" Style="{StaticResource MaterialDesignFlatButton}">
+                <materialDesign:PackIcon Kind="ChevronDoubleRight" />
+            </Button>
+
+            <!-- Week Navigation -->
+            <Button x:Name="BtnNextWeek" Click="BtnNextWeek_Click" ToolTip="هفته بعد" Margin="2" Padding="2" Width="30" Height="30" Style="{StaticResource MaterialDesignFlatButton}">
+                <materialDesign:PackIcon Kind="ChevronRight" />
+            </Button>
+
+            <!-- Day Navigation -->
+            <Button x:Name="BtnNextDay" Click="BtnNextDay_Click" ToolTip="روز بعد" Margin="2" Padding="2" Width="30" Height="30" Style="{StaticResource MaterialDesignFlatButton}">
+                <materialDesign:PackIcon Kind="ChevronRight" />
+                <!-- Using same icon? Maybe Single chevron for day, double for week? Let's adjust icons -->
+            </Button>
+
+            <!-- Date Display -->
+            <xctk:MaskedTextBox x:Name="txtDate" Mask="0000/00/00" Width="83" Style="{StaticResource FuzzyOut}" Padding="3" FlowDirection="LeftToRight" Height="30" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="5" PreviewLostKeyboardFocus="txtDate_PreviewLostKeyboardFocus" PreviewGotKeyboardFocus="txtDate_PreviewGotKeyboardFocus"/>
+
+            <TextBlock x:Name="txtDayName" VerticalAlignment="Center" Margin="5,0,5,0" FontWeight="Bold" Visibility="Collapsed" />
+
+            <!-- Day Navigation -->
+            <Button x:Name="BtnPrevDay" Click="BtnPrevDay_Click" ToolTip="روز قبل" Margin="2" Padding="2" Width="30" Height="30" Style="{StaticResource MaterialDesignFlatButton}">
+                <materialDesign:PackIcon Kind="ChevronLeft" />
+            </Button>
+            
+            <!-- Week Navigation -->
+            <Button x:Name="BtnPrevWeek" Click="BtnPrevWeek_Click" ToolTip="هفته قبل" Margin="2" Padding="2" Width="30" Height="30" Style="{StaticResource MaterialDesignFlatButton}">
+                <materialDesign:PackIcon Kind="ChevronLeft" />
+            </Button>
+
+            <!-- Month Navigation -->
+            <Button x:Name="BtnPrevMonth" Click="BtnPrevMonth_Click" ToolTip="ماه قبل" Margin="2" Padding="2" Width="30" Height="30" Style="{StaticResource MaterialDesignFlatButton}">
+                <materialDesign:PackIcon Kind="ChevronDoubleLeft" />
+            </Button>
+
+        </StackPanel>
+    </Grid>
+</UserControl>

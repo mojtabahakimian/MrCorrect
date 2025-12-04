@@ -676,6 +676,8 @@ namespace Prg_UI
 
                         if (string.IsNullOrEmpty(Str_US[0])) { GoExitTheApplication(); }
 
+                        if (Str_US.Length < 5) { GoExitTheApplication(); } // Ensure we have all parts (Connection, UserCode, Shift, Vahed, Section)
+
                         CL_CCNNMANAGER.CONNECTION_STR = CL_CCNNMANAGER.ExtractConnectionString(Str_US[0]); //Connection String 0
                         Baseknow.USERCOD = Convert.ToInt32(Str_US[1]);
                         CL_Generaly.SHIFT_OF_USER = Convert.ToInt32(Str_US[2]);

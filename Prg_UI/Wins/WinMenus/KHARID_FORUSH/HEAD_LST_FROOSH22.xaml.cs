@@ -1313,6 +1313,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                    PEPID, /*اعلامیه قیمت*/
                    PEID, /*اعلامیه تخفیف*/
                    MODAT_PPID, /*نحوع پرداخت*/
+                   BUTTON_SAVE_HAVALE,
                    INVO_LST_sub,
                    MABL_VAR2,
                    CMB_MOIN_VAR2,
@@ -1333,6 +1334,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                    PEPID, /*اعلامیه قیمت*/
                    PEID, /*اعلامیه تخفیف*/
                    MODAT_PPID, /*نحوع پرداخت*/
+                   BUTTON_SAVE_HAVALE,
                    INVO_LST_sub,
                    MABL_VAR2,
                    CMB_MOIN_VAR2,
@@ -1401,7 +1403,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
                 {
-                    if (SHARAYET.IsFocused || SHARAYET.IsKeyboardFocusWithin)
+                    if (SHARAYET.IsFocused || SHARAYET.IsKeyboardFocusWithin || BUTTON_SAVE_HAVALE.IsFocused)
                     {
                         //continue out
                     }
@@ -2659,6 +2661,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             //سایر
             BUTTON_SAVE_Sayer.IsEnabled = CAN;
             DELETE_SAYER.IsEnabled = CAN;
+            DEPATMAN.IsEnabled = CAN;
             MAGHSAD.IsEnabled = CAN;
 
             bool AllowedToSavePursantVisitor = CL_HESABDARI.LETSGO("VISITORS"); //ثبت پورسانت ویزیتور
@@ -3182,6 +3185,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 if ((bool)(SelectedModatItem?.PPAME?.Trim().Equals("آزاد")))
                 {
+                    if (string.IsNullOrWhiteSpace(MAS.Text) || MAS.Text == "0")
+                    {
+                        MAS.Text = "1";
+                    }
                     //Skip
                 }
                 else
@@ -7505,14 +7512,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     //this.moadian.IsEnabled = true;
 
 
-                    if (!CL_HESABDARI.LETSGO("DEFA")) // اپراتور دسترسی به واحد ندارد قفل کن
-                    {
-                        DEPATMAN.IsEnabled = false;
-                    }
-                    else
-                    {
-                        DEPATMAN.IsEnabled = true;
-                    }
+                    DEPATMAN.IsEnabled = true;
 
                     BUTTON_SAVE_HAVALE.IsEnabled = true;
                 }
@@ -8572,71 +8572,76 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             #endregion
             return true;
         }
-
         private bool SaveMasterNewNumberINSERT()
         {
             try
             {
-                if (NUMBER1.Text == "0") // Only run for new records
+                if (string.IsNullOrWhiteSpace(NUMBER1.Text) || NUMBER1.Text == "0")
                 {
-                    double newNumber1;
-                    double newNumber;
+                    long newNumber1;
+                    long newNumber;
 
                     using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
                     {
                         db.Open();
-                        // Use Serializable isolation level to prevent other users from reading MAX or inserting 
-                        using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
+                        using (var transaction = db.BeginTransaction(System.Data.IsolationLevel.Serializable))
                         {
                             try
                             {
+                                // 1. قفل کردن جدول (کار شما صحیح بود و اینجا هم تکرار می‌کنیم)
                                 db.Execute("SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WITH (TABLOCKX, HOLDLOCK)", null, transaction);
 
-                                // 2. Get MAX(NUMBER1) for Invoice (fTAG = 13)
-                                var rst_11 = db.Query<double?>("SELECT Max(HEAD_LST.NUMBER1) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)=13))", null, transaction).FirstOrDefault();
-                                if (rst_11 == 0 || rst_11 == null)
+                                // ************************************************************
+                                // اصلاح حیاتی 1: محاسبه شماره فاکتور چاپی (NUMBER1)
+                                // ************************************************************
+                                // برای اطمینان، ماکسیمم را از تگ 13 میگیریم
+                                var maxNum1 = db.Query<double?>("SELECT MAX(NUMBER1) FROM HEAD_LST WHERE TAG = 13", null, transaction).FirstOrDefault();
+                                newNumber1 = (maxNum1 == null || maxNum1 == 0) ? (long)Baseknow.STHFR : Convert.ToInt64(maxNum1 + 1);
+
+                                // حلقه اطمینان (برای محکم کاری): اگر به هر دلیلی این شماره پر بود، بعدی را بگیر
+                                while (db.Query<int>("SELECT COUNT(*) FROM HEAD_LST WHERE NUMBER1 = @N1 AND TAG = 13", new { N1 = newNumber1 }, transaction).FirstOrDefault() > 0)
                                 {
-                                    newNumber1 = Baseknow.STHFR; // Start number
-                                }
-                                else
-                                {
-                                    newNumber1 = Convert.ToDouble(rst_11 + 1);
+                                    newNumber1++;
                                 }
 
-                                // 3. Get MAX(NUMBER) for Dispatch (hTAG = 2) if it's a direct factor
+                                // ************************************************************
+                                // اصلاح حیاتی 2: محاسبه شماره داخلی (NUMBER)
+                                // ************************************************************
                                 if (IsDirectFactor)
                                 {
-                                    var rst_12 = db.Query<double?>("SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)=2))", null, transaction).FirstOrDefault();
-                                    if (rst_12 == 0 || rst_12 == null)
+                                    // نکته کلیدی: باید ماکسیمم را بین *هر دو* تگ چک کنیم
+                                    // تا اگر فاکتوری بدون حواله وجود داشت، شماره تکراری نسازیم
+                                    var maxNum = db.Query<double?>("SELECT MAX(NUMBER) FROM HEAD_LST WHERE TAG IN (2, 13)", null, transaction).FirstOrDefault();
+
+                                    newNumber = (maxNum == null || maxNum == 0) ? (long)Baseknow.STHFR : Convert.ToInt64(maxNum + 1);
+
+                                    // حلقه اطمینان: چک میکنیم این شماره در هیچکدام از تگ‌ها نباشد
+                                    while (db.Query<int>("SELECT COUNT(*) FROM HEAD_LST WHERE NUMBER = @N AND TAG IN (2, 13)", new { N = newNumber }, transaction).FirstOrDefault() > 0)
                                     {
-                                        newNumber = Baseknow.STHFR; // Start number
-                                    }
-                                    else
-                                    {
-                                        newNumber = Convert.ToDouble(rst_12 + 1);
+                                        newNumber++;
                                     }
                                 }
                                 else
                                 {
-                                    // If not direct, we use the existing NUMBER from the ComboBox
-                                    newNumber = Convert.ToDouble(NUMBER.Text);
+                                    // در حالت غیر مستقیم، شماره داخلی همان شماره حواله انتخاب شده است
+                                    newNumber = Convert.ToInt64(NUMBER.Text);
                                 }
 
-                                // 4. Insert Invoice record (fTAG = 13)
+                                // 3. درج در دیتابیس (بدون تغییر)
+                                // درج فاکتور (TAG 13)
                                 db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER, NUMBER1, TAG, DATE_N, MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF, UID)
-                                    VALUES ({newNumber}, {newNumber1}, {fTAG}, 0, 0, 0, 0, 0, 0, 0, 0, {Baseknow.USERCOD})", null, transaction);
+                            VALUES ({newNumber}, {newNumber1}, {fTAG}, 0, 0, 0, 0, 0, 0, 0, 0, {Baseknow.USERCOD})", null, transaction);
 
-                                // 5. Insert Dispatch record (hTAG = 2) if direct
+                                // درج حواله (TAG 2) - اگر مستقیم بود
                                 if (IsDirectFactor)
                                 {
                                     db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER, NUMBER1, TAG, DATE_N, MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF, UID)
-                                    VALUES ({newNumber}, {newNumber1}, {hTAG}, 0, 0, 0, 0, 0, 0, 0, 0, {Baseknow.USERCOD})", null, transaction);
+                            VALUES ({newNumber}, {newNumber1}, {hTAG}, 0, 0, 0, 0, 0, 0, 0, 0, {Baseknow.USERCOD})", null, transaction);
                                 }
 
-                                // 6. If all inserts are successful, commit the transaction
                                 transaction.Commit();
 
-                                // 7. NOW update the UI
+                                // آپدیت UI
                                 NUMBER1.Text = newNumber1.ToString();
                                 NUMBER.Text = newNumber.ToString();
                                 NUMBER1.UpdateLayout();
@@ -8644,44 +8649,41 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                             }
                             catch (Exception)
                             {
-                                // If anything fails, roll back the entire operation
                                 transaction.Rollback();
-                                throw; // Re-throw the exception to be caught by the outer try-catch
+                                throw;
                             }
-                        } // Transaction disposes
-                    } // Connection disposes
+                        }
+                    }
 
-                    // Update navigation manager and state
                     _navigationManager.IsNewRecord = false;
                     RefreshAfterUpdate();
-
                     this.CDDATE = CL_HESABDARI.FARSIDATE();
                     this.CDTIME = CL_HESABDARI.GTFS();
-
                     CL_HESABDARI.ADDTAKH(Convert.ToInt64(CUST_KIND.SelectedValue), Convert.ToInt64(NUMBER.Text), 2);
                 }
             }
             catch (SqlException ex)
             {
-                if (ex.Number == 2627) // Unique key violation (if you add one)
+                if (ex.Number == 2627)
                 {
-                    new Msgwin(false, $"شماره فاکتور {NUMBER1.Text} یا شماره حواله {NUMBER.Text} تکراری است و توسط کاربر دیگری ثبت شده. لطفا دوباره تلاش کنید.").Show();
+                    new Msgwin(false, $"خطای تکراری بودن شماره! سیستم شماره {NUMBER1.Text} را پیشنهاد داد اما در لحظه آخر ثبت شده بود.").Show();
                 }
                 else
                 {
-                    new Msgwin(false, $"خطا در انجام عملیات ذخیره , لطفا مجددا امتحان کنید").Show();
+                    new Msgwin(false, $"خطا در انجام عملیات ذخیره پایگاه داده: {ex.Message}").Show();
                 }
                 return false;
             }
             catch (Exception ex)
             {
-                CL_LMethods.DoWriteMyLog("خطا در ذخیره SaveMasterNewNumberINSERT فاکتور فروش", ex);
-                new Msgwin(false, $"خطا در انجام عملیات").Show();
+                CL_LMethods.DoWriteMyLog("خطا در ذخیره SaveMasterNewNumberINSERT", ex);
+                new Msgwin(false, "خطا در انجام عملیات").Show();
                 return false;
             }
 
             return true;
         }
+
 
         private void M_NAGHD_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
@@ -12793,18 +12795,20 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         private void INVO_LST_sub_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             var dataGrid = sender as DataGrid;
-            if (dataGrid?.SelectedItem == null)
+            if (dataGrid?.SelectedItem == null || dataGrid?.SelectedItem == CollectionView.NewItemPlaceholder || dataGrid?.SelectedItem?.ToString() == "{NewItemPlaceholder}")
             {
                 e.Handled = true;
                 return;
             }
-            base.OnContextMenuOpening(e);
+            //base.OnContextMenuOpening(e);
         }
 
         private void INVO_LST_sub_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
-            DataGrid dataGrid = sender as DataGrid;
-            if (dataGrid == null) return;
+            if (sender is not DataGrid dataGrid)
+            {
+                return;
+            }
 
             if (dataGrid.SelectedItems.Count > 0)
             {

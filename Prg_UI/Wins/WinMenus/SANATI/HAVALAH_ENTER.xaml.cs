@@ -1051,7 +1051,7 @@ namespace Wins.WinMenus.SANATI
 
             ChangeIsHappend = false;
         }
-        private void SANAD()
+        private void SANAD_0()
         {
             // --- ایمنی: Parse و Validation ورودی‌ها ---
             if (!long.TryParse(NUMBER.Text, out long numberVal))
@@ -1405,6 +1405,428 @@ namespace Wins.WinMenus.SANATI
                 ProcLoader.Stop(Prc);
             }
         }
+
+        private void SANAD()
+        {
+            // --- ایمنی: Parse و Validation ورودی‌ها ---
+            if (!long.TryParse(NUMBER.Text, out long numberVal))
+            {
+                return;
+            }
+
+            long.TryParse(NUMBER1.Text, out long number1Val); // اگر ناموفق باشد، 0 می‌شود
+
+            if (!long.TryParse(DATE_N.Text.ToRawTarikh(), out long dateNVal))
+            {
+                return;
+            }
+
+            Process Prc = ProcLoader.Start();
+
+            try
+            {
+                var (SanadNumber, IsSuccessy) = AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADVORUDSAKHT(numberVal, numberVal, false);
+
+                if (SanadNumber != null)
+                {
+                    N_S.Text = SanadNumber.ToString();
+                }
+
+                if (Baseknow.ECONM ?? false)
+                {
+                    double num = 0;
+                    long MABLTMP = 0;
+
+                    // --- شرط اصلی: بررسی کاراکتر 56 از OPTIONSS ---
+                    if (Strings.Mid(Baseknow.OPTIONSS, 56, 1) != "5")
+                    {
+                        // ========================================
+                        // بلوک A: OPTIONSS != "5"
+                        // ========================================
+                        if (number1Val != 0)
+                        {
+                            // --- بلوک A.1: NUMBER1 موجود است (UPDATE) ---
+                            var rst = (dbms.DoGetDataSQL<HEAD_LST>(
+                                "SELECT * FROM HEAD_LST WHERE NUMBER = @Num AND TAG = 10",
+                                new { Num = number1Val })).ToList();
+
+                            if (rst.Count == 1)
+                            {
+                                // --- حذف رکوردهای قبلی ---
+                                dbms.DoExecuteSQL(
+                                   "DELETE FROM INVO_LST WHERE NUMBER = @Num AND TAG = 10",
+                                   new { Num = number1Val });
+
+                                // --- بارگذاری رکوردهای منبع (TAG=9) ---
+                                var RSTK = (dbms.DoGetDataSQL<INVO_LST>(
+                                    "SELECT * FROM INVO_LST WHERE NUMBER = @Num AND TAG = 9",
+                                    new { Num = numberVal })).ToList();
+
+                                var newInvoListItems = new List<INVO_LST>();
+
+                                for (int i = 0; i < RSTK.Count; i++)
+                                {
+                                    var rstf = (dbms.DoGetDataSQL<VKSQRE2>(
+                                        @"SELECT dbo.HEAD_MANF.CODE, dbo.DTL_MANF.FNUMB, dbo.DTL_MANF.CODE AS CODB, 
+                                dbo.DTL_MANF.ANBAR, dbo.DTL_MANF.MEGHk, dbo.DTL_MANF.VAHED_K, 
+                                dbo.DTL_MANF.MEGH, dbo.DTL_MANF.PERT, dbo.DTL_MANF.smabl, dbo.DTL_MANF.MABLK 
+                         FROM dbo.DTL_MANF 
+                         INNER JOIN dbo.HEAD_MANF ON dbo.DTL_MANF.FNUMB = dbo.HEAD_MANF.FNUMB 
+                         WHERE (dbo.HEAD_MANF.CODE = @Code)",
+                                        new { Code = RSTK[i].CODE })).ToList();
+
+                                    for (int j = 0; j < rstf.Count; j++)
+                                    {
+                                        MABLTMP = (long)CL_HESABDARI.LASTAVRAGE(rstf[j].CODB, Convert.ToInt64(rstf[j].ANBAR), dateNVal);
+
+                                        var newItem = new INVO_LST
+                                        {
+                                            NUMBER = number1Val,
+                                            TAG = 10,
+                                            ANBAR = (int)rstf[j].ANBAR,
+                                            CODE = rstf[j].CODB,
+                                            VAHED_K = rstf[j].VAHED_K,
+                                            MEGH = (double)((rstf[j].MEGH + rstf[j].PERT) * RSTK[i].MEGHk),
+                                            MEGHk = (double)((rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk),
+                                            N_RASID = rstf[j].FNUMB?.ToString(),
+                                            MABL = MABLTMP,
+                                            AVRAGE = MABLTMP,
+                                            MABL_K = (double)(MABLTMP * (rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk)
+                                        };
+                                        newInvoListItems.Add(newItem);
+                                    }
+                                }
+
+                                string insertQuery = @"INSERT INTO dbo.INVO_LST(NUMBER,TAG,ANBAR,CODE,VAHED_K,MEGH,MEGHk,N_RASID,MABL,AVRAGE,MABL_K) 
+                                       VALUES (@NUMBER,@TAG,@ANBAR,@CODE,@VAHED_K,@MEGH,@MEGHk,@N_RASID,@MABL,@AVRAGE,@MABL_K)";
+                                if (newInvoListItems.Any())
+                                {
+                                    dbms.DoExecuteSQL(insertQuery, newInvoListItems);
+                                }
+
+                                AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGMAVAD(number1Val, number1Val, false);
+                            }
+                        }
+                        else
+                        {
+                            // ═══════════════════════════════════════════════════════════════════════════════
+                            // بلوک A.2: NUMBER1 موجود نیست (INSERT جدید) - اصلاح شده با Transaction و Lock
+                            // ═══════════════════════════════════════════════════════════════════════════════
+
+                            using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+                            {
+                                db.Open();
+                                using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
+                                {
+                                    try
+                                    {
+                                        // قفل کردن جدول برای جلوگیری از Race Condition
+                                        db.Execute("SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WITH (TABLOCKX, HOLDLOCK) WHERE TAG = 10", null, transaction);
+
+                                        // تولید شماره جدید با امنیت
+                                        var rstq = db.Query<double?>(
+                                            "SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WITH (UPDLOCK) WHERE (((HEAD_LST.TAG)=10))",
+                                            null, transaction).FirstOrDefault();
+
+                                        num = (rstq == null || rstq == 0) ? 1L : (double)(rstq + 1);
+
+                                        // درج رکورد جدید در HEAD_LST با Transaction
+                                        string insertHeadSql = @"INSERT INTO dbo.HEAD_LST(NUMBER,TAG,USER_NAME,DATE_N,FNUMCO,CUST_NO,DEPATMAN,MOLAH,OKF)
+                                                 VALUES(@NUMBER,@TAG,@USER_NAME,@DATE_N,@FNUMCO,@CUST_NO,@DEPATMAN,@MOLAH,1)";
+                                        db.Execute(insertHeadSql, new
+                                        {
+                                            NUMBER = num,
+                                            TAG = 10,
+                                            USER_NAME = CL_HESABDARI.UCurrentUser(),
+                                            DATE_N = dateNVal,
+                                            FNUMCO = numberVal,
+                                            CUST_NO = CUST_NO.SelectedValue?.ToString(),
+                                            DEPATMAN = DEPATMAN.SelectedValue,
+                                            MOLAH = "بر اساس توليد"
+                                        }, transaction);
+
+                                        // بارگذاری رکوردهای منبع (TAG=9)
+                                        var RSTK = (dbms.DoGetDataSQL<INVO_LST>(
+                                            "SELECT * FROM INVO_LST WHERE NUMBER = @Num AND TAG = 9",
+                                            new { Num = numberVal })).ToList();
+
+                                        var newInvoListItems = new List<INVO_LST>();
+
+                                        for (int i = 0; i < RSTK.Count; i++)
+                                        {
+                                            var rstf = (dbms.DoGetDataSQL<VKSQRE2>(
+                                                @"SELECT dbo.HEAD_MANF.CODE, dbo.DTL_MANF.FNUMB, dbo.DTL_MANF.CODE AS CODB, 
+                                        dbo.DTL_MANF.ANBAR, dbo.DTL_MANF.MEGHk, dbo.DTL_MANF.VAHED_K, 
+                                        dbo.DTL_MANF.MEGH, dbo.DTL_MANF.PERT, dbo.DTL_MANF.smabl, dbo.DTL_MANF.MABLK 
+                                 FROM dbo.DTL_MANF 
+                                 INNER JOIN dbo.HEAD_MANF ON dbo.DTL_MANF.FNUMB = dbo.HEAD_MANF.FNUMB 
+                                 WHERE (dbo.HEAD_MANF.CODE = @Code)",
+                                                new { Code = RSTK[i].CODE })).ToList();
+
+                                            for (int j = 0; j < rstf.Count; j++)
+                                            {
+                                                MABLTMP = (long)CL_HESABDARI.LASTAVRAGE(rstf[j].CODB, Convert.ToInt64(rstf[j].ANBAR), dateNVal);
+
+                                                var newItem = new INVO_LST
+                                                {
+                                                    NUMBER = num,
+                                                    TAG = 10,
+                                                    ANBAR = (int)rstf[j].ANBAR,
+                                                    CODE = rstf[j].CODB,
+                                                    VAHED_K = rstf[j].VAHED_K,
+                                                    MEGH = (double)((rstf[j].MEGH + rstf[j].PERT) * RSTK[i].MEGHk),
+                                                    MEGHk = (double)((rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk),
+                                                    N_RASID = rstf[j].FNUMB?.ToString(),
+                                                    MABL = MABLTMP,
+                                                    AVRAGE = MABLTMP,
+                                                    MABL_K = (double)(MABLTMP * (rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk)
+                                                };
+                                                newInvoListItems.Add(newItem);
+                                            }
+                                        }
+
+                                        // درج رکوردهای INVO_LST
+                                        string insertQuery = @"INSERT INTO dbo.INVO_LST(NUMBER,TAG,ANBAR,CODE,VAHED_K,MEGH,MEGHk,N_RASID,MABL,AVRAGE,MABL_K) 
+                                               VALUES (@NUMBER,@TAG,@ANBAR,@CODE,@VAHED_K,@MEGH,@MEGHk,@N_RASID,@MABL,@AVRAGE,@MABL_K)";
+                                        if (newInvoListItems.Any())
+                                        {
+                                            foreach (var item in newInvoListItems)
+                                            {
+                                                db.Execute(insertQuery, item, transaction);
+                                            }
+                                        }
+
+                                        // Commit Transaction - اگر به اینجا رسید یعنی همه چیز موفق بود
+                                        transaction.Commit();
+
+                                        // فقط بعد از Commit موفق، NUMBER1 را ست کن
+                                        this.NUMBER1.Text = num.ToString();
+
+                                        AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGMAVAD(Convert.ToInt64(num), Convert.ToInt64(num), false);
+                                    }
+                                    catch (SqlException ex)
+                                    {
+                                        transaction.Rollback();
+
+                                        if (ex.Number == 2601 || ex.Number == 2627)
+                                        {
+                                            // خطای Duplicate Key - تلاش مجدد با شماره جدید
+                                            new Msgwin(false, "شماره تکراری - لطفاً دوباره تلاش کنید").ShowDialog();
+                                        }
+                                        else
+                                        {
+                                            new Msgwin(false, $"خطا در درج سند: {ex.Message}").ShowDialog();
+                                        }
+                                        return;
+                                    }
+                                }
+                                db?.Close();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // ========================================
+                        // بلوک B: OPTIONSS == "5" - همان منطق اصلاح شده
+                        // ========================================
+                        if (number1Val != 0)
+                        {
+                            // --- بلوک B.1: NUMBER1 موجود است (UPDATE) ---
+                            var rst = (dbms.DoGetDataSQL<HEAD_LST>(
+                                "SELECT * FROM HEAD_LST WHERE NUMBER = @Num AND TAG = 10",
+                                new { Num = number1Val })).ToList();
+
+                            if (rst.Count == 1)
+                            {
+                                dbms.DoExecuteSQL(
+                                   "DELETE FROM INVO_LST WHERE NUMBER = @Num AND TAG = 10",
+                                   new { Num = number1Val });
+
+                                var RSTK = (dbms.DoGetDataSQL<INVO_LST>(
+                                    "SELECT * FROM INVO_LST WHERE NUMBER = @Num AND TAG = 9",
+                                    new { Num = numberVal })).ToList();
+
+                                var newInvoListItems = new List<INVO_LST>();
+
+                                for (int i = 0; i < RSTK.Count; i++)
+                                {
+                                    var nKolParam = (RSTK[i].N_KOL == null || RSTK[i].N_KOL == 0) ? "0" : RSTK[i].N_KOL.ToString();
+
+                                    var rstf = (dbms.DoGetDataSQL<VKSQRE2>(
+                                        @"SELECT dbo.HEAD_MANF.CODE, dbo.DTL_MANF.FNUMB, dbo.DTL_MANF.CODE AS CODB, 
+                                dbo.DTL_MANF.ANBAR, dbo.DTL_MANF.MEGHk, dbo.DTL_MANF.VAHED_K, 
+                                dbo.DTL_MANF.MEGH, dbo.DTL_MANF.PERT, dbo.DTL_MANF.smabl, dbo.DTL_MANF.MABLK 
+                         FROM dbo.DTL_MANF 
+                         INNER JOIN dbo.HEAD_MANF ON dbo.DTL_MANF.FNUMB = dbo.HEAD_MANF.FNUMB 
+                         WHERE (dbo.HEAD_MANF.FNUMB = @FNUMB)",
+                                        new { FNUMB = nKolParam })).ToList();
+
+                                    for (int j = 0; j < rstf.Count; j++)
+                                    {
+                                        MABLTMP = (long)CL_HESABDARI.LASTAVRAGE(rstf[j].CODB, Convert.ToInt64(rstf[j].ANBAR), dateNVal);
+
+                                        var newItem = new INVO_LST
+                                        {
+                                            NUMBER = number1Val,
+                                            TAG = 10,
+                                            ANBAR = (int)rstf[j].ANBAR,
+                                            CODE = rstf[j].CODB,
+                                            VAHED_K = rstf[j].VAHED_K,
+                                            MEGH = (double)((rstf[j].MEGH + rstf[j].PERT) * RSTK[i].MEGHk),
+                                            MEGHk = (double)((rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk),
+                                            N_RASID = rstf[j].FNUMB?.ToString(),
+                                            MABL = MABLTMP,
+                                            AVRAGE = MABLTMP,
+                                            MABL_K = (double)(MABLTMP * (rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk)
+                                        };
+                                        newInvoListItems.Add(newItem);
+                                    }
+                                }
+
+                                string insertQuery = @"INSERT INTO dbo.INVO_LST(NUMBER,TAG,ANBAR,CODE,VAHED_K,MEGH,MEGHk,N_RASID,MABL,AVRAGE,MABL_K) 
+                                       VALUES (@NUMBER,@TAG,@ANBAR,@CODE,@VAHED_K,@MEGH,@MEGHk,@N_RASID,@MABL,@AVRAGE,@MABL_K)";
+                                if (newInvoListItems.Any())
+                                {
+                                    dbms.DoExecuteSQL(insertQuery, newInvoListItems);
+                                }
+
+                                AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGMAVAD(number1Val, number1Val, false);
+                            }
+                        }
+                        else
+                        {
+                            // ═══════════════════════════════════════════════════════════════════════════════
+                            // بلوک B.2: NUMBER1 موجود نیست (INSERT جدید) - اصلاح شده با Transaction و Lock
+                            // ═══════════════════════════════════════════════════════════════════════════════
+
+                            using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+                            {
+                                db.Open();
+                                using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
+                                {
+                                    try
+                                    {
+                                        // قفل کردن جدول برای جلوگیری از Race Condition
+                                        db.Execute("SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WITH (TABLOCKX, HOLDLOCK) WHERE TAG = 10", null, transaction);
+
+                                        // تولید شماره جدید با امنیت
+                                        var rstq = db.Query<double?>(
+                                            "SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WITH (UPDLOCK) WHERE (((HEAD_LST.TAG)=10))",
+                                            null, transaction).FirstOrDefault();
+
+                                        num = (rstq == null || rstq == 0) ? 1L : (double)(rstq + 1);
+
+                                        // درج رکورد جدید در HEAD_LST با Transaction
+                                        string insertHeadSql = @"INSERT INTO dbo.HEAD_LST(NUMBER,TAG,USER_NAME,DATE_N,FNUMCO,CUST_NO,DEPATMAN,MOLAH,OKF)
+                                                 VALUES(@NUMBER,@TAG,@USER_NAME,@DATE_N,@FNUMCO,@CUST_NO,@DEPATMAN,@MOLAH,1)";
+                                        db.Execute(insertHeadSql, new
+                                        {
+                                            NUMBER = num,
+                                            TAG = 10,
+                                            USER_NAME = CL_HESABDARI.UCurrentUser(),
+                                            DATE_N = dateNVal,
+                                            FNUMCO = numberVal,
+                                            CUST_NO = CUST_NO.SelectedValue?.ToString(),
+                                            DEPATMAN = DEPATMAN.SelectedValue,
+                                            MOLAH = "بر اساس توليد"
+                                        }, transaction);
+
+                                        // بارگذاری رکوردهای منبع (TAG=9)
+                                        var RSTK = (dbms.DoGetDataSQL<INVO_LST>(
+                                            "SELECT * FROM INVO_LST WHERE NUMBER = @Num AND TAG = 9",
+                                            new { Num = numberVal })).ToList();
+
+                                        var newInvoListItems = new List<INVO_LST>();
+
+                                        for (int i = 0; i < RSTK.Count; i++)
+                                        {
+                                            var nKolParam = (RSTK[i].N_KOL == null || RSTK[i].N_KOL == 0) ? "0" : RSTK[i].N_KOL.ToString();
+
+                                            var rstf = (dbms.DoGetDataSQL<VKSQRE2>(
+                                                @"SELECT dbo.HEAD_MANF.CODE, dbo.DTL_MANF.FNUMB, dbo.DTL_MANF.CODE AS CODB, 
+                                        dbo.DTL_MANF.ANBAR, dbo.DTL_MANF.MEGHk, dbo.DTL_MANF.VAHED_K, 
+                                        dbo.DTL_MANF.MEGH, dbo.DTL_MANF.PERT, dbo.DTL_MANF.smabl, dbo.DTL_MANF.MABLK 
+                                 FROM dbo.DTL_MANF 
+                                 INNER JOIN dbo.HEAD_MANF ON dbo.DTL_MANF.FNUMB = dbo.HEAD_MANF.FNUMB 
+                                 WHERE (dbo.HEAD_MANF.FNUMB = @FNUMB)",
+                                                new { FNUMB = nKolParam })).ToList();
+
+                                            for (int j = 0; j < rstf.Count; j++)
+                                            {
+                                                MABLTMP = (long)CL_HESABDARI.LASTAVRAGE(rstf[j].CODB, Convert.ToInt64(rstf[j].ANBAR), dateNVal);
+
+                                                var newItem = new INVO_LST
+                                                {
+                                                    NUMBER = num,
+                                                    TAG = 10,
+                                                    ANBAR = (int)rstf[j].ANBAR,
+                                                    CODE = rstf[j].CODB,
+                                                    VAHED_K = rstf[j].VAHED_K,
+                                                    MEGH = (double)((rstf[j].MEGH + rstf[j].PERT) * RSTK[i].MEGHk),
+                                                    MEGHk = (double)((rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk),
+                                                    N_RASID = rstf[j].FNUMB?.ToString(),
+                                                    MABL = MABLTMP,
+                                                    AVRAGE = MABLTMP,
+                                                    MABL_K = (double)(MABLTMP * (rstf[j].MEGHk + rstf[j].PERT) * RSTK[i].MEGHk)
+                                                };
+                                                newInvoListItems.Add(newItem);
+                                            }
+                                        }
+
+                                        // درج رکوردهای INVO_LST
+                                        string insertQuery = @"INSERT INTO dbo.INVO_LST(NUMBER,TAG,ANBAR,CODE,VAHED_K,MEGH,MEGHk,N_RASID,MABL,AVRAGE,MABL_K) 
+                                               VALUES (@NUMBER,@TAG,@ANBAR,@CODE,@VAHED_K,@MEGH,@MEGHk,@N_RASID,@MABL,@AVRAGE,@MABL_K)";
+                                        if (newInvoListItems.Any())
+                                        {
+                                            foreach (var item in newInvoListItems)
+                                            {
+                                                db.Execute(insertQuery, item, transaction);
+                                            }
+                                        }
+
+                                        // Commit Transaction
+                                        transaction.Commit();
+
+                                        // فقط بعد از Commit موفق، NUMBER1 را ست کن
+                                        NUMBER1.Text = num.ToString();
+
+                                        AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.SANADKHORUGMAVAD(Convert.ToInt64(num), Convert.ToInt64(num), false);
+                                    }
+                                    catch (SqlException ex)
+                                    {
+                                        transaction.Rollback();
+
+                                        if (ex.Number == 2601 || ex.Number == 2627)
+                                        {
+                                            new Msgwin(false, "شماره تکراری - لطفاً دوباره تلاش کنید").ShowDialog();
+                                        }
+                                        else
+                                        {
+                                            new Msgwin(false, $"خطا در درج سند").ShowDialog();
+                                        }
+                                        return;
+                                    }
+                                }
+                                db?.Close();
+                            }
+                        }
+                    }
+                }
+
+                DoCmdHeaderSave();
+                GetBalanceInfo();
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, "خطا در عملیات سند").Show();
+                return;
+            }
+            finally
+            {
+                ProcLoader.Stop(Prc);
+            }
+        }
+
 
         private void ESLAH_Click(object sender, RoutedEventArgs e)
         {

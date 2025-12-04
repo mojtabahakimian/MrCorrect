@@ -77,10 +77,10 @@
             </ComboBox.ItemsPanel>
         </ComboBox>
 
-        <xctk:MaskedTextBox x:Name="DT1" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="11111111" Height="30" Margin="0,78,92,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" TabIndex="1" HorizontalAlignment="Right" Width="88" />
-        <Label Content="از تاریخ:" FlowDirection="RightToLeft" Margin="0,78,40,0" VerticalAlignment="Top" Width="49" HorizontalAlignment="Right"/>
+        <xctk:MaskedTextBox x:Name="DT1" Style="{StaticResource FuzzyOut}" Padding="3" Mask="0000/00/00" Text="11111111" Height="30" Margin="0,78,92,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" TabIndex="1" HorizontalAlignment="Right" Width="88" />
+        <Label Content="از تاریخ:" PreviewMouseDoubleClick="DT1_PreviewMouseDoubleClick" FlowDirection="RightToLeft" Margin="0,78,40,0" VerticalAlignment="Top" Width="49" HorizontalAlignment="Right"/>
         <xctk:MaskedTextBox x:Name="DT2" Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Text="99991230" Height="30" Margin="0,78,386,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12" TabIndex="2" HorizontalAlignment="Right" Width="88" />
-        <Label Content="تا تاریخ:" FlowDirection="RightToLeft" Margin="0,77,332,0" VerticalAlignment="Top" Width="49" HorizontalAlignment="Right"/>
+        <Label Content="تا تاریخ:" PreviewMouseDoubleClick="DT2_PreviewMouseDoubleClick" FlowDirection="RightToLeft" Margin="0,77,332,0" VerticalAlignment="Top" Width="49" HorizontalAlignment="Right"/>
 
 
         <StackPanel x:Name="VI" Margin="0,166,15,0" Orientation="Vertical" HorizontalAlignment="Right" Width="245" Height="63" VerticalAlignment="Top">

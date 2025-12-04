@@ -1,29 +1,32 @@
-﻿using Prg_SendInvoice.CNNMANAGER;
-using Prg_UI.Functions;
-using System.Linq;
-using System.Windows;
-using System.Windows.Input;
-using Functions;
+﻿using Functions;
+using MaterialDesignThemes.Wpf;
+using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
+using Prg_SendInvoice.CNNMANAGER;
+using Prg_UI.Functions;
+using Prg_UI.HelperWins;
+using Prg_UI.UiTools;
+using Syncfusion.Data;
 using Syncfusion.Data.Extensions;
+using Syncfusion.UI.Xaml.BulletGraph;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
 using System;
-using System.Collections.ObjectModel;
-using Syncfusion.UI.Xaml.BulletGraph;
-using System.Windows.Controls;
-using Prg_Proccessy.FUNCTIONS;
-using System.Windows.Interop;
-using Prg_UI.UiTools;
-using System.Text;
-using Prg_UI.HelperWins;
-using Syncfusion.Data;
 using System.Collections.Generic;
-using System.Windows.Media;
-using MaterialDesignThemes.Wpf;
-using Prg_Proccessy.MODELS;
-using static Prg_UI.Functions.CL_LMethods;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Interop;
+using System.Windows.Media;
+using static Prg_UI.Functions.CL_LMethods;
 
 namespace Wins.WinMenus.Checkha
 {
@@ -32,6 +35,9 @@ namespace Wins.WinMenus.Checkha
         public WIN_CHKE_DLIST(string? openargs = null)
         {
             InitializeComponent();
+
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
+            GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
 
             this.DataContext = this;
 
@@ -155,7 +161,7 @@ namespace Wins.WinMenus.Checkha
             {
                 e.Handled = true;
 
-                CL_LMethods.SendKey_US(Key.Tab);
+                CL_LMethods.SendKey_US(Key.Tab, true);
             }
             else
             {
@@ -215,7 +221,7 @@ namespace Wins.WinMenus.Checkha
 
             GenerateAutomaticSummary(SFDATAGRID_SUB);
 
-            CL_LMethods.FocusLastSfDataGridRow(SFDATAGRID_SUB);
+            //CL_LMethods.FocusLastSfDataGridRow(SFDATAGRID_SUB);
 
             ProcLoader.Stop(Prc);
         }
