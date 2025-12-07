@@ -971,7 +971,7 @@ namespace Wins.WinMenus.SANATI
 
             if (HeaderIsValid() is false) return; //اگر اطلاعات سربرگ صحیح نیست خارج شو
 
-            if (NUMBER.Text == "0")
+            if (string.IsNullOrWhiteSpace(NUMBER.Text) || NUMBER.Text == "0")
             {
                 using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
                 {
@@ -1010,7 +1010,10 @@ namespace Wins.WinMenus.SANATI
 
             try
             {
-                DoCmdHeaderSave();
+                if (!DoCmdHeaderSave())
+                {
+                    return;
+                }
             }
             catch (SqlException ex)
             {
@@ -1260,6 +1263,13 @@ namespace Wins.WinMenus.SANATI
                                         // فقط بعد از Commit موفق، NUMBER1 را ست کن
                                         this.NUMBER1.Text = num.ToString();
 
+                                        if (!string.IsNullOrWhiteSpace(NUMBER1.Text) && NUMBER1.Text != "0")
+                                        {
+                                            //بروز رسانی NUMBER1 مربوط به برگه خروج برای برگه ورود
+                                            // ذخیره NUMBER1 در رکورد TAG=9 (حواله ورود تولید)
+                                            dbms.DoExecuteSQL($@"UPDATE dbo.HEAD_LST SET NUMBER1 = {num} WHERE NUMBER = {numberVal} AND TAG = {FTAG}");
+                                        }
+
                                         if (number1Val > 0) //بروز رسانی فیلد تاریخ در برگه خروج مواد اولیه
                                         {
                                             if (long.TryParse(DATE_N.Text.ToRawTarikh(), out var dateVal))
@@ -1466,9 +1476,15 @@ namespace Wins.WinMenus.SANATI
 
                                         // Commit Transaction
                                         transaction.Commit();
-                                        
+
                                         // فقط بعد از Commit موفق، NUMBER1 را ست کن
                                         NUMBER1.Text = num.ToString();
+                                        if (!string.IsNullOrWhiteSpace(NUMBER1.Text) && NUMBER1.Text != "0")
+                                        {
+                                            //بروز رسانی NUMBER1 مربوط به برگه خروج برای برگه ورود
+                                            // ذخیره NUMBER1 در رکورد TAG=9 (حواله ورود تولید)
+                                            dbms.DoExecuteSQL($@"UPDATE dbo.HEAD_LST SET NUMBER1 = {num} WHERE NUMBER = {numberVal} AND TAG = {FTAG}");
+                                        }
 
                                         // بروزرسانی تاریخ سربرگ برگه خروج
                                         if (number1Val > 0) //بروز رسانی فیلد تاریخ در برگه خروج مواد اولیه
@@ -1682,6 +1698,10 @@ namespace Wins.WinMenus.SANATI
             if (_NUMBER1_ != null)
             {
                 NUMBER1.Text = _NUMBER1_?.ToString();
+            }
+            else
+            {
+                NUMBER1.Text = ""; // پاک کردن مقدار قبلی برای جلوگیری از تکراری شدن NUMBER1
             }
 
             //کادر سبز و سند و مانده حساب

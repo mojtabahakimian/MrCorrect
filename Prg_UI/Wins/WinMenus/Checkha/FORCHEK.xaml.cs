@@ -391,7 +391,10 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     _ = pgetHed.CmdSaveRecord(parentItem);
                 }
                 pgetHed.SANAD();
+
             }
+
+            this.Close();
         }
 
         private void _Exit_Click(object sender, RoutedEventArgs e)

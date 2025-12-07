@@ -944,7 +944,11 @@ namespace Functions
             /// <summary>
             /// کنترل اسناد و دفاتر چک
             /// </summary>
-            CONTROL_ASNAD_DAFATERCHECK_FORM11
+            CONTROL_ASNAD_DAFATERCHECK_FORM11,
+            /// <summary>
+            /// به حساب گذاشتن چک
+            /// </summary>
+            WIN_CHREC_HES_BEHESABCHECK
         }
         #endregion
 
@@ -963,6 +967,9 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+
+                case WinNameType.WIN_CHREC_HES_BEHESABCHECK: /* به حساب گذاشتن چک */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_CHREC_HES(), isModalDialog: false, allowMultipleInstances: false); break;
+
                 case WinNameType.CONTROL_ASNAD_DAFATERCHECK_FORM11: /* کنترل اسناد و دفاتر چک */
                     CL_CONTORL_ASNAD.StartIntegrityChecks();
                     break;

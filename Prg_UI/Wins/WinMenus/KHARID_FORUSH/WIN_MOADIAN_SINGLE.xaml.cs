@@ -1,7 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Functions;
-using ImageMagick;
 using Interfaces;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;

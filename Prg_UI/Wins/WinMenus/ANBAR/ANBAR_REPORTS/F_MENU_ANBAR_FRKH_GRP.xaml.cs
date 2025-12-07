@@ -1,7 +1,6 @@
 ﻿using AUTO_BAZ.HelperWins;
 using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Wordprocessing;
-using ImageMagick;
 using MaterialDesignThemes.Wpf;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.Generaly;

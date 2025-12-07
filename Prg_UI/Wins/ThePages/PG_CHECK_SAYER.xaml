@@ -197,7 +197,7 @@
                         <Label Content="لیست چکهای پرداختی با جمع مبالغ" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" PreviewMouseDown="WrapPanel_PreviewMouseDown">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/Budget.png" CacheOption="OnLoad"/>

@@ -45,7 +45,6 @@ using System.IO;
 using static Interfaces.INavigator;
 using Functions;
 using static Functions.DataGridClipboardManager;
-using ImageMagick;
 using Interfaces;
 using static Prg_UI.HelperWins.Msgwin;
 using Rpts;
@@ -2834,7 +2833,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             //از حساب
             if (e.Column.SortMemberPath == "FHES")
             {
-
                 if (string.IsNullOrEmpty(ENTERED_VALUE_ROW.ToStringNullSafe().Trim()))
                 {
                     universControl.PopNotifyShow("فیلد از حساب نمیتواند خالی باشد", Pop1, Pop1Text1, Pop_Border1);
@@ -2938,6 +2936,15 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     }
 
                 }
+
+                if (CL_HESABDARI.ISTAF(CURRENT_ITMES_ROW.FHES))
+                {
+                    universControl.PopNotifyShow("حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!", Pop1, Pop1Text1, Pop_Border1);
+                    CURRENT_ITMES_ROW.FHES = WAS_ROW_ITEM?.FHES;
+                    RestoreFocusCell(e);
+                    return;
+                }
+
                 if (CURRENT_ITMES_ROW.NAHVA == 5 && CURRENT_ITMES_ROW.NO_AM == 1)
                 {
                     if (IsNull(CURRENT_ITMES_ROW.N_SERI) || IsNull(CURRENT_ITMES_ROW.BANK))
@@ -3083,6 +3090,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                 if (PGET_LST_SUB.SelectedItem == null)
                 {
+                    return;
+                }
+
+                if (CL_HESABDARI.ISTAF(CURRENT_ITMES_ROW.THES))
+                {
+                    universControl.PopNotifyShow("حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!", Pop1, Pop1Text1, Pop_Border1);
+                    CURRENT_ITMES_ROW.THES = WAS_ROW_ITEM?.THES;
+                    RestoreFocusCell(e);
                     return;
                 }
 

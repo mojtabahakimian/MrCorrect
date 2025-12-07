@@ -15,7 +15,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows.Media.Imaging;
-using ImageMagick;
 using System.Text.RegularExpressions;
 using System.Buffers;
 using Prg_Proccessy.Generaly;
@@ -1572,31 +1571,59 @@ namespace Prg_UI.Functions
                 }
             }
         }
-        public static byte[] CompressImage(BitmapImage bitmapImage, int ImageQualityTreshHold = 50)
+        //public static byte[] CompressImage(BitmapImage bitmapImage, int ImageQualityTreshHold = 50)
+        //{
+        //    var encoder = new JpegBitmapEncoder();
+        //    encoder.Frames.Add(BitmapFrame.Create(bitmapImage));
+
+        //    using (var stream = new MemoryStream())
+        //    {
+        //        encoder.Save(stream);
+        //        var originalImageBytes = stream.ToArray();
+
+        //        using (MagickImage image = new MagickImage(originalImageBytes))
+        //        {
+        //            image.Format = MagickFormat.Jpg; // Get or Set the format of the image.
+        //            //image.Resize(40, 40); // Fit the image into the requested width and height. 
+        //            image.Quality = (uint)ImageQualityTreshHold; // This is the compression level.
+
+        //            using (MemoryStream ms = new MemoryStream())
+        //            {
+        //                image.Write(ms);
+        //                byte[] imageBytes = ms.ToArray();
+        //                return imageBytes;
+        //            }
+        //        }
+        //    }
+        //}
+
+        /// <summary>
+        /// فشرده‌سازی تصویر با استفاده از امکانات داخلی WPF
+        /// </summary>
+        /// <param name="source">تصویر ورودی</param>
+        /// <param name="qualityLevel">کیفیت بین 1 تا 100 (پیش‌فرض 75)</param>
+        /// <returns>آرایه بایت تصویر فشرده شده</returns>
+        public static byte[] CompressImage(BitmapSource source, int qualityLevel = 75)
         {
-            var encoder = new JpegBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(bitmapImage));
+            if (source == null) return null;
+
+            // اطمینان از اینکه کیفیت در بازه استاندارد است
+            int quality = Math.Clamp(qualityLevel, 1, 100);
+
+            var encoder = new JpegBitmapEncoder
+            {
+                QualityLevel = quality
+            };
+
+            encoder.Frames.Add(BitmapFrame.Create(source));
 
             using (var stream = new MemoryStream())
             {
                 encoder.Save(stream);
-                var originalImageBytes = stream.ToArray();
-
-                using (MagickImage image = new MagickImage(originalImageBytes))
-                {
-                    image.Format = MagickFormat.Jpg; // Get or Set the format of the image.
-                    //image.Resize(40, 40); // Fit the image into the requested width and height. 
-                    image.Quality = (uint)ImageQualityTreshHold; // This is the compression level.
-
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        image.Write(ms);
-                        byte[] imageBytes = ms.ToArray();
-                        return imageBytes;
-                    }
-                }
+                return stream.ToArray();
             }
         }
+
         public static System.Drawing.Image ConvertBitmapSourceToDrawingImage(BitmapSource bitmapSource)
         {
             using (MemoryStream memoryStream = new MemoryStream())
@@ -3217,7 +3244,7 @@ namespace Prg_UI.Functions
                 Traverse(child);
             }
         }
-        
+
         // Flag برای جلوگیری از فراخوانی مجدد OverrideMetadata
         private static bool _isScrollViewerMetadataOverridden = false;
         public static void OptimizeForRemoteDesktop(DependencyObject obj)
