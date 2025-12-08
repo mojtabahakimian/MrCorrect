@@ -137,7 +137,10 @@ namespace Prg_Proccessy.CNNMANAGER
 
         public void DoCommit(bool _AutomaticDispose = true)
         {
-            _transaction?.Commit();
+            if (_transaction != null && _transaction.Connection != null)
+            {
+                _transaction?.Commit();
+            }
 
             if (_AutomaticDispose)
             {
@@ -146,7 +149,10 @@ namespace Prg_Proccessy.CNNMANAGER
         }
         public void DoRollback(bool _AutomaticDispose = true)
         {
-            _transaction?.Rollback();
+            if (_transaction != null && _transaction.Connection != null)
+            {
+                _transaction?.Rollback();
+            }
 
             if (_AutomaticDispose)
             {
@@ -156,7 +162,11 @@ namespace Prg_Proccessy.CNNMANAGER
         public void Dispose()
         {
             _transaction?.Dispose();
+            _transaction = null;
+
             _connection?.Close();
+            _connection?.Dispose();
+            _connection = null;
         }
 
         private static void LogDeadlock(string sql, int attempt, int maxRetries, SqlException ex)
