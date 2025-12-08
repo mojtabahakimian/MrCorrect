@@ -456,6 +456,38 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     {
                         if (DG?.CurrentColumn != null && DG.SelectedItem != null)
                         {
+                            // 1. جستجو برای پیدا کردن پنجره پیام (چه فعال باشد چه نباشد)
+                            var messageWindow = Application.Current.Windows.OfType<Window>()
+                                .FirstOrDefault(w => w is Prg_UI.HelperWins.Msgwin || w is Prg_UI.HelperWins.MsgListwin);
+
+                            if (messageWindow != null)
+                            {
+                                try
+                                {
+                                    // استفاده از Dispatcher با اولویت Input برای اطمینان از اعمال فوکوس
+                                    Application.Current.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Input, new Action(() =>
+                                    {
+                                        // 2. اگر پنجره مینیمایز شده است، آن را به حالت عادی برگردان
+                                        if (messageWindow.WindowState == WindowState.Minimized)
+                                        {
+                                            messageWindow.WindowState = WindowState.Normal;
+                                        }
+
+                                        // 3. آوردن پنجره به جلوترین حالت
+                                        messageWindow.Activate();
+                                        var was = messageWindow.Topmost;
+                                        messageWindow.Topmost = true;  // موقتا روترین پنجره شود
+                                        messageWindow.Topmost = was; // به حالت عادی برگردد (اختیاری)
+
+                                        // 4. فوکوس نهایی
+                                        messageWindow.Focus();
+                                    }));
+                                }
+                                catch { }
+
+                                // اگر این کد در رویداد دکمه‌ای مثل Enter است، اینجا ریترن می‌کنیم
+                                return;
+                            }
                             int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
                             bool isLastColumn = DG.CurrentColumn?.SortMemberPath == "MABL";
                             bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
@@ -483,16 +515,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                                                 }
                                             }), DispatcherPriority.Background);
 
-                                            //تو فوکوس روی پنجره پیام باشه , برای راحتی با اینتر
-                                            var focusedWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
-                                            if (focusedWindow != null)
-                                            {
-                                                Dispatcher.BeginInvoke(new Action(() =>
-                                                {
-                                                    focusedWindow.Activate();
-                                                    focusedWindow.Focus();
-                                                }), DispatcherPriority.Background);
-                                            }
+
                                         }
                                     }
                                     return;
@@ -506,7 +529,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         return;
                     }
 
-                    CL_LMethods.SendKey_US(Key.Tab);
+                    CL_LMethods.SendKey_US(Key.Tab, true);
                 }
 
                 if (!PGET_LST_SUB.IsKeyboardFocusWithin && !PGET_LST_SUB.IsFocused) //Only On Form F7 Pressed Not DataGrid
@@ -2230,7 +2253,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     row_index = CURRENT_ROW_INDEX;
                 }
             }
-
 
             // Determine entered value
             object enteredValue = null;

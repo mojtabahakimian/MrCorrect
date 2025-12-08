@@ -6,6 +6,7 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_SendInvoice.SQLMODELS;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
+using Prg_UI.Scriptses;
 using Prg_UI.UiTools;
 using Syncfusion.Windows.Shared;
 using System;
@@ -281,7 +282,14 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
 
         private void Command41_Click(object sender, RoutedEventArgs e)
         {
+            Msgwin msgwin = new Msgwin(true, "آیا از اجرای اسکریپت اطمینان دارید؟"); msgwin.ShowDialog();
+            if (msgwin.DialogResult != true)
+            {
+                return;
+            }
 
+            ScriptSqly.LetsGo(true);
+            new Msgwin(false, "اسکریپت‌ها اجرا شدند.").Show();
         }
 
         private void Command39_Click(object sender, RoutedEventArgs e)

@@ -381,12 +381,12 @@ namespace Prg_UI.Wins
 
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
 
-            //new WinBase().Show();
+            new WIN_About().Show();
             //new HEAD_LST_BRFR(2030d).Show();
 
             //new WIN_CHREC_HES().Show();
             //new HEAD_LST_ENTEGHAL_WIN().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_DIRECT, this, "10977,10969");
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
             //new WIN_OPTIONS().Show();
