@@ -202,8 +202,8 @@ namespace Functions
 
                         if (isBarGashti) //فاکتور/انبار برگشت فروش
                         {
-                            var RST = TM.SqlQueryCtc<STUF_STK_CSHARP>("SELECT * FROM dbo.STUF_STK WHERE CODE = @CODE AND ANBAR = @ANBAR",
-                               new { CODE, ANBAR }).FirstOrDefault();
+                            var RST = TM.SqlQueryCtc<STUF_STK_CSHARP>("SELECT * FROM dbo.STUF_STK WITH (UPDLOCK, ROWLOCK) WHERE CODE = @CODE AND ANBAR = @ANBAR",
+                                          new { CODE, ANBAR }).FirstOrDefault();
 
                             if (RST == null)
                             {
