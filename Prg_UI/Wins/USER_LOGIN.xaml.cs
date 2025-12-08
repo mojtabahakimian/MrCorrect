@@ -12,6 +12,7 @@ using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.Scriptses;
 using Prg_UI.Wins.WinMenus.ANBAR;
+using Prg_UI.Wins.WinMenus.Checkha;
 using Prg_UI.Wins.WinMenus.CONFIGS;
 using Prg_UI.Wins.WinMenus.HESABDARI;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
@@ -380,12 +381,12 @@ namespace Prg_UI.Wins
 
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
 
-            //new WinBase().Show();
+            new WIN_About().Show();
             //new HEAD_LST_BRFR(2030d).Show();
 
-            //new WIN_OPTIONS().Show();
+            //new WIN_CHREC_HES().Show();
             //new HEAD_LST_ENTEGHAL_WIN().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALAH_ENTER, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_DIRECT, this, "10977,10969");
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
             //new WIN_OPTIONS().Show();

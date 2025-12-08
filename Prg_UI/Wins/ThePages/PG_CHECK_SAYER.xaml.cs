@@ -59,5 +59,10 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CHEKS_BESTANKAR, null);
         }
+
+        private void WrapPanel_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHREC_HES_BEHESABCHECK, default);
+        }
     }
 }

@@ -611,9 +611,17 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                             CANCEL = true;
                             return;
                         }
-                        N_KOL = CL_HESABDARI.GETKOL(selected).ToString();
-                        N_MOIN = CL_HESABDARI.GETMOIN(selected).ToString();
-                        N_TAF = CL_HESABDARI.GETTAF(selected).ToString();
+
+                        if (string.IsNullOrWhiteSpace(N_KOL) || N_KOL == "911")
+                        {
+                            //No Get Out
+                        }
+                        else
+                        {
+                            N_KOL = CL_HESABDARI.GETKOL(selected).ToString();
+                            N_MOIN = CL_HESABDARI.GETMOIN(selected).ToString();
+                            N_TAF = CL_HESABDARI.GETTAF(selected).ToString();
+                        }
                     }
                 }
                 else

@@ -573,7 +573,6 @@
 		<!--<PackageReference Include="Dapper" Version="2.0.143" />-->
 		<PackageReference Include="IPE.SmsIr" Version="1.2.7" />
 		<PackageReference Include="itext7" Version="8.0.3" />
-		<PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.9.1" />
 		<PackageReference Include="MaterialDesignThemes" Version="5.2.1" />
 		<PackageReference Include="Microsoft.Office.Interop.Excel" Version="15.0.4795.1001" />
 		<PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />

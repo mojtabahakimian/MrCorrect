@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using System;
+using static Stimulsoft.Report.StiOptions;
 
 namespace Prg_UI.Scriptses
 {
@@ -12,7 +13,7 @@ namespace Prg_UI.Scriptses
         /// <summary>
         /// Update Database Via Scripts ...
         /// </summary>
-        public static void LetsGo()
+        public static void LetsGo(bool isCustomCall = false)
         {
             CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
             using (var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
@@ -2200,6 +2201,147 @@ END;";
 
                 try { db.Execute($@"ALTER TABLE [dbo].[PAY_GETP] ALTER COLUMN [SHOBEH] NVARCHAR(50) NULL"); } catch { }
                 try { db.Execute($@"ALTER TABLE [dbo].[PAY_GETD] ALTER COLUMN [SHOBEH] NVARCHAR(50) NULL"); } catch { }
+
+                // ============================================================================
+                // بررسی و حذف رزرو قطعی پیش‌فاکتورهایی که زمان رزرو آن‌ها منقضی شده است (96 ساعت)
+                // ============================================================================
+                if (isCustomCall) //برای اینکه با اطلاع و خواست کاربر این اجرا شود و نه خودکار در آپدیت
+                {
+                    // 1. حذف پروسیجر در صورت وجود
+                    try
+                    {
+                        db.Execute(@"
+                        IF OBJECT_ID(N'[dbo].[sp_CheckReservationTimeout]', N'P') IS NOT NULL
+                        BEGIN
+                            DROP PROCEDURE [dbo].[sp_CheckReservationTimeout];
+                        END");
+                    }
+                    catch { }
+                    // 2. ایجاد پروسیجر بررسی تایم‌اوت رزرو
+                    try
+                    {
+                        db.Execute(@"
+                        CREATE PROCEDURE [dbo].[sp_CheckReservationTimeout]
+                        AS
+                        BEGIN
+                            SET NOCOUNT ON;
+                            SET XACT_ABORT ON;
+                            SET LOCK_TIMEOUT 5000;
+                            DECLARE @OutputLog TABLE (NUMBER FLOAT);
+                            BEGIN TRY
+                                BEGIN TRANSACTION;
+                                ;WITH TargetReservations AS (
+                                    SELECT h.NUMBER, h.TAMIR
+                                    FROM dbo.HEAD_LST h
+                                    WHERE h.TAG = 20
+                                      AND h.TAMIR = 1
+                                      AND EXISTS (
+                                          SELECT 1
+                                          FROM dbo.HEAD_LST_LOG l
+                                          WHERE l.NUMBER = h.NUMBER
+                                            AND l.TAGG = 20
+                                            AND l.UP_DATE < DATEADD(HOUR, -96, GETDATE())
+                                      )
+                                )
+                                UPDATE TargetReservations
+                                SET TAMIR = 0
+                                OUTPUT inserted.NUMBER INTO @OutputLog(NUMBER);
+                                INSERT INTO dbo.HEAD_LST_LOG (UP_DATE, NUMBER, TAGG, RESERVED, UP_USER_NAME, FIELDNAME)
+                                SELECT GETDATE(), NUMBER, 20, 0, 'Auto_Job', 'TIMEOUT_CANCELED'
+                                FROM @OutputLog;
+                                COMMIT TRANSACTION;
+                            END TRY
+                            BEGIN CATCH
+                                IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+                                IF ERROR_NUMBER() = 1222
+                                BEGIN
+                                    PRINT 'Table is locked by another user. Skipping execution.';
+                                END
+                                ELSE
+                                BEGIN
+                                    DECLARE @Err NVARCHAR(MAX) = ERROR_MESSAGE();
+                                    RAISERROR(@Err, 16, 1);
+                                END
+                            END CATCH
+                        END");
+                    }
+                    catch { }
+                    // 3. ایجاد SQL Server Agent Job برای اجرای خودکار پروسیجر (هر 1 ساعت)
+                    try
+                    {
+                        db.Execute(@"
+                        -- پاکسازی جاب قدیمی در صورت وجود
+                        IF EXISTS (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = N'CheckReservationTimeout')
+                        BEGIN
+                            EXEC msdb.dbo.sp_delete_job @job_name = N'CheckReservationTimeout', @delete_unused_schedule = 1;
+                        END");
+                    }
+                    catch { }
+
+                    try
+                    {
+                        db.Execute(@"
+                        DECLARE @ReturnCode INT = 0;
+                        DECLARE @JobId BINARY(16);
+						DECLARE @DbName NVARCHAR(128) = DB_NAME();
+                        -- ایجاد دسته‌بندی در صورت نیاز
+                        IF NOT EXISTS (SELECT name FROM msdb.dbo.syscategories WHERE name = N'[Uncategorized (Local)]' AND category_class = 1)
+                        BEGIN
+                            EXEC @ReturnCode = msdb.dbo.sp_add_category @class = N'JOB', @type = N'LOCAL', @name = N'[Uncategorized (Local)]';
+                        END
+                        -- تعریف مشخصات اصلی جاب
+                        EXEC @ReturnCode = msdb.dbo.sp_add_job
+                            @job_name = N'CheckReservationTimeout',
+                            @enabled = 1,
+                            @notify_level_eventlog = 0,
+                            @notify_level_email = 0,
+                            @notify_level_netsend = 0,
+                            @notify_level_page = 0,
+                            @delete_level = 0,
+                            @description = N'بررسی و لغو خودکار رزروهای منقضی شده (بیش از 96 ساعت).',
+                            @category_name = N'[Uncategorized (Local)]',
+                            @owner_login_name = N'sa',
+                            @job_id = @JobId OUTPUT;
+                        -- تعریف مرحله اجرایی
+                        EXEC @ReturnCode = msdb.dbo.sp_add_jobstep
+                            @job_id = @JobId,
+                            @step_name = N'Execute SP CheckReservationTimeout',
+                            @step_id = 1,
+                            @cmdexec_success_code = 0,
+                            @on_success_action = 1,
+                            @on_success_step_id = 0,
+                            @on_fail_action = 2,
+                            @on_fail_step_id = 0,
+                            @retry_attempts = 2,
+                            @retry_interval = 5,
+                            @os_run_priority = 0,
+                            @subsystem = N'TSQL',
+                            @command = N'EXEC [dbo].[sp_CheckReservationTimeout]',
+                            @database_name = @DbName,
+                            @flags = 0;
+                        -- تنظیم استپ شروع
+                        EXEC @ReturnCode = msdb.dbo.sp_update_job @job_id = @JobId, @start_step_id = 1;
+                        -- تعریف زمان‌بندی - هر 1 ساعت
+                        EXEC @ReturnCode = msdb.dbo.sp_add_jobschedule
+                            @job_id = @JobId,
+                            @name = N'Hourly Schedule',
+                            @enabled = 1,
+                            @freq_type = 4,
+                            @freq_interval = 1,
+                            @freq_subday_type = 8,
+                            @freq_subday_interval = 1,
+                            @freq_relative_interval = 0,
+                            @freq_recurrence_factor = 0,
+                            @active_start_date = 20240101,
+                            @active_end_date = 99991231,
+                            @active_start_time = 0,
+                            @active_end_time = 235959;
+                        -- اختصاص جاب به سرور محلی
+                        EXEC @ReturnCode = msdb.dbo.sp_add_jobserver @job_id = @JobId, @server_name = N'(local)';
+                    ");
+                    }
+                    catch { }
+                }
 
             }
         }

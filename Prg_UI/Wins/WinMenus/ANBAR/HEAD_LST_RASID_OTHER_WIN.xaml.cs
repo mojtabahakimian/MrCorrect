@@ -1114,6 +1114,18 @@ namespace Wins.WinMenus.ANBAR
                 }
             }
 
+            //فاکتور برگشت فروش آزاد از سایر رسید انبار ها
+            var NUMBER_BARGASHTI = dbms.DoGetDataSQL<int?>($"SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WHERE TAG = 25 AND NUMBER = {NUMBER.Text} ").FirstOrDefault();
+            if (NUMBER_BARGASHTI > 0)
+            {
+                new Msgwin(false, "این برگه دارای مرجوعی (برگشت فروش آزاد) است , سند آن فاکتور هم اصلاح میشود.").ShowDialog();
+                AUTO_BAZ.Functions.CL_HESABDARI_AUTO_BAZ.gensanadbargashfroosh2(Convert.ToInt64(NUMBER_BARGASHTI), Convert.ToInt64(NUMBER_BARGASHTI), false);
+            }
+            else
+            {
+
+            }
+
             if (e != null)
             {
                 universControl.PopNotifyShow("اطلاعات سربرگ با موفقیت ذخیره شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
@@ -2186,21 +2198,11 @@ namespace Wins.WinMenus.ANBAR
                 }
                 else
                 {
-                    //فاکتور برگشت فروش آزاد از سایر رسید انبار ها
-                    AnyCrossAzadInvoiced = dbms.DoGetDataSQL<int?>($"SELECT TOP 1 NUMBER FROM dbo.HEAD_LST WHERE TAG = 25 AND NUMBER = {NUMBER.Text} ").Any();
-                    if (AnyCrossAzadInvoiced)
-                    {
-                        universControl.PopNotifyShowUp("این برگه دارای مرجوعی (برگشت فروش آزاد) است و نمیتوان سطر های آنرا تغییر داد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
-                        this.AllowEdits = true;
-                        INVO_LST_RASIDA_SUB.IsReadOnly = true;
-                    }
-                    else
-                    {
-                        this.AllowEdits = true;
-                        this.AllowDeletions = true;
-                        ALL_ITEMS_ENABLE();
-                        this.INVO_LST_RASIDA_SUB.IsReadOnly = false;
-                    }
+
+                    this.AllowEdits = true;
+                    this.AllowDeletions = true;
+                    ALL_ITEMS_ENABLE();
+                    this.INVO_LST_RASIDA_SUB.IsReadOnly = false;
                 }
                 //this["INVO_LST_RASIDA_SUB"].Form.Refresh();
             }

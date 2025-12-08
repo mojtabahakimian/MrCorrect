@@ -298,10 +298,10 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تنظیم پیش فرض کاربران برای ارجاع", WIN_NAME = CL_MenuManager.WinNameType.UserPersonelOrderWin_PishfarzeErja });
 
 
-            // case WinNameType.WIN_VISIT_ROUTE_FORM: //تعيين مسير وزيت براي مشتريان
+            // case WinNameType.WIN_VISIT_ROUTE_FORM: //تعیین مسیر وزیت برای مشتریان
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تنظیم لیست دستی توضیع", WIN_NAME = CL_MenuManager.WinNameType.WIN_TOZIE });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف ویزیت روزانه برای ویزیتور", WIN_NAME = CL_MenuManager.WinNameType.VISITOR_DAY_HEAD });
-            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعيين مسير وزيت براي مشتريان", WIN_NAME = CL_MenuManager.WinNameType.WIN_VISIT_ROUTE_FORM });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعیین مسیر وزیت برای مشتریان", WIN_NAME = CL_MenuManager.WinNameType.WIN_VISIT_ROUTE_FORM });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "نمودار فروش کلی", WIN_NAME = CL_MenuManager.WinNameType.AMAR_FROOSH_KOL });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست چکهای دریافتی سررسید شده", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_DCHSS });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست چکهای برگشتی (دریافتی)", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_CHKB });
@@ -326,7 +326,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش فروش به تفکیک واحد ها", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_GOZARESH_FROOSH });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست جمع فروش کالا ها تفکیک کالا", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_DATE_CFRALL });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست خرید به تفکیک کالا ....", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_DATE_CKRALL });
-            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "امار فروش کالا ها به تفکیک روز", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_DATE_AMFDAY });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "آمار فروش کالا ها به تفکیک روز", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_DATE_AMFDAY });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش فاکتور های فروش به اشخاص", WIN_NAME = CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_FLIST });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش فاکتور های خرید به اشخاص", WIN_NAME = CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_KLIST });
 
@@ -363,6 +363,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "کنترل سریالی چکهای پرداختی", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_SERILA });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "چکهای پرداختی اعلام وصول یا برگشت شده", WIN_NAME = CL_MenuManager.WinNameType.CHEKS_PBESTANKAR });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "چکهای واگذار - برگشت - وصول شده", WIN_NAME = CL_MenuManager.WinNameType.CHEKS_BESTANKAR });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "به حساب گذاشتن چک", WIN_NAME = CL_MenuManager.WinNameType.WIN_CHREC_HES_BEHESABCHECK });
 
             //حسابداری
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "کنترل اسناد و دفاتر چک", WIN_NAME = CL_MenuManager.WinNameType.CONTROL_ASNAD_DAFATERCHECK_FORM11 });

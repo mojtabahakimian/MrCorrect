@@ -7837,7 +7837,7 @@ namespace Prg_Proccessy.FUNCTIONS
 
                             if (IsNull(rss00))
                             {
-                                var rss1 = db.Query<double?>("SELECT count(HEAD_LST.NUMBER1) AS MaxOfNUMBER1 FROM HEAD_LSTWHERE TAG = " + TAGG, null, transaction).FirstOrDefault();
+                                var rss1 = db.Query<double?>("SELECT count(HEAD_LST.NUMBER1) AS MaxOfNUMBER1 FROM HEAD_LST WHERE TAG = " + TAGG, null, transaction).FirstOrDefault();
 
                                 if (rss1 == 0 || IsNull(rss1))
                                 {
@@ -7870,7 +7870,7 @@ namespace Prg_Proccessy.FUNCTIONS
 
                             if (IsNull(rss00))
                             {
-                                var rss1 = db.Query<double?>("SELECT count(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LSTWHERE TAG = " + TAGG, null, transaction).FirstOrDefault();
+                                var rss1 = db.Query<double?>("SELECT count(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE TAG = " + TAGG, null, transaction).FirstOrDefault();
                                 if (rss1 == 0 || IsNull(rss1))
                                 {
                                     MAXNUM = 1L;
@@ -7889,7 +7889,25 @@ namespace Prg_Proccessy.FUNCTIONS
                         {
                             MAXNUM = (long)(rss0 + 1);
                         }
-                        db.Execute("INSERT INTO HEAD_LST (NUMBER,NUMBER1,TAG,DATE_N,CUST_NO,OKF,CDDATE,CDTIME) VALUES (" + MAXNUM + "," + num + "," + TAGG + "," + DATE_N + ",'" + CUST_NO + "',0," + Tarikh.GET_OADATE_DAO() + "," + Tarikh.FullCurrentDate + ")", null, transaction);
+                        var maxNumber1ForTag = db.Query<long?>("SELECT Max(HEAD_LST.NUMBER1) AS MaxOfNUMBER1 FROM HEAD_LST WHERE TAG = @Tag", new { Tag = TAGG }, transaction).FirstOrDefault();
+                        var nextAvailableNumber1 = IsNull(maxNumber1ForTag) ? 1L : (long)maxNumber1ForTag + 1;
+                        long number1ToUse = num;
+
+                        if (num == 0)
+                        {
+                            number1ToUse = nextAvailableNumber1;
+                        }
+                        else
+                        {
+                            var existingNumber1Count = db.Query<int>("SELECT COUNT(1) FROM HEAD_LST WHERE TAG = @Tag AND NUMBER1 = @Number1", new { Tag = TAGG, Number1 = num }, transaction).FirstOrDefault();
+
+                            if (existingNumber1Count > 0)
+                            {
+                                number1ToUse = nextAvailableNumber1;
+                            }
+                        }
+
+                        db.Execute("INSERT INTO HEAD_LST (NUMBER,NUMBER1,TAG,DATE_N,CUST_NO,OKF,CDDATE,CDTIME) VALUES (" + MAXNUM + "," + number1ToUse + "," + TAGG + "," + DATE_N + ",'" + CUST_NO + "',0," + Tarikh.GET_OADATE_DAO() + "," + Tarikh.FullCurrentDate + ")", null, transaction);
                     }
 
                     //Remove NUll Insert:

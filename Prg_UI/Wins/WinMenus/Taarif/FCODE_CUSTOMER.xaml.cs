@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using Functions;
-using ImageMagick;
 using Interfaces;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
