@@ -971,6 +971,15 @@ namespace Wins.WinMenus.SANATI
 
             if (HeaderIsValid() is false) return; //اگر اطلاعات سربرگ صحیح نیست خارج شو
 
+            if (INVO_LST_SUB.IsEnabled && !INVO_LST_SUB.IsReadOnly)
+            {
+                if (!ForceDataGridCommit())
+                {
+                    universControl.PopNotifyShow("لطفا ابتدا ویرایش سطر را تکمیل کنید...", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                    return;
+                }
+            }
+
             if (string.IsNullOrWhiteSpace(NUMBER.Text) || NUMBER.Text == "0")
             {
                 using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
@@ -1864,6 +1873,35 @@ namespace Wins.WinMenus.SANATI
                     }
                 }
             }
+        }
+
+        private bool ForceDataGridCommit()
+        {
+            // اگر فوکوس روی دیتاگرید نیست، نیازی به کامیت نیست (مثلاً کاربر روی تکست باکس دیگری بوده)
+            // اما برای اطمینان، اگر سطر جدیدی در حال ویرایش است، آن را نهایی میکنیم
+            try
+            {
+                INVO_LST_SUB.CommitEdit();
+                INVO_LST_SUB.CommitEdit(DataGridEditingUnit.Row, true);
+
+                // نهایی کردن ویرایش سطر جاری (این دستور باعث اجرای رویداد RowEditEnding و درج در دیتابیس میشود)
+                bool rowCommitted = INVO_LST_SUB.CommitEdit(DataGridEditingUnit.Row, true);
+
+                // رفرش کردن برای اطمینان از همگامی UI (اختیاری اما توصیه شده در سناریوی شما)
+                if (rowCommitted)
+                {
+                    INVO_LST_SUB.Items.Refresh();
+                }
+
+                //return rowCommitted;
+            }
+            catch (Exception)
+            {
+                // در صورت بروز خطای اعتبارسنجی در سطح دیتاگرید
+                return false;
+            }
+
+            return true;
         }
 
         private void INVO_LST_SUB_SelectionChanged(object sender, SelectionChangedEventArgs e)
