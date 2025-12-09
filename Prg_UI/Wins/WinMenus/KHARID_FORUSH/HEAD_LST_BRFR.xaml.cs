@@ -152,7 +152,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 NUMBER.Text = number_to_open.ToString(); //شماره رسید
                 IsOpenedFromAutomation = _isAutomasion_;
             }
-
         }
         public bool IsOpenedFromAutomation { get; } = false;
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
@@ -380,6 +379,20 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 MOIN_HAZ.IsReadOnly = !ican; //معین خدمت
                 PAY_GETP_SUB.IsReadOnly = !ican; //چک ها
                 INVO_LST_SUB.IsReadOnly = !ican;
+
+                // --- New Fields ---
+                MODAT_PPID.IsEnabled = ican;
+                PEPID.IsEnabled = ican;
+                PEID.IsEnabled = ican;
+                // Special logic for GHAYM=7
+                if (CL_Generaly.IsGHAYM_7)
+                {
+                    if (!CL_HESABDARI.LETSGO("elamghe"))
+                    {
+                        this.PEPID.IsEnabled = false;
+                        this.PEID.IsEnabled = false;
+                    }
+                }
 
                 bool AllowedToSavePursantVisitor = CL_HESABDARI.LETSGO("FRMOST"); //ثبت پورسانت ویزیتور
                 if (AllowedToSavePursantVisitor)
@@ -680,6 +693,30 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 this.SGN3.IsEnabled = false;
             }
 
+            if (!CL_HESABDARI.LETSGO("elamghe"))
+            {
+                this.PEPID.IsEnabled = false;
+                this.PEID.IsEnabled = false;
+            }
+            else
+            {
+                this.PEPID.IsEnabled = true;
+                this.PEID.IsEnabled = true;
+            }
+
+            if (Baseknow.GHAYM == 7)
+            {
+                MODAT_PPID.Visibility = Visibility.Visible;
+                PEPID.Visibility = Visibility.Visible;
+                PEID.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                MODAT_PPID.Visibility = Visibility.Hidden;
+                PEPID.Visibility = Visibility.Hidden;
+                PEID.Visibility = Visibility.Hidden;
+            }
+
             AllowEdits = false;
         }
 
@@ -860,6 +897,15 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             NCHK.Text = "0";
 
+            MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
+            MODAT_PPID.SelectedIndex = -1; MODAT_PPID.Items.Refresh();
+            MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
+
+            PEPID.SelectedIndex = -1;
+            PEID.SelectedIndex = -1;
+
+            MODAT_PPID_Enter(); // Logic to refresh payment methods
+
             INVO_LST_FACTOR22_DATA.Clear();
             PAY_GETP_SUB_DATA?.Clear(); //چک
             SAYER_VISITOR_DATA?.Clear();
@@ -989,6 +1035,16 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 {
                     TAKHFIF.Text = HEADER.TAKHFIF.ToStringNullSafe(); //مبلغ تخفیف
                 }
+
+                // --- Map New Fields ---
+                MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
+                MODAT_PPID.SelectedValue = HEADER.MODAT_PPID;
+                MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
+
+                PEPID.SelectedValue = HEADER.PEPID;
+                PEID.SelectedValue = HEADER.PEID;
+
+                MODAT_PPID_Enter(); // Refresh list based on selections
 
                 //پشت فاکتور
                 MABL_HAZ.Text = (string.IsNullOrEmpty(HEADER.MABL_HAZ.ToStringNullSafe()) ? "0" : HEADER.MABL_HAZ.ToStringNullSafe()); //مبلغ خدمات
@@ -1126,6 +1182,317 @@ namespace Wins.WinMenus.KHARID_FORUSH
             var ARST = dbms.DoGetDataSQL<Custom_TCODANBAR>(RowSource_ANBAR).ToList();
             ANBAR_COLUMN.ItemsSource = ARST;
         }
+        private void GET_MODAT_PPID_SOURCE()
+        {
+            MODAT_PPID.ItemsSource = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO").ToList();
+            MODAT_PPID.DisplayMemberPath = "PPAME";
+            MODAT_PPID.SelectedValuePath = "PPID";
+        }
+        private void MODAT_PPID_Enter()
+        {
+            if (Baseknow.GHAYM.ToString() != "7")
+                return;
+
+            int currentSelectedPPID = -1;
+            if (_navigationManager?.CurrentRecord?.MODAT_PPID != null)
+            {
+                currentSelectedPPID = Convert.ToInt32(_navigationManager.CurrentRecord.MODAT_PPID);
+            }
+
+            if (DEPATMAN.SelectedItem == null)
+            {
+                universControl.PopNotifyShow("واحد نميتواند خالي باشد", Pop1, Pop1Text1, Pop_Border1);
+                return;
+            }
+
+            string tarikhRaw = DATE_N.Text.ToRawTarikh();
+            if (!long.TryParse(tarikhRaw, out long tarikhValue))
+            {
+                // Handle invalid date if necessary
+                return;
+            }
+
+            List<PRICE_PAYNO_MODATP> filteredList;
+            if (PEID.SelectedValue != null)
+            {
+                filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT PRICE_PAYNO.PPID, PRICE_PAYNO.PPAME, PRICE_PAYNO.MODAT FROM PRICE_PAYNO INNER JOIN PRICE_ELAMIETF_DTL ON PRICE_PAYNO.PPID = PRICE_ELAMIETF_DTL.PPID WHERE (PRICE_ELAMIETF_DTL.PEID = " + this.PEID.SelectedValue + ") union SELECT 0, 'آزاد', 0").ToList();
+            }
+            else
+            {
+                int departId = Convert.ToInt32(DEPATMAN.SelectedValue);
+                string sqlGetPEID = "SELECT TOP (1) PEID FROM dbo.PRICE_ELAMIETF WHERE (PEDATE <= " + tarikhRaw + ") AND (PEPDEPART = " + departId + ") ORDER BY PEID DESC";
+                int? lastPEID = dbms.DoGetDataSQL<int?>(sqlGetPEID).FirstOrDefault();
+
+                if (lastPEID != null)
+                {
+                    string sqlFiltered = "SELECT P.PPID, P.PPAME, P.MODAT FROM PRICE_PAYNO P INNER JOIN PRICE_ELAMIETF_DTL D ON P.PPID = D.PPID WHERE D.PEID = " + lastPEID + " UNION SELECT 0, 'آزاد', 0";
+                    filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>(sqlFiltered).ToList();
+                }
+                else
+                {
+                    if (_navigationManager?.CurrentRecord?.PEID != null)
+                    {
+                        filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT PRICE_PAYNO.PPID, PRICE_PAYNO.PPAME, PRICE_PAYNO.MODAT FROM PRICE_PAYNO INNER JOIN PRICE_ELAMIETF_DTL ON PRICE_PAYNO.PPID = PRICE_ELAMIETF_DTL.PPID WHERE (PRICE_ELAMIETF_DTL.PEID = " + _navigationManager.CurrentRecord.PEID + ") union SELECT 0, 'آزاد', 0").ToList();
+                    }
+                    else
+                    {
+                        filteredList = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>("SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO").ToList();
+                    }
+                }
+            }
+
+            if (currentSelectedPPID > -1 && !filteredList.Any(p => p.PPID == currentSelectedPPID))
+            {
+                string sqlGetSaved = $"SELECT PPID, PPAME, MODAT FROM PRICE_PAYNO WHERE PPID = {currentSelectedPPID}";
+                PRICE_PAYNO_MODATP savedItem = dbms.DoGetDataSQL<PRICE_PAYNO_MODATP>(sqlGetSaved).FirstOrDefault();
+
+                if (savedItem != null)
+                {
+                    savedItem.IsTempyDisplay = true;
+                    filteredList.Add(savedItem);
+                }
+                else
+                {
+                    currentSelectedPPID = -1;
+                }
+            }
+
+            MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
+            MODAT_PPID.ItemsSource = filteredList;
+            MODAT_PPID.DisplayMemberPath = "PPAME";
+            MODAT_PPID.SelectedValuePath = "PPID";
+
+            if (currentSelectedPPID > -1)
+            {
+                MODAT_PPID.SelectedValue = currentSelectedPPID;
+            }
+            else
+            {
+                MODAT_PPID.SelectedIndex = -1;
+            }
+            MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
+        }
+        private void MODAT_PPID_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!NowIsReady) { return; }
+
+            if (Baseknow.GHAYM == 7)
+            {
+                if (!CL_HESABDARI.LETSGO("AZADPAY") && Convert.ToInt32(MODAT_PPID.SelectedValue) == 0)
+                {
+                    MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
+                    if (!_navigationManager.IsNewRecord)
+                    {
+                        MODAT_PPID.SelectedValue = _navigationManager?.CurrentRecord?.MODAT_PPID;
+                    }
+                    else
+                    {
+                        MODAT_PPID.SelectedIndex = -1;
+                    }
+                    MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
+                    universControl.PopNotifyShow($"شما اجازه قيمت گذاري آزاد نداريد", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                }
+
+                if (MODAT_PPID.SelectedItem is PRICE_PAYNO_MODATP selectedItem && selectedItem.IsTempyDisplay)
+                {
+                    MODAT_PPID.SelectionChanged -= MODAT_PPID_SelectionChanged;
+                    if (e != null && e.RemovedItems.Count > 0)
+                    {
+                        MODAT_PPID.SelectedItem = e.RemovedItems[0] as PRICE_PAYNO_MODATP;
+                    }
+                    MODAT_PPID.SelectionChanged += MODAT_PPID_SelectionChanged;
+                    universControl.PopNotifyShowUp($"این گزینه قابل انتخاب نیست : {selectedItem?.PPAME}", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
+                }
+
+                GetModatValueDays();
+            }
+        }
+
+        private void MODAT_PPID_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (!(e.NewFocus is ComboBox)) return;
+            GetModatValueDays();
+            GoGheymateUpdator();
+        }
+
+        private void MODAT_PPID_LostFocus(object sender, RoutedEventArgs e)
+        {
+            // Similar logic to FROOSH22 to focus grid if needed
+            if (!MODAT_PPID.IsKeyboardFocusWithin && INVO_LST_FACTOR22_DATA.Count == 0)
+            {
+                INVO_LST_SUB.Dispatcher.BeginInvoke(() =>
+                {
+                    INVO_LST_SUB.SelectedIndex = INVO_LST_SUB.Items.Count - 1;
+                    int idx = INVO_LST_SUB_DEF_INDEX_COL; // Default MABL
+                    if (INVO_LST_SUB.Columns.Count > idx)
+                    {
+                        INVO_LST_SUB.CurrentCell = new DataGridCellInfo(INVO_LST_SUB.SelectedItem, INVO_LST_SUB.Columns[idx]);
+                        INVO_LST_SUB.BeginEdit();
+                    }
+                });
+            }
+        }
+
+        private void PEPID_DropDownOpened(object sender, EventArgs e) { /* Optional logic */ }
+        private void PEID_DropDownOpened(object sender, EventArgs e) { /* Optional logic */ }
+
+        private void PEPID_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (PEPID.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
+            if (NowIsReady && Baseknow.GHAYM.ToString() == "7")
+            {
+                MODAT_PPID_Enter();
+            }
+            GoGheymateUpdator();
+        }
+
+        private void PEID_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (PEID.IsEditable) { if (!(e.OriginalSource is TextBox)) return; }
+            if (NowIsReady && Baseknow.GHAYM.ToString() == "7")
+            {
+                MODAT_PPID_Enter();
+            }
+            GoGheymateUpdator();
+        }
+        private void GetModatValueDays(bool FocusonMAS = true)
+        {
+            if (MODAT_PPID.SelectedItem is PRICE_PAYNO_MODATP SelectedModatItem)
+            {
+                if ((bool)(SelectedModatItem?.PPAME?.Trim().Equals("آزاد")))
+                {
+                    if (string.IsNullOrWhiteSpace(MAS.Text) || MAS.Text == "0")
+                    {
+                        MAS.Text = "1";
+                    }
+                }
+                else
+                {
+                    int modt = CL_HESABDARI.Getmodat(Convert.ToInt32(MODAT_PPID.SelectedValue));
+                    if (modt != Convert.ToInt32(MAS.Text))
+                    {
+                        this.MAS.Text = modt.ToString();
+                    }
+                }
+            }
+            if (Convert.ToInt32(MODAT_PPID.SelectedValue) == 0)
+            {
+                this.MAS.IsReadOnly = false;
+                if (FocusonMAS)
+                {
+                    Dispatcher.BeginInvoke(new Action(() => { this.MAS.Focus(); }));
+                }
+            }
+            else
+            {
+                this.MAS.IsReadOnly = true;
+            }
+            IF_AZAD_THENLOCK();
+        }
+
+        private void GoGheymateUpdator()
+        {
+            // Note: FTAG is 25 for Sales Return Open
+            var IsSavedBefore = CL_LMethods.IsNumeric(NUMBER.Text) && NUMBER.Text != "0";
+
+            if (NowIsReady && CL_Generaly.IsGHAYM_7 && IsSavedBefore)
+            {
+                if (SGN1.IsChecked is false && SGN2.IsChecked is false && SGN3.IsChecked is false)
+                {
+                    if (CUST_KIND.SelectedValue != null && DEPATMAN.SelectedValue != null && MODAT_PPID.SelectedValue != null)
+                    {
+                        // ChangeIsHappend = true; // Optional: Track changes
+
+                        if (Convert.ToInt32(MODAT_PPID.SelectedValue) == 0)
+                        {
+                            return;
+                        }
+
+                        int retVal = ExecutePricingUpdate(
+                            Convert.ToInt32(NUMBER.Text),
+                            FTAG, // 25
+                            PEPID.SelectedValue is null ? 0 : Convert.ToInt32(PEPID.SelectedValue),
+                            PEID.SelectedValue is null ? 0 : Convert.ToInt32(PEID.SelectedValue),
+                            Convert.ToInt32(MODAT_PPID.SelectedValue),
+                            TICMBAA.IsChecked == true,
+                            Convert.ToInt32(CUST_KIND.SelectedValue),
+                            Convert.ToInt32(DATE_N.Text.ToRawTarikh()),
+                            Convert.ToInt32(DEPATMAN.SelectedValue));
+
+                        // اگر اعلامیه تخفیف خالی یا صفر است، مقادیر تخفیف را در دیتابیس صفر کن
+                        if (PEID.SelectedValue == null || Convert.ToInt32(PEID.SelectedValue) == 0)
+                        {
+                            // HTAG = 24 (سطرهای فاکتور برگشت فروش)
+                            dbms.DoExecuteSQL($"UPDATE dbo.INVO_LST SET N_KOL = 0, N_MOIN = 0, TKHN = 0 WHERE NUMBER = {NUMBER.Text} AND TAG = {HTAG}");
+                            DoCmdHeaderSave();
+                        }
+
+                        string? strSpecificError = default;
+                        if (retVal != 0)
+                        {
+                            switch (retVal)
+                            {
+                                case -1: strSpecificError = "خطا: اعلامیه قیمت فعال یافت نشد."; break;
+                                case -2: strSpecificError = "خطا: قیمت برای یک یا چند کالا در اعلامیه قیمت مشخص، تعریف نشده است."; break;
+                                case -99: strSpecificError = "خطا: یک خطای عمومی در پایگاه داده رخ داد."; break;
+                                default: strSpecificError = "خطا: عملیات ناموفق بود. کد خطای ناشناخته: " + retVal; break;
+                            }
+                            new Msgwin(false, strSpecificError).ShowDialog();
+                        }
+
+                        ReGetDataAll(); // Refresh Grids
+
+                        if (!string.IsNullOrEmpty(strSpecificError))
+                        {
+                            return;
+                        }
+
+                        universControl.PopNotifyShowUp("قیمت بروز شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green, 1);
+                        IF_AZAD_THENLOCK();
+                    }
+                }
+            }
+        }
+
+        private int ExecutePricingUpdate(int numb, int tgg, int pepid, int peid, int modat_ppid, bool ticmbaa, int cust_kind, int dtt, int depatman)
+        {
+            DynamicParameters param = new DynamicParameters();
+            param.Add("@numb", numb);
+            param.Add("@tgg", tgg);
+            param.Add("@PEPID_In", pepid);
+            param.Add("@PEID_In", peid);
+            param.Add("@MODAT_PPID_In", modat_ppid);
+            param.Add("@TICMBAA_In", ticmbaa);
+            param.Add("@CUST_KIND_In", cust_kind);
+            param.Add("@DTT_In", dtt);
+            param.Add("@DEPATMAN_In", depatman);
+            param.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+
+            dbms.OpenStoredProcedure("sp_UpdateInvoicePricingAndDiscount", param);
+
+            return param.Get<int>("@ReturnValue");
+        }
+
+        private void IF_AZAD_THENLOCK()
+        {
+            if (Baseknow.GHAYM == 7)
+            {
+                if (MODAT_PPID.SelectedIndex == 0) // Azad
+                {
+                    MABL_COLUMN.IsReadOnly = false;
+                    MABL_K_COLUMN.IsReadOnly = false;
+                    N_KOL_COLUMN.IsReadOnly = false;
+                    N_MOIN_COLUMN.IsReadOnly = false;
+                }
+                else
+                {
+                    MABL_COLUMN.IsReadOnly = true;
+                    MABL_K_COLUMN.IsReadOnly = true;
+                    N_KOL_COLUMN.IsReadOnly = true;
+                    N_MOIN_COLUMN.IsReadOnly = true;
+                }
+            }
+        }
         private void FILL_ALL_COMBOBOXES()
         {
             //نوع مشتری
@@ -1185,6 +1552,20 @@ namespace Wins.WinMenus.KHARID_FORUSH
             PERSONEL.ItemsSource = rst_personel;
             PERSONEL.DisplayMemberPath = "SAL_NAME";
             PERSONEL.SelectedValuePath = "IDD";
+
+            // --- NEW CODE START ---
+            // نحوه پرداخت و مدت
+            GET_MODAT_PPID_SOURCE();
+
+            // اعلامیه قیمت
+            PEPID.ItemsSource = dbms.DoGetDataSQL<PRICELIST_CSHARP>("SELECT PEPID, PEPNAME, PEPDATE, PEPDEPART FROM PRICE_ELAMIE ORDER BY PEPNAME DESC").ToList();
+            PEPID.DisplayMemberPath = "PEPNAME";
+            PEPID.SelectedValuePath = "PEPID";
+
+            // اعلامیه تخفیف
+            PEID.ItemsSource = dbms.DoGetDataSQL<PRICELIST_ETF_TAKHFIF__CSHARP>("SELECT PEID, PENAME, PEDATE, PEPDEPART FROM PRICE_ELAMIETF").ToList();
+            PEID.DisplayMemberPath = "PENAME";
+            PEID.SelectedValuePath = "PEID";
 
             //شماره رسید سایر انبار 
             NUMBER.ItemsSource = dbms.DoGetDataSQL<QRE_LST_BARGASHT>($"SELECT NUMBER FROM HEAD_LST WHERE (TAG = {HTAG /*24*/}) AND (NOT (NUMBER IN (SELECT HEAD_LST.NUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG) = {FTAG /*25*/}))))) ORDER BY NUMBER").ToList();
@@ -2809,6 +3190,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 return;
             }
 
+            GoGheymateUpdator();
+
             Summer();
             UpdateVisitorCommissions();
 
@@ -2889,6 +3272,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     OKF = {Convert.ToByte(OKF.IsChecked)},
                     ANBAR =  {(ANBAR is null ? "NULL" : ANBAR)},
                     USER_NAME = N'{USER_NAME.Text}',
+                    MODAT_PPID = {(MODAT_PPID.SelectedValue is null ? "NULL" : MODAT_PPID.SelectedValue)}, 
+                    PEPID = {(PEPID.SelectedValue is null ? "NULL" : PEPID.SelectedValue)},
+                    PEID = {(PEID.SelectedValue is null ? "NULL" : PEID.SelectedValue)},
                     sgn1usid = {(SGN1usid.Tag is null ? "NULL" : SGN1usid.Tag)}, 
                     sgn2usid = {(SGN2usid.Tag is null ? "NULL" : SGN2usid.Tag)}, 
                     sgn3usid = {(SGN3usid.Tag is null ? "NULL" : SGN3usid.Tag)}
@@ -5326,6 +5712,23 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (!string.IsNullOrEmpty(N_S.Text) && N_S.Text != "0")
             {
                 CL_MenuManager.MenuBaseOnKindOpen(this, dbms, 0, Convert.ToDouble(N_S.Text), false);
+            }
+        }
+
+        private void Label_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            //اعلامیه قیمت
+            if (PEPID.SelectedItem is PRICELIST_CSHARP SelectedPEPIDValue)
+            {
+                CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT, this, SelectedPEPIDValue.PEPID);
+            }
+        }
+
+        private void Label_PreviewMouseDoubleClick_1(object sender, MouseButtonEventArgs e)
+        {
+            if (PEID.SelectedItem is PRICELIST_ETF_TAKHFIF__CSHARP SelectedPEIDValue)
+            {
+                CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_TAKHFIF, this, SelectedPEIDValue.PEID);
             }
         }
     }

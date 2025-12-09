@@ -44,12 +44,22 @@ namespace Prg_UI.Wins.WinMenus.Taarif
     /// </summary>
     public partial class PRICE_ELAMIETF_FORM : Window, ISearchableWindow
     {
-        public PRICE_ELAMIETF_FORM()
+        public PRICE_ELAMIETF_FORM(int? number_to_open = null, bool _isAutomasion_ = false)
         {
             InitializeComponent();
 
             this.DataContext = this;
+
+            if (number_to_open != null)
+            {
+                PEID_TO_OPEN = (int?)number_to_open;
+                PEID.Text = PEID_TO_OPEN.ToString();
+                IsOpenedFromAutomation = _isAutomasion_;
+            }
         }
+        private int? PEID_TO_OPEN;
+
+        public bool IsOpenedFromAutomation { get; } = false;
 
         #region Header Window Begin
         //Header Window Begin
@@ -435,13 +445,20 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
             FILL_ALL_COMBOBOXES();
 
+            string WhereCondition = "";
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                WhereCondition = $" WHERE PEID = {PEID.Text} ";
+            }
+
             //--PEID is Primary Key --Header Master
             _navigationManager = new NavigationManager<PRICE_ELAMIETF>(
                 dbms,
                 x => x?.PEID?.ToString(),
-                $"SELECT * FROM PRICE_ELAMIETF ", //ORDER BY CRT
+                $"SELECT * FROM PRICE_ELAMIETF {WhereCondition} ", //ORDER BY CRT
                 x => $"SELECT * FROM PRICE_ELAMIETF WHERE PEID = {x?.PEID} ",
-                default);
+            Convert.ToDouble(PEID.Text));
+            //default);
 
             _navigationManager.CurrentRecordChanged += OnCurrentRecordChanged;
             _navigationManager.OnInsertRecord += OnInsertRecord;
@@ -543,7 +560,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                     }
                 }
             }
-           
+
         }
         private void ValidateDataGridRow(DataGridRowEditEndingEventArgs args, PasteValidationResult validationResult)
         {
@@ -1022,14 +1039,18 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         }
         private void SecurityAllCheck()
         {
-            //CL_HESABDARI.SETSECURITY(this.GetType().Name, "HENTER", new WindowInteropHelper(this).Handle, this.GetType().Name);
-            //CL_HESABDARI.SETSECURITYSUB(DG_SUB, "HENTER");
-
-            //if (!this.IsLoaded)
-            //{
-            //    this.Close();
-            //    return;
-            //}
+            #region SecuritCheck
+            try
+            {
+                string Formname = "PRELMTF";
+                var helper = new WindowInteropHelper(this);
+                helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            #endregion
         }
         private bool HeaderIsValid(bool _DisplayErrors = true)
         {
@@ -1475,6 +1496,9 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 {
                     PRICE_ELAMIETF_DTL_DATA?.Add(item);
                 }
+
+
+
             }
         }
         private void Command106_Click(object sender, RoutedEventArgs e)

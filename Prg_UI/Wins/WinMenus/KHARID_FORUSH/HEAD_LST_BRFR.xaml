@@ -72,10 +72,10 @@
                         <RowDefinition/>
                     </Grid.RowDefinitions>
                     <TextBox x:Name="NUMBER1" Text="0" Height="28" Margin="0,13,135,0" IsReadOnly="True"   Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="90" Tag="RD" IsTabStop="False" />
-                    <xctk:MaskedTextBox x:Name="DATE_N" TabIndex="0"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="28" Margin="0,13,581,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"   HorizontalAlignment="Right" Width="88" PreviewLostKeyboardFocus="DATE_N_PreviewLostKeyboardFocus" PreviewGotKeyboardFocus="DATE_N_PreviewGotKeyboardFocus" />
+                    <xctk:MaskedTextBox x:Name="DATE_N" TabIndex="0"  Style="{StaticResource FuzzyOut}" Padding="3"  Mask="0000/00/00" Height="28" Margin="0,13,587,0" TextWrapping="Wrap" VerticalAlignment="Top"  BorderThickness="1" FontSize="12"   HorizontalAlignment="Right" Width="88" PreviewLostKeyboardFocus="DATE_N_PreviewLostKeyboardFocus" PreviewGotKeyboardFocus="DATE_N_PreviewGotKeyboardFocus" />
                     <Label Content="شماره فاکتور برگشت فروش:" Margin="0,13,10,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="125" Height="28" VerticalAlignment="Top"/>
                     <TextBox x:Name="USER_NAME" IsReadOnly="True" Text="نام کاربر" Height="28" Margin="584,380,333,0"   Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  Padding="3" IsTabStop="False" />
-                    <Label Content="تاریخ:" Margin="0,13,546,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="34" Height="28" VerticalAlignment="Top"/>
+                    <Label Content="تاریخ:" Margin="0,13,552,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="34" Height="28" VerticalAlignment="Top"/>
                     <Label Content="کاربر:" Margin="0,380,301,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="30" Height="28" VerticalAlignment="Top"/>
                     <Label Content="شماره (سایر) رسید انبار:" Margin="0,15,226,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="107" Height="24" VerticalAlignment="Top"/>
                     <Label Content="مشتری:" Margin="0,84,11,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="46" Height="25" VerticalAlignment="Top"/>
@@ -125,7 +125,7 @@
                         FlowDirection="RightToLeft" 
                         SelectionUnit="FullRow" 
                         CanUserDeleteRows="False"
-                        Margin="4,201,4,163" BorderThickness="1" IsKeyboardFocusWithinChanged="INVO_LST_SUB_IsKeyboardFocusWithinChanged"  CellEditEnding="INVO_LST_SUB_CellEditEnding" PreviewMouseLeftButtonUp="INVO_LST_SUB_PreviewMouseLeftButtonUp" SelectionChanged="INVO_LST_SUB_SelectionChanged" RowEditEnding="INVO_LST_SUB_RowEditEnding" PreviewKeyDown="INVO_LST_SUB_PreviewKeyDown" PreparingCellForEdit="INVO_LST_SUB_PreparingCellForEdit" BeginningEdit="INVO_LST_SUB_BeginningEdit" CanUserAddRows="False"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                        Margin="4,202,4,163" BorderThickness="1" IsKeyboardFocusWithinChanged="INVO_LST_SUB_IsKeyboardFocusWithinChanged"  CellEditEnding="INVO_LST_SUB_CellEditEnding" PreviewMouseLeftButtonUp="INVO_LST_SUB_PreviewMouseLeftButtonUp" SelectionChanged="INVO_LST_SUB_SelectionChanged" RowEditEnding="INVO_LST_SUB_RowEditEnding" PreviewKeyDown="INVO_LST_SUB_PreviewKeyDown" PreparingCellForEdit="INVO_LST_SUB_PreparingCellForEdit" BeginningEdit="INVO_LST_SUB_BeginningEdit" CanUserAddRows="False"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <DataGrid.Style>
                             <!--خط بندی سطر های دیتاگرید-->
@@ -300,7 +300,7 @@
                         </ComboBox.ItemsPanel>
                     </ComboBox>
 
-                    <Border   FlowDirection="RightToLeft" HorizontalAlignment="Left"  Height="63" Margin="4,58,0,0"  VerticalAlignment="Top" Width="294" CornerRadius="5" Background="#FF003B69" >
+                    <Border   FlowDirection="RightToLeft" HorizontalAlignment="Left"  Height="63" Margin="4,52,0,0"  VerticalAlignment="Top" Width="294" CornerRadius="5" Background="#FF003B69" >
                         <StackPanel Margin="2">
                             <StackPanel Orientation="Horizontal">
                                 <Label Width="auto" Opacity="0.8" Foreground="White">مانده حساب:</Label>
@@ -333,13 +333,40 @@
 
                     <TextBox x:Name="SGN3usid"   Style="{StaticResource FuzzyOut}" Padding="3"  Margin="0,0,91,64" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft"  HorizontalAlignment="Right" Width="202" IsReadOnly="True"/>
 
-                    <Button x:Name="BTN_DELETE"  Content="حذف" Tag="hazfer" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="6,157,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="108" Click="BTN_DELETE_Click" />
+                    <Button x:Name="BTN_DELETE"  Content="حذف" Tag="hazfer" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="7,160,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="108" Click="BTN_DELETE_Click" />
 
-                    <Button x:Name="BTN_SAVE" Click="BTN_SAVE_Click"  Content="ذخیره"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Foreground="#DDFFFFFF" Height="35" Margin="0,157,4,0" VerticalAlignment="Top" TabIndex="4" HorizontalAlignment="Right" Width="115" />
+                    <Button x:Name="BTN_SAVE" Click="BTN_SAVE_Click"  Content="ذخیره"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Foreground="#DDFFFFFF" Height="36" Margin="0,159,4,0" VerticalAlignment="Top" TabIndex="4" HorizontalAlignment="Right" Width="115" />
 
+                    <ComboBox x:Name="MODAT_PPID"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}"  IsTextSearchEnabled="True" Margin="0,163,800,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="144" PreviewLostKeyboardFocus="MODAT_PPID_PreviewLostKeyboardFocus" SelectionChanged="MODAT_PPID_SelectionChanged" LostFocus="MODAT_PPID_LostFocus" TabIndex="4">
+                        <ComboBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                            </ItemsPanelTemplate>
+                        </ComboBox.ItemsPanel>
+                    </ComboBox>
+
+                    <ComboBox x:Name="PEPID"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,163,196,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="238" DropDownOpened="PEPID_DropDownOpened" PreviewLostKeyboardFocus="PEPID_PreviewLostKeyboardFocus" IsEditable="True" TabIndex="6">
+                        <ComboBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                            </ItemsPanelTemplate>
+                        </ComboBox.ItemsPanel>
+                    </ComboBox>
+
+                    <ComboBox x:Name="PEID"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,163,515,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="212" DropDownOpened="PEID_DropDownOpened" PreviewLostKeyboardFocus="PEID_PreviewLostKeyboardFocus" IsEditable="True" TabIndex="5">
+                        <ComboBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                            </ItemsPanelTemplate>
+                        </ComboBox.ItemsPanel>
+                    </ComboBox>
+
+                    <Label Content="نحوه پرداخت :" Visibility="{Binding ElementName=MODAT_PPID,Path=Visibility}" Margin="0,165,731,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="24" VerticalAlignment="Top"/>
+                    <Label Content="اعلامیه قیمت :" Visibility="{Binding ElementName=PEPID,Path=Visibility}" PreviewMouseDoubleClick="Label_PreviewMouseDoubleClick" Margin="0,165,122,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="24" VerticalAlignment="Top"/>
+                    <Label Content="اعلامیه تخفیف :" Visibility="{Binding ElementName=PEID,Path=Visibility}" PreviewMouseDoubleClick="Label_PreviewMouseDoubleClick_1"  Margin="0,165,439,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="24" VerticalAlignment="Top"/>
 
                     <Label x:Name="LABEL_FNUMCO_" Content="شماره داخلی:" Margin="606,121,0,0" Visibility="Visible"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="62" Height="25" VerticalAlignment="Top"/>
-                    <Button x:Name="BTN_FACTORHA" Content="لیست فاکتور ها" Margin="123,157,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="118" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_FACTORHA_Click"/>
+                    <Button x:Name="BTN_FACTORHA" Content="لیست فاکتور ها" Margin="7,120,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="9" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="106" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_FACTORHA_Click"/>
                     <Button x:Name="Command108" Content="چاپ فاکتور 1" Margin="107,8,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="92" Foreground="#DDFFFFFF" FontWeight="Bold" Click="Command108_Click" IsEnabled="False"/>
                     <TextBox x:Name="FNUMCO" Height="26" Margin="514,120,0,0" IsReadOnly="True"   Style="{StaticResource FuzzyOut}" Padding="3"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Left" Width="90" Tag="RD" IsTabStop="False" />
                     <Label Content="مدت:" Margin="478,120,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="30" Height="25" VerticalAlignment="Top"/>

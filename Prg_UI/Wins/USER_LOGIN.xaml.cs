@@ -386,7 +386,7 @@ namespace Prg_UI.Wins
 
             //new WIN_CHREC_HES().Show();
             //new HEAD_LST_ENTEGHAL_WIN().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALAH_ENTER, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_BRFR, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
             //new WIN_OPTIONS().Show();

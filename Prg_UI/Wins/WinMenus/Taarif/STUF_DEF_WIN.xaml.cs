@@ -13,6 +13,7 @@ using Prg_UI.Functions.Jostejoo;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Prg_UI.Wins.WinMenus.ANBAR;
+using Prg_UI.Wins.WinMenus.Taarif;
 using Prg_UI.Wins.WinOther;
 using Syncfusion.Data.Extensions;
 using Syncfusion.Windows.Controls.PivotGrid;
@@ -3768,6 +3769,16 @@ namespace Wins.WinMenus.Taarif
                 {
                     REWARDS_WAS_ROW_ITEM = ((RewardRules)INVOICE_REWARDS_SUB.SelectedItem).Clone() as RewardRules;
                 }
+            }
+        }
+
+        private void Label_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (PGID.SelectedValue != null && !string.IsNullOrEmpty(CODE.Text))
+            {
+                int pgid = Convert.ToInt32(PGID.SelectedValue);
+                // Note: Discount Declarations are fetched by Product Code (Exceptions) as they don't support Price Groups directly in the database.
+                new WIN_SHOW_IN_DECLARATIONS(pgid, CODE.Text).ShowDialog();
             }
         }
     }

@@ -1125,9 +1125,20 @@ namespace Functions
                 //Mojtaba{
                 case WinNameType.CRMMAIN: /* مدیریت ارتباط با مشتری CRM */ CL_LMethods.OpenWindow(OWNERWIN, new CRMMAIN(), isModalDialog: false, allowMultipleInstances: false); break;
 
-                case WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_TAKHFIF: /* تعریف اعلامیه تخفیف */ CL_LMethods.OpenWindow(OWNERWIN, new PRICE_ELAMIETF_FORM(), isModalDialog: false, allowMultipleInstances: false); break;
+                case WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_TAKHFIF: /* تعریف اعلامیه تخفیف */
+                    CL_LMethods.OpenWindow(OWNERWIN, new PRICE_ELAMIETF_FORM(
+                        _PARAMETERS_.Length > 0 ? (int?)_PARAMETERS_[0] : null,
+                        _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])
+                        )
+                        , isModalDialog: false, allowMultipleInstances: false); break;
 
-                case WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT: /* تعریف اعلامیه قیمت */ CL_LMethods.OpenWindow(OWNERWIN, new PRICE_ELAMIE_FORM(), isModalDialog: false, allowMultipleInstances: false); break;
+                case WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT: /* تعریف اعلامیه قیمت */
+                    CL_LMethods.OpenWindow(OWNERWIN,
+                        new PRICE_ELAMIE_FORM(
+                            _PARAMETERS_.Length > 0 ? (int?)_PARAMETERS_[0] : null,
+                            _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])
+                            )
+                        , isModalDialog: false, allowMultipleInstances: false); break;
                 //Mojtaba}
 
                 case WinNameType.F_MENU_CHEK_CHKB: /* لیست چکهای برگشتی دریافتی */ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_CHEK("chkb", "لیست چکهای برگشتی دریافتی"), isModalDialog: false, allowMultipleInstances: false); break;

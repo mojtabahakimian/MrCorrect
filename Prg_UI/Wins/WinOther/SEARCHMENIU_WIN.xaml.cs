@@ -448,6 +448,7 @@ namespace Wins.WinOther
             var menuItem = LISTBOX_MENU.SelectedItem as MenuItemModel;
             if (menuItem != null)
             {
+                this.Close();
                 CL_MenuManager.OpenWinMenu(menuItem.WIN_NAME, this, menuItem.TheParam ?? default);
             }
         }
