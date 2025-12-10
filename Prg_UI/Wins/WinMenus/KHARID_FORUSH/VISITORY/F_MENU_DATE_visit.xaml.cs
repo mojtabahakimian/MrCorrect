@@ -128,7 +128,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             {
                 string Formname = "VISITDLV";
 
-                if (Formname == "VISITDLV") //"VISITDLV" //گزارش عملکرد ویزیتور ها
+                if (OpenArgs == "VISITDLV") //"VISITDLV" //گزارش عملکرد ویزیتور ها
                 {
                     // 2. Run Security:
                     bool HasAccess = CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, WINDOW_ID, this.GetType().Name);
