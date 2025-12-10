@@ -7,7 +7,6 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
-using Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT;
 using Syncfusion.Data;
 using Syncfusion.Data.Extensions;
 using Syncfusion.UI.Xaml.BulletGraph;
@@ -16,10 +15,12 @@ using Syncfusion.UI.Xaml.ScrollAxis;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Windows;
@@ -28,11 +29,172 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using Wins.WinMenus.HESABDARI.GOZARESHAT;
 using static Prg_UI.Functions.CL_LMethods;
 
-namespace Wins.WinMenus.HESABDARI.GOZARESHAT
+namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
 {
-    public partial class TARAZ_4 : Window
+    public class TARAZ_MAH_MODEL : INotifyPropertyChanged
+    {
+        // Implementation of the INotifyPropertyChanged interface
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Raises the PropertyChanged event for a given property name.
+        /// The [CallerMemberName] attribute automatically passes the property name, reducing errors.
+        /// </summary>
+        /// <param name="propertyName">The name of the property that changed.</param>
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        // Backing fields for properties
+        private long _NUMBER;
+        private string _NAME;
+        private int _MON;
+        private long? _HES_M;
+        private long? _HES_T;
+        private string _TAFZ;
+        private double _SumOfBED;
+        private double _SumOfBES;
+        private double _BED;
+        private double _BES;
+
+        // --- Core Properties (Mandatory for DataGrid) ---
+        public long NUMBER
+        {
+            get => _NUMBER;
+            set
+            {
+                if (_NUMBER != value)
+                {
+                    _NUMBER = value;
+                    OnPropertyChanged();
+                }
+            }
+        } // HES_K (Kol Number)
+
+        public string NAME
+        {
+            get => _NAME;
+            set
+            {
+                if (_NAME != value)
+                {
+                    _NAME = value;
+                    OnPropertyChanged();
+                }
+            }
+        } // Account Name
+
+        public int MON
+        {
+            get => _MON;
+            set
+            {
+                if (_MON != value)
+                {
+                    _MON = value;
+                    OnPropertyChanged();
+                }
+            }
+        } // Month (1-12)
+
+        // --- Detailed fields for Child window ---
+        public long? HES_M
+        {
+            get => _HES_M;
+            set
+            {
+                if (_HES_M != value)
+                {
+                    _HES_M = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public long? HES_T
+        {
+            get => _HES_T;
+            set
+            {
+                if (_HES_T != value)
+                {
+                    _HES_T = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string TAFZ
+        {
+            get => _TAFZ;
+            set
+            {
+                if (_TAFZ != value)
+                {
+                    _TAFZ = value;
+                    OnPropertyChanged();
+                }
+            }
+        } // Detail Name
+
+        // --- Amounts ---
+        public double SumOfBED
+        {
+            get => _SumOfBED;
+            set
+            {
+                if (_SumOfBED != value)
+                {
+                    _SumOfBED = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public double SumOfBES
+        {
+            get => _SumOfBES;
+            set
+            {
+                if (_SumOfBES != value)
+                {
+                    _SumOfBES = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public double BED
+        {
+            get => _BED;
+            set
+            {
+                if (_BED != value)
+                {
+                    _BED = value;
+                    OnPropertyChanged();
+                }
+            }
+        } // Balance Debit
+
+        public double BES
+        {
+            get => _BES;
+            set
+            {
+                if (_BES != value)
+                {
+                    _BES = value;
+                    OnPropertyChanged();
+                }
+            }
+        } // Balance Credit
+    }
+    public partial class TARAZ_4_MAH : Window
     {
         #region Header Window Begin
         //Header Window Begin
@@ -76,15 +238,11 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         //Header Window End;
         #endregion
 
-        public TARAZ_4(string _DT1_, string _DT2_, bool _BEDBESKOL_ = false)
+        public TARAZ_4_MAH()
         {
             InitializeComponent();
 
             this.DataContext = this;
-
-            DT1 = _DT1_;
-            DT2 = _DT2_;
-            BEDBESKOL = _BEDBESKOL_;
 
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
             GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
@@ -95,7 +253,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         UniversControl universControl = new UniversControl();
         //universControl.PopNotifyShowUp("اطلاعات با موفقیت ذخیره شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
 
-        public ObservableCollection<TARAZ_4_MODEL> TARAZ_DATA { get; set; } = new ObservableCollection<TARAZ_4_MODEL>();
+        public ObservableCollection<TARAZ_MAH_MODEL> TARAZ_DATA { get; set; } = new ObservableCollection<TARAZ_MAH_MODEL>();
 
         public bool NowIsReady { get; private set; }
         public double? NUMBER_TO_OPEN { get; set; }
@@ -190,87 +348,79 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            string callername = (this.GetType().Name);
-            string Formname = "TARAZ4";
-
-            if (BEDBESKOL) //لیست بدهکاران و بستانکاران محدود شده در تراز چهار ستونی کل
-            {
-                LABEL_HEADER.Content = "ليست حسابهای كل محدود شده";
-                callername = (this.GetType().Name + LABEL_HEADER.Content.ToString());
-                Formname = "BEDBESM";
-            }
-            #region SecuritCheck
-            try
-            {
-                var helper = new WindowInteropHelper(this); helper.EnsureHandle(); // Critical: Ensures handle exists before access
-                bool HasAccess = CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
-                if (!HasAccess)
-                {
-                    this?.Close(); return;
-                }
-            }
-            catch { try { this.Close(); } catch { } }
-            if (!BEDBESKOL)
-            {
-                if (!this.IsLoaded) { this.Close(); return; }
-                //اگر بدهکاران و بستانکاران محدود نبوده و تراز بوده و دسترسی هم نداشته و به هر دلیلی بسته نشده ببندش
-            }
-            #endregion         
+            CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
             LoadData();
         }
 
-        private void DateNavigator_DateChanged(object sender, string e)
-        {
-            DT1 = e.ToRawTarikh();
-            DT2 = e.ToRawTarikh();
-            LoadData();
-        }
         private void LoadData()
         {
             Process Prc = ProcLoader.Start();
 
-            double SNDNUM1 = 0; // Assuming these are float values.
-            double SNDNUM2 = 929292929;
-            var parameters = new
-            {
-                Forms___FMENU_TARAZ_4___DT1 = Convert.ToInt64(DT1),
-                Forms___FMENU_TARAZ_4___DT2 = Convert.ToInt64(DT2),
-                Forms___FMENU_TARAZ_4___SNDNUM1 = SNDNUM1,
-                Forms___FMENU_TARAZ_4___SNDNUM2 = SNDNUM2
-            };
+            string sql = @"
+                    SELECT 
+                        T.NUMBER,
+                        dbo.Umonth(H.DATE_S) AS MON,
+                        T.NAME,
+                        -- Calculate Balance Logic similar to VBA IIF
+                        CASE 
+                            WHEN SUM(D.BED) - SUM(D.BES) > 0 THEN SUM(D.BED) - SUM(D.BES) 
+                            ELSE 0 
+                        END AS bed,
+                        CASE 
+                            WHEN SUM(D.BED) - SUM(D.BES) < 0 THEN (SUM(D.BED) - SUM(D.BES)) * -1 
+                            ELSE 0 
+                        END AS bes
+                    FROM dbo.DEED_HED H
+                    INNER JOIN dbo.DEED_DTL D ON H.N_S = D.N_S
+                    INNER JOIN dbo.TOTA_HES T ON D.HES_K = T.NUMBER
+                    GROUP BY T.NUMBER, T.NAME, dbo.Umonth(H.DATE_S)
+                    ORDER BY T.NUMBER, dbo.Umonth(H.DATE_S)";
+
+            var result = dbms.DoGetDataSQL<TARAZ_MAH_MODEL>(sql);
 
             TARAZ_DATA?.Clear();
-            List<TARAZ_4_MODEL> MasterHead = new List<TARAZ_4_MODEL>(); //EXEC dbo.TARAZ_4 '10000101', '99991230', '0', '929292929'
-            if (BEDBESKOL) //ليست حسابهاي كل محدود شده
+            foreach (var item in result)
             {
-                MasterHead = dbms.DoGetDataSQL<TARAZ_4_MODEL>("SELECT  HES_K AS NUMBER , SUM(SumOfBED) AS SumOfBED, SUM(SumOfBES) AS SumOfBES, dbo.TOTA_HES.NAME, dbo.UIIF(SUM(BEDBES), '>', 0, SUM(BEDBES), 0) AS BED,dbo.UIIF(SUM(BEDBES), '>', 0, 0, SUM(BEDBES) * - 1) AS BES FROM dbo.BEDBESMAH" + Baseknow.USERCOD + " INNER JOIN dbo.TOTA_HES ON HES_K = dbo.TOTA_HES.NUMBER GROUP BY HES_K, dbo.TOTA_HES.NAME ORDER BY HES_K").ToList();
-            }
-            else
-            {
-                MasterHead = dbms.DoGetStoreProcedureSQL<TARAZ_4_MODEL>("dbo.TARAZ_4", parameters).ToList(); //EXEC dbo.TARAZ_4 '10000101', '99991230', '0', '929292929'
-            }
-
-            foreach (var item in MasterHead)
-            {
-                //Fix:
-                item.SumOfBES = Math.Abs(Math.Truncate(item.SumOfBES ?? 0));
-                item.SumOfBED = Math.Abs(Math.Truncate(item.SumOfBED ?? 0));
-                item.bed = Math.Abs(Math.Truncate(item.bed ?? 0));
-                item.bes = Math.Abs(Math.Truncate(item.bes ?? 0));
-
                 TARAZ_DATA?.Add(item);
             }
 
-            GenerateAutomaticSummary(SYNCFUSION_DG);
+            // Add Summary Row (Total)
+            AddSummaryRow();
+
+            //GenerateAutomaticSummary(SYNCFUSION_DG);
 
             ProcLoader.Stop(Prc);
         }
-        public string DT1 { get; set; }
-        public string DT2 { get; set; }
+    
+        private void AddSummaryRow()
+        {
+            if (SYNCFUSION_DG.TableSummaryRows.Count > 0) return;
+
+            var summaryRow = new GridTableSummaryRow();
+            summaryRow.ShowSummaryInRow = false;
+            summaryRow.Position = TableSummaryRowPosition.Bottom;
+
+            summaryRow.SummaryColumns.Add(new GridSummaryColumn
+            {
+                Name = "bedSum",
+                MappingName = "bed",
+                SummaryType = Syncfusion.Data.SummaryType.DoubleAggregate,
+                Format = "{Sum:N0}"
+            });
+            summaryRow.SummaryColumns.Add(new GridSummaryColumn
+            {
+                Name = "besSum",
+                MappingName = "bes",
+                SummaryType = Syncfusion.Data.SummaryType.DoubleAggregate,
+                Format = "{Sum:N0}"
+            });
+
+            SYNCFUSION_DG.TableSummaryRows.Add(summaryRow);
+        }
 
         #region _SfDataGrid_
-        private readonly FilterService<TARAZ_4_MODEL> filterService = new FilterService<TARAZ_4_MODEL>();
+        private readonly FilterService<TARAZ_MAH_MODEL> filterService = new FilterService<TARAZ_MAH_MODEL>();
         public ObservableCollection<string> ActiveFilters { get; set; } = new ObservableCollection<string>();
 
 
@@ -562,7 +712,7 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
         private void ApplyCumulativeFilter() // Method to apply all cumulative filters to the data grid
         {
             // Set the filter for the data grid view using the filter service
-            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as TARAZ_4_MODEL);
+            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as TARAZ_MAH_MODEL);
             // Refresh the filter to update the view
             SYNCFUSION_DG.View.RefreshFilter();
         }
@@ -684,12 +834,12 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
             var summaryColumns = new ObservableCollection<ISummaryColumn>();
 
-            var dataType = typeof(TARAZ_4_MODEL);
+            var dataType = typeof(TARAZ_MAH_MODEL);
 
             //foreach (var column in SYNCFUSION_DG.Columns)
             foreach (var column in _DG_.Columns.OfType<GridTextColumn>())
             {
-                var propertyInfo = typeof(TARAZ_4_MODEL).GetProperty(column.MappingName);
+                var propertyInfo = typeof(TARAZ_MAH_MODEL).GetProperty(column.MappingName);
                 if (propertyInfo == null)
                     continue;
 
@@ -757,11 +907,11 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
 
         private void BTN_OPEN_SUB_Click(object sender, RoutedEventArgs e)
         {
-            var CurrentRow = SYNCFUSION_DG.SelectedItem as TARAZ_4_MODEL;
+            var CurrentRow = SYNCFUSION_DG.SelectedItem as TARAZ_MAH_MODEL;
 
             if (CurrentRow != null && CurrentRow?.NUMBER != null)
             {
-                new TARAZ_4_MOIN(DT1, DT2, CurrentRow?.NUMBER.ToString(), BEDBESKOL).Show();
+                new TARAZ_4_MAH_TAF(CurrentRow?.NUMBER.ToString()).Show();
             }
         }
         private void DATERNAV(object sender, RoutedEventArgs e)
@@ -771,29 +921,8 @@ namespace Wins.WinMenus.HESABDARI.GOZARESHAT
                 dateNavigator.Visibility = Visibility.Visible;
                 //dateNavigator.CurrentDate = DT1.ToString().Insert(4, "/").Insert(7, "/");
                 dateNavigator.CurrentDate = "99991230"; //Tarikh.FullCurrentDate;
-                dateNavigator.DateChanged += DateNavigator_DateChanged;
-            }
-        }
-
-        private void MAHANEH(object sender, RoutedEventArgs e)
-        {
-            // Check if the window is already open
-            var existingWindow = Application.Current.Windows.OfType<TARAZ_4_MAH>().FirstOrDefault();
-
-            if (existingWindow != null)
-            {
-                // If open, restore (if minimized) and bring to front
-                if (existingWindow.WindowState == WindowState.Minimized)
-                {
-                    existingWindow.WindowState = WindowState.Normal;
-                }
-                existingWindow.Activate();
-            }
-            else
-            {
-                // If not open, create and show new instance
-                new TARAZ_4_MAH().Show();
             }
         }
     }
+
 }
