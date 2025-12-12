@@ -1008,7 +1008,26 @@ namespace Wins.WinMenus.KHARID_FORUSH
             //DATE_N_AfterUpdate
             if (!IsNumberSelectedNow) //Is Not IsNumberSelectedNow
             {
-                var HEADER = dbms.DoGetDataSQL<HEAD_LST>("SELECT * FROM HEAD_LST WHERE NUMBER = " + NUMBER.Text + $" AND TAG = {FTAG}").FirstOrDefault();
+                if (string.IsNullOrWhiteSpace(NUMBER.Text))
+                {
+                    return;
+                }
+
+                if (!double.TryParse(NUMBER.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out var numberValue))
+                {
+                    return;
+                }
+
+                var HEADER = dbms.DoGetDataSQL<HEAD_LST>(
+                    "SELECT * FROM HEAD_LST WHERE NUMBER = @Number AND TAG = @Tag",
+                    new { Number = numberValue, Tag = FTAG })
+                    .FirstOrDefault();
+
+                if (HEADER == null)
+                {
+                    new Msgwin(false, "شماره مورد نظر یافت نشد !").Show();
+                    return;
+                }
 
                 //فاکتور : NUMBER1
                 //رسید : NUMBER
