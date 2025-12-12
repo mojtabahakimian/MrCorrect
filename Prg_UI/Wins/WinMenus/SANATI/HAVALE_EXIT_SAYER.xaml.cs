@@ -4,6 +4,7 @@ using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
@@ -12,43 +13,44 @@ using Prg_UI.Functions.Jostejoo;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Prg_UI.Wins.WinOther;
+using Rpts;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Components;
+using Stimulsoft.Report.Dictionary;
+using Syncfusion.Data.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
-using Wins.WinMenus.ANBAR;
-using Syncfusion.Data.Extensions;
-using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
-using Rpts;
-using Stimulsoft.Report.Components;
-using Stimulsoft.Report.Dictionary;
-using Stimulsoft.Report;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using System.Threading;
 using System.Windows.Threading;
-using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
-using System.Windows.Data;
-using System.ComponentModel;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
-using Prg_Proccessy.Generaly;
+using Wins.WinMenus.ANBAR;
+using Wins.WinOther;
+using static Interfaces.INavigator;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
-using System.Windows.Controls.Primitives;
+using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
+using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace Prg_UI.Wins.WinMenus.SANATI
 {
     /// <summary>
     /// Interaction logic for HAVALE_EXIT_SAYER.xaml
     /// </summary>
-    public partial class HAVALE_EXIT_SAYER : Window
+    public partial class HAVALE_EXIT_SAYER : Window, ISearchableWindow
     {
 
         #region Header Window Begin
@@ -195,9 +197,8 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
         public ObservableCollection<INVO_LST_FACTOR22> INVO_LST_FACTOR22_DATA { get; } = new ObservableCollection<INVO_LST_FACTOR22>();
 
-
         /// <summary>
-        /// TAG = 10
+        /// 11 TAG
         /// </summary>
         public byte HTAG { get; } = 11;
 
@@ -613,6 +614,24 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 }
             }
 
+            if (!INVO_LST_SUB.IsKeyboardFocusWithin && !INVO_LST_SUB.IsFocused)
+            {
+                if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+                    var searchWindow = new EnhancedSearchWindow(this);
+                    searchWindow.Owner = this;
+                    searchWindow.ShowDialog();
+                }
+            }
+            else
+            {
+                if (e.Key is Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    DataGridExtension.HandleKeyPress(sender, e, INVO_LST_SUB);
+                }
+            }
+
 
             // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
             var nonDataKeys = new[]
@@ -642,6 +661,48 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 }
             }
         }
+
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
+
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            if (selectedItem is HEAD_LST item)
+            {
+                var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.NUMBER.Equals(Convert.ToDouble(item.NUMBER)));
+
+                if (itemfound != null)
+                {
+                    _navigationManager.IsNewRecord = false;
+
+                    int idx = _navigationManager.RecordsData.IndexOf(itemfound);
+
+                    if (idx < 0)
+                    {
+                        new Msgwin(false, "یافت نشد: مورد انتخاب شده در لیست اصلی وجود ندارد").Show();
+                        return;
+                    }
+
+                    _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+                }
+                else
+                {
+                    new Msgwin(false, "رکورد مورد نظر در لیست بارگذاری شده یافت نشد.").Show();
+                }
+            }
+        }
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+                new SearchableProperty { DisplayName = "شماره برگه", PropertyPath = "NUMBER", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "تاریخ", PropertyPath = "DATE_N", PropertyType = typeof(long) },
+                new SearchableProperty { DisplayName = "کد مسئول شیفت", PropertyPath = "CUST_NO", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "کاربر", PropertyPath = "USER_NAME", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "ملاحظات", PropertyPath = "MOLAH", PropertyType = typeof(string) },
+            };
+        }
+        #endregion
 
         private void GetFocusOnDefaultCell()
         {

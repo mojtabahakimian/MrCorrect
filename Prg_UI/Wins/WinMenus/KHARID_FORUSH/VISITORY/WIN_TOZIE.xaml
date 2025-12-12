@@ -100,7 +100,6 @@
                 CanUserDeleteRows="False"
                 SelectionUnit="FullRow" 
                 Margin="4,176,4,65" BorderThickness="1" CellEditEnding="DG_SUB_CellEditEnding" PreviewMouseLeftButtonUp="DG_SUB_PreviewMouseLeftButtonUp" SelectionChanged="DG_SUB_SelectionChanged" RowEditEnding="DG_SUB_RowEditEnding" PreviewKeyDown="DG_SUB_PreviewKeyDown" PreparingCellForEdit="DG_SUB_PreparingCellForEdit" BeginningEdit="DG_SUB_BeginningEdit"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
-
                 <!--<DataGrid.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>

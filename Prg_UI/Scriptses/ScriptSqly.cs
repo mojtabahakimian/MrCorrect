@@ -675,6 +675,10 @@ namespace Prg_UI.Scriptses
                     }
                 }
 
+                if (isCustomCall)
+                {
+                    try { db.Execute($"DROP PROCEDURE dbo.sp_UpdateInvoicePricingAndDiscount"); } catch { }
+                }
 
                 try { db.Execute($@"CREATE PROCEDURE [dbo].[sp_UpdateInvoicePricingAndDiscount]
 									     @numb INT,
@@ -706,8 +710,8 @@ namespace Prg_UI.Scriptses
 									     DECLARE @modat_from_price_payno INT;
 									     DECLARE @current_mas_in_head_lst FLOAT;
 									 
-									     SET @effective_tgg = CASE WHEN @tgg = 13 THEN 2 ELSE @tgg END;
-									 
+									 	 SET @effective_tgg = CASE WHEN @tgg = 13 THEN 2 WHEN @tgg = 25 THEN 24 ELSE @tgg END;
+
 									     -- بخش جدید: محاسبه و به‌روزرسانی MAS در HEAD_LST
 									     IF @MODAT_PPID_In IS NOT NULL AND @MODAT_PPID_In <> 0
 									     BEGIN
@@ -2343,6 +2347,8 @@ END;";
                     catch { }
                 }
 
+                //تعریف پورسانت ویزیتور
+                try { db.Execute($@"ALTER TABLE dbo.VISITORS_PORSANT_KALA ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
             }
         }
 

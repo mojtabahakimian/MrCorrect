@@ -208,6 +208,15 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     NUMBER_HAV_COLUMN.HeaderText = "شماره رسید انبار ها";
                     break;
 
+                case 11:
+                    WINTILENAME.Content = "برگه خروج سایر مواد از انبار";
+                    NUMBER_HAV_COLUMN.HeaderText = "شماره";
+                    CUST_HESAB_COLUMN.HeaderText = "حساب مسئول شیفت";
+                    CUST_NAME_COLUMN.HeaderText = "نام مسئول شیفت";
+                    TARIKH_FAC_COLUMN.HeaderText = "تاریخ";
+                    MODAT_COLUMN.IsHidden = true;
+                    break;
+
                 case 10:
                     WINTILENAME.Content = "برگه های خروج مواد اولیه";
                     NUMBER_HAV_COLUMN.HeaderText = "شماره حواله انبار";
@@ -326,6 +335,13 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         if (currentRow?.NUMBER != null)
                         {
                             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALAH_EXIT, this, (double)currentRow.NUMBER);
+                        }
+                        break;
+
+                    case 11: //برگه خروج مواد اولیه
+                        if (currentRow?.NUMBER != null)
+                        {
+                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALE_EXIT_SAYER, this, (double)currentRow.NUMBER);
                         }
                         break;
 
@@ -699,7 +715,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 element.ContextMenu = this.Resources["DataGridContextMenu"] as ContextMenu;
             }
         }
-  
+
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {

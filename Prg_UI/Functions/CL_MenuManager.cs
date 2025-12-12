@@ -948,7 +948,11 @@ namespace Functions
             /// <summary>
             /// به حساب گذاشتن چک
             /// </summary>
-            WIN_CHREC_HES_BEHESABCHECK
+            WIN_CHREC_HES_BEHESABCHECK,
+            /// <summary>
+            /// تعریف پورسانت ویزیتور ها
+            /// </summary>
+            VISITORS_PORSANT_HEAD
         }
         #endregion
 
@@ -968,6 +972,7 @@ namespace Functions
             {
                 //Mojtaba{
 
+                case WinNameType.VISITORS_PORSANT_HEAD: /* تعریف پورسانت ویزیتور ها */ CL_LMethods.OpenWindow(OWNERWIN, new VISITORS_PORSANT_HEAD(), isModalDialog: false, allowMultipleInstances: false); break;
                 case WinNameType.WIN_CHREC_HES_BEHESABCHECK: /* به حساب گذاشتن چک */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_CHREC_HES(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.CONTROL_ASNAD_DAFATERCHECK_FORM11: /* کنترل اسناد و دفاتر چک */
@@ -1125,9 +1130,20 @@ namespace Functions
                 //Mojtaba{
                 case WinNameType.CRMMAIN: /* مدیریت ارتباط با مشتری CRM */ CL_LMethods.OpenWindow(OWNERWIN, new CRMMAIN(), isModalDialog: false, allowMultipleInstances: false); break;
 
-                case WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_TAKHFIF: /* تعریف اعلامیه تخفیف */ CL_LMethods.OpenWindow(OWNERWIN, new PRICE_ELAMIETF_FORM(), isModalDialog: false, allowMultipleInstances: false); break;
+                case WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_TAKHFIF: /* تعریف اعلامیه تخفیف */
+                    CL_LMethods.OpenWindow(OWNERWIN, new PRICE_ELAMIETF_FORM(
+                        _PARAMETERS_.Length > 0 ? (int?)_PARAMETERS_[0] : null,
+                        _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])
+                        )
+                        , isModalDialog: false, allowMultipleInstances: false); break;
 
-                case WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT: /* تعریف اعلامیه قیمت */ CL_LMethods.OpenWindow(OWNERWIN, new PRICE_ELAMIE_FORM(), isModalDialog: false, allowMultipleInstances: false); break;
+                case WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT: /* تعریف اعلامیه قیمت */
+                    CL_LMethods.OpenWindow(OWNERWIN,
+                        new PRICE_ELAMIE_FORM(
+                            _PARAMETERS_.Length > 0 ? (int?)_PARAMETERS_[0] : null,
+                            _PARAMETERS_.Length > 1 && Convert.ToBoolean(_PARAMETERS_[1])
+                            )
+                        , isModalDialog: false, allowMultipleInstances: false); break;
                 //Mojtaba}
 
                 case WinNameType.F_MENU_CHEK_CHKB: /* لیست چکهای برگشتی دریافتی */ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_CHEK("chkb", "لیست چکهای برگشتی دریافتی"), isModalDialog: false, allowMultipleInstances: false); break;
@@ -2043,7 +2059,7 @@ namespace Functions
                     break;
 
                 case WinNameType.HAVALE_EXIT_SAYER: //صدور برگه خروج سایر مواد از انبار
-                    CL_LMethods.OpenWindow(OWNERWIN, new HAVALE_EXIT_SAYER(), default, false);
+                    CL_LMethods.OpenWindow(OWNERWIN, new HAVALE_EXIT_SAYER((double?)_PARAMETERS_.FirstOrDefault()), default, false);
                     break;
 
 

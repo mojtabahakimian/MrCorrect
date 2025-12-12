@@ -17,7 +17,7 @@
         WindowStyle="None"
         WindowState="Maximized"
         WindowStartupLocation="CenterOwner"
-        Title="اتوماسیون اداری" Height="760" Width="1245" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" Closed="Window_Closed" PreviewKeyDown="Window_PreviewKeyDown" >
+        Title="اتوماسیون اداری" Height="760" Width="1245" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" Closing="Window_Closing" Closed="Window_Closed" PreviewKeyDown="Window_PreviewKeyDown" >
     <!--xmlns:Cnv="clr-namespace:Proccessy.Models.ConvertorsVals;assembly=Proccessy"-->
     <!--<Window.Resources>
         <Cnv:SALNAME_CONRETOR x:Key="SAL_NAMEConverter" />
@@ -330,7 +330,7 @@
                    DisplayMemberPath="SAL_NAME"
                    SelectedValuePath="USERCO"
                    TextBoxBase.TextChanged="PERSONEL_TextChanged"
-                   PreviewLostKeyboardFocus="PERSONEL_PreviewLostKeyboardFocus">
+                   PreviewLostKeyboardFocus="PERSONEL_PreviewLostKeyboardFocus" SelectionChanged="PERSONEL_SelectionChanged">
                 <ComboBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>

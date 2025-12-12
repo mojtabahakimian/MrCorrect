@@ -48,7 +48,22 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
             this.DataContext = this;
         }
+        public PRICE_ELAMIE_FORM(int? number_to_open = null, bool _isAutomasion_ = false)
+        {
+            InitializeComponent();
 
+            this.DataContext = this;
+
+            if (number_to_open != null)
+            {
+                PEPID_TO_OPEN = (int?)number_to_open;
+                PEPID.Text = PEPID_TO_OPEN.ToString();
+                IsOpenedFromAutomation = _isAutomasion_;
+            }
+        }
+        private int? PEPID_TO_OPEN;
+
+        public bool IsOpenedFromAutomation { get; } = false;
         #region Header Window Begin
         //Header Window Begin
         private void Btn_Close_Click(object sender, RoutedEventArgs e)
@@ -116,9 +131,9 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         {
             get
             {
-                return _newrecord;
+                return _navigationManager.IsNewRecord;
             }
-            set { _newrecord = value; }
+
         }
 
         public long? CURRENT_ROW_INDEX { get; set; } = 0;
@@ -368,12 +383,19 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
             FILL_ALL_COMBOBOXES();
 
+            string WhereCondition = "";
+            if (IsOpenedFromAutomation) //اگر از اتوماسیون اداری باز شده فقط همین شماره رو باز کنه
+            {
+                WhereCondition = $" WHERE PEPID = {PEPID.Text} ";
+            }
+
             _navigationManager = new NavigationManager<PRICE_ELAMIE>(
                 dbms,
                 x => x?.PEPID?.ToString(),
-                $"SELECT * FROM PRICE_ELAMIE ORDER BY CRT",
+                $"SELECT * FROM PRICE_ELAMIE {WhereCondition} ORDER BY CRT",
                 x => $"SELECT * FROM PRICE_ELAMIE WHERE PEPID = {x?.PEPID} ",
-                default);
+                Convert.ToDouble(PEPID.Text));
+            //default);
 
             _navigationManager.CurrentRecordChanged += OnCurrentRecordChanged;
             _navigationManager.OnInsertRecord += OnInsertRecord;
@@ -415,7 +437,6 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             {
                 var itemtoadd = dbms.DoGetDataSQL<PRICE_ELAMIE>($"SELECT * FROM PRICE_ELAMIE WHERE PEPID = {PEPID.Text}").FirstOrDefault();
                 record = itemtoadd;
-                NewRecord = false;
                 return true;
             }
             catch (Exception ex)
@@ -440,7 +461,6 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             }
             else
             {
-                NewRecord = false; //Currrent Record is not new
                 Command106.IsEnabled = true;
 
                 PEPID.Text = HEADER_FAC.PEPID.ToString();
@@ -579,7 +599,6 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         }
         private void RefreshAfterUpdate()
         {
-            NewRecord = false;
             var CURRENT_HEADER = dbms.DoGetDataSQL<PRICE_ELAMIE>($"SELECT * FROM PRICE_ELAMIE WHERE PEPID = {PEPID.Text}").FirstOrDefault();
             _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
         }
@@ -631,9 +650,8 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         }
         private void ClearFreshAll()
         {
-            NewRecord = true;
+            PEPID.Text = "0";
 
-            PEPID.Text = null;
             PEPNAME.Text = null;
             USERNAME.Text = Baseknow.UUSER;
             PEPDATE.Text = Tarikh.FullCurrentDate;
@@ -677,14 +695,18 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         }
         private void SecurityAllCheck()
         {
-            //CL_HESABDARI.SETSECURITY(this.GetType().Name, "HENTER", new WindowInteropHelper(this).Handle, this.GetType().Name);
-            //CL_HESABDARI.SETSECURITYSUB(DG_SUB, "HENTER");
-
-            //if (!this.IsLoaded)
-            //{
-            //    this.Close();
-            //    return;
-            //}
+            #region SecuritCheck
+            try
+            {
+                string Formname = "PRELMPR";
+                var helper = new WindowInteropHelper(this);
+                helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                // 3. Final State Check:
+                if (!this.IsLoaded) { this.Close(); return; }
+            }
+            catch { try { this.Close(); } catch { } }
+            #endregion
         }
         private bool HeaderIsValid(bool _DisplayErrors = true)
         {
@@ -1017,7 +1039,8 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
         private bool DoCmdHeaderSave(bool DisplayMsg = true)
         {
-            int _PEPID_ = Convert.ToInt32(string.IsNullOrEmpty(PEPID.Text) ? "0" : PEPID.Text);
+            int _PEPID_ = _PEPID_ = Convert.ToInt32((string.IsNullOrWhiteSpace(PEPID.Text) ? "0" : PEPID.Text));
+
             if (_navigationManager.IsNewRecord)
             {
                 _PEPID_ = (int)CL_HESABDARI.GetLIDD("PRICE_ELAMIE", "PEPID");

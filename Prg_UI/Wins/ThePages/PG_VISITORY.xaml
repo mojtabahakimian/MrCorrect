@@ -201,7 +201,7 @@
                 </StackPanel>
                 <!-- دومین ستاک پنل -->
                 <StackPanel FlowDirection="RightToLeft" Orientation="Vertical" Margin="10">
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10" PreviewMouseDown="WrapPanel_PreviewMouseDown">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/PoorsantForVisitor.png" CacheOption="OnLoad"/>

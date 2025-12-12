@@ -1,6 +1,27 @@
-﻿using System;
+﻿using Dapper;
+using Functions;
+using MaterialDesignThemes.Wpf;
+using Microsoft.Data.SqlClient;
+using Microsoft.VisualBasic;
+using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.Generaly;
+using Prg_Proccessy.MODELS;
+using Prg_Proccessy.SQLMODELS;
+using Prg_SendInvoice.CNNMANAGER;
+using Prg_UI.CUC;
+using Prg_UI.Functions;
+using Prg_UI.Functions.Jostejoo;
+using Prg_UI.HelperWins;
+using Prg_UI.UiTools;
+using Prg_UI.Wins.WinOther;
+using Rpts;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Components;
+using Stimulsoft.Report.Dictionary;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
@@ -10,38 +31,18 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using Dapper;
-using MaterialDesignThemes.Wpf;
-using Microsoft.Data.SqlClient;
-using Microsoft.VisualBasic;
-using Prg_Proccessy.FUNCTIONS;
-using Prg_Proccessy.MODELS;
-using Prg_Proccessy.SQLMODELS;
-using Prg_SendInvoice.CNNMANAGER;
-using Prg_Proccessy.Generaly;
-using Prg_UI.Functions;
-using Prg_UI.Functions.Jostejoo;
-using Prg_UI.HelperWins;
-using Prg_UI.UiTools;
-using Prg_UI.Wins.WinOther;
-using Stimulsoft.Report;
-using Stimulsoft.Report.Components;
-using Stimulsoft.Report.Dictionary;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
-using static Prg_UI.Functions.CL_LMethods;
-using Wins.WinMenus.KHARID_FORUSH;
-using System.ComponentModel;
-using Functions;
-using static Prg_UI.HelperWins.Msgwin;
-using Rpts;
-using Wins.WinOther;
-using static Interfaces.INavigator;
 using System.Windows.Threading;
 using Wins.WinMenus.ANBAR;
-using System.Windows.Data;
+using Wins.WinMenus.KHARID_FORUSH;
+using Wins.WinOther;
+using static Interfaces.INavigator;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
+using static Prg_UI.Functions.CL_LMethods;
+using static Prg_UI.HelperWins.Msgwin;
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
 {
@@ -225,6 +226,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             InitializeComponent();
             this.DataContext = this;
         }
+
         public bool IsOpenedFromAutomation { get; } = false;
         public ObservableCollection<INVO_LST_FACTOR22> HAVALEH_INVO_DATA { get; set; } = new ObservableCollection<INVO_LST_FACTOR22>();
 
@@ -482,9 +484,9 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 this.SGN3.Visibility = Visibility.Visible;
             }
 
-            PERSONEL.ItemsSource = rst_personel;
-            PERSONEL.DisplayMemberPath = "SAL_NAME";
-            PERSONEL.SelectedValuePath = "IDD";
+            //PERSONEL.ItemsSource = rst_personel;
+            //PERSONEL.DisplayMemberPath = "SAL_NAME";
+            //PERSONEL.SelectedValuePath = "IDD";
 
 
             GetDefaultFocus();
@@ -706,7 +708,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     ShowMissingOrRestrictedMessage();
                     return;
                 }
-            }         
+            }
             else
             {
                 NewRecord = false; //Currrent Record is not new
@@ -766,10 +768,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 SGN2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == QRE_HED?.sgn2usid)?.SAL_NAME;
                 SGN3usid.Text = rst_personel.FirstOrDefault(x => x.IDD == QRE_HED?.sgn3usid)?.SAL_NAME;
 
-                PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
-                PERSONEL.Text = null;
-                PERSONEL.SelectedValue = null; PERSONEL.Items.Refresh();
-                PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+                //PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
+                //PERSONEL.Text = null;
+                //PERSONEL.SelectedValue = null; PERSONEL.Items.Refresh();
+                //PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+                ucPersonel.SelectedValue = null;
 
                 MakeOKFReady();
 
@@ -921,6 +924,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             foreach (var item_person in rst_personel)
                 item_person.SAL_NAME = CL_HESABDARI.DECODEUN(item_person.SAL_NAME);
 
+            ucPersonel.LoadData((int)Baseknow.USERCOD);
+
             //PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
             //PERSONEL.SelectedValue = Baseknow.USERCOD;
             //PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
@@ -948,7 +953,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         private void Form_Current()
         {
             bool ghat;
-            this.PERSONEL.Visibility = Visibility.Visible;
+            //this.PERSONEL.Visibility = Visibility.Visible;
 
             var IsExistingInvoice = CL_LMethods.IsNumeric(NUMBER.Text) && NUMBER.Text != "0";
 
@@ -1162,53 +1167,328 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
         }
 
-        /// <summary>
-        ///  تابعی برای قفل کردن فیلد های سربرگ حواله به جز کلید های چاپ - اصلاح - تایید بارگیری
-        /// </summary>
-        /// <param name="YN"></param>
+        #region OLD_WAY
+        //private bool _suppress_PERSONEL_SelectionChanged;
+        //private bool _suppress_PERSONEL_LostFocus;
+        //private bool _personelSearchDialogIsOpen;
+        //private string _lastPersonelSearchTextDismissed = string.Empty;
+        //// متغیر کنترلی برای جلوگیری از ذخیره تکراری یک انتخاب یکسان
+        //private int? _lastCommittedPersonelId = null;
+        //// 1. منطق اصلی ذخیره‌سازی را به یک متد مستقل منتقل می‌کنیم
+        //private void CommitPersonelReferral()
+        //{
+        //    try
+        //    {
+        //        if (PERSONEL.SelectedValue == null)
+        //            return;
 
+        //        // فقط انتخاب واقعی
+        //        if (!double.TryParse(NUMBER.Text, out double numberValue))
+        //            return;
 
-        private void PERSONEL_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //        // تبدیل مقدار انتخاب شده
+        //        if (!int.TryParse(PERSONEL.SelectedValue.ToString(), out int personelId))
+        //            return;
+
+        //        // جلوگیری از تکرار: اگر همین پرسنل الان ذخیره شده، دوباره ذخیره نکن
+        //        if (_lastCommittedPersonelId == personelId)
+        //            return;
+
+        //        string custNoValue = CUST_NO?.SelectedValue?.ToString();
+        //        if (string.IsNullOrWhiteSpace(custNoValue))
+        //            return;
+
+        //        string rawTarikh = DATE_N?.Text?.ToRawTarikh();
+        //        if (!long.TryParse(rawTarikh, out long tarikhNumeric))
+        //            return;
+
+        //        string tarikhFormatted = FormatPersianTarikhNumeric(tarikhNumeric);
+
+        //        string tafName = CL_HESABDARI.GETTAFNAME(custNoValue) ?? string.Empty;
+        //        string safeTafName = EscapeSingleQuoteForSqlLiteral(tafName);
+
+        //        string description =
+        //            "حواله شماره: " + NUMBER.Text +
+        //            " مورخ " + tarikhFormatted +
+        //            "  به نام: " + safeTafName;
+
+        //        string payload =
+        //            "'" + description + "','" + EscapeSingleQuoteForSqlLiteral(custNoValue) + "'";
+
+        //        // اجرای عملیات دیتابیس
+        //        Meidnum = CL_HESABDARI.PERSONELUpdate(
+        //            2,
+        //            numberValue,
+        //            personelId,
+        //            payload
+        //        );
+
+        //        // ثبت اینکه این ID پردازش شد
+        //        _lastCommittedPersonelId = personelId;
+
+        //        universControl.PopNotifyShow(".ارجاع داده شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // مدیریت خطا در صورت نیاز
+        //        universControl.PopNotifyShow(".خطا در ثبت ارجاع", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+        //    }
+        //}
+        //// 2. این رویداد را در XAML اضافه کنید: DropDownClosed="PERSONEL_DropDownClosed"
+        //// این متد وقتی اجرا می‌شود که کاربر با موس یک آیتم را از لیست انتخاب کند
+        //private void PERSONEL_DropDownClosed(object sender, EventArgs e)
+        //{
+        //    if (PERSONEL.SelectedValue != null)
+        //    {
+        //        CommitPersonelReferral();
+        //    }
+        //}
+        //// 3. این رویداد را در XAML اضافه کنید: PreviewKeyDown="PERSONEL_PreviewKeyDown"
+        //// این متد وقتی اجرا می‌شود که کاربر روی آیتم اینتر بزند
+        //private void PERSONEL_PreviewKeyDown(object sender, KeyEventArgs e)
+        //{
+        //    if (e.Key == Key.Enter)
+        //    {
+        //        if (PERSONEL.SelectedValue != null)
+        //        {
+        //            CommitPersonelReferral();
+        //            // جلوگیری از رفتار پیش‌فرض اینتر اگر نیاز است
+        //            // e.Handled = true; 
+        //        }
+        //    }
+        //}
+        //// 4. رویداد SelectionChanged دیگر نباید عملیات دیتابیس انجام دهد
+        //// فقط برای آپدیت‌های سبک UI (اگر لازم است) نگه داشته می‌شود
+        //private void PERSONEL_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //{
+        //    // اینجا را خالی می‌گذاریم یا فقط منطق‌های سبک UI را قرار می‌دهیم.
+        //    // عملیات دیتابیس (Commit) حذف شد تا هنگام تایپ مزاحم نشود.
+
+        //    // ریست کردن ترکر اگر انتخاب null شد (مثلا کاربر پاک کرد)
+        //    if (PERSONEL.SelectedValue == null)
+        //    {
+        //        _lastCommittedPersonelId = null;
+        //    }
+        //}
+        //private void PERSONEL_LostFocus(object sender, RoutedEventArgs e)
+        //{
+        //    if (_suppress_PERSONEL_LostFocus)
+        //        return;
+
+        //    if (_personelSearchDialogIsOpen)
+        //        return;
+
+        //    if (!PERSONEL.IsEditable)
+        //        return;
+
+        //    // --- تغییر مهم: اگر انتخاب معتبر است، یعنی کاربر تایپ کرده و Tab زده (یا انتخاب قبلی بوده) ---
+        //    // پس باید عملیات ذخیره (Commit) را انجام دهیم و خارج شویم.
+        //    if (PERSONEL.SelectedValue != null)
+        //    {
+        //        CommitPersonelReferral();
+        //        return;
+        //    }
+
+        //    string text = GetComboBoxEditableText(PERSONEL).Trim();
+        //    if (string.IsNullOrWhiteSpace(text))
+        //        return;
+
+        //    if (string.Equals(text, _lastPersonelSearchTextDismissed, StringComparison.Ordinal))
+        //        return;
+
+        //    try
+        //    {
+        //        // مسیر عددی: اگر ID موجود بود
+        //        if (int.TryParse(text, out int id))
+        //        {
+        //            int? rst = dbms
+        //                .DoGetDataSQL<int?>(
+        //                    "select idd from sala_dtl where idd = @Idd",
+        //                    new { Idd = id }
+        //                )
+        //                .FirstOrDefault();
+
+        //            if (rst != null)
+        //            {
+        //                _suppress_PERSONEL_SelectionChanged = true;
+        //                PERSONEL.SelectedValue = rst.Value;
+        //                _suppress_PERSONEL_SelectionChanged = false;
+
+        //                _lastPersonelSearchTextDismissed = string.Empty;
+
+        //                // چون انتخاب با موفقیت انجام شد، همینجا ذخیره کن
+        //                CommitPersonelReferral();
+        //                return;
+        //            }
+        //        }
+
+        //        // مسیر متنی: دیالوگ جستجو
+        //        string filter =
+        //            "sal_name like N'%" + CL_HESABDARI.CODESAL(text) + "%' or " +
+        //            "sal_name like N'%" + CL_HESABDARI.CODESAL(CL_HESABDARI.Fixp(text)) + "%' or " +
+        //            "sal_name like N'%" + CL_HESABDARI.CODESAL(CL_HESABDARI.Fixpi(text)) + "%'";
+
+        //        _personelSearchDialogIsOpen = true;
+
+        //        SelectUser selectUser = new SelectUser(filter, WINDOW_ID);
+        //        selectUser.Owner = Window.GetWindow(this);
+        //        selectUser.ShowDialog();
+
+        //        if (PERSONEL.SelectedValue == null)
+        //        {
+        //            _lastPersonelSearchTextDismissed = text;
+        //        }
+        //        else
+        //        {
+        //            _lastPersonelSearchTextDismissed = string.Empty;
+        //            // اگر در دیالوگ انتخابی انجام شد، ذخیره کن
+        //            CommitPersonelReferral();
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
+        //        universControl.PopNotifyShow(".خطا در جستجوی پرسنل", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+        //    }
+        //    finally
+        //    {
+        //        _personelSearchDialogIsOpen = false;
+
+        //        _suppress_PERSONEL_LostFocus = true;
+        //        PERSONEL.Dispatcher.BeginInvoke(new Action(() =>
+        //        {
+        //            try
+        //            {
+        //                PERSONEL.Focus();
+        //                var tb = PERSONEL.Template?.FindName("PART_EditableTextBox", PERSONEL) as TextBox;
+        //                if (tb != null)
+        //                {
+        //                    tb.Focus();
+        //                    tb.CaretIndex = tb.Text?.Length ?? 0;
+        //                    tb.Select(tb.CaretIndex, 0);
+        //                }
+        //            }
+        //            finally
+        //            {
+        //                _suppress_PERSONEL_LostFocus = false;
+        //            }
+        //        }));
+        //    }
+        //}
+        #endregion
+        // متدهای کمکی بدون تغییر باقی می‌مانند
+        private static string GetComboBoxEditableText(ComboBox comboBox)
         {
-            if (string.IsNullOrEmpty(NUMBER.Text) || NUMBER.Text == "0")
-            {
-                e.Handled = true;
+            if (comboBox == null) return string.Empty;
+            comboBox.ApplyTemplate();
+            var editableTextBox = comboBox.Template?.FindName("PART_EditableTextBox", comboBox) as TextBox;
+            return editableTextBox != null ? editableTextBox.Text ?? string.Empty : comboBox.Text ?? string.Empty;
+        }
+        private static string EscapeSingleQuoteForSqlLiteral(string input)
+        {
+            return (input ?? string.Empty).Replace("'", "''");
+        }
+        private static string FormatPersianTarikhNumeric(long tarikhNumeric)
+        {
+            string s = tarikhNumeric.ToString(CultureInfo.InvariantCulture);
+            if (s.Length != 8) return s;
+            return s.Substring(0, 4) + "/" + s.Substring(4, 2) + "/" + s.Substring(6, 2);
+        }
 
-                PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
-                PERSONEL.Text = null; PERSONEL.SelectedValue = null; PERSONEL.Items.Refresh();
-                PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
 
-                universControl.PopNotifyShow($".هنوز ذخیره را انجام نداده اید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
-                return;
-            }
+        private void ucPersonel_PersonelSelected(object sender, PersonelSelectedEventArgs e)
+        {
+            try
+            {
+                // 1. اعتبارسنجی‌های اولیه
+                if (e.SelectedItem == null) return;
 
-            if (PERSONEL.SelectedIndex > -1 && !(PERSONEL.SelectedValue is null))
-            {
-                Meidnum = CL_HESABDARI.PERSONELUpdate(2, Convert.ToDouble(NUMBER.Text), Convert.ToInt32(PERSONEL.SelectedValue), "'حواله شماره: " + this.NUMBER.Text + " مورخ " + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToString()) + "','" + this.CUST_NO.SelectedValue + "'");
-                universControl.PopNotifyShow($".ارجاع داده شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
-            }
-            else
-            {
-                //Not in List
-                if (CUST_NO.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده نادیده بگیر
-                string personel_tex = ((TextBox)PERSONEL.Template.FindName("PART_EditableTextBox", PERSONEL)).Text;
-                //if (Information.IsNumeric(NewData))
-                if (int.TryParse(personel_tex, out _))
+                // دریافت ID از آرگومان رویداد
+                int personelId = e.SelectedId;
+
+                // بررسی مبلغ/شماره (NUMBER)
+                if (!double.TryParse(NUMBER.Text, out double numberValue))
                 {
-                    var RST = dbms.DoGetDataSQL<int?>("select idd from sala_dtl where idd = " + personel_tex).FirstOrDefault();
-                    if (!(RST is null))
-                    {
-                        this.PERSONEL.SelectedValue = RST;
-                    }
+                    universControl.PopNotifyShow("شماره حواله نامعتبر است", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                    return;
                 }
-                else
+
+                // بررسی طرف حساب (CUST_NO)
+                string custNoValue = CUST_NO?.SelectedValue?.ToString();
+                if (string.IsNullOrWhiteSpace(custNoValue))
                 {
-                    //DoCmd.OpenForm("SelectUser", acFormDS, default, "sal_name like N'%" + CODESAL(NewData) + "%' or sal_name like N'%" + CODESAL(Fixp(NewData)) + "%' or sal_name like N'%" + CODESAL(Fixpi(NewData)) + "%'", default, acDialog, 3);
-                    SelectUser selectUser = new SelectUser("sal_name like N'%" + CL_HESABDARI.CODESAL(personel_tex) + "%' or sal_name like N'%" + CL_HESABDARI.CODESAL(CL_HESABDARI.Fixp(personel_tex)) + "%' or sal_name like N'%" + CL_HESABDARI.CODESAL(CL_HESABDARI.Fixpi(personel_tex)) + "%'", WINDOW_ID);
-                    selectUser.ShowDialog();
+                    universControl.PopNotifyShow("طرف حساب مشخص نشده است", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                    return;
                 }
+
+                // بررسی تاریخ (DATE_N) - فرض بر وجود اکستنشن متد ToRawTarikh یا حذف اسلش‌ها
+                string rawTarikhText = DATE_N?.Text?.Replace("/", "") ?? string.Empty;
+                if (!long.TryParse(rawTarikhText, out long tarikhNumeric))
+                {
+                    universControl.PopNotifyShow("تاریخ نامعتبر است", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                    return;
+                }
+
+                // 2. آماده‌سازی داده‌ها برای Payload
+                string tarikhFormatted = FormatPersianTarikhNumeric(tarikhNumeric);
+
+                // دریافت نام تفصیلی از کلاس حسابداری
+                string tafName = CL_HESABDARI.GETTAFNAME(custNoValue) ?? string.Empty;
+
+                // ایمن‌سازی رشته‌ها برای جلوگیری از شکستن کوتیشن‌ها در SQL لگاسی
+                string safeTafName = EscapeSingleQuoteForSqlLiteral(tafName);
+                string safeCustNo = EscapeSingleQuoteForSqlLiteral(custNoValue);
+
+                // ساخت شرح سند
+                string description = "حواله شماره: " + NUMBER.Text +
+                                     " مورخ " + tarikhFormatted +
+                                     "  به نام: " + safeTafName;
+
+                // 3. ساخت Payload نهایی (فرمت خاص لگاسی: 'Description','CustNo')
+                // نکته: در سیستم‌های قدیمی معمولاً مقادیر رشته‌ای را با '' در دیتابیس ذخیره می‌کردند یا پاس می‌دادند
+                string payload = "'" + description + "','" + safeCustNo + "'";
+
+                // 4. آپدیت دیتابیس
+                // پارامتر اول (2) احتمالاً Type عملیات در پروسیجر قدیمی است
+                Meidnum = CL_HESABDARI.PERSONELUpdate(
+                    2,
+                    numberValue,
+                    personelId,
+                    payload
+                );
+
+                var PersonelName = e.SelectedItem.SAL_NAME;
+
+                // 5. نمایش پیام موفقیت
+                universControl.PopNotifyShow($"به {PersonelName} ارجاع داده شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+            }
+            catch (Exception ex)
+            {
+                // لاگ کردن خطا در صورت نیاز
+                universControl.PopNotifyShow(".خطا در ثبت ارجاع", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
             }
         }
+        private void ucPersonel_SearchRequested(object sender, PersonelSearchEventArgs e)
+        {
+            if (e is null) return;
+
+            // 1. ایجاد پنجره
+            SelectUser selectUser = new SelectUser(e.SqlFilterClause);
+
+            // 2. تنظیم مالک (برای اینکه پشت فرم اصلی نرود)
+            selectUser.Owner = Window.GetWindow(this);
+
+            // 3. *** خط حیاتی: نمایش پنجره به صورت Modal ***
+            // این خط کد را نگه می‌دارد تا زمانی که کاربر پنجره را ببندد
+            selectUser.ShowDialog();
+
+            // 4. بررسی نتیجه بعد از بسته شدن پنجره
+            if (selectUser.SelectedPersonel != null)
+            {
+                e.ResultId = selectUser.SelectedPersonel.IDD;
+            }
+        }
+
+
         private void ReGetdata()
         {
             if (!string.IsNullOrEmpty(NUMBER.Text) && NUMBER.Text != "0")
@@ -1665,7 +1945,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + MID + ",'" + CL_HESABDARI.UCurrentUser() + "','" + (Convert.ToBoolean(SGN1.IsChecked) ? "امضا شد1 " : ":امضا برداشته شد1:") + "'," + CL_HESABDARI.FARSIDATE() + "," + DateTime.Now.Hour * (100 + DateTime.Now.Minute) + ",2," + this.NUMBER.Text + ",2 )");
             }
             //this.PERSONEL.Visible = true;
-            this.PERSONEL.Visibility = Visibility.Visible;
+            //this.PERSONEL.Visibility = Visibility.Visible;
             Meidnum = MID;
             if (!Convert.ToBoolean(OKF.IsChecked))
             {
@@ -1751,7 +2031,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + MID + ",'" + CL_HESABDARI.UCurrentUser() + "','" + (Convert.ToBoolean(SGN2.IsChecked) ? "امضا شد2 " : ":امضا برداشته شد2:") + "'," + CL_HESABDARI.FARSIDATE() + "," + DateTime.Now.Hour * (100 + DateTime.Now.Minute) + ",2," + this.NUMBER.Text + ",2 )");
             }
             //this.PERSONEL.Visible = true;
-            this.PERSONEL.Visibility = Visibility.Visible;
+            //this.PERSONEL.Visibility = Visibility.Visible;
             Meidnum = MID;
             if (!Convert.ToBoolean(OKF.IsChecked))
             {
@@ -1829,7 +2109,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + MID + ",'" + CL_HESABDARI.UCurrentUser() + "','" + (Convert.ToBoolean(SGN3.IsChecked) ? "امضا شد3 " : ":امضا برداشته شد3:") + "'," + CL_HESABDARI.FARSIDATE() + "," + DateTime.Now.Hour * (100 + DateTime.Now.Minute) + ",2," + this.NUMBER.Text + ",2 )");
             }
             //this.PERSONEL.Visible = true;
-            this.PERSONEL.Visibility = Visibility.Visible;
+            //this.PERSONEL.Visibility = Visibility.Visible;
             Meidnum = MID;
             if (!Convert.ToBoolean(OKF.IsChecked))
             {
@@ -3940,9 +4220,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             SGN2usid.Text = null; SGN2usid.Tag = null; SGN2.IsChecked = false;
             SGN3usid.Text = null; SGN3usid.Tag = null; SGN3.IsChecked = false;
 
-            PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
-            PERSONEL.SelectedIndex = -1; PERSONEL.Items.Refresh();
-            PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+            //PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
+            //PERSONEL.SelectedIndex = -1; PERSONEL.Items.Refresh();
+            //PERSONEL.SelectionChanged += PERSONEL_SelectionChanged;
+
+            ucPersonel.SelectedValue = null;
 
             MOGU.Text = null; //موجودی
 
@@ -4033,5 +4315,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 e.Handled = true;
             }
         }
+
     }
 }

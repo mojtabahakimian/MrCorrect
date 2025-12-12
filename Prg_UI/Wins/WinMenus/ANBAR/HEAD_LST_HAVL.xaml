@@ -62,7 +62,7 @@
         <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True" Grid.RowSpan="2">
             <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
                 <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
-                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1" FlowDirection="RightToLeft"  VerticalAlignment="Center" Background="{x:Null}"
                      Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
                 </Border>
             </StackPanel>
@@ -298,6 +298,11 @@
                     <DataGridTextColumn Header="مبلغ کل" x:Name="MABL_K_COL" Binding="{Binding MABL_K, UpdateSourceTrigger=LostFocus}" Visibility="Collapsed"  Width="auto"   MinWidth="80"/>
                 </DataGrid.Columns>
             </DataGrid>
+
+            <CNC:PersonelComboBox x:Name="ucPersonel" Height="28" 
+                     PersonelSelected="ucPersonel_PersonelSelected"
+                     SearchRequested="ucPersonel_SearchRequested" Margin="392,0,58,93" Grid.ColumnSpan="2" VerticalAlignment="Bottom"/>
+
             <CheckBox x:Name="SGN1" Tag="RD" Content="فروش" Margin="0,0,11,96" Height="23" VerticalAlignment="Bottom" Click="SGN1_Click" Grid.Column="2" HorizontalAlignment="Right" Width="89" />
             <CheckBox x:Name="SGN2" Tag="RD"  Content="انبار" Margin="0,0,11,61" HorizontalAlignment="Right" Width="89" Height="23" VerticalAlignment="Bottom" Click="SGN2_Click" Grid.Column="2"/>
             <CheckBox x:Name="SGN3" Tag="RD" Content="مدیر عامل" Margin="0,0,11,26" HorizontalAlignment="Right" Width="89" Height="23" VerticalAlignment="Bottom" Click="SGN3_Click" Grid.Column="2"/>
@@ -305,14 +310,18 @@
             <TextBox x:Name="MOGU" IsReadOnly="True" Tag="RD"  Text="" Height="27" Margin="230,0,0,94"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Left" Width="94"  Padding="3" />
             <Label Content="جمع تحویلی:" Margin="156,0,0,96"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="63" Height="25" VerticalAlignment="Bottom"/>
             <TextBox x:Name="Text59" IsReadOnly="True" Tag="RD"  Text="" Height="27" Margin="10,0,0,94"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Bottom" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Left" Width="141"  Padding="3" />
-            <Label Content="ارجاع به:" Margin="0,0,20,94"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="43" Height="26" VerticalAlignment="Bottom" Grid.Column="1"/>
-            <ComboBox x:Name="PERSONEL" Tag="RD" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,0,67,93" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft"   IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="230" SelectionChanged="PERSONEL_SelectionChanged" Grid.ColumnSpan="2">
+            <Label Content="ارجاع به:" Margin="0,0,9,94"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="43" Height="26" VerticalAlignment="Bottom" Grid.Column="1"/>
+            <!--<ComboBox x:Name="PERSONEL" Tag="RD" Visibility="Hidden" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,0,170,43" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft"   IsEditable="True" Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="230"
+                      SelectionChanged="PERSONEL_SelectionChanged"
+                      DropDownClosed="PERSONEL_DropDownClosed"
+                      PreviewKeyDown="PERSONEL_PreviewKeyDown"
+                      LostFocus="PERSONEL_LostFocus">
                 <ComboBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                     </ItemsPanelTemplate>
                 </ComboBox.ItemsPanel>
-            </ComboBox>
+            </ComboBox>-->
 
             <TextBox x:Name="SGN1usid"   Style="{StaticResource FuzzyOut}" Padding="3" Margin="0,0,105,93" VerticalAlignment="Bottom" Height="28" FlowDirection="RightToLeft" HorizontalAlignment="Right" Width="202" IsReadOnly="True" Grid.Column="2"/>
 

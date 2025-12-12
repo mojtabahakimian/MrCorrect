@@ -372,6 +372,7 @@ namespace Wins.WinOther
 
             //تعاریف
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف مرکز هزینه", WIN_NAME = CL_MenuManager.WinNameType.TCOD_MARKAZHAZ_WIN });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف پورسانت ویزیتور ها", WIN_NAME = CL_MenuManager.WinNameType.VISITORS_PORSANT_HEAD });
 
 
             //ترازها و مراکز هزینه
@@ -448,6 +449,7 @@ namespace Wins.WinOther
             var menuItem = LISTBOX_MENU.SelectedItem as MenuItemModel;
             if (menuItem != null)
             {
+                this.Close();
                 CL_MenuManager.OpenWinMenu(menuItem.WIN_NAME, this, menuItem.TheParam ?? default);
             }
         }

@@ -32,6 +32,7 @@ using System.Windows.Threading;
 using UiTools;
 using Wins.WinMenus.WinAutomasion;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
+using static Prg_UI.HelperWins.Msgwin;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace Prg_UI.Wins.WinMenus.WinAutomasion
@@ -258,6 +259,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
 
         public bool DoesTextedOnCOMP_COD { get; set; } = false;
         public bool DG_TASKS_IsFocused { get; private set; }
+        public bool ChangeIsHappend { get; private set; } = false;
 
         private bool ISHEADOK(bool _ShowMessage_ = true)
         {
@@ -1216,6 +1218,8 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
 
             //TASK_LST.Add(cL_Automasion);
             DoLoadKartabl();
+
+            ChangeIsHappend = false;
         }
         private async void RefloadBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -1706,6 +1710,8 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                 AutoRefreshToggle.IsChecked = BEFORE_TOGGLE;
                 CanUisBeActive = true;
             }
+
+            ChangeIsHappend = false;
         }
 
         private void COLUMN_SELECTIVE_Click(object sender, RoutedEventArgs e)
@@ -1803,5 +1809,91 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                 new Msgwin(false, $"خطا در باز کردن پرونده مشتری").ShowDialog();
             }
         }
+
+        private void PERSONEL_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!NowIsReady) { return; }
+
+            ChangeIsHappend = true;
+        }
+        private int _saveErrorCount = 0;
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            // اگر هیچ تغییری انجام نشده، نیازی به دیالوگ نیست
+            if (!ChangeIsHappend)
+            {
+                return;
+            }
+
+            var MSGCAP = new MSGCAPTIONMODEL()
+            {
+                YES_CAPTION = "ذخـیره و خروج",
+                NO_CAPTION = "صرفا خارج شو"
+            };
+
+            string message = "تغییرات شما ذخیره نشده است. آیا مایل به ذخیره کردن هستید؟";
+
+            Msgwin msgwin = new Msgwin(true, message, default, default, MSGCAP);
+            bool? dialogResult = msgwin.ShowDialog();
+
+            if (dialogResult == true)
+            {
+                // کاربر درخواست ذخیره کرده است
+                try
+                {
+
+                    // اگر BTN_SAVE_Click از sender استفاده می‌کند،
+                    // اینجا "this" را می‌فرستیم نه default تا NullReferenceException نگیریم.
+                    SaveBtn_Click(this, new RoutedEventArgs());
+
+                    // اگر ذخیره موفق بود، فلگ تغییرات را پاک می‌کنیم
+                    ChangeIsHappend = false;
+
+                    _saveErrorCount = 0; // ریست شمارنده خطا برای دفعات بعدی
+                    // نکته مهم:
+                    // در اینجا e.Cancel را دست نمی‌زنیم → بستن فرم ادامه پیدا می‌کند.
+                    // اگر ذخیره داخل BTN_SAVE_Click شکست بخورد و Exception بدهد،
+                    // catch زیر مانع خروج می‌شود.
+                }
+                catch (Exception ex)
+                {
+                    // 1. شمارنده‌ی خطا را افزایش بده
+                    _saveErrorCount++;
+
+                    new Msgwin(false, "در هنگام ذخیره‌سازی خطایی رخ داد و عملیات بستن پنجره لغو شد.\n").Show();
+                    if (_saveErrorCount < 2)
+                    {
+                        // در اولین خطا اجازه‌ی بسته شدن پنجره را نمی‌دهیم
+                        e.Cancel = true;
+                        // ChangeIsHappend را دست نمی‌زنیم تا کاربر بداند هنوز ذخیره نشده
+                        return;
+                    }
+                    else
+                    {
+                        // در این مرحله، کاربر عملاً می‌خواهد از این خطا خلاص شود
+                        // و ما می‌پذیریم که بدون ذخیره پنجره بسته شود.
+                        ChangeIsHappend = false;
+
+                        // نکته‌ی مهم:
+                        // این‌جا e.Cancel را true نمی‌کنیم.
+                        // مقدار پیش‌فرض e.Cancel = false است، پس پنجره بسته می‌شود.
+                        return;
+                    }
+                }
+            }
+            else if (dialogResult == false)
+            {
+                // کاربر "صرفا خارج شو" را زده → خروج بدون ذخیره
+                ChangeIsHappend = false;
+                _saveErrorCount = 0;
+            }
+            else // dialogResult == null
+            {
+                // کاربر دیالوگ را بسته (ضربدر، ESC، Alt+F4 روی دیالوگ و ...)
+                // این یعنی می‌خواهد از عملیات بستن "انصراف" بدهد.
+                e.Cancel = true;
+            }
+        }
+
     }
 }
