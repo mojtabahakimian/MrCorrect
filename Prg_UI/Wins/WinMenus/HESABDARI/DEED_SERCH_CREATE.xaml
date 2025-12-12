@@ -384,7 +384,7 @@
 
 
                                                 <syncfusion:SfTreeGrid x:Name="PART_ItemsControl" Margin="0,30,0,0"
-                                                ColumnSizer="SizeToCells"
+                                                ColumnSizer="Star"
                                               Height="{TemplateBinding Height}"
                                               HorizontalAlignment="Stretch"
                                               VerticalAlignment="Stretch"
@@ -533,7 +533,7 @@
                        ItemsSource="{Binding SEARCH_ON_SANAD_DATA}" FilterRowPosition="Top"
                        AutoGenerateColumns="False"
                        EnableDataVirtualization="True"
-                       ColumnSizer="SizeToCells"
+                       ColumnSizer="Star"
                        SelectionUnit="Row"
                        IsReadOnly="True"
                        AllowDraggingRows="True"

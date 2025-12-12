@@ -384,7 +384,7 @@
 
                                                 <syncfusion:SfTreeGrid x:Name="PART_ItemsControl" 
                                                                        Margin="0,30,0,0"
-                                                                       ColumnSizer="SizeToCells"
+                                                                       ColumnSizer="Star"
                                                                        Height="{TemplateBinding Height}"
                                                                        HorizontalAlignment="Stretch"
                                                                        VerticalAlignment="Stretch"
