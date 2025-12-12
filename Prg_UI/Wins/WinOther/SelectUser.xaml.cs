@@ -70,53 +70,102 @@ namespace Prg_UI.Wins.WinOther
             }
             InitializeComponent();
         }
+        public SelectUser(string _arg)
+        {
+            if (!string.IsNullOrEmpty(_arg))
+            {
+                //ServerFilter = $" AND SAL_NAME LIKE N'%{_arg}%'";
+                ServerFilter = _arg;
+            }
+            InitializeComponent();
+        }
+        public S_USER_SALADTL? SelectedPersonel { get; set; } = null;
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            var QRE1 = dbms.DoGetDataSQL<S_USER_SALADTL>($"SELECT SAL_NAME, PSAL_NAME, GRSAL, ENABL, IDD FROM SALA_DTL WHERE (ENABL = 0) AND (IDD <> 1)").ToList();
-            for (int i = 0; i < QRE1.Count; i++)
-                QRE1[i].SAL_NAME = CL_HESABDARI.DECODEUN(QRE1[i].SAL_NAME.ToString()).Replace("ي", "ی").Replace("ك", "ک");
+            try
+            {
+                // کوئری پایه: کاربران فعال و غیر سیستمی (IDD <> 1)
+                string sql = "SELECT SAL_NAME, PSAL_NAME, GRSAL, ENABL, IDD FROM SALA_DTL WHERE (ENABL = 0) AND (IDD <> 1)";
 
+                // اگر فیلتری از سمت UserControl آمده، آن را اضافه کن
+                // UserControl قبلاً فیلتر را امن کرده است (Sanitized)
+                if (!string.IsNullOrWhiteSpace(ServerFilter))
+                {
+                    sql += $" AND ({ServerFilter})";
+                }
 
-            QRE1 = QRE1.Where(x => x.SAL_NAME.ToLower().Contains(ServerFilter.Trim().ToLower())).ToList();
-            DGR_SUN_USER.ItemsSource = QRE1;
+                // مرتب‌سازی برای نمایش بهتر
+                sql += " ORDER BY SAL_NAME";
+
+                // اجرای کوئری (بدون پارامتر چون فیلتر شامل لیترال‌هاست)
+                var list = dbms.DoGetDataSQL<S_USER_SALADTL>(sql, new { }).ToList();
+
+                // دیکد کردن نام‌ها (Legacy Decoding)
+                foreach (var item in list)
+                {
+                    if (item.SAL_NAME != null)
+                    {
+                        item.SAL_NAME = CL_HESABDARI.DECODEUN(item.SAL_NAME)
+                                        .Replace("ي", "ی")
+                                        .Replace("ك", "ک");
+                    }
+                }
+
+                DGR_SUN_USER.ItemsSource = list;
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, "خطا در بارگذاری لیست کاربران").Show();
+                return;
+            }
+
+            DGR_SUN_USER.Focus();
+            DGR_SUN_USER.SelectedIndex = 0;
         }
         private void SetSelectedRow()
         {
             if (DGR_SUN_USER.SelectedIndex > -1 && !(DGR_SUN_USER.SelectedItem is null))
             {
-                //اگر اتوماسیون هست
-                if (TheWindow.GetType().Name == "MAIN")
+                ComboBox? MY_ELEMENT = null;
+                if (TheWindow != null)
                 {
-                    try
+                    //اگر اتوماسیون هست
+                    if (TheWindow.GetType().Name == "MAIN")
                     {
-                        MAIN.MAIN_INST.PERSONEL.SelectedValue = null;
-                        MAIN.MAIN_INST.PERSONEL.SelectedValue = (DGR_SUN_USER.SelectedItem as S_USER_SALADTL).IDD;
-                        MAIN.MAIN_INST.PERSONEL.Items.Refresh();
-                    }
-                    catch (Exception)
-                    {
-                        //کبموباکس مجری
-                        MAIN.MAIN_INST.rst_personel = dbms.DoGetDataSQL<COMBOPERSONEL>("SELECT SAL_NAME, PSAL_NAME, GRSAL, ENABL, IDD FROM SALA_DTL WHERE (ENABL=0)").ToList();
-                        foreach (var item_person in MAIN.MAIN_INST.rst_personel)
-                            item_person.SAL_NAME = CL_HESABDARI.DECODEUN(item_person.SAL_NAME);
+                        try
+                        {
+                            MAIN.MAIN_INST.PERSONEL.SelectedValue = null;
+                            MAIN.MAIN_INST.PERSONEL.SelectedValue = (DGR_SUN_USER.SelectedItem as S_USER_SALADTL).IDD;
+                            MAIN.MAIN_INST.PERSONEL.Items.Refresh();
+                        }
+                        catch (Exception)
+                        {
+                            //کبموباکس مجری
+                            MAIN.MAIN_INST.rst_personel = dbms.DoGetDataSQL<COMBOPERSONEL>("SELECT SAL_NAME, PSAL_NAME, GRSAL, ENABL, IDD FROM SALA_DTL WHERE (ENABL=0)").ToList();
+                            foreach (var item_person in MAIN.MAIN_INST.rst_personel)
+                                item_person.SAL_NAME = CL_HESABDARI.DECODEUN(item_person.SAL_NAME);
 
-                        MAIN.MAIN_INST.PERSONEL.SelectedValue = null;
-                        MAIN.MAIN_INST.PERSONEL.SelectedValue = (DGR_SUN_USER.SelectedItem as S_USER_SALADTL).IDD;
-                        MAIN.MAIN_INST.PERSONEL.Items.Refresh();
+                            MAIN.MAIN_INST.PERSONEL.SelectedValue = null;
+                            MAIN.MAIN_INST.PERSONEL.SelectedValue = (DGR_SUN_USER.SelectedItem as S_USER_SALADTL).IDD;
+                            MAIN.MAIN_INST.PERSONEL.Items.Refresh();
+                        }
+                    }
+                    if (TheWindow != null)
+                    {
+                        MY_ELEMENT = TextBoxFormat.FindVisualChildren<ComboBox>(TheWindow).Where(x => x.Name != null && x.Name.ToString() == "PERSONEL").FirstOrDefault();
                     }
                 }
 
-                var MY_ELEMENT = TextBoxFormat.FindVisualChildren<ComboBox>(TheWindow).Where(x => x.Name != null && x.Name.ToString() == "PERSONEL").FirstOrDefault();
-                if (MY_ELEMENT is null)
+                if (DGR_SUN_USER.SelectedItem is S_USER_SALADTL SelectedUserValueItem)
                 {
-                    new Msgwin(false, "خطا در انجام عملیات").ShowDialog();
-                }
-                else
-                {
-                    MY_ELEMENT.SelectedValue = null;
-                    MY_ELEMENT.SelectedValue = (DGR_SUN_USER.SelectedItem as S_USER_SALADTL).IDD;
-                    MY_ELEMENT.Items.Refresh();
-                    //Close();
+                    if (MY_ELEMENT != null) //Called via Ui Widnow
+                    {
+                        MY_ELEMENT.SelectedValue = null;
+                        MY_ELEMENT.SelectedValue = SelectedUserValueItem.IDD;
+                        MY_ELEMENT.Items.Refresh();
+                    }
+
+                    SelectedPersonel = SelectedUserValueItem; //Just Get Value
                 }
 
                 Close();
@@ -124,13 +173,14 @@ namespace Prg_UI.Wins.WinOther
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            e.Handled = true;
             if (e.Key is Key.Enter)
             {
+                e.Handled = true;
                 SetSelectedRow();
             }
             else if (e.Key is Key.Escape)
             {
+                e.Handled = true;
                 Close();
             }
         }

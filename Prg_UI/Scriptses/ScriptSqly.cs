@@ -2347,6 +2347,8 @@ END;";
                     catch { }
                 }
 
+                //تعریف پورسانت ویزیتور
+                try { db.Execute($@"ALTER TABLE dbo.VISITORS_PORSANT_KALA ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
             }
         }
 

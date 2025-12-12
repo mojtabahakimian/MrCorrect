@@ -948,7 +948,11 @@ namespace Functions
             /// <summary>
             /// به حساب گذاشتن چک
             /// </summary>
-            WIN_CHREC_HES_BEHESABCHECK
+            WIN_CHREC_HES_BEHESABCHECK,
+            /// <summary>
+            /// تعریف پورسانت ویزیتور ها
+            /// </summary>
+            VISITORS_PORSANT_HEAD
         }
         #endregion
 
@@ -968,6 +972,7 @@ namespace Functions
             {
                 //Mojtaba{
 
+                case WinNameType.VISITORS_PORSANT_HEAD: /* تعریف پورسانت ویزیتور ها */ CL_LMethods.OpenWindow(OWNERWIN, new VISITORS_PORSANT_HEAD(), isModalDialog: false, allowMultipleInstances: false); break;
                 case WinNameType.WIN_CHREC_HES_BEHESABCHECK: /* به حساب گذاشتن چک */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_CHREC_HES(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.CONTROL_ASNAD_DAFATERCHECK_FORM11: /* کنترل اسناد و دفاتر چک */
@@ -2054,7 +2059,7 @@ namespace Functions
                     break;
 
                 case WinNameType.HAVALE_EXIT_SAYER: //صدور برگه خروج سایر مواد از انبار
-                    CL_LMethods.OpenWindow(OWNERWIN, new HAVALE_EXIT_SAYER(), default, false);
+                    CL_LMethods.OpenWindow(OWNERWIN, new HAVALE_EXIT_SAYER((double?)_PARAMETERS_.FirstOrDefault()), default, false);
                     break;
 
 

@@ -131,9 +131,9 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         {
             get
             {
-                return _newrecord;
+                return _navigationManager.IsNewRecord;
             }
-            set { _newrecord = value; }
+
         }
 
         public long? CURRENT_ROW_INDEX { get; set; } = 0;
@@ -437,7 +437,6 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             {
                 var itemtoadd = dbms.DoGetDataSQL<PRICE_ELAMIE>($"SELECT * FROM PRICE_ELAMIE WHERE PEPID = {PEPID.Text}").FirstOrDefault();
                 record = itemtoadd;
-                NewRecord = false;
                 return true;
             }
             catch (Exception ex)
@@ -462,7 +461,6 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             }
             else
             {
-                NewRecord = false; //Currrent Record is not new
                 Command106.IsEnabled = true;
 
                 PEPID.Text = HEADER_FAC.PEPID.ToString();
@@ -601,7 +599,6 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         }
         private void RefreshAfterUpdate()
         {
-            NewRecord = false;
             var CURRENT_HEADER = dbms.DoGetDataSQL<PRICE_ELAMIE>($"SELECT * FROM PRICE_ELAMIE WHERE PEPID = {PEPID.Text}").FirstOrDefault();
             _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
         }
@@ -653,9 +650,8 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         }
         private void ClearFreshAll()
         {
-            NewRecord = true;
+            PEPID.Text = "0";
 
-            PEPID.Text = null;
             PEPNAME.Text = null;
             USERNAME.Text = Baseknow.UUSER;
             PEPDATE.Text = Tarikh.FullCurrentDate;
@@ -1043,7 +1039,8 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
         private bool DoCmdHeaderSave(bool DisplayMsg = true)
         {
-            int _PEPID_ = Convert.ToInt32(string.IsNullOrEmpty(PEPID.Text) ? "0" : PEPID.Text);
+            int _PEPID_ = _PEPID_ = Convert.ToInt32((string.IsNullOrWhiteSpace(PEPID.Text) ? "0" : PEPID.Text));
+
             if (_navigationManager.IsNewRecord)
             {
                 _PEPID_ = (int)CL_HESABDARI.GetLIDD("PRICE_ELAMIE", "PEPID");

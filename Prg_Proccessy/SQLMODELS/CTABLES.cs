@@ -967,6 +967,12 @@ namespace Prg_Proccessy.SQLMODELS
             public int? IDD { get; set; }
             public int? SUBUSERCO { get; set; }
             public int? USERCO { get; set; }
+
+            // برای نمایش در کومبوباکس
+            public override string ToString()
+            {
+                return SAL_NAME ?? string.Empty;
+            }
         }
 
         // پیش فاکتور های مشتری :

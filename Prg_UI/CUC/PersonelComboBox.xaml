@@ -1,0 +1,31 @@
+﻿<UserControl x:Class="Prg_UI.CUC.PersonelComboBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Prg_UI.CUC"
+             mc:Ignorable="d" 
+             d:DesignHeight="30" d:DesignWidth="250"
+             FlowDirection="RightToLeft">
+    <Grid>
+        <ComboBox x:Name="cmbPersonel" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}"
+                  IsEditable="True"
+                  IsTextSearchEnabled="True"
+                  VerticalAlignment="Stretch" 
+                  HorizontalAlignment="Stretch"
+                  DisplayMemberPath="SAL_NAME"
+                  SelectedValuePath="IDD"
+                  SelectionChanged="cmbPersonel_SelectionChanged"
+                  DropDownClosed="cmbPersonel_DropDownClosed"
+                  PreviewKeyDown="cmbPersonel_PreviewKeyDown"
+                  LostFocus="cmbPersonel_LostFocus">
+
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" 
+                                            VirtualizingPanel.VirtualizationMode="Recycling"/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+    </Grid>
+</UserControl>

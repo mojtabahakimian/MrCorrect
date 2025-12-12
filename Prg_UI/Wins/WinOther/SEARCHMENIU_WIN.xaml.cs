@@ -372,6 +372,7 @@ namespace Wins.WinOther
 
             //تعاریف
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف مرکز هزینه", WIN_NAME = CL_MenuManager.WinNameType.TCOD_MARKAZHAZ_WIN });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف پورسانت ویزیتور ها", WIN_NAME = CL_MenuManager.WinNameType.VISITORS_PORSANT_HEAD });
 
 
             //ترازها و مراکز هزینه

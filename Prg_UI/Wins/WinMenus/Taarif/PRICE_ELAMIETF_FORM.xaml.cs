@@ -139,9 +139,8 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         {
             get
             {
-                return _newrecord;
+                return _navigationManager.IsNewRecord;
             }
-            set { _newrecord = value; }
         }
 
         public long? CURRENT_ROW_INDEX { get; set; } = 0;
@@ -765,7 +764,6 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             {
                 var itemtoadd = dbms.DoGetDataSQL<PRICE_ELAMIETF>($"SELECT * FROM PRICE_ELAMIETF WHERE PEID = {PEID.Text}").FirstOrDefault();
                 record = itemtoadd;
-                NewRecord = false;
                 return true;
             }
             catch (Exception ex)
@@ -790,7 +788,6 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             }
             else
             {
-                NewRecord = false; //Currrent Record is not new
                 Command106.IsEnabled = true;
 
                 PEID.Text = HEADER_FAC.PEID.ToString();
@@ -930,7 +927,6 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
         private void RefreshAfterUpdate()
         {
-            NewRecord = false;
             var CURRENT_HEADER = dbms.DoGetDataSQL<PRICE_ELAMIETF>($"SELECT * FROM PRICE_ELAMIETF WHERE PEID = {PEID.Text}").FirstOrDefault();
             _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
         }
@@ -993,9 +989,8 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         }
         private void ClearFreshAll()
         {
-            NewRecord = true;
+            PEID.Text = "0";
 
-            PEID.Text = null;
             PENAME.Text = null;
             USERNAME.Text = Baseknow.UUSER;
             PEPDATE.Text = Tarikh.FullCurrentDate;
@@ -1406,7 +1401,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
         private bool DoCmdHeaderSave(bool DisplayMsg = true)
         {
-            int _PEPID_ = Convert.ToInt32(string.IsNullOrEmpty(PEID.Text) ? "0" : PEID.Text);
+            int _PEPID_ = Convert.ToInt32(string.IsNullOrWhiteSpace(PEID.Text) ? "0" : PEID.Text);
             if (_navigationManager.IsNewRecord)
             {
                 _PEPID_ = (int)CL_HESABDARI.GetLIDD("PRICE_ELAMIETF", "PEID");
@@ -1794,6 +1789,10 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             var ROW = e.Row.Item as PRICE_ELAMIETF_DTL_MODEL;
             if (e.Row.Item == null || ROW is null) { return; }
 
+            if (ROW?.PPID == null || ROW?.PPID == 0)
+            {
+                DG_SUB_CANCEL_EDIT(); return;
+            }
             if (ConstructorRowDetector.IsPristine(ROW)) { DG_SUB_CANCEL_EDIT(); return; } //اگر سطر «دست‌نخورده» است، بدون خطا عمل کن
 
             IsSaveSuccess = false;

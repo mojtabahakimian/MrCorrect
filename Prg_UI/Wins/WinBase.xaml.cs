@@ -1496,5 +1496,15 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHREC_HES_BEHESABCHECK, default);
         }
+
+        private void Button_Click_137(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Button_Click_138(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.VISITORS_PORSANT_HEAD, default);
+        }
     }
 }

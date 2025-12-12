@@ -385,9 +385,9 @@ namespace Prg_UI.Wins
             //new TARAZ_4_MAH().Show();
             //new HEAD_LST_BRFR(2030d).Show();
 
-            new F_MENU_DATE_visit("VISITONE").Show();
-            //new HEAD_LST_ENTEGHAL_WIN().Show();
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_KOL_FT4, this);
+            //new F_MENU_DATE_visit("VISITONE").Show();
+            new VISITORS_PORSANT_HEAD().Show();
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALE_EXIT_SAYER, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
             //new WIN_OPTIONS().Show();
