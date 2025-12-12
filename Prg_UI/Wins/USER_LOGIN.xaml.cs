@@ -386,8 +386,8 @@ namespace Prg_UI.Wins
             //new HEAD_LST_BRFR(2030d).Show();
 
             //new F_MENU_DATE_visit("VISITONE").Show();
-            new VISITORS_PORSANT_HEAD().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALE_EXIT_SAYER, this);
+            new BEDEHKARAN_BESTANKARAN().Show();
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALE_EXIT_SAYER, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
             //new WIN_OPTIONS().Show();

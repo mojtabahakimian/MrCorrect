@@ -133,14 +133,50 @@ namespace Wins.WinMenus.HESABDARI
             if (IsCTRLF9)
             {
                 WINTILENAME.Content = "لیست بدهکاران و بستانکاران محدود شده";
-                //var ServerFilter = "HES_K = " + Baseknow.BESTANKAR + " OR HES_K = " + Baseknow.BEDEHKAR;
-                //MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>(@$"SELECT * FROM Q_BEDEHBESTANH_MAIN WHERE {ServerFilter} OPTION (FORCE ORDER, QUERYTRACEON 2312)").ToList();
+                //MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>("SELECT BEDBESMAH" + Baseknow.USERCOD + ".*  FROM BEDBESMAH" + Baseknow.USERCOD + " WHERE (HES_K = " + KOL_PASSED + ") And (HES_M = " + MOIN_PASSED + ")  ORDER BY HES_K, HES_M, HES_T").ToList();
+                var limitedQuery = $@"
+                    SELECT src.*, balanceOrigin.BALANCE_DATE AS LAST_DEED_DATE
+                    FROM BEDBESMAH{Baseknow.USERCOD} AS src
+                    OUTER APPLY (
+                        SELECT TOP (1) orderedRows.DATE_S AS BALANCE_DATE
+                        FROM (
+                            SELECT h.DATE_S,
+                                   SUM(CASE WHEN ISNULL(src.BEDBES, 0) > 0 THEN ISNULL(d.BED, 0) ELSE ISNULL(d.BES, 0) END)
+                                       OVER (ORDER BY h.DATE_S DESC, d.N_S DESC ROWS UNBOUNDED PRECEDING) AS RunningAmount
+                            FROM DEED_DTL d
+                            INNER JOIN DEED_HED h ON h.N_S = d.N_S
+                            WHERE d.HES_K = src.HES_K AND d.HES_M = src.HES_M AND d.HES_T = src.HES_T
+                        ) AS orderedRows
+                        WHERE orderedRows.RunningAmount >= ABS(ISNULL(src.BEDBES, 0)) AND ABS(ISNULL(src.BEDBES, 0)) > 0
+                        ORDER BY orderedRows.DATE_S DESC
+                    ) AS balanceOrigin
+                    WHERE (src.HES_K = {KOL_PASSED}) And (src.HES_M = {MOIN_PASSED})
+                    ORDER BY src.HES_K, src.HES_M, src.HES_T";
 
-                MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>("SELECT BEDBESMAH" + Baseknow.USERCOD + ".*  FROM BEDBESMAH" + Baseknow.USERCOD + " WHERE (HES_K = " + KOL_PASSED + ") And (HES_M = " + MOIN_PASSED + ")  ORDER BY HES_K, HES_M, HES_T").ToList();
+                MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>(limitedQuery).ToList();
             }
             else
             {
-                MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>("SELECT * FROM Q_BEDEHBESTANH_MAIN OPTION (FORCE ORDER, QUERYTRACEON 2312)").ToList();
+                //MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>("SELECT * FROM Q_BEDEHBESTANH_MAIN OPTION (FORCE ORDER, QUERYTRACEON 2312)").ToList();
+                const string fullQuery = @"
+                             SELECT main.*, balanceOrigin.BALANCE_DATE AS LAST_DEED_DATE
+                             FROM Q_BEDEHBESTANH_MAIN AS main
+                             OUTER APPLY (
+                                 SELECT TOP (1) orderedRows.DATE_S AS BALANCE_DATE
+                                 FROM (
+                                     SELECT h.DATE_S,
+                                            SUM(CASE WHEN ISNULL(main.BEDBES, 0) > 0 THEN ISNULL(d.BED, 0) ELSE ISNULL(d.BES, 0) END)
+                                                OVER (ORDER BY h.DATE_S DESC, d.N_S DESC ROWS UNBOUNDED PRECEDING) AS RunningAmount
+                                     FROM DEED_DTL d
+                                     INNER JOIN DEED_HED h ON h.N_S = d.N_S
+                                     WHERE d.HES_K = main.HES_K AND d.HES_M = main.HES_M AND d.HES_T = main.HES_T
+                                 ) AS orderedRows
+                                 WHERE orderedRows.RunningAmount >= ABS(ISNULL(main.BEDBES, 0)) AND ABS(ISNULL(main.BEDBES, 0)) > 0
+                                 ORDER BY orderedRows.DATE_S DESC
+                             ) AS balanceOrigin
+                             OPTION (FORCE ORDER, QUERYTRACEON 2312)";
+
+                MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>(fullQuery).ToList();
             }
 
             foreach (var item in MasterHead)

@@ -381,7 +381,7 @@
 
 
                                                 <syncfusion:SfTreeGrid x:Name="PART_ItemsControl" Margin="0,30,0,0"
-                                                ColumnSizer="SizeToCells"
+                                                ColumnSizer="Star"
                                               Height="{TemplateBinding Height}"
                                               HorizontalAlignment="Stretch"
                                               VerticalAlignment="Stretch"
@@ -411,7 +411,7 @@
                                                                    RelativeSource={RelativeSource TemplatedParent},
                                                                    Converter={StaticResource ResourceKey=boolToVisiblityConverter}}">
                                                     <syncfusion:SfTreeGrid.Columns>
-                                                        <syncfusion:TreeGridTextColumn HeaderText="DisplayText" MappingName="DisplayText" ColumnSizer="Auto" />
+                                                        <syncfusion:TreeGridTextColumn HeaderText="DisplayText" MappingName="DisplayText" ColumnSizer="Star" />
                                                     </syncfusion:SfTreeGrid.Columns>
 
                                                 </syncfusion:SfTreeGrid>
@@ -631,6 +631,12 @@
                 <syncfusion:GridTextColumn HeaderText="مانده بستانکار" MappingName="BESM">
                     <syncfusion:GridTextColumn.DisplayBinding>
                         <Binding Path="BESM"  StringFormat="{}{0:#,0}" />
+                    </syncfusion:GridTextColumn.DisplayBinding>
+                </syncfusion:GridTextColumn>
+
+                <syncfusion:GridTextColumn HeaderText="تاریخ ایجاد مانده" MappingName="LAST_DEED_DATE" Width="140">
+                    <syncfusion:GridTextColumn.DisplayBinding>
+                        <Binding Path="LAST_DEED_DATE" StringFormat="####/##/##" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 

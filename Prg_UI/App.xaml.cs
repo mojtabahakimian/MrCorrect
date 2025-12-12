@@ -674,9 +674,9 @@ namespace Prg_UI
                     {
                         string[] Str_US = input.Split('#');
 
-                        if (string.IsNullOrEmpty(Str_US[0])) { GoExitTheApplication(); }
+                        if (string.IsNullOrEmpty(Str_US[0])) { GoExitTheApplication(); return; }
 
-                        if (Str_US.Length < 5) { GoExitTheApplication(); } // Ensure we have all parts (Connection, UserCode, Shift, Vahed, Section)
+                        if (Str_US?.Length < 5) { GoExitTheApplication(); return; } // Ensure we have all parts (Connection, UserCode, Shift, Vahed, Section)
 
                         CL_CCNNMANAGER.CONNECTION_STR = CL_CCNNMANAGER.ExtractConnectionString(Str_US[0]); //Connection String 0
                         Baseknow.USERCOD = Convert.ToInt32(Str_US[1]);

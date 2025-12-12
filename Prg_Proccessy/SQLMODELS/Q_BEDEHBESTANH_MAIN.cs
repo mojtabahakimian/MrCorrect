@@ -37,5 +37,6 @@
         public string? MOBILE { get; set; }
         public int? OSTANID { get; set; }
         public int? SHAHRID { get; set; }
+        public long? LAST_DEED_DATE { get; set; }
     }
 }
