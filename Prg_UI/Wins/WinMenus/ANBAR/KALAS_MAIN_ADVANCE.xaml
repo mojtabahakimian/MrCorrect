@@ -382,7 +382,7 @@
 
 
                                                 <syncfusion:SfTreeGrid x:Name="PART_ItemsControl" Margin="0,30,0,0"
-                                                ColumnSizer="SizeToCells"
+                                                ColumnSizer="Star"
                                               Height="{TemplateBinding Height}"
                                               HorizontalAlignment="Stretch"
                                               VerticalAlignment="Stretch"
@@ -562,7 +562,7 @@
                 <syncfusion:SfDataGrid.Columns>
                     <!-- Core Information -->
                     <syncfusion:GridTextColumn HeaderText="کد کالا" MappingName="code" x:Name="CODE" TextAlignment="Left" IsHidden="True"/>
-                    <syncfusion:GridTextColumn HeaderText="نام کالا" MappingName="kala" x:Name="KALA" Width="300" ColumnSizer="SizeToCells"  IsHidden="True" TextAlignment="Left" />
+                    <syncfusion:GridTextColumn HeaderText="نام کالا" MappingName="kala" x:Name="KALA" Width="300" ColumnSizer="Star"  IsHidden="True" TextAlignment="Left" />
                     <!--BARGAH-->
                     <!--<syncfusion:GridTextColumn HeaderText="نوع برگه" MappingName="BARGAH" IsHidden="True" TextAlignment="Left" />-->
                     <syncfusion:GridComboBoxColumn 
@@ -711,7 +711,7 @@
 
                     <!-- Customer and Personnel Information -->
                     <syncfusion:GridTextColumn HeaderText="کد شخص" MappingName="hes" x:Name="HES" TextAlignment="Left" IsHidden="True"/>
-                    <syncfusion:GridTextColumn HeaderText="نام شخص" MappingName="CUSTNAME" Width="300" x:Name="CUSTNAME" ColumnSizer="SizeToCells" TextAlignment="Left"  IsHidden="True"/>
+                    <syncfusion:GridTextColumn HeaderText="نام شخص" MappingName="CUSTNAME" Width="300" x:Name="CUSTNAME" ColumnSizer="Star" TextAlignment="Left"  IsHidden="True"/>
                     <!--<syncfusion:GridTextColumn HeaderText="نوع مشتری" MappingName="CUSTKNAME" TextAlignment="Left"  IsHidden="True" />-->
                     <syncfusion:GridComboBoxColumn 
                     x:Name="CUST_COD" IsHidden="True"
@@ -742,7 +742,7 @@
                     <!--<syncfusion:GridTextColumn HeaderText="نام گروه کالا" MappingName="GRPNAME" TextAlignment="Left"  IsHidden="True"/>-->
                     <syncfusion:GridComboBoxColumn IsHidden="True" 
                     x:Name="GRPCODE"
-                    HeaderText="گروه کالا"  ColumnSizer="SizeToCells" 
+                    HeaderText="گروه کالا"  ColumnSizer="Star" 
                     MappingName="GRPCODE"
                     SelectedValuePath="CODE"
                     DisplayMemberPath="NAMES"/>
