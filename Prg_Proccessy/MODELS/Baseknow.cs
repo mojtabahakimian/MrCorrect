@@ -1,4 +1,5 @@
-﻿using Prg_Proccessy.FUNCTIONS;
+﻿using Microsoft.Data.SqlClient;
+using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.Generaly;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_SendInvoice.SQLMODELS;
@@ -196,7 +197,6 @@ namespace Prg_Proccessy.MODELS
                 //0- بررسی اتصال به اس کیو ال
                 _ = dbms.CheckIsConnectedToSQLDB();
             }
-
             //1- بررسی نهایی و مقدار دهی
             //StiLicense.Key = StiLicKey; //#Left
             if (CL_CCNNMANAGER.ConnectedToSQLDB == true)
@@ -211,20 +211,35 @@ namespace Prg_Proccessy.MODELS
                     connetionstring = CL_CCNNMANAGER.CONNECTION_STR;
                 }
 
-                int DataSrcIndx = connetionstring.IndexOf("Data Source=", StringComparison.CurrentCultureIgnoreCase);//++11
-                int InitlCtalg = connetionstring.IndexOf(";Initial Catalog", StringComparison.CurrentCultureIgnoreCase);//++15
-                int Integrated_Secrt = connetionstring.IndexOf(";Integrated Security", StringComparison.CurrentCultureIgnoreCase);
-                int intiti2 = InitlCtalg;
-                string servnm = connetionstring.Substring(DataSrcIndx + 12, ((InitlCtalg - DataSrcIndx) - 12));
-                string dbnm = connetionstring.Substring(InitlCtalg + 17, ((Integrated_Secrt - intiti2) - 17)); // چون در ساب استرینگ فاصله میخوام یعنی میگه چندتا برم جلو نه مختصات
-                string qt = "\"";
-                //char nothing = '';
-                if (dbnm.Contains(qt))
-                {
-                    dbnm = dbnm.Replace(qt, "");
-                }
-                CL_Generaly.General_Servername = servnm;
-                CL_Generaly.General_DBname = dbnm;
+                //int DataSrcIndx = connetionstring.IndexOf("Data Source=", StringComparison.CurrentCultureIgnoreCase);//++11
+                //int InitlCtalg = connetionstring.IndexOf(";Initial Catalog", StringComparison.CurrentCultureIgnoreCase);//++15
+                //int Integrated_Secrt = connetionstring.IndexOf(";Integrated Security", StringComparison.CurrentCultureIgnoreCase);
+                //int intiti2 = InitlCtalg;
+                //string servnm = connetionstring.Substring(DataSrcIndx + 12, ((InitlCtalg - DataSrcIndx) - 12));
+                //string dbnm = connetionstring.Substring(InitlCtalg + 17, ((Integrated_Secrt - intiti2) - 17)); // چون در ساب استرینگ فاصله میخوام یعنی میگه چندتا برم جلو نه مختصات
+                //string qt = "\"";
+                ////char nothing = '';
+                //if (dbnm.Contains(qt))
+                //{
+                //    dbnm = dbnm.Replace(qt, "");
+                //}
+
+                // استفاده از بیلد برای تجزیه استاندارد کانکشن استرینگ
+                var builder = new SqlConnectionStringBuilder(connetionstring);
+
+                // استخراج نام سرور (خودش هندل میکنه چه Data Source باشه چه Server)
+                CL_Generaly.General_Servername = builder.DataSource;
+                
+                // استخراج نام دیتابیس (خودش هندل میکنه چه Initial Catalog باشه چه Database)
+                CL_Generaly.General_DBname = builder.InitialCatalog;
+
+                // استخراج نام کاربری و رمز عبور (اگر وجود داشته باشند)
+                CL_Generaly.General_Username = builder.UserID;
+                CL_Generaly.General_Password = builder.Password;
+
+                // بررسی اینکه آیا ویندوزی است یا نه
+                bool isWindowsAuth = builder.IntegratedSecurity;
+
 
                 #region GetTarikh_Times_OfToday
                 DateTime thisDate = DateTime.Now;
