@@ -187,7 +187,6 @@
                         </VisualState>
                     </VisualStateGroup>
                 </VisualStateManager.VisualStateGroups>
-
                 <Border Margin="4,4,-4,-4"
         Background="#052A2E31"
         CornerRadius="5" />
@@ -200,7 +199,6 @@
                 <Border Margin="1,1,-1,-1"
         Background="#352A2E31"
         CornerRadius="2" />
-
                 <Border Background="#FFDC000C" CornerRadius="2" />
                 <Border CornerRadius="2">
                     <TextBlock MaxWidth="250"
@@ -222,7 +220,6 @@
                                 <ColumnDefinition Width="30" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-
                             <Border Grid.Column="0"
                     Width="19"
                     Height="19"
@@ -254,13 +251,11 @@
                                     </Path.RenderTransform>
                                 </Path>
                             </Border>
-
                             <Grid Grid.Column="1">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
-
                                 <!--Matter Part 1-->
                                 <Grid Margin="0,8,4,2" Background="{TemplateBinding Background}" Visibility="{TemplateBinding SearchOptionVisibility}">
                                     <!--Matter Part 2-->
@@ -276,7 +271,6 @@
                              FontWeight="{TemplateBinding FontWeight}"
                              BorderBrush="#FF727272"
                              BorderThickness="1" />
-
                                     <TextBlock Margin="5,0,0,0"
                                HorizontalAlignment="Left"
                                VerticalAlignment="Center"
@@ -290,7 +284,6 @@
                                Opacity="0.7"
                                Text="{syncfusion:GridLocalizationResourceExtension ResourceName=Search}"
                                Visibility="{TemplateBinding SearchTextBlockVisibility}" />
-
                                     <Border Width="18"
                             Height="18"
                             Margin="0,0,5,0"
@@ -379,16 +372,14 @@
                                                         </TransformGroup>
                                                     </Path.RenderTransform>
                                                 </Path>
-
-
                                                 <syncfusion:SfTreeGrid x:Name="PART_ItemsControl" Margin="0,30,0,0"
-                                                ColumnSizer="Auto"
+                                                ColumnSizer="Star"
                                               Height="{TemplateBinding Height}"
                                               HorizontalAlignment="Stretch"
                                               VerticalAlignment="Stretch"
                                               GridLinesVisibility="None"   
                                               BorderThickness="0"
-                                              IsTabStop="false"
+                                              IsTabStop="False"
                                               ShowCheckBox="True"
                                               SelectionMode="None"
                                                       AllowEditing="True"
@@ -417,10 +408,8 @@
                                                     <syncfusion:SfTreeGrid.Columns>
                                                         <syncfusion:TreeGridTextColumn HeaderText="DisplayText" MappingName="DisplayText" ColumnSizer="Auto" />
                                                     </syncfusion:SfTreeGrid.Columns>
-
                                                 </syncfusion:SfTreeGrid>
                                             </Grid>
-
                                             <Border Grid.Row="1"
                                     Margin="0,0,20,0"
                                     VerticalAlignment="Top"
@@ -446,7 +435,6 @@
                                                                ElementName=PART_ItemsControl}" />
                                             </Border>
                                         </Grid>
-
                                     </Grid>
                                 </Border>
                             </Grid>

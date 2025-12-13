@@ -2,6 +2,10 @@
 {
     public class FACTOR_SPLIT_MODEL
     {
+        public string? Taxid { get; set; }
+        public string? Inno { get; set; }
+        public bool? TheSuccess { get; set; }
+
         public double? NUMBER { get; set; }
         public double? TAG { get; set; }
         public long? DATE_N { get; set; }

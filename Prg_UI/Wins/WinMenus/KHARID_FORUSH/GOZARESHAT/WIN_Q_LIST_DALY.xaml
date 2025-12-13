@@ -561,50 +561,50 @@
 
                 <syncfusion:GridTextColumn x:Name="mand_NAGHD_COLUMN" HeaderText="مانده فاکتور" MappingName="mand">
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="mand"  StringFormat="{}{0:#,0}" /> 
+                        <Binding Path="mand"  StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 
                 <syncfusion:GridTextColumn x:Name="JAMF_COLUMN" MappingName="jamf" HeaderText="جمع فاکتور">
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="jamf"  StringFormat="{}{0:#,0}" /> 
+                        <Binding Path="jamf"  StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 
                 <syncfusion:GridTextColumn x:Name="SumOfM_NAGHD_COLUMN" HeaderText="مبلغ نقد" MappingName="SumOfM_NAGHD">
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="SumOfM_NAGHD"  StringFormat="{}{0:#,0}" /> 
+                        <Binding Path="SumOfM_NAGHD"  StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 
                 <syncfusion:GridTextColumn x:Name="SumOfMABL_VAR_COLUMN" MappingName="SumOfMABL_VAR" HeaderText="مبلغ واریزی">
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="SumOfMABL_VAR"  StringFormat="{}{0:#,0}" /> 
+                        <Binding Path="SumOfMABL_VAR"  StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 
                 <syncfusion:GridTextColumn x:Name="SumOfMABL_HAV_COLUMN" MappingName="SumOfMABL_HAV" HeaderText="مبلغ حواله">
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="SumOfMABL_HAV"  StringFormat="{}{0:#,0}" /> 
+                        <Binding Path="SumOfMABL_HAV"  StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 
                 <syncfusion:GridTextColumn x:Name="SumOfMABL_HAZ_COLUMN" MappingName="SumOfMABL_HAZ" HeaderText="مبلغ سرویس">
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="SumOfMABL_HAZ"  StringFormat="{}{0:#,0}" /> 
+                        <Binding Path="SumOfMABL_HAZ"  StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 
                 <syncfusion:GridTextColumn x:Name="SumOfTAKHFIF_COLUMN" MappingName="SumOfTAKHFIF" HeaderText="مبلغ تخفیف">
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="SumOfTAKHFIF"  StringFormat="{}{0:#,0}" /> 
+                        <Binding Path="SumOfTAKHFIF"  StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 
 
                 <syncfusion:GridTextColumn x:Name="JAMCH_COLUMN" MappingName="jamch" HeaderText="جمع چک">
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="jamch"  StringFormat="{}{0:#,0}" /> 
+                        <Binding Path="jamch"  StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 
@@ -612,7 +612,7 @@
 
                 <syncfusion:GridTextColumn x:Name="SIMBAA_COLUMN" MappingName="simbaa" HeaderText="کنترل ارزش افزوده">
                     <syncfusion:GridTextColumn.DisplayBinding>
-                        <Binding Path="simbaa"  StringFormat="{}{0:#,0}" /> 
+                        <Binding Path="simbaa"  StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 
@@ -666,6 +666,9 @@
                 <syncfusion:GridTextColumn x:Name="DEPATMAN_COLUMN" HeaderText="دپارتمان" MappingName="DEPATMAN" ColumnSizer="Auto"/>
                 <syncfusion:GridTextColumn x:Name="CUST_KIND_COLUMN" HeaderText="نوع مشتری" MappingName="CUST_KIND" ColumnSizer="Auto"/>
                 <syncfusion:GridTextColumn x:Name="SHARAYET_COLUMN" HeaderText="شرایط" MappingName="SHARAYET" ColumnSizer="Auto"/>
+                <syncfusion:GridTextColumn x:Name="Taxid_COLUMN" HeaderText="شناسه مالیاتی" MappingName="Taxid" ColumnSizer="Auto"/>
+                <syncfusion:GridTextColumn x:Name="Inno_COLUMN" HeaderText="شناسه فاکتور" MappingName="Inno" ColumnSizer="Auto"/>
+                <syncfusion:GridCheckBoxColumn x:Name="TheSuccess_COLUMN" HeaderText="موفق" MappingName="TheSuccess" ColumnSizer="Auto"/>
                 <syncfusion:GridCheckBoxColumn x:Name="SGN1_COLUMN" HeaderText="امضا 1" MappingName="SGN1" ColumnSizer="Auto"/>
                 <syncfusion:GridCheckBoxColumn x:Name="SGN2_COLUMN" HeaderText="امضا 2" MappingName="SGN2" ColumnSizer="Auto"/>
                 <syncfusion:GridCheckBoxColumn x:Name="SGN3_COLUMN" HeaderText="امضا 3" MappingName="SGN3" ColumnSizer="Auto"/>
@@ -682,7 +685,7 @@
                 <syncfusion:GridTextColumn x:Name="PEPID_COLUMN" HeaderText="الگوی قیمت" MappingName="PEPID" ColumnSizer="Auto"/>
                 <syncfusion:GridTextColumn x:Name="PEID_COLUMN" HeaderText="الگوی تخفیف" MappingName="PEID" ColumnSizer="Auto"/>
 
- 
+
 
             </syncfusion:SfDataGrid.Columns>
 

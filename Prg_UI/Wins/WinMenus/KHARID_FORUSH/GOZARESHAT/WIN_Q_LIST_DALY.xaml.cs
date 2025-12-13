@@ -98,7 +98,8 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             System.Collections.Generic.List<FACTOR_SPLIT_MODEL> MasterHead = null;
             if (WINNAME == "LFACT")
             {
-                MasterHead = dbms.DoGetDataSQL<FACTOR_SPLIT_MODEL>(@$"SELECT * FROM dbo.Q_LIST_DAYLY_1({DT1}, {DT2})").ToList();
+                //MasterHead = dbms.DoGetDataSQL<FACTOR_SPLIT_MODEL>(@$"SELECT * FROM dbo.Q_LIST_DAYLY_1({DT1}, {DT2})").ToList();
+                MasterHead = dbms.DoGetDataSQL<FACTOR_SPLIT_MODEL>(@$"SELECT q.*, t.TheSuccess, t.Taxid, t.Inno FROM dbo.Q_LIST_DAYLY_1({DT1}, {DT2}) q LEFT JOIN dbo.TAXDTL t ON t.NUMBER = q.NUMBER").ToList();
             }
 
             FACTOR_DATA?.Clear();
