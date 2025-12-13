@@ -12,6 +12,7 @@ using Prg_UI.Functions;
 using Prg_UI.Functions.Jostejoo;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Prg_UI.Wins.WinMenus.ANBAR;
 using Prg_UI.Wins.WinOther;
 using Rpts;
 using Stimulsoft.Report;
@@ -611,6 +612,27 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 {
                     e.Handled = true;
                     BTN_SAVE_Click(null, null);
+                }
+            }
+
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && e.Key == Key.G)
+            {
+                e.Handled = true;
+
+                if (!_navigationManager.IsNewRecord)
+                {
+                    var dt = DateTime.Now;
+                    CL_HESABDARI.TR("HEAD_LST", "(NUMBER = " + NUMBER.Text + $") AND (TAG = {HTAG})", dt, 1);
+                    CL_HESABDARI.TR("INVO_LST", "(NUMBER = " + NUMBER.Text + $") AND (TAG = {HTAG})", dt, 1);
+
+                    //BUTTON_SAVE_HAVALE_Click(null, null);
+
+                    if (!_navigationManager.IsNewRecord)
+                    {
+                        OTHER_DTL win = new OTHER_DTL(HTAG, I_AM_VK_SAKHTEH);
+                        win.NUMBER = Convert.ToInt64(NUMBER.Text);
+                        win.Show();
+                    }
                 }
             }
 

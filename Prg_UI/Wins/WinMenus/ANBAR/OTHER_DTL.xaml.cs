@@ -1,27 +1,28 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Input;
-using System.Windows.Media;
+﻿using Functions;
 using MaterialDesignThemes.Wpf;
+using Microsoft.Data.SqlClient;
+using Microsoft.IdentityModel.Tokens;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
-using Wins.WinMenus.KHARID_FORUSH;
-using Microsoft.IdentityModel.Tokens;
-using Functions;
-using Microsoft.Data.SqlClient;
+using Prg_UI.Wins.WinMenus.SANATI;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
+using System.Windows.Media;
+using Wins.WinMenus.KHARID_FORUSH;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
 {
@@ -114,6 +115,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 TAG = 2;
             }
 
+            if (OpenArgs == 11) //برگه خروج سایر مواد از انبار
+            {
+                TAG = OpenArgs;
+            }
+
             Form_Open();
             FillCombo();
             NAME_CODE_LOADITEM();
@@ -121,11 +127,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         }
         bool IsNull(object hTAF2) => hTAF2 == null ? true : false;
 
-        void CAMIUN_BeforeUpdate()
-        {
-            //DoCmd.RunCommand(acCmdSaveRecord);
-            //this.OTHER_DTL_SUB_SUB.Requery();
-        }
         void CAMIUN_NUM_AfterUpdate()
         {
             CAMIUN_NUM.PreviewLostKeyboardFocus -= CAMIUN_NUM_PreviewLostKeyboardFocus;
@@ -222,41 +223,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         /// <summary>
         /// برای فرم های دیگر مثل فاکتور فروش و خرید این رویداد به کار می آید
         /// </summary>
-        void Form_BeforeInsert()
-        {
-            if (OpenArgs == 1)
-            {
-                if (IsNull(NUMBER))
-                {
-                    //if (IsLoaded("HEAD_LST_PISHFROOSH2"))
-                    //{
-                    //    NUMBER = Forms["HEAD_LST_PISHFROOSH2"]["NUMBER"];
-                    //    this["TAG"] = 20;
-                    //}
-                    //else if (IsLoaded("HEAD_LST_HAVL"))
-                    //{
-                    //    this.NUMBER = Forms["HEAD_LST_HAVL"]["NUMBER"];
-                    //    this["TAG"] = 2;
-                    //}
-                    //else if (IsLoaded("HEAD_LST_FROOSH22"))
-                    //{
-                    //    this.NUMBER = Forms["HEAD_LST_FROOSH22"]["NUMBER"];
-                    //    this["TAG"] = 2;
-                    //}
-                    //else
-                    //{
-                    //this.NUMBER = Forms["HEAD_LST_RASID"]["NUMBER"];
-                    //TAG = 1;
-                    //}
-                }
-            }
-        }
-        void Form_Error(int DataErr, int Response)
-        {
-            //errdetector[DataErr];
-            //Response = acDataErrContinue;
-            //DoCmd.RunMacro("stop");
-        }
         void Form_Open()
         {
             INSERTVAZN();
@@ -304,6 +270,28 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     // this.OTHER_DTL_SUB_SUB.Requery();
                 }
                 KINDF = "PISH";
+            }
+            else if (Win_US is HAVALE_EXIT_SAYER)
+            {
+                KINDF = "HAV_SAYER";
+                if (OpenArgs == 11)
+                {
+                    var _TG_ = 11;
+                    var _NUMBER_ = (Win_US as HAVALE_EXIT_SAYER).NUMBER.Text;
+                    TAG = Convert.ToByte(_TG_);
+                    NUMBER = Convert.ToDouble(_NUMBER_);
+
+                    RecordSource = $"SELECT * FROM OTHER_DTL WHERE TAG = {_TG_} and NUMBER = " + _NUMBER_;
+
+                    dbms.DoExecuteSQL(
+                      "INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) " +
+                      "SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i " +
+                      "WHERE i.NUMBER = " + _NUMBER_ + $" AND i.TAG = {_TG_} " +
+                      "AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) " +
+                      "GROUP BY i.NUMBER, i.TAG, i.CODE");
+
+                    dbms.DoExecuteSQL($"DELETE FROM dbo.OTHER_DTL_SUB WHERE     (TAGG = {_TG_}) AND (NUMBER = " + _NUMBER_ + ") AND (NOT (CODE IN   (SELECT     CODE  FROM dbo.INVO_LST   WHERE     (NUMBER = " + _NUMBER_ + $") AND (TAG = {_TG_}))))");
+                }
             }
             else if (Win_US is HEAD_LST_HAVL)
             {
@@ -773,6 +761,30 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                             // Forms["HEAD_LST_RASID"]["INVO_LST_RASID_SUB"].Requery();
                             break;
                         }
+                    case "HAV_SAYER":
+                        {
+                            ////var rst = dbms.DoGetDataSQL<QRE_KH_06>("SELECT * FROM OTHER_DTL_sub WHERE tagg= 11 and MEGHk > 0 and NUMBER = " + NUMBER).ToList();
+                            ////if (rst.Count > 0)
+                            ////{
+                            ////    for (int i = 0; i < rst.Count; i++) //while (/*!rst.EOF 1 == 1)
+                            ////    {
+                            ////        var RST2 = dbms.DoGetDataSQL<INVO_LST_CSHARP>("select * from invo_lst where tag = 11 and NUMBER = " + NUMBER + " and code = '" + rst[i].CODE + "'").ToList();
+                            ////        if (RST2.Count == 1)
+                            ////        {
+                            ////            dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET
+                            ////                                               MEGH ={rst[i].MEGHk} ,
+                            ////                                               MEGHk = {rst[i].MEGHk} ,
+                            ////                                               MABL_K = {Math.Round((double)(rst[i].MEGHk * RST2[0].MABL))},
+                            ////                                               N_MOIN = {Math.Round((double)(rst[i].MEGHk * RST2[0].MABL * RST2[0].N_KOL / 100))} 
+                            ////                                               WHERE TAG = 11 AND NUMBER = " + NUMBER + " AND CODE = '" + rst[i].CODE + "'" + $"  AND id = {RST2.FirstOrDefault().id}  ");
+
+                            ////            //RST2.update();
+                            ////        }
+                            ////        // rst.MoveNext();
+                            ////    }
+                            ////}
+                            break;
+                        }
                 }
                 //DoCmd.Close(acForm, this.NAME);
             }
@@ -1070,6 +1082,14 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                                 "WHERE i.TAG = 20 AND i.NUMBER = " + this.NUMBER +
                                 " AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) GROUP BY i.NUMBER, i.TAG, i.CODE");
 
+                            break;
+                        }
+                    case "HAV_SAYER":
+                        {
+                            dbms.DoExecuteSQL("INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) " +
+                                "SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i " +
+                                "WHERE i.TAG = 11 AND i.NUMBER = " + this.NUMBER + " " +
+                                "AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) GROUP BY i.NUMBER, i.TAG, i.CODE");
                             break;
                         }
                     case "HAV":
