@@ -4,7 +4,10 @@ using iText.Layout.Properties;
 using Microsoft.Data.SqlClient;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
+using Prg_UI.Functions;
 using System;
+using System.Collections.Generic;
+using System.Windows;
 using static Stimulsoft.Report.Func;
 using static Stimulsoft.Report.StiOptions;
 
@@ -2352,137 +2355,139 @@ END;";
                 //تعریف پورسانت ویزیتور
                 try { db.Execute($@"ALTER TABLE dbo.VISITORS_PORSANT_KALA ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
-				if (isCustomCall)
-				{
-					//این فعلا به طور آزمایشی اضافه شده ممکنه بعدا مشکلی ایجاد کنه , پس باید حواسم به این بخش باشه که جدید اضافه شده
+                if (isCustomCall)
+                {
+                    bool allSuccess = true;
+                    List<string> failedSections = new List<string>();
+
+                    // FIX: تعریف یک رشته تنظیمات استاندارد برای استفاده در تمام کوئری‌های حساس
+                    string setOptions = "SET ANSI_NULLS ON; SET ANSI_PADDING ON; SET ANSI_WARNINGS ON; SET ARITHABORT ON; SET CONCAT_NULL_YIELDS_NULL ON; SET QUOTED_IDENTIFIER ON; SET NUMERIC_ROUNDABORT OFF; ";
+
                     #region Optimization_TDETA_HES_AND_TAXDTL
-                    // 1. Correct Index on TAXDTL (Matching "Method 1" logic)
+                    // 1. Correct Index on TAXDTL
                     try
                     {
+                        // FIX: اضافه کردن تنظیمات به ابتدای کوئری
                         db.Execute($@"
-						IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_TAXDTL_Success_Number_Include' AND object_id = OBJECT_ID('dbo.TAXDTL'))
-						BEGIN
-						    CREATE NONCLUSTERED INDEX [IX_TAXDTL_Success_Number_Include] 
-						    ON [dbo].[TAXDTL] ([NUMBER], [TheSuccess]) 
-						    INCLUDE ([Taxid], [Inno]) 
-						    WHERE [TheSuccess] = 1;
-						END");
+						 {setOptions}
+						 CREATE NONCLUSTERED INDEX [IX_TAXDTL_Success_Number_Include] 
+						 ON [dbo].[TAXDTL] ([NUMBER], [TheSuccess]) 
+						 INCLUDE ([Taxid], [Inno]) 
+						 WHERE [TheSuccess] = 1");
                     }
-                    catch { }
+                    catch { allSuccess = false; failedSections.Add("TAXDTL Index"); }
 
-                    // 2. Computed Columns: CLEANUP OLD "BAD" COLUMNS (ISNULL version) if they exist
+                    // 2. Computed Columns: CLEANUP OLD "BAD" COLUMNS
                     try
                     {
-						// Check and Drop for TDETA_HES
-						db.Execute(@$"
-						IF EXISTS(SELECT 1 FROM sys.computed_columns WHERE object_id = OBJECT_ID('dbo.TDETA_HES') AND name = 'CUST_NO_CALC' AND definition LIKE '%ISNULL%')
-						BEGIN
-                        DROP INDEX[IX_TDETA_HES_CUST_NO_CALC] ON[dbo].[TDETA_HES];
-                        ALTER TABLE[dbo].[TDETA_HES] DROP COLUMN[CUST_NO_CALC];
-                        END
-                        IF EXISTS(SELECT 1 FROM sys.computed_columns WHERE object_id = OBJECT_ID('dbo.TDETA_HES2') AND name = 'CUST_NO_CALC' AND definition LIKE '%ISNULL%')
-                        BEGIN
-                        DROP INDEX[IX_TDETA_HES2_CUST_NO_CALC] ON[dbo].[TDETA_HES2];
-                        ALTER TABLE[dbo].[TDETA_HES2] DROP COLUMN[CUST_NO_CALC];
-                        END
-                        IF EXISTS(SELECT 1 FROM sys.computed_columns WHERE object_id = OBJECT_ID('dbo.TDETA_HES3') AND name = 'CUST_NO_CALC' AND definition LIKE '%ISNULL%')
-                        BEGIN
-                        DROP INDEX[IX_TDETA_HES3_CUST_NO_CALC] ON[dbo].[TDETA_HES3];
-                        ALTER TABLE[dbo].[TDETA_HES3] DROP COLUMN[CUST_NO_CALC];
-                        END
-                        IF EXISTS(SELECT 1 FROM sys.computed_columns WHERE object_id = OBJECT_ID('dbo.TDETA_HES4') AND name = 'CUST_NO_CALC' AND definition LIKE '%ISNULL%')
-                        BEGIN
-                        DROP INDEX[IX_TDETA_HES4_CUST_NO_CALC] ON[dbo].[TDETA_HES4];
-                        ALTER TABLE[dbo].[TDETA_HES4] DROP COLUMN[CUST_NO_CALC];
-                        END");
+                        db.Execute(@$"
+							BEGIN
+							    IF EXISTS (SELECT * FROM sys.indexes WHERE name='IX_TDETA_HES_CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES')) DROP INDEX [IX_TDETA_HES_CUST_NO_CALC] ON [dbo].[TDETA_HES];
+							    IF EXISTS (SELECT * FROM sys.columns WHERE name='CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES')) ALTER TABLE [dbo].[TDETA_HES] DROP COLUMN [CUST_NO_CALC];
+							END
+							BEGIN
+							    IF EXISTS (SELECT * FROM sys.indexes WHERE name='IX_TDETA_HES2_CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES2')) DROP INDEX [IX_TDETA_HES2_CUST_NO_CALC] ON [dbo].[TDETA_HES2];
+							    IF EXISTS (SELECT * FROM sys.columns WHERE name='CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES2')) ALTER TABLE [dbo].[TDETA_HES2] DROP COLUMN [CUST_NO_CALC];
+							END
+							BEGIN
+							    IF EXISTS (SELECT * FROM sys.indexes WHERE name='IX_TDETA_HES3_CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES3')) DROP INDEX [IX_TDETA_HES3_CUST_NO_CALC] ON [dbo].[TDETA_HES3];
+							    IF EXISTS (SELECT * FROM sys.columns WHERE name='CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES3')) ALTER TABLE [dbo].[TDETA_HES3] DROP COLUMN [CUST_NO_CALC];
+							END
+							BEGIN
+							    IF EXISTS (SELECT * FROM sys.indexes WHERE name='IX_TDETA_HES4_CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES4')) DROP INDEX [IX_TDETA_HES4_CUST_NO_CALC] ON [dbo].[TDETA_HES4];
+							    IF EXISTS (SELECT * FROM sys.columns WHERE name='CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES4')) ALTER TABLE [dbo].[TDETA_HES4] DROP COLUMN [CUST_NO_CALC];
+							END");
                     }
-                    catch { }
+                    catch { allSuccess = false; failedSections.Add("Cleanup Old Columns"); }
 
-                    // 3. Create Correct Computed Columns (Method 1: No ISNULL, uses CONVERT)
+                    // 3. Create Correct Computed Columns
                     // TDETA_HES (Level 3)
                     try
                     {
+                        // FIX: اضافه کردن setOptions
                         db.Execute($@"
-						IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.TDETA_HES') AND name = 'CUST_NO_CALC')
-						BEGIN
-						    ALTER TABLE dbo.TDETA_HES ADD CUST_NO_CALC AS 
-						    (rtrim(CONVERT(nvarchar(30),[N_KOL],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[NUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER],0))) PERSISTED;
-						END");
+						{setOptions}
+						ALTER TABLE dbo.TDETA_HES ADD CUST_NO_CALC AS 
+						(rtrim(CONVERT(nvarchar(30),[N_KOL],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[NUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER],0))) PERSISTED;");
                     }
-                    catch { }
+                    catch (Exception ex) { allSuccess = false; failedSections.Add("ALTER TABLE dbo.TDETA_HES"); CL_LMethods.DoWriteMyLog("ALTER TABLE dbo.TDETA_HES", ex); }
+
                     try
                     {
+                        // FIX: اضافه کردن setOptions
                         db.Execute($@"
-						IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_TDETA_HES_CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES'))
-						BEGIN
-						    CREATE INDEX IX_TDETA_HES_CUST_NO_CALC ON dbo.TDETA_HES(CUST_NO_CALC);
-						END");
+						{setOptions}
+						CREATE INDEX IX_TDETA_HES_CUST_NO_CALC ON dbo.TDETA_HES(CUST_NO_CALC);");
                     }
-                    catch { }
+                    catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.IX_TDETA_HES_CUST_NO_CALC"); }
 
                     // TDETA_HES2 (Level 4)
                     try
                     {
+                        // FIX: اضافه کردن setOptions
                         db.Execute($@"
-						IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.TDETA_HES2') AND name = 'CUST_NO_CALC')
-						BEGIN
-						    ALTER TABLE dbo.TDETA_HES2 ADD CUST_NO_CALC AS 
-						    (rtrim(CONVERT(nvarchar(30),[N_KOL],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[NUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER2],0))) PERSISTED;
-						END");
+						{setOptions}
+						ALTER TABLE dbo.TDETA_HES2 ADD CUST_NO_CALC AS 
+						(rtrim(CONVERT(nvarchar(30),[N_KOL],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[NUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER2],0))) PERSISTED;");
                     }
-                    catch { }
+                    catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.TDETA_HES2"); }
                     try
                     {
+                        // FIX: اضافه کردن setOptions
                         db.Execute($@"
-						IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_TDETA_HES2_CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES2'))
-						BEGIN
-						    CREATE INDEX IX_TDETA_HES2_CUST_NO_CALC ON dbo.TDETA_HES2(CUST_NO_CALC);
-						END");
+						{setOptions}
+						CREATE INDEX IX_TDETA_HES2_CUST_NO_CALC ON dbo.TDETA_HES2(CUST_NO_CALC);");
                     }
-                    catch { }
+                    catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.IX_TDETA_HES2_CUST_NO_CALC"); }
 
                     // TDETA_HES3 (Level 5)
                     try
                     {
+                        // FIX: اضافه کردن setOptions
                         db.Execute($@"
-						IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.TDETA_HES3') AND name = 'CUST_NO_CALC')
-						BEGIN
-						    ALTER TABLE dbo.TDETA_HES3 ADD CUST_NO_CALC AS 
-						    (rtrim(CONVERT(nvarchar(30),[N_KOL],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[NUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER2],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER3],0))) PERSISTED;
-						END");
+						{setOptions}
+						ALTER TABLE dbo.TDETA_HES3 ADD CUST_NO_CALC AS 
+						(rtrim(CONVERT(nvarchar(30),[N_KOL],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[NUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER2],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER3],0))) PERSISTED;");
                     }
-                    catch { }
+                    catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.TDETA_HES3"); }
                     try
                     {
+                        // FIX: اضافه کردن setOptions
                         db.Execute($@"
-						IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_TDETA_HES3_CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES3'))
-						BEGIN
-						    CREATE INDEX IX_TDETA_HES3_CUST_NO_CALC ON dbo.TDETA_HES3(CUST_NO_CALC);
-						END");
+						{setOptions}
+						CREATE INDEX IX_TDETA_HES3_CUST_NO_CALC ON dbo.TDETA_HES3(CUST_NO_CALC);");
                     }
-                    catch { }
+                    catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.IX_TDETA_HES3_CUST_NO_CALC"); }
 
                     // TDETA_HES4 (Level 6)
                     try
                     {
+                        // FIX: اضافه کردن setOptions
                         db.Execute($@"
-						IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.TDETA_HES4') AND name = 'CUST_NO_CALC')
-						BEGIN
-						    ALTER TABLE dbo.TDETA_HES4 ADD CUST_NO_CALC AS 
-						    (rtrim(CONVERT(nvarchar(30),[N_KOL],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[NUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER2],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER3],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER4],0))) PERSISTED;
-						END");
+						{setOptions}
+						ALTER TABLE dbo.TDETA_HES4 ADD CUST_NO_CALC AS 
+						(rtrim(CONVERT(nvarchar(30),[N_KOL],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[NUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER2],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER3],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER4],0))) PERSISTED;");
                     }
-                    catch { }
+                    catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.TDETA_HES4"); }
                     try
                     {
+                        // FIX: اضافه کردن setOptions
                         db.Execute($@"
-						IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_TDETA_HES4_CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES4'))
-						BEGIN
-						    CREATE INDEX IX_TDETA_HES4_CUST_NO_CALC ON dbo.TDETA_HES4(CUST_NO_CALC);
-						END");
+						{setOptions}
+						CREATE INDEX IX_TDETA_HES4_CUST_NO_CALC ON dbo.TDETA_HES4(CUST_NO_CALC);");
                     }
-                    catch { }
+                    catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.IX_TDETA_HES4_CUST_NO_CALC"); }
                     #endregion
+
+                    //if (allSuccess)
+                    //{
+                    //    MessageBox.Show("تمامی عملیات بهینه‌سازی با موفقیت انجام شد.", "عملیات موفق");
+                    //}
+                    //else
+                    //{
+                    //    string failedList = string.Join("\n", failedSections);
+                    //    MessageBox.Show($"برخی از بخش‌ها با خطا مواجه شدند:\n{failedList}", "خطا در اجرا");
+                    //}
                 }
             }
         }

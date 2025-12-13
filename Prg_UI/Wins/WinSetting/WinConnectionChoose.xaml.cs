@@ -5,6 +5,7 @@ using Prg_Proccessy.Generaly;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
+using Syncfusion.Windows.Shared;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -138,7 +139,7 @@ namespace Prg_UI.Wins.WinSetting
             if (rd_WinAuth.IsChecked is true) //Windows Authentication
                 CNN_STR = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};Integrated Security=True;TrustServerCertificate=True;"; //WIN
             else if (rd_SqlAuth.IsChecked is true) //SQL Authentication
-                CNN_STR = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Text};Integrated Security=False;"; // SQL
+                CNN_STR = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Password};Integrated Security=False;;TrustServerCertificate=True;"; // SQL
 
             try
             {
@@ -203,7 +204,7 @@ namespace Prg_UI.Wins.WinSetting
                 if (rd_WinAuth.IsChecked is true) //Windows Authentication
                     _cnn = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};Integrated Security=True;TrustServerCertificate=True;"; //WIN
                 else if (rd_SqlAuth.IsChecked is true) //SQL Authentication
-                    _cnn = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Text};Integrated Security=False;"; // SQL
+                    _cnn = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Password};Integrated Security=False;TrustServerCertificate=True;"; // SQL
             });
 
             CL_CCNNMANAGER tsdb = new CL_CCNNMANAGER();
@@ -212,7 +213,7 @@ namespace Prg_UI.Wins.WinSetting
             {
                 _result = tsdb.DoGetDataSQL<string>("SELECT SERVERNAM FROM dbo.SAZMAN").FirstOrDefault();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return false;
             }
@@ -250,6 +251,15 @@ namespace Prg_UI.Wins.WinSetting
 
                 ServerChooser.Items.Add(CL_Generaly.General_Servername);
                 DbChooser.Items.Add(CL_Generaly.General_DBname);
+
+                if (!string.IsNullOrWhiteSpace(CL_Generaly.General_Username))
+                {
+                    Textbox_DataUsername.Text = CL_Generaly.General_Username;
+                }
+                if (!string.IsNullOrWhiteSpace(CL_Generaly.General_Password))
+                {
+                    Textbox_Datapass.Password = CL_Generaly.General_Password;
+                }
 
                 ServerChooser.SelectionChanged += ServerChooser_SelectionChanged; //برای ایکه رویداد الکی اجرا نشه تداخل درست کنه
             }
@@ -290,7 +300,7 @@ namespace Prg_UI.Wins.WinSetting
                 if (rd_WinAuth.IsChecked is true) //Windows Authentication
                     _TMPCNN = $@"Data Source={ServerChooser_TEX};Initial Catalog=master;Integrated Security=True;TrustServerCertificate=True;"; //WIN
                 else if (rd_SqlAuth.IsChecked is true) //SQL Authentication
-                    _TMPCNN = $@"Data Source={ServerChooser_TEX};Initial Catalog=master;User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Text};Integrated Security=False;"; // SQL
+                    _TMPCNN = $@"Data Source={ServerChooser_TEX};Initial Catalog=master;User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Password};Integrated Security=False;"; // SQL
 
                 using (IDbConnection db = new SqlConnection(_TMPCNN))
                 {

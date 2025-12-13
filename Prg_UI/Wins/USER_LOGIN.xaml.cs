@@ -385,7 +385,7 @@ namespace Prg_UI.Wins
             //new TARAZ_4_MAH().Show();
             //new HEAD_LST_BRFR(2030d).Show();
 
-            //new FACTORS_LST(20).Show();
+            new WinConnectionChoose().Show();
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_LFACT, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
