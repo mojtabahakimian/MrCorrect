@@ -1,9 +1,11 @@
 ﻿using Dapper;
 using DocumentFormat.OpenXml.Math;
+using iText.Layout.Properties;
 using Microsoft.Data.SqlClient;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using System;
+using static Stimulsoft.Report.Func;
 using static Stimulsoft.Report.StiOptions;
 
 namespace Prg_UI.Scriptses
@@ -2349,6 +2351,139 @@ END;";
 
                 //تعریف پورسانت ویزیتور
                 try { db.Execute($@"ALTER TABLE dbo.VISITORS_PORSANT_KALA ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+
+				if (isCustomCall)
+				{
+					//این فعلا به طور آزمایشی اضافه شده ممکنه بعدا مشکلی ایجاد کنه , پس باید حواسم به این بخش باشه که جدید اضافه شده
+                    #region Optimization_TDETA_HES_AND_TAXDTL
+                    // 1. Correct Index on TAXDTL (Matching "Method 1" logic)
+                    try
+                    {
+                        db.Execute($@"
+						IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_TAXDTL_Success_Number_Include' AND object_id = OBJECT_ID('dbo.TAXDTL'))
+						BEGIN
+						    CREATE NONCLUSTERED INDEX [IX_TAXDTL_Success_Number_Include] 
+						    ON [dbo].[TAXDTL] ([NUMBER], [TheSuccess]) 
+						    INCLUDE ([Taxid], [Inno]) 
+						    WHERE [TheSuccess] = 1;
+						END");
+                    }
+                    catch { }
+
+                    // 2. Computed Columns: CLEANUP OLD "BAD" COLUMNS (ISNULL version) if they exist
+                    try
+                    {
+						// Check and Drop for TDETA_HES
+						db.Execute(@$"
+						IF EXISTS(SELECT 1 FROM sys.computed_columns WHERE object_id = OBJECT_ID('dbo.TDETA_HES') AND name = 'CUST_NO_CALC' AND definition LIKE '%ISNULL%')
+						BEGIN
+                        DROP INDEX[IX_TDETA_HES_CUST_NO_CALC] ON[dbo].[TDETA_HES];
+                        ALTER TABLE[dbo].[TDETA_HES] DROP COLUMN[CUST_NO_CALC];
+                        END
+                        IF EXISTS(SELECT 1 FROM sys.computed_columns WHERE object_id = OBJECT_ID('dbo.TDETA_HES2') AND name = 'CUST_NO_CALC' AND definition LIKE '%ISNULL%')
+                        BEGIN
+                        DROP INDEX[IX_TDETA_HES2_CUST_NO_CALC] ON[dbo].[TDETA_HES2];
+                        ALTER TABLE[dbo].[TDETA_HES2] DROP COLUMN[CUST_NO_CALC];
+                        END
+                        IF EXISTS(SELECT 1 FROM sys.computed_columns WHERE object_id = OBJECT_ID('dbo.TDETA_HES3') AND name = 'CUST_NO_CALC' AND definition LIKE '%ISNULL%')
+                        BEGIN
+                        DROP INDEX[IX_TDETA_HES3_CUST_NO_CALC] ON[dbo].[TDETA_HES3];
+                        ALTER TABLE[dbo].[TDETA_HES3] DROP COLUMN[CUST_NO_CALC];
+                        END
+                        IF EXISTS(SELECT 1 FROM sys.computed_columns WHERE object_id = OBJECT_ID('dbo.TDETA_HES4') AND name = 'CUST_NO_CALC' AND definition LIKE '%ISNULL%')
+                        BEGIN
+                        DROP INDEX[IX_TDETA_HES4_CUST_NO_CALC] ON[dbo].[TDETA_HES4];
+                        ALTER TABLE[dbo].[TDETA_HES4] DROP COLUMN[CUST_NO_CALC];
+                        END");
+                    }
+                    catch { }
+
+                    // 3. Create Correct Computed Columns (Method 1: No ISNULL, uses CONVERT)
+                    // TDETA_HES (Level 3)
+                    try
+                    {
+                        db.Execute($@"
+						IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.TDETA_HES') AND name = 'CUST_NO_CALC')
+						BEGIN
+						    ALTER TABLE dbo.TDETA_HES ADD CUST_NO_CALC AS 
+						    (rtrim(CONVERT(nvarchar(30),[N_KOL],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[NUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER],0))) PERSISTED;
+						END");
+                    }
+                    catch { }
+                    try
+                    {
+                        db.Execute($@"
+						IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_TDETA_HES_CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES'))
+						BEGIN
+						    CREATE INDEX IX_TDETA_HES_CUST_NO_CALC ON dbo.TDETA_HES(CUST_NO_CALC);
+						END");
+                    }
+                    catch { }
+
+                    // TDETA_HES2 (Level 4)
+                    try
+                    {
+                        db.Execute($@"
+						IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.TDETA_HES2') AND name = 'CUST_NO_CALC')
+						BEGIN
+						    ALTER TABLE dbo.TDETA_HES2 ADD CUST_NO_CALC AS 
+						    (rtrim(CONVERT(nvarchar(30),[N_KOL],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[NUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER2],0))) PERSISTED;
+						END");
+                    }
+                    catch { }
+                    try
+                    {
+                        db.Execute($@"
+						IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_TDETA_HES2_CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES2'))
+						BEGIN
+						    CREATE INDEX IX_TDETA_HES2_CUST_NO_CALC ON dbo.TDETA_HES2(CUST_NO_CALC);
+						END");
+                    }
+                    catch { }
+
+                    // TDETA_HES3 (Level 5)
+                    try
+                    {
+                        db.Execute($@"
+						IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.TDETA_HES3') AND name = 'CUST_NO_CALC')
+						BEGIN
+						    ALTER TABLE dbo.TDETA_HES3 ADD CUST_NO_CALC AS 
+						    (rtrim(CONVERT(nvarchar(30),[N_KOL],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[NUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER2],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER3],0))) PERSISTED;
+						END");
+                    }
+                    catch { }
+                    try
+                    {
+                        db.Execute($@"
+						IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_TDETA_HES3_CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES3'))
+						BEGIN
+						    CREATE INDEX IX_TDETA_HES3_CUST_NO_CALC ON dbo.TDETA_HES3(CUST_NO_CALC);
+						END");
+                    }
+                    catch { }
+
+                    // TDETA_HES4 (Level 6)
+                    try
+                    {
+                        db.Execute($@"
+						IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.TDETA_HES4') AND name = 'CUST_NO_CALC')
+						BEGIN
+						    ALTER TABLE dbo.TDETA_HES4 ADD CUST_NO_CALC AS 
+						    (rtrim(CONVERT(nvarchar(30),[N_KOL],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[NUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER2],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER3],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER4],0))) PERSISTED;
+						END");
+                    }
+                    catch { }
+                    try
+                    {
+                        db.Execute($@"
+						IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_TDETA_HES4_CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES4'))
+						BEGIN
+						    CREATE INDEX IX_TDETA_HES4_CUST_NO_CALC ON dbo.TDETA_HES4(CUST_NO_CALC);
+						END");
+                    }
+                    catch { }
+                    #endregion
+                }
             }
         }
 

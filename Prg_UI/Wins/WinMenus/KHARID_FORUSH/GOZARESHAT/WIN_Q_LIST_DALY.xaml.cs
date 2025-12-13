@@ -99,7 +99,18 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             if (WINNAME == "LFACT")
             {
                 //MasterHead = dbms.DoGetDataSQL<FACTOR_SPLIT_MODEL>(@$"SELECT * FROM dbo.Q_LIST_DAYLY_1({DT1}, {DT2})").ToList();
-                MasterHead = dbms.DoGetDataSQL<FACTOR_SPLIT_MODEL>(@$"SELECT q.*, t.TheSuccess, t.Taxid, t.Inno FROM dbo.Q_LIST_DAYLY_1({DT1}, {DT2}) q LEFT JOIN dbo.TAXDTL t ON t.NUMBER = q.NUMBER").ToList();
+                MasterHead = dbms.DoGetDataSQL<FACTOR_SPLIT_MODEL>
+                    ($@"SELECT q.DATE_N, q.NUMBER, q.SumOfM_NAGHD, q.SumOfMABL_VAR, q.SumOfMABL_HAV,
+                        q.SumOfMABL_HAZ, q.SumOfTAKHFIF, q.hes, q.NAME, q.DEPATMAN, q.USER_NAME, q.SHIFT,
+                        q.SHNAME, q.DEPNAME, q.USS, q.kk, q.jamf, q.simbaa, q.jamch, q.ECODE, q.SMBAA, q.mand,
+                        q.MOLAH, q.TEL, q.CUST_KIND, q.CUSTKNAME, q.MOIN_HAV, q.MOIN_HAZ, q.MOIN_VAR, q.date_h, 
+                        q.ddf, q.NUMBER1, q.TICMBAA, q.N_S, q.VAS, q.MAS, q.TAH, q.ANBAR, q.MOIN_KHF, q.ANBARF, 
+                        q.SHARAYET, q.SGN1, q.SGN2, q.SGN3, q.SGN4, q.HMBAA, q.TAMIR, q.TKHF, q.SADER, q.ARZD,
+                        q.ARZKIND, q.JAY, q.MODAT_PPID, q.PEPID, q.PEID, q.MCODEM, q.MOBILE, q.OSTANID, q.SHAHRID,
+                        t.TheSuccess, t.Taxid, t.Inno
+                        FROM dbo.Q_LIST_DAYLY_1({DT1}, {DT2}) q
+                             LEFT JOIN dbo.TAXDTL t ON t.NUMBER=q.NUMBER AND t.TheSuccess=1;
+                        ").ToList();
             }
 
             FACTOR_DATA?.Clear();
