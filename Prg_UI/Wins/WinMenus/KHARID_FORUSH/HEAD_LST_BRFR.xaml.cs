@@ -43,6 +43,7 @@ using Wins.WinMenus.ANBAR;
 using System.Windows.Data;
 using System.Windows.Controls.Primitives;
 using static Prg_UI.Functions.CL_LMethods;
+using System.Windows.Threading;
 
 namespace Wins.WinMenus.KHARID_FORUSH
 {
@@ -473,39 +474,58 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            DataGrid DG = INVO_LST_SUB;
-            UIElement uie = e.OriginalSource as UIElement;
-
             try
             {
-                if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+                var originalSource = e.OriginalSource as DependencyObject;
+                DataGrid activeGrid = FindParent<DataGrid>(originalSource);
+
+                if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
                 {
                     e.Handled = true;
 
-                    if (INVO_LST_SUB_IsFocused)
+                    // Smart Detection: Are we inside a DataGrid?
+                    if (activeGrid != null)
                     {
-                        if (DG.CurrentColumn != null)
+                        // Logic specific to DataGrid Navigation
+                        if (activeGrid.CurrentColumn != null)
                         {
-                            int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                            bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
-                            bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+                            int currentColumnIndex = activeGrid.CurrentColumn.DisplayIndex;
+                            // Check actual visible columns count, not just count
+                            bool isLastColumn = currentColumnIndex >= activeGrid.Columns.Count - 1;
+                            bool isLastRow = activeGrid.SelectedIndex == activeGrid.Items.Count - 2; // -2 assumes "CanUserAddRows" is true creating a placeholder
 
                             if (isLastColumn)
                             {
-                                // If it's the last column, move focus to the first cell of next row
                                 if (isLastRow)
                                 {
-                                    // Add focus to new row if needed
-                                    DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
+                                    // Move to new row
+                                    activeGrid.SelectedIndex++; // Move to the placeholder row
 
-                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[INVO_LST_SUB_DEF_INDEX_COL]);
+                                    // Determine which column to focus based on Grid Name (Legacy Logic Preservation)
+                                    int targetColIndex = 0;
+                                    if (activeGrid.Name == "VISITOR_DTL_SUB")
+                                    {
+                                        targetColIndex = 0;
+                                    }
+                                    else if (activeGrid.Name == "INVO_LST_SUB")
+                                    {
+                                        // Ensure the constant INVO_LST_SUB_DEF_INDEX_COL exists in your class
+                                        targetColIndex = INVO_LST_SUB_DEF_INDEX_COL;
+                                    }
 
-                                    //Dispatcher.BeginInvoke(new Action(() =>
-                                    //{
-                                    //    DG.BeginEdit();
-                                    //}), DispatcherPriority.Background);
+                                    // Safety check for column index
+                                    if (targetColIndex < activeGrid.Columns.Count)
+                                    {
+                                        activeGrid.CurrentCell = new DataGridCellInfo(activeGrid.SelectedItem, activeGrid.Columns[targetColIndex]);
+                                    }
 
-                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                    // Enter Edit Mode on the new cell
+                                    Dispatcher.BeginInvoke(new Action(() =>
+                                    {
+                                        activeGrid.BeginEdit();
+                                    }), DispatcherPriority.Background);
+
+                                    return; // Stop here, do not tab
                                 }
                             }
                         }
@@ -513,46 +533,52 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                     CL_LMethods.SendKey_US(Key.Tab);
                 }
-            }
-            catch { /*ignore*/ }
 
-            if (!INVO_LST_SUB.IsKeyboardFocusWithin && !INVO_LST_SUB.IsFocused) //Only On Form F7 Pressed Not DataGrid
-            {
+                // Only trigger if NOT editing inside the main grid (prevent interrupting data entry)
                 if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
                 {
-                    e.Handled = true;
-                    var searchWindow = new EnhancedSearchWindow(this);
-                    searchWindow.Owner = this;
-                    searchWindow.ShowDialog();
-                }
-            }
+                    // Check if we are "busy" editing inside the specific grid
+                    bool isEditingMainGrid = (activeGrid != null && activeGrid.Name == "INVO_LST_SUB" && activeGrid.IsKeyboardFocusWithin);
 
-            // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
-            var nonDataKeys = new[]
-            {
-                Key.Enter, Key.Tab, Key.LeftShift, Key.RightShift,
-                Key.CapsLock, Key.Left, Key.Right, Key.Up, Key.Down,
-                Key.LeftAlt, Key.RightAlt, Key.LeftCtrl, Key.RightCtrl,
-                Key.F1, Key.F2, Key.F3, Key.F4, Key.F5, Key.F6,
-                Key.F7, Key.F8, Key.F9, Key.F10, Key.F11, Key.F12,
-                Key.Escape, Key.Insert, Key.Home, Key.End,
-                Key.PageUp, Key.PageDown
-            };
-            if (!nonDataKeys.Contains(e.Key))
-            {
-                var focused = Keyboard.FocusedElement as DependencyObject;
-                if (focused != null && (CL_LMethods.IsInside<TextBoxBase>(focused) || CL_LMethods.IsInside<ComboBox>(focused) || CL_LMethods.IsInside<CheckBox>(focused)))
-                {
-                    ChangeIsHappend = true;
-                }
-                else
-                {
-                    var focusedElement = Keyboard.FocusedElement;
-                    if (focusedElement is Xceed.Wpf.Toolkit.MaskedTextBox)
+                    if (!isEditingMainGrid)
                     {
-                        ChangeIsHappend = true;
+                        e.Handled = true;
+                        var searchWindow = new EnhancedSearchWindow(this);
+                        searchWindow.Owner = this;
+                        searchWindow.ShowDialog();
                     }
                 }
+
+                // --- DIRTY FLAG (CHANGE TRACKING) LOGIC ---
+                var nonDataKeys = new[]
+                {
+                    Key.Enter, Key.Tab, Key.LeftShift, Key.RightShift,
+                    Key.CapsLock, Key.Left, Key.Right, Key.Up, Key.Down,
+                    Key.LeftAlt, Key.RightAlt, Key.LeftCtrl, Key.RightCtrl,
+                    Key.F1, Key.F2, Key.F3, Key.F4, Key.F5, Key.F6,
+                    Key.F7, Key.F8, Key.F9, Key.F10, Key.F11, Key.F12,
+                    Key.Escape, Key.Insert, Key.Home, Key.End,
+                    Key.PageUp, Key.PageDown, Key.System // Alt key combinations
+                };
+
+                if (!nonDataKeys.Contains(e.Key))
+                {
+                    var focused = Keyboard.FocusedElement as DependencyObject;
+
+                    if (focused != null)
+                    {
+                        if (CL_LMethods.IsInside<TextBoxBase>(focused) ||
+                            CL_LMethods.IsInside<ComboBox>(focused) ||
+                            CL_LMethods.IsInside<CheckBox>(focused) ||
+                            focused is Xceed.Wpf.Toolkit.MaskedTextBox) // Direct check for Xceed
+                        {
+                            ChangeIsHappend = true;
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
             }
         }
         public void Form_Current()
@@ -829,8 +855,15 @@ namespace Wins.WinMenus.KHARID_FORUSH
             _navigationManager.InsertCurrentRecord(CURRENT_HEADER);
         }
 
+        private void RefreshReceiptNumbers()
+        {
+            //شماره رسید سایر انبار 
+            NUMBER.ItemsSource = dbms.DoGetDataSQL<QRE_LST_BARGASHT>($"SELECT NUMBER FROM HEAD_LST WHERE (TAG = {HTAG /*24*/}) AND (NOT (NUMBER IN (SELECT HEAD_LST.NUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG) = {FTAG /*25*/}))))) ORDER BY NUMBER").ToList();
+        }
         public void ClearFreshNew()
         {
+            RefreshReceiptNumbers();
+
             NUMBER.SelectedIndex = -1; NUMBER.Items.Refresh(); //شماره فاکتور
 
             NUMBER.Text = "0"; //شماره حواله
@@ -916,7 +949,6 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
             INVO_LST_SUB.IsReadOnly = true;
         }
-
 
         #region SPECIAL_F7
         object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
@@ -1587,7 +1619,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             PEID.SelectedValuePath = "PEID";
 
             //شماره رسید سایر انبار 
-            NUMBER.ItemsSource = dbms.DoGetDataSQL<QRE_LST_BARGASHT>($"SELECT NUMBER FROM HEAD_LST WHERE (TAG = {HTAG /*24*/}) AND (NOT (NUMBER IN (SELECT HEAD_LST.NUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG) = {FTAG /*25*/}))))) ORDER BY NUMBER").ToList();
+            //NUMBER.ItemsSource = dbms.DoGetDataSQL<QRE_LST_BARGASHT>($"SELECT NUMBER FROM HEAD_LST WHERE (TAG = {HTAG /*24*/}) AND (NOT (NUMBER IN (SELECT HEAD_LST.NUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG) = {FTAG /*25*/}))))) ORDER BY NUMBER").ToList();
+            RefreshReceiptNumbers();
 
             //پشت فاکتور بخش چک:
             #region POSHTE_FACTOR

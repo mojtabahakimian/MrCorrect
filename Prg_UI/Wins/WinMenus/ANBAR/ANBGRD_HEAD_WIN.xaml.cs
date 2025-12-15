@@ -1721,6 +1721,10 @@ namespace Wins.WinMenus.ANBAR
 
         private void Command23_Click(object sender, RoutedEventArgs e)
         {
+            if (_navigationManager.IsNewRecord)
+            {
+                return;
+            }
             Process Prc = ProcLoader.Start();
 
             var report = new StiReport();
@@ -1743,6 +1747,10 @@ namespace Wins.WinMenus.ANBAR
 
         private void Command21_Click(object sender, RoutedEventArgs e)
         {
+            if (_navigationManager.IsNewRecord)
+            {
+                return;
+            }
             Process Prc = ProcLoader.Start();
 
             var report = new StiReport();
@@ -1766,6 +1774,10 @@ namespace Wins.WinMenus.ANBAR
 
         private void Command22_Click(object sender, RoutedEventArgs e)
         {
+            if (_navigationManager.IsNewRecord)
+            {
+                return;
+            }
             Process Prc = ProcLoader.Start();
 
             var report = new StiReport();
@@ -1787,6 +1799,11 @@ namespace Wins.WinMenus.ANBAR
 
         private void Command25_Click(object sender, RoutedEventArgs e)
         {
+            if (_navigationManager.IsNewRecord)
+            {
+                return;
+            }
+
             Process Prc = ProcLoader.Start();
 
             var report = new StiReport();
@@ -1810,6 +1827,10 @@ namespace Wins.WinMenus.ANBAR
 
         private void Command24_Click(object sender, RoutedEventArgs e)
         {
+            if (_navigationManager.IsNewRecord)
+            {
+                return;
+            }
             Process Prc = ProcLoader.Start();
 
             var report = new StiReport();
