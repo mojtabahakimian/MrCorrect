@@ -186,20 +186,46 @@ ORDER BY NAME";
             {
                 HesCodeCombo.SelectedValue = hes;
             }
-        }
 
-        private void HesCodeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!NowIsReady)
+            if (HesCodeCombo.SelectedValue is not null)
             {
-                return;
+                if (CL_HESABDARI.ISTAF(HesCodeCombo.SelectedValue.ToString()))
+                {
+                    Msgwin msgwin = new Msgwin(false, "حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!");
+                    msgwin.ShowDialog();
+                    HesCodeCombo.SelectedValue = null;
+                }
+                //if (Convert.ToBoolean(Baseknow.SAGHF) || Convert.ToBoolean(Baseknow.SAGHF2))
+                //{
+                //    if (Convert.ToBoolean(CL_HESABDARI.Checketebar(HesCodeCombo.SelectedValue.ToString())) == false || Convert.ToBoolean(CL_HESABDARI.ChecketebarMEG(this.HesCodeCombo.SelectedValue.ToString())) == false)
+                //    {
+                //        Msgwin msgwin = new Msgwin(false, "اعتبار اين مشتري تمام شده است و نمي تواند خريد نمايد...!");
+                //        msgwin.ShowDialog();
+                //        HesCodeCombo.SelectedValue = null;
+                //    }
+                //}
+                if (CL_HESABDARI.BLOCKEDCUST(HesCodeCombo.SelectedValue.ToString()))
+                {
+                    HesCodeCombo.SelectedItem = null;
+                    universControl.PopNotifyShow(" حساب مسدود گرديده است لطفا با مديريت مالي تماس بگيريد", Pop1, Pop1Text1, Pop_Border1);
+                    return;
+                }
             }
 
-            if (HesCodeCombo.SelectedValue is string hes)
-            {
-                HesCombo.SelectedValue = hes;
-            }
         }
+
+        //private void HesCodeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //{
+        //    if (!NowIsReady)
+        //    {
+        //        return;
+        //    }
+
+        //    if (HesCodeCombo.SelectedValue is string hes)
+        //    {
+        //        HesCombo.SelectedValue = hes;
+        //    }
+        //}
 
         private void HesCodeCombo_LostFocus(object sender, RoutedEventArgs e)
         {
@@ -396,7 +422,7 @@ ORDER BY NAME";
                         GRSAL = selectedGroup,
                         IDD = newId,
                         HES = string.IsNullOrWhiteSpace(hesValue) ? null : hesValue,
-                        EMZA = (object?)_signatureBytes ?? DBNull.Value
+                        EMZA = _signatureBytes
                     });
 
                 if (insertCount <= 0)
@@ -413,7 +439,7 @@ ORDER BY NAME";
                 dbms.DoExecuteSQL("INSERT INTO dbo.SIGN (USERCO) VALUES (@IDD)", new { IDD = newId });
 
                 new Msgwin(false, "کاربر جدید با موفقیت ثبت شد", "#FF1AAA2C").ShowDialog();
-                DialogResult = true;
+                //DialogResult = true;
                 Close();
             }
             catch (Exception ex)
