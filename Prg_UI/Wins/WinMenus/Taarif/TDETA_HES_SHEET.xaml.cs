@@ -593,6 +593,11 @@ namespace Wins.WinMenus.Taarif
                         return;
                     }
 
+                    if (e.Row.Item is null || e.EditingElement is null)
+                    {
+                        return;
+                    }
+
                     #region REFILL_CURRENTS_
                     DataGridColumn col1 = e.Column;
                     DataGridRow row1 = e.Row;
@@ -611,9 +616,12 @@ namespace Wins.WinMenus.Taarif
                     if (!ReferenceEquals(Comboval, null))
                         ENTERED_VALUE_ROW = Comboval.SelectedValue;
                     else
-                        ENTERED_VALUE_ROW = TexboVal.Text.Trim();
+                        ENTERED_VALUE_ROW = TexboVal?.Text?.Trim();
 
                     CURRENT_ROW_ITEMS = e.Row.Item as TDETA_HES;
+
+                    if (CURRENT_ROW_ITEMS == null) return;
+
                     #endregion
 
                     if (e.Column.SortMemberPath == "TNUMBER") //کد حساب
@@ -1245,6 +1253,30 @@ namespace Wins.WinMenus.Taarif
             }
 
             base.OnContextMenuOpening(e);
+        }
+
+        private void TDETA_HES_SUB_PreviewExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            //# Avoid this error : Object reference not set to an instance of an object
+            if (e.Command != DataGrid.CommitEditCommand)
+            {
+                return;
+            }
+
+            var grid = sender as DataGrid ?? TDETA_HES_SUB;
+            if (grid is null)
+            {
+                return;
+            }
+
+            var itemsView = grid.Items as IEditableCollectionView;
+            var hasInvalidCell = !grid.CurrentCell.IsValid || grid.CurrentItem is null || grid.SelectedItem is null;
+
+            if (hasInvalidCell)
+            {
+                itemsView?.CancelEdit();
+                e.Handled = true;
+            }
         }
     }
 }

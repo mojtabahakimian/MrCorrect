@@ -25,22 +25,23 @@ namespace Prg_UI.Scriptses
             {
                 //try { db.Execute($@""); } catch { }
 
-
-                try { db.Execute($@"ALTER TABLE PAY_GETD
+                if (isCustomCall)
+                {
+                    try { db.Execute($@"ALTER TABLE PAY_GETD
 									   ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { } //برای پشت فاکتور و دریافت چک برای قادر به ذخیره با شرط آیدی
-                try { db.Execute($@"INSERT INTO dbo.PRICE_PAYNO ([PPID], [PPAME], [TR_DATE], [USERNAME], [MODAT]) VALUES (0, N'آزاد', GETDATE(), N'System', 0);"); } catch { } //برای کمبوباکس نحوه پرداخت ازاد خالی نباشه
+                    try { db.Execute($@"INSERT INTO dbo.PRICE_PAYNO ([PPID], [PPAME], [TR_DATE], [USERNAME], [MODAT]) VALUES (0, N'آزاد', GETDATE(), N'System', 0);"); } catch { } //برای کمبوباکس نحوه پرداخت ازاد خالی نباشه
 
-                try { db.Execute($@"ALTER TABLE dbo.MODULE_D ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { } //برای سایر واحد ها قابل آپدیت کردن با آیدی
+                    try { db.Execute($@"ALTER TABLE dbo.MODULE_D ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { } //برای سایر واحد ها قابل آپدیت کردن با آیدی
 
-                try { db.Execute($@"ALTER TABLE dbo.TAKHPERS ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.TAKHPERS ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.TCOD_MAP ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.TCOD_MAP ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.TCOD_MAP_GRP ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.TCOD_MAP_GRP ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.AZAE ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.AZAE ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
-                try { db.Execute($@"INSERT INTO GSCADTL ([GSCADTCOD], [GSCANAME], [GSCAGRADE], [GSCAFROM], [GSCATO], [GSCACOD])
+                    try { db.Execute($@"INSERT INTO GSCADTL ([GSCADTCOD], [GSCANAME], [GSCAGRADE], [GSCAFROM], [GSCATO], [GSCACOD])
 									VALUES
 									( 1, N'عالی', 100, 0, 0, 1 ), 
 									( 2, N'خیلی خوب', 83, 0, 0, 1 ), 
@@ -150,13 +151,13 @@ namespace Prg_UI.Scriptses
 									( 106, N'خیلی ضعیف', 160, 0, 0, 12 ), 
 									( 107, N'بد', 0, 0, 0, 12 )"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.TOTA_HES ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { } // سرفصل حساب های کل
+                    try { db.Execute($@"ALTER TABLE dbo.TOTA_HES ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { } // سرفصل حساب های کل
 
-                try { db.Execute($@"ALTER TABLE dbo.DETA_HES ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { } // سرفصل حساب های معین
+                    try { db.Execute($@"ALTER TABLE dbo.DETA_HES ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { } // سرفصل حساب های معین
 
-                try { db.Execute($@"ALTER TABLE dbo.HEAD_MANF ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.HEAD_MANF ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
-                try { db.Execute($@"CREATE TABLE [dbo].[TR_PAY_GETD]
+                    try { db.Execute($@"CREATE TABLE [dbo].[TR_PAY_GETD]
 									(
 									[N_SERI] [float] NULL,
 									[BANK] [int] NULL,
@@ -201,19 +202,19 @@ namespace Prg_UI.Scriptses
 									[TRIDD] [int] NOT NULL IDENTITY(1, 1)
 									) ON [PRIMARY] "); } catch { }
 
-                try { db.Execute($@" ALTER TABLE [dbo].[TR_PAY_GETD] ADD CONSTRAINT [PK__TR_PAY_G__9FFE4EA46E02EDDB] PRIMARY KEY CLUSTERED ([TRIDD]) ON [PRIMARY]"); } catch { }
+                    try { db.Execute($@" ALTER TABLE [dbo].[TR_PAY_GETD] ADD CONSTRAINT [PK__TR_PAY_G__9FFE4EA46E02EDDB] PRIMARY KEY CLUSTERED ([TRIDD]) ON [PRIMARY]"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.HEAD_MANF ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.HEAD_MANF ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.TAKHFIF_DEF_DTL ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.TAKHFIF_DEF_DTL ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.CUSTKIND_TF ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.CUSTKIND_TF ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.TCODE_MENUITEM ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.TCODE_MENUITEM ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.PAY_GETP ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.PAY_GETP ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
-                try { db.Execute($@"ALTER VIEW ANBARGRD_SUB2 AS  SELECT  dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM2 AS EKH, dbo.ANBGRD_LST.GRD_NUM, dbo.ANBGRD_LST.CODE, dbo.STUF_DEF.NAME AS nam, dbo.ANBGRD_LST.MOG, dbo.ANBGRD_LST.NUM1, dbo.ANBGRD_LST.NUM2, 
+                    try { db.Execute($@"ALTER VIEW ANBARGRD_SUB2 AS  SELECT  dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM2 AS EKH, dbo.ANBGRD_LST.GRD_NUM, dbo.ANBGRD_LST.CODE, dbo.STUF_DEF.NAME AS nam, dbo.ANBGRD_LST.MOG, dbo.ANBGRD_LST.NUM1, dbo.ANBGRD_LST.NUM2, 
                          dbo.ANBGRD_LST.NUM3, dbo.ANBGRD_LST.MABL, dbo.TCOD_VAHEDS.NAMES, dbo.STUF_DEF.N_FANI, dbo.TCOD_STUFGROUP.NAMES AS grp
 					     FROM            dbo.ANBGRD_LST INNER JOIN
 					                              dbo.STUF_DEF ON dbo.ANBGRD_LST.CODE = dbo.STUF_DEF.CODE INNER JOIN
@@ -221,7 +222,7 @@ namespace Prg_UI.Scriptses
 					                              dbo.TCOD_STUFGROUP ON dbo.STUF_DEF.RADAH = dbo.TCOD_STUFGROUP.CODE
 					     WHERE        (dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM1 <> 0)"); } catch { }
 
-                try { db.Execute($@"ALTER VIEW ANBARGRD_SUB3 AS  SELECT  dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM2 AS EKH, dbo.ANBGRD_LST.GRD_NUM, dbo.ANBGRD_LST.CODE, dbo.STUF_DEF.NAME AS nam, dbo.ANBGRD_LST.MOG, dbo.ANBGRD_LST.NUM1, dbo.ANBGRD_LST.NUM2, 
+                    try { db.Execute($@"ALTER VIEW ANBARGRD_SUB3 AS  SELECT  dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM2 AS EKH, dbo.ANBGRD_LST.GRD_NUM, dbo.ANBGRD_LST.CODE, dbo.STUF_DEF.NAME AS nam, dbo.ANBGRD_LST.MOG, dbo.ANBGRD_LST.NUM1, dbo.ANBGRD_LST.NUM2, 
                          dbo.ANBGRD_LST.NUM3, dbo.ANBGRD_LST.MABL, dbo.TCOD_VAHEDS.NAMES, dbo.STUF_DEF.N_FANI, dbo.TCOD_STUFGROUP.NAMES AS grp
 					     FROM            dbo.ANBGRD_LST INNER JOIN
 					                              dbo.STUF_DEF ON dbo.ANBGRD_LST.CODE = dbo.STUF_DEF.CODE INNER JOIN
@@ -229,9 +230,9 @@ namespace Prg_UI.Scriptses
 					                              dbo.TCOD_STUFGROUP ON dbo.STUF_DEF.RADAH = dbo.TCOD_STUFGROUP.CODE
 					     WHERE        (dbo.ANBGRD_LST.MOG - dbo.ANBGRD_LST.NUM1 <> 0)"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.VISITOR_DTL ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.VISITOR_DTL ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
-                try { db.Execute($@"CREATE FUNCTION dbo.ExtractAccountPattern
+                    try { db.Execute($@"CREATE FUNCTION dbo.ExtractAccountPattern
 									(
 									    @InputString NVARCHAR(4000)
 									)
@@ -279,12 +280,12 @@ namespace Prg_UI.Scriptses
 									    RETURN @Result
 									END"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.TCOD_ARZ ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.TCOD_ARZ ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.HEAD_LST ADD ARZKIND2 bigint"); } catch { } //نوع ارز به صورت آیدی یکتا ID
-                try { db.Execute($@"ALTER TABLE dbo.HEAD_LST ADD ARZCODING nvarchar(100) "); } catch { }  //کدینگ ارز String
+                    try { db.Execute($@"ALTER TABLE dbo.HEAD_LST ADD ARZKIND2 bigint"); } catch { } //نوع ارز به صورت آیدی یکتا ID
+                    try { db.Execute($@"ALTER TABLE dbo.HEAD_LST ADD ARZCODING nvarchar(100) "); } catch { }  //کدینگ ارز String
 
-                try { db.Execute($@"CREATE PROCEDURE GET_NAME_HES
+                    try { db.Execute($@"CREATE PROCEDURE GET_NAME_HES
 									    @code NVARCHAR(255)
 									AS
 									BEGIN
@@ -319,8 +320,8 @@ namespace Prg_UI.Scriptses
 									    SELECT @name AS AccountName;
 									END "); } catch { }
 
-                //لاگ حذف کردن
-                try { db.Execute($@"CREATE TABLE [dbo].[USER_AUDIT_LOG](
+                    //لاگ حذف کردن
+                    try { db.Execute($@"CREATE TABLE [dbo].[USER_AUDIT_LOG](
 										[ID] [BIGINT] IDENTITY(1,1) NOT NULL,
 										[UserName] [NVARCHAR](100) NOT NULL,
 										[WindowsUserName] [NVARCHAR](100) NULL,
@@ -347,27 +348,27 @@ namespace Prg_UI.Scriptses
 									)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 									) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY] "); } catch { }
 
-                try { db.Execute($@"ALTER TABLE [dbo].[USER_AUDIT_LOG] ADD  DEFAULT ((1)) FOR [IsSuccess]"); } catch { }
+                    try { db.Execute($@"ALTER TABLE [dbo].[USER_AUDIT_LOG] ADD  DEFAULT ((1)) FOR [IsSuccess]"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE [dbo].[PAY_GETD] ALTER COLUMN [NAME_TAH] NVARCHAR(200) NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE [dbo].[PAY_GETD] ALTER COLUMN [NAME_TAH] NVARCHAR(200) NULL"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.MESAGEP ADD IsNotifyCalled BIT NULL DEFAULT (0)"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.MESAGEP ADD IsNotifyCalled BIT NULL DEFAULT (0)"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.EVENTS ADD [FXTYPE] [NVARCHAR] (10) NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.EVENTS ADD [FXTYPE] [NVARCHAR] (10) NULL"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.SAZMAN ADD SMSTYPE NVARCHAR(255) NULL DEFAULT 'TSMS' "); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.SAZMAN ADD SMSTYPE NVARCHAR(255) NULL DEFAULT 'TSMS' "); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.SMS_FORMATS ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.SMS_FORMATS ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.BLOCK_CUSTOMER ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.BLOCK_CUSTOMER ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE [dbo].[SALA_DTL] ADD [DEFAULT_NAHVA] [bigint] NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE [dbo].[SALA_DTL] ADD [DEFAULT_NAHVA] [bigint] NULL"); } catch { }
 
-                //حل مشکل آدرس توی سطح های بالاتر تفضیلی
-                try
-                {
-                    db.Execute(
-                    $@"
+                    //حل مشکل آدرس توی سطح های بالاتر تفضیلی
+                    try
+                    {
+                        db.Execute(
+                        $@"
 						CREATE VIEW [dbo].[CUST_HESAB_DTL_EXTENDED]
 						AS
 						SELECT
@@ -464,11 +465,11 @@ namespace Prg_UI.Scriptses
 						    AND dbo.TDETA_HES3.TNUMBER2 = dbo.TDETA_HES4.TNUMBER2
 						    AND dbo.TDETA_HES3.TNUMBER3 = dbo.TDETA_HES4.TNUMBER3
 						ORDER BY dbo.TDETA_HES.NAME -- This ORDER BY applies to the entire UNION result set ");
-                }
-                catch { }
+                    }
+                    catch { }
 
 
-                try { db.Execute($@"CREATE TABLE [dbo].[CustomerComplaints](
+                    try { db.Execute($@"CREATE TABLE [dbo].[CustomerComplaints](
 								    [ComplaintID] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
 								    [CustomerFirstName] [nvarchar](100) NOT NULL,
 								    [CustomerLastName] [nvarchar](100) NOT NULL,
@@ -507,11 +508,11 @@ namespace Prg_UI.Scriptses
 								    [ComplaintStatus] [nvarchar](50) NOT NULL DEFAULT N'جدید' -- e.g., جدید، در حال بررسی، بررسی شده، بسته شده
 								   ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY];"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE dbo.HEAD_LST ALTER COLUMN SHARAYET NVARCHAR(MAX)"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.HEAD_LST ALTER COLUMN SHARAYET NVARCHAR(MAX)"); } catch { }
 
-                //New 1
-                {
-                    string script = @"CREATE TABLE [dbo].[InvoiceRewards](
+                    //New 1
+                    {
+                        string script = @"CREATE TABLE [dbo].[InvoiceRewards](
 											[InvoiceRewardID] [bigint] IDENTITY(1,1) NOT NULL,
 											[InvoiceNumber] [float] NOT NULL,
 											[InvoiceTag] [float] NOT NULL,
@@ -551,19 +552,19 @@ namespace Prg_UI.Scriptses
 										
 										ALTER TABLE [dbo].[InvoiceRewards] ADD  CONSTRAINT [DF__InvoiceRewa__CRT__268ACAE1]  DEFAULT (getdate()) FOR [CRT]";
 
-                    var commands = script.Split(new string[] { "GO\r\n", "GO ", "GO\t" }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (var cmdText in commands)
-                    {
-                        if (!string.IsNullOrWhiteSpace(cmdText))
+                        var commands = script.Split(new string[] { "GO\r\n", "GO ", "GO\t" }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var cmdText in commands)
                         {
-                            try { db.Execute(cmdText); } catch { }
+                            if (!string.IsNullOrWhiteSpace(cmdText))
+                            {
+                                try { db.Execute(cmdText); } catch { }
+                            }
                         }
                     }
-                }
 
-                //New 2
-                {
-                    string script = @"CREATE TABLE [dbo].[PRICE_ELAMIETF_EXCEPTION](
+                    //New 2
+                    {
+                        string script = @"CREATE TABLE [dbo].[PRICE_ELAMIETF_EXCEPTION](
 									[EXCEPTION_ID] [int] IDENTITY(1,1) NOT NULL,
 									[PETID] [int] NOT NULL,
 									[CODE] [nvarchar](15) NOT NULL,
@@ -611,21 +612,21 @@ namespace Prg_UI.Scriptses
 								
 								ALTER TABLE [dbo].[PRICE_ELAMIETF_EXCEPTION] ADD  CONSTRAINT [DF_PRICE_ELAMIETF_EXCEPTION_CRT]  DEFAULT (getdate()) FOR [CRT]";
 
-                    var commands = script.Split(new string[] { "GO\r\n", "GO ", "GO\t" }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (var cmdText in commands)
-                    {
-                        if (!string.IsNullOrWhiteSpace(cmdText))
+                        var commands = script.Split(new string[] { "GO\r\n", "GO ", "GO\t" }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var cmdText in commands)
                         {
-                            try { db.Execute(cmdText); } catch { }
+                            if (!string.IsNullOrWhiteSpace(cmdText))
+                            {
+                                try { db.Execute(cmdText); } catch { }
+                            }
                         }
                     }
-                }
 
-                //توابع قیمت گذاری از طریق استور پروسیجر
+                    //توابع قیمت گذاری از طریق استور پروسیجر
 
-                //New 3
-                {
-                    string script = @"CREATE TABLE [dbo].[RewardRules](
+                    //New 3
+                    {
+                        string script = @"CREATE TABLE [dbo].[RewardRules](
 									  	[RuleID] [int] IDENTITY(1,1) NOT NULL,
 									  	[ProductID_Target] [nvarchar](15) NOT NULL,
 									  	[Quantity_Threshold] [int] NOT NULL,
@@ -670,22 +671,22 @@ namespace Prg_UI.Scriptses
 									  ALTER TABLE [dbo].[RewardRules] ADD  CONSTRAINT [DF__RewardRules__CRT__1EE9A919]  DEFAULT (getdate()) FOR [CRT]
 									  GO";
 
-                    var commands = script.Split(new string[] { "GO\r\n", "GO ", "GO\t" }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (var cmdText in commands)
-                    {
-                        if (!string.IsNullOrWhiteSpace(cmdText))
+                        var commands = script.Split(new string[] { "GO\r\n", "GO ", "GO\t" }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var cmdText in commands)
                         {
-                            try { db.Execute(cmdText); } catch { }
+                            if (!string.IsNullOrWhiteSpace(cmdText))
+                            {
+                                try { db.Execute(cmdText); } catch { }
+                            }
                         }
                     }
-                }
 
-                if (isCustomCall)
-                {
-                    try { db.Execute($"DROP PROCEDURE dbo.sp_UpdateInvoicePricingAndDiscount"); } catch { }
-                }
+                    if (isCustomCall)
+                    {
+                        try { db.Execute($"DROP PROCEDURE dbo.sp_UpdateInvoicePricingAndDiscount"); } catch { }
+                    }
 
-                try { db.Execute($@"CREATE PROCEDURE [dbo].[sp_UpdateInvoicePricingAndDiscount]
+                    try { db.Execute($@"CREATE PROCEDURE [dbo].[sp_UpdateInvoicePricingAndDiscount]
 									     @numb INT,
 									     @tgg INT,
 									     @PEPID_In INT,
@@ -951,11 +952,11 @@ namespace Prg_UI.Scriptses
 									 END
 									 "); } catch { }
 
-                #region SP_JAYZEH
-                try
-                {
-                    try { db.Execute(@"IF OBJECT_ID('dbo.sp_ManageInvoiceRewards', 'P') IS NOT NULL DROP PROCEDURE dbo.sp_ManageInvoiceRewards;"); } catch { }
-                    db.Execute(@"CREATE PROCEDURE [dbo].[sp_ManageInvoiceRewards]
+                    #region SP_JAYZEH
+                    try
+                    {
+                        try { db.Execute(@"IF OBJECT_ID('dbo.sp_ManageInvoiceRewards', 'P') IS NOT NULL DROP PROCEDURE dbo.sp_ManageInvoiceRewards;"); } catch { }
+                        db.Execute(@"CREATE PROCEDURE [dbo].[sp_ManageInvoiceRewards]
 								    @InvoiceNumber bigint,
 								    @InvoiceTag bigint,
 								    @IsRewardSystemActive BIT,
@@ -1183,298 +1184,291 @@ namespace Prg_UI.Scriptses
 								          RETURN;
 								      END CATCH;
 								  END"
-                    );
-                }
-                catch { }
+                        );
+                    }
+                    catch { }
 
 
 
-                //       try { db.Execute(@"ALTER PROCEDURE [dbo].[sp_UpdateInvoicePricingAndDiscount]
-                //    @numb INT,
-                //    @tgg INT,
-                //    @PEPID_In INT,
-                //    @PEID_In INT,
-                //    @MODAT_PPID_In INT,
-                //    @TICMBAA_In BIT,
-                //    @CUST_KIND_In INT,
-                //    @DTT_In INT,
-                //    @DEPATMAN_In INT
-                //AS
-                //BEGIN
-                //    SET NOCOUNT ON;
-                //    BEGIN TRANSACTION;
+                    //try { db.Execute(@"ALTER PROCEDURE [dbo].[sp_UpdateInvoicePricingAndDiscount]
+                    //    @numb INT,
+                    //    @tgg INT,
+                    //    @PEPID_In INT,
+                    //    @PEID_In INT,
+                    //    @MODAT_PPID_In INT,
+                    //    @TICMBAA_In BIT,
+                    //    @CUST_KIND_In INT,
+                    //    @DTT_In INT,
+                    //    @DEPATMAN_In INT
+                    //AS
+                    //BEGIN
+                    //    SET NOCOUNT ON;
+                    //    BEGIN TRANSACTION;
 
-                //    DECLARE @effective_tgg INT;
-                //    DECLARE @CurrentPEPID INT;
-                //    DECLARE @CurrentPEID INT;
+                    //    DECLARE @effective_tgg INT;
+                    //    DECLARE @CurrentPEPID INT;
+                    //    DECLARE @CurrentPEID INT;
 
-                //    DECLARE @General_TF1 REAL;
-                //    DECLARE @General_TF2 REAL;
-                //    DECLARE @PETID INT; 
+                    //    DECLARE @General_TF1 REAL;
+                    //    DECLARE @General_TF2 REAL;
+                    //    DECLARE @PETID INT; 
 
-                //    DECLARE @stf_total_discount FLOAT = 0;
-                //    DECLARE @MLBAA_total_vat FLOAT = 0;
-                //    DECLARE @ErrorMessage NVARCHAR(1000);
+                    //    DECLARE @stf_total_discount FLOAT = 0;
+                    //    DECLARE @MLBAA_total_vat FLOAT = 0;
+                    //    DECLARE @ErrorMessage NVARCHAR(1000);
 
-                //    DECLARE @modat_from_price_payno INT;
-                //    DECLARE @current_mas_in_head_lst FLOAT;
+                    //    DECLARE @modat_from_price_payno INT;
+                    //    DECLARE @current_mas_in_head_lst FLOAT;
 
-                //    SET @effective_tgg = CASE WHEN @tgg = 13 THEN 2 ELSE @tgg END;
+                    //    SET @effective_tgg = CASE WHEN @tgg = 13 THEN 2 ELSE @tgg END;
 
-                //    -- بخش جدید: محاسبه و به‌روزرسانی MAS در HEAD_LST
-                //    IF @MODAT_PPID_In IS NOT NULL AND @MODAT_PPID_In <> 0
-                //    BEGIN
-                //        SELECT @modat_from_price_payno = COALESCE(MODAT, 0) 
-                //        FROM dbo.PRICE_PAYNO 
-                //        WHERE PPID = @MODAT_PPID_In;
+                    //    -- بخش جدید: محاسبه و به‌روزرسانی MAS در HEAD_LST
+                    //    IF @MODAT_PPID_In IS NOT NULL AND @MODAT_PPID_In <> 0
+                    //    BEGIN
+                    //        SELECT @modat_from_price_payno = COALESCE(MODAT, 0) 
+                    //        FROM dbo.PRICE_PAYNO 
+                    //        WHERE PPID = @MODAT_PPID_In;
 
-                //        -- خواندن مقدار فعلی MAS از HEAD_LST
-                //        SELECT @current_mas_in_head_lst = MAS 
-                //        FROM dbo.HEAD_LST 
-                //        WHERE ""NUMBER"" = @numb AND TAG = @tgg; 
+                    //        -- خواندن مقدار فعلی MAS از HEAD_LST
+                    //        SELECT @current_mas_in_head_lst = MAS 
+                    //        FROM dbo.HEAD_LST 
+                    //        WHERE ""NUMBER"" = @numb AND TAG = @tgg; 
 
-                //        IF @modat_from_price_payno <> ISNULL(@current_mas_in_head_lst, -1) -- مقایسه با مقدار فعلی، اگر MAS قبلا Null بوده با -1 مقایسه می‌شود تا آپدیت شود
-                //        BEGIN
-                //            UPDATE dbo.HEAD_LST 
-                //            SET MAS = @modat_from_price_payno 
-                //            WHERE ""NUMBER"" = @numb AND TAG = @tgg; 
+                    //        IF @modat_from_price_payno <> ISNULL(@current_mas_in_head_lst, -1) -- مقایسه با مقدار فعلی، اگر MAS قبلا Null بوده با -1 مقایسه می‌شود تا آپدیت شود
+                    //        BEGIN
+                    //            UPDATE dbo.HEAD_LST 
+                    //            SET MAS = @modat_from_price_payno 
+                    //            WHERE ""NUMBER"" = @numb AND TAG = @tgg; 
 
-                //            IF @tgg = 13 -- اگر فاکتور فروش بود، MAS حواله مرتبط را نیز به‌روز کن
-                //            BEGIN
-                //                UPDATE dbo.HEAD_LST 
-                //                SET MAS = @modat_from_price_payno 
-                //                WHERE ""NUMBER"" = @numb AND TAG = 2; 
-                //            END
-                //        END
-                //    END
-                //    -- پایان بخش جدید
+                    //            IF @tgg = 13 -- اگر فاکتور فروش بود، MAS حواله مرتبط را نیز به‌روز کن
+                    //            BEGIN
+                    //                UPDATE dbo.HEAD_LST 
+                    //                SET MAS = @modat_from_price_payno 
+                    //                WHERE ""NUMBER"" = @numb AND TAG = 2; 
+                    //            END
+                    //        END
+                    //    END
+                    //    -- پایان بخش جدید
 
-                //    -- 1. تعیین PEPID (شناسه اعلامیه قیمت)
-                //    IF @PEPID_In IS NULL OR @PEPID_In = 0
-                //    BEGIN
-                //        SELECT TOP 1 @CurrentPEPID = PEPID 
-                //        FROM dbo.PRICE_ELAMIE 
-                //        WHERE PEPDATE <= @DTT_In AND PEPDEPART = @DEPATMAN_In 
-                //        ORDER BY PEPID DESC;
-                //    END
-                //    ELSE
-                //    BEGIN
-                //        SET @CurrentPEPID = @PEPID_In;
-                //    END
+                    //    -- 1. تعیین PEPID (شناسه اعلامیه قیمت)
+                    //    IF @PEPID_In IS NULL OR @PEPID_In = 0
+                    //    BEGIN
+                    //        SELECT TOP 1 @CurrentPEPID = PEPID 
+                    //        FROM dbo.PRICE_ELAMIE 
+                    //        WHERE PEPDATE <= @DTT_In AND PEPDEPART = @DEPATMAN_In 
+                    //        ORDER BY PEPID DESC;
+                    //    END
+                    //    ELSE
+                    //    BEGIN
+                    //        SET @CurrentPEPID = @PEPID_In;
+                    //    END
 
-                //    IF @CurrentPEPID IS NULL
-                //    BEGIN
-                //        IF EXISTS (SELECT 1 FROM dbo.INVO_LST WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg AND ISNULL(JAY, 0) = 0)
-                //        BEGIN
-                //             UPDATE dbo.INVO_LST SET IMBAA = 0, N_KOL = 0, N_MOIN = 0, TKHN = 0, MABL_K = 0, MABL = 0 
-                //             WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg;
+                    //    IF @CurrentPEPID IS NULL
+                    //    BEGIN
+                    //        IF EXISTS (SELECT 1 FROM dbo.INVO_LST WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg AND ISNULL(JAY, 0) = 0)
+                    //        BEGIN
+                    //             UPDATE dbo.INVO_LST SET IMBAA = 0, N_KOL = 0, N_MOIN = 0, TKHN = 0, MABL_K = 0, MABL = 0 
+                    //             WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg;
 
-                //             SET @ErrorMessage = N'اعلامیه قیمت فعال برای تاریخ ' + CAST(@DTT_In AS NVARCHAR(10)) + N' و واحد ' + CAST(@DEPATMAN_In AS NVARCHAR(10)) + N' یافت نشد. قیمت‌ها به‌روز نشدند.';
-                //             RAISERROR(@ErrorMessage, 16, 1);
-                //             IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-                //             RETURN -1; 
-                //        END
-                //    END
+                    //             SET @ErrorMessage = N'اعلامیه قیمت فعال برای تاریخ ' + CAST(@DTT_In AS NVARCHAR(10)) + N' و واحد ' + CAST(@DEPATMAN_In AS NVARCHAR(10)) + N' یافت نشد. قیمت‌ها به‌روز نشدند.';
+                    //             RAISERROR(@ErrorMessage, 16, 1);
+                    //             IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+                    //             RETURN -1; 
+                    //        END
+                    //    END
 
-                //    -- 2. تعیین PEID (شناسه اعلامیه تخفیف)
-                //    IF @PEID_In IS NULL OR @PEID_In = 0
-                //    BEGIN
-                //        SELECT TOP 1 @CurrentPEID = PEID 
-                //        FROM dbo.PRICE_ELAMIETF 
-                //        WHERE PEDATE <= @DTT_In AND PEPDEPART = @DEPATMAN_In 
-                //        ORDER BY PEID DESC;
-                //    END
-                //    ELSE
-                //    BEGIN
-                //        SET @CurrentPEID = @PEID_In;
-                //    END
+                    //    -- 2. تعیین PEID (شناسه اعلامیه تخفیف)
+                    //    IF @PEID_In IS NULL OR @PEID_In = 0
+                    //    BEGIN
+                    //        SELECT TOP 1 @CurrentPEID = PEID 
+                    //        FROM dbo.PRICE_ELAMIETF 
+                    //        WHERE PEDATE <= @DTT_In AND PEPDEPART = @DEPATMAN_In 
+                    //        ORDER BY PEID DESC;
+                    //    END
+                    //    ELSE
+                    //    BEGIN
+                    //        SET @CurrentPEID = @PEID_In;
+                    //    END
 
-                //    -- 3. به‌روزرسانی PEPID و PEID در جدول HEAD_LST (اگر از قبل به‌روز نشده باشند یا تغییر کرده باشند)
-                //    UPDATE dbo.HEAD_LST 
-                //    SET PEPID = @CurrentPEPID, PEID = @CurrentPEID 
-                //    WHERE ""NUMBER"" = @numb AND TAG = @tgg 
-                //      AND (ISNULL(PEPID, -1) <> ISNULL(@CurrentPEPID, -1) OR ISNULL(PEID, -1) <> ISNULL(@CurrentPEID, -1) ); -- فقط در صورت تغییر آپدیت کن
+                    //    -- 3. به‌روزرسانی PEPID و PEID در جدول HEAD_LST (اگر از قبل به‌روز نشده باشند یا تغییر کرده باشند)
+                    //    UPDATE dbo.HEAD_LST 
+                    //    SET PEPID = @CurrentPEPID, PEID = @CurrentPEID 
+                    //    WHERE ""NUMBER"" = @numb AND TAG = @tgg 
+                    //      AND (ISNULL(PEPID, -1) <> ISNULL(@CurrentPEPID, -1) OR ISNULL(PEID, -1) <> ISNULL(@CurrentPEID, -1) ); -- فقط در صورت تغییر آپدیت کن
 
-                //    IF @tgg = 13
-                //    BEGIN
-                //        UPDATE dbo.HEAD_LST 
-                //        SET PEPID = @CurrentPEPID, PEID = @CurrentPEID 
-                //        WHERE ""NUMBER"" = @numb AND TAG = 2
-                //          AND (ISNULL(PEPID, -1) <> ISNULL(@CurrentPEPID, -1) OR ISNULL(PEID, -1) <> ISNULL(@CurrentPEID, -1) );
-                //    END
+                    //    IF @tgg = 13
+                    //    BEGIN
+                    //        UPDATE dbo.HEAD_LST 
+                    //        SET PEPID = @CurrentPEPID, PEID = @CurrentPEID 
+                    //        WHERE ""NUMBER"" = @numb AND TAG = 2
+                    //          AND (ISNULL(PEPID, -1) <> ISNULL(@CurrentPEPID, -1) OR ISNULL(PEID, -1) <> ISNULL(@CurrentPEID, -1) );
+                    //    END
 
-                //    -- 4. به‌روزرسانی قیمت‌ها در INVO_LST
-                //    IF @CurrentPEPID IS NOT NULL
-                //    BEGIN
-                //        DECLARE @MissingPriceProductCode_HAVEPRICE NVARCHAR(15);
-                //        DECLARE @MissingPriceProductName_HAVEPRICE NVARCHAR(80);
+                    //    -- 4. به‌روزرسانی قیمت‌ها در INVO_LST
+                    //    IF @CurrentPEPID IS NOT NULL
+                    //    BEGIN
+                    //        DECLARE @MissingPriceProductCode_HAVEPRICE NVARCHAR(15);
+                    //        DECLARE @MissingPriceProductName_HAVEPRICE NVARCHAR(80);
 
-                //        SELECT TOP 1 @MissingPriceProductCode_HAVEPRICE = il.CODE, @MissingPriceProductName_HAVEPRICE = sd.NAME
-                //        FROM dbo.INVO_LST il
-                //        JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
-                //        LEFT JOIN dbo.PRICE_ELAMIE_DTL ped ON sd.PGID = ped.PGID AND ped.PEPID = @CurrentPEPID
-                //        WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ped.PRICE1 IS NULL AND ISNULL(JAY, 0) = 0;
+                    //        SELECT TOP 1 @MissingPriceProductCode_HAVEPRICE = il.CODE, @MissingPriceProductName_HAVEPRICE = sd.NAME
+                    //        FROM dbo.INVO_LST il
+                    //        JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
+                    //        LEFT JOIN dbo.PRICE_ELAMIE_DTL ped ON sd.PGID = ped.PGID AND ped.PEPID = @CurrentPEPID
+                    //        WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ped.PRICE1 IS NULL AND ISNULL(JAY, 0) = 0;
 
-                //        IF @MissingPriceProductCode_HAVEPRICE IS NOT NULL
-                //        BEGIN
-                //            SET @ErrorMessage = N'کالای : ''' + @MissingPriceProductCode_HAVEPRICE + N''' - ''' + ISNULL(@MissingPriceProductName_HAVEPRICE, N'') + N''' دارای گروه بندی قیمتی نیست یا گروه آن در اعلامیه قیمت با شناسه ' + CAST(@CurrentPEPID AS NVARCHAR(10)) + N' تعریف نشده.';
-                //            RAISERROR(@ErrorMessage, 16, 1);
-                //            IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-                //            RETURN -2; 
-                //        END
+                    //        IF @MissingPriceProductCode_HAVEPRICE IS NOT NULL
+                    //        BEGIN
+                    //            SET @ErrorMessage = N'کالای : ''' + @MissingPriceProductCode_HAVEPRICE + N''' - ''' + ISNULL(@MissingPriceProductName_HAVEPRICE, N'') + N''' دارای گروه بندی قیمتی نیست یا گروه آن در اعلامیه قیمت با شناسه ' + CAST(@CurrentPEPID AS NVARCHAR(10)) + N' تعریف نشده.';
+                    //            RAISERROR(@ErrorMessage, 16, 1);
+                    //            IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+                    //            RETURN -2; 
+                    //        END
 
-                //        UPDATE il
-                //        SET 
-                //            il.MABL = ped.PRICE1,
-                //            il.MABL_K = ROUND(ped.PRICE1 * il.MEGHk, 0)
-                //        FROM dbo.INVO_LST il
-                //        JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
-                //        JOIN dbo.PRICE_ELAMIE_DTL ped ON sd.PGID = ped.PGID
-                //        WHERE il.""NUMBER"" = @numb 
-                //          AND il.TAG = @effective_tgg 
-                //          AND ped.PEPID = @CurrentPEPID AND ISNULL(JAY, 0) = 0;
-                //    END
-                //    ELSE 
-                //    BEGIN
-                //        IF EXISTS (SELECT 1 FROM dbo.INVO_LST WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg AND ISNULL(JAY, 0) = 0)
-                //        BEGIN
-                //             UPDATE dbo.INVO_LST 
-                //             SET MABL = 0, MABL_K = 0, IMBAA = 0, N_KOL = 0, N_MOIN = 0, TKHN = 0 
-                //             WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg;
-                //        END
-                //    END
+                    //        UPDATE il
+                    //        SET 
+                    //            il.MABL = ped.PRICE1,
+                    //            il.MABL_K = ROUND(ped.PRICE1 * il.MEGHk, 0)
+                    //        FROM dbo.INVO_LST il
+                    //        JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
+                    //        JOIN dbo.PRICE_ELAMIE_DTL ped ON sd.PGID = ped.PGID
+                    //        WHERE il.""NUMBER"" = @numb 
+                    //          AND il.TAG = @effective_tgg 
+                    //          AND ped.PEPID = @CurrentPEPID AND ISNULL(JAY, 0) = 0;
+                    //    END
+                    //    ELSE 
+                    //    BEGIN
+                    //        IF EXISTS (SELECT 1 FROM dbo.INVO_LST WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg AND ISNULL(JAY, 0) = 0)
+                    //        BEGIN
+                    //             UPDATE dbo.INVO_LST 
+                    //             SET MABL = 0, MABL_K = 0, IMBAA = 0, N_KOL = 0, N_MOIN = 0, TKHN = 0 
+                    //             WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg;
+                    //        END
+                    //    END
 
-                //    -- 5. اعمال تخفیفات و محاسبه ارزش افزوده
-                //    IF @CurrentPEID IS NOT NULL 
-                //    BEGIN
-                //        SELECT 
-                //            @General_TF1 = COALESCE(TF1, 0), 
-                //            @General_TF2 = COALESCE(TF2, 0), 
-                //            @PETID = PETID
-                //        FROM dbo.PRICE_ELAMIETF_DTL 
-                //        WHERE PEID = @CurrentPEID
-                //          AND CUSTCODE = @CUST_KIND_In 
-                //          AND PPID = @MODAT_PPID_In;
+                    //    -- 5. اعمال تخفیفات و محاسبه ارزش افزوده
+                    //    IF @CurrentPEID IS NOT NULL 
+                    //    BEGIN
+                    //        SELECT 
+                    //            @General_TF1 = COALESCE(TF1, 0), 
+                    //            @General_TF2 = COALESCE(TF2, 0), 
+                    //            @PETID = PETID
+                    //        FROM dbo.PRICE_ELAMIETF_DTL 
+                    //        WHERE PEID = @CurrentPEID
+                    //          AND CUSTCODE = @CUST_KIND_In 
+                    //          AND PPID = @MODAT_PPID_In;
 
-                //        IF @PETID IS NOT NULL 
-                //        BEGIN
-                //            WITH InvoiceLineCalculations AS (
-                //                SELECT 
-                //                    il.id AS invo_lst_id,
-                //                    il.CODE AS ProductCode,
-                //                    il.MABL_K AS Current_MABL_K,
-                //                    sd.CMBAA,
-                //                    sd.vra AS VatRate 
-                //                FROM dbo.INVO_LST il
-                //                JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
-                //                WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(JAY, 0) = 0
-                //            ),
-                //            AppliedDiscounts AS (
-                //                SELECT
-                //                    ild.invo_lst_id,
-                //                    ild.Current_MABL_K,
-                //                    ild.CMBAA,
-                //                    ild.VatRate,
-                //                    COALESCE(exc.EXCEPTION_TF1, @General_TF1) AS TF1_Final,
-                //                    COALESCE(exc.EXCEPTION_TF2, @General_TF2) AS TF2_Final
-                //                FROM InvoiceLineCalculations ild
-                //                LEFT JOIN dbo.PRICE_ELAMIETF_EXCEPTION exc ON exc.PETID = @PETID AND exc.CODE = ild.ProductCode
-                //            ),
-                //            FinalLineValues AS (
-                //                SELECT
-                //                    ad.invo_lst_id,
-                //                    ad.TF1_Final,
-                //                    ad.TF2_Final,
-                //                    (ROUND(ad.Current_MABL_K * ad.TF1_Final / 100.0, 0) + 
-                //                     ROUND((ad.Current_MABL_K - ROUND(ad.Current_MABL_K * ad.TF1_Final / 100.0, 0)) * ad.TF2_Final / 100.0, 0))
-                //                    AS TotalLineDiscount,
-                //                    CASE 
-                //                        WHEN @TICMBAA_In = 1 AND ad.CMBAA = 1 AND ad.VatRate IS NOT NULL THEN 
-                //                            FLOOR((ad.Current_MABL_K - 
-                //                                   (ROUND(ad.Current_MABL_K * ad.TF1_Final / 100.0, 0) + 
-                //                                    ROUND((ad.Current_MABL_K - ROUND(ad.Current_MABL_K * ad.TF1_Final / 100.0, 0)) * ad.TF2_Final / 100.0, 0))
-                //                                  ) * ad.VatRate / 100.0)
-                //                        ELSE 0 
-                //                    END AS LineVAT
-                //                FROM AppliedDiscounts ad
-                //            )
-                //            UPDATE il
-                //            SET 
-                //                il.N_KOL = flv.TF1_Final,
-                //                il.TKHN = flv.TF2_Final,
-                //                il.N_MOIN = flv.TotalLineDiscount,
-                //                il.IMBAA = flv.LineVAT
-                //            FROM dbo.INVO_LST il
-                //            JOIN FinalLineValues flv ON il.id = flv.invo_lst_id;
-                //        END
-                //        ELSE 
-                //        BEGIN
-                //            UPDATE dbo.INVO_LST SET N_KOL = 0, N_MOIN = 0, TKHN = 0, IMBAA = 0 
-                //            WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg AND ISNULL(JAY, 0) = 0;
-                //        END
-                //    END
-                //    ELSE 
-                //    BEGIN
-                //        UPDATE dbo.INVO_LST SET N_KOL = 0, N_MOIN = 0, TKHN = 0, IMBAA = 0
-                //        WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg AND ISNULL(JAY, 0) = 0;
-                //    END
+                    //        IF @PETID IS NOT NULL 
+                    //        BEGIN
+                    //            WITH InvoiceLineCalculations AS (
+                    //                SELECT 
+                    //                    il.id AS invo_lst_id,
+                    //                    il.CODE AS ProductCode,
+                    //                    il.MABL_K AS Current_MABL_K,
+                    //                    sd.CMBAA,
+                    //                    sd.vra AS VatRate 
+                    //                FROM dbo.INVO_LST il
+                    //                JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE
+                    //                WHERE il.""NUMBER"" = @numb AND il.TAG = @effective_tgg AND ISNULL(JAY, 0) = 0
+                    //            ),
+                    //            AppliedDiscounts AS (
+                    //                SELECT
+                    //                    ild.invo_lst_id,
+                    //                    ild.Current_MABL_K,
+                    //                    ild.CMBAA,
+                    //                    ild.VatRate,
+                    //                    COALESCE(exc.EXCEPTION_TF1, @General_TF1) AS TF1_Final,
+                    //                    COALESCE(exc.EXCEPTION_TF2, @General_TF2) AS TF2_Final
+                    //                FROM InvoiceLineCalculations ild
+                    //                LEFT JOIN dbo.PRICE_ELAMIETF_EXCEPTION exc ON exc.PETID = @PETID AND exc.CODE = ild.ProductCode
+                    //            ),
+                    //            FinalLineValues AS (
+                    //                SELECT
+                    //                    ad.invo_lst_id,
+                    //                    ad.TF1_Final,
+                    //                    ad.TF2_Final,
+                    //                    (ROUND(ad.Current_MABL_K * ad.TF1_Final / 100.0, 0) + 
+                    //                     ROUND((ad.Current_MABL_K - ROUND(ad.Current_MABL_K * ad.TF1_Final / 100.0, 0)) * ad.TF2_Final / 100.0, 0))
+                    //                    AS TotalLineDiscount,
+                    //                    CASE 
+                    //                        WHEN @TICMBAA_In = 1 AND ad.CMBAA = 1 AND ad.VatRate IS NOT NULL THEN 
+                    //                            FLOOR((ad.Current_MABL_K - 
+                    //                                   (ROUND(ad.Current_MABL_K * ad.TF1_Final / 100.0, 0) + 
+                    //                                    ROUND((ad.Current_MABL_K - ROUND(ad.Current_MABL_K * ad.TF1_Final / 100.0, 0)) * ad.TF2_Final / 100.0, 0))
+                    //                                  ) * ad.VatRate / 100.0)
+                    //                        ELSE 0 
+                    //                    END AS LineVAT
+                    //                FROM AppliedDiscounts ad
+                    //            )
+                    //            UPDATE il
+                    //            SET 
+                    //                il.N_KOL = flv.TF1_Final,
+                    //                il.TKHN = flv.TF2_Final,
+                    //                il.N_MOIN = flv.TotalLineDiscount,
+                    //                il.IMBAA = flv.LineVAT
+                    //            FROM dbo.INVO_LST il
+                    //            JOIN FinalLineValues flv ON il.id = flv.invo_lst_id;
+                    //        END
+                    //        ELSE 
+                    //        BEGIN
+                    //            UPDATE dbo.INVO_LST SET N_KOL = 0, N_MOIN = 0, TKHN = 0, IMBAA = 0 
+                    //            WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg AND ISNULL(JAY, 0) = 0;
+                    //        END
+                    //    END
+                    //    ELSE 
+                    //    BEGIN
+                    //        UPDATE dbo.INVO_LST SET N_KOL = 0, N_MOIN = 0, TKHN = 0, IMBAA = 0
+                    //        WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg AND ISNULL(JAY, 0) = 0;
+                    //    END
 
-                //    SELECT 
-                //        @stf_total_discount = COALESCE(SUM(N_MOIN), 0), 
-                //        @MLBAA_total_vat = COALESCE(SUM(IMBAA), 0)
-                //    FROM dbo.INVO_LST 
-                //    WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg;
+                    //    SELECT 
+                    //        @stf_total_discount = COALESCE(SUM(N_MOIN), 0), 
+                    //        @MLBAA_total_vat = COALESCE(SUM(IMBAA), 0)
+                    //    FROM dbo.INVO_LST 
+                    //    WHERE ""NUMBER"" = @numb AND TAG = @effective_tgg;
 
-                //    -- 6. به‌روزرسانی نهایی سرفصل فاکتور HEAD_LST
-                //    UPDATE dbo.HEAD_LST 
-                //    SET 
-                //        MBAA = @MLBAA_total_vat, 
-                //        TAKHFIF = @stf_total_discount
-                //    WHERE ""NUMBER"" = @numb AND TAG = @tgg;
+                    //    -- 6. به‌روزرسانی نهایی سرفصل فاکتور HEAD_LST
+                    //    UPDATE dbo.HEAD_LST 
+                    //    SET 
+                    //        MBAA = @MLBAA_total_vat, 
+                    //        TAKHFIF = @stf_total_discount
+                    //    WHERE ""NUMBER"" = @numb AND TAG = @tgg;
 
-                //    IF @tgg = 13
-                //    BEGIN
-                //        UPDATE dbo.HEAD_LST 
-                //        SET 
-                //            MBAA = @MLBAA_total_vat, 
-                //            TAKHFIF = @stf_total_discount
-                //        WHERE ""NUMBER"" = @numb AND TAG = 2;
-                //    END
+                    //    IF @tgg = 13
+                    //    BEGIN
+                    //        UPDATE dbo.HEAD_LST 
+                    //        SET 
+                    //            MBAA = @MLBAA_total_vat, 
+                    //            TAKHFIF = @stf_total_discount
+                    //        WHERE ""NUMBER"" = @numb AND TAG = 2;
+                    //    END
 
-                //    IF @@ERROR <> 0
-                //    BEGIN
-                //        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-                //        SET @ErrorMessage = N'خطایی در حین عملیات به‌روزرسانی رخ داد و تغییرات بازگردانده شد. کد خطای SQL: ' + CAST(@@ERROR AS NVARCHAR(10));
-                //        RAISERROR(@ErrorMessage, 16, 1);
-                //        RETURN -99; 
-                //    END
+                    //    IF @@ERROR <> 0
+                    //    BEGIN
+                    //        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+                    //        SET @ErrorMessage = N'خطایی در حین عملیات به‌روزرسانی رخ داد و تغییرات بازگردانده شد. کد خطای SQL: ' + CAST(@@ERROR AS NVARCHAR(10));
+                    //        RAISERROR(@ErrorMessage, 16, 1);
+                    //        RETURN -99; 
+                    //    END
 
-                //    IF @@TRANCOUNT > 0 COMMIT TRANSACTION;
-                //    RETURN 0; -- موفقیت
+                    //    IF @@TRANCOUNT > 0 COMMIT TRANSACTION;
+                    //    RETURN 0; -- موفقیت
 
-                //END
-                //"); } catch { }
+                    //END
+                    //"); } catch { }
 
-                ////try { db.Execute($@"ALTER TABLE dbo.Visit_route ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
-                #endregion
+                    ////try { db.Execute($@"ALTER TABLE dbo.Visit_route ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    #endregion
 
-                //جدولی برای ثبت تریتب کاربران برای ارجاع
-                try { db.Execute(@"CREATE TABLE USER_PERSONEL_ORDER (
+                    //جدولی برای ثبت تریتب کاربران برای ارجاع
+                    try { db.Execute(@"CREATE TABLE USER_PERSONEL_ORDER (
 									USER_ID      INT        NOT NULL,
 									PERSONEL_ID  INT        NOT NULL,
 									SORT_ORDER   INT        NOT NULL,
 									PRIMARY KEY (USER_ID, PERSONEL_ID))"); } catch { }
 
-
-                #region Blazor_WebAssemblly_Safir
-                BlazorDbScriptUpdate(db);
-                #endregion
-
-
-
-                //بررسی مالکیت فاکتور و محاسبه پورسانت به صورت هوشمند
-                {
-                    string sqlscript = @"
+                    //بررسی مالکیت فاکتور و محاسبه پورسانت به صورت هوشمند
+                    {
+                        string sqlscript = @"
 CREATE FUNCTION dbo.Fixp
 (
     @st NVARCHAR(MAX)       -- رشتهٔ اصلی
@@ -1852,28 +1846,28 @@ BEGIN
 	END;
 
 END;";
-                    var commands = sqlscript.Split(new string[] { "GO\r\n", "GO ", "GO\t" }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (var cmdText in commands)
-                    {
-                        if (!string.IsNullOrWhiteSpace(cmdText))
+                        var commands = sqlscript.Split(new string[] { "GO\r\n", "GO ", "GO\t" }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var cmdText in commands)
                         {
-                            try { db.Execute(cmdText); } catch { }
+                            if (!string.IsNullOrWhiteSpace(cmdText))
+                            {
+                                try { db.Execute(cmdText); } catch { }
+                            }
                         }
                     }
-                }
 
-                //Super Fast Index for Automation MAIN
-                try { db.Execute($@"CREATE NONCLUSTERED INDEX IX_TASKS_Status1
+                    //Super Fast Index for Automation MAIN
+                    try { db.Execute($@"CREATE NONCLUSTERED INDEX IX_TASKS_Status1
 									ON dbo.TASKS (STATUS, IDNUM)          -- برای فیلتر و ORDER BY
 									INCLUDE (GR, PERSONEL, TASK, PERIORITY, STDATE, STTIME,
 									         ENDATE, ENTIME, USERNAME, COMP_COD, SUMTIME,
 									          ss, skid, num, tg, CTIM, USERCO, SEE)"); } catch { }
 
 
-                try { db.Execute($@"ALTER TABLE dbo.VISITOR_DTL ADD LOG NVARCHAR(4000) NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE dbo.VISITOR_DTL ADD LOG NVARCHAR(4000) NULL"); } catch { }
 
 
-                try { db.Execute($@"CREATE FUNCTION dbo.Getusersemat
+                    try { db.Execute($@"CREATE FUNCTION dbo.Getusersemat
 									(
 									    @usid INT,
 									    @fld NVARCHAR(50)
@@ -1911,7 +1905,7 @@ END;";
 									    RETURN ISNULL(@ret, N'')
 									END"); } catch { }
 
-                try { db.Execute($@"CREATE FUNCTION dbo.GETUSERHES
+                    try { db.Execute($@"CREATE FUNCTION dbo.GETUSERHES
 									(
 									    @US INT
 									)
@@ -1923,7 +1917,7 @@ END;";
 									    RETURN ISNULL(@hes, '')
 									END"); } catch { }
 
-                try { db.Execute($@"CREATE FUNCTION dbo.GETHESNAME
+                    try { db.Execute($@"CREATE FUNCTION dbo.GETHESNAME
 									(
 									    @HES NVARCHAR(50)
 									)
@@ -1935,7 +1929,7 @@ END;";
 									    RETURN ISNULL(@name, '')
 									END"); } catch { }
 
-                try { db.Execute($@"CREATE FUNCTION [dbo].[SplitInts]
+                    try { db.Execute($@"CREATE FUNCTION [dbo].[SplitInts]
 									(
 									    @List NVARCHAR(MAX),
 									    @Delimiter CHAR(1)
@@ -1956,90 +1950,132 @@ END;";
 									END
 									"); } catch { }
 
-                //Ctrl + F8
-                try { db.Execute($@"CREATE PROC [dbo].[usp_TafzilLedger]
-									    @FromDate INT,
-									    @ToDate INT,
-									    @TafzilCode NVARCHAR(50),
-									    @SortExpr NVARCHAR(400) = N'DATE_S, BED DESC'
-									AS
-									BEGIN
-									    SET ARITHABORT ON;
-									    SET NOCOUNT ON;
-									    DECLARE @WhiteList TABLE
-									    (
-									        Col sysname PRIMARY KEY
-									    );
-									    INSERT @WhiteList
-									    (
-									        Col
-									    )
-									    VALUES
-									    ('N_S'),
-									    ('DATE_S'),
-									    ('base'),
-									    ('HES_K'),
-									    ('HES_M'),
-									    ('HES_T'),
-									    ('HES_T2'),
-									    ('TAFZILN'),
-									    ('SHARH'),
-									    ('BED'),
-									    ('BES'),
-									    ('MAND'),
-									    ('NO_S'),
-									    ('N_SERI'),
-									    ('BANK'),
-									    ('NUMBER'),
-									    ('TAG'),
-									    ('ARZD'),
-									    ('id'),
-									    ('HES');
-									    DECLARE @ExprUpper NVARCHAR(4000);
-									    DECLARE @ExprNoDir NVARCHAR(4000);
-									    DECLARE @Xml XML;
-									    SET @ExprUpper = UPPER(@SortExpr);
-									    SET @ExprNoDir = REPLACE(REPLACE(@ExprUpper, ' DESC', ''), ' ASC', '');
-									    SET @Xml = CAST('<r>' + REPLACE(@ExprNoDir, ',', '</r><r>') + '</r>' AS XML);
-									    DECLARE @Tokens TABLE
-									    (
-									        token sysname
-									    );
-									    INSERT @Tokens
-									    (
-									        token
-									    )
-									    SELECT LTRIM(RTRIM(N.value('.', 'nvarchar(100)')))
-									    FROM @Xml.nodes('/r') AS T(N);
-									    IF EXISTS
-									    (
-									        SELECT 1
-									        FROM @Tokens t
-									        WHERE NOT EXISTS
-									        (
-									            SELECT 1
-									            FROM @WhiteList w
-									            WHERE w.Col = t.token
-									        )
-									    )
-									    BEGIN
-									        RAISERROR(N'يک يا چند نام ستون غيرمجاز در SortExpr وجود دارد.', 16, 1);
-									        RETURN;
-									    END;
-									    DECLARE @sql NVARCHAR(MAX)
-									        = N';WITH CTE AS(SELECT N_S,DATE_S,HES_K,HES_M,HES_T,HES_T2,TAFZILN,SHARH,BED,BES,NO_S,N_SERI,BANK,[NUMBER],TAG,ARZD,base,id,DiffAmt=BED-BES FROM dbo.QDAFTARTAFZIL2_H(@FromDate,@ToDate,@TafzilCode)),Ordered AS(SELECT *,rn=ROW_NUMBER() OVER(ORDER BY '
-									          + @SortExpr
-									          + N', id) FROM CTE) SELECT o.N_S,o.DATE_S,o.HES_K,o.HES_M,o.HES_T,o.HES_T2,o.TAFZILN,o.SHARH,o.BED,o.BES,ABS(c.SumAmt) AS MAND,CASE WHEN c.SumAmt>0 THEN N''بد'' WHEN c.SumAmt=0 THEN N''--'' ELSE N''بس'' END AS TASH,@TafzilCode AS hes,o.NO_S,o.N_SERI,o.BANK,o.[NUMBER],o.TAG,o.ARZD,o.base FROM Ordered o CROSS APPLY (SELECT SumAmt=SUM(i.DiffAmt) FROM Ordered i WHERE i.rn<=o.rn) c ORDER BY '
-									          + @SortExpr + N', id;';
-									    EXEC sp_executesql @sql,
-									                       N'@FromDate int,@ToDate int,@TafzilCode nvarchar(50)',
-									                       @FromDate,
-									                       @ToDate,
-									                       @TafzilCode;
-									END"); } catch { }
+                    //Ctrl + F8
+                    try { db.Execute("DROP PROC usp_TafzilLedger"); } catch { }
+                    try { db.Execute($@"
+										CREATE PROC [dbo].[usp_TafzilLedger]
+										    @FromDate     INT,
+										    @ToDate       INT,
+										    @TafzilCode   nvarchar(50),
+										    @SortExpr     nvarchar(400) = N'DATE_S, BED DESC'
+										AS
+										BEGIN
+										    SET ARITHABORT ON;
+										    SET NOCOUNT ON;
+										
+										    ----------------------------------------------------------
+										    -- 0) کنترل امنیت و پیش‌فرض‌ها
+										    ----------------------------------------------------------
+										    DECLARE @SafeSort nvarchar(400);
+										    IF ISNULL(@SortExpr, '') = '' SET @SortExpr = 'DATE_S, BED DESC';
+										
+										    -- وایت‌لیست
+										    IF NOT EXISTS (
+										        SELECT 1 FROM (VALUES 
+										            ('N_S'),('DATE_S'),('BED'),('BES'),('SHARH'),('NO_S'),('id'),
+										            ('N_S DESC'),('DATE_S DESC'),('BED DESC'),('BES DESC'),('NO_S DESC')
+										        ) AS ValidCols(ColName) WHERE CHARINDEX(ColName, @SortExpr) > 0
+										    )
+										        SET @SafeSort = 'DATE_S, N_S';
+										    ELSE
+										        SET @SafeSort = @SortExpr;
+										
+										    ----------------------------------------------------------
+										    -- 1) ساخت جدول موقت
+										    ----------------------------------------------------------
+										    CREATE TABLE #TempLedger (
+										        pk_id       bigint IDENTITY(1,1), 
+										        RowNum      int,                  
+										        N_S         int,
+										        DATE_S      int, 
+										        SHARH       nvarchar(MAX),
+										        BED         float DEFAULT 0,
+										        BES         float DEFAULT 0,
+										        DiffAmt     AS (BED - BES),       
+										        RunningSum  float DEFAULT 0,      
+										        TASH        nvarchar(10),
+										        NO_S        int,
+										        N_SERI      nvarchar(50),
+										        HES         nvarchar(50),
+										        HES_K       nvarchar(50),
+										        HES_M       nvarchar(50),
+										        HES_T       nvarchar(50),
+										        HES_T2      nvarchar(50),
+										        TAFZILN     nvarchar(200),
+										        BANK        nvarchar(100),
+										        [NUMBER]    nvarchar(50),
+										        TAG         nvarchar(MAX),
+										        ARZD        nvarchar(50),
+										        base        int,
+										        SourceID    bigint
+										    );
+										
+										    ----------------------------------------------------------
+										    -- 2) درج تراکنش‌های جاری (بدون محاسبه قبلی‌ها)
+										    ----------------------------------------------------------
+										    -- فقط بازه انتخابی را می‌آوریم
+										    INSERT INTO #TempLedger (
+										        N_S, DATE_S, SHARH, BED, BES, NO_S, N_SERI, HES,
+										        HES_K, HES_M, HES_T, HES_T2, TAFZILN, BANK, [NUMBER], TAG, ARZD, base, SourceID
+										    )
+										    SELECT 
+										        N_S, DATE_S, SHARH, BED, BES, NO_S, N_SERI, @TafzilCode,
+										        HES_K, HES_M, HES_T, HES_T2, TAFZILN, BANK, [NUMBER], TAG, ARZD, base, id
+										    FROM dbo.QDAFTARTAFZIL2_H(@FromDate, @ToDate, @TafzilCode);
+										
+										    ----------------------------------------------------------
+										    -- 3) اعمال سورت داینامیک
+										    ----------------------------------------------------------
+										    DECLARE @SQL nvarchar(MAX);
+										    
+										    -- همه رکوردها را شماره‌گذاری کن
+										    SET @SQL = N'
+										        UPDATE T
+										        SET RowNum = SortedData.NewRowID
+										        FROM #TempLedger T
+										        INNER JOIN (
+										            SELECT pk_id, ROW_NUMBER() OVER (ORDER BY ' + @SafeSort + N') AS NewRowID
+										            FROM #TempLedger
+										        ) SortedData ON T.pk_id = SortedData.pk_id;
+										    ';
+										
+										    EXEC sp_executesql @SQL;
+										
+										    ----------------------------------------------------------
+										    -- 4) محاسبه مانده در خط (Quirky Update)
+										    ----------------------------------------------------------
+										    CREATE CLUSTERED INDEX [IX_TempLedger_Sort] ON #TempLedger (RowNum);
+										
+										    DECLARE @RunningTotal float = 0;
+										
+										    -- آپدیت دقیق و سریع
+										    UPDATE #TempLedger
+										    SET @RunningTotal = RunningSum = @RunningTotal + DiffAmt
+										    FROM #TempLedger WITH (INDEX(IX_TempLedger_Sort))
+										    OPTION (MAXDOP 1);
+										
+										    ----------------------------------------------------------
+										    -- 5) خروجی نهایی
+										    ----------------------------------------------------------
+										    SELECT 
+										        N_S, DATE_S, HES_K, HES_M, HES_T, HES_T2, TAFZILN, SHARH, 
+										        BED, BES, 
+										        ABS(RunningSum) AS MAND,
+										        CASE 
+										            WHEN RunningSum > 0 THEN N'بد'
+										            WHEN RunningSum < 0 THEN N'بس'
+										            ELSE N'--'
+										        END AS TASH,
+										        HES, NO_S, N_SERI, BANK, [NUMBER], TAG, ARZD, base, SourceID AS id
+										    FROM #TempLedger
+										    ORDER BY RowNum;
+										
+										    DROP TABLE #TempLedger;
+										END
+										"); } catch { }
 
-                //SELECT * FROM dbo.VISITOR_DTL_KALA(0, 99991230, N'%')WHERE DEPATMAN = 20;
-                try { db.Execute($@"ALTER FUNCTION dbo.VISITOR_DTL_KALA
+                    //SELECT * FROM dbo.VISITOR_DTL_KALA(0, 99991230, N'%')WHERE DEPATMAN = 20;
+                    try { db.Execute($@"ALTER FUNCTION dbo.VISITOR_DTL_KALA
 									(
 									    @dt1 bigint,
 									    @dt2 bigint,
@@ -2082,8 +2118,8 @@ END;";
 									    HAVING vd.CUST_NO LIKE @visitor
 									)"); } catch { }
 
-                //تنظیمات عمومی بیشتر
-                try { db.Execute(@"CREATE TABLE [dbo].[GENERAL_OPTIONS] (
+                    //تنظیمات عمومی بیشتر
+                    try { db.Execute(@"CREATE TABLE [dbo].[GENERAL_OPTIONS] (
 								       [OptionName]  NVARCHAR(100) PRIMARY KEY NOT NULL,
 								       [OptionValue] NVARCHAR(500) NULL,
 								       [Description] NVARCHAR(1000) NULL,
@@ -2091,18 +2127,18 @@ END;";
 				
 								   );"); } catch { }
 
-                //اضافه کردن ستون CRT (تاریخ ایجاد) به GENERAL_OPTIONS
-                try { db.Execute(@"ALTER TABLE [dbo].[GENERAL_OPTIONS]
+                    //اضافه کردن ستون CRT (تاریخ ایجاد) به GENERAL_OPTIONS
+                    try { db.Execute(@"ALTER TABLE [dbo].[GENERAL_OPTIONS]
                                    ADD [CRT] DATETIME NULL
                                    CONSTRAINT [DF__GENERAL_OPT__CRT__2C3B9588] DEFAULT (GETDATE());"); } catch { }
-                //اضافه کردن ستون UID (کد کاربر) به GENERAL_OPTIONS برای تنظیمات per-user
-                try { db.Execute(@"ALTER TABLE [dbo].[GENERAL_OPTIONS]
+                    //اضافه کردن ستون UID (کد کاربر) به GENERAL_OPTIONS برای تنظیمات per-user
+                    try { db.Execute(@"ALTER TABLE [dbo].[GENERAL_OPTIONS]
                                    ADD [UID] bigint NULL;"); } catch { }
 
 
 
-                //باز گردانی اصلاحیه اشتباه برای این تابع , برش میگردونیم به چیزی که قبلا بود مثل اکسس
-                try { db.Execute(@"ALTER FUNCTION [dbo].[Q_BEDEHBESTANHA_SUB]
+                    //باز گردانی اصلاحیه اشتباه برای این تابع , برش میگردونیم به چیزی که قبلا بود مثل اکسس
+                    try { db.Execute(@"ALTER FUNCTION [dbo].[Q_BEDEHBESTANHA_SUB]
 								   (@DT bigint)
 									RETURNS TABLE
 									AS
@@ -2125,17 +2161,17 @@ END;";
 									HAVING      (SUM(dbo.DEED_DTL.BED - dbo.DEED_DTL.BES) <> 0) )"); } catch { }
 
 
-                //حالا تابع جدیدی که شامل صفر ها هم برای لیست بدهکاران وبستاناکران میشود :
-                try
-                {
-                    // 1. ساختن تابع جدید با نام متفاوت که منطق اصلی و هر دو پارامتر را دارد
-                    // (ابتدا چک میکنیم اگر وجود نداشت ساخته شود، سپس آلتر شود یا دراپ و کریت شود)
-                    // برای سادگی در SQL 2008، فرض بر ایجاد تابع جدید است:
+                    //حالا تابع جدیدی که شامل صفر ها هم برای لیست بدهکاران وبستاناکران میشود :
+                    try
+                    {
+                        // 1. ساختن تابع جدید با نام متفاوت که منطق اصلی و هر دو پارامتر را دارد
+                        // (ابتدا چک میکنیم اگر وجود نداشت ساخته شود، سپس آلتر شود یا دراپ و کریت شود)
+                        // برای سادگی در SQL 2008، فرض بر ایجاد تابع جدید است:
 
-                    // اگر تابع جدید قبلا وجود دارد آن را حذف کن تا دوباره بسازیم
-                    db.Execute("IF OBJECT_ID('dbo.Q_BEDEHBESTANHA_FULL') IS NOT NULL DROP FUNCTION dbo.Q_BEDEHBESTANHA_FULL");
+                        // اگر تابع جدید قبلا وجود دارد آن را حذف کن تا دوباره بسازیم
+                        db.Execute("IF OBJECT_ID('dbo.Q_BEDEHBESTANHA_FULL') IS NOT NULL DROP FUNCTION dbo.Q_BEDEHBESTANHA_FULL");
 
-                    db.Execute(@"
+                        db.Execute(@"
 								CREATE FUNCTION [dbo].[Q_BEDEHBESTANHA_FULL]
 								(
 								    @DT bigint,
@@ -2190,46 +2226,46 @@ END;";
 								        (@IncludeZero = 1) OR (SUM(dbo.DEED_DTL.BED - dbo.DEED_DTL.BES) <> 0)
 								)");
 
-                }
-                catch { }
+                    }
+                    catch { }
 
-                //اتوماسیون
-                try { db.Execute(@"ALTER TABLE MESAGEP ADD SNOOZE_COUNT INT DEFAULT 0 
+                    //اتوماسیون
+                    try { db.Execute(@"ALTER TABLE MESAGEP ADD SNOOZE_COUNT INT DEFAULT 0 
 								   ALTER TABLE MESAGEP ADD LAST_NOTIFY_TIME DATETIME NULL"); } catch { }
 
-                //مرکز هزینه
-                try { db.Execute($@"ALTER TABLE dbo.TCOD_MARKAZHAZ ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    //مرکز هزینه
+                    try { db.Execute($@"ALTER TABLE dbo.TCOD_MARKAZHAZ ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
-                //ایجاد فرمول ساخت سطر
-                try { db.Execute($@"ALTER TABLE dbo.DTL_MANF ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    //ایجاد فرمول ساخت سطر
+                    try { db.Execute($@"ALTER TABLE dbo.DTL_MANF ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
 
-                //دفتر چک افزایش فضای نام حساب پرداختی
-                try { db.Execute($@"ALTER TABLE [dbo].[PAY_GETP] ALTER COLUMN [NAME_TAH] NVARCHAR(200) NULL"); } catch { }
-                try { db.Execute($@"ALTER TABLE [dbo].[PAY_GETP] ALTER COLUMN [N_HESAB] NVARCHAR(200) NULL"); } catch { }
+                    //دفتر چک افزایش فضای نام حساب پرداختی
+                    try { db.Execute($@"ALTER TABLE [dbo].[PAY_GETP] ALTER COLUMN [NAME_TAH] NVARCHAR(200) NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE [dbo].[PAY_GETP] ALTER COLUMN [N_HESAB] NVARCHAR(200) NULL"); } catch { }
 
-                try { db.Execute($@"ALTER TABLE [dbo].[PAY_GETP] ALTER COLUMN [SHOBEH] NVARCHAR(50) NULL"); } catch { }
-                try { db.Execute($@"ALTER TABLE [dbo].[PAY_GETD] ALTER COLUMN [SHOBEH] NVARCHAR(50) NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE [dbo].[PAY_GETP] ALTER COLUMN [SHOBEH] NVARCHAR(50) NULL"); } catch { }
+                    try { db.Execute($@"ALTER TABLE [dbo].[PAY_GETD] ALTER COLUMN [SHOBEH] NVARCHAR(50) NULL"); } catch { }
 
-                // ============================================================================
-                // بررسی و حذف رزرو قطعی پیش‌فاکتورهایی که زمان رزرو آن‌ها منقضی شده است (96 ساعت) : فقط برای رزرو عادی یعنی HEAD_LST.TAMIR = 1 || HEAD_LST_LOG.RESERVED = 1
-                // ============================================================================
-                if (isCustomCall) //برای اینکه با اطلاع و خواست کاربر این اجرا شود و نه خودکار در آپدیت
-                {
-                    // 1. حذف پروسیجر در صورت وجود
-                    try
+                    // ============================================================================
+                    // بررسی و حذف رزرو قطعی پیش‌فاکتورهایی که زمان رزرو آن‌ها منقضی شده است (96 ساعت) : فقط برای رزرو عادی یعنی HEAD_LST.TAMIR = 1 || HEAD_LST_LOG.RESERVED = 1
+                    // ============================================================================
+                    if (isCustomCall) //برای اینکه با اطلاع و خواست کاربر این اجرا شود و نه خودکار در آپدیت
                     {
-                        db.Execute(@"
+                        // 1. حذف پروسیجر در صورت وجود
+                        try
+                        {
+                            db.Execute(@"
                         IF OBJECT_ID(N'[dbo].[sp_CheckReservationTimeout]', N'P') IS NOT NULL
                         BEGIN
                             DROP PROCEDURE [dbo].[sp_CheckReservationTimeout];
                         END");
-                    }
-                    catch { }
-                    // 2. ایجاد پروسیجر بررسی تایم‌اوت رزرو
-                    try
-                    {
-                        db.Execute(@"
+                        }
+                        catch { }
+                        // 2. ایجاد پروسیجر بررسی تایم‌اوت رزرو
+                        try
+                        {
+                            db.Execute(@"
                         CREATE PROCEDURE [dbo].[sp_CheckReservationTimeout]
                         AS
                         BEGIN
@@ -2273,23 +2309,23 @@ END;";
                                 END
                             END CATCH
                         END");
-                    }
-                    catch { }
-                    // 3. ایجاد SQL Server Agent Job برای اجرای خودکار پروسیجر (هر 1 ساعت)
-                    try
-                    {
-                        db.Execute(@"
+                        }
+                        catch { }
+                        // 3. ایجاد SQL Server Agent Job برای اجرای خودکار پروسیجر (هر 1 ساعت)
+                        try
+                        {
+                            db.Execute(@"
                         -- پاکسازی جاب قدیمی در صورت وجود
                         IF EXISTS (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = N'CheckReservationTimeout')
                         BEGIN
                             EXEC msdb.dbo.sp_delete_job @job_name = N'CheckReservationTimeout', @delete_unused_schedule = 1;
                         END");
-                    }
-                    catch { }
+                        }
+                        catch { }
 
-                    try
-                    {
-                        db.Execute(@"
+                        try
+                        {
+                            db.Execute(@"
                         DECLARE @ReturnCode INT = 0;
                         DECLARE @JobId BINARY(16);
 						DECLARE @DbName NVARCHAR(128) = DB_NAME();
@@ -2348,39 +2384,40 @@ END;";
                         -- اختصاص جاب به سرور محلی
                         EXEC @ReturnCode = msdb.dbo.sp_add_jobserver @job_id = @JobId, @server_name = N'(local)';
                     ");
+                        }
+                        catch { }
                     }
-                    catch { }
-                }
 
-                //تعریف پورسانت ویزیتور
-                try { db.Execute($@"ALTER TABLE dbo.VISITORS_PORSANT_KALA ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
+                    //تعریف پورسانت ویزیتور
+                    try { db.Execute($@"ALTER TABLE dbo.VISITORS_PORSANT_KALA ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { }
 
-                if (isCustomCall)
-                {
-                    bool allSuccess = true;
-                    List<string> failedSections = new List<string>();
-
-                    // FIX: تعریف یک رشته تنظیمات استاندارد برای استفاده در تمام کوئری‌های حساس
-                    string setOptions = "SET ANSI_NULLS ON; SET ANSI_PADDING ON; SET ANSI_WARNINGS ON; SET ARITHABORT ON; SET CONCAT_NULL_YIELDS_NULL ON; SET QUOTED_IDENTIFIER ON; SET NUMERIC_ROUNDABORT OFF; ";
-
-                    #region Optimization_TDETA_HES_AND_TAXDTL
-                    // 1. Correct Index on TAXDTL
-                    try
+                    if (false) //isCustomCall
                     {
-                        // FIX: اضافه کردن تنظیمات به ابتدای کوئری
-                        db.Execute($@"
+                        //این کار فشار زیادی روی SQL Server 2008 ایجاد میکنه و باعث کرش میشه !
+                        bool allSuccess = true;
+                        List<string> failedSections = new List<string>();
+
+                        // FIX: تعریف یک رشته تنظیمات استاندارد برای استفاده در تمام کوئری‌های حساس
+                        string setOptions = "SET ANSI_NULLS ON; SET ANSI_PADDING ON; SET ANSI_WARNINGS ON; SET ARITHABORT ON; SET CONCAT_NULL_YIELDS_NULL ON; SET QUOTED_IDENTIFIER ON; SET NUMERIC_ROUNDABORT OFF; ";
+
+                        #region Optimization_TDETA_HES_AND_TAXDTL
+                        // 1. Correct Index on TAXDTL
+                        try
+                        {
+                            // FIX: اضافه کردن تنظیمات به ابتدای کوئری
+                            db.Execute($@"
 						 {setOptions}
 						 CREATE NONCLUSTERED INDEX [IX_TAXDTL_Success_Number_Include] 
 						 ON [dbo].[TAXDTL] ([NUMBER], [TheSuccess]) 
 						 INCLUDE ([Taxid], [Inno]) 
 						 WHERE [TheSuccess] = 1");
-                    }
-                    catch { allSuccess = false; failedSections.Add("TAXDTL Index"); }
+                        }
+                        catch { allSuccess = false; failedSections.Add("TAXDTL Index"); }
 
-                    // 2. Computed Columns: CLEANUP OLD "BAD" COLUMNS
-                    try
-                    {
-                        db.Execute(@$"
+                        // 2. Computed Columns: CLEANUP OLD "BAD" COLUMNS
+                        try
+                        {
+                            db.Execute(@$"
 							BEGIN
 							    IF EXISTS (SELECT * FROM sys.indexes WHERE name='IX_TDETA_HES_CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES')) DROP INDEX [IX_TDETA_HES_CUST_NO_CALC] ON [dbo].[TDETA_HES];
 							    IF EXISTS (SELECT * FROM sys.columns WHERE name='CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES')) ALTER TABLE [dbo].[TDETA_HES] DROP COLUMN [CUST_NO_CALC];
@@ -2397,98 +2434,107 @@ END;";
 							    IF EXISTS (SELECT * FROM sys.indexes WHERE name='IX_TDETA_HES4_CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES4')) DROP INDEX [IX_TDETA_HES4_CUST_NO_CALC] ON [dbo].[TDETA_HES4];
 							    IF EXISTS (SELECT * FROM sys.columns WHERE name='CUST_NO_CALC' AND object_id = OBJECT_ID('dbo.TDETA_HES4')) ALTER TABLE [dbo].[TDETA_HES4] DROP COLUMN [CUST_NO_CALC];
 							END");
-                    }
-                    catch { allSuccess = false; failedSections.Add("Cleanup Old Columns"); }
+                        }
+                        catch { allSuccess = false; failedSections.Add("Cleanup Old Columns"); }
 
-                    // 3. Create Correct Computed Columns
-                    // TDETA_HES (Level 3)
-                    try
-                    {
-                        // FIX: اضافه کردن setOptions
-                        db.Execute($@"
+                        // 3. Create Correct Computed Columns
+                        // TDETA_HES (Level 3)
+                        try
+                        {
+                            // FIX: اضافه کردن setOptions
+                            db.Execute($@"
 						{setOptions}
 						ALTER TABLE dbo.TDETA_HES ADD CUST_NO_CALC AS 
 						(rtrim(CONVERT(nvarchar(30),[N_KOL],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[NUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER],0))) PERSISTED;");
-                    }
-                    catch (Exception ex) { allSuccess = false; failedSections.Add("ALTER TABLE dbo.TDETA_HES"); CL_LMethods.DoWriteMyLog("ALTER TABLE dbo.TDETA_HES", ex); }
+                        }
+                        catch (Exception ex) { allSuccess = false; failedSections.Add("ALTER TABLE dbo.TDETA_HES"); CL_LMethods.DoWriteMyLog("ALTER TABLE dbo.TDETA_HES", ex); }
 
-                    try
-                    {
-                        // FIX: اضافه کردن setOptions
-                        db.Execute($@"
+                        try
+                        {
+                            // FIX: اضافه کردن setOptions
+                            db.Execute($@"
 						{setOptions}
 						CREATE INDEX IX_TDETA_HES_CUST_NO_CALC ON dbo.TDETA_HES(CUST_NO_CALC);");
-                    }
-                    catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.IX_TDETA_HES_CUST_NO_CALC"); }
+                        }
+                        catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.IX_TDETA_HES_CUST_NO_CALC"); }
 
-                    // TDETA_HES2 (Level 4)
-                    try
-                    {
-                        // FIX: اضافه کردن setOptions
-                        db.Execute($@"
+                        // TDETA_HES2 (Level 4)
+                        try
+                        {
+                            // FIX: اضافه کردن setOptions
+                            db.Execute($@"
 						{setOptions}
 						ALTER TABLE dbo.TDETA_HES2 ADD CUST_NO_CALC AS 
 						(rtrim(CONVERT(nvarchar(30),[N_KOL],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[NUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER2],0))) PERSISTED;");
-                    }
-                    catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.TDETA_HES2"); }
-                    try
-                    {
-                        // FIX: اضافه کردن setOptions
-                        db.Execute($@"
+                        }
+                        catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.TDETA_HES2"); }
+                        try
+                        {
+                            // FIX: اضافه کردن setOptions
+                            db.Execute($@"
 						{setOptions}
 						CREATE INDEX IX_TDETA_HES2_CUST_NO_CALC ON dbo.TDETA_HES2(CUST_NO_CALC);");
-                    }
-                    catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.IX_TDETA_HES2_CUST_NO_CALC"); }
+                        }
+                        catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.IX_TDETA_HES2_CUST_NO_CALC"); }
 
-                    // TDETA_HES3 (Level 5)
-                    try
-                    {
-                        // FIX: اضافه کردن setOptions
-                        db.Execute($@"
+                        // TDETA_HES3 (Level 5)
+                        try
+                        {
+                            // FIX: اضافه کردن setOptions
+                            db.Execute($@"
 						{setOptions}
 						ALTER TABLE dbo.TDETA_HES3 ADD CUST_NO_CALC AS 
 						(rtrim(CONVERT(nvarchar(30),[N_KOL],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[NUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER2],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER3],0))) PERSISTED;");
-                    }
-                    catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.TDETA_HES3"); }
-                    try
-                    {
-                        // FIX: اضافه کردن setOptions
-                        db.Execute($@"
+                        }
+                        catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.TDETA_HES3"); }
+                        try
+                        {
+                            // FIX: اضافه کردن setOptions
+                            db.Execute($@"
 						{setOptions}
 						CREATE INDEX IX_TDETA_HES3_CUST_NO_CALC ON dbo.TDETA_HES3(CUST_NO_CALC);");
-                    }
-                    catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.IX_TDETA_HES3_CUST_NO_CALC"); }
+                        }
+                        catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.IX_TDETA_HES3_CUST_NO_CALC"); }
 
-                    // TDETA_HES4 (Level 6)
-                    try
-                    {
-                        // FIX: اضافه کردن setOptions
-                        db.Execute($@"
+                        // TDETA_HES4 (Level 6)
+                        try
+                        {
+                            // FIX: اضافه کردن setOptions
+                            db.Execute($@"
 						{setOptions}
 						ALTER TABLE dbo.TDETA_HES4 ADD CUST_NO_CALC AS 
 						(rtrim(CONVERT(nvarchar(30),[N_KOL],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[NUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER2],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER3],0)) + N'-' + rtrim(CONVERT(nvarchar(30),[TNUMBER4],0))) PERSISTED;");
-                    }
-                    catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.TDETA_HES4"); }
-                    try
-                    {
-                        // FIX: اضافه کردن setOptions
-                        db.Execute($@"
+                        }
+                        catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.TDETA_HES4"); }
+                        try
+                        {
+                            // FIX: اضافه کردن setOptions
+                            db.Execute($@"
 						{setOptions}
 						CREATE INDEX IX_TDETA_HES4_CUST_NO_CALC ON dbo.TDETA_HES4(CUST_NO_CALC);");
-                    }
-                    catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.IX_TDETA_HES4_CUST_NO_CALC"); }
-                    #endregion
+                        }
+                        catch { allSuccess = false; failedSections.Add("ALTER TABLE dbo.IX_TDETA_HES4_CUST_NO_CALC"); }
+                        #endregion
 
-                    //if (allSuccess)
-                    //{
-                    //    MessageBox.Show("تمامی عملیات بهینه‌سازی با موفقیت انجام شد.", "عملیات موفق");
-                    //}
-                    //else
-                    //{
-                    //    string failedList = string.Join("\n", failedSections);
-                    //    MessageBox.Show($"برخی از بخش‌ها با خطا مواجه شدند:\n{failedList}", "خطا در اجرا");
-                    //}
+                        //if (allSuccess)
+                        //{
+                        //    MessageBox.Show("تمامی عملیات بهینه‌سازی با موفقیت انجام شد.", "عملیات موفق");
+                        //}
+                        //else
+                        //{
+                        //    string failedList = string.Join("\n", failedSections);
+                        //    MessageBox.Show($"برخی از بخش‌ها با خطا مواجه شدند:\n{failedList}", "خطا در اجرا");
+                        //}
+                    }
                 }
+
+				if (isCustomCall)
+				{
+                    #region Blazor_WebAssemblly_Safir
+                    BlazorDbScriptUpdate(db);
+                    #endregion
+                }
+
             }
         }
 

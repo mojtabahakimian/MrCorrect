@@ -5075,7 +5075,7 @@ namespace AUTO_BAZ.Functions
             return SHARTCRATORRet;
         }
 
-        public static bool Frisok(string HES, bool InternalCalling = true)
+        public static bool Frisok_Old(string HES, bool InternalCalling = true)
         {
             bool FrisokRet = default;
             int i;
@@ -5128,6 +5128,122 @@ namespace AUTO_BAZ.Functions
             }
             return FrisokRet;
         }
+
+        /// <summary>
+        /// بررسی مغایرت بین فاکتور فروش و سند حسابداری
+        /// تغییرات: ایجاد ویوهای جدید با پسوند _New برای عدم تداخل با برنامه Access
+        /// اصلاح: استفاده از مبلغ خالص (MABL_K) برای رفع خطای محاسباتی
+        /// </summary>
+        public static bool Frisok(string HES, bool InternalCalling = true)
+        {
+            bool FrisokRet = default;
+            int i;
+
+            if (string.IsNullOrEmpty(HES)) return true;
+
+            string safeHes = HES.Replace("'", "''");
+
+            try
+            {
+                string optionChar = "";
+                if (!string.IsNullOrEmpty(Baseknow.OPTIONSS) && Baseknow.OPTIONSS.Length >= 64)
+                {
+                    optionChar = Baseknow.OPTIONSS.Substring(63, 1);
+                }
+
+                if (optionChar == "5")
+                {
+                    string viewNameSnd = "frsnd_New" + Baseknow.USERCOD;
+                    string viewNameInv = "frinv_New" + Baseknow.USERCOD;
+
+                    // 1. حذف ویوهای قبلی
+                    dbms.DoExecuteSQL($"IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{viewNameSnd}') DROP VIEW {viewNameSnd}");
+                    dbms.DoExecuteSQL($"IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{viewNameInv}') DROP VIEW {viewNameInv}");
+
+                    // 2. ساخت ویوی سند (اصلاح شده برای چک کردن تراز سند)
+                    // تغییر مهم: اضافه کردن شرط HAVING برای اطمینان از تراز بودن کل سند
+                    // اگر سند تراز نباشد (مثل مثالی که زدید)، این کوئری رکوردی برنمی‌گرداند و باعث وقوع خطای مغایرت می‌شود.
+                    string sqlCreateSnd = $"CREATE VIEW {viewNameSnd} AS " +
+                                          $"SELECT SUM(T1.BED - T1.BES) AS Expr2, T1.NUMBER " +
+                                          $"FROM dbo.DEED_DTL AS T1 " +
+                                          $"WHERE (T1.TAG = 13) AND (T1.HES = N'{safeHes}') " +
+                                          $"GROUP BY T1.NUMBER " +
+                                          $"HAVING ROUND((SELECT SUM(T2.BED - T2.BES) FROM dbo.DEED_DTL T2 WHERE T2.NUMBER = T1.NUMBER AND T2.TAG = 13), 0) = 0";
+
+                    dbms.DoExecuteSQL(sqlCreateSnd);
+
+                    // 3. ساخت ویوی فاکتور (با فرمول صحیح خالص + مالیات - تخفیف)
+                    string sqlCreateInv = $"CREATE VIEW {viewNameInv} AS " +
+                                          $"SELECT H.NUMBER, " +
+                                          $"( " +
+                                          // محاسبه بدهکاری واقعی مشتری طبق لاجیک تولید سند
+                                          $"  (ISNULL(MAX(DTL.NetTotal), 0) + MAX(H.MABL_HAZ) + MAX(H.MBAA) - MAX(H.TAKHFIF)) " +
+                                          $"  - " +
+                                          // کسر پرداختی‌ها
+                                          $"  (MAX(H.M_NAGHD) + MAX(H.MABL_VAR) + MAX(H.MABL_HAV) + ISNULL(MAX(CHK.mabch), 0)) " +
+                                          $") AS Expr1 " +
+                                          $"FROM dbo.HEAD_LST H " +
+                                          $"INNER JOIN ( " +
+                                          $"    SELECT NUMBER, TAG, SUM(MABL_K) as NetTotal " +
+                                          $"    FROM dbo.INVO_LST " +
+                                          $"    GROUP BY NUMBER, TAG " +
+                                          $") DTL ON H.NUMBER = DTL.NUMBER AND H.TAG = DTL.TAG + 11 " +
+                                          $"LEFT OUTER JOIN dbo.jamchkfact CHK ON DTL.NUMBER = CHK.NUMBER " +
+                                          $"WHERE (H.TAG = 13) AND (H.CUST_NO = N'{safeHes}') " +
+                                          $"GROUP BY H.NUMBER " +
+                                          $"HAVING ( " +
+                                          $"  (ISNULL(MAX(DTL.NetTotal), 0) + MAX(H.MABL_HAZ) + MAX(H.MBAA) - MAX(H.TAKHFIF)) " +
+                                          $"  - " +
+                                          $"  (MAX(H.M_NAGHD) + MAX(H.MABL_VAR) + MAX(H.MABL_HAV) + ISNULL(MAX(CHK.mabch), 0)) " +
+                                          $") <> 0";
+
+                    dbms.DoExecuteSQL(sqlCreateInv);
+
+                    // 4. مقایسه
+                    // اگر سند تراز نباشد، Expr2 نال می‌شود و شرط (S.Expr2 IS NULL) برقرار شده و خطا می‌دهد
+                    string sqlCheck = $"SELECT I.NUMBER, S.Expr2 " +
+                                      $"FROM {viewNameSnd} S " +
+                                      $"RIGHT OUTER JOIN {viewNameInv} I ON S.NUMBER = I.NUMBER " +
+                                      $"WHERE (I.Expr1 > 0) AND ((S.Expr2 IS NULL) OR (ROUND(I.Expr1 - S.Expr2, 0) <> 0))";
+
+                    var rst = dbms.DoGetDataSQL<Q9>(sqlCheck).ToList();
+
+                    if (rst.Count > 0)
+                    {
+                        string _Pathfile_ = @"C:\CORRECT\errorfr.txt";
+                        string directory = Path.GetDirectoryName(_Pathfile_);
+
+                        if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+
+                        using (StreamWriter writer = new StreamWriter(_Pathfile_, true))
+                        {
+                            for (i = 0; i < rst.Count; i++)
+                            {
+                                GENSANADFROOSH(rst[i].NUMBER, Convert.ToInt64(rst[i].NUMBER), InternalCalling);
+                                writer.WriteLine("شماره حواله مغایرت دار (عدم تراز یا اختلاف مبلغ) که سعی شد سند مجددا آن بازسازی شود : " + rst[i].NUMBER.ToStringNullSafe());
+                            }
+                        }
+                        FrisokRet = false;
+                    }
+                    else
+                    {
+                        FrisokRet = true;
+                    }
+                }
+                else
+                {
+                    FrisokRet = true;
+                }
+            }
+            catch (Exception)
+            {
+                FrisokRet = false;
+            }
+
+            return FrisokRet;
+        }
+
+
         private static Object LOCKER = new Object();
         public static long Createsanad(long DATE_S, string SHARH_S, int GHATEI, int NO_S, int OKF, string USER_NAME)
         {
