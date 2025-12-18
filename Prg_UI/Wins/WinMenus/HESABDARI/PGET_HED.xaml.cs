@@ -5041,41 +5041,39 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         private void PGET_LST_SUB_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            return;
-            if (PGET_LST_SUB.IsEnabled == true)
+            try
             {
                 var grid = sender as DataGrid;
                 if (grid != null && grid?.CurrentCell != null && grid.CurrentCell.Column != null && PGET_LST_SUB.SelectedIndex > -1)
                 {
-                    var CurrentData = PGET_LST_SUB.Items[PGET_LST_SUB.SelectedIndex] as PGET_LST;
-
-                    if (grid.CurrentCell.Column.SortMemberPath == "NAHVA")
+                    if (PGET_LST_SUB.IsReadOnly == true)
                     {
-                        CREATE_CHEKDP cREATE_CHEKDP = new CREATE_CHEKDP(I_AM_KHAZANEH, CURRENT_ROW_INDEX);
-                        cREATE_CHEKDP.ShowDialog();
-                    }
-
-                    if (grid.CurrentCell.Column.SortMemberPath == "SHARH")
-                    {
-                        CREATE_CHEKPDP cREATE_CHEKPDP = new CREATE_CHEKPDP(I_AM_KHAZANEH, CURRENT_ROW_INDEX);
-                        cREATE_CHEKPDP.ShowDialog();
-                    }
-                    if (grid.CurrentCell.Column.SortMemberPath == "THES")
-                    {
-                        if (CurrentData.THES is not null)
+                        var CurrentData = PGET_LST_SUB.Items[PGET_LST_SUB.SelectedIndex] as PGET_LST;
+                        if (CurrentData != null && grid?.CurrentCell.Column?.SortMemberPath == "MABL")
                         {
-                            new F_MENU_KOL_MOIN_TAFZIL(CurrentData.THES.ToString());
-                        }
-                    }
-                    if (grid.CurrentCell.Column.SortMemberPath == "FHES")
-                    {
-                        if (CurrentData.FHES is not null)
-                        {
-                            new F_MENU_KOL_MOIN_TAFZIL(CurrentData.FHES.ToString());
+                            CURRENT_ROW_INDEX = PGET_LST_SUB.SelectedIndex;
+                            if (CurrentData.NO_AM == 1 && CurrentData.NAHVA == 2)
+                            {
+                                GETCHEK gETCHEK = new GETCHEK(I_AM_KHAZANEH, CurrentData.MABL.ToString(), CURRENT_ROW_INDEX, true);
+                                gETCHEK.ShowDialog();
+                            }
+                            if (CurrentData.NO_AM == 2 && (CurrentData.NAHVA == 2 || CurrentData.NAHVA == 1))
+                            {
+                                var _serverfilter = "N_SERI = " + CurrentData.N_SERI + " AND BANK = " + CurrentData.BANK + " AND MABL = " + CurrentData.MABL;
+                                PAYCHEK pAYCHEK = new PAYCHEK(_serverfilter, I_AM_KHAZANEH, CurrentData.MABL.ToString(), CURRENT_ROW_INDEX, true);
+                                pAYCHEK.ShowDialog();
+                            }
+                            if (CurrentData.NO_AM == 2 && CurrentData.NAHVA == 4)
+                            {
+                                var _serverfilter = "N_SERI = " + CurrentData.N_SERI + " AND BANK = " + CurrentData.BANK + " AND MABL = " + CurrentData.MABL;
+                                FORCHEK fORCHEK = new FORCHEK(I_AM_KHAZANEH, _serverfilter, CURRENT_ROW_INDEX, true);
+                                fORCHEK.ShowDialog();
+                            }
                         }
                     }
                 }
             }
+            catch (Exception) { }
         }
 
         public bool IsCancelSavingRequested(DataGridRowEditEndingEventArgs e = null)

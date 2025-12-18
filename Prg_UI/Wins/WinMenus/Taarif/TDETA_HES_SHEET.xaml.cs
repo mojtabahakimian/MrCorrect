@@ -365,8 +365,28 @@ namespace Wins.WinMenus.Taarif
             DataViewPal = CollectionViewSource.GetDefaultView(TDETA_HES_DATA);
             TDETA_HES_SUB.ItemsSource = DataViewPal;
         }
+        private void ApplyDataGridItems()
+        {
+            try
+            {
+                if (TDETA_HES_SUB.Items is IEditableCollectionView editableCollectionView)
+                {
+                    if (editableCollectionView.IsAddingNew)
+                    {
+                        editableCollectionView.CancelNew(); // discard the new item
+                    }
+                    if (editableCollectionView.IsEditingItem)
+                    {
+                        editableCollectionView.CommitEdit(); // commit the edit transaction
+                    }
+                }
+            }
+            catch { }
+        }
         private void SearchText_TextChanged(object sender, TextChangedEventArgs e)
         {
+            ApplyDataGridItems();
+
             string query = SearchText.Text?.Trim().ToLower() ?? string.Empty;
 
             if (string.IsNullOrEmpty(query))
@@ -1271,10 +1291,14 @@ namespace Wins.WinMenus.Taarif
 
             var itemsView = grid.Items as IEditableCollectionView;
             var hasInvalidCell = !grid.CurrentCell.IsValid || grid.CurrentItem is null || grid.SelectedItem is null;
-
+          
             if (hasInvalidCell)
             {
-                itemsView?.CancelEdit();
+                bool canCancel = itemsView?.CanCancelEdit == true && (itemsView.IsEditingItem || itemsView.IsAddingNew);
+                if (canCancel)
+                {
+                    itemsView!.CancelEdit();
+                }
                 e.Handled = true;
             }
         }

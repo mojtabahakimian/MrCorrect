@@ -35,7 +35,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         public string ANBAR { get; set; } = "1";
         public bool can { get; private set; }
         public bool CANCEL { get; private set; }
-
+        public bool IsReadOnlyMode { get; set; } = false;
         public class QueryT1
         {
             public int? TNUMBER { get; set; }
@@ -56,8 +56,9 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         public int INDEX_DG { get; set; }
         public bool NowIsReady { get; private set; }
 
-        public GETCHEK(Visual the_win, string _mabl_chek_arg = null, int _current_index = -1)
+        public GETCHEK(Visual the_win, string _mabl_chek_arg = null, int _current_index = -1, bool isreadonly = false)
         {
+            IsReadOnlyMode = isreadonly;
             THE_WIN = the_win;
             MABL_CHEK_ARG = _mabl_chek_arg;
             INDEX_DG = _current_index;
@@ -176,6 +177,27 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
 
             N_HESAB.ItemSource = dbms.DoGetDataSQL<N_HESAB_MODEL>("SELECT DISTINCT N_HESAB FROM dbo.PAY_GETD").ToList();
+
+            if (IsReadOnlyMode)
+            {
+                N_SERI.IsEnabled = false;
+                BANK.IsEnabled = false;
+                SHOBEH.IsEnabled = false;
+                LIST_NO.IsEnabled = false;
+                DATE_S.IsEnabled = false;
+                DATE.IsEnabled = false;
+                MABL.IsEnabled = false;
+                NAME_TAH.IsEnabled = false;
+                N_HESAB.IsEnabled = false;
+                SANDUGH.IsEnabled = false;
+                SAYADI.IsEnabled = false;
+                HES.IsEnabled = false;
+
+                _SaveExit.IsEnabled = false;
+                _SaveExit.Visibility = Visibility.Collapsed;
+
+                this.Title += " (فقط خواندنی)";
+            }
         }
 
         private void Fill_ComboBoxes()

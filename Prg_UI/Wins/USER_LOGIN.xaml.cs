@@ -329,26 +329,6 @@ namespace Prg_UI.Wins
                 CL_LMethods.GoExitTheApplication(); return;// for access
             }
 
-            //this.Show(); //Here for debug comment
-            this.Activate();
-
-            CmbUsers.Focus();
-
-            CL_LMethods.SetTabIndexes(CmbUsers, Rmzo, Greet);
-
-            #region VERY_IMPORTANT_IT_IS_TEMPRORY
-            //Yazdsepar
-            //Baseknow.tindata = "0000000000000000000CORRECT" + "moadian:A11X6O,14040101,A2HGPP,14040101";
-            //CL_Generaly.IsMrCorrectLocky = true;
-            if (false)
-            {
-                //T-SMS
-                SMSPINFO.SERVICE_TYPE = SmsServiceType.TsmsUrl;
-                SMSPINFO.USERNAME = @"yazdseparsms";
-                SMSPINFO.PASSWORD = @"ABCabc123456";
-                SMSPINFO.LINE_NUMBER = 3000119981;
-            }
-            #endregion
 
 #if DEBUG
             //Baseknow.tindata = "0000000000000000000CORRECT";
@@ -385,8 +365,8 @@ namespace Prg_UI.Wins
             //new TARAZ_4_MAH().Show();
             //new HEAD_LST_BRFR(2030d).Show();
 
-            new WinConnectionChoose().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_LFACT, this);
+            //new HEAD_LST_PISHFROOSH2().Show();
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.TOTA_HES_SHEET_WIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
@@ -495,7 +475,30 @@ namespace Prg_UI.Wins
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
 
             //new WinEVENTS(37729).ShowDialog();
+            return;
 #endif
+
+            this.Show(); //Here for debug comment
+            this.Activate();
+
+            CmbUsers.Focus();
+
+            CL_LMethods.SetTabIndexes(CmbUsers, Rmzo, Greet);
+
+            #region VERY_IMPORTANT_IT_IS_TEMPRORY
+            //Yazdsepar
+            //Baseknow.tindata = "0000000000000000000CORRECT" + "moadian:A11X6O,14040101,A2HGPP,14040101";
+            //CL_Generaly.IsMrCorrectLocky = true;
+            if (false)
+            {
+                //T-SMS
+                SMSPINFO.SERVICE_TYPE = SmsServiceType.TsmsUrl;
+                SMSPINFO.USERNAME = @"yazdseparsms";
+                SMSPINFO.PASSWORD = @"ABCabc123456";
+                SMSPINFO.LINE_NUMBER = 3000119981;
+            }
+            #endregion
+
 
             //Thread.Sleep(3000);
             //CL_PRC_LOADER.HidePreloader();
