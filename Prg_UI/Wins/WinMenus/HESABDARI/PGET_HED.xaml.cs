@@ -5557,6 +5557,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
             else if (jamf != 0d & JCHK == 0d)
             {
+                string temp = (report.GetComponentByName("HR") as StiText).Text = "مبلغ: " + Strings.Format(jamf, "#,###") + "  " + CL_HESABDARI.ALPHANUM(jamf) + " " + " ريال نـــقد         به " + rst.FirstOrDefault().NAME + Interaction.IIf(rst.FirstOrDefault().MOLAH == "" || IsNull(rst.FirstOrDefault().MOLAH), " ", " بابت " + rst.FirstOrDefault().MOLAH) + " پرداخت گرديد ";
+
                 (report.GetComponentByName("HR") as StiText).Text = "مبلغ: " + Strings.Format(jamf, "#,###") + "  " + CL_HESABDARI.ALPHANUM(jamf) + " " + " ريال نـــقد         به " + rst.FirstOrDefault().NAME + Interaction.IIf(rst.FirstOrDefault().MOLAH == "" || IsNull(rst.FirstOrDefault().MOLAH), " ", " بابت " + rst.FirstOrDefault().MOLAH) + " پرداخت گرديد ";
 
                 //غیر فعال شدن جدول چک
@@ -5576,7 +5578,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 (report.GetComponentByName("VerticalLinePrimitive13") as StiVerticalLinePrimitive).Enabled = false;
 
             }
-            (report.GetComponentByName("HR") as StiText).Text = CL_HESABDARI.ALPHANUM(JCHK + jamf) + " " + "ريال ";
             #endregion
 
             //report.Compile();
