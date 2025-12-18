@@ -19,6 +19,7 @@ using Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
+using Prg_UI.Wins.WinMenus.SPECIAL_F1;
 using Prg_UI.Wins.WinMenus.WinAutomasion;
 using Prg_UI.Wins.WinMenus.WinDEFAULT;
 using Prg_UI.Wins.WinSetting;
@@ -365,8 +366,8 @@ namespace Prg_UI.Wins
             //new TARAZ_4_MAH().Show();
             //new HEAD_LST_BRFR(2030d).Show();
 
-            //new HEAD_LST_PISHFROOSH2().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.TOTA_HES_SHEET_WIN, this);
+            //new WinBase().Show();
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.TOTA_HES_SHEET_WIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
