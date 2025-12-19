@@ -1110,7 +1110,7 @@ namespace Prg_UI.Scriptses
 								                              @RewardProductID, 
 								                              CAST(@CalculatedRewardQuantity AS FLOAT), -- مقدار محاسبه شده
 								                              CAST(@CalculatedRewardQuantity AS FLOAT),
-								                              0, NULL, 0, 0, 0, NULL, 0, NULL, NULL, NULL, NULL,
+								                              0, NULL, 1, CAST(@CalculatedRewardQuantity AS FLOAT), 0, NULL, 0, NULL, NULL, NULL, NULL,
 								                              (SELECT
 								                                  CASE
 								                                      WHEN ISNUMERIC(SDEF.VAHED) = 1
@@ -1118,7 +1118,7 @@ namespace Prg_UI.Scriptses
 								                                      ELSE NULL
 								                                  END
 								                              FROM dbo.STUF_DEF SDEF WHERE SDEF.CODE = @RewardProductID),
-								                              0, 0, NULL, 0, 0, 0, @InvoiceUserName, 0,
+								                              100, CAST(@CalculatedRewardQuantity AS FLOAT), NULL, 0, 0, 0, @InvoiceUserName, 0,
 								                              @SourceProductLineID, 
 								                              NULL, GETDATE(), @PerformingUserID;
 								  

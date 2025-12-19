@@ -5994,6 +5994,14 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void MABL_AfterUpdate(INVO_LST_FACTOR22? Rowy, bool IsSingleCurrentRow = true, bool DoShoeMessages = true)
         {
+            if (Rowy is null) return;
+            if (Convert.ToInt64(Rowy.JAY) > 0)
+            {
+                Rowy.MABL = 1;
+                Rowy.MABL_K = Rowy.MEGHk;
+                Rowy.N_KOL = 100;
+            }
+
             List<MsgModel> ErrosMessages = new List<MsgModel>();
 
             //CURRENT_ROW_ITEMS
