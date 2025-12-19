@@ -6,6 +6,7 @@ using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
+using Prg_UI.Wins.WinMenus.SPECIAL_F1;
 using Prg_UI.Wins.WinSetting;
 using Rpts;
 using Stimulsoft.Report;
@@ -448,6 +449,11 @@ namespace Prg_UI.Wins
             {
                 e.Handled = true;
                 App.SEARCHMENIU_WIN_ST_Show();
+            }
+            else if (e.Key == Key.F1 && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                e.Handled = true;
+                new WINF1().ShowDialog();
             }
 
             if (Keyboard.IsKeyDown(Key.LeftAlt) && Keyboard.IsKeyDown(Key.LeftShift))

@@ -96,8 +96,9 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         //Header Window End;
         #endregion
 
-        public PAYCHEK(string _serverfilter, Visual _thewin, string _mabl_check_arg = null, int _current_index = -1)
+        public PAYCHEK(string _serverfilter, Visual _thewin, string _mabl_check_arg = null, int _current_index = -1, bool isreadonly = false)
         {
+            IsReadOnlyMode = isreadonly;
             THE_WIN = _thewin;
             MABL_CHEK_ARG = _mabl_check_arg;
             ServerFilter = _serverfilter;
@@ -120,7 +121,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         {
             public string NAME_TAH { get; set; }
         }
-
+        public bool IsReadOnlyMode { get; set; } = false;
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
@@ -199,6 +200,26 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             //SAYADI.IsEnabled = true;
             //SAYADI.TabIndex = 8;
             #endregion
+
+            if (IsReadOnlyMode)
+            {
+                N_SERI.IsEnabled = false;
+                BANK.IsEnabled = false;
+                SHOBEH.IsEnabled = false;
+                DATE_S.IsEnabled = false;
+                DATE.IsEnabled = false;
+                MABL.IsEnabled = false;
+                NAME_TAH.IsEnabled = false;
+                N_HESAB.IsEnabled = false;
+                HES1.IsEnabled = false;
+                SAYADI.IsEnabled = false;
+                KIND.IsEnabled = false;
+
+                _SaveExit.IsEnabled = false;
+                _SaveExit.Visibility = Visibility.Collapsed;
+
+                this.Title += " (فقط خواندنی)";
+            }
         }
 
         private void Fill_ComboBoxes()

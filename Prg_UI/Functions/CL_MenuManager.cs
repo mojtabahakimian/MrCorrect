@@ -18,6 +18,7 @@ using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
 using Prg_UI.Wins.WinMenus.SANATI;
+using Prg_UI.Wins.WinMenus.SPECIAL_F1;
 using Prg_UI.Wins.WinMenus.Taarif;
 using Prg_UI.Wins.WinMenus.WinAutomasion;
 using Prg_UI.Wins.WinMenus.WinDEFAULT;
@@ -952,7 +953,11 @@ namespace Functions
             /// <summary>
             /// تعریف پورسانت ویزیتور ها
             /// </summary>
-            VISITORS_PORSANT_HEAD
+            VISITORS_PORSANT_HEAD,
+            /// <summary>
+            /// پارامتر ها
+            /// </summary>
+            WIN_ZCHRBI
         }
         #endregion
 
@@ -971,6 +976,7 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+                case WinNameType.WIN_ZCHRBI: /* پارامتر ها */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_ZCHRBI(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.VISITORS_PORSANT_HEAD: /* تعریف پورسانت ویزیتور ها */ CL_LMethods.OpenWindow(OWNERWIN, new VISITORS_PORSANT_HEAD(), isModalDialog: false, allowMultipleInstances: false); break;
                 case WinNameType.WIN_CHREC_HES_BEHESABCHECK: /* به حساب گذاشتن چک */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_CHREC_HES(), isModalDialog: false, allowMultipleInstances: false); break;

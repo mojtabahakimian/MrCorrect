@@ -19,6 +19,7 @@ using Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
+using Prg_UI.Wins.WinMenus.SPECIAL_F1;
 using Prg_UI.Wins.WinMenus.WinAutomasion;
 using Prg_UI.Wins.WinMenus.WinDEFAULT;
 using Prg_UI.Wins.WinSetting;
@@ -329,26 +330,6 @@ namespace Prg_UI.Wins
                 CL_LMethods.GoExitTheApplication(); return;// for access
             }
 
-            //this.Show(); //Here for debug comment
-            this.Activate();
-
-            CmbUsers.Focus();
-
-            CL_LMethods.SetTabIndexes(CmbUsers, Rmzo, Greet);
-
-            #region VERY_IMPORTANT_IT_IS_TEMPRORY
-            //Yazdsepar
-            //Baseknow.tindata = "0000000000000000000CORRECT" + "moadian:A11X6O,14040101,A2HGPP,14040101";
-            //CL_Generaly.IsMrCorrectLocky = true;
-            if (false)
-            {
-                //T-SMS
-                SMSPINFO.SERVICE_TYPE = SmsServiceType.TsmsUrl;
-                SMSPINFO.USERNAME = @"yazdseparsms";
-                SMSPINFO.PASSWORD = @"ABCabc123456";
-                SMSPINFO.LINE_NUMBER = 3000119981;
-            }
-            #endregion
 
 #if DEBUG
             //Baseknow.tindata = "0000000000000000000CORRECT";
@@ -385,18 +366,18 @@ namespace Prg_UI.Wins
             //new TARAZ_4_MAH().Show();
             //new HEAD_LST_BRFR(2030d).Show();
 
-            new WinConnectionChoose().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_LFACT, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.TOTA_HES_SHEET_WIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
             //new WIN_OPTIONS().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KART, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this, "10410,10391");
+            //new WIN_About().Show();
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "11338,11323");
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_CHEK_VOSUL_LES, this);
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "9520,9509"); //اتکا
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this); //اتکا
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHKE_DLIST_KOLCHECKD, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT, this);
 
@@ -495,7 +476,30 @@ namespace Prg_UI.Wins
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
 
             //new WinEVENTS(37729).ShowDialog();
+            return;
 #endif
+
+            this.Show(); //Here for debug comment
+            this.Activate();
+
+            CmbUsers.Focus();
+
+            CL_LMethods.SetTabIndexes(CmbUsers, Rmzo, Greet);
+
+            #region VERY_IMPORTANT_IT_IS_TEMPRORY
+            //Yazdsepar
+            //Baseknow.tindata = "0000000000000000000CORRECT" + "moadian:A11X6O,14040101,A2HGPP,14040101";
+            //CL_Generaly.IsMrCorrectLocky = true;
+            if (false)
+            {
+                //T-SMS
+                SMSPINFO.SERVICE_TYPE = SmsServiceType.TsmsUrl;
+                SMSPINFO.USERNAME = @"yazdseparsms";
+                SMSPINFO.PASSWORD = @"ABCabc123456";
+                SMSPINFO.LINE_NUMBER = 3000119981;
+            }
+            #endregion
+
 
             //Thread.Sleep(3000);
             //CL_PRC_LOADER.HidePreloader();

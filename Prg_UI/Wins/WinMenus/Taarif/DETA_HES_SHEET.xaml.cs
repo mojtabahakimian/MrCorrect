@@ -501,8 +501,27 @@ namespace Wins.WinMenus.Taarif
             DataViewPal = CollectionViewSource.GetDefaultView(DETA_HES_DATA);
             DETA_HES_SUB.ItemsSource = DataViewPal;
         }
+        private void ApplyDataGridItems()
+        {
+            try
+            {
+                if (DETA_HES_SUB.Items is IEditableCollectionView editableCollectionView)
+                {
+                    if (editableCollectionView.IsAddingNew)
+                    {
+                        editableCollectionView.CancelNew(); // discard the new item
+                    }
+                    if (editableCollectionView.IsEditingItem)
+                    {
+                        editableCollectionView.CommitEdit(); // commit the edit transaction
+                    }
+                }
+            }
+            catch { }
+        }
         private void SearchText_TextChanged(object sender, TextChangedEventArgs e)
         {
+            ApplyDataGridItems();
             string query = SearchText.Text?.Trim().ToLower() ?? string.Empty;
 
             if (string.IsNullOrEmpty(query))

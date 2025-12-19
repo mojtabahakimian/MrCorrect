@@ -89,8 +89,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         public Visual I_AM_FORCHECK { get; set; }
         public string ServerFilter { get; set; }
         public int INDEX_DG { get; set; }
-        public FORCHEK(Visual thewin, string _filter, int _current_index = -1)
+        public bool IsReadOnlyMode { get; set; } = false;
+
+        public FORCHEK(Visual thewin, string _filter, int _current_index = -1, bool isreadonly = false)
         {
+            IsReadOnlyMode = isreadonly;
             THE_WIN = thewin;
             ServerFilter = _filter;
             InitializeComponent();
@@ -189,7 +192,27 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 this.N_SERI.IsReadOnly = true;
             }
 
-            N_SERI.Focus();
+            if (IsReadOnlyMode)
+            {
+                N_SERI.IsEnabled = false;
+                BANK.IsEnabled = false;
+                SANDUGH.IsEnabled = false;
+                SHOBEH.IsEnabled = false;
+                DATE_S.IsEnabled = false;
+                DATE.IsEnabled = false;
+                NAME_TAH.IsEnabled = false;
+                N_HESAB.IsEnabled = false;
+                MABL.IsEnabled = false;
+
+                _SaveExit.IsEnabled = false;
+                _SaveExit.Visibility = Visibility.Collapsed;
+
+                this.Title += " (فقط خواندنی)";
+            }
+            else
+            {
+                N_SERI.Focus();
+            }
         }
 
         bool isClosing = false;

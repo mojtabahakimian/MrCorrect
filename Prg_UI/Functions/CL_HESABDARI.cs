@@ -3649,14 +3649,58 @@ namespace Prg_Proccessy.FUNCTIONS
                 return;
             }
 
-            var TheWindo = (Window)System.Windows.Interop.HwndSource.FromHwnd(windowHandle).RootVisual;
-            //var TheWindo = Application.Current.Windows.OfType<Window>().SingleOrDefault(win => win.GetType().Name.Equals(FRM));
+            //var TheWindo = (Window)System.Windows.Interop.HwndSource.FromHwnd(windowHandle).RootVisual;
+            ////var TheWindo = Application.Current.Windows.OfType<Window>().SingleOrDefault(win => win.GetType().Name.Equals(FRM));
+
+            //// 1) از HWND یک HwndSource بگیرید
+            //var source = HwndSource.FromHwnd(windowHandle);
+
+            //// 2) نصب هُک
+            //source.AddHook(HwndHook);
 
             // 1) از HWND یک HwndSource بگیرید
             var source = HwndSource.FromHwnd(windowHandle);
+            Window TheWindo = null;
 
-            // 2) نصب هُک
-            source.AddHook(HwndHook);
+            if (source != null)
+            {
+                TheWindo = source.RootVisual as Window;
+                // 2) نصب هُک
+                source.AddHook(HwndHook);
+            }
+
+            // Fallback strategy to find the window if HwndSource failed or RootVisual was null
+            if (TheWindo == null)
+            {
+                foreach (Window win in Application.Current.Windows)
+                {
+                    try
+                    {
+                        // Check by Handle
+                        if (new WindowInteropHelper(win).Handle == windowHandle)
+                        {
+                            TheWindo = win;
+                            break;
+                        }
+                    }
+                    catch { /* Ignore invalid handles */ }
+                }
+            }
+
+            if (TheWindo == null && !string.IsNullOrEmpty(FRM))
+            {
+                foreach (Window win in Application.Current.Windows)
+                {
+                    // Check by Name (Type Name)
+                    if (win.GetType().Name == FRM)
+                    {
+                        TheWindo = win;
+                        break;
+                    }
+                }
+            }
+
+            if (TheWindo == null) return; // If still null, we cannot proceed with signature checks
 
 
             object rst = null;
