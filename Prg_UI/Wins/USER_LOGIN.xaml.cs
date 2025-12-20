@@ -366,14 +366,14 @@ namespace Prg_UI.Wins
             //new TARAZ_4_MAH().Show();
             //new HEAD_LST_BRFR(2030d).Show();
 
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.TOTA_HES_SHEET_WIN, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
             //new WIN_OPTIONS().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KART, this);
-            //new WIN_About().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "11338,11323");
+            //new WinBase().Show();
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "11338,11323");
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_CHEK_VOSUL_LES, this);
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this);
