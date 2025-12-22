@@ -167,9 +167,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
             CL_HESABDARI.SETSECURITY(this.GetType().Name, "SAVEREP", new WindowInteropHelper(this).Handle, this.GetType().Name);
+
             if (!this.IsLoaded)
             {
                 this.Close();
@@ -178,21 +180,48 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             SFG_DATA?.Clear();
 
+            // 1. Get raw allowed users
             const string sqlSub = @"SELECT sd.SAL_NAME  
-                                    FROM dbo.CHARTSAZMANI cs
-                                        LEFT JOIN SALA_DTL sd
-                                            ON cs.SUBUSERCO = sd.IDD
-                                        LEFT JOIN USER_PERSONEL_ORDER uo
-                                            ON cs.SUBUSERCO = uo.PERSONEL_ID
-                                               AND uo.USER_ID = @UserId WHERE cs.USERCO = @UserId";
-            List<string> MyAllowedUsers = dbms.DoGetDataSQL<string>(sqlSub, new { UserId = Baseknow.USERCOD }).ToList();
-            for (int i = 0; i < MyAllowedUsers.Count; i++)
-            {
-                MyAllowedUsers[i] = CL_HESABDARI.DECODEUN(MyAllowedUsers[i]);
-                MyAllowedUsers[i] = CL_LMethods.NormalizeForMatching(MyAllowedUsers[i]);
-            } // Decrypte Username and Normalize
+                                FROM dbo.CHARTSAZMANI cs
+                                    LEFT JOIN SALA_DTL sd
+                                        ON cs.SUBUSERCO = sd.IDD
+                                    LEFT JOIN USER_PERSONEL_ORDER uo
+                                        ON cs.SUBUSERCO = uo.PERSONEL_ID
+                                        AND uo.USER_ID = @UserId WHERE cs.USERCO = @UserId";
 
-            //const string sqlFiltered = @"SELECT IDD, SQLST, TITEL, USER_NAME, LETOTHER, CR_DATE, CRT, UID FROM dbo.SQLSTATE WHERE (USER_NAME IN @Users)";
+            List<string> rawUsers = dbms.DoGetDataSQL<string>(sqlSub, new { UserId = Baseknow.USERCOD }).ToList();
+
+            // 2. Decrypt, Normalize, and Sanitize (Remove Nulls)
+            List<string> safeUserList = new List<string>();
+
+            if (rawUsers != null)
+            {
+                foreach (var rawUser in rawUsers)
+                {
+                    if (string.IsNullOrWhiteSpace(rawUser)) continue;
+
+                    var decoded = CL_HESABDARI.DECODEUN(rawUser);
+
+                    // CRITICAL FIX: Ensure decoded value is not null before normalization
+                    if (!string.IsNullOrWhiteSpace(decoded))
+                    {
+                        var normalized = CL_LMethods.NormalizeForMatching(decoded);
+                        // Double check normalization didn't return null
+                        if (!string.IsNullOrWhiteSpace(normalized))
+                        {
+                            safeUserList.Add(normalized);
+                        }
+                    }
+                }
+            }
+
+            // 3. Handle Empty List Edge Case
+            // If list is empty, 'IN @Users' generates invalid SQL (IN ()). 
+            // We add a dummy value that won't match anything to keep SQL valid.
+            if (safeUserList.Count == 0)
+            {
+                safeUserList.Add("###NO_MATCH_DUMMY###");
+            }
 
             const string sqlFiltered = @"
                  SELECT IDD, SQLST, TITEL, USER_NAME, LETOTHER, CR_DATE, CRT, UID
@@ -219,8 +248,10 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                      IN @Users
                  )";
 
-            //حالا کد سی شارپی بنویس که فقط به کاربرانی که دسترسی دارد ببیند
-            var MasterHead = dbms.DoGetDataSQL<SQLSTATE>(sqlFiltered, new { Users = MyAllowedUsers.ToArray() }).ToList();
+            // 4. Execute with the sanitized list
+            // حالا کد سی شارپی بنویس که فقط به کاربرانی که دسترسی دارد ببیند
+            var MasterHead = dbms.DoGetDataSQL<SQLSTATE>(sqlFiltered, new { Users = safeUserList.ToArray() }).ToList();
+
             foreach (var item in MasterHead)
             {
                 SFG_DATA?.Add(item);
@@ -228,12 +259,14 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             FILL_ALL_COMBOBOXES();
 
-            //SYNCFUSION_DG.ColumnSizer = GridLengthUnitType.Auto;
+            // SYNCFUSION_DG.ColumnSizer = GridLengthUnitType.Auto;
 
             if (SYNCFUSION_DG != null)
             {
                 SYNCFUSION_DG.FilterChanged += View_FilterChanged;
-                SYNCFUSION_DG.Loaded += (s, e) => UpdateRowCountLabel();
+
+                // Fixed lambda syntax slightly for clarity
+                SYNCFUSION_DG.Loaded += (s, args) => UpdateRowCountLabel();
 
                 UpdateRowCountLabel();
             }

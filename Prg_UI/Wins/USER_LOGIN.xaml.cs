@@ -374,9 +374,7 @@ namespace Prg_UI.Wins
             //new TR_FACOTRLST(25).Show();//سوابق برگشت فروش آزاد
             //new TR_FACOTRLST(26).Show();//سوابق سایر حواله انبار : برای برگشت خرید
 
-            //new WIN_About().Show();
-
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_F12, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);

@@ -495,7 +495,7 @@
                 </MenuItem.Icon>
             </MenuItem>
         </ContextMenu>
-        
+
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
@@ -529,7 +529,23 @@
         <!--HEADER↑-->
 
         <DockPanel Margin="10,45,10,45" LastChildFill="True">
-            <Label x:Name="LBL_STATE" DockPanel.Dock="Top" Content="" Margin="5" Visibility="Collapsed" FlowDirection="RightToLeft"/>
+            <Label x:Name="LBL_STATE" DockPanel.Dock="Top" Content="asdasd" Margin="5" Visibility="Collapsed" FlowDirection="RightToLeft"/>
+            <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft"  DockPanel.Dock="Top" Margin="10,6,10,8" Height="40" VerticalAlignment="Bottom">
+                <ComboBox x:Name="PERSONEL_CHANGE_COMBO" IsEditable="True"
+                          Width="220"
+                          ItemsSource="{Binding PERSONEL_COMBO_DATA}"
+                          DisplayMemberPath="SAL_NAME"
+                          SelectedValuePath="IDD"
+                          Margin="0,0,10,0"
+                          materialDesign:HintAssist.Hint="انتخاب مجری جدید"/>
+                <Button Content="ذخیره تغییر مجری"
+                        Width="125"
+                        Height="34"
+                        Click="ChangePersonelButton_Click"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        VerticalAlignment="Center" FontSize="12"/>
+            </StackPanel>
+
             <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" 
                 ContextMenu="{StaticResource DataGridContextMenu}"
                 ItemsSource="{Binding FACTOR_DATA}" 
@@ -537,7 +553,7 @@
                 EnableDataVirtualization="True"
                 SelectionUnit="Row"
                 AllowEditing="True"
-                IsReadOnly="True"
+                IsReadOnly="False"
                 AllowDraggingColumns="True"
                 AllowResizingColumns="True"
                 AllowFiltering="True"
@@ -550,6 +566,8 @@
                 d:ItemsSource="{d:SampleData ItemCount=5}"
                 Style="{StaticResource KDG}"
                 HeaderStyle="{StaticResource KDGHeader}"
+                CurrentCellBeginEdit="SYNCFUSION_DG_CurrentCellBeginEdit"
+                CurrentCellEndEdit="SYNCFUSION_DG_CurrentCellEndEdit"
                 CurrentCellActivated="SYNCFUSION_DG_CurrentCellActivated"
                 PreviewMouseRightButtonDown="SYNCFUSION_DG_PreviewMouseRightButtonDown"
                 AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged" PreviewKeyDown="SYNCFUSION_DG_PreviewKeyDown">
@@ -564,25 +582,9 @@
                 </syncfusion:SfDataGrid.Resources>
 
                 <syncfusion:SfDataGrid.Columns>
-
-                    <syncfusion:GridTemplateColumn HeaderText="رویداد" Width="60" MappingName="IsButtony" FilterRowEditorType="None" AllowSorting="False" AllowFiltering="False"  AllowEditing="False" AllowGrouping="False">
-                        <syncfusion:GridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button x:Name="BTN_ISEND" IsTabStop="False" Click="BTN_ISEND_Click_2" Tag="{Binding}"
-                                        materialDesign:ButtonAssist.CornerRadius="2"
-                                        Style="{StaticResource MaterialDesignFlatButton}"
-                                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
-                                        HorizontalContentAlignment="Center">
-                                    <materialDesign:PackIcon Kind="Plus"/>
-                                </Button>
-
-                            </DataTemplate>
-                        </syncfusion:GridTemplateColumn.CellTemplate>
-                    </syncfusion:GridTemplateColumn>
-
                     <syncfusion:GridTextColumn MappingName="IDNUM" HeaderText="شماره" IsReadOnly="True" Width="90"/>
                     <!-- مجری -->
-                    <syncfusion:GridComboBoxColumn x:Name="PERSONEL_COL"
+                    <syncfusion:GridComboBoxColumn x:Name="PERSONEL_COL" IsReadOnly="True"
                              HeaderText="مجری"
                              MappingName="PERSONEL"
                              Width="200"
@@ -590,13 +592,13 @@
                              DisplayMemberPath="SAL_NAME"
                              SelectedValuePath="IDD">
                     </syncfusion:GridComboBoxColumn>
-                    
-                    <syncfusion:GridTextColumn MappingName="COMP_COD" HeaderText="کد" Width="150"/>
-                    <syncfusion:GridTextColumn MappingName="NAME" HeaderText="نام تماس گیرنده" Width="200"/>
 
-                    <syncfusion:GridTextColumn MappingName="TASK" HeaderText="وظیفه" Width="300"/>
-                    
-                    <syncfusion:GridTextColumn MappingName="USERNAME" HeaderText="کاربر" Width="150"/>
+                    <syncfusion:GridTextColumn MappingName="COMP_COD" HeaderText="کد" Width="150" IsReadOnly="True"/>
+                    <syncfusion:GridTextColumn MappingName="NAME" HeaderText="نام تماس گیرنده" Width="200" IsReadOnly="True"/>
+
+                    <syncfusion:GridTextColumn MappingName="TASK" HeaderText="وظیفه" Width="300" IsReadOnly="True"/>
+
+                    <syncfusion:GridTextColumn MappingName="USERNAME" HeaderText="کاربر" Width="150" IsReadOnly="True"/>
                     <!-- اولویت -->
                     <syncfusion:GridComboBoxColumn x:Name="PERIORITY_COL"
                                        HeaderText="اولویت"
@@ -604,7 +606,7 @@
                                        Width="100"
                                        ItemsSource="{Binding PERIORITY_COMBO_DATA}"
                                        DisplayMemberPath="PERIORITY_NAME"
-                                       SelectedValuePath="PERIORITY" />
+                                       SelectedValuePath="PERIORITY" IsReadOnly="True" />
 
                     <!-- وضعیت -->
                     <syncfusion:GridComboBoxColumn x:Name="STATUS_COL"
@@ -613,33 +615,33 @@
                                        Width="90"
                                        ItemsSource="{Binding STATUS_COMBO_DATA}"
                                        DisplayMemberPath="STATUS_NAME"
-                                       SelectedValuePath="STATUS">
+                                       SelectedValuePath="STATUS" IsReadOnly="True">
                     </syncfusion:GridComboBoxColumn>
 
                     <!-- تاریخ ارجاع -->
 
-                    <syncfusion:GridTextColumn HeaderText="تاریخ ارجاع" MappingName="STDATE" Width="70">
+                    <syncfusion:GridTextColumn HeaderText="تاریخ ارجاع" MappingName="STDATE" Width="70" IsReadOnly="True">
                         <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="STDATE" StringFormat="####/##/##" />
                         </syncfusion:GridTextColumn.DisplayBinding>
                     </syncfusion:GridTextColumn>
 
                     <!-- زمان ارجاع -->
-                    <syncfusion:GridTextColumn HeaderText="زمان ارجاع" MappingName="STTIME" Width="90">
+                    <syncfusion:GridTextColumn HeaderText="زمان ارجاع" MappingName="STTIME" Width="90" IsReadOnly="True">
                         <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="STTIME" StringFormat="##:##" />
                         </syncfusion:GridTextColumn.DisplayBinding>
                     </syncfusion:GridTextColumn>
 
                     <!-- تاریخ انجام -->
-                    <syncfusion:GridTextColumn HeaderText="تاریخ انجام" MappingName="ENDATE" Width="100">
+                    <syncfusion:GridTextColumn HeaderText="تاریخ انجام" MappingName="ENDATE" Width="100" IsReadOnly="True">
                         <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="ENDATE" StringFormat="####/##/##" />
                         </syncfusion:GridTextColumn.DisplayBinding>
                     </syncfusion:GridTextColumn>
 
                     <!-- زمان انجام -->
-                    <syncfusion:GridTextColumn HeaderText="زمان انجام" MappingName="ENTIME" Width="90">
+                    <syncfusion:GridTextColumn HeaderText="زمان انجام" MappingName="ENTIME" Width="90" IsReadOnly="True">
                         <syncfusion:GridTextColumn.DisplayBinding>
                             <Binding Path="ENTIME" StringFormat="##:##" />
                         </syncfusion:GridTextColumn.DisplayBinding>
@@ -649,6 +651,8 @@
 
             </syncfusion:SfDataGrid>
         </DockPanel>
+
+
 
         <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft" Margin="10,0,10,8" Height="30" VerticalAlignment="Bottom">
             <Label Content="تعداد رکورد ها:" FlowDirection="RightToLeft" Width="84" HorizontalAlignment="Right" Height="27"/>

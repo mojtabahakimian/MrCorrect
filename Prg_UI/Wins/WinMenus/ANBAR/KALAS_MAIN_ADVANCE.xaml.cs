@@ -27,6 +27,8 @@ using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_SERCH_MAIN_ADVANC;
 using Prg_Proccessy.MODELS;
 using System.ComponentModel;
+using Syncfusion.UI.Xaml.TreeGrid;
+
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
 {
@@ -93,6 +95,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         public bool isSummed { get; set; } = false;
         public List<string> RestrictionMessages { get; set; } = new List<string>();
         public List<string> ColumnSelectedPassed { get; set; } = new List<string>();
+
+
 
         #region ComboBoxItemPassed
         //public List<TAGCOD>? TAGCODE_Data { get; set; }

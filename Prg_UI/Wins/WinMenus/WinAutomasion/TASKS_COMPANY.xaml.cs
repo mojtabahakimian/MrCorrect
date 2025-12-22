@@ -198,13 +198,25 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             //List<COMBOPERSONEL> sub_rst_personel = dbms.DoGetDataSQL<COMBOPERSONEL>(sqlSub, new { UserId = Baseknow.USERCOD }).ToList();
 
             // مجری (مرتب‌سازی بر اساس سفارش کاربر)
-            var rows = dbms.DoGetDataSQL<COMBOPERSONEL>(@"SELECT SAL_NAME, IDD FROM dbo.SALA_DTL").ToList();
+
+            const string sql = @"
+                SELECT sd.SAL_NAME,sd.GRSAL, sd.ENABL, sd.IDD
+                FROM SALA_DTL sd
+                LEFT JOIN USER_PERSONEL_ORDER uo 
+                     ON sd.IDD = uo.PERSONEL_ID AND uo.USER_ID = @UserId
+                ORDER BY
+                     CASE WHEN uo.SORT_ORDER IS NULL THEN 1 ELSE 0 END,
+                     uo.SORT_ORDER, sd.SAL_NAME";
+
+            //var rows = dbms.DoGetDataSQL<COMBOPERSONEL>(@"SELECT SAL_NAME, IDD FROM dbo.SALA_DTL").ToList();
+            var rows = dbms.DoGetDataSQL<COMBOPERSONEL>(sql, new { UserId = Baseknow.USERCOD }).ToList();
             PERSONEL_COMBO_DATA.Clear();
             foreach (var item in rows)
             {
                 item.SAL_NAME = CL_HESABDARI.DECODEUN(item.SAL_NAME);
                 PERSONEL_COMBO_DATA.Add(item);
             }
+
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -814,6 +826,87 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                         }
                     }
                 }
+            }
+
+        }
+
+        private void SYNCFUSION_DG_CurrentCellBeginEdit(object sender, CurrentCellBeginEditEventArgs e)
+        {
+        }
+        private void SYNCFUSION_DG_CurrentCellEndEdit(object sender, CurrentCellEndEditEventArgs e)
+        {
+
+        }
+
+        private void ChangePersonelButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (SYNCFUSION_DG.SelectedItem is not TASKS selectedTask || selectedTask.IDNUM is null)
+            {
+                universControl.PopNotifyShow("لطفاً یک ردیف را انتخاب کنید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            if (PERSONEL_CHANGE_COMBO.SelectedValue is null || !int.TryParse(PERSONEL_CHANGE_COMBO.SelectedValue.ToString(), out var personelId))
+            {
+                universControl.PopNotifyShow("مجری جدید را انتخاب کنید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            if (selectedTask.PERSONEL == personelId)
+            {
+                universControl.PopNotifyShow("مجری انتخاب‌شده با مجری فعلی یکسان است", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            string wasPeronName = PERSONEL_COMBO_DATA.FirstOrDefault(p => p.IDD == selectedTask.PERSONEL)?.SAL_NAME ?? string.Empty;
+            string selectedPersonName = PERSONEL_COMBO_DATA.FirstOrDefault(p => p.IDD == personelId)?.SAL_NAME ?? string.Empty;
+            Msgwin msgwin = new Msgwin(true, $"آیا از تغییر این مجری [{wasPeronName}] به ← [{selectedPersonName}] برای شماره اتوماسیون {selectedTask.IDNUM} مطمئن هستید ؟ ");
+            msgwin.ShowDialog();
+            if (msgwin.DialogResult != true)
+            {
+                return;
+            }
+
+            try
+            {
+                DateTime dt = DateTime.MinValue;
+                dt = DateTime.Now;
+                if (Convert.ToBoolean(Baseknow.TRANSF))
+                {
+                    CL_HESABDARI.TR("TASKS", "(IDNUM = " + selectedTask.IDNUM + " )", dt, 1);
+                    CL_HESABDARI.TR("EVENTS", "(IDNUM = " + selectedTask.IDNUM + " )", dt, 1);
+                }
+
+                const string updateSql = "UPDATE dbo.TASKS SET PERSONEL = @Personel WHERE IDNUM = @Id";
+                dbms.DoExecuteSQL(updateSql, new { Personel = personelId, Id = selectedTask.IDNUM });
+
+                try
+                {
+                    string eventDescription = $"از بخش مشاهده پرونده ارجاع شد به : تغییر مجری [{wasPeronName}] به ← [{selectedPersonName}]";
+                    const string insertEvent = @"INSERT INTO events (IDNUM, USERNAME, EVENTS, STDATE, STTIME, SKID, NUM, TG)
+                                          VALUES (@IdNum, @UserName, @EventDesc, @StDate, @StTime, @SkId, @Num, @Tg)";
+                    dbms.DoExecuteSQL(insertEvent, new
+                    {
+                        IdNum = selectedTask.IDNUM,
+                        UserName = Baseknow.UUSER ?? "Unknown",
+                        EventDesc = eventDescription,
+                        StDate = Convert.ToInt32(Tarikh.GoGetPersianDate(true)),
+                        StTime = Convert.ToInt32(DateTime.Now.ToString("HHmm")),
+                        SkId = selectedTask.skid,
+                        Num = selectedTask.num,
+                        Tg = selectedTask.tg
+                    });
+                }
+                catch { }
+
+                universControl.PopNotifyShowUp("مجری با موفقیت تغییر کرد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green, 1);
+
+                SYNCFUSION_DG.SelectedIndex = -1;
+            }
+            catch (Exception ex)
+            {
+                universControl.PopNotifyShow($"خطا در تغییر مجری", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                ReGetData();
             }
 
         }
