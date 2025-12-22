@@ -430,15 +430,8 @@ namespace Prg_UI.Wins.WinMenus.TR
                 fullDetails.Checks = (await multi.ReadAsync<PAY_GETD_SUB22_MODEL>()).ToList();
                 fullDetails.VisitorDetails = (await multi.ReadAsync<VISITOR_DTL>()).ToList();
                 fullDetails.OtherDetails = await multi.ReadFirstOrDefaultAsync<OTHER_DTL_CSHARP>();
-                fullDetails.TaxDetails = await multi.ReadFirstOrDefaultAsync<HEAD_LST_EXTENDED>();
                 fullDetails.Customer = await multi.ReadFirstOrDefaultAsync<Custom_CUST_HESAB>();
                 fullDetails.SanadBase = await multi.ReadFirstOrDefaultAsync<string>();
-            }
-
-            // Execute scalar function for account balance separately
-            if (fullDetails.Header?.CUST_NO != null)
-            {
-                fullDetails.AccountBalance = CL_HESABDARI.GETMANDAH(fullDetails.Header.CUST_NO);
             }
 
             return fullDetails;

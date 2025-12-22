@@ -20,6 +20,7 @@ using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
 using Prg_UI.Wins.WinMenus.SPECIAL_F1;
+using Prg_UI.Wins.WinMenus.TR;
 using Prg_UI.Wins.WinMenus.WinAutomasion;
 using Prg_UI.Wins.WinMenus.WinDEFAULT;
 using Prg_UI.Wins.WinSetting;
@@ -363,10 +364,19 @@ namespace Prg_UI.Wins
 
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
 
-            //new TARAZ_4_MAH().Show();
-            //new HEAD_LST_BRFR(2030d).Show();
+            //new TR_FACOTRLST(1).Show();//سوابق رسید انبار
+            //new TR_FACOTRLST(2).Show();//سوابق حواله انبار
+            //new TR_FACOTRLST(24).Show();//سوابق سایر رسید انبار
+            //new TR_FACOTRLST(4).Show();//سوابق برگشت فروش عادی
+            //new TR_FACOTRLST(12).Show();//سوابق فاکتور خرید
+            //new TR_FACOTRLST(13).Show();//سوابق فاکتور فروش
+            //new TR_FACOTRLST(20).Show();//سوابق پیش فاکتور
+            //new TR_FACOTRLST(25).Show();//سوابق برگشت فروش آزاد
+            //new TR_FACOTRLST(26).Show();//سوابق سایر حواله انبار : برای برگشت خرید
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN, this);
+            //new WIN_About().Show();
+
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);

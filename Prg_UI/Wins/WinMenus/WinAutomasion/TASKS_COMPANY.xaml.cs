@@ -130,7 +130,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             //{
             //    FACTOR_DATA.Add(item);
             //}
-            
+
             FILL_ALL_COMBOBOXES();
 
             ReGetData();
@@ -796,6 +796,26 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             //{
             //    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_MOADIAN_SINGLE, this, Convert.ToDouble(CurrentRow.NUMBER));
             //}
+        }
+
+
+        private void BTN_ISEND_Click_2(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                if (!(btn.Tag is null))
+                {
+                    if ((btn.Tag as TASKS)?.IDNUM is not null)
+                    {
+                        var Row = btn.Tag as TASKS;
+                        if (Row != null && Row?.IDNUM > 0)
+                        {
+                            new WinEVENTS((long)Row.IDNUM).ShowDialog();
+                        }
+                    }
+                }
+            }
+
         }
     }
 }
