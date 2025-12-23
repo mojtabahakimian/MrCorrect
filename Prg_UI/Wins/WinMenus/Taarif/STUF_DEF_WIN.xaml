@@ -401,8 +401,8 @@
                             </DataGridComboBoxColumn.ElementStyle>
                         </DataGridComboBoxColumn>
 
-                        <DataGridTextColumn Header="تاریخ شروع"  Binding="{Binding StartDate, StringFormat=####/##/##}"  MinWidth="120"/>
-                        <DataGridTextColumn Header="تاریخ پایان"  Binding="{Binding EndDate, StringFormat=####/##/##}"  MinWidth="120"/>
+                        <DataGridTextColumn Header="تاریخ شروع"  Binding="{Binding StartDate, StringFormat=####/##/##,UpdateSourceTrigger=LostFocus}"  MinWidth="120"/>
+                        <DataGridTextColumn Header="تاریخ پایان"  Binding="{Binding EndDate, StringFormat=####/##/##,UpdateSourceTrigger=LostFocus}"  MinWidth="120"/>
 
                         <DataGridTextColumn x:Name="Description_COLUMN" Header="شرح" Binding="{Binding Description,UpdateSourceTrigger=LostFocus}" Width="auto" MinWidth="200">
                             <DataGridTextColumn.EditingElementStyle>

@@ -977,10 +977,10 @@ namespace Wins.WinMenus.Taarif
         private void REWARDS_ReGetData()
         {
             REWARDS_DATA?.Clear();
-            var data = dbms.DoGetDataSQL<RewardRules>($"SELECT * FROM RewardRules WHERE ProductID_Target = '{CODE.Text}' ").ToList();
+            var data = dbms.DoGetDataSQL<RewardRules>($"SELECT * FROM RewardRules WHERE ProductID_Target = N'{CODE.Text}' ").ToList();
             foreach (var item in data)
             {
-                REWARDS_DATA.Add(item);
+                REWARDS_DATA?.Add(item);
             }
         }
 
@@ -3637,36 +3637,60 @@ namespace Wins.WinMenus.Taarif
                 return;
             }
 
-
             try
             {
+                var parameters = new
+                {
+                    RuleID = ROW.RuleID,
+                    ProductID_Target = CODE.Text, // مقدار از تکست‌باکس
+                    ROW.Quantity_Threshold,
+                    ROW.Reward_Type,
+                    ROW.Reward_ProductID,
+                    ROW.Reward_Quantity,
+                    ROW.Reward_Discount_Percentage,
+                    IsActive = ROW.IsActive ?? false, // تبدیل Nullable Bool به Bool معمولی
+                    ROW.StartDate,
+                    ROW.EndDate,
+                    ROW.Description,
+                    UID = Baseknow.USERCOD
+                };
+
                 if (ROW.RuleID == null || ROW.RuleID == 0) // INSERT
                 {
-                    var insertedId = dbms.DoGetDataSQL<int>($@"
-                INSERT INTO RewardRules(ProductID_Target, Quantity_Threshold, Reward_Type, Reward_ProductID,
-                    Reward_Quantity, Reward_Discount_Percentage, IsActive, StartDate, EndDate, Description, UID)
-                OUTPUT INSERTED.RuleID
-                VALUES(N'{CODE.Text}', {ROW.Quantity_Threshold}, N'{ROW.Reward_Type}', N'{ROW.Reward_ProductID}',
-                    {ROW.Reward_Quantity?.ToString() ?? "NULL"}, {ROW.Reward_Discount_Percentage?.ToString() ?? "NULL"},
-                    {((bool)ROW.IsActive ? 1 : 0)}, {ROW.StartDate?.ToString() ?? "NULL"}, {ROW.EndDate?.ToString() ?? "NULL"},
-                    N'{ROW.Description}', {Baseknow.USERCOD}) ").FirstOrDefault();
+                    string sqlInsert = @"
+                     INSERT INTO RewardRules (
+                         ProductID_Target, Quantity_Threshold, Reward_Type, Reward_ProductID,
+                         Reward_Quantity, Reward_Discount_Percentage, IsActive, StartDate, EndDate, Description, UID
+                     )
+                     OUTPUT INSERTED.RuleID
+                     VALUES (
+                         @ProductID_Target, @Quantity_Threshold, @Reward_Type, @Reward_ProductID,
+                         @Reward_Quantity, @Reward_Discount_Percentage, @IsActive, @StartDate, @EndDate, @Description, @UID
+                     )";
 
+                    // اجرا و دریافت ID جدید
+                    var insertedId = dbms.DoGetDataSQL<int>(sqlInsert, parameters).FirstOrDefault();
                     ROW.RuleID = insertedId;
                 }
                 else // UPDATE
                 {
-                    dbms.DoExecuteSQL($@"UPDATE RewardRules SET ProductID_Target = N'{CODE.Text}' ,
-                    Quantity_Threshold = {ROW.Quantity_Threshold},
-                    Reward_Type = N'{ROW.Reward_Type}',
-                    Reward_ProductID = N'{ROW.Reward_ProductID}',
-                    Reward_Quantity = {ROW.Reward_Quantity?.ToString() ?? "NULL"},
-                    Reward_Discount_Percentage = {ROW.Reward_Discount_Percentage?.ToString() ?? "NULL"},
-                    IsActive = {((bool)ROW.IsActive ? 1 : 0)},
-                    StartDate = {ROW.StartDate?.ToString() ?? "NULL"},
-                    EndDate = {ROW.EndDate?.ToString() ?? "NULL"},
-                    Description = N'{ROW.Description}',
-                    UID = {Baseknow.USERCOD}
-                    WHERE RuleID = {ROW.RuleID}");
+                    string sqlUpdate = @"
+                     UPDATE RewardRules SET 
+                         ProductID_Target = @ProductID_Target,
+                         Quantity_Threshold = @Quantity_Threshold,
+                         Reward_Type = @Reward_Type,
+                         Reward_ProductID = @Reward_ProductID,
+                         Reward_Quantity = @Reward_Quantity,
+                         Reward_Discount_Percentage = @Reward_Discount_Percentage,
+                         IsActive = @IsActive,
+                         StartDate = @StartDate,
+                         EndDate = @EndDate,
+                         Description = @Description,
+                         UID = @UID
+                     WHERE RuleID = @RuleID";
+
+                    // اجرای آپدیت
+                    dbms.DoExecuteSQL(sqlUpdate, parameters);
                 }
             }
             catch (SqlException ex)
