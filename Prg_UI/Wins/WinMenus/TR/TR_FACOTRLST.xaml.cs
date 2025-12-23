@@ -329,6 +329,8 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
                 var DATA = dbms.DoGetDataSQL<TAKHFIF_APLAY>("SELECT TID, NUMBER, KIND FROM TR_TAKHFIF_APLAY").ToList();
             }
             #endregion
+
+            SYNCFUSION_DG.Visibility = Visibility.Visible;
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -511,7 +513,8 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
             ////کمبوباکس های پشت فاکتور
             bANKColumn.ItemsSource = dbms.DoGetDataSQL<TCOD_BANKS>("SELECT TCOD_BANKS.CODE, TCOD_BANKS.NAMES FROM TCOD_BANKS ORDER BY TCOD_BANKS.NAMES").ToList();
 
-            var HESNAMELST = dbms.DoGetDataSQL<CUSTOM_HESABHA>("SELECT N_KOL,NUMBER,TNUMBER, RTRIM(CAST(N_KOL AS NVARCHAR))+'-'+RTRIM(CAST(NUMBER AS NVARCHAR))+'-'+RTRIM(CAST(TNUMBER AS NVARCHAR)) AS hes, NAME FROM TDETA_HES").ToList();
+            var HESNAMELST = new List<CUSTOM_HESABHA>();
+            //var HESNAMELST = dbms.DoGetDataSQL<CUSTOM_HESABHA>("SELECT N_KOL,NUMBER,TNUMBER, RTRIM(CAST(N_KOL AS NVARCHAR))+'-'+RTRIM(CAST(NUMBER AS NVARCHAR))+'-'+RTRIM(CAST(TNUMBER AS NVARCHAR)) AS hes, NAME FROM TDETA_HES").ToList();
             CMB_MOIN_VAR.ItemsSource = HESNAMELST.Where(w => w.N_KOL == Baseknow.BANKHA).ToList(); //معین واریزی
             CMB_MOIN_HAV.ItemsSource = HESNAMELST.ToList(); //معين حواله
             CMB_MOIN_HAZ.ItemsSource = HESNAMELST.ToList(); //معين خدمات
@@ -597,77 +600,16 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
             public string SanadBase { get; set; } // MABNA
         }
 
-        private async Task<FactorFullDetails> GetFactorFullDetailsAsync11(TR_HEAD_LST TrRow)
+        private CUSTOM_HESABHA? GetHesabhaByCode(string hesCode)
         {
-            var fullDetails = new FactorFullDetails();
-            string sql = $@"
-                -- 1. Header
-                SELECT * FROM dbo.TR_HEAD_LST WHERE NUMBER = @FactorNumber AND TAG = @fTAG;
+            if (string.IsNullOrWhiteSpace(hesCode))
+                return null;
 
-                -- 2. Invoice Items
-                SELECT il.*, sd.NAME AS NAME_CODE 
-                FROM dbo.TR_INVO_LST il 
-                LEFT JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE 
-                WHERE il.NUMBER = @FactorNumber AND il.TAG = @hTAG;
+            var result = dbms.DoGetDataSQL<CUSTOM_HESABHA>($"SELECT TOP 1 hes,NAME FROM dbo.CUST_HESAB WHERE hes = @hes",
+                new { hes = hesCode }
+            ).FirstOrDefault();
 
-                -- 3. Advanced Discounts
-                SELECT tad.*, td.TSHARH 
-                FROM dbo.TR_TAKHFIF_APLAY tad
-                JOIN dbo.TAKHFIF_DEF td ON tad.TID = td.TID
-                WHERE tad.NUMBER = @FactorNumber AND tad.KIND = 2; -- Assuming kind=2 is for sales invoices
-
-                -- 4. Checks
-                SELECT * FROM dbo.PAY_GETD WHERE NUMBER = @FactorNumber AND TAG = @hTAG AND (N_KOL IS NULL OR N_KOL <> 911);
-
-                -- 5. Visitor Details
-                SELECT v.*, ch.NAME AS CUST_NO_NAME
-                FROM dbo.TR_VISITOR_DTL v
-                LEFT JOIN CUST_HESAB ch ON v.CUST_NO = ch.hes
-                WHERE v.NUMBER = @FactorNumber AND v.TAG = @hTAG;
-
-                -- 6. Other Details (Ranandeh)
-                SELECT * FROM dbo.TR_OTHER_DTL WHERE NUMBER = @FactorNumber AND TAG = @fTAG;
-
-                -- 8. Customer Details (Fetch based on Header's CUST_NO) // 8. Customer Details (Fix: Use TOP 1 in the subquery)
-                SELECT TOP 1 * FROM dbo.CUST_HESAB WHERE hes = (SELECT TOP 1 CUST_NO FROM dbo.TR_HEAD_LST WHERE NUMBER = @FactorNumber AND TAG = @fTAG);
-
-                -- 10. Sanad Base (Mabna)
-                --SELECT TOP 1 BASE FROM dbo.DEED_HED WHERE NO_S = 2 AND N_S = (SELECT N_S FROM dbo.TR_HEAD_LST WHERE NUMBER = @FactorNumber AND TAG = @fTAG);
-            ";
-
-            using var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR);
-
-            if (TAGCODE == 13) //اگر فاکتور فروش است
-            {
-                fTAG = 13;
-                hTAG = 2;
-            }
-            else if (TAGCODE == 12) //اگر فاکتور خرید است
-            {
-                fTAG = 12;
-                hTAG = 1;
-            }
-            else
-            {
-                fTAG = TAGCODE;
-                hTAG = TAGCODE;
-            }
-
-            using (var multi = await db.QueryMultipleAsync(sql, new { FactorNumber = TrRow.NUMBER, fTAG = fTAG, hTAG = hTAG }))
-            {
-                fullDetails.Header = await multi.ReadFirstOrDefaultAsync<HEAD_LST>();
-                if (fullDetails.Header == null) return null; // Factor not found
-
-                fullDetails.InvoiceItems = (await multi.ReadAsync<INVO_LST_FACTOR22>()).ToList();
-                fullDetails.AdvancedDiscounts = (await multi.ReadAsync<TAKHFIF_APLAY>()).ToList();
-                fullDetails.Checks = (await multi.ReadAsync<PAY_GETD_SUB22_MODEL>()).ToList();
-                fullDetails.VisitorDetails = (await multi.ReadAsync<VISITOR_DTL>()).ToList();
-                fullDetails.OtherDetails = await multi.ReadFirstOrDefaultAsync<OTHER_DTL_CSHARP>();
-                fullDetails.Customer = await multi.ReadFirstOrDefaultAsync<Custom_CUST_HESAB>(); //--
-                //fullDetails.SanadBase = await multi.ReadFirstOrDefaultAsync<string>();
-            }
-
-            return fullDetails;
+            return result;
         }
 
         private async Task<FactorFullDetails> GetFactorFullDetailsAsync(TR_HEAD_LST TrRow)
@@ -804,6 +746,74 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
                 fullDetails.Checks.ForEach(PAY_GETD_SUB22_DATA.Add);
                 SAYER_VISITOR_DATA.Clear();
                 fullDetails.VisitorDetails.ForEach(SAYER_VISITOR_DATA.Add);
+
+                // معین واریزی - CMB_MOIN_VAR (with BANKHA filter)
+                if (!string.IsNullOrWhiteSpace(header.MOIN_VAR))
+                {
+                    var moinVarRecord = GetHesabhaByCode(header.MOIN_VAR);
+                    if (moinVarRecord != null && moinVarRecord.N_KOL == Baseknow.BANKHA)
+                    {
+                        CMB_MOIN_VAR.ItemsSource = new List<CUSTOM_HESABHA> { moinVarRecord };
+                        CMB_MOIN_VAR.SelectedValue = moinVarRecord.hes;
+                        CMB_MOIN_VAR.DisplayMemberPath = "NAME";
+                        CMB_MOIN_VAR.SelectedValuePath = "hes";
+                    }
+                    else
+                    {
+                        CMB_MOIN_VAR.ItemsSource = null;
+                    }
+                }
+
+                // معين حواله - CMB_MOIN_HAV
+                if (!string.IsNullOrWhiteSpace(header.MOIN_HAV))
+                {
+                    var moinHavRecord = GetHesabhaByCode(header.MOIN_HAV);
+                    if (moinHavRecord != null)
+                    {
+                        CMB_MOIN_HAV.ItemsSource = new List<CUSTOM_HESABHA> { moinHavRecord };
+                        CMB_MOIN_HAV.SelectedValue = moinHavRecord.hes;
+                        CMB_MOIN_HAV.DisplayMemberPath = "NAME";
+                        CMB_MOIN_HAV.SelectedValuePath = "hes";
+                    }
+                    else
+                    {
+                        CMB_MOIN_HAV.ItemsSource = null;
+                    }
+                }
+
+                // معين خدمات - CMB_MOIN_HAZ
+                if (!string.IsNullOrWhiteSpace(header.MOIN_HAZ))
+                {
+                    var moinHazRecord = GetHesabhaByCode(header.MOIN_HAZ);
+                    if (moinHazRecord != null)
+                    {
+                        CMB_MOIN_HAZ.ItemsSource = new List<CUSTOM_HESABHA> { moinHazRecord };
+                        CMB_MOIN_HAZ.SelectedValue = moinHazRecord.hes;
+                        CMB_MOIN_HAZ.DisplayMemberPath = "NAME";
+                        CMB_MOIN_HAZ.SelectedValuePath = "hes";
+                    }
+                    else
+                    {
+                        CMB_MOIN_HAZ.ItemsSource = null;
+                    }
+                }
+
+                // معین مالیات - CMB_HMBAA
+                if (!string.IsNullOrWhiteSpace(header.HMBAA))
+                {
+                    var hmbaaRecord = GetHesabhaByCode(header.HMBAA);
+                    if (hmbaaRecord != null)
+                    {
+                        CMB_HMBAA.ItemsSource = new List<CUSTOM_HESABHA> { hmbaaRecord };
+                        CMB_HMBAA.SelectedValue = hmbaaRecord.hes;
+                        CMB_HMBAA.DisplayMemberPath = "NAME";
+                        CMB_HMBAA.SelectedValuePath = "hes";
+                    }
+                    else
+                    {
+                        CMB_HMBAA.ItemsSource = null;
+                    }
+                }
 
                 M_NAGHD.Text = header.M_NAGHD.ToStringNullSafe();
                 MABL_VAR.Text = header.MABL_VAR.ToStringNullSafe();
