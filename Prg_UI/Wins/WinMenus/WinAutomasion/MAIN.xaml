@@ -42,7 +42,7 @@
         </Style>-->
 
         <ContextMenu x:Key="ContextUtilityMenu2" IsEnabled="{Binding ElementName=tASKSDataGrid,Path=IsEnabled}" FontSize="12" FontFamily="{StaticResource IRANYEKAN}">
-            <MenuItem Header="مشاهره پرونده تماس گیرنده" Click="MenuItem_Click">
+            <MenuItem Header="مشاهده پرونده تماس گیرنده" Click="MenuItem_Click">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="FolderOutline"/>
                 </MenuItem.Icon>

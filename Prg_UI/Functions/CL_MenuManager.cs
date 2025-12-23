@@ -957,7 +957,11 @@ namespace Functions
             /// <summary>
             /// پارامتر ها
             /// </summary>
-            WIN_ZCHRBI
+            WIN_ZCHRBI,
+            /// <summary>
+            /// گزارش ویژه 115
+            /// </summary>
+            BEDEHKARAN_BESTANKARAN_NEW
         }
         #endregion
 
@@ -976,6 +980,7 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+                case WinNameType.BEDEHKARAN_BESTANKARAN_NEW: /* گزارش ویژه 115 */ CL_LMethods.OpenWindow(OWNERWIN, new BEDEHKARAN_BESTANKARAN_NEW(), isModalDialog: false, allowMultipleInstances: false); break;
                 case WinNameType.WIN_ZCHRBI: /* پارامتر ها */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_ZCHRBI(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.VISITORS_PORSANT_HEAD: /* تعریف پورسانت ویزیتور ها */ CL_LMethods.OpenWindow(OWNERWIN, new VISITORS_PORSANT_HEAD(), isModalDialog: false, allowMultipleInstances: false); break;

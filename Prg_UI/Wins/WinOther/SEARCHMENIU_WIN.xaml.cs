@@ -368,6 +368,7 @@ namespace Wins.WinOther
             //حسابداری
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "کنترل اسناد و دفاتر چک", WIN_NAME = CL_MenuManager.WinNameType.CONTROL_ASNAD_DAFATERCHECK_FORM11 });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "حسابهای ترازنامه", WIN_NAME = CL_MenuManager.WinNameType.TARAZHES_WIN });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش ویژه 115", WIN_NAME = CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN_NEW });
 
 
             //تعاریف
