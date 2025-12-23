@@ -364,7 +364,8 @@ namespace Prg_UI.Wins
 
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
 
-            //new TR_FACOTRLST(1).Show();//سوابق رسید انبار
+            new TR_FACOTRLST(1).Show();//سوابق رسید انبار
+
             //new TR_FACOTRLST(2).Show();//سوابق حواله انبار
             //new TR_FACOTRLST(24).Show();//سوابق سایر رسید انبار
             //new TR_FACOTRLST(4).Show();//سوابق برگشت فروش عادی
@@ -380,7 +381,7 @@ namespace Prg_UI.Wins
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
             //new WIN_OPTIONS().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KART, this);
-            new WinBase().Show();
+            //new WinBase().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "11338,11323");
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_CHEK_VOSUL_LES, this);
 

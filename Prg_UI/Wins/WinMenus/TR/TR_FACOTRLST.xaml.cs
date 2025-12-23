@@ -738,7 +738,7 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
                 SELECT * FROM dbo.TR_OTHER_DTL WHERE NUMBER = @FactorNumber AND TAG = @fTAG AND UP_DATE = @UpDate 
                   AND UP_TIME = @UpTime;";
 
-            bool isFactor = TAGCODE == 13;
+            bool isFactor = TAGCODE == 13 || TAGCODE == 12;
 
             // Updated SQL to include both UP_DATE and UP_TIME filters
             string sql = $@"
@@ -764,7 +764,7 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
                 -- 4. Checks
                 {(isFactor ? QUERY_TR_PAY_GETD : "")}
 
-                {QUERY_SAYER}
+                {(isFactor ? QUERY_SAYER : "")}
 
                 -- 8. Customer Details
                 SELECT TOP 1 * FROM dbo.CUST_HESAB 
@@ -809,15 +809,165 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
                 if (fullDetails.Header == null) return null;
 
                 fullDetails.InvoiceItems = (await multi.ReadAsync<INVO_LST_FACTOR22>()).ToList();
-                fullDetails.AdvancedDiscounts = (await multi.ReadAsync<TAKHFIF_APLAY>()).ToList();
-                fullDetails.Checks = (await multi.ReadAsync<PAY_GETD_SUB22_MODEL>()).ToList();
-                fullDetails.VisitorDetails = (await multi.ReadAsync<VISITOR_DTL>()).ToList();
-                fullDetails.OtherDetails = await multi.ReadFirstOrDefaultAsync<OTHER_DTL_CSHARP>();
+
+                if (isFactor)
+                {
+                    fullDetails.AdvancedDiscounts = (await multi.ReadAsync<TAKHFIF_APLAY>()).ToList();
+                    fullDetails.Checks = (await multi.ReadAsync<PAY_GETD_SUB22_MODEL>()).ToList();
+                    fullDetails.VisitorDetails = (await multi.ReadAsync<VISITOR_DTL>()).ToList();
+                    fullDetails.OtherDetails = await multi.ReadFirstOrDefaultAsync<OTHER_DTL_CSHARP>();
+                }
+
                 fullDetails.Customer = await multi.ReadFirstOrDefaultAsync<Custom_CUST_HESAB>();
             }
 
             return fullDetails;
         }
+
+        private async Task<FactorFullDetails> GetFactorFullDetailsAsync2(TR_HEAD_LST TrRow)
+        {
+            var fullDetails = new FactorFullDetails();
+
+            // تعریف دقت Round (6 رقم اعشار کافی است)
+            const int ROUND_PRECISION = 6;
+
+            // Query برای تخفیف‌های پیشرفته
+            string QUERY_TR_TAKHFIF_APLAY = $@"
+                    SELECT tad.*, td.TSHARH 
+                    FROM dbo.TR_TAKHFIF_APLAY tad
+                    JOIN dbo.TAKHFIF_DEF td ON tad.TID = td.TID
+                    WHERE tad.NUMBER = @FactorNumber 
+                      AND tad.KIND = 2      
+                      AND tad.UP_DATE = @UpDate 
+                      AND ROUND(tad.UP_TIME, {ROUND_PRECISION}) = ROUND(@UpTime, {ROUND_PRECISION})";
+
+            // Query برای چک‌ها
+            string QUERY_TR_PAY_GETD = $@"
+                    SELECT * 
+                    FROM dbo.TR_PAY_GETD 
+                    WHERE NUMBER = @FactorNumber 
+                      AND TAG = @hTAG 
+                      AND UP_DATE = @UpDate 
+                      AND ROUND(UP_TIME, {ROUND_PRECISION}) = ROUND(@UpTime, {ROUND_PRECISION})";
+
+            // Query برای سایر جزئیات
+            string QUERY_SAYER = $@"
+                    -- Visitor Details
+                    SELECT v.*, ch.NAME AS CUST_NO_NAME
+                    FROM dbo.TR_VISITOR_DTL v
+                    LEFT JOIN CUST_HESAB ch ON v.CUST_NO = ch.hes
+                    WHERE v.NUMBER = @FactorNumber 
+                      AND v.TAG = @hTAG 
+                      AND v.UP_DATE = @UpDate 
+                      AND ROUND(v.UP_TIME, {ROUND_PRECISION}) = ROUND(@UpTime, {ROUND_PRECISION});
+
+                    -- Other Details (Ranandeh)
+                    SELECT * 
+                    FROM dbo.TR_OTHER_DTL 
+                    WHERE NUMBER = @FactorNumber 
+                      AND TAG = @fTAG 
+                      AND UP_DATE = @UpDate 
+                      AND ROUND(UP_TIME, {ROUND_PRECISION}) = ROUND(@UpTime, {ROUND_PRECISION})";
+
+            bool isFactor = TAGCODE == 13 || TAGCODE == 12;
+
+            // Query اصلی
+            string sql = $@"
+                    -- 1. Header (Specific Version)
+                    SELECT * 
+                    FROM dbo.TR_HEAD_LST 
+                    WHERE NUMBER = @FactorNumber 
+                      AND TAG = @fTAG 
+                      AND UP_DATE = @UpDate 
+                      AND ROUND(UP_TIME, {ROUND_PRECISION}) = ROUND(@UpTime, {ROUND_PRECISION});
+
+                    -- 2. Invoice Items (Filtered by Header's UP_DATE & UP_TIME)
+                    SELECT il.*, sd.NAME AS NAME_CODE 
+                    FROM dbo.TR_INVO_LST il 
+                    LEFT JOIN dbo.STUF_DEF sd ON il.CODE = sd.CODE 
+                    WHERE il.NUMBER = @FactorNumber 
+                      AND il.TAG = @hTAG 
+                      AND il.UP_DATE = @UpDate 
+                      AND ROUND(il.UP_TIME, {ROUND_PRECISION}) = ROUND(@UpTime, {ROUND_PRECISION});
+
+                    -- 3. Advanced Discounts
+                    {(isFactor ? QUERY_TR_TAKHFIF_APLAY : "")}
+
+                    -- 4. Checks
+                    {(isFactor ? QUERY_TR_PAY_GETD : "")}
+
+                    {(isFactor ? QUERY_SAYER : "")}
+
+                    -- 8. Customer Details
+                    SELECT TOP 1 * 
+                    FROM dbo.CUST_HESAB 
+                    WHERE hes = (
+                        SELECT TOP 1 CUST_NO 
+                        FROM dbo.TR_HEAD_LST 
+                        WHERE NUMBER = @FactorNumber 
+                          AND TAG = @fTAG 
+                          AND UP_DATE = @UpDate 
+                          AND ROUND(UP_TIME, {ROUND_PRECISION}) = ROUND(@UpTime, {ROUND_PRECISION})
+                    );
+                ";
+
+            using var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR);
+
+            // تنظیم TAG ها بر اساس نوع فاکتور
+            if (TAGCODE == 13) // Sales Invoice
+            {
+                fTAG = 13;
+                hTAG = 2;
+            }
+            else if (TAGCODE == 12) // Purchase Invoice
+            {
+                fTAG = 12;
+                hTAG = 1;
+            }
+            else
+            {
+                fTAG = TAGCODE;
+                hTAG = TAGCODE;
+            }
+
+            // تعریف پارامترها
+            var parameters = new
+            {
+                FactorNumber = TrRow.NUMBER,
+                fTAG = fTAG,
+                hTAG = hTAG,
+                UpDate = TrRow.UP_DATE,
+                UpTime = TrRow.UP_TIME ?? 0 // اگر null بود، 0 می‌فرستیم
+            };
+
+            using (var multi = await db.QueryMultipleAsync(sql, parameters))
+            {
+                // 1. خواندن Header
+                fullDetails.Header = await multi.ReadFirstOrDefaultAsync<HEAD_LST>();
+                if (fullDetails.Header == null)
+                {
+                    return null;
+                }
+
+                // 2. خواندن Invoice Items
+                fullDetails.InvoiceItems = (await multi.ReadAsync<INVO_LST_FACTOR22>()).ToList();
+
+                // 3. خواندن سایر اطلاعات (فقط برای فاکتورهای فروش و خرید)
+                if (isFactor)
+                {
+                    fullDetails.AdvancedDiscounts = (await multi.ReadAsync<TAKHFIF_APLAY>()).ToList();
+                    fullDetails.Checks = (await multi.ReadAsync<PAY_GETD_SUB22_MODEL>()).ToList();
+                    fullDetails.VisitorDetails = (await multi.ReadAsync<VISITOR_DTL>()).ToList();
+                    fullDetails.OtherDetails = await multi.ReadFirstOrDefaultAsync<OTHER_DTL_CSHARP>();
+                }
+
+                // 4. خواندن اطلاعات مشتری
+                fullDetails.Customer = await multi.ReadFirstOrDefaultAsync<Custom_CUST_HESAB>();
+            }
+
+            return fullDetails;
+        }
+
         private async void ReGetData(TR_HEAD_LST TrRow)
         {
             try
@@ -1595,6 +1745,7 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
             {
                 ClearAllSfDataFilters(); // حذف فیلترها
                 ReGetHeadMaster();
+                Btn_First_Click(default, default);
             }
             catch { }
         }
@@ -1680,7 +1831,6 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             ClearAllSfDataFilters();
-
         }
 
         private void ClearAllSfDataFilters()
