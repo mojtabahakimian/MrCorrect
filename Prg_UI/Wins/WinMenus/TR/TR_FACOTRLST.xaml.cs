@@ -23,8 +23,10 @@ using Syncfusion.UI.Xaml.BulletGraph;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -106,6 +108,9 @@ namespace Prg_UI.Wins.WinMenus.TR
 
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
             GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
+
+            // --- اتصال شمارنده به گرید اصلی ---
+            AttachRecordCountUpdater(SYNCFUSION_DG, ROWCOUNT_TEXTBLK1);
 
         }
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
@@ -331,6 +336,10 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
             #endregion
 
             SYNCFUSION_DG.Visibility = Visibility.Visible;
+
+            AttachRecordCountUpdater(SF_SUB, TXT_COUNT_FACTOR);
+            AttachRecordCountUpdater(PAY_GETD_SUB22, TXT_COUNT_POSHT);
+            AttachRecordCountUpdater(VISITOR_DTL_SUB, TXT_COUNT_SAYER);
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -556,6 +565,99 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
         public ObservableCollection<TAKHFIF_APLAY> TAKHFIF_APLAY_DATA { get; set; } = new ObservableCollection<TAKHFIF_APLAY>();
         public ObservableCollection<PAY_GETD_SUB22_MODEL> PAY_GETD_SUB22_DATA { get; set; } = new ObservableCollection<PAY_GETD_SUB22_MODEL>();
         public ObservableCollection<VISITOR_DTL> SAYER_VISITOR_DATA { get; set; } = new ObservableCollection<VISITOR_DTL>();
+
+        private void AttachRecordCountUpdater1(Syncfusion.UI.Xaml.Grid.SfDataGrid dataGrid, TextBlock targetTextBlock)
+        {
+            if (dataGrid == null || targetTextBlock == null) return;
+
+            // متد داخلی برای به‌روزرسانی متن
+            void UpdateLabel()
+            {
+                var count = dataGrid.View?.Records?.Count ?? 0;
+                targetTextBlock.Text = count.ToString("N0"); // فرمت عددی
+            }
+
+            // رویداد لود شدن گرید
+            dataGrid.Loaded += (s, e) => UpdateLabel();
+
+            // رویداد تغییر فیلتر
+            dataGrid.FilterChanged += (s, e) => UpdateLabel();
+
+            // رویداد تغییر منبع داده (مثلاً وقتی سطر جدید اضافه یا حذف می‌شود)
+            dataGrid.ItemsSourceChanged += (s, e) =>
+            {
+                UpdateLabel();
+                // اگر منبع داده ObservableCollection باشد، باید به تغییرات آن هم گوش داد
+                if (dataGrid.View != null)
+                {
+                    dataGrid.View.CollectionChanged += (sender, args) => UpdateLabel();
+                    // همچنین گوش دادن به تغییرات رکوردها (مثل فیلتر شدن توسط View)
+                    dataGrid.View.Records.CollectionChanged += (sender, args) => UpdateLabel();
+                }
+            };
+
+            // فراخوانی اولیه در صورت لود بودن
+            if (dataGrid.View != null)
+            {
+                dataGrid.View.Records.CollectionChanged += (sender, args) => UpdateLabel();
+                UpdateLabel();
+            }
+        }
+        private void AttachRecordCountUpdater(Syncfusion.UI.Xaml.Grid.SfDataGrid dataGrid, TextBlock targetTextBlock)
+        {
+            if (dataGrid == null || targetTextBlock == null) return;
+
+            // متد داخلی برای به‌روزرسانی متن بر اساس منبع داده
+            void UpdateLabel()
+            {
+                int count = 0;
+
+                // اولویت با بررسی مستقیم منبع داده است (چون دقیق‌تر و سریع‌تر از View است)
+                if (dataGrid.ItemsSource is ICollection collection)
+                {
+                    count = collection.Count;
+                }
+                else if (dataGrid.View != null && dataGrid.View.Records != null)
+                {
+                    // اگر منبع داده مستقیم نبود، سراغ ویو می‌رویم
+                    count = dataGrid.View.Records.Count;
+                }
+
+                // چون ممکن است این فراخوانی از ترد دیگری باشد، از Dispatcher استفاده می‌کنیم
+                Dispatcher.Invoke(() =>
+                {
+                    targetTextBlock.Text = count.ToString("N0");
+                });
+            }
+
+            // متد برای اتصال به رویداد تغییرات کالکشن
+            void SubscribeToCollection(object source)
+            {
+                if (source is INotifyCollectionChanged notifyingCollection)
+                {
+                    notifyingCollection.CollectionChanged += (s, e) => UpdateLabel();
+                }
+            }
+
+            // 1. هر وقت کل منبع داده عوض شد (مثلا new ObservableCollection شد)
+            dataGrid.ItemsSourceChanged += (s, e) =>
+            {
+                // به کالکشن جدید گوش بده
+                if (e.NewItemsSource != null)
+                {
+                    SubscribeToCollection(e.NewItemsSource);
+                }
+                UpdateLabel();
+            };
+
+            // 2. اگر همین الان دیتایی دارد، به آن وصل شو و مقدار اولیه را ست کن
+            if (dataGrid.ItemsSource != null)
+            {
+                SubscribeToCollection(dataGrid.ItemsSource);
+                UpdateLabel();
+            }
+        }
+
         private double _sum_of_mabl_k = 0;
         public double SUM_OF_MABL_K
         {
@@ -901,15 +1003,15 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
         }
         private void UpdateRowCountLabel()
         {
-            // Defensive checks
-            if (ROWCOUNT_TEXTBLK == null) return;
-            if (SYNCFUSION_DG?.View == null) return;
+            //// Defensive checks
+            //if (ROWCOUNT_TEXTBLK == null) return;
+            //if (SYNCFUSION_DG?.View == null) return;
 
-            // Safely retrieve the record count
-            var recordCount = SYNCFUSION_DG.View.Records?.Count ?? 0;
+            //// Safely retrieve the record count
+            //var recordCount = SYNCFUSION_DG.View.Records?.Count ?? 0;
 
-            // Set the label content
-            ROWCOUNT_TEXTBLK.Text = recordCount.ToString();
+            //// Set the label content
+            //ROWCOUNT_TEXTBLK.Text = recordCount.ToString();
         }
 
         private readonly FilterService<TR_HEAD_LST> filterService = new FilterService<TR_HEAD_LST>();
@@ -1398,6 +1500,60 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
             {
                 new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
             }
+        }
+        #endregion
+
+        #region Navigation Logic
+        private void Btn_First_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (SYNCFUSION_DG.View != null && SYNCFUSION_DG.View.Records.Count > 0)
+                {
+                    SYNCFUSION_DG.SelectedIndex = 0;
+                    SYNCFUSION_DG.ScrollInView(new Syncfusion.UI.Xaml.ScrollAxis.RowColumnIndex(1, 0));
+                }
+            }
+            catch { }
+        }
+
+        private void Btn_Prev_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (SYNCFUSION_DG.View != null && SYNCFUSION_DG.SelectedIndex > 0)
+                {
+                    SYNCFUSION_DG.SelectedIndex--;
+                    // اسکرول به ایندکس جدید (ایندکس رکورد + هدرها)
+                    SYNCFUSION_DG.ScrollInView(new Syncfusion.UI.Xaml.ScrollAxis.RowColumnIndex(SYNCFUSION_DG.SelectedIndex + 1, 0));
+                }
+            }
+            catch { }
+        }
+        private void Btn_Next_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (SYNCFUSION_DG.View != null && SYNCFUSION_DG.SelectedIndex < SYNCFUSION_DG.View.Records.Count - 1)
+                {
+                    SYNCFUSION_DG.SelectedIndex++;
+                    SYNCFUSION_DG.ScrollInView(new Syncfusion.UI.Xaml.ScrollAxis.RowColumnIndex(SYNCFUSION_DG.SelectedIndex + 1, 0));
+                }
+            }
+            catch { }
+        }
+        private void Btn_Last_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (SYNCFUSION_DG.View != null && SYNCFUSION_DG.View.Records.Count > 0)
+                {
+                    var lastIndex = SYNCFUSION_DG.View.Records.Count - 1;
+                    SYNCFUSION_DG.SelectedIndex = lastIndex;
+                    SYNCFUSION_DG.ScrollInView(new Syncfusion.UI.Xaml.ScrollAxis.RowColumnIndex(lastIndex + 1, 0));
+                }
+            }
+            catch { }
         }
         #endregion
 

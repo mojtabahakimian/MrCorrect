@@ -622,7 +622,9 @@
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
 
-                                --><!-- Header --><!--
+                                -->
+        <!-- Header -->
+        <!--
                                 <Border Grid.Row="0" 
                               Background="{TemplateBinding BorderBrush}"
                               CornerRadius="10,10,0,0"
@@ -644,7 +646,9 @@
                                     </DockPanel>
                                 </Border>
 
-                                --><!-- Content --><!--
+                                -->
+        <!-- Content -->
+        <!--
                                 <Border Grid.Row="1" 
                               Background="{StaticResource MaterialDesignPaper}"
                               CornerRadius="0,0,10,10"
@@ -708,8 +712,27 @@
                 <DockPanel LastChildFill="True">
                     <DockPanel  FlowDirection="RightToLeft" Margin="5" DockPanel.Dock="Bottom">
                         <Label Content="تعداد رکورد ها:" FlowDirection="RightToLeft" Width="84" HorizontalAlignment="Right"/>
-                        <TextBlock x:Name="ROWCOUNT_TEXTBLK" Text="" FlowDirection="RightToLeft" Width="230" HorizontalAlignment="Right" Height="23" VerticalAlignment="Center"/>
-                        <Button Content="حذف همه فیلتر ها" Style="{StaticResource MaterialDesignFlatButton}" Click="Button_Click" FontSize="12"/>
+                        <TextBlock x:Name="ROWCOUNT_TEXTBLK1" Text="" FlowDirection="RightToLeft" Width="230" HorizontalAlignment="Right" Height="23" VerticalAlignment="Center"/>
+                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" HorizontalAlignment="Left" FlowDirection="LeftToRight">
+
+                            <Button ToolTip="اولین رکورد" Click="Btn_First_Click" Style="{StaticResource MaterialDesignIconButton}" Width="30" Height="30">
+                                <materialDesign:PackIcon Kind="PageFirst" />
+                            </Button>
+
+                            <Button ToolTip="رکورد قبلی" Click="Btn_Prev_Click" Style="{StaticResource MaterialDesignIconButton}" Width="30" Height="30">
+                                <materialDesign:PackIcon Kind="ChevronLeft" />
+                            </Button>
+
+                            <Button ToolTip="رکورد بعدی" Click="Btn_Next_Click" Style="{StaticResource MaterialDesignIconButton}" Width="30" Height="30">
+                                <materialDesign:PackIcon Kind="ChevronRight" />
+                            </Button>
+
+                            <Button ToolTip="آخرین رکورد" Click="Btn_Last_Click" Style="{StaticResource MaterialDesignIconButton}" Width="30" Height="30">
+                                <materialDesign:PackIcon Kind="PageLast" />
+                            </Button>
+
+                        </StackPanel>
+                        <Button Content="حذف همه فیلتر ها" Style="{StaticResource MaterialDesignFlatButton}" Click="Button_Click" FontSize="12" Margin="40,0,0,0"/>
                     </DockPanel>
                     <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" Visibility="Collapsed" d:Visibility="Visible"
                     ContextMenu="{StaticResource DataGridContextMenu}"
@@ -852,7 +875,7 @@
                     </syncfusion:SfDataGrid>
                 </DockPanel>
             </GroupBox>
-   
+
 
             <!--Splitter ↓↑-->
             <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="#FF00A7FF"/>
@@ -861,8 +884,20 @@
             <Grid Grid.Row="2" Margin="5">
                 <GroupBox Header="جزئیات" Style="{StaticResource FluentGroupBox2}" FlowDirection="LeftToRight" Margin="0,15,0,0">
                     <DockPanel>
+                        <DockPanel  FlowDirection="RightToLeft" Margin="5" DockPanel.Dock="Bottom">
+                            <Label Content="تعداد رکورد ها:" FlowDirection="RightToLeft" Width="84" HorizontalAlignment="Right"/>
+                            <TextBlock x:Name="ROWCOUNT_TEXTBLK2" Text="" FlowDirection="RightToLeft" Width="230" HorizontalAlignment="Right" Height="23" VerticalAlignment="Center"/>
+                        </DockPanel>
                         <TabControl  materialDesign:TransitionAssist.DisableTransitions="True">
-                            <TabItem Header="فاکتور" x:Name="PAGE_FACTOR" IsSelected="True">
+                            <TabItem  x:Name="PAGE_FACTOR" IsSelected="True">
+                                <TabItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="فاکتور"/>
+                                        <Border Background="{StaticResource PrimaryHueMidBrush}" CornerRadius="4" Margin="5,0,0,0" Padding="4,0" VerticalAlignment="Center">
+                                            <TextBlock x:Name="TXT_COUNT_FACTOR" Text="0" Foreground="White" FontSize="10"/>
+                                        </Border>
+                                    </StackPanel>
+                                </TabItem.Header>
                                 <Grid FlowDirection="RightToLeft">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition/>
@@ -966,7 +1001,15 @@
                                     </DataGrid>
                                 </Grid>
                             </TabItem>
-                            <TabItem Header="پشت فاکتور" x:Name="PAGE_POSHT">
+                            <TabItem x:Name="PAGE_POSHT">
+                                <TabItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="پشت فاکتور"/>
+                                        <Border Background="{StaticResource PrimaryHueMidBrush}" CornerRadius="4" Margin="5,0,0,0" Padding="4,0" VerticalAlignment="Center">
+                                            <TextBlock x:Name="TXT_COUNT_POSHT" Text="0" Foreground="White" FontSize="10"/>
+                                        </Border>
+                                    </StackPanel>
+                                </TabItem.Header>
                                 <Grid>
                                     <Label Content="مبلغ تخفیف :" Margin="0,103,27,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
                                     <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" x:Name="M_NAGHD"   Text="0" Height="27" Margin="0,8,97,0"    VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Right" Width="123"   MaxLength="16" />
@@ -1133,7 +1176,15 @@
                                     </ComboBox>
                                 </Grid>
                             </TabItem>
-                            <TabItem Header="سایر" x:Name="PAGE_SAYER" d:IsEnabled="True">
+                            <TabItem x:Name="PAGE_SAYER" d:IsEnabled="True">
+                                <TabItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="سایر"/>
+                                        <Border Background="{StaticResource PrimaryHueMidBrush}" CornerRadius="4" Margin="5,0,0,0" Padding="4,0" VerticalAlignment="Center">
+                                            <TextBlock x:Name="TXT_COUNT_SAYER" Text="0" Foreground="White" FontSize="10"/>
+                                        </Border>
+                                    </StackPanel>
+                                </TabItem.Header>
                                 <Grid>
                                     <Label Content="شماره درخواست کالا:" Margin="0,7,13,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
                                     <Label Content="موبایل راننده:" Margin="0,39,45,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
