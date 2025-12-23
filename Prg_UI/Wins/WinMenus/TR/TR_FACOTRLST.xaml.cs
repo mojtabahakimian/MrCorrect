@@ -1,26 +1,21 @@
 ﻿using Dapper;
-using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.Drawing.Charts;
-using DocumentFormat.OpenXml.Spreadsheet;
 using Functions;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
-using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
-using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
-using Prg_UI.Wins.WinMenus.WinAutomasion;
-using Syncfusion.CompoundFile.XlsIO.Native;
+using Stimulsoft.Report.Helpers;
 using Syncfusion.Data;
 using Syncfusion.Data.Extensions;
 using Syncfusion.UI.Xaml.BulletGraph;
 using Syncfusion.UI.Xaml.Grid;
+using Syncfusion.UI.Xaml.Grid.Helpers;
 using Syncfusion.UI.Xaml.ScrollAxis;
 using System;
 using System.Collections;
@@ -30,7 +25,6 @@ using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,9 +35,7 @@ using Wins.WinMenus.KHARID_FORUSH;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
 using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
-using static Prg_UI.Wins.WinMenus.Checkha.CHEK_DLISTS;
 using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
-using static Stimulsoft.Base.Plans.StiCloudPlans;
 
 namespace Prg_UI.Wins.WinMenus.TR
 {
@@ -109,8 +101,6 @@ namespace Prg_UI.Wins.WinMenus.TR
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
             GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
 
-            // --- اتصال شمارنده به گرید اصلی ---
-            AttachRecordCountUpdater(SYNCFUSION_DG, ROWCOUNT_TEXTBLK1);
 
         }
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
@@ -127,36 +117,7 @@ namespace Prg_UI.Wins.WinMenus.TR
         {
             FILL_ALL_COMBOBOXES();
 
-            FACTOR_DATA?.Clear();
-
-            string WhereCondition = TAGCODE > 0 ? $" WHERE (dbo.TR_HEAD_LST.TAG = {TAGCODE}) " : "  ";
-
-            //WhereCondition = CL_LMethods.GetRestrictedSqlQuery(TAGCODE, WhereCondition);
-
-            var MasterHead = dbms.DoGetDataSQL<TR_HEAD_LST>(@$"
-SELECT        dbo.TR_HEAD_LST.NUMBER1, dbo.TR_HEAD_LST.TAH, dbo.TR_HEAD_LST.NUMBER, dbo.TR_HEAD_LST.DATE_N, dbo.TR_HEAD_LST.MAS, dbo.TR_HEAD_LST.N_S, dbo.TR_HEAD_LST.CUST_NO, dbo.CUST_HESAB.NAME, 
-                         dbo.TR_HEAD_LST.MOLAH, dbo.TR_HEAD_LST.M_NAGHD, dbo.TR_HEAD_LST.MABL_VAR, dbo.TR_HEAD_LST.MOIN_VAR, dbo.TR_HEAD_LST.MABL_HAV, dbo.TR_HEAD_LST.MOIN_HAV, dbo.TR_HEAD_LST.MABL_HAZ, 
-                         dbo.TR_HEAD_LST.MOIN_HAZ, dbo.TR_HEAD_LST.TAKHFIF, dbo.TR_HEAD_LST.MOIN_KHF, dbo.TR_HEAD_LST.TAG, dbo.DEPART.DEPNAME, dbo.SHIFT.SHNAME, dbo.CUSTKIND.CUSTKNAME, 
-                         dbo.TR_HEAD_LST.USER_NAME, dbo.TR_HEAD_LST.SHARAYET, dbo.TR_HEAD_LST.MBAA, dbo.TR_HEAD_LST.HMBAA, dbo.TR_HEAD_LST.TICMBAA, dbo.TR_HEAD_LST.TKHF, dbo.TR_HEAD_LST.OKF, 
-                         dbo.TR_HEAD_LST.JAY, dbo.TR_HEAD_LST.SGN1, dbo.TR_HEAD_LST.SGN2, dbo.TR_HEAD_LST.SGN3, dbo.TR_HEAD_LST.sgn1usid, dbo.TR_HEAD_LST.sgn2usid, dbo.TR_HEAD_LST.sgn3usid, dbo.TR_HEAD_LST.CRT, 
-                         dbo.TR_HEAD_LST.UID, dbo.PRICE_ELAMIE.PEPNAME, dbo.PRICE_ELAMIETF.PENAME, dbo.PRICE_PAYNO.PPAME, dbo.TR_HEAD_LST.ANBAR, dbo.TR_HEAD_LST.FNUMCO, dbo.TR_HEAD_LST.IPADD, 
-                         dbo.TR_HEAD_LST.PC_NAME, dbo.TR_HEAD_LST.UP_USER_NAME, dbo.TR_HEAD_LST.UP_TIME, dbo.TR_HEAD_LST.UP_DATE
-FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
-                         dbo.PRICE_PAYNO ON dbo.TR_HEAD_LST.MODAT_PPID = dbo.PRICE_PAYNO.PPID LEFT OUTER JOIN
-                         dbo.PRICE_ELAMIETF ON dbo.TR_HEAD_LST.PEID = dbo.PRICE_ELAMIETF.PEID LEFT OUTER JOIN
-                         dbo.CUSTKIND ON dbo.TR_HEAD_LST.CUST_KIND = dbo.CUSTKIND.CUST_COD LEFT OUTER JOIN
-                         dbo.PRICE_ELAMIE ON dbo.TR_HEAD_LST.PEPID = dbo.PRICE_ELAMIE.PEPID LEFT OUTER JOIN
-                         dbo.DEPART ON dbo.TR_HEAD_LST.DEPATMAN = dbo.DEPART.DEPATMAN LEFT OUTER JOIN
-                         dbo.SHIFT ON dbo.TR_HEAD_LST.SHIFT = dbo.SHIFT.SHIFT_ID LEFT OUTER JOIN
-                         dbo.CUST_HESAB ON dbo.TR_HEAD_LST.CUST_NO = dbo.CUST_HESAB.hes
-                         {WhereCondition} ").ToList();
-
-            foreach (var item in MasterHead)
-            {
-                ////item.UP_TIME = DateTime.FromOADate(Convert.ToDouble(item.UP_TIME)).ToString("G", new CultureInfo("fa-IR"));
-                ////item.UP_TIME = DateTime.FromOADate(Convert.ToDouble(item.UP_TIME)).ToString("HH:mm:ss", new CultureInfo("fa-IR"));
-                FACTOR_DATA?.Add(item);
-            }
+            ReGetHeadMaster();
 
             #region COLUMN_DISPLAYER
             switch (TAGCODE)
@@ -337,10 +298,49 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
 
             SYNCFUSION_DG.Visibility = Visibility.Visible;
 
+            // --- اتصال شمارنده به گرید اصلی ---
+            //AttachRecordCountUpdater(SYNCFUSION_DG, ROWCOUNT_TEXTBLK1);
+
+            SetupGridNavigation();
             AttachRecordCountUpdater(SF_SUB, TXT_COUNT_FACTOR);
             AttachRecordCountUpdater(PAY_GETD_SUB22, TXT_COUNT_POSHT);
             AttachRecordCountUpdater(VISITOR_DTL_SUB, TXT_COUNT_SAYER);
         }
+
+        private void ReGetHeadMaster()
+        {
+            FACTOR_DATA?.Clear();
+
+            string WhereCondition = TAGCODE > 0 ? $" WHERE (dbo.TR_HEAD_LST.TAG = {TAGCODE}) " : "  ";
+
+            //WhereCondition = CL_LMethods.GetRestrictedSqlQuery(TAGCODE, WhereCondition);
+
+            var MasterHead = dbms.DoGetDataSQL<TR_HEAD_LST>(@$"
+SELECT        dbo.TR_HEAD_LST.NUMBER1, dbo.TR_HEAD_LST.TAH, dbo.TR_HEAD_LST.NUMBER, dbo.TR_HEAD_LST.DATE_N, dbo.TR_HEAD_LST.MAS, dbo.TR_HEAD_LST.N_S, dbo.TR_HEAD_LST.CUST_NO, dbo.CUST_HESAB.NAME, 
+                         dbo.TR_HEAD_LST.MOLAH, dbo.TR_HEAD_LST.M_NAGHD, dbo.TR_HEAD_LST.MABL_VAR, dbo.TR_HEAD_LST.MOIN_VAR, dbo.TR_HEAD_LST.MABL_HAV, dbo.TR_HEAD_LST.MOIN_HAV, dbo.TR_HEAD_LST.MABL_HAZ, 
+                         dbo.TR_HEAD_LST.MOIN_HAZ, dbo.TR_HEAD_LST.TAKHFIF, dbo.TR_HEAD_LST.MOIN_KHF, dbo.TR_HEAD_LST.TAG, dbo.DEPART.DEPNAME, dbo.SHIFT.SHNAME, dbo.CUSTKIND.CUSTKNAME, 
+                         dbo.TR_HEAD_LST.USER_NAME, dbo.TR_HEAD_LST.SHARAYET, dbo.TR_HEAD_LST.MBAA, dbo.TR_HEAD_LST.HMBAA, dbo.TR_HEAD_LST.TICMBAA, dbo.TR_HEAD_LST.TKHF, dbo.TR_HEAD_LST.OKF, 
+                         dbo.TR_HEAD_LST.JAY, dbo.TR_HEAD_LST.SGN1, dbo.TR_HEAD_LST.SGN2, dbo.TR_HEAD_LST.SGN3, dbo.TR_HEAD_LST.sgn1usid, dbo.TR_HEAD_LST.sgn2usid, dbo.TR_HEAD_LST.sgn3usid, dbo.TR_HEAD_LST.CRT, 
+                         dbo.TR_HEAD_LST.UID, dbo.PRICE_ELAMIE.PEPNAME, dbo.PRICE_ELAMIETF.PENAME, dbo.PRICE_PAYNO.PPAME, dbo.TR_HEAD_LST.ANBAR, dbo.TR_HEAD_LST.FNUMCO, dbo.TR_HEAD_LST.IPADD, 
+                         dbo.TR_HEAD_LST.PC_NAME, dbo.TR_HEAD_LST.UP_USER_NAME, dbo.TR_HEAD_LST.UP_TIME, dbo.TR_HEAD_LST.UP_DATE
+FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
+                         dbo.PRICE_PAYNO ON dbo.TR_HEAD_LST.MODAT_PPID = dbo.PRICE_PAYNO.PPID LEFT OUTER JOIN
+                         dbo.PRICE_ELAMIETF ON dbo.TR_HEAD_LST.PEID = dbo.PRICE_ELAMIETF.PEID LEFT OUTER JOIN
+                         dbo.CUSTKIND ON dbo.TR_HEAD_LST.CUST_KIND = dbo.CUSTKIND.CUST_COD LEFT OUTER JOIN
+                         dbo.PRICE_ELAMIE ON dbo.TR_HEAD_LST.PEPID = dbo.PRICE_ELAMIE.PEPID LEFT OUTER JOIN
+                         dbo.DEPART ON dbo.TR_HEAD_LST.DEPATMAN = dbo.DEPART.DEPATMAN LEFT OUTER JOIN
+                         dbo.SHIFT ON dbo.TR_HEAD_LST.SHIFT = dbo.SHIFT.SHIFT_ID LEFT OUTER JOIN
+                         dbo.CUST_HESAB ON dbo.TR_HEAD_LST.CUST_NO = dbo.CUST_HESAB.hes
+                         {WhereCondition} ").ToList();
+
+            foreach (var item in MasterHead)
+            {
+                ////item.UP_TIME = DateTime.FromOADate(Convert.ToDouble(item.UP_TIME)).ToString("G", new CultureInfo("fa-IR"));
+                ////item.UP_TIME = DateTime.FromOADate(Convert.ToDouble(item.UP_TIME)).ToString("HH:mm:ss", new CultureInfo("fa-IR"));
+                FACTOR_DATA?.Add(item);
+            }
+        }
+
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None && SYNCFUSION_DG.SelectedItem != null)
@@ -1504,6 +1504,100 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
         #endregion
 
         #region Navigation Logic
+        // 1. این متد را در انتهای Window_Loaded صدا بزنید
+        // --- Safe Navigation Logic ---
+
+        private void SetupGridNavigation()
+        {
+            // 1. بررسی ایمنی: اگر کنترل‌ها هنوز ساخته نشده‌اند، خارج شو
+            // این خط جلوی خطای NullReference را می‌گیرد اگر XAML آپدیت نشده باشد
+            if (SYNCFUSION_DG == null || TXT_TOTAL_COUNT == null || TXT_CURRENT_INDEX == null)
+            {
+                // جهت دیباگ: اگر این خط اجرا شد یعنی یکی از نام‌ها در XAML اشتباه است
+                return;
+            }
+
+            // 2. اتصال رویداد تغییر انتخاب (Selection)
+            // ابتدا حذف می‌کنیم تا دوبار متصل نشود (-=)
+            SYNCFUSION_DG.SelectionChanged -= OnNavSelectionChanged;
+            SYNCFUSION_DG.SelectionChanged += OnNavSelectionChanged;
+
+            // 3. اتصال رویداد تغییر تعداد رکوردها (Collection Changed)
+            // نکته مهم: بررسی می‌کنیم که View آماده است یا نه
+            if (SYNCFUSION_DG.View != null && SYNCFUSION_DG.View.Records != null)
+            {
+                // اگر ویو آماده بود، وصل شو
+                ((System.Collections.Specialized.INotifyCollectionChanged)SYNCFUSION_DG.View.Records).CollectionChanged -= OnNavCollectionChanged;
+                ((System.Collections.Specialized.INotifyCollectionChanged)SYNCFUSION_DG.View.Records).CollectionChanged += OnNavCollectionChanged;
+            }
+            else
+            {
+                // اگر ویو هنوز نال بود، به رویداد Loaded خود گرید وصل می‌شویم تا بعدا انجام دهیم
+                SYNCFUSION_DG.Loaded -= OnGridLoadedForNav;
+                SYNCFUSION_DG.Loaded += OnGridLoadedForNav;
+            }
+
+            // 4. آپدیت اولیه متن‌ها (با بررسی نال)
+            UpdateNavigationText();
+        }
+
+        // اگر گرید در ابتدا آماده نبود، این متد بعداً صدا زده می‌شود
+        private void OnGridLoadedForNav(object sender, RoutedEventArgs e)
+        {
+            if (SYNCFUSION_DG.View != null && SYNCFUSION_DG.View.Records != null)
+            {
+                ((System.Collections.Specialized.INotifyCollectionChanged)SYNCFUSION_DG.View.Records).CollectionChanged -= OnNavCollectionChanged;
+                ((System.Collections.Specialized.INotifyCollectionChanged)SYNCFUSION_DG.View.Records).CollectionChanged += OnNavCollectionChanged;
+                UpdateNavigationText();
+            }
+        }
+
+        // هندلرهای کمکی برای جلوگیری از خطای ترد
+        private void OnNavSelectionChanged(object sender, GridSelectionChangedEventArgs e) => UpdateNavigationText();
+        private void OnNavCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => UpdateNavigationText();
+
+        private void UpdateNavigationText()
+        {
+            // بررسی ایمنی مجدد
+            if (TXT_TOTAL_COUNT == null || TXT_CURRENT_INDEX == null) return;
+
+            int total = 0;
+            int current = 0;
+
+            try
+            {
+                // محاسبه تعداد کل (ایمن)
+                if (SYNCFUSION_DG != null && SYNCFUSION_DG.View != null && SYNCFUSION_DG.View.Records != null)
+                {
+                    total = SYNCFUSION_DG.View.Records.Count;
+                }
+
+                // محاسبه ایندکس جاری (ایمن)
+                if (SYNCFUSION_DG != null && SYNCFUSION_DG.SelectedIndex >= 0)
+                {
+                    current = SYNCFUSION_DG.SelectedIndex + 1;
+                }
+            }
+            catch
+            {
+                // نادیده گرفتن خطا در شرایط خاص
+            }
+
+            // نمایش
+            TXT_TOTAL_COUNT.Text = total.ToString("N0");
+            TXT_CURRENT_INDEX.Text = current.ToString("N0");
+        }
+
+        // 3. رویدادهای کلیک دکمه‌ها
+        private void Btn_Reload_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                ClearAllSfDataFilters(); // حذف فیلترها
+                ReGetHeadMaster();
+            }
+            catch { }
+        }
         private void Btn_First_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -1511,7 +1605,8 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
                 if (SYNCFUSION_DG.View != null && SYNCFUSION_DG.View.Records.Count > 0)
                 {
                     SYNCFUSION_DG.SelectedIndex = 0;
-                    SYNCFUSION_DG.ScrollInView(new Syncfusion.UI.Xaml.ScrollAxis.RowColumnIndex(1, 0));
+                    //SYNCFUSION_DG.ScrollInView(new Syncfusion.UI.Xaml.ScrollAxis.RowColumnIndex(1, 0));
+                    SYNCFUSION_DG.GetVisualContainer().ScrollOwner.ScrollToHome();
                 }
             }
             catch { }
@@ -1525,7 +1620,21 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
                 {
                     SYNCFUSION_DG.SelectedIndex--;
                     // اسکرول به ایندکس جدید (ایندکس رکورد + هدرها)
-                    SYNCFUSION_DG.ScrollInView(new Syncfusion.UI.Xaml.ScrollAxis.RowColumnIndex(SYNCFUSION_DG.SelectedIndex + 1, 0));
+                    //SYNCFUSION_DG.ScrollInView(new Syncfusion.UI.Xaml.ScrollAxis.RowColumnIndex(SYNCFUSION_DG.SelectedIndex + 1, 0));
+                    //var rowIndex = SYNCFUSION_DG.ResolveToRowIndex(SYNCFUSION_DG.SelectedIndex);
+                    //SYNCFUSION_DG.GetVisualContainer().ScrollRows.ScrollInView(rowIndex, 0);
+
+                    SYNCFUSION_DG.SelectedIndex--;
+
+                    // 1. پیدا کردن ایندکس واقعی سطر در گرید (با احتساب هدرها و فیلترها)
+                    var rowIndex = SYNCFUSION_DG.ResolveToRowIndex(SYNCFUSION_DG.SelectedIndex);
+
+                    // 2. پیدا کردن اولین ستون قابل مشاهده (برای ساخت RowColumnIndex صحیح)
+                    var columnIndex = SYNCFUSION_DG.ResolveToGridVisibleColumnIndex(0);
+                    if (columnIndex < 0) columnIndex = 0;
+
+                    // 3. اسکرول کردن به آن نقطه
+                    SYNCFUSION_DG.ScrollInView(new Syncfusion.UI.Xaml.ScrollAxis.RowColumnIndex(rowIndex, columnIndex));
                 }
             }
             catch { }
@@ -1537,7 +1646,16 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
                 if (SYNCFUSION_DG.View != null && SYNCFUSION_DG.SelectedIndex < SYNCFUSION_DG.View.Records.Count - 1)
                 {
                     SYNCFUSION_DG.SelectedIndex++;
-                    SYNCFUSION_DG.ScrollInView(new Syncfusion.UI.Xaml.ScrollAxis.RowColumnIndex(SYNCFUSION_DG.SelectedIndex + 1, 0));
+
+                    // 1. پیدا کردن ایندکس واقعی سطر در گرید
+                    var rowIndex = SYNCFUSION_DG.ResolveToRowIndex(SYNCFUSION_DG.SelectedIndex);
+
+                    // 2. پیدا کردن اولین ستون
+                    var columnIndex = SYNCFUSION_DG.ResolveToGridVisibleColumnIndex(0);
+                    if (columnIndex < 0) columnIndex = 0;
+
+                    // 3. اسکرول کردن به آن نقطه
+                    SYNCFUSION_DG.ScrollInView(new Syncfusion.UI.Xaml.ScrollAxis.RowColumnIndex(rowIndex, columnIndex));
                 }
             }
             catch { }
@@ -1550,7 +1668,9 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
                 {
                     var lastIndex = SYNCFUSION_DG.View.Records.Count - 1;
                     SYNCFUSION_DG.SelectedIndex = lastIndex;
-                    SYNCFUSION_DG.ScrollInView(new Syncfusion.UI.Xaml.ScrollAxis.RowColumnIndex(lastIndex + 1, 0));
+                    //SYNCFUSION_DG.ScrollInView(new Syncfusion.UI.Xaml.ScrollAxis.RowColumnIndex(lastIndex + 1, 0));
+
+                    SYNCFUSION_DG.GetVisualContainer().ScrollOwner.ScrollToBottom();
                 }
             }
             catch { }
@@ -1558,6 +1678,12 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
         #endregion
 
         private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            ClearAllSfDataFilters();
+
+        }
+
+        private void ClearAllSfDataFilters()
         {
             try
             {
@@ -1572,7 +1698,6 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
             catch (Exception)
             {
             }
-
         }
     }
 }

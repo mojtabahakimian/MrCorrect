@@ -711,24 +711,38 @@
             <GroupBox Header="سربرگ" Style="{StaticResource FluentGroupBox}" Grid.Row="0"  FlowDirection="LeftToRight" Margin="10,30,10,10">
                 <DockPanel LastChildFill="True">
                     <DockPanel  FlowDirection="RightToLeft" Margin="5" DockPanel.Dock="Bottom">
-                        <Label Content="تعداد رکورد ها:" FlowDirection="RightToLeft" Width="84" HorizontalAlignment="Right"/>
-                        <TextBlock x:Name="ROWCOUNT_TEXTBLK1" Text="" FlowDirection="RightToLeft" Width="230" HorizontalAlignment="Right" Height="23" VerticalAlignment="Center"/>
-                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" HorizontalAlignment="Left" FlowDirection="LeftToRight">
+                        <!--<Label Content="تعداد رکورد ها:" FlowDirection="RightToLeft" Width="84" HorizontalAlignment="Right"/>
+                        <TextBlock x:Name="ROWCOUNT_TEXTBLK1" Text="" FlowDirection="RightToLeft" Width="230" HorizontalAlignment="Right" Height="23" VerticalAlignment="Center"/>-->
+                        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" FlowDirection="LeftToRight">
 
-                            <Button ToolTip="اولین رکورد" Click="Btn_First_Click" Style="{StaticResource MaterialDesignIconButton}" Width="30" Height="30">
-                                <materialDesign:PackIcon Kind="PageFirst" />
+                            <Button ToolTip="بارگذاری مجدد" Click="Btn_Reload_Click" Style="{StaticResource MaterialDesignIconButton}" Width="30" Height="30" Foreground="Gray">
+                                <materialDesign:PackIcon Kind="Refresh" Width="20" Height="20"/>
                             </Button>
 
-                            <Button ToolTip="رکورد قبلی" Click="Btn_Prev_Click" Style="{StaticResource MaterialDesignIconButton}" Width="30" Height="30">
-                                <materialDesign:PackIcon Kind="ChevronLeft" />
+                            <Border Width="1" Height="20" Background="LightGray" Margin="5,0"/>
+
+                            <Button ToolTip="اولین رکورد" Click="Btn_First_Click" Style="{StaticResource MaterialDesignIconButton}" Width="32" Height="32">
+                                <materialDesign:PackIcon Kind="PageFirst" Width="22" Height="22" Foreground="{StaticResource PrimaryHueMidBrush}"/>
                             </Button>
 
-                            <Button ToolTip="رکورد بعدی" Click="Btn_Next_Click" Style="{StaticResource MaterialDesignIconButton}" Width="30" Height="30">
-                                <materialDesign:PackIcon Kind="ChevronRight" />
+                            <Button ToolTip="رکورد قبلی" Click="Btn_Prev_Click" Style="{StaticResource MaterialDesignIconButton}" Width="32" Height="32">
+                                <materialDesign:PackIcon Kind="ChevronLeft" Width="24" Height="24" Foreground="{StaticResource PrimaryHueMidBrush}"/>
                             </Button>
 
-                            <Button ToolTip="آخرین رکورد" Click="Btn_Last_Click" Style="{StaticResource MaterialDesignIconButton}" Width="30" Height="30">
-                                <materialDesign:PackIcon Kind="PageLast" />
+                            <Border Background="#10000000" CornerRadius="4" Margin="5,0" Padding="8,2" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="TXT_CURRENT_INDEX" Text="0" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <TextBlock Text=" / " Foreground="Gray" Margin="4,0" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="TXT_TOTAL_COUNT" Text="0" FontWeight="Bold" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Button ToolTip="رکورد بعدی" Click="Btn_Next_Click" Style="{StaticResource MaterialDesignIconButton}" Width="32" Height="32">
+                                <materialDesign:PackIcon Kind="ChevronRight" Width="24" Height="24" Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                            </Button>
+
+                            <Button ToolTip="آخرین رکورد" Click="Btn_Last_Click" Style="{StaticResource MaterialDesignIconButton}" Width="32" Height="32">
+                                <materialDesign:PackIcon Kind="PageLast" Width="22" Height="22" Foreground="{StaticResource PrimaryHueMidBrush}"/>
                             </Button>
 
                         </StackPanel>
@@ -884,10 +898,10 @@
             <Grid Grid.Row="2" Margin="5">
                 <GroupBox Header="جزئیات" Style="{StaticResource FluentGroupBox2}" FlowDirection="LeftToRight" Margin="0,15,0,0">
                     <DockPanel>
-                        <DockPanel  FlowDirection="RightToLeft" Margin="5" DockPanel.Dock="Bottom">
+                        <!--<DockPanel  FlowDirection="RightToLeft" Margin="5" DockPanel.Dock="Bottom">
                             <Label Content="تعداد رکورد ها:" FlowDirection="RightToLeft" Width="84" HorizontalAlignment="Right"/>
                             <TextBlock x:Name="ROWCOUNT_TEXTBLK2" Text="" FlowDirection="RightToLeft" Width="230" HorizontalAlignment="Right" Height="23" VerticalAlignment="Center"/>
-                        </DockPanel>
+                        </DockPanel>-->
                         <TabControl  materialDesign:TransitionAssist.DisableTransitions="True">
                             <TabItem  x:Name="PAGE_FACTOR" IsSelected="True">
                                 <TabItem.Header>
