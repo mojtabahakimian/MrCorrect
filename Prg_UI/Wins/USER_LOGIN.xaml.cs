@@ -221,8 +221,8 @@ namespace Prg_UI.Wins
 
             if (!CL_VERSION.IsValidGreaterVersion())
             {
-                new Msgwin(false, "ورژن نرم افزار شما بروز نیست , شما باید از ورژن جدید تر استفاده کنید.").ShowDialog();
-                CL_LMethods.GoExitTheApplication();
+                PerformAutoUpdate();
+                return;
             }
 
             //
@@ -840,6 +840,77 @@ namespace Prg_UI.Wins
             //    if (Rmzo.Visibility == Visibility.Visible) Rmzo.Focus();
             //    else if (SecoRmzo.Visibility == Visibility.Visible) SecoRmzo.Focus();
             //}
+        }
+        private void PerformAutoUpdate()
+        {
+            try
+            {
+                string currentExe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                string currentDir = System.IO.Path.GetDirectoryName(currentExe);
+                string exeName = System.IO.Path.GetFileName(currentExe);
+                // Update source path provided by user: \\MAIN\ade\EXE\1404
+                string sourcePath = System.IO.Path.Combine(@"\\MAIN\ade\EXE\1404", exeName);
+
+                if (!System.IO.File.Exists(sourcePath))
+                {
+                     // Fallback to old behavior if update not found
+                     new Msgwin(false, "نسخه جدید در مسیر مشخص شده یافت نشد. لطفا با واحد پشتیبانی تماس بگیرید.").ShowDialog();
+                     CL_LMethods.GoExitTheApplication();
+                     return;
+                }
+
+                // Show non-blocking or just show dialogue then proceed
+                // Using Show() to let logic continue, assuming Msgwin doesn't block thread unless ShowDialog is used.
+                // However, original code used ShowDialog(). We want the user to know.
+                // If we use Show(), we must ensure the app doesn't close before the user sees it? 
+                // Actually the batch script takes over. 
+                // Let's use ShowDialog() simply to say "Update started, please wait".
+                // But ShowDialog() waits for user to close.
+                // We want to force update. So maybe just a notify or a custom window that we can close?
+                // For now, let's use Show() and hope the user sees it before the app closes 2 seconds later.
+                // Or better, Thread.Sleep(2000) after showing.
+                
+                new Msgwin(false, "در حال بروزرسانی نرم افزار... لطفا منتظر بمانید.", "#FF1AAA2C").Show(); 
+                
+                // Allow UI to render
+                System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Background);
+
+                string tempExe = System.IO.Path.Combine(currentDir, "Update_Temp.exe");
+                System.IO.File.Copy(sourcePath, tempExe, true);
+
+                string batPath = System.IO.Path.Combine(currentDir, "update_script.bat");
+                string batchScript = $@"
+@echo off
+timeout /t 2 /nobreak > nul
+:loop
+tasklist | find /i ""{exeName}"" > nul
+if not errorlevel 1 (
+  timeout /t 1 /nobreak > nul
+  goto loop
+)
+copy /Y ""{tempExe}"" ""{currentExe}""
+start """" ""{currentExe}""
+del ""{tempExe}""
+del ""%~f0""
+";
+                System.IO.File.WriteAllText(batPath, batchScript);
+
+                var startInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = batPath,
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+                };
+                System.Diagnostics.Process.Start(startInfo);
+
+                Environment.Exit(0);
+            }
+            catch (Exception ex)
+            {
+                 new Msgwin(false, $"خطا در بروزرسانی: {ex.Message}").ShowDialog();
+                 CL_LMethods.GoExitTheApplication();
+            }
         }
     }
 }
