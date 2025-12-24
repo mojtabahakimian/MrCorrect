@@ -14,6 +14,7 @@ namespace UiTools
 
         private readonly DispatcherTimer _timer;
         private static HideAllButton _hideAllButton;
+        private const double HideButtonHeight = 45;
 
         public int PASSED_IDNUM { get; set; }
 
@@ -46,6 +47,7 @@ namespace UiTools
                 _hideAllButton.Show();
             }
             _hideAllButton.UpdatePosition();
+            RepositionNotifications();
         }
 
         public static void HideHideAllButton()
@@ -67,6 +69,10 @@ namespace UiTools
             // محاسبهٔ جایگذاری نهایی
             var workingArea = SystemParameters.WorkArea;
             double bottomOffset = 10;
+
+            if (_activeNotifications.Count >= 1)
+                bottomOffset += HideButtonHeight + 10;
+
             foreach (var n in _activeNotifications)
                 bottomOffset += n.ActualHeight + 10;
 
@@ -97,9 +103,13 @@ namespace UiTools
             // (عمداً حذف شد) :contentReference[oaicite:1]{index=1}
         }
 
-        private void RepositionNotifications()
+        private static void RepositionNotifications()
         {
             double bottomOffset = 10;
+
+            if (_activeNotifications.Count > 1)
+                bottomOffset += HideButtonHeight + 10;
+
             var storyboard = new Storyboard();
 
             foreach (var notification in _activeNotifications)
