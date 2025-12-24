@@ -118,5 +118,16 @@
             </Border.Effect>
         </Border>
 
+
+        <!-- Update Progress UI -->
+        <Border x:Name="UpdatePanel" Visibility="Collapsed" CornerRadius="10" Background="#E6212121" Width="450" Height="180" VerticalAlignment="Center" HorizontalAlignment="Center" Panel.ZIndex="1000">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <materialDesign:PackIcon Kind="CloudDownload" Width="50" Height="50" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,15" />
+                <Label Content="در حال دانلود نسخه جدید..." Foreground="White" FontSize="16" HorizontalAlignment="Center" Margin="0,0,0,10" FontFamily="{StaticResource IRANYEKAN}"/>
+                <ProgressBar x:Name="UpdatePrg" Width="350" Height="15" Minimum="0" Maximum="100" BorderBrush="White" BorderThickness="1" Background="Transparent" Foreground="#FF4CAF50"/>
+                <Label x:Name="UpdateLbl" Content="0%" Foreground="White" HorizontalAlignment="Center" Margin="0,5,0,0" FontSize="14" FontFamily="{StaticResource IRANYEKAN}"/>
+            </StackPanel>
+        </Border>
+
     </Grid>
 </Window>
