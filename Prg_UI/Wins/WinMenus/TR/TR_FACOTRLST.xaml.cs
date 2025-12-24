@@ -1014,7 +1014,7 @@ namespace Prg_UI.Wins.WinMenus.TR
             return fullDetails;
         }
 
-        private async void ReGetData(TR_HEAD_LST TrRow)
+        private async void ReGetData1(TR_HEAD_LST TrRow)
         {
             try
             {
@@ -1159,6 +1159,135 @@ namespace Prg_UI.Wins.WinMenus.TR
                 // Optional: Hide loading indicator here
             }
         }
+        private async void ReGetData(TR_HEAD_LST TrRow)
+        {
+            // جلوگیری از اجرای همزمان روی یک رکورد یا خطا
+            if (TrRow == null) return;
+
+            // تعریف تسک دریافت اطلاعات (هنوز await نمی‌کنیم تا اجرا شروع شود)
+            var dataFetchTask = GetFactorFullDetailsAsync(TrRow);
+
+            // تعریف یک تاخیر ۳۰۰ میلی‌ثانیه‌ای (آستانه تحمل کاربر قبل از نیاز به لودینگ)
+            var delayTask = Task.Delay(300);
+
+            // مسابقه بین دریافت اطلاعات و تاخیر
+            // اگر دیتابیس سریعتر از ۳۰۰ میلی‌ثانیه جواب داد، وارد شرط نمی‌شود
+            var completedTask = await Task.WhenAny(dataFetchTask, delayTask);
+
+            bool loaderShown = false;
+
+            if (completedTask == delayTask)
+            {
+                // یعنی ۳۰۰ میلی‌ثانیه گذشت و دیتا هنوز لود نشده است
+                // پس لودینگ را نشان بده
+                BusyOverlay.Visibility = Visibility.Visible;
+                loaderShown = true;
+            }
+
+            try
+            {
+                // حالا منتظر نتیجه نهایی دیتا می‌مانیم
+                // اگر دیتا قبلاً آماده شده باشد (در حالت سریع)، این خط بلافاصله اجرا می‌شود
+                FactorFullDetails fullDetails = await dataFetchTask;
+
+                if (fullDetails == null || fullDetails.Header == null)
+                {
+                    // اگر لودینگ نمایش داده شده بود، مخفی شود تا پیام خطا دیده شود
+                    if (loaderShown) BusyOverlay.Visibility = Visibility.Collapsed;
+
+                    new Msgwin(false, "این فاکتور خالی است یا اطلاعات کامل آن یافت نشد.").Show();
+                    return;
+                }
+
+                // --- شروع پر کردن فیلدها (کدهای قبلی بدون تغییر) ---
+                var header = fullDetails.Header;
+
+                FACTOR22_INVO_DATA.Clear();
+                fullDetails.InvoiceItems.ForEach(FACTOR22_INVO_DATA.Add);
+
+                TAKHFIF_APLAY_DATA.Clear();
+                fullDetails.AdvancedDiscounts.ForEach(TAKHFIF_APLAY_DATA.Add);
+
+                PAY_GETD_SUB22_DATA.Clear();
+                fullDetails.Checks.ForEach(PAY_GETD_SUB22_DATA.Add);
+
+                SAYER_VISITOR_DATA.Clear();
+                fullDetails.VisitorDetails.ForEach(SAYER_VISITOR_DATA.Add);
+
+                // --- منطق پر کردن کمبوباکس‌ها (Hesabha Logic) ---
+                void SetCombo(ComboBox cmb, string hesCode, int? nKolFilter = null)
+                {
+                    if (!string.IsNullOrWhiteSpace(hesCode))
+                    {
+                        var record = GetHesabhaByCode(hesCode);
+                        if (record != null && (nKolFilter == null || record.N_KOL == nKolFilter))
+                        {
+                            cmb.ItemsSource = new List<CUSTOM_HESABHA> { record };
+                            cmb.SelectedValue = record.hes;
+                            cmb.DisplayMemberPath = "NAME";
+                            cmb.SelectedValuePath = "hes";
+                        }
+                        else
+                        {
+                            cmb.ItemsSource = null;
+                        }
+                    }
+                    else
+                    {
+                        cmb.ItemsSource = null;
+                        cmb.SelectedItem = null;
+                    }
+                }
+
+                SetCombo(CMB_MOIN_VAR, header.MOIN_VAR, (int)Baseknow.BANKHA);
+                SetCombo(CMB_MOIN_HAV, header.MOIN_HAV);
+                SetCombo(CMB_MOIN_HAZ, header.MOIN_HAZ);
+                SetCombo(CMB_HMBAA, header.HMBAA);
+
+                // --- Text Fields ---
+                M_NAGHD.Text = header.M_NAGHD.ToStringNullSafe();
+                MABL_VAR.Text = header.MABL_VAR.ToStringNullSafe();
+                MABL_HAV.Text = header.MABL_HAV.ToStringNullSafe();
+                TAKHFIF.Text = header.TAKHFIF.ToStringNullSafe();
+                MOIN_VAR.Text = header.MOIN_VAR.ToStringNullSafe();
+                MOIN_HAV.Text = header.MOIN_HAV.ToStringNullSafe();
+
+                MABL_HAZ.Text = header.MABL_HAZ.ToStringNullSafe();
+                MOIN_HAZ.Text = header.MOIN_HAZ;
+                MBAA.Text = header.MBAA.ToStringNullSafe();
+                HMBAA.Text = header.HMBAA;
+
+                if (fullDetails.OtherDetails != null)
+                {
+                    var other = fullDetails.OtherDetails;
+                    REQUEST_NO.Text = other.REQUEST_NO;
+                    DRIVER_MOB.Text = other.DRIVER_MOB;
+                    MAGHSAD.SelectedValue = other.MAGHSAD;
+                    BARNAMEH.Text = other.BARNAMEH;
+                    CAMIUN_NUM.Text = other.CAMIUN_NUM;
+                    CAM_KHALY.Text = other.CAM_KHALY.ToStringNullSafe();
+                    DRIVER.Text = other.DRIVER;
+                    CAMIUN.Text = other.CAMIUN;
+                    CAM_POOR.Text = other.CAM_POOR.ToStringNullSafe();
+                    TOZIH.Text = other.TOZIH;
+                }
+
+                MasterSummerAndMandeh();
+                GenerateAutomaticSummary(SF_SUB);
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, $"خطا در بارگذاری اطلاعات").ShowDialog();
+            }
+            finally
+            {
+                // فقط اگر لودینگ نمایش داده شده بود، آن را مخفی کن
+                if (loaderShown)
+                {
+                    BusyOverlay.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
         private void MasterSummerAndMandeh()
         {
             Summer();
@@ -1225,6 +1354,8 @@ namespace Prg_UI.Wins.WinMenus.TR
         }
         private void SYNCFUSION_DG_SelectionChanged(object sender, GridSelectionChangedEventArgs e) // Event handler for when the selection changes in the data grid
         {
+            if (!NowIsReady) return;
+
             if (SYNCFUSION_DG.SelectedItem is TR_HEAD_LST SelectedHeadFactor)
             {
                 if (SelectedHeadFactor?.NUMBER != null)
