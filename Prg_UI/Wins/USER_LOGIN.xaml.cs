@@ -858,7 +858,14 @@ namespace Prg_UI.Wins
         {
             try
             {
-                string currentExe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                // Use Environment.ProcessPath which is safer in .NET 6+
+                string currentExe = Environment.ProcessPath;
+                if (string.IsNullOrEmpty(currentExe))
+                {
+                     // Fallback for unlikely case where ProcessPath is null
+                     currentExe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                }
+                
                 string currentDir = System.IO.Path.GetDirectoryName(currentExe);
                 string exeName = System.IO.Path.GetFileName(currentExe);
                 // Update source path provided by user: \\MAIN\ade\EXE\1404
