@@ -20,6 +20,7 @@ using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
 using Prg_UI.Wins.WinMenus.SANATI;
 using Prg_UI.Wins.WinMenus.SPECIAL_F1;
 using Prg_UI.Wins.WinMenus.Taarif;
+using Prg_UI.Wins.WinMenus.TR;
 using Prg_UI.Wins.WinMenus.WinAutomasion;
 using Prg_UI.Wins.WinMenus.WinDEFAULT;
 using Prg_UI.Wins.WinSetting;
@@ -961,7 +962,59 @@ namespace Functions
             /// <summary>
             /// گزارش ویژه 115
             /// </summary>
-            BEDEHKARAN_BESTANKARAN_NEW
+            BEDEHKARAN_BESTANKARAN_NEW,
+            /// <summary>
+            /// سوابق رسید انبار
+            /// </summary>
+            TR_HISTORY_RASID_ANBAR,
+            /// <summary>
+            /// سوابق حواله انبار
+            /// </summary>
+            TR_HISTORY_HAVALE_ANBAR,
+            /// <summary>
+            /// سوابق سایر رسید انبار
+            /// </summary>
+            TR_HISTORY_SAYER_RASID_ANBAR,
+            /// <summary>
+            /// سوابق سایر حواله انبار : برای برگشت خرید
+            /// </summary>
+            TR_HISTORY_SAYER_HAVALE_ANBAR,
+            /// <summary>
+            /// سوابق برگشت فروش عادی
+            /// </summary>
+            TR_HISTORY_FROOSH_RETURN_NORMAL,
+            /// <summary>
+            /// سوابق فاکتور خرید
+            /// </summary>
+            TR_HISTORY_FACTOR_KHARID,
+            /// <summary>
+            /// سوابق فاکتور فروش
+            /// </summary>
+            TR_HISTORY_FACTOR_FROOSH,
+            /// <summary>
+            /// سوابق پیش فاکتور
+            /// </summary>
+            TR_HISTORY_PISH_FACTOR,
+            /// <summary>
+            /// سوابق برگشت فروش آزاد
+            /// </summary>
+            TR_HISTORY_FROOSH_RETURN_AZAD,
+            /// <summary>
+            /// سوابق برگشت خرید آزاد
+            /// </summary>
+            TR_HISTORY_KHARID_RETURN_AZAD,
+            /// <summary>
+            /// برگه ورود کالای ساخته شده
+            /// </summary>
+            TR_HISTORY_VOROD_KALA_SAKHTEH,
+            /// <summary>
+            /// برگه خروج مواد اولیه جهت تولید
+            /// </summary>
+            TR_HISTORY_KHOROJ_MAVAD_AVALIYEH,
+            /// <summary>
+            /// صدور برگه خروج سایر مواد از انبار
+            /// </summary>
+            TR_HISTORY_KHOROJ_SAYER_MAVAD
         }
         #endregion
 
@@ -980,6 +1033,58 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+                case WinNameType.TR_HISTORY_RASID_ANBAR: //سوابق رسید انبار
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(1), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.TR_HISTORY_HAVALE_ANBAR: //سوابق حواله انبار
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(2), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.TR_HISTORY_SAYER_RASID_ANBAR: //سوابق سایر رسید انبار
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(24), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.TR_HISTORY_SAYER_HAVALE_ANBAR: //سوابق سایر حواله انبار : برای برگشت خرید
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(26), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.TR_HISTORY_FROOSH_RETURN_NORMAL: //سوابق برگشت فروش عادی
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(4), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.TR_HISTORY_FACTOR_KHARID: //سوابق فاکتور خرید
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(12), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.TR_HISTORY_FACTOR_FROOSH: //سوابق فاکتور فروش
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(13), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.TR_HISTORY_PISH_FACTOR: //سوابق پیش فاکتور
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(20), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.TR_HISTORY_FROOSH_RETURN_AZAD: //سوابق برگشت فروش آزاد
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(25), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.TR_HISTORY_KHARID_RETURN_AZAD: //سوابق برگشت خرید آزاد
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(27), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.TR_HISTORY_VOROD_KALA_SAKHTEH: //برگه ورود کالای ساخته شده
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(9), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.TR_HISTORY_KHOROJ_MAVAD_AVALIYEH: //برگه خروج مواد اولیه جهت تولید
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(10), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.TR_HISTORY_KHOROJ_SAYER_MAVAD: //صدور برگه خروج سایر مواد از انبار
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(11), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
                 case WinNameType.BEDEHKARAN_BESTANKARAN_NEW: /* گزارش ویژه 115 */ CL_LMethods.OpenWindow(OWNERWIN, new BEDEHKARAN_BESTANKARAN_NEW(), isModalDialog: false, allowMultipleInstances: false); break;
                 case WinNameType.WIN_ZCHRBI: /* پارامتر ها */ CL_LMethods.OpenWindow(OWNERWIN, new WIN_ZCHRBI(), isModalDialog: false, allowMultipleInstances: false); break;
 

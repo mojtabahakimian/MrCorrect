@@ -8208,6 +8208,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     TAH = N'{TAH.Text}', MAS = {MAS.Text}, VAS = {VAS}, N_S = {_n_s}, CUST_NO = N'{CUST_NO.SelectedValue}', MOLAH = N'{MOLAH.Text}',
                     M_NAGHD = {M_NAGHD2.Text}, MABL_VAR = {MABL_VAR2.Text}, MOIN_VAR = N'{CMB_MOIN_VAR2.SelectedValue}', MABL_HAV = {MABL_HAV2.Text}, MOIN_HAV = N'{CMB_MOIN_HAV2.SelectedValue}',
                     MABL_HAZ = {MABL_HAZ.Text}, MOIN_HAZ = N'{CMB_MOIN_HAZ.SelectedValue}', TAKHFIF = {TAKHFIF2.Text},
+                    TAMIR = ISNULL(TAMIR, 0),
                     DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue}, CUST_KIND = {CUST_KIND.SelectedValue},
                     SHARAYET = N'{SHARAYET.Text}', SGN1 = {Convert.ToByte(SGN1.IsChecked)}, SGN2 = {Convert.ToByte(SGN2.IsChecked)}, 
                     SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.Text}', 
@@ -8643,8 +8644,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                                 // درج حواله (TAG 2) - اگر مستقیم بود
                                 if (IsDirectFactor)
                                 {
-                                    db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER, NUMBER1, TAG, DATE_N, MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF, UID)
-                            VALUES ({newNumber}, {newNumber1}, {hTAG}, 0, 0, 0, 0, 0, 0, 0, 0, {Baseknow.USERCOD})", null, transaction);
+                                    db.Execute($@"INSERT INTO dbo.HEAD_LST (NUMBER, NUMBER1, TAG, DATE_N, MAS, VAS, M_NAGHD, MABL_VAR, MABL_HAV, MABL_HAZ, TAKHFIF, TAMIR, UID)
+                            VALUES ({newNumber}, {newNumber1}, {hTAG}, 0, 0, 0, 0, 0, 0, 0, 0, 0, {Baseknow.USERCOD})", null, transaction);
                                 }
 
                                 transaction.Commit();
