@@ -24,6 +24,7 @@ using Prg_UI.Wins.WinMenus.TR;
 using Prg_UI.Wins.WinMenus.WinAutomasion;
 using Prg_UI.Wins.WinMenus.WinDEFAULT;
 using Prg_UI.Wins.WinSetting;
+using System.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -219,11 +220,12 @@ namespace Prg_UI.Wins
                 return;
             }
 
-            if (!CL_VERSION.IsValidGreaterVersion())
-            {
-                PerformAutoUpdate();
-                return;
-            }
+            // Moved to Window_ContentRendered to allow UI to show progress
+            //if (!CL_VERSION.IsValidGreaterVersion())
+            //{
+            //    PerformAutoUpdate();
+            //    return;
+            //}
 
             //
             //Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("ODc4NkAzMjMwMkUzNDJFMzBsa2MvT0xqRTVEaHV1d01nNjUveFFoV2dWbHhhTVBIWVZ4alJjS3ltaVZnPQ==");
@@ -315,6 +317,13 @@ namespace Prg_UI.Wins
             //.NET 6.0.21
 
             NowIsReady = true;
+
+            // Check version here after UI is rendered
+            if (!CL_VERSION.IsValidGreaterVersion())
+            {
+                _ = PerformAutoUpdateAsync(); // Fire and forget (it will exit app)
+                return; // Stop further processing
+            }
 
             try
             {
@@ -845,7 +854,7 @@ namespace Prg_UI.Wins
             //    else if (SecoRmzo.Visibility == Visibility.Visible) SecoRmzo.Focus();
             //}
         }
-        private void PerformAutoUpdate()
+        private async Task PerformAutoUpdateAsync()
         {
             try
             {
@@ -863,24 +872,14 @@ namespace Prg_UI.Wins
                      return;
                 }
 
-                // Show non-blocking or just show dialogue then proceed
-                // Using Show() to let logic continue, assuming Msgwin doesn't block thread unless ShowDialog is used.
-                // However, original code used ShowDialog(). We want the user to know.
-                // If we use Show(), we must ensure the app doesn't close before the user sees it? 
-                // Actually the batch script takes over. 
-                // Let's use ShowDialog() simply to say "Update started, please wait".
-                // But ShowDialog() waits for user to close.
-                // We want to force update. So maybe just a notify or a custom window that we can close?
-                // For now, let's use Show() and hope the user sees it before the app closes 2 seconds later.
-                // Or better, Thread.Sleep(2000) after showing.
+                // Show Update UI
+                UpdatePanel.Visibility = Visibility.Visible;
+                //new Msgwin(false, "در حال بروزرسانی نرم افزار... لطفا منتظر بمانید.", "#FF1AAA2C").Show(); 
                 
-                new Msgwin(false, "در حال بروزرسانی نرم افزار... لطفا منتظر بمانید.", "#FF1AAA2C").Show(); 
-                
-                // Allow UI to render
-                System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Background);
-
                 string tempExe = System.IO.Path.Combine(currentDir, "Update_Temp.exe");
-                System.IO.File.Copy(sourcePath, tempExe, true);
+                
+                // Perform Async Copy with Progress
+                await CopyFileWithProgressAsync(sourcePath, tempExe);
 
                 string batPath = System.IO.Path.Combine(currentDir, "update_script.bat");
                 string batchScript = $@"
@@ -914,6 +913,35 @@ del ""%~f0""
             {
                  new Msgwin(false, $"خطا در بروزرسانی: {ex.Message}").ShowDialog();
                  CL_LMethods.GoExitTheApplication();
+            }
+        }
+
+        private async Task CopyFileWithProgressAsync(string source, string destination)
+        {
+            const int bufferSize = 81920; // 80KB
+            using (var sourceStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, true))
+            using (var destinationStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, true))
+            {
+                var buffer = new byte[bufferSize];
+                long totalBytes = sourceStream.Length;
+                long totalRead = 0;
+                int bytesRead;
+
+                while ((bytesRead = await sourceStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                {
+                    await destinationStream.WriteAsync(buffer, 0, bytesRead);
+                    totalRead += bytesRead;
+                    
+                    if (totalBytes > 0)
+                    {
+                        double progress = (double)totalRead / totalBytes * 100;
+                        Dispatcher.Invoke(() =>
+                        {
+                            UpdatePrg.Value = progress;
+                            UpdateLbl.Content = $"{progress:F0}%";
+                        });
+                    }
+                }
             }
         }
     }

@@ -140,18 +140,27 @@ namespace Functions
             }
 
             // --- Fix for Persian Date ---
-            // Use PersianCalendar and fa-IR culture to parse the date
+            // Use PersianCalendar directly to avoid CultureInfo issues on older Windows (e.g., Server 2008 R2)
             DateTime date;
             try
             {
-                CultureInfo persianCulture = new CultureInfo("fa-IR");
-                persianCulture.DateTimeFormat.Calendar = new PersianCalendar();
-                date = DateTime.ParseExact(datePart, "yyyy/MM/dd", persianCulture);
+                var parts = datePart.Split('/');
+                if (parts.Length != 3)
+                {
+                     throw new FormatException($"Date part '{datePart}' is not in the expected format 'yyyy/MM/dd'.");
+                }
+                
+                int year = int.Parse(parts[0]);
+                int month = int.Parse(parts[1]);
+                int day = int.Parse(parts[2]);
+
+                var pc = new PersianCalendar();
+                date = pc.ToDateTime(year, month, day, 0, 0, 0, 0);
             }
-            catch (FormatException ex)
+            catch (Exception ex)
             {
                 // Rethrow with more context if parsing fails
-                throw new FormatException($"Could not parse date part '{datePart}' from string '{versionString}' as a Persian date.", ex);
+                throw new FormatException($"Could not parse date part '{datePart}' from string '{versionString}' as a Persian date. Details: {ex.Message}", ex);
             }
             // --- End Fix ---
 
