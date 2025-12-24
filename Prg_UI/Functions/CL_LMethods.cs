@@ -185,6 +185,29 @@ namespace Prg_UI.Functions
             }
         }
 
+        public static int? GetTamirLikeAccess(string _VALUE_)
+        {
+            bool _RESULT_ = false;
+
+            if (CL_LMethods.IsNumeric(_VALUE_))
+            {
+                _RESULT_ = Convert.ToBoolean(Convert.ToInt32(_VALUE_));
+            }
+            else
+            {
+                _RESULT_ = Convert.ToBoolean(_VALUE_);
+            }
+
+            if (_RESULT_ == true)
+            {
+                return -1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
         public static bool IsInside<T>(DependencyObject start) where T : DependencyObject
         {
             for (DependencyObject cur = start; cur != null;)
