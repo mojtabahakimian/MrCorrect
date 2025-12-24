@@ -50,8 +50,11 @@
 
         <Style TargetType="sfusion:GridCell" BasedOn="{StaticResource GridCellStyle}">
             <Setter Property="BorderBrush" Value="{Binding BorderBrush, ElementName=GENERAL_RANG}" />
-            <Setter Property="BorderThickness" Value="0.6" />
+        </Style>
 
+        <Style x:Key="SFCELL" TargetType="sfusion:GridCell" BasedOn="{StaticResource GridCellStyle}">
+            <Setter Property="BorderBrush" Value="{Binding BorderBrush, ElementName=GENERAL_RANG}" />
+            <Setter Property="BorderThickness" Value="0.6" />
         </Style>
 
 
@@ -75,11 +78,6 @@
             <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Margin" Value="10,5,10,10"/>
-            <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect BlurRadius="15" ShadowDepth="4" Direction="270" Color="#D1D9E6" Opacity="0.3"/>
-                </Setter.Value>
-            </Setter>
         </Style>
 
         <Style x:Key="FluentDataGridStyle" TargetType="syncfusion:SfDataGrid" BasedOn="{StaticResource SfDataGridStyle}">
@@ -822,31 +820,32 @@
                         </DockPanel>
                         <Border Style="{StaticResource CardBorderStyle}">
                             <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" Visibility="Collapsed" d:Visibility="Visible"
-                            ContextMenu="{StaticResource DataGridContextMenu}"
-                            ItemsSource="{Binding FACTOR_DATA}" 
-                            AutoGenerateColumns="False" SelectedIndex="0"
-                            EnableDataVirtualization="True"
-                            SelectionUnit="Row"
-                            AllowEditing="True"
-                            IsReadOnly="True"
-                            AllowDraggingColumns="True"
-                            AllowResizingColumns="True"
-                            AllowFiltering="True"
-                            AllowSorting="True"
-                            FilterRowPosition="Top"
-                                                
-                            SelectionMode="Extended"
-                            RowHeight="38"
-                            FrozenColumnCount="0"
-                            FlowDirection="RightToLeft"
-                            d:ItemsSource="{d:SampleData ItemCount=5}"
-                            Style="{StaticResource FluentDataGridStyle}"
-                                                                            
-                            HeaderStyle="{StaticResource KDGHeader_Fluent}"
-                            SelectionChanged="SYNCFUSION_DG_SelectionChanged" 
-                            CurrentCellActivated="SYNCFUSION_DG_CurrentCellActivated"
-                            PreviewMouseRightButtonDown="SYNCFUSION_DG_PreviewMouseRightButtonDown"
-                            AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" PreviewKeyDown="SYNCFUSION_DG_PreviewKeyDown">
+                                 ContextMenu="{StaticResource DataGridContextMenu}"
+                                 ItemsSource="{Binding FACTOR_DATA}" 
+                                 CellStyle="{StaticResource SFCELL}"
+                                 AutoGenerateColumns="False" SelectedIndex="0"
+                                 EnableDataVirtualization="True"
+                                 SelectionUnit="Row"
+                                 AllowEditing="True"
+                                 IsReadOnly="True"
+                                 AllowDraggingColumns="True"
+                                 AllowResizingColumns="True"
+                                 AllowFiltering="True"
+                                 AllowSorting="True"
+                                 FilterRowPosition="Top"
+                                                     
+                                 SelectionMode="Extended"
+                                 RowHeight="38"
+                                 FrozenColumnCount="0"
+                                 FlowDirection="RightToLeft"
+                                 d:ItemsSource="{d:SampleData ItemCount=5}"
+                                 Style="{StaticResource FluentDataGridStyle}"
+                                                                                 
+                                 HeaderStyle="{StaticResource KDGHeader_Fluent}"
+                                 SelectionChanged="SYNCFUSION_DG_SelectionChanged" 
+                                 CurrentCellActivated="SYNCFUSION_DG_CurrentCellActivated"
+                                 PreviewMouseRightButtonDown="SYNCFUSION_DG_PreviewMouseRightButtonDown"
+                                 AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" PreviewKeyDown="SYNCFUSION_DG_PreviewKeyDown">
 
                                 <syncfusion:SfDataGrid.Columns>
                                     <syncfusion:GridTextColumn x:Name="NUMBER_FAC_COLUMN" HeaderText="شماره فاکتور" MappingName="NUMBER1" Width="130" ColumnSizer="Auto" IsHidden="True"/>
@@ -962,7 +961,7 @@
                                 </syncfusion:SfDataGrid.Columns>
                             </syncfusion:SfDataGrid>
                         </Border>
-         
+
                     </DockPanel>
                 </materialDesign:Card>
             </GroupBox>
@@ -984,7 +983,7 @@
                             <TabItem  x:Name="PAGE_FACTOR" IsSelected="True">
                                 <TabItem.Header>
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="فاکتور"/>
+                                        <TextBlock Text="اقلام برگه"/>
                                         <Border Background="{StaticResource PrimaryHueMidBrush}" CornerRadius="4" Margin="5,0,0,0" Padding="4,0" VerticalAlignment="Center">
                                             <TextBlock x:Name="TXT_COUNT_FACTOR" Text="0" Foreground="White" FontSize="10"/>
                                         </Border>
@@ -1096,7 +1095,7 @@
                             <TabItem x:Name="PAGE_POSHT">
                                 <TabItem.Header>
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="پشت فاکتور"/>
+                                        <TextBlock Text="اطلاعات پرداخت"/>
                                         <Border Background="{StaticResource PrimaryHueMidBrush}" CornerRadius="4" Margin="5,0,0,0" Padding="4,0" VerticalAlignment="Center">
                                             <TextBlock x:Name="TXT_COUNT_POSHT" Text="0" Foreground="White" FontSize="10"/>
                                         </Border>

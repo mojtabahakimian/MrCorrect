@@ -364,9 +364,9 @@ namespace Prg_UI.Wins
 
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
 
-            new TR_FACOTRLST(1).Show();//سوابق رسید انبار
+            //new TR_FACOTRLST(1).Show();//سوابق رسید انبار
+            new TR_FACOTRLST(2).Show();//سوابق حواله انبار
 
-            //new TR_FACOTRLST(2).Show();//سوابق حواله انبار
             //new TR_FACOTRLST(24).Show();//سوابق سایر رسید انبار
             //new TR_FACOTRLST(4).Show();//سوابق برگشت فروش عادی
             //new TR_FACOTRLST(12).Show();//سوابق فاکتور خرید
