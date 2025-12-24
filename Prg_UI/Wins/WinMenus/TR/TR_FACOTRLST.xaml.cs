@@ -31,6 +31,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using Wins.WinMenus.KHARID_FORUSH;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
@@ -130,8 +131,6 @@ namespace Prg_UI.Wins.WinMenus.TR
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            FILL_ALL_COMBOBOXES();
-
             #region COLUMN_DISPLAYER
             switch (TAGCODE)
             {
@@ -176,15 +175,20 @@ namespace Prg_UI.Wins.WinMenus.TR
             PAGE_POSHT.Visibility = Visibility.Collapsed; //پشت فاکتور
             PAGE_SAYER.Visibility = Visibility.Collapsed; //سایر
 
+            string Formname = "";
+
             switch (TAGCODE) //عنوان پنجره
             {
                 case 27:
                     WINTILENAME.Content = "فاکتور های برگشت خرید آزاد";
                     PAGE_POSHT.Visibility = Visibility.Visible; //پشت فاکتور
                     MEGH_MAR_COLUMN.IsHidden = false; //Show the Column
+                    Formname = "TR_KHB";
                     break;
 
-                case 26: WINTILENAME.Content = "سایر حواله انبار ها"; break;
+                case 26: WINTILENAME.Content = "سایر حواله انبار ها";
+                    Formname = "TR_FRH";
+                    break;
 
                 case 25:
                     WINTILENAME.Content = "فاکتور های برگشت فروش آزاد رسید شده";
@@ -192,16 +196,20 @@ namespace Prg_UI.Wins.WinMenus.TR
                     PAGE_POSHT.Visibility = Visibility.Visible; //پشت فاکتور
                     PAGE_SAYER.Visibility = Visibility.Visible; //سایر
                     MEGH_MAR_COLUMN.IsHidden = false; //Show the Column
+                    Formname = "TR_FRB";
                     break;
+
                 case 24:
                     WINTILENAME.Content = "سایر رسید انبار ها";
                     NUMBER_HAV_COLUMN.HeaderText = "شماره رسید";
                     MEGH_MAR_COLUMN.IsHidden = false; //Show the Column
+                    Formname = "TR_KHH";
                     break;
 
                 case 23:
                     WINTILENAME.Content = "درخواست خرید ها";
                     TAH_COLUMN.IsHidden = false;
+                    Formname = "";
                     break;
 
                 case 20:
@@ -209,6 +217,7 @@ namespace Prg_UI.Wins.WinMenus.TR
                     NUMBER_FAC_COLUMN.IsHidden = true;
                     SANAD_COLUMN.IsHidden = true;
                     NUMBER_HAV_COLUMN.HeaderText = "شماره پیش فاکتور";
+                    Formname = "TR_PFRB";
                     break;
 
                 case 14: WINTILENAME.Content = "فاکتور های خدمات"; break;
@@ -216,11 +225,13 @@ namespace Prg_UI.Wins.WinMenus.TR
                     WINTILENAME.Content = "فاکتور های فروش";
                     PAGE_POSHT.Visibility = Visibility.Visible; //پشت فاکتور
                     PAGE_SAYER.Visibility = Visibility.Visible; //سایر
+                    Formname = "TR_FR";
                     break;
                 case 12:
                     WINTILENAME.Content = "فاکتور های خرید";
                     NUMBER_HAV_COLUMN.HeaderText = "شماره رسید انبار ها";
                     PAGE_POSHT.Visibility = Visibility.Visible; //پشت فاکتور
+                    Formname = "TR_KH";
                     break;
 
                 case 11:
@@ -239,6 +250,7 @@ namespace Prg_UI.Wins.WinMenus.TR
 
                     SANAD_NO_COLUMN_COMBO.IsHidden = false; //Show مرکز هزینه
                     SANAD_NO_COLUMN_COMBO.ItemsSource = dbms.DoGetDataSQL<SN_MODEL_TR>(@"SELECT MHAZ_NO, MHAZNAME FROM TCOD_MARKAZHAZ").ToList();
+                    Formname = "TR_SMAVA";
                     break;
 
                 case 10:
@@ -248,12 +260,12 @@ namespace Prg_UI.Wins.WinMenus.TR
                     CUST_NAME_COLUMN.HeaderText = "نام مسئول شیفت";
                     TARIKH_FAC_COLUMN.HeaderText = "تاریخ حواله";
                     MODAT_COLUMN.IsHidden = true;
-
                     N_RASID_COLUMN_COMBO.IsHidden = false; //Show محل مصرف
                     N_RASID_COLUMN_COMBO.ItemsSource = dbms.DoGetDataSQL<N_RASID_MODEL>(@"SELECT dbo.HEAD_MANF.FNUMB, STUF_DEF.NAME+' '+ISNULL(HEAD_MANF.TOZIH, ' ') AS nam, dbo.HEAD_MANF.FNUMB AS Expr1
                                                           FROM dbo.STUF_DEF
                                                                INNER JOIN dbo.HEAD_MANF ON dbo.STUF_DEF.CODE=dbo.HEAD_MANF.CODE
                                                           WHERE(NOT(dbo.STUF_DEF.NAME IS NULL))").ToList();
+                    Formname = "TR_MAVA";
                     break;
 
                 case 9:
@@ -265,8 +277,8 @@ namespace Prg_UI.Wins.WinMenus.TR
                     N_KOL_COLUMN_COMBO.IsHidden = false; //Show //فرمول ساخت
                     N_KOL_COLUMN.IsHidden = true; //Hide
                     MODAT_COLUMN.IsHidden = true;
-
                     N_KOL_COLUMN_COMBO.ItemsSource = dbms.DoGetDataSQL<FSAKHT_COMBO>("SELECT HEAD_MANF.FNUMB, STUF_DEF.NAME + N' - ' + CAST(HEAD_MANF.DATE_ACTIV AS nvarchar) + N' :-' + ISNULL(HEAD_MANF.TOZIH, N' ') + CAST(HEAD_MANF.FNUMB AS char) AS Expr1 FROM HEAD_MANF INNER JOIN STUF_DEF ON HEAD_MANF.CODE = STUF_DEF.CODE").ToList();
+                    Formname = "TR_TOL";
                     break;
 
                 case 5:
@@ -278,26 +290,46 @@ namespace Prg_UI.Wins.WinMenus.TR
                     PAGE_POSHT.Visibility = Visibility.Visible; //پشت فاکتور
                     PAGE_SAYER.Visibility = Visibility.Visible; //سایر
                     MEGH_MAR_COLUMN.IsHidden = false; //Show the Column
+                    Formname = "TR_FRB";
                     break;
                 case 3:
                     WINTILENAME.Content = "فاکتور های برگشت خرید - عادی";
                     PAGE_POSHT.Visibility = Visibility.Visible; //پشت فاکتور
                     MEGH_MAR_COLUMN.IsHidden = false; //Show the Column
+                    Formname = "TR_KHB";
                     break;
 
                 case 2:
                     WINTILENAME.Content = "حواله های فروش";
                     NUMBER_FAC_COLUMN.IsHidden = true;
+                    Formname = "TR_FRH";
                     break;
 
                 case 1:
                     WINTILENAME.Content = "رسید های خرید";
                     NUMBER_HAV_COLUMN.HeaderText = "شماره رسید";
                     NUMBER_FAC_COLUMN.IsHidden = true;
+                    Formname = "TR_KHH";
                     break;
 
                 default: WINTILENAME.Content = "همه نوع فاکتور"; break;
             }
+
+            #region SecuritCheck
+            if (!string.IsNullOrWhiteSpace(Formname))
+            {
+                try
+                {
+                    var helper = new WindowInteropHelper(this);
+                    helper.EnsureHandle(); // Critical: Ensures handle exists before access
+                                           // 2. Run Security:
+                    CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
+                    // 3. Final State Check:
+                    if (!this.IsLoaded) { this.Close(); return; }
+                }
+                catch { try { this.Close(); } catch { } }
+            }
+            #endregion
 
             if (TAGCODE == 13) // فاکتور فروش
             {
@@ -334,6 +366,8 @@ namespace Prg_UI.Wins.WinMenus.TR
                 fTAG = TAGCODE;
                 hTAG = TAGCODE;
             }
+
+            FILL_ALL_COMBOBOXES();
 
             #region Configy
             if (!CL_HESABDARI.LETSGO("TKHPISH"))
