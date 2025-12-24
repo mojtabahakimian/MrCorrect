@@ -367,12 +367,16 @@ namespace Prg_UI.Wins
             //new TR_FACOTRLST(1).Show();//سوابق رسید انبار
             //new TR_FACOTRLST(2).Show();//سوابق حواله انبار
             //new TR_FACOTRLST(24).Show();//سوابق سایر رسید انبار
+            //new TR_FACOTRLST(26).Show();//سوابق سایر حواله انبار : برای برگشت خرید
             //new TR_FACOTRLST(4).Show();//سوابق برگشت فروش عادی
             //new TR_FACOTRLST(12).Show();//سوابق فاکتور خرید
             //new TR_FACOTRLST(13).Show();//سوابق فاکتور فروش
             //new TR_FACOTRLST(20).Show();//سوابق پیش فاکتور
             //new TR_FACOTRLST(25).Show();//سوابق برگشت فروش آزاد
-            //new TR_FACOTRLST(26).Show();//سوابق سایر حواله انبار : برای برگشت خرید
+            //new TR_FACOTRLST(27).Show();//سوابق برگشت خرید آزاد
+            //new TR_FACOTRLST(9).Show();//برگه ورود کالای ساخته شده
+            //new TR_FACOTRLST(10).Show();//برگه خروج مواد اولیه جهت تولید
+            //new TR_FACOTRLST(11).Show();//صدور برگه خروج سایر مواد از انبار
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_F12, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
@@ -380,7 +384,7 @@ namespace Prg_UI.Wins
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
             //new WIN_OPTIONS().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KART, this);
-            new WinBase().Show();
+            //new WinBase().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "11338,11323");
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_CHEK_VOSUL_LES, this);
 
