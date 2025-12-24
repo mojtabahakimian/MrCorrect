@@ -44,6 +44,7 @@ using Wins.WinMenus.SANATI;
 using Wins.WinMenus.Taarif;
 using Wins.WinSetting;
 using static Functions.SMSService.SmsServiceFactory;
+using System.Threading.Tasks;
 
 namespace Prg_UI.Wins
 {
@@ -854,40 +855,54 @@ namespace Prg_UI.Wins
             //    else if (SecoRmzo.Visibility == Visibility.Visible) SecoRmzo.Focus();
             //}
         }
+
         private async Task PerformAutoUpdateAsync()
         {
             try
             {
-                // Use Environment.ProcessPath which is safer in .NET 6+
+                // 1. دریافت مسیر فایل اجرایی با ایمنی بالا برای دات نت 8
                 string currentExe = Environment.ProcessPath;
                 if (string.IsNullOrEmpty(currentExe))
                 {
-                     // Fallback for unlikely case where ProcessPath is null
-                     currentExe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                    // فال‌بک برای شرایط خاص
+                    using var process = System.Diagnostics.Process.GetCurrentProcess();
+                    if (process.MainModule != null)
+                    {
+                        currentExe = process.MainModule.FileName;
+                    }
                 }
-                
+
+                if (string.IsNullOrEmpty(currentExe))
+                {
+                    new Msgwin(false, "مسیر فایل اجرایی یافت نشد.").ShowDialog();
+                    return;
+                }
+
                 string currentDir = System.IO.Path.GetDirectoryName(currentExe);
                 string exeName = System.IO.Path.GetFileName(currentExe);
-                // Update source path provided by user: \\MAIN\ade\EXE\1404
+
+                // مسیر فایل آپدیت در شبکه
                 string sourcePath = System.IO.Path.Combine(@"\\MAIN\ade\EXE\1404", exeName);
 
                 if (!System.IO.File.Exists(sourcePath))
                 {
-                     // Fallback to old behavior if update not found
-                     new Msgwin(false, "نسخه جدید در مسیر مشخص شده یافت نشد. لطفا با واحد پشتیبانی تماس بگیرید.").ShowDialog();
-                     CL_LMethods.GoExitTheApplication();
-                     return;
+                    new Msgwin(false, "نسخه جدید در مسیر مشخص شده یافت نشد. لطفا با واحد پشتیبانی تماس بگیرید.").ShowDialog();
+                    CL_LMethods.GoExitTheApplication();
+                    return;
                 }
 
-                // Show Update UI
-                UpdatePanel.Visibility = Visibility.Visible;
-                //new Msgwin(false, "در حال بروزرسانی نرم افزار... لطفا منتظر بمانید.", "#FF1AAA2C").Show(); 
-                
+                // 2. نمایش پنل آپدیت با چک کردن Null بودن
+                if (UpdatePanel != null)
+                {
+                    UpdatePanel.Visibility = Visibility.Visible;
+                }
+
                 string tempExe = System.IO.Path.Combine(currentDir, "Update_Temp.exe");
-                
-                // Perform Async Copy with Progress
+
+                // 3. شروع کپی فایل
                 await CopyFileWithProgressAsync(sourcePath, tempExe);
 
+                // 4. ساخت فایل بچ برای جایگزینی
                 string batPath = System.IO.Path.Combine(currentDir, "update_script.bat");
                 string batchScript = $@"
 @echo off
@@ -918,8 +933,10 @@ del ""%~f0""
             }
             catch (Exception ex)
             {
-                 new Msgwin(false, $"خطا در بروزرسانی: {ex.Message}").ShowDialog();
-                 CL_LMethods.GoExitTheApplication();
+                // لاگ کردن خطا برای فهمیدن علت دقیق
+                MessageBox.Show($"Error Detail: {ex.StackTrace}");
+                new Msgwin(false, $"خطا در بروزرسانی: {ex.Message}").ShowDialog();
+                CL_LMethods.GoExitTheApplication();
             }
         }
 
@@ -938,14 +955,17 @@ del ""%~f0""
                 {
                     await destinationStream.WriteAsync(buffer, 0, bytesRead);
                     totalRead += bytesRead;
-                    
+
                     if (totalBytes > 0)
                     {
                         double progress = (double)totalRead / totalBytes * 100;
-                        Dispatcher.Invoke(() =>
+
+                        // استفاده از دیسپچر خودِ پنجره
+                        this.Dispatcher.Invoke(() =>
                         {
-                            UpdatePrg.Value = progress;
-                            UpdateLbl.Content = $"{progress:F0}%";
+                            // چک کردن Null بودن کنترل‌ها قبل از مقداردهی
+                            if (UpdatePrg != null) UpdatePrg.Value = progress;
+                            if (UpdateLbl != null) UpdateLbl.Content = $"{progress:F0}%";
                         });
                     }
                 }
