@@ -36,6 +36,9 @@ using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
 using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
 using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
+using static Prg_UI.Wins.WinMenus.SANATI.HAVALE_EXIT_SAYER;
+using static Wins.WinMenus.SANATI.HAVALAH_ENTER;
+
 
 namespace Prg_UI.Wins.WinMenus.TR
 {
@@ -104,7 +107,19 @@ namespace Prg_UI.Wins.WinMenus.TR
 
         }
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
-
+        #region LOCALMODEL
+        public class N_RASID_MODEL
+        {
+            public string? FNUMB { get; set; }
+            public string? nam { get; set; }
+            public int? Expr1 { get; set; }
+        }
+        public class SN_MODEL_TR
+        {
+            public double? MHAZ_NO { get; set; }
+            public string? MHAZNAME { get; set; }
+        }
+        #endregion
         UniversControl universControl = new UniversControl();
         public ObservableCollection<TR_HEAD_LST> FACTOR_DATA { get; set; } = new ObservableCollection<TR_HEAD_LST>();
         public bool NowIsReady { get; private set; }
@@ -117,20 +132,20 @@ namespace Prg_UI.Wins.WinMenus.TR
         {
             FILL_ALL_COMBOBOXES();
 
-            ReGetHeadMaster();
-
             #region COLUMN_DISPLAYER
             switch (TAGCODE)
             {
                 //فاکتوری ها
-                case 3:
-                case 4:
-                case 12:
-                case 13:
+                case 3: /*برگشت خرید عادی*/
+                case 4: /*برگشت فروش عادی*/
+                case 12: /*فاکتور خرید*/
+                case 13: /*فاکتور فروش*/
                 case 14:
                 case 20:
-                case 27:
+                case 25: /*برگشت فروش آزاد*/
+                case 27: /*برگشت خرید آزاد*/
                     NUMBER_FAC_COLUMN.IsHidden = false; //Show
+                    isFactory = true;
                     break;
 
                 //انباری ها
@@ -166,6 +181,7 @@ namespace Prg_UI.Wins.WinMenus.TR
                 case 27:
                     WINTILENAME.Content = "فاکتور های برگشت خرید آزاد";
                     PAGE_POSHT.Visibility = Visibility.Visible; //پشت فاکتور
+                    MEGH_MAR_COLUMN.IsHidden = false; //Show the Column
                     break;
 
                 case 26: WINTILENAME.Content = "سایر حواله انبار ها"; break;
@@ -175,8 +191,13 @@ namespace Prg_UI.Wins.WinMenus.TR
                     NUMBER_HAV_COLUMN.HeaderText = "شماره برگه";
                     PAGE_POSHT.Visibility = Visibility.Visible; //پشت فاکتور
                     PAGE_SAYER.Visibility = Visibility.Visible; //سایر
+                    MEGH_MAR_COLUMN.IsHidden = false; //Show the Column
                     break;
-                case 24: WINTILENAME.Content = "سایر رسید انبار ها"; break;
+                case 24:
+                    WINTILENAME.Content = "سایر رسید انبار ها";
+                    NUMBER_HAV_COLUMN.HeaderText = "شماره رسید";
+                    MEGH_MAR_COLUMN.IsHidden = false; //Show the Column
+                    break;
 
                 case 23:
                     WINTILENAME.Content = "درخواست خرید ها";
@@ -209,6 +230,15 @@ namespace Prg_UI.Wins.WinMenus.TR
                     CUST_NAME_COLUMN.HeaderText = "نام مسئول شیفت";
                     TARIKH_FAC_COLUMN.HeaderText = "تاریخ";
                     MODAT_COLUMN.IsHidden = true;
+
+                    N_RASID_COLUMN_COMBO.IsHidden = false; //Show محل مصرف
+                    N_RASID_COLUMN_COMBO.ItemsSource = dbms.DoGetDataSQL<N_RASID_MODEL>(@"SELECT dbo.HEAD_MANF.FNUMB, STUF_DEF.NAME+' '+ISNULL(HEAD_MANF.TOZIH, ' ') AS nam, dbo.HEAD_MANF.FNUMB AS Expr1
+                                                          FROM dbo.STUF_DEF
+                                                               INNER JOIN dbo.HEAD_MANF ON dbo.STUF_DEF.CODE=dbo.HEAD_MANF.CODE
+                                                          WHERE(NOT(dbo.STUF_DEF.NAME IS NULL))").ToList();
+
+                    SANAD_NO_COLUMN_COMBO.IsHidden = false; //Show مرکز هزینه
+                    SANAD_NO_COLUMN_COMBO.ItemsSource = dbms.DoGetDataSQL<SN_MODEL_TR>(@"SELECT MHAZ_NO, MHAZNAME FROM TCOD_MARKAZHAZ").ToList();
                     break;
 
                 case 10:
@@ -218,6 +248,12 @@ namespace Prg_UI.Wins.WinMenus.TR
                     CUST_NAME_COLUMN.HeaderText = "نام مسئول شیفت";
                     TARIKH_FAC_COLUMN.HeaderText = "تاریخ حواله";
                     MODAT_COLUMN.IsHidden = true;
+
+                    N_RASID_COLUMN_COMBO.IsHidden = false; //Show محل مصرف
+                    N_RASID_COLUMN_COMBO.ItemsSource = dbms.DoGetDataSQL<N_RASID_MODEL>(@"SELECT dbo.HEAD_MANF.FNUMB, STUF_DEF.NAME+' '+ISNULL(HEAD_MANF.TOZIH, ' ') AS nam, dbo.HEAD_MANF.FNUMB AS Expr1
+                                                          FROM dbo.STUF_DEF
+                                                               INNER JOIN dbo.HEAD_MANF ON dbo.STUF_DEF.CODE=dbo.HEAD_MANF.CODE
+                                                          WHERE(NOT(dbo.STUF_DEF.NAME IS NULL))").ToList();
                     break;
 
                 case 9:
@@ -226,7 +262,11 @@ namespace Prg_UI.Wins.WinMenus.TR
                     CUST_HESAB_COLUMN.HeaderText = "حساب مسئول شیفت";
                     CUST_NAME_COLUMN.HeaderText = "نام مسئول شیفت";
                     TARIKH_FAC_COLUMN.HeaderText = "تاریخ";
+                    N_KOL_COLUMN_COMBO.IsHidden = false; //Show //فرمول ساخت
+                    N_KOL_COLUMN.IsHidden = true; //Hide
                     MODAT_COLUMN.IsHidden = true;
+
+                    N_KOL_COLUMN_COMBO.ItemsSource = dbms.DoGetDataSQL<FSAKHT_COMBO>("SELECT HEAD_MANF.FNUMB, STUF_DEF.NAME + N' - ' + CAST(HEAD_MANF.DATE_ACTIV AS nvarchar) + N' :-' + ISNULL(HEAD_MANF.TOZIH, N' ') + CAST(HEAD_MANF.FNUMB AS char) AS Expr1 FROM HEAD_MANF INNER JOIN STUF_DEF ON HEAD_MANF.CODE = STUF_DEF.CODE").ToList();
                     break;
 
                 case 5:
@@ -237,10 +277,12 @@ namespace Prg_UI.Wins.WinMenus.TR
                     WINTILENAME.Content = "فاکتور های برگشت فروش - عادی";
                     PAGE_POSHT.Visibility = Visibility.Visible; //پشت فاکتور
                     PAGE_SAYER.Visibility = Visibility.Visible; //سایر
+                    MEGH_MAR_COLUMN.IsHidden = false; //Show the Column
                     break;
                 case 3:
                     WINTILENAME.Content = "فاکتور های برگشت خرید - عادی";
                     PAGE_POSHT.Visibility = Visibility.Visible; //پشت فاکتور
+                    MEGH_MAR_COLUMN.IsHidden = false; //Show the Column
                     break;
 
                 case 2:
@@ -257,33 +299,54 @@ namespace Prg_UI.Wins.WinMenus.TR
                 default: WINTILENAME.Content = "همه نوع فاکتور"; break;
             }
 
-            GenerateAutomaticSummary(SYNCFUSION_DG);
-
-            if (SYNCFUSION_DG != null)
+            if (TAGCODE == 13) // فاکتور فروش
             {
-                SYNCFUSION_DG.FilterChanged += View_FilterChanged;
-                SYNCFUSION_DG.Loaded += (s, e) => UpdateRowCountLabel();
-
-                UpdateRowCountLabel();
+                fTAG = 13; //سربرگ فاکتور
+                hTAG = 2; //اطلاعا کالا و حواله اون
             }
-
-            WINTILENAME.Content = " سابقه " + WINTILENAME.Content.ToString();
+            else if (TAGCODE == 12) // فاکتور خرید
+            {
+                fTAG = 12;
+                hTAG = 1;
+            }
+            else if (TAGCODE == 4) // فاکتور برگشت فروش عادی
+            {
+                fTAG = 4;
+                hTAG = 2;
+            }
+            else if (TAGCODE == 3) // فاکتور برگشت خرید عادی
+            {
+                fTAG = 3;
+                hTAG = 1;
+            }
+            else if (TAGCODE == 25) // فاکتور برگشت فروش آزاد
+            {
+                fTAG = 25;
+                hTAG = 24;
+            }
+            else if (TAGCODE == 27) // فاکتور برگشت خرید آزاد
+            {
+                fTAG = 27;
+                hTAG = 26;
+            }
+            else
+            {
+                fTAG = TAGCODE;
+                hTAG = TAGCODE;
+            }
 
             #region Configy
             if (!CL_HESABDARI.LETSGO("TKHPISH"))
             {
                 this.TAKHFIF_APLAY_SUB.Visibility = Visibility.Hidden;
-                //this.ScrollBars = 0;
             }
             else
             {
                 this.TAKHFIF_APLAY_SUB.Visibility = Visibility.Visible;
-                //this.ScrollBars = 2;
             }
             if (Strings.Mid(Baseknow.OPTIONSS, 58, 1) != "5")
             {
                 this.TAKHFIF_APLAY_SUB.Visibility = Visibility.Hidden;
-                //this.ScrollBars = 0;
             }
 
             if (TAKHFIF_APLAY_SUB.Visibility == Visibility.Visible)
@@ -296,11 +359,23 @@ namespace Prg_UI.Wins.WinMenus.TR
             }
             #endregion
 
-            SYNCFUSION_DG.Visibility = Visibility.Visible;
+            ReGetHeadMaster();
 
-            // --- اتصال شمارنده به گرید اصلی ---
+            GenerateAutomaticSummary(SYNCFUSION_DG);
+
+            if (SYNCFUSION_DG != null)
+            {
+                SYNCFUSION_DG.FilterChanged += View_FilterChanged;
+                SYNCFUSION_DG.Loaded += (s, e) => UpdateRowCountLabel();
+
+                UpdateRowCountLabel();
+            }
+
+            WINTILENAME.Content = " سابقه " + WINTILENAME.Content.ToString();
+
+            SYNCFUSION_DG.Visibility = Visibility.Visible; //Make Visible after data loading to reduce the slowness
+
             //AttachRecordCountUpdater(SYNCFUSION_DG, ROWCOUNT_TEXTBLK1);
-
             SetupGridNavigation();
             AttachRecordCountUpdater(SF_SUB, TXT_COUNT_FACTOR);
             AttachRecordCountUpdater(PAY_GETD_SUB22, TXT_COUNT_POSHT);
@@ -316,22 +391,22 @@ namespace Prg_UI.Wins.WinMenus.TR
             //WhereCondition = CL_LMethods.GetRestrictedSqlQuery(TAGCODE, WhereCondition);
 
             var MasterHead = dbms.DoGetDataSQL<TR_HEAD_LST>(@$"
-SELECT        dbo.TR_HEAD_LST.NUMBER1, dbo.TR_HEAD_LST.TAH, dbo.TR_HEAD_LST.NUMBER, dbo.TR_HEAD_LST.DATE_N, dbo.TR_HEAD_LST.MAS, dbo.TR_HEAD_LST.N_S, dbo.TR_HEAD_LST.CUST_NO, dbo.CUST_HESAB.NAME, 
-                         dbo.TR_HEAD_LST.MOLAH, dbo.TR_HEAD_LST.M_NAGHD, dbo.TR_HEAD_LST.MABL_VAR, dbo.TR_HEAD_LST.MOIN_VAR, dbo.TR_HEAD_LST.MABL_HAV, dbo.TR_HEAD_LST.MOIN_HAV, dbo.TR_HEAD_LST.MABL_HAZ, 
-                         dbo.TR_HEAD_LST.MOIN_HAZ, dbo.TR_HEAD_LST.TAKHFIF, dbo.TR_HEAD_LST.MOIN_KHF, dbo.TR_HEAD_LST.TAG, dbo.DEPART.DEPNAME, dbo.SHIFT.SHNAME, dbo.CUSTKIND.CUSTKNAME, 
-                         dbo.TR_HEAD_LST.USER_NAME, dbo.TR_HEAD_LST.SHARAYET, dbo.TR_HEAD_LST.MBAA, dbo.TR_HEAD_LST.HMBAA, dbo.TR_HEAD_LST.TICMBAA, dbo.TR_HEAD_LST.TKHF, dbo.TR_HEAD_LST.OKF, 
-                         dbo.TR_HEAD_LST.JAY, dbo.TR_HEAD_LST.SGN1, dbo.TR_HEAD_LST.SGN2, dbo.TR_HEAD_LST.SGN3, dbo.TR_HEAD_LST.sgn1usid, dbo.TR_HEAD_LST.sgn2usid, dbo.TR_HEAD_LST.sgn3usid, dbo.TR_HEAD_LST.CRT, 
-                         dbo.TR_HEAD_LST.UID, dbo.PRICE_ELAMIE.PEPNAME, dbo.PRICE_ELAMIETF.PENAME, dbo.PRICE_PAYNO.PPAME, dbo.TR_HEAD_LST.ANBAR, dbo.TR_HEAD_LST.FNUMCO, dbo.TR_HEAD_LST.IPADD, 
-                         dbo.TR_HEAD_LST.PC_NAME, dbo.TR_HEAD_LST.UP_USER_NAME, dbo.TR_HEAD_LST.UP_TIME, dbo.TR_HEAD_LST.UP_DATE
-FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
-                         dbo.PRICE_PAYNO ON dbo.TR_HEAD_LST.MODAT_PPID = dbo.PRICE_PAYNO.PPID LEFT OUTER JOIN
-                         dbo.PRICE_ELAMIETF ON dbo.TR_HEAD_LST.PEID = dbo.PRICE_ELAMIETF.PEID LEFT OUTER JOIN
-                         dbo.CUSTKIND ON dbo.TR_HEAD_LST.CUST_KIND = dbo.CUSTKIND.CUST_COD LEFT OUTER JOIN
-                         dbo.PRICE_ELAMIE ON dbo.TR_HEAD_LST.PEPID = dbo.PRICE_ELAMIE.PEPID LEFT OUTER JOIN
-                         dbo.DEPART ON dbo.TR_HEAD_LST.DEPATMAN = dbo.DEPART.DEPATMAN LEFT OUTER JOIN
-                         dbo.SHIFT ON dbo.TR_HEAD_LST.SHIFT = dbo.SHIFT.SHIFT_ID LEFT OUTER JOIN
-                         dbo.CUST_HESAB ON dbo.TR_HEAD_LST.CUST_NO = dbo.CUST_HESAB.hes
-                         {WhereCondition} ").ToList();
+                    SELECT        dbo.TR_HEAD_LST.NUMBER1, dbo.TR_HEAD_LST.TAH, dbo.TR_HEAD_LST.NUMBER, dbo.TR_HEAD_LST.DATE_N, dbo.TR_HEAD_LST.MAS, dbo.TR_HEAD_LST.N_S, dbo.TR_HEAD_LST.CUST_NO, dbo.CUST_HESAB.NAME, 
+                                             dbo.TR_HEAD_LST.MOLAH, dbo.TR_HEAD_LST.M_NAGHD, dbo.TR_HEAD_LST.MABL_VAR, dbo.TR_HEAD_LST.MOIN_VAR, dbo.TR_HEAD_LST.MABL_HAV, dbo.TR_HEAD_LST.MOIN_HAV, dbo.TR_HEAD_LST.MABL_HAZ, 
+                                             dbo.TR_HEAD_LST.MOIN_HAZ, dbo.TR_HEAD_LST.TAKHFIF, dbo.TR_HEAD_LST.MOIN_KHF, dbo.TR_HEAD_LST.TAG, dbo.DEPART.DEPNAME, dbo.SHIFT.SHNAME, dbo.CUSTKIND.CUSTKNAME, 
+                                             dbo.TR_HEAD_LST.USER_NAME, dbo.TR_HEAD_LST.SHARAYET, dbo.TR_HEAD_LST.MBAA, dbo.TR_HEAD_LST.HMBAA, dbo.TR_HEAD_LST.TICMBAA, dbo.TR_HEAD_LST.TKHF, dbo.TR_HEAD_LST.OKF, 
+                                             dbo.TR_HEAD_LST.JAY, dbo.TR_HEAD_LST.SGN1, dbo.TR_HEAD_LST.SGN2, dbo.TR_HEAD_LST.SGN3, dbo.TR_HEAD_LST.sgn1usid, dbo.TR_HEAD_LST.sgn2usid, dbo.TR_HEAD_LST.sgn3usid, dbo.TR_HEAD_LST.CRT, 
+                                             dbo.TR_HEAD_LST.UID, dbo.PRICE_ELAMIE.PEPNAME, dbo.PRICE_ELAMIETF.PENAME, dbo.PRICE_PAYNO.PPAME, dbo.TR_HEAD_LST.ANBAR, dbo.TR_HEAD_LST.FNUMCO, dbo.TR_HEAD_LST.IPADD, 
+                                             dbo.TR_HEAD_LST.PC_NAME, dbo.TR_HEAD_LST.UP_USER_NAME, dbo.TR_HEAD_LST.UP_TIME, dbo.TR_HEAD_LST.UP_DATE
+                    FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
+                                             dbo.PRICE_PAYNO ON dbo.TR_HEAD_LST.MODAT_PPID = dbo.PRICE_PAYNO.PPID LEFT OUTER JOIN
+                                             dbo.PRICE_ELAMIETF ON dbo.TR_HEAD_LST.PEID = dbo.PRICE_ELAMIETF.PEID LEFT OUTER JOIN
+                                             dbo.CUSTKIND ON dbo.TR_HEAD_LST.CUST_KIND = dbo.CUSTKIND.CUST_COD LEFT OUTER JOIN
+                                             dbo.PRICE_ELAMIE ON dbo.TR_HEAD_LST.PEPID = dbo.PRICE_ELAMIE.PEPID LEFT OUTER JOIN
+                                             dbo.DEPART ON dbo.TR_HEAD_LST.DEPATMAN = dbo.DEPART.DEPATMAN LEFT OUTER JOIN
+                                             dbo.SHIFT ON dbo.TR_HEAD_LST.SHIFT = dbo.SHIFT.SHIFT_ID LEFT OUTER JOIN
+                                             dbo.CUST_HESAB ON dbo.TR_HEAD_LST.CUST_NO = dbo.CUST_HESAB.hes
+                                             {WhereCondition} ").ToList();
 
             foreach (var item in MasterHead)
             {
@@ -507,8 +582,6 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
             VAHED_K_COLUMN.ItemsSource = dbms.DoGetDataSQL<Custom_VAHEDK>("SELECT CODE AS VAHED,NAMES FROM dbo.TCOD_VAHEDS").ToList();
 
             ////پشت فاکتور بخش چک:
-            //#region POSHTE_FACTOR
-
             vAZColumn.ItemsSource = new List<VAZ_MODEL_CHECK>()
             {
                  new VAZ_MODEL_CHECK { VAZ = 1, NAME_VAZ = "نزد صندوق" },
@@ -523,7 +596,6 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
             bANKColumn.ItemsSource = dbms.DoGetDataSQL<TCOD_BANKS>("SELECT TCOD_BANKS.CODE, TCOD_BANKS.NAMES FROM TCOD_BANKS ORDER BY TCOD_BANKS.NAMES").ToList();
 
             var HESNAMELST = new List<CUSTOM_HESABHA>();
-            //var HESNAMELST = dbms.DoGetDataSQL<CUSTOM_HESABHA>("SELECT N_KOL,NUMBER,TNUMBER, RTRIM(CAST(N_KOL AS NVARCHAR))+'-'+RTRIM(CAST(NUMBER AS NVARCHAR))+'-'+RTRIM(CAST(TNUMBER AS NVARCHAR)) AS hes, NAME FROM TDETA_HES").ToList();
             CMB_MOIN_VAR.ItemsSource = HESNAMELST.Where(w => w.N_KOL == Baseknow.BANKHA).ToList(); //معین واریزی
             CMB_MOIN_HAV.ItemsSource = HESNAMELST.ToList(); //معين حواله
             CMB_MOIN_HAZ.ItemsSource = HESNAMELST.ToList(); //معين خدمات
@@ -538,12 +610,8 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
             //تفضیلی
             n_TAFColumn.ItemsSource = dbms.DoGetDataSQL<_HES_QRE3_>($"SELECT TDETA_HES.TNUMBER, TDETA_HES.NAME FROM TDETA_HES WHERE (((TDETA_HES.N_KOL) ={Baseknow.BANKHA}))GROUP BY TDETA_HES.TNUMBER, TDETA_HES.NAME ORDER BY TDETA_HES.NAME\r\n").ToList();
 
-
             ////موقعیت چک
             sANDUGHColumn.ItemsSource = dbms.DoGetDataSQL<TDETA_HES_CHECK>("SELECT TNUMBER, NAME FROM TDETA_HES WHERE (N_KOL = " + CL_HESABDARI.GETKOL(Baseknow.ADA) + ") AND (NUMBER = 1)").ToList();
-
-            //#endregion
-
 
             //الگوی پورسانت:
             PORID_COLUMN.ItemsSource = dbms.DoGetDataSQL<PORD_COL_MODEL>("SELECT VISITORS_PORSANT.PORID, CAST(VISITORS_PORSANT.PORID AS nvarchar) + N' - ' + CAST(VISITORS_PORSANT.VDATE AS nvarchar) + N' - ' + ISNULL(CUSTKIND.CUSTKNAME, N'بدون گروه (همه)') + N' - ' + ISNULL(VISITORS_PORSANT.COMMENT, N' ') + N' - ' + CUST_HESAB.NAME AS Expr1 FROM VISITORS_PORSANT INNER JOIN CUST_HESAB ON VISITORS_PORSANT.HES = CUST_HESAB.hes LEFT OUTER JOIN CUSTKIND ON VISITORS_PORSANT.CUST_COD = CUSTKIND.CUST_COD").ToList();
@@ -554,11 +622,7 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
             //if (IsExporty)
             //{
             //    ARZKIND2.ItemsSource = dbms.DoGetDataSQL<TCOD_ARZ>($"SELECT ID,Code, Title, ISOCode, (ISOCode+N' - '+Title+N' - '+CountryName) AS ARZCOUNTRY, CRT, UID FROM dbo.[TCOD_ARZ]").ToList();
-
-            //    //نوع ارز در مودیان
-            //    CUT.ItemsSource = ARZKIND2.ItemsSource;
             //}
-
         }
 
         public ObservableCollection<INVO_LST_FACTOR22> FACTOR22_INVO_DATA { get; set; } = new ObservableCollection<INVO_LST_FACTOR22>();
@@ -738,8 +802,6 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
                 SELECT * FROM dbo.TR_OTHER_DTL WHERE NUMBER = @FactorNumber AND TAG = @fTAG AND UP_DATE = @UpDate 
                   AND UP_TIME = @UpTime;";
 
-            bool isFactor = TAGCODE == 13 || TAGCODE == 12;
-
             // Updated SQL to include both UP_DATE and UP_TIME filters
             string sql = $@"
                 -- 1. Header (Specific Version)
@@ -759,12 +821,12 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
                   AND il.UP_TIME = @UpTime; -- Added UP_TIME
 
                 -- 3. Advanced Discounts
-                {(isFactor ? QUERY_TR_TAKHFIF_APLAY : "")}
+                {(isFactory ? QUERY_TR_TAKHFIF_APLAY : "")}
 
                 -- 4. Checks
-                {(isFactor ? QUERY_TR_PAY_GETD : "")}
+                {(isFactory ? QUERY_TR_PAY_GETD : "")}
 
-                {(isFactor ? QUERY_SAYER : "")}
+                {(isFactory ? QUERY_SAYER : "")}
 
                 -- 8. Customer Details
                 SELECT TOP 1 * FROM dbo.CUST_HESAB 
@@ -776,22 +838,6 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
                 ";
 
             using var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR);
-
-            if (TAGCODE == 13) // Sales Invoice
-            {
-                fTAG = 13;
-                hTAG = 2;
-            }
-            else if (TAGCODE == 12) // Purchase Invoice
-            {
-                fTAG = 12;
-                hTAG = 1;
-            }
-            else
-            {
-                fTAG = TAGCODE;
-                hTAG = TAGCODE;
-            }
 
             // Parameters now include UpTime
             var parameters = new
@@ -810,7 +856,7 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
 
                 fullDetails.InvoiceItems = (await multi.ReadAsync<INVO_LST_FACTOR22>()).ToList();
 
-                if (isFactor)
+                if (isFactory)
                 {
                     fullDetails.AdvancedDiscounts = (await multi.ReadAsync<TAKHFIF_APLAY>()).ToList();
                     fullDetails.Checks = (await multi.ReadAsync<PAY_GETD_SUB22_MODEL>()).ToList();
@@ -1101,14 +1147,7 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
                 //N_S.Text = header.N_S.ToStringNullSafe();
                 //MABNA.Text = fullDetails.SanadBase;
 
-                //filterService.ClearFilters();
-                //ActiveFilters.Clear();
-                ////ApplyCumulativeFilter();
-                //SYNCFUSION_DG.ClearFilters();
-                //SF_SUB.ClearFilters();
-
                 GenerateAutomaticSummary(SF_SUB);
-
             }
             catch (Exception ex)
             {
@@ -1127,23 +1166,26 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
 
         private void Summer()
         {
-            NCHK.Text = PAY_GETD_SUB22_DATA?.Sum(x => x?.MABL ?? 0).ToString();
+            if (PAGE_POSHT.Visibility == Visibility.Visible)
+            {
+                NCHK.Text = PAY_GETD_SUB22_DATA?.Sum(x => x?.MABL ?? 0).ToString();
 
-            HKH.Text = MABL_HAZ.Text; // هزینه خدمات
-            NTKHFIF.Text = TAKHFIF.Text; //تخفیفات
-            JF.Text = SUM_OF_MABL_K.ToString(); //جمع کل فاکتور برای فسمت روی فاکتور
+                HKH.Text = MABL_HAZ.Text; // هزینه خدمات
+                NTKHFIF.Text = TAKHFIF.Text; //تخفیفات
+                JF.Text = SUM_OF_MABL_K.ToString(); //جمع کل فاکتور برای فسمت روی فاکتور
 
-            //مبلغ قابل پرداخت: //= [JF] + [HKH] - [NTKHFIF] + [MBAA]
-            var rghabel = Convert.ToInt64(JF.Text) + Convert.ToInt64(HKH.Text) - Convert.ToInt64(NTKHFIF.Text) + Convert.ToInt64(MBAA.Text);
-            GHABEL.Text = rghabel.ToString();
+                //مبلغ قابل پرداخت: //= [JF] + [HKH] - [NTKHFIF] + [MBAA]
+                var rghabel = Convert.ToInt64(JF.Text) + Convert.ToInt64(HKH.Text) - Convert.ToInt64(NTKHFIF.Text) + Convert.ToInt64(MBAA.Text);
+                GHABEL.Text = rghabel.ToString();
 
-            //جمع مبالغ پرداختی
-            //=[M_NAGHD]+[MABL_VAR]+[MABL_HAV]+[NCHK]
-            var RMP = Convert.ToInt64(M_NAGHD.Text) + Convert.ToInt64(MABL_VAR.Text) + Convert.ToInt64(MABL_HAV.Text) + Convert.ToInt64(NCHK.Text);
-            NPAR.Text = RMP.ToString();
+                //جمع مبالغ پرداختی
+                //=[M_NAGHD]+[MABL_VAR]+[MABL_HAV]+[NCHK]
+                var RMP = Convert.ToInt64(M_NAGHD.Text) + Convert.ToInt64(MABL_VAR.Text) + Convert.ToInt64(MABL_HAV.Text) + Convert.ToInt64(NCHK.Text);
+                NPAR.Text = RMP.ToString();
 
-            //=[GHABEL]-[NPAR]
-            MAN.Text = Convert.ToString(Convert.ToInt64(GHABEL.Text) - Convert.ToInt64(NPAR.Text)); //مانده
+                //=[GHABEL]-[NPAR]
+                MAN.Text = Convert.ToString(Convert.ToInt64(GHABEL.Text) - Convert.ToInt64(NPAR.Text)); //مانده
+            }
         }
 
         #region _SfDataGrid_
@@ -1170,6 +1212,8 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
 
         private string? CurrentCellValue = null;
         private RowColumnIndex CurrentCellIndex;
+        private bool isFactory = false;
+
         private void SYNCFUSION_DG_CurrentCellActivated(object sender, Syncfusion.UI.Xaml.Grid.CurrentCellActivatedEventArgs e) // Event handler for when a cell is activated in the data grid
         {
             if (e?.CurrentRowColumnIndex == null)
@@ -1187,6 +1231,13 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
                 {
                     ReGetData(SelectedHeadFactor);
                 }
+                else
+                {
+                    FACTOR22_INVO_DATA?.Clear();
+                    TAKHFIF_APLAY_DATA?.Clear();
+                    PAY_GETD_SUB22_DATA?.Clear();
+                    SAYER_VISITOR_DATA?.Clear();
+                }
             }
             //// Get the selected row and column index
             //var currentCell = SYNCFUSION_DG.SelectionController.CurrentCellManager.CurrentCell;
@@ -1196,8 +1247,6 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
             //    UpdateCurrentCellValue(rowColumnIndex);
             //}
         }
-
-
         private void UpdateCurrentCellValue(RowColumnIndex rowColumnIndex) // Method to update the current cell value
         {
             CurrentCellIndex = rowColumnIndex; // Update current cell index
@@ -1230,7 +1279,7 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
             var property = record.GetType().GetProperty(mappingName);
             if (property == null)
             {
-                Console.WriteLine("Property " + mappingName + " not found on type " + record.GetType().Name);
+                //Console.WriteLine("Property " + mappingName + " not found on type " + record.GetType().Name);
                 return;
             }
 
@@ -1424,7 +1473,6 @@ FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
                 element.ContextMenu = this.Resources["DataGridContextMenu"] as ContextMenu;
             }
         }
-
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
