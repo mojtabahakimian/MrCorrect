@@ -145,6 +145,7 @@ namespace Wins.WinOther
         private List<MenuItemModel> MenuItemModels = new List<MenuItemModel>();
         private void LoadMenuItemModels()
         {
+
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "اتوماسیون", WIN_NAME = CL_MenuManager.WinNameType.Automasion_MAIN });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "انتقال کالا از یک انبار به انبار دیگر (انتقال انبار به انبار)", WIN_NAME = CL_MenuManager.WinNameType.HEAD_LST_ENTEGHAL_WIN });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "انبار گردانی", WIN_NAME = CL_MenuManager.WinNameType.ANBGRD_HEAD_WIN });
@@ -410,6 +411,20 @@ namespace Wins.WinOther
 
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف گروه بندی قیمتی", WIN_NAME = CL_MenuManager.WinNameType.PRICE_GRP_FORM_GRUHBANDI_GHEYMATI });
 
+            //سوابق
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق رسید انبار", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_RASID_ANBAR });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق حواله انبار", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_HAVALE_ANBAR });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق سایر رسید انبار", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_SAYER_RASID_ANBAR });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق سایر حواله انبار : برای برگشت خرید", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_SAYER_HAVALE_ANBAR });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق برگشت فروش عادی", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_FROOSH_RETURN_NORMAL });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق فاکتور خرید", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_FACTOR_KHARID });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق فاکتور فروش", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_FACTOR_FROOSH });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق پیش فاکتور", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_PISH_FACTOR });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق برگشت فروش آزاد", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_FROOSH_RETURN_AZAD });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق برگشت خرید آزاد", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_KHARID_RETURN_AZAD });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "برگه ورود کالای ساخته شده", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_VOROD_KALA_SAKHTEH });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "برگه خروج مواد اولیه جهت تولید", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_KHOROJ_MAVAD_AVALIYEH });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "صدور برگه خروج سایر مواد از انبار", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_KHOROJ_SAYER_MAVAD });
 
 
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());
