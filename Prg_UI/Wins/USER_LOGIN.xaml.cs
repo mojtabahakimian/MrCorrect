@@ -322,6 +322,16 @@ namespace Prg_UI.Wins
             // Check version here after UI is rendered
             if (!CL_VERSION.IsValidGreaterVersion())
             {
+                try
+                {
+                    CmbUsers.IsEnabled = false;
+                    Rmzo.IsEnabled = false;
+                    SecoRmzo.IsEnabled = false;
+                    Greet.IsEnabled = false;
+                    dispass.IsEnabled = false;
+                }
+                catch { }
+
                 _ = PerformAutoUpdateAsync(); // Fire and forget (it will exit app)
                 return; // Stop further processing
             }
@@ -936,6 +946,7 @@ del ""%~f0""
             }
             catch (Exception ex)
             {
+                new Msgwin(false, "ورژن نرم افزار شما بروز نبود , من سعی کردم آپدیت خودکار رو انجام بدم اما به خطا بر خورد کردم , لطفا آپدیت جدید را اجرا کنید").ShowDialog();
                 // لاگ کردن خطا برای فهمیدن علت دقیق
                 MessageBox.Show($"Error Detail: {ex.StackTrace}");
                 new Msgwin(false, $"خطا در بروزرسانی: {ex.Message}").ShowDialog();
