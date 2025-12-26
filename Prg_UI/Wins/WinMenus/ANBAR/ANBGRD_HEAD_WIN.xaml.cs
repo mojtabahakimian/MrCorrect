@@ -1337,12 +1337,12 @@ namespace Wins.WinMenus.ANBAR
 
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e)
         {
-            if (!BTN_SAVE.IsEnabled) { return; }
+            // 1. UI State Check
+            if (!BTN_SAVE.IsEnabled) return;
 
-            if (VALIDATION() is false)
-            {
-                return;
-            }
+            // 2. Business Logic Validation
+            if (VALIDATION() == false) return;
+
             try
             {
                 if (string.IsNullOrEmpty(USER_NAME.Text))
@@ -1350,94 +1350,112 @@ namespace Wins.WinMenus.ANBAR
                     USER_NAME.Text = Baseknow.UUSER;
                 }
 
-                //Here Save
+                long grdDateVal = 0;
+                long.TryParse(GRD_DATE.Text.ToRawTarikh().ToString(), out grdDateVal);
+
+                int grdAnbarVal = Convert.ToInt32(GRD_ANBAR.SelectedValue); // Handle Null automatically (returns 0)
+                string grdHesVal = GRD_HES.SelectedValue?.ToString() ?? ""; // Handle Null
+                string commentVal = COMMENT.Text ?? "";
+                string userNameVal = USER_NAME.Text;
+                int currentGrdNum = 0;
+
+                if (!_navigationManager.IsNewRecord)
+                {
+                    int.TryParse(GRD_NUM.Text, out currentGrdNum);
+                }
+
+                // ساخت پارامتر برای Dapper
+                var parameters = new
+                {
+                    GrdDate = grdDateVal,
+                    GrdAnbar = grdAnbarVal,
+                    GrdHes = grdHesVal,
+                    Comment = commentVal,
+                    UserName = userNameVal,
+                    GrdNum = currentGrdNum
+                };
+
                 if (_navigationManager.IsNewRecord)
                 {
-                    try
+                    // --- INSERT LOGIC ---
+                    // استفاده از تکنیک قفل‌گذاری برای تولید شماره سریال یکتا در محیط چندکاربره
+                    string sqlInsert = @"
+                        DECLARE @NewID INT;
+
+                        SELECT @NewID = ISNULL(MAX(GRD_NUM), 0) + 1 
+                        FROM dbo.ANBGRD_HEAD WITH (UPDLOCK, HOLDLOCK);
+
+                        INSERT INTO dbo.ANBGRD_HEAD (
+                            GRD_NUM, GRD_DATE, GRD_ANBAR, GRD_HES, COMMENT, USER_NAME
+                        )
+                        VALUES (
+                            @NewID, @GrdDate, @GrdAnbar, @GrdHes, @Comment, @UserName
+                        );
+
+                        SELECT @NewID;";
+
+                    var newId = dbms.DoGetDataSQL<int?>(sqlInsert, parameters).FirstOrDefault();
+
+                    if (newId.HasValue && newId.Value > 0)
                     {
-
-                        using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
-                        {
-                            db.Open();
-                            using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
-                            {
-                                // Fake Query for Lock Table
-                                db.Execute("UPDATE TOP(1) ANBGRD_HEAD SET COMMENT = COMMENT", null, transaction);
-
-                                // محاسبه شماره گردش انبار
-                                var maxNumber = db.Query<double?>("SELECT Max(GRD_NUM) FROM ANBGRD_HEAD", null, transaction).FirstOrDefault();
-                                if (maxNumber == null || maxNumber == 0)
-                                {
-                                    GRD_NUM.Text = "1";
-                                }
-                                else
-                                {
-                                    GRD_NUM.Text = (maxNumber + 1).ToString();
-                                }
-
-                                // INSERT رکورد
-                                db.Execute(@$"INSERT INTO dbo.ANBGRD_HEAD (       GRD_NUM,                     GRD_DATE,                GRD_ANBAR,                    GRD_HES,          COMMENT,           USER_NAME)
-                                                                   VALUES ({GRD_NUM.Text},{GRD_DATE.Text.ToRawTarikh()},{GRD_ANBAR.SelectedValue}, N'{GRD_HES.SelectedValue}',N'{COMMENT.Text}', N'{USER_NAME.Text}')", null, transaction);
-
-                                transaction.Commit();
-                            }
-                        }
-                        RefreshAfterUpdate();
+                        GRD_NUM.Text = newId.Value.ToString();
                     }
-                    catch (SqlException ex)
+                    else
                     {
-                        if (ex.Number == 2627)
-                        {
-                            new Msgwin(false, "در حال حاضر شماره توسط کاربر دیگری ثبت شده است. لطفا مجددا تلاش کنید تا شماره جدید تخصیص داده شود.").ShowDialog();
-                        }
-                        else
-                        {
-                            new Msgwin(false, "خطا در انجام عملیات ذخیره، لطفا مجددا امتحان کنید").ShowDialog();
-                        }
-                        return;
+                        throw new Exception("شماره سند جدید تولید نشد (Null Return).");
                     }
-                    catch (Exception ex)
-                    {
-                        CL_LMethods.DoWriteMyLog("خطا در ذخیره ANBGRD_HEAD_WIN", ex);
-                        new Msgwin(false, "خطا در انجام عملیات").ShowDialog();
-                        return;
-                    }
+
+                    RefreshAfterUpdate();
                 }
                 else
                 {
-                    //UPDATE
-                    dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_HEAD
-                                                      SET 
-                                                          GRD_DATE = {GRD_DATE.Text.ToRawTarikh()},
-                                                          GRD_ANBAR = {GRD_ANBAR.SelectedValue},
-                                                          GRD_HES = N'{GRD_HES.SelectedValue}',
-                                                          COMMENT = N'{COMMENT.Text}',
-                                                          USER_NAME = N'{USER_NAME.Text}'
-                                                      WHERE 
-                                                          GRD_NUM = {GRD_NUM.Text}");
+                    string sqlUpdate = @"
+                        UPDATE dbo.ANBGRD_HEAD
+                        SET 
+                            GRD_DATE = @GrdDate,
+                            GRD_ANBAR = @GrdAnbar,
+                            GRD_HES = @GrdHes,
+                            COMMENT = @Comment,
+                            USER_NAME = @UserName
+                        WHERE 
+                            GRD_NUM = @GrdNum";
+
+                    int? result = dbms.DoExecuteSQL(sqlUpdate, parameters);
+
+                    // بررسی اینکه آیا آپدیت واقعا انجام شد؟
+                    if (result == null || result == 0)
+                    {
+                        throw new Exception("رکوردی برای ویرایش یافت نشد (شاید توسط کاربر دیگری حذف شده است).");
+                    }
                 }
+
+                universControl.PopNotifyShowUp("ذخیره با موفقیت انجام شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
+
+                ChangeIsHappend = false;
+                Command19.IsEnabled = true;
             }
             catch (SqlException ex)
             {
-                if (ex.Number == 2601 || ex.Number == 2627)
+                // هندل کردن خطاهای خاص SQL
+                if (ex.Number == 2627 || ex.Number == 2601) // Unique Constraint Violation
                 {
-                    new Msgwin(false, "داده تکراری است آنرا اصلاح کنید").ShowDialog();
+                    new Msgwin(false, " اطلاعات تکراری : این شماره گردش یا ترکیب کلیدها قبلاً ثبت شده است.").ShowDialog();
+                }
+                else if (ex.Number == 547) // Foreign Key Violation
+                {
+                    new Msgwin(false, "اطلاعات وارد شده (مانند کد انبار یا حساب) در سیستم معتبر نیستند.").ShowDialog();
                 }
                 else
                 {
-                    new Msgwin(false, "خطا در انجام ذخیره!").ShowDialog(); return;
+                    new Msgwin(false, $" خطای پایگاه داده " + ex.Message).ShowDialog();
                 }
-                return;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                new Msgwin(false, "خطا در انجام عملیات ذخیره!").ShowDialog(); return;
+                // ثبت لاگ دقیق
+                CL_LMethods.DoWriteMyLog("Error in BTN_SAVE_Click (ANBGRD_HEAD)", ex);
+                new Msgwin(false, "خطا در انجام عملیات: \n" + ex.Message).ShowDialog();
             }
-
-            universControl.PopNotifyShowUp("ذخیره انجام شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
-
-            ChangeIsHappend = false;
-            Command19.IsEnabled = true;
         }
         private void ESLAH_Click(object sender, RoutedEventArgs e)
         {
@@ -1698,6 +1716,8 @@ namespace Wins.WinMenus.ANBAR
 
         private void Command22_Copy_Click(object sender, RoutedEventArgs e)
         {
+            if (_navigationManager.IsNewRecord) { return; }
+
             if (!string.IsNullOrWhiteSpace(GRD_HES.SelectedValue?.ToString()))
             {
                 SANAD();

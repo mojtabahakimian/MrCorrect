@@ -18,7 +18,7 @@
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
-        Title="سابقه خزانه داری" Height="720" Width="1200" d:Width="2000" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+        Title="سابقه خزانه داری" Height="720" Width="1200" d:Width="1920" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
 
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">
@@ -348,33 +348,15 @@
                                 <syncfusion:GridTextColumn MappingName="IPADD" HeaderText="IP" MinimumWidth="120" AllowEditing="False"/>
 
                                 <!-- Main Data -->
-                                <syncfusion:GridTextColumn MappingName="NUMBER" HeaderText="شماره برگه" Width="100" />
-                                <syncfusion:GridTextColumn MappingName="DATE" HeaderText="تاریخ برگه" Width="100">
+                                <syncfusion:GridTextColumn MappingName="ID" HeaderText="شماره خزانه" Width="120" />
+                                <syncfusion:GridTextColumn MappingName="IDK" HeaderText="شماره برگه" Width="120" />
+                                <syncfusion:GridTextColumn MappingName="DATE" HeaderText="تاریخ برگه" Width="120">
                                     <syncfusion:GridTextColumn.DisplayBinding>
                                         <Binding Path="DATE" StringFormat="####/##/##" />
                                     </syncfusion:GridTextColumn.DisplayBinding>
                                 </syncfusion:GridTextColumn>
+                                <syncfusion:GridTextColumn MappingName="MOLAH" HeaderText="ملاحظات" Width="200" ColumnSizer="Star" />
 
-                                <syncfusion:GridTextColumn MappingName="NAME" HeaderText="نام طرف حساب" Width="250" />
-                                <syncfusion:GridTextColumn MappingName="SHARH" HeaderText="شرح برگه" Width="300"/>
-
-                                <syncfusion:GridTextColumn MappingName="M_KOL" HeaderText="مبلغ کل" Width="130">
-                                    <syncfusion:GridTextColumn.DisplayBinding>
-                                        <Binding Path="M_KOL" StringFormat="{}{0:N0}" />
-                                    </syncfusion:GridTextColumn.DisplayBinding>
-                                </syncfusion:GridTextColumn>
-
-                                <syncfusion:GridTextColumn MappingName="M_NAGHD" HeaderText="مبلغ نقد" Width="120">
-                                    <syncfusion:GridTextColumn.DisplayBinding>
-                                        <Binding Path="M_NAGHD" StringFormat="{}{0:N0}" />
-                                    </syncfusion:GridTextColumn.DisplayBinding>
-                                </syncfusion:GridTextColumn>
-
-                                <syncfusion:GridTextColumn MappingName="M_CHK" HeaderText="مبلغ چک" Width="120">
-                                    <syncfusion:GridTextColumn.DisplayBinding>
-                                        <Binding Path="M_CHK" StringFormat="{}{0:N0}" />
-                                    </syncfusion:GridTextColumn.DisplayBinding>
-                                </syncfusion:GridTextColumn>
 
                                 <syncfusion:GridTextColumn MappingName="N_S" HeaderText="شماره سند" Width="100"/>
                                 <syncfusion:GridTextColumn MappingName="ID" HeaderText="شناسه سیستمی" Width="100" IsHidden="True"/>
@@ -403,7 +385,7 @@
                             <TabItem IsSelected="True">
                                 <TabItem.Header>
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="سطر های خزانه"/>
+                                        <TextBlock Text="سطر خزانه"/>
                                         <Border Background="{StaticResource PrimaryHueMidBrush}" CornerRadius="4" Margin="5,0,0,0" Padding="4,0" VerticalAlignment="Center">
                                             <TextBlock x:Name="TXT_COUNT_ROWS" Text="0" Foreground="White" FontSize="10"/>
                                         </Border>
@@ -411,7 +393,7 @@
                                 </TabItem.Header>
                                 <Grid FlowDirection="RightToLeft">
                                     <syncfusion:SfDataGrid x:Name="PGET_LST_SUB"
-                                        ItemsSource="{Binding ROW_DATA}" 
+                                        ItemsSource="{Binding ROW_DATA}" d:ItemsSource="{d:SampleData ItemCount=5}"
                                         AutoGenerateColumns="False" 
                                         EnableDataVirtualization="True"
                                         SelectionUnit="Row"
@@ -421,26 +403,33 @@
                                         AllowSorting="True"                                       
                                         SelectionMode="Extended"
                                         RowHeight="30"
+                                        AllowResizingColumns="True"
                                         FlowDirection="RightToLeft"
                                         Style="{StaticResource KDG}"
                                         HeaderStyle="{StaticResource KDGHeader}"
                                         AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" >
 
                                         <syncfusion:SfDataGrid.Columns>
-                                            <syncfusion:GridTextColumn MappingName="KOL" HeaderText="کل" Width="60"/>
-                                            <syncfusion:GridTextColumn MappingName="MOIN" HeaderText="معین" Width="60"/>
-                                            <syncfusion:GridTextColumn MappingName="TAF" HeaderText="تفصیلی" Width="80"/>
-                                            <syncfusion:GridTextColumn MappingName="AccountName" HeaderText="نام حساب" Width="200" />
+                                            <syncfusion:GridTextColumn MappingName="RADIF" HeaderText="ردیف" Width="70"/>
+                                            <syncfusion:GridComboBoxColumn MappingName="NO_AM" HeaderText="نوع عملیات" Width="120" DisplayMemberPath="NAMES" SelectedValuePath="CODE" x:Name="NO_AM_COL"/>
+                                            <syncfusion:GridComboBoxColumn MappingName="NAHVA" HeaderText="نحوه" Width="120" DisplayMemberPath="NAMES" SelectedValuePath="CODE" x:Name="NAHVA_COL"/>
 
-                                            <syncfusion:GridTextColumn MappingName="SHARH" HeaderText="شرح ردیف" Width="300" />
+                                            <syncfusion:GridTextColumn MappingName="NAME_FHES" HeaderText="از حساب (نام)" Width="200"/>
+                                            <syncfusion:GridTextColumn MappingName="FHES" HeaderText="از حساب (کد)" Width="120"/>
 
-                                            <syncfusion:GridTextColumn MappingName="MABL" HeaderText="مبلغ" Width="130">
+                                            <syncfusion:GridTextColumn MappingName="NAME_THES" HeaderText="به حساب (نام)" Width="200"/>
+                                            <syncfusion:GridTextColumn MappingName="THES" HeaderText="به حساب (کد)" Width="120"/>
+
+                                            <syncfusion:GridTextColumn MappingName="SHARH" HeaderText="شرح" Width="400" ColumnSizer="Star"/>
+
+                                            <syncfusion:GridTextColumn MappingName="MABL" HeaderText="مبلغ" Width="120">
                                                 <syncfusion:GridTextColumn.DisplayBinding>
                                                     <Binding Path="MABL" StringFormat="{}{0:N0}" />
                                                 </syncfusion:GridTextColumn.DisplayBinding>
                                             </syncfusion:GridTextColumn>
 
-                                            <syncfusion:GridTextColumn MappingName="CODE_PIGIRI" HeaderText="کد پیگیری" Width="100"/>
+                                            <syncfusion:GridTextColumn MappingName="N_SERI" HeaderText="شماره سریال چک" Width="150"/>
+
                                         </syncfusion:SfDataGrid.Columns>
                                     </syncfusion:SfDataGrid>
                                 </Grid>
