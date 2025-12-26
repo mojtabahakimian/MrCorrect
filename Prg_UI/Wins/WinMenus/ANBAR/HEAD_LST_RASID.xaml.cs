@@ -1727,7 +1727,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             }
         }
-        private void Form_AfterUpdate()
+        private void Form_AfterUpdate1()
         {
             long num = 0;
 
@@ -1779,6 +1779,81 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     }
                 }
             }
+            if (Convert.ToInt32(this.NUMBER.Text) > 0)
+            {
+                CL_HESABDARI.LetSigneTick(this.GetType().Name, 1, Convert.ToInt32(Baseknow.USERCOD), new WindowInteropHelper(this).Handle);
+            }
+            else
+            {
+                this.SGN1.IsEnabled = false;
+                this.SGN2.IsEnabled = false;
+            }
+        }
+        private void Form_AfterUpdate()
+        {
+            long num = 0;
+
+            // بخش کدهای مربوط به شماره درخواست (بدون تغییر)
+            if (Strings.Mid(Baseknow.OPTIONSS, 17, 1) == "5")
+            {
+                var rst = dbms.DoGetDataSQL<INVO_LST_CSHARP>("select * from invo_lst where tag = 23 and NUMBER = " + this.NUMBER1.Text).ToList();
+                var RST2 = dbms.DoGetDataSQL<INVO_LST_CSHARP>("select * from invo_lst where tag = 1 and NUMBER = " + this.NUMBER.Text).ToList();
+                if (RST2.Count == 0)
+                {
+                    for (int i = 0; i < rst.Count; i++)
+                    {
+                        dbms.DoExecuteSQL($@"INSERT INTO dbo.INVO_LST
+                                                        (
+                                                            NUMBER,
+                                                            TAG,
+                                                            ANBAR,
+                                                            CODE,
+                                                            RADAH,
+                                                            VAHED_K
+                                                        )
+                                                        VALUES
+                                                        (   {NUMBER.Text},
+                                                            1,
+                                                            {rst[i].ANBAR},
+                                                            N'{rst[i].CODE}',
+                                                            {rst[i].id},
+                                                            {rst[i].VAHED_K}
+                                                            )");
+                    }
+                }
+            }
+            ;
+
+            // --- اصلاحیه رفع مغایرت کد مشتری بین رسید (Tag 1) و فاکتور خرید (Tag 12) ---
+            if (!IsNull(this.NUMBER.Text) && !IsNull(this.CUST_NO.SelectedValue))
+            {
+                // خواندن اطلاعات فاکتور خرید متناظر (Tag 12)
+                var rst = dbms.DoGetDataSQL<HEAD_LST_CSHARP>("SELECT * FROM dbo.HEAD_LST WHERE TAG = 12 AND NUMBER = @NUM", new { NUM = NUMBER.Text }).ToList();
+
+                // اگر فاکتور خریدی با این شماره وجود دارد
+                if (rst.Count > 0)
+                {
+                    var currentCustNo = CUST_NO.SelectedValue.ToString()?.Trim();
+                    var factorCustNo = rst.FirstOrDefault()?.CUST_NO?.Trim();
+
+                    // اگر کد مشتری در فاکتور با کد مشتری جدید (در رسید) متفاوت است
+                    if (factorCustNo != currentCustNo)
+                    {
+                        var updateParams = new { CUST = currentCustNo, NUM = NUMBER.Text };
+
+                        // 1. اصلاح سربرگ فاکتور خرید (Tag 12) -> رفع خطای مغایرت سربرگ در برنامه قدیم
+                        dbms.DoExecuteSQL("UPDATE dbo.HEAD_LST SET CUST_NO = @CUST WHERE TAG = 12 AND NUMBER = @NUM", updateParams);
+
+                        // 2. اصلاح ریز کالاهای فاکتور خرید (Tag 12) -> رفع خطای مغایرت ریز در برنامه قدیم
+                        dbms.DoExecuteSQL($"UPDATE dbo.INVO_LST SET NUMBER = {rst.FirstOrDefault().NUMBER} WHERE TAG = 12 AND NUMBER = @NUM", updateParams);
+
+                        // اصلاح سند حسابداری (اگر تولید شده باشد)
+                        CL_HESABDARI.GENSANADKHAREED(num, num);
+                    }
+                }
+            }
+            // --- پایان اصلاحیه ---
+
             if (Convert.ToInt32(this.NUMBER.Text) > 0)
             {
                 CL_HESABDARI.LetSigneTick(this.GetType().Name, 1, Convert.ToInt32(Baseknow.USERCOD), new WindowInteropHelper(this).Handle);

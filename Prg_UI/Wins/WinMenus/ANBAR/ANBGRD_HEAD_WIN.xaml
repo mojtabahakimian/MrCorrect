@@ -242,7 +242,7 @@
 
         <TextBlock x:Name="COUNTERS_TB" Margin="0,0,17,29" Text="تعداد سطر های شمارش اول :	  شمارش دوم :	  شمارش سوم :" FlowDirection="RightToLeft" TextAlignment="Left" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="565"/>
 
-        <CNC:RecordNavigatorControl x:Name = "navigatorControl" VerticalAlignment = "Top" Margin = "10,836,10,0" />
+        <CNC:RecordNavigatorControl x:Name = "navigatorControl" Margin = "10,0,10,20" Height="38" VerticalAlignment="Bottom" />
         <!--Start.......................................................................................-->
         <Button x:Name="BTN_SAVE" Content="ذخیره"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="200,46,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Click="BTN_SAVE_Click" TabIndex="4" />
         <Button x:Name="ESLAH"  Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="111,46,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="84" Click="ESLAH_Click" IsTabStop="False"/>
@@ -282,7 +282,7 @@
         </Border>
         <Button x:Name="Command24" Content="چاپ تگ"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="111,100,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Click="Command24_Click" />
         <Button x:Name="Command25"  Content="چاپ"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="22,100,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="84" IsTabStop="False" Click="Command25_Click"/>
-        <Button x:Name="BTN_NEWABARGRD" Content="انبار گردانی جدید"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="216,101,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="118" Click="BTN_NEWABARGRD_Click" />
-        <Button x:Name="BTN_LSTANBATGRD" Content="لیست انبار گردانی ها"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="339,101,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="136" Click="BTN_LSTANBATGRD_Click" />
+        <Button x:Name="BTN_NEWABARGRD" Content="انبار گردانی جدید" Visibility="Collapsed" BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="216,101,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="118" Click="BTN_NEWABARGRD_Click" IsEnabled="False" />
+        <Button x:Name="BTN_LSTANBATGRD" Content="لیست انبار گردانی ها"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="216,101,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="136" Click="BTN_LSTANBATGRD_Click" />
     </Grid>
 </Window>
