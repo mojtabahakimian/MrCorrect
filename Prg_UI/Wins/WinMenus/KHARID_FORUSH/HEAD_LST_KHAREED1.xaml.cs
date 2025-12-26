@@ -1401,10 +1401,38 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                     if (rst is not null && rst?.CUST_NO != null)
                     {
-                        string thevalue = rst.CUST_NO;
-                        if (!string.IsNullOrEmpty(thevalue))
+                        string receiptCustNo = rst?.CUST_NO?.Trim(); //TAG 1
+                        if (!string.IsNullOrEmpty(receiptCustNo))
                         {
-                            var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT TOP 1 hes,CUST_COD, NAME FROM dbo.CUST_HESAB WHERE HES = N'" + thevalue + "'").FirstOrDefault();
+                            string currentInvoiceCustNo = _navigationManager.CurrentRecord?.CUST_NO.Trim();
+                            if (currentInvoiceCustNo != receiptCustNo)
+                            {
+                                // بررسی مغایرت کد مشتری بین رسید و فاکتور
+                                if (!string.IsNullOrEmpty(currentInvoiceCustNo) && currentInvoiceCustNo != receiptCustNo)
+                                {
+                                    var msgCheck = new Msgwin(true, $"کد مشتری در رسید انبار ({receiptCustNo}) با فاکتور خرید ({currentInvoiceCustNo}) مغایرت دارد. \nآیا مایل به اصلاح فاکتور بر اساس رسید هستید؟");
+                                    msgCheck.ShowDialog();
+
+                                    if (msgCheck.DialogResult == true)
+                                    {
+                                        try
+                                        {
+                                            // اصلاح سربرگ فاکتور خرید (Tag 12)
+                                            dbms.DoExecuteSQL($"UPDATE HEAD_LST SET CUST_NO = N'{receiptCustNo}' WHERE NUMBER = {NUMBER.Text} AND TAG = {FTAG}");
+
+                                            ChangeIsHappend = true;
+
+                                            universControl.PopNotifyShowUp("اصلاح مشتری فاکتور با موفقیت انجام شد , مجددا روی ذخیره کلیک کنید برای صدور سند.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            new Msgwin(false, "خطا در اصلاح مشتری فاکتور: ").ShowDialog();
+                                        }
+                                    }
+                                }
+                            }
+
+                            var data = dbms.DoGetDataSQL<CUST_HESAB>("SELECT TOP 1 hes,CUST_COD, NAME FROM dbo.CUST_HESAB WHERE HES = N'" + receiptCustNo + "'").FirstOrDefault();
                             if (data != null)
                             {
                                 if (CUST_NO.ItemsSource == null)
@@ -1412,11 +1440,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                     CUST_NO.ItemsSource = new List<Custom_CUST_HESAB>();
                                 }
 
-                                if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
+                                if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == receiptCustNo))
                                 {
-                                    ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
+                                    ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = receiptCustNo, NAME = data.NAME });
                                 }
-                                CUST_NO.SelectedValue = thevalue;
+                                CUST_NO.SelectedValue = receiptCustNo;
                                 CUST_NO.Items.Refresh();
                             }
                         }
