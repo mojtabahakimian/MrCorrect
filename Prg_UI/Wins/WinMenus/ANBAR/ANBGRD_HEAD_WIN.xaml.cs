@@ -1851,6 +1851,20 @@ namespace Wins.WinMenus.ANBAR
             {
                 return;
             }
+
+            if (string.IsNullOrWhiteSpace(GRD_NUM.Text) || !long.TryParse(GRD_NUM.Text, out var grdNumber))
+            {
+                new Msgwin(false, "شماره انبارگردانی معتبر نیست.").Show();
+                return;
+            }
+
+            var anbarValueText = Convert.ToString(GRD_ANBAR.SelectedValue);
+            if (string.IsNullOrWhiteSpace(anbarValueText) || !double.TryParse(anbarValueText, NumberStyles.Any, CultureInfo.InvariantCulture, out var anbarId))
+            {
+                new Msgwin(false, "انبار انتخاب شده معتبر نیست.").Show();
+                return;
+            }
+
             Process Prc = ProcLoader.Start();
 
             var report = new StiReport();
