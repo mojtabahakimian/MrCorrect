@@ -1014,7 +1014,15 @@ namespace Functions
             /// <summary>
             /// صدور برگه خروج سایر مواد از انبار
             /// </summary>
-            TR_HISTORY_KHOROJ_SAYER_MAVAD
+            TR_HISTORY_KHOROJ_SAYER_MAVAD,
+            /// <summary>
+            /// سوابق رسید خزانه داری | سوابق دریافت پرداخت
+            /// </summary>
+            TR_PGET_HED,
+            /// <summary>
+            /// سوابق سند دستی | صدور و ویرایش اسناد
+            /// </summary>
+            TR_DEED_HEAD
         }
         #endregion
 
@@ -1033,6 +1041,14 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+                case WinNameType.TR_DEED_HEAD: //سوابق سند دستی | صدور و ویرایش اسناد
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_DEED_HEAD(), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
+                case WinNameType.TR_PGET_HED: //سوابق رسید خزانه داری | سوابق دریافت پرداخت
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_PGET_HED(), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
                 case WinNameType.TR_HISTORY_RASID_ANBAR: //سوابق رسید انبار
                     CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(1), isModalDialog: false, allowMultipleInstances: false);
                     break;
