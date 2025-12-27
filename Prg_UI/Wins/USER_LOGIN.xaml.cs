@@ -315,8 +315,6 @@ namespace Prg_UI.Wins
         }
         private void Window_ContentRendered(object sender, EventArgs e) //-----------------------------------------------------------------------------------------
         {
-            //.NET 6.0.21
-
             NowIsReady = true;
 
             // Check version here after UI is rendered
@@ -948,13 +946,10 @@ del ""%~f0""
             catch (Exception ex)
             {
                 new Msgwin(false, "ورژن نرم افزار شما بروز نبود , من سعی کردم آپدیت خودکار رو انجام بدم اما به خطا بر خورد کردم , لطفا آپدیت جدید را اجرا کنید").ShowDialog();
-                // لاگ کردن خطا برای فهمیدن علت دقیق
-                MessageBox.Show($"Error Detail: {ex.StackTrace}");
-                new Msgwin(false, $"خطا در بروزرسانی: {ex.Message}").ShowDialog();
+                new Msgwin(false, $"خطا در بروزرسانی: {ex.StackTrace} \n {ex.Message}").ShowDialog();
                 CL_LMethods.GoExitTheApplication();
             }
         }
-
         private async Task CopyFileWithProgressAsync(string source, string destination)
         {
             const int bufferSize = 81920; // 80KB
