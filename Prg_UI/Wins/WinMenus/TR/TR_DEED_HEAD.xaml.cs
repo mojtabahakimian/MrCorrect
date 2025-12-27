@@ -1,14 +1,22 @@
 ﻿using Dapper;
+using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Functions;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
+using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
+using Stimulsoft.Report.Helpers;
 using Syncfusion.Data;
+using Syncfusion.Data.Extensions;
+using Syncfusion.UI.Xaml.BulletGraph;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.Grid.Helpers;
 using Syncfusion.UI.Xaml.ScrollAxis;
@@ -17,10 +25,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,47 +36,37 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Media;
-using Syncfusion.Data.Extensions;
-using Syncfusion.UI.Xaml.BulletGraph;
+using Wins.WinMenus.KHARID_FORUSH;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
+using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
+using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
+using static Prg_UI.Wins.WinMenus.SANATI.HAVALE_EXIT_SAYER;
+using static Wins.WinMenus.SANATI.HAVALAH_ENTER;
 
 namespace Prg_UI.Wins.WinMenus.TR
 {
-    public partial class TR_PGET_HED : Window
+    public partial class TR_DEED_HEAD : Window
     {
-        #region Models
-        // Extended Header Model for History (Inherits from your PGET_HED)
-        public class TR_PGET_HED_EXT : PGET_HED
+        #region Local Models
+        public class TR_DEED_HED_MODEL
         {
-            // History Specific Fields
-            public string? UP_DATE { get; set; }
+            public double? N_S { get; set; }
+            public long? DATE_S { get; set; }
+            public string? SHARH_S { get; set; }
+            public int? NO_S { get; set; }
+            public bool? GHATEI { get; set; }
+            public bool? OKF { get; set; }
+            public string? BASE { get; set; }
+
+            // Audit Fields
+            public long? UP_DATE { get; set; }
             public double? UP_TIME { get; set; }
             public string? UP_USER_NAME { get; set; }
             public string? PC_NAME { get; set; }
             public string? IPADD { get; set; }
 
-            public int? ID { get; set; }
-            public long? DATE { get; set; }
-            public string? MOLAH { get; set; }
-            public double? N_S { get; set; }
-            public int? DEPATMAN { get; set; }
-            public int? SHIFT { get; set; }
-            public int? CUST_KIND { get; set; }
-            public string? USER_NAME { get; set; }
-            public short? KIND { get; set; }
-            public int? IDK { get; set; }
-            public bool? OKF { get; set; }
-            public int? RPLICA { get; set; }
-            public bool? SGN1 { get; set; }
-            public bool? SGN2 { get; set; }
-            public bool? SGN3 { get; set; }
-            public int? sgn1usid { get; set; }
-            public int? sgn2usid { get; set; }
-            public int? sgn3usid { get; set; }
-            public DateTime? CRT { get; set; }
-            public int? UID { get; set; }
-
+            // Calculated Property for display time
             public string UpTimeDisplay
             {
                 get
@@ -85,67 +83,35 @@ namespace Prg_UI.Wins.WinMenus.TR
                 }
             }
         }
-        public class TR_PGET_LST
+
+        public class TR_DEED_DTL_MODEL
         {
-            public int? ID { get; set; }
-            public long? DATE { get; set; }
-            public double? RADIF { get; set; }
-            public int? NO_AM { get; set; }
-            public double? NAHVA { get; set; }
-            public int? FHES_K { get; set; }
-            public int? FHES_M { get; set; }
-            public int? FHES_T { get; set; }
-            public int? THES_K { get; set; }
-            public int? THES_M { get; set; }
-            public int? THES_T { get; set; }
+            public string? HES { get; set; }
+            public string? NAME_HES { get; set; }
             public string? SHARH { get; set; }
-            public double? MABL { get; set; }
-            public double? N_SERI { get; set; }
-            public int? BANK { get; set; }
-            public int? IDH { get; set; }
-            public string? FHES { get; set; }
-            public string? THES { get; set; }
-            public double? ARZD { get; set; }
-            public int? FHES_T2 { get; set; }
-            public int? THES_T2 { get; set; }
-            public int? FHES_T3 { get; set; }
-            public int? THES_T3 { get; set; }
-            public int? FHES_T4 { get; set; }
-            public int? THES_T4 { get; set; }
-            public DateTime? CRT { get; set; }
-            public int? UID { get; set; }
+            public double? BED { get; set; }
+            public double? BES { get; set; }
 
-            // Extra display properties
-            public string? NAME_FHES { get; set; }
-            public string? NAME_THES { get; set; }
-
-            // History fields
+            // Link Fields
+            public double? N_S { get; set; }
             public long? UP_DATE { get; set; }
             public double? UP_TIME { get; set; }
-            public string? UP_USER_NAME { get; set; }
-        }
-        public class TR_PAY_GETD
-        {
-            public string? N_SERI { get; set; }
-            public string? DATE_S { get; set; }
-            public double? MABL { get; set; }
-            public string? BANK_NAME { get; set; }
-            public string? SHOBEH { get; set; }
-            public string? N_HESAB { get; set; }
-            public string? SAYADI { get; set; }
-            public int? BANK { get; set; }
-        }
-
-        public class TreasuryFullDetails
-        {
-            public TR_PGET_HED_EXT Header { get; set; }
-            public List<PGET_LST> Rows { get; set; } = new List<PGET_LST>();
-            public List<TR_PAY_GETD> Checks { get; set; } = new List<TR_PAY_GETD>();
         }
         #endregion
 
-        #region Header Window Begin
+        #region Window Setup
+        public TR_DEED_HEAD()
+        {
+            InitializeComponent();
+            this.DataContext = this;
+
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
+            GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
+        }
+
         private void Btn_Close_Click(object sender, RoutedEventArgs e) => this.Close();
+        private void Btn_Minimize_Click(object sender, RoutedEventArgs e) => this.WindowState = WindowState.Minimized;
+
         private void Btn_Max_Click(object sender, RoutedEventArgs e)
         {
             PackIcon packIcon = new PackIcon();
@@ -163,7 +129,7 @@ namespace Prg_UI.Wins.WinMenus.TR
                     break;
             }
         }
-        private void Btn_Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+
         private void TitleDrawBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left) this.DragMove();
@@ -174,60 +140,29 @@ namespace Prg_UI.Wins.WinMenus.TR
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         UniversControl universControl = new UniversControl();
 
-        public ObservableCollection<TR_PGET_HED_EXT> HISTORY_DATA { get; set; } = new ObservableCollection<TR_PGET_HED_EXT>();
-        public ObservableCollection<PGET_LST> ROW_DATA { get; set; } = new ObservableCollection<PGET_LST>(); //TR_PGET_LST
-        public ObservableCollection<TR_PAY_GETD> CHECK_DATA { get; set; } = new ObservableCollection<TR_PAY_GETD>();
-
-        public bool NowIsReady { get; private set; }
-        public byte PARAMS { get; private set; }
-
-        public TR_PGET_HED(byte? _PARAM_ = null)
-        {
-            InitializeComponent();
-            this.DataContext = this;
-
-            if (_PARAM_ != null)
-                PARAMS = (byte)_PARAM_;
-
-            Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
-        }
+        public ObservableCollection<TR_DEED_HED_MODEL> HISTORY_HEAD_DATA { get; set; } = new ObservableCollection<TR_DEED_HED_MODEL>();
+        public ObservableCollection<TR_DEED_DTL_MODEL> HISTORY_DTL_DATA { get; set; } = new ObservableCollection<TR_DEED_DTL_MODEL>();
 
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
-        }
 
+        }
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+
+        }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            string formName = "TR_PGL";
-            switch (PARAMS)
+            // Security Check
+            try
             {
-                case 1:
-                    WINTILENAME.Content = "سابقه برگه های دریافت (خزانه)";
-                    break;
-                case 2:
-                    WINTILENAME.Content = "سابقه برگه های پرداخت (خزانه)";
-                    break;
-                default:
-                    WINTILENAME.Content = "سابقه خزانه داری";
-                    break;
+                var helper = new WindowInteropHelper(this);
+                helper.EnsureHandle();
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, "TR_DED", helper.Handle, this.GetType().Name);
+                if (!this.IsLoaded) { this.Close(); return; }
             }
-
-            #region Security Check
-            if (!string.IsNullOrWhiteSpace(formName))
-            {
-                try
-                {
-                    var helper = new WindowInteropHelper(this);
-                    helper.EnsureHandle();
-                    CL_HESABDARI.SETSECURITY(this.GetType().Name, formName, helper.Handle, this.GetType().Name);
-                    if (!this.IsLoaded) { this.Close(); return; }
-                }
-                catch { try { this.Close(); } catch { } }
-            }
-            #endregion
-
-            FILL_ALL_COMBOBOXES();
+            catch { this.Close(); return; }
 
             ReGetHeadMaster();
 
@@ -235,155 +170,142 @@ namespace Prg_UI.Wins.WinMenus.TR
             {
                 SYNCFUSION_DG.FilterChanged += View_FilterChanged;
                 SYNCFUSION_DG.Loaded += (s, e) => UpdateRowCountLabel();
+
                 UpdateRowCountLabel();
             }
 
-            SYNCFUSION_DG.Visibility = Visibility.Visible;
+            WINTILENAME.Content = " سابقه " + WINTILENAME.Content.ToString();
 
             SetupGridNavigation();
-            AttachRecordCountUpdater(PGET_LST_SUB, TXT_COUNT_ROWS);
-            AttachRecordCountUpdater(PAY_GETD_SUB, TXT_COUNT_CHECKS);
-        }
-
-        private void FILL_ALL_COMBOBOXES()
-        {
-            //نوع عملیات
-            NO_AM_COL.ItemsSource = dbms.DoGetDataSQL<TCOD_BANKS>("SELECT TCOD_DPS.CODE, TCOD_DPS.NAMES FROM TCOD_DPS ORDER BY TCOD_DPS.CODE, TCOD_DPS.NAMES").ToList();
-            NO_AM_COL.DisplayMemberPath = "NAMES";
-            NO_AM_COL.SelectedValuePath = "CODE";
-
-            //نحوه
-            NAHVA_COL.ItemsSource = dbms.DoGetDataSQL<TCOD_DPSKIND>("SELECT TCOD_DPSKIND.CODE, TCOD_DPSKIND.NAMES FROM TCOD_DPSKIND ORDER BY TCOD_DPSKIND.CODE, TCOD_DPSKIND.NAMES").ToList();
-            NAHVA_COL.DisplayMemberPath = "NAMES";
-            NAHVA_COL.SelectedValuePath = "CODE";
+            AttachRecordCountUpdater(SF_SUB, TXT_COUNT_FACTOR);
         }
 
         private void ReGetHeadMaster()
         {
-            HISTORY_DATA?.Clear();
+            HISTORY_HEAD_DATA.Clear();
 
-            string WhereCondition = PARAMS > 0 ? $" WHERE (TAG = {PARAMS}) " : " ";
+            string sql = @"
+                SELECT 
+                    N_S, DATE_S, SHARH_S, NO_S, GHATEI, OKF, BASE,
+                    UP_DATE, UP_TIME, UP_USER_NAME, PC_NAME, IPADD
+                FROM dbo.TR_DEED_HED
+                ORDER BY UP_DATE DESC, UP_TIME DESC";
 
-            // Optimized Query selecting ALL columns into the Extended Model
-            var query = $@"
-                    SELECT *
-                    FROM dbo.TR_PGET_HED
-                    {WhereCondition}
-                    ORDER BY UP_DATE DESC, UP_TIME DESC";
-
-            var data = dbms.DoGetDataSQL<TR_PGET_HED_EXT>(query).ToList();
+            var data = dbms.DoGetDataSQL<TR_DEED_HED_MODEL>(sql).ToList();
 
             foreach (var item in data)
             {
-                HISTORY_DATA?.Add(item);
+                HISTORY_HEAD_DATA.Add(item);
             }
+
+
         }
 
-        private async Task<TreasuryFullDetails> GetTreasuryFullDetailsAsync(TR_PGET_HED_EXT TrRow)
+        private void SYNCFUSION_DG_SelectionChanged(object sender, GridSelectionChangedEventArgs e)
         {
-            var fullDetails = new TreasuryFullDetails();
-            const int ROUND_PRECISION = 6;
+            var currentHeader = SYNCFUSION_DG.SelectedItem as TR_DEED_HED_MODEL;
+            if (currentHeader != null)
+            {
+                ReGetData(currentHeader);
+            }
+            else
+            {
+                HISTORY_DTL_DATA.Clear();
+            }
 
-            string sql = $@"
-        -- 1. List Details with Account Names
-        SELECT 
-            l.*,
-            ch1.NAME AS NAME_FHES,
-            ch2.NAME AS NAME_THES
-        FROM dbo.TR_PGET_LST l
-        LEFT JOIN dbo.CUST_HESAB ch1 ON l.FHES = ch1.hes
-        LEFT JOIN dbo.CUST_HESAB ch2 ON l.THES = ch2.hes
-        WHERE l.ID = @ID 
-          AND l.UP_DATE = @UpDate 
-          AND ROUND(l.UP_TIME, {ROUND_PRECISION}) = ROUND(@UpTime, {ROUND_PRECISION});
 
-        -- 2. Details Snapshot
-        -- Matching Details that share the same N_S and History Timestamp
-        SELECT * FROM dbo.TR_PAY_GETD 
-        WHERE N_S = @N_S 
-          AND UP_DATE = @UpDate 
-          AND ROUND(UP_TIME, {ROUND_PRECISION}) = ROUND(@UpTime, {ROUND_PRECISION});
-    ";
+        }
 
-            using var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR);
+        // 1. متد غیرهمگام برای دریافت داده‌ها از دیتابیس
+        private async Task<List<TR_DEED_DTL_MODEL>> GetDeedDetailsAsync(TR_DEED_HED_MODEL header)
+        {
+            // Note: Using composite key matching for history details
+            // Floating point time comparison needs precision handling or casting
+            const string sql = @"
+                SELECT 
+                    D.HES, 
+                    C.NAME AS NAME_HES, 
+                    D.SHARH, 
+                    D.BED, 
+                    D.BES
+                FROM dbo.TR_DEED_DTL D
+                LEFT JOIN dbo.CUST_HESAB C ON D.HES = C.hes
+                WHERE D.N_S = @N_S 
+                  AND D.UP_DATE = @UP_DATE 
+                  AND ABS(D.UP_TIME - @UP_TIME) < 0.00001"; // Safe float comparison
 
             var parameters = new
             {
-                ID = TrRow.ID,
-                N_S = TrRow.N_S,
-                UpDate = TrRow.UP_DATE,
-                UpTime = TrRow.UP_TIME ?? 0
+                N_S = header.N_S,
+                UP_DATE = header.UP_DATE,
+                UP_TIME = header.UP_TIME ?? 0
             };
 
-            using (var multi = await db.QueryMultipleAsync(sql, parameters))
+            using (var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
             {
-                fullDetails.Rows = (await multi.ReadAsync<PGET_LST>()).ToList();
+                // استفاده از OpenAsync برای جلوگیری از فریز شدن UI در زمان اتصال
+                await db.OpenAsync();
 
-                fullDetails.Checks = (await multi.ReadAsync<TR_PAY_GETD>()).ToList();
+                // استفاده از Dapper به صورت Async
+                var result = await db.QueryAsync<TR_DEED_DTL_MODEL>(sql, parameters);
+                return result.ToList();
             }
-
-            // Set the header from the passed parameter
-            fullDetails.Header = TrRow;
-
-            return fullDetails;
         }
 
-        private async void ReGetData(TR_PGET_HED_EXT row)
+        // 2. متد اصلی مدیریت UI و فراخوانی
+        private async void ReGetData(TR_DEED_HED_MODEL header)
         {
-            if (row == null) return;
+            // جلوگیری از اجرای خطا در صورت نال بودن ورودی
+            if (header == null) return;
 
-            var dataFetchTask = GetTreasuryFullDetailsAsync(row);
+            // تعریف تسک دریافت اطلاعات (هنوز await نمی‌کنیم)
+            var dataFetchTask = GetDeedDetailsAsync(header);
+
+            // تعریف یک تاخیر ۳۰۰ میلی‌ثانیه‌ای (آستانه تحمل کاربر)
             var delayTask = Task.Delay(300);
+
+            // مسابقه بین دریافت اطلاعات و تاخیر
             var completedTask = await Task.WhenAny(dataFetchTask, delayTask);
 
             bool loaderShown = false;
+
+            // اگر تاخیر زودتر تمام شد (یعنی دیتابیس بیشتر از ۳۰۰ میلی‌ثانیه طول کشیده)
             if (completedTask == delayTask)
             {
-                BusyOverlay.Visibility = Visibility.Visible;
+                if (BusyOverlay != null) BusyOverlay.Visibility = Visibility.Visible;
                 loaderShown = true;
             }
 
             try
             {
+                // دریافت نتیجه نهایی (اگر تسک دیتا تمام شده باشد، بلافاصله برمی‌گردد)
                 var details = await dataFetchTask;
 
-                if (details == null || details.Header == null)
+                if (details == null)
                 {
-                    if (loaderShown) BusyOverlay.Visibility = Visibility.Collapsed;
+                    if (loaderShown && BusyOverlay != null) BusyOverlay.Visibility = Visibility.Collapsed;
                     return;
                 }
 
-                ROW_DATA.Clear();
-                details.Rows.ForEach(ROW_DATA.Add);
+                // --- بروزرسانی UI ---
+                HISTORY_DTL_DATA.Clear();
+                foreach (var item in details)
+                {
+                    HISTORY_DTL_DATA.Add(item);
+                }
 
-                CHECK_DATA.Clear();
-                details.Checks.ForEach(CHECK_DATA.Add);
+                GenerateAutomaticSummary(SF_SUB);
             }
             catch (Exception ex)
             {
-                new Msgwin(false, "خطا در بارگذاری جزئیات").ShowDialog();
+                new Msgwin(false, "خطا در بارگذاری جزئیات سند").ShowDialog();
             }
             finally
             {
-                if (loaderShown) BusyOverlay.Visibility = Visibility.Collapsed;
-            }
-        }
-
-        #region Grid Events & Navigation
-        private void SYNCFUSION_DG_SelectionChanged(object sender, GridSelectionChangedEventArgs e)
-        {
-            if (!NowIsReady) return;
-
-            if (SYNCFUSION_DG.SelectedItem is TR_PGET_HED_EXT selected)
-            {
-                if (selected.ID != null)
+                // اگر لودینگ نمایش داده شده بود، مخفی شود
+                if (loaderShown && BusyOverlay != null)
                 {
-                    ReGetData(selected);
-                }
-                else
-                {
-                    ROW_DATA.Clear();
-                    CHECK_DATA.Clear();
+                    BusyOverlay.Visibility = Visibility.Collapsed;
                 }
             }
         }
@@ -406,9 +328,10 @@ namespace Prg_UI.Wins.WinMenus.TR
             //ROWCOUNT_TEXTBLK.Text = recordCount.ToString();
         }
 
-        private readonly FilterService<TR_PGET_HED_EXT> filterService = new FilterService<TR_PGET_HED_EXT>();
+        private readonly FilterService<TR_DEED_HED_MODEL> filterService = new FilterService<TR_DEED_HED_MODEL>();
         public ObservableCollection<string> ActiveFilters { get; set; } = new ObservableCollection<string>();
         public bool IsExporty { get; private set; } = false;
+        public bool NowIsReady { get; private set; }
 
         private string? CurrentCellValue = null;
         private RowColumnIndex CurrentCellIndex;
@@ -636,7 +559,7 @@ namespace Prg_UI.Wins.WinMenus.TR
         private void ApplyCumulativeFilter() // Method to apply all cumulative filters to the data grid
         {
             // Set the filter for the data grid view using the filter service
-            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as TR_PGET_HED_EXT);
+            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as TR_DEED_HED_MODEL);
             // Refresh the filter to update the view
             SYNCFUSION_DG.View.RefreshFilter();
 
@@ -775,60 +698,6 @@ namespace Prg_UI.Wins.WinMenus.TR
                 return null;
             }
         }
-        public void GenerateAutomaticSummary(SfDataGrid _DG_, bool _ClearAnySummaryBefore_ = false)
-        {
-            if (_ClearAnySummaryBefore_)
-            {
-                SYNCFUSION_DG.TableSummaryRows.Clear();
-            }
-            else
-            {
-                // Check if a summary row already exists
-                if (_DG_.TableSummaryRows.Count > 0)
-                {
-                    return; // Exit the method if a summary row already exists
-                }
-            }
-
-            var summaryRow = new GridTableSummaryRow();
-            summaryRow.ShowSummaryInRow = false;
-            summaryRow.Position = TableSummaryRowPosition.Bottom;
-
-            var summaryColumns = new ObservableCollection<ISummaryColumn>();
-
-            var dataType = typeof(TR_PGET_HED_EXT);
-
-            //foreach (var column in SYNCFUSION_DG.Columns)
-            foreach (var column in _DG_.Columns.OfType<GridTextColumn>())
-            {
-                var propertyInfo = typeof(TR_PGET_HED_EXT).GetProperty(column.MappingName);
-                if (propertyInfo == null)
-                    continue;
-
-                //var propertyInfo = dataType.GetProperty(column.MappingName);
-                //if (propertyInfo == null)
-                //    continue;
-
-                if (IsNumericType(propertyInfo.PropertyType) && (column.MappingName.ToLower() == "meghk" || column.MappingName.ToLower() == "mablk"))
-                {
-                    var summaryColumn = new GridSummaryColumn
-                    {
-                        Name = column.MappingName + "Sum",
-                        MappingName = column.MappingName,
-                        SummaryType = Syncfusion.Data.SummaryType.DoubleAggregate,
-                        //Format = "{Sum:N0}"
-                        Format = "{Sum:N0}"
-                    };
-                    summaryColumns.Add(summaryColumn);
-                }
-            }
-
-            summaryRow.SummaryColumns = summaryColumns;
-
-            _DG_.TableSummaryRows.Add(summaryRow);
-
-
-        }
         private bool IsNumericType(Type type)
         {
             if (type == null)
@@ -877,11 +746,112 @@ namespace Prg_UI.Wins.WinMenus.TR
             }
         }
         #endregion
-
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        public void GenerateAutomaticSummary1(SfDataGrid _DG_, bool _ClearAnySummaryBefore_ = false)
         {
-        }
+            if (_ClearAnySummaryBefore_)
+            {
+                _DG_.TableSummaryRows.Clear();
+            }
+            else
+            {
+                // Check if a summary row already exists
+                if (_DG_.TableSummaryRows.Count > 0)
+                {
+                    return; // Exit the method if a summary row already exists
+                }
+            }
 
+            var summaryRow = new GridTableSummaryRow();
+            summaryRow.ShowSummaryInRow = false;
+            summaryRow.Position = TableSummaryRowPosition.Bottom;
+
+            var summaryColumns = new ObservableCollection<ISummaryColumn>();
+
+            var dataType = typeof(TR_DEED_DTL_MODEL);
+
+            //foreach (var column in SYNCFUSION_DG.Columns)
+            foreach (var column in _DG_.Columns.OfType<GridTextColumn>())
+            {
+                var propertyInfo = typeof(TR_DEED_DTL_MODEL).GetProperty(column.MappingName);
+                if (propertyInfo == null)
+                    continue;
+
+                //var propertyInfo = dataType.GetProperty(column.MappingName);
+                //if (propertyInfo == null)
+                //    continue;
+
+                if (IsNumericType(propertyInfo.PropertyType) && (column.MappingName.ToLower() == "bed" || column.MappingName.ToLower() == "bes"))
+                {
+                    var summaryColumn = new GridSummaryColumn
+                    {
+                        Name = column.MappingName + "Sum",
+                        MappingName = column.MappingName,
+                        SummaryType = Syncfusion.Data.SummaryType.DoubleAggregate,
+                        //Format = "{Sum:N0}"
+                        Format = "{Sum:N0}"
+                    };
+                    summaryColumns.Add(summaryColumn);
+                }
+            }
+
+            summaryRow.SummaryColumns = summaryColumns;
+
+            _DG_.TableSummaryRows.Add(summaryRow);
+
+
+        }
+        public void GenerateAutomaticSummary(SfDataGrid _DG_)
+        {
+            // همیشه پاک کن و دوباره بساز تا از تکرار جلوگیری شود
+            _DG_.TableSummaryRows.Clear();
+
+            var summaryRow = new GridTableSummaryRow();
+            summaryRow.ShowSummaryInRow = false;
+            summaryRow.Position = TableSummaryRowPosition.Bottom;
+            summaryRow.Title = "جمع:"; // اختیاری
+
+            var summaryColumns = new ObservableCollection<ISummaryColumn>();
+
+            // تعریف دستی ستون‌های جمع برای اطمینان
+            // چون مدل مشخص است، نیازی به حلقه و رفلکشن پیچیده نیست
+
+            // جمع بدهکار
+            summaryColumns.Add(new GridSummaryColumn
+            {
+                Name = "BEDSum",
+                MappingName = "BED",
+                SummaryType = Syncfusion.Data.SummaryType.DoubleAggregate, // یا DecimalAggregate بسته به نوع داده
+                Format = "{Sum:N0}"
+            });
+
+            // جمع بستانکار
+            summaryColumns.Add(new GridSummaryColumn
+            {
+                Name = "BESSum",
+                MappingName = "BES",
+                SummaryType = Syncfusion.Data.SummaryType.DoubleAggregate,
+                Format = "{Sum:N0}"
+            });
+
+            //summaryRow.SummaryColumns = summaryColumns;
+            //_DG_.TableSummaryRows.Add(summaryRow);
+
+            // 4. اعمال تغییرات و رفرش اجباری
+            if (summaryColumns.Any())
+            {
+                summaryRow.SummaryColumns = summaryColumns;
+                _DG_.TableSummaryRows.Add(summaryRow);
+
+                // ******************************************************
+                // *** نکته کلیدی: این خط مشکل صفر بودن را حل می‌کند ***
+                // ******************************************************
+                // به گرید می‌گوییم حالا که سامری اضافه شد، محاسبات را انجام بده
+                if (_DG_.View != null)
+                {
+                    _DG_.View.Refresh();
+                }
+            }
+        }
 
         #region Navigation Logic
         // 1. این متد را در انتهای Window_Loaded صدا بزنید
@@ -1058,45 +1028,79 @@ namespace Prg_UI.Wins.WinMenus.TR
         }
         #endregion
 
-        private void Button_Click(object sender, RoutedEventArgs e) => ClearAllSfDataFilters();
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            ClearAllSfDataFilters();
+        }
+        private void AttachRecordCountUpdater(Syncfusion.UI.Xaml.Grid.SfDataGrid dataGrid, TextBlock targetTextBlock)
+        {
+            if (dataGrid == null || targetTextBlock == null) return;
 
+            // متد داخلی برای به‌روزرسانی متن بر اساس منبع داده
+            void UpdateLabel()
+            {
+                int count = 0;
+
+                // اولویت با بررسی مستقیم منبع داده است (چون دقیق‌تر و سریع‌تر از View است)
+                if (dataGrid.ItemsSource is ICollection collection)
+                {
+                    count = collection.Count;
+                }
+                else if (dataGrid.View != null && dataGrid.View.Records != null)
+                {
+                    // اگر منبع داده مستقیم نبود، سراغ ویو می‌رویم
+                    count = dataGrid.View.Records.Count;
+                }
+
+                // چون ممکن است این فراخوانی از ترد دیگری باشد، از Dispatcher استفاده می‌کنیم
+                Dispatcher.Invoke(() =>
+                {
+                    targetTextBlock.Text = count.ToString("N0");
+                });
+            }
+
+            // متد برای اتصال به رویداد تغییرات کالکشن
+            void SubscribeToCollection(object source)
+            {
+                if (source is INotifyCollectionChanged notifyingCollection)
+                {
+                    notifyingCollection.CollectionChanged += (s, e) => UpdateLabel();
+                }
+            }
+
+            // 1. هر وقت کل منبع داده عوض شد (مثلا new ObservableCollection شد)
+            dataGrid.ItemsSourceChanged += (s, e) =>
+            {
+                // به کالکشن جدید گوش بده
+                if (e.NewItemsSource != null)
+                {
+                    SubscribeToCollection(e.NewItemsSource);
+                }
+                UpdateLabel();
+            };
+
+            // 2. اگر همین الان دیتایی دارد، به آن وصل شو و مقدار اولیه را ست کن
+            if (dataGrid.ItemsSource != null)
+            {
+                SubscribeToCollection(dataGrid.ItemsSource);
+                UpdateLabel();
+            }
+        }
         private void ClearAllSfDataFilters()
         {
             try
             {
                 filterService.ClearFilters();
                 ActiveFilters.Clear();
-                SYNCFUSION_DG.View.Filter = null;
-                SYNCFUSION_DG.View.RefreshFilter();
+                ApplyCumulativeFilter();
                 SYNCFUSION_DG.ClearFilters();
-                PGET_LST_SUB.ClearFilters();
-                PAY_GETD_SUB.ClearFilters();
+
+                SF_SUB.ClearFilters();
             }
-            catch { }
+            catch (Exception)
+            {
+            }
         }
 
-        private void AttachRecordCountUpdater(Syncfusion.UI.Xaml.Grid.SfDataGrid dataGrid, TextBlock targetTextBlock)
-        {
-            if (dataGrid == null || targetTextBlock == null) return;
-            void UpdateLabel()
-            {
-                int count = 0;
-                if (dataGrid.ItemsSource is ICollection collection) count = collection.Count;
-                else if (dataGrid.View?.Records != null) count = dataGrid.View.Records.Count;
-                Dispatcher.Invoke(() => targetTextBlock.Text = count.ToString("N0"));
-            }
-            dataGrid.ItemsSourceChanged += (s, e) =>
-            {
-                if (e.NewItemsSource is INotifyCollectionChanged nc) nc.CollectionChanged += (sender, args) => UpdateLabel();
-                UpdateLabel();
-            };
-            if (dataGrid.ItemsSource != null)
-            {
-                if (dataGrid.ItemsSource is INotifyCollectionChanged nc) nc.CollectionChanged += (sender, args) => UpdateLabel();
-                UpdateLabel();
-            }
-        }
-            
-        #endregion
     }
 }

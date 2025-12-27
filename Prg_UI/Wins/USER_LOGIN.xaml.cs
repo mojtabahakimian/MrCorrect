@@ -24,13 +24,16 @@ using Prg_UI.Wins.WinMenus.TR;
 using Prg_UI.Wins.WinMenus.WinAutomasion;
 using Prg_UI.Wins.WinMenus.WinDEFAULT;
 using Prg_UI.Wins.WinSetting;
-using System.IO;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -44,7 +47,6 @@ using Wins.WinMenus.SANATI;
 using Wins.WinMenus.Taarif;
 using Wins.WinSetting;
 using static Functions.SMSService.SmsServiceFactory;
-using System.Threading.Tasks;
 
 namespace Prg_UI.Wins
 {
@@ -313,25 +315,19 @@ namespace Prg_UI.Wins
 
             this.Title = Baseknow.YEA + " " + Baseknow.WIDTH_D;
         }
-        private void Window_ContentRendered(object sender, EventArgs e) //-----------------------------------------------------------------------------------------
+        private async void Window_ContentRendered(object sender, EventArgs e) //-----------------------------------------------------------------------------------------
         {
             NowIsReady = true;
 
-            // Check version here after UI is rendered
+            // Check version logic (Assuming CL_VERSION is reliable)
             if (!CL_VERSION.IsValidGreaterVersion())
             {
-                try
-                {
-                    CmbUsers.IsEnabled = false;
-                    Rmzo.IsEnabled = false;
-                    SecoRmzo.IsEnabled = false;
-                    Greet.IsEnabled = false;
-                    dispass.IsEnabled = false;
-                }
-                catch { }
+                // Disable UI interactions immediately
+                DisableLoginUI();
 
-                _ = PerformAutoUpdateAsync(); // Fire and forget (it will exit app)
-                return; // Stop further processing
+                // Await the task to ensure exceptions are caught within the context if possible, 
+                // though usually top-level event handlers are void.
+                await PerformAutoUpdateAsync();
             }
 
             try
@@ -396,10 +392,10 @@ namespace Prg_UI.Wins
             //new TR_FACOTRLST(10).Show();//برگه خروج مواد اولیه جهت تولید
             //new TR_FACOTRLST(11).Show();//صدور برگه خروج سایر مواد از انبار
 
-            //new TR_PGET_HED().Show();
+            new TR_DEED_HEAD().Show();
 
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID, this);
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this);
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
@@ -868,118 +864,198 @@ namespace Prg_UI.Wins
             //}
         }
 
-        private async Task PerformAutoUpdateAsync()
+        #region AutoUpdate
+        // Configuration Constants
+        private const string UPDATE_SERVER_PATH = @"\\MAIN\ade\EXE\1404";
+        private const string TEMP_FILE_SUFFIX = "_UpdateTemp.exe";
+        private const int COPY_BUFFER_SIZE = 81920; // 80KB
+        private const int NETWORK_TIMEOUT_SECONDS = 30;
+
+        private void DisableLoginUI()
         {
             try
             {
-                // 1. دریافت مسیر فایل اجرایی با ایمنی بالا برای دات نت 8
+                if (CmbUsers != null) CmbUsers.IsEnabled = false;
+                if (Rmzo != null) Rmzo.IsEnabled = false;
+                if (SecoRmzo != null) SecoRmzo.IsEnabled = false;
+                if (Greet != null) Greet.IsEnabled = false;
+                if (dispass != null) dispass.IsEnabled = false;
+            }
+            catch { /* Ignore UI state errors during shutdown */ }
+        }
+
+        private async Task PerformAutoUpdateAsync()
+        {
+            string tempExePath = null;
+
+            try
+            {
+                // 1. Resolve Paths Securely
                 string currentExe = Environment.ProcessPath;
                 if (string.IsNullOrEmpty(currentExe))
                 {
-                    // فال‌بک برای شرایط خاص
-                    using var process = System.Diagnostics.Process.GetCurrentProcess();
-                    if (process.MainModule != null)
-                    {
-                        currentExe = process.MainModule.FileName;
-                    }
+                    using var proc = Process.GetCurrentProcess();
+                    currentExe = proc.MainModule?.FileName;
                 }
 
-                if (string.IsNullOrEmpty(currentExe))
+                if (string.IsNullOrEmpty(currentExe) || !File.Exists(currentExe))
                 {
-                    new Msgwin(false, "مسیر فایل اجرایی یافت نشد.").ShowDialog();
+                    throw new FileNotFoundException("Critical Error: Cannot resolve current executable path.");
+                }
+
+                string currentDir = Path.GetDirectoryName(currentExe);
+                string exeName = Path.GetFileName(currentExe);
+                string sourcePath = Path.Combine(UPDATE_SERVER_PATH, exeName);
+                tempExePath = Path.Combine(currentDir, exeName + TEMP_FILE_SUFFIX);
+
+                // 2. Pre-Flight Checks
+                if (!File.Exists(sourcePath))
+                {
+                    ShowErrorAndExit("نسخه جدید در سرور یافت نشد. مسیر:\n" + sourcePath);
                     return;
                 }
 
-                string currentDir = System.IO.Path.GetDirectoryName(currentExe);
-                string exeName = System.IO.Path.GetFileName(currentExe);
-
-                // مسیر فایل آپدیت در شبکه
-                string sourcePath = System.IO.Path.Combine(@"\\MAIN\ade\EXE\1404", exeName);
-
-                if (!System.IO.File.Exists(sourcePath))
+                if (!HasWritePermission(currentDir))
                 {
-                    new Msgwin(false, "نسخه جدید در مسیر مشخص شده یافت نشد. لطفا با واحد پشتیبانی تماس بگیرید.").ShowDialog();
-                    CL_LMethods.GoExitTheApplication();
+                    ShowErrorAndExit("عدم دسترسی به پوشه برنامه.\nلطفا برنامه را به عنوان Administrator اجرا کنید.");
                     return;
                 }
 
-                // 2. نمایش پنل آپدیت با چک کردن Null بودن
+                // 3. Prepare UI
                 if (UpdatePanel != null)
                 {
                     UpdatePanel.Visibility = Visibility.Visible;
+                    if (UpdateLbl != null) UpdateLbl.Content = "در حال اتصال به سرور...";
                 }
 
-                string tempExe = System.IO.Path.Combine(currentDir, "Update_Temp.exe");
-
-                // 3. شروع کپی فایل
-                await CopyFileWithProgressAsync(sourcePath, tempExe);
-
-                // 4. ساخت فایل بچ برای جایگزینی
-                string batPath = System.IO.Path.Combine(currentDir, "update_script.bat");
-                string batchScript = $@"
-@echo off
-timeout /t 2 /nobreak > nul
-:loop
-tasklist | find /i ""{exeName}"" > nul
-if not errorlevel 1 (
-  timeout /t 1 /nobreak > nul
-  goto loop
-)
-copy /Y ""{tempExe}"" ""{currentExe}""
-start """" ""{currentExe}""
-del ""{tempExe}""
-del ""%~f0""
-";
-                System.IO.File.WriteAllText(batPath, batchScript);
-
-                var startInfo = new System.Diagnostics.ProcessStartInfo
+                // 4. Copy File with Resilience
+                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(NETWORK_TIMEOUT_SECONDS)))
                 {
-                    FileName = batPath,
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                    WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
-                };
-                System.Diagnostics.Process.Start(startInfo);
+                    await CopyFileWithProgressAsync(sourcePath, tempExePath, cts.Token);
+                }
 
-                Environment.Exit(0);
+                // 5. Execute Atomic Swap Script
+                ExecuteUpdateScript(currentExe, tempExePath, exeName, currentDir);
+            }
+            catch (OperationCanceledException)
+            {
+                CleanupTemp(tempExePath);
+                ShowErrorAndExit("زمان اتصال به سرور به پایان رسید (Timeout).\nلطفا اتصال شبکه را بررسی کنید.");
             }
             catch (Exception ex)
             {
-                new Msgwin(false, "ورژن نرم افزار شما بروز نبود , من سعی کردم آپدیت خودکار رو انجام بدم اما به خطا بر خورد کردم , لطفا آپدیت جدید را اجرا کنید").ShowDialog();
-                new Msgwin(false, $"خطا در بروزرسانی: {ex.StackTrace} \n {ex.Message}").ShowDialog();
-                CL_LMethods.GoExitTheApplication();
+                CleanupTemp(tempExePath);
+                // Log exception to file here
+                ShowErrorAndExit($"خطا در بروزرسانی خودکار:\n{ex.Message}");
             }
         }
-        private async Task CopyFileWithProgressAsync(string source, string destination)
+
+        private async Task CopyFileWithProgressAsync(string source, string destination, CancellationToken token)
         {
-            const int bufferSize = 81920; // 80KB
-            using (var sourceStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, true))
-            using (var destinationStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, true))
+            using (var sourceStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, COPY_BUFFER_SIZE, true))
+            using (var destinationStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, COPY_BUFFER_SIZE, true))
             {
-                var buffer = new byte[bufferSize];
+                var buffer = new byte[COPY_BUFFER_SIZE];
                 long totalBytes = sourceStream.Length;
                 long totalRead = 0;
                 int bytesRead;
 
-                while ((bytesRead = await sourceStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                // Throttling UI updates to avoid freezing (Update every 100ms max)
+                var lastUpdate = DateTime.MinValue;
+
+                while ((bytesRead = await sourceStream.ReadAsync(buffer, 0, buffer.Length, token)) > 0)
                 {
-                    await destinationStream.WriteAsync(buffer, 0, bytesRead);
+                    await destinationStream.WriteAsync(buffer, 0, bytesRead, token);
                     totalRead += bytesRead;
 
-                    if (totalBytes > 0)
+                    if (totalBytes > 0 && (DateTime.Now - lastUpdate).TotalMilliseconds > 100)
                     {
                         double progress = (double)totalRead / totalBytes * 100;
+                        lastUpdate = DateTime.Now;
 
-                        // استفاده از دیسپچر خودِ پنجره
-                        this.Dispatcher.Invoke(() =>
+                        // Use Dispatcher.InvokeAsync for non-blocking UI update
+                        await this.Dispatcher.InvokeAsync(() =>
                         {
-                            // چک کردن Null بودن کنترل‌ها قبل از مقداردهی
                             if (UpdatePrg != null) UpdatePrg.Value = progress;
-                            if (UpdateLbl != null) UpdateLbl.Content = $"{progress:F0}%";
+                            if (UpdateLbl != null) UpdateLbl.Content = $"در حال دانلود: {progress:F0}%";
                         });
                     }
                 }
             }
         }
+
+        private void ExecuteUpdateScript(string currentExe, string tempExe, string exeName, string currentDir)
+        {
+            string batPath = Path.Combine(currentDir, "update_installer.bat");
+
+            // Hardened Batch Script
+            // 1. Loops trying to overwrite (handles file locking)
+            // 2. Starts app in correct Working Directory (/D)
+            // 3. Quotes paths to handle spaces
+            string batchScript = $@"
+@echo off
+title Updating Application...
+echo Waiting for application to close...
+
+:RETRY_COPY
+timeout /t 1 /nobreak > nul
+copy /Y ""{tempExe}"" ""{currentExe}"" > nul
+if %errorlevel% neq 0 (
+    echo File is locked. Retrying...
+    goto RETRY_COPY
+)
+
+echo Update Successful. Starting application...
+start """" /D ""{currentDir}"" ""{currentExe}""
+
+:CLEANUP
+del ""{tempExe}""
+del ""%~f0"" & exit
+";
+
+            File.WriteAllText(batPath, batchScript);
+
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = batPath,
+                UseShellExecute = true, // Required for batch file execution in this context
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden
+            };
+
+            Process.Start(startInfo);
+
+            // Force kill current process to ensure file handle is released
+            Environment.Exit(0);
+        }
+
+        private bool HasWritePermission(string path)
+        {
+            try
+            {
+                string testFile = Path.Combine(path, Path.GetRandomFileName());
+                using (FileStream fs = File.Create(testFile, 1, FileOptions.DeleteOnClose)) { }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void CleanupTemp(string path)
+        {
+            if (!string.IsNullOrEmpty(path) && File.Exists(path))
+            {
+                try { File.Delete(path); } catch { }
+            }
+        }
+
+        private void ShowErrorAndExit(string message)
+        {
+            new Msgwin(false, message).ShowDialog();
+            CL_LMethods.GoExitTheApplication();
+        }
+        #endregion
     }
 }

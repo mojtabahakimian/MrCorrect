@@ -412,6 +412,8 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف گروه بندی قیمتی", WIN_NAME = CL_MenuManager.WinNameType.PRICE_GRP_FORM_GRUHBANDI_GHEYMATI });
 
             //سوابق
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق (سند دستی) صدور و ویرایش اسناد", WIN_NAME = CL_MenuManager.WinNameType.TR_DEED_HEAD });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق (دریافت پرداخت) خزانه داری", WIN_NAME = CL_MenuManager.WinNameType.TR_PGET_HED });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق رسید انبار", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_RASID_ANBAR });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق حواله انبار", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_HAVALE_ANBAR });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق سایر رسید انبار", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_SAYER_RASID_ANBAR });
