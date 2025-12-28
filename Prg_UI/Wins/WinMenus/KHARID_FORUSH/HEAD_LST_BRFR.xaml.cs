@@ -395,7 +395,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                     }
                 }
 
-                bool AllowedToSavePursantVisitor = CL_HESABDARI.LETSGO("FRMOST"); //ثبت پورسانت ویزیتور
+                bool AllowedToSavePursantVisitor = CL_HESABDARI.LETSGO("VISITORS"); //ثبت پورسانت ویزیتور
                 if (AllowedToSavePursantVisitor)
                 {
                     VISITOR_DTL_SUB.IsReadOnly = !ican;

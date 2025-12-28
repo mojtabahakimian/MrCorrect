@@ -1397,6 +1397,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                 if (!IsDirectFactor)
                 {
+                    // در حالت فاکتور غیرمستقیم ممکن است هنگام خروج از فیلد شماره، ناوبری هنوز مقداردهی نشده باشد
+                    if (_navigationManager == null)
+                    {
+                        return;
+                    }
+
                     var rst = dbms.DoGetDataSQL<_FACT_HEAD_HAV_>("SELECT HEAD_LST.CUST_NO,HEAD_LST.MAS,HEAD_LST.DEPATMAN,HEAD_LST.TICMBAA,HEAD_LST.SHARAYET,HEAD_LST.FNUMCO,HEAD_LST.JAY,MODAT_PPID,PEID,PEPID,HEAD_LST.USER_NAME FROM HEAD_LST WHERE (((HEAD_LST.NUMBER) = " + NUMBER.Text + $") And ((HEAD_LST.TAG) = {HTAG})) GROUP BY TICMBAA,HEAD_LST.CUST_NO,HEAD_LST.MAS,HEAD_LST.FNUMCO,HEAD_LST.SHARAYET,HEAD_LST.JAY,HEAD_LST.DEPATMAN,MODAT_PPID,PEID,PEPID,HEAD_LST.USER_NAME").FirstOrDefault();
 
                     if (rst is not null && rst?.CUST_NO != null)
@@ -1404,7 +1410,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                         string receiptCustNo = rst?.CUST_NO?.Trim(); //TAG 1
                         if (!string.IsNullOrEmpty(receiptCustNo))
                         {
-                            string currentInvoiceCustNo = _navigationManager.CurrentRecord?.CUST_NO.Trim();
+                            string currentInvoiceCustNo = _navigationManager?.CurrentRecord?.CUST_NO?.Trim();
                             if (currentInvoiceCustNo != receiptCustNo)
                             {
                                 // بررسی مغایرت کد مشتری بین رسید و فاکتور

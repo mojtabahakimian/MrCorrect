@@ -233,7 +233,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
             FACTOR_DATA?.Clear();
 
-            CL_LMethods.DoWriteMyLog(SqlQueryPassed, default);
+            //CL_LMethods.DoWriteMyLog(SqlQueryPassed, default);
 
             var MasterHead = dbms.DoGetDataSQL<KALAS>(SqlQueryPassed).ToList();
             foreach (var item in MasterHead)
