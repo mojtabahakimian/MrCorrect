@@ -43,6 +43,7 @@ using Wins.WinMenus.ANBAR;
 using Wins.WinMenus.Checkha;
 using Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.KHARID_FORUSH;
+using Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
 using Wins.WinMenus.SANATI;
 using Wins.WinMenus.Taarif;
 using Wins.WinSetting;
@@ -378,23 +379,11 @@ namespace Prg_UI.Wins
 
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
 
-            //new TR_FACOTRLST(1).Show();//سوابق رسید انبار
-            //new TR_FACOTRLST(2).Show();//سوابق حواله انبار
-            //new TR_FACOTRLST(24).Show();//سوابق سایر رسید انبار
-            //new TR_FACOTRLST(26).Show();//سوابق سایر حواله انبار : برای برگشت خرید
-            //new TR_FACOTRLST(4).Show();//سوابق برگشت فروش عادی
-            //new TR_FACOTRLST(12).Show();//سوابق فاکتور خرید
-            //new TR_FACOTRLST(13).Show();//سوابق فاکتور فروش
-            //new TR_FACOTRLST(20).Show();//سوابق پیش فاکتور
-            //new TR_FACOTRLST(25).Show();//سوابق برگشت فروش آزاد
-            //new TR_FACOTRLST(27).Show();//سوابق برگشت خرید آزاد
-            //new TR_FACOTRLST(9).Show();//برگه ورود کالای ساخته شده
-            //new TR_FACOTRLST(10).Show();//برگه خروج مواد اولیه جهت تولید
-            //new TR_FACOTRLST(11).Show();//صدور برگه خروج سایر مواد از انبار
+            //new WinBase().Show();
 
-            //new HEAD_LST_BRFR().Show();
+            //new F_MENU_GOZARESH_FROOSH("FR").ShowDialog();
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CHAPCHEK, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this);
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
@@ -402,108 +391,6 @@ namespace Prg_UI.Wins
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
             //new WIN_OPTIONS().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KART, this);
-            //new WinBase().Show();
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "11338,11323");
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_CHEK_VOSUL_LES, this);
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this); //اتکا
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHKE_DLIST_KOLCHECKD, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_GHEYMAT, this);
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_CHEK_VLISTALL_NAZDEBANK, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this, 807d);
-            //new F_MENU_CHEK("cvp", "لیست چکهای پرداختی اعلام وصول نشده").Show();
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAVL, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK_AZAD, this);
-
-            //new F_MENU_CHEK("chkva", "لیست چکهای دریافتی نزد بانک و صندوق وصول نشده").Show();
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_TAKHFIF, this);
-
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this);
-
-            //new HEAD_SERCH_MAIN().Show();
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_PAYGETD_LST, this);
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_CHEK_VLISTALL_NAZDEBANK, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ANBAR_FRKH_RK, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_ENTEGHAL_WIN, this);
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ANBAR_F_AK_MOGUDI_ANBAR_LIST, this);
-
-            //new WIN_HEAD_MANF().Show();
-            //new Window4().Show();
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_KOL_FT4, this);
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_DIRECT, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_F12, this);
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_VISIT_ROUTE_FORM, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAV_OTHER_WIN, this);
-
-            //new WinBase().Show(); //فاکتور برگشت فروش (آزاد) رسید شده TAG = 25
-
-            //new HEAD_LST_FROOSH_BACK2().Show(); //فاکتور برگشت فروش - عادی TAG = 4
-
-            //new HEAD_LST_FROOSH_BACK2().Show(); //فاکتور برگشت فروش - عادی TAG = 4
-
-            //new HEAD_LST_KH_BACK().Show(); //فاکتور برگشت خرید - عادی TAG = 3
-
-            ////فاکتور برگشت خرید آزاد
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK_AZAD, this);
-
-            ////فاکتور برگشت فروش - عادی
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_BACK2, this);
-
-            ////فاکتور برگشت خرید - عادی
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK, this);
-
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN_LIMITED, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
-
-            //new WinConnectionChoose().ShowDialog();
-            //new HEAD_LST_HAVL(4306d).ShowDialog();
-            //new HEAD_LST_RASID(3872d).ShowDialog();
-
-            //new HAVALAH_ENTER(356d).ShowDialog(); 
-            //new WIN_TOZIE().ShowDialog(); //برگه خروج
-
-            //CL_MenuManager.OpenWinMenu(WinNameType.PGET_HED, this, default);
-
-            //new VISITOR_GOL_REP_MAR().Show(); //لیست تراز چهار ستونی کل
-            //new FMENU_TARAZ_4("FT4M").Show(); //ليست تراز آزمايشي چهار ستوني معين  //TARAZ4M
-            //new FMENU_TARAZ_4("FT4T").Show(); //ليست تراز آزمايشي چهارستوني تفصيلي  //TARAZ4T
-
-            //new WinConnectionChoose().Show();
-
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.VISITOR_DAY_HEAD, this);
-
-
-            //new TDETA_HES_SHEET2(213, 1, 1).Show();
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_SAZMAN, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, this , 3557d );
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FCODE_CUSTOMER, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ANBAR_F_AK_MOGUDI_ANBAR_LIST, this);
-
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_USER_PERMITION_FORMS_DASTRASI, this);
 
             //new WinEVENTS(37729).ShowDialog();
             return;

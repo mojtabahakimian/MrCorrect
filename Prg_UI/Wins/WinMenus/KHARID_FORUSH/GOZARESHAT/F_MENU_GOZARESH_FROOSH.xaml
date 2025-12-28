@@ -13,7 +13,7 @@
         FontFamily="{StaticResource IRANYEKAN}"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterScreen"
-        Title="" Height="250" Width="587" MinHeight="215" MinWidth="400" Loaded="Window_Loaded">
+        Title="" Height="250" Width="587" MinHeight="215" MinWidth="400" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <ItemsPanelTemplate x:Key="VSP">
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"  VirtualizingPanel.VirtualizationMode="Recycling"/>

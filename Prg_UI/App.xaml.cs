@@ -85,6 +85,20 @@ namespace Prg_UI
             bool shouldAttemptConnectionRecovery = false;
             bool isRecoveryAlreadyInProgress = false;
 
+            if (IsSyncfusionCheckboxFilterKeyboardIssue(e.Exception))
+            {
+                LogException(e.Exception, "Handled Syncfusion filter keyboard crash.");
+
+                try
+                {
+                    new Msgwin(false, "یک خطای موقت هنگام استفاده از فیلتر رخ داد. لطفاً دوباره تلاش کنید.").ShowDialog();
+                }
+                catch { }
+
+                e.Handled = true;
+                return;
+            }
+
             try
             {
                 string userMessage = string.Empty;
@@ -756,6 +770,22 @@ namespace Prg_UI
             CL_LMethods.CleanupBeforeExiting();
         }
 
+        private static bool IsSyncfusionCheckboxFilterKeyboardIssue(Exception exception)
+        {
+            if (exception is NullReferenceException && exception.TargetSite != null)
+            {
+                var declaringType = exception.TargetSite.DeclaringType?.FullName;
+                var methodName = exception.TargetSite.Name;
+
+                if (string.Equals(declaringType, "Syncfusion.UI.Xaml.Grid.CheckboxFilterControl", StringComparison.Ordinal) &&
+                    string.Equals(methodName, "OnPreviewKeyDown", StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
         private void SetGeneralRdpMode()
         {
             if (GeneralOptionManager.IsRDPMode) //SystemParameters.IsRemoteSession &&

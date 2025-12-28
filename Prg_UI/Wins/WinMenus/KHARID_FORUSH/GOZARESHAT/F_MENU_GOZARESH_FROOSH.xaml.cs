@@ -7,18 +7,21 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Rpts;
 using Stimulsoft.Base;
+using Stimulsoft.Report;
 using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
-using Stimulsoft.Report;
 using System;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
+using Wins.WinOther;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
-using Rpts;
 
 namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 {
@@ -92,6 +95,10 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             public double? MAND { get; set; }
             public int? TEDAD { get; set; }
         }
+        public class FMG3
+        {
+            public string? USER_NAME { get; set; }
+        }
         #endregion
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -114,12 +121,14 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                 SHIFT.Visibility = Visibility.Hidden;
                 USERR.Visibility = Visibility.Hidden;
             }
+
+            DEPART.Focus();
         }
         private void FILL_ALL_COMBOBOXES()
         {
             DEPART.ItemsSource = dbms.DoGetDataSQL<Custom_DEPART>($"SELECT DEPATMAN, DEPNAME FROM dbo.DEPART").ToList();
             SHIFT.ItemsSource = dbms.DoGetDataSQL<SHIFT>($"SELECT SHIFT_ID, SHNAME FROM dbo.SHIFT").ToList();
-            USERR.ItemsSource = dbms.DoGetDataSQL<SHIFT>($"SELECT USER_NAME FROM dbo.HEAD_LST GROUP BY USER_NAME ORDER BY USER_NAME").ToList();
+            USERR.ItemsSource = dbms.DoGetDataSQL<FMG3>($"SELECT DISTINCT USER_NAME FROM dbo.HEAD_LST ORDER BY USER_NAME").ToList();
         }
         private void DTL_Click(object sender, RoutedEventArgs e)
         {
@@ -143,7 +152,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
         private void OpenReport()
         {
             var report = new StiReport();
-            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.GOZARESH_FROOSH_USER.mrt");
+            using var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.GOZARESH_FROOSH_USER.mrt");
             report.Load(pathreport);
             string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
@@ -164,7 +173,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
         private void OpenReport_2()
         {
             var report = new StiReport();
-            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.LIST_FROOSH_ANBARS_DTL.mrt");
+            using var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.LIST_FROOSH_ANBARS_DTL.mrt");
             report.Load(pathreport);
             string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
@@ -175,7 +184,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
 
             report["USER_PARM"] = USERR.SelectedValue.ToString();
-            report["SHIFT_PARM"] = DT2.Text.ToString();
+            report["SHIFT_PARM"] = SHIFT.SelectedValue.ToString();
             report["VAHED_PARM"] = DEPART.SelectedValue.ToString();
             report["FDATE_PARM"] = DT1.Text.ToRawTarikh();
             report["EDATE_PARM"] = DT2.Text.ToRawTarikh();
@@ -186,7 +195,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
         private void OpenReport_3()
         {
             var report = new StiReport();
-            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.GOZARESH_FROOSH_USER3.mrt");
+            using var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.GOZARESH_FROOSH_USER3.mrt");
             report.Load(pathreport);
             string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
@@ -205,6 +214,21 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
         private void BTN_GO_Click(object sender, RoutedEventArgs e)
         {
+            if (USERR.Visibility == Visibility.Visible)
+            {
+                if (USERR.SelectedItem is null)
+                {
+                    new Msgwin(false, "کاربر نمیتواند خالی باشد").ShowDialog();
+                    return;
+                }
+
+                if (SHIFT.SelectedItem is null)
+                {
+                    new Msgwin(false, "شیفت نمیتواند خالی باشد").ShowDialog();
+                    return;
+                }
+            }
+
             try
             {
                 string sql = string.Empty;
@@ -307,6 +331,32 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
         private void DT2_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             DT2.SelectAll();
+        }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            try
+            {
+                if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    if (BTN_GO.IsFocused)
+                    {
+                        BTN_GO_Click(null, null);
+                        return;
+                    }
+                    else
+                    {
+                        e.Handled = true;
+
+                        try
+                        {
+                            CL_LMethods.SendKey_US(Key.Tab);
+                        }
+                        catch { /*ignore*/ }
+                    }
+                }
+            }
+            catch { }
         }
     }
 }

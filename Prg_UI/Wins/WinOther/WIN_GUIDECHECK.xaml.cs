@@ -67,7 +67,7 @@ namespace Wins.WinOther
         {
             InitializeComponent();
         }
-
+        public byte TYPE_GUIDE { get; set; } = 1;
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
@@ -75,6 +75,19 @@ namespace Wins.WinOther
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
+
+            switch (TYPE_GUIDE)
+            {
+                case 1: //چک فیت دستگاه
+                    VB_FITCHECKIMAGE.Visibility = Visibility.Visible;
+
+                    VB_VERTICAL.Visibility = Visibility.Hidden;
+                    CARD_3.Visibility = Visibility.Hidden;
+                    TXB_2.Text = "چک رو مطابق تصویر داخل پرینتر قرار دهید.";
+                    break;
+
+                default: break;
+            }
 
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)

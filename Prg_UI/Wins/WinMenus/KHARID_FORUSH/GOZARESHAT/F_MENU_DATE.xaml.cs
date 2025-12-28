@@ -668,7 +668,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
         {
 
             var report = new StiReport();
-            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.DAFTAR_ROOZNAMEH.mrt");
+            using var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.DAFTAR_ROOZNAMEH.mrt");
             report.Load(pathreport);
             string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
@@ -697,7 +697,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
 
             var report = new StiReport();
-            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.R_DP_DAYLY.mrt");
+            using var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.R_DP_DAYLY.mrt");
             report.Load(pathreport);
             string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
@@ -728,7 +728,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
 
             var report = new StiReport();
-            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.R_DP_DAYLY.mrt");
+            using var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.HESABDARI.R_DP_DAYLY.mrt");
             report.Load(pathreport);
             string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
@@ -756,7 +756,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
 
             var report = new StiReport();
-            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.TODAYBARGIRI.mrt");
+            using var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.TODAYBARGIRI.mrt");
             report.Load(pathreport);
             string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();

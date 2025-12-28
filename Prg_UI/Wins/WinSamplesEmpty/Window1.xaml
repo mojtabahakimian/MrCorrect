@@ -15,12 +15,12 @@
         </ItemsPanelTemplate>
     </Window.Resources>
     <Grid>
-        <WrapPanel>
-            
-        </WrapPanel>
-       
-
-
-
+        <UniformGrid>
+            <Image Stretch="Uniform" >
+                <Image.Source>
+                    <BitmapImage DecodePixelWidth="400" DecodePixelHeight="400" UriSource="/UiDrive/IMGS/FitCheck.png" CacheOption="OnLoad"/>
+                </Image.Source>
+            </Image>
+        </UniformGrid>
     </Grid>
 </Window>

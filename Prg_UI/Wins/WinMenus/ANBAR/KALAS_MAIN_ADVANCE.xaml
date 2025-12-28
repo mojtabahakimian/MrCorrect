@@ -427,6 +427,7 @@
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Center"
                                    Content="{syncfusion:GridLocalizationResourceExtension ResourceName=SelectAll}"
+                                   IsChecked="{Binding IsAllSelected, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                    Focusable="True"
                                    FontFamily="{TemplateBinding FontFamily}"
                                    FontSize="{TemplateBinding FontSize}"
