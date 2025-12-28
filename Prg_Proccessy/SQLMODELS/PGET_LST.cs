@@ -32,6 +32,9 @@ namespace Prg_Proccessy.SQLMODELS
         // Return any model-level error here (often left empty)
         public string Error => null;
 
+        private bool _HasAttachment;
+        public bool HasAttachment { get => _HasAttachment; set { if (_HasAttachment == value) return; _HasAttachment = value; OnPropertyChanged("HasAttachment"); } }
+
         private double? _mabl;
         public double? MABL
         {

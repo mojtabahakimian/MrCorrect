@@ -57,6 +57,12 @@
                     <materialDesign:PackIcon Kind="FileExcelOutline" FontSize="14" />
                 </MenuItem.Icon>
             </MenuItem>
+            <Separator/>
+            <MenuItem Header="حذف تصویر سطر" Click="MenuItem_Click" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="Remove" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
 
         </ContextMenu>
 
@@ -277,7 +283,33 @@
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>-->
 
-
+                    <DataGridTemplateColumn Header="تصویر" Width="95">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button x:Name="BTN_ATTACH" IsTabStop="False" Click="BTN_ATTACH_Click" Tag="{Binding}"
+                                    materialDesign:ButtonAssist.CornerRadius="2"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                                    HorizontalContentAlignment="Center"
+                                    ToolTip="مشاهده/افزودن تصویر">
+                                    <materialDesign:PackIcon Width="20" Height="20">
+                                        <materialDesign:PackIcon.Style>
+                                            <Style TargetType="materialDesign:PackIcon">
+                                                <Setter Property="Kind" Value="Paperclip" />
+                                                <Setter Property="Foreground" Value="Gray" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasAttachment}" Value="True">
+                                                        <Setter Property="Kind" Value="Image" />
+                                                        <Setter Property="Foreground" Value="{StaticResource PrimaryHueMidBrush}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </materialDesign:PackIcon.Style>
+                                    </materialDesign:PackIcon>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
 
                     <DataGridTextColumn x:Name="fHES_KColumn" Binding="{Binding FHES_K}" Header="از کل" Width="auto" Visibility="Hidden"/>

@@ -648,8 +648,8 @@
                             </ItemsPanelTemplate>
                         </ComboBox.ItemsPanel>
                     </ComboBox>
-                    <CNC:NumericTextBox x:Name="FNUMCO" DoesAcceptDouble="False" LastValueShouldZero="True" Text="0" Height="26" Margin="454,43,0,0" VerticalAlignment="Top" Visibility="Hidden"  HorizontalAlignment="Left" Width="69"  />
-                    <Label x:Name="LABEL_FNUMCO_" Content="شماره داخلی:" Margin="528,44,0,0" Visibility="Hidden"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="62" Height="25" VerticalAlignment="Top"/>
+                    <CNC:NumericTextBox x:Name="FNUMCO" DoesAcceptDouble="False" d:Visibility="Visible"  LastValueShouldZero="True" Text="0" Height="26" Margin="444,79,0,0" VerticalAlignment="Top" Visibility="Hidden" HorizontalAlignment="Left" Width="69"  />
+                    <Label x:Name="LABEL_FNUMCO_" Content="شماره داخلی:" Margin="523,80,0,0" Visibility="Hidden"  d:Visibility="Visible"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="62" Height="25" VerticalAlignment="Top"/>
                     <Button x:Name="BTN_FACTORHA" Content="لیست فاکتور ها" Margin="117,200,0,0"  Style="{StaticResource GerdC}"  BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5"  FontSize="10" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Width="118" Foreground="#DDFFFFFF" FontWeight="Bold" Click="BTN_FACTORHA_Click"/>
 
                     <Grid x:Name="EXPORTY_GRID" Margin="0,196,120,0" d:Visibility="Visible" Visibility="Hidden" Height="42" VerticalAlignment="Top" HorizontalAlignment="Right" Width="644">

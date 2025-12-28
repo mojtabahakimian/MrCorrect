@@ -11,7 +11,7 @@ namespace Functions
     public static class CL_VERSION
     {
         //public static string MrCorrectFullVersion { get; } = "Version 1.0.0.327 Date : 1404/09/24";
-        public static string MrCorrectFullVersion { get; } = "Version 1.0.0.342 Date : 1404/10/06";
+        public static string MrCorrectFullVersion { get; } = "Version 1.0.0.345 Date : 1404/10/07";
 
         /// <summary>
         /// Checks if the current application version is valid and greater than or equal to the version stored in the database.
@@ -147,9 +147,9 @@ namespace Functions
                 var parts = datePart.Split('/');
                 if (parts.Length != 3)
                 {
-                     throw new FormatException($"Date part '{datePart}' is not in the expected format 'yyyy/MM/dd'.");
+                    throw new FormatException($"Date part '{datePart}' is not in the expected format 'yyyy/MM/dd'.");
                 }
-                
+
                 int year = int.Parse(parts[0]);
                 int month = int.Parse(parts[1]);
                 int day = int.Parse(parts[2]);

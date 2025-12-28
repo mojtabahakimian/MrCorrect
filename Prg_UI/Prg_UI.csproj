@@ -68,6 +68,7 @@
 		<None Remove="Rpts\BUGETRP.mrt" />
 		<None Remove="Rpts\BUGETRP_tahlil.mrt" />
 		<None Remove="Rpts\Checkha\CHAPCHEK.mrt" />
+		<None Remove="Rpts\Checkha\CHAPCHEK_FIT.mrt" />
 		<None Remove="Rpts\Checkha\CHEK_DLISTS.mrt" />
 		<None Remove="Rpts\Checkha\ELVSL_ADA.mrt" />
 		<None Remove="Rpts\DASHBOARD\ELAMIEY_DEF.mrt" />
@@ -481,6 +482,7 @@
 		<EmbeddedResource Include="Rpts\BUGETRP.mrt" />
 		<EmbeddedResource Include="Rpts\BUGETRP_tahlil.mrt" />
 		<EmbeddedResource Include="Rpts\Checkha\CHAPCHEK.mrt" />
+		<EmbeddedResource Include="Rpts\Checkha\CHAPCHEK_FIT.mrt" />
 		<EmbeddedResource Include="Rpts\Checkha\CHEK_DLISTS.mrt" />
 		<EmbeddedResource Include="Rpts\Checkha\ELVSL_ADA.mrt" />
 		<EmbeddedResource Include="Rpts\DASHBOARD\ELAMIEY_DEF.mrt" />

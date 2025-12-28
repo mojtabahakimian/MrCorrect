@@ -1,6 +1,10 @@
 ﻿using Dapper;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Functions;
+using Interfaces;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.Generaly;
@@ -8,14 +12,15 @@ using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
+using Prg_UI.Functions.Jostejoo;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Prg_UI.Wins.WinMenus.Checkha;
 using Prg_UI.Wins.WinOther;
-using Stimulsoft.Base;
+using Rpts;
+using Stimulsoft.Report;
 using Stimulsoft.Report.Components;
 using Stimulsoft.Report.Dictionary;
-using Stimulsoft.Report;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -23,6 +28,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -33,22 +39,17 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Threading;
+using Wins.WinOther;
+using static Functions.DataGridClipboardManager;
+using static Interfaces.INavigator;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
+using static Prg_UI.Functions.CL_LMethods;
+using static Prg_UI.HelperWins.Msgwin;
 using static Prg_UI.Wins.WinMenus.Checkha.GETCHEK;
 using ComboBox = System.Windows.Controls.ComboBox;
 using DataGrid = System.Windows.Controls.DataGrid;
 using TextBox = System.Windows.Controls.TextBox;
-using System.Windows.Threading;
-using static Prg_UI.Functions.CL_LMethods;
-using Prg_UI.Functions.Jostejoo;
-using System.IO;
-using static Interfaces.INavigator;
-using Functions;
-using static Functions.DataGridClipboardManager;
-using Interfaces;
-using static Prg_UI.HelperWins.Msgwin;
-using Rpts;
-using Wins.WinOther;
 
 //using Convert = System.Convert;
 
@@ -726,7 +727,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             //پر کردن دیتا گرید از دیتابیس برای سطر های خزانه
             //با این روش فقط اومدین با قدرت چند هسته ای سی شارپ اسم های سطر های خزانه رو جداگانه با کمک سی شارپ پارالل پر کردیم
 
-            var QRE_KHZ_DATA = dbms.DoGetDataSQL<PGET_LST>($"SELECT ID, DATE, RADIF, NO_AM, NAHVA, FHES_K, FHES_M, FHES_T, THES_K, THES_M, THES_T, SHARH, MABL, N_SERI, BANK, IDH, FHES, THES, ARZD, FHES_T2, THES_T2, FHES_T3, THES_T3, FHES_T4, THES_T4, CRT, UID FROM dbo.PGET_LST WHERE ID = {ID.Text}").ToList();
+            var QRE_KHZ_DATA = dbms.DoGetDataSQL<PGET_LST>($"SELECT ID, DATE, RADIF, NO_AM, NAHVA, FHES_K, FHES_M, FHES_T, THES_K, THES_M, THES_T, SHARH, MABL, N_SERI, BANK, IDH, FHES, THES, ARZD, FHES_T2, THES_T2, FHES_T3, THES_T3, FHES_T4, THES_T4, CRT, UID, " +
+                $"CAST(CASE WHEN EXISTS(SELECT 1 FROM dbo.TASKS WHERE num = dbo.PGET_LST.IDH AND tg = 34) THEN 1 ELSE 0 END AS BIT) AS HasAttachment" +
+                $" FROM dbo.PGET_LST WHERE ID = {ID.Text}").ToList();
+
+            //var QRE_KHZ_DATA = dbms.DoGetDataSQL<PGET_LST>($"SELECT ID, DATE, RADIF, NO_AM, NAHVA, FHES_K, FHES_M, FHES_T, THES_K, THES_M, THES_T, SHARH, MABL, N_SERI, BANK, IDH, FHES, THES, ARZD, FHES_T2, THES_T2, FHES_T3, THES_T3, FHES_T4, THES_T4, CRT, UID, " +
+            //    $"CAST(CASE WHEN EXISTS(SELECT 1 FROM dbo.TASKS WHERE skid=34 AND num=dbo.PGET_LST.ID AND tg=34) THEN 1 ELSE 0 END AS BIT) AS HasCheckAttachment FROM dbo.PGET_LST WHERE ID = {ID.Text}").ToList();
+
+
             if (QRE_KHZ_DATA != null)
             {
                 Parallel.For(0, QRE_KHZ_DATA.Count, i =>
@@ -1049,7 +1057,192 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         }
 
-        private static bool IsNull(object p)
+        private void BTN_ATTACH_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is Button btn && btn.Tag is PGET_LST currentRow)) return;
+
+            if (currentRow.IDH == null || currentRow.IDH <= 0)
+            {
+                new Msgwin(false, "ابتدا سطر را ذخیره کنید تا امکان ضمیمه تصویر فراهم شود.").ShowDialog();
+                return;
+            }
+
+            double khazanehNumber = Convert.ToDouble(ID.Text);
+            int? currentIDH = currentRow.IDH;
+
+            if (currentRow.HasAttachment)
+            {
+                // View Attachment
+                try
+                {
+                    var query = @"SELECT E.pic 
+                                  FROM dbo.TASKS T
+                                  INNER JOIN dbo.EVENTS E ON T.IDNUM = E.IDNUM
+                                  WHERE T.num = @id AND T.tg = 34";
+
+                    var imageData = dbms.DoGetDataSQL<byte[]>(query, new { id = currentRow.IDH }).FirstOrDefault();
+
+                    if (imageData != null && imageData.Length > 0)
+                    {
+                        new ImagePreviewWindow(imageData).ShowDialog();
+                    }
+                    else
+                    {
+                        new Msgwin(false, "تصویری برای نمایش یافت نشد.").ShowDialog();
+                        currentRow.HasAttachment = false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    new Msgwin(false, "خطا در دریافت تصویر: " + ex.Message).ShowDialog();
+                }
+            }
+            else
+            {
+                // Attach New Image
+                var openFileDialog = new Microsoft.Win32.OpenFileDialog
+                {
+                    Title = "انتخاب تصویر سند",
+                    Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp",
+                    Multiselect = false
+                };
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    try
+                    {
+                        byte[] fileBytes = System.IO.File.ReadAllBytes(openFileDialog.FileName);
+                        if (fileBytes.Length > 0)
+                        {
+
+                            long taskId = CL_HESABDARI.Gettaskid((double)currentIDH, 34);
+                            if (taskId <= 0)
+                            {
+                                var insertSql = @"
+INSERT INTO dbo.TASKS (PERSONEL,TASK,PERIORITY,STATUS,STDATE,STTIME,ENDATE,ENTIME,USERNAME,COMP_COD,SUMTIME,pic,ss,skid,num,tg,CTIM,USERCO,SEE)
+VALUES (@PERSONEL,@TASK,@PERIORITY,1,@STDATE,@STTIME,NULL,NULL,@USERNAME,@COMP_COD,NULL,NULL,NULL,@skid,@num,@tg,GETDATE(),@USERCO,0);
+SELECT CAST(SCOPE_IDENTITY() AS INT);";
+
+                                var newTaskId = dbms.DoGetDataSQL<int>(insertSql, new
+                                {
+                                    PERSONEL = Baseknow.USERCOD,
+                                    COMP_COD = currentRow.FHES,
+                                    TASK = $"تصویر چک خزانه {khazanehNumber} مورخ {Strings.Format(Convert.ToInt64(DATE.Text.ToRawTarikh()), "####/##/##")}  ردیف {currentRow.RADIF}",
+                                    PERIORITY = 2,
+                                    STDATE = Tarikh.GoGetPersianDate(true),
+                                    STTIME = Convert.ToInt32(DateTime.Now.ToString("HHmm")),
+                                    USERNAME = Baseknow.UUSER,
+                                    skid = khazanehNumber,
+                                    num = currentIDH,
+                                    tg = 34,
+                                    USERCO = Baseknow.USERCOD
+                                }).FirstOrDefault();
+
+                                taskId = newTaskId;
+                            }
+
+                            if (taskId > 0)
+                            {
+                                var fxType = Path.GetExtension(openFileDialog.FileName)?.ToLower();
+
+                                var eventId = GetLatestCheckAttachment((int)taskId, 34);
+                                string normalizedExt = string.IsNullOrWhiteSpace(fxType) ? ".jpg" : (fxType.StartsWith(".") ? fxType : $".{fxType}");
+                                int today = Convert.ToInt32(Tarikh.GoGetPersianDate(true));
+                                int nowTime = Convert.ToInt32(DateTime.Now.ToString("HHmm"));
+
+                                // --- ساخت شرح کامل رویداد ---
+                                string opType = currentRow.NO_AM == 1 ? "دریافت" : (currentRow.NO_AM == 2 ? "پرداخت" : "نامشخص");
+
+                                string nahvaStr = currentRow.NAHVA switch
+                                {
+                                    1 => "نقد",
+                                    2 => "چک",
+                                    3 => "سایر",
+                                    4 => "واگذاری",
+                                    5 => "برگشتی",
+                                    6 => "مسترد",
+                                    _ => "نامشخص"
+                                };
+
+                                // استفاده از نام حساب (در صورت وجود) یا کد حساب
+                                string fromAcc = !string.IsNullOrEmpty(currentRow.NAME_FHES) ? currentRow.NAME_FHES : currentRow.FHES;
+                                string toAcc = !string.IsNullOrEmpty(currentRow.NAME_THES) ? currentRow.NAME_THES : currentRow.THES;
+                                string amountStr = currentRow.MABL?.ToString("N0") ?? "0";
+                                string sharhStr = currentRow.SHARH ?? "-";
+
+                                //string eventText = $"تصویر چک خزانه {khazanehNumber} ردیف {(currentRow.RADIF ?? currentIDH)} " + $"به شرح {currentRow.SHARH}";
+                                // ترکیب رشته نهایی
+                                string eventText = $"تصویر چک خزانه {khazanehNumber} ردیف {(currentRow.RADIF ?? currentIDH)} | " + $"{opType} - {nahvaStr} - از: {fromAcc} - به: {toAcc} - شرح: {sharhStr} - مبلغ: {amountStr}";
+
+                                if (eventId is null)
+                                {
+                                    const string insertSql = @"INSERT INTO dbo.EVENTS(IDNUM, EVENTS, STDATE, STTIME, USERNAME, SUMTIME, skid, num, tg, FXTYPE, pic)
+                                           VALUES(@TaskId, @Events, @StDate, @StTime, @UserName, @SumTime, @SkId, @Num, @RowId, @FxType, @Pic)";
+                                    dbms.DoExecuteSQL(insertSql, new
+                                    {
+                                        TaskId = taskId,
+                                        Events = eventText,
+                                        StDate = today,
+                                        StTime = nowTime,
+                                        UserName = Baseknow.UUSER ?? CL_HESABDARI.UCurrentUser(),
+                                        SumTime = 0,
+                                        SkId = khazanehNumber,
+                                        Num = currentIDH,
+                                        RowId = 34,
+                                        FxType = normalizedExt,
+                                        Pic = fileBytes
+                                    });
+                                }
+                                else
+                                {
+                                    const string updateSql = @"UPDATE dbo.EVENTS
+                                           SET EVENTS = @Events, STDATE = @StDate, STTIME = @StTime, USERNAME = @UserName,
+                                               SUMTIME = @SumTime, skid = @SkId, num = @Num, tg = @RowId, FXTYPE = @FxType, pic = @Pic
+                                           WHERE IDNUM = @TaskId AND IDD = @EventId";
+                                    dbms.DoExecuteSQL(updateSql, new
+                                    {
+                                        TaskId = taskId,
+                                        Events = eventText,
+                                        StDate = today,
+                                        StTime = nowTime,
+                                        UserName = Baseknow.UUSER ?? CL_HESABDARI.UCurrentUser(),
+                                        SumTime = 0,
+                                        SkId = khazanehNumber,
+                                        Num = currentIDH,
+                                        RowId = 34,
+                                        FxType = normalizedExt,
+                                        Pic = fileBytes,
+                                        EventId = eventId
+                                    });
+                                }
+
+                                currentRow.HasAttachment = true;
+                                universControl.PopNotifyShow("تصویر با موفقیت ضمیمه شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+                            }
+                            else
+                            {
+                                new Msgwin(false, "خطا در ایجاد رکورد اتوماسیون (TASKS).").ShowDialog();
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        new Msgwin(false, "خطا در ذخیره تصویر: " + ex.Message).ShowDialog();
+                    }
+                }
+            }
+        }
+
+        private AutomasionEVNT? GetLatestCheckAttachment(int automationId, int rowId)
+        {
+            var sql = @"SELECT TOP 1 IDNUM,IDD,EVENTS,STDATE,STTIME,USERNAME,COMPANY,SUMTIME,pic,skid,num,tg,FXTYPE 
+                        FROM dbo.EVENTS 
+                        WHERE IDNUM = @idnum AND tg = @tg AND pic IS NOT NULL 
+                        ORDER BY IDD DESC";
+            return dbms.DoGetDataSQL<AutomasionEVNT>(sql, new { idnum = automationId, tg = rowId }).FirstOrDefault();
+        }
+
+           private static bool IsNull(object p)
         {
             if (!(p is null))
             {
@@ -6040,5 +6233,84 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 CL_MenuManager.MenuBaseOnKindOpen(this, dbms, 0, Convert.ToDouble(N_S.Text), false);
             }
         }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // 1. یافتن سطر انتخاب شده
+                // اگر دکمه داخل دیتاگرید است:
+                var btn = sender as FrameworkElement; // یا MenuItem اگر در کلیک راست است
+                var rowItem = btn?.DataContext as PGET_LST;
+
+                // اگر سطر انتخاب شده نال بود (مثلا از طریق ContextMenu روی سطر خالی کلیک شده)
+                if (rowItem == null)
+                {
+                    if (PGET_LST_SUB.SelectedItem is PGET_LST selected)
+                    {
+                        rowItem = selected;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+
+                // 2. اعتبارسنجی
+                if (rowItem.IDH == null || rowItem.IDH <= 0)
+                {
+                    new Msgwin(false, "این سطر هنوز ذخیره نشده و تصویری ندارد.").ShowDialog();
+                    return;
+                }
+
+                long rowIdH = Convert.ToInt64(rowItem.IDH);
+                //double currentHeadId = Convert.ToDouble(ID.Text);
+
+                // 3. پیدا کردن شناسه تسک (پرونده اتوماسیون)
+                long taskId = CL_HESABDARI.Gettaskid(rowIdH, 34); // 34 = کد فرم خزانه
+
+                if (taskId <= 0)
+                {
+                    new Msgwin(false, "پرونده اتوماسیون برای این سند یافت نشد.").ShowDialog();
+                    return;
+                }
+
+                string sqlCheck = $"SELECT TOP 1 IDD FROM dbo.EVENTS WHERE IDNUM = {taskId} AND num = {rowIdH} AND pic IS NOT NULL";
+                var eventId = dbms.DoGetDataSQL<int?>(sqlCheck).FirstOrDefault();
+
+                if (eventId == null || eventId <= 0)
+                {
+                    new Msgwin(false, "تصویری برای این سطر یافت نشد.").ShowDialog();
+                    return;
+                }
+
+                // 5. گرفتن تأییدیه از کاربر
+                Msgwin confirmDlg = new Msgwin(true, "آیا از حذف تصویر ضمیمه شده برای این سطر اطمینان دارید؟");
+                confirmDlg.ShowDialog();
+
+                if (confirmDlg.DialogResult == true)
+                {
+                    _ = AuditLogger.LogActionAsync(
+                          actionType: "DELETE",
+                          tableName: "خزانه داری : حذف تصویر سطر",
+                          recordId: rowItem.IDH.ToString(),
+                          oldValue: $"ID = {ID.Text}",
+                          newValue: null,
+                          additionalInfo: $@"{this.GetType().Name} , EXE PATH : {System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}");
+
+                    dbms.DoExecuteSQL($"UPDATE dbo.EVENTS SET pic = NULL WHERE IDD = {eventId}");
+
+                    // 7. بروزرسانی UI
+                    rowItem.HasAttachment = false; // تغییر پراپرتی برای آپدیت شدن آیکون در گرید
+
+                    universControl.PopNotifyShow("تصویر با موفقیت حذف شد", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
+                }
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, "خطا در حذف تصویر: " + ex.Message).ShowDialog();
+            }
+        }
+
     }
 }
