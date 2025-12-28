@@ -2789,6 +2789,71 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 MODAT_PPID_Enter(); //بروز رسانی سورس نحوه پرداخت بر اساس اعلامیه ها
             }
 
+            // متد کمکی برای شکستن متن به کلمات مجزا و نرمال‌سازی
+            static IEnumerable<string> BuildTokens(string source)
+            {
+                if (string.IsNullOrWhiteSpace(source)) return Enumerable.Empty<string>();
+
+                var normalized = CL_LMethods.NormalizeArabicPersian(source);
+                // جداکننده‌های رایج در نام واحدها
+                char[] separators = ['-', '،', ',', ' ', '/', '\\', '|', '_', '(', ')'];
+
+                return normalized
+                    .Split(separators, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(token => token.Trim()) // حذف فضاهای خالی اضافی
+                    .Where(token => !string.IsNullOrWhiteSpace(token));
+            }
+
+            // منطق اصلی داخل بدنه کد شما
+            if (IsDirectFactor)
+            {
+                try
+                {
+                    // --- شروع منطق هوشمند تشخیص شهر از روی نام واحد ---
+                    if (DEPATMAN.SelectedItem is Prg_Proccessy.SQLMODELS.CTABLES.Custom_DEPART selectedDep)
+                    {
+                        string depName = selectedDep.DEPNAME; // مثلا: "شعبه مرکزی - شیراز"
+
+                        if (!string.IsNullOrWhiteSpace(depName))
+                        {
+                            // 1. تبدیل نام واحد به مجموعه‌ای از کلمات (Token) برای جستجوی سریع
+                            // استفاده از HashSet برای سرعت بالا در جستجو
+                            var depTokens = new HashSet<string>(BuildTokens(depName));
+
+                            var maghsadItems = MAGHSAD.ItemsSource as List<TCOD_CITY>;
+
+                            if (maghsadItems != null)
+                            {
+                                // 2. جستجو در لیست شهرها
+                                var matchedCity = maghsadItems
+                                    .Where(c => !string.IsNullOrWhiteSpace(c.CITYNAME))
+                                    // اولویت با شهرهای چند کلمه‌ای (طولانی‌تر) است تا "خراسان رضوی" قبل از "خراسان" چک شود
+                                    .OrderByDescending(c => c.CITYNAME.Length)
+                                    .FirstOrDefault(city =>
+                                    {
+                                        // کلمات نام شهر را جدا می‌کنیم
+                                        var cityTokens = BuildTokens(city.CITYNAME).ToList();
+
+                                        if (cityTokens.Count == 0) return false;
+
+                                        // شرط تطابق: تمام کلمات شهر باید در کلمات نام واحد وجود داشته باشند
+                                        // مثال: اگر شهر "بندر عباس" است، هم "بندر" و هم "عباس" باید در نام واحد باشند
+                                        return cityTokens.All(token => depTokens.Contains(token));
+                                    });
+
+                                if (matchedCity != null)
+                                {
+                                    Maghsad_Havaleh_Directyfactor = matchedCity.CITYCODE;
+                                }
+                            }
+                        }
+                    }
+                    // --- پایان منطق هوشمند ---
+                }
+                catch { /* Ignore errors in auto-detection */ }
+            }
+
+
             #region DEPATMAN_AfterUpdate
             if (!_navigationManager.IsNewRecord)
             {
@@ -8205,7 +8270,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 {
                     _qre = $@"UPDATE dbo.HEAD_LST
                     SET NUMBER = {NUMBER.Text}, DATE_N = {DATE_N.Text.ToRawTarikh()}, 
-                    TAH = N'{TAH.Text}', MAS = {MAS.Text}, VAS = {VAS}, N_S = {_n_s}, CUST_NO = N'{CUST_NO.SelectedValue}', MOLAH = N'{MOLAH.Text}',
+                    TAH = N'{TAH.Text}', MAS = {(Maghsad_Havaleh_Directyfactor is null ? MAS.Text : Maghsad_Havaleh_Directyfactor)}, VAS = {VAS}, N_S = {_n_s}, CUST_NO = N'{CUST_NO.SelectedValue}', MOLAH = N'{MOLAH.Text}',
                     M_NAGHD = {M_NAGHD2.Text}, MABL_VAR = {MABL_VAR2.Text}, MOIN_VAR = N'{CMB_MOIN_VAR2.SelectedValue}', MABL_HAV = {MABL_HAV2.Text}, MOIN_HAV = N'{CMB_MOIN_HAV2.SelectedValue}',
                     MABL_HAZ = {MABL_HAZ.Text}, MOIN_HAZ = N'{CMB_MOIN_HAZ.SelectedValue}', TAKHFIF = {TAKHFIF2.Text},
                     TAMIR = ISNULL(TAMIR, 0),
@@ -10054,6 +10119,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         public VISITOR_DTL CURRENT_ROW_VISITOR { get; set; }
         public long OKDATE { get; private set; }
         public long OKTIME { get; private set; }
+        public int? Maghsad_Havaleh_Directyfactor { get; private set; }
 
         private void VISITOR_DTL_SUB_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {

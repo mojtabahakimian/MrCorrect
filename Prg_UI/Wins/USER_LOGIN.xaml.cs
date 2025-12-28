@@ -392,9 +392,9 @@ namespace Prg_UI.Wins
             //new TR_FACOTRLST(10).Show();//برگه خروج مواد اولیه جهت تولید
             //new TR_FACOTRLST(11).Show();//صدور برگه خروج سایر مواد از انبار
 
-            new TR_DEED_HEAD().Show();
+            //new TR_DEED_HEAD().Show();
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this);
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
