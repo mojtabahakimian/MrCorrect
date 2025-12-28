@@ -103,7 +103,8 @@ namespace Wins.WinMenus.Checkha
                 else
                 {
                     // Defer the operation until the window is fully rendered
-                    this.Dispatcher.BeginInvoke(new Action(() => {
+                    this.Dispatcher.BeginInvoke(new Action(() =>
+                    {
                         // Try again after the window is fully initialized
                         IntPtr newHandle = new WindowInteropHelper(this).Handle;
                         if (newHandle != IntPtr.Zero)
@@ -228,6 +229,8 @@ namespace Wins.WinMenus.Checkha
         {
             if (!BTN_GO.IsEnabled) { return; }
 
+            #region Validate
+
             if (string.IsNullOrEmpty(mabl.Text) || mabl.Text == "0")
             {
                 universControl.PopNotifyShow("مبلغ نمیتواند خالی باشد.", Pop1, Pop1Text1, Pop_Border1);
@@ -274,11 +277,14 @@ namespace Wins.WinMenus.Checkha
                 universControl.PopNotifyShow("دسته چک نمیتواند خالی باشد !", Pop1, Pop1Text1, Pop_Border1);
                 return;
             }
+            #endregion
 
             #region Report
-            
+
+            bool isFitChoosed = Convert.ToBoolean(RD_FTICHECK.IsChecked);
+
             var report = new StiReport();
-            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Checkha.CHAPCHEK.mrt");
+            using var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Checkha.{(isFitChoosed ? "CHAPCHEK_FIT" : "CHAPCHEK")}.mrt");
             report.Load(pathreport);
 
             // Date
@@ -308,6 +314,10 @@ namespace Wins.WinMenus.Checkha
                 ApplyTextComponentProperties(report, "MABL", record.NUM_TOP, record.NUM_LEFT, record.NUM_HEIGHT, record.NUM_FONT, (float)record.NUM_SIZE, (bool)record.NUM_B, (bool)record.NUM_I, (bool)record.NUM_U, (int)record.NUM_COLOR, (bool)record.NUM_P);
                 ApplyTextComponentProperties(report, "TEXTMABL", record.ALPHA_TOP, record.ALPHA_LEFT, record.ALPHA_HEIGHT, record.ALPHA_FONT, (float)record.ALPHA_SIZE, (bool)record.ALPHA_B, (bool)record.ALPHA_I, (bool)record.ALPHA_U, (int)record.ALPHA_COLOR, (bool)record.ALPHA_P);
                 ApplyTextComponentProperties(report, "VAJH", record.VAJH_TOP, record.VAJH_LEFT, record.VAJH_HEIGHT, record.VAJH_FONT, (float)record.VAJH_SIZE, (bool)record.VAJH_B, (bool)record.VAJH_I, (bool)record.VAJH_U, (int)record.VAJH_COLOR, (bool)record.VAJH_P);
+            }
+            else if (isFitChoosed)
+            {
+
             }
             else
             {

@@ -368,8 +368,8 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
             //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
             //Baseknow.USERCOD = 108; Baseknow.UUSER = "modir-mali";
-            Baseknow.USERCOD = 102; Baseknow.UUSER = "mina mehrnia";
-            //Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
+            //Baseknow.USERCOD = 102; Baseknow.UUSER = "mina mehrnia";
+            Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
 
             CL_Generaly.SHIFT_OF_USER = 1; //شیفت صبح
             CL_Generaly.VAHED_OF_USER = 1; //دپارتمان DEPARTEMAN اداری
@@ -392,9 +392,9 @@ namespace Prg_UI.Wins
             //new TR_FACOTRLST(10).Show();//برگه خروج مواد اولیه جهت تولید
             //new TR_FACOTRLST(11).Show();//صدور برگه خروج سایر مواد از انبار
 
-            new HEAD_LST_BRFR().Show();
+            //new HEAD_LST_BRFR().Show();
 
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CHAPCHEK, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this);
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);

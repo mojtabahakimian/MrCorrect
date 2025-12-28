@@ -93,11 +93,12 @@
                 </ComboBox>
             </StackPanel>
             <DockPanel Margin="0,8,0,0">
-                <Button x:Name="BTN_GO" Style="{StaticResource MaterialDesignFlatButton}" Content="چاپ چک" BorderBrush="{x:Null}" FontSize="12" Height="34" Click="BTN_GO_Click" Width="302" />
-                <StackPanel Orientation="Horizontal" Width="213">
-                    <RadioButton Content="فرمت پیش فرض"  IsChecked="True" FontSize="10" x:Name="RD_DEFAULT" GroupName="RDR" Margin="5" Foreground="{Binding ElementName=GENERAL_RANG,Path=Background}" Padding="4,-1,0,0"/>
-                    <RadioButton Content="فرمت تنظیم شده" IsChecked="False" FontSize="10" x:Name="RD_FORMATDB" GroupName="RDR" Margin="5" Foreground="{Binding ElementName=GENERAL_RANG,Path=Background}" Padding="4,-1,0,0"/>
-                </StackPanel>
+                <Button x:Name="BTN_GO" Style="{StaticResource MaterialDesignFlatButton}" Content="چاپ چک" BorderBrush="{x:Null}" FontSize="12" Height="34" Click="BTN_GO_Click" Width="195" />
+                <UniformGrid Rows="1">
+                    <RadioButton Content="Fit برگه چک"  IsChecked="True" FontSize="9" x:Name="RD_FTICHECK" GroupName="RDR" Margin="5" Foreground="{Binding ElementName=GENERAL_RANG,Path=Background}" Padding="4,-1,0,0"/>
+                    <RadioButton Content="فرمت کاغذ A4 عمودی" x:Name="RD_VERTICAL" IsChecked="False" FontSize="9"  GroupName="RDR" Foreground="{Binding ElementName=GENERAL_RANG,Path=Background}" Padding="4,-1,0,0"/>
+                    <RadioButton Content="فرمت تنظیم شده"  IsChecked="False" FontSize="9" x:Name="RD_FORMATDB" GroupName="RDR" Margin="5" Foreground="{Binding ElementName=GENERAL_RANG,Path=Background}" Padding="4,-1,0,0"/>
+                </UniformGrid>
             </DockPanel>
         </StackPanel>
 
