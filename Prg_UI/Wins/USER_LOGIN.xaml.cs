@@ -756,7 +756,8 @@ namespace Prg_UI.Wins
         private const string UPDATE_SERVER_PATH = @"\\MAIN\ade\EXE\1404";
         private const string TEMP_FILE_SUFFIX = "_UpdateTemp.exe";
         private const int COPY_BUFFER_SIZE = 81920; // 80KB
-        private const int NETWORK_TIMEOUT_SECONDS = 30;
+        private const int READ_TIMEOUT_SECONDS = 20; // Timeout for a single read operation (inactivity timeout)
+        private const int MAX_RETRIES = 10;
 
         private void DisableLoginUI()
         {
@@ -774,6 +775,7 @@ namespace Prg_UI.Wins
         private async Task PerformAutoUpdateAsync()
         {
             string tempExePath = null;
+            string sourcePath = null;
 
             try
             {
@@ -792,7 +794,7 @@ namespace Prg_UI.Wins
 
                 string currentDir = Path.GetDirectoryName(currentExe);
                 string exeName = Path.GetFileName(currentExe);
-                string sourcePath = Path.Combine(UPDATE_SERVER_PATH, exeName);
+                sourcePath = Path.Combine(UPDATE_SERVER_PATH, exeName);
                 tempExePath = Path.Combine(currentDir, exeName + TEMP_FILE_SUFFIX);
 
                 // 2. Pre-Flight Checks
@@ -815,44 +817,121 @@ namespace Prg_UI.Wins
                     if (UpdateLbl != null) UpdateLbl.Content = "در حال اتصال به سرور...";
                 }
 
-                // 4. Copy File with Resilience
-                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(NETWORK_TIMEOUT_SECONDS)))
+                // 4. Download Loop with Retry and Resume
+                bool downloadSuccess = false;
+                Exception lastException = null;
+
+                for (int attempt = 1; attempt <= MAX_RETRIES; attempt++)
                 {
-                    await CopyFileWithProgressAsync(sourcePath, tempExePath, cts.Token);
+                    try
+                    {
+                        // Calculate resume offset
+                        long startOffset = 0;
+                        if (File.Exists(tempExePath))
+                        {
+                            var fi = new FileInfo(tempExePath);
+                            var sourceFi = new FileInfo(sourcePath);
+
+                            if (fi.Length < sourceFi.Length)
+                            {
+                                startOffset = fi.Length;
+                            }
+                            else if (fi.Length >= sourceFi.Length)
+                            {
+                                // Already downloaded or corrupt (larger).
+                                // If equal, assume success.
+                                if (fi.Length == sourceFi.Length)
+                                {
+                                    downloadSuccess = true;
+                                    break;
+                                }
+                                // If larger, delete and restart
+                                File.Delete(tempExePath);
+                                startOffset = 0;
+                            }
+                        }
+
+                        if (attempt > 1 && UpdateLbl != null)
+                        {
+                            await this.Dispatcher.InvokeAsync(() => UpdateLbl.Content = $"تلاش مجدد {attempt}/{MAX_RETRIES}...");
+                        }
+
+                        await CopyFileWithProgressAsync(sourcePath, tempExePath, startOffset);
+                        downloadSuccess = true;
+                        break; // Success
+                    }
+                    catch (Exception ex)
+                    {
+                        lastException = ex;
+                        // Wait before retry
+                        await Task.Delay(2000);
+                    }
+                }
+
+                if (!downloadSuccess)
+                {
+                    throw lastException ?? new Exception("Download failed after multiple attempts.");
                 }
 
                 // 5. Execute Atomic Swap Script
                 ExecuteUpdateScript(currentExe, tempExePath, exeName, currentDir);
             }
-            catch (OperationCanceledException)
-            {
-                CleanupTemp(tempExePath);
-                ShowErrorAndExit("زمان اتصال به سرور به پایان رسید (Timeout).\nلطفا اتصال شبکه را بررسی کنید.");
-            }
             catch (Exception ex)
             {
                 CleanupTemp(tempExePath);
-                // Log exception to file here
                 ShowErrorAndExit($"خطا در بروزرسانی خودکار:\n{ex.Message}");
             }
         }
 
-        private async Task CopyFileWithProgressAsync(string source, string destination, CancellationToken token)
+        private async Task CopyFileWithProgressAsync(string source, string destination, long startOffset)
         {
+            // Open source
             using (var sourceStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, COPY_BUFFER_SIZE, true))
-            using (var destinationStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, COPY_BUFFER_SIZE, true))
+            // Open destination (OpenOrCreate to support resume)
+            using (var destinationStream = new FileStream(destination, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, COPY_BUFFER_SIZE, true))
             {
-                var buffer = new byte[COPY_BUFFER_SIZE];
                 long totalBytes = sourceStream.Length;
-                long totalRead = 0;
+
+                // Seek to offset
+                if (startOffset > 0)
+                {
+                    if (startOffset > totalBytes) startOffset = 0; // Safety check
+
+                    sourceStream.Seek(startOffset, SeekOrigin.Begin);
+                    destinationStream.Seek(startOffset, SeekOrigin.Begin);
+                }
+                else
+                {
+                    // Ensure we start from 0 if no offset (truncate if exists but we want fresh start)
+                    destinationStream.SetLength(0);
+                }
+
+                var buffer = new byte[COPY_BUFFER_SIZE];
+                long totalRead = startOffset;
                 int bytesRead;
 
-                // Throttling UI updates to avoid freezing (Update every 100ms max)
                 var lastUpdate = DateTime.MinValue;
 
-                while ((bytesRead = await sourceStream.ReadAsync(buffer, 0, buffer.Length, token)) > 0)
+                while (totalRead < totalBytes)
                 {
-                    await destinationStream.WriteAsync(buffer, 0, bytesRead, token);
+                    // Read with timeout
+                    var readTask = sourceStream.ReadAsync(buffer, 0, buffer.Length);
+
+                    try
+                    {
+                        // Use WaitAsync for timeout logic
+                        // This prevents indefinite hanging on a dead connection
+                        bytesRead = await readTask.WaitAsync(TimeSpan.FromSeconds(READ_TIMEOUT_SECONDS));
+                    }
+                    catch (TimeoutException)
+                    {
+                        throw new IOException("Connection timed out (Read).");
+                    }
+
+                    if (bytesRead == 0) break; // End of stream
+
+                    // Write to local file
+                    await destinationStream.WriteAsync(buffer, 0, bytesRead);
                     totalRead += bytesRead;
 
                     if (totalBytes > 0 && (DateTime.Now - lastUpdate).TotalMilliseconds > 100)
@@ -860,7 +939,6 @@ namespace Prg_UI.Wins
                         double progress = (double)totalRead / totalBytes * 100;
                         lastUpdate = DateTime.Now;
 
-                        // Use Dispatcher.InvokeAsync for non-blocking UI update
                         await this.Dispatcher.InvokeAsync(() =>
                         {
                             if (UpdatePrg != null) UpdatePrg.Value = progress;
