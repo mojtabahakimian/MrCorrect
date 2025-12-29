@@ -34,13 +34,15 @@
         <Name>DataSource1</Name>
         <NameInSource>MS SQL</NameInSource>
         <Parameters isList="true" count="0" />
-        <SqlCommand>SELECT FKNAME, FMNAME, FTNAME, NAMES, SHARH, MABL, nonames, TKNAME, TMNAME, TTNAME, DT, KK FROM dbo.PGET_HED_REP WHERE (DT &gt;= 14030801 And DT &lt;= 99991230)</SqlCommand>
+        <SqlCommand>{Q_PARM}</SqlCommand>
       </DataSource1>
     </DataSources>
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Resources isList="true" count="0" />
-    <Variables isList="true" count="0" />
+    <Variables isList="true" count="1">
+      <value>,Q_PARM,Q_PARM,,System.String,,False,False,False,False,,,True</value>
+    </Variables>
   </Dictionary>
   <EngineVersion>EngineV2</EngineVersion>
   <GlobalizationStrings isList="true" count="1">
@@ -825,10 +827,10 @@
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>4/5/2025 3:29:45 PM</ReportChanged>
+  <ReportChanged>12/29/2025 12:19:20 AM</ReportChanged>
   <ReportCreated>9/5/2021 1:38:11 PM</ReportCreated>
-  <ReportFile>C:\prg\Made Reports\All\R_DP_DAYLY.mrt</ReportFile>
-  <ReportGuid>da65245151c843d8bb2d3f90a06356d3</ReportGuid>
+  <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\HESABDARI\R_DP_DAYLY.mrt</ReportFile>
+  <ReportGuid>6351575aea3944efa4b03b81acd20f48</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

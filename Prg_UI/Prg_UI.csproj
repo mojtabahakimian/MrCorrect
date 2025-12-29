@@ -159,8 +159,10 @@
 		<None Remove="UiDrive\EXEFILES\Preloader.exe" />
 		<None Remove="UiDrive\FNT\IRANYekanFN.TTF" />
 		<None Remove="UiDrive\IMGS\budget.jpg" />
+		<None Remove="UiDrive\IMGS\CHECKGUIDE.jpg" />
 		<None Remove="UiDrive\IMGS\CHECKGUIDE.png" />
 		<None Remove="UiDrive\IMGS\FirstBaseDesk.png" />
+		<None Remove="UiDrive\IMGS\FitCheck.png" />
 		<None Remove="UiDrive\IMGS\MCR.ico" />
 		<None Remove="UiDrive\IMGS\MCR.png" />
 		<None Remove="UiDrive\IMGS\PICMENU\AnbargardaniSanad.png" />
@@ -568,6 +570,8 @@
 		<EmbeddedResource Include="Rpts\Visitory\Visit_gol_dtl_REP_print_grp.mrt" />
 		<EmbeddedResource Include="Rpts\Visitory\R_LIST_VISIT_DAY.mrt" />
 		<EmbeddedResource Include="UiDrive\EXEFILES\Preloader.exe" />
+		<Resource Include="UiDrive\IMGS\CHECKGUIDE.jpg" />
+		<Resource Include="UiDrive\IMGS\FitCheck.png" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -738,7 +742,6 @@
 	<ItemGroup>
 		<Resource Include="UiDrive\FNT\IRANYekanFN.TTF" />
 		<Resource Include="UiDrive\IMGS\budget.jpg" />
-		<Resource Include="UiDrive\IMGS\CHECKGUIDE.png" />
 		<Resource Include="UiDrive\IMGS\FirstBaseDesk.png" />
 		<Resource Include="UiDrive\IMGS\PICMENU\AnbargardaniSanad.png" />
 		<Resource Include="UiDrive\IMGS\PICMENU\ANBAR\Anbar_Gardani.png" />

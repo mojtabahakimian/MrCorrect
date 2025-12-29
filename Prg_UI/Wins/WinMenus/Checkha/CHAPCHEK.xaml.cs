@@ -412,7 +412,16 @@ namespace Wins.WinMenus.Checkha
 
         private void BTN_HELP_Click(object sender, RoutedEventArgs e)
         {
-            new WIN_GUIDECHECK().ShowDialog();
+            WIN_GUIDECHECK Guide_Win = new WIN_GUIDECHECK();
+            if (RD_FTICHECK.IsChecked == true) 
+            {
+                Guide_Win.TYPE_GUIDE = 1;
+            }
+            else if (RD_VERTICAL.IsChecked == true)
+            {
+                Guide_Win.TYPE_GUIDE = 2;
+            }
+            Guide_Win.ShowDialog();
         }
     }
 }

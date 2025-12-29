@@ -21,6 +21,29 @@
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+
+        <Style x:Key="GuideTextStyle" TargetType="TextBlock">
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{StaticResource MaterialDesignBody}"/>
+        </Style>
+
+        <Style x:Key="StepNumberStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource PrimaryHueMidBrush}"/>
+            <Setter Property="CornerRadius" Value="50"/>
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+        </Style>
+        <Style x:Key="StepNumberText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
@@ -54,20 +77,110 @@
         <!--HEADER↑-->
 
         <!--Start.......................................................................................-->
-        <Label Content="برای چاپ چک ابتدا موارد زیر را بررسی کنید" Margin="13,57,9,0" VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FlowDirection="RightToLeft" FontWeight="Bold" FontSize="14"/>
-        <TextBlock TextWrapping="Wrap" Margin="26,164,30,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Height="46"><Run FlowDirection="RightToLeft" Text="2"/><Run Text="- برای تست"/><Run Text=","/><Run Text=" ابتدا یک برگه کاغذ A4 را به اندازه ی یک"/><Run Text=" برگ"/><Run Text=" چک برش دهید"/><Run Text=" , "/><Run Text="دقت کنید که تما"/><Run Text="ما"/><Run Text=" از لحاظ ابعاد با برگ چک یکی باشد"/><Run Text=", از "/><Run Language="fa-ir" Text="این"/><Run Text=" کاغذ به عنوان برگ چک برای تست چاپ چک استفاده کنید و بعد از چاپ این کاغذ را با یک برگ واقعی چک مقایسه کنید , تا از مناسب بودن چاپ اطمینان حاصل کنید."/></TextBlock>
-        <TextBlock TextWrapping="Wrap" Margin="26,120,30,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Height="24"><Run FlowDirection="RightToLeft" Language="fa-ir" Text="1- اگر فاصله اجزای چک را از کاغذ ندارید از &quot;فرمت پیش فرض&quot; استفاده کنید."/></TextBlock>
-        <TextBlock TextWrapping="Wrap" Margin="48,214,30,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Height="54"><Run Text="3- برگ چک را مانند تصویر به صورت افقی روی کاغذ های A4 (کاغد های A4 به صورت عادی یا همون عمودی باشند) , بالا گوشه سمت راست کاغذ تنظیم کنید."/><LineBreak/><Run/></TextBlock>
+        <Grid Margin="0,40,0,0" FlowDirection="RightToLeft">
+            <Grid Grid.Row="1" Margin="20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.5*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
 
-        <UniformGrid Margin="48,276,582,132">
-            <Image Stretch="Uniform" >
-                <Image.Source>
-                    <BitmapImage DecodePixelWidth="400" DecodePixelHeight="400" UriSource="/UiDrive/IMGS/CHECKGUIDE.png" CacheOption="OnLoad"/>
-                </Image.Source>
-            </Image>
-        </UniformGrid>
-        <TextBlock TextWrapping="Wrap" Margin="458,286,30,0" VerticalAlignment="Top" FlowDirection="RightToLeft" Height="140"><Run Text="4- اطمینان حاصل کنید که تنظیمات مربوط به پرینتر (General &gt; Preferences) روی این حالت ها باشد :"/><LineBreak/><Run/><LineBreak/><Run Text="- Orientation (جهت کاغذ) = Portrait (عمودی)"/><LineBreak/><Run/><LineBreak/><Run Text="- Original Size (اندازه کاغذ) = A4"/><LineBreak/><Run/><LineBreak/><Run/></TextBlock>
+                <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                    <TextBlock Text="نکات مهم قبل از چاپ" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,0,0,15" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
 
+
+                    <materialDesign:Card Padding="10" Margin="0,0,0,10" UniformCornerRadius="8">
+                        <DockPanel>
+                            <Border Style="{StaticResource StepNumberStyle}">
+                                <TextBlock Text="1" Style="{StaticResource StepNumberText}"/>
+                            </Border>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource GuideTextStyle}" FontWeight="Bold" Text="تست چاپ روی کاغذ معمولی:"/>
+                                <TextBlock Style="{StaticResource GuideTextStyle}" Margin="0,5,0,0" Text="یک کاغذ A4 را دقیقاً به اندازه ابعاد چک برش دهید. ابتدا روی این کاغذ تستی چاپ بگیرید و با چک اصلی مقایسه کنید تا از هدر رفتن برگ چک جلوگیری شود."/>
+                            </StackPanel>
+                        </DockPanel>
+                    </materialDesign:Card>
+
+                    <materialDesign:Card Padding="10" Margin="0,0,0,10" UniformCornerRadius="8">
+                        <DockPanel>
+                            <Border Style="{StaticResource StepNumberStyle}">
+                                <TextBlock Text="2" Style="{StaticResource StepNumberText}"/>
+                            </Border>
+                            <TextBlock x:Name="TXB_2" Visibility="Visible" Style="{StaticResource GuideTextStyle}" Text="برگ چک را مطابق تصویر روبرو، به صورت افقی (Landscape) در گوشه سمت راست سینی کاغذ A4 قرار دهید."/>
+                        </DockPanel>
+                    </materialDesign:Card>
+
+                    <materialDesign:Card x:Name="CARD_3" Padding="10" UniformCornerRadius="8" Background="#FFF4F4F4">
+                        <DockPanel>
+                            <Border Style="{StaticResource StepNumberStyle}" Background="#607D8B">
+                                <TextBlock Text="3" Style="{StaticResource StepNumberText}"/>
+                            </Border>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource GuideTextStyle}" FontWeight="Bold" Text="تنظیمات درایور پرینتر (Preferences):"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                    <materialDesign:PackIcon Kind="FileDocumentOutline" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                    <TextBlock Text="Orientation: Portrait (عمودی)" Style="{StaticResource GuideTextStyle}" Margin="0,0,15,0"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                    <materialDesign:PackIcon Kind="RulerSquare" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                    <TextBlock Text="Size: A4" Style="{StaticResource GuideTextStyle}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </DockPanel>
+                    </materialDesign:Card>
+                </StackPanel>
+
+                <Border Grid.Column="1" Background="#FAFAFA" CornerRadius="10" BorderBrush="#EEEEEE" BorderThickness="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="نحوه قرارگیری در پرینتر" HorizontalAlignment="Center" Margin="10" FontWeight="Bold" Opacity="0.6"/>
+
+                        <Viewbox x:Name="VB_VERTICAL" Grid.Row="1" Margin="20" Stretch="Uniform">
+                            <Canvas Width="210" Height="297" Background="White">
+                                <Canvas.Effect>
+                                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>
+                                </Canvas.Effect>
+
+                                <Rectangle Width="210" Height="297" Stroke="#CCCCCC" StrokeThickness="1" StrokeDashArray="4 2"/>
+                                <TextBlock Text="سینی کاغذ (A4)" Canvas.Left="65" Canvas.Top="150" Foreground="#CCCCCC" FontSize="10" RenderTransformOrigin="0.5,0.5">
+                                    <TextBlock.RenderTransform>
+                                        <RotateTransform Angle="-45"/>
+                                    </TextBlock.RenderTransform>
+                                </TextBlock>
+
+                                <Border Width="170" Height="85" Canvas.Top="0" BorderBrush="#7B1FA2" BorderThickness="1" Background="#F3E5F5" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <Grid>
+                                        <Image Source="/UiDrive/IMGS/CHECKGUIDE.jpg"  Stretch="UniformToFill" Opacity="0.9"/>
+
+                                        <Border Background="#AA000000" VerticalAlignment="Center" HorizontalAlignment="Center" CornerRadius="4" Padding="4">
+                                            <TextBlock Text="محل قرارگیری چک" Foreground="White" FontSize="10"/>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+
+                                <Path Fill="#FF5722" Data="M 125,90 L 125,110 L 115,110 L 135,130 L 155,110 L 145,110 L 145,90 Z" Canvas.Left="0" Canvas.Top="0"/>
+                                <TextBlock Text="جهت ورود به پرینتر" Canvas.Left="100" Canvas.Top="135" FontSize="8" Foreground="#FF5722"/>
+
+                            </Canvas>
+                        </Viewbox>
+
+                        <Viewbox x:Name="VB_FITCHECKIMAGE" Visibility="Hidden" Grid.Row="1" Margin="20" Stretch="Uniform">
+                            <Image Stretch="Uniform" >
+                                <Image.Source>
+                                    <BitmapImage DecodePixelWidth="800" DecodePixelHeight="1024" UriSource="/UiDrive/IMGS/FitCheck.png" CacheOption="OnLoad"/>
+                                </Image.Source>
+                            </Image>
+                        </Viewbox>
+
+
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+      
     </Grid>
 </Window>
 
