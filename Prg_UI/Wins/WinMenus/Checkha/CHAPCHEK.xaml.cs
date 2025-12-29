@@ -303,6 +303,9 @@ namespace Wins.WinMenus.Checkha
             var _VAJH_ = report.GetComponentByName("VAJH") as StiText;
             _VAJH_.Text = VAJH.Text + "*******************************************************************";
 
+            var _SHANASEH_ = report.GetComponentByName("CODEIDENTITY") as StiText;
+            _SHANASEH_.Text = SHANASEH.Text;
+
             long COBANK = Convert.ToInt64(MOIN.SelectedValue);
             byte COKIND = Convert.ToByte(kindp.SelectedValue);
             var record = dbms.DoGetDataSQL<FORMAT>($"SELECT * FROM FORMAT WHERE BANK = {COBANK} AND KIND = {COKIND}").FirstOrDefault();
@@ -413,7 +416,7 @@ namespace Wins.WinMenus.Checkha
         private void BTN_HELP_Click(object sender, RoutedEventArgs e)
         {
             WIN_GUIDECHECK Guide_Win = new WIN_GUIDECHECK();
-            if (RD_FTICHECK.IsChecked == true) 
+            if (RD_FTICHECK.IsChecked == true)
             {
                 Guide_Win.TYPE_GUIDE = 1;
             }
@@ -422,6 +425,10 @@ namespace Wins.WinMenus.Checkha
                 Guide_Win.TYPE_GUIDE = 2;
             }
             Guide_Win.ShowDialog();
+        }
+
+        private void mabl_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
         }
     }
 }

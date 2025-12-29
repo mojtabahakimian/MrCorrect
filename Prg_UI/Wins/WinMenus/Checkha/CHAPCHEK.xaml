@@ -63,15 +63,17 @@
 
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                 <Label Content="مبلغ:" Width="auto" Padding="34,4,4,4"/>
-                <CNC:NumericTextBox FlowDirection="LeftToRight" x:Name="mabl" DoesAcceptDouble="False" MaxLength="15" ThreeTwoZero="True" DigitGroupOnEnter="True" IsDigitGroupActive="True" Text="0" Height="30" Visibility="Visible" Width="170"/>
+                <CNC:NumericTextBox FlowDirection="LeftToRight" x:Name="mabl" DoesAcceptDouble="False" MaxLength="15" PreviewGotKeyboardFocus="mabl_PreviewGotKeyboardFocus" ThreeTwoZero="True" DigitGroupOnEnter="True" IsDigitGroupActive="True" Text="0" Height="30" Visibility="Visible" Width="170"/>
             </StackPanel>
 
             <StackPanel  Orientation="Horizontal" Margin="0,5,0,0">
                 <Label Content="دروجه:" FlowDirection="RightToLeft" Width="auto" Padding="25,4,4,4"/>
-                <TextBox x:Name="VAJH" Text="" Height="30" TextAlignment="Left" Style="{StaticResource FuzzyOut}" Padding="3" TextWrapping="Wrap"  Visibility="Visible" Width="467" />
+                <TextBox x:Name="VAJH" Text="" Height="30" TextAlignment="Left" Style="{StaticResource FuzzyOut}" Padding="3" TextWrapping="Wrap"  Visibility="Visible" Width="240" />
+                <Label Content="شناسه ملی:" FlowDirection="RightToLeft" Width="auto" Padding="5,4,4,4"/>
+                <TextBox x:Name="SHANASEH" Text="" Height="30" MaxLength="20" TextAlignment="Left" Style="{StaticResource FuzzyOut}" Padding="3" TextWrapping="Wrap"  Visibility="Visible" Width="170" />
             </StackPanel>
 
-            <StackPanel  Orientation="Horizontal" Margin="0,5,0,0">
+            <StackPanel x:Name="SP_AZ_HESAB" Visibility="Visible" Orientation="Horizontal" Margin="0,5,0,0">
                 <Label Content="از حساب:" FlowDirection="RightToLeft" Width="auto" Padding="12,4,4,4"/>
                 <ComboBox x:Name="MOIN" Padding="7,0,10,0" SelectedValuePath="CODE" DisplayMemberPath="NAMES" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1" Width="212">
                     <ComboBox.ItemsPanel>
@@ -82,7 +84,7 @@
                 </ComboBox>
             </StackPanel>
 
-            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+            <StackPanel x:Name="SP_DASTEHCHECK" Visibility="Visible" Orientation="Horizontal" Margin="0,5,0,0">
                 <Label Content="دسته چک:" FlowDirection="RightToLeft" Width="auto"/>
                 <ComboBox x:Name="kindp" SelectedValuePath="CO_KIND" DisplayMemberPath="KIND" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1" Width="212">
                     <ComboBox.ItemsPanel>
