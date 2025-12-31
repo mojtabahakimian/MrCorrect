@@ -283,16 +283,22 @@
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>-->
 
-                    <DataGridTemplateColumn Header="تصویر" Width="95">
+
+                    <DataGridTemplateColumn IsReadOnly="True" CanUserResize="False" Header="تصویر">
+                        <DataGridTemplateColumn.CellStyle>
+                            <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                <Setter Property="IsTabStop" Value="False" />
+                            </Style>
+                        </DataGridTemplateColumn.CellStyle>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button x:Name="BTN_ATTACH" IsTabStop="False" Click="BTN_ATTACH_Click" Tag="{Binding}"
-                                    materialDesign:ButtonAssist.CornerRadius="2"
-                                    Style="{StaticResource MaterialDesignFlatButton}"
-                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
-                                    HorizontalContentAlignment="Center"
-                                    ToolTip="مشاهده/افزودن تصویر">
-                                    <materialDesign:PackIcon Width="20" Height="20">
+                                <Button x:Name="BTN_ATTACH" Click="BTN_ATTACH_Click" Tag="{Binding}"
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        ToolTip="مشاهده/افزودن تصویر"
+                                        IsTabStop="False" materialDesign:ButtonAssist.CornerRadius="2"
+                                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                                        Margin="-14,-7,-14,-7" HorizontalContentAlignment="Center">
+                                    <materialDesign:PackIcon Width="18" Height="18">
                                         <materialDesign:PackIcon.Style>
                                             <Style TargetType="materialDesign:PackIcon">
                                                 <Setter Property="Kind" Value="Paperclip" />
