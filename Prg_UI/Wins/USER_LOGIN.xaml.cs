@@ -381,8 +381,8 @@ namespace Prg_UI.Wins
 
             //new WinBase().Show();
             //new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED().Show();
-            new F_MENU_DATE("KHCUST").Show();
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this);
+            //new TR_STUF_DEF_WIN().Show();
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID, this);
 
             //new F_MENU_GOZARESH_FROOSH("FR").ShowDialog();
 

@@ -44,5 +44,11 @@ namespace Prg_Proccessy.SQLMODELS
         public DateTime? CRT { get => _crt; set { if (_crt == value) return; _crt = value; OnPropertyChanged("CRT"); } }
         private int? _uid;
         public int? UID { get => _uid; set { if (_uid == value) return; _uid = value; OnPropertyChanged("UID"); } }
+
+        public long? UP_DATE { get; set; }
+        public double? UP_TIME { get; set; }
+        public string? UP_USER_NAME { get; set; }
+        public string? PC_NAME { get; set; }
+        public string? IPADD { get; set; }
     }
 }

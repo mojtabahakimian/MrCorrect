@@ -68,7 +68,8 @@
 
         <DataGrid x:Name="TDETA_HES2_SUB" ItemsSource="{Binding TDETA_HES2_DATA}"
               ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"  
-                  ContextMenu="{StaticResource DataGridContextMenu}"
+              ContextMenu="{StaticResource DataGridContextMenu}"
+              CommandManager.PreviewExecuted="TDETA_HES2_SUB_PreviewExecuted"
               PreviewMouseRightButtonDown="DataGrid_PreviewMouseRightButtonDown"
               MouseRightButtonUp="DG_SUB_MouseRightButtonUp"
               ContextMenuOpening="DG_SUB_ContextMenuOpening" 

@@ -1022,7 +1022,11 @@ namespace Functions
             /// <summary>
             /// سوابق سند دستی | صدور و ویرایش اسناد
             /// </summary>
-            TR_DEED_HEAD
+            TR_DEED_HEAD,
+            /// سوابق تعریف کالا
+            /// </summary>
+            TR_HISTORY_STUF_DEF,
+            /// <summary>
         }
         #endregion
 
@@ -1041,6 +1045,11 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+
+                case WinNameType.TR_HISTORY_STUF_DEF: //سوابق تعریف کالا
+                    CL_LMethods.OpenWindow(OWNERWIN, new TR_STUF_DEF_WIN(), isModalDialog: false, allowMultipleInstances: false);
+                    break;
+
                 case WinNameType.TR_DEED_HEAD: //سوابق سند دستی | صدور و ویرایش اسناد
                     CL_LMethods.OpenWindow(OWNERWIN, new TR_DEED_HEAD(), isModalDialog: false, allowMultipleInstances: false);
                     break;

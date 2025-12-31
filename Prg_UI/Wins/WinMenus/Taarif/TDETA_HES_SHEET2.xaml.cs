@@ -770,33 +770,32 @@ namespace Wins.WinMenus.Taarif
 
             if (!BodyIsValid(e.Row.Item as TDETA_HES2))
             {
-
-                TDETA_HES2_SUB.CellEditEnding -= TDETA_HES2_SUB_CellEditEnding;
-                TDETA_HES2_SUB.RowEditEnding -= TDETA_HES2_SUB_RowEditEnding;
-
                 e.Cancel = true;
-                TDETA_HES2_SUB.CancelEdit(DataGridEditingUnit.Cell);
+                //TDETA_HES2_SUB.CellEditEnding -= TDETA_HES2_SUB_CellEditEnding;
+                //TDETA_HES2_SUB.RowEditEnding -= TDETA_HES2_SUB_RowEditEnding;
 
-                //// Optional: Force focus back to the row/first invalid cell if needed
-                //Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() =>
-                //{
-                //    if (e.Row != null)
-                //    {
-                //        var dg = sender as DataGrid;
-                //        if (dg != null)
-                //            dg.SelectedItem = e.Row;
+                //TDETA_HES2_SUB.CancelEdit(DataGridEditingUnit.Cell);
 
-                //        e.Row.Focus(); // Focus the row container
-                //                       // Find the first cell with an error and focus it - Requires more complex helper
-                //                       // Example: Focus the known required cell if it's likely the cause
-                //        var cell = CL_LMethods.GetCell(TDETA_HES2_SUB, e.Row.GetIndex(), NAME_CODE_INDEX_COL); // Focus TNUMBER2 cell
-                //        if (cell != null) cell.Focus();
-                //        TDETA_HES2_SUB.BeginEdit(); // Ensure the cell is editable
-                //    }
-                //}));
+                ////// Optional: Force focus back to the row/first invalid cell if needed
+                ////Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() =>
+                ////{
+                ////    if (e.Row != null)
+                ////    {
+                ////        var dg = sender as DataGrid;
+                ////        if (dg != null)
+                ////            dg.SelectedItem = e.Row;
 
-                TDETA_HES2_SUB.RowEditEnding += TDETA_HES2_SUB_RowEditEnding;
-                TDETA_HES2_SUB.CellEditEnding += TDETA_HES2_SUB_CellEditEnding;
+                ////        e.Row.Focus(); // Focus the row container
+                ////                       // Find the first cell with an error and focus it - Requires more complex helper
+                ////                       // Example: Focus the known required cell if it's likely the cause
+                ////        var cell = CL_LMethods.GetCell(TDETA_HES2_SUB, e.Row.GetIndex(), NAME_CODE_INDEX_COL); // Focus TNUMBER2 cell
+                ////        if (cell != null) cell.Focus();
+                ////        TDETA_HES2_SUB.BeginEdit(); // Ensure the cell is editable
+                ////    }
+                ////}));
+
+                //TDETA_HES2_SUB.RowEditEnding += TDETA_HES2_SUB_RowEditEnding;
+                //TDETA_HES2_SUB.CellEditEnding += TDETA_HES2_SUB_CellEditEnding;
 
                 return;
             }
@@ -1242,6 +1241,37 @@ namespace Wins.WinMenus.Taarif
             }
 
             base.OnContextMenuOpening(e);
+        }
+
+        private void TDETA_HES2_SUB_PreviewExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                if (e.Command != DataGrid.CommitEditCommand)
+                {
+                    return;
+                }
+
+                var grid = sender as DataGrid ?? TDETA_HES2_SUB;
+                if (grid is null)
+                {
+                    return;
+                }
+
+                var itemsView = grid.Items as IEditableCollectionView;
+                var hasInvalidCell = !grid.CurrentCell.IsValid || grid.CurrentItem is null || grid.SelectedItem is null;
+
+                if (hasInvalidCell)
+                {
+                    bool canCancel = itemsView?.CanCancelEdit == true && (itemsView.IsEditingItem || itemsView.IsAddingNew);
+                    if (canCancel)
+                    {
+                        itemsView!.CancelEdit();
+                    }
+                    e.Handled = true;
+                }
+            }
+            catch (Exception) { }
         }
     }
 }
