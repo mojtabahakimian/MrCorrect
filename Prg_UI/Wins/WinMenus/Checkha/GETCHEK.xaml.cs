@@ -1,4 +1,4 @@
-﻿using MaterialDesignThemes.Wpf;
+using MaterialDesignThemes.Wpf;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
@@ -55,6 +55,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         public string DATE_CHEK_ARG { get; set; }
         public int INDEX_DG { get; set; }
         public bool NowIsReady { get; private set; }
+
+        private long? CurrentRecordID = null;
 
         public GETCHEK(Visual the_win, string _mabl_chek_arg = null, int _current_index = -1, bool isreadonly = false)
         {
@@ -146,6 +148,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 var CheckExistData = dbms.DoGetDataSQL<PAY_GETD>($"SELECT TOP 1 * FROM PAY_GETD WHERE N_SERI = {KhazanehRow.N_SERI} AND BANK = {KhazanehRow.BANK} AND MABL = {KhazanehRow.MABL} ORDER BY RADIF").ToList();
                 if (CheckExistData.Count > 0)
                 {
+                    CurrentRecordID = CheckExistData.FirstOrDefault()?.ID; // Capture ID
+
                     RADIF.Text = CheckExistData.FirstOrDefault()?.RADIF.ToString();
                     N_SERI.Text = CheckExistData.FirstOrDefault()?.N_SERI.ToString();
                     BANK.SelectedValue = CheckExistData.FirstOrDefault()?.BANK.ToString();
@@ -387,13 +391,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         /// متد جدید برای بروزرسانی HES1 در PAY_GETD هنگام تغییر مشتری در دریافت چک
         /// این متد از مغایرت بین خزانه و دفتر چک جلوگیری می‌کند
         /// </summary>
-        /// <param name="n_seri">شماره سریال چک</param>
-        /// <param name="bank">کد بانک</param>
-        /// <param name="date_s">تاریخ سررسید</param>
+        /// <param name="id">شناسه رکورد چک</param>
         /// <param name="newCustNo">شناسه حساب جدید مشتری (CUST_NO)</param>
-        private void UpdateCheckHES1WhenCustomerChanges(string n_seri, string bank, string date_s, string newCustNo)
+        private void UpdateCheckHES1WhenCustomerChanges(long? id, string newCustNo)
         {
-            if (string.IsNullOrWhiteSpace(n_seri) || string.IsNullOrWhiteSpace(bank) || string.IsNullOrWhiteSpace(date_s))
+            if (id == null || id <= 0)
             {
                 return;
             }
@@ -406,15 +408,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 dbms.DoExecuteSQL(@"
                     UPDATE dbo.PAY_GETD 
                     SET HES1 = @HES1
-                    WHERE N_SERI = @N_SERI 
-                      AND BANK = @BANK 
-                      AND DATE_S = @DATE_S",
+                    WHERE ID = @ID",
                     new
                     {
                         HES1 = newCustNo,
-                        N_SERI = n_seri,
-                        BANK = bank,
-                        DATE_S = date_s
+                        ID = id
                     });
             }
             catch (Exception ex)
@@ -528,7 +526,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 {
                     ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).N_SERI = Convert.ToDouble(N_SERI.Text);
                     ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).BANK = Convert.ToInt32(BANK.SelectedValue);
-                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).SHARH = Strings.Left("چك" + N_SERI.Text + "بانك" + CL_HESABDARI.GETBANK(Convert.ToDouble(BANK.SelectedValue)) + " " + SHOBEH.SelectedValue + " مورخ " + Strings.Format(Convert.ToInt32(DATE_S.Text.ToRawTarikh()), "####/##/##") + "-" + NAME_TAH.Text, 255);
+                    ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).SHARH = Strings.Left(" چك" + N_SERI.Text + "بانك" + CL_HESABDARI.GETBANK(Convert.ToDouble(BANK.SelectedValue)) + " " + SHOBEH.SelectedValue + " مورخ " + Strings.Format(Convert.ToInt32(DATE_S.Text.ToRawTarikh()), "####/##/##") + "-" + NAME_TAH.Text, 255);
                     CANCEL = false;
                 }
                 if (this.CUST_NO != ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST).FHES || IsNull(this.CUST_NO))
@@ -585,21 +583,21 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     }
                 }
 
+                PAY_GETD existingRecord = null;
+                if (CurrentRecordID != null && CurrentRecordID > 0)
+                {
+                    existingRecord = dbms.DoGetDataSQL<PAY_GETD>($"SELECT TOP 1 * FROM PAY_GETD WHERE ID = {CurrentRecordID}").FirstOrDefault();
+                }
 
-                var KhazanehRow = ((THE_WIN as PGET_HED).PGET_LST_SUB.Items[INDEX_DG] as PGET_LST);
-                var CheckExistData = dbms.DoGetDataSQL<PAY_GETD>($"SELECT TOP 1 * FROM PAY_GETD WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()} ORDER BY RADIF").ToList();
                 var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
                 var _SHOBEH_ = SHOBEH.SelectedValue.ToStringNullSafe().Length > 20 ? SHOBEH.SelectedValue.ToStringNullSafe().Substring(0, 19) : SHOBEH.SelectedValue.ToStringNullSafe();
 
                 var _SAYADI_ = SAYADI.Text.Length > 16 ? SAYADI.Text.Substring(0, 16) : SAYADI.Text;
 
                 string selected = HES?.SelectedValue?.ToString(); //به حساب
-                bool isVagozarShodeh = CheckExistData.FirstOrDefault()?.VAZ == 4; //وضعیت این چک واگذار شده
-                string oldCustNo = null;
-                if (CheckExistData.Count > 0)
-                {
-                    oldCustNo = CheckExistData.FirstOrDefault()?.CUST_NO;
-                }
+                bool isVagozarShodeh = existingRecord?.VAZ == 4; //وضعیت این چک واگذار شده
+                string oldCustNo = existingRecord?.CUST_NO;
+
                 // بررسی آیا مشتری تغییر کرده است
                 bool customerChanged = !string.IsNullOrWhiteSpace(oldCustNo) &&
                                        !string.IsNullOrWhiteSpace(CUST_NO) &&
@@ -666,7 +664,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                         ANBAR = ANBAR,
                         RADIF = RADIF.Text,
                         CUST_NO = CUST_NO,
-                        VAZ = CheckExistData.Count > 0 ? (CheckExistData.FirstOrDefault().VAZ ?? 1) : 1,
+                        VAZ = existingRecord != null ? (existingRecord.VAZ ?? 1) : 1,
                         LIST_NO = LIST_NO.SelectedValue,
                         KIND = KIND.SelectedValue,
                         SANDUGH = SANDUGH.SelectedValue,
@@ -674,10 +672,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                         N_HESAB = string.IsNullOrEmpty(N_HESAB.Text) ? (object)DBNull.Value : N_HESAB.Text,
                         N_KOL = string.IsNullOrEmpty(N_KOL) ? (object)DBNull.Value : N_KOL,
                         N_MOIN = string.IsNullOrEmpty(N_MOIN) ? (object)DBNull.Value : N_MOIN,
-                        N_TAF = string.IsNullOrEmpty(N_TAF) ? (object)DBNull.Value : N_TAF
+                        N_TAF = string.IsNullOrEmpty(N_TAF) ? (object)DBNull.Value : N_TAF,
+                        ID = CurrentRecordID
                     };
 
-                    if (CheckExistData.Count > 0)
+                    if (existingRecord != null)
                     {
                         string HESUPDATE_SQL = $"{(isVagozarShodeh ? " ,HES1 = @CUST_NO" : "")}";
                         var updateSql = $@"UPDATE dbo.PAY_GETD 
@@ -701,9 +700,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                                     N_MOIN = @N_MOIN, 
                                     N_TAF = @N_TAF
                                     {HESUPDATE_SQL}
-                                WHERE N_SERI = @N_SERI 
-                                  AND BANK = @BANK 
-                                  AND DATE_S = @DATE_S";
+                                WHERE ID = @ID";
                         dbms.DoExecuteSQL(updateSql, parameters);
 
                         // =====================================================================
@@ -713,9 +710,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                         if (customerChanged)
                         {
                             UpdateCheckHES1WhenCustomerChanges(
-                                N_SERI.Text,
-                                BANK.SelectedValue?.ToString(),
-                                DATE_S.Text.ToRawTarikh(),
+                                CurrentRecordID,
                                 CUST_NO);
                         }
                         // =====================================================================
