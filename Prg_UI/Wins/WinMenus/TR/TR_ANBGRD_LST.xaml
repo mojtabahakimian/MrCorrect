@@ -1,11 +1,11 @@
-﻿<Window x:Class="Prg_UI.Wins.WinMenus.TR.TR_FACOTRLST"
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.TR.TR_ANBGRD_LST"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.TR"
         mc:Ignorable="d"
-        xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+                xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         xmlns:sfusion="clr-namespace:Syncfusion.UI.Xaml.Grid;assembly=Syncfusion.SfGrid.WPF"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:VLD="clr-namespace:Prg_UI.Validatory"
@@ -743,7 +743,7 @@
                     <Label x:Name="WINTILENAME" Padding="21,10,10,10" Foreground="White" Margin="0,0,110,0">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="History" Width="20" Height="20" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                            <TextBlock Text="سابقه ها" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock Text="سابقه انبار گردانی" VerticalAlignment="Center" FontWeight="Bold"/>
                         </StackPanel>
                     </Label>
                     <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click"  Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
@@ -818,9 +818,9 @@
                             </StackPanel>
                             <Button Content="حذف همه فیلتر ها" Style="{StaticResource MaterialDesignFlatButton}" Click="Button_Click" FontSize="12" HorizontalAlignment="Right"/>
                         </DockPanel>
-                        <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" Visibility="Collapsed" d:Visibility="Visible"
+                        <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" Visibility="Visible"
                              ContextMenu="{StaticResource DataGridContextMenu}"
-                             ItemsSource="{Binding FACTOR_DATA}" 
+                             ItemsSource="{Binding ANBGRD_HEAD_DATA}" 
                              CellStyle="{StaticResource SFCELL}"
                              AutoGenerateColumns="False"
                              EnableDataVirtualization="True"
@@ -847,121 +847,21 @@
                              AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" PreviewKeyDown="SYNCFUSION_DG_PreviewKeyDown">
 
                             <syncfusion:SfDataGrid.Columns>
-                                <!-- Update Date -->
-                                <syncfusion:GridTextColumn MappingName="UP_DATE" HeaderText="تاریخ اصلاح" MinimumWidth="110">
-                                    <syncfusion:GridTextColumn.DisplayBinding>
-                                        <Binding Path="UP_DATE" StringFormat="####/##/##" />
-                                    </syncfusion:GridTextColumn.DisplayBinding>
-                                </syncfusion:GridTextColumn>
+                                <syncfusion:GridTextColumn MappingName="GRD_NUM" HeaderText="شماره" TextAlignment="Center"/>
+                                <syncfusion:GridTextColumn MappingName="GRD_DATE" HeaderText="تاریخ" TextAlignment="Center"/>
+                                <syncfusion:GridTextColumn MappingName="GRD_ANBAR_NAME" HeaderText="نام انبار"/>
+                                <syncfusion:GridTextColumn MappingName="GRD_HES_NAME" HeaderText="حساب کسری/اضافات" Width="200"/>
+                                <syncfusion:GridTextColumn MappingName="COMMENT" HeaderText="توضیحات" Width="200"/>
+                                <syncfusion:GridTextColumn MappingName="N_S" HeaderText="شماره سند"/>
+                                <syncfusion:GridTextColumn MappingName="USER_NAME" HeaderText="کاربر ایجاد"/>
 
-                                <!-- Update Time -->
-                                <syncfusion:GridTextColumn MappingName="UpTimeDisplay" HeaderText="زمان اصلاح" MinimumWidth="160" AllowEditing="False">
-                                    <syncfusion:GridTextColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding UpTimeDisplay}" 
-                                                       FlowDirection="LeftToRight"
-                                                       TextAlignment="Center"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center"                                                     
-                                                       Margin="5,0"/>
-                                        </DataTemplate>
-                                    </syncfusion:GridTextColumn.CellTemplate>
-                                </syncfusion:GridTextColumn>
+                                <!-- History Columns -->
+                                <syncfusion:GridTextColumn MappingName="UP_USER_NAME" HeaderText="کاربر تغییر دهنده" />
+                                <syncfusion:GridTextColumn MappingName="UpTimeDisplay" HeaderText="زمان تغییر" />
+                                <syncfusion:GridTextColumn MappingName="UP_DATE" HeaderText="تاریخ تغییر" />
+                                <syncfusion:GridTextColumn MappingName="PC_NAME" HeaderText="نام سیستم" IsHidden="True"/>
+                                <syncfusion:GridTextColumn MappingName="IPADD" HeaderText="IP Address" IsHidden="True"/>
 
-                                <!-- User Name -->
-                                <syncfusion:GridTextColumn MappingName="UP_USER_NAME" HeaderText="کاربر اصلاح کننده" MinimumWidth="150" AllowEditing="False"/>
-
-                                <!-- PC Name -->
-                                <syncfusion:GridTextColumn MappingName="PC_NAME" HeaderText="نام کامپیوتر" MinimumWidth="150" AllowEditing="False"/>
-
-                                <!-- IP Address -->
-                                <syncfusion:GridTextColumn MappingName="IPADD" HeaderText="IP" MinimumWidth="120" AllowEditing="False"/>
-
-                                <syncfusion:GridTextColumn x:Name="NUMBER_FAC_COLUMN" HeaderText="شماره فاکتور" MappingName="NUMBER1" Width="130" ColumnSizer="Auto" IsHidden="True" AllowEditing="False"/>
-                                <syncfusion:GridTextColumn x:Name="NUMBER_HAV_COLUMN" HeaderText="شماره حواله" MappingName="NUMBER" Width="160" />
-                                <syncfusion:GridTextColumn x:Name="TARIKH_FAC_COLUMN" HeaderText="تاریخ فاکتور" MappingName="DATE_N"  Width="120">
-                                    <syncfusion:GridTextColumn.DisplayBinding>
-                                        <Binding Path="DATE_N" StringFormat="####/##/##" />
-                                    </syncfusion:GridTextColumn.DisplayBinding>
-                                </syncfusion:GridTextColumn>
-                                
-                                <syncfusion:GridComboBoxColumn x:Name="ANBAR_MASTER_COLUMN" MappingName="ANBAR" HeaderText="انبار مبدا" IsHidden="True" MinimumWidth="150" DisplayMemberPath="NAMES" SelectedValuePath="CODE" AllowEditing="False"/>
-                                <syncfusion:GridComboBoxColumn x:Name="ANBARF_MASTER_COLUMN" MappingName="ANBARF" HeaderText="انبار مقصد" IsHidden="True" MinimumWidth="150" DisplayMemberPath="NAMES" SelectedValuePath="CODE" AllowEditing="False"/>
-
-                                <syncfusion:GridTextColumn x:Name="MODAT_COLUMN" HeaderText="مدت" MappingName="MAS" Width="100"/>
-                                <syncfusion:GridTextColumn x:Name="USERNAME_COLUMN" HeaderText="نام کاربر" MappingName="USER_NAME" />
-
-                                <syncfusion:GridTextColumn x:Name="TAH_COLUMN" HeaderText="نام درخواست کننده" MappingName="TAH" IsHidden="True" />
-                                <syncfusion:GridTextColumn x:Name="CUST_HESAB_COLUMN" HeaderText="حساب مشتری" MappingName="CUST_NO" Width="200" />
-                                <syncfusion:GridTextColumn x:Name="CUST_NAME_COLUMN" HeaderText="نام مشتری" MappingName="NAME" Width="350" />
-                                <syncfusion:GridTextColumn x:Name="MOLAH_COLUMN" HeaderText="ملاحظات" MappingName="MOLAH" Width="350"/>
-
-
-
-                                <syncfusion:GridTextColumn x:Name="SANAD_COLUMN" HeaderText="شماره سند" MappingName="N_S"  Width="110"/>
-                                <syncfusion:GridTextColumn HeaderText="شماره داخلی" MappingName="FNUMCO"  Width="110"/>
-
-                                <syncfusion:GridTextColumn HeaderText="واحد" MappingName="DEPNAME" />
-                                <syncfusion:GridTextColumn x:Name="SHIFT_COLUMN" HeaderText="شیفت" MappingName="SHNAME" />
-                                <syncfusion:GridTextColumn x:Name="CUST_TYPE_COLUMN" HeaderText="نوع مشتری" MappingName="CUSTKNAME" />
-                                <syncfusion:GridTextColumn x:Name="SHARAYET_COLUMN" HeaderText="شرایط" MappingName="SHARAYET" />
-
-                                <syncfusion:GridCheckBoxColumn x:Name="IMBAA_TICK_COLUMN" HeaderText="تیک مالیات" MappingName="TICMBAA" />
-                                <syncfusion:GridCheckBoxColumn x:Name="TAEED_FAC_COLUMN" HeaderText="تایید فاکتور" MappingName="OKF" />
-                                <syncfusion:GridCheckBoxColumn x:Name="JAYZEH_COLUMN" HeaderText="ثبت جایزه" MappingName="JAY" />
-
-                                <syncfusion:GridTextColumn x:Name="NAGHD_COLUMN" HeaderText="مبلغ نقد" MappingName="M_NAGHD" />
-                                <syncfusion:GridTextColumn x:Name="VARIZI_COLUMN" HeaderText="مبلغ واریزی" MappingName="MABL_VAR">
-                                    <syncfusion:GridTextColumn.DisplayBinding>
-                                        <Binding Path="MABL_VAR"  StringFormat="{}{0:#,0}" />
-                                    </syncfusion:GridTextColumn.DisplayBinding>
-                                </syncfusion:GridTextColumn>
-                                <syncfusion:GridTextColumn x:Name="MOEENVARIZ_COLUMN" MappingName="MOIN_VAR" HeaderText="معین واریزی">
-                                    <syncfusion:GridTextColumn.DisplayBinding>
-                                        <Binding Path="MOIN_VAR"  StringFormat="{}{0:#,0}" />
-                                    </syncfusion:GridTextColumn.DisplayBinding>
-                                </syncfusion:GridTextColumn>
-                                <syncfusion:GridTextColumn x:Name="MABL_HAV_COLUMN" MappingName="MABL_HAV" HeaderText="مبلغ حواله">
-                                    <syncfusion:GridTextColumn.DisplayBinding>
-                                        <Binding Path="MABL_HAV"  StringFormat="{}{0:#,0}" />
-                                    </syncfusion:GridTextColumn.DisplayBinding>
-                                </syncfusion:GridTextColumn>
-                                <syncfusion:GridTextColumn x:Name="MOEEN_HAV_COLUMN" MappingName="MOIN_HAV" HeaderText="معین حواله">
-                                    <syncfusion:GridTextColumn.DisplayBinding>
-                                        <Binding Path="MOIN_HAV"  StringFormat="{}{0:#,0}" />
-                                    </syncfusion:GridTextColumn.DisplayBinding>
-                                </syncfusion:GridTextColumn>
-                                <syncfusion:GridTextColumn x:Name="MABL_KHAD_COLUMN" MappingName="MABL_HAZ" HeaderText="مبلغ خدمات">
-                                    <syncfusion:GridTextColumn.DisplayBinding>
-                                        <Binding Path="MABL_HAZ"  StringFormat="{}{0:#,0}" />
-                                    </syncfusion:GridTextColumn.DisplayBinding>
-                                </syncfusion:GridTextColumn>
-                                <syncfusion:GridTextColumn x:Name="MOEEN_KHAD_COLUMN" MappingName="MOIN_HAZ" HeaderText="معین خدمات">
-                                    <syncfusion:GridTextColumn.DisplayBinding>
-                                        <Binding Path="MOIN_HAZ"  StringFormat="{}{0:#,0}" />
-                                    </syncfusion:GridTextColumn.DisplayBinding>
-                                </syncfusion:GridTextColumn>
-                                <syncfusion:GridTextColumn x:Name="MABL_TAKHFIF_COLUMN" MappingName="TAKHFIF" HeaderText="مبلغ تخفیف">
-                                    <syncfusion:GridTextColumn.DisplayBinding>
-                                        <Binding Path="TAKHFIF"  StringFormat="{}{0:#,0}" />
-                                    </syncfusion:GridTextColumn.DisplayBinding>
-                                </syncfusion:GridTextColumn>
-
-                                <syncfusion:GridTextColumn x:Name="IMBAA_COLUMN" MappingName="MBAA" HeaderText="مبلغ مالیات">
-                                    <syncfusion:GridTextColumn.DisplayBinding>
-                                        <Binding Path="MBAA"  StringFormat="{}{0:#,0}" />
-                                    </syncfusion:GridTextColumn.DisplayBinding>
-                                </syncfusion:GridTextColumn>
-                                <syncfusion:GridTextColumn x:Name="MOEEN_IMBAA_COLUMN" HeaderText="معین مالیات" MappingName="HMBAA" />
-
-                                <syncfusion:GridTextColumn x:Name="NAHVE_PAY_COLUMN" HeaderText="نحوه پرداخت" MappingName="PPAME" />
-                                <syncfusion:GridTextColumn x:Name="ELAMIYEH_MABL_COLUMN" HeaderText="اعلامیه قیمت" MappingName="PEPNAME" />
-                                <syncfusion:GridTextColumn x:Name="ELAMIYEH_TAKHFIF_COLUMN" HeaderText="اعلامیه تخفیف" MappingName="PENAME" />
-
-                                <syncfusion:GridCheckBoxColumn x:Name="SGN1_COLUMN" HeaderText="امضا فروش" MappingName="SGN1"/>
-                                <syncfusion:GridCheckBoxColumn x:Name="SGN2_COLUMN" HeaderText="امضا حسابداری" MappingName="SGN2" />
-                                <syncfusion:GridCheckBoxColumn x:Name="SGN3_COLUMN" HeaderText="امضا مدیر عامل" MappingName="SGN3" />
-                                <!--<syncfusion:GridTextColumn HeaderText="تاریخ ایجاد فاکتور" MappingName="CRT" />-->
                                 <syncfusion:GridDateTimeColumn x:Name="CRT_COLUMN" HeaderText="تاریخ ایجاد رکود" MappingName="CRT" Pattern="FullDateTime"/>
                             </syncfusion:SfDataGrid.Columns>
                         </syncfusion:SfDataGrid>
@@ -1002,7 +902,7 @@
                                         <ColumnDefinition/>
                                     </Grid.ColumnDefinitions>
                                     <syncfusion:SfDataGrid x:Name="SF_SUB" Grid.Column="0"
-                                        ItemsSource="{Binding FACTOR22_INVO_DATA}" 
+                                        ItemsSource="{Binding ANBGRD_SUB_DATA}" 
                                         AutoGenerateColumns="False" SelectedIndex="0"
                                         EnableDataVirtualization="True"
                                         SelectionUnit="Row"
@@ -1019,361 +919,20 @@
                                         d:ItemsSource="{d:SampleData ItemCount=5}"
                                         Style="{StaticResource KDG}"
                                         HeaderStyle="{StaticResource KDGHeader}"
-                                        AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" >
+                                        AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ShowRowHeader="True" ShowGroupDropArea="True" >
 
                                         <syncfusion:SfDataGrid.Columns>
-                                            <syncfusion:GridTextColumn x:Name="JAY_COLUMN" MappingName="JAY" HeaderText="جايزه" MinimumWidth="100" IsHidden="True" AllowEditing="False" />
-                                            <syncfusion:GridComboBoxColumn x:Name="ANBAR_COLUMN" MappingName="ANBAR" HeaderText="انبار" MinimumWidth="150" DisplayMemberPath="NAMES" SelectedValuePath="CODE"/>
-                                            <syncfusion:GridTextColumn HeaderText="کد کالا" MinimumWidth="80" MappingName="CODE" AllowEditing="False"/>
-                                            <syncfusion:GridTextColumn MappingName="NAME_CODE" HeaderText="نام کالا" Width="250" MinimumWidth="250" ColumnSizer="Star" />
-                                            <syncfusion:GridComboBoxColumn x:Name="VAHED_K_COLUMN" MappingName="VAHED_K" HeaderText=" واحد کالا" MinimumWidth="120" DisplayMemberPath="NAMES" SelectedValuePath="VAHED"/>
-
-                                            <syncfusion:GridTextColumn x:Name="N_TAF_COLUMN" MappingName="N_TAF" HeaderText="Unit Price" MinimumWidth="110" IsHidden="True" />
-                                            <syncfusion:GridTextColumn x:Name="TOTALARZ_COLUMN" MappingName="TOTALARZ" HeaderText="Line Total" MinimumWidth="120" IsHidden="True" />
-
-                                            <syncfusion:GridTextColumn x:Name="MEGH_MAR_COLUMN" MappingName="MEGH_MAR" HeaderText="مقدار مرجوعی" MinimumWidth="50" IsHidden="True" />
-
-                                            <syncfusion:GridTextColumn MappingName="MEGH" HeaderText="مقدار" MinimumWidth="80"/>
-                                            <syncfusion:GridTextColumn MappingName="MEGHk" HeaderText="مقدار کل" MinimumWidth="90"/>
-
-                                            <syncfusion:GridTextColumn x:Name="MABL_COLUMN" MappingName="MABL" HeaderText="مبلغ" MinimumWidth="110">
-                                                <syncfusion:GridTextColumn.DisplayBinding>
-                                                    <Binding Path="MABL" StringFormat="{}{0:N0}" />
-                                                </syncfusion:GridTextColumn.DisplayBinding>
-                                            </syncfusion:GridTextColumn>
-
-                                            <syncfusion:GridTextColumn x:Name="MABL_K_COLUMN" MappingName="MABL_K" HeaderText="مبلغ کل" MinimumWidth="140">
-                                                <syncfusion:GridTextColumn.DisplayBinding>
-                                                    <Binding Path="MABL_K" StringFormat="{}{0:N0}" />
-                                                </syncfusion:GridTextColumn.DisplayBinding>
-                                            </syncfusion:GridTextColumn>
-
-                                            <syncfusion:GridComboBoxColumn x:Name="N_RASID_COLUMN_COMBO" IsHidden="True"
-                                                                           MappingName="N_RASID" 
-                                                                           HeaderText="محل مصرف" 
-                                                                           MinimumWidth="150" 
-                                                                           DisplayMemberPath="nam" SelectedValuePath="FNUMB"/>
-
-                                            <syncfusion:GridComboBoxColumn x:Name="SANAD_NO_COLUMN_COMBO" IsHidden="True"
-                                                                           MappingName="SANAD_NO" 
-                                                                           HeaderText="مرکز هزینه" 
-                                                                           MinimumWidth="150" 
-                                                                           DisplayMemberPath="MHAZNAME" SelectedValuePath="MHAZ_NO"/>
-
-                                            <syncfusion:GridComboBoxColumn x:Name="N_KOL_COLUMN_COMBO" IsHidden="True"
-                                                                           MappingName="N_KOL" HeaderText="فرمول ساخت" 
-                                                                           MinimumWidth="150" 
-                                                                           DisplayMemberPath="Expr1" SelectedValuePath="FNUMB"/>
-
-                                            <syncfusion:GridTextColumn x:Name="N_KOL_COLUMN" MappingName="N_KOL" HeaderText="%ت" MinimumWidth="75">
-                                                <syncfusion:GridTextColumn.DisplayBinding>
-                                                    <Binding Path="N_KOL" StringFormat="{}{0:F2}" />
-                                                </syncfusion:GridTextColumn.DisplayBinding>
-                                            </syncfusion:GridTextColumn>
-
-                                            <syncfusion:GridTextColumn x:Name="TKHN_COLUMN" MappingName="TKHN" HeaderText="ت.ن%" MinimumWidth="70" IsHidden="True" />
-
-                                            <syncfusion:GridTextColumn x:Name="N_MOIN_COLUMN" MappingName="N_MOIN" HeaderText="مبلغ تخفیف" MinimumWidth="130">
-                                                <syncfusion:GridTextColumn.DisplayBinding>
-                                                    <Binding Path="N_MOIN" StringFormat="{}{0:N0}" />
-                                                </syncfusion:GridTextColumn.DisplayBinding>
-                                            </syncfusion:GridTextColumn>
-
-                                            <syncfusion:GridTextColumn  MappingName="IMBAA" HeaderText="مالیات ب.ا.ا" MinimumWidth="120" AllowEditing="False">
-                                                <syncfusion:GridTextColumn.DisplayBinding>
-                                                    <Binding Path="IMBAA" StringFormat="{}{0:N0}" />
-                                                </syncfusion:GridTextColumn.DisplayBinding>
-                                            </syncfusion:GridTextColumn>
-
-                                            <syncfusion:GridTextColumn x:Name="MANDAH_COLUMN" MappingName="MANDAH" HeaderText="ملاحظات" MinimumWidth="130" ColumnSizer="Star" />
-
-                                            <syncfusion:GridTextColumn x:Name="AVRAGE_COLUMN" MappingName="AVRAGE" HeaderText="AVRAGE" MinimumWidth="50" IsHidden="True" />
-                                            <syncfusion:GridTextColumn x:Name="ID_COLUMN" MappingName="id" HeaderText="id" MinimumWidth="50" IsHidden="True" AllowEditing="False"/>
-                                            <syncfusion:GridTextColumn x:Name="AVRAGE2_COLUMN" MappingName="AVRAGE2" HeaderText="AVRAGE 2" MinimumWidth="50" IsHidden="True" />
-                                            <syncfusion:GridTextColumn x:Name="VISITOR_COLUMN" MappingName="VISITOR" HeaderText="VISITOR" MinimumWidth="50" IsHidden="True" />
-
-                                            <syncfusion:GridTextColumn MappingName="JAYO" MinimumWidth="50" IsHidden="True" />
-                                            <syncfusion:GridComboBoxColumn x:Name="JAYO_COLUMN" MappingName="JAYO" HeaderText="الگوي جايزه" MinimumWidth="60" IsHidden="True" DisplayMemberPath="NAMES" SelectedValuePath="VAHED"/>
-
-                                            <syncfusion:GridTextColumn x:Name="UID_COLUMN" MappingName="UID" HeaderText="UID" IsHidden="True" />
+                                            <syncfusion:GridTextColumn MappingName="CODE" HeaderText="کد کالا"/>
+                                            <syncfusion:GridTextColumn MappingName="nam" HeaderText="نام کالا" Width="200"/>
+                                            <!--<syncfusion:GridTextColumn MappingName="NAMES" HeaderText="واحد"/>-->
+                                            <syncfusion:GridTextColumn MappingName="MOG" HeaderText="موجودی سیستم" TextAlignment="Center"/>
+                                            <syncfusion:GridTextColumn MappingName="NUM1" HeaderText="شمارش اول" TextAlignment="Center"/>
+                                            <syncfusion:GridTextColumn MappingName="NUM2" HeaderText="شمارش دوم" TextAlignment="Center"/>
+                                            <syncfusion:GridTextColumn MappingName="NUM3" HeaderText="شمارش سوم" TextAlignment="Center"/>
+                                            <syncfusion:GridTextColumn MappingName="MABL" HeaderText="مبلغ (ریال)" TextAlignment="Right" IsHidden="True"/>
 
                                         </syncfusion:SfDataGrid.Columns>
                                     </syncfusion:SfDataGrid>
-                                    <DataGrid x:Name="TAKHFIF_APLAY_SUB" Visibility="Collapsed"
-                                            EnableColumnVirtualization="True"
-                                            EnableRowVirtualization="True"
-                                            VirtualizingPanel.IsVirtualizing="True"
-                                            VirtualizingPanel.VirtualizationMode="Recycling"
-                                            ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"           
-                                            HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
-                                            VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
-                                            KeyboardNavigation.TabNavigation="Contained"
-                                            Tag="RD"
-                                            IsReadOnly="True" AutoGenerateColumns="False"  FlowDirection="RightToLeft"  SelectionUnit="FullRow"   BorderThickness="1" HorizontalAlignment="Right" Width="320">
-                                        <DataGrid.Columns>
-                                            <DataGridTextColumn x:Name="nUMBERColumn" Binding="{Binding NUMBER}" Header="شماره" Visibility="Hidden" Width="SizeToHeader"/>
-                                            <DataGridTextColumn x:Name="kINDColumn" Binding="{Binding KIND}" Header="نوع" Visibility="Hidden" Width="SizeToHeader"/>
-                                            <DataGridTextColumn x:Name="tIDColumn" Binding="{Binding TID}" Header="كد تخفيف" Width="auto"/>
-                                            <DataGridComboBoxColumn x:Name="Combo6Column" MinWidth="80" Width="*" Header=" تخفيف " SelectedValueBinding="{Binding TID,UpdateSourceTrigger=LostFocus}" DisplayMemberPath="TSHARH" SelectedValuePath="TID">
-                                            </DataGridComboBoxColumn>
-                                        </DataGrid.Columns>
-                                    </DataGrid>
-                                </Grid>
-                            </TabItem>
-                            <TabItem x:Name="PAGE_POSHT">
-                                <TabItem.Header>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="اطلاعات پرداخت"/>
-                                        <Border Background="{StaticResource PrimaryHueMidBrush}" CornerRadius="4" Margin="5,0,0,0" Padding="4,0" VerticalAlignment="Center">
-                                            <TextBlock x:Name="TXT_COUNT_POSHT" Text="0" Foreground="White" FontSize="10"/>
-                                        </Border>
-                                    </StackPanel>
-                                </TabItem.Header>
-                                <Grid>
-                                    <Label Content="مبلغ تخفیف :" Margin="0,103,27,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True" x:Name="M_NAGHD"   Text="0" Height="27" Margin="0,8,97,0"    VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Right" Width="123"   MaxLength="16" IsReadOnly="True" />
-
-                                    <syncfusion:SfDataGrid x:Name="PAY_GETD_SUB22" 
-                                            ItemsSource="{Binding PAY_GETD_SUB22_DATA}" 
-                                            AutoGenerateColumns="False" SelectedIndex="0"
-                                            EnableDataVirtualization="True"
-                                            SelectionUnit="Row"
-                                            AllowEditing="True"
-                                            IsReadOnly="True"
-                                            AllowDraggingColumns="True"
-                                            AllowResizingColumns="True"
-                                            AllowFiltering="True"
-                                            AllowSorting="True"
-                                            SelectionMode="Extended"
-                                            RowHeight="30"
-                                            FrozenColumnCount="0"
-                                            FlowDirection="RightToLeft"
-                                            d:ItemsSource="{d:SampleData ItemCount=5}"
-                                            Style="{StaticResource KDG}"
-                                            HeaderStyle="{StaticResource KDGHeader}"
-                                            AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" Margin="0,199,0,0">
-                                        <syncfusion:SfDataGrid.Columns>
-
-                                            <syncfusion:GridTextColumn x:Name="dATEColumn" MappingName="DATE" HeaderText="تاريخ دريافت *" ColumnSizer="Auto">
-                                                <syncfusion:GridTextColumn.DisplayBinding>
-                                                    <Binding Path="DATE" StringFormat="####/##/##" />
-                                                </syncfusion:GridTextColumn.DisplayBinding>
-                                            </syncfusion:GridTextColumn>
-
-                                            <syncfusion:GridTextColumn x:Name="n_SERIColumn" MappingName="N_SERI" HeaderText="شماره سريال *" ColumnSizer="Auto" />
-
-                                            <syncfusion:GridComboBoxColumn x:Name="bANKColumn" MappingName="BANK" HeaderText="بانک *" MinimumWidth="80" ColumnSizer="Auto"
-                                                                           DisplayMemberPath="NAMES" SelectedValuePath="CODE"
-                                                                           ItemsSource="{Binding BANK_LIST}" />
-
-                                            <syncfusion:GridTextColumn x:Name="sHOBEHColumn" MappingName="SHOBEH" HeaderText="نام شعبه" ColumnSizer="Auto" />
-
-                                            <syncfusion:GridTextColumn x:Name="dATE_SColumn" MappingName="DATE_S" HeaderText="تاريخ سررسيد *" ColumnSizer="Auto">
-                                                <syncfusion:GridTextColumn.DisplayBinding>
-                                                    <Binding Path="DATE_S" StringFormat="####/##/##" />
-                                                </syncfusion:GridTextColumn.DisplayBinding>
-                                            </syncfusion:GridTextColumn>
-
-                                            <syncfusion:GridTextColumn x:Name="mABLColumn" MappingName="MABL" HeaderText="مبلغ *" MinimumWidth="120" ColumnSizer="Auto">
-                                                <syncfusion:GridTextColumn.DisplayBinding>
-                                                    <Binding Path="MABL" StringFormat="{}{0:N0}" />
-                                                </syncfusion:GridTextColumn.DisplayBinding>
-                                            </syncfusion:GridTextColumn>
-
-                                            <syncfusion:GridTextColumn x:Name="nAME_TAHColumn" MappingName="NAME_TAH" HeaderText="نام پرداخت كننده" ColumnSizer="Auto" />
-
-                                            <syncfusion:GridTextColumn x:Name="n_HESABColumn" MappingName="N_HESAB" HeaderText="جاري چك" ColumnSizer="Auto" />
-
-                                            <syncfusion:GridComboBoxColumn x:Name="n_KOLColumn" MappingName="N_KOL" HeaderText=" به حساب كل " MinimumWidth="80" ColumnSizer="Auto"
-                                                                           DisplayMemberPath="NAME" SelectedValuePath="NUMBER"
-                                                                           ItemsSource="{Binding KOL_LIST}" />
-
-                                            <syncfusion:GridComboBoxColumn x:Name="n_MOINColumn" MappingName="N_MOIN" HeaderText=" به حساب  معين " MinimumWidth="80" ColumnSizer="Auto"
-                                                                           DisplayMemberPath="NAME" SelectedValuePath="NUMBER"
-                                                                           ItemsSource="{Binding MOIN_LIST}" />
-
-                                            <syncfusion:GridComboBoxColumn x:Name="n_TAFColumn" MappingName="N_TAF" HeaderText=" به حساب  تفصيلي " ColumnSizer="Auto"
-                                                                           DisplayMemberPath="NAME" SelectedValuePath="TNUMBER"
-                                                                           ItemsSource="{Binding TAF_LIST}" />
-
-                                            <syncfusion:GridTextColumn x:Name="rADIFColumn" MappingName="RADIF" HeaderText="رديف دفتر" AllowEditing="False" ColumnSizer="SizeToHeader" />
-
-                                            <syncfusion:GridComboBoxColumn x:Name="vAZColumn" MappingName="VAZ" HeaderText=" وضعيت چك* " MinimumWidth="80" ColumnSizer="Auto"
-                                                                           DisplayMemberPath="NAME_VAZ" SelectedValuePath="VAZ"
-                                                                           ItemsSource="{Binding VAZ_LIST}" />
-
-                                            <syncfusion:GridComboBoxColumn x:Name="sANDUGHColumn" MappingName="SANDUGH" HeaderText=" موقعيت چك* " MinimumWidth="80" ColumnSizer="Auto"
-                                                                           DisplayMemberPath="NAME" SelectedValuePath="TNUMBER"
-                                                                           ItemsSource="{Binding SANDUGH_LIST}" />
-
-                                            <syncfusion:GridTextColumn x:Name="sAYADIColumn" MappingName="SAYADI" HeaderText="شماره صیادی" ColumnSizer="Auto" />
-
-                                        </syncfusion:SfDataGrid.Columns>
-                                    </syncfusion:SfDataGrid>
-
-                                    <Label Content="مبلغ نقد :" Margin="0,8,44,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="مبلغ واریزی :" Margin="0,40,30,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="مبلغ حواله :" Margin="0,72,35,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="خدمات :" Margin="0,135,49,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="مالیات و عوارض :" Margin="0,167,12,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="معین واریزی :" Margin="0,38,242,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="معین حواله :" Margin="0,70,247,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="معین خدمات :" Margin="0,133,239,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="معین مالیات :" Margin="0,165,241,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="جمع کل فاکتور :" Margin="167,8,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="هزینه خدمات :" Margin="167,40,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="تخفیفات :" Margin="167,70,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="مبلغ قابل پرداخت :" Margin="167,100,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="جمع مبالغ پرداختی :" Margin="167,130,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="مانده :" Margin="167,160,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="جمع مبلغ چکها :" Margin="0,101,1146,0"  FlowDirection="RightToLeft" FontSize="10" Width="76" Height="25" VerticalAlignment="Top" HorizontalAlignment="Right"/>
-                                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="MABL_VAR"   Text="0" Height="27" Margin="0,40,97,0"    VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123" MaxLength="16" IsReadOnly="True"  />
-                                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="MABL_HAV"   Text="0" Height="27" Margin="0,71,97,0"   VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Right" Width="123" MaxLength="16" IsReadOnly="True" />
-                                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="TAKHFIF" Text="{Binding ElementName=TAKHFIF2,Path=Text,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" CustomUpdateSourceTrigger="PropertyChanged"  Height="27" Margin="0,103,97,0"     VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123" MaxLength="16" IsReadOnly="True" >
-                                    </CNC:NumericTextBox>
-
-                                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" ThreeTwoZero="True" x:Name="MABL_HAZ" Text="0" Height="27" Margin="0,135,97,0"    VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Right" Width="123" MaxLength="16" IsReadOnly="True" />
-                                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" IsDigitGroupActive="True" x:Name="MBAA"   Text="0" Height="27" Margin="0,167,97,0"     VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123" IsReadOnly="False"  />
-                                    <CNC:NumericTextBox DoesAcceptDouble="False" DigitGroupOnEnter="True" TextBoxStyle="{StaticResource MaterialDesignTextBox}"  IsDigitGroupActive="True"  x:Name="JF" IsReadOnly="True"   Text="0" Height="27" Margin="17,6,0,0"  VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Left" Width="145"  BorderBrush="{x:Null}" />
-                                    <TextBox x:Name="MOIN_VAR" Height="27" Margin="0,38,312,0" Text="{Binding ElementName=MOIN_VAR2,Path=Text,UpdateSourceTrigger=LostFocus,Mode=TwoWay}"   Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  Padding="3" IsReadOnly="True" />
-
-                                    <ComboBox x:Name="CMB_MOIN_VAR" SelectedValue="{Binding ElementName=MOIN_VAR,Path=Text}" DisplayMemberPath="NAME" SelectedValuePath="hes"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="299,38,440,0" VerticalAlignment="Top" Height="27" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" >
-                                        <ComboBox.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
-                                            </ItemsPanelTemplate>
-                                        </ComboBox.ItemsPanel>
-                                    </ComboBox>
-
-                                    <TextBox x:Name="MOIN_HAV" Height="27" Margin="0,70,312,0" Text="{Binding ElementName=MOIN_HAV2,Path=Text,UpdateSourceTrigger=LostFocus,Mode=TwoWay}"  Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  Padding="3" IsReadOnly="True" />
-                                    <TextBox x:Name="MOIN_HAZ" Height="27" Margin="0,133,312,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  Padding="3" IsReadOnly="True" />
-                                    <TextBox x:Name="HMBAA" Height="27" Margin="0,165,312,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  Padding="3" Tag="RD" Focusable="False" IsReadOnly="True" />
-                                    <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" TextBoxStyle="{StaticResource MaterialDesignTextBox}" DigitGroupOnEnter="True"   x:Name="HKH" IsReadOnly="True"   Text="0" Height="27" Margin="17,38,0,0"     VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Left" Width="145"  BorderBrush="{x:Null}" />
-                                    <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" TextBoxStyle="{StaticResource MaterialDesignTextBox}" DigitGroupOnEnter="True"   x:Name="NTKHFIF" IsReadOnly="True"   Text="0" Height="27" Margin="17,68,0,0"     VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Left" Width="145"   BorderBrush="{x:Null}" />
-                                    <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" TextBoxStyle="{StaticResource MaterialDesignTextBox}" DigitGroupOnEnter="True"   x:Name="GHABEL" IsReadOnly="True"   Text="0" Height="27" Margin="17,98,0,0"    VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Left" Width="145"  BorderBrush="{x:Null}" />
-                                    <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" TextBoxStyle="{StaticResource MaterialDesignTextBox}"  DigitGroupOnEnter="True"  x:Name="NPAR" IsReadOnly="True"   Text="0" Height="27" Margin="17,129,0,0"   VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Left" Width="145"  BorderBrush="{x:Null}" />
-                                    <CNC:NumericTextBox DoesAcceptDouble="False" TextBoxStyle="{StaticResource MaterialDesignTextBox}" IsDigitGroupActive="True" DigitGroupOnEnter="True"   x:Name="MAN" IsReadOnly="True"   Text="0" Height="27" Margin="17,159,0,0"     VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Left" Width="145"  BorderBrush="{x:Null}" />
-                                    <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" Tag="RD" x:Name="NCHK"   Text="0" Height="27" Margin="299,101,0,0"    VerticalAlignment="Top"  Visibility="Visible"  BorderBrush="{x:Null}" IsReadOnly="True" HorizontalAlignment="Left" Width="164" />
-                                    <GroupBox Header="خدمات" FlowDirection="RightToLeft" Style="{x:Null}" HorizontalAlignment="Left" Height="51" Margin="360,36,0,0" VerticalAlignment="Top" Width="315" Padding="0,-4,0,0" Visibility="Hidden">
-                                        <UniformGrid>
-                                            <RadioButton x:Name="VAS1" Content="به عهده فروشنده" Margin="0,-1,0,-13"/>
-                                            <RadioButton x:Name="VAS2" Content="به عهده خریدار" Margin="0,-1,0,-13"/>
-                                        </UniformGrid>
-
-                                    </GroupBox>
-                                    <ComboBox x:Name="CMB_MOIN_HAV"  SelectedValue="{Binding ElementName=MOIN_HAV,Path=Text}"  DisplayMemberPath="NAME" SelectedValuePath="hes"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="299,70,440,0" VerticalAlignment="Top" Height="27" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" >
-                                        <ComboBox.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
-                                            </ItemsPanelTemplate>
-                                        </ComboBox.ItemsPanel>
-                                    </ComboBox>
-                                    <ComboBox x:Name="CMB_MOIN_HAZ"   SelectedValue="{Binding ElementName=MOIN_HAZ,Path=Text}"  DisplayMemberPath="NAME" SelectedValuePath="hes"   Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="299,133,440,0" VerticalAlignment="Top" Height="27" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" >
-                                        <ComboBox.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
-                                            </ItemsPanelTemplate>
-                                        </ComboBox.ItemsPanel>
-                                    </ComboBox>
-                                    <ComboBox x:Name="CMB_HMBAA" SelectedValue="{Binding ElementName=HMBAA,Path=Text}" DisplayMemberPath="NAME" SelectedValuePath="hes"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="299,165,440,0" VerticalAlignment="Top" Height="27" FlowDirection="RightToLeft"  Background="{x:Null}" BorderThickness="1" IsReadOnly="True" Tag="RD" Focusable="False" IsHitTestVisible="False" >
-                                        <ComboBox.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
-                                            </ItemsPanelTemplate>
-                                        </ComboBox.ItemsPanel>
-                                    </ComboBox>
-                                </Grid>
-                            </TabItem>
-                            <TabItem x:Name="PAGE_SAYER" d:IsEnabled="True">
-                                <TabItem.Header>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="سایر"/>
-                                        <Border Background="{StaticResource PrimaryHueMidBrush}" CornerRadius="4" Margin="5,0,0,0" Padding="4,0" VerticalAlignment="Center">
-                                            <TextBlock x:Name="TXT_COUNT_SAYER" Text="0" Foreground="White" FontSize="10"/>
-                                        </Border>
-                                    </StackPanel>
-                                </TabItem.Header>
-                                <Grid>
-                                    <Label Content="شماره درخواست کالا:" Margin="0,7,13,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="موبایل راننده:" Margin="0,39,45,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="مقصد بار:" Margin="0,70,60,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="توضیحات:" Margin="0,103,56,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="شماره بارنامه:" Margin="0,7,289,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="شماره ماشین :" Margin="0,39,283,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="وزن ماشین خالی :" Margin="0,70,270,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="نام راننده :" Margin="0,6,511,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="نوع ماشین :" Margin="0,38,503,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <Label Content="وزن ماشین پر :" Margin="0,70,490,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Right" Width="auto" Height="25" VerticalAlignment="Top"/>
-                                    <CNC:NumericTextBox DoesAcceptDouble="False" x:Name="REQUEST_NO"   Text="0" Height="27" Margin="0,6,111,0"    VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123" MaxLength="16" IsReadOnly="True"  />
-                                    <TextBox x:Name="DRIVER_MOB"   Text="0" Height="27" Margin="0,38,111,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  Padding="3" MaxLength="16" IsReadOnly="True" />
-                                    <ComboBox x:Name="MAGHSAD" DisplayMemberPath="CITYNAME" SelectedValuePath="CITYCODE"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="0,70,111,0" VerticalAlignment="Top" Height="28" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Right" Width="145" IsReadOnly="True">
-                                        <ComboBox.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
-                                            </ItemsPanelTemplate>
-                                        </ComboBox.ItemsPanel>
-                                    </ComboBox>
-                                    <TextBox x:Name="TOZIH" Height="27" Margin="0,103,111,0"    Style="{StaticResource FuzzyOut}" MaxLength="48"  TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="579"  Padding="3" IsReadOnly="True" />
-                                    <TextBox x:Name="BARNAMEH"   Text="0" Height="27" Margin="0,6,357,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  Padding="3" MaxLength="16" IsReadOnly="True" />
-                                    <TextBox x:Name="CAMIUN_NUM"   Text="0" Height="27" Margin="0,39,357,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  Padding="3" MaxLength="16" IsReadOnly="True" />
-                                    <CNC:NumericTextBox DoesAcceptDouble="False"  x:Name="CAM_KHALY"   Text="0" Height="27" Margin="0,70,357,0"    VerticalAlignment="Top"   Visibility="Visible"  HorizontalAlignment="Right" Width="123" MaxLength="16" IsReadOnly="True"  />
-                                    <TextBox x:Name="DRIVER" Height="27" Margin="0,6,567,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  Padding="3" IsReadOnly="True" />
-                                    <TextBox x:Name="CAMIUN" Height="27" Margin="0,40,567,0"    Style="{StaticResource FuzzyOut}"   TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  Padding="3" IsReadOnly="True" />
-                                    <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" x:Name="CAM_POOR"   Text="0" Height="27" Margin="0,72,567,0"     VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123" MaxLength="12" IsReadOnly="True" />
-
-                                    <syncfusion:SfDataGrid x:Name="VISITOR_DTL_SUB" 
-                                            ItemsSource="{Binding SAYER_VISITOR_DATA}" 
-                                            AutoGenerateColumns="False" SelectedIndex="0"
-                                            EnableDataVirtualization="True"
-                                            SelectionUnit="Row"
-                                            AllowEditing="True"
-                                            IsReadOnly="True"
-                                            AllowDraggingColumns="True"
-                                            AllowResizingColumns="True"
-                                            AllowFiltering="True"
-                                            AllowSorting="True"
-                                            SelectionMode="Extended"
-                                            RowHeight="30"
-                                            FrozenColumnCount="0"
-                                            FlowDirection="RightToLeft"
-                                            d:ItemsSource="{d:SampleData ItemCount=5}"
-                                            Style="{StaticResource KDG}"
-                                            HeaderStyle="{StaticResource KDGHeader}"
-                                            AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" Margin="0,144,0,8">
-                                        <syncfusion:SfDataGrid.Columns>
-
-                                            <syncfusion:GridTextColumn HeaderText="کد حساب" MinimumWidth="80" MappingName="CUST_NO" AllowEditing="False">
-                                            </syncfusion:GridTextColumn>
-
-                                            <syncfusion:GridTextColumn x:Name="CUST_NO_NAME_COLUMN" MappingName="CUST_NO_NAME" HeaderText="نام شخص" MinimumWidth="200" ColumnSizer="Auto"/>
-
-                                            <syncfusion:GridTextColumn x:Name="cUST_NOColumn" MappingName="CUST_NO" HeaderText="کد شخص" IsHidden="True" ColumnSizer="SizeToHeader"/>
-
-                                            <syncfusion:GridTextColumn x:Name="dARSADColumn" MappingName="DARSAD" HeaderText="درصد*" ColumnSizer="Auto">
-                                                <syncfusion:GridTextColumn.DisplayBinding>
-                                                    <Binding Path="DARSAD" StringFormat="{}{0:N2}" />
-                                                </syncfusion:GridTextColumn.DisplayBinding>
-                                            </syncfusion:GridTextColumn>
-
-                                            <syncfusion:GridTextColumn x:Name="pURSANTColumn" MappingName="PURSANT" HeaderText="مبلغ پورسانت*" ColumnSizer="Auto">
-                                                <syncfusion:GridTextColumn.DisplayBinding>
-                                                    <Binding Path="PURSANT" StringFormat="{}{0:N0}" />
-                                                </syncfusion:GridTextColumn.DisplayBinding>
-                                            </syncfusion:GridTextColumn>
-
-                                            <syncfusion:GridCheckBoxColumn x:Name="sTATColumn" MappingName="STAT" HeaderText="مبلغ ثابت" ColumnSizer="Auto" />
-
-                                            <syncfusion:GridComboBoxColumn x:Name="PORID_COLUMN" MappingName="PORID" HeaderText="الگوی پرداخت پورسانت" MinimumWidth="80" ColumnSizer="Auto"
-                                                                           DisplayMemberPath="Expr1" SelectedValuePath="PORID"
-                                                                           ItemsSource="{Binding POR_LIST}" />
-
-                                            <syncfusion:GridTextColumn x:Name="tOZIHColumn" MappingName="TOZIH" HeaderText="توضیح" ColumnSizer="Star" />
-
-                                            <syncfusion:GridTextColumn x:Name="lOGColumn" MappingName="LOG" HeaderText="رخداد نگاری" AllowEditing="False" ColumnSizer="Star"/>
-
-                                        </syncfusion:SfDataGrid.Columns>
-                                    </syncfusion:SfDataGrid>
-
                                 </Grid>
                             </TabItem>
                         </TabControl>

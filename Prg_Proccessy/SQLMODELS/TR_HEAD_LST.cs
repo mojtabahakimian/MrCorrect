@@ -87,5 +87,8 @@ namespace Prg_Proccessy.SQLMODELS
         public string? UP_USER_NAME { get; set; }
         public string? PC_NAME { get; set; }
         public string? IPADD { get; set; }
+
+        public int? ANBAR { get; set; }
+        public int? ANBARF { get; set; }
     }
 }

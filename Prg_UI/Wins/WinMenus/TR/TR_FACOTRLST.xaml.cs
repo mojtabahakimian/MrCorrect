@@ -166,6 +166,39 @@ namespace Prg_UI.Wins.WinMenus.TR
                     MABL_KHAD_COLUMN.IsHidden = true;
                     MOEEN_KHAD_COLUMN.IsHidden = true;
                     MABL_TAKHFIF_COLUMN.IsHidden = true;
+
+                    if (TAGCODE == 5) //انتقال از انبار به انبار
+                    {
+                        NUMBER_HAV_COLUMN.HeaderText = "شماره انتقالی";
+
+                        ANBAR_MASTER_COLUMN.IsHidden = false;
+                        ANBARF_MASTER_COLUMN.IsHidden = false;
+
+                        // Hide irrelevant columns
+                        MODAT_COLUMN.IsHidden = true;
+                        SANAD_COLUMN.IsHidden = true;
+                        NAGHD_COLUMN.IsHidden = true;
+                        VARIZI_COLUMN.IsHidden = true;
+                        MOEENVARIZ_COLUMN.IsHidden = true;
+                        MABL_HAV_COLUMN.IsHidden = true;
+                        MOEEN_HAV_COLUMN.IsHidden = true;
+                        MABL_KHAD_COLUMN.IsHidden = true;
+                        MOEEN_KHAD_COLUMN.IsHidden = true;
+                        MABL_TAKHFIF_COLUMN.IsHidden = true;
+                        IMBAA_COLUMN.IsHidden = true;
+                        MOEEN_IMBAA_COLUMN.IsHidden = true;
+
+                        CUST_HESAB_COLUMN.IsHidden = true;
+                        CUST_NAME_COLUMN.IsHidden = true;
+                        IMBAA_TICK_COLUMN.IsHidden = true;
+                        JAYZEH_COLUMN.IsHidden = true;
+
+                        // Detail Grid Hiding
+                        SF_SUB.Columns["N_KOL"].IsHidden = true;
+                        SF_SUB.Columns["N_MOIN"].IsHidden = true;
+                        SF_SUB.Columns["IMBAA"].IsHidden = true;
+                        SF_SUB.Columns["VAHED_K"].IsHidden = true;
+                    }
                     break;
 
                 default: break;
@@ -186,7 +219,8 @@ namespace Prg_UI.Wins.WinMenus.TR
                     Formname = "TR_KHB";
                     break;
 
-                case 26: WINTILENAME.Content = "سایر حواله انبار ها";
+                case 26:
+                    WINTILENAME.Content = "سایر حواله انبار ها";
                     Formname = "TR_FRH";
                     break;
 
@@ -430,7 +464,7 @@ namespace Prg_UI.Wins.WinMenus.TR
                                              dbo.TR_HEAD_LST.MOIN_HAZ, dbo.TR_HEAD_LST.TAKHFIF, dbo.TR_HEAD_LST.MOIN_KHF, dbo.TR_HEAD_LST.TAG, dbo.DEPART.DEPNAME, dbo.SHIFT.SHNAME, dbo.CUSTKIND.CUSTKNAME, 
                                              dbo.TR_HEAD_LST.USER_NAME, dbo.TR_HEAD_LST.SHARAYET, dbo.TR_HEAD_LST.MBAA, dbo.TR_HEAD_LST.HMBAA, dbo.TR_HEAD_LST.TICMBAA, dbo.TR_HEAD_LST.TKHF, dbo.TR_HEAD_LST.OKF, 
                                              dbo.TR_HEAD_LST.JAY, dbo.TR_HEAD_LST.SGN1, dbo.TR_HEAD_LST.SGN2, dbo.TR_HEAD_LST.SGN3, dbo.TR_HEAD_LST.sgn1usid, dbo.TR_HEAD_LST.sgn2usid, dbo.TR_HEAD_LST.sgn3usid, dbo.TR_HEAD_LST.CRT, 
-                                             dbo.TR_HEAD_LST.UID, dbo.PRICE_ELAMIE.PEPNAME, dbo.PRICE_ELAMIETF.PENAME, dbo.PRICE_PAYNO.PPAME, dbo.TR_HEAD_LST.ANBAR, dbo.TR_HEAD_LST.FNUMCO, dbo.TR_HEAD_LST.IPADD, 
+                                             dbo.TR_HEAD_LST.UID, dbo.PRICE_ELAMIE.PEPNAME, dbo.PRICE_ELAMIETF.PENAME, dbo.PRICE_PAYNO.PPAME, dbo.TR_HEAD_LST.ANBAR,dbo.TR_HEAD_LST.ANBARF, dbo.TR_HEAD_LST.FNUMCO, dbo.TR_HEAD_LST.IPADD, 
                                              dbo.TR_HEAD_LST.PC_NAME, dbo.TR_HEAD_LST.UP_USER_NAME, dbo.TR_HEAD_LST.UP_TIME, dbo.TR_HEAD_LST.UP_DATE
                     FROM            dbo.TR_HEAD_LST LEFT OUTER JOIN
                                              dbo.PRICE_PAYNO ON dbo.TR_HEAD_LST.MODAT_PPID = dbo.PRICE_PAYNO.PPID LEFT OUTER JOIN
@@ -611,6 +645,8 @@ namespace Prg_UI.Wins.WinMenus.TR
             //انبار کالا
             var ARST = dbms.DoGetDataSQL<Custom_TCODANBAR>($"SELECT TCOD_ANBAR.CODE, TCOD_ANBAR.NAMES FROM dbo.TCOD_ANBAR").ToList();
             ANBAR_COLUMN.ItemsSource = ARST;
+            ANBAR_MASTER_COLUMN.ItemsSource = ARST;
+            ANBARF_MASTER_COLUMN.ItemsSource = ARST;
 
             //پر کردن کمبوباکس ستون واحد به طور مقدار اولیه
             VAHED_K_COLUMN.ItemsSource = dbms.DoGetDataSQL<Custom_VAHEDK>("SELECT CODE AS VAHED,NAMES FROM dbo.TCOD_VAHEDS").ToList();
