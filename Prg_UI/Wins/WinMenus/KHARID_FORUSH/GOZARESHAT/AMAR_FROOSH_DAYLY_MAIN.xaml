@@ -531,7 +531,7 @@
         <!--HEADER↑-->
 
         <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" ContextMenu="{StaticResource DataGridContextMenu}"
-           ItemsSource="{Binding AMAR_FROOSH_DATA}" FilterRowPosition="Top"
+           ItemsSource="{Binding AMAR_FROOSH_DATA}" FilterRowPosition="None"
            AutoGenerateColumns="False"
            EnableDataVirtualization="True"
            SelectionUnit="Row"
@@ -548,7 +548,7 @@
            HeaderStyle="{StaticResource KDGHeader}"
            BorderBrush="{StaticResource GENERAL_Grlicom}"
            CurrentCellActivated="SYNCFUSION_DG_CurrentCellActivated"
-           Margin="10,49,10,10" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowRowHeader="True" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged">
+           Margin="10,49,10,10" AllowRowHoverHighlighting="True" AllowSelectionOnPointerPressed="True" ScrollMode="Async" ShowGroupDropArea="True" SelectionChanged="SYNCFUSION_DG_SelectionChanged">
 
             <syncfusion:SfDataGrid.Columns>
                 <syncfusion:GridTextColumn HeaderText="نام مشتری" MappingName="NAME" Width="500"/>
