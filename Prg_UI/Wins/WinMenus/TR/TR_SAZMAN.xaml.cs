@@ -406,51 +406,6 @@ namespace Prg_UI.Wins.WinMenus.TR
                     SERVERNAM.Text = config?.SERVERNAM;
                     OPTIONSS.Text = config?.OPTIONSS;
 
-                    //// Try to load existing signature
-                    //if (config?.EMZA != null && config.EMZA.Length > 0)
-                    //{
-                    //    try
-                    //    {
-                    //        // First try to load the image directly
-                    //        BitmapImage bitmapSource = CL_LMethods.ByteArrayToBitmapImage(config.EMZA);
-
-                    //        if (bitmapSource != null)
-                    //        {
-                    //            // We successfully loaded the image
-                    //            ImageBrush brush = new ImageBrush(bitmapSource);
-                    //            brush.Stretch = Stretch.Uniform;
-                    //            EMZA_CANVAS.Background = brush;
-
-                    //            // Disable drawing when showing an existing image
-                    //            EMZA_CANVAS.EditingMode = InkCanvasEditingMode.None;
-                    //            _uploadedImageData = config.EMZA;
-                    //        }
-                    //        else
-                    //        {
-                    //            // If loading fails, try to load as InkCanvas strokes if applicable
-                    //            try
-                    //            {
-                    //                using (MemoryStream ms = new MemoryStream(config.EMZA))
-                    //                {
-                    //                    EMZA_CANVAS.Strokes.Clear();
-                    //                    EMZA_CANVAS.Strokes = new System.Windows.Ink.StrokeCollection(ms);
-                    //                }
-                    //            }
-                    //            catch
-                    //            {
-                    //                // If all attempts fail, just show a white background
-                    //                EMZA_CANVAS.Background = Brushes.White;
-                    //                EMZA_CANVAS.Strokes.Clear();
-                    //            }
-                    //        }
-                    //    }
-                    //    catch (Exception)
-                    //    {
-                    //        new Msgwin(false, "خطا در بارگذاری تصویر از دیتابیس").ShowDialog();
-                    //        EMZA_CANVAS.Background = Brushes.White;
-                    //        EMZA_CANVAS.Strokes.Clear();
-                    //    }
-                    //}
                     #endregion
 
                     #region ASNAD_VA_HESAB_TAB
@@ -486,8 +441,8 @@ namespace Prg_UI.Wins.WinMenus.TR
                     MAND.IsChecked = config.MAND;
                     SERFACB.IsChecked = config.SERFACB;
                     LOCKFAP.IsChecked = config.LOCKFAP;
-                    DEFANB.SelectedValue = config.DEFANB; DEFANB.Items.Refresh();
-                    DEFTKH.SelectedValue = config.DEFTKH; DEFTKH.Items.Refresh();
+                    DEFANB.SelectedValue = config.DEFANB;
+                    DEFTKH.SelectedValue = config.DEFTKH;
                     TRANSF.IsChecked = config.TRANSF;
                     #endregion
 
