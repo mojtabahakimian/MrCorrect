@@ -1,4 +1,6 @@
-﻿namespace Prg_Proccessy.SQLMODELS
+﻿using System.Globalization;
+
+namespace Prg_Proccessy.SQLMODELS
 {
     public class STUF_DEF
     {
@@ -27,5 +29,33 @@
         public int mu { get; set; }
         public string? sstid { get; set; }
         public double? vra { get; set; }
+
+        public long? UP_DATE { get; set; }
+        public double? UP_TIME { get; set; }
+        public string? UP_USER_NAME { get; set; }
+        public string? PC_NAME { get; set; }
+        public string? IPADD { get; set; }
+
+        public string UpTimeDisplay
+        {
+            get
+            {
+                if (UP_TIME.HasValue)
+                {
+                    try
+                    {
+                        var dt = DateTime.FromOADate(UP_TIME.Value);
+                        var persianCulture = new CultureInfo("fa-IR");
+                        persianCulture.DateTimeFormat.Calendar = new GregorianCalendar();
+                        return dt.ToString("yyyy/MM/dd hh:mm:ss tt", persianCulture);
+                    }
+                    catch
+                    {
+                        return "";
+                    }
+                }
+                return "";
+            }
+        }
     }
 }

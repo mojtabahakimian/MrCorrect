@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -230,5 +231,42 @@ namespace Prg_SendInvoice.SQLMODELS
         public string? SMSTYPE { get; set; }
 
         public bool? HTAHOL { get; set; }
+
+        #region TR
+        public int? IDD { get; set; }
+        public long? UP_DATE { get; set; }
+        public double? UP_TIME { get; set; } //string
+        // پراپرتی نمایشی (رشته فرمت شده)
+        public string UpTimeDisplay
+        {
+            get
+            {
+                if (UP_TIME.HasValue)
+                {
+                    try
+                    {
+                        var dt = DateTime.FromOADate(UP_TIME.Value);
+
+                        // ایجاد کالچر فارسی
+                        var persianCulture = new CultureInfo("fa-IR");
+
+                        // اجبار به استفاده از تقویم میلادی (برای اینکه سال 2025 باشد نه 1404)
+                        persianCulture.DateTimeFormat.Calendar = new GregorianCalendar();
+
+                        // فرمت‌دهی: روز/ماه/سال ساعت:دقیقه:ثانیه ب.ظ
+                        return dt.ToString("yyyy/MM/dd hh:mm:ss tt", persianCulture);
+                    }
+                    catch
+                    {
+                        return "";
+                    }
+                }
+                return "";
+            }
+        }
+        public string UP_USER_NAME { get; set; }
+        public string PC_NAME { get; set; }
+        public string IPADD { get; set; }
+        #endregion
     }
 }
