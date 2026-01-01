@@ -1018,7 +1018,7 @@
                                                             </ItemsPanelTemplate>
                                                         </ComboBox.ItemsPanel>
                                                     </ComboBox>
-                                                    <ComboBox x:Name="SANDOGH2" DisplayMemberPath="NAME" SelectedValuePath="NUMBER" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="28" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" VerticalAlignment="Top" Width="200" Margin="3,0,0,0">
+                                                    <ComboBox x:Name="SANDOGH2" VirtualizingStackPanel.IsVirtualizingWhenGrouping="True" ScrollViewer.IsDeferredScrollingEnabled="True" DisplayMemberPath="NAME" SelectedValuePath="NUMBER" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="28" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" VerticalAlignment="Top" Width="200" Margin="3,0,0,0">
                                                         <ComboBox.ItemsPanel>
                                                             <ItemsPanelTemplate>
                                                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
