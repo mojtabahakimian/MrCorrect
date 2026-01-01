@@ -101,105 +101,47 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
         public class AMAR_MODEL
         {
-            public string Name { get; set; }
+            public string? NAME { get; set; }
 
-            [Column("1")]
+            // حالا نام‌ها با کوئری SQL یکی هستند و به صورت خودکار پر می‌شوند
             public double? Day1 { get; set; }
-
-            [Column("2")]
             public double? Day2 { get; set; }
-
-            [Column("3")]
             public double? Day3 { get; set; }
-
-            [Column("4")]
             public double? Day4 { get; set; }
-
-            [Column("5")]
             public double? Day5 { get; set; }
-
-            [Column("6")]
             public double? Day6 { get; set; }
-
-            [Column("7")]
             public double? Day7 { get; set; }
-
-            [Column("8")]
             public double? Day8 { get; set; }
-
-            [Column("9")]
             public double? Day9 { get; set; }
-
-            [Column("10")]
             public double? Day10 { get; set; }
-
-            [Column("11")]
             public double? Day11 { get; set; }
-
-            [Column("12")]
             public double? Day12 { get; set; }
-
-            [Column("13")]
             public double? Day13 { get; set; }
-
-            [Column("14")]
             public double? Day14 { get; set; }
-
-            [Column("15")]
             public double? Day15 { get; set; }
-
-            [Column("16")]
             public double? Day16 { get; set; }
-
-            [Column("17")]
             public double? Day17 { get; set; }
-
-            [Column("18")]
             public double? Day18 { get; set; }
-
-            [Column("19")]
             public double? Day19 { get; set; }
-
-            [Column("20")]
             public double? Day20 { get; set; }
-
-            [Column("21")]
             public double? Day21 { get; set; }
-
-            [Column("22")]
             public double? Day22 { get; set; }
-
-            [Column("23")]
             public double? Day23 { get; set; }
-
-            [Column("24")]
             public double? Day24 { get; set; }
-
-            [Column("25")]
             public double? Day25 { get; set; }
-
-            [Column("26")]
             public double? Day26 { get; set; }
-
-            [Column("27")]
             public double? Day27 { get; set; }
-
-            [Column("28")]
             public double? Day28 { get; set; }
-
-            [Column("29")]
             public double? Day29 { get; set; }
-
-            [Column("30")]
             public double? Day30 { get; set; }
-
-            [Column("31")]
             public double? Day31 { get; set; }
 
-            public string VH { get; set; }
-            public string GRP { get; set; }
-            public string Vahed { get; set; }
-            public string Names { get; set; }
+            // اگر در دیتابیس عدد هستند، بهتر است int یا double باشند
+            public int? VH { get; set; }
+            public double? GRP { get; set; }
+
+            public string? vahed { get; set; }
+            public string? NAMES { get; set; }
         }
 
         public ObservableCollection<AMAR_MODEL> AMAR_FROOSH_DATA { get; set; } = new ObservableCollection<AMAR_MODEL>();
@@ -216,9 +158,88 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
             AMAR_FROOSH_DATA?.Clear();
 
-            var MasterHead = dbms.DoGetDataSQL<AMAR_MODEL>(@$"  SELECT     NAME, SUM([1]) AS [1], SUM([2]) AS [2], SUM([3]) AS [3], SUM([4]) AS [4], SUM([5]) AS [5], SUM([6]) AS [6], SUM([7]) AS [7], SUM([8]) AS [8], SUM([9])  AS [9], SUM([10]) AS [10], SUM([11]) AS [11], SUM([12]) AS [12], SUM([13]) AS [13], SUM([14]) AS [14], 
-                                                                SUM([15]) AS [15], SUM([16]) AS [16], SUM([17])                       AS [17], SUM([18]) AS [18], SUM([19]) AS [19], SUM([20]) AS [20], SUM([21]) AS [21], SUM([22]) AS [22], SUM([23]) AS [23], SUM([24]) AS [24], SUM([25])   AS [25], SUM([26]) AS [26], SUM([27]) AS [27], 
-                                                                SUM([28]) AS [28], SUM([29]) AS [29], SUM([30]) AS [30], SUM([31]) AS [31], VH, GRP, vahed,  NAMES FROM         (SELECT     NAME, CASE DAYY WHEN 1 THEN MEGHT ELSE 0 END AS [1], CASE DAYY WHEN 2 THEN MEGHT ELSE 0 END AS [2], CASE DAYY WHEN 3 THEN MEGHT ELSE 0 END AS [3], CASE DAYY WHEN 4 THEN MEGHT ELSE 0 END AS [4], CASE DAYY WHEN 5 THEN MEGHT ELSE 0 END AS [5], CASE DAYY WHEN 6 THEN MEGHT ELSE 0 END AS [6], CASE DAYY WHEN 7 THEN MEGHT ELSE 0 END AS [7], CASE DAYY WHEN 8 THEN MEGHT ELSE 0 END AS [8], CASE DAYY WHEN 9 THEN MEGHT ELSE 0 END AS [9], CASE DAYY WHEN 10 THEN MEGHT ELSE 0 END AS [10], CASE DAYY WHEN 11 THEN MEGHT ELSE 0 END AS [11], CASE DAYY WHEN 12 THEN MEGHT ELSE 0 END AS [12], CASE DAYY WHEN 13 THEN MEGHT ELSE 0 END AS [13], CASE DAYY WHEN 14 THEN MEGHT ELSE 0 END AS [14], CASE DAYY WHEN 15 THEN MEGHT ELSE 0 END AS [15], CASE DAYY WHEN 16 THEN MEGHT ELSE 0 END AS [16], CASE DAYY WHEN 17 THEN MEGHT ELSE 0 END AS [17], CASE DAYY WHEN 18 THEN MEGHT ELSE 0 END AS [18], CASE DAYY WHEN 19 THEN MEGHT ELSE 0 END AS [19], CASE DAYY WHEN 20 THEN MEGHT ELSE 0 END AS [20], CASE DAYY WHEN 21 THEN MEGHT ELSE 0 END AS [21], CASE DAYY WHEN 22 THEN MEGHT ELSE 0 END AS [22], CASE DAYY WHEN 23 THEN MEGHT ELSE 0 END AS [23], CASE DAYY WHEN 24 THEN MEGHT ELSE 0 END AS [24], CASE DAYY WHEN 25 THEN MEGHT ELSE 0 END AS [25], CASE DAYY WHEN 26 THEN MEGHT ELSE 0 END AS [26], CASE DAYY WHEN 27 THEN MEGHT ELSE 0 END AS [27], CASE DAYY WHEN 28 THEN MEGHT ELSE 0 END AS [28], CASE DAYY WHEN 29 THEN MEGHT ELSE 0 END AS [29], CASE DAYY WHEN 30 THEN MEGHT ELSE 0 END AS [30], CASE DAYY WHEN 31 THEN MEGHT ELSE 0 END AS [31], NAMES, vahed, GRP, VH, DAYY, date_n   FROM dbo.AMAR_FROOSH_DAYLY  WHERE     (date_n BETWEEN {DT1} AND {DT2} )) DERIVEDTBL GROUP BY NAME, VH, GRP, vahed, NAMES ").ToList();
+            var MasterHead = dbms.DoGetDataSQL<AMAR_MODEL>(@$"SELECT 
+    NAME, 
+    SUM([1]) AS Day1, 
+    SUM([2]) AS Day2, 
+    SUM([3]) AS Day3, 
+    SUM([4]) AS Day4, 
+    SUM([5]) AS Day5, 
+    SUM([6]) AS Day6, 
+    SUM([7]) AS Day7, 
+    SUM([8]) AS Day8, 
+    SUM([9]) AS Day9, 
+    SUM([10]) AS Day10, 
+    SUM([11]) AS Day11, 
+    SUM([12]) AS Day12, 
+    SUM([13]) AS Day13, 
+    SUM([14]) AS Day14, 
+    SUM([15]) AS Day15, 
+    SUM([16]) AS Day16, 
+    SUM([17]) AS Day17, 
+    SUM([18]) AS Day18, 
+    SUM([19]) AS Day19, 
+    SUM([20]) AS Day20, 
+    SUM([21]) AS Day21, 
+    SUM([22]) AS Day22, 
+    SUM([23]) AS Day23, 
+    SUM([24]) AS Day24, 
+    SUM([25]) AS Day25, 
+    SUM([26]) AS Day26, 
+    SUM([27]) AS Day27, 
+    SUM([28]) AS Day28, 
+    SUM([29]) AS Day29, 
+    SUM([30]) AS Day30, 
+    SUM([31]) AS Day31, 
+    VH, 
+    GRP, 
+    vahed, 
+    NAMES 
+FROM 
+    (SELECT 
+        NAME, 
+        CASE DAYY WHEN 1 THEN MEGHT ELSE 0 END AS [1], 
+        CASE DAYY WHEN 2 THEN MEGHT ELSE 0 END AS [2], 
+        CASE DAYY WHEN 3 THEN MEGHT ELSE 0 END AS [3], 
+        CASE DAYY WHEN 4 THEN MEGHT ELSE 0 END AS [4], 
+        CASE DAYY WHEN 5 THEN MEGHT ELSE 0 END AS [5], 
+        CASE DAYY WHEN 6 THEN MEGHT ELSE 0 END AS [6], 
+        CASE DAYY WHEN 7 THEN MEGHT ELSE 0 END AS [7], 
+        CASE DAYY WHEN 8 THEN MEGHT ELSE 0 END AS [8], 
+        CASE DAYY WHEN 9 THEN MEGHT ELSE 0 END AS [9], 
+        CASE DAYY WHEN 10 THEN MEGHT ELSE 0 END AS [10], 
+        CASE DAYY WHEN 11 THEN MEGHT ELSE 0 END AS [11], 
+        CASE DAYY WHEN 12 THEN MEGHT ELSE 0 END AS [12], 
+        CASE DAYY WHEN 13 THEN MEGHT ELSE 0 END AS [13], 
+        CASE DAYY WHEN 14 THEN MEGHT ELSE 0 END AS [14], 
+        CASE DAYY WHEN 15 THEN MEGHT ELSE 0 END AS [15], 
+        CASE DAYY WHEN 16 THEN MEGHT ELSE 0 END AS [16], 
+        CASE DAYY WHEN 17 THEN MEGHT ELSE 0 END AS [17], 
+        CASE DAYY WHEN 18 THEN MEGHT ELSE 0 END AS [18], 
+        CASE DAYY WHEN 19 THEN MEGHT ELSE 0 END AS [19], 
+        CASE DAYY WHEN 20 THEN MEGHT ELSE 0 END AS [20], 
+        CASE DAYY WHEN 21 THEN MEGHT ELSE 0 END AS [21], 
+        CASE DAYY WHEN 22 THEN MEGHT ELSE 0 END AS [22], 
+        CASE DAYY WHEN 23 THEN MEGHT ELSE 0 END AS [23], 
+        CASE DAYY WHEN 24 THEN MEGHT ELSE 0 END AS [24], 
+        CASE DAYY WHEN 25 THEN MEGHT ELSE 0 END AS [25], 
+        CASE DAYY WHEN 26 THEN MEGHT ELSE 0 END AS [26], 
+        CASE DAYY WHEN 27 THEN MEGHT ELSE 0 END AS [27], 
+        CASE DAYY WHEN 28 THEN MEGHT ELSE 0 END AS [28], 
+        CASE DAYY WHEN 29 THEN MEGHT ELSE 0 END AS [29], 
+        CASE DAYY WHEN 30 THEN MEGHT ELSE 0 END AS [30], 
+        CASE DAYY WHEN 31 THEN MEGHT ELSE 0 END AS [31], 
+        NAMES, 
+        vahed, 
+        GRP, 
+        VH, 
+        DAYY, 
+        date_n   
+    FROM dbo.AMAR_FROOSH_DAYLY  
+    WHERE (date_n BETWEEN {DT1} AND {DT2})
+    ) DERIVEDTBL 
+GROUP BY 
+    NAME, VH, GRP, vahed, NAMES").ToList();
 
             foreach (var item in MasterHead)
             {

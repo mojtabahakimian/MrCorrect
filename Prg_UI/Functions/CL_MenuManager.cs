@@ -1626,7 +1626,7 @@ namespace Functions
                     break;
 
                 case WinNameType.F_MENU_GOZARESH_FROOSH: //گزارش فروش روزانه واحد ها
-                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_GOZARESH_FROOSH(default), isModalDialog: false, allowMultipleInstances: false);
+                    CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_GOZARESH_FROOSH("F"), isModalDialog: false, allowMultipleInstances: false);
                     break;
 
                 case WinNameType.F_MENU_DATE_FRCUST: //گزارش ارزش افزوده فروش - گزارش فصلی
