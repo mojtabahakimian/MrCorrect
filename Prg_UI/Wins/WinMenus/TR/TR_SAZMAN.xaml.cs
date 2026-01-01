@@ -36,6 +36,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Wins.WinMenus.KHARID_FORUSH;
 using Xceed.Wpf.Toolkit.Primitives;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
@@ -120,6 +121,8 @@ namespace Prg_UI.Wins.WinMenus.TR
         public ObservableCollection<SAZMAN> SAZMAN_HISTORY_DATA { get; set; } = new ObservableCollection<SAZMAN>();
         public bool NowIsReady { get; private set; }
         public byte TAGCODE { get; private set; }
+        private readonly SemaphoreSlim _loadLock = new(1, 1);
+        private CancellationTokenSource? _loadCts;
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
@@ -370,299 +373,268 @@ namespace Prg_UI.Wins.WinMenus.TR
             using var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR);
             return await db.QueryFirstOrDefaultAsync<SAZMAN>(sql, parameters);
         }
-        private async void ReGetData(SAZMAN TrRow)
+        private async Task ReGetDataAsync(SAZMAN TrRow)
         {
             if (TrRow == null) return;
 
-            var dataFetchTask = GetSazmanConfigAsync(TrRow);
-            var delayTask = Task.Delay(300);
-            var completedTask = await Task.WhenAny(dataFetchTask, delayTask);
+            _loadCts?.Cancel();
+            _loadCts = new CancellationTokenSource();
+            var token = _loadCts.Token;
 
-            bool loaderShown = false;
-            if (completedTask == delayTask)
-            {
-                BusyOverlay.Visibility = Visibility.Visible;
-                loaderShown = true;
-            }
-
+            var lockTaken = false;
             try
             {
-                SAZMAN config = await dataFetchTask;
-                if (config == null)
+                await _loadLock.WaitAsync(token);
+                lockTaken = true;
+
+                var dataFetchTask = GetSazmanConfigAsync(TrRow);
+                var delayTask = Task.Delay(300, token);
+                var completedTask = await Task.WhenAny(dataFetchTask, delayTask);
+
+                bool loaderShown = false;
+                if (completedTask == delayTask && !token.IsCancellationRequested)
+                {
+                    BusyOverlay.Visibility = Visibility.Visible;
+                    loaderShown = true;
+                }
+
+                try
+                {
+                    SAZMAN config = await dataFetchTask;
+                    token.ThrowIfCancellationRequested();
+
+                    if (config == null)
+                    {
+                        if (loaderShown) BusyOverlay.Visibility = Visibility.Collapsed;
+                        new Msgwin(false, "اطلاعات یافت نشد.").Show();
+                        return;
+                    }
+
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        #region GENERAL_TAB
+                        WIDTH_D.Text = config?.WIDTH_D;
+                        HIGH_D.Text = config?.HIGH_D;
+                        BACKPATH.Text = config?.BACKPATH;
+                        TFADDRESS.Text = config?.TFADDRESS;
+                        TFTEL.Text = config?.TFTEL;
+                        SERVERNAM.Text = config?.SERVERNAM;
+                        OPTIONSS.Text = config?.OPTIONSS;
+                        #endregion
+
+                        #region ASNAD_VA_HESAB_TAB
+
+                        SetGrpOption(GRP_PERSON, (int)(config?.PERSON ?? -1)); //اشخاص مشخص شده در حسابها
+                        SetGrpOption(GRP_TKHF, config?.TKHF ?? -1); //تخفیفات فاکتورها
+                        SetGrpOption(GRP_SANAD, config?.SANAD ?? -1); //سند زدن
+
+                        SIGN.IsChecked = config?.SIGN ?? false; //گردش كاری و فرمها با امضاء عمل شود
+                        CTL_DT.IsChecked = config?.CTL_DT ?? false; //تاريخ فقط مربوط به همين سال باشد
+                        SNDKH.IsChecked = config?.SNDKH ?? false; //سند ها روزانه باشد
+                        SAGHF.IsChecked = config?.SAGHF ?? false; //سقف اعتبار 1
+                        SAGHF2.IsChecked = config?.SAGHF2 ?? false; //سقف اعتبار 2
+
+                        CPI.Text = config?.CPI?.ToStringNullSafe(); //تاریخ قابل برگشت
+                        ARSESH.Text = config?.ARSESH.ToStringNullSafe(); //درصد مالیات بر ارزش افزوده
+                        TFTPAGE.Text = config?.TFTPAGE.ToStringNullSafe(); //فاصله از پائين كاغذ در چاپ سند :
+                        #endregion
+
+                        #region FACTOR_VA_ANBAR_TAB
+                        SetGrpOption(GRP_GHAYM, config?.GHAYM ?? -1);
+                        SetGrpOption(GRP_KALA, config?.KALA ?? -1);
+                        SetGrpOption(GRP_FRUP, Convert.ToInt32(config?.FRUP));
+                        SetGrpOption(GRP_WAR, (int)(config?.WAR));
+                        SetGrpOption(GRP_LST, (int)(config?.LST));
+                        SetGrpOption(GRP_UPDDATE, Convert.ToInt32(config?.UPDDATE));
+
+                        MOJU.IsChecked = config.MOJU;
+                        RMOG.IsChecked = config.RMOG;
+                        DIG.Text = config.DIG?.ToString();
+                        TFCODE_E.Text = config.TFCODE_E;
+                        CODEVIEW.IsChecked = config.CODEVIEW == 1; // smallint to bool
+                        MAND.IsChecked = config.MAND;
+                        SERFACB.IsChecked = config.SERFACB;
+                        LOCKFAP.IsChecked = config.LOCKFAP;
+                        DEFANB.SelectedValue = config.DEFANB; DEFANB.Items.Refresh();
+                        DEFTKH.SelectedValue = config.DEFTKH; DEFTKH.Items.Refresh();
+                        TRANSF.IsChecked = config.TRANSF;
+                        #endregion
+
+                        #region SALARY_TAB
+                        HAZEDAR.SelectedValue = config.HAZEDAR;
+                        HAZTOLID.SelectedValue = config.HAZTOLID;
+                        HAZFROOSH.SelectedValue = config.HAZFROOSH;
+                        HAZKHADAMAT.SelectedValue = config.HAZKHADAMAT;
+                        EDABIM.SelectedValue = config.EDABIM;
+                        HAZBIM.SelectedValue = config.HAZBIM;
+                        BESHO.SelectedValue = config.BESHO;
+                        BEDMOS.SelectedValue = config.BEDMOS;
+                        PARDAKH.SelectedValue = config.PARDAKH;
+                        HAZMALI.SelectedValue = config.HAZMALI;
+                        PSANDHES.SelectedValue = config.PSANDHES;
+
+                        SANAVP.Text = config.SANAVP?.ToString();
+                        SAGHFH.Text = config.SAGHFH?.ToString();
+
+                        HEZA.IsChecked = config.HEZA;
+                        HPAD.IsChecked = config.HPAD;
+                        HOLA.IsChecked = config.HOLA;
+                        HKHA.IsChecked = config.HKHA;
+                        HNAH.IsChecked = config.HNAH;
+                        HJAZ.IsChecked = config.HJAZ;
+                        HRAN.IsChecked = config.HRAN;
+                        HCON.IsChecked = config.HCON;
+                        HSAY.IsChecked = config.HSAY;
+                        HSHI.IsChecked = config.HSHI;
+                        HBON.IsChecked = config.HBON ?? false;
+                        HTAHOL.IsChecked = config.HTAHOL ?? false;
+                        #endregion
+
+                        #region SANATI_TAB
+                        ECONM.IsChecked = config.ECONM;
+                        SANAT.IsChecked = config.SANAT;
+                        // شماره شروع‌ها
+                        STFR.Text = config.STFR?.ToString();
+                        STKH.Text = config.STKH?.ToString();
+                        STHFR.Text = config.STHFR?.ToString();
+                        STHKH.Text = config.STHKH?.ToString();
+                        STENT.Text = config.STENT?.ToString();
+                        STKHS.Text = config.STKHS?.ToString();
+                        STKHH.Text = config.STKHH?.ToString();
+                        STTOL.Text = config.STTOL?.ToString();
+                        STFRB.Text = config.STFRB?.ToString();
+                        STBKH.Text = config.STBKH?.ToString();
+                        STMO.Text = config.STMO?.ToString();
+                        STKHA.Text = config.STKHA?.ToString();
+
+                        // چک‌باکس‌های عوامل حقوق
+                        SA_HOGH.IsChecked = config.SA_HOGH;
+                        SA_40EZ.IsChecked = config.SA_40EZ;
+                        SA_EZAF.IsChecked = config.SA_EZAF;
+                        SA_PADA.IsChecked = config.SA_PADA;
+                        SA_HOLA.IsChecked = config.SA_HOLA;
+                        SA_KHAR.IsChecked = config.SA_KHAR;
+                        SA_NAHA.IsChecked = config.SA_NAHA;
+                        SA_JAZB.IsChecked = config.SA_JAZB;
+                        SA_RAND.IsChecked = config.SA_RAND;
+                        SA_COND.IsChecked = config.SA_COND;
+                        SA_SAYE.IsChecked = config.SA_SAYE;
+                        SA_23BI.IsChecked = config.SA_23BI;
+
+                        SetGrpOption(GRP_FINALS, Convert.ToInt32(config.FINALS));
+                        #endregion
+
+                        #region SMS_TAB
+                        SMS_USERNAME.Text = config?.SMS_USERNAME;
+                        SMS_PASSWORD.Password = config?.SMS_PASSWORD;
+                        SMS_TSMSHOST.Text = config?.SMS_TSMSHOST; //Line Number
+                        SMS_LIBKEY.Password = config?.SMS_LIBKEY; //Api Key
+
+                        SMS_OWNER.Text = config?.SMS_OWNER;
+
+                        DSMS.IsChecked = (config?.DSMS ?? false);
+                        PRMFR.IsChecked = (config?.PRMFR ?? false);
+                        SMSACT.IsChecked = (config?.SMSACT ?? false);
+
+                        switch (config?.SMSTYPE)
+                        {
+                            case "TSMS":
+                                RB_TUBA.IsChecked = true;
+                                break;
+
+                            case "SMSIR":
+                                RB_SMSIR.IsChecked = true;
+                                break;
+
+                            default: break;
+                        }
+                        #endregion
+
+                        #region ISO_TAB
+                        ISO_FROOSH.Text = config.ISO_FROOSH;
+                        ISO_KHAREED.Text = config.ISO_KHAREED;
+                        ISO_MAVAD.Text = config.ISO_MAVAD;
+                        ISO_TOLID.Text = config.ISO_TOLID;
+                        ISO_MAVADSAYER.Text = config.ISO_MAVADSAYER;
+                        ISO_DTOLID.Text = config.ISO_DTOLID;
+                        #endregion
+
+                        #region CRM_SETTING_TAB
+                        // عناوین آیتم‌ها
+                        IT1.Text = config.IT1; IT2.Text = config.IT2; IT3.Text = config.IT3;
+                        IT4.Text = config.IT4; IT5.Text = config.IT5; IT6.Text = config.IT6;
+                        IT7.Text = config.IT7; IT8.Text = config.IT8; IT9.Text = config.IT9;
+                        // عناوین ستون‌ها
+                        IS1.Text = config.IS1; IS2.Text = config.IS2; IS3.Text = config.IS3;
+                        IS4.Text = config.IS4; IS5.Text = config.IS5; IS6.Text = config.IS6;
+                        IS7.Text = config.IS7; IS8.Text = config.IS8; IS9.Text = config.IS9;
+                        IS10.Text = config.IS10; IS11.Text = config.IS11; IS12.Text = config.IS12;
+                        IS14.Text = config.IS14; IS15.Text = config.IS15; IS16.Text = config.IS16;
+                        #endregion
+
+                        #region SSM
+                        SSMTRTAKM.Text = config.SSMTRTAKM?.ToString();
+                        SSMTRTAGM.Text = config.SSMTRTAGM?.ToString();
+                        SSMSNDAUTO.IsChecked = config.SSMSNDAUTO.HasValue && config.SSMSNDAUTO != 0;
+                        SSMTBMON.Text = config.SSMTBMON?.ToString();
+                        SSMDARSAD.Text = config.SSMDARSAD?.ToString();
+                        HDARKASRTAKHF.SelectedValue = config.HDARKASRTAKHF;
+                        #endregion
+
+                        #region MOADIAN
+                        PRIVIATEKEY.Text = config.PRIVIATEKEY;
+                        Dcertificate.Text = config.Dcertificate;
+                        MEMORYID.Text = config.MEMORYID;
+                        MEMORYIDsand.Text = config.MEMORYIDsand;
+                        #endregion
+
+                        //حسابهای خودگردان
+                        SANDOGH.SelectedValue = config.SANDOGH;
+                        BANKHA.SelectedValue = config.BANKHA;
+                        BESTANKAR.SelectedValue = config.BESTANKAR;
+                        BEDEHKAR.SelectedValue = config.BEDEHKAR;
+                        KHARID.SelectedValue = config.KHARID;
+                        MKHARID.SelectedValue = config.MKHARID;
+                        TKHARID.SelectedValue = config.TKHARID;
+                        HKHARID.SelectedValue = config.HKHARID;
+                        FROSH.SelectedValue = config.FROSH;
+                        MFROSH.SelectedValue = config.MFROSH;
+                        TFROSH.SelectedValue = config.TFROSH;
+                        HFROSH.SelectedValue = config.HFROSH;
+                        MOGODIA.SelectedValue = config.MOGODIA;
+                        DARAM.SelectedValue = config.DARAM;
+                        HDARAM.SelectedValue = config.HDARAM;
+                        HAVALAH.SelectedValue = config.HAVALAH;
+                        HAZ_TOL.SelectedValue = config.HAZ_TOL;
+                        PHAZ_TOL.SelectedValue = config.PHAZ_TOL;
+                        PJHAZ_TOL1.SelectedValue = config.PJHAZ_TOL1;
+                        PPDAST.SelectedValue = config.PPDAST;
+                        PPSAR.SelectedValue = config.PPSAR;
+                        CONKAL.SelectedValue = config.CONKAL;
+                        GHEYMAT.SelectedValue = config.GHEYMAT;
+                        AMALKARD.SelectedValue = config.AMALKARD;
+                        PKHARID.SelectedValue = config.PKHARID;
+
+                        PERSONEL.SelectedValue = config.PERSONEL;
+                        PERVAM.SelectedValue = config.PERVAM;
+                        HESMBAA.SelectedValue = config.HESMBAA;
+
+                        ADA.SelectedValue = config.ADA;
+                        APA.SelectedValue = config.APA;
+                        ADV.SelectedValue = config.ADV;
+                        APV.SelectedValue = config.APV;
+                        hesnaghd.SelectedValue = config.hesnaghd;
+                        HPOR.SelectedValue = config.HPOR;
+                    }, DispatcherPriority.Background, token);
+                }
+                finally
                 {
                     if (loaderShown) BusyOverlay.Visibility = Visibility.Collapsed;
-                    new Msgwin(false, "اطلاعات یافت نشد.").Show();
-                    return;
                 }
-                //مخشصات سیسیتم
-                if (config != null)
-                {
-                    #region GENERAL_TAB
-                    WIDTH_D.Text = config?.WIDTH_D;
-                    HIGH_D.Text = config?.HIGH_D;
-                    BACKPATH.Text = config?.BACKPATH;
-                    TFADDRESS.Text = config?.TFADDRESS;
-                    TFTEL.Text = config?.TFTEL;
-                    SERVERNAM.Text = config?.SERVERNAM;
-                    OPTIONSS.Text = config?.OPTIONSS;
-
-                    //// Try to load existing signature
-                    //if (config?.EMZA != null && config.EMZA.Length > 0)
-                    //{
-                    //    try
-                    //    {
-                    //        // First try to load the image directly
-                    //        BitmapImage bitmapSource = CL_LMethods.ByteArrayToBitmapImage(config.EMZA);
-
-                    //        if (bitmapSource != null)
-                    //        {
-                    //            // We successfully loaded the image
-                    //            ImageBrush brush = new ImageBrush(bitmapSource);
-                    //            brush.Stretch = Stretch.Uniform;
-                    //            EMZA_CANVAS.Background = brush;
-
-                    //            // Disable drawing when showing an existing image
-                    //            EMZA_CANVAS.EditingMode = InkCanvasEditingMode.None;
-                    //            _uploadedImageData = config.EMZA;
-                    //        }
-                    //        else
-                    //        {
-                    //            // If loading fails, try to load as InkCanvas strokes if applicable
-                    //            try
-                    //            {
-                    //                using (MemoryStream ms = new MemoryStream(config.EMZA))
-                    //                {
-                    //                    EMZA_CANVAS.Strokes.Clear();
-                    //                    EMZA_CANVAS.Strokes = new System.Windows.Ink.StrokeCollection(ms);
-                    //                }
-                    //            }
-                    //            catch
-                    //            {
-                    //                // If all attempts fail, just show a white background
-                    //                EMZA_CANVAS.Background = Brushes.White;
-                    //                EMZA_CANVAS.Strokes.Clear();
-                    //            }
-                    //        }
-                    //    }
-                    //    catch (Exception)
-                    //    {
-                    //        new Msgwin(false, "خطا در بارگذاری تصویر از دیتابیس").ShowDialog();
-                    //        EMZA_CANVAS.Background = Brushes.White;
-                    //        EMZA_CANVAS.Strokes.Clear();
-                    //    }
-                    //}
-                    #endregion
-
-                    #region ASNAD_VA_HESAB_TAB
-
-                    SetGrpOption(GRP_PERSON, (int)(config?.PERSON ?? -1)); //اشخاص مشخص شده در حسابها
-                    SetGrpOption(GRP_TKHF, config?.TKHF ?? -1); //تخفیفات فاکتورها
-                    SetGrpOption(GRP_SANAD, config?.SANAD ?? -1); //سند زدن
-
-                    SIGN.IsChecked = config?.SIGN ?? false; //گردش كاری و فرمها با امضاء عمل شود
-                    CTL_DT.IsChecked = config?.CTL_DT ?? false; //تاريخ فقط مربوط به همين سال باشد
-                    SNDKH.IsChecked = config?.SNDKH ?? false; //سند ها روزانه باشد
-                    SAGHF.IsChecked = config?.SAGHF ?? false; //سقف اعتبار 1
-                    SAGHF2.IsChecked = config?.SAGHF2 ?? false; //سقف اعتبار 2
-
-                    CPI.Text = config?.CPI?.ToStringNullSafe(); //تاریخ قابل برگشت
-                    ARSESH.Text = config?.ARSESH.ToStringNullSafe(); //درصد مالیات بر ارزش افزوده
-                    TFTPAGE.Text = config?.TFTPAGE.ToStringNullSafe(); //فاصله از پائين كاغذ در چاپ سند :
-                    #endregion
-
-                    #region FACTOR_VA_ANBAR_TAB
-                    SetGrpOption(GRP_GHAYM, config?.GHAYM ?? -1);
-                    SetGrpOption(GRP_KALA, config?.KALA ?? -1);
-                    SetGrpOption(GRP_FRUP, Convert.ToInt32(config?.FRUP));
-                    SetGrpOption(GRP_WAR, (int)(config?.WAR));
-                    SetGrpOption(GRP_LST, (int)(config?.LST));
-                    SetGrpOption(GRP_UPDDATE, Convert.ToInt32(config?.UPDDATE));
-
-                    MOJU.IsChecked = config.MOJU;
-                    RMOG.IsChecked = config.RMOG;
-                    DIG.Text = config.DIG?.ToString();
-                    TFCODE_E.Text = config.TFCODE_E;
-                    CODEVIEW.IsChecked = config.CODEVIEW == 1; // smallint to bool
-                    MAND.IsChecked = config.MAND;
-                    SERFACB.IsChecked = config.SERFACB;
-                    LOCKFAP.IsChecked = config.LOCKFAP;
-                    DEFANB.SelectedValue = config.DEFANB; DEFANB.Items.Refresh();
-                    DEFTKH.SelectedValue = config.DEFTKH; DEFTKH.Items.Refresh();
-                    TRANSF.IsChecked = config.TRANSF;
-                    #endregion
-
-                    #region SALARY_TAB
-                    HAZEDAR.SelectedValue = config.HAZEDAR;
-                    HAZTOLID.SelectedValue = config.HAZTOLID;
-                    HAZFROOSH.SelectedValue = config.HAZFROOSH;
-                    HAZKHADAMAT.SelectedValue = config.HAZKHADAMAT;
-                    EDABIM.SelectedValue = config.EDABIM;
-                    HAZBIM.SelectedValue = config.HAZBIM;
-                    BESHO.SelectedValue = config.BESHO;
-                    BEDMOS.SelectedValue = config.BEDMOS;
-                    PARDAKH.SelectedValue = config.PARDAKH;
-                    HAZMALI.SelectedValue = config.HAZMALI;
-                    PSANDHES.SelectedValue = config.PSANDHES;
-
-                    SANAVP.Text = config.SANAVP?.ToString();
-                    SAGHFH.Text = config.SAGHFH?.ToString();
-
-                    HEZA.IsChecked = config.HEZA;
-                    HPAD.IsChecked = config.HPAD;
-                    HOLA.IsChecked = config.HOLA;
-                    HKHA.IsChecked = config.HKHA;
-                    HNAH.IsChecked = config.HNAH;
-                    HJAZ.IsChecked = config.HJAZ;
-                    HRAN.IsChecked = config.HRAN;
-                    HCON.IsChecked = config.HCON;
-                    HSAY.IsChecked = config.HSAY;
-                    HSHI.IsChecked = config.HSHI;
-                    HBON.IsChecked = config.HBON ?? false;
-                    HTAHOL.IsChecked = config.HTAHOL ?? false;
-                    #endregion
-
-                    #region SANATI_TAB
-                    ECONM.IsChecked = config.ECONM;
-                    SANAT.IsChecked = config.SANAT;
-                    // شماره شروع‌ها
-                    STFR.Text = config.STFR?.ToString();
-                    STKH.Text = config.STKH?.ToString();
-                    STHFR.Text = config.STHFR?.ToString();
-                    STHKH.Text = config.STHKH?.ToString();
-                    STENT.Text = config.STENT?.ToString();
-                    STKHS.Text = config.STKHS?.ToString();
-                    STKHH.Text = config.STKHH?.ToString();
-                    STTOL.Text = config.STTOL?.ToString();
-                    STFRB.Text = config.STFRB?.ToString();
-                    STBKH.Text = config.STBKH?.ToString();
-                    STMO.Text = config.STMO?.ToString();
-                    STKHA.Text = config.STKHA?.ToString();
-
-                    // چک‌باکس‌های عوامل حقوق
-                    SA_HOGH.IsChecked = config.SA_HOGH;
-                    SA_40EZ.IsChecked = config.SA_40EZ;
-                    SA_EZAF.IsChecked = config.SA_EZAF;
-                    SA_PADA.IsChecked = config.SA_PADA;
-                    SA_HOLA.IsChecked = config.SA_HOLA;
-                    SA_KHAR.IsChecked = config.SA_KHAR;
-                    SA_NAHA.IsChecked = config.SA_NAHA;
-                    SA_JAZB.IsChecked = config.SA_JAZB;
-                    SA_RAND.IsChecked = config.SA_RAND;
-                    SA_COND.IsChecked = config.SA_COND;
-                    SA_SAYE.IsChecked = config.SA_SAYE;
-                    SA_23BI.IsChecked = config.SA_23BI;
-
-                    SetGrpOption(GRP_FINALS, Convert.ToInt32(config.FINALS));
-                    #endregion
-
-                    #region SMS_TAB
-                    SMS_USERNAME.Text = config?.SMS_USERNAME;
-                    SMS_PASSWORD.Password = config?.SMS_PASSWORD;
-                    SMS_TSMSHOST.Text = config?.SMS_TSMSHOST; //Line Number
-                    SMS_LIBKEY.Password = config?.SMS_LIBKEY; //Api Key
-
-                    SMS_OWNER.Text = config?.SMS_OWNER;
-
-                    DSMS.IsChecked = (config?.DSMS ?? false);
-                    PRMFR.IsChecked = (config?.PRMFR ?? false);
-                    SMSACT.IsChecked = (config?.SMSACT ?? false);
-
-                    switch (config?.SMSTYPE)
-                    {
-                        case "TSMS":
-                            RB_TUBA.IsChecked = true;
-                            break;
-
-                        case "SMSIR":
-                            RB_SMSIR.IsChecked = true;
-                            break;
-
-                        default: break;
-                    }
-                    #endregion
-
-                    #region ISO_TAB
-                    ISO_FROOSH.Text = config.ISO_FROOSH;
-                    ISO_KHAREED.Text = config.ISO_KHAREED;
-                    ISO_MAVAD.Text = config.ISO_MAVAD;
-                    ISO_TOLID.Text = config.ISO_TOLID;
-                    ISO_MAVADSAYER.Text = config.ISO_MAVADSAYER;
-                    ISO_DTOLID.Text = config.ISO_DTOLID;
-                    #endregion
-
-                    #region CRM_SETTING_TAB
-                    // عناوین آیتم‌ها
-                    IT1.Text = config.IT1; IT2.Text = config.IT2; IT3.Text = config.IT3;
-                    IT4.Text = config.IT4; IT5.Text = config.IT5; IT6.Text = config.IT6;
-                    IT7.Text = config.IT7; IT8.Text = config.IT8; IT9.Text = config.IT9;
-                    // عناوین ستون‌ها
-                    IS1.Text = config.IS1; IS2.Text = config.IS2; IS3.Text = config.IS3;
-                    IS4.Text = config.IS4; IS5.Text = config.IS5; IS6.Text = config.IS6;
-                    IS7.Text = config.IS7; IS8.Text = config.IS8; IS9.Text = config.IS9;
-                    IS10.Text = config.IS10; IS11.Text = config.IS11; IS12.Text = config.IS12;
-                    IS14.Text = config.IS14; IS15.Text = config.IS15; IS16.Text = config.IS16;
-                    #endregion
-
-                    #region SSM
-                    SSMTRTAKM.Text = config.SSMTRTAKM?.ToString();
-                    SSMTRTAGM.Text = config.SSMTRTAGM?.ToString();
-                    SSMSNDAUTO.IsChecked = config.SSMSNDAUTO.HasValue && config.SSMSNDAUTO != 0;
-                    SSMTBMON.Text = config.SSMTBMON?.ToString();
-                    SSMDARSAD.Text = config.SSMDARSAD?.ToString();
-                    HDARKASRTAKHF.SelectedValue = config.HDARKASRTAKHF;
-                    #endregion
-
-                    #region MOADIAN
-                    PRIVIATEKEY.Text = config.PRIVIATEKEY;
-                    Dcertificate.Text = config.Dcertificate;
-                    MEMORYID.Text = config.MEMORYID;
-                    MEMORYIDsand.Text = config.MEMORYIDsand;
-                    #endregion
-                }
-
-                //حسابهای خودگردان
-                if (config != null)
-                {
-                    // گروه اول: تنظیم مقادیر انتخاب شده
-                    SANDOGH.SelectedValue = config.SANDOGH;
-                    BANKHA.SelectedValue = config.BANKHA;
-                    BESTANKAR.SelectedValue = config.BESTANKAR;
-                    BEDEHKAR.SelectedValue = config.BEDEHKAR;
-                    KHARID.SelectedValue = config.KHARID;
-                    MKHARID.SelectedValue = config.MKHARID;
-                    TKHARID.SelectedValue = config.TKHARID;
-                    HKHARID.SelectedValue = config.HKHARID;
-                    FROSH.SelectedValue = config.FROSH;
-                    MFROSH.SelectedValue = config.MFROSH;
-                    TFROSH.SelectedValue = config.TFROSH;
-                    HFROSH.SelectedValue = config.HFROSH;
-                    MOGODIA.SelectedValue = config.MOGODIA;
-                    DARAM.SelectedValue = config.DARAM;
-                    HDARAM.SelectedValue = config.HDARAM;
-                    HAVALAH.SelectedValue = config.HAVALAH;
-                    HAZ_TOL.SelectedValue = config.HAZ_TOL;
-                    PHAZ_TOL.SelectedValue = config.PHAZ_TOL;
-                    PJHAZ_TOL1.SelectedValue = config.PJHAZ_TOL1;
-                    PPDAST.SelectedValue = config.PPDAST;
-                    PPSAR.SelectedValue = config.PPSAR;
-                    CONKAL.SelectedValue = config.CONKAL;
-                    GHEYMAT.SelectedValue = config.GHEYMAT;
-                    AMALKARD.SelectedValue = config.AMALKARD;
-                    PKHARID.SelectedValue = config.PKHARID;
-
-                    // گروه دوم
-                    PERSONEL.SelectedValue = config.PERSONEL;
-                    PERVAM.SelectedValue = config.PERVAM;
-                    HESMBAA.SelectedValue = config.HESMBAA;
-
-                    // گروه سوم
-                    ADA.SelectedValue = config.ADA;
-                    APA.SelectedValue = config.APA;
-                    ADV.SelectedValue = config.ADV;
-                    APV.SelectedValue = config.APV;
-                    hesnaghd.SelectedValue = config.hesnaghd;
-                    HPOR.SelectedValue = config.HPOR;
-                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Swallow cancellation to keep UI responsive
             }
             catch (Exception ex)
             {
@@ -670,7 +642,7 @@ namespace Prg_UI.Wins.WinMenus.TR
             }
             finally
             {
-                if (loaderShown) BusyOverlay.Visibility = Visibility.Collapsed;
+                if (lockTaken) _loadLock.Release();
             }
         }
 
@@ -930,7 +902,7 @@ namespace Prg_UI.Wins.WinMenus.TR
 
             if (SYNCFUSION_DG.SelectedItem is SAZMAN SelectedHead)
             {
-                ReGetData(SelectedHead);
+                _ = ReGetDataAsync(SelectedHead);
             }
             else
             {
