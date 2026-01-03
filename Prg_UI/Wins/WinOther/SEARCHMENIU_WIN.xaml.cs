@@ -1,21 +1,22 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using Functions;
+using MaterialDesignThemes.Wpf;
+using Prg_Proccessy.Generaly;
+using Prg_Proccessy.MODELS;
+using Prg_UI;
+using Prg_UI.Functions;
+using Prg_UI.Wins.WinMenus.BARNAME_RIZI;
+using Prg_UI.Wins.WinMenus.TR;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Linq;
-using System;
-using Prg_UI;
-using Prg_UI.Functions;
 using System.Windows.Media;
-using System.IO;
-using Prg_Proccessy.MODELS;
-using Prg_Proccessy.Generaly;
-using Functions;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
-using static Functions.CL_MenuManager;
 using Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
-using Prg_UI.Wins.WinMenus.BARNAME_RIZI;
+using static Functions.CL_MenuManager;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
 
 namespace Wins.WinOther
 {
@@ -428,7 +429,8 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "برگه ورود کالای ساخته شده", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_VOROD_KALA_SAKHTEH });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "برگه خروج مواد اولیه جهت تولید", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_KHOROJ_MAVAD_AVALIYEH });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "صدور برگه خروج سایر مواد از انبار", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_KHOROJ_SAYER_MAVAD });
-
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق انبار گردانی", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_TR_ANBGRD_LST });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق انتقالی از انبار به انبار", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_ANBAR_ENTERGHAL });
 
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());
 

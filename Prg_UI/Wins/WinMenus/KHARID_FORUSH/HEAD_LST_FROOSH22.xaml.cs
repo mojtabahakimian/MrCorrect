@@ -8109,6 +8109,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             if (TICMBAA.IsChecked == true)
             {
+                double.TryParse(MBAA.Text, out var currentMbaa);
+
                 // Pre-fetch all needed codes to reduce SQL round-trips
                 var codes = invoiceList.Select(x => x.CODE).Distinct().ToList();
                 var cmbaaMap = dbms.DoGetDataSQL<HLF2>($"SELECT CMBAA, CODE FROM STUF_DEF WHERE CODE IN @Codes", new { Codes = codes }).ToDictionary(x => x.CODE, x => x.CMBAA);
@@ -8143,10 +8145,18 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         new { IMBAA = row.IMBAA, NUMBER = number, TAG = tag, ID = row.id });
                 }
 
-                if (smbaa != Convert.ToDouble(MBAA.Text) && smbaa > 0d)
+                if (smbaa > 0d)
                 {
-                    this.MBAA.Text = smbaa.ToString();
+                    if (smbaa != currentMbaa)
+                    {
+                        this.MBAA.Text = smbaa.ToString();
+                    }
                     this.HMBAA.Text = Baseknow.HESMBAA;
+                    this.CMB_HMBAA.SelectedValue = this.HMBAA.Text;
+                }
+                else
+                {
+                    ClearTaxFields();
                 }
             }
             else
@@ -8172,13 +8182,26 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     this.MBAA.Text = "0";
                     this.HMBAA.Text = null;
                 }
+
+                ClearTaxFields();
             }
 
             // 3. Adjust read-only properties
             this.HMBAA.IsReadOnly = TICMBAA.IsChecked == true;
             this.MBAA.IsReadOnly = TICMBAA.IsChecked == true;
         }
+        private void ClearTaxFields()
+        {
+            MBAA.Text = "0"; //مبلغ مالیات
+            HMBAA.Text = null; //معین مالیات
 
+            if (CMB_HMBAA is not null)
+            {
+                CMB_HMBAA.SelectedIndex = -1;
+                CMB_HMBAA.SelectedValue = null;
+                CMB_HMBAA.Text = null;
+            }
+        }
         private void CalculateAdvanceDiscount()
         {
             //محاسبه تخفیفات پیشرفته
@@ -8266,6 +8289,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                 var HEADER_FAC = dbms.DoGetDataSQL<HEAD_LST>($"SELECT TAH,MOLAH FROM HEAD_LST WHERE NUMBER = {NUMBER.Text} AND TAG = {hTAG}").FirstOrDefault(); //برای فاکتور غیر مستقیم
 
+                var hmbaaSqlValue = string.IsNullOrWhiteSpace(HMBAA.Text)
+                    ? "NULL"
+                    : $"N'{CMB_HMBAA.SelectedValue ?? HMBAA.Text}'";
+
                 if (IsDirectFactor)
                 {
                     _qre = $@"UPDATE dbo.HEAD_LST
@@ -8276,7 +8303,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     TAMIR = ISNULL(TAMIR, 0),
                     DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue}, CUST_KIND = {CUST_KIND.SelectedValue},
                     SHARAYET = N'{SHARAYET.Text}', SGN1 = {Convert.ToByte(SGN1.IsChecked)}, SGN2 = {Convert.ToByte(SGN2.IsChecked)}, 
-                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.Text}', 
+                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = {hmbaaSqlValue}, 
                     TICMBAA = {Convert.ToByte(TICMBAA.IsChecked)}, OKF = {Convert.ToByte(OKF.IsChecked)},
                     OKTIME = {(string.IsNullOrEmpty(OKTIME.ToStringNullSafe()) ? "NULL" : OKTIME)},
                     OKDATE = {(string.IsNullOrEmpty(OKDATE.ToStringNullSafe()) ? "NULL" : OKDATE)},                    
@@ -8300,7 +8327,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     MABL_HAZ = {MABL_HAZ.Text}, MOIN_HAZ = N'{CMB_MOIN_HAZ.SelectedValue}', TAKHFIF = {TAKHFIF2.Text},
                     DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue}, CUST_KIND = {CUST_KIND.SelectedValue},
                     SHARAYET = N'{SHARAYET.Text}', SGN1 = {Convert.ToByte(SGN1.IsChecked)}, SGN2 = {Convert.ToByte(SGN2.IsChecked)}, 
-                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', 
+                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA =  {hmbaaSqlValue}, 
                     TICMBAA = {Convert.ToByte(TICMBAA.IsChecked)}, OKF = {Convert.ToByte(OKF.IsChecked)},
                     OKTIME = {(string.IsNullOrEmpty(OKTIME.ToStringNullSafe()) ? "NULL" : OKTIME)},
                     OKDATE = {(string.IsNullOrEmpty(OKDATE.ToStringNullSafe()) ? "NULL" : OKDATE)},                    
@@ -8337,7 +8364,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     MABL_HAZ = {MABL_HAZ.Text}, MOIN_HAZ = N'{CMB_MOIN_HAZ.SelectedValue}', TAKHFIF = {TAKHFIF2.Text}, FNUMCO = {FNUMCO.Text},
                     DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue}, CUST_KIND = {CUST_KIND.SelectedValue},
                     SHARAYET = N'{SHARAYET.Text}', SGN1 = {Convert.ToByte(SGN1.IsChecked)}, SGN2 = {Convert.ToByte(SGN2.IsChecked)}, 
-                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = N'{CMB_HMBAA.SelectedValue}', 
+                    SGN3 = {Convert.ToByte(SGN3.IsChecked)}, MBAA = {MBAA.Text}, HMBAA = {hmbaaSqlValue}, 
                     TICMBAA = {Convert.ToByte(TICMBAA.IsChecked)}, OKF = {Convert.ToByte(OKF.IsChecked)},
                     ANBARF = {(string.IsNullOrEmpty(ANBARF.Text) ? "NULL" : ANBARF.Text)},
                     ARZD = {(string.IsNullOrEmpty(ARZD.Text) ? "NULL" : ARZD.Text)},

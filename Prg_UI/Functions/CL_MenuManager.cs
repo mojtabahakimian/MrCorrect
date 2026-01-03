@@ -1027,6 +1027,14 @@ namespace Functions
             /// </summary>
             TR_HISTORY_STUF_DEF,
             /// <summary>
+            /// سوابق انتقالی از انبار به انبار
+            /// </summary>
+            TR_HISTORY_ANBAR_ENTERGHAL,
+            /// <summary>
+            /// سوابق انبار گردانی
+            /// </summary>
+            TR_HISTORY_TR_ANBGRD_LST,
+            /// <summary>
         }
         #endregion
 
@@ -1046,9 +1054,11 @@ namespace Functions
             {
                 //Mojtaba{
 
-                case WinNameType.TR_HISTORY_STUF_DEF: //سوابق تعریف کالا
-                    CL_LMethods.OpenWindow(OWNERWIN, new TR_STUF_DEF_WIN(), isModalDialog: false, allowMultipleInstances: false);
-                    break;
+                case WinNameType.TR_HISTORY_TR_ANBGRD_LST: /*سوابق انبار گردانی*/ CL_LMethods.OpenWindow(OWNERWIN, new TR_ANBGRD_LST(), isModalDialog: false, allowMultipleInstances: false); break;
+
+                case WinNameType.TR_HISTORY_ANBAR_ENTERGHAL: /*سوابق انتقالی از انبار به انبار*/ CL_LMethods.OpenWindow(OWNERWIN, new TR_FACOTRLST(5), isModalDialog: false, allowMultipleInstances: false); break;
+
+                case WinNameType.TR_HISTORY_STUF_DEF: /*سوابق تعریف کالا*/ CL_LMethods.OpenWindow(OWNERWIN, new TR_STUF_DEF_WIN(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.TR_DEED_HEAD: //سوابق سند دستی | صدور و ویرایش اسناد
                     CL_LMethods.OpenWindow(OWNERWIN, new TR_DEED_HEAD(), isModalDialog: false, allowMultipleInstances: false);
