@@ -910,5 +910,15 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             }
 
         }
+
+        private void BTN_COLUMN_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button btn || btn.Tag is not TASKS task || task.IDNUM is null || task.IDNUM <= 0)
+            {
+                return;
+            }
+
+            new WinEVENTS((long)task.IDNUM, isReadOnly: true).ShowDialog();
+        }
     }
 }

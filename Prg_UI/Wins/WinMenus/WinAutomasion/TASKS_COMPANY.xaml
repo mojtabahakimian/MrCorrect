@@ -583,6 +583,22 @@
 
                 <syncfusion:SfDataGrid.Columns>
                     <syncfusion:GridTextColumn MappingName="IDNUM" HeaderText="شماره" IsReadOnly="True" Width="90"/>
+
+                    <syncfusion:GridTemplateColumn HeaderText="" Width="50" MappingName="IsButtony" FilterRowEditorType="None" AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
+                        <syncfusion:GridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button x:Name="BTN_COLUMN" IsTabStop="False" Click="BTN_COLUMN_Click" Tag="{Binding}"
+                                        materialDesign:ButtonAssist.CornerRadius="2"
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                        VerticalContentAlignment="Center"
+                                        HorizontalContentAlignment="Center">
+                                    <materialDesign:PackIcon Kind="Plus"/>
+                                </Button>
+                            </DataTemplate>
+                        </syncfusion:GridTemplateColumn.CellTemplate>
+                    </syncfusion:GridTemplateColumn>
+
                     <!-- مجری -->
                     <syncfusion:GridComboBoxColumn x:Name="PERSONEL_COL" IsReadOnly="True"
                              HeaderText="مجری"
