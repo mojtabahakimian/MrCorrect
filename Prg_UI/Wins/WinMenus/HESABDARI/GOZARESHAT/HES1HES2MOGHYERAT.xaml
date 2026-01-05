@@ -32,7 +32,7 @@
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="RowHeight" Value="32" />
             <Setter Property="HeaderRowHeight" Value="40" />
-            <Setter Property="SelectionMode" Value="Single" />
+            <Setter Property="SelectionMode" Value="Extended" />
             <Setter Property="GridLinesVisibility" Value="Both" />
         </Style>
         <!-- Modified Column Header Style -->
