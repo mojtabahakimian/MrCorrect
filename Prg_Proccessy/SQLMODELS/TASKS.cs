@@ -94,6 +94,8 @@ namespace Prg_Proccessy.SQLMODELS
         private bool _IsSelected = false;
         public bool IsSelected { get => _IsSelected; set { if (_IsSelected == value) return; _IsSelected = value; OnPropertyChanged("IsSelected"); } }
 
+        public bool IsButtony { get; set; } = true;
+
         #region MyRegion
         private int? _idd;
         public int? IDD { get => _idd; set { if (_idd == value) return; _idd = value; OnPropertyChanged("IDD"); } }

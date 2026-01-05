@@ -103,9 +103,10 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
         /// Give me the IDNUM of TASK for events
         /// </summary>
         /// <param name="giveTheIDNUMTASK"></param>
-        public WinEVENTS(long giveTheIDNUMTASK)
+        public WinEVENTS(long giveTheIDNUMTASK, bool isReadOnly = false)
         {
             IDNUMTASK = giveTheIDNUMTASK;
+            IsReadOnlyMode = isReadOnly;
             InitializeComponent();
 
             this.DataContext = this;
@@ -114,6 +115,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
         private int _name_code_index;
         private bool eVENTSDataGrid_IsFocused;
 
+        public bool IsReadOnlyMode { get; set; } = false;
         public int NAME_CODE_INDEX_COL
         {
             get
@@ -195,6 +197,25 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             FILL_ALL_COMBOBOXES();
+
+            if (IsReadOnlyMode)
+            {
+                //eVENTSDataGrid.IsReadOnly = true;
+                eVENTSDataGrid.CanUserAddRows = false;
+                eVENTSDataGrid.ContextMenu = null;
+
+                eVENTSDataGrid.CellEditEnding -= eVENTSDataGrid_CellEditEnding;
+                eVENTSDataGrid.RowEditEnding -= eVENTSDataGrid_RowEditEnding;
+                eVENTSDataGrid.AddingNewItem -= eVENTSDataGrid_AddingNewItem;
+
+                if (FindName("DeleteCurrentRowIMG") is MenuItem deleteItem)
+                {
+                    deleteItem.Visibility = Visibility.Collapsed;
+                }
+
+                var TheTitle = HEADER_LABEL.Content.ToStringNullSafe();
+                HEADER_LABEL.Content = TheTitle + " |حالت فقط خواندنی| ";
+            }
 
             ReGetData(true);
         }
@@ -955,6 +976,11 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             DataGrid dataGrid = sender as DataGrid;
 
             if (dataGrid == null) return;
+
+            if (dataGrid.ContextMenu is null)
+            {
+                return;
+            }
 
             try
             {
