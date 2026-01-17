@@ -609,13 +609,23 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         {
             if (!IsVisible || !IsLoaded || isClosing) { return; }
 
-            var shobetext = (TextBox)SHOBEH.Template.FindName("PART_EditableTextBox", SHOBEH);
+            if (SHOBEH == null) { return; }
+
+            var shobetext = SHOBEH.Template?.FindName("PART_EditableTextBox", SHOBEH) as TextBox;
+
+            if (shobetext == null) { return; }
+
             if (string.IsNullOrEmpty(shobetext.Text))
             {
-                if (!((List<PAY_GETP>)SHOBEH.ItemsSource).Any(item => item?.SHOBEH == shobetext.Text))
+                var sourceList = SHOBEH.ItemsSource as List<PAY_GETP>;
+                if (sourceList != null)
                 {
-                    ((List<PAY_GETP>)SHOBEH.ItemsSource).Add(new PAY_GETP { SHOBEH = shobetext.Text });
-                    SHOBEH.SelectedValue = shobetext.Text;
+                    bool itemExists = sourceList.Any(item => item?.SHOBEH == shobetext.Text);
+                    if (!itemExists)
+                    {
+                        sourceList.Add(new PAY_GETP { SHOBEH = shobetext.Text });
+                        SHOBEH.SelectedValue = shobetext.Text;
+                    }
                 }
             }
         }

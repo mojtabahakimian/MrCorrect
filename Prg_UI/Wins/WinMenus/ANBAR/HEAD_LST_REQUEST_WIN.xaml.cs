@@ -1153,26 +1153,29 @@ namespace Wins.WinMenus.ANBAR
         public bool CmdSaveRecord(INVO_LST_FACTOR22 TheRow)
         {
             //Saving...
+            string numText = string.IsNullOrEmpty(NUMBER.Text) ? "0" : NUMBER.Text;
+
             if (TheRow.id is null || TheRow.id <= 0) //INSERT
             {
                 TheRow.id = dbms.DoGetDataSQL<long?>($@"INSERT INTO INVO_LST (       NUMBER, TAG,         ANBAR,                                           RADIF,             CODE,         MEGH,         MEGHk,                                              MEGH_MAR,                                          MABL,                                            MABL_K,                         FROM_A,                                            MEGH_R,         VAHED_K,                                           N_KOL,                                            N_MOIN,                                            AVRAGE,                                             AVRAGE2,                                           IMBAA,                                              TOTALARZ,                                          TKHN,                                      JAY ,MANDAH ) 
-			                                                       VALUES ({NUMBER.Text},  23,{TheRow.ANBAR},{(TheRow.RADIF is null ? "NULL" : TheRow.RADIF)}, N'{TheRow.CODE}',{TheRow.MEGH},{TheRow.MEGHk},{(TheRow.MEGH_MAR is null ? "NULL" : TheRow.MEGH_MAR)},{(TheRow.MABL is null ? "NULL" : TheRow.MABL)},{(TheRow.MABL_K is null ? "NULL" : TheRow.MABL_K)},{Convert.ToByte(TheRow.FROM_A)},{(TheRow.MEGH_R is null ? "NULL" : TheRow.MEGH_R)},{TheRow.VAHED_K},{(TheRow.N_KOL is null ? "NULL" : TheRow.N_KOL)},{(TheRow.N_MOIN is null ? "NULL" : TheRow.N_MOIN)},{(TheRow.AVRAGE is null ? "NULL" : TheRow.AVRAGE)},{(TheRow.AVRAGE2 is null ? "NULL" : TheRow.AVRAGE2)},{(TheRow.IMBAA is null ? "NULL" : TheRow.IMBAA)},{(TheRow.TOTALARZ is null ? "NULL" : TheRow.TOTALARZ)},{(TheRow.TKHN is null ? "NULL" : TheRow.TKHN)},{(TheRow.JAY is null ? "0" : TheRow.JAY)} , N'{(TheRow.MANDAH is null ? "" : TheRow.MANDAH)}')").FirstOrDefault();
+			                                                       VALUES ({numText},  23,{(TheRow.ANBAR is null ? "NULL" : TheRow.ANBAR)},{(TheRow.RADIF is null ? "NULL" : TheRow.RADIF)}, N'{TheRow.CODE}',{(TheRow.MEGH is null ? "NULL" : TheRow.MEGH)},{(TheRow.MEGHk is null ? "NULL" : TheRow.MEGHk)},{(TheRow.MEGH_MAR is null ? "NULL" : TheRow.MEGH_MAR)},{(TheRow.MABL is null ? "NULL" : TheRow.MABL)},{(TheRow.MABL_K is null ? "NULL" : TheRow.MABL_K)},{Convert.ToByte(TheRow.FROM_A)},{(TheRow.MEGH_R is null ? "NULL" : TheRow.MEGH_R)},{(TheRow.VAHED_K is null ? "NULL" : TheRow.VAHED_K)},{(TheRow.N_KOL is null ? "NULL" : TheRow.N_KOL)},{(TheRow.N_MOIN is null ? "NULL" : TheRow.N_MOIN)},{(TheRow.AVRAGE is null ? "NULL" : TheRow.AVRAGE)},{(TheRow.AVRAGE2 is null ? "NULL" : TheRow.AVRAGE2)},{(TheRow.IMBAA is null ? "NULL" : TheRow.IMBAA)},{(TheRow.TOTALARZ is null ? "NULL" : TheRow.TOTALARZ)},{(TheRow.TKHN is null ? "NULL" : TheRow.TKHN)},{(TheRow.JAY is null ? "0" : TheRow.JAY)} , N'{(TheRow.MANDAH is null ? "" : TheRow.MANDAH)}')
+                                                   SELECT CAST(SCOPE_IDENTITY() AS BIGINT)").FirstOrDefault();
             }
             else //UPDATE
             {
                 dbms.DoExecuteSQL($@"UPDATE INVO_LST 
                                             SET 
-                                                ANBAR = {TheRow.ANBAR},
+                                                ANBAR = {(TheRow.ANBAR is null ? "NULL" : TheRow.ANBAR)},
                                                 RADIF = {(TheRow.RADIF is null ? "NULL" : TheRow.RADIF)},
                                                 CODE = N'{TheRow.CODE}',
-                                                MEGH = {TheRow.MEGH},
-                                                MEGHk = {TheRow.MEGHk},
+                                                MEGH = {(TheRow.MEGH is null ? "NULL" : TheRow.MEGH)},
+                                                MEGHk = {(TheRow.MEGHk is null ? "NULL" : TheRow.MEGHk)},
                                                 MEGH_MAR = {(TheRow.MEGH_MAR is null ? "NULL" : TheRow.MEGH_MAR)},
                                                 MABL = {(TheRow.MABL is null ? "NULL" : TheRow.MABL)},
                                                 MABL_K = {(TheRow.MABL_K is null ? "NULL" : TheRow.MABL_K)},
                                                 FROM_A = {Convert.ToByte(TheRow.FROM_A)},
                                                 MEGH_R = {(TheRow.MEGH_R is null ? "NULL" : TheRow.MEGH_R)},
-                                                VAHED_K = {TheRow.VAHED_K},
+                                                VAHED_K = {(TheRow.VAHED_K is null ? "NULL" : TheRow.VAHED_K)},
                                                 N_KOL = {(TheRow.N_KOL is null ? "NULL" : TheRow.N_KOL)},
                                                 N_MOIN = {(TheRow.N_MOIN is null ? "NULL" : TheRow.N_MOIN)},
                                                 AVRAGE = {(TheRow.AVRAGE is null ? "NULL" : TheRow.AVRAGE)},
@@ -1182,7 +1185,7 @@ namespace Wins.WinMenus.ANBAR
                                                 TKHN = {(TheRow.TKHN is null ? "NULL" : TheRow.TKHN)},
                                                 JAY = {(TheRow.JAY is null ? "0" : TheRow.JAY)},
                                                 MANDAH = N'{(TheRow.MANDAH is null ? "" : TheRow.MANDAH)}'
-                                            WHERE NUMBER = {NUMBER.Text} AND id = {TheRow.id} AND TAG = 23");
+                                            WHERE NUMBER = {numText} AND id = {TheRow.id} AND TAG = 23");
             }
 
             return true;
