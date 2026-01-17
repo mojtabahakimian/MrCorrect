@@ -247,7 +247,7 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
 
             string sql = @"UPDATE SAZMAN SET 
                 UNIVERSITY_CO = @UNIVERSITY_CO, NAME = @NAME, IYALAT = @IYALAT, CITY = @CITY,
-                ECODE = @ECODE, PCODE = @PCODE, MCODEM = @MCODEM, MANAGER = @MANAGER,SERVERNAM=@SERVERNAM,Whether=@Whether
+                ECODE = @ECODE, PCODE = @PCODE, MCODEM = @MCODEM, MANAGER = @MANAGER,SERVERNAM=@SERVERNAM,Whether=@Whether,
                 MOAVEN = @MOAVEN, ZIHESAB = @ZIHESAB, AMINAMVAL = @AMINAMVAL";
             var parameters = new
             {
@@ -268,7 +268,7 @@ namespace Prg_UI.Wins.WinMenus.CONFIGS
             try
             {
                 dbms.DoExecuteSQL(sql, parameters);
-                new Msgwin(false, "تغییرات با موفقیت ذخیره شد");
+                new Msgwin(false, "تغییرات با موفقیت ذخیره شد").ShowDialog();
                 AllowEdits = false;
             }
             catch (Exception ex)

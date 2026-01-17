@@ -2924,11 +2924,11 @@ namespace Wins.WinMenus.Taarif
                 {
                     tmpid = dbms.DoGetDataSQL<long?>($@"INSERT INTO  dbo.MODULE_D (CODE, VAHED, NESBAT, MABL_F)
                                             OUTPUT INSERTED.ID
-                                            VALUES ('{CODE.Text}', {ROW.VAHED}, {ROW.NESBAT}, {ROW.MABL_F})").FirstOrDefault();
+                                            VALUES ('{CODE.Text}', {ROW.VAHED}, {ROW.NESBAT}, {(ROW.MABL_F is null ? 0 : ROW.MABL_F)})").FirstOrDefault();
                 }
                 else //UPDATE
                 {
-                    dbms.DoExecuteSQL($@"UPDATE dbo.MODULE_D SET CODE '{CODE.Text}' , NESBAT = {ROW.NESBAT},VAHED = {ROW.VAHED} WHERE ID = {ROW.ID}");
+                    dbms.DoExecuteSQL($@"UPDATE dbo.MODULE_D SET CODE = '{CODE.Text}' , NESBAT = {ROW.NESBAT},VAHED = {ROW.VAHED}, MABL_F = {(ROW.MABL_F is null ? 0 : ROW.MABL_F)} WHERE ID = {ROW.ID}");
                 }
             }
             catch (SqlException ex)

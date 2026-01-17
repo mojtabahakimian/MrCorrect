@@ -209,7 +209,9 @@ namespace Prg_SendInvoice.CNNMANAGER
                     var results = db.Query<TEntity>(sql, parameters, commandTimeout: 3600);
                     return results;
                 }
-                catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
+                //catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
+                catch (SqlException ex) when ((ex.Number == 1205 || IsConnectionRelated(ex)) && attempt < maxRetries)
+
                 {
                     Thread.Sleep(200 * (attempt + 1));
                     continue;
@@ -254,11 +256,12 @@ namespace Prg_SendInvoice.CNNMANAGER
                 }
             }
 
-            using var db = new SqlConnection(CONNECTION_STR);
+            //using var db = new SqlConnection(CONNECTION_STR);
 
             int maxRetries = 3;
             for (int i = 0; i <= maxRetries; i++)
             {
+                using var db = new SqlConnection(CONNECTION_STR);
                 try
                 {
                     db.Open();
@@ -267,7 +270,7 @@ namespace Prg_SendInvoice.CNNMANAGER
                 }
                 catch (SqlException ex)
                 {
-                    if (ex.Number == 1205 && i < maxRetries) // 1205 = Deadlock
+                    if ((ex.Number == 1205 || IsConnectionRelated(ex)) && i < maxRetries) // 1205 = Deadlock or Connection Error
                     {
                         System.Threading.Thread.Sleep(200 * (i + 1)); // Wait and retry
                         continue;

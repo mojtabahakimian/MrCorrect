@@ -4070,7 +4070,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     }
                 }
             }
-            ROW.N_MOIN = Math.Round((double)(ROW.N_KOL * ROW.MABL_K / 100)) + Math.Round((double)((ROW.MABL_K - Math.Round((double)(ROW.N_KOL * ROW.MABL_K / 100))) * ROW.TKHN / 100)); //#Changed 2024
+            var n_kol_safe = ROW.N_KOL.GetValueOrDefault();
+            var mabl_k_safe = ROW.MABL_K.GetValueOrDefault();
+            var tkhn_safe = ROW.TKHN.GetValueOrDefault();
+
+            ROW.N_MOIN = Math.Round(n_kol_safe * mabl_k_safe / 100) + Math.Round((mabl_k_safe - Math.Round(n_kol_safe * mabl_k_safe / 100)) * tkhn_safe / 100); //#Changed 2024
             if ((bool)TICMBAA.IsChecked)
             {
                 var RSTT = dbms.DoGetDataSQL<HLF2>("SELECT CMBAA ,CODE FROM STUF_DEF WHERE CODE = '" + ROW.CODE + "'").ToList();
@@ -4078,9 +4082,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 {
                     if ((bool)RSTT.FirstOrDefault().CMBAA)
                     {
-                        if (ROW.IMBAA != Math.Round((double)((ROW.MABL_K - ROW.N_MOIN) * CL_HESABDARI.GetArzesh(ROW.CODE) / 100)))
+                        var n_moin_safe = ROW.N_MOIN.GetValueOrDefault();
+                        if (ROW.IMBAA != Math.Round((mabl_k_safe - n_moin_safe) * CL_HESABDARI.GetArzesh(ROW.CODE) / 100))
                         {
-                            ROW.IMBAA = Math.Round((double)((ROW.MABL_K - ROW.N_MOIN) * CL_HESABDARI.GetArzesh(ROW.CODE) / 100));
+                            ROW.IMBAA = Math.Round((mabl_k_safe - n_moin_safe) * CL_HESABDARI.GetArzesh(ROW.CODE) / 100);
                         }
                     }
                     else if (ROW.IMBAA != 0)
@@ -7636,11 +7641,29 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     // فرمول: PURSANT = (JF - TAKHFIF) * DARSAD / 100
                     visitor.PURSANT = Math.Round((jfValue - takhfifValue) * visitor.DARSAD.Value / 100);
 
-                    dbms.DoExecuteSQL($@"UPDATE dbo.VISITOR_DTL SET 
-                            NUMBER = {NUMBER.Text}, CUST_NO = N'{visitor.CUST_NO}' , DARSAD = {visitor?.DARSAD} ,
-                            PURSANT = {visitor?.PURSANT} , TOZIH = N'{visitor.TOZIH}' , STAT = {Convert.ToByte(visitor.STAT ?? false)},
-                            PORID = {(string.IsNullOrEmpty(visitor?.PORID.ToStringNullSafe()) ? "NULL" : visitor?.PORID)}
-                            WHERE ID = {visitor?.ID}");
+                    string sql = @"UPDATE dbo.VISITOR_DTL SET 
+                            NUMBER = @NUMBER, 
+                            CUST_NO = @CUST_NO, 
+                            DARSAD = @DARSAD,
+                            PURSANT = @PURSANT, 
+                            TOZIH = @TOZIH, 
+                            STAT = @STAT,
+                            PORID = @PORID
+                            WHERE ID = @ID";
+
+                    var parameters = new
+                    {
+                        NUMBER = Convert.ToDouble(NUMBER.Text),
+                        CUST_NO = visitor.CUST_NO,
+                        DARSAD = visitor.DARSAD,
+                        PURSANT = visitor.PURSANT,
+                        TOZIH = visitor.TOZIH,
+                        STAT = visitor.STAT ?? false,
+                        PORID = visitor.PORID,
+                        ID = visitor.ID
+                    };
+
+                    dbms.DoExecuteSQL(sql, parameters);
                 }
             }
 
@@ -7998,6 +8021,20 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             //باز محاسبه پورسانت ها چون ممکنه مبالغ فاکتور تغییر کرده باشه
             #region SAYER_PURSANT
+
+            // Check for duplicate visitors
+            var duplicateVisitors = SAYER_VISITOR_DATA
+                .GroupBy(x => x.CUST_NO)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToList();
+
+            if (duplicateVisitors.Any())
+            {
+                new Msgwin(false, "تکراری بودن ویزیتور مجاز نیست لطفا اصلاح کنید").ShowDialog();
+                return;
+            }
+
             //Validations
             foreach (var FINAL_CROW_ITEM in SAYER_VISITOR_DATA)
             {
