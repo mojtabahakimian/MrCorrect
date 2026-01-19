@@ -221,11 +221,16 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 DataGridRow row = dep as DataGridRow;
                 if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
                 {
-                    // Select the row under the mouse
-                    dataGrid.SelectedItem = row.Item;
-
-                    // Show the context menu
-                    dataGrid.ContextMenu.IsOpen = true;
+                    if (dataGrid?.SelectedItem != null)
+                    {
+                        // Select the row under the mouse
+                        dataGrid.SelectedItem = row.Item;
+                    }
+                    if (dataGrid?.ContextMenu != null)
+                    {
+                        // Show the context menu
+                        dataGrid.ContextMenu.IsOpen = true;
+                    }
 
                     // Mark the event as handled to prevent the default context menu behavior
                     e.Handled = true;
