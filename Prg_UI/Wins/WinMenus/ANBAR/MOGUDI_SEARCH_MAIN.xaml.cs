@@ -4,10 +4,14 @@ using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
+using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 
 namespace Prg_UI.Wins.WinMenus.ANBAR
@@ -197,6 +201,48 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     CL_LMethods.SendKey_US(Key.Tab);
                 }
             }
+        }
+
+        private void mogudi_search_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            DataGrid dataGrid = sender as DataGrid;
+
+            if (dataGrid == null) return;
+
+            try
+            {
+                // Find the row under the mouse
+                DependencyObject dep = (DependencyObject)e.OriginalSource;
+                while (dep != null && !(dep is DataGridRow))
+                {
+                    dep = VisualTreeHelper.GetParent(dep);
+                }
+
+                DataGridRow row = dep as DataGridRow;
+                if (row != null && row.Item != null && row.Item != CollectionView.NewItemPlaceholder)
+                {
+                    // Select the row under the mouse
+                    dataGrid.SelectedItem = row.Item;
+
+                    // Show the context menu
+                    dataGrid.ContextMenu.IsOpen = true;
+
+                    // Mark the event as handled to prevent the default context menu behavior
+                    e.Handled = true;
+                }
+                else
+                {
+                    // No valid row, don't show context menu
+                    var isEditing = ((IEditableCollectionView)mogudi_search.Items).IsEditingItem;
+                    dataGrid.ContextMenu.IsOpen = true;
+                    e.Handled = true;
+                }
+            }
+            catch (Exception)
+            {
+                e.Handled = true;
+            }
+
         }
     }
 }

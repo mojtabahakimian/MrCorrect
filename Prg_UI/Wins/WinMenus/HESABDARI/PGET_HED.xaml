@@ -201,7 +201,7 @@
                     ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"           
                     HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
 					VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}" GotFocus="PGET_LST_SUB_GotFocus" TabIndex="3" PreviewKeyDown="PGET_LST_SUB_PreviewKeyDown" PreviewMouseDoubleClick="PGET_LST_SUB_PreviewMouseDoubleClick" CanUserDeleteRows="False"                     
-                     ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                    ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                 <DataGrid.Style>
                     <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MaterialDesignDataGrid}">
