@@ -1035,6 +1035,10 @@ namespace Functions
             /// </summary>
             TR_HISTORY_TR_ANBGRD_LST,
             /// <summary>
+            /// تعریف پارامتر های کمی و کیفی (گرید) رده بندی مشتریان
+            /// </summary>
+            WIN_GSCALE,
+            /// <summary>
         }
         #endregion
 
@@ -1053,6 +1057,8 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+
+                case WinNameType.WIN_GSCALE: /*تعریف پارامتر های کمی و کیفی (گرید) رده بندی مشتریان*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_GSCALE(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.TR_HISTORY_TR_ANBGRD_LST: /*سوابق انبار گردانی*/ CL_LMethods.OpenWindow(OWNERWIN, new TR_ANBGRD_LST(), isModalDialog: false, allowMultipleInstances: false); break;
 
