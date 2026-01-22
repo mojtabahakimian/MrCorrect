@@ -22,6 +22,8 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Wins.WinOther;
+using static Interfaces.INavigator;
 using static Prg_UI.Functions.CL_LMethods;
 
 namespace Prg_UI.Wins.WinMenus.Taarif
@@ -29,7 +31,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
     /// <summary>
     /// Interaction logic for WIN_GSCALE.xaml
     /// </summary>
-    public partial class WIN_GSCALE : Window
+    public partial class WIN_GSCALE : Window, ISearchableWindow
     {
         public WIN_GSCALE(int? number_to_open = null, bool _isAutomasion_ = false)
         {
@@ -261,6 +263,25 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 CL_LMethods.SendKey_US(Key.Tab);
             }
 
+            if (!DG_SUB.IsKeyboardFocusWithin && !DG_SUB.IsFocused) //Only On Form F7 Pressed Not DataGrid
+            {
+                if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+                    var searchWindow = new EnhancedSearchWindow(this);
+                    searchWindow.Owner = this;
+                    searchWindow.ShowDialog();
+                }
+            }
+            else
+            {
+                if (e.Key is Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    DataGridExtension.HandleKeyPress(sender, e, DG_SUB);
+                }
+            }
+
+
             // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
             var nonDataKeys = new[]
             {
@@ -318,6 +339,48 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             }
             return true;
         }
+
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            // Handle the selected item
+            if (selectedItem is GSCALE item)
+            {
+                if (item != null)
+                {
+                    //_navigationManager.MoveReGetData(INavigator.Jahat.)
+                    var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.GSCACOD.Equals(item.GSCACOD));
+                    if (itemfound != null)
+                    {
+                        _navigationManager.IsNewRecord = false;
+
+                        // 1) Find its index in the master list
+                        int idx = _navigationManager.RecordsData.IndexOf(itemfound);
+                        if (idx < 0)
+                        {
+                            // not found (perhaps filtered out?), bail out
+                            new Msgwin(false, "یافت نشد: مورد انتخاب شده در لیست اصلی وجود ندارد").Show();
+                            return;
+                        }
+
+                        // 2) Tell the navigation manager to move to that position
+                        _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+
+                        //OnCurrentRecordChanged(itemfound);
+                    }
+                }
+            }
+        }
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+                new SearchableProperty { DisplayName = "کد اِسکِیل", PropertyPath = "GSCACOD", PropertyType = typeof(int) },
+                new SearchableProperty { DisplayName = "نام", PropertyPath = "GSCANAME", PropertyType = typeof(string) },
+            };
+        }
+        #endregion
 
         private void DataGridActivation()
         {

@@ -385,7 +385,7 @@ namespace Prg_UI.Wins
             //new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED().Show();
             //new TR_FACOTRLST(5).Show();
             //new TR_ANBGRD_LST().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.MOGUDI_SEARCH_MAIN, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.MOGUDI_SEARCH_MAIN, this);
 
             //new F_MENU_GOZARESH_FROOSH("FR").ShowDialog();
 
