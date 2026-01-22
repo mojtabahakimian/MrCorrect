@@ -1039,6 +1039,10 @@ namespace Functions
             /// </summary>
             WIN_GSCALE,
             /// <summary>
+            /// تعریف گروه قیمت گذاری
+            /// </summary>
+            WIN_PRICE_GRP,
+            /// <summary>
         }
         #endregion
 
@@ -1057,6 +1061,8 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+
+                case WinNameType.WIN_PRICE_GRP: /*تعریف گروه قیمت گذاری*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_PRICE_GRP(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_GSCALE: /*تعریف پارامتر های کمی و کیفی (گرید) رده بندی مشتریان*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_GSCALE(), isModalDialog: false, allowMultipleInstances: false); break;
 
