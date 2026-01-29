@@ -1,0 +1,251 @@
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.Taarif.ENHESAR_MOSHTARI_WIN"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.Taarif"
+        mc:Ignorable="d"
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        Height="600" Width="800" d:Width="1920"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        MinHeight="400"
+        FontFamily="{StaticResource IRANYEKAN}"
+        Background="{x:Null}"
+        AllowsTransparency="True" AllowDrop="True"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="15"/>
+    </WindowChrome.WindowChrome>
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ScrollViewer.CanContentScroll="True"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Color="{Binding ElementName=GENERAL_RANG, Path=Background.Color}" Opacity="0.3"/>
+    </Window.Resources>
+
+    <Grid x:Name="mygrid" Margin="8,8,8,0">
+        <!-- Hidden button for color binding reference -->
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Width="1" Height="1"/>
+        <!-- Main container -->
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding ElementName=GENERAL_RANG, Path=Background}" BorderThickness="1" CornerRadius="10" Padding="8">
+            <!-- Title bar -->
+            <Border  x:Name="TitleDrawBar" Style="{StaticResource BordG}"  Background="{Binding ElementName=GENERAL_RANG, Path=Background}"  CornerRadius="10,10,0,0" Margin="-9,-9,-9,0"  Height="38"  VerticalAlignment="Top" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <!-- Window title -->
+                    <Label x:Name="LABEL_HEADER" Content="انحصار" Padding="17,8,10,10" Foreground="White" Margin="0,0,110,0" VerticalAlignment="Center"/>
+                    <!-- Window control buttons -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,13,0">
+                        <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" Height="24" Padding="0,0,0,-1" IsTabStop="False" ToolTip="Minimize">
+                            <materialDesign:PackIcon Kind="WindowMinimize" Width="18" Height="18" Foreground="White"/>
+                        </Button>
+                        <Button x:Name="Btn_Max" Click="Btn_Max_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" FontSize="12" Height="24" Padding="0" Margin="4,0,0,0" IsTabStop="False" ToolTip="Maximize">
+                            <materialDesign:PackIcon Kind="WindowMaximize" Width="17" Height="17" Foreground="White"/>
+                        </Button>
+                        <Button x:Name="Btn_Close" Click="Btn_Close_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" Height="24" Padding="0" Margin="4,0,0,0" FontSize="12" IsTabStop="False" ToolTip="Close">
+                            <materialDesign:PackIcon Kind="WindowClose" Width="19" Height="19" Foreground="White"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Border>
+        <!-- Notification popup -->
+        <Popup x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative" Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Width="{Binding ElementName=mygrid, Path=ActualWidth, Mode=OneWay}" Height="84" Padding="10">
+                <TextBox x:Name="Pop1Text1" IsReadOnly="True" Background="Transparent" FlowDirection="RightToLeft" BorderBrush="Transparent" Foreground="White" Text="محل نمایش اعلان های سیستم" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+            </Border>
+        </Popup>
+
+        <!-- Content area -->
+        <Grid Margin="0,38,0,0" FlowDirection="RightToLeft">
+            <Grid Background="{DynamicResource MaterialDesignPaper}" Margin="0,0,0,60">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header Section -->
+                <Border Grid.Row="0" Margin="5" BorderBrush="Gray" BorderThickness="1" Padding="5" CornerRadius="5">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Row 0: Dates & Customer -->
+                        <Grid Grid.Row="0" Grid.ColumnSpan="2" Margin="0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="تاریخ شروع انحصار:" VerticalAlignment="Center" Margin="5"/>
+                            <CNC:DateNavigator x:Name="EN_STDATE" Grid.Column="1" Margin="5" DateChanged="EN_STDATE_DateChanged"/>
+
+                            <TextBlock Text="تاریخ پایان انحصار:" VerticalAlignment="Center" Grid.Column="2" Margin="15,0,5,0"/>
+                            <CNC:DateNavigator x:Name="EN_ENDEN" Grid.Column="3" Margin="5" DateChanged="EN_ENDEN_DateChanged"/>
+
+                            <TextBlock Text="مشتری:" VerticalAlignment="Center" Grid.Column="4" Margin="15,0,5,0"/>
+                            <ComboBox x:Name="EN_CUST_CO" Grid.Column="5" Margin="5" 
+                                      SelectedValuePath="hes"
+                                      TextSearch.TextPath="NAME"
+                                      PreviewLostKeyboardFocus="EN_CUST_CO_PreviewLostKeyboardFocus"
+                                      Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding NAME}" TextAlignment="Justify" MinWidth="200" Width="Auto" />
+                                            <TextBlock Text="{Binding hes}" TextAlignment="Center" MinWidth="70"  Width="Auto" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                                
+                                <ComboBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                    </ItemsPanelTemplate>
+                                </ComboBox.ItemsPanel>
+                            </ComboBox>
+                        </Grid>
+
+                        <!-- Row 1: Users & Location -->
+                        <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="0,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="کشور:" VerticalAlignment="Center" Margin="5"/>
+                            <ComboBox x:Name="EN_COUNTRY" Grid.Column="1" Margin="5" DisplayMemberPath="CountriesName" SelectedValuePath="Code" Style="{StaticResource FuzzyOutComboBox}" PreviewLostKeyboardFocus="EN_COUNTRY_PreviewLostKeyboardFocus" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" Padding="7,0,10,0" SelectionChanged="EN_COUNTRY_SelectionChanged" >
+                                <ComboBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                    </ItemsPanelTemplate>
+                                </ComboBox.ItemsPanel>
+                            </ComboBox>
+
+
+                            <TextBlock Text="استان:" Grid.Column="2" VerticalAlignment="Center"  Margin="5"/>
+                            <ComboBox x:Name="EN_IYALAT" Grid.Column="3" Margin="5" DisplayMemberPath="OSNAME" SelectedValuePath="OSCODE" Style="{StaticResource FuzzyOutComboBox}" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" Padding="7,0,10,0" PreviewLostKeyboardFocus="EN_IYALAT_PreviewLostKeyboardFocus" SelectionChanged="EN_IYALAT_SelectionChanged" >
+                                <ComboBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                    </ItemsPanelTemplate>
+                                </ComboBox.ItemsPanel>
+                            </ComboBox>
+
+
+                            <TextBlock Text="شهر:" VerticalAlignment="Center" Grid.Column="4" Margin="5"/>
+                            <ComboBox x:Name="EN_CITY" Grid.Column="5" Margin="5" DisplayMemberPath="CITYNAME" SelectedValuePath="CITYCODE" Style="{StaticResource FuzzyOutComboBox}" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" Padding="7,0,10,0" >
+                                <ComboBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                    </ItemsPanelTemplate>
+                                </ComboBox.ItemsPanel>
+                            </ComboBox>
+
+                            <TextBlock Text="کاربر یادآوری کننده:" Grid.Column="6" VerticalAlignment="Center" Margin="5"/>
+                            <ComboBox x:Name="USERID_REM" Grid.Column="7" Margin="5" DisplayMemberPath="SAL_NAME" SelectedValuePath="IDD" Style="{StaticResource FuzzyOutComboBox}" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1" Padding="7,0,10,0" >
+                                <ComboBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                    </ItemsPanelTemplate>
+                                </ComboBox.ItemsPanel>
+                            </ComboBox>
+
+
+                            <TextBlock Text="کد کاربر:" Grid.Column="8" VerticalAlignment="Center" Margin="5"/>
+                            <TextBox x:Name="USERID" Grid.Column="9" Margin="5" IsReadOnly="True" Style="{StaticResource FuzzyOut}" Padding="3"/>
+
+                        </Grid>
+
+                        <!-- Buttons -->
+                        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
+                            <Button x:Name="BTN_SAVE" Content="ذخیره" Margin="5" Click="SaveOnLostFocus" BorderBrush="{x:Null}" Foreground="#DDFFFFFF" Height="34" FontSize="10" Width="110" Visibility="Visible"/>
+                            <Button x:Name="BTN_EDIT" Content="اصلاح" Margin="5" Click="BTN_EDIT_Click" BorderBrush="{x:Null}" Foreground="#DDFFFFFF" Height="34" FontSize="10" Width="75"/>
+                            <Button x:Name="BTN_PRINT" Content="چاپ" Margin="5" Click="BTN_PRINT_Click" BorderBrush="{x:Null}" Foreground="#DDFFFFFF" Height="34" FontSize="10" Width="100"/>
+                            <Button x:Name="BTN_DELETE" Tag="hazfer" Content="حذف" Margin="15" Click="SaveOnLostFocus" BorderBrush="{x:Null}" Foreground="#DDFFFFFF" Height="34" FontSize="10" Width="80" Visibility="Visible"/>
+                        </StackPanel>
+
+                        <!-- Description Label -->
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="جهت انحصار براي هريک از مشتريان , هريک از گروه هاي تعريف شده زير را که لازم است مشخص کنيد.درصورتيکه کالاي خاصي مد نظر است در ستون نام کالا ,کالاي منظور را انتخاب کنيد." 
+                           TextWrapping="Wrap" VerticalAlignment="Center" Margin="10,0"/>
+                    </Grid>
+                </Border>
+
+                <!-- Detail Grid -->
+                <DataGrid x:Name="ENHESAR_KALA_GRID"
+                          Grid.Row="2"
+                          Margin="5" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
+                          ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
+                          CellStyle="{StaticResource CellFocusyBorder}"
+                          HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                          VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
+                          ItemsSource="{Binding ENHESAR_KALA_DATA}"
+                          RowEditEnding="ENHESAR_KALA_GRID_RowEditEnding" CellEditEnding="ENHESAR_KALA_GRID_CellEditEnding"
+                          PreviewKeyDown="ENHESAR_KALA_GRID_PreviewKeyDown">
+                    <DataGrid.Columns>
+
+                        <DataGridTextColumn Binding="{Binding KALA_NAME,UpdateSourceTrigger=LostFocus}" Header="نام کالا" Visibility="Visible" Width="auto" MinWidth="180">
+                            <DataGridTextColumn.EditingElementStyle>
+                                <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                                </Style>
+                            </DataGridTextColumn.EditingElementStyle>
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="کد کالا" Width="80" MinWidth="80" Binding="{Binding EN_KALA_COD, UpdateSourceTrigger=LostFocus}" IsReadOnly="True">
+                            <DataGridTextColumn.CellStyle>
+                                <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                    <Setter Property="Focusable" Value="False"/>
+                                    <Setter Property="KeyboardNavigation.IsTabStop" Value="False"/>
+                                    <Setter Property="IsTabStop"  Value="False"/>
+                                </Style>
+                            </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Group Code (Int) -->
+                        <!--<DataGridTextColumn Header="گروه کالا" Binding="{Binding EN_KALA_GR, UpdateSourceTrigger=LostFocus}" Width="150"/>-->
+
+                        <DataGridComboBoxColumn x:Name="COL_GR1"  Header="کد گروه 1"  SelectedValueBinding="{Binding EN_GRCODE1}"  SortMemberPath="EN_GRCODE1"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
+                        <DataGridComboBoxColumn x:Name="COL_GR2"  Header="کد گروه 2"  SelectedValueBinding="{Binding EN_GRCODE2}"  SortMemberPath="EN_GRCODE2"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
+                        <DataGridComboBoxColumn x:Name="COL_GR3"  Header="کد گروه 3"  SelectedValueBinding="{Binding EN_GRCODE3}"  SortMemberPath="EN_GRCODE3"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
+                        <DataGridComboBoxColumn x:Name="COL_GR4"  Header="کد گروه 4"  SelectedValueBinding="{Binding EN_GRCODE4}"  SortMemberPath="EN_GRCODE4"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
+                        <DataGridComboBoxColumn x:Name="COL_GR5"  Header="کد گروه 5"  SelectedValueBinding="{Binding EN_GRCODE5}"  SortMemberPath="EN_GRCODE5"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
+                        <DataGridComboBoxColumn x:Name="COL_GR6"  Header="کد گروه 6"  SelectedValueBinding="{Binding EN_GRCODE6}"  SortMemberPath="EN_GRCODE6"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
+                        <DataGridComboBoxColumn x:Name="COL_GR7"  Header="کد گروه 7"  SelectedValueBinding="{Binding EN_GRCODE7}"  SortMemberPath="EN_GRCODE7"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
+                        <DataGridComboBoxColumn x:Name="COL_GR8"  Header="کد گروه 8"  SelectedValueBinding="{Binding EN_GRCODE8}"  SortMemberPath="EN_GRCODE8"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
+                        <DataGridComboBoxColumn x:Name="COL_GR9"  Header="کد گروه 9"  SelectedValueBinding="{Binding EN_GRCODE9}"  SortMemberPath="EN_GRCODE9"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
+                        <DataGridComboBoxColumn x:Name="COL_GR10" Header="کد گروه 10" SelectedValueBinding="{Binding EN_GRCODE10}" SortMemberPath="EN_GRCODE10" SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+
+            <CNC:RecordNavigatorControl x:Name="navigatorControl" VerticalAlignment="Bottom" FlowDirection="LeftToRight" Margin="10,0,10,13"/>
+
+        </Grid>
+    </Grid>
+</Window>
