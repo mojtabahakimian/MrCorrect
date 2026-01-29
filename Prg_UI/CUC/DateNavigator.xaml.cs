@@ -153,6 +153,22 @@ namespace Prg_UI.CUC
         private void txtDate_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             _originalDateText = txtDate.Text;
+
+            if (!txtDate.IsFocused)
+            {
+                GetFocus();
+            }
+        }
+
+        public void GetFocus()
+        {
+            txtDate.Focus();
+            txtDate.SelectAll();
+        }
+
+        private void txtDate_PreviewGotKeyboardFocus_1(object sender, KeyboardFocusChangedEventArgs e)
+        {
+
         }
     }
 }

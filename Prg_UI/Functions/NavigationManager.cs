@@ -1,4 +1,5 @@
-﻿using Prg_SendInvoice.CNNMANAGER;
+﻿using AUTO_BAZ.Functions;
+using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.HelperWins;
 using System;
 using System.Collections;
@@ -225,7 +226,7 @@ namespace Functions
             Func<T, string> propertySelector,
             string masterquery,
             Func<T, string> queryReloadWhere,
-            double? numberToOpen = null)
+            object? numberToOpen = null)
         {
             dbms = _dbms_;
             RecordsData = new ObservableCollection<T>();
@@ -233,9 +234,21 @@ namespace Functions
             MasterQuery = masterquery;
             _queryReloadWhere = queryReloadWhere;
 
-            if (numberToOpen != null && numberToOpen > 0)
+            //if (numberToOpen != null && numberToOpen > 0)
+            //{
+            //    NUMBER_TO_OPEN = numberToOpen;
+            //}
+
+            if (numberToOpen != null)
             {
-                NUMBER_TO_OPEN = numberToOpen;
+                if (numberToOpen is double numberToOpendobuley && numberToOpendobuley > 0)
+                {
+                    NUMBER_TO_OPEN = numberToOpendobuley;
+                }
+                else if (numberToOpen.ToStringNullSafe() != "0")
+                {
+                    NUMBER_TO_OPEN = numberToOpen;
+                }
             }
 
             ReGetMasterData();

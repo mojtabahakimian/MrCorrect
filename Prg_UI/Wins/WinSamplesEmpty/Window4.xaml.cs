@@ -218,7 +218,6 @@ namespace Wins.WinSamplesEmpty
             return true;
         }
 
-
         private void BTN_SAVE_Click(object sender, RoutedEventArgs e)
         {
             //if (!BTN_SAVE.IsEnabled) { return; }

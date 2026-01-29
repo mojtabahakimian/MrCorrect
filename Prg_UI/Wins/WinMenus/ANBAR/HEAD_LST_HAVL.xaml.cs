@@ -660,6 +660,20 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 }
             }
         }
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (ChangeIsHappend)
+            {
+                var MSGCAP = new MSGCAPTIONMODEL() { YES_CAPTION = "برگرد", NO_CAPTION = "خارج شو" };
+                Msgwin msgwin = new Msgwin(true, "اطلاعات را ذخیره نکرده اید آیا مایل به بازگشت هستید ؟", default, default, MSGCAP); msgwin.ShowDialog();
+                if (msgwin.DialogResult is true)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
+
+        }
 
         private CL_LMethods.RestrictionInfo _restrictionInfo;
         private string GetAccessDeniedMessage()
@@ -1149,20 +1163,6 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 this.SGN1.IsEnabled = false;
                 this.SGN2.IsEnabled = false;
                 this.SGN3.IsEnabled = false;
-            }
-
-        }
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            if (ChangeIsHappend)
-            {
-                var MSGCAP = new MSGCAPTIONMODEL() { YES_CAPTION = "برگرد", NO_CAPTION = "خارج شو" };
-                Msgwin msgwin = new Msgwin(true, "اطلاعات را ذخیره نکرده اید آیا مایل به بازگشت هستید ؟", default, default, MSGCAP); msgwin.ShowDialog();
-                if (msgwin.DialogResult is true)
-                {
-                    e.Cancel = true;
-                    return;
-                }
             }
 
         }
@@ -1786,7 +1786,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
 
         }
-      
+
         private void Command122_Click(object sender, RoutedEventArgs e)
         {
             //var _SGN1_ = Convert.ToBoolean(SGN1.IsChecked);
@@ -3204,6 +3204,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 var DEFINDX = (INVO_LST_HAVL_SUB.SelectedIndex < 0) ? 0 : INVO_LST_HAVL_SUB.SelectedIndex;
                 CL_LMethods.FocusCellReadyToEdit(INVO_LST_HAVL_SUB, "ANBAR", DEFINDX, true);
             }
+
+            ChangeIsHappend = false;
         }
 
         private bool DoCmdSaveHeader()

@@ -2590,7 +2590,8 @@ namespace Prg_Proccessy.FUNCTIONS
             }
             else //SQLY
             {
-                var RST = dbms.DoGetDataSQL<SECURITYQuery>("SELECT TFORMS.CAPTION, TFORMS.kind, SAL_CHEK.USERCO, SAL_CHEK.RUN, SAL_CHEK.SEE, SAL_CHEK.INP, SAL_CHEK.UPD, SAL_CHEK.DEL FROM TFORMS INNER JOIN (SALA_DTL INNER JOIN SAL_CHEK ON SALA_DTL.IDD = SAL_CHEK.USERCO) ON TFORMS.IDH = SAL_CHEK.OBJECT WHERE     (TFORMS.FORMNAME = '" + WANTEDFORM(frm) + "') AND (SAL_CHEK.USERCO = " + Baseknow.USERCOD + " )").FirstOrDefault();
+                var RST = dbms.DoGetDataSQL<SECURITYQuery>("SELECT TFORMS.CAPTION, TFORMS.kind, SAL_CHEK.USERCO, SAL_CHEK.RUN, SAL_CHEK.SEE, SAL_CHEK.INP, SAL_CHEK.UPD, SAL_CHEK.DEL FROM TFORMS INNER JOIN (SALA_DTL INNER JOIN SAL_CHEK ON SALA_DTL.IDD = SAL_CHEK.USERCO) ON TFORMS.IDH = SAL_CHEK.OBJECT WHERE  " +
+                    "   (TFORMS.FORMNAME = '" + WANTEDFORM(frm) + "') AND (SAL_CHEK.USERCO = " + Baseknow.USERCOD + " )").FirstOrDefault();
 
                 ////if (RST.INP != true || RST.UPD != true) { TheWind.IsEnabled = false; return; }
 
