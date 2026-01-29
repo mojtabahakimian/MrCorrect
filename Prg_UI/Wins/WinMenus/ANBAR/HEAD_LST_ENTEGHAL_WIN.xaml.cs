@@ -32,6 +32,8 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Wins.WinMenus.KHARID_FORUSH;
+using Wins.WinOther;
+using static Interfaces.INavigator;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
 using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
@@ -39,7 +41,7 @@ using SGN_IMODEL = Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED.SGN_IMODEL;
 
 namespace Wins.WinMenus.ANBAR
 {
-    public partial class HEAD_LST_ENTEGHAL_WIN : Window
+    public partial class HEAD_LST_ENTEGHAL_WIN : Window, ISearchableWindow, IComboLookupProvider
     {
         public HEAD_LST_ENTEGHAL_WIN(double? _NUMBER_ = null, bool _isAutomasion_ = false)
         {
@@ -278,6 +280,49 @@ namespace Wins.WinMenus.ANBAR
             }
             set { _newrecord = value; }
         }
+
+        #region SPECIAL_F7
+        object ISearchableWindow.GetSearchSource() => _navigationManager.RecordsData;
+        public void OnSearchResultSelected(object selectedItem)
+        {
+            if (selectedItem is HEAD_LST item)
+            {
+                var itemfound = _navigationManager.RecordsData.FirstOrDefault(x => x.NUMBER.Equals(Convert.ToDouble(item.NUMBER)));
+                if (itemfound != null)
+                {
+                    _navigationManager.IsNewRecord = false;
+
+                    int idx = _navigationManager.RecordsData.IndexOf(itemfound);
+                    if (idx < 0)
+                    {
+                        new Msgwin(false, "یافت نشد: مورد انتخاب شده در لیست اصلی وجود ندارد").Show();
+                        return;
+                    }
+
+                    _navigationManager.MoveReGetData(Jahat.CustomPosition, idx);
+                }
+            }
+        }
+        public IEnumerable<SearchableProperty> GetSearchableProperties()
+        {
+            return new[]
+            {
+                new SearchableProperty { DisplayName = "شماره انتقال", PropertyPath = "NUMBER", PropertyType = typeof(double) },
+                new SearchableProperty { DisplayName = "تاریخ", PropertyPath = "DATE_N", PropertyType = typeof(long) },
+                new SearchableProperty { DisplayName = "کد مشتری", PropertyPath = "CUST_NO", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "کاربر", PropertyPath = "USER_NAME", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "تحویل گیرنده", PropertyPath = "TAH", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "تحویل دهنده", PropertyPath = "MOLAH", PropertyType = typeof(string) },
+                new SearchableProperty { DisplayName = "ملاحظات", PropertyPath = "SHARAYET", PropertyType = typeof(string) },
+            };
+        }
+        public IEnumerable<ComboLookupSpec> GetComboLookups()
+        {
+            yield return new ComboLookupSpec { DisplayName = "انبار مبدا", KeyPropertyPath = "ANBAR", Combo = ANBAR };
+            yield return new ComboLookupSpec { DisplayName = "انبار مقصد", KeyPropertyPath = "ANBARF", Combo = ANBARF };
+        }
+
+        #endregion
 
         public string CDDATE { get; set; }
         public string CDTIME { get; set; }
@@ -2717,6 +2762,16 @@ namespace Wins.WinMenus.ANBAR
                 }
             }
 
+            if (!INVO_LST_ENTEGHAL_SUB.IsKeyboardFocusWithin && !INVO_LST_ENTEGHAL_SUB.IsFocused) //Only On Form F7 Pressed Not DataGrid
+            {
+                if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+                    var searchWindow = new EnhancedSearchWindow(this);
+                    searchWindow.Owner = this;
+                    searchWindow.ShowDialog();
+                }
+            }
 
         }
 
