@@ -8,7 +8,7 @@
         xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        Height="600" Width="800" d:Width="1920"
+        Height="600" Width="1024" d:Width="1920"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         MinHeight="400"
         FontFamily="{StaticResource IRANYEKAN}"
@@ -98,7 +98,7 @@
                             <CNC:DateNavigator x:Name="EN_ENDEN" Grid.Column="3" Margin="5" DateChanged="EN_ENDEN_DateChanged"/>
 
                             <TextBlock Text="مشتری:" VerticalAlignment="Center" Grid.Column="4" Margin="15,0,5,0"/>
-                            <ComboBox x:Name="EN_CUST_CO" Grid.Column="5" Margin="5" 
+                            <ComboBox x:Name="EN_CUST_CO" Grid.Column="5" Margin="5,0,181,0" IsSynchronizedWithCurrentItem="True"
                                       SelectedValuePath="hes"
                                       TextSearch.TextPath="NAME"
                                       PreviewLostKeyboardFocus="EN_CUST_CO_PreviewLostKeyboardFocus"
@@ -111,7 +111,14 @@
                                         </StackPanel>
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
-                                
+
+                                <ComboBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                    </ItemsPanelTemplate>
+                                </ComboBox.ItemsPanel>
+                            </ComboBox>
+                            <ComboBox x:Name="EN_CUST_CO2" Grid.Column="5" IsSynchronizedWithCurrentItem="True" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Height="30" FlowDirection="RightToLeft" IsEditable="True"  Background="{x:Null}" BorderThickness="1" Margin="0,0,10,0" HorizontalAlignment="Right" Width="166">
                                 <ComboBox.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -201,7 +208,7 @@
                           CellStyle="{StaticResource CellFocusyBorder}"
                           HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
                           VerticalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
-                          ItemsSource="{Binding ENHESAR_KALA_DATA}"
+                          ItemsSource="{Binding DetailData}"
                           RowEditEnding="ENHESAR_KALA_GRID_RowEditEnding" CellEditEnding="ENHESAR_KALA_GRID_CellEditEnding"
                           PreviewKeyDown="ENHESAR_KALA_GRID_PreviewKeyDown">
                     <DataGrid.Columns>

@@ -234,24 +234,117 @@ namespace Functions
             MasterQuery = masterquery;
             _queryReloadWhere = queryReloadWhere;
 
-            //if (numberToOpen != null && numberToOpen > 0)
-            //{
-            //    NUMBER_TO_OPEN = numberToOpen;
-            //}
-
-            if (numberToOpen != null)
-            {
-                if (numberToOpen is double numberToOpendobuley && numberToOpendobuley > 0)
-                {
-                    NUMBER_TO_OPEN = numberToOpendobuley;
-                }
-                else if (numberToOpen.ToStringNullSafe() != "0")
-                {
-                    NUMBER_TO_OPEN = numberToOpen;
-                }
-            }
+            if (TryGetOpenKey(numberToOpen, out var key))
+                NUMBER_TO_OPEN = key;
 
             ReGetMasterData();
+        }
+
+        private static bool TryGetOpenKey(object? value, out object openKey)
+        {
+            openKey = default!;
+
+            if (value is null)
+                return false;
+
+            return value switch
+            {
+                string s => TryParseStringKey(s, out openKey),
+                int i => TrySetNumericKey(i, out openKey),
+                long l => TrySetNumericKey(l, out openKey),
+                double d => TrySetNumericKey(d, out openKey),
+                float f => TrySetNumericKey(f, out openKey),
+                decimal dec => TrySetNumericKey(dec, out openKey),
+                _ => TryParseFallbackKey(value, out openKey)
+            };
+        }
+
+        private static bool TryParseStringKey(string s, out object openKey)
+        {
+            openKey = default!;
+
+            s = NormalizeDigits(s).Trim();
+
+            if (string.IsNullOrWhiteSpace(s))
+                return false;
+
+            // اگر رشته عددی است
+            if (decimal.TryParse(s,
+                                System.Globalization.NumberStyles.Number,
+                                System.Globalization.CultureInfo.InvariantCulture,
+                                out var numericValue))
+            {
+                if (numericValue <= 0)
+                    return false;
+
+                openKey = numericValue;
+                return true;
+            }
+
+            // اگر رشته غیرعددی است (مثل "115-1-1")
+            openKey = s;
+            return true;
+        }
+        private static bool TrySetNumericKey<T>(T value, out object openKey) where T : struct, IComparable<T>
+        {
+            openKey = default!;
+
+            // تبدیل به decimal برای مقایسه یکپارچه
+            decimal decimalValue = value switch
+            {
+                int i => i,
+                long l => l,
+                double d => d > 0 && !double.IsNaN(d) && !double.IsInfinity(d) ? (decimal)d : -1m,
+                float f => f > 0 && !float.IsNaN(f) && !float.IsInfinity(f) ? (decimal)f : -1m,
+                decimal dec => dec,
+                _ => -1m
+            };
+
+            if (decimalValue <= 0)
+                return false;
+
+            openKey = value;
+            return true;
+        }
+        private static bool TryParseFallbackKey(object value, out object openKey)
+        {
+            openKey = default!;
+
+            var str = NormalizeDigits(value.ToString() ?? string.Empty).Trim();
+
+            if (string.IsNullOrWhiteSpace(str))
+                return false;
+
+            // تلاش برای تبدیل به عدد
+            if (decimal.TryParse(str,
+                                System.Globalization.NumberStyles.Number,
+                                System.Globalization.CultureInfo.InvariantCulture,
+                                out var numericValue))
+            {
+                if (numericValue <= 0)
+                    return false;
+
+                openKey = numericValue;
+                return true;
+            }
+            // اگر عددی نیست ولی رشته معتبری است
+            openKey = str;
+            return true;
+        }
+        private static string NormalizeDigits(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return input;
+
+            return input
+                // اعداد فارسی
+                .Replace('۰', '0').Replace('۱', '1').Replace('۲', '2')
+                .Replace('۳', '3').Replace('۴', '4').Replace('۵', '5')
+                .Replace('۶', '6').Replace('۷', '7').Replace('۸', '8').Replace('۹', '9')
+                // اعداد عربی
+                .Replace('٠', '0').Replace('١', '1').Replace('٢', '2')
+                .Replace('٣', '3').Replace('٤', '4').Replace('٥', '5')
+                .Replace('٦', '6').Replace('٧', '7').Replace('٨', '8').Replace('٩', '9');
         }
 
         public void SubscribeToEvents(
@@ -281,7 +374,7 @@ namespace Functions
                 RecordsData.Add(record);
             }
 
-            if (NUMBER_TO_OPEN != null)
+            if (!string.IsNullOrWhiteSpace(NUMBER_TO_OPEN?.ToString()))
             {
                 var item = RecordsData.FirstOrDefault(x => _propertySelector(x).Equals(NUMBER_TO_OPEN.ToString()));
                 if (item != null)

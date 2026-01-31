@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace Prg_UI.CUC
 {
@@ -153,22 +154,40 @@ namespace Prg_UI.CUC
         private void txtDate_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             _originalDateText = txtDate.Text;
-
-            if (!txtDate.IsFocused)
-            {
-                GetFocus();
-            }
         }
 
         public void GetFocus()
         {
-            txtDate.Focus();
-            txtDate.SelectAll();
+            try
+            {
+                Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() =>
+                {
+                    txtDate.Focus();
+                    txtDate.SelectAll();
+                }));
+            }
+            catch (Exception)
+            {
+            }
         }
 
-        private void txtDate_PreviewGotKeyboardFocus_1(object sender, KeyboardFocusChangedEventArgs e)
+        private void UserControl_GotFocus(object sender, RoutedEventArgs e)
         {
+            //if (e.OriginalSource == this)
+            //{
+            //    GetFocus();
+            //}
+        }
 
+        private void DateNavigator_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (txtDate.IsKeyboardFocusWithin)
+            {
+                return;
+            }
+
+            GetFocus();
+            //e.Handled = true;
         }
     }
 }
