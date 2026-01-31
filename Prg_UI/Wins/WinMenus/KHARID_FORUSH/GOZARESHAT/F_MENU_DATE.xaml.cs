@@ -92,7 +92,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                     //this.HelpContext = 302;
                     break;
                 case "BEDBESM":
-                    DT1.Visibility = Visibility.Collapsed;
+                    //DT1.Visibility = Visibility.Collapsed;
                     LABEL_WIN_HEADER.Content = "لیست بدهکاران و بستانکاران محدود شده";
                     break;
                 case "TDBARG":
@@ -332,7 +332,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             //dbms.DoExecuteSQL(sqlQuery, new { DT2 = Convert.ToInt64(DT2.Text.ToRawTarikh()) });
 
             CreateTempTableData();
-            new TARAZ_4("0", DT2.Text.ToRawTarikh(), true).Show();
+            new TARAZ_4(string.IsNullOrWhiteSpace(DT1.Text.ToRawTarikh()) ? "0" : DT1.Text.ToRawTarikh(), DT2.Text.ToRawTarikh(), true).Show();
         }
         public class TMP_MODEL1
         {
@@ -423,6 +423,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
         private void CreateTempTableData()
         {
             int userCod = int.Parse(Baseknow.USERCOD.ToString());
+            string dateVal1 = DT1.Text.ToRawTarikh();
             string dateVal = DT2.Text.ToRawTarikh();
 
             // ==========================================================================
@@ -530,6 +531,51 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             dbms.DoExecuteSQL(dropTableSql, new { TableName = tableName });
 
             // کوئری اصلی SELECT INTO
+            string subQuery = $@"
+                                (SELECT
+                                    dbo.DEED_DTL.HES_K,
+                                    dbo.DEED_DTL.HES_M,
+                                    dbo.DEED_DTL.HES_T,
+                                    SUM(dbo.DEED_DTL.BED) AS SumOfBED,
+                                    SUM(dbo.DEED_DTL.BES) AS SumOfBES,
+                                    SUM(dbo.DEED_DTL.BED - dbo.DEED_DTL.BES) AS BEDBES,
+                                    dbo.TOTA_HES.NAME,
+                                    dbo.DETA_HES.NAME AS MOIN,
+                                    dbo.TDETA_HES.NAME AS TAFZIL,
+                                    dbo.TDETA_HES.ADDRESS,
+                                    dbo.TDETA_HES.TEL,
+                                    dbo.TDETA_HES.CODE_E,
+                                    dbo.TDETA_HES.TOZIH,
+                                    dbo.DEED_DTL.HES,
+                                    dbo.TDETA_HES.ECODE,
+                                    dbo.TDETA_HES.CUST_COD,
+                                    dbo.TDETA_HES.ROUTE_NAME,
+                                    dbo.DEED_DTL.HES_T2,
+                                    dbo.DEED_DTL.HES_T3,
+                                    dbo.DEED_DTL.HES_T4
+                                FROM dbo.TOTA_HES
+                                INNER JOIN dbo.DETA_HES
+                                    INNER JOIN dbo.TDETA_HES
+                                        ON dbo.DETA_HES.NUMBER = dbo.TDETA_HES.NUMBER
+                                       AND dbo.DETA_HES.N_KOL  = dbo.TDETA_HES.N_KOL
+                                    INNER JOIN dbo.DEED_HED
+                                        INNER JOIN dbo.DEED_DTL
+                                            ON dbo.DEED_HED.N_S = dbo.DEED_DTL.N_S
+                                        ON dbo.TDETA_HES.TNUMBER = dbo.DEED_DTL.HES_T
+                                       AND dbo.TDETA_HES.NUMBER  = dbo.DEED_DTL.HES_M
+                                       AND dbo.TDETA_HES.N_KOL   = dbo.DEED_DTL.HES_K
+                                    ON dbo.TOTA_HES.NUMBER = dbo.DETA_HES.N_KOL
+                                WHERE dbo.DEED_HED.DATE_S BETWEEN {dateVal1} AND {dateVal}
+                                GROUP BY
+                                    dbo.DEED_DTL.HES_K, dbo.DEED_DTL.HES_M, dbo.DEED_DTL.HES_T,
+                                    dbo.TOTA_HES.NAME, dbo.DETA_HES.NAME, dbo.TDETA_HES.NAME,
+                                    dbo.TDETA_HES.ADDRESS, dbo.TDETA_HES.TEL, dbo.TDETA_HES.CODE_E,
+                                    dbo.TDETA_HES.TOZIH, dbo.DEED_DTL.HES, dbo.TDETA_HES.ECODE,
+                                    dbo.TDETA_HES.CUST_COD, dbo.TDETA_HES.ROUTE_NAME,
+                                    dbo.DEED_DTL.HES_T2, dbo.DEED_DTL.HES_T3, dbo.DEED_DTL.HES_T4
+                                ) Q ";
+
+            // کوئری اصلی SELECT INTO
             string selectIntoSql = $@"
                 SELECT Q.TAFZIL, 
                        Q.HES_K, 
@@ -558,7 +604,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                        CUST_HESAB_1.NAME AS tafname
                 INTO   {tableName}
                 FROM   dbo.CUST_HESAB CUST_HESAB_1
-                INNER JOIN dbo.Q_BEDEHBESTANHA_FULL({dateVal}, 1) Q 
+                INNER JOIN {subQuery} 
                        ON CUST_HESAB_1.hes = Q.HES
                 LEFT OUTER JOIN dbo.CUST_HESAB
                        INNER JOIN dbo.Visit_route 

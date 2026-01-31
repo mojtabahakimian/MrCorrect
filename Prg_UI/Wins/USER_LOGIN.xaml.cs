@@ -375,9 +375,9 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 86; Baseknow.UUSER = "آقاي سجاد راستي";
             //Baseknow.USERCOD = 174; Baseknow.UUSER = "Miss yeganeh Karbakhsh";
             //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
-            //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
             //Baseknow.USERCOD = 108; Baseknow.UUSER = "modir-mali";
             //Baseknow.USERCOD = 102; Baseknow.UUSER = "mina mehrnia";
+            //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
             Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
 
             CL_Generaly.SHIFT_OF_USER = 1; //شیفت صبح
@@ -387,9 +387,10 @@ namespace Prg_UI.Wins
 
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
 
-            new HEAD_LST_HAVL().Show();
-            //new ENHESAR_MOSHTARI_WIN().Show();
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN_LIMITED, this);
             //new WinBase().Show();
+            //new HEAD_LST_HAVL().Show();
+            //new ENHESAR_MOSHTARI_WIN().Show();
             //new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED().Show();
             //new TR_FACOTRLST(5).Show();
             //new TR_ANBGRD_LST().Show();
