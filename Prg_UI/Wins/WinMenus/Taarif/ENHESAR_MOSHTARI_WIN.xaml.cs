@@ -162,6 +162,8 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 EN_IYALAT.IsEnabled = ican;
                 EN_COUNTRY.IsEnabled = ican;
                 USERID_REM.IsEnabled = ican;
+                EN_CUST_CO.IsEnabled = ican;
+                EN_CUST_CO2.IsEnabled = ican;
 
                 ENHESAR_KALA_GRID.IsReadOnly = !ican;
 
@@ -198,7 +200,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 dbms,
                 x => x?.EN_CUST_CO.ToString(),
                 $"SELECT * FROM dbo.ENHESAR_MOSHTARI {WhereCondition} ORDER BY CRT",
-                x => $"SELECT * FROM dbo.ENHESAR_MOSHTARI WHERE EN_CUST_CO = {x?.EN_CUST_CO} ",
+                x => $"SELECT * FROM dbo.ENHESAR_MOSHTARI WHERE EN_CUST_CO = N'{x?.EN_CUST_CO}' ",
                 Convert.ToString(EN_CUST_CO.SelectedValue));
 
             _navigationManager.CurrentRecordChanged += OnCurrentRecordChanged;
@@ -265,7 +267,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
         private void MakeDefaultFocuseReady()
         {
-            EN_STDATE.Focus();
+            EN_STDATE.GetFocus();
         }
 
         private void DataGridActivation()
@@ -340,6 +342,24 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 EN_CITY.SelectedValue = record.EN_CITY;
                 USERID_REM.SelectedValue = record.USERID_REM;
 
+                string thevalue = record.EN_CUST_CO;
+                var data = dbms.DoGetDataSQL<HESAB_CMB_MODEL>("SELECT hes, NAME FROM dbo.CUST_HESAB WHERE hes = N'" + thevalue + "'").FirstOrDefault();
+                if (data != null)
+                {
+                    if (EN_CUST_CO.ItemsSource == null)
+                    {
+                        EN_CUST_CO.ItemsSource = new List<HESAB_CMB_MODEL>();
+                    }
+
+                    var sourceList = (List<HESAB_CMB_MODEL>)EN_CUST_CO.ItemsSource;
+                    if (!sourceList.Any(item => item?.hes == thevalue))
+                    {
+                        sourceList.Add(new HESAB_CMB_MODEL { hes = thevalue, NAME = data.NAME });
+                    }
+                    EN_CUST_CO.Items.Refresh();
+                }
+                EN_CUST_CO.SelectedValue = thevalue;
+
                 BTN_EDIT.IsEnabled = true; //ESLAH
 
                 AllowEdits = false;
@@ -395,6 +415,10 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         private void FILL_ALL_COMBOBOXES()
         {
             EN_CUST_CO.ItemsSource = new List<HESAB_CMB_MODEL>();
+            //حساب یا کد مشتریان
+            EN_CUST_CO2.ItemsSource = EN_CUST_CO.ItemsSource;
+            EN_CUST_CO2.DisplayMemberPath = "hes";
+            EN_CUST_CO2.SelectedValuePath = "hes";
 
             // Countries
             var countries = dbms.DoGetDataSQL<CNT_COMBO>("SELECT Code, CountriesName FROM TCOD_Countries ORDER BY CountriesName").ToList();
@@ -658,17 +682,24 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 }
             }
 
-            var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(default, dbms, CUTSNO_TEX.Text);
-            if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
+            if (!string.IsNullOrWhiteSpace(CUTSNO_TEX?.Text))
             {
-                universControl.PopNotifyShow($"مشتری نمی تواند خالی باشد", Pop1, Pop1Text1, Pop_Border1);
-                //e.Handled = true;
+                var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(default, dbms, CUTSNO_TEX.Text);
+                if (!string.IsNullOrEmpty(_SelectedHesab_?.hes))
+                {
+                    var FoundCust = new HESAB_CMB_MODEL() { hes = _SelectedHesab_.hes, NAME = _SelectedHesab_.NAME };
+                    SetCustomer(FoundCust);
+                }
             }
-            else
+            else if (EN_CUST_CO.SelectedItem is HESAB_CMB_MODEL CustomerValueHes)
             {
-                var FoundCust = new HESAB_CMB_MODEL() { hes = _SelectedHesab_.hes, NAME = _SelectedHesab_.NAME };
-                SetCustomer(FoundCust);
+                string? StoredCustomer = _navigationManager?.CurrentRecord?.EN_CUST_CO;
+                if (!string.IsNullOrWhiteSpace(StoredCustomer))
+                {
+                    universControl.PopNotifyShow($"مشتری نمی تواند خالی باشد", Pop1, Pop1Text1, Pop_Border1);
+                }
             }
+
 
             if (EN_CUST_CO.SelectedValue is not null)
             {
@@ -1009,7 +1040,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
             CURRENT_ITEMS_ROW = e.Row.Item as ENHESAR_KALA;
             #endregion
-              
+
 
             if (e.EditAction == DataGridEditAction.Commit)
             {

@@ -291,22 +291,29 @@ namespace Prg_UI.Wins
 
             IncreaseMemoryDesktopHeapExhaustion();
 
-            var RST = dbms.DoGetDataSQL<SAZMAN>($"SELECT SMS_USERNAME,SMS_PASSWORD ,SMS_LIBKEY , SMS_TSMSHOST , DSMS , PRMFR , SMSACT , SMS_OWNER , SMSTYPE FROM dbo.SAZMAN").FirstOrDefault();
-            if (RST != null)
+            try
             {
-                SMSPINFO.USERNAME = RST?.SMS_USERNAME;
-                SMSPINFO.PASSWORD = RST?.SMS_PASSWORD;
-                SMSPINFO.LINE_NUMBER = Convert.ToInt64(RST?.SMS_TSMSHOST);
-                SMSPINFO.API_KEY = RST?.SMS_LIBKEY;
-
-                switch (RST?.SMSTYPE)
+                var RST = dbms.DoGetDataSQL<SAZMAN>($"SELECT SMS_USERNAME,SMS_PASSWORD ,SMS_LIBKEY , SMS_TSMSHOST , DSMS , PRMFR , SMSACT , SMS_OWNER , SMSTYPE FROM dbo.SAZMAN").FirstOrDefault();
+                if (RST != null)
                 {
-                    case "TSMS": SMSPINFO.SERVICE_TYPE = SmsServiceType.TsmsUrl; break;
+                    SMSPINFO.USERNAME = RST?.SMS_USERNAME;
+                    SMSPINFO.PASSWORD = RST?.SMS_PASSWORD;
+                    SMSPINFO.LINE_NUMBER = Convert.ToInt64(RST?.SMS_TSMSHOST);
+                    SMSPINFO.API_KEY = RST?.SMS_LIBKEY;
 
-                    case "SMSIR": SMSPINFO.SERVICE_TYPE = SmsServiceType.SmsIr; break;
+                    switch (RST?.SMSTYPE)
+                    {
+                        case "TSMS": SMSPINFO.SERVICE_TYPE = SmsServiceType.TsmsUrl; break;
 
-                    default: break;
+                        case "SMSIR": SMSPINFO.SERVICE_TYPE = SmsServiceType.SmsIr; break;
+
+                        default: break;
+                    }
                 }
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "در بارگذاری یکسری تنظیمات مربوط به نرم افزار (SMS) خطایی رخ داده , از بروز بودن نرم افزار و اجرا بودن اسکریپت اطمینان حاصل فرمایید").Show();
             }
 
             //string sname = dbms.Database.SqlQuery<string>("Select @@servername as [ServerName]").FirstOrDefault().ToString();
@@ -368,9 +375,9 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 86; Baseknow.UUSER = "آقاي سجاد راستي";
             //Baseknow.USERCOD = 174; Baseknow.UUSER = "Miss yeganeh Karbakhsh";
             //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
-            //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
             //Baseknow.USERCOD = 108; Baseknow.UUSER = "modir-mali";
             //Baseknow.USERCOD = 102; Baseknow.UUSER = "mina mehrnia";
+            //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
             Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
 
             CL_Generaly.SHIFT_OF_USER = 1; //شیفت صبح
@@ -380,8 +387,10 @@ namespace Prg_UI.Wins
 
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
 
-            new HEAD_LST_ENTEGHAL_WIN().Show();
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN_LIMITED, this);
             //new WinBase().Show();
+            //new HEAD_LST_HAVL().Show();
+            //new ENHESAR_MOSHTARI_WIN().Show();
             //new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED().Show();
             //new TR_FACOTRLST(5).Show();
             //new TR_ANBGRD_LST().Show();

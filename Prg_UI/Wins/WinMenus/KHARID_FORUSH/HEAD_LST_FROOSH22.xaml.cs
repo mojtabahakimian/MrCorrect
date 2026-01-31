@@ -1,4 +1,6 @@
 ﻿using Dapper;
+using Functions;
+using Functions.SMSService;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic;
@@ -15,15 +17,25 @@ using Prg_UI.Validatory;
 using Prg_UI.Wins.WinMenus.ANBAR;
 using Prg_UI.Wins.WinMenus.HESABDARI;
 using Prg_UI.Wins.WinOther;
-using Stimulsoft.Report.Dictionary;
+using Rpts;
 using Stimulsoft.Report;
+using Stimulsoft.Report.Components;
+using Stimulsoft.Report.Dictionary;
+using Syncfusion.Data.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
+using System.Drawing.Printing;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using System.Transactions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -31,29 +43,18 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
-using DataGridTextColumn = System.Windows.Controls.DataGridTextColumn;
-using Msgwin = Prg_UI.HelperWins.Msgwin;
-using Stimulsoft.Report.Components;
-using Convert = System.Convert;
-using System.Drawing.Printing;
-using System.ComponentModel;
-using Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.ANBAR;
-using Functions;
-using Syncfusion.Data.Extensions;
-using System.Diagnostics;
-using System.IO;
-using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
-using static Prg_UI.HelperWins.Msgwin;
-using Rpts;
-using Functions.SMSService;
+using Wins.WinMenus.HESABDARI;
 using Wins.WinOther;
 using static Interfaces.INavigator;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Functions.CL_LMethods;
+using static Prg_UI.HelperWins.Msgwin;
+using static Prg_UI.Wins.WinMenus.ANBAR.HEAD_LST_HAVL;
 using static Wins.WinMenus.KHARID_FORUSH.HEAD_LST_PISHFROOSH2;
-using System.Text;
-using System.Threading.Tasks;
+using Convert = System.Convert;
+using DataGridTextColumn = System.Windows.Controls.DataGridTextColumn;
+using Msgwin = Prg_UI.HelperWins.Msgwin;
 
 
 //مواردی که باید بعدا در نظر گرفته شود :
@@ -2849,6 +2850,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         }
                     }
                     // --- پایان منطق هوشمند ---
+
+               
                 }
                 catch { /* Ignore errors in auto-detection */ }
             }
@@ -8329,6 +8332,16 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 var hmbaaSqlValue = string.IsNullOrWhiteSpace(HMBAA.Text)
                     ? "NULL"
                     : $"N'{CMB_HMBAA.SelectedValue ?? HMBAA.Text}'";
+
+
+                if (CUST_NO.SelectedValue != null && Maghsad_Havaleh_Directyfactor is null)
+                {
+                    var masMaghsad = dbms.DoGetDataSQL<int?>($"SELECT SHAHRID FROM dbo.CUST_HESAB WHERE hes = N'{CUST_NO.SelectedValue}'").FirstOrDefault();
+                    if (masMaghsad != null)
+                    {
+                        Maghsad_Havaleh_Directyfactor = masMaghsad;
+                    }
+                }
 
                 if (IsDirectFactor)
                 {
