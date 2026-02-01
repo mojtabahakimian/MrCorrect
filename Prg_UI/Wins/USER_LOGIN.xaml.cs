@@ -387,7 +387,7 @@ namespace Prg_UI.Wins
 
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
 
-            new ENHESAR_WIN().Show();
+            new HEAD_LST_HAVL().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN_LIMITED, this);
             //new WinBase().Show();
             //new HEAD_LST_HAVL().Show();

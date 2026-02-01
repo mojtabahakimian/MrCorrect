@@ -150,7 +150,7 @@ namespace Prg_UI.CUC
         // --- Internal Logic ---
 
         // این متد جدید، قلب تپنده لاجیک شماست که هم با اینتر و هم با لاست‌فوکوس صدا زده می‌شود
-        private void ProcessInput()
+        private void ProcessInput(bool forceSearch)
         {
             // 1. اگر همین الان آیتمی به درستی انتخاب شده، فقط تایید کن
             if (cmbPersonel.SelectedValue != null)
@@ -159,19 +159,18 @@ namespace Prg_UI.CUC
                 return;
             }
 
-            // 2. اگر متنی تایپ شده که انتخاب نشده است
+            // 2. دریافت متن
             string text = GetComboBoxText().Trim();
             if (string.IsNullOrWhiteSpace(text)) return;
 
-            // اگر کاربر قبلاً این متن را جستجو کرده و کنسل کرده، دوباره مزاحم نشو
-            // (مگر اینکه کاربر صراحتاً اینتر زده باشد - این شرط را در LostFocus مدیریت می‌کنیم نه اینجا)
-            // اما برای سادگی فعلا اینجا می‌گذاریم بماند، مگر اینکه بخواهید با اینتر حتماً دوباره سرچ کند
-            if (string.Equals(text, _lastDismissedSearchText, StringComparison.Ordinal))
+            // 3. منطق جلوگیری از لوپ (فقط برای حالت غیر اجباری/لاست فوکوس)
+            if (!forceSearch)
             {
-                // اگر کاربر صراحتاً اینتر زده باشد، شاید بخواهد دوباره تلاش کند؟
-                // اگر می‌خواهید با اینتر زورکی سرچ کند، این شرط را بردارید یا فلگ خاص بگذارید.
-                // فعلاً طبق منطق قبلی رها می‌کنیم.
-                // return; 
+                // اگر کاربر قبلاً این متن را جستجو کرده و کنسل کرده، دوباره مزاحم نشو
+                if (string.Equals(text, _lastDismissedSearchText, StringComparison.Ordinal))
+                {
+                    return;
+                }
             }
 
             try
@@ -180,7 +179,6 @@ namespace Prg_UI.CUC
                 if (int.TryParse(text, out int id))
                 {
                     int? rst = dbms.DoGetDataSQL<int?>("select idd from sala_dtl where idd = @Idd", new { Idd = id }).FirstOrDefault();
-
                     if (rst != null)
                     {
                         SetSelectedIdSafe(rst.Value);
@@ -214,6 +212,8 @@ namespace Prg_UI.CUC
                 else
                 {
                     // Parent چیزی برنگرداند (کنسل کرد)
+                    // اگر کاربر با اینتر زده بود، باز هم این متن را به عنوان دیسمیس شده ست میکنیم
+                    // تا اگر بلافاصله تب زد (لاست فوکوس)، دوباره پنجره باز نشود
                     _lastDismissedSearchText = text;
                 }
             }
@@ -232,11 +232,11 @@ namespace Prg_UI.CUC
         {
             if (e.Key == Key.Enter)
             {
-                // تغییر مهم: چه انتخاب شده باشد چه نباشد، لاجیک پردازش را صدا بزن
-                ProcessInput();
+                // تغییر مهم: ارسال true برای اجبار به جستجو حتی اگر قبلا کنسل شده باشد
+                ProcessInput(true);
 
-                // جلوگیری از صدای دینگ و رفتار پیش‌فرض
-                //e.Handled = true;
+                // جلوگیری از رفتار پیش‌فرض اینتر
+                e.Handled = true;
             }
         }
 
@@ -246,12 +246,7 @@ namespace Prg_UI.CUC
             if (_isSearchDialogActive) return;
             if (!cmbPersonel.IsEditable) return;
 
-            // فقط چک کردن Dismissed Text برای LostFocus مهم است تا لوپ نیفتد
-            string text = GetComboBoxText().Trim();
-            if (string.Equals(text, _lastDismissedSearchText, StringComparison.Ordinal) && cmbPersonel.SelectedValue == null)
-                return;
-
-            ProcessInput();
+            ProcessInput(true);
         }
 
         // --- Helpers ---

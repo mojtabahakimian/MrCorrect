@@ -66,7 +66,7 @@ namespace Prg_UI.Wins.WinOther
             if (!string.IsNullOrEmpty(_arg))
             {
                 //ServerFilter = $" AND SAL_NAME LIKE N'%{_arg}%'";
-                ServerFilter = _arg;
+                ServerFilter = BuildServerFilter(_arg);
             }
             InitializeComponent();
         }
@@ -75,9 +75,56 @@ namespace Prg_UI.Wins.WinOther
             if (!string.IsNullOrEmpty(_arg))
             {
                 //ServerFilter = $" AND SAL_NAME LIKE N'%{_arg}%'";
-                ServerFilter = _arg;
+                ServerFilter = BuildServerFilter(_arg);
             }
             InitializeComponent();
+        }
+        private static string BuildServerFilter(string filterOrText)
+        {
+            if (LooksLikeSqlFilter(filterOrText))
+            {
+                return filterOrText;
+            }
+
+            string text = filterOrText.Trim();
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return string.Empty;
+            }
+
+            string coded = EscapeSqlLike(CL_HESABDARI.CODESAL(text));
+            string fixedPersian = EscapeSqlLike(CL_HESABDARI.CODESAL(CL_HESABDARI.Fixp(text)));
+            string fixedPersianAlt = EscapeSqlLike(CL_HESABDARI.CODESAL(CL_HESABDARI.Fixpi(text)));
+
+            return "sal_name like N'%" + coded + "%' or " +
+                   "sal_name like N'%" + fixedPersian + "%' or " +
+                   "sal_name like N'%" + fixedPersianAlt + "%'";
+        }
+
+        private static bool LooksLikeSqlFilter(string filterOrText)
+        {
+            if (string.IsNullOrWhiteSpace(filterOrText))
+            {
+                return false;
+            }
+
+            string lower = filterOrText.Trim().ToLowerInvariant();
+            return lower.Contains(" like ")
+                || lower.Contains(" and ")
+                || lower.Contains(" or ")
+                || lower.Contains("sal_name")
+                || lower.Contains("psal_name")
+                || lower.Contains("grsal")
+                || lower.Contains("enabl")
+                || lower.Contains("idd")
+                || lower.Contains("=")
+                || lower.Contains("<")
+                || lower.Contains(">");
+        }
+
+        private static string EscapeSqlLike(string value)
+        {
+            return value.Replace("'", "''");
         }
         public S_USER_SALADTL? SelectedPersonel { get; set; } = null;
         private void Window_Loaded(object sender, RoutedEventArgs e)

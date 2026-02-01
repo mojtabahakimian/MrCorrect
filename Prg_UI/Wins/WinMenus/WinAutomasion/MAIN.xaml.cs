@@ -1371,7 +1371,13 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
 
             if (!string.IsNullOrEmpty(PERSONEL_TEX.Text.Trim()))
             {
-                new SelectUser(PERSONEL_TEX.Text, new WindowInteropHelper(this).Handle).ShowDialog();
+                string text = PERSONEL_TEX.Text;
+                string filter =
+                    "sal_name like N'%" + CL_HESABDARI.CODESAL(text) + "%' or " +
+                    "sal_name like N'%" + CL_HESABDARI.CODESAL(CL_HESABDARI.Fixp(text)) + "%' or " +
+                    "sal_name like N'%" + CL_HESABDARI.CODESAL(CL_HESABDARI.Fixpi(text)) + "%'";
+
+                new SelectUser(filter, new WindowInteropHelper(this).Handle).ShowDialog();
             }
 
             if (PERSONEL.SelectedValue is null)

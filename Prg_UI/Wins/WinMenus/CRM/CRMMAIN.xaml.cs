@@ -196,15 +196,15 @@ namespace Prg_UI.Wins.WinMenus.CRM
             // نام این متغیر را از items به statusList تغییر می‌دهیم تا با Property جدید تداخل نداشته باشد
             List<Status_List> statusList = new List<Status_List>()
             {
-                new Status_List() { NAME = Baseknow.IT1.ToString(), CODE = 1 },
-                new Status_List() { NAME = Baseknow.IT2.ToString(), CODE = 2 },
-                new Status_List() { NAME = Baseknow.IT3.ToString(), CODE = 3 },
-                new Status_List() { NAME = Baseknow.IT4.ToString(), CODE = 4 },
-                new Status_List() { NAME = Baseknow.IT5.ToString(), CODE = 5 },
-                new Status_List() { NAME = Baseknow.IT6.ToString(), CODE = 6 },
-                new Status_List() { NAME = Baseknow.IT7.ToString(), CODE = 7 },
-                new Status_List() { NAME = Baseknow.IT8.ToString(), CODE = 8 },
-                new Status_List() { NAME = Baseknow.IT9.ToString(), CODE = 9 },
+                new Status_List() { NAME = Baseknow.IT1 ?? "", CODE = 1 },
+                new Status_List() { NAME = Baseknow.IT2 ?? "", CODE = 2 },
+                new Status_List() { NAME = Baseknow.IT3 ?? "", CODE = 3 },
+                new Status_List() { NAME = Baseknow.IT4 ?? "", CODE = 4 },
+                new Status_List() { NAME = Baseknow.IT5 ?? "", CODE = 5 },
+                new Status_List() { NAME = Baseknow.IT6 ?? "", CODE = 6 },
+                new Status_List() { NAME = Baseknow.IT7 ?? "", CODE = 7 },
+                new Status_List() { NAME = Baseknow.IT8 ?? "", CODE = 8 },
+                new Status_List() { NAME = Baseknow.IT9 ?? "", CODE = 9 },
             };
 
             // مقداردهی Property جدید
