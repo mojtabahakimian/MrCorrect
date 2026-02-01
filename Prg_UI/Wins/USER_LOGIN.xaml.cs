@@ -387,10 +387,10 @@ namespace Prg_UI.Wins
 
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
 
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN_LIMITED, this);
+            new ENHESAR_WIN().Show();
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN_LIMITED, this);
             //new WinBase().Show();
             //new HEAD_LST_HAVL().Show();
-            //new ENHESAR_MOSHTARI_WIN().Show();
             //new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED().Show();
             //new TR_FACOTRLST(5).Show();
             //new TR_ANBGRD_LST().Show();

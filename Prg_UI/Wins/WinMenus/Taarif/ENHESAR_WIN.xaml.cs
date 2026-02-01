@@ -28,9 +28,9 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace Prg_UI.Wins.WinMenus.Taarif
 {
-    public partial class ENHESAR_MOSHTARI_WIN : Window
+    public partial class ENHESAR_WIN : Window
     {
-        public ENHESAR_MOSHTARI_WIN(string? number_to_open = null, bool _isAutomasion_ = false)
+        public ENHESAR_WIN(string? number_to_open = null, bool _isAutomasion_ = false)
         {
             InitializeComponent();
 
@@ -463,6 +463,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 // Me("EN_GRCODE1").RowSource = ... WHERE (TCOD_MAP.MPP = 1)
 
                 var groups = dbms.DoGetDataSQL<TCOD_MAP_GRP>("SELECT * FROM TCOD_MAP_GRP ORDER BY MPP").ToList();
+                int activeGroupsCount = 0;
                 if (groups.Count > 0)
                 {
                     // Access loops from 2 to Count for columns, but let's just map MPP 1 to 10
@@ -476,6 +477,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                         if (grp.MPP.HasValue && grp.MPP.Value >= 1 && grp.MPP.Value <= 10)
                         {
                             int idx = grp.MPP.Value;
+                            activeGroupsCount = Math.Max(activeGroupsCount, idx);
 
                             // Find column by name (COL_GR1 ... COL_GR10)
                             System.Windows.Controls.DataGridComboBoxColumn col = this.FindName($"COL_GR{idx}") as System.Windows.Controls.DataGridComboBoxColumn;
@@ -513,6 +515,16 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                             }
                         }
                     }
+
+                    //مخفی کردن ستون‌های اضافی
+                    for (int i = 1; i <= 10; i++)
+                    {
+                        var col = this.FindName($"COL_GR{i}") as DataGridColumn;
+                        if (col != null)
+                        {
+                            col.Visibility = (i <= activeGroupsCount) ? Visibility.Visible : Visibility.Collapsed;
+                        }
+                    }
                 }
                 else
                 {
@@ -528,15 +540,16 @@ namespace Prg_UI.Wins.WinMenus.Taarif
         }
         private void EN_COUNTRY_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            if (EN_COUNTRY.SelectedItem is TCOD_CITY selectcity)
+            if (EN_COUNTRY.SelectedItem is CNT_COMBO selectedCountry)
             {
-                if (selectcity.CITYCODE != IRAN_CODE)
+                if (selectedCountry.Code != IRAN_CODE)
                 {
                     EN_COUNTRY.SelectedValue = IRAN_CODE;
                     new Msgwin(false, "در حال حاضر امکان انتخاب کشوری جز ایران مقدور نیست").ShowDialog();
                 }
             }
         }
+
         private void EN_COUNTRY_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (EN_COUNTRY.SelectedValue is null)
@@ -625,10 +638,12 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                     ErrosMessages.Add(new MsgModel { MessageText_U = $"{END_CP} مربوط به سال جاری نیست" });
                 }
 
-                if (Convert.ToInt32(BEGIN_DATE) < Convert.ToInt32(END_DATE))
+
+                if (Convert.ToInt32(BEGIN_DATE) > Convert.ToInt32(END_DATE))
                 {
-                    ErrosMessages.Add(new MsgModel { MessageText_U = $"{BG_CP} نمیتواند کمتر از {END_CP} باشد" });
+                    ErrosMessages.Add(new MsgModel { MessageText_U = $"{BG_CP} نمیتواند بزرگتر از {END_CP} باشد" });
                 }
+
             }
 
             if (EN_CUST_CO.SelectedValue is null)
@@ -1157,8 +1172,10 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
                 if (row.EN_IDD == 0)
                 {
-                    var maxId = dbms.DoGetDataSQL<int?>("SELECT MAX(EN_IDD) FROM ENHESAR_KALA").FirstOrDefault();
-                    row.EN_IDD = (maxId ?? 0) + 1;
+                    //var maxId = dbms.DoGetDataSQL<int?>("SELECT MAX(EN_IDD) FROM ENHESAR_KALA").FirstOrDefault();
+                    long maxId = CL_HESABDARI.GetLIDD("ENHESAR_KALA", "EN_IDD");
+
+                    row.EN_IDD = (int)maxId;
 
                     string sql = @"INSERT INTO ENHESAR_KALA (EN_IDD, EN_CUST_CO, EN_KALA_COD, EN_KALA_GR, 
                                     EN_GRCODE1, EN_GRCODE2, EN_GRCODE3, EN_GRCODE4, EN_GRCODE5, 
