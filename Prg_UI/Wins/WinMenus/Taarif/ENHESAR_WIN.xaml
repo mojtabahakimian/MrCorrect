@@ -237,16 +237,206 @@
                         <!-- Group Code (Int) -->
                         <!--<DataGridTextColumn Header="گروه کالا" Binding="{Binding EN_KALA_GR, UpdateSourceTrigger=LostFocus}" Width="150"/>-->
 
-                        <DataGridComboBoxColumn x:Name="COL_GR1"  Header="کد گروه 1"  SelectedValueBinding="{Binding EN_GRCODE1}"  SortMemberPath="EN_GRCODE1"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
-                        <DataGridComboBoxColumn x:Name="COL_GR2"  Header="کد گروه 2"  SelectedValueBinding="{Binding EN_GRCODE2}"  SortMemberPath="EN_GRCODE2"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
-                        <DataGridComboBoxColumn x:Name="COL_GR3"  Header="کد گروه 3"  SelectedValueBinding="{Binding EN_GRCODE3}"  SortMemberPath="EN_GRCODE3"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
-                        <DataGridComboBoxColumn x:Name="COL_GR4"  Header="کد گروه 4"  SelectedValueBinding="{Binding EN_GRCODE4}"  SortMemberPath="EN_GRCODE4"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
-                        <DataGridComboBoxColumn x:Name="COL_GR5"  Header="کد گروه 5"  SelectedValueBinding="{Binding EN_GRCODE5}"  SortMemberPath="EN_GRCODE5"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
-                        <DataGridComboBoxColumn x:Name="COL_GR6"  Header="کد گروه 6"  SelectedValueBinding="{Binding EN_GRCODE6}"  SortMemberPath="EN_GRCODE6"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
-                        <DataGridComboBoxColumn x:Name="COL_GR7"  Header="کد گروه 7"  SelectedValueBinding="{Binding EN_GRCODE7}"  SortMemberPath="EN_GRCODE7"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
-                        <DataGridComboBoxColumn x:Name="COL_GR8"  Header="کد گروه 8"  SelectedValueBinding="{Binding EN_GRCODE8}"  SortMemberPath="EN_GRCODE8"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
-                        <DataGridComboBoxColumn x:Name="COL_GR9"  Header="کد گروه 9"  SelectedValueBinding="{Binding EN_GRCODE9}"  SortMemberPath="EN_GRCODE9"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
-                        <DataGridComboBoxColumn x:Name="COL_GR10" Header="کد گروه 10" SelectedValueBinding="{Binding EN_GRCODE10}" SortMemberPath="EN_GRCODE10" SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120"/>
+                        <DataGridComboBoxColumn x:Name="COL_GR1"  Header="کد گروه 1"  SelectedValueBinding="{Binding EN_GRCODE1}"  SortMemberPath="EN_GRCODE1"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120">
+                            <DataGridComboBoxColumn.EditingElementStyle>
+                                <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                    <Setter Property="IsEditable" Value="True"/>
+                                    <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                    <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                </Style>
+                            </DataGridComboBoxColumn.EditingElementStyle>
+                            <DataGridComboBoxColumn.ElementStyle>
+                                <Style TargetType="{x:Type ComboBox}">
+                                </Style>
+                            </DataGridComboBoxColumn.ElementStyle>
+                            <DataGridComboBoxColumn.CellStyle>
+                                <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                    <Setter Property = "IsTabStop" Value = "True" />
+                                </Style>
+                            </DataGridComboBoxColumn.CellStyle>
+                        </DataGridComboBoxColumn>
+                        <DataGridComboBoxColumn x:Name="COL_GR2"  Header="کد گروه 2"  SelectedValueBinding="{Binding EN_GRCODE2}"  SortMemberPath="EN_GRCODE2"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120">
+                            <DataGridComboBoxColumn.EditingElementStyle>
+                                <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                    <Setter Property="IsEditable" Value="True"/>
+                                    <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                    <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                </Style>
+                            </DataGridComboBoxColumn.EditingElementStyle>
+                            <DataGridComboBoxColumn.ElementStyle>
+                                <Style TargetType="{x:Type ComboBox}">
+                                </Style>
+                            </DataGridComboBoxColumn.ElementStyle>
+                            <DataGridComboBoxColumn.CellStyle>
+                                <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                    <Setter Property = "IsTabStop" Value = "True" />
+                                </Style>
+                            </DataGridComboBoxColumn.CellStyle>
+                        </DataGridComboBoxColumn>
+                        <DataGridComboBoxColumn x:Name="COL_GR3"  Header="کد گروه 3"  SelectedValueBinding="{Binding EN_GRCODE3}"  SortMemberPath="EN_GRCODE3"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120">
+                            <DataGridComboBoxColumn.EditingElementStyle>
+                                <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                    <Setter Property="IsEditable" Value="True"/>
+                                    <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                    <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                </Style>
+                            </DataGridComboBoxColumn.EditingElementStyle>
+                            <DataGridComboBoxColumn.ElementStyle>
+                                <Style TargetType="{x:Type ComboBox}">
+                                </Style>
+                            </DataGridComboBoxColumn.ElementStyle>
+                            <DataGridComboBoxColumn.CellStyle>
+                                <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                    <Setter Property = "IsTabStop" Value = "True" />
+                                </Style>
+                            </DataGridComboBoxColumn.CellStyle>
+                        </DataGridComboBoxColumn>
+                        <DataGridComboBoxColumn x:Name="COL_GR4"  Header="کد گروه 4"  SelectedValueBinding="{Binding EN_GRCODE4}"  SortMemberPath="EN_GRCODE4"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120">
+                            <DataGridComboBoxColumn.EditingElementStyle>
+                                <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                    <Setter Property="IsEditable" Value="True"/>
+                                    <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                    <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                </Style>
+                            </DataGridComboBoxColumn.EditingElementStyle>
+                            <DataGridComboBoxColumn.ElementStyle>
+                                <Style TargetType="{x:Type ComboBox}">
+                                </Style>
+                            </DataGridComboBoxColumn.ElementStyle>
+                            <DataGridComboBoxColumn.CellStyle>
+                                <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                    <Setter Property = "IsTabStop" Value = "True" />
+                                </Style>
+                            </DataGridComboBoxColumn.CellStyle>
+                        </DataGridComboBoxColumn>
+                        <DataGridComboBoxColumn x:Name="COL_GR5"  Header="کد گروه 5"  SelectedValueBinding="{Binding EN_GRCODE5}"  SortMemberPath="EN_GRCODE5"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120">
+                            <DataGridComboBoxColumn.EditingElementStyle>
+                                <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                    <Setter Property="IsEditable" Value="True"/>
+                                    <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                    <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                </Style>
+                            </DataGridComboBoxColumn.EditingElementStyle>
+                            <DataGridComboBoxColumn.ElementStyle>
+                                <Style TargetType="{x:Type ComboBox}">
+                                </Style>
+                            </DataGridComboBoxColumn.ElementStyle>
+                            <DataGridComboBoxColumn.CellStyle>
+                                <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                    <Setter Property = "IsTabStop" Value = "True" />
+                                </Style>
+                            </DataGridComboBoxColumn.CellStyle>
+                        </DataGridComboBoxColumn>
+                        <DataGridComboBoxColumn x:Name="COL_GR6"  Header="کد گروه 6"  SelectedValueBinding="{Binding EN_GRCODE6}"  SortMemberPath="EN_GRCODE6"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120">
+                            <DataGridComboBoxColumn.EditingElementStyle>
+                                <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                    <Setter Property="IsEditable" Value="True"/>
+                                    <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                    <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                </Style>
+                            </DataGridComboBoxColumn.EditingElementStyle>
+                            <DataGridComboBoxColumn.ElementStyle>
+                                <Style TargetType="{x:Type ComboBox}">
+                                </Style>
+                            </DataGridComboBoxColumn.ElementStyle>
+                            <DataGridComboBoxColumn.CellStyle>
+                                <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                    <Setter Property = "IsTabStop" Value = "True" />
+                                </Style>
+                            </DataGridComboBoxColumn.CellStyle>
+                        </DataGridComboBoxColumn>
+                        <DataGridComboBoxColumn x:Name="COL_GR7"  Header="کد گروه 7"  SelectedValueBinding="{Binding EN_GRCODE7}"  SortMemberPath="EN_GRCODE7"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120">
+                            <DataGridComboBoxColumn.EditingElementStyle>
+                                <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                    <Setter Property="IsEditable" Value="True"/>
+                                    <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                    <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                </Style>
+                            </DataGridComboBoxColumn.EditingElementStyle>
+                            <DataGridComboBoxColumn.ElementStyle>
+                                <Style TargetType="{x:Type ComboBox}">
+                                </Style>
+                            </DataGridComboBoxColumn.ElementStyle>
+                            <DataGridComboBoxColumn.CellStyle>
+                                <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                    <Setter Property = "IsTabStop" Value = "True" />
+                                </Style>
+                            </DataGridComboBoxColumn.CellStyle>
+                        </DataGridComboBoxColumn>
+                        <DataGridComboBoxColumn x:Name="COL_GR8"  Header="کد گروه 8"  SelectedValueBinding="{Binding EN_GRCODE8}"  SortMemberPath="EN_GRCODE8"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120">
+                            <DataGridComboBoxColumn.EditingElementStyle>
+                                <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                    <Setter Property="IsEditable" Value="True"/>
+                                    <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                    <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                </Style>
+                            </DataGridComboBoxColumn.EditingElementStyle>
+                            <DataGridComboBoxColumn.ElementStyle>
+                                <Style TargetType="{x:Type ComboBox}">
+                                </Style>
+                            </DataGridComboBoxColumn.ElementStyle>
+                            <DataGridComboBoxColumn.CellStyle>
+                                <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                    <Setter Property = "IsTabStop" Value = "True" />
+                                </Style>
+                            </DataGridComboBoxColumn.CellStyle>
+                        </DataGridComboBoxColumn>
+                        <DataGridComboBoxColumn x:Name="COL_GR9"  Header="کد گروه 9"  SelectedValueBinding="{Binding EN_GRCODE9}"  SortMemberPath="EN_GRCODE9"  SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120">
+                            <DataGridComboBoxColumn.EditingElementStyle>
+                                <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                    <Setter Property="IsEditable" Value="True"/>
+                                    <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                    <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                </Style>
+                            </DataGridComboBoxColumn.EditingElementStyle>
+                            <DataGridComboBoxColumn.ElementStyle>
+                                <Style TargetType="{x:Type ComboBox}">
+                                </Style>
+                            </DataGridComboBoxColumn.ElementStyle>
+                            <DataGridComboBoxColumn.CellStyle>
+                                <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                    <Setter Property = "IsTabStop" Value = "True" />
+                                </Style>
+                            </DataGridComboBoxColumn.CellStyle>
+                        </DataGridComboBoxColumn>
+                        <DataGridComboBoxColumn x:Name="COL_GR10" Header="کد گروه 10" SelectedValueBinding="{Binding EN_GRCODE10}" SortMemberPath="EN_GRCODE10" SelectedValuePath="MPCODE" DisplayMemberPath="MPNAME" Width="auto" MinWidth="120">
+                            <DataGridComboBoxColumn.EditingElementStyle>
+                                <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource MaterialDesignComboBox}">
+                                    <Setter Property="IsEditable" Value="True"/>
+                                    <Setter Property="ItemsPanel" Value="{StaticResource VSP}"/>
+                                    <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                                    <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                                </Style>
+                            </DataGridComboBoxColumn.EditingElementStyle>
+                            <DataGridComboBoxColumn.ElementStyle>
+                                <Style TargetType="{x:Type ComboBox}">
+                                </Style>
+                            </DataGridComboBoxColumn.ElementStyle>
+                            <DataGridComboBoxColumn.CellStyle>
+                                <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                                    <Setter Property = "IsTabStop" Value = "True" />
+                                </Style>
+                            </DataGridComboBoxColumn.CellStyle>
+                        </DataGridComboBoxColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
