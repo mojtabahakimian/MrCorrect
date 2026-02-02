@@ -1043,6 +1043,10 @@ namespace Functions
             /// </summary>
             WIN_PRICE_GRP,
             /// <summary>
+            /// بررسی وضعیت کارشناس
+            /// </summary>
+            NABZMOSH_KARSHENASH,
+            /// <summary>
         }
         #endregion
 
@@ -1061,6 +1065,8 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+
+                case WinNameType.NABZMOSH_KARSHENASH: /*بررسی وضعیت کارشناس*/ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_TAFZIL("NABZMOSH"), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_PRICE_GRP: /*تعریف گروه قیمت گذاری*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_PRICE_GRP(), isModalDialog: false, allowMultipleInstances: false); break;
 

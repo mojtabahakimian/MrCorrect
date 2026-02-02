@@ -1,6 +1,5 @@
 ﻿using Functions;
 using MaterialDesignThemes.Wpf;
-using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
@@ -13,28 +12,18 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using Wins.WinMenus.ANBAR;
 using static Prg_UI.Functions.CL_LMethods;
 using Syncfusion.Data.Extensions;
 using Syncfusion.UI.Xaml.BulletGraph;
 using Prg_Proccessy.MODELS;
 using Syncfusion.Data;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
-using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Threading;
-
-using Prg_Proccessy.Generaly;
 
 namespace Prg_UI.Wins.WinMenus.CRM
 {
@@ -124,15 +113,15 @@ namespace Prg_UI.Wins.WinMenus.CRM
             // نام این متغیر را از items به statusList تغییر می‌دهیم تا با Property جدید تداخل نداشته باشد
             List<Status_List> statusList = new List<Status_List>()
             {
-                new Status_List() { NAME = Baseknow.IT1.ToString(), CODE = 1 },
-                new Status_List() { NAME = Baseknow.IT2.ToString(), CODE = 2 },
-                new Status_List() { NAME = Baseknow.IT3.ToString(), CODE = 3 },
-                new Status_List() { NAME = Baseknow.IT4.ToString(), CODE = 4 },
-                new Status_List() { NAME = Baseknow.IT5.ToString(), CODE = 5 },
-                new Status_List() { NAME = Baseknow.IT6.ToString(), CODE = 6 },
-                new Status_List() { NAME = Baseknow.IT7.ToString(), CODE = 7 },
-                new Status_List() { NAME = Baseknow.IT8.ToString(), CODE = 8 },
-                new Status_List() { NAME = Baseknow.IT9.ToString(), CODE = 9 },
+                new Status_List() { NAME = Baseknow.IT1 ?? "", CODE = 1 },
+                new Status_List() { NAME = Baseknow.IT2 ?? "", CODE = 2 },
+                new Status_List() { NAME = Baseknow.IT3 ?? "", CODE = 3 },
+                new Status_List() { NAME = Baseknow.IT4 ?? "", CODE = 4 },
+                new Status_List() { NAME = Baseknow.IT5 ?? "", CODE = 5 },
+                new Status_List() { NAME = Baseknow.IT6 ?? "", CODE = 6 },
+                new Status_List() { NAME = Baseknow.IT7 ?? "", CODE = 7 },
+                new Status_List() { NAME = Baseknow.IT8 ?? "", CODE = 8 },
+                new Status_List() { NAME = Baseknow.IT9 ?? "", CODE = 9 },
             };
 
             // بایند کردن به ItemsControl (چون DataContext خود پنجره است، این کار می‌کند)
