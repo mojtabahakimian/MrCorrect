@@ -1512,5 +1512,10 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.VISITORS_PORSANT_HEAD, default);
         }
+
+        private void Button_Click_139(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.NABZMOSH_KARSHENASH, default);
+        }
     }
 }

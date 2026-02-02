@@ -433,6 +433,10 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق انبار گردانی", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_TR_ANBGRD_LST });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق انتقالی از انبار به انبار", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_ANBAR_ENTERGHAL });
 
+
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "بررسی وضعیت کارشناس", WIN_NAME = CL_MenuManager.WinNameType.NABZMOSH_KARSHENASH });
+
+
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());
 
             // Loading user-specific access level

@@ -1,0 +1,188 @@
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.NABZ_MOSHTARI"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD"
+        mc:Ignorable="d"
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:chart="clr-namespace:Syncfusion.UI.Xaml.Charts;assembly=Syncfusion.SfChart.WPF"
+        xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        Height="600" Width="800"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        MinHeight="400"
+        FontFamily="{StaticResource IRANYEKAN}"
+        Background="{x:Null}"
+        AllowsTransparency="True" AllowDrop="True"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="15"/>
+    </WindowChrome.WindowChrome>
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ScrollViewer.CanContentScroll="True"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Color="{Binding ElementName=GENERAL_RANG, Path=Background.Color}" Opacity="0.3"/>
+    </Window.Resources>
+
+    <Grid x:Name="mygrid" Margin="8,8,8,0">
+        <!-- Hidden button for color binding reference -->
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Width="1" Height="1"/>
+        <!-- Main container -->
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding ElementName=GENERAL_RANG, Path=Background}" BorderThickness="1" CornerRadius="10" Padding="8">
+            <!-- Title bar -->
+            <Border  x:Name="TitleDrawBar" Style="{StaticResource BordG}"  Background="{Binding ElementName=GENERAL_RANG, Path=Background}"  CornerRadius="10,10,0,0" Margin="-9,-9,-9,0"  Height="38"  VerticalAlignment="Top" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <!-- Window title -->
+                    <Label x:Name="LABEL_HEADER" Content="بررسی وضعیت مشتری" Padding="17,8,10,10" Foreground="White" Margin="0,0,110,0" VerticalAlignment="Center"/>
+                    <!-- Window control buttons -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,13,0">
+                        <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" Height="24" Padding="0,0,0,-1" IsTabStop="False" ToolTip="Minimize">
+                            <materialDesign:PackIcon Kind="WindowMinimize" Width="18" Height="18" Foreground="White"/>
+                        </Button>
+                        <Button x:Name="Btn_Max" Click="Btn_Max_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" FontSize="12" Height="24" Padding="0" Margin="4,0,0,0" IsTabStop="False" ToolTip="Maximize">
+                            <materialDesign:PackIcon Kind="WindowMaximize" Width="17" Height="17" Foreground="White"/>
+                        </Button>
+                        <Button x:Name="Btn_Close" Click="Btn_Close_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" Height="24" Padding="0" Margin="4,0,0,0" FontSize="12" IsTabStop="False" ToolTip="Close">
+                            <materialDesign:PackIcon Kind="WindowClose" Width="19" Height="19" Foreground="White"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Border>
+        <!-- Notification popup -->
+        <Popup x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative" Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Width="{Binding ElementName=mygrid, Path=ActualWidth, Mode=OneWay}" Height="84" Padding="10">
+                <TextBox x:Name="Pop1Text1" IsReadOnly="True" Background="Transparent" FlowDirection="RightToLeft" BorderBrush="Transparent" Foreground="White" Text="محل نمایش اعلان های سیستم" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+            </Border>
+        </Popup>
+
+        <!-- Content area -->
+        <Grid Margin="0,38,0,0" FlowDirection="LeftToRight">
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+
+                <!-- Main Content -->
+                <Grid Grid.Row="1" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="250"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="350"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Buttons -->
+                    <StackPanel Grid.Column="0" Margin="5">
+                        <Button Style="{StaticResource GerdC}" BorderBrush="{x:Null}" FontSize="12" Foreground="#DDFFFFFF" x:Name="btnValidation" Content="فرم اعتبار سنجی" Height="40" Margin="0,5" Click="btnValidation_Click"/>
+                        <Button Style="{StaticResource GerdC}" BorderBrush="{x:Null}" FontSize="12" Foreground="#DDFFFFFF" x:Name="btnPaymentStatus" Content="گزارش وضعیت پرداخت های مشتری" Height="40" Margin="0,5" Click="btnPaymentStatus_Click"/>
+                        <Button Style="{StaticResource GerdC}" BorderBrush="{x:Null}" FontSize="12" Foreground="#DDFFFFFF" x:Name="btnArchive" Content="فرم های بایگانی و پرونده ها" Height="40" Margin="0,5" Click="btnArchive_Click"/>
+                        <Button Style="{StaticResource GerdC}" BorderBrush="{x:Null}" FontSize="12" Foreground="#DDFFFFFF" x:Name="btnUnsoldGoods" Content="لیست اجناس فروخته نشده به مشتری" Height="40" Margin="0,5" Click="btnUnsoldGoods_Click" VerticalAlignment="Bottom"/>
+                    </StackPanel>
+
+                    <!-- Center: Chart -->
+                    <Border Grid.Column="1" Margin="5" BorderBrush="Orange" BorderThickness="2" Background="#FFF8CBAD">
+                        <chart:SfChart x:Name="salesChart" Header="نمودار فروش 6 ماهه" Margin="5">
+
+                            <chart:SfChart.Behaviors>
+                                <chart:ChartZoomPanBehavior EnableMouseWheelZooming="True" EnablePinchZooming="True" EnablePanning="True" ZoomRelativeToCursor="True">
+                                </chart:ChartZoomPanBehavior>
+                            </chart:SfChart.Behaviors>
+
+                            <chart:SfChart.PrimaryAxis>
+                                <chart:CategoryAxis Header="ماه"/>
+                            </chart:SfChart.PrimaryAxis>
+                            <chart:SfChart.SecondaryAxis>
+                                <chart:NumericalAxis Header="مبلغ" LabelFormat="#,#"/>
+                            </chart:SfChart.SecondaryAxis>
+
+                            <chart:SplineSeries ItemsSource="{Binding ChartData}"
+                                              EnableAnimation="True" ShowTooltip="True"
+                                              XBindingPath="MN" YBindingPath="MABL_K" 
+                                              StrokeThickness="3">
+
+
+                                <chart:SplineSeries.TooltipTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#404040" BorderBrush="White" BorderThickness="1" CornerRadius="3" Padding="5">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="فروش :" Foreground="White" Margin="0,0,5,0" FontFamily="{StaticResource IRANYEKAN}"/>
+                                                <TextBlock Text="{Binding Item.MABL_K, StringFormat='#,#'}" Foreground="White" FontFamily="{StaticResource IRANYEKAN}"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </chart:SplineSeries.TooltipTemplate>
+
+                                <!--<chart:SplineSeries.AdornmentsInfo>
+                                    <chart:ChartAdornmentInfo  ShowLabel="False" SegmentLabelFormat="#,#">
+                                    </chart:ChartAdornmentInfo>
+                                </chart:SplineSeries.AdornmentsInfo>-->
+                            </chart:SplineSeries>
+
+                        </chart:SfChart>
+
+                    </Border>
+
+                    <!-- Right: Customer Info -->
+                    <Border Grid.Column="2" Margin="5" BorderBrush="Gray" BorderThickness="1" Padding="10">
+                        <StackPanel FlowDirection="RightToLeft">
+                            <TextBlock x:Name="txtCustomerName" Text="مشتری: ..." FontSize="14" FontWeight="Bold" Margin="0,5"/>
+                            <TextBlock x:Name="txtGrade" Text="گرید مشتری: ..." FontSize="14" Margin="0,5"/>
+                            <TextBlock x:Name="txtBalance" Text="مانده حساب: ..." FontSize="14" Margin="0,5"/>
+                            <TextBlock x:Name="txtPreInvoiceBalance" Text="مانده پیش فاکتورهای تایید شده: ..." FontSize="14" Margin="0,5"/>
+                            <TextBlock x:Name="txtHavaleBalance" Text="جمع حواله های بارگیری نشده: ..." FontSize="14" Margin="0,5"/>
+                            <TextBlock x:Name="txtDocBalance" Text="مانده اسناد پاس نشده: ..." FontSize="14" Margin="0,5"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Bottom: Tabs -->
+                <TabControl Grid.Row="2" FlowDirection="RightToLeft">
+                    <TabItem Header="پیش فاکتور های مشتری">
+                        <DataGrid x:Name="grade_pishDataGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="نام کاربر" Binding="{Binding USER_NAME}"/>
+                                <DataGridTextColumn Header="شماره مشتری" Binding="{Binding CUST_NO}"/>
+                                <DataGridTextColumn Header="وضعیت" Binding="{Binding TAMIR}"/>
+                                <DataGridTextColumn Header="مبلغ" Binding="{Binding GMAB, StringFormat='#,#'}"/>
+                                <DataGridTextColumn Header="شماره پیش فاکتور" Binding="{Binding NUMBER}"/>
+                                <DataGridTextColumn Header="تاریخ" Binding="{Binding DATE_N}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </TabItem>
+                    <TabItem Header="حواله های مشتری">
+                        <DataGrid x:Name="grade_havalaDataGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="نام کاربر" Binding="{Binding USER_NAME}"/>
+                                <DataGridTextColumn Header="شماره مشتری" Binding="{Binding CUST_NO}"/>
+                                <DataGridTextColumn Header="وضعیت" Binding="{Binding TAMIR}"/>
+                                <DataGridTextColumn Header="مبلغ" Binding="{Binding GMAB, StringFormat='#,#'}"/>
+                                <DataGridTextColumn Header="شماره حواله" Binding="{Binding NUMBER}"/>
+                                <DataGridTextColumn Header="تاریخ" Binding="{Binding DATE_N}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </TabItem>
+                    <TabItem Header="چکهای برگشتی">
+                        <DataGrid x:Name="grade_chek_bargashtiDataGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="شماره سریال" Binding="{Binding N_SERI}"/>
+                                <DataGridTextColumn Header="وضعیت" Binding="{Binding VAZ}"/>
+                                <DataGridTextColumn Header="مبلغ" Binding="{Binding MABL, StringFormat='#,#'}"/>
+                                <DataGridTextColumn Header="تاریخ سررسید" Binding="{Binding DATE_S}"/>
+                                <DataGridTextColumn Header="تاریخ برگشت" Binding="{Binding DATE}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+
+        </Grid>
+    </Grid>
+</Window>
