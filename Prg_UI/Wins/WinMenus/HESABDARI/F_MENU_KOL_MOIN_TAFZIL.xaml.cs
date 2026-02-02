@@ -41,7 +41,25 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         public string HTTAF { get; private set; }
         public bool NowReady { get; private set; }
         public Visual I_AM_F_MENU_KOL_MOIN_TAFZIL { get; set; }
-
+        #region Header Window Begin
+        //Header Window Begin
+        private void Btn_Close_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+        private void Btn_Minimize_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState.Minimized;
+        }
+        private void TitleDrawBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                this.DragMove();
+            }
+        }
+        //Header Window End;
+        #endregion
         public string AZ_DT_PARAM { get; set; } = "0";
         public string TA_DT_PARAM { get; set; } = "9999999999";
         public F_MENU_KOL_MOIN_TAFZIL(object open_arg = null, string _AZ_TARIKH_ = "0", string _TA_TARIKH_ = "999999999999")
@@ -66,6 +84,12 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 {
                     LBL_WIN.Content = "بررسی وضعیت مشتری";
                 }
+                else if (open_arg == "VAZ")
+                {
+                    LBL_WIN.Content = "صورت وضعیت معاملات اشخاص";
+
+                    DT2.Text = Tarikh.FullCurrentDate;
+                }
                 else
                 {
                     this.Hide();
@@ -83,26 +107,76 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
             //this.Owner = PublicVRB.WINBASE; // برای اینکه وقتی هرچند بار که پنجره رو باز میکنی روی پنجره اصلی باز بشه و باز بمونه نره اون پشت
         }
-
-        #region Header Window Begin
-        //Header Window Begin
-        private void Btn_Close_Click(object sender, RoutedEventArgs e)
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            this.Close();
-        }
-        private void Btn_Minimize_Click(object sender, RoutedEventArgs e)
-        {
-            WindowState = WindowState.Minimized;
-        }
-        private void TitleDrawBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton == MouseButton.Left)
+            if (NowReady && e.Key == Key.Enter)
             {
-                this.DragMove();
+                if (!Command5.IsFocused)
+                {
+                    e.Handled = true;
+                    CL_LMethods.SendKey_US(Key.Tab);
+                }
             }
+
+            try
+            {
+                if (e.Key == Key.Escape)
+                {
+                    this?.Close();
+                }
+            }
+            catch { }
+            //Command5
         }
-        //Header Window End;
-        #endregion
+        private void Window_ContentRendered(object sender, EventArgs e)
+        {
+            NowReady = true;
+
+            Keyboard.Focus(Combo34);
+            Combo34.Focus();
+        }
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
+
+            if (OPEN_ARG is not null)
+            {
+                if (OPEN_ARG == "NABZMOSH")
+                {
+                    CL_HESABDARI.SETSECURITY(this.GetType().Name, "NABZKAR", new WindowInteropHelper(this).Handle, this.GetType().Name);
+                    if (!this.IsLoaded)
+                    {
+                        this.Close();
+                        return;
+                    }
+                }
+                else if (OPEN_ARG == "VAZ")
+                {
+
+                }
+                else if (OPEN_ARG != "TAF")
+                {
+                    return;
+                }
+            }
+
+            I_AM_F_MENU_KOL_MOIN_TAFZIL = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
+
+
+            Process Prc = ProcLoader.Start();
+
+            Combo36.ItemsSource = dbms.DoGetDataSQL<Custom_CUST_HESAB>("SELECT hes,NAME FROM CUST_HESAB").ToList();
+            Combo36.DisplayMemberPath = "NAME";
+            Combo36.SelectedValuePath = "hes";
+
+            //CODE (HES)
+            Combo34.ItemsSource = Combo36.ItemsSource;
+            Combo34.DisplayMemberPath = "hes";
+            Combo34.SelectedValuePath = "hes";
+
+            DT2.Text = Tarikh.FullCurrentDate;
+            ProcLoader.Stop(Prc);
+        }
 
         private void Command5_Click(object sender, RoutedEventArgs e)
         {
@@ -304,7 +378,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     //DoCmd.OpenReport("R_DAFTAR_TAFZILY_2_2", acViewPreview);
                 }
             }
-            if (OPEN_ARG == "VAZ")
+            else if (OPEN_ARG == "VAZ")
             {
                 //DoCmd.OpenReport("R_GARDESH_KHFR_DAFTAR", acViewPreview);
 
@@ -328,10 +402,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                 //report.Render();
                 //report.Show();
-
+                ProcLoader.Stop(Prc);
                 new WINRPT(report, "صورت وضعیت معاملات اشخاص").Show();
             }
-            if (OPEN_ARG == "FRKMA4")
+            else if (OPEN_ARG == "FRKMA4")
             {
                 //DoCmd.OpenReport("R_GARDESH_KHFR_DAFTAR_A4", acViewPreview);
 
@@ -358,9 +432,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                 new WINRPT(report, "صورت وضعیت معاملات تاریخ چک").Show();
             }
-
-
-            if (OPEN_ARG == "NABZMOSH") //بررسی وضعیت کارشناس
+            else if (OPEN_ARG == "NABZMOSH") //بررسی وضعیت کارشناس
             {
                 new NABZ_MOSHTARI(Combo34.SelectedValue.ToString()).Show();
                 ProcLoader.Stop(Prc);
@@ -460,6 +532,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             try { this?.Close(); } catch (Exception) { }
         }
 
+
         private bool IsNull(object hTAF2)
         {
             if (hTAF2 is null)
@@ -472,7 +545,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
             return true;
         }
-
         private void Combo34_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (Combo34.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
@@ -515,51 +587,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             //    }
             //}
         }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
-
-            if (OPEN_ARG is not null)
-            {
-                if (OPEN_ARG == "NABZMOSH")
-                {
-                    CL_HESABDARI.SETSECURITY(this.GetType().Name, "NABZKAR", new WindowInteropHelper(this).Handle, this.GetType().Name);
-                    if (!this.IsLoaded)
-                    {
-                        this.Close();
-                        return;
-                    }
-                }
-                else if (OPEN_ARG != "TAF")
-                {
-                    return;
-                }
-            }
-
-            I_AM_F_MENU_KOL_MOIN_TAFZIL = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
-
-
-            Process Prc = ProcLoader.Start();
-
-            Combo36.ItemsSource = dbms.DoGetDataSQL<Custom_CUST_HESAB>("SELECT hes,NAME FROM CUST_HESAB").ToList();
-            Combo36.DisplayMemberPath = "NAME";
-            Combo36.SelectedValuePath = "hes";
-
-            //CODE (HES)
-            Combo34.ItemsSource = Combo36.ItemsSource;
-            Combo34.DisplayMemberPath = "hes";
-            Combo34.SelectedValuePath = "hes";
-
-            DT2.Text = Tarikh.FullCurrentDate;
-            ProcLoader.Stop(Prc);
-        }
-
         private void Command6_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }
-
         private void Combo36_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (Combo36.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
@@ -572,46 +603,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 return;
             }
         }
-
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (NowReady && e.Key == Key.Enter)
-            {
-                if (!Command5.IsFocused)
-                {
-                    e.Handled = true;
-                    CL_LMethods.SendKey_US(Key.Tab);
-                }
-            }
-
-            try
-            {
-                if (e.Key == Key.Escape)
-                {
-                    this?.Close();
-                }
-            }
-            catch { }
-            //Command5
-        }
-        private void Window_ContentRendered(object sender, EventArgs e)
-        {
-            NowReady = true;
-
-            Keyboard.Focus(Combo34);
-            Combo34.Focus();
-        }
-
         private void Label_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
 
         }
-
         private void Label_PreviewGotKeyboardFocus_1(object sender, KeyboardFocusChangedEventArgs e)
         {
 
         }
-
         private void DT1_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             DT1.SelectAll();
