@@ -61,6 +61,12 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 {
                     LBL_WIN.Content = "گزارش چاپی دفتر تفضیلی";
                 }
+                if (open_arg == "VAZ")
+                {
+                    LBL_WIN.Content = "صورت وضعیت معاملات اشخاص";
+
+                    DT2.Text = Tarikh.FullCurrentDate;
+                }
                 else
                 {
                     this.Hide();
@@ -98,6 +104,69 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         }
         //Header Window End;
         #endregion
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (NowReady && e.Key == Key.Enter)
+            {
+                if (!Command5.IsFocused)
+                {
+                    e.Handled = true;
+                    CL_LMethods.SendKey_US(Key.Tab);
+                }
+            }
+
+            try
+            {
+                if (e.Key == Key.Escape)
+                {
+                    this?.Close();
+                }
+            }
+            catch { }
+            //Command5
+        }
+        private void Window_ContentRendered(object sender, EventArgs e)
+        {
+            NowReady = true;
+
+            Keyboard.Focus(Combo34);
+            Combo34.Focus();
+        }
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
+
+            if (OPEN_ARG is not null)
+            {
+                if (OPEN_ARG == "VAZ")
+                {
+
+                }
+                else if (OPEN_ARG != "TAF")
+                {
+                    return;
+                }
+            }
+
+            I_AM_F_MENU_KOL_MOIN_TAFZIL = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
+
+
+            Process Prc = ProcLoader.Start();
+
+            Combo36.ItemsSource = dbms.DoGetDataSQL<Custom_CUST_HESAB>("SELECT hes,NAME FROM CUST_HESAB").ToList();
+            Combo36.DisplayMemberPath = "NAME";
+            Combo36.SelectedValuePath = "hes";
+
+            //CODE (HES)
+            Combo34.ItemsSource = Combo36.ItemsSource;
+            Combo34.DisplayMemberPath = "hes";
+            Combo34.SelectedValuePath = "hes";
+
+            DT2.Text = Tarikh.FullCurrentDate;
+            ProcLoader.Stop(Prc);
+
+
+        }
 
         private void Command5_Click(object sender, RoutedEventArgs e)
         {
@@ -200,7 +269,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         break;
                     }
             }
-        
+
 
             try
             {
@@ -234,8 +303,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 }
                 else
                 {
-
-
                     var report = new StiReport();
                     var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.R_DAFTAR_TAFZILY_2_2.mrt");
                     report.Load(pathreport);
@@ -296,11 +363,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                     #endregion
 
-
                     //DoCmd.OpenReport("R_DAFTAR_TAFZILY_2_2", acViewPreview);
                 }
             }
-            if (OPEN_ARG == "VAZ")
+            else if (OPEN_ARG == "VAZ")
             {
                 //DoCmd.OpenReport("R_GARDESH_KHFR_DAFTAR", acViewPreview);
 
@@ -324,10 +390,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                 //report.Render();
                 //report.Show();
+                ProcLoader.Stop(Prc);
 
                 new WINRPT(report, "صورت وضعیت معاملات اشخاص").Show();
             }
-            if (OPEN_ARG == "FRKMA4")
+            else if (OPEN_ARG == "FRKMA4")
             {
                 //DoCmd.OpenReport("R_GARDESH_KHFR_DAFTAR_A4", acViewPreview);
 
@@ -354,91 +421,96 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                 new WINRPT(report, "صورت وضعیت معاملات تاریخ چک").Show();
             }
-
-            if (OPEN_ARG != "TAF")  //if (this.OpenArgs == "RMOIN")
+            else
             {
-                var F_AZ = DT1.Text.ToRawTarikh();
-                var F_TA = DT2.Text.ToRawTarikh();
-                if (this.IsVisible && !string.IsNullOrEmpty(F_AZ) && !string.IsNullOrEmpty(F_TA))
+                if (OPEN_ARG != "TAF")  //if (this.OpenArgs == "RMOIN")
                 {
-                    AZ_DT_PARAM = F_AZ;
-                    TA_DT_PARAM = F_TA;
-                }
-
-                if (true)
-                {
-                    dbms.DoExecuteSQL("IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_NAME = '" + "MOIN" + Baseknow.USERCOD + "')   DROP TABLE " + "MOIN" + Baseknow.USERCOD);
-                    //string QRE = "SELECT    N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES INTO dbo.MOIN" + Baseknow.USERCOD + " FROM         dbo.QDAFTARTAFZIL2_H(" + this.DT1.Text.ToRawTarikh() + " , " + this.DT2.Text.ToRawTarikh() + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT;
-                    string QRE = "SELECT TOP(2000000000000)   N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES, N'بد' AS TSH INTO dbo.MOIN" + Baseknow.USERCOD + "  FROM   " +
-                        "      dbo.QDAFTARTAFZIL2_H(" + AZ_DT_PARAM + " , " + TA_DT_PARAM + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT;
-                    dbms.DoExecuteSQL(QRE);
-                    MAN = 0d;
-                    var rst = dbms.DoGetDataSQL<MOIN_CUSTOM>($"SELECT * FROM MOIN{Baseknow.USERCOD}").ToList();
-                    for (int rst_EOF = 0; rst_EOF < rst.Count; rst_EOF++)
+                    var F_AZ = DT1.Text.ToRawTarikh();
+                    var F_TA = DT2.Text.ToRawTarikh();
+                    if (this.IsVisible && !string.IsNullOrEmpty(F_AZ) && !string.IsNullOrEmpty(F_TA))
                     {
-                        string tashkhis = "";
-                        MAN = (double)(MAN + rst[rst_EOF].MAND);
-                        if (MAN < 0)
-                        {
-                            tashkhis = "بس";
-                        }
-                        else if (MAN > 0)
-                        {
-                            tashkhis = "بد";
-                        }
-                        else
-                        {
-                            tashkhis = "--";
-                        }
-
-                        rst[rst_EOF].MAND = MAN;
-                        dbms.DoExecuteSQL($"UPDATE MOIN{Baseknow.USERCOD} SET MAND = {MAN} , TSH = N'{tashkhis}' WHERE id = {rst[rst_EOF].id}");
+                        AZ_DT_PARAM = F_AZ;
+                        TA_DT_PARAM = F_TA;
                     }
 
-                    R_DAFTAR_MOIN_LIST r_DAFTAR_MOIN_LIST = new R_DAFTAR_MOIN_LIST($"MOIN{Baseknow.USERCOD} {SORTT}", Combo34.SelectedValue.ToStringNullSafe() + $" {Combo36.Text} ");
-                    ProcLoader.Stop(Prc);
-
-                    if (OPEN_ARG is not null)
+                    if (true)
                     {
-                        this.Close();
-                    }
+                        dbms.DoExecuteSQL("IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_NAME = '" + "MOIN" + Baseknow.USERCOD + "')   DROP TABLE " + "MOIN" + Baseknow.USERCOD);
+                        //string QRE = "SELECT    N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES INTO dbo.MOIN" + Baseknow.USERCOD + " FROM         dbo.QDAFTARTAFZIL2_H(" + this.DT1.Text.ToRawTarikh() + " , " + this.DT2.Text.ToRawTarikh() + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT;
+                        string QRE = "SELECT TOP(2000000000000)   N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES, N'بد' AS TSH INTO dbo.MOIN" + Baseknow.USERCOD + "  FROM   " +
+                            "      dbo.QDAFTARTAFZIL2_H(" + AZ_DT_PARAM + " , " + TA_DT_PARAM + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT;
+                        dbms.DoExecuteSQL(QRE);
+                        MAN = 0d;
+                        var rst = dbms.DoGetDataSQL<MOIN_CUSTOM>($"SELECT * FROM MOIN{Baseknow.USERCOD}").ToList();
+                        for (int rst_EOF = 0; rst_EOF < rst.Count; rst_EOF++)
+                        {
+                            string tashkhis = "";
+                            MAN = (double)(MAN + rst[rst_EOF].MAND);
+                            if (MAN < 0)
+                            {
+                                tashkhis = "بس";
+                            }
+                            else if (MAN > 0)
+                            {
+                                tashkhis = "بد";
+                            }
+                            else
+                            {
+                                tashkhis = "--";
+                            }
 
-                    r_DAFTAR_MOIN_LIST.Show();
+                            rst[rst_EOF].MAND = MAN;
+                            dbms.DoExecuteSQL($"UPDATE MOIN{Baseknow.USERCOD} SET MAND = {MAN} , TSH = N'{tashkhis}' WHERE id = {rst[rst_EOF].id}");
+                        }
+
+                        R_DAFTAR_MOIN_LIST r_DAFTAR_MOIN_LIST = new R_DAFTAR_MOIN_LIST($"MOIN{Baseknow.USERCOD} {SORTT}", Combo34.SelectedValue.ToStringNullSafe() + $" {Combo36.Text} ");
+                        ProcLoader.Stop(Prc);
+
+                        if (OPEN_ARG is not null)
+                        {
+                            this.Close();
+                        }
+
+                        r_DAFTAR_MOIN_LIST.Show();
+                    }
+                    //else if (!IsLoaded("R_DAFTAR_MOIN_LIST2"))
+                    //{
+                    //    dbms.DoExecuteSQL("IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_NAME = '" + "MOIN" + Baseknow.USERCOD + "_2')   DROP TABLE " + "MOIN" + Baseknow.USERCOD + "_2");
+                    //    dbms.DoExecuteSQL("SELECT    N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES INTO dbo.MOIN" + Baseknow.USERCOD + "_2 FROM         dbo.QDAFTARTAFZIL2_H(" + this.DT1.Text.ToRawTarikh() + " , " + this.DT2.Text.ToRawTarikh() + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT);
+                    //    MAN = 0d;
+                    //    rst.Open("MOIN" + Baseknow.USERCOD + "_2");
+                    //    while (!rst.EOF())
+                    //    {
+                    //        MAN = MAN + rst.Fields("MAND");
+                    //        rst.Fields("MAND") = MAN;
+                    //        rst.update();
+                    //        rst.MoveNext();
+                    //    }
+                    //    DoCmd.OpenForm("R_DAFTAR_MOIN_LIST2", acFormDS);
+                    //    DoCmd.OpenForm(this.Name, default, default, default, default, acHidden);
+                    //}
+                    //else
+                    //{
+                    //    dbms.DoExecuteSQL("IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_NAME = '" + "MOIN" + Forms["baseknow"]["USERCOD"] + "_3')   DROP TABLE " + "MOIN" + Forms["baseknow"]["USERCOD"] + "_3");
+                    //    dbms.DoExecuteSQL("SELECT    N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES INTO dbo.MOIN" + Forms["baseknow"]["USERCOD"] + "_3 FROM         dbo.QDAFTARTAFZIL2_H(" + this.DT1 + " , " + this.DT2 + " , '" + this.Combo34 + "') QDAFTARTAFZIL2_H " + SORTT);
+                    //    MAN = 0d;
+                    //    rst.Open("MOIN" + Forms["baseknow"]["USERCOD"] + "_3");
+                    //    while (!rst.EOF())
+                    //    {
+                    //        MAN = MAN + rst.Fields("MAND");
+                    //        rst.Fields("MAND") = MAN;
+                    //        rst.update();
+                    //        rst.MoveNext();
+                    //    }
+                    //    DoCmd.OpenForm("R_DAFTAR_MOIN_LIST3", acFormDS);
+                    //    DoCmd.OpenForm(this.Name, default, default, default, default, acHidden);
+                    //}
+                    //DoCmd.OpenForm(this.Name, default, default, default, default, acHidden);
                 }
-                //else if (!IsLoaded("R_DAFTAR_MOIN_LIST2"))
-                //{
-                //    dbms.DoExecuteSQL("IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_NAME = '" + "MOIN" + Baseknow.USERCOD + "_2')   DROP TABLE " + "MOIN" + Baseknow.USERCOD + "_2");
-                //    dbms.DoExecuteSQL("SELECT    N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES INTO dbo.MOIN" + Baseknow.USERCOD + "_2 FROM         dbo.QDAFTARTAFZIL2_H(" + this.DT1.Text.ToRawTarikh() + " , " + this.DT2.Text.ToRawTarikh() + " , '" + this.Combo34.SelectedValue + "') QDAFTARTAFZIL2_H " + SORTT);
-                //    MAN = 0d;
-                //    rst.Open("MOIN" + Baseknow.USERCOD + "_2");
-                //    while (!rst.EOF())
-                //    {
-                //        MAN = MAN + rst.Fields("MAND");
-                //        rst.Fields("MAND") = MAN;
-                //        rst.update();
-                //        rst.MoveNext();
-                //    }
-                //    DoCmd.OpenForm("R_DAFTAR_MOIN_LIST2", acFormDS);
-                //    DoCmd.OpenForm(this.Name, default, default, default, default, acHidden);
-                //}
-                //else
-                //{
-                //    dbms.DoExecuteSQL("IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES  WHERE TABLE_NAME = '" + "MOIN" + Forms["baseknow"]["USERCOD"] + "_3')   DROP TABLE " + "MOIN" + Forms["baseknow"]["USERCOD"] + "_3");
-                //    dbms.DoExecuteSQL("SELECT    N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4,TAFZILN,HES INTO dbo.MOIN" + Forms["baseknow"]["USERCOD"] + "_3 FROM         dbo.QDAFTARTAFZIL2_H(" + this.DT1 + " , " + this.DT2 + " , '" + this.Combo34 + "') QDAFTARTAFZIL2_H " + SORTT);
-                //    MAN = 0d;
-                //    rst.Open("MOIN" + Forms["baseknow"]["USERCOD"] + "_3");
-                //    while (!rst.EOF())
-                //    {
-                //        MAN = MAN + rst.Fields("MAND");
-                //        rst.Fields("MAND") = MAN;
-                //        rst.update();
-                //        rst.MoveNext();
-                //    }
-                //    DoCmd.OpenForm("R_DAFTAR_MOIN_LIST3", acFormDS);
-                //    DoCmd.OpenForm(this.Name, default, default, default, default, acHidden);
-                //}
-                //DoCmd.OpenForm(this.Name, default, default, default, default, acHidden);
             }
+
+
+
             //if (this.OpenArgs == "NABZMOSH")
             //{
             //    DoCmd.OpenForm("NABZ_MOSHTARI", default, default, default, default, default, this.Combo34);
@@ -492,34 +564,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             //}
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
-
-            if (OPEN_ARG is not null && OPEN_ARG != "TAF")
-            {
-                return;
-            }
-
-            I_AM_F_MENU_KOL_MOIN_TAFZIL = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
-
-
-            Process Prc = ProcLoader.Start();
-
-            Combo36.ItemsSource = dbms.DoGetDataSQL<Custom_CUST_HESAB>("SELECT hes,NAME FROM CUST_HESAB").ToList();
-            Combo36.DisplayMemberPath = "NAME";
-            Combo36.SelectedValuePath = "hes";
-
-            //CODE (HES)
-            Combo34.ItemsSource = Combo36.ItemsSource;
-            Combo34.DisplayMemberPath = "hes";
-            Combo34.SelectedValuePath = "hes";
-
-            DT2.Text = Tarikh.FullCurrentDate;
-            ProcLoader.Stop(Prc);
-
-
-        }
 
         private void Command6_Click(object sender, RoutedEventArgs e)
         {
@@ -539,34 +583,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
         }
 
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (NowReady && e.Key == Key.Enter)
-            {
-                if (!Command5.IsFocused)
-                {
-                    e.Handled = true;
-                    CL_LMethods.SendKey_US(Key.Tab);
-                }
-            }
 
-            try
-            {
-                if (e.Key == Key.Escape)
-                {
-                    this?.Close();
-                }
-            }
-            catch { }
-            //Command5
-        }
-        private void Window_ContentRendered(object sender, EventArgs e)
-        {
-            NowReady = true;
-
-            Keyboard.Focus(Combo34);
-            Combo34.Focus();
-        }
 
         private void Label_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
