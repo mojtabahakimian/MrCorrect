@@ -307,7 +307,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             catch (Exception ex)
             {
                 // swallow errors as in VBA's On Error Resume Next
-                Debug.WriteLine("Error in Command5_Click: " + ex);
+                Debug.WriteLine("Error in BTN_PROCCESS_Click: " + ex);
             }
         }
 

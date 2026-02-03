@@ -528,6 +528,12 @@ namespace Prg_UI
                                     CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_KOL_FT4, default);
                                 });
                                 break;                      
+                            case Key.F8:
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL_VAZ, default);
+                                });
+                                break;                      
                         }
                     }
                     else if (altPressed)
