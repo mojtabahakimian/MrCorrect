@@ -12,10 +12,12 @@ using Rpts;
 using Stimulsoft.Base;
 using Stimulsoft.Report;
 using Stimulsoft.Report.Components;
+using Stimulsoft.Report.Components.TextFormats;
 using Stimulsoft.Report.Dictionary;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -41,7 +43,25 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         public string HTTAF { get; private set; }
         public bool NowReady { get; private set; }
         public Visual I_AM_F_MENU_KOL_MOIN_TAFZIL { get; set; }
-
+        #region Header Window Begin
+        //Header Window Begin
+        private void Btn_Close_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+        private void Btn_Minimize_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState.Minimized;
+        }
+        private void TitleDrawBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                this.DragMove();
+            }
+        }
+        //Header Window End;
+        #endregion
         public string AZ_DT_PARAM { get; set; } = "0";
         public string TA_DT_PARAM { get; set; } = "9999999999";
         public F_MENU_KOL_MOIN_TAFZIL(object open_arg = null, string _AZ_TARIKH_ = "0", string _TA_TARIKH_ = "999999999999")
@@ -66,6 +86,12 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 {
                     LBL_WIN.Content = "بررسی وضعیت مشتری";
                 }
+                else if (open_arg == "VAZ")
+                {
+                    LBL_WIN.Content = "صورت وضعیت معاملات اشخاص";
+
+                    DT2.Text = Tarikh.FullCurrentDate;
+                }
                 else
                 {
                     this.Hide();
@@ -78,33 +104,87 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     ((List<Custom_CUST_HESAB>)Combo34.ItemsSource).Add(new Custom_CUST_HESAB { hes = OPEN_ARG.ToString() });
                     Combo34.SelectedIndex = 0;
 
-                    Command5_Click(null, null);
+                    BTN_PROCCESS_Click(null, null);
                 }
             }
             //this.Owner = PublicVRB.WINBASE; // برای اینکه وقتی هرچند بار که پنجره رو باز میکنی روی پنجره اصلی باز بشه و باز بمونه نره اون پشت
         }
-
-        #region Header Window Begin
-        //Header Window Begin
-        private void Btn_Close_Click(object sender, RoutedEventArgs e)
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            this.Close();
-        }
-        private void Btn_Minimize_Click(object sender, RoutedEventArgs e)
-        {
-            WindowState = WindowState.Minimized;
-        }
-        private void TitleDrawBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton == MouseButton.Left)
+            if (NowReady && e.Key == Key.Enter)
             {
-                this.DragMove();
+                if (!Command5.IsFocused)
+                {
+                    e.Handled = true;
+                    CL_LMethods.SendKey_US(Key.Tab);
+                }
             }
-        }
-        //Header Window End;
-        #endregion
 
-        private void Command5_Click(object sender, RoutedEventArgs e)
+            try
+            {
+                if (e.Key == Key.Escape)
+                {
+                    this?.Close();
+                }
+            }
+            catch { }
+            //Command5
+        }
+        private void Window_ContentRendered(object sender, EventArgs e)
+        {
+            NowReady = true;
+
+            Keyboard.Focus(Combo34);
+            Combo34.Focus();
+        }
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
+
+            if (OPEN_ARG is not null)
+            {
+                string PERNAME = "";
+                if (OPEN_ARG == "NABZMOSH")
+                {
+                    PERNAME = "NABZKAR";
+                }
+                else if (OPEN_ARG == "VAZ")
+                {
+                    PERNAME = "VAZ"; //صورت وضعیت معاملات اشخاص
+                }
+                else if (OPEN_ARG != "TAF")
+                {
+                    return;
+                }
+
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, PERNAME, new WindowInteropHelper(this).Handle, this.GetType().Name);
+                if (!this.IsLoaded)
+                {
+                    this.Close();
+                    return;
+                }
+
+            }
+
+            I_AM_F_MENU_KOL_MOIN_TAFZIL = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
+
+
+            Process Prc = ProcLoader.Start();
+
+            Combo36.ItemsSource = dbms.DoGetDataSQL<Custom_CUST_HESAB>("SELECT hes,NAME FROM CUST_HESAB").ToList();
+            Combo36.DisplayMemberPath = "NAME";
+            Combo36.SelectedValuePath = "hes";
+
+            //CODE (HES)
+            Combo34.ItemsSource = Combo36.ItemsSource;
+            Combo34.DisplayMemberPath = "hes";
+            Combo34.SelectedValuePath = "hes";
+
+            DT2.Text = Tarikh.FullCurrentDate;
+            ProcLoader.Stop(Prc);
+        }
+
+        private void BTN_PROCCESS_Click(object sender, RoutedEventArgs e)
         {
             if (Combo34.SelectedValue is null)
             {
@@ -304,34 +384,12 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     //DoCmd.OpenReport("R_DAFTAR_TAFZILY_2_2", acViewPreview);
                 }
             }
-            if (OPEN_ARG == "VAZ")
+            else if (OPEN_ARG == "VAZ")
             {
                 //DoCmd.OpenReport("R_GARDESH_KHFR_DAFTAR", acViewPreview);
-
-                var report = new StiReport();
-                var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.Factors.R_GARSESH_KHFR_DAFTAR.mrt");
-                report.Load(pathreport);
-                string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
-                report.Dictionary.Databases.Clear();
-                report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
-
-                report["FDATE_PARM"] = DT1.Text.ToRawTarikh().ToString();
-                report["EDATE_PARM"] = DT2.Text.ToRawTarikh().ToString();
-                report["CUST_PARM"] = Combo34.SelectedValue.ToString();
-
-                string dt1 = $"از تاریخ : {DT1.Text}";
-                string dt2 = $"تا تاریخ : {DT2.Text}";
-
-                (report.GetComponentByName("SAL_N") as StiText).Text = Baseknow.WIDTH_D.ToString();
-                (report.GetComponentByName("DT1_N") as StiText).Text = dt1;
-                (report.GetComponentByName("DT2_N") as StiText).Text = dt2;
-
-                //report.Render();
-                //report.Show();
-
-                new WINRPT(report, "صورت وضعیت معاملات اشخاص").Show();
+                GenerateReport(Prc);
             }
-            if (OPEN_ARG == "FRKMA4")
+            else if (OPEN_ARG == "FRKMA4")
             {
                 //DoCmd.OpenReport("R_GARDESH_KHFR_DAFTAR_A4", acViewPreview);
 
@@ -358,9 +416,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                 new WINRPT(report, "صورت وضعیت معاملات تاریخ چک").Show();
             }
-
-
-            if (OPEN_ARG == "NABZMOSH") //بررسی وضعیت کارشناس
+            else if (OPEN_ARG == "NABZMOSH") //بررسی وضعیت کارشناس
             {
                 new NABZ_MOSHTARI(Combo34.SelectedValue.ToString()).Show();
                 ProcLoader.Stop(Prc);
@@ -460,6 +516,162 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             try { this?.Close(); } catch (Exception) { }
         }
 
+        private void GenerateReport(Process Prc)
+        {
+            // -----------------------------
+            // 1) Safety / Validation
+            // -----------------------------
+            if (DT1 == null || DT2 == null)
+                throw new InvalidOperationException("DT1/DT2 is null.");
+
+            var fdateRaw = DT1.Text.ToRawTarikh().ToString();
+            var edateRaw = DT2.Text.ToRawTarikh().ToString();
+
+            if (string.IsNullOrWhiteSpace(fdateRaw) || string.IsNullOrWhiteSpace(edateRaw))
+                throw new InvalidOperationException("تاریخ شروع/پایان معتبر نیست.");
+
+            if (Combo34?.SelectedValue == null || string.IsNullOrWhiteSpace(Combo34.SelectedValue.ToString()))
+                throw new InvalidOperationException("شخص/تفصیلی انتخاب نشده است.");
+
+            // این همان HTAF در Access است (تفصیلی)
+
+            // این دو مقدار در Access از فرم می‌آید (HKOL/HMOIN)
+            // اینجا باید از متغیرها/کنترل‌های واقعی پروژه خودتان بردارید:
+            string CustomerHes = Combo34.SelectedValue.ToString();
+            long hkol = CL_HESABDARI.GETKOL(CustomerHes);   // <-- اگر ندارید: از کنترل مربوطه بخوانید
+            long hmoin = CL_HESABDARI.GETMOIN(CustomerHes); // <-- اگر ندارید: از کنترل مربوطه بخوانید
+            long htaf = CL_HESABDARI.GETTAF(CustomerHes); // <-- اگر ندارید: از کنترل مربوطه بخوانید
+
+            // -----------------------------
+            // 2) Load report + DB
+            // -----------------------------
+            var report = new StiReport();
+            using (var pathreport = Assembly.GetEntryAssembly()!
+                       .GetManifestResourceStream("Prg_UI.Rpts.Factors.R_GARSESH_KHFR_DAFTAR.mrt"))
+            {
+                if (pathreport == null)
+                    throw new InvalidOperationException("فایل گزارش (Embedded Resource) پیدا نشد: R_GARSESH_KHFR_DAFTAR.mrt");
+
+                report.Load(pathreport);
+            }
+
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR;
+            if (!connstr.TrimEnd().EndsWith(";")) connstr += ";";
+            connstr += "Connect Timeout=900;";
+
+            report.Dictionary.Databases.Clear();
+            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
+
+            // -----------------------------
+            // 3) Pass parameters (same as current code)
+            // -----------------------------
+            report["FDATE_PARM"] = fdateRaw;
+            report["EDATE_PARM"] = edateRaw;
+            report["CUST_PARM"] = CustomerHes;
+            (report.GetComponentByName("DT3_N") as StiText).Text = Tarikh.FullCurrentDate;
+
+
+            SafeSetText(report, "SAL_N", Baseknow.WIDTH_D.ToString());
+            SafeSetText(report, "DT1_N", $"از تاریخ : {DT1.Text}");
+            SafeSetText(report, "DT2_N", $"تا تاریخ : {DT2.Text}");
+
+            // -----------------------------
+            // 4) Access-equivalent "Ledger Balance" (SBK/SBS/SBSB/TASH)
+            //    دقیقا مثل Report_Open در Access
+            // -----------------------------
+            var sums = dbms.DoGetDataSQL<SumBedBesModel>(
+                @"SELECT 
+             SUM(DEED_DTL.BED) AS SumOfBED,
+             SUM(DEED_DTL.BES) AS SumOfBES
+           FROM DEED_DTL
+           WHERE 
+             DEED_DTL.HES_K = @HKOL
+             AND DEED_DTL.HES_M = @HMOIN
+             AND DEED_DTL.HES_t = @HTAF",
+                new { HKOL = hkol, HMOIN = hmoin, HTAF = htaf }
+            ).FirstOrDefault();
+
+            double sumBed = sums?.SumOfBED ?? 0;
+            double sumBes = sums?.SumOfBES ?? 0;
+            double diff = sumBed - sumBes;
+
+            // معادل: SBK/SBS/SBSB/TASH در Access
+            // در mrt شما این‌ها این اسم‌ها هستند (همان‌هایی که الآن 0 هستند):
+            // Text50: SumBed (بدهکار)  | Text49: SumBes (بستانکار)
+            // Text47: Abs(diff) (مانده) | Text48: بد/بس
+            SafeSetText(report, "Text50", FormatMoney(sumBed));          // بدهکار
+            SafeSetText(report, "Text49", FormatMoney(sumBes));          // بستانکار
+            SafeSetText(report, "Text47", FormatMoney(Math.Abs(diff)));  // مانده
+            SafeSetText(report, "Text48", diff > 0 ? "بد" : "بس");       // تش
+
+
+            /*
+             * SBK //بدهکار --Text50
+               SBS //بستانکار --Text49
+               TASH // تش --Text48
+               SBSB //مانده --Text47
+             */
+
+            // -----------------------------
+            // 5) DecimalDigits for MEGK like Access (DIG)
+            //    Access: Me.MEGHk.DecimalPlaces = Forms![BASEKNOW]![DIG]
+            // -----------------------------
+            int dig = (int)Baseknow.DIG; // <-- همان DIG پروژه شما
+
+            ApplyDecimalDigits(report, "Text5", dig);  // Text5 = {DataSource1.MEGK}
+
+            // -----------------------------
+            // 6) Show report (your way)
+            // -----------------------------
+            ProcLoader.Stop(Prc);
+            new WINRPT(report, "صورت وضعیت معاملات اشخاص").Show();
+        }
+        private sealed class SumBedBesModel
+        {
+            public double? SumOfBED { get; set; }
+            public double? SumOfBES { get; set; }
+        }
+        private static void SafeSetText(StiReport report, string componentName, string text)
+        {
+            var comp = report.GetComponentByName(componentName) as StiText;
+            if (comp == null)
+                return; // عمداً Silent: در پروژه شما شاید نام‌ها کمی فرق داشته باشد
+            comp.Text = text ?? string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(comp?.Text) && comp?.Text != "0")
+            {
+                comp.Enabled = true;
+                var complabel = report.GetComponentByName("Text51") as StiText;
+                complabel.Enabled = true;
+            }
+        }
+        private static string FormatMoney(double value)
+        {
+            // شبیه Access "#,###" / Standard بدون اعشار
+            return string.Format(CultureInfo.InvariantCulture, "{0:#,0}", value);
+        }
+        private static void ApplyDecimalDigits(StiReport report, string componentName, int decimalDigits)
+        {
+            if (decimalDigits < 0) decimalDigits = 0;
+            if (decimalDigits > 6) decimalDigits = 6; // محافظه‌کارانه
+
+            var comp = report.GetComponentByName(componentName) as StiText;
+            if (comp == null) return;
+
+            // اگر NumberFormat دارد همان را آپدیت می‌کنیم، در غیر اینصورت می‌سازیم
+            var nf = comp.TextFormat as StiNumberFormatService;
+            if (nf == null)
+            {
+                nf = new StiNumberFormatService();
+                comp.TextFormat = nf;
+            }
+
+            nf.DecimalDigits = decimalDigits;
+            nf.GroupSeparator = ",";
+            nf.NegativePattern = 1;
+            nf.State = StiTextFormatState.DecimalDigits;
+        }
+
         private bool IsNull(object hTAF2)
         {
             if (hTAF2 is null)
@@ -472,7 +684,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
             return true;
         }
-
         private void Combo34_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (Combo34.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
@@ -515,51 +726,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             //    }
             //}
         }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
-
-            if (OPEN_ARG is not null)
-            {
-                if (OPEN_ARG == "NABZMOSH")
-                {
-                    CL_HESABDARI.SETSECURITY(this.GetType().Name, "NABZKAR", new WindowInteropHelper(this).Handle, this.GetType().Name);
-                    if (!this.IsLoaded)
-                    {
-                        this.Close();
-                        return;
-                    }
-                }
-                else if (OPEN_ARG != "TAF")
-                {
-                    return;
-                }
-            }
-
-            I_AM_F_MENU_KOL_MOIN_TAFZIL = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
-
-
-            Process Prc = ProcLoader.Start();
-
-            Combo36.ItemsSource = dbms.DoGetDataSQL<Custom_CUST_HESAB>("SELECT hes,NAME FROM CUST_HESAB").ToList();
-            Combo36.DisplayMemberPath = "NAME";
-            Combo36.SelectedValuePath = "hes";
-
-            //CODE (HES)
-            Combo34.ItemsSource = Combo36.ItemsSource;
-            Combo34.DisplayMemberPath = "hes";
-            Combo34.SelectedValuePath = "hes";
-
-            DT2.Text = Tarikh.FullCurrentDate;
-            ProcLoader.Stop(Prc);
-        }
-
         private void Command6_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }
-
         private void Combo36_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (Combo36.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
@@ -572,46 +742,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 return;
             }
         }
-
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (NowReady && e.Key == Key.Enter)
-            {
-                if (!Command5.IsFocused)
-                {
-                    e.Handled = true;
-                    CL_LMethods.SendKey_US(Key.Tab);
-                }
-            }
-
-            try
-            {
-                if (e.Key == Key.Escape)
-                {
-                    this?.Close();
-                }
-            }
-            catch { }
-            //Command5
-        }
-        private void Window_ContentRendered(object sender, EventArgs e)
-        {
-            NowReady = true;
-
-            Keyboard.Focus(Combo34);
-            Combo34.Focus();
-        }
-
         private void Label_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
 
         }
-
         private void Label_PreviewGotKeyboardFocus_1(object sender, KeyboardFocusChangedEventArgs e)
         {
 
         }
-
         private void DT1_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             DT1.SelectAll();
