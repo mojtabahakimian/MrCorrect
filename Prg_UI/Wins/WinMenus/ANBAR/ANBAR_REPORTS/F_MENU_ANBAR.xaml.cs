@@ -4,25 +4,16 @@ using Prg_SendInvoice.CNNMANAGER;
 using Syncfusion.Data.Extensions;
 using System;
 using System.Linq;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Prg_Proccessy.MODELS;
 using Prg_UI.Wins.WinOther;
 using Prg_UI.HelperWins;
 using Prg_UI.Functions;
 using System.Windows.Interop;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
-using static Functions.InventoryManager;
-using Prg_Proccessy.Generaly;
-using Stimulsoft.Base;
 using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report;
 using System.Reflection;
@@ -263,12 +254,14 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
                         }
                         if (this.KALA.SelectedValue is null && ANBAR.SelectedValue is null && CANBAR.SelectedValue is null)
                         {
-                            string Query = $"SELECT * FROM mogudi_tafkik({DT2.Text.ToRawTarikh()},N'%')";
+                            //string Query = $"SELECT * FROM mogudi_tafkik({DT2.Text.ToRawTarikh()},N'%')";
+                            string Query = $"EXEC dbo.sp_Mogudi_Tafkik_Optimized @Forms___F_MENU_ANBAR___DT2 = {DT2.Text.ToRawTarikh()}, @Forms___F_MENU_ANBAR___MANBAR = N'%'";
                             new AK_MOGUDI_ANBAR_LIST(Query).Show();
                         }
                         else if (ANBAR.SelectedValue is not null && CANBAR.SelectedValue is not null && KALA.SelectedValue is null)
                         {
-                            string Query = $"SELECT * FROM mogudi_tafkik({DT2.Text.ToRawTarikh()},N'{ANBAR.SelectedValue}')";
+                            //string Query = $"SELECT * FROM sp_Mogudi_Tafkik_Optimized({DT2.Text.ToRawTarikh()},N'{ANBAR.SelectedValue}')";
+                            string Query = $"EXEC dbo.sp_Mogudi_Tafkik_Optimized @Forms___F_MENU_ANBAR___DT2 = {DT2.Text.ToRawTarikh()}, @Forms___F_MENU_ANBAR___MANBAR = N'{ANBAR.SelectedValue}'";
                             new AK_MOGUDI_ANBAR_LIST(Query).Show();
                         }
                         else if (ANBAR.SelectedValue is not null && CANBAR.SelectedValue is not null && KALA.SelectedValue is not null)

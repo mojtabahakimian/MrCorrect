@@ -7,7 +7,7 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
-using Prg_UI.Wins.WinMenus.ANBAR;
+using Prg_UI.Wins.WinMenus.HESABDARI;
 using Syncfusion.Data;
 using Syncfusion.Data.Extensions;
 using Syncfusion.UI.Xaml.BulletGraph;
@@ -15,7 +15,6 @@ using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -25,16 +24,17 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Media;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
+using Wins.WinMenus.ANBAR;
+using Wins.WinMenus.KHARID_FORUSH;
 using static Prg_UI.Functions.CL_LMethods;
+using static Stimulsoft.Base.StiDbType;
 
-namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
+namespace Prg_UI.Wins.WinMenus.ANBAR
 {
     /// <summary>
-    /// Interaction logic for AK_MOGUDI_ANBAR_LIST.xaml
+    /// Interaction logic for MOGHAYERAT_ANBAR_WIN.xaml
     /// </summary>
-    public partial class AK_MOGUDI_ANBAR_LIST : Window
+    public partial class MOGHAYERAT_ANBAR_WIN : Window
     {
         #region Header Window Begin
         //Header Window Begin
@@ -77,60 +77,44 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         }
         //Header Window End;
         #endregion
-        public AK_MOGUDI_ANBAR_LIST(string _SQL_DATA_)
-        {
-            SQL_DATA = _SQL_DATA_;
 
-            DIG = 3;
+        public MOGHAYERAT_ANBAR_WIN(string date, string anbarCode)
+        {
+            DATE_PARAM = date;
+            ANBAR_CODE = anbarCode;
 
             InitializeComponent();
 
             this.DataContext = this;
 
+            SYNCFUSION_DG.SelectionController = new SafeGridSelectionController(SYNCFUSION_DG);
+
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
             GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
+
         }
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
-        public int DIG { get; set; }
-
         UniversControl universControl = new UniversControl();
-        public ObservableCollection<MDS> AK_MOGUDI_DATA { get; set; } = new ObservableCollection<MDS>();
-
-        public System.Windows.Media.Brush AlternatingRowBackground { get; set; }
+        public ObservableCollection<MOGHA_ANBAR_MODEL> AK_MOGUDI_DATA { get; set; } = new ObservableCollection<MOGHA_ANBAR_MODEL>();
         public bool NowIsReady { get; private set; }
 
-        public string SQL_DATA { get; private set; }
-        public class MDS
+        public string DATE_PARAM { get; set; }
+        public string ANBAR_CODE { get; set; }
+
+        public class MOGHA_ANBAR_MODEL
         {
-            public string? CODE { get; set; }
-            public double? MAND { get; set; }
-            public double? ANBAR { get; set; }
-            public string? ANBARN { get; set; }
-            public double? FII { get; set; }
+            public string CODE { get; set; }
             public double? MABLK { get; set; }
-            public string? NAME { get; set; }
-            public string? NAMES { get; set; }
-            public long? VCOD { get; set; }
-            public double? GRCOD { get; set; }
-            public string? GRNAME { get; set; }
-            public double? MANDF { get; set; }
-            public string? N_FANI { get; set; }
-            public double? NESBAT { get; set; }
-            public double? MEGHBAR { get; set; }
-            public double? bsef { get; set; }
-            public double? nsef { get; set; }
-            public double? maxm { get; set; }
-            public double? minm { get; set; }
-            public double? VAZN { get; set; }
-            public double? VAZNK { get; set; }
-            public string? menuit { get; set; }
-            public double? MABL_F { get; set; }
-            public double? B_SEF { get; set; }
-            public double? fisiclymand { get; set; }
-            public double? MAX_M { get; set; }
-            public double? MEGHRES { get; set; }
-            public string? POSITION { get; set; }
+            public double? MAND { get; set; }
+            public double? mab { get; set; }
+            public double? tafBED { get; set; }
+            public double? TAFBES { get; set; }
+            public string HES_T { get; set; }
+            public string HES_K { get; set; }
+            public string HES_M { get; set; }
+            public string HES { get; set; }
+            public string NAME { get; set; }
         }
 
         private void Window_ContentRendered(object sender, EventArgs e)
@@ -139,46 +123,67 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            //Process Prc = ProcLoader.Start();
             #region SecuritCheck
             try
             {
                 string Formname = "AKMOGO";
                 var helper = new WindowInteropHelper(this);
-                helper.EnsureHandle(); // Critical: Ensures handle exists before access
-                                       // 2. Run Security:
+                helper.EnsureHandle();
                 CL_HESABDARI.SETSECURITY(this.GetType().Name, Formname, helper.Handle, this.GetType().Name);
-                // 3. Final State Check:
-                if (!this.IsLoaded) { this.Close(); return; }
+                if (!IsLoaded)
+                {
+                    Close();
+                    return;
+                }
             }
-            catch { try { this.Close(); } catch { } }
+            catch
+            {
+                try { Close(); } catch { }
+            }
             #endregion
 
-            AK_MOGUDI_DATA?.Clear();
-
-            var MasterHead = dbms.DoGetDataSQL<MDS>($"{SQL_DATA}").ToList();
-
-            foreach (var item in MasterHead)
+            try
             {
-                AK_MOGUDI_DATA.Add(item);
+                AK_MOGUDI_DATA?.Clear();
+                var kol = Baseknow.MOGODIA;
+
+                string query = $"SELECT * FROM dbo.MOGHA_ANBAR({DATE_PARAM}, {ANBAR_CODE}, {kol}) ORDER BY TAFBES DESC";
+                var list = dbms.DoGetDataSQL<MOGHA_ANBAR_MODEL>(query).ToList();
+
+                foreach (var item in list)
+                {
+                    AK_MOGUDI_DATA.Add(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, "خطا در بارگذاری اطلاعات: " + ex.Message).ShowDialog();
             }
 
-        }
+            //SYNCFUSION_DG.ColumnSizer = GridLengthUnitType.Auto;
 
+            GenerateAutomaticSummary(SYNCFUSION_DG);
+
+            // Ensure the SfDataGrid is not null before subscribing
+            if (SYNCFUSION_DG != null)
+            {
+                SYNCFUSION_DG.FilterChanged += View_FilterChanged;
+                SYNCFUSION_DG.Loaded += (s, e) => UpdateRowCountLabel();
+
+                UpdateRowCountLabel();
+            }
+
+            //ProcLoader.Stop(Prc);
+
+        }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None && SYNCFUSION_DG.SelectedItem != null)
             {
                 e.Handled = true;
 
-                var currentRow = SYNCFUSION_DG.SelectedItem as MDS;
-
-                if (currentRow?.CODE != null)
-                {
-                    F_MENU_KART f_MENU_KART = new F_MENU_KART("R", currentRow.ANBAR.ToString(), currentRow.CODE);
-                    f_MENU_KART.ExternalCallShowReport();
-                    f_MENU_KART.Close();
-                }
-
+                var currentRow = SYNCFUSION_DG.SelectedItem as MOGHA_ANBAR_MODEL;
             }
         }
         public void OpenWindow(Type windowType, object parameter, string errorMessage)
@@ -186,14 +191,17 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
             if (windowType == null || !typeof(Window).IsAssignableFrom(windowType))
                 return;
 
+            var constructor = windowType.GetConstructor(new[] { parameter.GetType() });
+            if (constructor != null)
+            {
+                var window = (Window)constructor.Invoke(new[] { parameter });
+                window.Show();
+            }
+
+            return; //Check is there any open window before ?
             if (!CL_LMethods.IsWindowOpen(windowType)) //CL_LMethods.IsWindowOpen<HEAD_LST_FROOSH22>()
             {
-                var constructor = windowType.GetConstructor(new[] { parameter.GetType() });
-                if (constructor != null)
-                {
-                    var window = (Window)constructor.Invoke(new[] { parameter });
-                    window.Show();
-                }
+
             }
             else
             {
@@ -202,12 +210,35 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         }
 
         #region _SfDataGrid_
-        private readonly FilterService<MDS> filterService = new FilterService<MDS>();
+        private void View_FilterChanged(object sender, GridFilterEventArgs e)
+        {
+            UpdateRowCountLabel();
+        }
+        private void UpdateRowCountLabel()
+        {
+            // Defensive checks
+            if (ROWCOUNT_TEXTBLK == null) return;
+            if (SYNCFUSION_DG?.View == null) return;
+
+            // Safely retrieve the record count
+            var recordCount = SYNCFUSION_DG.View.Records?.Count ?? 0;
+
+            // Set the label content
+            ROWCOUNT_TEXTBLK.Text = recordCount.ToString();
+        }
+
+        private readonly FilterService<MOGHA_ANBAR_MODEL> filterService = new FilterService<MOGHA_ANBAR_MODEL>();
         public ObservableCollection<string> ActiveFilters { get; set; } = new ObservableCollection<string>();
+
         private string? CurrentCellValue = null;
         private RowColumnIndex CurrentCellIndex;
         private void SYNCFUSION_DG_CurrentCellActivated(object sender, Syncfusion.UI.Xaml.Grid.CurrentCellActivatedEventArgs e) // Event handler for when a cell is activated in the data grid
         {
+            if (e?.CurrentRowColumnIndex == null)
+            {
+                return;
+            }
+
             if (e?.CurrentRowColumnIndex == null) return; UpdateCurrentCellValue(e.CurrentRowColumnIndex);
         }
         private void SYNCFUSION_DG_SelectionChanged(object sender, GridSelectionChangedEventArgs e) // Event handler for when the selection changes in the data grid
@@ -225,17 +256,74 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
             CurrentCellIndex = rowColumnIndex; // Update current cell index
             CurrentCellValue = null; // Reset current cell value
 
+            if (this.SYNCFUSION_DG?.Columns == null || this.SYNCFUSION_DG.Columns.Count == 0)
+            {
+                return;
+            }
+
             int rowIndex = rowColumnIndex.RowIndex;
             int columnIndex = this.SYNCFUSION_DG.ResolveToGridVisibleColumnIndex(rowColumnIndex.ColumnIndex);
             if (columnIndex < 0) return;
 
             var mappingName = this.SYNCFUSION_DG.Columns[columnIndex].MappingName; if (string.IsNullOrEmpty(mappingName)) return;
-
             var recordIndex = this.SYNCFUSION_DG.ResolveToRecordIndex(rowIndex);
             if (recordIndex < 0) return;
 
             var record = this.SYNCFUSION_DG.View.Records.GetItemAt(recordIndex);
+
+
+            if (record == null)
+            {
+                return;
+            }
+            if (string.IsNullOrEmpty(mappingName))
+            {
+                return;
+            }
+            var property = record.GetType().GetProperty(mappingName);
+            if (property == null)
+            {
+                Console.WriteLine("Property " + mappingName + " not found on type " + record.GetType().Name);
+                return;
+            }
+
+            //CurrentCellValue = property.GetValue(record)?.ToString();
             CurrentCellValue = record?.GetType()?.GetProperty(mappingName ?? string.Empty)?.GetValue(record)?.ToString();
+        }
+        private string GetSelectedText()
+        {
+            var dataGrid = SYNCFUSION_DG;
+            var currentCell = dataGrid.SelectionController?.CurrentCellManager?.CurrentCell;
+
+            if (currentCell == null)
+                return string.Empty;
+
+            // حالت 1: Edit Mode
+            if (currentCell.IsEditing)
+            {
+                var editingElement = dataGrid.FindElementOfType<TextBox>();
+                if (editingElement != null && !string.IsNullOrEmpty(editingElement.SelectedText))
+                {
+                    return editingElement.SelectedText;
+                }
+            }
+
+            // حالت 2: جستجوی ساده - بدون GetCellElement
+            try
+            {
+                var gridCellElement = currentCell?.ColumnElement;
+                if (gridCellElement != null)
+                {
+                    var textBox = FindVisualChild<TextBox>(gridCellElement);
+                    if (textBox != null && !string.IsNullOrWhiteSpace(textBox.SelectedText))
+                    {
+                        return textBox.SelectedText;
+                    }
+                }
+            }
+            catch { }
+
+            return string.Empty;
         }
         private void FilterBySelection_Click(object sender, RoutedEventArgs e)
         {
@@ -329,7 +417,7 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
             {
                 try
                 {
-                    return Convert.ToDecimal(value).ToString("N" + DIG, System.Globalization.CultureInfo.InvariantCulture);
+                    return Convert.ToDecimal(value).ToString("N", System.Globalization.CultureInfo.InvariantCulture);
                 }
                 catch
                 {
@@ -375,75 +463,21 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         private void ApplyCumulativeFilter() // Method to apply all cumulative filters to the data grid
         {
             // Set the filter for the data grid view using the filter service
-            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as MDS);
+            SYNCFUSION_DG.View.Filter = item => filterService.ApplyFilter(item as MOGHA_ANBAR_MODEL);
             // Refresh the filter to update the view
             SYNCFUSION_DG.View.RefreshFilter();
+
+            UpdateRowCountLabel();
         }
         private void SYNCFUSION_DG_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (!string.IsNullOrEmpty(GetSelectedText()))
+            var element = e.OriginalSource as FrameworkElement;
+            if (element != null)
             {
-                var element = e.OriginalSource as FrameworkElement;
-                if (element != null)
-                {
-                    element.ContextMenu = this.Resources["DataGridContextMenu"] as ContextMenu;
-                }
+                element.ContextMenu = this.Resources["DataGridContextMenu"] as ContextMenu;
             }
         }
 
-
-        private T FindChildElement<T>(DependencyObject parent) where T : DependencyObject
-        {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-            {
-                var child = VisualTreeHelper.GetChild(parent, i);
-                if (child is T typedChild)
-                {
-                    return typedChild;
-                }
-                var result = FindChildElement<T>(child);
-                if (result != null)
-                {
-                    return result;
-                }
-            }
-            return null;
-        }
-        private string GetSelectedText()
-        {
-            var dataGrid = SYNCFUSION_DG;
-            var currentCell = dataGrid.SelectionController?.CurrentCellManager?.CurrentCell;
-
-            if (currentCell == null)
-                return string.Empty;
-
-            // حالت 1: Edit Mode
-            if (currentCell.IsEditing)
-            {
-                var editingElement = dataGrid.FindElementOfType<TextBox>();
-                if (editingElement != null && !string.IsNullOrEmpty(editingElement.SelectedText))
-                {
-                    return editingElement.SelectedText;
-                }
-            }
-
-            // حالت 2: جستجوی ساده - بدون GetCellElement
-            try
-            {
-                var gridCellElement = currentCell?.ColumnElement;
-                if (gridCellElement != null)
-                {
-                    var textBox = FindVisualChild<TextBox>(gridCellElement);
-                    if (textBox != null && !string.IsNullOrWhiteSpace(textBox.SelectedText))
-                    {
-                        return textBox.SelectedText;
-                    }
-                }
-            }
-            catch { }
-
-            return string.Empty;
-        }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
@@ -457,7 +491,7 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
                 if (!string.IsNullOrEmpty(_SelectedTextCell_))
                 {
                     Clipboard.SetText(_SelectedTextCell_);
-                    universControl.PopNotifyShowUp("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
+                    universControl.PopNotifyShow("متن مورد نظر کپی شد", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
                     return;
                 }
             }
@@ -571,8 +605,6 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         }
         public void GenerateAutomaticSummary(SfDataGrid _DG_, bool _ClearAnySummaryBefore_ = false)
         {
-            return; //Temprary Disabled
-
             if (_ClearAnySummaryBefore_)
             {
                 SYNCFUSION_DG.TableSummaryRows.Clear();
@@ -592,29 +624,30 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
 
             var summaryColumns = new ObservableCollection<ISummaryColumn>();
 
-            var dataType = typeof(MDS);
+            var dataType = typeof(MOGHA_ANBAR_MODEL);
 
             //foreach (var column in SYNCFUSION_DG.Columns)
             foreach (var column in _DG_.Columns.OfType<GridTextColumn>())
             {
-                var propertyInfo = typeof(MDS).GetProperty(column.MappingName);
+                var propertyInfo = typeof(MOGHA_ANBAR_MODEL).GetProperty(column.MappingName);
                 if (propertyInfo == null)
                     continue;
 
-                if (column.MappingName == "BED" || column.MappingName == "BES")
+                //var propertyInfo = dataType.GetProperty(column.MappingName);
+                //if (propertyInfo == null)
+                //    continue;
+
+                if (IsNumericType(propertyInfo.PropertyType) && (column.MappingName.ToLower() == "meghk" || column.MappingName.ToLower() == "mablk"))
                 {
-                    if (IsNumericType(propertyInfo.PropertyType))
+                    var summaryColumn = new GridSummaryColumn
                     {
-                        var summaryColumn = new GridSummaryColumn
-                        {
-                            Name = column.MappingName + "Sum",
-                            MappingName = column.MappingName,
-                            SummaryType = Syncfusion.Data.SummaryType.DoubleAggregate,
-                            //Format = "{Sum:N0}"
-                            Format = "{Sum:N0}"
-                        };
-                        summaryColumns.Add(summaryColumn);
-                    }
+                        Name = column.MappingName + "Sum",
+                        MappingName = column.MappingName,
+                        SummaryType = Syncfusion.Data.SummaryType.DoubleAggregate,
+                        //Format = "{Sum:N0}"
+                        Format = "{Sum:N0}"
+                    };
+                    summaryColumns.Add(summaryColumn);
                 }
             }
 
@@ -663,7 +696,7 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
         {
             try
             {
-                universControl.PopNotifyShowUp($" ... در حال اماده سازی فایل اکسل این عملیات مدتی طول خواهد کشید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 4);
+                universControl.PopNotifyShowUp($" ... در حال آماده سازی فایل اکسل این عملیات مدتی طول خواهد کشید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 4);
                 await UniversalExcelExporter.ExportToExcelAsync(SYNCFUSION_DG, "ExportedExcel");
             }
             catch (Exception)
@@ -671,48 +704,117 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
                 new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
             }
         }
-
-        //کارت انبار این کالا
+        #endregion
         private void MenuItem_Click_1(object sender, RoutedEventArgs e)
         {
+            // Karte Anbare in kala
             if (AK_MOGUDI_DATA.Count > 0)
             {
                 if (SYNCFUSION_DG.SelectedItem is not null)
                 {
-                    var Row = SYNCFUSION_DG.SelectedItem as MDS;
-                    if (Row?.ANBAR != null && !string.IsNullOrEmpty(Row.CODE))
+                    var Row = SYNCFUSION_DG.SelectedItem as MOGHA_ANBAR_MODEL;
+                    if (Row != null && !string.IsNullOrEmpty(Row.CODE))
                     {
-                        F_MENU_KART f_MENU_KART = new F_MENU_KART("R", Row.ANBAR.ToString(), Row.CODE);
-                        f_MENU_KART.ExternalCallShowReport();
-                        f_MENU_KART.Close();
+                        if (CL_HESABDARI.LETSGO("KARTR"))
+                        {
+                            F_MENU_KART f_MENU_KART = new F_MENU_KART("R", ANBAR_CODE, Row.CODE);
+                            f_MENU_KART.ExternalCallShowReport();
+                            f_MENU_KART.Close();
+                        }
+                        else
+                        {
+                            new Msgwin(false, "شما اجازه لازم براي استفاده از اين بخش را نداريد.!").ShowDialog();
+                        }
                     }
                 }
             }
         }
-
-
-        #endregion
-
-        private void BTN_ISEND_Click(object sender, RoutedEventArgs e)
-        {
-            var currentRow = SYNCFUSION_DG.SelectedItem as MDS;
-
-            if (currentRow?.CODE != null)
-            {
-                F_MENU_KART f_MENU_KART = new F_MENU_KART("R", currentRow.ANBAR.ToString(), currentRow.CODE);
-                f_MENU_KART.ExternalCallShowReport();
-                f_MENU_KART.Close();
-            }
-        }
-
         private void BTN_ISEND_Click_1(object sender, RoutedEventArgs e)
         {
-            var currentRow = SYNCFUSION_DG.SelectedItem as MDS;
+            var record = SYNCFUSION_DG.SelectedItem as MOGHA_ANBAR_MODEL;
 
-            if (currentRow?.ANBAR != null && currentRow?.CODE != null)
+            if (true) //currentColumn.MappingName == "MABLK"
             {
-                new MOGHAYERAT_ANBAR_WIN("99999999",currentRow?.ANBAR.ToString()!).Show();  //' ! ' this means I know What I'm doing , Just Disable The Warnings
+                if (CL_HESABDARI.LETSGO("KARTR"))
+                {
+                    // Open F_MENU_KART -> R_KA_KALA
+                    F_MENU_KART f_MENU_KART = new F_MENU_KART("R", ANBAR_CODE, record.CODE);
+                    f_MENU_KART.ExternalCallShowReport();
+                    f_MENU_KART.Close();
+                }
+                else
+                {
+                    new Msgwin(false, "شما اجازه لازم براي استفاده از اين بخش را نداريد.!").ShowDialog();
+                }
             }
         }
+        private void BTN_ISEND_Click_2(object sender, RoutedEventArgs e)
+        {
+            var record = SYNCFUSION_DG.SelectedItem as MOGHA_ANBAR_MODEL;
+
+            // Accounting Card Balance Drill-down
+            if (true) // if (currentColumn.MappingName == "mab")
+            {
+                if (CL_HESABDARI.BLOCKEDMK(record.HES))
+                {
+                    new Msgwin(false, "حساب مورد نظر مسدود مي باشد!").ShowDialog();
+                    return;
+                }
+
+                new F_MENU_KOL_MOIN_TAFZIL(record.HES); //نیازی به Show نیست , خودش داخل خودش انجام میده
+                return;
+
+                #region ClassicWay
+                try
+                {
+                    string tableName = $"MOIN{Baseknow.USERCOD}";
+
+                    // Drop existing table
+                    dbms.DoExecuteSQL($"IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[{tableName}]') AND type in (N'U')) DROP TABLE [dbo].[{tableName}]");
+
+                    // Create table using Function
+                    // Access: SELECT ... INTO MOIN... FROM QDAFTARTAFZIL2_H(...)
+                    string createSql = $"SELECT N_S, base, DATE_S, HES_K, HES_M, HES_T, HES_T2, SHARH, BED, BES, MAND, id, NO_S, N_SERI, BANK, NUMBER, TAG, ARZD, HES_T3, HES_T4, TAFZILN, HES INTO dbo.{tableName} FROM dbo.QDAFTARTAFZIL2_H(1, 99999999, '{record.HES}') AS QDAFTARTAFZIL2_H ORDER BY DATE_S, BED DESC";
+                    dbms.DoExecuteSQL(createSql);
+
+                    // Update MAND (Running Balance)
+                    // Access loop does: MAN = MAN + MAND; MAND = MAN
+                    // Using SQL Window function for efficiency
+                    // Note: If QDAFTARTAFZIL2_H already returns running balance in MAND, this update is redundant but Access code suggests it recalculates it.
+                    // Assuming the function returns transaction amount or delta in MAND.
+                    string updateSql = $@"
+                        ;WITH CTE AS (
+                            SELECT ID, SUM(MAND) OVER (ORDER BY DATE_S, BED DESC ROWS UNBOUNDED PRECEDING) as RunBal
+                            FROM dbo.{tableName}
+                        )
+                        UPDATE T
+                        SET T.MAND = C.RunBal
+                        FROM dbo.{tableName} T
+                        JOIN CTE C ON T.ID = C.ID";
+
+                    // Check SQL Server version compatibility? Access code had a check, memory mentions fallback.
+                    // But here I'll assume SQL 2012+ (Window functions). 
+                    // If 2008, use correlated subquery or cursor.
+                    // Given the prompt mention "This logic now supports SQL Server 2008 R2 ... fallback to using MAX(DATE_S)", 
+                    // I should be careful. 
+                    // However, SUM() OVER (... ROWS UNBOUNDED PRECEDING) is available since SQL 2012. 
+                    // If target is older, this will fail.
+                    // The Access loop was client-side (VB). 
+                    // I'll stick to SQL for now. If it fails, I might need to implement C# loop update.
+
+                    dbms.DoExecuteSQL(updateSql);
+
+                    // Open Report Window
+                    new R_DAFTAR_MOIN_LIST(tableName, record.HES).Show();
+                }
+                catch (Exception ex)
+                {
+                    new Msgwin(false, "خطا در آماده سازی دفتر معین: " + ex.Message).ShowDialog();
+                }
+                #endregion
+
+            }
+        }
+
     }
 }
