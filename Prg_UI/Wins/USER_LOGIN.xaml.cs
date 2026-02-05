@@ -387,10 +387,11 @@ namespace Prg_UI.Wins
             //CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
 
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
+            
+            new F_MENU_SSM().Show();
+            new WinBase().Show();
 
-            new F_MENU_ANBAR("F").Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL_VAZ, this);
-            //new WinBase().Show();
             //new HEAD_LST_HAVL().Show();
             //new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED().Show();
             //new TR_FACOTRLST(5).Show();
@@ -767,7 +768,7 @@ namespace Prg_UI.Wins
 
         #region AutoUpdate
         // Configuration Constants
-        private const string UPDATE_SERVER_PATH = @"\\MAIN\ade\EXE\1404";
+        private const string UPDATE_SERVER_PATH = @"\\win-server2016\ade\EXE\1404";
         private const string TEMP_FILE_SUFFIX = "_UpdateTemp.exe";
         private const int COPY_BUFFER_SIZE = 81920; // 80KB
         private const int READ_TIMEOUT_SECONDS = 20; // Timeout for a single read operation (inactivity timeout)
