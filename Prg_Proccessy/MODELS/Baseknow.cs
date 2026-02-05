@@ -188,6 +188,14 @@ namespace Prg_Proccessy.MODELS
         public static string IYALAT { get; private set; }
         public static string CITY { get; private set; }
         public static string PCODE { get; private set; }
+
+        public static int? SSMTRTAKM { get; set; }
+        public static int? SSMTRTAGM { get; set; }
+        public static int? SSMSNDAUTO { get; set; }
+        public static int? SSMTBMON { get; set; }
+        public static Single? SSMDARSAD { get; set; }
+        public static string HDARKASRTAKHF { get; set; }
+
         #endregion
         public static void GetInitTheApp()
         {
@@ -479,6 +487,14 @@ namespace Prg_Proccessy.MODELS
                     if (item.IT7 != null) IT7 = item.IT7;
                     if (item.IT8 != null) IT8 = item.IT8;
                     if (item.IT9 != null) IT9 = item.IT9;
+
+
+                    if (item.SSMTRTAKM != null) SSMTRTAKM = item.SSMTRTAKM;
+                    if (item.SSMTRTAGM != null) SSMTRTAGM = item.SSMTRTAGM;
+                    if (item.SSMSNDAUTO != null) SSMSNDAUTO = item.SSMSNDAUTO;
+                    if (item.SSMTBMON != null) SSMTBMON = item.SSMTBMON;
+                    if (item.SSMDARSAD != null) SSMDARSAD = item.SSMDARSAD;
+                    if (item.HDARKASRTAKHF != null) HDARKASRTAKHF = item.HDARKASRTAKHF;
 
 
                     if (item.IYALAT != null) IYALAT = item.IYALAT;

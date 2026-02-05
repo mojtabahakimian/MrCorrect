@@ -152,18 +152,24 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 {
                     PERNAME = "VAZ"; //صورت وضعیت معاملات اشخاص
                 }
+                else if (OPEN_ARG == "TAF")
+                {
+                    PERNAME = "HTAF"; //F8 چاپی
+                }
                 else if (OPEN_ARG != "TAF")
                 {
                     return;
                 }
 
-                CL_HESABDARI.SETSECURITY(this.GetType().Name, PERNAME, new WindowInteropHelper(this).Handle, this.GetType().Name);
-                if (!this.IsLoaded)
+                if (!string.IsNullOrWhiteSpace(PERNAME))
                 {
-                    this.Close();
-                    return;
+                    CL_HESABDARI.SETSECURITY(this.GetType().Name, PERNAME, new WindowInteropHelper(this).Handle, this.GetType().Name);
+                    if (!this.IsLoaded)
+                    {
+                        this.Close();
+                        return;
+                    }
                 }
-
             }
 
             I_AM_F_MENU_KOL_MOIN_TAFZIL = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);

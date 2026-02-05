@@ -639,6 +639,12 @@ namespace Prg_UI
                                     CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FCODE_CUSTOMER, default);
                                 });
                                 break;
+                            case Key.F8:
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL_TAF, default);
+                                });
+                                break;
                             case Key.F9:
                                 Application.Current.Dispatcher.Invoke(() =>
                                 {
@@ -651,12 +657,7 @@ namespace Prg_UI
                                     CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, default);
                                 });
                                 break;
-                            case Key.F8:
-                                Application.Current.Dispatcher.Invoke(() =>
-                                {
-                                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL_TAF, default);
-                                });
-                                break;
+                      
                             case Key.F12:
                                 Application.Current.Dispatcher.Invoke(() =>
                                 {
