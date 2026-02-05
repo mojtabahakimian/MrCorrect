@@ -423,6 +423,213 @@ namespace Prg_Proccessy.FUNCTIONS
 
         //______________
 
+        public static double GetJAMFR(string HES, int mm)
+        {
+            try
+            {
+                string sql = $@"SELECT SUM(dbo.FACTOREFROOSH.MABL_K - dbo.FACTOREFROOSH.N_MOIN + dbo.FACTOREFROOSH.IMBAA) AS MAB 
+                                FROM dbo.HEAD_LST 
+                                INNER JOIN dbo.FACTOREFROOSH ON dbo.HEAD_LST.NUMBER = dbo.FACTOREFROOSH.NUMBER 
+                                    AND dbo.HEAD_LST.TAG - 11 = dbo.FACTOREFROOSH.TAG 
+                                WHERE (dbo.Umonth(dbo.HEAD_LST.DATE_N) = {mm}) 
+                                    AND (dbo.HEAD_LST.CUST_NO = N'{HES}') 
+                                    AND (dbo.HEAD_LST.TAG = 13)";
+
+                var result = dbms.DoGetDataSQL<double?>(sql).FirstOrDefault();
+                return result ?? 0;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        public static int GetRASPAY(string HES, int mm, double MAND, long TARIKHMABNA)
+        {
+            try
+            {
+                string sql = $@"SELECT TOP (100) PERCENT 
+                                    dbo.DEED_DTL.HES, dbo.DEED_DTL.BED, dbo.DEED_DTL.BES, dbo.DEED_DTL.N_SERI, 
+                                    dbo.DEED_DTL.BANK, dbo.DEED_DTL.NUMBER, dbo.DEED_DTL.TAG, dbo.DEED_DTL.ID, 
+                                    dbo.DEED_HED.DATE_S, dbo.DEED_HED.N_S, dbo.PAY_GETD.DATE_S AS PDT 
+                                FROM dbo.DEED_HED 
+                                INNER JOIN dbo.DEED_DTL ON dbo.DEED_HED.N_S = dbo.DEED_DTL.N_S 
+                                LEFT OUTER JOIN dbo.PAY_GETD ON dbo.DEED_DTL.N_SERI = dbo.PAY_GETD.N_SERI 
+                                    AND dbo.DEED_DTL.BANK = dbo.PAY_GETD.BANK 
+                                WHERE (dbo.DEED_DTL.HES = N'{HES}') 
+                                ORDER BY dbo.DEED_HED.DATE_S, dbo.PAY_GETD.DATE_S";
+
+                var records = dbms.DoGetDataSQL<RasPayDto>(sql).ToList();
+
+                bool okk = false;
+                double mabChk = 0;
+                double mabChkR = 0;
+                double notch = 0;
+                double mandOld = 0;
+
+                int index = 0;
+                while (index < records.Count && !okk)
+                {
+                    var rec = records[index];
+                    MAND -= rec.BES;
+
+                    if (MAND <= 0)
+                    {
+                        okk = true;
+                        if (MAND < 0)
+                        {
+                            while (index < records.Count)
+                            {
+                                rec = records[index];
+                                if (rec.BES > 0)
+                                {
+                                    double diffu = 0;
+
+                                    if (rec.PDT.HasValue)
+                                    {
+                                        diffu = CL_HESABDARI.DIFF(TARIKHMABNA, rec.PDT.Value);
+                                        if (MAND < 0)
+                                        {
+                                            mabChk += Math.Abs(MAND);
+                                            mabChkR += Math.Abs(MAND) * diffu;
+                                            mandOld = MAND;
+                                            MAND = 0;
+                                        }
+                                        else
+                                        {
+                                            mabChk += rec.BES;
+                                            mabChkR += rec.BES * diffu;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        notch += rec.BES;
+                                    }
+
+                                    long scmid = CL_HESABDARI.GetLIDD("SSM_CUST_RASPAY", "SCMID");
+                                    string pdtVal = rec.PDT.HasValue ? rec.PDT.Value.ToString() : "NULL";
+
+                                    string insertSql = $@"INSERT INTO SSM_CUST_RASPAY 
+                                    (SCMID, CUST_NO, SCMDATECH, SCMDATE_S, SCMMABNADATE, SCMMABL, SCMMABCHK, SCMMABCHKR, SCMMAND, SCMDIFF, NOTCH, USERCO, MONTH)
+                                    VALUES ({scmid}, N'{HES}', {pdtVal}, {rec.DATE_S}, {TARIKHMABNA}, {rec.BES}, {mabChk}, {mabChkR}, {mandOld}, {diffu}, {notch}, {Baseknow.USERCOD}, {mm})";
+
+                                    dbms.DoExecuteSQL(insertSql);
+                                }
+                                index++;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        index++;
+                    }
+                }
+
+                if (MAND > 0) return 10000;
+
+                if ((mabChk + notch) != 0)
+                {
+                    return (int)Math.Round(mabChkR / (mabChk + notch));
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+            catch
+            {
+                return 1;
+            }
+        }
+
+        public static int GetRASTAVAF(string HES, int mm)
+        {
+            try
+            {
+                string sql = $@"SELECT 
+                                    SUM((dbo.FACTOREFROOSH.MABL_K - dbo.FACTOREFROOSH.N_MOIN + dbo.FACTOREFROOSH.IMBAA) * 
+                                        CASE WHEN dbo.HEAD_LST.MODAT_PPID = 0 THEN dbo.HEAD_LST.MAS ELSE dbo.PRICE_PAYNO.MODAT END) AS MABKR, 
+                                    SUM(dbo.FACTOREFROOSH.MABL_K - dbo.FACTOREFROOSH.N_MOIN + dbo.FACTOREFROOSH.IMBAA) AS MAB 
+                                FROM dbo.HEAD_LST 
+                                INNER JOIN dbo.FACTOREFROOSH ON dbo.HEAD_LST.NUMBER = dbo.FACTOREFROOSH.NUMBER 
+                                    AND dbo.HEAD_LST.TAG - 11 = dbo.FACTOREFROOSH.TAG 
+                                LEFT OUTER JOIN dbo.PRICE_PAYNO ON dbo.HEAD_LST.MODAT_PPID = dbo.PRICE_PAYNO.PPID 
+                                WHERE (dbo.Umonth(dbo.HEAD_LST.DATE_N) = {mm}) 
+                                    AND (dbo.HEAD_LST.CUST_NO = N'{HES}') 
+                                    AND (dbo.HEAD_LST.TAG = 13)";
+
+                var res = dbms.DoGetDataSQL<RasFrDto>(sql).FirstOrDefault();
+
+                if (res == null || (res.MAB ?? 0) == 0) return 0;
+
+                return (int)Math.Round((res.MABKR ?? 0) / (res.MAB ?? 0));
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        public static int GetRASFR(string HES, int mm)
+        {
+            try
+            {
+                long refDate = long.Parse($"{Baseknow.YEA}{mm:00}01");
+
+                string sql1 = $@"SELECT 
+                                    SUM((dbo.FACTOREFROOSH.MABL_K - dbo.FACTOREFROOSH.N_MOIN + dbo.FACTOREFROOSH.IMBAA) * dbo.Udatediff(dbo.HEAD_LST.DATE_N, {refDate})) AS MABKR, 
+                                    SUM(dbo.FACTOREFROOSH.MABL_K - dbo.FACTOREFROOSH.N_MOIN + dbo.FACTOREFROOSH.IMBAA) AS MAB 
+                                FROM dbo.HEAD_LST 
+                                INNER JOIN dbo.FACTOREFROOSH ON dbo.HEAD_LST.NUMBER = dbo.FACTOREFROOSH.NUMBER 
+                                    AND dbo.HEAD_LST.TAG - 11 = dbo.FACTOREFROOSH.TAG 
+                                WHERE (dbo.Umonth(dbo.HEAD_LST.DATE_N) = {mm}) 
+                                    AND (dbo.HEAD_LST.CUST_NO = N'{HES}') 
+                                    AND (dbo.HEAD_LST.TAG = 13)";
+
+                var res1 = dbms.DoGetDataSQL<RasFrDto>(sql1).FirstOrDefault();
+
+                if (res1 == null || (res1.MAB ?? 0) == 0) return 0;
+
+                string sql2 = $@"SELECT SUM(dbo.DEED_DTL.BED) AS nofa 
+                                 FROM dbo.DEED_DTL 
+                                 INNER JOIN dbo.DEED_HED ON dbo.DEED_DTL.N_S = dbo.DEED_HED.N_S 
+                                 WHERE (dbo.Umonth(dbo.DEED_HED.DATE_S) = {mm}) 
+                                   AND (dbo.DEED_DTL.HES = N'{HES}') 
+                                   AND (dbo.DEED_DTL.TAG <> 13 OR dbo.DEED_DTL.TAG IS NULL)";
+
+                double nofa = dbms.DoGetDataSQL<double?>(sql2).FirstOrDefault() ?? 0;
+
+                double denominator = (res1.MAB ?? 0) + nofa;
+                if (denominator == 0) return 0;
+
+                return (int)Math.Round((res1.MABKR ?? 0) / denominator);
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+        public class RasPayDto
+        {
+            public string HES { get; set; }
+            public double BED { get; set; }
+            public double BES { get; set; }
+            public string N_SERI { get; set; }
+            public int BANK { get; set; }
+            public long NUMBER { get; set; }
+            public int TAG { get; set; }
+            public long ID { get; set; }
+            public long DATE_S { get; set; }
+            public double N_S { get; set; }
+            public long? PDT { get; set; }
+        }
+
+        public class RasFrDto
+        {
+            public double? MABKR { get; set; }
+            public double? MAB { get; set; }
+        }
+
         public static string CODESAL(string cody)
         {
             byte[] RawCoded = Encoding.GetEncoding(1256).GetBytes(cody);// ی 237

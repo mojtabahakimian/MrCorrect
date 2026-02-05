@@ -25,7 +25,6 @@ using System.Windows.Interop;
 using System.Windows.Threading;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 
-
 namespace Prg_UI.Wins.WinMenus.HESABDARI
 {
     public class SSM_CUST_ANALYS_MODEL
@@ -220,7 +219,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 return;
             }
 
-            int month = int.Parse(((ComboBoxItem)MMO.SelectedItem).Tag.ToString());
+            int month = MMO.SelectedIndex + 1;
+            if (month <= 0) month = 1;
 
             // Check if records exist for this month
             var count = dbms.DoGetDataSQL<int>($"SELECT COUNT(*) FROM dbo.SSM_CUST_ANALYS WHERE MONTH = {month}").FirstOrDefault();
@@ -233,21 +233,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             int currentMonth = int.Parse(Tarikh.Current_Mah);
             int limit = Baseknow.SSMTBMON ?? 0;
 
-            // Simplified date check logic based on legacy code intent (Month diff check)
-            // Legacy: UMonth(FARSIDATE(DATE)) > Me.MMO + SSMTBMON
-            // We'll check if current month is strictly greater than selected month + limit
-            // Note: This logic assumes within same year or handles wrap around. Legacy code was simple.
-            // A more robust check would involve years, but sticking to legacy logic:
-
-            // Assuming we are calculating for the current year.
+            // Allow calculation if strictly passed the limit delay
+            // Or if different year? Legacy code: UMonth(DATE) > month + limit.
+            // Assuming simplified check for current fiscal year context.
             if (currentMonth > month + limit)
             {
                 try
                 {
                     // Get customers with Sales in that month
-                    // Legacy: SELECT CUST_NO FROM HEAD_LST WHERE (TAG = 13) AND (dbo.Umonth(DATE_N) = Me.MMO) GROUP BY CUST_NO
-                    // Converted to SQL Server compatible
-                    // Tag 13 is likely Sales Invoice.
                     var customers = dbms.DoGetDataSQL<string>($"SELECT CUST_NO FROM dbo.HEAD_LST WHERE (TAG = 13) AND (dbo.Umonth(DATE_N) = {month}) GROUP BY CUST_NO").ToList();
 
                     if (customers.Count > 0)
@@ -273,9 +266,83 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 new Msgwin(false, $"با توجه به تنظیمات برای ماه مورد نظر قابل محاسبه نیست حداقل باید {limit} ماه با تاخیر محاسبه گردد").ShowDialog();
             }
         }
-        private void HesAnalysis(string custNo, int month)
+        private void HesAnalysis(string HES, int mm)
         {
-            //TODO
+            try
+            {
+                long limitDate = long.Parse($"{Baseknow.YEA}{mm:00}00");
+                string sql = $@"SELECT SUM(dbo.DEED_DTL.BED) AS bedd 
+                                FROM dbo.DEED_DTL 
+                                INNER JOIN dbo.DEED_HED ON dbo.DEED_DTL.N_S = dbo.DEED_HED.N_S 
+                                WHERE (dbo.DEED_HED.DATE_S < {limitDate}) 
+                                  AND (dbo.DEED_DTL.HES = N'{HES}')";
+
+                double? bedResult = dbms.DoGetDataSQL<double?>(sql).FirstOrDefault();
+
+                if (bedResult == null)
+                {
+                    return;
+                }
+
+                double bedehiI = bedResult.Value;
+                double mand = bedehiI;
+
+                double jamf = CL_HESABDARI.GetJAMFR(HES, mm);
+                int rasf = CL_HESABDARI.GetRASFR(HES, mm);
+
+                long tarikhMabna = long.Parse($"{Baseknow.YEA}{mm:00}{rasf:00}");
+
+                int rastavFogh = CL_HESABDARI.GetRASTAVAF(HES, mm);
+                int rasPay = CL_HESABDARI.GetRASPAY(HES, mm, mand, tarikhMabna);
+
+                long takhtaj = 0;
+                if (rasPay == 10000)
+                {
+                    takhtaj = 0;
+                }
+                else
+                {
+                    takhtaj = rasPay - rastavFogh;
+                }
+
+                double scamabla = 0;
+                if (takhtaj != 0)
+                {
+                    if (takhtaj > 0)
+                    {
+                        if (rasPay != 10000)
+                        {
+                            if (takhtaj > (Baseknow.SSMTRTAKM ?? 0))
+                            {
+                                scamabla = Math.Round(jamf * (Baseknow.SSMDARSAD ?? 0) / 100 * takhtaj);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Acceleration
+                        if (takhtaj < (Baseknow.SSMTRTAGM ?? 0))
+                        {
+                            scamabla = Math.Round(jamf * (Baseknow.SSMDARSAD ?? 0) / 100 * takhtaj);
+                        }
+                    }
+                }
+
+                long scaid = CL_HESABDARI.GetLIDD("SSM_CUST_ANALYS", "SCAID");
+                long scaDate = 0;
+                long.TryParse(Tarikh.FullCurrentDate, out scaDate);
+                double scaRasPay = (rasPay == 10000) ? -1 : rasPay;
+
+                string insertSql = $@"INSERT INTO SSM_CUST_ANALYS 
+                (SCAID, CUST_NO, SCADATE, SCAJAMF, SCARASFR, SCARASTAV, SCARASPAY, SCATAFAVOT, SCAMABNADATE, SCAMABLA, SCAMABP, USERCO, MONTH)
+                VALUES ({scaid}, N'{HES}', {scaDate}, {jamf}, {rasf}, {rastavFogh}, {scaRasPay}, {takhtaj}, {tarikhMabna}, {scamabla}, {Baseknow.SSMDARSAD ?? 0}, {Baseknow.USERCOD}, {mm})";
+
+                dbms.DoExecuteSQL(insertSql);
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, "خطا در محاسبه برای مشتری " + HES + ": " + ex.Message).ShowDialog();
+            }
         }
 
         private void ReGetData(int month)
@@ -301,12 +368,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             if (MMO.SelectedItem == null) return;
             int month = int.Parse(((ComboBoxItem)MMO.SelectedItem).Tag.ToString());
 
-            if (Baseknow.TRANSF == true)
-            {
-                // Call TR (Transaction Log) - assuming TR is a method in CL_HESABDARI or similar
-                // CL_HESABDARI.TR("SSM_CUST_ANALYS", $"(MONTH = {month})", DateTime.Now, 1); 
-                // Since TR is not clearly defined in provided files, we might skip or log simply
-            }
+            CL_HESABDARI.TR("SSM_CUST_ANALYS", $"(MONTH = {month})", DateTime.Now, 1);
 
             // Allow deletion - In WPF, we can just enable a "Delete" button or delete logic.
             // For now, we will just delete all records for this month to allow recalculation.
@@ -314,6 +376,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             {
                 dbms.DoExecuteSQL($"DELETE FROM SSM_CUST_ANALYS WHERE MONTH = {month}");
                 ReGetData(month);
+                SSM_CUST_ANALYS_form.IsReadOnly = false;
             }
         }
 
@@ -490,6 +553,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             {
                 int month = int.Parse(((ComboBoxItem)MMO.SelectedItem).Tag.ToString());
                 ReGetData(month);
+                SSM_CUST_ANALYS_form.IsReadOnly = true;
             }
         }
     }
