@@ -387,10 +387,8 @@ namespace Prg_UI.Wins
             //CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
 
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
-            
-            new F_MENU_SSM().Show();
-            new WinBase().Show();
 
+            new F_MENU_KOL_MOIN_TAFZIL("NABZKAR").Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL_VAZ, this);
             //new HEAD_LST_HAVL().Show();
             //new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED().Show();

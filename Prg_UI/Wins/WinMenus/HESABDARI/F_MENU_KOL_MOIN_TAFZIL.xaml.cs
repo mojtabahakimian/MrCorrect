@@ -86,6 +86,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 {
                     LBL_WIN.Content = "بررسی وضعیت مشتری";
                 }
+                else if (open_arg == "NABZKAR")
+                {
+                    LBL_WIN.Content = "بررسی وضعیت کارشناس";
+                }
                 else if (open_arg == "VAZ")
                 {
                     LBL_WIN.Content = "صورت وضعیت معاملات اشخاص";
@@ -145,6 +149,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             {
                 string PERNAME = "";
                 if (OPEN_ARG == "NABZMOSH")
+                {
+                    PERNAME = "NABZKAR";
+                }
+                else if (OPEN_ARG == "NABZKAR")
                 {
                     PERNAME = "NABZKAR";
                 }
@@ -422,14 +430,15 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                 new WINRPT(report, "صورت وضعیت معاملات تاریخ چک").Show();
             }
-            else if (OPEN_ARG == "NABZMOSH") //بررسی وضعیت کارشناس
+            else if (OPEN_ARG == "NABZMOSH") //بررسی وضعیت مشتری
             {
                 new NABZ_MOSHTARI(Combo34.SelectedValue.ToString()).Show();
                 ProcLoader.Stop(Prc);
             }
-            else if (OPEN_ARG == "NABZKAR") //بررسی وضعیت مشتری
+            else if (OPEN_ARG == "NABZKAR") //بررسی وضعیت کارشناس
             {
-
+                new NABZKAR(Combo34.SelectedValue.ToString()).Show();
+                ProcLoader.Stop(Prc);
             }
             else
             {
