@@ -1,24 +1,18 @@
-﻿using DocumentFormat.OpenXml.Bibliography;
-using Functions;
+﻿using Functions;
 using MaterialDesignThemes.Wpf;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
-using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
-using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
-using Syncfusion.CompoundFile.XlsIO.Native;
-using Syncfusion.Windows.Controls.Input;
+using Prg_UI.Wins.WinMenus.HESABDARI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -28,7 +22,6 @@ using System.Windows.Media;
 using Wins.WinOther;
 using static Interfaces.INavigator;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
-using static Wins.WinMenus.ANBAR.HEAD_LST_HAV_OTHER_WIN;
 
 namespace Wins.WinMenus.HESABDARI
 {
@@ -1252,6 +1245,22 @@ namespace Wins.WinMenus.HESABDARI
                     AllowEdits = true;
                 }
             }
+        }
+
+        private void BTN_CTRLF8_Click(object sender, RoutedEventArgs e)
+        {
+            var Hes = CUST_NO.SelectedValue.ToString();
+            var Kol = CL_HESABDARI.GETKOL(Hes);
+            var Moin = CL_HESABDARI.GETMOIN(Hes);
+            var Taf = CL_HESABDARI.GETTAF(Hes);
+
+            if (CL_HESABDARI.BLOCKED(Kol, Moin, Taf))
+            {
+                new Msgwin(false, "حساب مورد نظر مسدود مي باشد!").ShowDialog();
+                return;
+            }
+
+            new F_MENU_KOL_MOIN_TAFZIL(Hes);
         }
     }
 }
