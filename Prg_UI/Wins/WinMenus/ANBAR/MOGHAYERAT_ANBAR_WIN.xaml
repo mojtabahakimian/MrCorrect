@@ -562,7 +562,7 @@
 
             <syncfusion:SfDataGrid.Columns>
 
-                <syncfusion:GridTemplateColumn HeaderText="کارت انبار" x:Name="BTN_COLUMN1" Width="100" MappingName="IsButtony" FilterRowEditorType="None" AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
+                <syncfusion:GridTemplateColumn HeaderText="کارت انبار" x:Name="BTN_COLUMN1" Width="100" MappingName="IsButtonyKart" FilterRowEditorType="None" AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_ISEND" IsTabStop="False" Click="BTN_ISEND_Click_1" Tag="{Binding}"
@@ -578,7 +578,7 @@
                 </syncfusion:GridTemplateColumn>
 
 
-                <syncfusion:GridTemplateColumn HeaderText="صورت حساب" x:Name="BTN_COLUMN2" Width="110" MappingName="IsButtony" FilterRowEditorType="None" AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
+                <syncfusion:GridTemplateColumn HeaderText="صورت حساب" x:Name="BTN_COLUMN2" Width="110" MappingName="IsButtonyHesab" FilterRowEditorType="None" AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button x:Name="BTN_ISEND" IsTabStop="False" Click="BTN_ISEND_Click_2" Tag="{Binding}"

@@ -104,6 +104,9 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
         public class MOGHA_ANBAR_MODEL
         {
+            public bool IsButtonyKart { get; set; }
+            public bool IsButtonyHesab { get; set; }
+
             public string CODE { get; set; }
             public double? MABLK { get; set; }
             public double? MAND { get; set; }

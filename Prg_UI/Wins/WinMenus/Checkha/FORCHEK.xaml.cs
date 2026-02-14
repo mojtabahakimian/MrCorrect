@@ -215,6 +215,15 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
         }
 
+        private bool CanShowModalMessage()
+        {
+            return IsLoaded
+                && IsVisible
+                && !isClosing
+                && !Dispatcher.HasShutdownStarted
+                && !Dispatcher.HasShutdownFinished;
+        }
+
         bool isClosing = false;
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -222,6 +231,8 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         }
         private void N_SERI_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (!CanShowModalMessage()) { return; }
+
             if (!IsVisible || !IsLoaded || isClosing) { return; }
 
             if (N_SERI.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
@@ -230,12 +241,14 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             if (N_SERI.SelectedValue == null)
             {
                 e.Handled = true;
+                if (!CanShowModalMessage()) { return; }
                 new Msgwin(false, "شماره سریال نمیتواند خالی باشد").ShowDialog();
                 return;
             }
 
             if (!IsNull(N_SERI.SelectedValue?.ToString()))
             {
+                if (!CanShowModalMessage()) { return; }
                 FOR_CHK_SERCH fOR_CHK_SERCH = new FOR_CHK_SERCH("1", "N_SERI = " + N_SERI.SelectedValue.ToStringNullSafe(), I_AM_FORCHECK);
                 fOR_CHK_SERCH.ShowDialog();
             }
@@ -244,6 +257,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private void BANK_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (!CanShowModalMessage()) { return; }
             if (!IsVisible || !IsLoaded || isClosing) { return; }
 
             if (BANK.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
@@ -254,6 +268,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
             if (BANK.SelectedValue == null)
             {
+                if (!CanShowModalMessage()) { return; }
                 new Msgwin(false, "بانک نمیتواند خالی باشد").ShowDialog();
                 return;
             }

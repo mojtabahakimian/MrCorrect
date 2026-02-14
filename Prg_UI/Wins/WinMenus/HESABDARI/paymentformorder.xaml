@@ -73,14 +73,14 @@
         <xctk:MaskedTextBox x:Name="PAYDATE" Style="{StaticResource FuzzyOut}" Padding="3" Mask="0000/00/00" Height="30" Margin="0,88,136,0" TextWrapping="Wrap" VerticalAlignment="Top" BorderThickness="1" FontSize="12"  HorizontalAlignment="Right" Width="77" TabIndex="0"/>
         <CNC:NumericTextBox x:Name="MABLS"  DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" ThreeTwoZero="True"   Text="0" Height="30" Margin="0,125,136,0"   VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Right" Width="123"  MaxLength="16" TabIndex="1" />
         <TextBox x:Name="BABAT" Text="" Height="30" Margin="37,161,136,0"  Style="{StaticResource FuzzyOut}" Padding="3"  TextWrapping="Wrap" VerticalAlignment="Top"  Visibility="Visible" MaxLength="499" TabIndex="2" FlowDirection="RightToLeft" />
-        <ComboBox x:Name="CUST_NO" PreviewLostKeyboardFocus="CUST_NO_PreviewLostKeyboardFocus"  DisplayMemberPath="NAME" SelectedValuePath="hes"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="296,198,136,0" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" VerticalAlignment="Top" TabIndex="3">
+        <ComboBox x:Name="CUST_NO" PreviewLostKeyboardFocus="CUST_NO_PreviewLostKeyboardFocus"  DisplayMemberPath="NAME" SelectedValuePath="hes"  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="425,198,136,0" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" VerticalAlignment="Top" TabIndex="3">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                 </ItemsPanelTemplate>
             </ComboBox.ItemsPanel>
         </ComboBox>
-        <ComboBox x:Name="CUST_NO2"  DisplayMemberPath="hes" SelectedValuePath="hes"   Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="148,198,0,0" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="146" VerticalAlignment="Top">
+        <ComboBox x:Name="CUST_NO2"  DisplayMemberPath="hes" SelectedValuePath="hes"   Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Margin="275,198,0,0" Height="30" FlowDirection="RightToLeft"   IsEditable="True"  Background="{x:Null}" BorderThickness="1" HorizontalAlignment="Left" Width="146" VerticalAlignment="Top">
             <ComboBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -199,10 +199,11 @@
 
         <Border Background="{Binding Background, ElementName=GENERAL_RANG}" Height="11" VerticalAlignment="Top" CornerRadius="1" Opacity="0.3" Margin="0,546,0,0" />
         <Button x:Name="BTN_NEW_PAYORDER" Visibility="Collapsed" Content="درخواست جدید +"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="37,506,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" TabIndex="14" Click="BTN_NEW_PAYORDER_Click" />
-        <Button x:Name="BTN_INFO_RECIVER" Click="BTN_INFO_RECIVER_Click" Content="مشخصات دریافت کننده" Style="{StaticResource MaterialDesignFlatButton}" FontSize="10" Margin="37,198,0,0" Height="29" VerticalAlignment="Top" HorizontalAlignment="Left" Width="108" Padding="0,4,0,4" />
+        <Button x:Name="BTN_INFO_RECIVER" Click="BTN_INFO_RECIVER_Click" Content="مشخصات دریافت کننده" Style="{StaticResource MaterialDesignFlatButton}" FontSize="10" Margin="37,199,0,0" Height="28" VerticalAlignment="Top" HorizontalAlignment="Left" Width="108" Padding="0,4,0,4" />
         <Button x:Name="ESLAH" Click="ESLAH_Click" Content="اصلاح"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="37,422,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" />
 
         <CNC:RecordNavigatorControl x:Name="navigatorControl" VerticalAlignment="Bottom" Margin="10,0,12,10"/>
+        <Button x:Name="BTN_CTRLF8" Click="BTN_CTRLF8_Click" Content="صورت حساب" Style="{StaticResource MaterialDesignFlatButton}" FontSize="10" Margin="160,198,0,0" Height="30" VerticalAlignment="Top" HorizontalAlignment="Left" Width="108" Padding="0,4,0,4" />
 
     </Grid>
 </Window>
