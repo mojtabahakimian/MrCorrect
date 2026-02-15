@@ -1573,5 +1573,10 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_GOZARESH_FROOSH_FR, default);
         }
+
+        private void Button_Click_151(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_ORDR_HED_SEFARESH, default);
+        }
     }
 }

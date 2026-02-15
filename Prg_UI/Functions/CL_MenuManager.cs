@@ -1047,6 +1047,10 @@ namespace Functions
             /// </summary>
             NABZMOSH_KARSHENASH,
             /// <summary>
+            /// ثبت سفارشات کالا
+            /// </summary>
+            WIN_ORDR_HED_SEFARESH,
+            /// <summary>
         }
         #endregion
 
@@ -1065,6 +1069,8 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+
+                case WinNameType.WIN_ORDR_HED_SEFARESH: /*ثبت سفارشات کالا*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_ORDR_HED(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.NABZMOSH_KARSHENASH: /*بررسی وضعیت کارشناس*/ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_TAFZIL("NABZMOSH"), isModalDialog: false, allowMultipleInstances: false); break;
 

@@ -16,6 +16,7 @@ using Prg_UI.Wins.WinMenus.Checkha;
 using Prg_UI.Wins.WinMenus.CONFIGS;
 using Prg_UI.Wins.WinMenus.HESABDARI;
 using Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT;
+using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
 using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
@@ -388,9 +389,10 @@ namespace Prg_UI.Wins
 
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
 
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_KLIST, this);
+            new WIN_ORDR_HED().Show();
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.NABZMOSH_KARSHENASH, this);
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
-            new WinBase().Show();
+            //new WinBase().Show();
             //new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED().Show();
             //new TR_FACOTRLST(5).Show();
             //new TR_ANBGRD_LST().Show();

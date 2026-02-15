@@ -72,5 +72,10 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.RAAS , null /*DEFAULT OWNER MAIN*/);
         }
+
+        private void Image_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_ORDR_HED_SEFARESH, default);
+        }
     }
 }
