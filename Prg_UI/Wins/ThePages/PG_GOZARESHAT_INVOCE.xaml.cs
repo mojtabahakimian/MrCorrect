@@ -107,5 +107,30 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_SERCH_MAIN_ADVANC_F12, null);
         }
+
+        private void Image_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_CFRALL, null);
+        }
+
+        private void Image_PreviewMouseLeftButtonUp_1(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_CKRALL, null);
+        }
+
+        private void Image_PreviewMouseLeftButtonUp_2(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_AMFDAY, null);
+        }
+
+        private void Image_PreviewMouseLeftButtonUp_3(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_FLIST, null);
+        }
+
+        private void Image_PreviewMouseLeftButtonUp_4(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_KLIST, null);
+        }
     }
 }

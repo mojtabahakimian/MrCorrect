@@ -94,8 +94,7 @@ namespace Wins.ThePages
 
         private void Image_PreviewMouseDown_14(object sender, MouseButtonEventArgs e)
         {
-
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ASNAD_PRINT, default); //لیست اسنادی که تراز نیستند
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ASNAD_PRINT, default);
         }
     }
 }

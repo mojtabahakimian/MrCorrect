@@ -1517,5 +1517,61 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.NABZMOSH_KARSHENASH, default);
         }
+
+        private void Button_Click_140(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ASNAD_PRINT, default);
+        }
+
+        private void Button_Click_141(object sender, RoutedEventArgs e)
+        {
+            //گزارش تراز آزمایشی چهار ستونی تفضیلی
+        }
+
+        private void Button_Click_142(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HAVALE_EXIT_SAYER, default);
+        }
+
+        private void Button_Click_143(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_SADERATI, default);
+        }
+
+        private void Button_Click_144(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_SADERATI, default);
+        }
+
+        private void Button_Click_145(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FROOSH_NARAFTAH, default);
+        }
+
+        private void Button_Click_146(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_F_MENU_KHFR_FONARP, default);
+        }
+
+        private void Button_Click_147(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_CUSTNP, default);
+        }
+
+        private void Button_Click_148(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.LIST_KHARID, default);
+        }
+
+        private void Button_Click_149(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.LIST_FROOSH, default);
+
+        }
+
+        private void Button_Click_150(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_GOZARESH_FROOSH_FR, default);
+        }
     }
 }
