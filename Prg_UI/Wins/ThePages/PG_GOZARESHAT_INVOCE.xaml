@@ -163,7 +163,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_4">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseLeftButtonUp="Image_PreviewMouseLeftButtonUp" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_4">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/GOZARESHAT_INVOCE/SellListSumByKala.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -172,7 +172,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_5">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseLeftButtonUp="Image_PreviewMouseLeftButtonUp_1" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_5">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/GOZARESHAT_INVOCE/KharidListByKala.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -181,7 +181,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_6">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseLeftButtonUp="Image_PreviewMouseLeftButtonUp_2" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_6">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/GOZARESHAT_INVOCE/AmarSellByDay.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -190,7 +190,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_7">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseLeftButtonUp="Image_PreviewMouseLeftButtonUp_3" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_7">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/GOZARESHAT_INVOCE/SellReportsByPerson.png" CacheOption="OnLoad"/>
                             </Image.Source>
@@ -199,7 +199,7 @@
                     </WrapPanel>
 
                     <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_8">
+                        <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" PreviewMouseLeftButtonUp="Image_PreviewMouseLeftButtonUp_4" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_8">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/GOZARESHAT_INVOCE/KalaBuyReportByAnbar.png" CacheOption="OnLoad"/>
                             </Image.Source>
