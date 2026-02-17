@@ -362,8 +362,7 @@ namespace Prg_UI.Wins
             //CL_Generaly.IsMrCorrectLocky = true;
 
             //Baseknow.USERCOD = 108;
-            //Baseknow.UUSER = "modir-mali";   
-
+            //Baseknow.UUSER = "modir-mali";
 
             Baseknow.mrcorrect = true;
 
@@ -391,7 +390,7 @@ namespace Prg_UI.Wins
 
             //new WIN_ORDR_HED().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FACTORS_LST, this, 13);
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.Automasion_MAIN, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ANBAR_F_AK_MOGUDI_ANBAR_LIST, this);
             //new WinBase().Show();
             //new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED().Show();
             //new TR_FACOTRLST(5).Show();
