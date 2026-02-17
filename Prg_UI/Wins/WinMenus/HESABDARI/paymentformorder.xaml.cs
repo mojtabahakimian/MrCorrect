@@ -1224,7 +1224,9 @@ namespace Wins.WinMenus.HESABDARI
                         message = "اطلاعاتی برای نمایش وجود ندارد.";
                     }
 
-                    new Msgwin(false, message, "", true).ShowDialog();
+                    Msgwin msgwin = new Msgwin(false, message, "", true);
+                    msgwin.Height = 350;
+                    msgwin.Show();
                 }
                 else
                 {

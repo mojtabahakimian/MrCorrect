@@ -307,7 +307,12 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
         private readonly CancellationTokenSource _Cts_ = new CancellationTokenSource();
         private int _refreshCounter = 0;
 
-        private const int MsgAndRemindersInterval = 1;
+        private const int MsgAndRemindersInterval = 10;
+
+                // Circuit Breaker fields
+        private int _consecutiveFailures = 0;
+        private const int MAX_FAILURES = 3;
+        private DateTime _nextRetryTime = DateTime.MinValue;
 
         private DispatcherTimer KartablTimer;
         private readonly SemaphoreSlim _KartablSemaphore = new SemaphoreSlim(1, 1);
@@ -339,6 +344,8 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                 return;
             }
 
+            if (_consecutiveFailures >= MAX_FAILURES && DateTime.Now < _nextRetryTime)
+                return;
 
             if (/*!Convert.ToBoolean(AutoRefreshToggle.IsChecked) ||*/ !_Semaphore_.Wait(0))
             {
@@ -356,16 +363,24 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                     //DoLoadKartabl()
                 };
                 await Task.WhenAll(tasks);
+                _consecutiveFailures = 0;
             }
             catch (ObjectDisposedException)
             {
             }
             catch (Exception ex)
             {
+                if (ex is SqlException || ex.InnerException is SqlException)
+                {
+                    _consecutiveFailures++;
+                    var delay = TimeSpan.FromMinutes(Math.Pow(2, _consecutiveFailures));
+                    _nextRetryTime = DateTime.Now + delay;
+                }
+
                 if (ex is SqlException sqlEx && CL_CCNNMANAGER.IsConnectionRelated(sqlEx))
                 {
                     CL_CCNNMANAGER.ConnectedToSQLDB = false;
-                    throw;
+                    //throw;
                 }
                 await Dispatcher.InvokeAsync(() =>
                 {

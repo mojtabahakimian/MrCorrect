@@ -105,7 +105,6 @@ namespace Prg_SendInvoice.CNNMANAGER
 
             return connectionStringBuilder.ConnectionString + ";";
         }
-
         private static readonly int[] ConnectionErrorNumbers =
         {
             2,      // The system cannot find the file specified
@@ -142,7 +141,7 @@ namespace Prg_SendInvoice.CNNMANAGER
             }
 
             if (exception.InnerException is Win32Exception win32 &&
-                (win32.NativeErrorCode == 53 || win32.NativeErrorCode == 64))
+                   (win32.NativeErrorCode == 53 || win32.NativeErrorCode == 64 || win32.NativeErrorCode == 10060))
             {
                 return true;
             }
@@ -495,6 +494,11 @@ namespace Prg_SendInvoice.CNNMANAGER
         [System.Diagnostics.DebuggerStepThrough]
         public async Task<IEnumerable<TEntity>> SqlQueryAsync<TEntity>(string sql, object? parameters = null, CancellationToken cancellationToken = default)
         {
+            // این خط باعث می‌شود متد بلافاصله آزاد شود و UI قفل نشود
+            // Defensive coding: Force continuation on a ThreadPool thread to mitigate deadlocks 
+            // if the caller incorrectly blocks the UI thread (e.g., using .Result or .Wait()).
+            await Task.Yield();
+
             const int maxRetries = 3;
             const int baseDelayMilliseconds = 200;
 
@@ -571,6 +575,11 @@ namespace Prg_SendInvoice.CNNMANAGER
         [System.Diagnostics.DebuggerStepThrough]
         public async Task<int> ExecuteSqlCommandAsync(string sql, object? parameters = null, CancellationToken cancellationToken = default)
         {
+            // این خط باعث می‌شود متد بلافاصله آزاد شود و UI قفل نشود
+            // Defensive coding: Force continuation on a ThreadPool thread to mitigate deadlocks 
+            // if the caller incorrectly blocks the UI thread (e.g., using .Result or .Wait()).
+            await Task.Yield();
+
             const int maxRetries = 3;
             const int baseDelayMilliseconds = 200;
             var transientErrorNumbers = new[] { 1205, -2, 4060, 40197, 40501, 40613, 49918, 49919, 49920 };
@@ -831,7 +840,7 @@ namespace Prg_SendInvoice.CNNMANAGER
             {
                 RegConnectionStr = GetConnectionSpecifyNameApp();
 
-                if (RegConnectionStr == "InitError")
+                if (RegConnectionStr == "InitError" || string.IsNullOrWhiteSpace(RegConnectionStr))
                 {
                     CL_CCNNMANAGER.ConnectedToSQLDB = false;
                     return false;
@@ -843,7 +852,9 @@ namespace Prg_SendInvoice.CNNMANAGER
                 }
                 else
                 {
-                    CONNECTION_STR = CL_CryptionAlgorithem.DecryptTextUsingUTF8(RegConnectionStr) + "TrustServerCertificate=True;";
+                    //CONNECTION_STR = CL_CryptionAlgorithem.DecryptTextUsingUTF8(RegConnectionStr) + "TrustServerCertificate=True;";
+                    CONNECTION_STR = CL_CryptionAlgorithem.DecryptTextUsingUTF8(RegConnectionStr) + ";TrustServerCertificate=True;MultipleActiveResultSets=True;"; //MultipleActiveResultSets=True این اضافه شده , تا در عین اجرای کوئری های در سی شارپ با کد حلقه هم وسط Reader بتونه Execute کنه
+
                     CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
                     using var db = new SqlConnection(CONNECTION_STR);
@@ -863,6 +874,22 @@ namespace Prg_SendInvoice.CNNMANAGER
                 //Choosing_Connection choscnn = new Choosing_Connection();
                 //choscnn.ShowDialog();
                 CL_CCNNMANAGER.ConnectedToSQLDB = false;
+                return false;
+            }
+        }
+        public static async Task<bool> IsAvailableAsync()
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(CONNECTION_STR)) return false;
+                var builder = new SqlConnectionStringBuilder(CONNECTION_STR);
+                builder.ConnectTimeout = 3; // 3 seconds timeout
+                using var db = new SqlConnection(builder.ConnectionString);
+                await db.OpenAsync().ConfigureAwait(false);
+                return true;
+            }
+            catch
+            {
                 return false;
             }
         }
