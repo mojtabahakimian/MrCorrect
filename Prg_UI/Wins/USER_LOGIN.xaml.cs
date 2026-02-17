@@ -362,8 +362,7 @@ namespace Prg_UI.Wins
             //CL_Generaly.IsMrCorrectLocky = true;
 
             //Baseknow.USERCOD = 108;
-            //Baseknow.UUSER = "modir-mali";   
-
+            //Baseknow.UUSER = "modir-mali";
 
             Baseknow.mrcorrect = true;
 
@@ -389,9 +388,9 @@ namespace Prg_UI.Wins
 
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
 
-            new WIN_ORDR_HED().Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.NABZMOSH_KARSHENASH, this);
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
+            //new WIN_ORDR_HED().Show();
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FACTORS_LST, this, 13);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ANBAR_F_AK_MOGUDI_ANBAR_LIST, this);
             //new WinBase().Show();
             //new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED().Show();
             //new TR_FACOTRLST(5).Show();

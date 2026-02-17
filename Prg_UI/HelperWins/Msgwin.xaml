@@ -53,7 +53,7 @@
         <Button Padding="1" x:Name="Btn_no" Visibility="Visible" Content="خیر" Margin="84,0,276,13"    Height="42" BorderBrush="{x:Null}" Click="Btn_no_Click" Foreground="White" VerticalAlignment="Bottom" Cursor="Hand" FontSize="12" TabIndex="2" />
 
         <!--YesAndNoForDoing_End MsgTextBig-->
-        <TextBlock x:Name="MsgTextBig" Text="Long Resposive" Padding="1" Width="417"  TextWrapping="Wrap" TextAlignment="Right"  Margin="32,42,32,60" />
+        <TextBox x:Name="MsgTextBig" Text="Long Resposive" Padding="1" Width="417"  TextWrapping="Wrap" TextAlignment="Right"  Margin="32,42,32,60" />
 
         <TextBox Name="MsgTextNote" IsReadOnly="True" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FlowDirection="RightToLeft"  TextWrapping="Wrap" Text="اینجا پیغام اول به صورت پیغام عادی می باشد"  Foreground="Black" Margin="9,42,12,70"/>
         <!--JustOKCancelStart-->

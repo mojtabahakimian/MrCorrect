@@ -2741,19 +2741,18 @@ END;";
                         // Step 1: Drop the procedure if it already exists
                         // This ensures we can cleanly "CREATE" it again.
                         // ---------------------------------------------------------
-                        string dropSql = @"
-                IF OBJECT_ID('[dbo].[sp_Mogudi_Tafkik_Optimized]') IS NOT NULL
-                    DROP PROCEDURE [dbo].[sp_Mogudi_Tafkik_Optimized];
-            ";
-                        db.Execute(dropSql);
+                        //            string dropSql = @"
+                        //    IF OBJECT_ID('[dbo].[sp_Mogudi_Tafkik_Optimized]') IS NOT NULL
+                        //        DROP PROCEDURE [dbo].[sp_Mogudi_Tafkik_Optimized];
+                        //";
+                        //            db.Execute(dropSql);
 
                         // ---------------------------------------------------------
                         // Step 2: Create the Stored Procedure
                         // ---------------------------------------------------------
-                        string createSql = $@"
-                SET QUOTED_IDENTIFIER ON
-                SET ANSI_NULLS ON
 
+                        db.Execute("SET QUOTED_IDENTIFIER ON; SET ANSI_NULLS ON;");
+                        string createSql = $@"
                 CREATE PROCEDURE [dbo].[sp_Mogudi_Tafkik_Optimized]
                     @Forms___F_MENU_ANBAR___DT2 BIGINT,
                     @Forms___F_MENU_ANBAR___MANBAR NVARCHAR(10)
@@ -2946,6 +2945,7 @@ END;";
                     DROP TABLE #FinalAggregates;
                 END
             ";
+
                         db.Execute(createSql);
                     }
                     catch (Exception ex)

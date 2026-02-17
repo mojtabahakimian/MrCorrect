@@ -159,9 +159,6 @@ namespace Prg_UI.HelperWins
             try { ThreadSafeProperties.IsStillWorking = true; } catch { }
         }
 
-
-        // ...
-
         public static void ShowSequential(string message)
         {
             if (activeInstance != null)

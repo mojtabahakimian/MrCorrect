@@ -137,9 +137,9 @@ namespace Prg_UI.Wins.WinSetting
             }
 
             if (rd_WinAuth.IsChecked is true) //Windows Authentication
-                CNN_STR = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};Integrated Security=True;TrustServerCertificate=True;"; //WIN
+                CNN_STR = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;"; //WIN
             else if (rd_SqlAuth.IsChecked is true) //SQL Authentication
-                CNN_STR = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Password};Integrated Security=False;;TrustServerCertificate=True;"; // SQL
+                CNN_STR = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Password};Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=True;"; // SQL
 
             try
             {
@@ -202,9 +202,9 @@ namespace Prg_UI.Wins.WinSetting
                 var DbChooser_TEX = DbChooser_TEXBOX.Text.Trim();
 
                 if (rd_WinAuth.IsChecked is true) //Windows Authentication
-                    _cnn = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};Integrated Security=True;TrustServerCertificate=True;"; //WIN
+                    _cnn = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;"; //WIN
                 else if (rd_SqlAuth.IsChecked is true) //SQL Authentication
-                    _cnn = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Password};Integrated Security=False;TrustServerCertificate=True;"; // SQL
+                    _cnn = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Password};Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=True;"; // SQL
             });
 
             CL_CCNNMANAGER tsdb = new CL_CCNNMANAGER();
