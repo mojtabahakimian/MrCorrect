@@ -379,7 +379,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                     SELECT  I.EN_IDD,
                             I.EN_CUST_CO,
                             I.EN_KALA_COD,
-                            S.NAME AS KALA_NAME,
+                            S.NAME AS NAME_CODE,
                             I.EN_KALA_GR,
                             I.EN_GRCODE1,
                             I.EN_GRCODE2,
@@ -1063,7 +1063,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
                 string colHeader = e.Column.Header.ToString();
 
                 // Validation Rule: EN_KALA_COD vs Groups
-                if (e.Column.SortMemberPath == "EN_KALA_COD" || e.Column.SortMemberPath == "KALA_NAME")
+                if (e.Column.SortMemberPath == "EN_KALA_COD" || e.Column.SortMemberPath == "NAME_CODE")
                 {
                     //کالا
                     if (ENTERED_VALUE_ROW?.ToString() != WAS_ROW_ITEM?.KALA_NAME.ToStringNullSafe().Trim() ||

@@ -41,6 +41,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
             {
                 NUMBER_TO_OPEN = (double)number_to_open;
             }
+
+            //LBL1 , DARSAD
         }
 
         #region Header Window Begin

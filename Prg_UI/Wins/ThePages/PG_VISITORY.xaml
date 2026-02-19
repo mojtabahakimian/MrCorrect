@@ -145,7 +145,7 @@
                         <Label Content="گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در ماه فروش)" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
+                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" PreviewMouseLeftButtonDown="WrapPanel_PreviewMouseLeftButtonDown" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_2">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorKalaAmalkardByMonth.png" CacheOption="OnLoad"/>
@@ -154,7 +154,7 @@
                         <Label Content="گزارش عملکرد ویزیتور ها به تفکیک کالا (برگشتی در تاریخ برگشت)" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
+                    <WrapPanel FlowDirection="RightToLeft" PreviewMouseLeftButtonDown="WrapPanel_PreviewMouseLeftButtonDown_1" Orientation="Horizontal" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_3">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorsListByFactor.png" CacheOption="OnLoad"/>
@@ -163,7 +163,7 @@
                         <Label Content="لیست ویزیتور ها و پورسانت به تفکیک فاکتور" Foreground="#DDFFFFFF" Height="27" VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal" Margin="0,0,0,10">
+                    <WrapPanel FlowDirection="RightToLeft" PreviewMouseLeftButtonDown="WrapPanel_PreviewMouseLeftButtonDown_2" Orientation="Horizontal" Margin="0,0,0,10">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_4">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/VISITORY/VisitorSellListByFactor.png" CacheOption="OnLoad"/>

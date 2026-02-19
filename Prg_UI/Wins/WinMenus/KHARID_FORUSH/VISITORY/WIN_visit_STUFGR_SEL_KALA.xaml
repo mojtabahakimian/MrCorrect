@@ -61,7 +61,7 @@
         <!-- Content area -->
         <Grid Margin="0,38,0,0" FlowDirection="RightToLeft">
 
-            <Label Content="درصد پورسانت هر کالا:" Margin="10,10,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="26" VerticalAlignment="Top"/>
+            <Label x:Name="LBL1" Content="درصد پورسانت هر کالا:" Margin="10,10,0,0"  FlowDirection="RightToLeft" FontSize="10" HorizontalAlignment="Left" Width="auto" Height="26" VerticalAlignment="Top"/>
             <CNC:NumericTextBox x:Name="DARSAD" TextAlignment="Center" DoesAcceptDouble="True" Text="0" MaxLength="6" CustomUpdateSourceTrigger="PropertyChanged"  Height="28" Margin="117,8,0,0"     VerticalAlignment="Top"  Visibility="Visible"  HorizontalAlignment="Left" Width="55" NumericLostFocus="DARSAD_NumericLostFocus" />
             <Button x:Name="BTN_SAVE" Content="اضافه کردن و بستن"  BorderBrush="{x:Null}" FontSize="10" Foreground="#DDFFFFFF" Margin="0,5,457,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Right" Width="140" Click="BTN_SAVE_Click" />
 
