@@ -89,5 +89,20 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.VISITORS_PORSANT_HEAD, default);
         }
+
+        private void WrapPanel_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_VISIT_VISITKALMA, default);
+        }
+
+        private void WrapPanel_PreviewMouseLeftButtonDown_1(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.flist_porsant_factors, default);
+        }
+
+        private void WrapPanel_PreviewMouseLeftButtonDown_2(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_DATE_VISIT_VISITONE, default);
+        }
     }
 }

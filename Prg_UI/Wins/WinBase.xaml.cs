@@ -1578,5 +1578,10 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_ORDR_HED_SEFARESH, default);
         }
+
+        private void Button_Click_152(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_VISITGOL_HEAD_AHDAF, default);
+        }
     }
 }

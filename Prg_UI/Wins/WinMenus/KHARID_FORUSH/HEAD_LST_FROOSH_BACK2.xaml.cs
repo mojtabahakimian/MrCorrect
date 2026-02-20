@@ -2139,7 +2139,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                     Porid = visitorDtl.PORID,
                                     Tozih = visitorDtl.TOZIH,
                                     Stat = false,
-                                    Pursant = Math.Round((double)(Convert.ToDouble(JF.Text) * visitorDtl.DARSAD / 100))
+                                    Pursant = Math.Round((double)((Convert.ToDouble(JF.Text) - Convert.ToDouble(TAKHFIF.Text) + Convert.ToDouble(MBAA.Text)) * visitorDtl.DARSAD / 100))
                                 });
                         }
                     }
@@ -4426,6 +4426,11 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (FINAL_CROW_ITEM.STAT == null)
             {
                 ErrosMessages.Add(new MsgModel { MessageText_U = "تیک مبلغ ثابت خالی است!" });
+            }
+
+            if (!INVO_LST_FACTOR22_DATA.Any(x => x.MEGH_MAR > 0))
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار مرجوعی وارد نکرده اید!" });
             }
             //if (!double.TryParse(FINAL_CROW_ITEM.PORID?.ToString(), out double _) || string.IsNullOrEmpty(FINAL_CROW_ITEM?.PORID?.ToString()))
             //{

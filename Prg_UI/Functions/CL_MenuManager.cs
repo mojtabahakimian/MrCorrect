@@ -1051,6 +1051,10 @@ namespace Functions
             /// </summary>
             WIN_ORDR_HED_SEFARESH,
             /// <summary>
+            /// تعریف اهداف برای ویزیتور
+            /// </summary>
+            WIN_VISITGOL_HEAD_AHDAF,
+            /// <summary>
         }
         #endregion
 
@@ -1069,6 +1073,8 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+
+                case WinNameType.WIN_VISITGOL_HEAD_AHDAF: /*تعریف اهداف برای ویزیتور*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_VISITGOL_HEAD(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_ORDR_HED_SEFARESH: /*ثبت سفارشات کالا*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_ORDR_HED(), isModalDialog: false, allowMultipleInstances: false); break;
 
