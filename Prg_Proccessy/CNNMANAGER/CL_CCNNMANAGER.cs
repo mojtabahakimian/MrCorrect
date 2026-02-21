@@ -97,6 +97,8 @@ namespace Prg_SendInvoice.CNNMANAGER
             // Append "TrustServerCertificate=True;" for .NET Core compatibility.
             connectionStringBuilder.TrustServerCertificate = true;
 
+            connectionStringBuilder.MaxPoolSize = 1000; // ADDED: Prevent Connection Pool Exhaustion safety net
+
             // If the password was not provided, and we're not using Integrated Security, set it as an empty string.
             if (!passwordProvided && userIdProvided && !integratedSecurityProvided)
             {
@@ -104,6 +106,7 @@ namespace Prg_SendInvoice.CNNMANAGER
             }
 
             return connectionStringBuilder.ConnectionString + ";";
+
         }
         private static readonly int[] ConnectionErrorNumbers =
         {
@@ -349,6 +352,7 @@ namespace Prg_SendInvoice.CNNMANAGER
                         await db.CloseAsync();
                     }
                     await db.DisposeAsync();
+
                 }
             }
         }
@@ -853,7 +857,12 @@ namespace Prg_SendInvoice.CNNMANAGER
                 else
                 {
                     //CONNECTION_STR = CL_CryptionAlgorithem.DecryptTextUsingUTF8(RegConnectionStr) + "TrustServerCertificate=True;";
-                    CONNECTION_STR = CL_CryptionAlgorithem.DecryptTextUsingUTF8(RegConnectionStr) + ";TrustServerCertificate=True;MultipleActiveResultSets=True;"; //MultipleActiveResultSets=True این اضافه شده , تا در عین اجرای کوئری های در سی شارپ با کد حلقه هم وسط Reader بتونه Execute کنه
+
+                    var builder = new SqlConnectionStringBuilder(CL_CryptionAlgorithem.DecryptTextUsingUTF8(RegConnectionStr));
+                    builder.TrustServerCertificate = true;
+                    builder.MultipleActiveResultSets = true;
+                    builder.MaxPoolSize = 1000;
+                    CONNECTION_STR = builder.ConnectionString;
 
                     CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
@@ -863,6 +872,8 @@ namespace Prg_SendInvoice.CNNMANAGER
 
                     //dbms.Databasek.CommandTimeout = 100;
                     var TestCnn = dbms.DoGetDataSQL<string>("SELECT SERVERNAM FROM dbo.SAZMAN").FirstOrDefault();
+
+                    db?.Close(); db?.Dispose();
                     CL_CCNNMANAGER.ConnectedToSQLDB = true;
                     return true;
                 }
