@@ -327,6 +327,7 @@ namespace AUTO_BAZ
 
             SERVER_NAME_LBL.Text = CL_Generaly.General_Servername + " | " + CL_Generaly.General_DBname;
             YEAR_LBL.Content = Baseknow.NAME + " " + Baseknow.YEA;
+            //LBL_HEADER.Content = CL_CCNNMANAGER.CONNECTION_STR;
             #endregion
 
             // Load From Saved Data List
@@ -752,7 +753,7 @@ namespace AUTO_BAZ
                     Console.WriteLine(ex.ToString());
                 }
             }
-         
+
 
             //End}-----------------------------------
         }
@@ -949,7 +950,8 @@ namespace AUTO_BAZ
                     {
                         var rst = dbms.DoGetDataSQL<THE_QUERY1>("SELECT     dbo.STUF_FSK.CODE, dbo.STUF_FSK.ANBAR, dbo.STUF_FSK.MOGODI_A, dbo.STUF_FSK.FI_A, dbo.STUF_FSK.MABL_A FROM         dbo.STUF_DEF INNER JOIN                      dbo.STUF_FSK ON dbo.STUF_DEF.CODE = dbo.STUF_FSK.CODE GROUP BY dbo.STUF_FSK.CODE, dbo.STUF_FSK.ANBAR, dbo.STUF_FSK.MOGODI_A, dbo.STUF_FSK.FI_A, dbo.STUF_FSK.MABL_A").ToList(); LogWriter.WriteLog($" After    if (Strings.Mid(Baseknow.OPTIONSS, 66, 1) == \"5\") rst.Count = {rst.Count}");
                         //Parallel.For(0, rst.Count, r =>
-                        Parallel.For(0, rst.Count, r => //while (!rst.EOF)
+                        var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(rst.Count);
+                        Parallel.For(0, rst.Count, dbParallelOptions, r => //while (!rst.EOF)
                         {
                             List<cm_model> RST2 = null;
                             int errorno;

@@ -25,112 +25,8 @@ using System.Windows.Shapes;
 
 namespace AUTO_BAZ
 {
-    public class SqlLocator
-    {
-        [DllImport("odbc32.dll")]
-        private static extern short SQLAllocHandle(short hType, IntPtr inputHandle, out IntPtr outputHandle);
-        [DllImport("odbc32.dll")]
-        private static extern short SQLSetEnvAttr(IntPtr henv, int attribute, IntPtr valuePtr, int strLength);
-        [DllImport("odbc32.dll")]
-        private static extern short SQLFreeHandle(short hType, IntPtr handle);
-        [DllImport("odbc32.dll", CharSet = CharSet.Ansi)]
-        private static extern short SQLBrowseConnect(IntPtr hconn, StringBuilder inString,
-            short inStringLength, StringBuilder outString, short outStringLength,
-            out short outLengthNeeded);
-
-        private const short SQL_HANDLE_ENV = 1;
-        private const short SQL_HANDLE_DBC = 2;
-        private const int SQL_ATTR_ODBC_VERSION = 200;
-        private const int SQL_OV_ODBC3 = 3;
-        private const short SQL_SUCCESS = 0;
-
-        private const short SQL_NEED_DATA = 99;
-        private const short DEFAULT_RESULT_SIZE = 1024;
-        private const string SQL_DRIVER_STR = "DRIVER=SQL SERVER";
-
-        private SqlLocator() { }
-
-        public static string[] GetServers()
-        {
-            string[] retval = null;
-            string txt = string.Empty;
-            IntPtr henv = IntPtr.Zero;
-            IntPtr hconn = IntPtr.Zero;
-            StringBuilder inString = new StringBuilder(SQL_DRIVER_STR);
-            StringBuilder outString = new StringBuilder(DEFAULT_RESULT_SIZE);
-            short inStringLength = (short)inString.Length;
-            short lenNeeded = 0;
-
-            try
-            {
-                if (SQL_SUCCESS == SQLAllocHandle(SQL_HANDLE_ENV, henv, out henv))
-                {
-                    if (SQL_SUCCESS == SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (IntPtr)SQL_OV_ODBC3, 0))
-                    {
-                        if (SQL_SUCCESS == SQLAllocHandle(SQL_HANDLE_DBC, henv, out hconn))
-                        {
-                            if (SQL_NEED_DATA == SQLBrowseConnect(hconn, inString, inStringLength, outString,
-                                DEFAULT_RESULT_SIZE, out lenNeeded))
-                            {
-                                if (DEFAULT_RESULT_SIZE < lenNeeded)
-                                {
-                                    outString.Capacity = lenNeeded;
-                                    if (SQL_NEED_DATA != SQLBrowseConnect(hconn, inString, inStringLength, outString,
-                                        lenNeeded, out lenNeeded))
-                                    {
-                                        throw new ApplicationException("Unabled to aquire SQL Servers from ODBC driver.");
-                                    }
-                                }
-                                txt = outString.ToString();
-                                int start = txt.IndexOf("{") + 1;
-                                int len = txt.IndexOf("}") - start;
-                                if ((start > 0) && (len > 0))
-                                {
-                                    txt = txt.Substring(start, len);
-                                }
-                                else
-                                {
-                                    txt = string.Empty;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                //Throw away any error if we are not in debug mode
-                //MessageBox.Show(ex.Message, "Acquire SQL Servier List Error");
-                txt = string.Empty;
-            }
-            finally
-            {
-                if (hconn != IntPtr.Zero)
-                {
-                    SQLFreeHandle(SQL_HANDLE_DBC, hconn);
-                }
-                if (henv != IntPtr.Zero)
-                {
-                    SQLFreeHandle(SQL_HANDLE_ENV, hconn);
-                }
-            }
-
-            if (txt.Length > 0)
-            {
-                retval = txt.Split(",".ToCharArray());
-            }
-
-            return retval;
-        }
-    }
-
     public partial class WinConnectionChoose : Window
     {
-        CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
-        public WinConnectionChoose()
-        {
-            InitializeComponent();
-        }
         #region Header Window Begin
         //Header Window Begin
         private void btnm_Click(object sender, RoutedEventArgs e)
@@ -184,37 +80,12 @@ namespace AUTO_BAZ
         }
         //Header Window End;
         #endregion
+        CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+        public WinConnectionChoose()
+        {
+            InitializeComponent();
+        }
         private string CNN_STR { get; set; } = null;
-        //public static List<string> GetAllSqlServerNames()
-        //{
-        //    // Create a new list to hold the server names
-        //    List<string> servers = new List<string>();
-
-        //    // Use the SqlDataSourceEnumerator instance to get information about data sources
-        //    SqlDataSourceEnumerator instance = SqlDataSourceEnumerator.Instance;
-
-        //    DataTable serversTable = instance.GetDataSources();
-
-        //    // Iterate through the returned table and populate the server names list
-        //    foreach (DataRow row in serversTable.Rows)
-        //    {
-        //        string serverName = row["ServerName"].ToString();
-        //        string instanceName = row["InstanceName"].ToString();
-
-        //        // If the instance name is empty, just use the server name
-        //        if (string.IsNullOrEmpty(instanceName))
-        //        {
-        //            servers.Add(serverName);
-        //        }
-        //        else // If the instance name is not empty, use both the server name and instance name
-        //        {
-        //            servers.Add($"{serverName}\\{instanceName}");
-        //        }
-        //    }
-
-        //    return servers;
-        //}
-
         public static List<string> GetAllSqlServerNames()
         {
             // Create a new list to hold the server names
@@ -223,31 +94,32 @@ namespace AUTO_BAZ
             return servers;
         }
 
-        public static List<string> GetAllSqlServerNames_Fast()
-        {
-            // Use a HashSet to store the server names
-            HashSet<string> servers = new HashSet<string>();
+        //public static List<string> GetAllSqlServerNames_Fast()
+        //{
+        //    // Use a HashSet to store the server names
+        //    HashSet<string> servers = new HashSet<string>();
 
-            // Use a parallel loop to iterate through the rows
-            Parallel.ForEach(SqlDataSourceEnumerator.Instance.GetDataSources().AsEnumerable(), row =>
-            {
-                string serverName = row.Field<string>("ServerName");
-                string instanceName = row.Field<string>("InstanceName");
+        //    // Use a parallel loop to iterate through the rows
+        //    Parallel.ForEach(SqlDataSourceEnumerator.Instance.GetDataSources().AsEnumerable(), row =>
+        //    {
+        //        string serverName = row.Field<string>("ServerName");
+        //        string instanceName = row.Field<string>("InstanceName");
 
-                // Use a StringBuilder to construct the server name
-                StringBuilder sb = new StringBuilder(serverName);
-                if (!string.IsNullOrEmpty(instanceName))
-                {
-                    sb.Append("\\").Append(instanceName);
-                }
+        //        // Use a StringBuilder to construct the server name
+        //        StringBuilder sb = new StringBuilder(serverName);
+        //        if (!string.IsNullOrEmpty(instanceName))
+        //        {
+        //            sb.Append("\\").Append(instanceName);
+        //        }
 
-                // Use the Add method of the HashSet to avoid duplicates
-                servers.Add(sb.ToString());
-            });
+        //        // Use the Add method of the HashSet to avoid duplicates
+        //        servers.Add(sb.ToString());
+        //    });
 
-            // Convert the HashSet to a List and return it
-            return servers.ToList();
-        }
+        //    // Convert the HashSet to a List and return it
+        //    return servers.ToList();
+        //}
+
         private void Btn_SaveConnection_Click(object sender, RoutedEventArgs e)
         {
             string ServerChooser_TEX = ((TextBox)ServerChooser.Template.FindName("PART_EditableTextBox", ServerChooser)).Text;
@@ -268,9 +140,9 @@ namespace AUTO_BAZ
             }
 
             if (rd_WinAuth.IsChecked is true) //Windows Authentication
-                CNN_STR = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};Integrated Security=True;TrustServerCertificate=True;"; //WIN
+                CNN_STR = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;"; //WIN
             else if (rd_SqlAuth.IsChecked is true) //SQL Authentication
-                CNN_STR = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Text};Integrated Security=False;"; // SQL
+                CNN_STR = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Text};Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=True;"; // SQL
 
             try
             {
@@ -286,13 +158,14 @@ namespace AUTO_BAZ
                 return;
             }
             dbms.CreateConnectionSpecifyNameApp(CNN_STR);
-            new Msgwin(false, "با موفقیت به دیتابیس متصل شد , برنامه باید یکبار ری استارت شود.").ShowDialog();
+            new Msgwin(false, "با موفق به دیتابیس متصل شد , برنامه باید یکبار ری استارت شود.").ShowDialog();
             this.Close();
 
             var currentExecutablePath = Process.GetCurrentProcess().MainModule.FileName;
             Process.Start(currentExecutablePath);
+
             Application.Current.Shutdown();
-            Environment.Exit(0);
+            CL_LMethods.GoExitTheApplication(); //#NABILOO#
             return;
 
             //Restart Application
@@ -330,9 +203,9 @@ namespace AUTO_BAZ
                 var DbChooser_TEX = DbChooser_TEXBOX.Text.Trim();
 
                 if (rd_WinAuth.IsChecked is true) //Windows Authentication
-                    _cnn = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};Integrated Security=True;TrustServerCertificate=True;"; //WIN
+                    _cnn = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;"; //WIN
                 else if (rd_SqlAuth.IsChecked is true) //SQL Authentication
-                    _cnn = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Text};Integrated Security=False;"; // SQL
+                    _cnn = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Text};Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=True;"; // SQL
             });
 
             CL_CCNNMANAGER tsdb = new CL_CCNNMANAGER();
@@ -341,7 +214,7 @@ namespace AUTO_BAZ
             {
                 _result = tsdb.DoGetDataSQL<string>("SELECT SERVERNAM FROM dbo.SAZMAN").FirstOrDefault();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return false;
             }
@@ -380,6 +253,15 @@ namespace AUTO_BAZ
                 ServerChooser.Items.Add(CL_Generaly.General_Servername);
                 DbChooser.Items.Add(CL_Generaly.General_DBname);
 
+                if (!string.IsNullOrWhiteSpace(CL_Generaly.General_Username))
+                {
+                    Textbox_DataUsername.Text = CL_Generaly.General_Username;
+                }
+                if (!string.IsNullOrWhiteSpace(CL_Generaly.General_Password))
+                {
+                    Textbox_Datapass.Text = CL_Generaly.General_Password;
+                }
+
                 ServerChooser.SelectionChanged += ServerChooser_SelectionChanged; //برای ایکه رویداد الکی اجرا نشه تداخل درست کنه
             }
         }
@@ -413,23 +295,17 @@ namespace AUTO_BAZ
         {
             try
             {
-
-                if (string.IsNullOrEmpty(ServerChooser.SelectedValue.ToStringNullSafe()))
-                {
-                    var ServerChooser_TEX = (TextBox)ServerChooser.Template.FindName("PART_EditableTextBox", ServerChooser);
-                    ServerChooser.SelectedValue = ServerChooser_TEX.Text;
-                }
+                string ServerChooser_TEX = ((TextBox)ServerChooser.Template.FindName("PART_EditableTextBox", ServerChooser)).Text;
 
                 var _TMPCNN = "";
                 if (rd_WinAuth.IsChecked is true) //Windows Authentication
-                    _TMPCNN = $@"Data Source={ServerChooser.SelectedValue};Initial Catalog=master;Integrated Security=True;TrustServerCertificate=True;"; //WIN
+                    _TMPCNN = $@"Data Source={ServerChooser_TEX};Initial Catalog=master;Integrated Security=True;TrustServerCertificate=True;"; //WIN
                 else if (rd_SqlAuth.IsChecked is true) //SQL Authentication
-                    _TMPCNN = $@"Data Source={ServerChooser.SelectedValue};Initial Catalog=master;User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Text};Integrated Security=False;"; // SQL
+                    _TMPCNN = $@"Data Source={ServerChooser_TEX};Initial Catalog=master;User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Text};Integrated Security=False;"; // SQL
 
                 using (IDbConnection db = new SqlConnection(_TMPCNN))
                 {
                     db.Open();
-
                     var LastSelectedDatabase = DbChooser.SelectedValue;
 
                     var commandDefinition = new CommandDefinition("SELECT name from sys.databases where name not in ('master', 'model', 'tempdb', 'msdb') order by name", parameters: null, commandTimeout: 300);
