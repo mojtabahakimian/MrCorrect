@@ -369,14 +369,10 @@
                             </ProgressBar.RenderTransform>
                         </ProgressBar>
                     </Viewbox>
-
-
-                    <TextBlock Margin="0,0,33,33" TextWrapping="Wrap" FlowDirection="RightToLeft" Text="تعداد روز هایی که برگردد " Width="132" VerticalAlignment="Bottom" HorizontalAlignment="Right" Cursor="Hand" Height="20" Foreground="#D8000000"/>
-                    <TextBlock Margin="0,0,33,33" TextWrapping="Wrap" FlowDirection="RightToLeft" Text="تعداد روز هایی که برگردد " Width="132" VerticalAlignment="Bottom" HorizontalAlignment="Right" Cursor="Hand" Height="20" Foreground="#D8000000"/>
-                    <TextBox x:Name="daysb" Style="{StaticResource MaterialDesignOutlinedTextBox}" TextAlignment="Center" Padding="3" Margin="0,0,163,30" Text="365" PreviewLostKeyboardFocus="daysb_PreviewLostKeyboardFocus" HorizontalAlignment="Right" Width="48" Height="25" VerticalAlignment="Bottom" Foreground="#D81A1A1A" BorderThickness="0,0,0,0" Background="#FFF2F2F2"/>
-                    <TextBlock Margin="0,0,219,33" TextWrapping="Wrap" FlowDirection="RightToLeft" Text="تعداد تکرار :" Width="61" VerticalAlignment="Bottom" HorizontalAlignment="Right" Cursor="Hand" Height="20" Foreground="#D8000000"/>
-                    <TextBox x:Name="repeatb" Style="{StaticResource MaterialDesignOutlinedTextBox}" TextAlignment="Center" Padding="3" Margin="0,0,285,30" Text="1" PreviewLostKeyboardFocus="repeatb_PreviewLostKeyboardFocus" HorizontalAlignment="Right" Width="48" Height="25" VerticalAlignment="Bottom" Foreground="#D81A1A1A" BorderThickness="0,0,0,0" Background="#FFF2F2F2"/>
-
+                    <TextBlock Margin="0,0,33,23" TextWrapping="Wrap" FlowDirection="RightToLeft" Text="تعداد روز هایی که برگردد " Width="132" VerticalAlignment="Bottom" HorizontalAlignment="Right" Cursor="Hand" Height="20" Foreground="#D8000000"/>
+                    <TextBox x:Name="daysb" Style="{StaticResource MaterialDesignOutlinedTextBox}" TextAlignment="Center" Padding="3" Margin="0,0,163,20" Text="365" PreviewLostKeyboardFocus="daysb_PreviewLostKeyboardFocus" HorizontalAlignment="Right" Width="48" Height="25" VerticalAlignment="Bottom" Foreground="#D81A1A1A" BorderThickness="0,0,0,0" Background="#FFF2F2F2"/>
+                    <TextBlock Margin="0,0,219,23" TextWrapping="Wrap" FlowDirection="RightToLeft" Text="تعداد تکرار :" Width="61" VerticalAlignment="Bottom" HorizontalAlignment="Right" Cursor="Hand" Height="20" Foreground="#D8000000"/>
+                    <TextBox x:Name="repeatb" Style="{StaticResource MaterialDesignOutlinedTextBox}" TextAlignment="Center" Padding="3" Margin="0,0,285,20" Text="1" PreviewLostKeyboardFocus="repeatb_PreviewLostKeyboardFocus" HorizontalAlignment="Right" Width="48" Height="25" VerticalAlignment="Bottom" Foreground="#D81A1A1A" BorderThickness="0,0,0,0" Background="#FFF2F2F2"/>
 
                 </Grid>
             </Border>
