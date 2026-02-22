@@ -456,8 +456,10 @@ namespace AUTO_BAZ
             Properties.Settings.Default.IsC9 = c9.IsChecked ?? false;
             Properties.Settings.Default.IsC10 = c10.IsChecked ?? false;
             Properties.Settings.Default.IsC11 = c11.IsChecked ?? false;
+            Properties.Settings.Default.UseSmartThrottling = chkUseSmartThrottling.IsChecked ?? false;
 
             //Properties.Settings.Default.IsDefacc = defacc.IsChecked ?? false;
+            Properties.Settings.Default.UseParallelProcessing = UseParallelProcessing.IsChecked ?? true;
 
             Properties.Settings.Default.Save();
         }
@@ -478,6 +480,8 @@ namespace AUTO_BAZ
                 c9.IsChecked = Properties.Settings.Default.IsC9;
                 c10.IsChecked = Properties.Settings.Default.IsC10;
                 c11.IsChecked = Properties.Settings.Default.IsC11;
+                UseParallelProcessing.IsChecked = Properties.Settings.Default.UseParallelProcessing;
+                chkUseSmartThrottling.IsChecked = Properties.Settings.Default.UseSmartThrottling;
             }
             else
             {
@@ -493,11 +497,18 @@ namespace AUTO_BAZ
                 c9.IsChecked = CHKITEMS[9];
                 c10.IsChecked = CHKITEMS[10];
                 c11.IsChecked = CHKITEMS[11];
+                UseParallelProcessing.IsChecked = Properties.Settings.Default.UseParallelProcessing;
+                chkUseSmartThrottling.IsChecked = Properties.Settings.Default.UseSmartThrottling;
             }
+
+            CL_HESABDARI_AUTO_BAZ.UseSmartThrottlingByDefault = chkUseSmartThrottling.IsChecked ?? false;
 
             //defacc.IsChecked = Properties.Settings.Default.IsDefacc;
         }
-
+        private void UseParallelProcessing_Click(object sender, RoutedEventArgs e)
+        {
+            SaveCheckBoxesState();
+        }
         private bool IsNull(object inputy)
         {
             if (string.IsNullOrEmpty(inputy.ToStringNullSafe())) // بله خالیه
@@ -566,7 +577,7 @@ namespace AUTO_BAZ
             // Loop through each checkbox and set the IsChecked property
             foreach (CheckBox checkbox in checkboxes)
             {
-                if (checkbox.Name == "FORMOL" || checkbox.Name == "defacc" || checkbox.Name == "C00")
+                if (checkbox.Name == "FORMOL" || checkbox.Name == "defacc" || checkbox.Name == "C00" || checkbox.Name == "chkUseSmartThrottling")
                 {
                 }
                 else
@@ -604,6 +615,7 @@ namespace AUTO_BAZ
             {
                 if (checkbox.Name == "FORMOL") { /*ignore*/ }
                 else if (checkbox.Name == "defacc") { /*ignore*/ }
+                else if (checkbox.Name == "chkUseSmartThrottling") { /*ignore*/ }
                 else
                 {
                     if ((bool)checkbox.IsChecked)
@@ -949,9 +961,9 @@ namespace AUTO_BAZ
                     if (Strings.Mid(Baseknow.OPTIONSS, 66, 1) == "5")
                     {
                         var rst = dbms.DoGetDataSQL<THE_QUERY1>("SELECT     dbo.STUF_FSK.CODE, dbo.STUF_FSK.ANBAR, dbo.STUF_FSK.MOGODI_A, dbo.STUF_FSK.FI_A, dbo.STUF_FSK.MABL_A FROM         dbo.STUF_DEF INNER JOIN                      dbo.STUF_FSK ON dbo.STUF_DEF.CODE = dbo.STUF_FSK.CODE GROUP BY dbo.STUF_FSK.CODE, dbo.STUF_FSK.ANBAR, dbo.STUF_FSK.MOGODI_A, dbo.STUF_FSK.FI_A, dbo.STUF_FSK.MABL_A").ToList(); LogWriter.WriteLog($" After    if (Strings.Mid(Baseknow.OPTIONSS, 66, 1) == \"5\") rst.Count = {rst.Count}");
-                        //Parallel.For(0, rst.Count, r =>
+                        //CL_HESABDARI_AUTO_BAZ.ExecuteWithPreferredLoop(0, rst.Count, r =>
                         var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(rst.Count);
-                        Parallel.For(0, rst.Count, dbParallelOptions, r => //while (!rst.EOF)
+                        CL_HESABDARI_AUTO_BAZ.ExecuteWithPreferredLoop(0, rst.Count, dbParallelOptions, r => //while (!rst.EOF)
                         {
                             List<cm_model> RST2 = null;
                             int errorno;
@@ -2487,6 +2499,11 @@ namespace AUTO_BAZ
         }
         private void defacc_Click(object sender, RoutedEventArgs e)
         {
+            SaveCheckBoxesState();
+        }
+        private void chkUseSmartThrottling_Click(object sender, RoutedEventArgs e)
+        {
+            CL_HESABDARI_AUTO_BAZ.UseSmartThrottlingByDefault = chkUseSmartThrottling.IsChecked ?? false;
             SaveCheckBoxesState();
         }
 
