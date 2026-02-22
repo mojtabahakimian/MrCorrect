@@ -191,37 +191,20 @@ namespace AUTO_BAZ
         // put this in the Task :      CancellationToken token = CancelerTOKEN.Token;         token.ThrowIfCancellationRequested();
         List<Task> tasks = new List<Task>();
 
-        private List<ProgressBar> individualProgressBars = new List<ProgressBar>();
+        private List<(CheckBox checkBox, ProgressBar progressBar)> _taskControls = new List<(CheckBox, ProgressBar)>();
         public void UpdateOverallProgressBar()
         {
-            individualProgressBars?.Clear();
+            if (_taskControls == null || _taskControls.Count == 0) return;
 
-            individualProgressBars.Add(PRGR_C0);
-            individualProgressBars.Add(PRGR_C00);
-            individualProgressBars.Add(PRGR_C1);
-            individualProgressBars.Add(PRGR_C2);
-            individualProgressBars.Add(PRGR_C3);
-            individualProgressBars.Add(PRGR_C4);
-            individualProgressBars.Add(PRGR_C5);
-            individualProgressBars.Add(PRGR_C6);
-            individualProgressBars.Add(PRGR_C7);
-            individualProgressBars.Add(PRGR_C8);
-            individualProgressBars.Add(PRGR_C9);
-            individualProgressBars.Add(PRGR_C10);
-            individualProgressBars.Add(PRGR_C11);
-
-            double totalValue = individualProgressBars.Where(pb => pb.Value > 0).Sum(pb => pb.Value);
-            int activeProgressBarCount = individualProgressBars.Count(pb => pb.Value > 0);
+            var activeTasks = _taskControls.Where(x => x.checkBox.IsChecked == true).ToList();
+            int activeCount = activeTasks.Count;
 
             double overallProgress = 0;
 
-            if (activeProgressBarCount > 0)
+            if (activeCount > 0)
             {
-                overallProgress = totalValue / activeProgressBarCount;
-            }
-            else
-            {
-                overallProgress = 0;
+                double totalValue = activeTasks.Sum(x => x.progressBar.Value);
+                overallProgress = totalValue / activeCount;
             }
 
             // Update the text label
@@ -329,6 +312,23 @@ namespace AUTO_BAZ
             YEAR_LBL.Content = Baseknow.NAME + " " + Baseknow.YEA;
             //LBL_HEADER.Content = CL_CCNNMANAGER.CONNECTION_STR;
             #endregion
+
+            _taskControls = new List<(CheckBox, ProgressBar)>
+            {
+                (C0, PRGR_C0),
+                (C00, PRGR_C00),
+                (c1, PRGR_C1),
+                (c2, PRGR_C2),
+                (c3, PRGR_C3),
+                (c4, PRGR_C4),
+                (c5, PRGR_C5),
+                (c6, PRGR_C6),
+                (c7, PRGR_C7),
+                (c8, PRGR_C8),
+                (c9, PRGR_C9),
+                (c10, PRGR_C10),
+                (c11, PRGR_C11)
+            };
 
             // Load From Saved Data List
             if (!string.IsNullOrEmpty(Properties.Settings.Default.TheHistoryLST))
@@ -632,6 +632,8 @@ namespace AUTO_BAZ
             Dispatcher.Invoke(new Action(() =>
             {
                 if (IsAtLeasOnChecked() is false) { return; }
+
+                Generaly.DoResetCountersDisplay();
 
                 if (!int.TryParse(repeatb.Text.Trim(), out repeatCount) || repeatCount <= 0)
                 {

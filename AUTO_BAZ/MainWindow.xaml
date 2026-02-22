@@ -81,7 +81,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="280"/>
                         <ColumnDefinition/>
-                        <ColumnDefinition Width="325.06"/>
+                        <ColumnDefinition Width="335"/>
                     </Grid.ColumnDefinitions>
 
                     <Grid Grid.Column="0" Margin="0,0,10,0">
@@ -181,124 +181,117 @@
                                     <Label x:Name="lblchecks" Content="انتخاب همه اسناد و عملیات" Style="{StaticResource HeaderTextStyle}"/>
                                 </StackPanel>
 
-                                <Grid Grid.Row="1">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                    </Grid.RowDefinitions>
+                                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                    <UniformGrid Columns="2">
 
-                                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,10" Cursor="Hand">
-                                        <Grid Width="40" Height="40" Margin="0,0,10,0">
-                                            <ProgressBar x:Name="PRGR_C0" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight" />
-                                            <Label x:Name="LBL_C0" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
-                                        </Grid>
-                                        <CheckBox x:Name="C0" Content="باز سازی نرخ میانگین" Click="C0_Click" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C0" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C0" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="C0" Content="باز سازی نرخ میانگین" Click="C0_Click" VerticalAlignment="Center"/>
+                                        </StackPanel>
 
-                                    <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,10">
-                                        <Grid Width="40" Height="40" Margin="0,0,10,0">
-                                            <ProgressBar x:Name="PRGR_C00" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight" />
-                                            <Label x:Name="LBL_C00" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
-                                        </Grid>
-                                        <CheckBox x:Name="C00" Content="باز سازی موجودی انبار" Click="C00_Click" VerticalAlignment="Center" Cursor="Hand"/>
-                                    </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C6" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C6" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c6" Content="سند خروج سایر" Click="c6_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
 
-                                    <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Margin="0,10">
-                                        <Grid Width="40" Height="40" Margin="0,0,10,0">
-                                            <ProgressBar x:Name="PRGR_C1" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight" />
-                                            <Label x:Name="LBL_C1" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
-                                        </Grid>
-                                        <CheckBox x:Name="c1" Content="سند فروش" Click="c1_Click" VerticalAlignment="Center" Cursor="Hand"/>
-                                    </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C00" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C00" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="C00" Content="باز سازی موجودی انبار" Click="C00_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
 
-                                    <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Margin="0,10">
-                                        <Grid Width="40" Height="40" Margin="0,0,10,0">
-                                            <ProgressBar x:Name="PRGR_C2" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight" />
-                                        </Grid>
-                                        <CheckBox x:Name="c2" Content="سند خرید" Click="c2_Click" VerticalAlignment="Center" Cursor="Hand"/>
-                                    </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C7" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C7" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c7" Content="سند تولید ورود" Click="c7_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
 
-                                    <StackPanel Grid.Row="4" Grid.Column="0" Orientation="Horizontal" Margin="0,10">
-                                        <Grid Width="40" Height="40" Margin="0,0,10,0">
-                                            <ProgressBar x:Name="PRGR_C3" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight" />
-                                            <Label x:Name="LBL_C3" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
-                                        </Grid>
-                                        <CheckBox x:Name="c3" Content="سند خزانه" Click="c3_Click" VerticalAlignment="Center" Cursor="Hand"/>
-                                    </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C1" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C1" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c1" Content="سند فروش" Click="c1_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
 
-                                    <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Horizontal" Margin="0,10">
-                                        <Grid Width="40" Height="40" Margin="0,0,10,0">
-                                            <ProgressBar x:Name="PRGR_C4" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight" />
-                                            <Label x:Name="LBL_C4" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
-                                        </Grid>
-                                        <CheckBox x:Name="c4" Content="سند انتقالی" Click="c4_Click" VerticalAlignment="Center" Cursor="Hand"/>
-                                    </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C8" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C8" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c8" Content="سند برگشت فروش" Click="c8_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
 
-                                    <StackPanel Grid.Row="6" Grid.Column="0" Orientation="Horizontal" Margin="0,10">
-                                        <Grid Width="40" Height="40" Margin="0,0,10,0">
-                                            <ProgressBar x:Name="PRGR_C5" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight" />
-                                            <Label x:Name="LBL_C5" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
-                                        </Grid>
-                                        <CheckBox x:Name="c5" Content="سند خروج مواد" Click="c5_Click" VerticalAlignment="Center" Cursor="Hand"/>
-                                    </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C2" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c2" Content="سند خرید" Click="c2_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
 
-                                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,10">
-                                        <Grid Width="40" Height="40" Margin="0,0,10,0">
-                                            <ProgressBar x:Name="PRGR_C6" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight" />
-                                            <Label x:Name="LBL_C6" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
-                                        </Grid>
-                                        <CheckBox x:Name="c6" Content="سند خروج سایر" Click="c6_Click" VerticalAlignment="Center" Cursor="Hand"/>
-                                    </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C9" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C9" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c9" Content="سند خدمات" Click="c9_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
 
-                                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,10">
-                                        <Grid Width="40" Height="40" Margin="0,0,10,0">
-                                            <ProgressBar x:Name="PRGR_C7" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight" />
-                                            <Label x:Name="LBL_C7" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
-                                        </Grid>
-                                        <CheckBox x:Name="c7" Content="سند تولید ورود" Click="c7_Click" VerticalAlignment="Center" Cursor="Hand"/>
-                                    </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C3" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C3" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c3" Content="سند خزانه" Click="c3_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
 
-                                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,10">
-                                        <Grid Width="40" Height="40" Margin="0,0,10,0">
-                                            <ProgressBar x:Name="PRGR_C8" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight" />
-                                            <Label x:Name="LBL_C8" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
-                                        </Grid>
-                                        <CheckBox x:Name="c8" Content="سند برگشت فروش" Click="c8_Click" VerticalAlignment="Center" Cursor="Hand"/>
-                                    </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C10" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C10" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c10" Content="سند انبار گردانی" Click="c10_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
 
-                                    <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,10">
-                                        <Grid Width="40" Height="40" Margin="0,0,10,0">
-                                            <ProgressBar x:Name="PRGR_C9" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight" />
-                                            <Label x:Name="LBL_C9" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
-                                        </Grid>
-                                        <CheckBox x:Name="c9" Content="سند خدمات" Click="c9_Click" VerticalAlignment="Center" Cursor="Hand"/>
-                                    </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C4" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C4" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c4" Content="سند انتقالی" Click="c4_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
 
-                                    <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Margin="0,10">
-                                        <Grid Width="40" Height="40" Margin="0,0,10,0">
-                                            <ProgressBar x:Name="PRGR_C10" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight" />
-                                            <Label x:Name="LBL_C10" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
-                                        </Grid>
-                                        <CheckBox x:Name="c10" Content="سند انبار گردانی" Click="c10_Click" VerticalAlignment="Center" Cursor="Hand"/>
-                                    </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C11" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C11" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c11" Content="سند وصولی اسناد دریافتنی" Click="c11_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
 
-                                    <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" Margin="0,10">
-                                        <Grid Width="40" Height="40" Margin="0,0,10,0">
-                                            <ProgressBar x:Name="PRGR_C11" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight" />
-                                            <Label x:Name="LBL_C11" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
-                                        </Grid>
-                                        <CheckBox x:Name="c11" Content="سند وصولی اسناد دریافتنی" Click="c11_Click" VerticalAlignment="Center" Cursor="Hand"/>
-                                    </StackPanel>
-                                </Grid>
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C5" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C5" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c5" Content="سند خروج مواد" Click="c5_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
+
+                                        <StackPanel MinWidth="150"/>
+
+                                    </UniformGrid>
+                                </ScrollViewer>
+
                             </Grid>
                         </materialDesign:Card>
                     </Grid>
@@ -317,7 +310,7 @@
                                 </StackPanel>
 
                                 <Grid HorizontalAlignment="Center" Margin="0,10,0,30">
-                                    <ProgressBar x:Name="TOGHER_PROGRESS" FlowDirection="LeftToRight" Style="{StaticResource MaterialDesignCircularProgressBar}" Value="0" Minimum="0" Maximum="100" Width="140" Height="140" Foreground="#FF05962F"/>
+                                    <ProgressBar x:Name="TOGHER_PROGRESS" FlowDirection="LeftToRight" Style="{StaticResource MaterialDesignCircularProgressBar}" Value="0" Minimum="0" Maximum="100" Width="140" Height="140" Foreground="#FF03A9F4"/>
                                     <Label x:Name="COUNTER_TXBL" Content="0.00%" FontSize="24" Foreground="#333" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 </Grid>
 
@@ -329,7 +322,7 @@
                                     </Grid.ColumnDefinitions>
 
                                     <Button x:Name="LetsGoBtn" Grid.Column="0" Content="شروع" Click="LetsGoBtn_Click" Background="#FF03A9F4" BorderBrush="{x:Null}" Foreground="White" Height="45" materialDesign:ButtonAssist.CornerRadius="8" FontSize="14" />
-                                    <Button x:Name="Btn_DoCancel" Grid.Column="2" Content="توقف" Click="Btn_DoCancel_Click" Background="#FFFF0B0B" BorderBrush="{x:Null}" Foreground="White" Height="45" materialDesign:ButtonAssist.CornerRadius="8" FontSize="14" IsEnabled="False"/>
+                                    <Button x:Name="Btn_DoCancel" Grid.Column="2" Content="توقف" Click="Btn_DoCancel_Click" Background="#FFE27C7C" BorderBrush="{x:Null}" Foreground="White" Height="45" materialDesign:ButtonAssist.CornerRadius="8" FontSize="14" IsEnabled="False"/>
                                 </Grid>
                             </StackPanel>
                         </materialDesign:Card>
