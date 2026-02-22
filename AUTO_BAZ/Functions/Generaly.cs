@@ -50,6 +50,32 @@ namespace AUTO_BAZ.Functions
         }
 
         private static volatile bool _defac = true; // Make it volatile for thread-safe reads
+        private static volatile bool _parallelMode = true;
+
+        public static bool UseParallelProcessing
+        {
+            get
+            {
+                try
+                {
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        var winy = (MainWindow)Application.Current.Windows.OfType<Window>().FirstOrDefault(window => window.GetType().Name == "MainWindow");
+                        if (winy != null)
+                        {
+                            _parallelMode = Convert.ToBoolean(winy.UseParallelProcessing.IsChecked);
+                        }
+                    }));
+                }
+                catch
+                {
+                    return Properties.Settings.Default.UseParallelProcessing;
+                }
+
+                return _parallelMode;
+            }
+        }
+
         /// <summary>
         /// تیک حساب هایی که نیست بساز
         /// </summary>

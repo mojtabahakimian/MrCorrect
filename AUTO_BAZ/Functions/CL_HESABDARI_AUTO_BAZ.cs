@@ -28,6 +28,8 @@ namespace AUTO_BAZ.Functions
     {
         static CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
+        public static bool UseSmartThrottlingByDefault { get; set; } = false;
+
         #region Custom_Modelses
         public class QUERY_MODEL6
         {
@@ -481,8 +483,25 @@ namespace AUTO_BAZ.Functions
         }
         //______________
 
+        public static void ExecuteWithPreferredLoop(int fromInclusive, int toExclusive, ParallelOptions parallelOptions, Action<int> body)
+        {
+            if (Generaly.UseParallelProcessing)
+            {
+                Parallel.For(fromInclusive, toExclusive, parallelOptions, body);
+            }
+            else
+            {
+                for (int i = fromInclusive; i < toExclusive; i++)
+                {
+                    body(i);
+                }
+            }
+        }
+
         public static ParallelOptions BuildDbAwareParallelOptions(int itemCount, bool useSmartThrottling = false)
         {
+            useSmartThrottling = useSmartThrottling || UseSmartThrottlingByDefault;
+
             // ۱. اگر حالت هوشمند غیرفعال باشد، دات‌نت را به حال خودش رها می‌کنیم (حالت پیش‌فرض و نامحدود)
             if (!useSmartThrottling)
             {
@@ -501,7 +520,7 @@ namespace AUTO_BAZ.Functions
                     var maxPoolSize = builder.MaxPoolSize > 0 ? builder.MaxPoolSize : 1000;
 
                     // هر Iteration یک Connection لحظه‌ای می‌گیرد؛ پس باید فاصله امن از سقف Pool نگه داریم.
-                    // 25% از Pool (حداقل 4 و حداکثر 16) برای این Parallel.For استفاده می‌شود تا سایر ماژول‌ها هم Connection داشته باشند.
+                    // 25% از Pool (حداقل 4 و حداکثر 16) برای این ExecuteWithPreferredLoop استفاده می‌شود تا سایر ماژول‌ها هم Connection داشته باشند.
                     maxDegree = Math.Clamp(maxPoolSize / 4, 4, 16);
                 }
             }
@@ -1002,7 +1021,7 @@ namespace AUTO_BAZ.Functions
             {
                 //for (int HFRST_EOF = 0; HFRST_EOF < HFRST.Count; HFRST_EOF++)
                 var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HFRST.Count);
-                Parallel.For(0, HFRST.Count, dbParallelOptions, HFRST_EOF =>
+                ExecuteWithPreferredLoop(0, HFRST.Count, dbParallelOptions, HFRST_EOF =>
                 {
                     double? max_ns, MABL_CHK = null, JAMF, JAMCH, CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null, HKOL = null, HMOIN = null, HTAF = null, HTAF2 = null, HTAF3 = null, HTAF4 = null, takh;
                     string shart;
@@ -2498,7 +2517,7 @@ namespace AUTO_BAZ.Functions
             }
 
             var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HFRST.Count);
-            Parallel.For(0, HFRST.Count, dbParallelOptions, HFRST_EOF =>
+            ExecuteWithPreferredLoop(0, HFRST.Count, dbParallelOptions, HFRST_EOF =>
             {
                 QRE10 SARST = null;
                 string SHSH;
@@ -3512,7 +3531,7 @@ namespace AUTO_BAZ.Functions
             //for (int EOFi = 0; EOFi < HFRST.Count; EOFi++)
             var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HFRST.Count);
 
-            Parallel.For(0, HFRST.Count, dbParallelOptions, EOFi =>
+            ExecuteWithPreferredLoop(0, HFRST.Count, dbParallelOptions, EOFi =>
             {
 
                 string sharhd;
@@ -3683,7 +3702,7 @@ namespace AUTO_BAZ.Functions
             LogWriter.WriteLog("سند انتقال شروع بازسازی از سند شماره : " + NUMBER + " تا سند شماره :" + NUMBER2 + " " + DateTime.Now);
 
             var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HEDRST.Count);
-            Parallel.For(0, HEDRST.Count, dbParallelOptions, rw =>
+            ExecuteWithPreferredLoop(0, HEDRST.Count, dbParallelOptions, rw =>
             {
                 string DBStr;
                 double MABL_CHK, JAMF, JAMCH;
@@ -3872,7 +3891,7 @@ namespace AUTO_BAZ.Functions
             LogWriter.WriteLog("SANADKHORUGMAVAD: شروع بازسازی از برگ شماره : " + NUMBER + " تا سند شماره :" + NUMBER2 + " " + DateTime.Now);
 
             var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HEDRST.Count);
-            Parallel.For(0, HEDRST.Count, dbParallelOptions, R => // while (!HEDRST.EOF())
+            ExecuteWithPreferredLoop(0, HEDRST.Count, dbParallelOptions, R => // while (!HEDRST.EOF())
             {
                 int RDD;
                 double MABL_CHK, JAMF, JAMCH;
@@ -4248,7 +4267,7 @@ namespace AUTO_BAZ.Functions
             //for (int EOF = 0; EOF < HEDRST.Count; EOF++)
 
             var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HEDRST.Count);
-            Parallel.For(0, HEDRST.Count, dbParallelOptions, EOF =>
+            ExecuteWithPreferredLoop(0, HEDRST.Count, dbParallelOptions, EOF =>
             {
                 string DBStr;
                 double max_ns, MABL_CHK, JAMF, JAMCH;
@@ -4509,7 +4528,7 @@ namespace AUTO_BAZ.Functions
             LogWriter.WriteLog("ورود ساخته شده تولید شروع باز سازي از سند شماره : " + NUMBER + " تا سند شماره :" + NUMBER2 + DateTime.Now);
 
             var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HEDRST.Count);
-            Parallel.For(0, HEDRST.Count, dbParallelOptions, ROW =>
+            ExecuteWithPreferredLoop(0, HEDRST.Count, dbParallelOptions, ROW =>
             {
                 double max_ns, MABL_CHK, JAMF, JAMCH;
                 string? shart = null;
@@ -4788,7 +4807,7 @@ namespace AUTO_BAZ.Functions
             LogWriter.WriteLog("شروع باز سازي از فاکتور برشگت فروش شماره : " + fnum + " تا فاكتور شماره :" + TNUM + DateTime.Now);
 
             var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HFRST.Count);
-            Parallel.For(0, HFRST.Count, dbParallelOptions, ROW =>
+            ExecuteWithPreferredLoop(0, HFRST.Count, dbParallelOptions, ROW =>
             //for (int ROW = 0; ROW < HFRST.Count; ROW++) //while (!HFRST.EOF)
             {
                 object a = default, fs;
@@ -5618,7 +5637,7 @@ namespace AUTO_BAZ.Functions
                 //});
 
                 //} ////For loop normal
-            }); // Parallel.For
+            }); // ExecuteWithPreferredLoop
             LogWriter.WriteLog("پایان فاکتور برگشت فروش" + DateTime.Now.ToString());
             //DoCmd.Close(acForm, "GUG");
             // DoCmd.Close acForm, "GENSANADFROOSH"
@@ -5681,7 +5700,7 @@ namespace AUTO_BAZ.Functions
             //اینجا قبلا For بوده حالا شده Parallel یعنی برگشت آزاد
 
             var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HFRST.Count);
-            Parallel.For(0, HFRST.Count, dbParallelOptions, HFRST_EOF =>
+            ExecuteWithPreferredLoop(0, HFRST.Count, dbParallelOptions, HFRST_EOF =>
             //for (int HFRST_EOF = 0; HFRST_EOF < HFRST.Count; HFRST_EOF++) //while (!HFRST.EOF) ////Normal loop for i
             {
                 object a = default, fs = null;
@@ -6754,7 +6773,7 @@ namespace AUTO_BAZ.Functions
             LogWriter.WriteLog("شروع باز سازي از انبار گردانی شماره : " + NUMBER + " تا فاكتور شماره :" + NUMBER2 + DateTime.Now);
 
             var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HEDRST.Count);
-            Parallel.For(0, HEDRST.Count, dbParallelOptions, HEDRST_EOF =>
+            ExecuteWithPreferredLoop(0, HEDRST.Count, dbParallelOptions, HEDRST_EOF =>
             {
                 if (InternalCalling)
                 {
@@ -6901,7 +6920,7 @@ namespace AUTO_BAZ.Functions
             LogWriter.WriteLog($"شروع باز سازي از سند وصول چكهاي دريافتي شماره :  {fnum} تا سند شماره : {TNUM}" + DateTime.Now);
 
             var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(HFRST.Count);
-            Parallel.For(0, HFRST.Count, dbParallelOptions, ROW => // while (!HFRST.EOF)
+            ExecuteWithPreferredLoop(0, HFRST.Count, dbParallelOptions, ROW => // while (!HFRST.EOF)
             {
                 string SHRH;
                 double? CKOLV = null, CMOINV = null, CTAFV = null, CTAF2V = null, CTAF3V = null, CTAF4V = null, CKOL = null, CMOIN = null, CTAF = null, CTAF2 = null, CTAF3 = null, CTAF4 = null, CKOLD = null, CMOIND = null, CTAFD = null, CTAF2D = null, CTAF3D = null, CTAF4D = null;

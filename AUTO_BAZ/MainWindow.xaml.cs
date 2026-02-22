@@ -191,37 +191,20 @@ namespace AUTO_BAZ
         // put this in the Task :      CancellationToken token = CancelerTOKEN.Token;         token.ThrowIfCancellationRequested();
         List<Task> tasks = new List<Task>();
 
-        private List<ProgressBar> individualProgressBars = new List<ProgressBar>();
+        private List<(CheckBox checkBox, ProgressBar progressBar)> _taskControls = new List<(CheckBox, ProgressBar)>();
         public void UpdateOverallProgressBar()
         {
-            individualProgressBars?.Clear();
+            if (_taskControls == null || _taskControls.Count == 0) return;
 
-            individualProgressBars.Add(PRGR_C0);
-            individualProgressBars.Add(PRGR_C00);
-            individualProgressBars.Add(PRGR_C1);
-            individualProgressBars.Add(PRGR_C2);
-            individualProgressBars.Add(PRGR_C3);
-            individualProgressBars.Add(PRGR_C4);
-            individualProgressBars.Add(PRGR_C5);
-            individualProgressBars.Add(PRGR_C6);
-            individualProgressBars.Add(PRGR_C7);
-            individualProgressBars.Add(PRGR_C8);
-            individualProgressBars.Add(PRGR_C9);
-            individualProgressBars.Add(PRGR_C10);
-            individualProgressBars.Add(PRGR_C11);
-
-            double totalValue = individualProgressBars.Where(pb => pb.Value > 0).Sum(pb => pb.Value);
-            int activeProgressBarCount = individualProgressBars.Count(pb => pb.Value > 0);
+            var activeTasks = _taskControls.Where(x => x.checkBox.IsChecked == true).ToList();
+            int activeCount = activeTasks.Count;
 
             double overallProgress = 0;
 
-            if (activeProgressBarCount > 0)
+            if (activeCount > 0)
             {
-                overallProgress = totalValue / activeProgressBarCount;
-            }
-            else
-            {
-                overallProgress = 0;
+                double totalValue = activeTasks.Sum(x => x.progressBar.Value);
+                overallProgress = totalValue / activeCount;
             }
 
             // Update the text label
@@ -329,6 +312,23 @@ namespace AUTO_BAZ
             YEAR_LBL.Content = Baseknow.NAME + " " + Baseknow.YEA;
             //LBL_HEADER.Content = CL_CCNNMANAGER.CONNECTION_STR;
             #endregion
+
+            _taskControls = new List<(CheckBox, ProgressBar)>
+            {
+                (C0, PRGR_C0),
+                (C00, PRGR_C00),
+                (c1, PRGR_C1),
+                (c2, PRGR_C2),
+                (c3, PRGR_C3),
+                (c4, PRGR_C4),
+                (c5, PRGR_C5),
+                (c6, PRGR_C6),
+                (c7, PRGR_C7),
+                (c8, PRGR_C8),
+                (c9, PRGR_C9),
+                (c10, PRGR_C10),
+                (c11, PRGR_C11)
+            };
 
             // Load From Saved Data List
             if (!string.IsNullOrEmpty(Properties.Settings.Default.TheHistoryLST))
@@ -456,8 +456,10 @@ namespace AUTO_BAZ
             Properties.Settings.Default.IsC9 = c9.IsChecked ?? false;
             Properties.Settings.Default.IsC10 = c10.IsChecked ?? false;
             Properties.Settings.Default.IsC11 = c11.IsChecked ?? false;
+            Properties.Settings.Default.UseSmartThrottling = chkUseSmartThrottling.IsChecked ?? false;
 
             //Properties.Settings.Default.IsDefacc = defacc.IsChecked ?? false;
+            Properties.Settings.Default.UseParallelProcessing = UseParallelProcessing.IsChecked ?? true;
 
             Properties.Settings.Default.Save();
         }
@@ -478,6 +480,8 @@ namespace AUTO_BAZ
                 c9.IsChecked = Properties.Settings.Default.IsC9;
                 c10.IsChecked = Properties.Settings.Default.IsC10;
                 c11.IsChecked = Properties.Settings.Default.IsC11;
+                UseParallelProcessing.IsChecked = Properties.Settings.Default.UseParallelProcessing;
+                chkUseSmartThrottling.IsChecked = Properties.Settings.Default.UseSmartThrottling;
             }
             else
             {
@@ -493,11 +497,18 @@ namespace AUTO_BAZ
                 c9.IsChecked = CHKITEMS[9];
                 c10.IsChecked = CHKITEMS[10];
                 c11.IsChecked = CHKITEMS[11];
+                UseParallelProcessing.IsChecked = Properties.Settings.Default.UseParallelProcessing;
+                chkUseSmartThrottling.IsChecked = Properties.Settings.Default.UseSmartThrottling;
             }
+
+            CL_HESABDARI_AUTO_BAZ.UseSmartThrottlingByDefault = chkUseSmartThrottling.IsChecked ?? false;
 
             //defacc.IsChecked = Properties.Settings.Default.IsDefacc;
         }
-
+        private void UseParallelProcessing_Click(object sender, RoutedEventArgs e)
+        {
+            SaveCheckBoxesState();
+        }
         private bool IsNull(object inputy)
         {
             if (string.IsNullOrEmpty(inputy.ToStringNullSafe())) // بله خالیه
@@ -566,7 +577,7 @@ namespace AUTO_BAZ
             // Loop through each checkbox and set the IsChecked property
             foreach (CheckBox checkbox in checkboxes)
             {
-                if (checkbox.Name == "FORMOL" || checkbox.Name == "defacc" || checkbox.Name == "C00")
+                if (checkbox.Name == "FORMOL" || checkbox.Name == "defacc" || checkbox.Name == "C00" || checkbox.Name == "chkUseSmartThrottling")
                 {
                 }
                 else
@@ -604,6 +615,7 @@ namespace AUTO_BAZ
             {
                 if (checkbox.Name == "FORMOL") { /*ignore*/ }
                 else if (checkbox.Name == "defacc") { /*ignore*/ }
+                else if (checkbox.Name == "chkUseSmartThrottling") { /*ignore*/ }
                 else
                 {
                     if ((bool)checkbox.IsChecked)
@@ -620,6 +632,8 @@ namespace AUTO_BAZ
             Dispatcher.Invoke(new Action(() =>
             {
                 if (IsAtLeasOnChecked() is false) { return; }
+
+                Generaly.DoResetCountersDisplay();
 
                 if (!int.TryParse(repeatb.Text.Trim(), out repeatCount) || repeatCount <= 0)
                 {
@@ -949,9 +963,9 @@ namespace AUTO_BAZ
                     if (Strings.Mid(Baseknow.OPTIONSS, 66, 1) == "5")
                     {
                         var rst = dbms.DoGetDataSQL<THE_QUERY1>("SELECT     dbo.STUF_FSK.CODE, dbo.STUF_FSK.ANBAR, dbo.STUF_FSK.MOGODI_A, dbo.STUF_FSK.FI_A, dbo.STUF_FSK.MABL_A FROM         dbo.STUF_DEF INNER JOIN                      dbo.STUF_FSK ON dbo.STUF_DEF.CODE = dbo.STUF_FSK.CODE GROUP BY dbo.STUF_FSK.CODE, dbo.STUF_FSK.ANBAR, dbo.STUF_FSK.MOGODI_A, dbo.STUF_FSK.FI_A, dbo.STUF_FSK.MABL_A").ToList(); LogWriter.WriteLog($" After    if (Strings.Mid(Baseknow.OPTIONSS, 66, 1) == \"5\") rst.Count = {rst.Count}");
-                        //Parallel.For(0, rst.Count, r =>
+                        //CL_HESABDARI_AUTO_BAZ.ExecuteWithPreferredLoop(0, rst.Count, r =>
                         var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(rst.Count);
-                        Parallel.For(0, rst.Count, dbParallelOptions, r => //while (!rst.EOF)
+                        CL_HESABDARI_AUTO_BAZ.ExecuteWithPreferredLoop(0, rst.Count, dbParallelOptions, r => //while (!rst.EOF)
                         {
                             List<cm_model> RST2 = null;
                             int errorno;
@@ -2487,6 +2501,11 @@ namespace AUTO_BAZ
         }
         private void defacc_Click(object sender, RoutedEventArgs e)
         {
+            SaveCheckBoxesState();
+        }
+        private void chkUseSmartThrottling_Click(object sender, RoutedEventArgs e)
+        {
+            CL_HESABDARI_AUTO_BAZ.UseSmartThrottlingByDefault = chkUseSmartThrottling.IsChecked ?? false;
             SaveCheckBoxesState();
         }
 

@@ -832,7 +832,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                     }
                     else
                     {
-                        universControl.PopNotifyShowUp("هشدار : تاریخ مربوط به سال جاری نیست", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow);
+                        universControl.PopNotifyShowUp("هشدار : تاریخ مربوط به سال جاری نیست", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Yellow, 1);
                     }
                 }
             }
@@ -1330,6 +1330,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                     SA_NHOU = @SaNhou,
                     SA_HOUR = @SaHour,
                     IMBIBE_SAR = @ImbibeSar,
+                    GHEYMAT = @GHEYMAT,
                     TOZIH = @Tozih
                 WHERE FNUMB = @Fumb";
             var parameters2 = new
@@ -1341,6 +1342,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 SaNhou = decimal.Parse(SA_NHOU.Text),
                 SaHour = decimal.Parse(SA_HOUR.Text),
                 ImbibeSar = decimal.Parse(IMBIBE_SAR.Text),
+                GHEYMAT = Convert.ToInt32(GHEYMAT.SelectedValue),
                 Tozih = TOZIH.Text.Trim(),
             };
             _ = dbms.DoExecuteSQL(updateQuery, parameters2);
@@ -2748,7 +2750,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             }
         }
 
-   
+
 
         private void SA_NHOU_NumericLostFocus(object sender, RoutedEventArgs e)
         {

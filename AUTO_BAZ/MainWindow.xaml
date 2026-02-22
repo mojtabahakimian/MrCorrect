@@ -4,414 +4,351 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AUTO_BAZ"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         x:Class="AUTO_BAZ.MainWindow"
         mc:Ignorable="d"
         FontFamily="pack://application:,,,/AUTO_BAZ;component/Assets/#IRANYekanFN"
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
-        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        Title="بازسازی" MinWidth="800" MinHeight="600" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" ContentRendered="Window_ContentRendered">
+        Title="بازسازی" MinWidth="800" MinHeight="600" 
+        Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" ContentRendered="Window_ContentRendered" Height="600" Width="1125">
 
     <Window.Resources>
-
         <AlternationConverter x:Key="BackgroundConverter">
-            <SolidColorBrush Color="#FFF2F2F2" />
+            <SolidColorBrush Color="#FFF9F9F9" />
             <SolidColorBrush Color="White" />
         </AlternationConverter>
 
-        <Style x:Key="Style1" TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource MaterialDesignListBoxItem}" >
-            <Setter Property="Background" Value="{Binding RelativeSource={RelativeSource Self},
-                 Path=(ItemsControl.AlternationIndex),
-                 Converter={StaticResource BackgroundConverter}}"/>
+        <Style x:Key="HistoryItemStyle" TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource MaterialDesignListBoxItem}">
+            <Setter Property="Background" Value="{Binding RelativeSource={RelativeSource Self}, Path=(ItemsControl.AlternationIndex), Converter={StaticResource BackgroundConverter}}"/>
+            <Setter Property="Padding" Value="10,8"/>
+        </Style>
+
+        <Style x:Key="SmallCircularProgress" TargetType="ProgressBar" BasedOn="{StaticResource MaterialDesignCircularProgressBar}">
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Minimum" Value="0"/>
+            <Setter Property="Maximum" Value="100"/>
+            <Setter Property="Foreground" Value="#FF0389C7"/>
+        </Style>
+
+        <Style x:Key="SmallProgressLabel" TargetType="Label">
+            <Setter Property="Visibility" Value="Hidden"/>
+            <Setter Property="FontSize" Value="9"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="HeaderTextStyle" TargetType="Label">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#FF333333"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
     </Window.Resources>
 
     <Grid x:Name="mygrid" Margin="-1,0,1,0" DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
-        <Border  BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1" Grid.RowSpan="2" Background="#FFF2F2F2">
-            <Border x:Name="TitleDrawBar" CornerRadius="10,10,0,0" Background="{Binding Background, ElementName=GENERAL_RANG}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
-                <Grid>
-                    <Label x:Name="LBL_HEADER" Content="اتوباز" Padding="21,10,10,10" Foreground="White"/>
-                    <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
-                        <materialDesign:PackIcon Kind="WindowClose" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
-                    </Button>
-                    <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Margin="0,10,70,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
-                        <materialDesign:PackIcon Kind="WindowMinimize" Margin="0,4,0,0" Height="17" Width="21" Foreground="White" />
-                    </Button>
-                </Grid>
-            </Border>
-        </Border>
-        <Button x:Name="Btn_Max" Click="Btn_Max_Click" Margin="0,10,41,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
-            <materialDesign:PackIcon Kind="WindowMaximize" Margin="0,0,0,0" Height="17" Width="21" Foreground="White" />
-        </Button>
-        <Button x:Name="GENERAL_RANG"  Tag="RD"  Content="Button" HorizontalAlignment="Left" Margin="50,511,0,0" VerticalAlignment="Top" Width="75" Visibility="Collapsed" Background="#FF03A9F4"/>
-
-        <Border Margin="0,39,0,0" CornerRadius="0,0,10,0"  Background="#FF0389C7" HorizontalAlignment="Right" Width="275">
+        <Border Background="#FFF0F2F5" CornerRadius="12" BorderBrush="#E0E0E0" BorderThickness="1">
             <Grid>
-                <Label x:Name="YEAR_LBL" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="یزد سپار 1402"  FontSize="14" Height="52" VerticalAlignment="Top" Foreground="#DDFFFFFF" FontWeight="Bold" Margin="0,11,0,0"/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="45"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-                <StackPanel Margin="0,81,0,125">
-                    <Button  x:Name="BtnCNNConf"  Click="BtnCNNConf_Click" Foreground="#DDFFFFFF" Height="37" Background="White" Cursor="Hand" Width="260" materialDesign:ButtonAssist.CornerRadius="10">
-                        <Viewbox Stretch="Uniform">
-                            <StackPanel Orientation="Horizontal">
-                                <Label Content="اتصال به سرور" Foreground="#FF585858" Padding="4,4,7,4"/>
+                <Border x:Name="TitleDrawBar" Background="{Binding Background, ElementName=GENERAL_RANG, FallbackValue=#FF0389C7}" CornerRadius="11,11,0,0" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                    <Grid>
+                        <Label x:Name="LBL_HEADER" Content="اتوباز" Foreground="White" FontWeight="Bold" FontSize="16" Margin="20,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
 
-                                <materialDesign:PackIcon Kind="Database" Height="31" Width="22" Foreground="#FF585858"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0" VerticalAlignment="Center">
+                            <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Style="{StaticResource MaterialDesignFlatButton}" Foreground="White" Height="30" Width="40" Padding="0" IsTabStop="False">
+                                <materialDesign:PackIcon Kind="WindowMinimize" Width="20" Height="20"/>
+                            </Button>
+                            <Button x:Name="Btn_Max" Click="Btn_Max_Click" Style="{StaticResource MaterialDesignFlatButton}" Foreground="White" Height="30" Width="40" Padding="0" IsTabStop="False">
+                                <materialDesign:PackIcon Kind="WindowMaximize" Width="20" Height="20"/>
+                            </Button>
+                            <Button x:Name="Btn_Close" Click="Btn_Close_Click" Style="{StaticResource MaterialDesignFlatButton}" Foreground="White" Height="30" Width="40" Padding="0" IsTabStop="False">
+                                <materialDesign:PackIcon Kind="WindowClose" Width="20" Height="20"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Button x:Name="GENERAL_RANG" Tag="RD" Visibility="Collapsed" Background="#FF03A9F4"/>
+
+                <Grid Grid.Row="1" Margin="15" FlowDirection="RightToLeft">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="280"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="335"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0" Margin="0,0,10,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <materialDesign:Card Grid.Row="0" UniformCornerRadius="10" Padding="20" Background="#FF2A99CC" Foreground="White" Margin="0,0,0,15" materialDesign:ElevationAssist.Elevation="Dp3">
+                            <StackPanel>
+                                <Label x:Name="YEAR_LBL" Content="نام شرکت و سال مالی" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20" Foreground="White"/>
+
+                                <Button x:Name="BtnCNNConf" Click="BtnCNNConf_Click" Background="White" Foreground="#FF0389C7" Height="45" materialDesign:ButtonAssist.CornerRadius="8" Cursor="Hand" Margin="0,0,0,20">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="DatabaseSettings" Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="اتصال به سرور" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <TextBlock x:Name="SERVER_NAME_LBL" Text="MERCEDES\SQL2019 Yazdsepar1401" TextAlignment="Center" TextWrapping="Wrap" FontSize="13" Opacity="0.9"/>
+                                <TextBlock Text="نسخه 1404/12/03 • 1.4.6" TextAlignment="Center" FontSize="11" Opacity="0.7" Margin="0,15,0,0"/>
                             </StackPanel>
-                        </Viewbox>
-                    </Button>
-                </StackPanel>
-                <TextBlock x:Name="SERVER_NAME_LBL" TextAlignment="Center" TextWrapping="Wrap"  Text="MERCEDES\SQL2019  Yazdsepar1401" Margin="11,0,10,58" FontSize="14" Foreground="White" Height="55" VerticalAlignment="Bottom"/>
-                <Label Content="نسخه 1404/12/03    1.4.5" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"  Margin="0,0,21,130" Foreground="#7FFFFFFF" HorizontalAlignment="Right" Width="153" Height="30" VerticalAlignment="Bottom" FontSize="13"/>
+                        </materialDesign:Card>
+
+                        <materialDesign:Card Grid.Row="1" UniformCornerRadius="10" Padding="15" materialDesign:ElevationAssist.Elevation="Dp1">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                                    <materialDesign:PackIcon Kind="Cog" Foreground="#FF0389C7" Width="20" Height="20" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <Label Content="تنظیمات پردازش" Style="{StaticResource HeaderTextStyle}"/>
+                                </StackPanel>
+
+                                <CheckBox x:Name="UseParallelProcessing" Foreground="#FF7A7A7A" Content="پردازش موازی (Parallel)" IsChecked="True" Margin="0,5" Click="UseParallelProcessing_Click" Cursor="Hand"/>
+                                <CheckBox x:Name="chkUseSmartThrottling" Content="پردازش با حداقل ظرفیت" ToolTip="بررسی هوشمند ظرفیت CPU" IsChecked="False" Margin="0,5" Click="chkUseSmartThrottling_Click" Cursor="Hand"/>
+
+                                <Grid Margin="0,15,0,5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="80"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="تعداد روز بازگشت:" VerticalAlignment="Center" Foreground="#555"/>
+                                    <TextBox x:Name="daysb" Grid.Column="1" Text="365" Foreground="#D81A1A1A" BorderThickness="0,0,0,0" Background="#FFF2F2F2" Style="{StaticResource MaterialDesignOutlinedTextBox}" TextAlignment="Center" Height="35" Padding="0,5" PreviewLostKeyboardFocus="daysb_PreviewLostKeyboardFocus"/>
+
+                                </Grid>
+
+                                <Grid Margin="0,5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="80"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="تعداد تکرار:" VerticalAlignment="Center" Foreground="#555"/>
+                                    <TextBox x:Name="repeatb" Foreground="#D81A1A1A" BorderThickness="0,0,0,0" Background="#FFF2F2F2" Grid.Column="1" Text="1" Style="{StaticResource MaterialDesignOutlinedTextBox}" TextAlignment="Center" Height="35" Padding="0,5" PreviewLostKeyboardFocus="repeatb_PreviewLostKeyboardFocus"/>
+                                </Grid>
+
+                                <CheckBox x:Name="FORMOL" Visibility="Collapsed" IsChecked="True"/>
+                                <CheckBox x:Name="defacc" Visibility="Collapsed" IsChecked="True" Click="defacc_Click"/>
+                            </StackPanel>
+                        </materialDesign:Card>
+                    </Grid>
+
+                    <Grid Grid.Column="1" Margin="5,0,5,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <UniformGrid Columns="3" Grid.Row="0" Margin="0,0,0,15">
+                            <materialDesign:Card UniformCornerRadius="8" Padding="15" Margin="5" materialDesign:ElevationAssist.Elevation="Dp1">
+                                <StackPanel>
+                                    <TextBlock x:Name="Text19" Text="0" FontSize="28" FontWeight="Bold" Foreground="#FF0389C7" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="تعداد پردازش" Foreground="#777" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                                </StackPanel>
+                            </materialDesign:Card>
+                            <materialDesign:Card UniformCornerRadius="8" Padding="15" Margin="5" materialDesign:ElevationAssist.Elevation="Dp1">
+                                <StackPanel>
+                                    <TextBlock x:Name="co" Text="0" FontSize="28" FontWeight="Bold" Foreground="#FF0389C7" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="کد کالا" Foreground="#777" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                                </StackPanel>
+                            </materialDesign:Card>
+                            <materialDesign:Card UniformCornerRadius="8" Padding="15" Margin="5" materialDesign:ElevationAssist.Elevation="Dp1">
+                                <StackPanel>
+                                    <TextBlock x:Name="Text23" Text="0" FontSize="28" FontWeight="Bold" Foreground="#FF0389C7" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="تعداد کالا" Foreground="#777" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                                </StackPanel>
+                            </materialDesign:Card>
+                        </UniformGrid>
+
+                        <materialDesign:Card Grid.Row="1" UniformCornerRadius="10" Padding="20" Margin="5,0,5,5" materialDesign:ElevationAssist.Elevation="Dp1">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20" Cursor="Hand" PreviewMouseLeftButtonDown="StackPanel_PreviewMouseLeftButtonDown">
+                                    <materialDesign:PackIcon Kind="CheckAll" Foreground="#FF03A9F4" Width="22" Height="22" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <Label x:Name="lblchecks" Content="انتخاب همه اسناد و عملیات" Style="{StaticResource HeaderTextStyle}"/>
+                                </StackPanel>
+
+                                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                    <UniformGrid Columns="2">
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C0" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C0" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="C0" Content="باز سازی نرخ میانگین" Click="C0_Click" VerticalAlignment="Center"/>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C6" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C6" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c6" Content="سند خروج سایر" Click="c6_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C00" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C00" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="C00" Content="باز سازی موجودی انبار" Click="C00_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C7" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C7" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c7" Content="سند تولید ورود" Click="c7_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C1" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C1" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c1" Content="سند فروش" Click="c1_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C8" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C8" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c8" Content="سند برگشت فروش" Click="c8_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C2" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c2" Content="سند خرید" Click="c2_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C9" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C9" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c9" Content="سند خدمات" Click="c9_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C3" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C3" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c3" Content="سند خزانه" Click="c3_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C10" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C10" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c10" Content="سند انبار گردانی" Click="c10_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C4" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C4" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c4" Content="سند انتقالی" Click="c4_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C11" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C11" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c11" Content="سند وصولی اسناد دریافتنی" Click="c11_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,10" Cursor="Hand" MinWidth="150">
+                                            <Grid Width="40" Height="40" Margin="0,0,10,0">
+                                                <ProgressBar x:Name="PRGR_C5" Style="{StaticResource SmallCircularProgress}" FlowDirection="LeftToRight"/>
+                                                <Label x:Name="LBL_C5" Content="0.00%" Style="{StaticResource SmallProgressLabel}"/>
+                                            </Grid>
+                                            <CheckBox x:Name="c5" Content="سند خروج مواد" Click="c5_Click" VerticalAlignment="Center" Cursor="Hand"/>
+                                        </StackPanel>
+
+                                        <StackPanel MinWidth="150"/>
+
+                                    </UniformGrid>
+                                </ScrollViewer>
+
+                            </Grid>
+                        </materialDesign:Card>
+                    </Grid>
+
+                    <Grid Grid.Column="2" Margin="10,0,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <materialDesign:Card Grid.Row="0" UniformCornerRadius="10" Padding="20" Margin="0,0,0,15" materialDesign:ElevationAssist.Elevation="Dp2" Background="#FAFAFA">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20" HorizontalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="Circle" Foreground="#FF03A9F4" Width="15" Height="15" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <Label Content="وضعیت عملیات" Style="{StaticResource HeaderTextStyle}"/>
+                                </StackPanel>
+
+                                <Grid HorizontalAlignment="Center" Margin="0,10,0,30">
+                                    <ProgressBar x:Name="TOGHER_PROGRESS" FlowDirection="LeftToRight" Style="{StaticResource MaterialDesignCircularProgressBar}" Value="0" Minimum="0" Maximum="100" Width="140" Height="140" Foreground="#FF03A9F4"/>
+                                    <Label x:Name="COUNTER_TXBL" Content="0.00%" FontSize="24" Foreground="#333" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Button x:Name="LetsGoBtn" Grid.Column="0" Content="شروع" Click="LetsGoBtn_Click" Background="#FF03A9F4" BorderBrush="{x:Null}" Foreground="White" Height="45" materialDesign:ButtonAssist.CornerRadius="8" FontSize="14" />
+                                    <Button x:Name="Btn_DoCancel" Grid.Column="2" Content="توقف" Click="Btn_DoCancel_Click" Background="#FFE27C7C" BorderBrush="{x:Null}" Foreground="White" Height="45" materialDesign:ButtonAssist.CornerRadius="8" FontSize="14" IsEnabled="False"/>
+                                </Grid>
+                            </StackPanel>
+                        </materialDesign:Card>
+
+                        <materialDesign:Card Grid.Row="1" UniformCornerRadius="10" Padding="15" materialDesign:ElevationAssist.Elevation="Dp1">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel x:Name="HRSTK1" Orientation="Horizontal" Margin="0,0,0,15" Cursor="Hand" PreviewMouseLeftButtonDown="HRSTK1_PreviewMouseLeftButtonDown">
+                                    <materialDesign:PackIcon Kind="History" Foreground="#FFE8B502" Width="22" Height="22" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <Label Content="سوابق بازسازی" Style="{StaticResource HeaderTextStyle}"/>
+                                </StackPanel>
+
+                                <ListBox x:Name="List5" Grid.Row="1" ItemsSource="{Binding LST_DATA5}" AlternationCount="2" ItemContainerStyle="{StaticResource HistoryItemStyle}" Background="Transparent" BorderThickness="0" d:ItemsSource="{d:SampleData ItemCount=10}"/>
+                            </Grid>
+                        </materialDesign:Card>
+                    </Grid>
+                </Grid>
             </Grid>
         </Border>
-
-        <Grid Margin="0,39,280,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="11*"/>
-                <ColumnDefinition Width="455*"/>
-                <ColumnDefinition Width="650*"/>
-                <ColumnDefinition Width="14*"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="26*"/>
-                <RowDefinition Height="315*"/>
-                <RowDefinition Height="360*"/>
-                <RowDefinition Height="20*"/>
-            </Grid.RowDefinitions>
-
-            <!--Righ 4 Up-->
-            <Border Margin="4,4,10,10" Background="White" CornerRadius="10" Grid.Row="1" Grid.Column="2">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="221*"/>
-                        <RowDefinition Height="45*"/>
-                        <RowDefinition Height="35*"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="11*"/>
-                        <ColumnDefinition Width="170*"/>
-                        <ColumnDefinition Width="274*"/>
-                        <ColumnDefinition Width="181*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel FlowDirection="RightToLeft" Orientation="Horizontal" Width="113" Height="31" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,8,15,0" Grid.Column="3">
-                        <Border Background="#FF0080B9" CornerRadius="50" Width="14" Height="14"/>
-                        <Label Content="خلاصه وضعیت" Width="86" Margin="3,0,0,0"/>
-                    </StackPanel>
-
-                    <Border Margin="10,93,0,0" Background="#FFF2F2F2" CornerRadius="10" Height="115" VerticalAlignment="Top" Grid.Column="3" HorizontalAlignment="Left" Width="140">
-                        <StackPanel>
-                            <TextBlock x:Name="Text23" Text="0"  FontSize="32" TextAlignment="Center" Height="75" Margin="0,14,0,2" FontWeight="Bold" Foreground="#D8000000"/>
-                            <Label Content="تعداد کالا" Height="42" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" Margin="0,-13,0,0"/>
-                        </StackPanel>
-                    </Border>
-                    <Border Margin="67,93,67,0" Background="#FFF2F2F2" CornerRadius="10" Width="140" Height="115" VerticalAlignment="Top" Grid.Column="2">
-                        <StackPanel>
-                            <TextBlock x:Name="co" Text="0"  FontSize="32" TextAlignment="Center" Height="75" Margin="0,14,0,2" FontWeight="Bold" Foreground="#D8000000"/>
-                            <Label Content="کد کالا" Height="42" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" Margin="0,-13,0,0"/>
-                        </StackPanel>
-                    </Border>
-                    <Border Margin="0,93,10,0" Background="#FFF2F2F2" CornerRadius="10" Height="115" VerticalAlignment="Top" HorizontalAlignment="Right" Width="140" Grid.Column="1">
-                        <StackPanel>
-                            <TextBlock x:Name="Text19" Text="0"  FontSize="32" TextAlignment="Center" Height="75" Margin="0,14,0,2" FontWeight="Bold" Foreground="#D8000000"/>
-                            <Label Content="تعداد پردازش" Height="42" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" Margin="0,-13,0,0"/>
-                        </StackPanel>
-                    </Border>
-                    <CheckBox IsChecked="True" Focusable="False"  IsHitTestVisible="False" Visibility="Hidden"  x:Name="FORMOL" Content="مبالغ استاندارد در فرمولها نيز اصلاح شود"  HorizontalContentAlignment="Center"   VerticalAlignment="Center" Height="24" Margin="15,0,14,0" Foreground="#FF7A7A7A" Grid.Column="2" Grid.Row="1"/>
-                    <CheckBox IsChecked="True" Focusable="False"  IsHitTestVisible="False" Visibility="Hidden"   x:Name="defacc"  FlowDirection="LeftToRight"   Margin="15,0,89,9" Cursor="Hand" Content="حسابهایی که نیست بساز" VerticalAlignment="Bottom"  Click="defacc_Click" Foreground="#FF7A7A7A" Grid.Row="2" Grid.Column="2"/>
-                </Grid>
-            </Border>
-
-            <Border Margin="4,0,10,19" Background="White" CornerRadius="10" Grid.Row="2" Grid.Column="2">
-                <Grid Margin="0,0,25,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel FlowDirection="RightToLeft" Orientation="Horizontal" Width="113" Height="31" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,8,0,0" PreviewMouseLeftButtonDown="StackPanel_PreviewMouseLeftButtonDown">
-                        <Border Background="#FF925C0C" CornerRadius="50" Width="14" Height="14"/>
-                        <Label x:Name="lblchecks" Content="انتخاب همه" Width="86" Margin="3,0,0,0" Cursor="Hand"/>
-                    </StackPanel>
-
-                    <Grid  FlowDirection="RightToLeft" Margin="12,48,26,70">
-                        <CheckBox  x:Name="C0"        Margin="17,10,0,0" Cursor="Hand" Content="باز سازی نرخ میانگین" HorizontalAlignment="Left" VerticalAlignment="Top" IsChecked="False" Click="C0_Click"/>
-                        <CheckBox  x:Name="c1"        Margin="17,100,0,0" Cursor="Hand" Content="سند فروش" HorizontalAlignment="Left" VerticalAlignment="Top" IsChecked="False" Click="c1_Click"/>
-                        <CheckBox  x:Name="c2"        Margin="17,143,0,0" Cursor="Hand" Content="سند خرید" HorizontalAlignment="Left" VerticalAlignment="Top" IsChecked="False" Click="c2_Click"/>
-                        <CheckBox  x:Name="C00"       Margin="17,54,0,0" Cursor="Hand" Content="باز سازی موجودی انبار" HorizontalAlignment="Left" VerticalAlignment="Top" Click="C00_Click"/>
-                        <CheckBox  x:Name="c3"        Margin="17,187,0,0" Cursor="Hand" Content="سند خزانه" HorizontalAlignment="Left" Height="23" VerticalAlignment="Top" Click="c3_Click"/>
-                        <CheckBox  x:Name="c4"        Margin="224,10,0,0" Cursor="Hand" Content="سند انتقالی" HorizontalAlignment="Left" VerticalAlignment="Top" Click="c4_Click"/>
-                        <CheckBox  x:Name="c5"        Margin="224,54,0,0" Cursor="Hand" Content="سند خروج مواد" HorizontalAlignment="Left" VerticalAlignment="Top" IsChecked="False" Click="c5_Click"/>
-                        <CheckBox  x:Name="c6"        Margin="224,100,0,0" Cursor="Hand" Content="سند خروج سایر" HorizontalAlignment="Left" VerticalAlignment="Top" IsChecked="False" Click="c6_Click"/>
-                        <CheckBox  x:Name="c7"        Margin="223,143,0,0" Cursor="Hand" Content="سند تولید ورود" HorizontalAlignment="Left" VerticalAlignment="Top" IsChecked="False" Click="c7_Click"/>
-                        <CheckBox  x:Name="c8"        Margin="224,187,0,0" Cursor="Hand" Content="سند برگشت فروش" HorizontalAlignment="Left" VerticalAlignment="Top" IsChecked="False" Click="c8_Click"/>
-                        <CheckBox  x:Name="c9"        Margin="415,10,0,0" Cursor="Hand" Content="سند خدمات" HorizontalAlignment="Left" VerticalAlignment="Top" Click="c9_Click"/>
-                        <CheckBox  x:Name="c10"       Margin="415,54,0,0" Cursor="Hand" Content="سند انبار گردانی" HorizontalAlignment="Left" VerticalAlignment="Top" Click="c10_Click"/>
-                        <CheckBox  x:Name="c11"       Margin="415,100,0,0" Cursor="Hand" Content="سند وصولی اسناد دریافتنی" HorizontalAlignment="Left" VerticalAlignment="Top" Click="c11_Click"/>
-                    </Grid>
-                    <Label x:Name="LBL_C0"  Visibility="Hidden"  Content="0.00%"  HorizontalContentAlignment="Center"  FontSize="7" VerticalContentAlignment="Center" Margin="0,56,5,0" HorizontalAlignment="Right" Width="40" Height="40" VerticalAlignment="Top">
-
-                    </Label>
-                    <Viewbox Margin="0,48,1,0" Height="40" VerticalAlignment="Top" HorizontalAlignment="Right" Width="40">
-                        <ProgressBar x:Name="PRGR_C0"  Style="{StaticResource MaterialDesignCircularProgressBar}" Minimum="0" Maximum="100" RenderTransformOrigin="0.5,0.5" Width="40" Height="40" SmallChange="1">
-                            <ProgressBar.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX="0.65" ScaleY="0.65"/>
-                                    <SkewTransform/>
-                                    <RotateTransform/>
-                                    <TranslateTransform X="0" Y="0"/>
-                                </TransformGroup>
-                            </ProgressBar.RenderTransform>
-                        </ProgressBar>
-                    </Viewbox>
-
-                    <Label x:Name="LBL_C00" Visibility="Hidden"   Content="0.00%"  HorizontalContentAlignment="Center" FontSize="7" VerticalContentAlignment="Center" Margin="0,100,5,0" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="33">
-
-                    </Label>
-
-                    <Viewbox Height="40" VerticalAlignment="Top" Margin="0,92,1,0" HorizontalAlignment="Right" Width="40">
-                        <ProgressBar x:Name="PRGR_C00"  Style="{StaticResource MaterialDesignCircularProgressBar}" Minimum="0" Maximum="100" RenderTransformOrigin="0.5,0.5" Width="40" Height="40" SmallChange="1">
-                            <ProgressBar.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX="0.65" ScaleY="0.65"/>
-                                    <SkewTransform/>
-                                    <RotateTransform/>
-                                    <TranslateTransform X="0"/>
-                                </TransformGroup>
-                            </ProgressBar.RenderTransform>
-                        </ProgressBar>
-                    </Viewbox>
-
-                    <Label x:Name="LBL_C1" Visibility="Hidden"   Content="0.00%"  HorizontalContentAlignment="Center" FontSize="7" VerticalContentAlignment="Center" Margin="0,146,5,0" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="31">
-
-
-                    </Label>
-                    <Viewbox Margin="0,140,1,0" Height="40" VerticalAlignment="Top" HorizontalAlignment="Right" Width="40">
-                        <ProgressBar x:Name="PRGR_C1"  Style="{StaticResource MaterialDesignCircularProgressBar}" Minimum="0" Maximum="100" RenderTransformOrigin="0.5,0.5" Width="40" Height="40" SmallChange="1">
-                            <ProgressBar.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX="0.65" ScaleY="0.65"/>
-                                    <SkewTransform/>
-                                    <RotateTransform/>
-                                    <TranslateTransform/>
-                                </TransformGroup>
-                            </ProgressBar.RenderTransform>
-                        </ProgressBar>
-                    </Viewbox>
-
-                    <Viewbox Margin="0,184,1,0" Height="40" VerticalAlignment="Top" HorizontalAlignment="Right" Width="40">
-                        <ProgressBar x:Name="PRGR_C2"  Style="{StaticResource MaterialDesignCircularProgressBar}" Minimum="0" Maximum="100" RenderTransformOrigin="0.5,0.5" Width="40" Height="40" SmallChange="1">
-                            <ProgressBar.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX="0.65" ScaleY="0.65"/>
-                                    <SkewTransform/>
-                                    <RotateTransform/>
-                                    <TranslateTransform/>
-                                </TransformGroup>
-                            </ProgressBar.RenderTransform>
-                        </ProgressBar>
-                    </Viewbox>
-
-                    <Label x:Name="LBL_C3"  Visibility="Hidden"  Content="0.00%"  HorizontalContentAlignment="Center" FontSize="7" VerticalContentAlignment="Center" Margin="0,235,5,0" HorizontalAlignment="Right" Width="32" Height="24" VerticalAlignment="Top">
-
-                    </Label>
-                    <Viewbox Margin="0,227,1,0" Height="40" VerticalAlignment="Top" HorizontalAlignment="Right" Width="40">
-                        <ProgressBar x:Name="PRGR_C3"  Style="{StaticResource MaterialDesignCircularProgressBar}" Minimum="0" Maximum="100" RenderTransformOrigin="0.5,0.5" Width="40" Height="40" SmallChange="1">
-                            <ProgressBar.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX="0.65" ScaleY="0.65"/>
-                                    <SkewTransform/>
-                                    <RotateTransform/>
-                                    <TranslateTransform/>
-                                </TransformGroup>
-                            </ProgressBar.RenderTransform>
-                        </ProgressBar>
-                    </Viewbox>
-
-                    <Label x:Name="LBL_C4"  Visibility="Hidden"  Content="0.00%"  HorizontalContentAlignment="Center" FontSize="7" VerticalContentAlignment="Center" Margin="0,56,211,0" HorizontalAlignment="Right" Width="32" Height="24" VerticalAlignment="Top">
-
-                    </Label>
-                    <Viewbox Margin="0,48,207,0" Height="40" VerticalAlignment="Top" HorizontalAlignment="Right" Width="40">
-                        <ProgressBar x:Name="PRGR_C4"  Style="{StaticResource MaterialDesignCircularProgressBar}" Minimum="0" Maximum="100" RenderTransformOrigin="0.5,0.5" Width="40" Height="40" SmallChange="1">
-                            <ProgressBar.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX="0.65" ScaleY="0.65"/>
-                                    <SkewTransform/>
-                                    <RotateTransform/>
-                                    <TranslateTransform/>
-                                </TransformGroup>
-                            </ProgressBar.RenderTransform>
-                        </ProgressBar>
-                    </Viewbox>
-
-                    <Label x:Name="LBL_C5"  Visibility="Hidden"  Content="0.00%"  HorizontalContentAlignment="Center" FontSize="7" VerticalContentAlignment="Center" Margin="0,100,210,0" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="32">
-
-                    </Label>
-                    <Viewbox Margin="0,92,207,0" Height="40" VerticalAlignment="Top" HorizontalAlignment="Right" Width="40">
-                        <ProgressBar x:Name="PRGR_C5"  Style="{StaticResource MaterialDesignCircularProgressBar}" Minimum="0" Maximum="100" RenderTransformOrigin="0.5,0.5" Width="40" Height="40" SmallChange="1">
-                            <ProgressBar.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX="0.65" ScaleY="0.65"/>
-                                    <SkewTransform/>
-                                    <RotateTransform/>
-                                    <TranslateTransform/>
-                                </TransformGroup>
-                            </ProgressBar.RenderTransform>
-                        </ProgressBar>
-                    </Viewbox>
-
-                    <Label x:Name="LBL_C6"  Visibility="Hidden"  Content="0.00%"  HorizontalContentAlignment="Center" FontSize="7" VerticalContentAlignment="Center" Margin="0,146,210,0" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="32">
-
-                    </Label>
-                    <Viewbox Margin="0,140,207,0" Height="40" VerticalAlignment="Top" HorizontalAlignment="Right" Width="40">
-                        <ProgressBar x:Name="PRGR_C6"  Style="{StaticResource MaterialDesignCircularProgressBar}" Minimum="0" Maximum="100" RenderTransformOrigin="0.5,0.5" Width="40" Height="40" SmallChange="1">
-                            <ProgressBar.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX="0.65" ScaleY="0.65"/>
-                                    <SkewTransform/>
-                                    <RotateTransform/>
-                                    <TranslateTransform/>
-                                </TransformGroup>
-                            </ProgressBar.RenderTransform>
-                        </ProgressBar>
-                    </Viewbox>
-
-                    <Label x:Name="LBL_C7"  Visibility="Hidden"  Content="0.00%"  HorizontalContentAlignment="Center" FontSize="7" VerticalContentAlignment="Center" Margin="0,192,210,0" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="32">
-
-                    </Label>
-                    <Viewbox Margin="0,184,207,0" HorizontalAlignment="Right" Width="40" Height="40" VerticalAlignment="Top">
-                        <ProgressBar x:Name="PRGR_C7"  Style="{StaticResource MaterialDesignCircularProgressBar}" Minimum="0" Maximum="100" RenderTransformOrigin="0.5,0.5" Width="40" Height="40" SmallChange="1">
-                            <ProgressBar.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX="0.65" ScaleY="0.65"/>
-                                    <SkewTransform/>
-                                    <RotateTransform/>
-                                    <TranslateTransform/>
-                                </TransformGroup>
-                            </ProgressBar.RenderTransform>
-                        </ProgressBar>
-                    </Viewbox>
-
-                    <Label x:Name="LBL_C8"  Content="0.00%" Visibility="Hidden"  HorizontalContentAlignment="Center" FontSize="7" VerticalContentAlignment="Center" Margin="0,235,210,0" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="32">
-                        <!--<Label.Style>
-                            <Style TargetType="Label" BasedOn="{StaticResource MaterialDesignLabel}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsChecked, ElementName=c8}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IsChecked, ElementName=c8}" Value="False">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Label.Style>-->
-                    </Label>
-                    <Viewbox Margin="0,227,207,0" HorizontalAlignment="Right" Width="40" Height="40" VerticalAlignment="Top">
-                        <ProgressBar x:Name="PRGR_C8"  Style="{StaticResource MaterialDesignCircularProgressBar}" Minimum="0" Maximum="100" RenderTransformOrigin="0.5,0.5" Width="40" Height="40" SmallChange="1">
-                            <ProgressBar.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX="0.65" ScaleY="0.65"/>
-                                    <SkewTransform/>
-                                    <RotateTransform/>
-                                    <TranslateTransform/>
-                                </TransformGroup>
-                            </ProgressBar.RenderTransform>
-                        </ProgressBar>
-                    </Viewbox>
-
-                    <Label x:Name="LBL_C9"  Visibility="Hidden"  Content="0.00%"  HorizontalContentAlignment="Center" FontSize="7" VerticalContentAlignment="Center" Margin="0,56,401,0" HorizontalAlignment="Right" Width="32" Height="24" VerticalAlignment="Top">
-
-                    </Label>
-                    <Viewbox Margin="0,48,396,0" HorizontalAlignment="Right" Width="40" Height="40" VerticalAlignment="Top">
-                        <ProgressBar x:Name="PRGR_C9"  Style="{StaticResource MaterialDesignCircularProgressBar}" Minimum="0" Maximum="100" RenderTransformOrigin="0.5,0.5" Height="40" Width="40" SmallChange="1">
-                            <ProgressBar.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX="0.65" ScaleY="0.65"/>
-                                    <SkewTransform/>
-                                    <RotateTransform/>
-                                    <TranslateTransform/>
-                                </TransformGroup>
-                            </ProgressBar.RenderTransform>
-                        </ProgressBar>
-                    </Viewbox>
-
-                    <Label x:Name="LBL_C10"  Visibility="Hidden"  Content="0.00%"  HorizontalContentAlignment="Center" FontSize="7" VerticalContentAlignment="Center" Margin="0,100,401,0" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="32">
-
-                    </Label>
-                    <Viewbox Margin="0,92,396,0" Height="40" VerticalAlignment="Top" HorizontalAlignment="Right" Width="40">
-                        <ProgressBar x:Name="PRGR_C10"  Style="{StaticResource MaterialDesignCircularProgressBar}" Minimum="0" Maximum="100" RenderTransformOrigin="0.5,0.5" Height="40" Width="40" SmallChange="1">
-                            <ProgressBar.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX="0.65" ScaleY="0.65"/>
-                                    <SkewTransform/>
-                                    <RotateTransform/>
-                                    <TranslateTransform/>
-                                </TransformGroup>
-                            </ProgressBar.RenderTransform>
-                        </ProgressBar>
-                    </Viewbox>
-
-                    <Label x:Name="LBL_C11"  Visibility="Hidden"  Content="0.00%"  HorizontalContentAlignment="Center" FontSize="7" VerticalContentAlignment="Center" Margin="0,148,401,0" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right" Width="32">
-
-                    </Label>
-                    <Viewbox Margin="0,140,396,0" Height="40" VerticalAlignment="Top" HorizontalAlignment="Right" Width="40">
-                        <ProgressBar x:Name="PRGR_C11"  Style="{StaticResource MaterialDesignCircularProgressBar}" Minimum="0" Maximum="100" RenderTransformOrigin="0.5,0.5" Width="40" Height="40" SmallChange="1">
-                            <ProgressBar.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX="0.65" ScaleY="0.65"/>
-                                    <SkewTransform/>
-                                    <RotateTransform/>
-                                    <TranslateTransform/>
-                                </TransformGroup>
-                            </ProgressBar.RenderTransform>
-                        </ProgressBar>
-                    </Viewbox>
-                    <TextBlock Margin="0,0,33,23" TextWrapping="Wrap" FlowDirection="RightToLeft" Text="تعداد روز هایی که برگردد " Width="132" VerticalAlignment="Bottom" HorizontalAlignment="Right" Cursor="Hand" Height="20" Foreground="#D8000000"/>
-                    <TextBox x:Name="daysb" Style="{StaticResource MaterialDesignOutlinedTextBox}" TextAlignment="Center" Padding="3" Margin="0,0,163,20" Text="365" PreviewLostKeyboardFocus="daysb_PreviewLostKeyboardFocus" HorizontalAlignment="Right" Width="48" Height="25" VerticalAlignment="Bottom" Foreground="#D81A1A1A" BorderThickness="0,0,0,0" Background="#FFF2F2F2"/>
-                    <TextBlock Margin="0,0,219,23" TextWrapping="Wrap" FlowDirection="RightToLeft" Text="تعداد تکرار :" Width="61" VerticalAlignment="Bottom" HorizontalAlignment="Right" Cursor="Hand" Height="20" Foreground="#D8000000"/>
-                    <TextBox x:Name="repeatb" Style="{StaticResource MaterialDesignOutlinedTextBox}" TextAlignment="Center" Padding="3" Margin="0,0,285,20" Text="1" PreviewLostKeyboardFocus="repeatb_PreviewLostKeyboardFocus" HorizontalAlignment="Right" Width="48" Height="25" VerticalAlignment="Bottom" Foreground="#D81A1A1A" BorderThickness="0,0,0,0" Background="#FFF2F2F2"/>
-
-                </Grid>
-            </Border>
-            <Border Margin="19,4,7,10" Background="White" CornerRadius="10" Grid.Row="1" Grid.Column="1">
-                <Grid>
-
-                    <StackPanel FlowDirection="RightToLeft" Orientation="Horizontal" Width="113" Height="31" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,8,15,0">
-                        <Border Background="#FF05962F" CornerRadius="50" Width="14" Height="14"/>
-                        <Label Content="عملیات" Width="86" Margin="3,0,0,0"/>
-                    </StackPanel>
-
-                    <Viewbox Stretch="Uniform" Margin="123,62,123,62" >
-                        <Grid Height="150" Width="150">
-                            <!--<TextBlock x:Name="COUNTER_TXBL" Text="0" FontSize="16" Margin="58,60,37,62"/>-->
-                            <Label x:Name="COUNTER_TXBL" Content="0.00%" FontSize="16" Margin="3,2,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
-                            <ProgressBar x:Name="TOGHER_PROGRESS" HorizontalAlignment="Center" Style="{StaticResource MaterialDesignCircularProgressBar}" Margin="0,-53,0,73" Value="0" Minimum="0" Maximum="100" Width="144"/>
-                        </Grid>
-                    </Viewbox>
-                    <Button  x:Name="LetsGoBtn" Content="شروع" materialDesign:ButtonAssist.CornerRadius="10" HorizontalAlignment="Right" Margin="0,0,71,27" VerticalAlignment="Bottom" Padding="19,1,16,4" Foreground="#DDFFFFFF" Width="74" Height="30" Click="LetsGoBtn_Click" FontSize="12"/>
-                    <Button x:Name="Btn_DoCancel" Click="Btn_DoCancel_Click" Content="لغو" materialDesign:ButtonAssist.CornerRadius="10" HorizontalAlignment="Left" Margin="74,0,0,27" VerticalAlignment="Bottom" Padding="16,2,16,4" Foreground="#DDFFFFFF" Width="74" Height="30" Background="#FFFF0B0B" BorderBrush="#FFF40303" FontSize="12" IsEnabled="False"/>
-
-                </Grid>
-            </Border>
-            <Border Margin="19,0,7,20" Background="White" CornerRadius="10" Grid.Row="2" Grid.Column="1">
-                <Grid>
-                    <ListBox x:Name="List5" ItemsSource="{Binding LST_DATA5}" AlternationCount="2" ItemContainerStyle="{StaticResource Style1}" Margin="10,44,15,10" d:ItemsSource="{d:SampleData ItemCount=5}"/>
-
-                    <StackPanel  x:Name="HRSTK1" PreviewMouseLeftButtonDown="HRSTK1_PreviewMouseLeftButtonDown" Cursor="Hand" FlowDirection="RightToLeft" Orientation="Horizontal" Width="113" Height="31" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,6,17,0">
-                        <Border Background="#FFE8B502" CornerRadius="50" Width="14" Height="14"/>
-                        <Label  Content="سوابق بازسازی" FontSize="12"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
-
-        </Grid>
-
     </Grid>
 
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="8" CornerRadius="12"/>
     </WindowChrome.WindowChrome>
 </Window>

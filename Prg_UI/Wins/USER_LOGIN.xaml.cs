@@ -390,7 +390,7 @@ namespace Prg_UI.Wins
 
             //new WIN_VISITGOL_HEAD().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FACTORS_LST, this, 13);
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_BACK2, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_HEAD_MANF_FORMULSAKHT, this);
             //new WinBase().Show();
             //new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED().Show();
             //new TR_FACOTRLST(5).Show();
