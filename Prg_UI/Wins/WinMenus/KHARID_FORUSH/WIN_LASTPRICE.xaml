@@ -229,7 +229,7 @@
                                             Background="Transparent" BorderThickness="0" FontSize="20" FontWeight="Bold" Foreground="#0D47A1" HorizontalContentAlignment="Left"/>
                                 <xctk:MaskedTextBox x:Name="DT" Mask="0000/00/00" Background="Transparent" BorderThickness="0" 
                                             Foreground="#1976D2" FontSize="12" Margin="0,2,0,0" HorizontalContentAlignment="Left"
-                                            FlowDirection="LeftToRight" TextAlignment="Right" LostFocus="DT_LostFocus" materialDesign:HintAssist.Hint="تاریخ"/>
+                                            FlowDirection="LeftToRight" TextAlignment="Center" LostFocus="DT_LostFocus" materialDesign:HintAssist.Hint="تاریخ"/>
                             </StackPanel>
                         </Border>
                     </UniformGrid>
