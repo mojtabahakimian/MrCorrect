@@ -391,7 +391,7 @@ namespace Prg_UI.Wins
 
             //new WIN_LASTPRICE().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FACTORS_LST, this, 13);
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.NABZMOSH_MOSHTARI, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_VISITGOL_HEAD_AHDAF, this);
             //new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED().Show();
             //new TR_FACOTRLST(5).Show();
             //new TR_ANBGRD_LST().Show();

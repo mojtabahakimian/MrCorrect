@@ -23,7 +23,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using Wins.ThePages;
-using static Wins.WinOther.SEARCHMENIU_WIN;
 
 namespace Prg_UI.Wins
 {

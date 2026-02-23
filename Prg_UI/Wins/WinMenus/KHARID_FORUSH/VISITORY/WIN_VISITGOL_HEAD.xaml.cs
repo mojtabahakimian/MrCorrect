@@ -9,6 +9,10 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Rpts;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Components;
+using Stimulsoft.Report.Dictionary;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -775,8 +779,19 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY
                 return;
             }
 
+            var report = new StiReport();
+            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.TAARIF.VISIT_GOL_HEAD_KALA.mrt");
+            report.Load(pathreport);
+            ((StiSqlDatabase)(report.Dictionary.Databases["MS SQL"])).ConnectionString = CL_CCNNMANAGER.CONNECTION_STR;
 
-            new Msgwin(false, "گزارش visitgol_head_KALA یافت نشد").ShowDialog();
+            report["MAH_PARM"] = MAH.SelectedValue;
+            report["HES_PARM"] = CUST_NO.SelectedValue;
+
+            (report.GetComponentByName("VNAME") as StiText).Text = CUST_NO.Text;
+            (report.GetComponentByName("VCODE") as StiText).Text = CUST_NO.SelectedValue.ToString();
+            (report.GetComponentByName("VDATE") as StiText).Text = Tarikh.FullCurrentDate;
+
+            new WINRPT(report, "تعيين اهداف براي ويزيتور ها").Show();
         }
 
         #region ISearchableWindow

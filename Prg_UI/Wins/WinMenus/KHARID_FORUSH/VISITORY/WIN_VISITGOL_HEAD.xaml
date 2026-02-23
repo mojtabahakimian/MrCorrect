@@ -35,7 +35,7 @@
             <Border  x:Name="TitleDrawBar" Style="{StaticResource BordG}"  Background="{Binding ElementName=GENERAL_RANG, Path=Background}"  CornerRadius="10,10,0,0" Margin="-9,-9,-9,0"  Height="38"  VerticalAlignment="Top" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
                 <Grid>
                     <!-- Window title -->
-                    <Label x:Name="LABEL_HEADER" Content="تعيين اهداف براي ويزيتورها" Padding="17,8,10,10" Foreground="White" Margin="0,0,110,0" VerticalAlignment="Center"/>
+                    <Label x:Name="LABEL_HEADER" Content="تعيين اهداف براي ويزيتور ها" Padding="17,8,10,10" Foreground="White" Margin="0,0,110,0" VerticalAlignment="Center"/>
                     <!-- Window control buttons -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,13,0">
                         <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" Height="24" Padding="0,0,0,-1" IsTabStop="False" ToolTip="Minimize">

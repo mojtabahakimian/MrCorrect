@@ -148,6 +148,7 @@
 		<None Remove="Rpts\SETPERMIS\userobjectpermision.mrt" />
 		<None Remove="Rpts\STUF_DEF.mrt" />
 		<None Remove="Rpts\TAARIF\GRADE_REP.mrt" />
+		<None Remove="Rpts\TAARIF\VISIT_GOL_HEAD_KALA.mrt" />
 		<None Remove="Rpts\Visitory\OLGU_POORSANT.mrt" />
 		<None Remove="Rpts\Visitory\R_LIST_MASIR.mrt" />
 		<None Remove="Rpts\Visitory\tozie_dasti.mrt" />
@@ -563,6 +564,7 @@
 		<EmbeddedResource Include="Rpts\SETPERMIS\userobjectpermision.mrt" />
 		<EmbeddedResource Include="Rpts\STUF_DEF.mrt" />
 		<EmbeddedResource Include="Rpts\TAARIF\GRADE_REP.mrt" />
+		<EmbeddedResource Include="Rpts\TAARIF\VISIT_GOL_HEAD_KALA.mrt" />
 		<EmbeddedResource Include="Rpts\Visitory\OLGU_POORSANT.mrt" />
 		<EmbeddedResource Include="Rpts\Visitory\R_LIST_MASIR.mrt" />
 		<EmbeddedResource Include="Rpts\Visitory\tozie_dasti.mrt" />
