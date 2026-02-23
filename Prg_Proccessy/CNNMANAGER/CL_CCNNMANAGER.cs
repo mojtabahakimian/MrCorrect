@@ -36,9 +36,26 @@ namespace Prg_SendInvoice.CNNMANAGER
             {
                 lock (_lock)
                 {
+                    //_connectionStr = NormalizeConnectionString(value);
                     _connectionStr = value;
                 }
             }
+        }
+        private static string NormalizeConnectionString(string connectionString)
+        {
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                return connectionString;
+            }
+
+            var normalized = connectionString.Trim();
+
+            if (!normalized.EndsWith(';'))
+            {
+                normalized += ";";
+            }
+
+            return normalized;
         }
 
         public static bool ConnectedToSQLDB { get; set; } = false;

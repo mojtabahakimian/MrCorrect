@@ -1374,27 +1374,41 @@ namespace Prg_UI.Functions
                 {
                     return;
                 }
-                if (_runningProcesses?.FirstOrDefault() != null)
-                {
-                    if (_runningProcesses.TryRemove(process.Id, out var removedProcess))
-                    {
-                        removedProcess.Kill();
-                        removedProcess.WaitForExit(500); // Set a 500ms timeout
-                        removedProcess.Dispose();
 
-                        // Clean up temporary file
-                        string tempExePath = _tempExePaths.FirstOrDefault(p => string.Equals(p, removedProcess.StartInfo.FileName, StringComparison.OrdinalIgnoreCase));
-                        if (tempExePath != null)
+                // If process is already disposed or stopped, accessing Id might throw InvalidOperationException
+                int processId;
+                try
+                {
+                    processId = process.Id;
+                }
+                catch (InvalidOperationException)
+                {
+                    // Process is likely disposed or not associated with a running process.
+                    return;
+                }
+                catch (Exception)
+                {
+                    return;
+                }
+
+                if (_runningProcesses.TryRemove(processId, out var removedProcess))
+                {
+                    removedProcess.Kill();
+                    removedProcess.WaitForExit(500); // Set a 500ms timeout
+                    removedProcess.Dispose();
+
+                    // Clean up temporary file
+                    string tempExePath = _tempExePaths.FirstOrDefault(p => string.Equals(p, removedProcess.StartInfo.FileName, StringComparison.OrdinalIgnoreCase));
+                    if (tempExePath != null)
+                    {
+                        try
                         {
-                            try
-                            {
-                                File.Delete(tempExePath);
-                                _tempExePaths.Remove(tempExePath);
-                            }
-                            catch (Exception)
-                            {
-                                // Handle the exception as needed
-                            }
+                            File.Delete(tempExePath);
+                            _tempExePaths.Remove(tempExePath);
+                        }
+                        catch (Exception)
+                        {
+                            // Handle the exception as needed
                         }
                     }
                 }
