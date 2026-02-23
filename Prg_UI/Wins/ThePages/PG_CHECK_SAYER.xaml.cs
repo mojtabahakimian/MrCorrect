@@ -64,5 +64,10 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHREC_HES_BEHESABCHECK, default);
         }
+
+        private void WrapPanel_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_CHKB, default);
+        }
     }
 }

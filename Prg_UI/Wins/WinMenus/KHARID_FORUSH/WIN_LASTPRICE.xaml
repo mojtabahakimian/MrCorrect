@@ -1,0 +1,278 @@
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.KHARID_FORUSH.WIN_LASTPRICE"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.KHARID_FORUSH"
+        mc:Ignorable="d"        
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        Height="600" Width="815"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        MinHeight="400"
+        FontFamily="{StaticResource IRANYEKAN}"
+        Background="{x:Null}"
+        AllowsTransparency="True" AllowDrop="True"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="15"/>
+    </WindowChrome.WindowChrome>
+    <Window.Resources>
+        <!-- Reusable Virtualizing Panel -->
+        <ItemsPanelTemplate x:Key="VirtualizingComboPanel">
+            <VirtualizingStackPanel IsVirtualizing="True" VirtualizationMode="Recycling" ScrollViewer.CanContentScroll="True"/>
+        </ItemsPanelTemplate>
+
+        <!-- Modern Fluent Card Style -->
+        <Style x:Key="ModernCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="20"/>
+
+        </Style>
+
+        <!-- Dashboard KPI Box Style -->
+        <Style x:Key="KPIBox" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+        </Style>
+
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Color="{Binding ElementName=GENERAL_RANG, Path=Background.Color}" Opacity="0.3"/>
+    </Window.Resources>
+
+
+    <Grid x:Name="mygrid" Margin="8,8,8,0">
+        <!-- Hidden button for color binding reference -->
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Width="1" Height="1"/>
+        <!-- Main container -->
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding ElementName=GENERAL_RANG, Path=Background}" BorderThickness="1" CornerRadius="10" Padding="8">
+            <!-- Title bar -->
+            <Border  x:Name="TitleDrawBar" Style="{StaticResource BordG}"  Background="{Binding ElementName=GENERAL_RANG, Path=Background}"  CornerRadius="10,10,0,0" Margin="-9,-9,-9,0"  Height="38"  VerticalAlignment="Top" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <!-- Window title -->
+                    <Label x:Name="LABEL_HEADER" Content="آخرین قیمت ها" Padding="17,8,10,10" Foreground="White" Margin="0,0,110,0" VerticalAlignment="Center"/>
+                    <!-- Window control buttons -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,13,0">
+                        <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" Height="24" Padding="0,0,0,-1" IsTabStop="False" ToolTip="Minimize">
+                            <materialDesign:PackIcon Kind="WindowMinimize" Width="18" Height="18" Foreground="White"/>
+                        </Button>
+                        <Button x:Name="Btn_Max" Click="Btn_Max_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" FontSize="12" Height="24" Padding="0" Margin="4,0,0,0" IsTabStop="False" ToolTip="Maximize">
+                            <materialDesign:PackIcon Kind="WindowMaximize" Width="17" Height="17" Foreground="White"/>
+                        </Button>
+                        <Button x:Name="Btn_Close" Click="Btn_Close_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" Height="24" Padding="0" Margin="4,0,0,0" FontSize="12" IsTabStop="False" ToolTip="Close">
+                            <materialDesign:PackIcon Kind="WindowClose" Width="19" Height="19" Foreground="White"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Border>
+        <!-- Notification popup -->
+        <Popup x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Slide" Placement="Relative" Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <Border x:Name="Pop_Border1" CornerRadius="12" Background="#EA4335" Width="{Binding ElementName=mygrid, Path=ActualWidth, Mode=OneWay}" Height="60" Margin="0,10,0,0">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="15" ShadowDepth="5" Opacity="0.3" Color="Black"/>
+                </Border.Effect>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <materialDesign:PackIcon Kind="BellRingOutline" Foreground="White" Width="24" Height="24" VerticalAlignment="Center" Margin="15,0,0,0"/>
+                    <TextBox x:Name="Pop1Text1" Grid.Column="1" IsReadOnly="True" Background="Transparent" FlowDirection="RightToLeft" BorderThickness="0" Foreground="White" Text="محل نمایش اعلان های سیستم" TextAlignment="Left" VerticalAlignment="Center" Margin="15,0,15,0" FontSize="14"/>
+                </Grid>
+            </Border>
+        </Popup>
+
+        <!-- Content area -->
+        <Grid Margin="0,38,0,0" FlowDirection="RightToLeft">
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Margin="20">
+
+                    <!-- Section 1: Filters Card -->
+                    <Border Style="{StaticResource ModernCard}" Margin="0,0,0,20">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="15"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="جستجو و انتخاب" FontSize="15" FontWeight="Bold" Foreground="#455A64" Margin="0,0,0,10"/>
+
+                            <!-- Product Row -->
+                            <Grid Grid.Row="0" Margin="0,35,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="0.4*"/>
+                                    <ColumnDefinition Width="15"/>
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Orientation="Horizontal" Grid.Column="0" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="PackageVariantClosed" Foreground="#78909C" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="کالا:" VerticalAlignment="Center" Foreground="#546E7A" Margin="-2,0,0,0"/>
+                                </StackPanel>
+
+                                <ComboBox x:Name="Combo13" Grid.Column="1" Height="40" Padding="10,0,10,0"
+                                  Style="{StaticResource FuzzyOutComboBox}" materialDesign:HintAssist.Hint="کد کالا"
+                                  IsEditable="True" IsTextSearchEnabled="True" IsSynchronizedWithCurrentItem="True" 
+                                  DisplayMemberPath="CODE" SelectedValuePath="CODE" SelectedIndex="-1" 
+                                  ItemsPanel="{StaticResource VirtualizingComboPanel}"
+                                  SelectionChanged="Combo13_SelectionChanged"/>
+                                
+                                <ComboBox x:Name="CODE" Grid.Column="3" Height="40" Padding="10,0,10,0"
+                                  Style="{StaticResource FuzzyOutComboBox}" materialDesign:HintAssist.Hint="نام کالا..."
+                                  IsEditable="True" IsTextSearchEnabled="True" IsSynchronizedWithCurrentItem="True" 
+                                  DisplayMemberPath="NAME" SelectedValuePath="CODE" SelectedIndex="-1" 
+                                  ItemsPanel="{StaticResource VirtualizingComboPanel}"
+                                  SelectionChanged="CODE_SelectionChanged" PreviewLostKeyboardFocus="CODE_PreviewLostKeyboardFocus"/>
+                                
+                            </Grid>
+
+                            <!-- Customer Row -->
+                            <Grid Grid.Row="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="0.5*"/>
+                                    <ColumnDefinition Width="15"/>
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Orientation="Horizontal" Grid.Column="0" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="AccountTie" Foreground="#78909C" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="مشتری:" VerticalAlignment="Center" Foreground="#546E7A" Margin="-3,0,0,0"/>
+                                </StackPanel>
+
+                                <ComboBox x:Name="HMOIN1" Grid.Column="1" Height="40" Padding="10,0,10,0"
+                                  Style="{StaticResource FuzzyOutComboBox}" materialDesign:HintAssist.Hint="کد مشتری"
+                                  IsEditable="True" IsTextSearchEnabled="True" IsSynchronizedWithCurrentItem="True" 
+                                  DisplayMemberPath="HES" SelectedValuePath="HES" 
+                                  ItemsPanel="{StaticResource VirtualizingComboPanel}"
+                                  SelectionChanged="HMOIN1_SelectionChanged" PreviewLostKeyboardFocus="HMOIN1_PreviewLostKeyboardFocus"/>
+
+                                <ComboBox x:Name="HHMOIN1" Grid.Column="3" Height="40" Padding="10,0,10,0"
+                                  Style="{StaticResource FuzzyOutComboBox}" materialDesign:HintAssist.Hint="نام مشتری..."
+                                  IsEditable="True" IsTextSearchEnabled="True" IsSynchronizedWithCurrentItem="True" 
+                                  DisplayMemberPath="NAME" SelectedValuePath="HES" 
+                                  ItemsPanel="{StaticResource VirtualizingComboPanel}"
+                                  SelectionChanged="HHMOIN1_SelectionChanged"/>
+
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <!-- Section 2: Action Button -->
+                    <Button Height="40" Margin="0,0,0,25" HorizontalAlignment="Center" Width="300"
+                            Style="{StaticResource MaterialDesignRaisedButton}" 
+                            Background="{Binding ElementName=GENERAL_RANG, Path=Background, FallbackValue=#009688}"
+                            BorderThickness="0"
+                            materialDesign:ButtonAssist.CornerRadius="22" 
+                            Click="Button_Click">
+                        <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+                            <materialDesign:PackIcon Kind="CloudSearchOutline" Width="22" Height="22" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White" />
+                            <TextBlock Text="پردازش و دریافت آخرین قیمت" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Section 3: KPI Dashboard (Prices) -->
+                    <UniformGrid Columns="4" Rows="1" Margin="0,0,0,25" HorizontalAlignment="Stretch">
+
+                        <!-- KPI 1: Sell Price -->
+                        <Border Style="{StaticResource KPIBox}" Margin="0,0,10,0">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <materialDesign:PackIcon Kind="TrendingUp" Foreground="#4CAF50" Width="18" Height="18" Margin="0,0,5,0"/>
+                                    <TextBlock Text="آخرین قیمت فروش" Foreground="#78909C" FontSize="13"/>
+                                </StackPanel>
+                                <CNC:NumericTextBox x:Name="LFP" IsReadOnly="True" DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" 
+                                            Background="Transparent" BorderThickness="0" FontSize="20" FontWeight="Bold" Foreground="#263238" HorizontalContentAlignment="Left"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- KPI 2: Buy Price -->
+                        <Border Style="{StaticResource KPIBox}" Margin="5,0,5,0">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <materialDesign:PackIcon Kind="TrendingDown" Foreground="#FF56ADD2" Width="18" Height="18" Margin="0,0,5,0"/>
+                                    <TextBlock Text="آخرین قیمت خرید" Foreground="#78909C" FontSize="13"/>
+                                </StackPanel>
+                                <CNC:NumericTextBox x:Name="LKP" IsReadOnly="True" DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" 
+                                            Background="Transparent" BorderThickness="0" FontSize="20" FontWeight="Bold" Foreground="#263238" HorizontalContentAlignment="Left"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- KPI 3: Initial Price -->
+                        <Border Style="{StaticResource KPIBox}" Margin="5,0,5,0">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <materialDesign:PackIcon Kind="TagOutline" Foreground="#FF9800" Width="18" Height="18" Margin="0,0,5,0"/>
+                                    <TextBlock Text="قیمت اولیه" Foreground="#78909C" FontSize="13"/>
+                                </StackPanel>
+                                <CNC:NumericTextBox x:Name="LP" IsReadOnly="True" DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" 
+                                            Background="Transparent" BorderThickness="0" FontSize="20" FontWeight="Bold" Foreground="#263238" HorizontalContentAlignment="Left"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- KPI 4: Customer Specific Sell -->
+                        <Border Style="{StaticResource KPIBox}" Margin="10,0,0,0" Background="#F3F8FF" BorderBrush="#BBDEFB">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <materialDesign:PackIcon Kind="AccountCash" Foreground="#1E88E5" Width="18" Height="18" Margin="0,0,5,0"/>
+                                    <TextBlock Text="فروش به این مشتری" Foreground="#1565C0" FontSize="13" FontWeight="SemiBold"/>
+                                </StackPanel>
+                                <CNC:NumericTextBox x:Name="LFPM" IsReadOnly="True" DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" 
+                                            Background="Transparent" BorderThickness="0" FontSize="20" FontWeight="Bold" Foreground="#0D47A1" HorizontalContentAlignment="Left"/>
+                                <xctk:MaskedTextBox x:Name="DT" Mask="0000/00/00" Background="Transparent" BorderThickness="0" 
+                                            Foreground="#1976D2" FontSize="12" Margin="0,2,0,0" HorizontalContentAlignment="Left"
+                                            FlowDirection="LeftToRight" TextAlignment="Center" LostFocus="DT_LostFocus" materialDesign:HintAssist.Hint="تاریخ"/>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <!-- Section 4: History DataGrids Card -->
+                    <Border Style="{StaticResource ModernCard}" VerticalAlignment="Stretch">
+                        <TabControl Background="Transparent" BorderThickness="0" materialDesign:ColorZoneAssist.Mode="Standard">
+                            <!-- Sale History Tab -->
+                            <TabItem Header="سابقه فروش به مشتری" Height="49" FontSize="14" FontWeight="Medium">
+                                <DataGrid x:Name="DGR_SaleHistory" AutoGenerateColumns="False" IsReadOnly="True" 
+                                  CanUserAddRows="False" CanUserDeleteRows="False" HeadersVisibility="Column" RowHeaderWidth="0"
+                                  Background="Transparent" BorderThickness="0" GridLinesVisibility="None" AlternationCount="2" AlternatingRowBackground="#F9FAFB" RowHeight="40" Margin="0,10,0,0">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="شماره" Binding="{Binding NUMBER}" Width="90" Visibility="Hidden"/>
+                                        <DataGridTextColumn Header="تاریخ" Binding="{Binding DATE_N_FM, StringFormat=####/##/##}" Width="120"/>
+                                        <DataGridTextColumn Header="مبلغ (ریال)" Binding="{Binding MABL, StringFormat=N0}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}"/>
+                                        <DataGridTextColumn Header="مبلغ کل (ریال)" Binding="{Binding MABL_K, StringFormat=N0}" Width="150" FontWeight="SemiBold"/>
+                                        <DataGridTextColumn Header="طرف حساب" Binding="{Binding CUST_NAME}" Width="*" Visibility="Hidden"/>
+                                        <DataGridTextColumn Header="مقدار کل کالا" Binding="{Binding MEGHk, StringFormat=N2}" Width="130"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </TabItem>
+
+                            <!-- Buy History Tab -->
+                            <TabItem Header="سابقه خرید کالا" Height="47" FontSize="14" FontWeight="Medium">
+                                <DataGrid x:Name="DGR_BuyHistory" AutoGenerateColumns="False" IsReadOnly="True" 
+                                  CanUserAddRows="False" CanUserDeleteRows="False" HeadersVisibility="Column" RowHeaderWidth="0"
+                                  Background="Transparent" BorderThickness="0" GridLinesVisibility="None" AlternationCount="2" AlternatingRowBackground="#F9FAFB" RowHeight="40" Margin="0,10,0,0">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="شماره" Binding="{Binding NUMBER}" Width="90" Visibility="Hidden"/>
+                                        <DataGridTextColumn Header="تاریخ" Binding="{Binding DATE_N_FM, StringFormat=####/##/##}" Width="120"/>
+                                        <DataGridTextColumn Header="مبلغ (ریال)" Binding="{Binding MABL, StringFormat=N0}" Width="150"/>
+                                        <DataGridTextColumn Header="مبلغ کل (ریال)" Binding="{Binding MABL_K, StringFormat=N0}" Width="150" FontWeight="SemiBold"/>
+                                        <DataGridTextColumn Header="طرف حساب" Binding="{Binding CUST_NAME}" Width="*" Visibility="Hidden"/>
+                                        <DataGridTextColumn Header="مقدار کل کالا" Binding="{Binding MEGHk, StringFormat=N2}" Width="130"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </TabItem>
+                        </TabControl>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+        </Grid>
+    </Grid>
+</Window>

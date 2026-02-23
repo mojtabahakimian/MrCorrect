@@ -93,11 +93,11 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
         //Header Window End;
         #endregion
 
-        CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
-
         public ObservableCollection<COMBOYMODEL> SKID_ITEMS { get; set; }
         public ObservableCollection<AutomasionEVNT> EVENTS_DATA { get; set; } = new ObservableCollection<AutomasionEVNT>();
         public long IDNUMTASK { get; set; }
+
+        CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
         /// <summary>
         /// Give me the IDNUM of TASK for events
@@ -384,77 +384,114 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                     }
                     else
                     {
-                        string _FXTYPE_ = (string.IsNullOrEmpty(CURRENT_ITM.FXTYPE) ? "NULL" : $"N'{CURRENT_ITM.FXTYPE}'");
-
-                        //Insert
-                        if (CURRENT_ITM.IDD is null)
+                        try
                         {
-                            string QRE_INSERT = "";
+                            string? _FXTYPE_ = string.IsNullOrEmpty(CURRENT_ITM.FXTYPE) ? null : CURRENT_ITM.FXTYPE;
 
-                            if (CURRENT_ITM?.pic is null)
+                            //Insert
+                            if (CURRENT_ITM.IDD is null)
                             {
-                                QRE_INSERT = $@"INSERT INTO dbo.EVENTS(IDNUM, EVENTS, STDATE, STTIME, USERNAME, SUMTIME, skid, num)
-                                              VALUES({IDNUMTASK},
-                                              N'{CURRENT_ITM.EVENTS.Trim()}' ,
-                                              {CURRENT_ITM.STDATE},
-                                              {CURRENT_ITM.STTIME},
-                                              N'{CL_HESABDARI.UCurrentUser()}',
-                                              {CURRENT_ITM.SUMTIME}, 
-                                              {(string.IsNullOrEmpty(CURRENT_ITM.skid.ToStringNullSafe()) ? "NULL" : CURRENT_ITM.skid.ToString())} ,
-                                              {(string.IsNullOrEmpty(CURRENT_ITM.num.ToStringNullSafe()) ? "NULL" : CURRENT_ITM.num.ToString())}
-                                              )";
-                                dbms.DoExecuteSQL(QRE_INSERT);
+                                string QRE_INSERT = "";
+
+                                if (CURRENT_ITM?.pic is null)
+                                {
+                                    QRE_INSERT = @"INSERT INTO dbo.EVENTS(IDNUM, EVENTS, STDATE, STTIME, USERNAME, SUMTIME, skid, num)
+                                              VALUES(@IdNum, @Events, @StDate, @StTime, @UserName, @SumTime, @Skid, @Num)";
+
+                                    dbms.DoExecuteSQL(QRE_INSERT, new
+                                    {
+                                        IdNum = IDNUMTASK,
+                                        Events = CURRENT_ITM.EVENTS.Trim(),
+                                        StDate = CURRENT_ITM.STDATE,
+                                        StTime = CURRENT_ITM.STTIME,
+                                        UserName = CL_HESABDARI.UCurrentUser(),
+                                        SumTime = CURRENT_ITM.SUMTIME,
+                                        Skid = CURRENT_ITM.skid,
+                                        Num = CURRENT_ITM.num
+                                    });
+                                }
+                                else
+                                {
+                                    QRE_INSERT = @"INSERT INTO dbo.EVENTS(IDNUM, EVENTS, STDATE, STTIME, USERNAME, SUMTIME, skid, num, FXTYPE, pic)
+                                              VALUES(@IdNum, @Events, @StDate, @StTime, @UserName, @SumTime, @Skid, @Num, @FxType, @Img)";
+
+                                    dbms.DoExecuteSQL(QRE_INSERT, new
+                                    {
+                                        IdNum = IDNUMTASK,
+                                        Events = CURRENT_ITM.EVENTS.Trim(),
+                                        StDate = CURRENT_ITM.STDATE,
+                                        StTime = CURRENT_ITM.STTIME,
+                                        UserName = CL_HESABDARI.UCurrentUser(),
+                                        SumTime = CURRENT_ITM.SUMTIME,
+                                        Skid = CURRENT_ITM.skid,
+                                        Num = CURRENT_ITM.num,
+                                        FxType = _FXTYPE_,
+                                        Img = CURRENT_ITM.pic
+                                    });
+                                }
+                                ReGetDataAndPreserveState();
                             }
+                            //Update
                             else
                             {
-                                QRE_INSERT = $@"INSERT INTO dbo.EVENTS(IDNUM, EVENTS, STDATE, STTIME, USERNAME, SUMTIME,skid, num, FXTYPE , pic)
-                                              VALUES({IDNUMTASK},
-                                              N'{CURRENT_ITM.EVENTS.Trim()}' ,
-                                              {CURRENT_ITM.STDATE},
-                                              {CURRENT_ITM.STTIME},
-                                              N'{CL_HESABDARI.UCurrentUser()}',
-                                              {CURRENT_ITM.SUMTIME},
-                                              {(string.IsNullOrEmpty(CURRENT_ITM.skid.ToStringNullSafe()) ? "NULL" : CURRENT_ITM.skid.ToString())} ,
-                                              {(string.IsNullOrEmpty(CURRENT_ITM.num.ToStringNullSafe()) ? "NULL" : CURRENT_ITM.num.ToString())} ,
-                                              {_FXTYPE_} ,
-                                              @img)";
+                                string QRE_UPDATE = "";
 
-                                dbms.DoExecuteSQL(QRE_INSERT, new { img = CURRENT_ITM.pic });
+                                if (CURRENT_ITM?.pic is null)
+                                {
+                                    QRE_UPDATE = @"UPDATE dbo.EVENTS SET
+                                              EVENTS = @Events, 
+                                              SUMTIME = @SumTime,
+                                              skid = @Skid,
+                                              num = @Num,
+                                              FXTYPE = @FxType, 
+                                              pic = @Img
+                                              WHERE IDNUM = @IdNum AND IDD = @Idd";
+
+                                    dbms.DoExecuteSQL(QRE_UPDATE, new
+                                    {
+                                        Events = CURRENT_ITM.EVENTS,
+                                        SumTime = CURRENT_ITM.SUMTIME,
+                                        Skid = CURRENT_ITM.skid,
+                                        Num = CURRENT_ITM.num,
+                                        FxType = _FXTYPE_,
+                                        Img = (byte[])null,
+                                        IdNum = IDNUMTASK,
+                                        Idd = CURRENT_ITM.IDD
+                                    });
+                                }
+                                else
+                                {
+                                    QRE_UPDATE = @"UPDATE dbo.EVENTS SET
+                                                EVENTS = @Events, 
+                                                SUMTIME = @SumTime,  
+                                                skid = @Skid,
+                                                num = @Num,
+                                                FXTYPE = @FxType, 
+                                                pic = @Img
+                                                WHERE IDNUM = @IdNum AND IDD = @Idd";
+
+                                    dbms.DoExecuteSQL(QRE_UPDATE, new
+                                    {
+                                        Events = CURRENT_ITM.EVENTS,
+                                        SumTime = CURRENT_ITM.SUMTIME,
+                                        Skid = CURRENT_ITM.skid,
+                                        Num = CURRENT_ITM.num,
+                                        FxType = _FXTYPE_,
+                                        Img = CURRENT_ITM.pic,
+                                        IdNum = IDNUMTASK,
+                                        Idd = CURRENT_ITM.IDD
+                                    });
+                                }
+                                ReGetDataAndPreserveState();
                             }
-                            ReGetDataAndPreserveState();
                         }
-                        //Update
-                        else
+                        catch (Microsoft.Data.SqlClient.SqlException ex)
                         {
-                            string QRE_UPDATE = "";
-
-                            if (CURRENT_ITM?.pic is null)
-                            {
-                                QRE_UPDATE = $@"UPDATE dbo.EVENTS SET
-                                              EVENTS = N'{CURRENT_ITM.EVENTS}' , 
-                                              SUMTIME = {CURRENT_ITM.SUMTIME} ,
-                                              skid = {(string.IsNullOrEmpty(CURRENT_ITM.skid.ToStringNullSafe()) ? "NULL" : CURRENT_ITM.skid.ToString())},
-                                              num = {(string.IsNullOrEmpty(CURRENT_ITM.num.ToStringNullSafe()) ? "NULL" : CURRENT_ITM.num.ToString())} ,
-                                              FXTYPE = {_FXTYPE_} , 
-                                              pic = @img
-                                              WHERE IDNUM = {IDNUMTASK} AND IDD = {CURRENT_ITM.IDD}";
-
-                                dbms.DoExecuteSQL(QRE_UPDATE, new { img = (byte[])null });
-                            }
-                            else
-                            {
-                                QRE_UPDATE = $@"UPDATE dbo.EVENTS SET
-                                                EVENTS = N'{CURRENT_ITM.EVENTS}' , 
-                                                SUMTIME = {CURRENT_ITM.SUMTIME},  
-                                                skid = {(string.IsNullOrEmpty(CURRENT_ITM.skid.ToStringNullSafe()) ? "NULL" : CURRENT_ITM.skid.ToString())},
-                                                num = {(string.IsNullOrEmpty(CURRENT_ITM.num.ToStringNullSafe()) ? "NULL" : CURRENT_ITM.num.ToString())} ,
-                                                FXTYPE = {_FXTYPE_} , 
-                                                pic = @img
-                                                WHERE IDNUM = {IDNUMTASK} AND IDD = {CURRENT_ITM.IDD}";
-
-                                dbms.DoExecuteSQL(QRE_UPDATE, new { img = CURRENT_ITM.pic });
-                            }
-                            ReGetDataAndPreserveState();
+                            new Msgwin(false, "خطا در برقراری ارتباط با سرور. لطفا اتصال اینترنت یا شبکه خود را بررسی کنید.").Show();
+                        }
+                        catch (Exception ex)
+                        {
+                            new Msgwin(false, "خطایی در ذخیره اطلاعات رخ داد.").Show();
                         }
                     }
                 }

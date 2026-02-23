@@ -1583,5 +1583,71 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_VISITGOL_HEAD_AHDAF, default);
         }
+
+        private void Button_Click_153(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_PAYGETD_LST, default);
+        }
+
+        private void Button_Click_154(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_PAYGETP_LST, default);
+        }
+
+        private void Button_Click_155(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHREC_H, default);
+        }
+
+        private void Button_Click_156(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHREC_HP, default);
+        }
+
+        private void Button_Click_157(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHECK_MON, default);
+        }
+
+        private void Button_Click_158(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHKE_DLIST_KOLCHECKD, default);
+        }
+
+        private void Button_Click_159(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_CHEK_VLISTALL_NAZDEBANK, default);
+        }
+
+        private void Button_Click_160(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_CHEK_CHEK_VOSUL_LES, default);
+        }
+
+        private void Button_Click_161(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PAY_GETD_LOG_FORM, default);
+        }
+
+        private void Button_Click_163(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHECK_MONP, default);
+        }
+
+        private void Button_Click_162(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHKE_PLIST, default);
+        }
+
+        private void Button_Click_164(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHKE_PLIST, default);
+
+        }
+
+        private void Button_Click_165(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CHAPCHEK, default);
+        }
     }
 }

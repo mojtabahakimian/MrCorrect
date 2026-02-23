@@ -353,6 +353,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش خلاصه فروش روزانه به تفکیک فاکتور", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_GOZARESH_FROOSH_FR });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست مشخصات کلیه کالا ها", WIN_NAME = CL_MenuManager.WinNameType.STUF_DEF_LIST });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست فروش کالا ها به تفکیک اشخاص", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_DATE_HES });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "آخرین قیمت ها", WIN_NAME = CL_MenuManager.WinNameType.WIN_LASTPRICE_CTRLF12 });
 
             //گزارشات چکها
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "لیست چکهای دریافتی سررسید شده", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_CHEK_DCHSS });
@@ -437,6 +438,8 @@ namespace Wins.WinOther
 
 
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "بررسی وضعیت کارشناس", WIN_NAME = CL_MenuManager.WinNameType.NABZMOSH_KARSHENASH });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "بررسی وضعیت مشتری", WIN_NAME = CL_MenuManager.WinNameType.NABZMOSH_MOSHTARI });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "محاسبه تاخیر پرداخت ها", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_SSM_TAKHIR_PAR });
 
 
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());

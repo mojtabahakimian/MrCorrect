@@ -36,9 +36,26 @@ namespace Prg_SendInvoice.CNNMANAGER
             {
                 lock (_lock)
                 {
+                    //_connectionStr = NormalizeConnectionString(value);
                     _connectionStr = value;
                 }
             }
+        }
+        private static string NormalizeConnectionString(string connectionString)
+        {
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                return connectionString;
+            }
+
+            var normalized = connectionString.Trim();
+
+            if (!normalized.EndsWith(';'))
+            {
+                normalized += ";";
+            }
+
+            return normalized;
         }
 
         public static bool ConnectedToSQLDB { get; set; } = false;
@@ -862,7 +879,7 @@ namespace Prg_SendInvoice.CNNMANAGER
                     builder.TrustServerCertificate = true;
                     builder.MultipleActiveResultSets = true;
                     builder.MaxPoolSize = 1000;
-                    CONNECTION_STR = builder.ConnectionString;
+                    CONNECTION_STR = builder.ConnectionString + ";";
 
                     CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 
