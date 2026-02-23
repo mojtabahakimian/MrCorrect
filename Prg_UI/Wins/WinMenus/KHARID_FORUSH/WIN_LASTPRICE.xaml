@@ -122,7 +122,7 @@
                 <GroupBox Header="انتخاب کالا" Padding="10,8,10,10" FlowDirection="RightToLeft">
                     <Grid>
                         <TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="0,0,733,0"><Run FlowDirection="RightToLeft" Language="fa-ir" Text="کالا:"/></TextBlock>
-                        <ComboBox x:Name="CODE" IsSynchronizedWithCurrentItem="True"                                 
+                        <ComboBox x:Name="CODE" IsSynchronizedWithCurrentItem="True"  SelectedIndex="-1"                                
                                   Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}"
                                   MinWidth="260" Margin="280,0,0,0"
                                   Height="30" PreviewLostKeyboardFocus="CODE_PreviewLostKeyboardFocus"
@@ -138,14 +138,13 @@
                                 </ItemsPanelTemplate>
                             </ComboBox.ItemsPanel>
                         </ComboBox>
-                        <ComboBox x:Name="Combo13" IsSynchronizedWithCurrentItem="True"
+                        <ComboBox x:Name="Combo13" IsSynchronizedWithCurrentItem="True" SelectedIndex="-1"
                           MinWidth="180" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}"
                           Height="30" Margin="25,0,480,0"
                           VerticalContentAlignment="Center"
                           DisplayMemberPath="CODE"
                           SelectedValuePath="CODE"
                           SelectionChanged="Combo13_SelectionChanged"
-                          LostFocus="Combo13_LostFocus"
                           IsTextSearchEnabled="True"
                           IsEditable="True" >
                             <ComboBox.ItemsPanel>
@@ -212,7 +211,7 @@
                     </StackPanel>
                 </Button>
 
-                <GroupBox Grid.Row="3" Header="آخرین قیمت‌ها" Padding="10,8,10,10" Margin="0,10,0,8">
+                <GroupBox Grid.Row="3" Header="آخرین قیمت ها (ریال)" Padding="10,8,10,10" Margin="0,10,0,8">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>

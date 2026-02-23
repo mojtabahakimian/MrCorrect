@@ -146,22 +146,28 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             FILL_ALL_COMBOBOXES();
 
+            bool _AnyParamsGo_ = false;
             if (!string.IsNullOrWhiteSpace(_initialCode))
             {
                 CODE.SelectedValue = _initialCode;
-                CODE.SelectedValue = _initialCode;
+                _AnyParamsGo_ = true;
             }
-
             if (!string.IsNullOrWhiteSpace(_initialCustNo))
             {
                 HMOIN1.SelectedValue = _initialCustNo;
                 HHMOIN1.SelectedValue = _initialCustNo;
+                _AnyParamsGo_ = true;
             }
 
             DT.Text = Tarikh.SlashyFullDate;
-            ReGetData();
-        }
 
+            if (_AnyParamsGo_)
+            {
+                ReGetData();
+            }
+
+            Combo13.Focus(); //کد کالا
+        }
 
         private void ReGetData()
         {
@@ -294,6 +300,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             LKP.Text = "0";
             LP.Text = "0";
             LFPM.Text = "0";
+
             DGR_SaleHistory.ItemsSource = new List<HistoryRow>();
             DGR_BuyHistory.ItemsSource = new List<HistoryRow>();
         }
@@ -313,16 +320,15 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             _isInternalSync = true;
             //CODE.SelectedValue = CODE.SelectedValue;
             _isInternalSync = false;
-            ReGetData();
+            //ReGetData();
         }
-
         private void Combo13_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_isInternalSync) return;
             _isInternalSync = true;
             //CODE.SelectedValue = CODE.SelectedValue;
             _isInternalSync = false;
-            ReGetData();
+            //ReGetData();
         }
 
         private void HMOIN1_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -331,21 +337,15 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             _isInternalSync = true;
             HHMOIN1.SelectedValue = HMOIN1.SelectedValue;
             _isInternalSync = false;
-            ReGetData();
+            //ReGetData();
         }
-
         private void HHMOIN1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_isInternalSync) return;
             _isInternalSync = true;
             HMOIN1.SelectedValue = HHMOIN1.SelectedValue;
             _isInternalSync = false;
-            ReGetData();
-        }
-
-        private void Combo13_LostFocus(object sender, RoutedEventArgs e)
-        {
-            ReGetData();
+            //ReGetData();
         }
 
         private void DT_LostFocus(object sender, RoutedEventArgs e)
@@ -373,11 +373,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 DT.Text = dVal.ToString();
             }
-        }
-
-        private void Command12_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
         }
 
         private sealed class PriceAndDateRow
@@ -440,13 +435,20 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         }
         private void FILL_ALL_COMBOBOXES()
         {
+            _isInternalSync = true; // مسدود کردن موقت رویدادها
+
             //نام کالا
             var items = dbms.DoGetDataSQL<STUF_DEF>(@"
                     SELECT CODE, NAME
                     FROM dbo.STUF_DEF
                     ORDER BY NAME").ToList();
+
+            CODE.SelectionChanged -= CODE_SelectionChanged;
+            Combo13.SelectionChanged -= Combo13_SelectionChanged;
             CODE.ItemsSource = items;
             Combo13.ItemsSource = CODE.ItemsSource;
+            CODE.SelectionChanged += CODE_SelectionChanged;
+            Combo13.SelectionChanged += Combo13_SelectionChanged;
 
             //مشتری ها
             var RST_HES = new List<Custom_CUST_HESAB>();
@@ -464,6 +466,13 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             HMOIN1.ItemsSource = HHMOIN1.ItemsSource;
             HMOIN1.DisplayMemberPath = "hes";
             HMOIN1.SelectedValuePath = "hes";
+
+            CODE.SelectedIndex = -1;
+            Combo13.SelectedIndex = -1;
+            HMOIN1.SelectedIndex = -1;
+            HHMOIN1.SelectedIndex = -1;
+
+            _isInternalSync = false; // باز کردن مجدد رویدادها
         }
 
         private bool HeaderIsValid(bool _DisplayErrors = true)
@@ -481,21 +490,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 return false;
             }
             return true;
-        }
-
-        private void BTN_SAVE_Click(object sender, RoutedEventArgs e)
-        {
-            //if (!BTN_SAVE.IsEnabled) { return; }
-
-            ChangeIsHappend = false;
-        }
-        private void ESLAH_Click(object sender, RoutedEventArgs e)
-        {
-            //if (!ESLAH.IsEnabled) { return; }
-        }
-        private void BTN_DELETE_Click(object sender, RoutedEventArgs e)
-        {
-
         }
 
         private void CODE_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
