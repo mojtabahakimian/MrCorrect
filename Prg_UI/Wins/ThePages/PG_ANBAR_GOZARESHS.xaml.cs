@@ -176,5 +176,10 @@ namespace Wins.ThePages
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.R_TARAZ_ANBARHA, null);
         }
+
+        private void WrapPanel_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_ANBAR_MERG, null);
+        }
     }
 }

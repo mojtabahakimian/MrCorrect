@@ -170,7 +170,7 @@
                         <Label Content="لیست موجودی کالا به تفکیک انبار" Foreground="#DDFFFFFF" Height="27"/>
                     </WrapPanel>
 
-                    <WrapPanel FlowDirection="RightToLeft" Orientation="Horizontal">
+                    <WrapPanel FlowDirection="RightToLeft" PreviewMouseLeftButtonUp="WrapPanel_PreviewMouseLeftButtonUp" Orientation="Horizontal">
                         <Image Stretch="Uniform" Style="{StaticResource LightyBlue}" Width="78" Height="77" VerticalAlignment="Top" Cursor="Hand" PreviewMouseDown="Image_PreviewMouseDown_3">
                             <Image.Source>
                                 <BitmapImage DecodePixelWidth="130" DecodePixelHeight="130" UriSource="/UiDrive/IMGS/PICMENU/ANBAR_GOZARESHAT/MergedAnbarStock.png" CacheOption="OnLoad"/>

@@ -438,6 +438,8 @@ namespace Wins.WinOther
 
 
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "بررسی وضعیت کارشناس", WIN_NAME = CL_MenuManager.WinNameType.NABZMOSH_KARSHENASH });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "بررسی وضعیت مشتری", WIN_NAME = CL_MenuManager.WinNameType.NABZMOSH_MOSHTARI });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "محاسبه تاخیر پرداخت ها", WIN_NAME = CL_MenuManager.WinNameType.F_MENU_SSM_TAKHIR_PAR });
 
 
             AssignRowNumbers(MenuItemModels.Where(m => m.ISCONFIRMED).ToList());

@@ -703,7 +703,7 @@ namespace Functions
             /// </summary>
             UserPersonelOrderWin_PishfarzeErja,
             /// <summary>
-            /// تعيين مسير وزيت براي مشتريان
+            /// تعیین مسیر وزیت برای مشتریان
             /// </summary>
             WIN_VISIT_ROUTE_FORM,
             /// <summary>
@@ -1059,6 +1059,14 @@ namespace Functions
             /// </summary>
             WIN_LASTPRICE_CTRLF12,
             /// <summary>
+            /// بررسی وضعیت کارشناس
+            /// </summary>
+            NABZMOSH_MOSHTARI,
+            /// <summary>
+            /// محاسبه تاخیر پرداخت ها
+            /// </summary>
+            F_MENU_SSM_TAKHIR_PAR,
+            /// <summary>
         }
         #endregion
 
@@ -1078,13 +1086,17 @@ namespace Functions
             {
                 //Mojtaba{
 
+                case WinNameType.F_MENU_SSM_TAKHIR_PAR: /*محاسبه تاخیر پرداخت ها*/ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_SSM(), isModalDialog: false, allowMultipleInstances: false); break;
+
                 case WinNameType.WIN_LASTPRICE_CTRLF12: /*آخرین قیمت ها*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_LASTPRICE(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_VISITGOL_HEAD_AHDAF: /*تعریف اهداف برای ویزیتور*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_VISITGOL_HEAD(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_ORDR_HED_SEFARESH: /*ثبت سفارشات کالا*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_ORDR_HED(), isModalDialog: false, allowMultipleInstances: false); break;
 
-                case WinNameType.NABZMOSH_KARSHENASH: /*بررسی وضعیت کارشناس*/ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_TAFZIL("NABZMOSH"), isModalDialog: false, allowMultipleInstances: false); break;
+                case WinNameType.NABZMOSH_KARSHENASH: /*بررسی وضعیت کارشناس*/ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_TAFZIL("NABZKAR"), isModalDialog: false, allowMultipleInstances: false); break;
+
+                case WinNameType.NABZMOSH_MOSHTARI: /*بررسی وضعیت مشتری*/ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_KOL_MOIN_TAFZIL("NABZMOSH"), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_PRICE_GRP: /*تعریف گروه قیمت گذاری*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_PRICE_GRP(), isModalDialog: false, allowMultipleInstances: false); break;
 
@@ -1347,7 +1359,7 @@ namespace Functions
                     CL_LMethods.OpenWindow(OWNERWIN, new VISITOR_DAY_HEAD(), isModalDialog: false, allowMultipleInstances: false);
                     break;
 
-                case WinNameType.WIN_VISIT_ROUTE_FORM: //تعيين مسير وزيت براي مشتريان
+                case WinNameType.WIN_VISIT_ROUTE_FORM: //تعیین مسیر وزیت برای مشتریان
                     CL_LMethods.OpenWindow(OWNERWIN, new WIN_VISIT_ROUTE_FORM(), isModalDialog: false, allowMultipleInstances: false);
                     break;
 
@@ -1848,10 +1860,10 @@ namespace Functions
                         // ---------------------------------------------------------
 
                         // تنظیمات کلی: آیا فاکتور فروش مستقیم اصلا فعال است؟ (تیک شماره 8)
-                        var IsDirectFactorActiveatall = Strings.Mid(Baseknow.OPTIONSS, 18, 1) == "5"; //فاكتور فروش مستقيم عمل شود : تنظیمات کلی
+                        var IsDirectFactorActiveatall = Strings.Mid(Baseknow.OPTIONSS, 18, 1) == "5"; //فاکتور فروش مستقیم عمل شود : تنظیمات کلی
 
                         // تنظیمات کلی: آیا نوع فاکتور (مستقیم/غیرمستقیم) باید بر اساس سطح دسترسی کاربر تعیین شود؟
-                        var MostaghimAmalShavad = Strings.Mid(Baseknow.OPTIONSS, 53, 1) == "5"; //فاكتور فروش مستقيم براي هركاربر از تعيين دسترسي انتخاب شود : تنظیمات کلی
+                        var MostaghimAmalShavad = Strings.Mid(Baseknow.OPTIONSS, 53, 1) == "5"; //فاکتور فروش مستقیم برای هرکاربر از تعیین دسترسی انتخاب شود : تنظیمات کلی
 
                         // دسترسی کاربر: آیا این کاربر خاص اجازه صدور فاکتور مستقیم را دارد؟ (FRMOST)
                         var UserHasDirectPermission = CL_HESABDARI.LETSGO("FRMOST"); //فاکتور فروش مستقیم فعال شود
