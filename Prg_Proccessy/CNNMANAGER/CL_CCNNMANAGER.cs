@@ -862,7 +862,7 @@ namespace Prg_SendInvoice.CNNMANAGER
                     builder.TrustServerCertificate = true;
                     builder.MultipleActiveResultSets = true;
                     builder.MaxPoolSize = 1000;
-                    CONNECTION_STR = builder.ConnectionString;
+                    CONNECTION_STR = builder.ConnectionString + ";";
 
                     CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 

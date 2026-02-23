@@ -1055,6 +1055,10 @@ namespace Functions
             /// </summary>
             WIN_VISITGOL_HEAD_AHDAF,
             /// <summary>
+            /// آخرین قیمت ها
+            /// </summary>
+            WIN_LASTPRICE_CTRLF12,
+            /// <summary>
         }
         #endregion
 
@@ -1073,6 +1077,8 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+
+                case WinNameType.WIN_LASTPRICE_CTRLF12: /*آخرین قیمت ها*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_LASTPRICE(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_VISITGOL_HEAD_AHDAF: /*تعریف اهداف برای ویزیتور*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_VISITGOL_HEAD(), isModalDialog: false, allowMultipleInstances: false); break;
 
