@@ -119,34 +119,33 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <GroupBox Header="انتخاب کالا" Padding="10,8,10,10" FlowDirection="RightToLeft">
+                <GroupBox Header="انتخاب کالا" Padding="10" FlowDirection="RightToLeft">
                     <Grid>
-                        <TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="0,0,733,0"><Run FlowDirection="RightToLeft" Language="fa-ir" Text="کالا:"/></TextBlock>
-                        <ComboBox x:Name="CODE" IsSynchronizedWithCurrentItem="True"  SelectedIndex="-1"                                
-                                  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}"
-                                  MinWidth="260" Margin="280,0,0,0"
-                                  Height="30" PreviewLostKeyboardFocus="CODE_PreviewLostKeyboardFocus"
-                                  VerticalContentAlignment="Center"
-                                  DisplayMemberPath="NAME"
-                                  SelectedValuePath="CODE"
-                                  SelectionChanged="CODE_SelectionChanged"
-                                  IsTextSearchEnabled="True"
-                                  IsEditable="True" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="0.4*"/>
+                            <ColumnDefinition Width="15"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="کالا:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+
+                        <ComboBox x:Name="CODE" Grid.Column="3" IsSynchronizedWithCurrentItem="True" SelectedIndex="-1" 
+                                  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Height="30" 
+                                  PreviewLostKeyboardFocus="CODE_PreviewLostKeyboardFocus" VerticalContentAlignment="Center" 
+                                  DisplayMemberPath="NAME" SelectedValuePath="CODE" SelectionChanged="CODE_SelectionChanged" 
+                                  IsTextSearchEnabled="True" IsEditable="True">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                                 </ItemsPanelTemplate>
                             </ComboBox.ItemsPanel>
                         </ComboBox>
-                        <ComboBox x:Name="Combo13" IsSynchronizedWithCurrentItem="True" SelectedIndex="-1"
-                          MinWidth="180" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}"
-                          Height="30" Margin="25,0,480,0"
-                          VerticalContentAlignment="Center"
-                          DisplayMemberPath="CODE"
-                          SelectedValuePath="CODE"
-                          SelectionChanged="Combo13_SelectionChanged"
-                          IsTextSearchEnabled="True"
-                          IsEditable="True" >
+
+                        <ComboBox x:Name="Combo13" Grid.Column="1" IsSynchronizedWithCurrentItem="True" SelectedIndex="-1" 
+                                  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Height="30" 
+                                  VerticalContentAlignment="Center" DisplayMemberPath="CODE" SelectedValuePath="CODE" 
+                                  SelectionChanged="Combo13_SelectionChanged" IsTextSearchEnabled="True" IsEditable="True">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -156,38 +155,33 @@
                     </Grid>
                 </GroupBox>
 
-                <GroupBox Grid.Row="1" Header="انتخاب مشتری" Padding="10,8,10,10">
+                <GroupBox Grid.Row="1" Header="انتخاب مشتری" Padding="10" Margin="0,8,0,0" FlowDirection="RightToLeft">
                     <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="0.5*"/>
+                            <ColumnDefinition Width="15"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="0,0,716,0"><Run FlowDirection="RightToLeft" Language="fa-ir" Text="مشتری:"/></TextBlock>
-                        <ComboBox x:Name="HMOIN1" IsSynchronizedWithCurrentItem="True"                         
-                                  Padding="7,0,10,0"
-                                  Style="{StaticResource FuzzyOutComboBox}"
-                                  MinWidth="260" PreviewLostKeyboardFocus="HMOIN1_PreviewLostKeyboardFocus"
-                                  Height="30"
-                                  VerticalContentAlignment="Center"
-                                  DisplayMemberPath="HES"
-                                  SelectedValuePath="HES"
-                                  SelectionChanged="HMOIN1_SelectionChanged"      
-                                  IsTextSearchEnabled="True"
-                                  IsEditable="True" Margin="47,0,0,0" HorizontalAlignment="Left" Width="238">
+                        <TextBlock Grid.Column="0" Text="مشتری:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+
+                        <ComboBox x:Name="HHMOIN1" Grid.Column="1" IsSynchronizedWithCurrentItem="True" 
+                      Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Height="30" 
+                      VerticalContentAlignment="Center" DisplayMemberPath="NAME" SelectedValuePath="HES" 
+                      SelectionChanged="HHMOIN1_SelectionChanged" IsTextSearchEnabled="True" IsEditable="True">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                                 </ItemsPanelTemplate>
                             </ComboBox.ItemsPanel>
                         </ComboBox>
-                        <ComboBox x:Name="HHMOIN1" IsSynchronizedWithCurrentItem="True"                                
-                                  Padding="7,0,10,0"
-                                  Style="{StaticResource FuzzyOutComboBox}"
-                                  MinWidth="260"
-                                  Height="30"
-                                  VerticalContentAlignment="Center"
-                                  DisplayMemberPath="NAME"
-                                  SelectedValuePath="HES"
-                                  SelectionChanged="HHMOIN1_SelectionChanged"
-                                  IsTextSearchEnabled="True"
-                                  IsEditable="True" Margin="312,0,0,0">
+
+                        <ComboBox x:Name="HMOIN1" Grid.Column="3" IsSynchronizedWithCurrentItem="True" 
+                                  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Height="30" 
+                                  PreviewLostKeyboardFocus="HMOIN1_PreviewLostKeyboardFocus" VerticalContentAlignment="Center" 
+                                  DisplayMemberPath="HES" SelectedValuePath="HES" SelectionChanged="HMOIN1_SelectionChanged" 
+                                  IsTextSearchEnabled="True" IsEditable="True">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -197,21 +191,15 @@
                     </Grid>
                 </GroupBox>
 
-                <Button Grid.Row="2"
-                        Style="{StaticResource MaterialDesignOutlinedSecondaryButton}" 
-                        materialDesign:ButtonAssist.CornerRadius="15" Click="Button_Click" Margin="0,5,0,0">
+                <Button Grid.Row="2" Style="{StaticResource MaterialDesignOutlinedSecondaryButton}" 
+            materialDesign:ButtonAssist.CornerRadius="15" Click="Button_Click" Margin="0,12,0,0">
                     <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
-                        <materialDesign:PackIcon Kind="Refresh" 
-                                 Width="20" 
-                                 Height="20" 
-                                 VerticalAlignment="Center" 
-                                 Margin="0,0,8,0" />
-                        <TextBlock Text="پردازش و دریافت آخرین قیمت " 
-                                   VerticalAlignment="Center" />
+                        <materialDesign:PackIcon Kind="Refresh" Width="20" Height="20" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBlock Text="پردازش و دریافت آخرین قیمت" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
 
-                <GroupBox Grid.Row="3" Header="آخرین قیمت ها (ریال)" Padding="10,8,10,10" Margin="0,10,0,8">
+                <GroupBox Grid.Row="3" Header="آخرین قیمت ها (ریال)" Padding="10" Margin="0,12,0,8" FlowDirection="RightToLeft">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -219,13 +207,13 @@
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*" MinWidth="80"/>
+                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="15"/>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*" MinWidth="80"/>
+                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="15"/>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*" MinWidth="80"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="0,0,8,0" Text="آخرین قیمت فروش:"/>
@@ -241,20 +229,13 @@
                         <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" x:Name="LFPM" Grid.Row="1" Grid.Column="1" Height="28" Margin="0,10,0,0" IsReadOnly="True"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="3" VerticalAlignment="Center" Margin="0,10,8,0" Text="تاریخ:"/>
-                        <xctk:MaskedTextBox x:Name="DT" Style="{StaticResource FuzzyOut}" FlowDirection="LeftToRight" TextAlignment="Left" Padding="3" Mask="0000/00/00" Text="" Grid.Row="1" Grid.Column="4" Height="28" Margin="0,10,0,0" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" LostFocus="DT_LostFocus"/>
+                        <xctk:MaskedTextBox x:Name="DT" Style="{StaticResource FuzzyOut}" FlowDirection="LeftToRight" TextAlignment="Left" Padding="3" Mask="0000/00/00" Grid.Row="1" Grid.Column="4" Height="28" Margin="0,10,0,0" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" LostFocus="DT_LostFocus"/>
                     </Grid>
                 </GroupBox>
 
                 <TabControl Grid.Row="4" Margin="0,0,0,8">
                     <TabItem Header="سابقه فروش کالا به مشتری">
-                        <DataGrid x:Name="DGR_SaleHistory"
-                                  AutoGenerateColumns="False"
-                                  IsReadOnly="True"
-                                  CanUserAddRows="False"
-                                  CanUserDeleteRows="False"
-                                  GridLinesVisibility="Horizontal"
-                                  HeadersVisibility="Column"
-                                  RowHeaderWidth="0">
+                        <DataGrid x:Name="DGR_SaleHistory" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeaderWidth="0">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="شماره" Binding="{Binding NUMBER}" Width="90" Visibility="Hidden"/>
                                 <DataGridTextColumn Header="تاریخ" Binding="{Binding DATE_N_FM, StringFormat=####/##/##}" Width="110"/>
@@ -266,14 +247,7 @@
                         </DataGrid>
                     </TabItem>
                     <TabItem Header="سابقه خرید کالا">
-                        <DataGrid x:Name="DGR_BuyHistory"
-                                  AutoGenerateColumns="False"
-                                  IsReadOnly="True"
-                                  CanUserAddRows="False"
-                                  CanUserDeleteRows="False"
-                                  GridLinesVisibility="Horizontal"
-                                  HeadersVisibility="Column"
-                                  RowHeaderWidth="0">
+                        <DataGrid x:Name="DGR_BuyHistory" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" GridLinesVisibility="Horizontal" HeadersVisibility="Column" RowHeaderWidth="0">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="شماره" Binding="{Binding NUMBER}" Width="90" Visibility="Hidden"/>
                                 <DataGridTextColumn Header="تاریخ" Binding="{Binding DATE_N_FM, StringFormat=####/##/##}" Width="110"/>
@@ -285,8 +259,6 @@
                         </DataGrid>
                     </TabItem>
                 </TabControl>
-
-                <DockPanel Grid.Row="4" LastChildFill="False"/>
             </Grid>
         </Grid>
     </Grid>
