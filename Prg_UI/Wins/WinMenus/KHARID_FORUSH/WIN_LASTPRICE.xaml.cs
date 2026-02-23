@@ -21,6 +21,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
 
 namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 {
@@ -142,8 +143,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(GetType().Name);
-            LoadKalaList();
-            LoadCustomerList();
+
+            FILL_ALL_COMBOBOXES();
 
             if (!string.IsNullOrWhiteSpace(_initialCode))
             {
@@ -158,39 +159,11 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
 
             DT.Text = Tarikh.SlashyFullDate;
-            RefreshAll();
+            ReGetData();
         }
 
-        private void LoadKalaList()
-        {
-            var items = dbms.DoGetDataSQL<KalaItem>(@"
-                    SELECT CODE, NAME
-                    FROM dbo.STUF_DEF
-                    ORDER BY NAME").ToList();
 
-            CODE.ItemsSource = items;
-            //Combo13.ItemsSource = items.OrderBy(x => x.CODE).ToList();
-        }
-
-        private void LoadCustomerList()
-        {
-            var items = dbms.DoGetDataSQL<CustomerItem>(@"
-                    SELECT
-                        RTRIM(CAST(N_KOL AS nvarchar(20))) + '-' + RTRIM(CAST(NUMBER AS nvarchar(20))) + '-' + RTRIM(CAST(TNUMBER AS nvarchar(20))) AS HES,
-                        NAME
-                    FROM dbo.TDETA_HES
-                    ORDER BY NAME").ToList();
-
-            foreach (var item in items)
-            {
-                item.DISPLAY = string.IsNullOrWhiteSpace(item.NAME) ? item.HES : item.NAME + " - " + item.HES;
-            }
-
-            HMOIN1.ItemsSource = items;
-            HHMOIN1.ItemsSource = items;
-        }
-
-        private void RefreshAll()
+        private void ReGetData()
         {
             try
             {
@@ -279,7 +252,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         H.DATE_N,
                         H.CUST_NO,
                         ISNULL(C.NAME, N'') AS CUST_NAME,
-                        I.TEDAD,
+                        I.MEGHk,
+                        I.MABL_K,
                         I.MABL
                     FROM dbo.HEAD_LST AS H
                     INNER JOIN dbo.INVO_LST AS I
@@ -299,8 +273,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         H.DATE_N,
                         H.CUST_NO,
                         ISNULL(C.NAME, N'') AS CUST_NAME,
-                        I.TEDAD,
-                        I.MABL
+                        I.MEGHk,
+                        I.MABL,
+                        I.MABL_K
                     FROM dbo.HEAD_LST AS H
                     INNER JOIN dbo.INVO_LST AS I
                         ON H.TAG = I.TAG
@@ -327,7 +302,6 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         {
             return (CODE.SelectedValue?.ToString() ?? CODE.SelectedValue?.ToString() ?? string.Empty).Trim();
         }
-
         private string GetCustomerValue()
         {
             return (HMOIN1.SelectedValue?.ToString() ?? HHMOIN1.SelectedValue?.ToString() ?? string.Empty).Trim();
@@ -337,18 +311,18 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         {
             if (_isInternalSync) return;
             _isInternalSync = true;
-            CODE.SelectedValue = CODE.SelectedValue;
+            //CODE.SelectedValue = CODE.SelectedValue;
             _isInternalSync = false;
-            RefreshAll();
+            ReGetData();
         }
 
         private void Combo13_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_isInternalSync) return;
             _isInternalSync = true;
-            CODE.SelectedValue = CODE.SelectedValue;
+            //CODE.SelectedValue = CODE.SelectedValue;
             _isInternalSync = false;
-            RefreshAll();
+            ReGetData();
         }
 
         private void HMOIN1_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -357,7 +331,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             _isInternalSync = true;
             HHMOIN1.SelectedValue = HMOIN1.SelectedValue;
             _isInternalSync = false;
-            RefreshAll();
+            ReGetData();
         }
 
         private void HHMOIN1_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -366,12 +340,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             _isInternalSync = true;
             HMOIN1.SelectedValue = HHMOIN1.SelectedValue;
             _isInternalSync = false;
-            RefreshAll();
+            ReGetData();
         }
 
         private void Combo13_LostFocus(object sender, RoutedEventArgs e)
         {
-            RefreshAll();
+            ReGetData();
         }
 
         private void DT_LostFocus(object sender, RoutedEventArgs e)
@@ -406,40 +380,27 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             Close();
         }
 
-        private sealed class KalaItem
-        {
-            public string CODE { get; set; } = "";
-            public string NAME { get; set; } = "";
-        }
-
-        private sealed class CustomerItem
-        {
-            public string HES { get; set; } = "";
-            public string NAME { get; set; } = "";
-            public string DISPLAY { get; set; } = "";
-        }
-
         private sealed class PriceAndDateRow
         {
             public decimal? MABL { get; set; }
             public long? MaxOfDATE_N { get; set; }
         }
-
         private sealed class FirstPriceRow
         {
             public decimal? FI_A { get; set; }
         }
-
         private sealed class HistoryRow
         {
             public long NUMBER { get; set; }
             public long DATE_N { get; set; }
             public string CUST_NO { get; set; } = "";
             public string CUST_NAME { get; set; } = "";
-            public double TEDAD { get; set; }
+            public double MEGHk { get; set; }
             public decimal MABL { get; set; }
+            public decimal MABL_K { get; set; }
             public string DATE_N_FM => DATE_N.ToString();
         }
+
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
@@ -479,7 +440,30 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         }
         private void FILL_ALL_COMBOBOXES()
         {
-            //COMBOHESAB.ItemsSource = dbms.DoGetDataSQL<HESAB_CMB_MODEL>($"SELECT hes, NAME FROM CUST_HESAB ORDER BY hes").ToList();
+            //نام کالا
+            var items = dbms.DoGetDataSQL<STUF_DEF>(@"
+                    SELECT CODE, NAME
+                    FROM dbo.STUF_DEF
+                    ORDER BY NAME").ToList();
+            CODE.ItemsSource = items;
+            Combo13.ItemsSource = CODE.ItemsSource;
+
+            //مشتری ها
+            var RST_HES = new List<Custom_CUST_HESAB>();
+            foreach (var item in RST_HES)
+            {
+                if (!string.IsNullOrEmpty(item?.NAME))
+                {
+                    item.NAME = item.NAME.FixPersianChars();
+                }
+            }
+            HHMOIN1.ItemsSource = RST_HES;
+            HHMOIN1.DisplayMemberPath = "NAME";
+            HHMOIN1.SelectedValuePath = "hes";
+
+            HMOIN1.ItemsSource = HHMOIN1.ItemsSource;
+            HMOIN1.DisplayMemberPath = "hes";
+            HMOIN1.SelectedValuePath = "hes";
         }
 
         private bool HeaderIsValid(bool _DisplayErrors = true)
@@ -512,6 +496,80 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
         private void BTN_DELETE_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void CODE_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (CODE.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
+            TextBox CUTSNO_TEX = (TextBox)CODE.Template.FindName("PART_EditableTextBox", CODE);
+            if (CUTSNO_TEX is null)
+            {
+                return;
+            }
+            if (CODE.SelectedValue is not null)
+            {
+                if ((CODE.SelectedItem as STUF_DEF)?.NAME == CUTSNO_TEX.Text)
+                {
+                    return;
+                }
+            }
+
+            var RST_KALA = CL_LMethods.GetKalaBySearch(dbms, default, CUTSNO_TEX.Text);
+            if (RST_KALA != null)
+            {
+                CODE.SelectedValue = RST_KALA.CODE;
+            }
+            else
+            {
+                new Msgwin(false, "چنین کدی وجود ندارد !").ShowDialog();
+                return;
+            }
+        }
+
+        private void HMOIN1_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (HMOIN1.IsEditable) { if (!(e.OriginalSource is TextBox)) return; } //اگر چیزی جز خود محتوای متن کمبوباکس صداش زده ندادیه بگیر
+            TextBox CUTSNO_TEX = (TextBox)HMOIN1.Template.FindName("PART_EditableTextBox", HMOIN1);
+            if (CUTSNO_TEX is null)
+            {
+                return;
+            }
+            if (HMOIN1.SelectedValue is not null)
+            {
+                if ((HMOIN1.SelectedItem as Custom_CUST_HESAB)?.NAME == CUTSNO_TEX.Text)
+                {
+                    return;
+                }
+            }
+
+            var _SelectedHesab_ = CL_LMethods.GetHesabBySearch(HMOIN1, dbms);
+            if (string.IsNullOrEmpty(_SelectedHesab_?.hes))
+            {
+                universControl.PopNotifyShow($"حساب شخص نمی تواند خالی باشد", Pop1, Pop1Text1, Pop_Border1);
+            }
+            else
+            {
+                if (HMOIN1.SelectedValue is not null)
+                {
+                    if (CL_HESABDARI.ISTAF(HMOIN1.SelectedValue.ToString()))
+                    {
+                        Msgwin msgwin = new Msgwin(false, "حساب مورد نظر داراي تفضيلي ميباشد بايد تفضيلي آن را انتخاب كنيد!");
+                        msgwin.ShowDialog();
+                        HMOIN1.SelectedValue = null;
+                    }
+                    if (CL_HESABDARI.BLOCKEDCUST(HMOIN1.SelectedValue.ToString()))
+                    {
+                        HMOIN1.SelectedItem = null;
+                        universControl.PopNotifyShow(" حساب مسدود گرديده است لطفا با مديريت مالي تماس بگيريد", Pop1, Pop1Text1, Pop_Border1);
+                        return;
+                    }
+                }
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            ReGetData();
         }
     }
 }
