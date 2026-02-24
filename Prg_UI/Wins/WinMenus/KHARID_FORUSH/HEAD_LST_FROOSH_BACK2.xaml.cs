@@ -2408,16 +2408,38 @@ namespace Wins.WinMenus.KHARID_FORUSH
             foreach (var visitor in SAYER_VISITOR_DATA)
             {
                 // فقط آیتم‌هایی که STAT = false (مبلغ ثابت نیست)
-                if (visitor.STAT == false && visitor.DARSAD.HasValue)
+                if (visitor.STAT == false && visitor.DARSAD.HasValue && visitor.ID.HasValue)
                 {
                     // فرمول: PURSANT = (JF - TAKHFIF) * DARSAD / 100
                     visitor.PURSANT = Math.Round((jfValue - takhfifValue) * visitor.DARSAD.Value / 100);
 
-                    dbms.DoExecuteSQL($@"UPDATE dbo.VISITOR_DTL SET 
-                            NUMBER = {NUMBER.Text}, CUST_NO = N'{visitor.CUST_NO}' , DARSAD = {visitor?.DARSAD} ,
-                            PURSANT = {visitor?.PURSANT} , TOZIH = N'{visitor.TOZIH}' , STAT = {Convert.ToByte(visitor.STAT ?? false)},
-                            PORID = {(string.IsNullOrEmpty(visitor?.PORID.ToStringNullSafe()) ? "NULL" : visitor?.PORID)}
-                            WHERE ID = {visitor?.ID}");
+                    try
+                    {
+                        dbms.DoExecuteSQL(@"UPDATE dbo.VISITOR_DTL SET 
+                            DARSAD = @DARSAD,
+                            PURSANT = @PURSANT,
+                            TOZIH = @TOZIH,
+                            STAT = @STAT,
+                            PORID = @PORID
+                            WHERE ID = @ID", new
+                        {
+                            DARSAD = visitor.DARSAD,
+                            PURSANT = visitor.PURSANT,
+                            TOZIH = visitor.TOZIH,
+                            STAT = visitor.STAT ?? false,
+                            PORID = visitor.PORID,
+                            ID = visitor.ID
+                        });
+                    }
+                    catch (SqlException ex) when (ex.Number == 2627)
+                    {
+                        new Msgwin(false, "ویزیتور تکراری است. ردیف‌های پورسانت را بررسی کنید.").ShowDialog();
+                        return;
+                    }
+                    catch (Exception)
+                    {
+                        new Msgwin(false, "خطا در عملیات پورسانت.").ShowDialog();
+                    }
                 }
             }
 

@@ -975,7 +975,7 @@ namespace Prg_UI.Scriptses
 								      DECLARE @RewardDiscountPercentage DECIMAL(5,2);
 								      DECLARE @AppliedDiscountAmount FLOAT;
 								      DECLARE @NewInvoiceDetailID BIGINT;
-								      DECLARE @AnbarIDForReward INT;
+								      DECLARE @AnbarIDForReward FLOAT;
 								      DECLARE @InvoiceUserName NVARCHAR(40);
 								      DECLARE @SourceProductLineID BIGINT;
 								      DECLARE @CalculatedRewardQuantity INT; -- مقدار جایزه محاسبه شده
@@ -1094,6 +1094,13 @@ namespace Prg_UI.Scriptses
 								  
 								                      IF @RewardType = 'Product' AND @RewardProductID IS NOT NULL AND @CalculatedRewardQuantity > 0
 								                      BEGIN
+								                          -- Ensure the product exists in the warehouse (STUF_FSK) to prevent FK violation
+								                          IF NOT EXISTS (SELECT 1 FROM dbo.STUF_FSK WHERE CODE = @RewardProductID AND ANBAR = @AnbarIDForReward)
+								                          BEGIN
+								                               INSERT INTO dbo.STUF_FSK (CODE, ANBAR, MOGODI_A, FI_A)
+								                               VALUES (@RewardProductID, @AnbarIDForReward, 0, 0);
+								                          END
+
 								                          -- درج ردیف جایزه در INVO_LST
 								                          INSERT INTO dbo.INVO_LST (
 								                              NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, 
@@ -2523,7 +2530,7 @@ END;";
                         //                  //}
                     }
 
-					//ایجاد داده های مربوط به لیست کشور ها
+                    //ایجاد داده های مربوط به لیست کشور ها
                     try { db.Execute($@"INSERT INTO TCOD_Countries ([Code], [CountriesName], [CodeIcon], [THREE_LETTER_CODE])
 						                VALUES
 						                ( 100001, N'آرژانتین', 64, N'ARG' ), 

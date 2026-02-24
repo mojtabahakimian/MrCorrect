@@ -1255,6 +1255,53 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         }
 
+        private void CommitInProgressEdits()
+        {
+            try
+            {
+                var editableCollectionView = Child14.Items as IEditableCollectionView;
+                if (editableCollectionView == null)
+                {
+                    return;
+                }
+
+                if (editableCollectionView.IsEditingItem)
+                {
+                    editableCollectionView.CommitEdit();
+                }
+
+                if (editableCollectionView.IsAddingNew)
+                {
+                    Child14.CancelEdit(DataGridEditingUnit.Row);
+                    editableCollectionView.CancelNew();
+                }
+            }
+            catch (Exception)
+            {
+                try
+                {
+                    Child14.CancelEdit(DataGridEditingUnit.Cell);
+                    Child14.CancelEdit(DataGridEditingUnit.Row);
+
+                    if (Child14.Items is IEditableCollectionView editableCollectionView)
+                    {
+                        if (editableCollectionView.IsAddingNew)
+                        {
+                            editableCollectionView.CancelNew();
+                        }
+
+                        if (editableCollectionView.IsEditingItem)
+                        {
+                            editableCollectionView.CancelEdit();
+                        }
+                    }
+                }
+                catch { }
+
+                // Ignore any error during commit as we want to proceed to ReadOnly mode anyway
+            }
+        }
+
         private void FILL_ALL_COMBOBOXES()
         {
             //کبموباکس مجری پرسنل
@@ -1859,6 +1906,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         private void SGN1_Click(object sender, RoutedEventArgs e)
         {
+            CommitInProgressEdits();
+
             #region Click
             double MID;
             string SHARH;
@@ -1907,9 +1956,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 //sgn3usid.IsEnabled = false;
 
                 Child14.IsReadOnly = true;
-           
+
             }
-        
+
 
             if ((bool)SGN1.IsChecked || (bool)SGN2.IsChecked || (bool)SGN3.IsChecked)
             {
@@ -1927,6 +1976,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         }
         private void SGN2_Click(object sender, RoutedEventArgs e)
         {
+            CommitInProgressEdits();
+
             #region Click
             double MID;
             string SHARH;
@@ -1996,6 +2047,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         }
         private void SGN3_Click(object sender, RoutedEventArgs e)
         {
+            CommitInProgressEdits();
+
             #region Click
             double MID;
             string SHARH;

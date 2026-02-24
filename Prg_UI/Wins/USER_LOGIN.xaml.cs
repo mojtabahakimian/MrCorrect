@@ -369,7 +369,6 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 139; Baseknow.UUSER = "negar sadeghi";
             //Baseknow.USERCOD = 132; Baseknow.UUSER = "Prima Chopan";    
             //Baseknow.USERCOD = 112; Baseknow.UUSER = "Mr.Tashakori";
-            //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
             //Baseknow.USERCOD = 116; Baseknow.UUSER = "Mr.Salmani";
             //Baseknow.USERCOD = 167; Baseknow.UUSER = "Mr nikonahad";
             //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
@@ -379,6 +378,7 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 108; Baseknow.UUSER = "modir-mali";
             //Baseknow.USERCOD = 102; Baseknow.UUSER = "mina mehrnia";
             //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
+            //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
             Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
 
             CL_Generaly.SHIFT_OF_USER = 1; //شیفت صبح
@@ -391,9 +391,12 @@ namespace Prg_UI.Wins
 
             //new WIN_LASTPRICE().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FACTORS_LST, this, 13);
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.NABZMOSH_MOSHTARI, this);
+
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "13774,13760");
+            
+            new WIN_About().Show();
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT, this, "14517,14503");
             //new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED().Show();
-            //new TR_FACOTRLST(5).Show();
             //new TR_ANBGRD_LST().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.MOGUDI_SEARCH_MAIN, this);
 
