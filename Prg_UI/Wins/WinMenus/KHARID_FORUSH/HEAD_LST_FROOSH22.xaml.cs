@@ -2851,7 +2851,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     }
                     // --- پایان منطق هوشمند ---
 
-               
+
                 }
                 catch { /* Ignore errors in auto-detection */ }
             }
@@ -7101,6 +7101,10 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                     NUMBER.Tag = NUMBER.SelectedValue; //Save Last Valid SelectedValue
                 }
+
+                VISITOR_DTL_SUB_ReGetData();
+                PAY_GETD_SUB_ReGetData();
+                TAKHFIF_APLAY_ReGetData();
             }
         }
 
@@ -7639,12 +7643,14 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             foreach (var visitor in SAYER_VISITOR_DATA)
             {
                 // فقط آیتم‌هایی که STAT = false (مبلغ ثابت نیست)
-                if (visitor.STAT == false && visitor.DARSAD.HasValue)
+                if (visitor.STAT == false && visitor.DARSAD.HasValue && visitor.ID.HasValue)
                 {
                     // فرمول: PURSANT = (JF - TAKHFIF) * DARSAD / 100
                     visitor.PURSANT = Math.Round((jfValue - takhfifValue) * visitor.DARSAD.Value / 100);
 
-                    string sql = @"UPDATE dbo.VISITOR_DTL SET 
+                    try
+                    {
+                        string sql = @"UPDATE dbo.VISITOR_DTL SET 
                             NUMBER = @NUMBER, 
                             CUST_NO = @CUST_NO, 
                             DARSAD = @DARSAD,
@@ -7654,19 +7660,30 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                             PORID = @PORID
                             WHERE ID = @ID";
 
-                    var parameters = new
-                    {
-                        NUMBER = Convert.ToDouble(NUMBER.Text),
-                        CUST_NO = visitor.CUST_NO,
-                        DARSAD = visitor.DARSAD,
-                        PURSANT = visitor.PURSANT,
-                        TOZIH = visitor.TOZIH,
-                        STAT = visitor.STAT ?? false,
-                        PORID = visitor.PORID,
-                        ID = visitor.ID
-                    };
+                        var parameters = new
+                        {
+                            NUMBER = Convert.ToDouble(NUMBER.Text),
+                            CUST_NO = visitor.CUST_NO,
+                            DARSAD = visitor.DARSAD,
+                            PURSANT = visitor.PURSANT,
+                            TOZIH = visitor.TOZIH,
+                            STAT = visitor.STAT ?? false,
+                            PORID = visitor.PORID,
+                            ID = visitor.ID
+                        };
 
-                    dbms.DoExecuteSQL(sql, parameters);
+                        dbms.DoExecuteSQL(sql, parameters);
+                    }
+                    catch (SqlException ex) when (ex.Number == 2627)
+                    {
+                        new Msgwin(false, "ویزیتور تکراری است. ردیف‌های پورسانت را بررسی کنید.").ShowDialog();
+                        return;
+                    }
+                    catch (Exception)
+                    {
+                        new Msgwin(false, "خطا در انجام عملیات پورسانت.").ShowDialog();
+                    }
+               
                 }
             }
 
