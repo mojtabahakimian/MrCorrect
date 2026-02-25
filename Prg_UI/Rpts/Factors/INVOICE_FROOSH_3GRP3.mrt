@@ -250,7 +250,7 @@
               <ClientRectangle>24.4,2.2,0.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,8</Font>
+              <Font>IRANYekanFN,7</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text67</Name>
@@ -284,7 +284,7 @@
               <ClientRectangle>26.6,3.8,0.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,8</Font>
+              <Font>IRANYekanFN,7</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text70</Name>
@@ -318,7 +318,7 @@
               <ClientRectangle>7.6,2.2,0.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,8</Font>
+              <Font>IRANYekanFN,7</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text72</Name>
@@ -352,7 +352,7 @@
               <ClientRectangle>2.4,2.2,0.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,8</Font>
+              <Font>IRANYekanFN,7</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text87</Name>
@@ -386,7 +386,7 @@
               <ClientRectangle>2.4,3.8,0.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,8</Font>
+              <Font>IRANYekanFN,7</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text89</Name>
@@ -403,7 +403,7 @@
               <ClientRectangle>12.6,3.8,14,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,6</Font>
+              <Font>IRANYekanFN,7</Font>
               <HorAlignment>Right</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>F_ADDRESS_N</Name>
@@ -584,7 +584,7 @@
               <ClientRectangle>13.6,3,0.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,8</Font>
+              <Font>IRANYekanFN,7</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text102</Name>
@@ -617,7 +617,7 @@
               <ClientRectangle>25.4,3,0.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,8</Font>
+              <Font>IRANYekanFN,7</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text104</Name>
@@ -667,7 +667,7 @@
               <ClientRectangle>24.4,5.4,0.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,8</Font>
+              <Font>IRANYekanFN,7</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text106</Name>
@@ -718,7 +718,7 @@
               <ClientRectangle>7.6,5.4,0.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,8</Font>
+              <Font>IRANYekanFN,7</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text109</Name>
@@ -752,7 +752,7 @@
               <ClientRectangle>2.4,5.4,0.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,8</Font>
+              <Font>IRANYekanFN,7</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text111</Name>
@@ -786,7 +786,7 @@
               <ClientRectangle>12.4,7,14,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,6</Font>
+              <Font>IRANYekanFN,7</Font>
               <HorAlignment>Right</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text113</Name>
@@ -923,7 +923,7 @@
               <ClientRectangle>2.4,7,0.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,8</Font>
+              <Font>IRANYekanFN,7</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text123</Name>
@@ -946,7 +946,7 @@
               <Name>Text124</Name>
               <Page isRef="5" />
               <Parent isRef="6" />
-              <Text>نشانی کامل استان :</Text>
+              <Text>نشانی کامل استان </Text>
               <TextBrush>[0:0:0]</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
@@ -957,7 +957,7 @@
               <ClientRectangle>25.4,6.2,0.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,8</Font>
+              <Font>IRANYekanFN,7</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text125</Name>
@@ -1008,7 +1008,7 @@
               <ClientRectangle>13.6,6.2,0.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,8</Font>
+              <Font>IRANYekanFN,7</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text128</Name>
@@ -1042,7 +1042,7 @@
               <ClientRectangle>26.4,7,0.2,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,8</Font>
+              <Font>IRANYekanFN,7</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text130</Name>
@@ -1416,10 +1416,11 @@
               <VertAlignment>Center</VertAlignment>
             </Text44>
           </Components>
-          <Condition>{DataSource1.NUMBER}</Condition>
+          <Condition>{DataSource1.NUMBER1}</Condition>
           <Conditions isList="true" count="0" />
           <Expressions isList="true" count="0" />
           <Name>GroupHeaderBand1</Name>
+          <NewPageBefore>True</NewPageBefore>
           <Page isRef="5" />
           <Parent isRef="5" />
         </GroupHeaderBand1>
@@ -2266,10 +2267,10 @@
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>11/13/2025 8:27:17 PM</ReportChanged>
+  <ReportChanged>2/25/2026 6:43:24 AM</ReportChanged>
   <ReportCreated>9/5/2021 1:38:11 PM</ReportCreated>
-  <ReportFile>C:\prg\MC\Prg_UI\Rpts\Factors\INVOICE_FROOSH_3GRP3.mrt</ReportFile>
-  <ReportGuid>caf9c7086e4e4c33a2bedaf6948f2696</ReportGuid>
+  <ReportFile>C:\Users\Notriko\Desktop\INVOICE_FROOSH_3GRP3.mrt</ReportFile>
+  <ReportGuid>adb5a71cf6e84227af9e5a94f9f31867</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>
