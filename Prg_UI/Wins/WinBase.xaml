@@ -16,18 +16,7 @@
         Title="مستر کارکت" Height="768" Width="1024" FontFamily="{StaticResource IRANYEKAN}" Loaded="Window_Loaded" Closed="Window_Closed_1" PreviewKeyDown="Window_PreviewKeyDown_1" ContentRendered="Window_ContentRendered">
 
     <Window.Resources>
-        <!-- Fluent Design Resources -->
-        <SolidColorBrush x:Key="FluentDarkBackground" Color="#1E1E1E"/>
-        <SolidColorBrush x:Key="FluentSurface" Color="#2D2D30" Opacity="0.95"/>
-        <SolidColorBrush x:Key="FluentAccent" Color="#0078D7"/>
-        <SolidColorBrush x:Key="FluentTextPrimary" Color="#FFFFFF"/>
-        <SolidColorBrush x:Key="FluentTextSecondary" Color="#B0B0B0"/>
-
-        <LinearGradientBrush x:Key="SidebarAcrylicBrush" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#F2202020" Offset="0"/>
-            <GradientStop Color="#F21A1A1A" Offset="1"/>
-        </LinearGradientBrush>
-
+        <!-- Fluent Design Resources (Dynamic for Material Design Theme switching) -->
         <Style TargetType="ScrollBar" BasedOn="{StaticResource MaterialDesignScrollBarMinimal}"/>
 
         <Style x:Key="FluentSidebarItem" TargetType="Button">
@@ -35,17 +24,19 @@
             <Setter Property="Margin" Value="6,2"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="{StaticResource FluentTextSecondary}"/>
+            <!-- Changed to DynamicResource to support Light/Dark mode -->
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                            Background="{TemplateBinding Background}"
-                            CornerRadius="6"
-                            Padding="12,0">
+                        <Grid>
+                            <Border x:Name="BgBorder" Background="{TemplateBinding Background}" CornerRadius="6"/>
+                            <!-- لایه هاور که با تغییر تم هماهنگ می‌شود (Overlay Technique) -->
+                            <Border x:Name="OverlayBorder" Background="{DynamicResource MaterialDesignBody}" Opacity="0" CornerRadius="6"/>
+
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -61,16 +52,16 @@
                                        Grid.Column="1"
                                        VerticalAlignment="Center"
                                        Margin="12,0,0,0"
+                                       Foreground="{TemplateBinding Foreground}"
                                        TextTrimming="CharacterEllipsis"/>
                             </Grid>
-                        </Border>
+                        </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#1FFFFFFF"/>
-                                <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+                                <Setter TargetName="OverlayBorder" Property="Opacity" Value="0.10"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#3FFFFFFF"/>
+                                <Setter TargetName="OverlayBorder" Property="Opacity" Value="0.20"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -80,7 +71,8 @@
 
         <Style x:Key="FluentExpander" TargetType="Expander" BasedOn="{StaticResource MaterialDesignExpander}">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource FluentTextPrimary}"/>
+            <!-- Changed to DynamicResource to support Light/Dark mode -->
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="Padding" Value="0,8,0,8"/>
@@ -486,13 +478,6 @@
         <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="95,56,0,0"  Width="1"/>
         <Border BorderBrush="{Binding Background, ElementName=GENERAL_RANG}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5"  Grid.ColumnSpan="5" BorderThickness="1">
 
-            <!--<Border.Background>
-                <RadialGradientBrush>
-                    <GradientStop Color="#FF0082D4"/>
-                    <GradientStop Color="#FF0389C7" Offset="1"/>
-                </RadialGradientBrush>
-            </Border.Background>-->
-
             <Border.Background>
                 <RadialGradientBrush Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
                     <GradientStop Color="{Binding Background.Color, ElementName=GENERAL_RANG}" Offset="0"/>
@@ -532,10 +517,12 @@
             </StackPanel>
         </Popup>
         <Rectangle x:Name="HaleCover" MouseDown="HaleCover_MouseDown" Visibility="Collapsed" Panel.ZIndex="1" Fill="#E51B1B1C" PreviewMouseLeftButtonUp="HaleCover_PreviewMouseLeftButtonUp"/>
+
+        <!-- Changed Background and BorderBrush to DynamicResource for Material Design Theme Engine -->
         <Border x:Name="MainSliderPanel"
         Width="280" HorizontalAlignment="Right" VerticalAlignment="Stretch"
-        Background="{StaticResource SidebarAcrylicBrush}"
-        BorderBrush="#33FFFFFF" BorderThickness="1,0,0,0"
+        Background="{DynamicResource MaterialDesignPaper}"
+        BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1,0,0,0"
         Margin="0,0,-278,0" Panel.ZIndex="100"
         RenderTransformOrigin="0.5,0.5" CornerRadius="16,0,0,16">
 
@@ -556,12 +543,13 @@
                 </Grid.RowDefinitions>
 
                 <Grid Grid.Row="0" Margin="0,15,0,10">
+                    <!-- Changed Foreground to MaterialDesignBody for Theme Compatibility -->
                     <Button x:Name="CloserPnl" Click="CloserPnl_Click" Style="{StaticResource MaterialDesignIconButton}"
-                    HorizontalAlignment="Left" Margin="15,0" Foreground="White">
+                    HorizontalAlignment="Left" Margin="15,0" Foreground="{DynamicResource MaterialDesignBody}">
                         <materialDesign:PackIcon x:Name="pico2" Kind="ArrowRight" Width="24" Height="24"/>
                     </Button>
                     <TextBlock Text="منو" HorizontalAlignment="Center" VerticalAlignment="Center"
-                       Foreground="White" FontWeight="Bold" FontSize="16"/>
+                       Foreground="{DynamicResource MaterialDesignBody}" FontWeight="Bold" FontSize="16"/>
                 </Grid>
 
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,0,0,20">
@@ -981,7 +969,7 @@
                         </Expander>
 
                         <!-- کلید راه اندازی مجدد در انتهای منو -->
-                        <Separator Background="#33FFFFFF" Margin="0,10"/>
+                        <Separator Background="{DynamicResource MaterialDesignDivider}" Margin="0,10"/>
                         <Button Style="{StaticResource FluentSidebarItem}" FlowDirection="RightToLeft" Content="راه اندازی مجدد" Tag="{x:Static materialDesign:PackIconKind.Restart}" Click="Button_Click_135" Foreground="#FF5555" Margin="6,10"/>
 
                     </StackPanel>
