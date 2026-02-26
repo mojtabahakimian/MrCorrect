@@ -8,6 +8,7 @@
         xmlns:gif="http://wpfanimatedgif.codeplex.com" x:Class="Prg_UI.Wins.WinBase"
         mc:Ignorable="d"
         
+        d:Height="1000"
         Background="{x:Null}"
         AllowsTransparency="True"
         AllowDrop="True" WindowStyle="None"
