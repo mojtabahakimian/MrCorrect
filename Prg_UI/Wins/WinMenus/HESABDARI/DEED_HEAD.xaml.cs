@@ -1283,7 +1283,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     Child14.CancelEdit(DataGridEditingUnit.Cell);
                     Child14.CancelEdit(DataGridEditingUnit.Row);
 
-                    if (Child14.Items is IEditableCollectionView editableCollectionView)
+                    var editableCollectionView = Child14.Items as IEditableCollectionView;
+                    if (editableCollectionView != null)
                     {
                         if (editableCollectionView.IsAddingNew)
                         {

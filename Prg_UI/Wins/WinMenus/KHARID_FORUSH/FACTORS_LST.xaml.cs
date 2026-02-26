@@ -276,6 +276,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
             if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None && SYNCFUSION_DG.SelectedItem != null)
             {
+                var focused = Keyboard.FocusedElement as DependencyObject;
+                if (focused != null && (CL_LMethods.IsInside<Syncfusion.UI.Xaml.Grid.GridFilterControl>(focused) || CL_LMethods.IsInside<Syncfusion.UI.Xaml.Grid.CheckboxFilterControl>(focused)))
+                {
+                    return;
+                }
+
                 e.Handled = true;
 
                 var currentRow = SYNCFUSION_DG.SelectedItem as HEAD_LST_SRC;

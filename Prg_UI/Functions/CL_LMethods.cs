@@ -691,7 +691,15 @@ namespace Prg_UI.Functions
                         };
                     }
 
-                    InputManager.Current.ProcessInput(e);
+                    try
+                    {
+                        InputManager.Current.ProcessInput(e);
+                    }
+                    catch (NullReferenceException ex) when (IsSyncfusionCheckboxFilterKeyboardIssue(ex))
+                    {
+                        // Work around a known Syncfusion crash path when keyboard events are forwarded
+                        // while the checkbox filter popup is active.
+                    }
 
                     // Note: Based on your requirements you may also need to fire events for:
                     // RoutedEvent = Keyboard.PreviewKeyDownEvent
@@ -706,6 +714,19 @@ namespace Prg_UI.Functions
             return txt.Replace(",", "");
         }
 
+        private static bool IsSyncfusionCheckboxFilterKeyboardIssue(NullReferenceException exception)
+        {
+            if (exception?.TargetSite == null)
+            {
+                return false;
+            }
+
+            var declaringType = exception.TargetSite.DeclaringType?.FullName;
+            var methodName = exception.TargetSite.Name;
+
+            return string.Equals(declaringType, "Syncfusion.UI.Xaml.Grid.CheckboxFilterControl", StringComparison.Ordinal) &&
+                   string.Equals(methodName, "OnPreviewKeyDown", StringComparison.Ordinal);
+        }
 
         /// <summary>
         /// Gets a value that indicates whether <paramref name="path"/>

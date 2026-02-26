@@ -159,6 +159,12 @@ namespace Wins.WinMenus.Checkha
         {
             if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None && ESTELAM_Popup.IsOpen == false)
             {
+                var focused = Keyboard.FocusedElement as DependencyObject;
+                if (focused != null && (CL_LMethods.IsInside<Syncfusion.UI.Xaml.Grid.GridFilterControl>(focused) || CL_LMethods.IsInside<Syncfusion.UI.Xaml.Grid.CheckboxFilterControl>(focused)))
+                {
+                    return;
+                }
+
                 e.Handled = true;
 
                 CL_LMethods.SendKey_US(Key.Tab, true);
