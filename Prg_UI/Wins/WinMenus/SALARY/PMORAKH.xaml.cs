@@ -1322,6 +1322,16 @@ namespace Wins.WinMenus.SALARY
 
                 if (NewRecord)
                 {
+                    if (CODE.SelectedValue != null && !string.IsNullOrEmpty(MODATE.Text))
+                    {
+                        var exists = dbms.DoGetDataSQL<int?>($"SELECT COUNT(*) FROM dbo.PMORAKH WHERE CODE = {CODE.SelectedValue} AND MODATE = {MODATE.Text.ToRawTarikh()}").FirstOrDefault();
+                        if (exists > 0)
+                        {
+                            new Msgwin(false, "برای این پرسنل در این تاریخ قبلاً مرخصی ثبت شده است.").ShowDialog();
+                            return false;
+                        }
+                    }
+
                     var _ID_ = dbms.DoGetDataSQL<int?>($@"INSERT INTO dbo.PMORAKH(CODE, MODATE, MORAKHDAY, MAND, KINDM, MOLAH, MOSTDATE, MOENDATE, OKF)
                                                           OUTPUT INSERTED.IDNUM
                                                           VALUES({CODE.SelectedValue},
