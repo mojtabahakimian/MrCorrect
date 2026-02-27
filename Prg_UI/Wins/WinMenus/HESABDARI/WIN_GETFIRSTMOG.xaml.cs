@@ -273,7 +273,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             // UI Constraint: Prevent double clicks
             Command3.IsEnabled = false;
-            Command4.IsEnabled = false;
 
             try
             {
