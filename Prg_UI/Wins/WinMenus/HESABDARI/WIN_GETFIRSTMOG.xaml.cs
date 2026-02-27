@@ -77,14 +77,18 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         #endregion
 
         private readonly CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
+        private readonly List<string> validDbNames = new List<string>();
+
+        private class DB_NAME_MODEL
+        {
+            public string name { get; set; }
+        }
 
         UniversControl universControl = new UniversControl();
 
         public bool NowIsReady { get; private set; }
         public double? NUMBER_TO_OPEN { get; set; }
         public bool ChangeIsHappend { get; private set; }
-
-
 
         private bool _bl;
         public bool AllowDeletions
@@ -138,12 +142,18 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
-            //CL_HESABDARI.SETSECURITY(this.GetType().Name, "", new WindowInteropHelper(this).Handle, this.GetType().Name);
-            //if (!this.IsLoaded)
-            //{
-            //    this.Close();
-            //    return;
-            //}
+            try
+            {
+                // Preserve legacy security and initializations
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, "NEWYEAR", new WindowInteropHelper(this).Handle, this.GetType().Name);
+
+                LoadYearSources();
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, "خطا در بارگذاری فرم:\n" + ex.Message).ShowDialog();
+                this.Close();
+            }
 
             FILL_ALL_COMBOBOXES();
         }
@@ -206,20 +216,187 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
             return true;
         }
-
-        private void BTN_SAVE_Click(object sender, RoutedEventArgs e)
+        private void LoadYearSources()
         {
-            //if (!BTN_SAVE.IsEnabled) { return; }
+            YEA.Items.Clear();
+            validDbNames.Clear();
 
-            ChangeIsHappend = false;
+            // Fetch all database names
+            var databases = dbms.DoGetDataSQL<DB_NAME_MODEL>("SELECT [name] FROM master.dbo.sysdatabases ORDER BY [name]").ToList();
+
+            foreach (var db in databases)
+            {
+                if (string.IsNullOrWhiteSpace(db.name))
+                    continue;
+
+                string dbName = db.name.Trim();
+                string safeDbName = QuoteDbName(dbName);
+
+                try
+                {
+                    // Check if the database has the required 'SAZMAN' table (Legacy logic adaptation)
+                    var hasSazman = dbms.DoGetDataSQL<int>($"SELECT TOP 1 1 FROM {safeDbName}.dbo.SAZMAN").FirstOrDefault();
+                    if (hasSazman == 1)
+                    {
+                        YEA.Items.Add(dbName);
+                        validDbNames.Add(dbName); // Store in-memory for security validation later
+                    }
+                }
+                catch
+                {
+                    // Ignore inaccessible or irrelevant databases silently (like original 'On Error Resume Next')
+                }
+            }
+
+            if (YEA.Items.Count > 0)
+            {
+                YEA.SelectedIndex = 0;
+            }
         }
-        private void ESLAH_Click(object sender, RoutedEventArgs e)
-        {
-            //if (!ESLAH.IsEnabled) { return; }
-        }
-        private void BTN_DELETE_Click(object sender, RoutedEventArgs e)
-        {
 
+        private void Command3_Click(object sender, RoutedEventArgs e)
+        {
+            if (YEA.SelectedItem == null)
+            {
+                new Msgwin(false, "لطفاً سال مالی را انتخاب کنید.").ShowDialog();
+                return;
+            }
+
+            string selectedDb = YEA.SelectedItem.ToString() ?? string.Empty;
+
+            // Security Check: Ensure selected DB is within our verified list to prevent injection
+            if (string.IsNullOrWhiteSpace(selectedDb) || !validDbNames.Contains(selectedDb))
+            {
+                new Msgwin(false, "سال مالی انتخاب شده معتبر نیست.").ShowDialog();
+                return;
+            }
+
+            // UI Constraint: Prevent double clicks
+            Command3.IsEnabled = false;
+            Command4.IsEnabled = false;
+
+            try
+            {
+                // Gather parameters
+                DateTime dt = DateTime.Now;
+                double upTime = dt.ToOADate();
+                long upDate = CL_HESABDARI.FARSIDATE();
+                string upUserName = "System" + (CL_HESABDARI.UCurrentUser()?.ToString() ?? string.Empty);
+                string pcName = CL_HESABDARI.CurrentMachineName();
+                string ipAddress = CL_HESABDARI.GETIPADD();
+                string safeDbName = QuoteDbName(selectedDb);
+
+                // Performance & Safety Optimization: 
+                // Using SET-BASED T-SQL with CROSS APPLY and TRANSACTIONS instead of C# foreach loops
+                string sql = $@"
+                SET NOCOUNT ON;
+
+                BEGIN TRY
+                    BEGIN TRAN;
+
+                    -- 1. Backup STUF_DEF
+                    INSERT INTO dbo.TR_STUF_DEF
+                    (
+                        CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F,
+                        DEPART, IDD, CMBAA, VAZN, OKF, UP_TIME, UP_DATE, UP_USER_NAME, PC_NAME, IPADD
+                    )
+                    SELECT
+                        CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F,
+                        DEPART, IDD, CMBAA, VAZN, OKF, @UpTime, @UpDate, @UpUserName, @PcName, @IpAdd
+                    FROM dbo.STUF_DEF;
+
+                    -- 2. Backup STUF_FSK
+                    INSERT INTO dbo.TR_STUF_FSK
+                    (
+                        CODE, ANBAR, MOGODI_A, FI_A, MABL_A, MANDAH_A, VAZ, IDD, POSITION,
+                        B_SEF, N_SEF, MIN_M, MAX_M, UP_TIME, UP_DATE
+                    )
+                    SELECT
+                        CODE, ANBAR, MOGODI_A, FI_A, MABL_A, MANDAH_A, VAZ, IDD, POSITION,
+                        B_SEF, N_SEF, MIN_M, MAX_M, @UpTime, @UpDate
+                    FROM dbo.STUF_FSK;
+
+                    -- 3. Drop existing temp table
+                    IF OBJECT_ID(N'dbo.STUFFSK', N'U') IS NOT NULL
+                        DROP TABLE dbo.STUFFSK;
+
+                    -- 4. Calculate inventory from Previous Year DB (Replaces VBA While Loop)
+                    SELECT
+                        AK.CODE,
+                        AK.MAND,
+                        AK.FII,
+                        AK.MABLK,
+                        AK.ANBAR
+                    INTO dbo.STUFFSK
+                    FROM {safeDbName}.dbo.TCOD_ANBAR AS A
+                    CROSS APPLY {safeDbName}.dbo.AKMOGUDI_KOL_ANBAR(99999999, A.CODE) AS AK;
+
+                    -- 5. Update Current Year Inventory (Replaces second VBA While Loop)
+                    UPDATE F
+                    SET
+                        F.MOGODI_A = S.MAND,
+                        F.FI_A = S.FII,
+                        F.MABL_A = S.MABLK
+                    FROM dbo.STUF_FSK AS F
+                    INNER JOIN dbo.STUFFSK AS S
+                        ON S.CODE = F.CODE
+                       AND S.ANBAR = F.ANBAR;
+
+                    COMMIT;
+                END TRY
+                BEGIN CATCH
+                    IF @@TRANCOUNT > 0
+                        ROLLBACK;
+                    THROW;
+                END CATCH;";
+
+                // Execute the entire block synchronously as mandated
+                dbms.DoExecuteSQL(sql, new
+                {
+                    UpTime = upTime,
+                    UpDate = upDate,
+                    UpUserName = upUserName,
+                    PcName = pcName,
+                    IpAdd = ipAddress
+                });
+
+                new Msgwin(false, "موجودی‌ها با موفقیت به‌روزرسانی شد.").ShowDialog();
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                new Msgwin(false, "خطا در انتقال موجودی:\n" + ex.Message).ShowDialog();
+            }
+            finally
+            {
+                // Restore UI state in case of failure
+                Command3.IsEnabled = true;
+                Command4.IsEnabled = true;
+            }
+        }
+
+        private void Command4_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void YEA_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (YEA.SelectedItem == null) return;
+
+            string selected = YEA.SelectedItem.ToString() ?? string.Empty;
+
+            // Replicating legacy behavior where "+" or "-" opened another form
+            if (selected == "+" || selected == "-")
+            {
+                new Msgwin(false, "انتخاب سال با علائم +/- در این فرم پشتیبانی نمی‌شود.").ShowDialog();
+            }
+        }
+
+        // Helper method to safely escape Database Names for T-SQL
+        private static string QuoteDbName(string dbName)
+        {
+            return $"[{dbName.Replace("]", "]]", StringComparison.Ordinal)}]";
         }
     }
 }
