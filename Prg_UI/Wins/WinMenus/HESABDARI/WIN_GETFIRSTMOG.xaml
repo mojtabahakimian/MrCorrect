@@ -65,7 +65,7 @@
                     <Label Content="سال مالي مورد نظر جهت انتقال موجودي از آن:" VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <ComboBox x:Name="YEA"
                                   Width="220"
-                                  Height="34"
+                                  Height="34" HorizontalContentAlignment="Right"
                                   FontSize="16"
                                   FontWeight="Bold"
                                   SelectionChanged="YEA_SelectionChanged" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1">

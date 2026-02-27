@@ -271,6 +271,19 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 return;
             }
 
+            // Validation Check: Prevent user from selecting the current connected database
+            string currentDb = dbms.DoGetDataSQL<string>("SELECT DB_NAME()").FirstOrDefault() ?? string.Empty;
+            if (selectedDb.Equals(currentDb, StringComparison.OrdinalIgnoreCase))
+            {
+                new Msgwin(false, "نمی‌توانید دیتابیس جاری (سال مالی فعلی) را به عنوان دیتابیس سال قبل انتخاب کنید.").ShowDialog();
+                return;
+            }
+
+            string message = $"شما در حال انتقال موجودی از سال مالی [{selectedDb}] به دیتابیس جاری خود [{currentDb}] , این عملیات غیر قابل باز گشت است , آیا از این کار اطمینان دارید ؟";
+            Msgwin msgwin = new Msgwin(true, message);
+            msgwin.ShowDialog();
+            if (msgwin.DialogResult != true) { return; }
+
             // UI Constraint: Prevent double clicks
             Command3.IsEnabled = false;
 

@@ -389,7 +389,7 @@ namespace Prg_UI.Wins
             //new WinBase().Show();
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
 
-            new WIN_SANAD_EFTETAHIYAH().Show();
+            new WIN_GETFIRSTMOG().Show();
             //new WIN_LASTPRICE().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FACTORS_LST, this, 13);
 
