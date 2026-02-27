@@ -371,7 +371,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             {
                 // Restore UI state in case of failure
                 Command3.IsEnabled = true;
-                Command4.IsEnabled = true;
             }
         }
 
