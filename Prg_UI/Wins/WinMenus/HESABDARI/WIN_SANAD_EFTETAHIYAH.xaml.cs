@@ -39,6 +39,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             this.DataContext = this;
         }
+
         #region Header Window Begin
         //Header Window Begin
         private void Btn_Close_Click(object sender, RoutedEventArgs e)
@@ -99,8 +100,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             public double N_S { get; set; }
         }
 
-
-
         private bool _bl;
         public bool AllowDeletions
         {
@@ -133,6 +132,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 }
             }
         }
+
         private bool ican;
         public bool AllowEdits
         {
@@ -145,10 +145,12 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 //ComboBox.IsEnabled = ican;
             }
         }
+
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
         }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
@@ -164,7 +166,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             ReGetData();
         }
-
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -203,6 +204,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 }
             }
         }
+
         private void FILL_ALL_COMBOBOXES()
         {
             // نام دیتابیس برای سال قبل
@@ -214,9 +216,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             {
                 new Msgwin(false, "خطا در دریافت دیتابیس های موجود").Show();
             }
-
-
         }
+
         private void ReGetData()
         {
             // Set Current DB Name
@@ -235,6 +236,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             {
                 previousDbName = dbms.DoGetDataSQL<string?>("SELECT TOP 1 name FROM sys.databases WHERE name < DB_NAME()  AND database_id > 4 ORDER BY name DESC;").FirstOrDefault();
             }
+
             bool PreviousDbExist = false;
             if (!string.IsNullOrWhiteSpace(previousDbName))
             {
@@ -245,13 +247,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     previousDbName = dbms.DoGetDataSQL<string?>("SELECT TOP 1 name FROM sys.databases WHERE name < DB_NAME()  AND database_id > 4 ORDER BY name DESC;").FirstOrDefault();
                     PreviousDbExist = dbms.DoGetDataSQL<bool>($"SELECT IIF(DB_ID('{previousDbName}') IS NOT NULL, 1, 0) AS [Exists];").FirstOrDefault();
                 }
-
             }
 
             if (!PreviousDbExist)
             {
-                ////new Msgwin(false, $"سال مالی {previousYear} ({previousDbName}) ایجاد نشده است.\nاین گزینه در صورتی استفاده میشود که سند اختتامیه سال قبل صادر شده باشد.").Show();
-
                 new Msgwin(false, "نام دیتابیس سال قبل یافت نشد !").Show(); return;
             }
             else if (currentDbName.ToLower().Trim() == previousDbName)
@@ -291,6 +290,46 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         {
             List<MsgModel> ErrosMessages = new List<MsgModel>();
 
+            // 1. Basic empty field validations
+            if (string.IsNullOrWhiteSpace(NDBS.Text))
+                ErrosMessages.Add(new MsgModel { MessageText_U = "لطفا بانک اطلاعاتی سال قبل را انتخاب کنید." });
+
+            if (string.IsNullOrWhiteSpace(DT.Text))
+                ErrosMessages.Add(new MsgModel { MessageText_U = "لطفا تاریخ سند را وارد کنید." });
+
+            // 2. Numeric validations for Vouchers
+            if (string.IsNullOrWhiteSpace(S1.Text) || !double.TryParse(S1.Text, out double s1Val) || s1Val <= 0)
+                ErrosMessages.Add(new MsgModel { MessageText_U = "شماره سند اختتامیه (سال قبل) نامعتبر است." });
+
+            if (string.IsNullOrWhiteSpace(S2.Text) || !double.TryParse(S2.Text, out double s2Val) || s2Val <= 0)
+                ErrosMessages.Add(new MsgModel { MessageText_U = "شماره سند افتتاحیه (سال جاری) نامعتبر است." });
+
+            // 3. Database existence and relation validation
+            if (!string.IsNullOrWhiteSpace(NDBS.Text))
+            {
+                var exists = dbms.DoGetDataSQL<int>("SELECT COUNT(1) FROM master.dbo.sysdatabases WHERE name = @Name", new { Name = NDBS.Text }).FirstOrDefault();
+                if (exists == 0)
+                {
+                    ErrosMessages.Add(new MsgModel { MessageText_U = "بانک اطلاعاتی انتخاب شده وجود ندارد." });
+                }
+                else if (double.TryParse(S1.Text, out double checkS1Val))
+                {
+                    // Escape brackets to prevent dynamic SQL injection in database name context
+                    string safeDbName = NDBS.Text.Replace("]", "]]");
+
+                    // Verify that the requested Source Voucher (S1) actually exists in the previous DB
+                    var voucherExists = dbms.DoGetDataSQL<int>($@"
+                        SELECT COUNT(1) 
+                        FROM [{safeDbName}].dbo.DEED_HED 
+                        WHERE N_S = @N_S", new { N_S = checkS1Val }).FirstOrDefault();
+
+                    if (voucherExists == 0)
+                    {
+                        ErrosMessages.Add(new MsgModel { MessageText_U = "شماره سند اختتامیه مورد نظر در بانک اطلاعاتی سال قبل یافت نشد." });
+                    }
+                }
+            }
+
             if (ErrosMessages.Any())
             {
                 if (_DisplayErrors)
@@ -306,29 +345,13 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         private void BTN_GO_Click(object sender, RoutedEventArgs e)
         {
-            string dbName = NDBS.Text;
-            string s1ValStr = S1.Text;
-            string s2ValStr = S2.Text;
+            // Execute all verifications logically inside the consolidated Validation method.
+            if (!HeaderIsValid()) return;
 
-            if (string.IsNullOrWhiteSpace(dbName) || string.IsNullOrWhiteSpace(s1ValStr) || string.IsNullOrWhiteSpace(s2ValStr))
-            {
-                universControl.PopNotifyShow("لطفا تمامی فیلدها را پر کنید.", Pop1, Pop1Text1, Pop_Border1);
-                return;
-            }
-
-            if (!double.TryParse(s1ValStr, out double s1Val) || !double.TryParse(s2ValStr, out double s2Val))
-            {
-                universControl.PopNotifyShow("شماره سند نامعتبر است.", Pop1, Pop1Text1, Pop_Border1);
-                return;
-            }
-
-            // Security Check
-            var exists = dbms.DoGetDataSQL<string>("SELECT name FROM master.dbo.sysdatabases WHERE name = @Name", new { Name = dbName }).FirstOrDefault();
-            if (string.IsNullOrEmpty(exists))
-            {
-                new Msgwin(false, "بانک اطلاعاتی انتخاب شده وجود ندارد.").ShowDialog();
-                return;
-            }
+            string dbName = NDBS.Text.Replace("]", "]]"); // Re-sanitizing for T-SQL structural requirement
+            double s1Val = double.Parse(S1.Text);
+            double s2Val = double.Parse(S2.Text);
+            string cleanDate = DT.Text.ToRawTarikh();
 
             Msgwin msgConfirm = new Msgwin(true, "آيا درمورد صدور سند افتتاحيه اطمينان داريد؟");
             msgConfirm.ShowDialog();
@@ -345,14 +368,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     dbms.DoExecuteSQL("INSERT INTO DEED_HED (N_S, DATE_S, SHARH_S, NO_S, OKF, USER_NAME) VALUES (@N_S, @DATE_S, @SHARH_S, 0, 1, @USER_NAME)", new
                     {
                         N_S = s2Val,
-                        DATE_S = DT.Text.Replace("/", ""), // Assuming DB stores raw long/string date without slashes
+                        DATE_S = cleanDate,
                         SHARH_S = SH.Text,
                         USER_NAME = CL_HESABDARI.UCurrentUser()
                     });
                 }
                 else
                 {
-                    Msgwin msgDup = new Msgwin(true, "شماره سند تكراري مي باشد.آيا اطمينان داريد؟");
+                    Msgwin msgDup = new Msgwin(true, "شماره سند تكراري مي باشد. آيا اطمينان داريد؟ (سند جایگزین خواهد شد)");
                     msgDup.ShowDialog();
                     if (msgDup.DialogResult != true) return;
 
@@ -360,7 +383,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     dbms.DoExecuteSQL("UPDATE DEED_HED SET DATE_S = @DATE_S, SHARH_S = @SHARH_S, NO_S = 0, OKF = 1, USER_NAME = @USER_NAME WHERE N_S = @N_S", new
                     {
                         N_S = s2Val,
-                        DATE_S = DT.Text.Replace("/", ""),
+                        DATE_S = cleanDate,
                         SHARH_S = SH.Text,
                         USER_NAME = CL_HESABDARI.UCurrentUser()
                     });
@@ -369,19 +392,19 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 // Clean Details
                 dbms.DoExecuteSQL("DELETE FROM DEED_DTL WHERE N_S = @N_S", new { N_S = s2Val });
 
-                // Transfer Details (Swap BED/BES)
+                // Transfer Details (Swap BED/BES). Fully parameterized to avoid SQL Injection.
                 string insertSql = $@"
                     INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, HES, BED, BES, SHARH, N_SERI, BANK, ARZD, RADIF)
-                    SELECT {s2Val}, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, HES,
+                    SELECT @New_NS, HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, HES,
                            BES, -- Swap
                            BED, -- Swap
                            CASE WHEN SHARH = N'سند اختتاميه' THEN N'سند افتتاحيه' ELSE SHARH END,
                            N_SERI, BANK, 1,
                            ROW_NUMBER() OVER (ORDER BY id)
                     FROM [{dbName}].dbo.DEED_DTL
-                    WHERE N_S = {s1Val}";
+                    WHERE N_S = @Old_NS";
 
-                dbms.DoExecuteSQL(insertSql);
+                dbms.DoExecuteSQL(insertSql, new { New_NS = s2Val, Old_NS = s1Val });
 
                 new Msgwin(false, "عملیات با موفقیت انجام شد.").ShowDialog();
                 this.Close();

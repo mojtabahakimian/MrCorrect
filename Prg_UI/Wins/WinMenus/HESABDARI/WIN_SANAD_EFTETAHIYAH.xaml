@@ -70,8 +70,9 @@
                 <DockPanel Margin="15,5,15,15" LastChildFill="True">
                     <Label Content="نام دیتابیس برای سال قبل:" HorizontalAlignment="Right" FlowDirection="RightToLeft"/>
                     <ComboBox x:Name="NDBS" PreviewLostKeyboardFocus="NDBS_PreviewLostKeyboardFocus"
+                              DisplayMemberPath="NAME" 
                               SelectedValuePath="NAME" 
-                              TextSearch.TextPath="NAME" HorizontalContentAlignment="Right"
+                              HorizontalContentAlignment="Right"
                               Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                         <ComboBox.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -99,7 +100,7 @@
 
                 <DockPanel Margin="15" LastChildFill="True">
                     <Label Content="شماره سند افتتاحيه:" HorizontalAlignment="Right" FlowDirection="RightToLeft"/>
-                    <CNC:NumericTextBox x:Name="S2" Text="" Width="150" MaxLength="30" HorizontalAlignment="Left" DoesAcceptDouble="False" RestoreLastValidValue="False" LastValueShouldZero="False" Height="30"/>
+                    <CNC:NumericTextBox x:Name="S2" Text="" Width="100" MaxLength="30" HorizontalAlignment="Left" DoesAcceptDouble="False" RestoreLastValidValue="False" LastValueShouldZero="False" Height="30"/>
                 </DockPanel>
 
                 <DockPanel Margin="15,5,15,15" LastChildFill="True">
@@ -109,7 +110,7 @@
 
                 <DockPanel Margin="15,5,15,15" LastChildFill="True">
                     <Label Content="شرح سند افتتاحیه:" HorizontalAlignment="Right" FlowDirection="RightToLeft"/>
-                    <TextBox x:Name="SH" Text="" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" MaxLength="48"/>
+                    <TextBox x:Name="SH" Text="" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" MaxLength="254"/>
                 </DockPanel>
 
                 <DockPanel Margin="15" LastChildFill="True">
