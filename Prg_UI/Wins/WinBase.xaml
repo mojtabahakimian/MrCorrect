@@ -639,7 +639,7 @@
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف شروط برای گرید" Tag="{x:Static materialDesign:PackIconKind.Gavel}" Click="Button_Click_131"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف فرمت گرید بندی مشتریان" Tag="{x:Static materialDesign:PackIconKind.FormatListChecks}"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف پارامتر های کمی و کیفی" Tag="{x:Static materialDesign:PackIconKind.Tune}"/>
-                                <Button Style="{StaticResource FluentSidebarItem}" Content="اعلامیه تخفیف" Tag="{x:Static materialDesign:PackIconKind.TagTextOutline}"/>
+                                <Button Style="{StaticResource FluentSidebarItem}" Content="اعلامیه تخفیف" Tag="{x:Static materialDesign:PackIconKind.TagTextOutline}" Click="Button_Click_166"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف گروه بندی قیمتی" Tag="{x:Static materialDesign:PackIconKind.FormatIndentIncrease}" Click="Button_Click_130"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="تعریف گروه و نحوه پرداخت" Tag="{x:Static materialDesign:PackIconKind.Group}"/>
                                 <Button Style="{StaticResource FluentSidebarItem}" Content="اعلامیه قیمت" Tag="{x:Static materialDesign:PackIconKind.TagPlus}" Click="Button_Click_89"/>

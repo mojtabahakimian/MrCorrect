@@ -1,0 +1,123 @@
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.HESABDARI.WIN_SANAD_EFTETAHIYAH"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.HESABDARI"
+        mc:Ignorable="d"
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        Height="450" Width="800"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        MinHeight="400"
+        FontFamily="{StaticResource IRANYEKAN}"
+        Background="{x:Null}"
+        AllowsTransparency="True" AllowDrop="True"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="15"/>
+    </WindowChrome.WindowChrome>
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="VSP">
+            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ScrollViewer.CanContentScroll="True"/>
+        </ItemsPanelTemplate>
+        <SolidColorBrush x:Key="GENERAL_Grlicom" Color="{Binding ElementName=GENERAL_RANG, Path=Background.Color}" Opacity="0.3"/>
+    </Window.Resources>
+
+    <Grid x:Name="mygrid" Margin="8,8,8,0">
+        <!-- Hidden button for color binding reference -->
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Width="1" Height="1"/>
+        <!-- Main container -->
+        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding ElementName=GENERAL_RANG, Path=Background}" BorderThickness="1" CornerRadius="10" Padding="8">
+            <!-- Title bar -->
+            <Border  x:Name="TitleDrawBar" Style="{StaticResource BordG}"  Background="{Binding ElementName=GENERAL_RANG, Path=Background}"  CornerRadius="10,10,0,0" Margin="-9,-9,-9,0"  Height="38"  VerticalAlignment="Top" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                <Grid>
+                    <!-- Window title -->
+                    <Label x:Name="LABEL_HEADER" Content="سند افتتـاحیـه" Padding="17,8,10,10" Foreground="White" Margin="0,0,110,0" VerticalAlignment="Center"/>
+                    <!-- Window control buttons -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,13,0">
+                        <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" Height="24" Padding="0,0,0,-1" IsTabStop="False" ToolTip="Minimize">
+                            <materialDesign:PackIcon Kind="WindowMinimize" Width="18" Height="18" Foreground="White"/>
+                        </Button>
+                        <Button x:Name="Btn_Max" Click="Btn_Max_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" FontSize="12" Height="24" Padding="0" Margin="4,0,0,0" IsTabStop="False" ToolTip="Maximize">
+                            <materialDesign:PackIcon Kind="WindowMaximize" Width="17" Height="17" Foreground="White"/>
+                        </Button>
+                        <Button x:Name="Btn_Close" Click="Btn_Close_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" Height="24" Padding="0" Margin="4,0,0,0" FontSize="12" IsTabStop="False" ToolTip="Close">
+                            <materialDesign:PackIcon Kind="WindowClose" Width="19" Height="19" Foreground="White"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Border>
+        <!-- Notification popup -->
+        <Popup x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative" Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
+            <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Width="{Binding ElementName=mygrid, Path=ActualWidth, Mode=OneWay}" Height="84" Padding="10">
+                <TextBox x:Name="Pop1Text1" IsReadOnly="True" Background="Transparent" FlowDirection="RightToLeft" BorderBrush="Transparent" Foreground="White" Text="محل نمایش اعلان های سیستم" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+            </Border>
+        </Popup>
+
+        <!-- Content area -->
+        <Grid Margin="0,38,0,0" FlowDirection="RightToLeft">
+            <StackPanel>
+
+                <DockPanel Margin="15" LastChildFill="True">
+                    <Label Content="نام دیتابیس در سال جاری:" HorizontalAlignment="Right" FlowDirection="RightToLeft"/>
+                    <TextBox x:Name="ODBS" Text="Database Name" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" TextAlignment="Right" IsReadOnly="True"/>
+                </DockPanel>
+
+                <DockPanel Margin="15,5,15,15" LastChildFill="True">
+                    <Label Content="نام دیتابیس برای سال قبل:" HorizontalAlignment="Right" FlowDirection="RightToLeft"/>
+                    <ComboBox x:Name="NDBS" PreviewLostKeyboardFocus="NDBS_PreviewLostKeyboardFocus"
+                              DisplayMemberPath="NAME" 
+                              SelectedValuePath="NAME" 
+                              HorizontalContentAlignment="Right"
+                              Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                        <ComboBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                            </ItemsPanelTemplate>
+                        </ComboBox.ItemsPanel>
+                    </ComboBox>
+
+                </DockPanel>
+
+                <DockPanel Margin="15,5,15,15" LastChildFill="True">
+                    <Label Content="شماره سند اختتاميه سال قبل:" HorizontalAlignment="Right" FlowDirection="RightToLeft"/>
+                    <ComboBox x:Name="S1" Width="150" HorizontalAlignment="Left"
+                              SelectedValuePath="N_S"
+                              DisplayMemberPath="N_S" HorizontalContentAlignment="Right"
+                              Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                        <ComboBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                            </ItemsPanelTemplate>
+                        </ComboBox.ItemsPanel>
+                    </ComboBox>
+                </DockPanel>
+                <Separator Background="{StaticResource MaterialDesignDivider}"/>
+
+                <DockPanel Margin="15" LastChildFill="True">
+                    <Label Content="شماره سند افتتاحيه:" HorizontalAlignment="Right" FlowDirection="RightToLeft"/>
+                    <CNC:NumericTextBox x:Name="S2" Text="" Width="100" MaxLength="30" HorizontalAlignment="Left" DoesAcceptDouble="False" RestoreLastValidValue="False" LastValueShouldZero="False" Height="30"/>
+                </DockPanel>
+
+                <DockPanel Margin="15,5,15,15" LastChildFill="True">
+                    <Label Content="تاريخ سند افتتاحيه:" HorizontalAlignment="Right" FlowDirection="RightToLeft"/>
+                    <xctk:MaskedTextBox x:Name="DT" FlowDirection="LeftToRight" HorizontalAlignment="Left" Style="{StaticResource FuzzyOut}" Padding="3" Mask="0000/00/00" Height="30" BorderThickness="1" FontSize="12" Width="88"/>
+                </DockPanel>
+
+                <DockPanel Margin="15,5,15,15" LastChildFill="True">
+                    <Label Content="شرح سند افتتاحیه:" HorizontalAlignment="Right" FlowDirection="RightToLeft"/>
+                    <TextBox x:Name="SH" Text="" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" MaxLength="254"/>
+                </DockPanel>
+
+                <DockPanel Margin="15" LastChildFill="True">
+                    <Button x:Name="BTN_GO" Content="صدور سند افتتاحیه" BorderBrush="{x:Null}" FontSize="11" Foreground="#DDFFFFFF" Height="34" Click="BTN_GO_Click" />
+                </DockPanel>
+
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
