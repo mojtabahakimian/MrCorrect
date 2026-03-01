@@ -3860,7 +3860,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         void MEGH_AfterUpdate()
         {
-            if (CURRENT_ROW_ITEMS.MABL is null || CURRENT_ROW_ITEMS.MEGHk is null)
+            if (CURRENT_ROW_ITEMS.MABL is null || CURRENT_ROW_ITEMS.MEGHk is null || CURRENT_ROW_ITEMS.MEGH is null)
             {
                 return;
             }
@@ -3878,8 +3878,18 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
             else
             {
+                var vahadInfo = RST0.FirstOrDefault();
+                if (vahadInfo?.NESBAT is null)
+                {
+                    Msgwin msgwin = new Msgwin(false, "واحد تعريف شده ناقص ميباشد نسبت آن مشخص نگرديده است.در بخش تعريف كالا آن را اصلاح كنيد.");
+                    msgwin.ShowDialog();
+                    return;
+                }
+
                 CURRENT_ROW_ITEMS.MEGHk = CURRENT_ROW_ITEMS.MEGH * RST0.FirstOrDefault().NESBAT;
                 CURRENT_ROW_ITEMS.MEGH_R = CURRENT_ROW_ITEMS.MEGH * RST0.FirstOrDefault().NESBAT;
+
+
                 if (CURRENT_ROW_ITEMS.MABL == 0)
                 {
                     var TheCol1 = INVO_LST_sub.Columns.FirstOrDefault(c => c.SortMemberPath == "MABL_K").DisplayIndex;
@@ -3898,6 +3908,12 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     if (!(THECELL1 is null))
                         THECELL1.IsTabStop = false;
                     //CURRENT_ROW_ITEMS.MABL_K.Text.TabStop = false;
+
+                    if (CURRENT_ROW_ITEMS.MEGHk is null)
+                    {
+                        return;
+                    }
+
                     CURRENT_ROW_ITEMS.MABL_K = Math.Round((double)(CURRENT_ROW_ITEMS.MABL * CURRENT_ROW_ITEMS.MEGHk));
                 }
             }
@@ -3910,14 +3926,15 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 // Else
                 // If IsNull(RST.Fields("MIN_M")) Then
                 min = CL_HESABDARI.Getmin((int)CURRENT_ROW_ITEMS.ANBAR, CURRENT_ROW_ITEMS.CODE);
-                if ((bool)Baseknow.RMOG && !IsNull(Baseknow.RMOG))
+                if (!IsNull(Baseknow.RMOG) && Convert.ToBoolean(Baseknow.RMOG))
                 {
 
                     var RSTM0 = dbms.DoGetDataSQL<double?>("SELECT  ROUND(ISNULL(AK_MOGO_AVL_KOL.SMEGH, 0) - ISNULL(AK_MOGO_FR.MEG, 0),2) AS mand  FROM         dbo.AK_MOGO_AVL_KOL(99999999," + CURRENT_ROW_ITEMS.ANBAR + ") AK_MOGO_AVL_KOL RIGHT OUTER JOIN   dbo.STUF_FSK ON AK_MOGO_AVL_KOL.CODE = dbo.STUF_FSK.CODE AND AK_MOGO_AVL_KOL.ANBAR = dbo.STUF_FSK.ANBAR LEFT OUTER JOIN  dbo.AK_MOGO_FR(99999999," + CURRENT_ROW_ITEMS.ANBAR + ") AK_MOGO_FR ON dbo.STUF_FSK.CODE = AK_MOGO_FR.CODE AND dbo.STUF_FSK.ANBAR = AK_MOGO_FR.ANBAR WHERE     (dbo.STUF_FSK.CODE = N'" + CURRENT_ROW_ITEMS.CODE + "') AND (dbo.STUF_FSK.ANBAR = " + CURRENT_ROW_ITEMS.ANBAR + ")").ToList();
                     if (RSTM0.Count > 0)
                     {
-                        MAND = (double)RSTM0.FirstOrDefault();
-                        if (Math.Round((double)(RSTM0.FirstOrDefault() - (CURRENT_ROW_ITEMS.MEGHk - (Conversion.Val(WAS_ROW_ITEM.MEGHk/*.TAG*/) - CURRENT_ROW_ITEMS.MEGH_MAR))), (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && CURRENT_ROW_ITEMS.ANBAR != 0 && Baseknow.MOJU)
+                        var mandValue = RSTM0.FirstOrDefault();
+                        MAND = mandValue.GetValueOrDefault();
+                        if (Math.Round((double)(mandValue.GetValueOrDefault() - (CURRENT_ROW_ITEMS.MEGHk - (Conversion.Val(WAS_ROW_ITEM.MEGHk/*.TAG*/) - CURRENT_ROW_ITEMS.MEGH_MAR))), (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && CURRENT_ROW_ITEMS.ANBAR != 0 && Baseknow.MOJU)
                         {
                             Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد.");
                             msgwin.ShowDialog();
@@ -4012,7 +4029,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 var RSTM7 = dbms.DoGetDataSQL<HLF2>("SELECT CMBAA ,CODE FROM STUF_DEF WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "'").ToList();
                 if (RSTM7.Count > 0)
                 {
-                    if ((bool)RSTM7.FirstOrDefault().CMBAA)
+                    if (RSTM7.FirstOrDefault()?.CMBAA == true)
                     {
                         if (CURRENT_ROW_ITEMS.IMBAA != Math.Round((double)((CURRENT_ROW_ITEMS.MABL_K - CURRENT_ROW_ITEMS.N_MOIN) * CL_HESABDARI.GetArzesh(CURRENT_ROW_ITEMS.CODE) / 100)))
                         {
@@ -7683,7 +7700,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     {
                         new Msgwin(false, "خطا در انجام عملیات پورسانت.").ShowDialog();
                     }
-               
+
                 }
             }
 
