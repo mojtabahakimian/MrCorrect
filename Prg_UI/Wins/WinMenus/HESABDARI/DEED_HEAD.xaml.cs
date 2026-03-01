@@ -1,46 +1,47 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using Functions;
+using Interfaces;
+using MaterialDesignThemes.Wpf;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
+using Prg_UI.Functions.Jostejoo;
+using Prg_UI.HelperWins;
+using Prg_UI.UiTools;
+using Prg_UI.Wins.WinOther;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Components;
+using Stimulsoft.Report.Dictionary;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
-using Prg_UI.Wins.WinOther;
-using static Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED;
-using Prg_UI.UiTools;
 using System.Windows.Threading;
-using Prg_UI.Functions.Jostejoo;
 using Wins.WinMenus.Checkha;
-using Msgwin = Prg_UI.HelperWins.Msgwin;
-using Stimulsoft.Report.Dictionary;
-using Stimulsoft.Report;
-using static Prg_UI.Functions.CL_LMethods;
-using System.Diagnostics;
-using System.Windows.Data;
-using static Interfaces.INavigator;
-using System.ComponentModel;
-using Functions;
-using Microsoft.Data.SqlClient;
-using Prg_UI.HelperWins;
-using Interfaces;
-using static Functions.DataGridClipboardManager;
-using System.IO;
-using System.Runtime.Serialization;
-using static Prg_UI.HelperWins.Msgwin;
 using Wins.WinOther;
-using System.Windows.Controls.Primitives;
+using static Functions.DataGridClipboardManager;
+using static Interfaces.INavigator;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
+using static Prg_UI.Functions.CL_LMethods;
+using static Prg_UI.HelperWins.Msgwin;
+using static Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED;
+using Msgwin = Prg_UI.HelperWins.Msgwin;
 
 namespace Prg_UI.Wins.WinMenus.HESABDARI
 {
@@ -2735,7 +2736,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     Process Prc = ProcLoader.Start();
 
 
-
                     var report = new StiReport();
 
                     var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream("Prg_UI.Rpts.SANAD_Reports.R_SANAD_PRINT.mrt");
@@ -2749,6 +2749,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                     //Parameters
                     var Saman_Name = dbms.DoGetDataSQL<string>("SELECT NAME FROM SAZMAN").FirstOrDefault();
+
+                    if (!string.IsNullOrWhiteSpace(SHARH_S.Text))
+                    {
+                        (report.GetComponentByName("SHARH_HEAD") as StiText).Text = "شرح سند: " + SHARH_S.Text.Trim();
+                    }
 
                     //report Show
                     report.Render(false);

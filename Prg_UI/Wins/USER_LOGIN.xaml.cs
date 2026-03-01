@@ -395,8 +395,8 @@ namespace Prg_UI.Wins
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "13774,13760");
 
-            new WIN_F_NEWYEAR().Show();
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHKE_DLIST_KOLCHECKD, this);
+            //new WIN_F_NEWYEAR().Show();
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this,14361d);
             //System.Windows.Forms.MessageBox.Show(CL_CCNNMANAGER.CONNECTION_STR);
             //new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED().Show();
             //new TR_ANBGRD_LST().Show();
