@@ -181,6 +181,11 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             }
             Fill_ComboBoxes();
             N_SERI.Focus();
+
+            CL_LMethods.SetTabIndexes(
+                N_SERI,
+                _SaveExit
+                );
         }
 
         bool isClosing = false;
@@ -375,7 +380,7 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                 SE_HES1 = HES1.SelectedValue?.ToString();
                 SE_SANDUGH = SANDUGH.SelectedValue.ToStringNullSafe();
                 SE_VAZ = VAZ.SelectedValue.ToStringNullSafe();
-                
+
             }
             else
             {

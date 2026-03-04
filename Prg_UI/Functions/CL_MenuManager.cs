@@ -1551,7 +1551,7 @@ namespace Functions
                     break;
 
 
-                case WinNameType.F_MENU_DATE_CROS: //لیست برگه های بدون قبض باسکول
+                case WinNameType.F_MENU_DATE_CROS: //
                     CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_DATE("CROS"), isModalDialog: false, allowMultipleInstances: false);
                     break;
 

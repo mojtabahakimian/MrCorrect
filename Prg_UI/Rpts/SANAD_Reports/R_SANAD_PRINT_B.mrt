@@ -6,7 +6,7 @@
     <Databases isList="true" count="1">
       <MS_x0020_SQL Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>MS SQL</Alias>
-        <ConnectionStringEncrypted>9FzPz8ZKQ5n5CE34dADhY9Fwla9IS5LIRk3tCMOEpOvFdrULxm2CHUUT2dRpSaRewlq7L8Jd+t1qE5zwTVx1F9la2YnNA5P1a0xN/UhU417EcNmsZVtDlHlJjQ==</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9BrNoe9K+yFqe73M+lTjF9U0gS5FWVKk4k25gHM9InvVeHfP5wX6XX0IqNRjbCIPxHD7z2J9c91qbFm9eh3rG8lwdytTe0mMR1rZzOnc</ConnectionStringEncrypted>
         <Key>16e46a178fba4a53863acd28e2a2dbf8</Key>
         <Name>MS SQL</Name>
       </MS_x0020_SQL>
@@ -71,62 +71,14 @@
       <Components isList="true" count="13">
         <PageHeaderBand2 Ref="6" type="PageHeaderBand" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,0.4,19,2</ClientRectangle>
+          <ClientRectangle>0,0.4,19,1.8</ClientRectangle>
           <Components isList="true" count="8">
-            <Text17 Ref="7" type="Text" isKey="true">
+            <Text23 Ref="7" type="Text" isKey="true">
               <Brush>Transparent</Brush>
-              <ClientRectangle>0,0,19,1</ClientRectangle>
+              <ClientRectangle>0,0,19,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,14</Font>
-              <HorAlignment>Center</HorAlignment>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text17</Name>
-              <Page isRef="5" />
-              <Parent isRef="6" />
-              <Text>سند پرداخت
-</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text17>
-            <Text21 Ref="8" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>15,1.2,4,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,10</Font>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text21</Name>
-              <Page isRef="5" />
-              <Parent isRef="6" />
-              <Text>تاریخ : {Format("{0:####/##/##}",DEAD_HEAD_PRINT.DATE_S)}</Text>
-              <TextBrush>Black</TextBrush>
-              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
-              <Type>Expression</Type>
-            </Text21>
-            <Text22 Ref="9" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>16.4,0.4,2.6,0.6</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
-              <HorAlignment>Right</HorAlignment>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text22</Name>
-              <Page isRef="5" />
-              <Parent isRef="6" />
-              <Text>شماره سند : {DEAD_HEAD_PRINT.N_S}</Text>
-              <TextBrush>Black</TextBrush>
-              <Type>Expression</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text22>
-            <Text23 Ref="10" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>4.6,1,9.6,0.8</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,12</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text23</Name>
@@ -137,12 +89,59 @@
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text23>
+            <Text17 Ref="8" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,0.8,19,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,10</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text17</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>سند حسابداری</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text17>
+            <Text21 Ref="9" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>15,1.2,4,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,10</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text21</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>تاریخ : {Format("{0:####/##/##}",DEAD_HEAD_PRINT.DATE_S)}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+            </Text21>
+            <Text22 Ref="10" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>16.4,0.4,2.6,0.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text22</Name>
+              <Page isRef="5" />
+              <Parent isRef="6" />
+              <Text>شماره سند : {DEAD_HEAD_PRINT.N_S}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text22>
             <Text24 Ref="11" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>2.74,1.2,1,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,10</Font>
+              <Font>IRANYekanFN,10</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text24</Name>
               <Page isRef="5" />
@@ -157,7 +156,7 @@
               <ClientRectangle>1.24,1.2,0.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,10</Font>
+              <Font>IRANYekanFN,10</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text25</Name>
               <Page isRef="5" />
@@ -172,7 +171,7 @@
               <ClientRectangle>1.71,1.21,1.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,10</Font>
+              <Font>IRANYekanFN,10</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text26</Name>
@@ -189,7 +188,7 @@
               <ClientRectangle>0,1.2,1.4,0.6</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,10</Font>
+              <Font>IRANYekanFN,10</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text27</Name>
@@ -218,7 +217,7 @@
               <ClientRectangle>0,0.1,2.8,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,9</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text5</Name>
@@ -241,13 +240,12 @@
               <ClientRectangle>5.6,0.1,13.4,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,9</Font>
               <HorAlignment>Right</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text6</Name>
               <Page isRef="5" />
               <Parent isRef="15" />
-              <Text>جمع نقل به صفحه بعد</Text>
               <TextBrush>Black</TextBrush>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
@@ -258,7 +256,7 @@
               <ClientRectangle>2.8,0.1,2.8,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,9</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text9</Name>
@@ -347,7 +345,7 @@
         </PageFooterBand1>
         <ColumnHeaderBand1 Ref="28" type="Stimulsoft.Report.Components.StiColumnHeaderBand" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,3.2,19,0.8</ClientRectangle>
+          <ClientRectangle>0,3,19,0.8</ClientRectangle>
           <Components isList="true" count="14">
             <Text33 Ref="29" type="Text" isKey="true">
               <Border>All;Black;1;Solid;False;4;Black</Border>
@@ -355,7 +353,7 @@
               <ClientRectangle>0,0,2.8,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,9</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text33</Name>
@@ -372,7 +370,7 @@
               <ClientRectangle>2.8,0,2.8,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,9</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text34</Name>
@@ -389,7 +387,7 @@
               <ClientRectangle>5.6,0,3.4,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,9</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text35</Name>
@@ -406,7 +404,7 @@
               <ClientRectangle>9,0,7.6,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,9</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text36</Name>
@@ -424,7 +422,7 @@
               <ClientRectangle>16.6,0,2.4,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,9</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text37</Name>
@@ -440,7 +438,7 @@
               <ClientRectangle>2.8,0.8,2.8,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,9</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text16</Name>
@@ -455,7 +453,7 @@
               <ClientRectangle>0,0.8,2.8,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,9</Font>
               <HorAlignment>Center</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text18</Name>
@@ -538,15 +536,14 @@
         </ColumnHeaderBand1>
         <GroupHeaderBand1 Ref="43" type="GroupHeaderBand" isKey="true">
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,4.8,19,0.8</ClientRectangle>
+          <ClientRectangle>0,4.6,19,0.8</ClientRectangle>
           <Components isList="true" count="5">
             <Text1 Ref="44" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>16.6,0,2.4,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
-              <HorAlignment>Center</HorAlignment>
+              <Font>IRANYekanFN,8</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text1</Name>
               <Page isRef="5" />
@@ -561,7 +558,7 @@
               <ClientRectangle>9,0,7.6,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,8</Font>
               <Margins>0,0,0,0</Margins>
               <Name>Text2</Name>
               <Page isRef="5" />
@@ -576,7 +573,7 @@
               <ClientRectangle>5.6,0,3.4,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,8</Font>
               <HorAlignment>Right</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text3</Name>
@@ -591,7 +588,7 @@
               <ClientRectangle>2.8,0,2.8,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,8</Font>
               <HorAlignment>Right</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text7</Name>
@@ -613,7 +610,7 @@
               <ClientRectangle>0,0,2.8,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,8</Font>
               <HorAlignment>Right</HorAlignment>
               <Margins>0,0,0,0</Margins>
               <Name>Text8</Name>
@@ -642,7 +639,7 @@
         <DataBand2 Ref="51" type="DataBand" isKey="true">
           <Brush>Transparent</Brush>
           <BusinessObjectGuid isNull="true" />
-          <ClientRectangle>0,6.4,19,1</ClientRectangle>
+          <ClientRectangle>0,6.2,19,1</ClientRectangle>
           <Components isList="true" count="5">
             <Text10 Ref="52" type="Text" isKey="true">
               <Border>Right;Black;1;Solid;False;4;Black</Border>
@@ -650,9 +647,8 @@
               <ClientRectangle>16.6,0,2.4,1</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
-              <HorAlignment>Center</HorAlignment>
-              <Margins>0,0,0,0</Margins>
+              <Font>IRANYekanFN,8</Font>
+              <Margins>0,0,10,0</Margins>
               <Name>Text10</Name>
               <Page isRef="5" />
               <Parent isRef="51" />
@@ -663,18 +659,20 @@
             </Text10>
             <Text11 Ref="53" type="Text" isKey="true">
               <Brush>Transparent</Brush>
+              <CanGrow>True</CanGrow>
               <ClientRectangle>9,0,7.6,1</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,8</Font>
               <HorAlignment>Right</HorAlignment>
-              <Margins>0,0,0,0</Margins>
+              <Margins>0,0,10,0</Margins>
               <Name>Text11</Name>
               <Page isRef="5" />
               <Parent isRef="51" />
               <Text>{DEAD_HEAD_PRINT.TNAME}
 {DEAD_HEAD_PRINT.SHARH}</Text>
               <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text11>
@@ -683,9 +681,9 @@
               <ClientRectangle>5.6,0,3.4,1</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,8</Font>
+              <Font>IRANYekanFN,8</Font>
               <HorAlignment>Right</HorAlignment>
-              <Margins>0,0,0,0</Margins>
+              <Margins>0,0,10,0</Margins>
               <Name>Text12</Name>
               <Page isRef="5" />
               <Parent isRef="51" />
@@ -705,9 +703,9 @@
               <ClientRectangle>2.8,0,2.8,1</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,8</Font>
               <HorAlignment>Right</HorAlignment>
-              <Margins>0,0,0,0</Margins>
+              <Margins>0,0,10,0</Margins>
               <Name>Text13</Name>
               <Page isRef="5" />
               <Parent isRef="51" />
@@ -720,9 +718,9 @@
               <ClientRectangle>0,0,2.8,1</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
-              <Font>WeblogmaYekan,9</Font>
+              <Font>IRANYekanFN,8</Font>
               <HorAlignment>Right</HorAlignment>
-              <Margins>0,0,0,0</Margins>
+              <Margins>0,0,10,0</Margins>
               <Name>Text14</Name>
               <Page isRef="5" />
               <Parent isRef="51" />
@@ -744,7 +742,7 @@
         <GroupFooterBand1 Ref="58" type="GroupFooterBand" isKey="true">
           <Border>Bottom;Black;1;Solid;False;4;Black</Border>
           <Brush>Transparent</Brush>
-          <ClientRectangle>0,8.2,19,0.2</ClientRectangle>
+          <ClientRectangle>0,8,19,0.2</ClientRectangle>
           <Components isList="true" count="3">
             <EndPointPrimitive22 Ref="59" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>10,-0.26,0,0</ClientRectangle>
@@ -790,7 +788,7 @@
           <ReferenceToGuid>d7393348461645669ef41341c021e70b</ReferenceToGuid>
         </EndPointPrimitive20>
         <VerticalLinePrimitive1 Ref="63" type="VerticalLinePrimitive" isKey="true">
-          <ClientRectangle>2.8,3.2,0.0254,24.4</ClientRectangle>
+          <ClientRectangle>2.8,3,0.0254,24.6</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
           <EndCap Ref="64" type="Cap" isKey="true">
@@ -806,7 +804,7 @@
           </StartCap>
         </VerticalLinePrimitive1>
         <VerticalLinePrimitive2 Ref="66" type="VerticalLinePrimitive" isKey="true">
-          <ClientRectangle>0,3.2,0.0254,24.4</ClientRectangle>
+          <ClientRectangle>0,3,0.0254,24.6</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
           <EndCap Ref="67" type="Cap" isKey="true">
@@ -822,7 +820,7 @@
           </StartCap>
         </VerticalLinePrimitive2>
         <VerticalLinePrimitive3 Ref="69" type="VerticalLinePrimitive" isKey="true">
-          <ClientRectangle>5.6,3.4,0.0254,24.2</ClientRectangle>
+          <ClientRectangle>5.6,3.2,0.0254,24.4</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
           <EndCap Ref="70" type="Cap" isKey="true">
@@ -838,7 +836,7 @@
           </StartCap>
         </VerticalLinePrimitive3>
         <VerticalLinePrimitive4 Ref="72" type="VerticalLinePrimitive" isKey="true">
-          <ClientRectangle>9,3.2,0.0254,23.6</ClientRectangle>
+          <ClientRectangle>9,3,0.0254,23.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
           <EndCap Ref="73" type="Cap" isKey="true">
@@ -854,7 +852,7 @@
           </StartCap>
         </VerticalLinePrimitive4>
         <VerticalLinePrimitive5 Ref="75" type="VerticalLinePrimitive" isKey="true">
-          <ClientRectangle>16.6,3.2,0.0254,23.6</ClientRectangle>
+          <ClientRectangle>16.6,3,0.0254,23.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
           <EndCap Ref="76" type="Cap" isKey="true">
@@ -870,7 +868,7 @@
           </StartCap>
         </VerticalLinePrimitive5>
         <VerticalLinePrimitive6 Ref="78" type="VerticalLinePrimitive" isKey="true">
-          <ClientRectangle>19,3.2,0.0254,23.6</ClientRectangle>
+          <ClientRectangle>19,3,0.0254,23.8</ClientRectangle>
           <Color>Black</Color>
           <Conditions isList="true" count="0" />
           <EndCap Ref="79" type="Cap" isKey="true">
@@ -907,10 +905,10 @@
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>2/2/2024 12:15:41 PM</ReportChanged>
+  <ReportChanged>3/1/2026 9:51:42 AM</ReportChanged>
   <ReportCreated>9/5/2021 1:38:11 PM</ReportCreated>
-  <ReportFile>C:\Users\Lenovo\Desktop\R_SANAD_PRINT_B.mrt</ReportFile>
-  <ReportGuid>0240e82d74f34ff995dcb39d77fd2021</ReportGuid>
+  <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\SANAD_Reports\R_SANAD_PRINT_B.mrt</ReportFile>
+  <ReportGuid>3830f5eca3d54c989fdd18b88d9f9bd4</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

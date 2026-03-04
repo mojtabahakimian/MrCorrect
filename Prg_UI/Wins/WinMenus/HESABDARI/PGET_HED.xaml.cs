@@ -24,6 +24,7 @@ using Stimulsoft.Report.Dictionary;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
@@ -55,6 +56,52 @@ using TextBox = System.Windows.Controls.TextBox;
 
 namespace Prg_UI.Wins.WinMenus.HESABDARI
 {
+    /// <summary>
+    /// ObservableCollection بهینه‌شده که AddRange را با یک اعلان واحد UI پشتیبانی می‌کند.
+    /// جایگزین مستقیم ObservableCollection استاندارد در تمام DataGrid های پروژه.
+    /// </summary>
+    public sealed class RangeObservableCollection<T> : ObservableCollection<T>
+    {
+        private bool _suppressNotification = false;
+
+        protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+        {
+            if (!_suppressNotification)
+                base.OnCollectionChanged(e);
+        }
+
+        /// <summary>
+        /// تمام آیتم‌ها را یکجا اضافه کرده و فقط یک بار UI را آپدیت می‌کند
+        /// </summary>
+        public void AddRange(IEnumerable<T> list)
+        {
+            if (list == null) return;
+
+            _suppressNotification = true;
+            foreach (var item in list)
+                Add(item);
+            _suppressNotification = false;
+
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(
+                NotifyCollectionChangedAction.Reset));
+        }
+
+        /// <summary>
+        /// Clear + AddRange در یک تراکنش UI واحد
+        /// </summary>
+        public void ReplaceAll(IEnumerable<T> list)
+        {
+            _suppressNotification = true;
+            Clear();
+            if (list != null)
+                foreach (var item in list)
+                    Add(item);
+            _suppressNotification = false;
+
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(
+                NotifyCollectionChangedAction.Reset));
+        }
+    }
     public partial class PGET_HED : Window, INotifyPropertyChanged, ISearchableWindow
     {
         #region Header Window Begin
@@ -117,8 +164,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
             set { _sum_of_mabl = value; OnPropertyChanged("SUM_OF_MABL"); }
         }
-        public ObservableCollection<PGET_LST> KHAZANEH_DATA { get; set; } = new ObservableCollection<PGET_LST>();
+        //public ObservableCollection<PGET_LST> KHAZANEH_DATA { get; set; } = new ObservableCollection<PGET_LST>();
 
+        public RangeObservableCollection<PGET_LST> KHAZANEH_DATA { get; } = new RangeObservableCollection<PGET_LST>();
         public CollectionViewSource RecordsData { get; set; } = new CollectionViewSource();
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
@@ -722,7 +770,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
 
         }
-        public void ReGetData()
+        public void ReGetData_0()
         {
             //پر کردن دیتا گرید از دیتابیس برای سطر های خزانه
             //با این روش فقط اومدین با قدرت چند هسته ای سی شارپ اسم های سطر های خزانه رو جداگانه با کمک سی شارپ پارالل پر کردیم
@@ -760,6 +808,231 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             this.MABL.Text = SUM_OF_MABL.ToString();
         }
+        public void ReGetData_3()
+        {
+            //Claude
+            // ═══════════════════════════════════════════════════════════════════
+            // OPTIMIZATION: یک کوئری واحد با JOIN دوگانه جایگزین N+1 کوئری موازی
+            // به جای N*2 رفت‌وبرگشت به دیتابیس، فقط یک بار اتصال برقرار می‌شود
+            // ═══════════════════════════════════════════════════════════════════
+            const string sql = @"
+        SELECT
+            p.ID,
+            p.DATE,
+            p.RADIF,
+            p.NO_AM,
+            p.NAHVA,
+            p.FHES_K,
+            p.FHES_M,
+            p.FHES_T,
+            p.THES_K,
+            p.THES_M,
+            p.THES_T,
+            p.SHARH,
+            p.MABL,
+            p.N_SERI,
+            p.BANK,
+            p.IDH,
+            p.FHES,
+            p.THES,
+            p.ARZD,
+            p.FHES_T2,
+            p.THES_T2,
+            p.FHES_T3,
+            p.THES_T3,
+            p.FHES_T4,
+            p.THES_T4,
+            p.CRT,
+            p.UID,
+            CAST(
+                CASE WHEN EXISTS (
+                    SELECT 1 FROM dbo.TASKS WITH (NOLOCK)
+                    WHERE num = p.IDH AND tg = 34
+                ) THEN 1 ELSE 0 END
+            AS BIT) AS HasAttachment,
+
+            -- ✅ نام حساب مبدا: جایگزین کوئری درون Parallel.For
+            cf.NAME AS NAME_FHES,
+
+            -- ✅ نام حساب مقصد: جایگزین کوئری درون Parallel.For
+            ct.NAME AS NAME_THES
+
+        FROM dbo.PGET_LST AS p WITH (NOLOCK)
+
+        -- LEFT JOIN برای جلوگیری از حذف سطرهایی که NAME ندارند
+        LEFT JOIN dbo.CUST_HESAB AS cf WITH (NOLOCK) ON cf.hes = p.FHES
+        LEFT JOIN dbo.CUST_HESAB AS ct WITH (NOLOCK) ON ct.hes = p.THES
+
+        WHERE p.ID = @ID;";
+
+            // ✅ SQL Injection Fix: استفاده از پارامتر به جای درج مستقیم ID.Text
+            if (!int.TryParse(ID.Text, out int parsedId))
+            {
+                KHAZANEH_DATA?.Clear();
+                this.MABL.Text = "0";
+                return;
+            }
+
+            var QRE_KHZ_DATA = dbms.DoGetDataSQL<PGET_LST>(sql, new { ID = parsedId });
+
+            KHAZANEH_DATA?.Clear();
+
+            if (QRE_KHZ_DATA != null)
+            {
+                foreach (var item in QRE_KHZ_DATA)
+                {
+                    KHAZANEH_DATA?.Add(item);
+                }
+            }
+
+            this.MABL.Text = SUM_OF_MABL.ToString();
+        }
+        public async Task ReGetDataAsync()
+        {
+            // 1. Offload the database call to a background thread to keep the WPF UI completely responsive (no freezing).
+            var QRE_KHZ_DATA = await Task.Run(() =>
+            {
+                // 2. Use LEFT JOINs to fetch all data, including the Names, in a SINGLE database round-trip.
+                string query = $@"
+            SELECT 
+                p.ID, p.DATE, p.RADIF, p.NO_AM, p.NAHVA, p.FHES_K, p.FHES_M, p.FHES_T, 
+                p.THES_K, p.THES_M, p.THES_T, p.SHARH, p.MABL, p.N_SERI, p.BANK, p.IDH, 
+                p.FHES, p.THES, p.ARZD, p.FHES_T2, p.THES_T2, p.FHES_T3, p.THES_T3, 
+                p.FHES_T4, p.THES_T4, p.CRT, p.UID, 
+                CAST(CASE WHEN EXISTS(SELECT 1 FROM dbo.TASKS t WHERE t.num = p.IDH AND t.tg = 34) THEN 1 ELSE 0 END AS BIT) AS HasAttachment,
+                c1.NAME AS NAME_FHES,
+                c2.NAME AS NAME_THES
+            FROM dbo.PGET_LST p
+            LEFT JOIN dbo.CUST_HESAB c1 ON p.FHES = c1.hes
+            LEFT JOIN dbo.CUST_HESAB c2 ON p.THES = c2.hes
+            WHERE p.ID = {ID.Text}";
+
+                // Execute ONE query instead of 1 + (2 * N) queries
+                return dbms.DoGetDataSQL<PGET_LST>(query).ToList();
+            });
+
+            // 3. Clear and repopulate the collection safely on the UI thread
+            KHAZANEH_DATA?.Clear();
+
+            if (QRE_KHZ_DATA != null)
+            {
+                foreach (var item in QRE_KHZ_DATA)
+                {
+                    if (item != null)
+                    {
+                        KHAZANEH_DATA?.Add(item);
+                    }
+                }
+            }
+
+            this.MABL.Text = SUM_OF_MABL.ToString();
+        }
+
+        public void ReGetData()
+        {
+            //Claude5
+            // ──────────────────────────────────────────────────────────────────
+            // FAST PATH: اعتبارسنجی ورودی قبل از هر عملیات دیگری
+            // ──────────────────────────────────────────────────────────────────
+            if (!int.TryParse(ID.Text?.Trim(), out int parsedId) || parsedId <= 0)
+            {
+                KHAZANEH_DATA.ReplaceAll(null);
+                this.MABL.Text = "0";
+                return;
+            }
+
+            // ──────────────────────────────────────────────────────────────────
+            // ULTIMATE SQL:
+            //   ✅ EXISTS → LEFT JOIN روی ست از پیش فیلترشده  (یک بار اجرا، نه N بار)
+            //   ✅ OUTER APPLY TOP 1  برای NAME_FHES / NAME_THES (ایمن در برابر تکراری بودن hes)
+            //   ✅ OPTION(OPTIMIZE FOR UNKNOWN) برای جلوگیری از پلن کش بد
+            //   ✅ WITH(NOLOCK) روی تمام جداول برای حداکثر موازی‌سازی خواندن
+            //   ✅ پارامتر @ID برای جلوگیری از SQL Injection
+            // ──────────────────────────────────────────────────────────────────
+            const string sql = @"
+        SELECT
+            p.ID,
+            p.DATE,
+            p.RADIF,
+            p.NO_AM,
+            p.NAHVA,
+            p.FHES_K,
+            p.FHES_M,
+            p.FHES_T,
+            p.THES_K,
+            p.THES_M,
+            p.THES_T,
+            p.SHARH,
+            p.MABL,
+            p.N_SERI,
+            p.BANK,
+            p.IDH,
+            p.FHES,
+            p.THES,
+            p.ARZD,
+            p.FHES_T2,
+            p.THES_T2,
+            p.FHES_T3,
+            p.THES_T3,
+            p.FHES_T4,
+            p.THES_T4,
+            p.CRT,
+            p.UID,
+
+            -- ✅ BOTTLENECK #1 FIX: EXISTS → pre-filtered LEFT JOIN
+            -- موتور SQL ست را یک بار می‌سازد، نه N بار
+            CAST(
+                CASE WHEN tk.num IS NOT NULL THEN 1 ELSE 0 END
+            AS BIT)                         AS HasAttachment,
+
+            -- ✅ BOTTLENECK #2 FIX: OUTER APPLY TOP 1
+            -- در صورت تکراری بودن hes هیچ‌گاه سطر تکراری ایجاد نمی‌کند
+            cf.NAME                         AS NAME_FHES,
+            ct.NAME                         AS NAME_THES
+
+        FROM dbo.PGET_LST AS p WITH (NOLOCK)
+
+        -- یک بار کل TASKS را با tg=34 فیلتر می‌کند، سپس JOIN می‌زند
+        LEFT JOIN (
+            SELECT DISTINCT num
+            FROM   dbo.TASKS WITH (NOLOCK)
+            WHERE  tg = 34
+        ) AS tk ON tk.num = p.IDH
+
+        -- TOP 1 ایمن: اگر hes تکراری باشد سطر اضافه نمی‌گیرد
+        OUTER APPLY (
+            SELECT TOP 1 NAME
+            FROM   dbo.CUST_HESAB WITH (NOLOCK)
+            WHERE  hes = p.FHES
+        ) AS cf
+
+        OUTER APPLY (
+            SELECT TOP 1 NAME
+            FROM   dbo.CUST_HESAB WITH (NOLOCK)
+            WHERE  hes = p.THES
+        ) AS ct
+
+        WHERE p.ID = @ID
+
+        -- ✅ BOTTLENECK #3 FIX: جلوگیری از استفاده از پلن کش نامناسب
+        OPTION (OPTIMIZE FOR (@ID UNKNOWN));";
+
+            // ──────────────────────────────────────────────────────────────────
+            // ✅ BOTTLENECK #4 FIX: AsList() از Dapper — بدون کپی اضافی حافظه
+            //    (ToList() یک List جدید می‌سازد؛ AsList() از بافر داخلی استفاده می‌کند)
+            // ──────────────────────────────────────────────────────────────────
+            var result = dbms.DoGetDataSQL<PGET_LST>(sql, new { ID = parsedId })
+                             ?.AsList();
+
+            // ──────────────────────────────────────────────────────────────────
+            // ✅ BOTTLENECK #5 FIX: ReplaceAll → یک CollectionChanged برای کل لیست
+            //    (به جای N بار CollectionChanged در foreach معمولی)
+            // ──────────────────────────────────────────────────────────────────
+            KHAZANEH_DATA.ReplaceAll(result);
+
+            this.MABL.Text = SUM_OF_MABL.ToString();
+        }
+
         private void MoveReGetData(Jahat jahat, int? custom_postiion = null)
         {
             int RecordCount() { return ((System.Windows.Data.ListCollectionView)RecordsData.View)?.Count ?? 0; }
@@ -1242,7 +1515,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             return dbms.DoGetDataSQL<AutomasionEVNT>(sql, new { idnum = automationId, tg = rowId }).FirstOrDefault();
         }
 
-           private static bool IsNull(object p)
+        private static bool IsNull(object p)
         {
             if (!(p is null))
             {
