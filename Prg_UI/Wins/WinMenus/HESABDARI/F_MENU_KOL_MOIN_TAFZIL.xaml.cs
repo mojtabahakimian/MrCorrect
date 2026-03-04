@@ -64,13 +64,19 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         #endregion
         public string AZ_DT_PARAM { get; set; } = "0";
         public string TA_DT_PARAM { get; set; } = "9999999999";
-        public F_MENU_KOL_MOIN_TAFZIL(object open_arg = null, string _AZ_TARIKH_ = "0", string _TA_TARIKH_ = "999999999999")
+        public Window? THEOWENER { get; set; }
+        public F_MENU_KOL_MOIN_TAFZIL(object open_arg = null, string _AZ_TARIKH_ = "0", string _TA_TARIKH_ = "999999999999", Window? _ownerwin_ = null)
         {
             InitializeComponent();
 
             if (!(open_arg is null))
             {
                 OPEN_ARG = open_arg;
+
+                if (_ownerwin_ != null)
+                {
+                    THEOWENER = _ownerwin_;
+                }
 
                 if (!string.IsNullOrEmpty(_AZ_TARIKH_) && !string.IsNullOrEmpty(_TA_TARIKH_))
                 {
@@ -113,6 +119,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
             //this.Owner = PublicVRB.WINBASE; // برای اینکه وقتی هرچند بار که پنجره رو باز میکنی روی پنجره اصلی باز بشه و باز بمونه نره اون پشت
         }
+
+
+
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (NowReady && e.Key == Key.Enter)
@@ -488,6 +497,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         if (OPEN_ARG is not null)
                         {
                             this.Close();
+                        }
+
+                        if (THEOWENER != null)
+                        {
+                            r_DAFTAR_MOIN_LIST.Owner = THEOWENER;
                         }
 
                         r_DAFTAR_MOIN_LIST.Show();

@@ -1262,7 +1262,7 @@ namespace Wins.WinMenus.HESABDARI
                 return;
             }
 
-            new F_MENU_KOL_MOIN_TAFZIL(Hes);
+            new F_MENU_KOL_MOIN_TAFZIL(Hes, _ownerwin_: this);
         }
     }
 }

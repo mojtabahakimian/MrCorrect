@@ -254,7 +254,7 @@ namespace Wins.WinMenus.ANBAR
             {
                 if (INVO_LST_RASIDA_SUB.Columns.Count > 0)
                 {
-                    int? defaultcolumnindex = INVO_LST_RASIDA_SUB.Columns.FirstOrDefault(c => c.SortMemberPath is not null && c.SortMemberPath == "NAME_CODE")?.DisplayIndex;
+                    int? defaultcolumnindex = INVO_LST_RASIDA_SUB.Columns.FirstOrDefault(c => c.SortMemberPath is not null && c.SortMemberPath == "ANBAR")?.DisplayIndex;
                     if (defaultcolumnindex is null || defaultcolumnindex < 0)
                     {
                         _DEFAULTCOL_index = 0;
@@ -338,6 +338,108 @@ namespace Wins.WinMenus.ANBAR
 
         private bool PERSONEL_First_Open = true;
         private bool chek;
+
+        private void Window_ContentRendered(object sender, EventArgs e)
+        {
+            NowIsReady = true;
+        }
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            DataGrid DG = INVO_LST_RASIDA_SUB;
+            UIElement uie = e.OriginalSource as UIElement;
+            try
+            {
+                if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    if (IsDataGridCellFocused)
+                    {
+                        if (DG.CurrentColumn != null)
+                        {
+                            int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
+                            //bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
+                            //bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
+                            if (DG.CurrentColumn is not null)
+                            {
+                                // If it's the last column, move focus to the first cell of next row
+                                if (DG.SelectedIndex == DG.Items.Count - 2 && DG.CurrentColumn.SortMemberPath == "MANDAH")
+                                {
+                                    // Add focus to new row if needed
+                                    DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
+
+                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[DEFAULTCOL_INDEX_COL]);
+
+                                    Dispatcher.BeginInvoke(new Action(() =>
+                                    {
+                                        DG.BeginEdit();
+                                    }), DispatcherPriority.Background);
+
+                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
+                                }
+                            }
+                        }
+                    }
+
+                    if (SAVE_BTN.IsFocused)
+                    {
+                        //Enter Key Continue
+                    }
+                    else
+                    {
+                        e.Handled = true;
+                        CL_LMethods.SendKey_US(Key.Tab);
+                    }
+
+                }
+            }
+            catch { /*ignore*/ }
+
+            if (!INVO_LST_RASIDA_SUB.IsKeyboardFocusWithin && !INVO_LST_RASIDA_SUB.IsFocused) //Only On Form F7 Pressed Not DataGrid
+            {
+                if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    e.Handled = true;
+                    var searchWindow = new EnhancedSearchWindow(this);
+                    searchWindow.Owner = this;
+                    searchWindow.ShowDialog();
+                }
+            }
+
+            if (e.Key is Key.Delete && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                if (INVO_LST_RASIDA_SUB_IsFocused)
+                {
+                    //DELETE_BTN_Click(null, null);
+                }
+            }
+
+            // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
+            var nonDataKeys = new[]
+            {
+                Key.Enter, Key.Tab, Key.LeftShift, Key.RightShift,
+                Key.CapsLock, Key.Left, Key.Right, Key.Up, Key.Down,
+                Key.LeftAlt, Key.RightAlt, Key.LeftCtrl, Key.RightCtrl,
+                Key.F1, Key.F2, Key.F3, Key.F4, Key.F5, Key.F6,
+                Key.F7, Key.F8, Key.F9, Key.F10, Key.F11, Key.F12,
+                Key.Escape, Key.Insert, Key.Home, Key.End,
+                Key.PageUp, Key.PageDown
+            };
+            if (!nonDataKeys.Contains(e.Key))
+            {
+                var focused = Keyboard.FocusedElement as DependencyObject;
+                if (focused != null && (IsInside<TextBoxBase>(focused) || IsInside<ComboBox>(focused) || IsInside<CheckBox>(focused)))
+                {
+                    ChangeIsHappend = true;
+                }
+                else
+                {
+                    var focusedElement = Keyboard.FocusedElement;
+                    if (focusedElement is Xceed.Wpf.Toolkit.MaskedTextBox)
+                    {
+                        ChangeIsHappend = true;
+                    }
+                }
+            }
+        }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -2231,11 +2333,6 @@ namespace Wins.WinMenus.ANBAR
         //    return false;
         //}
 
-        private void Window_ContentRendered(object sender, EventArgs e)
-        {
-            NowIsReady = true;
-        }
-
         private void PERSONEL_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!NowIsReady)
@@ -2586,103 +2683,6 @@ namespace Wins.WinMenus.ANBAR
             return true;
         }
 
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            DataGrid DG = INVO_LST_RASIDA_SUB;
-            UIElement uie = e.OriginalSource as UIElement;
-            try
-            {
-                if (e.Key is Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
-                {
-                    if (IsDataGridCellFocused)
-                    {
-                        if (DG.CurrentColumn != null)
-                        {
-                            int currentColumnIndex = DG.CurrentColumn.DisplayIndex;
-                            //bool isLastColumn = currentColumnIndex == DG.Columns.Count - 1;
-                            //bool isLastRow = DG.SelectedIndex == DG.Items.Count - 2; //Last Row that is new Empty
-                            if (DG.CurrentColumn is not null)
-                            {
-                                // If it's the last column, move focus to the first cell of next row
-                                if (DG.SelectedIndex == DG.Items.Count - 2 && DG.CurrentColumn.SortMemberPath == "MANDAH")
-                                {
-                                    // Add focus to new row if needed
-                                    DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
-
-                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[DEFAULTCOL_INDEX_COL]);
-
-                                    Dispatcher.BeginInvoke(new Action(() =>
-                                    {
-                                        DG.BeginEdit();
-                                    }), DispatcherPriority.Background);
-
-                                    return; //وقتی فوکوس کرد الکی تب نزنه وایسه روی همون خونه فوکوس شده در سطر جدید
-                                }
-                            }
-                        }
-                    }
-
-                    if (SAVE_BTN.IsFocused)
-                    {
-                        //Enter Key Continue
-                    }
-                    else
-                    {
-                        e.Handled = true;
-                        CL_LMethods.SendKey_US(Key.Tab);
-                    }
-
-                }
-            }
-            catch { /*ignore*/ }
-
-            if (!INVO_LST_RASIDA_SUB.IsKeyboardFocusWithin && !INVO_LST_RASIDA_SUB.IsFocused) //Only On Form F7 Pressed Not DataGrid
-            {
-                if (e.Key == Key.F7 && Keyboard.Modifiers == ModifierKeys.None)
-                {
-                    e.Handled = true;
-                    var searchWindow = new EnhancedSearchWindow(this);
-                    searchWindow.Owner = this;
-                    searchWindow.ShowDialog();
-                }
-            }
-
-            if (e.Key is Key.Delete && Keyboard.Modifiers == ModifierKeys.None)
-            {
-                if (INVO_LST_RASIDA_SUB_IsFocused)
-                {
-                    //DELETE_BTN_Click(null, null);
-                }
-            }
-
-            // اگر کلیدی که باعث تغییر داده نمی‌شود فشرده شده، نادیده بگیرید
-            var nonDataKeys = new[]
-            {
-                Key.Enter, Key.Tab, Key.LeftShift, Key.RightShift,
-                Key.CapsLock, Key.Left, Key.Right, Key.Up, Key.Down,
-                Key.LeftAlt, Key.RightAlt, Key.LeftCtrl, Key.RightCtrl,
-                Key.F1, Key.F2, Key.F3, Key.F4, Key.F5, Key.F6,
-                Key.F7, Key.F8, Key.F9, Key.F10, Key.F11, Key.F12,
-                Key.Escape, Key.Insert, Key.Home, Key.End,
-                Key.PageUp, Key.PageDown
-            };
-            if (!nonDataKeys.Contains(e.Key))
-            {
-                var focused = Keyboard.FocusedElement as DependencyObject;
-                if (focused != null && (IsInside<TextBoxBase>(focused) || IsInside<ComboBox>(focused) || IsInside<CheckBox>(focused)))
-                {
-                    ChangeIsHappend = true;
-                }
-                else
-                {
-                    var focusedElement = Keyboard.FocusedElement;
-                    if (focusedElement is Xceed.Wpf.Toolkit.MaskedTextBox)
-                    {
-                        ChangeIsHappend = true;
-                    }
-                }
-            }
-        }
         private void Command106_Click(object sender, RoutedEventArgs e)
         {
             Process Prc = ProcLoader.Start();

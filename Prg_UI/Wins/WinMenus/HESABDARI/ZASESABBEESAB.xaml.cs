@@ -10,6 +10,7 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
+using Stimulsoft.Data.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -99,7 +100,8 @@ namespace Wins.WinMenus.HESABDARI
                 else
                 {
                     // Defer the operation until the window is fully rendered
-                    this.Dispatcher.BeginInvoke(new Action(() => {
+                    this.Dispatcher.BeginInvoke(new Action(() =>
+                    {
                         // Try again after the window is fully initialized
                         IntPtr newHandle = new WindowInteropHelper(this).Handle;
                         if (newHandle != IntPtr.Zero)
@@ -123,7 +125,7 @@ namespace Wins.WinMenus.HESABDARI
         public bool NowIsReady { get; private set; }
         public Visual I_AM_ZASESABBEESAB { get; private set; }
         ComboBox CHESAB;
-       
+
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
@@ -358,6 +360,12 @@ namespace Wins.WinMenus.HESABDARI
                             }
                         }
                     }
+
+                    var HesRow = dbms.DoGetDataSQL<string?>($"SELECT TOP 1 hes FROM dbo.CUST_HESAB WHERE hes = @HES", new { HES = AZHES.Text }).FirstOrDefault();
+                    if (string.IsNullOrWhiteSpace(HesRow))
+                    {
+                        ErrosMessages.Add(new MsgModel { MessageText_U = $"کد وارد شده در قسمت از حساب , در سیستم وجود ندارد" });
+                    }
                 }
             }
 
@@ -387,6 +395,12 @@ namespace Wins.WinMenus.HESABDARI
                                 ErrosMessages.Add(new MsgModel { MessageText_U = "اعتبار حساب \"تبدیل بــه حساب\" تمام شده است و نمي تواند خريد نمايد...!" });
                             }
                         }
+                    }
+
+                    var HesRow = dbms.DoGetDataSQL<string?>($"SELECT TOP 1 hes FROM dbo.CUST_HESAB WHERE hes = @HES", new { HES = TOHES.Text }).FirstOrDefault();
+                    if (string.IsNullOrWhiteSpace(HesRow))
+                    {
+                        ErrosMessages.Add(new MsgModel { MessageText_U = $"کد وارد شده در قسمت بـه حساب , در سیستم وجود ندارد" });
                     }
                 }
             }
@@ -698,7 +712,7 @@ namespace Wins.WinMenus.HESABDARI
 
                         new Msgwin(false, "عملیات جایگذاری حساب با خطا مواجه شد؛ بنابراین، وضعیت به حالت اولیه بازمی‌گردد و هیچ تغییری اعمال نخواهد شد.").ShowDialog();
                     }
-                        
+
                     db?.Close();
                 }
             }
