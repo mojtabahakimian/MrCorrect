@@ -2369,17 +2369,30 @@ namespace Prg_UI.Functions
                 }
             }
 
-            bool CanSeeAllInvoice = CL_HESABDARI.LETSGO("FRSKB"); //فاکتور فروش سایر کاربران را بتواند ببیند
-            bool IsOnlyDepartemanVahed = CL_HESABDARI.LETSGO("DEPEMAL"); // اگر محدود به واحد خودش هست
-            bool IsZirMajmoehChart = CL_HESABDARI.LETSGO("chartfilter"); // اگر محدود به زير مجموعه خودش هست
-            bool IsDateLimited = !CL_HESABDARI.LETSGO("DECD"); //تاریخ قابل برگشت اعمال نشود
+            bool CanSeeAll = false;
+            bool IsOnlyDepartemanVahed = false;
+            bool IsZirMajmoehChart = false;
+            bool IsDateLimited = false;
 
-            if (!CanSeeAllInvoice) //به همه فاکتور ها دسترسی نداره!
+            if (TAGCODE == 0) //یعنی خزانه داری
+            {
+                CanSeeAll = CL_HESABDARI.LETSGO("DPDEED"); // اجازه دیدن تمام اسناد دریافت/پرداخت
+            }
+            else
+            {
+                CanSeeAll = CL_HESABDARI.LETSGO("FRSKB"); //فاکتور فروش سایر کاربران را بتواند ببیند
+                IsDateLimited = !CL_HESABDARI.LETSGO("DECD"); //تاریخ قابل برگشت اعمال نشود
+            }
+
+            IsOnlyDepartemanVahed = CL_HESABDARI.LETSGO("DEPEMAL"); // اگر محدود به واحد خودش هست
+            IsZirMajmoehChart = CL_HESABDARI.LETSGO("chartfilter"); // اگر محدود به زير مجموعه خودش هست
+
+            if (!CanSeeAll) //به همه فاکتور ها دسترسی نداره!
             {
                 if (!isOthery && IsDateLimited) //تاریخ قابل برگشت اعمال شود همراه با محدود به کاربری خودش
                 {
                     //تاریخ محدود (تاریخ قابل برگشت) اعمال میشود ...↓
-                    info.RestrictionMessages.Add("محدود به تاریخ برگشت فاکتور");
+                    info.RestrictionMessages.Add("محدود به تاریخ برگشت");
                     var sqlQuery = $"SELECT TOP 100 PERCENT DATE_N FROM dbo.HEAD_LST WHERE (TAG = {TAGCODE}) AND (DEPATMAN = {CL_Generaly.VAHED_OF_USER}) AND (dbo.HEAD_LST.USER_NAME = N'{CL_HESABDARI.UCurrentUser()}') GROUP BY DATE_N ORDER BY DATE_N DESC";
                     var result = dbms.DoGetDataSQL<long>(sqlQuery).ToList(); //Get Last New Bigest Date
 

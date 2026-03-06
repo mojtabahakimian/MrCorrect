@@ -113,9 +113,6 @@ namespace Wins.WinMenus.HESABDARI
             {
                 hData = dbms.DoGetDataSQL<LISTY_PGET_HED>("SELECT ID, DATE, MOLAH, N_S, DEPATMAN, SHIFT, USER_NAME, KIND, IDK, OKF, RPLICA, SGN1, SGN2, SGN3 FROM PGET_HED WHERE (USER_NAME = N'" + CL_HESABDARI.UCurrentUser() + "') ORDER BY DATE, ID").ToList();
             }
-           
-          
-
             //// Fetch all detail records from the database
             //var allDetails = dbms.DoGetDataSQL<PGET_LST>("SELECT ID, DATE, RADIF, NO_AM, NAHVA, FHES, THES, SHARH, MABL, N_SERI, BANK, IDH, ARZD FROM PGET_LST").ToList();
 

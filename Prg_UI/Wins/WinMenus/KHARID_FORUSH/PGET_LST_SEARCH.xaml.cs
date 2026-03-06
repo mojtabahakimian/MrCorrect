@@ -7,7 +7,6 @@ using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Syncfusion.Data;
-using Syncfusion.Data;
 using Syncfusion.UI.Xaml.BulletGraph;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
@@ -73,6 +72,12 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         UniversControl universControl = new UniversControl();
+        private void UpdateRowCount()
+        {
+            TXT_RowCount.Text = PGET_JOTEJU_DATA_SUB.View?.Records?.Count.ToString("N0") ?? "0";
+
+        }
+
         public PGET_LST_SEARCH()
         {
             InitializeComponent();
@@ -83,6 +88,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
         }
         public ObservableCollection<PGET_JOTEJU> PGET_JOTEJU_DATA { get; set; } = new ObservableCollection<PGET_JOTEJU>();
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             #region SecuritCheck
@@ -135,6 +141,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 LBL_STATE.Visibility = Visibility.Collapsed;
             }
+
+            UpdateRowCount();
+            PGET_JOTEJU_DATA_SUB.FilterChanged += (s, e) => UpdateRowCount();
         }
 
         private readonly FilterService<PGET_JOTEJU> filterService = new FilterService<PGET_JOTEJU>();
@@ -148,6 +157,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
         }
         private void PGET_JOTEJU_DATA_SUB_SelectionChanged(object sender, GridSelectionChangedEventArgs e) // Event handler for when the selection changes in the data grid
         {
+            UpdateRowCount();
+
             //// Get the selected row and column index
             //var currentCell = PGET_JOTEJU_DATA_SUB.SelectionController.CurrentCellManager.CurrentCell;
             //if (currentCell != null)
@@ -409,6 +420,8 @@ namespace Wins.WinMenus.KHARID_FORUSH
             ActiveFilters.Clear();
             // Apply the cumulative filter to the data grid
             ApplyCumulativeFilter();
+
+            UpdateRowCount();
         }
         private (string ColumnName, object FilterValue) GetSelectedCellDetails() // Method to get the details of the selected cell
         {
