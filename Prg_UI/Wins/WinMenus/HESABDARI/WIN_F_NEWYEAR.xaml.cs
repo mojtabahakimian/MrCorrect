@@ -92,7 +92,12 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             public string LogicalName { get; set; }
             public string Type { get; set; }
         }
-
+        private class ColumnMetaModel
+        {
+            public string ColumnName { get; set; }
+            public bool IsIdentity { get; set; }
+            public int ColumnOrder { get; set; }
+        }
         public bool NowIsReady { get; private set; }
         public double? NUMBER_TO_OPEN { get; set; }
         public bool ChangeIsHappend { get; private set; }
@@ -162,21 +167,36 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                 txtCurrentDbPath.Text = physicalPath;
 
-                string dbDirectory = string.Empty;
-                if (!string.IsNullOrEmpty(physicalPath))
+                string currentDbFolder = string.Empty;
+                string databasesRootFolder = string.Empty;
+
+                if (!string.IsNullOrWhiteSpace(physicalPath))
                 {
-                    dbDirectory = Path.GetDirectoryName(physicalPath) ?? string.Empty;
+                    // مثال:
+                    // physicalPath = E:\Databases\YAZD2025\YAZD2025_Data.mdf
+                    // currentDbFolder = E:\Databases\YAZD2025
+                    currentDbFolder = Path.GetDirectoryName(physicalPath) ?? string.Empty;
+
+                    // ریشه دیتابیس‌ها:
+                    // databasesRootFolder = E:\Databases
+                    try
+                    {
+                        databasesRootFolder = Directory.GetParent(currentDbFolder)?.FullName ?? string.Empty;
+                    }
+                    catch
+                    {
+                        databasesRootFolder = string.Empty;
+                    }
 
                     // جستجوی هوشمند برای فایل پشتیبان خام
-                    string potentialTemplate = Path.Combine(dbDirectory, "files", "neginsql.bak");
+                    string potentialTemplate = Path.Combine(currentDbFolder, "files", "neginsql.bak");
                     if (!File.Exists(potentialTemplate))
                     {
                         try
                         {
-                            string parentDir = Directory.GetParent(dbDirectory)?.FullName;
-                            if (!string.IsNullOrWhiteSpace(parentDir))
+                            if (!string.IsNullOrWhiteSpace(databasesRootFolder))
                             {
-                                potentialTemplate = Path.Combine(parentDir, "files", "neginsql.bak");
+                                potentialTemplate = Path.Combine(databasesRootFolder, "files", "neginsql.bak");
                             }
                         }
                         catch
@@ -187,35 +207,38 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     txtTemplateBackupFile.Text = potentialTemplate;
                 }
 
+                int nextYear;
+                string baseName;
+
                 Match match = Regex.Match(currentDbName, @"\d{2,4}$");
-                if (match.Success)
+                if (match.Success && int.TryParse(match.Value, out int currentYear))
                 {
-                    if (int.TryParse(match.Value, out int currentYear))
-                    {
-                        YEA.Text = (currentYear + 1).ToString();
-                        string baseName = currentDbName.Substring(0, match.Index);
-                        txtNewDbName.Text = $"{baseName}{currentYear + 1}";
-                    }
-                    else
-                    {
-                        txtNewDbName.Text = $"{currentDbName}1404";
-                        YEA.Text = "1404";
-                    }
+                    nextYear = currentYear + 1;
+                    baseName = currentDbName.Substring(0, match.Index);
                 }
                 else
                 {
-                    txtNewDbName.Text = $"{currentDbName}1404";
-                    YEA.Text = "1404";
+                    nextYear = (int)(CL_HESABDARI.FARSIDATE() / 10000 + 1);
+                    baseName = currentDbName;
                 }
 
-                // مسیر جدید = پوشه جاری + فولدر جدید به نام دیتابیس سال جدید
-                if (!string.IsNullOrWhiteSpace(dbDirectory) && !string.IsNullOrWhiteSpace(txtNewDbName.Text))
+                YEA.Text = nextYear.ToString();
+                txtNewDbName.Text = $"{baseName}{nextYear}";
+
+                // مسیر درست:
+                // E:\Databases\YAZD2026\
+                if (!string.IsNullOrWhiteSpace(databasesRootFolder) && !string.IsNullOrWhiteSpace(txtNewDbName.Text))
                 {
-                    txtNewDbPath.Text = Path.Combine(dbDirectory, txtNewDbName.Text) + "\\";
+                    txtNewDbPath.Text = Path.Combine(databasesRootFolder, txtNewDbName.Text) + "\\";
+                }
+                else if (!string.IsNullOrWhiteSpace(currentDbFolder))
+                {
+                    // fallback
+                    txtNewDbPath.Text = currentDbFolder + "\\";
                 }
                 else
                 {
-                    txtNewDbPath.Text = dbDirectory + "\\";
+                    txtNewDbPath.Text = string.Empty;
                 }
             }
             catch (Exception ex)
@@ -266,6 +289,76 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             //COMBOHESAB.ItemsSource = dbms.DoGetDataSQL<HESAB_CMB_MODEL>($"SELECT hes, NAME FROM CUST_HESAB ORDER BY hes").ToList();
         }
 
+        private void CopyTableAllRowsSmart(string oldDb, string newDb, string tableName)
+        {
+            string safeOld = QuoteDbName(oldDb);
+            string safeNew = QuoteDbName(newDb);
+
+            string getColumnsSql = $@"
+SELECT 
+    c.name AS ColumnName,
+    c.is_identity AS IsIdentity,
+    c.column_id AS ColumnOrder
+FROM {safeNew}.sys.columns c
+INNER JOIN {safeNew}.sys.tables t ON c.object_id = t.object_id
+INNER JOIN {safeNew}.sys.schemas s ON t.schema_id = s.schema_id
+WHERE s.name = 'dbo'
+  AND t.name = @TableName
+ORDER BY c.column_id;";
+
+            var columns = dbms.DoGetDataSQL<ColumnMetaModel>(getColumnsSql, new { TableName = tableName }).ToList();
+
+            if (columns == null || columns.Count == 0)
+            {
+                throw new Exception($"ساختار جدول [{tableName}] در دیتابیس مقصد پیدا نشد.");
+            }
+
+            bool hasIdentity = columns.Any(c => c.IsIdentity);
+
+            string allColumnList = string.Join(", ", columns.Select(c => $"[{c.ColumnName}]"));
+            string nonIdentityColumnList = string.Join(", ", columns.Where(c => !c.IsIdentity).Select(c => $"[{c.ColumnName}]"));
+
+            if (!hasIdentity)
+            {
+                string insertSql = $@"
+INSERT INTO {safeNew}.dbo.[{tableName}] ({allColumnList})
+SELECT {allColumnList}
+FROM {safeOld}.dbo.[{tableName}];";
+
+                dbms.DoExecuteSQL(insertSql);
+            }
+            else
+            {
+                string identitySql = $@"
+BEGIN TRY
+    BEGIN TRAN;
+
+    SET IDENTITY_INSERT {safeNew}.dbo.[{tableName}] ON;
+
+    INSERT INTO {safeNew}.dbo.[{tableName}] ({allColumnList})
+    SELECT {allColumnList}
+    FROM {safeOld}.dbo.[{tableName}];
+
+    SET IDENTITY_INSERT {safeNew}.dbo.[{tableName}] OFF;
+
+    COMMIT;
+END TRY
+BEGIN CATCH
+    IF @@TRANCOUNT > 0
+        ROLLBACK;
+
+    BEGIN TRY
+        SET IDENTITY_INSERT {safeNew}.dbo.[{tableName}] OFF;
+    END TRY
+    BEGIN CATCH
+    END CATCH;
+
+    THROW;
+END CATCH;";
+
+                dbms.DoExecuteSQL(identitySql);
+            }
+        }
         private string ValidateBeforeCreateNewYear(string newDbName, string newDbDirectory)
         {
             List<string> problems = new List<string>();
@@ -574,10 +667,16 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 "ENHESAR_MOSHTARI", "ENHESAR_KALA", "MORINFO", "MORINFO_SUB"
             };
 
+                //foreach (string tbl in standardTables)
+                //{
+                //    UpdateStatus($"انتقال کامل جدول {tbl}...");
+                //    dbms.DoExecuteSQL($"INSERT INTO {safeNew}.dbo.[{tbl}] SELECT * FROM {safeOld}.dbo.[{tbl}]");
+                //}
+
                 foreach (string tbl in standardTables)
                 {
                     UpdateStatus($"انتقال کامل جدول {tbl}...");
-                    dbms.DoExecuteSQL($"INSERT INTO {safeNew}.dbo.[{tbl}] SELECT * FROM {safeOld}.dbo.[{tbl}]");
+                    CopyTableAllRowsSmart(oldDb, newDb, tbl);
                 }
 
                 // گروه ۲: جداول نیازمند تعریف دقیق ستون‌ها
