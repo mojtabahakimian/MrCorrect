@@ -508,7 +508,6 @@ END CATCH;";
             // قفل کردن فرم و نمایش انیمیشن
             Command3.IsEnabled = false;
             prgBar.Visibility = Visibility.Visible;
-            Mouse.OverrideCursor = Cursors.Wait;
 
             try
             {
