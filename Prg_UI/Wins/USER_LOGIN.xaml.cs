@@ -12,17 +12,9 @@ using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.Scriptses;
 using Prg_UI.Wins.WinMenus.ANBAR;
-using Prg_UI.Wins.WinMenus.Checkha;
-using Prg_UI.Wins.WinMenus.CONFIGS;
 using Prg_UI.Wins.WinMenus.HESABDARI;
-using Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT;
-using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
-using Prg_UI.Wins.WinMenus.KHARID_FORUSH.VISITORY;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
-using Prg_UI.Wins.WinMenus.SPECIAL_F1;
-using Prg_UI.Wins.WinMenus.Taarif;
-using Prg_UI.Wins.WinMenus.TR;
 using Prg_UI.Wins.WinMenus.WinAutomasion;
 using Prg_UI.Wins.WinMenus.WinDEFAULT;
 using Prg_UI.Wins.WinSetting;
@@ -34,7 +26,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -42,12 +33,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Wins.WinMenus.ANBAR;
-using Wins.WinMenus.ANBAR.ANBAR_REPORTS;
-using Wins.WinMenus.Checkha;
 using Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.KHARID_FORUSH;
-using Wins.WinMenus.KHARID_FORUSH.GOZARESHAT;
-using Wins.WinMenus.SANATI;
 using Wins.WinMenus.Taarif;
 using Wins.WinSetting;
 using static Functions.SMSService.SmsServiceFactory;
@@ -386,10 +373,11 @@ namespace Prg_UI.Wins
             Baseknow.UGRP = "1";
             //CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
 
-            new WinBase().Show();
+            //new WinBase().Show();
             //new ZASESABBEESAB().Show();
             //new F_MENU_DATE("CROS").Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL, this);
+            new WIN_F_NEWYEAR().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this, 1642d);
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
 
@@ -400,7 +388,6 @@ namespace Prg_UI.Wins
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH22_HAVALEHEE, this, "13774,13760");
 
-            //new WIN_F_NEWYEAR().Show();
             //System.Windows.Forms.MessageBox.Show(CL_CCNNMANAGER.CONNECTION_STR);
             //new Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED().Show();
             //new TR_ANBGRD_LST().Show();

@@ -1,6 +1,5 @@
 ﻿using Functions;
 using MaterialDesignThemes.Wpf;
-using Microsoft.VisualBasic;
 using Microsoft.Win32;
 using HeyRed.Mime;
 using Prg_Proccessy.FUNCTIONS;
@@ -9,18 +8,13 @@ using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
-using Prg_UI.Wins.WinMenus.ANBAR;
-using Prg_UI.Wins.WinMenus.HESABDARI;
-using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -28,8 +22,6 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Wins.WinMenus.KHARID_FORUSH;
-using static MimeDetective.Definitions.Default;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 
 namespace Prg_UI.Wins.WinMenus.WinAutomasion

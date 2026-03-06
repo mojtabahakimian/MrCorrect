@@ -24,6 +24,7 @@ using System.Windows.Threading;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 
 namespace Prg_UI.Wins.WinMenus.HESABDARI
 {
@@ -86,6 +87,12 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
         UniversControl universControl = new UniversControl();
 
+        private class BackupFileModel
+        {
+            public string LogicalName { get; set; }
+            public string Type { get; set; }
+        }
+
         public bool NowIsReady { get; private set; }
         public double? NUMBER_TO_OPEN { get; set; }
         public bool ChangeIsHappend { get; private set; }
@@ -110,7 +117,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 else
                 {
                     // Defer the operation until the window is fully rendered
-                    this.Dispatcher.BeginInvoke(new Action(() => {
+                    this.Dispatcher.BeginInvoke(new Action(() =>
+                    {
                         // Try again after the window is fully initialized
                         IntPtr newHandle = new WindowInteropHelper(this).Handle;
                         if (newHandle != IntPtr.Zero)
@@ -148,13 +156,16 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 currentDbName = dbms.DoGetDataSQL<string>("SELECT DB_NAME()").FirstOrDefault() ?? string.Empty;
                 txtCurrentDbName.Text = currentDbName;
 
-                string physicalPath = dbms.DoGetDataSQL<string>($"SELECT physical_name FROM sys.master_files WHERE database_id = DB_ID('{currentDbName}') AND type = 0").FirstOrDefault() ?? string.Empty;
+                string physicalPath = dbms.DoGetDataSQL<string>(
+                    $"SELECT physical_name FROM sys.master_files WHERE database_id = DB_ID('{currentDbName}') AND type = 0"
+                ).FirstOrDefault() ?? string.Empty;
+
                 txtCurrentDbPath.Text = physicalPath;
 
                 string dbDirectory = string.Empty;
                 if (!string.IsNullOrEmpty(physicalPath))
                 {
-                    dbDirectory = Path.GetDirectoryName(physicalPath) + "\\";
+                    dbDirectory = Path.GetDirectoryName(physicalPath) ?? string.Empty;
 
                     // جستجوی هوشمند برای فایل پشتیبان خام
                     string potentialTemplate = Path.Combine(dbDirectory, "files", "neginsql.bak");
@@ -162,15 +173,19 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     {
                         try
                         {
-                            string parentDir = Directory.GetParent(dbDirectory.TrimEnd('\\'))?.FullName;
-                            if (parentDir != null)
+                            string parentDir = Directory.GetParent(dbDirectory)?.FullName;
+                            if (!string.IsNullOrWhiteSpace(parentDir))
+                            {
                                 potentialTemplate = Path.Combine(parentDir, "files", "neginsql.bak");
+                            }
                         }
-                        catch { }
+                        catch
+                        {
+                        }
                     }
+
                     txtTemplateBackupFile.Text = potentialTemplate;
                 }
-                txtNewDbPath.Text = dbDirectory;
 
                 Match match = Regex.Match(currentDbName, @"\d{2,4}$");
                 if (match.Success)
@@ -181,11 +196,26 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         string baseName = currentDbName.Substring(0, match.Index);
                         txtNewDbName.Text = $"{baseName}{currentYear + 1}";
                     }
+                    else
+                    {
+                        txtNewDbName.Text = $"{currentDbName}1404";
+                        YEA.Text = "1404";
+                    }
                 }
                 else
                 {
                     txtNewDbName.Text = $"{currentDbName}1404";
                     YEA.Text = "1404";
+                }
+
+                // مسیر جدید = پوشه جاری + فولدر جدید به نام دیتابیس سال جدید
+                if (!string.IsNullOrWhiteSpace(dbDirectory) && !string.IsNullOrWhiteSpace(txtNewDbName.Text))
+                {
+                    txtNewDbPath.Text = Path.Combine(dbDirectory, txtNewDbName.Text) + "\\";
+                }
+                else
+                {
+                    txtNewDbPath.Text = dbDirectory + "\\";
                 }
             }
             catch (Exception ex)
@@ -193,7 +223,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 new Msgwin(false, "خطا در بارگذاری اطلاعات دیتابیس:\n" + ex.Message).ShowDialog();
                 this.Close();
             }
-
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -237,6 +266,117 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             //COMBOHESAB.ItemsSource = dbms.DoGetDataSQL<HESAB_CMB_MODEL>($"SELECT hes, NAME FROM CUST_HESAB ORDER BY hes").ToList();
         }
 
+        private string ValidateBeforeCreateNewYear(string newDbName, string newDbDirectory)
+        {
+            List<string> problems = new List<string>();
+
+            string safeDbName = newDbName?.Trim() ?? string.Empty;
+            string safeDirectory = newDbDirectory?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(safeDbName))
+            {
+                problems.Add("نام دیتابیس جدید مشخص نیست.");
+            }
+
+            if (string.IsNullOrWhiteSpace(safeDirectory))
+            {
+                problems.Add("مسیر ذخیره دیتابیس جدید مشخص نیست.");
+            }
+
+            if (problems.Count > 0)
+            {
+                return "اطلاعات ورودی کامل نیست:\n\n- " + string.Join("\n- ", problems);
+            }
+
+            // 1) چک وجود دیتابیس روی SQL Server
+            int dbExists = dbms.DoGetDataSQL<int>(
+                "SELECT COUNT(1) FROM sys.databases WHERE name = @DbName",
+                new { DbName = safeDbName }
+            ).FirstOrDefault();
+
+            if (dbExists > 0)
+            {
+                problems.Add($"دیتابیس [{safeDbName}] از قبل روی SQL Server وجود دارد.");
+            }
+
+            // 2) چک فایل‌های فیزیکی محتمل در مسیر مقصد
+            string mdfPath = Path.Combine(safeDirectory, safeDbName + "_Data.mdf");
+            string ldfPath = Path.Combine(safeDirectory, safeDbName + "_Log.ldf");
+
+            if (Directory.Exists(safeDirectory))
+            {
+                if (File.Exists(mdfPath))
+                {
+                    problems.Add($"فایل دیتای دیتابیس از قبل وجود دارد:\n{mdfPath}");
+                }
+
+                if (File.Exists(ldfPath))
+                {
+                    problems.Add($"فایل لاگ دیتابیس از قبل وجود دارد:\n{ldfPath}");
+                }
+
+                // آثار احتمالی اجرای ناقص قبلی
+                string[] suspiciousFiles = Array.Empty<string>();
+                try
+                {
+                    suspiciousFiles = Directory
+                        .GetFiles(safeDirectory, safeDbName + "*", SearchOption.TopDirectoryOnly)
+                        .Where(f =>
+                            !string.Equals(f, mdfPath, StringComparison.OrdinalIgnoreCase) &&
+                            !string.Equals(f, ldfPath, StringComparison.OrdinalIgnoreCase))
+                        .ToArray();
+                }
+                catch
+                {
+                    suspiciousFiles = Array.Empty<string>();
+                }
+
+                if (suspiciousFiles.Length > 0)
+                {
+                    string fileList = string.Join("\n", suspiciousFiles.Take(10));
+                    if (suspiciousFiles.Length > 10)
+                    {
+                        fileList += "\n...";
+                    }
+
+                    problems.Add(
+                        "در مسیر مقصد فایل‌های مشکوک مرتبط با این نام دیتابیس پیدا شد که می‌تواند نشانه اجرای ناقص قبلی باشد:\n" +
+                        fileList
+                    );
+                }
+            }
+
+            // 3) چک ثبت مسیر فایل‌ها در SQL Server (اگر قبلاً attach/restore شده باشند)
+            var registeredFiles = dbms.DoGetDataSQL<string>(
+                @"SELECT physical_name
+          FROM sys.master_files
+          WHERE physical_name = @MdfPath OR physical_name = @LdfPath",
+                new
+                {
+                    MdfPath = mdfPath,
+                    LdfPath = ldfPath
+                }
+            ).ToList();
+
+            if (registeredFiles.Any())
+            {
+                string fileList = string.Join("\n", registeredFiles);
+                problems.Add(
+                    "مسیر فایل‌های مقصد قبلاً در SQL Server ثبت شده است:\n" + fileList
+                );
+            }
+
+            if (problems.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            return
+                "امکان شروع عملیات ایجاد سال جدید وجود ندارد.\n\n" +
+                string.Join("\n\n", problems) +
+                "\n\nلطفاً قبل از ادامه، دیتابیس/فایل‌های باقیمانده از اجرای قبلی را بررسی و پاکسازی کنید یا نام/مسیر جدید انتخاب نمایید.";
+        }
+
         private async void Command3_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtNewDbName.Text) || string.IsNullOrWhiteSpace(YEA.Text) || string.IsNullOrWhiteSpace(txtNewDbPath.Text) || string.IsNullOrWhiteSpace(txtTemplateBackupFile.Text))
@@ -254,6 +394,20 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             if (newDbName.Equals(oldDbName, StringComparison.OrdinalIgnoreCase))
             {
                 new Msgwin(false, "نمی‌توانید دیتابیس جاری را به عنوان دیتابیس سال جدید بازنویسی کنید!").ShowDialog();
+                return;
+            }
+
+            if (!File.Exists(backupFilePath))
+            {
+                new Msgwin(false, "فایل بکاپ خام انتخاب‌شده وجود ندارد یا مسیر آن نامعتبر است.").ShowDialog();
+                return;
+            }
+
+            // چک پیشگیرانه قبل از شروع عملیات
+            string validationMessage = ValidateBeforeCreateNewYear(newDbName, newDbDirectory);
+            if (!string.IsNullOrWhiteSpace(validationMessage))
+            {
+                new Msgwin(false, validationMessage).ShowDialog();
                 return;
             }
 
@@ -391,8 +545,21 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             string safeOld = QuoteDbName(oldDb);
             string safeNew = QuoteDbName(newDb);
 
-            // گروه ۱: جداول استاندارد (TCOD_OSTAN از این لیست حذف شد چون در VBA کامنت بود - BLOCKNON_HES در VBA اجرا می‌شود و باید باشد)
-            string[] standardTables = {
+            try
+            {
+                // 0. خاموش کردن هوشمند تمام کلیدهای خارجی در دیتابیس مقصد
+                UpdateStatus("در حال آماده‌سازی دیتابیس مقصد و غیرفعال‌سازی موقت کلیدهای خارجی...");
+                string disableFkSql = $@"
+                USE {safeNew};
+                DECLARE @disableSql NVARCHAR(MAX) = N'';
+                SELECT @disableSql += N'ALTER TABLE ' + QUOTENAME(s.name) + N'.' + QUOTENAME(t.name) + N' NOCHECK CONSTRAINT ALL; '
+                FROM sys.tables t
+                JOIN sys.schemas s ON t.schema_id = s.schema_id;
+                EXEC sp_executesql @disableSql;";
+                dbms.DoExecuteSQL(disableFkSql);
+
+                // گروه ۱: جداول استاندارد (TCOD_OSTAN از این لیست حذف شد چون در VBA کامنت بود - BLOCKNON_HES در VBA اجرا می‌شود و باید باشد)
+                string[] standardTables = {
                 "TFORMS", "sal_CHEK", "TCOD_HESKIND", "TCOD_HESGROUP", "TCOD_HESVAZ", "tota_hes", "DEta_hes",
                 "TCOD_ANBAR_KIND", "TCOD_DPS", "TCODE_MADRAK", "TCOD_DPSKIND", "TCOD_STUFGROUP", "TCOD_VAHEDS",
                 "STUF_STK", "MODULE_D", "HEAD_MANF", "DTL_MANF", "ROOM", "SHIFT", "SUD", "SURAT_MALI_HEAD", "SURAT_MALI",
@@ -407,84 +574,84 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 "ENHESAR_MOSHTARI", "ENHESAR_KALA", "MORINFO", "MORINFO_SUB"
             };
 
-            foreach (string tbl in standardTables)
-            {
-                UpdateStatus($"انتقال کامل جدول {tbl}...");
-                dbms.DoExecuteSQL($"INSERT INTO {safeNew}.dbo.[{tbl}] SELECT * FROM {safeOld}.dbo.[{tbl}]");
-            }
+                foreach (string tbl in standardTables)
+                {
+                    UpdateStatus($"انتقال کامل جدول {tbl}...");
+                    dbms.DoExecuteSQL($"INSERT INTO {safeNew}.dbo.[{tbl}] SELECT * FROM {safeOld}.dbo.[{tbl}]");
+                }
 
-            // گروه ۲: جداول نیازمند تعریف دقیق ستون‌ها
-            var customSelects = new Dictionary<string, string>
-            {
-                { "SAZMAN", "UNIVERSITY_CO, NAME, CITY, MANAGER, MOAVEN, ZIHESAB, AMINAMVAL, SANAD, GHAYM, KALA, PERSON, DIG, WAR, LST, TFTPAGE, TFSAZMAN, TFADDRESS, TFTEL, TFCODE_E, WIDTH_D, HIGH_D, CPI, SANDOGH, BANKHA, BESTANKAR, BEDEHKAR, KHARID, MKHARID, TKHARID, HKHARID, FROSH, MFROSH, TFROSH, HFROSH, MOGODIA, MOGODIP, DARAM, HDARAM, HKOL, ADA, APA, ADV, HAVALAH, CTRL_TS, F_ANBARF, GH_PK, L_NUMBER, SF_G, TAR_KM, BACKPATH, TKHF, HAZ_TOL, PJHAZ_TOL1, PHAZ_TOL, GHEYMAT, PPDAST, PPSAR, AMALKARD, PERSONEL, PERVAM, CONKAL, EMZA, HNAH, HEZA, HPAD, HOLA, HKHA, HJAZ, HRAN, HSAY, HCON, HSHI, HAZEDAR, EDABIM, HAZBIM, BESHO, BEDMOS, PARDAKH, HAZMALI, SAGHFH, MAND, MOJU, SA_HOGH, SA_40EZ, SA_EZAF, SA_PADA, SA_HOLA, SA_KHAR, SA_NAHA, SA_JAZB, SA_RAND, SA_COND, SA_SAYE, SA_23BI, HAZTOLID, HAZFROOSH, HAZKHADAMAT, PISHDAR, DEFANB, DEFTKH, ECONM, FRUP, UPDDATE, FINALS, PSANDHES, SANAVP, BON, ISO_FROOSH, ISO_KHAREED, ISO_MAVAD, ISO_TOLID, ISO_MAVADSAYER, SANAT, CODEVIEW, PKHARID, SIGN, BARCOD, SAGHF, SERVERNAM, TENDAR, LECOL1, LECOL2, LECOL3, LECOL4, LKCOL1, HESMBAA, ECODE, PCODE, IYALAT, MCODEM, HPOR, SAGHF2, OPTIONSS, CTL_DT, LOCKFAP, LOCKFSI, TRANSF, OKF, ARSESH, RMOG, APV, HOTCOD, STFR, STKH, STHFR, STHKH, STENT, STKHS, STKHH, STTOL, STFRB, STBKH, STMO, STKHA, SNDKH, SMS_USERNAME, SMS_PASSWORD, SMS_LIBKEY, SMS_TSMSHOST, SMS_ProxyUserName, SMS_ProxyPassword, SMS_ProxyServer, SMS_ProxyPort, SMS_FirewallUserName, SMS_FirewallPassword, SMS_FirewallHost, SMS_FirewallPort, SMS_FirewallType, DSMS, SMS_OWNER, PRMFR, SMSACT, HESDESK, ISO_DTOLID, SERFACB, HBON, pishpross, version, hesnaghd, IT1, IT2, IT3, IT4, IT5, IT6, IT7, IT8, IT9, IS1, IS2, IS3, IS4, IS5, IS6, IS7, IS8, IS9, IS10, IS11, IS12, IS13, IS14, IS15, IS16, SSMTRTAKM, SSMTRTAGM, SSMSNDAUTO, SSMTBMON, SSMDARSAD, HDARKASRTAKHF, CRT, UID" },
-                { "salA_dtl", "SAL_NAME, PSAL_NAME, GRSAL, ENABL, IDD, HES, PORID, EMZA, menup" },
-                { "TDETA_HES", "N_KOL, NUMBER, TNUMBER, NAME, TOZIH, BED_BES, ADDRESS, TEL, CODE_E, ECODE, PCODE, IYALAT, CITY, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID" },
-                { "TDETA_HES2", "N_KOL, NUMBER, TNUMBER, TNUMBER2, NAME, TOZIH, BED_BES, ADDRESS, TEL, CODE_E, ECODE, PCODE, IYALAT, CITY, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID" },
-                { "TDETA_HES3", "N_KOL, NUMBER, TNUMBER, TNUMBER2, TNUMBER3, NAME, TOZIH, BED_BES, ADDRESS, TEL, CODE_E, ECODE, PCODE, IYALAT, CITY, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID" },
-                { "TDETA_HES4", "N_KOL, NUMBER, TNUMBER, TNUMBER2, TNUMBER3, TNUMBER4, NAME, TOZIH, BED_BES, ADDRESS, TEL, CODE_E, ECODE, PCODE, IYALAT, CITY, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID" },
-                { "TCOD_ANBAR", "CODE, NAMES, KIND" },
-                { "TCOD_BANKS", "CODE, NAMES, TEJ_C, MEL_C, SAD_C, MLA_C, REF_C, TOS_C, KES_C, KAR_C, POS_C, TAT_C, SEP_C, TSA_C, SAN_C, MAS_C, EGH_C, PAR_C, PAS_C, DEY_C, SAM_C, SAR_C, SIN_C, SHA_C" },
-                { "STUF_DEF", "CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F, DEPART, CMBAA, VAZN, OKF, MENUIT, MEGHTA, MEGHJAY, PGID, BARCODE" },
-                { "DEPART", "DEPATMAN, DEPNAME" },
-                { "SHARH", "SHARH" },
-                { "OPANBACCESS", "USERCO, ANBCO" },
-                { "SIGN_TRAN", "NUMBER, TAG, SGN_ID, SGN_USER_NAME, SGN_DATE, SGN_TIME" },
-                { "AZAE", "HES, TOPETEB, TOPASN, ENDIS, TOPMEGH, JAMZARIB, EMTIAZ, gradeid, DTTIM" },
-                { "PTVAZ", "PIDT, PVAZ, PDATE, PTIME" },
-                { "SQLSTATE", "SQLST, TITEL, USER_NAME, LETOTHER, CR_DATE" },
-                { "Visit_route_dtl", "ROUTE_NAME, COUST_NO, RACTIVE, CLASS" },
-                { "tab_job", "Job_Code, Job_Desc" },
-                { "CHARTSAZMANI", "USERCO, SUBUSERCO" },
-                { "telef", "name, TEL" },
-                { "DEFAULTDEP", "TFSAZMAN, SHIFT, USERID" },
-                { "GRADE_FORMAT", "IDD, GFNAME, GFDATE, TOZIH, USERNAME, JAMZARIB, EMTIAZ" },
-                { "GRADE_TAB_FT", "GFID, GFTID, GFNAMEFT, GFGZARIB" },
-                { "GSCALE", "GSCACOD, GSCANAME, GSCAKIND" },
-                { "GSCADTL", "GSCADTCOD, GSCANAME, GSCAGRADE, GSCAFROM, GSCATO, GSCACOD" },
-                { "GRADE_GRP_FT", "GFTID, GFTGRPID, GFGRPNAMEFT, GFGRPZARIB, GFGRPGRADE, GVALUESCALE" },
-                { "GRADE_CUST_TAB", "GCTABID, GCNAME, GCZARIB, GCCUST_HES, GCDATE, USERNAME" },
-                { "GRADE_CUST_GRP", "GCGRPID, GCGRPNAME, GCGRPZARIB, GCGRPGRADE, GCTABID, GCVALUE, GCVALUESCAL" },
-                { "GRADE_RANGE", "GID, GNAME, GAZ, GTA, GTOZIH" },
-                { "GRADE_SHART_FUNC", "GSHARTID, GSHNAME, GSHFUNC, TOZIH" },
-                { "GRADE_SHART", "GSID, GID, GSHARTID, GSVALUE, GSVALUE2, GSVALUE3, TOZI" },
-                { "TCOD_CITY", "OSCODE, CITYCODE, CITYNAME" },
-                { "sudmah", "DATE_S, BEDS, BESS, sudday, SUD" },
-                { "SIGN", "USERCO, FFR_FROOSH, FFR_HESAB, FFR_MODIR, KFR_BAZAR, KFR_HESAB, KFR_MODIR, ANB_RASID_ANB, ANB_RASID_QC, ANB_HAVL_FROSH, ANB_HAVL_ANB, ANB_HAVL_MODIR, ANB_TOLID_MODIRT, ANB_TOLID_QC, ANB_TOLID_ANB, ANB_KHOROG_ANB, ANB_KHOROG_MODIRT, ANB_KHOROGS_ANB, ANB_KHOROGS_MODIRT, SND_TAHI, SND_MALI, SND_MODIR, FFRB_FROOSH, FFRB_ANB, FFRB_HESAB, FFRB_MODIR, KFRB_BAZAR, KFRB_ANB, KFRB_HESAB, KFRB_MODIR, FFRP_FROOSH, FFRP_ANB, FFRP_HESAB, FFRP_MODIR, RASM_HESAB, RASM_MODIR, PAY_MVAHED, PAY_HESAB, PAY_MAMEL, ENTGH_AZANB, ENTGH_BEANB, ENTGH_MODIR, PAZ_PAZ, PAZ_HES, PAZ_CEO, SGN0124, SGN0224, SGN0324, SGN0126, SGN0226, SGN0326, SGN0133, SGN0233, SGN0333, SGN0132, SGN0232, SGN0332, SGN0134, SGN0234, SGN0334, SGN0135, SGN0235, SGN0335, SGN0136, SGN0236, SGN0336, FFR_FROOSHTX, FFR_HESABTX, FFR_MODIRTX, KFR_BAZARTX, KFR_HESABTX, KFR_MODIRTX, ANB_RASID_ANBTX, ANB_RASID_QCTX, ANB_HAVL_FROSHTX, ANB_HAVL_ANBTX, ANB_HAVL_MODIRTX, ANB_TOLID_MODIRTTX, ANB_TOLID_QCTX, ANB_TOLID_ANBTX, ANB_KHOROG_ANBTX, ANB_KHOROG_MODIRTTX, ANB_KHOROGS_ABTX, ANB_KHOROGS_MODIRTTX, SND_TAHITX, SND_MALITX, SND_MODIRTX, FFRB_FROOSHTX, FFRB_ANBTX, FFRB_HESABTX, FFRB_MODIRTX, KFRB_BAZARTX, KFRB_ANBTX, KFRB_HESABTX, KFRB_MODIRTX, FFRP_FROOSHTX, FFRP_ANBTX, FFRP_HESABTX, FFRP_MODIRTX, RASM_HESABTX, RASM_MODIRTX, PAY_MVAHEDTX, PAY_HESABTX, PAY_MAMELTX, ENTGH_AZANBTX, ENTGH_BEANBTX, ENTGH_MODIRTX, PAZ_PAZTX, PAZ_HESTX, PAZ_CEOTX, SGN0124TX, SGN0224TX, SGN0324TX, SGN0126TX, SGN0226TX, SGN0326TX, SGN0133TX, SGN0233TX, SGN0333TX, SGN0132TX, SGN0232TX, SGN0332TX, SGN0134TX, SGN0234TX, SGN0334TX, SGN0135TX, SGN0235TX, SGN0335TX, SGN0136TX, SGN0236TX, SGN0336TX, SGN0137, SGN0237, SGN0337, SGN0137TX, SGN0237TX, SGN0337TX, SGN0140, SGN0240, SGN0340, SGN0140TX, SGN0240TX, SGN0340TX, SGN0141, SGN0241, SGN0341, SGN0141TX, SGN0241TX, SGN0341TX, SGN0142, SGN0242, SGN0342, SGN0142TX, SGN0242TX, SGN0342TX, CRT, UID" }
-            };
+                // گروه ۲: جداول نیازمند تعریف دقیق ستون‌ها
+                var customSelects = new Dictionary<string, string>
+                {
+                    { "SAZMAN", "UNIVERSITY_CO, NAME, CITY, MANAGER, MOAVEN, ZIHESAB, AMINAMVAL, SANAD, GHAYM, KALA, PERSON, DIG, WAR, LST, TFTPAGE, TFSAZMAN, TFADDRESS, TFTEL, TFCODE_E, WIDTH_D, HIGH_D, CPI, SANDOGH, BANKHA, BESTANKAR, BEDEHKAR, KHARID, MKHARID, TKHARID, HKHARID, FROSH, MFROSH, TFROSH, HFROSH, MOGODIA, MOGODIP, DARAM, HDARAM, HKOL, ADA, APA, ADV, HAVALAH, CTRL_TS, F_ANBARF, GH_PK, L_NUMBER, SF_G, TAR_KM, BACKPATH, TKHF, HAZ_TOL, PJHAZ_TOL1, PHAZ_TOL, GHEYMAT, PPDAST, PPSAR, AMALKARD, PERSONEL, PERVAM, CONKAL, EMZA, HNAH, HEZA, HPAD, HOLA, HKHA, HJAZ, HRAN, HSAY, HCON, HSHI, HAZEDAR, EDABIM, HAZBIM, BESHO, BEDMOS, PARDAKH, HAZMALI, SAGHFH, MAND, MOJU, SA_HOGH, SA_40EZ, SA_EZAF, SA_PADA, SA_HOLA, SA_KHAR, SA_NAHA, SA_JAZB, SA_RAND, SA_COND, SA_SAYE, SA_23BI, HAZTOLID, HAZFROOSH, HAZKHADAMAT, PISHDAR, DEFANB, DEFTKH, ECONM, FRUP, UPDDATE, FINALS, PSANDHES, SANAVP, BON, ISO_FROOSH, ISO_KHAREED, ISO_MAVAD, ISO_TOLID, ISO_MAVADSAYER, SANAT, CODEVIEW, PKHARID, SIGN, BARCOD, SAGHF, SERVERNAM, TENDAR, LECOL1, LECOL2, LECOL3, LECOL4, LKCOL1, HESMBAA, ECODE, PCODE, IYALAT, MCODEM, HPOR, SAGHF2, OPTIONSS, CTL_DT, LOCKFAP, LOCKFSI, TRANSF, OKF, ARSESH, RMOG, APV, HOTCOD, STFR, STKH, STHFR, STHKH, STENT, STKHS, STKHH, STTOL, STFRB, STBKH, STMO, STKHA, SNDKH, SMS_USERNAME, SMS_PASSWORD, SMS_LIBKEY, SMS_TSMSHOST, SMS_ProxyUserName, SMS_ProxyPassword, SMS_ProxyServer, SMS_ProxyPort, SMS_FirewallUserName, SMS_FirewallPassword, SMS_FirewallHost, SMS_FirewallPort, SMS_FirewallType, DSMS, SMS_OWNER, PRMFR, SMSACT, HESDESK, ISO_DTOLID, SERFACB, HBON, pishpross, version, hesnaghd, IT1, IT2, IT3, IT4, IT5, IT6, IT7, IT8, IT9, IS1, IS2, IS3, IS4, IS5, IS6, IS7, IS8, IS9, IS10, IS11, IS12, IS13, IS14, IS15, IS16, SSMTRTAKM, SSMTRTAGM, SSMSNDAUTO, SSMTBMON, SSMDARSAD, HDARKASRTAKHF, CRT, UID" },
+                    { "salA_dtl", "SAL_NAME, PSAL_NAME, GRSAL, ENABL, IDD, HES, PORID, EMZA, menup" },
+                    { "TDETA_HES", "N_KOL, NUMBER, TNUMBER, NAME, TOZIH, BED_BES, ADDRESS, TEL, CODE_E, ECODE, PCODE, IYALAT, CITY, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID" },
+                    { "TDETA_HES2", "N_KOL, NUMBER, TNUMBER, TNUMBER2, NAME, TOZIH, BED_BES, ADDRESS, TEL, CODE_E, ECODE, PCODE, IYALAT, CITY, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID" },
+                    { "TDETA_HES3", "N_KOL, NUMBER, TNUMBER, TNUMBER2, TNUMBER3, NAME, TOZIH, BED_BES, ADDRESS, TEL, CODE_E, ECODE, PCODE, IYALAT, CITY, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID" },
+                    { "TDETA_HES4", "N_KOL, NUMBER, TNUMBER, TNUMBER2, TNUMBER3, TNUMBER4, NAME, TOZIH, BED_BES, ADDRESS, TEL, CODE_E, ECODE, PCODE, IYALAT, CITY, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID" },
+                    { "TCOD_ANBAR", "CODE, NAMES, KIND" },
+                    { "TCOD_BANKS", "CODE, NAMES, TEJ_C, MEL_C, SAD_C, MLA_C, REF_C, TOS_C, KES_C, KAR_C, POS_C, TAT_C, SEP_C, TSA_C, SAN_C, MAS_C, EGH_C, PAR_C, PAS_C, DEY_C, SAM_C, SAR_C, SIN_C, SHA_C" },
+                    { "STUF_DEF", "CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F, DEPART, CMBAA, VAZN, OKF, MENUIT, MEGHTA, MEGHJAY, PGID, BARCODE" },
+                    { "DEPART", "DEPATMAN, DEPNAME" },
+                    { "SHARH", "SHARH" },
+                    { "OPANBACCESS", "USERCO, ANBCO" },
+                    { "SIGN_TRAN", "NUMBER, TAG, SGN_ID, SGN_USER_NAME, SGN_DATE, SGN_TIME" },
+                    { "AZAE", "HES, TOPETEB, TOPASN, ENDIS, TOPMEGH, JAMZARIB, EMTIAZ, gradeid, DTTIM" },
+                    { "PTVAZ", "PIDT, PVAZ, PDATE, PTIME" },
+                    { "SQLSTATE", "SQLST, TITEL, USER_NAME, LETOTHER, CR_DATE" },
+                    { "Visit_route_dtl", "ROUTE_NAME, COUST_NO, RACTIVE, CLASS" },
+                    { "tab_job", "Job_Code, Job_Desc" },
+                    { "CHARTSAZMANI", "USERCO, SUBUSERCO" },
+                    { "telef", "name, TEL" },
+                    { "DEFAULTDEP", "TFSAZMAN, SHIFT, USERID" },
+                    { "GRADE_FORMAT", "IDD, GFNAME, GFDATE, TOZIH, USERNAME, JAMZARIB, EMTIAZ" },
+                    { "GRADE_TAB_FT", "GFID, GFTID, GFNAMEFT, GFGZARIB" },
+                    { "GSCALE", "GSCACOD, GSCANAME, GSCAKIND" },
+                    { "GSCADTL", "GSCADTCOD, GSCANAME, GSCAGRADE, GSCAFROM, GSCATO, GSCACOD" },
+                    { "GRADE_GRP_FT", "GFTID, GFTGRPID, GFGRPNAMEFT, GFGRPZARIB, GFGRPGRADE, GVALUESCALE" },
+                    { "GRADE_CUST_TAB", "GCTABID, GCNAME, GCZARIB, GCCUST_HES, GCDATE, USERNAME" },
+                    { "GRADE_CUST_GRP", "GCGRPID, GCGRPNAME, GCGRPZARIB, GCGRPGRADE, GCTABID, GCVALUE, GCVALUESCAL" },
+                    { "GRADE_RANGE", "GID, GNAME, GAZ, GTA, GTOZIH" },
+                    { "GRADE_SHART_FUNC", "GSHARTID, GSHNAME, GSHFUNC, TOZIH" },
+                    { "GRADE_SHART", "GSID, GID, GSHARTID, GSVALUE, GSVALUE2, GSVALUE3, TOZI" },
+                    { "TCOD_CITY", "OSCODE, CITYCODE, CITYNAME" },
+                    { "sudmah", "DATE_S, BEDS, BESS, sudday, SUD" },
+                    { "SIGN", "USERCO, FFR_FROOSH, FFR_HESAB, FFR_MODIR, KFR_BAZAR, KFR_HESAB, KFR_MODIR, ANB_RASID_ANB, ANB_RASID_QC, ANB_HAVL_FROSH, ANB_HAVL_ANB, ANB_HAVL_MODIR, ANB_TOLID_MODIRT, ANB_TOLID_QC, ANB_TOLID_ANB, ANB_KHOROG_ANB, ANB_KHOROG_MODIRT, ANB_KHOROGS_ANB, ANB_KHOROGS_MODIRT, SND_TAHI, SND_MALI, SND_MODIR, FFRB_FROOSH, FFRB_ANB, FFRB_HESAB, FFRB_MODIR, KFRB_BAZAR, KFRB_ANB, KFRB_HESAB, KFRB_MODIR, FFRP_FROOSH, FFRP_ANB, FFRP_HESAB, FFRP_MODIR, RASM_HESAB, RASM_MODIR, PAY_MVAHED, PAY_HESAB, PAY_MAMEL, ENTGH_AZANB, ENTGH_BEANB, ENTGH_MODIR, PAZ_PAZ, PAZ_HES, PAZ_CEO, SGN0124, SGN0224, SGN0324, SGN0126, SGN0226, SGN0326, SGN0133, SGN0233, SGN0333, SGN0132, SGN0232, SGN0332, SGN0134, SGN0234, SGN0334, SGN0135, SGN0235, SGN0335, SGN0136, SGN0236, SGN0336, FFR_FROOSHTX, FFR_HESABTX, FFR_MODIRTX, KFR_BAZARTX, KFR_HESABTX, KFR_MODIRTX, ANB_RASID_ANBTX, ANB_RASID_QCTX, ANB_HAVL_FROSHTX, ANB_HAVL_ANBTX, ANB_HAVL_MODIRTX, ANB_TOLID_MODIRTTX, ANB_TOLID_QCTX, ANB_TOLID_ANBTX, ANB_KHOROG_ANBTX, ANB_KHOROG_MODIRTTX, ANB_KHOROGS_ABTX, ANB_KHOROGS_MODIRTTX, SND_TAHITX, SND_MALITX, SND_MODIRTX, FFRB_FROOSHTX, FFRB_ANBTX, FFRB_HESABTX, FFRB_MODIRTX, KFRB_BAZARTX, KFRB_ANBTX, KFRB_HESABTX, KFRB_MODIRTX, FFRP_FROOSHTX, FFRP_ANBTX, FFRP_HESABTX, FFRP_MODIRTX, RASM_HESABTX, RASM_MODIRTX, PAY_MVAHEDTX, PAY_HESABTX, PAY_MAMELTX, ENTGH_AZANBTX, ENTGH_BEANBTX, ENTGH_MODIRTX, PAZ_PAZTX, PAZ_HESTX, PAZ_CEOTX, SGN0124TX, SGN0224TX, SGN0324TX, SGN0126TX, SGN0226TX, SGN0326TX, SGN0133TX, SGN0233TX, SGN0333TX, SGN0132TX, SGN0232TX, SGN0332TX, SGN0134TX, SGN0234TX, SGN0334TX, SGN0135TX, SGN0235TX, SGN0335TX, SGN0136TX, SGN0236TX, SGN0336TX, SGN0137, SGN0237, SGN0337, SGN0137TX, SGN0237TX, SGN0337TX, SGN0140, SGN0240, SGN0340, SGN0140TX, SGN0240TX, SGN0340TX, SGN0141, SGN0241, SGN0341, SGN0141TX, SGN0241TX, SGN0341TX, SGN0142, SGN0242, SGN0342, SGN0142TX, SGN0242TX, SGN0342TX, CRT, UID" }
+                };
 
-            foreach (var kvp in customSelects)
-            {
-                UpdateStatus($"انتقال ساختار جدول {kvp.Key}...");
-                if (kvp.Key == "SAZMAN")
-                    dbms.DoExecuteSQL($"INSERT INTO {safeNew}.dbo.SAZMAN ({kvp.Value}, YEA) SELECT {kvp.Value}, {newYear} FROM {safeOld}.dbo.SAZMAN");
-                else
-                    dbms.DoExecuteSQL($"INSERT INTO {safeNew}.dbo.[{kvp.Key}] ({kvp.Value}) SELECT {kvp.Value} FROM {safeOld}.dbo.[{kvp.Key}]");
-            }
+                foreach (var kvp in customSelects)
+                {
+                    UpdateStatus($"انتقال ساختار جدول {kvp.Key}...");
+                    if (kvp.Key == "SAZMAN")
+                        dbms.DoExecuteSQL($"INSERT INTO {safeNew}.dbo.SAZMAN ({kvp.Value}, YEA) SELECT {kvp.Value}, {newYear} FROM {safeOld}.dbo.SAZMAN");
+                    else
+                        dbms.DoExecuteSQL($"INSERT INTO {safeNew}.dbo.[{kvp.Key}] ({kvp.Value}) SELECT {kvp.Value} FROM {safeOld}.dbo.[{kvp.Key}]");
+                }
 
-            // گروه ۳: جداول شرطی
-            var conditionalTables = new Dictionary<string, string>
-            {
-                { "MEHMAN", "KDATE IS NULL" },
-                { "PAZIRESH", "ENDIT = 1" }
-            };
+                // گروه ۳: جداول شرطی
+                var conditionalTables = new Dictionary<string, string>
+                {
+                    { "MEHMAN", "KDATE IS NULL" },
+                    { "PAZIRESH", "ENDIT = 1" }
+                };
 
-            foreach (var kvp in conditionalTables)
-            {
-                UpdateStatus($"انتقال شرطی جدول {kvp.Key}...");
-                dbms.DoExecuteSQL($"INSERT INTO {safeNew}.dbo.[{kvp.Key}] SELECT * FROM {safeOld}.dbo.[{kvp.Key}] WHERE {kvp.Value}");
-            }
+                foreach (var kvp in conditionalTables)
+                {
+                    UpdateStatus($"انتقال شرطی جدول {kvp.Key}...");
+                    dbms.DoExecuteSQL($"INSERT INTO {safeNew}.dbo.[{kvp.Key}] SELECT * FROM {safeOld}.dbo.[{kvp.Key}] WHERE {kvp.Value}");
+                }
 
-            // --- اصلاحیه مهم: تعیین دقیق ۱۰ فیلد برای جدول REMAINDER ---
-            UpdateStatus($"انتقال پیام‌های REMAINDER...");
-            dbms.DoExecuteSQL($@"
+                // --- اصلاحیه مهم: تعیین دقیق ۱۰ فیلد برای جدول REMAINDER ---
+                UpdateStatus($"انتقال پیام‌های REMAINDER...");
+                dbms.DoExecuteSQL($@"
                 INSERT INTO {safeNew}.dbo.REMAINDER (PERSONEL, PAYAM, STATUS, CTDATE, CTTIME, USERNAME, COMP_COD, STDATE, STTIME, SMSOK) 
                 SELECT PERSONEL, PAYAM, STATUS, CTDATE, CTTIME, USERNAME, COMP_COD, STDATE, STTIME, SMSOK 
                 FROM {safeOld}.dbo.REMAINDER WHERE STATUS = 1
             ");
 
-            // --- اصلاحیه مهم: مپینگ دقیق فیلدهای NULL AS Expr6 (NUMBER) و NULL AS Expr7 (TAG) برای اسناد ---
-            UpdateStatus($"انتقال اسناد خزانه‌داری...");
-            dbms.DoExecuteSQL($@"
+                // --- اصلاحیه مهم: مپینگ دقیق فیلدهای NULL AS Expr6 (NUMBER) و NULL AS Expr7 (TAG) برای اسناد ---
+                UpdateStatus($"انتقال اسناد خزانه‌داری...");
+                dbms.DoExecuteSQL($@"
                 INSERT INTO {safeNew}.dbo.PAY_GETD (N_SERI, BANK, DATE_S, DATE, SHOBEH, MABL, NAME_TAH, N_HESAB, N_S, N_KOL, N_MOIN, N_TAF, N_KOL2, N_MOIN2, N_TAF2, N_KOL3,N_MOIN3, N_TAF3, NUMBER, TAG, ANBAR, RADIF, CUST_NO, VAZ,LIST_NO,KIND,SANDUGH,HES1,HES2,HES3,ESTELAM,SAYADI) 
                 SELECT N_SERI, BANK, DATE_S, DATE, SHOBEH, MABL, NAME_TAH, N_HESAB, N_S, N_KOL, N_MOIN, N_TAF, N_KOL2, N_MOIN2, N_TAF2, N_KOL3, N_MOIN3, N_TAF3, NULL, NULL, ANBAR, RADIF, CUST_NO, VAZ,LIST_NO,KIND,SANDUGH,HES1,HES2,HES3,ESTELAM,SAYADI 
                 FROM {safeOld}.dbo.PAY_GETD 
@@ -492,41 +659,41 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                   AND N_KOL2 IS NULL AND N_MOIN2 IS NULL AND N_TAF2 IS NULL AND N_KOL3 IS NULL AND N_MOIN3 IS NULL AND N_TAF3 IS NULL
             ");
 
-            dbms.DoExecuteSQL($@"
+                dbms.DoExecuteSQL($@"
                 INSERT INTO {safeNew}.dbo.PAY_GETP (N_SERI, BANK, DATE_S, DATE, SHOBEH, MABL, NAME_TAH, N_HESAB, N_S, N_KOL, N_MOIN, N_TAF, N_KOL2, N_MOIN2, N_TAF2, N_KOL3, N_MOIN3, N_TAF3, NUMBER, TAG, ANBAR, RADIF, CUST_NO,HES1,HES2,HES3,SAYADI) 
                 SELECT N_SERI, BANK, DATE_S, DATE, SHOBEH, MABL, NAME_TAH, N_HESAB, N_S, N_KOL, N_MOIN, N_TAF, N_KOL2, N_MOIN2, N_TAF2, N_KOL3, N_MOIN3, N_TAF3, NULL, NULL, ANBAR, NULL, CUST_NO,HES1,HES2,HES3,SAYADI 
                 FROM {safeOld}.dbo.PAY_GETP 
                 WHERE N_KOL2 IS NULL AND N_KOL <> 911 AND N_MOIN2 IS NULL AND N_TAF2 IS NULL AND N_KOL3 IS NULL AND N_MOIN3 IS NULL AND N_TAF3 IS NULL
             ");
 
-            // گروه ۴: جداول کلید خودکار (IDENTITY TABLES)
-            var identityTables = new Dictionary<string, string>
-            {
-                { "COPMANES", "id, COMPANY_NAME, CITY, MANAGER, FACT_TEL, MOBILE, PERNUM, STATUS_FACT, PRODUCTS, ADDR, ACCOUNTANT, SOFTWARE, ESP_PERSON, REAGENT, STATUS, COMMENT, date_sabt, USER_NAME, pic, dt, userid, Longitude, Latitude, OSTANID, SHAHRID, CRT, UID" },
-                { "TASKS", "IDNUM, GR, PERSONEL, TASK, PERIORITY, STATUS, STDATE, STTIME, ENDATE, ENTIME, USERNAME, COMP_COD, SUMTIME, pic, ss, skid, num, tg, CTIM, USERCO, SEE, SEET, CRT, UID" },
-                { "EVENTS", "IDNUM, IDD, EVENTS, STDATE, STTIME, USERNAME, COMPANY, SUMTIME, pic, skid, num, tg, CRT, UID" },
-                { "PM_location", "IDD, LO_NAME, LO_IDD, CR, US, CRT, UID" },
-                { "PM_ASSETS", "IDD, AS_NAME, AS_SERIAL, AS_MODEL, AS_GRP, AS_Longitude, AS_Latitude, AS_IDDMAIN, AS_IDAMVAL, AS_IMAGE, AS_HESAB, AS_GARANTI, AS_GARANTICOMP, AS_LOCATION, AS_STATUS, AS_CODING, SGN1, SGN2, SGN3, SGN4, sgn1usid, sgn2usid, sgn3usid, CR, US, CRT, UID" },
-                { "PM_RUMAINTE", "IDD, AS_IDD, RM_RSANGESH, RM_PERIOD, RM_MEGHDAR, RM_PERSON, RM_JOB, RM_STDATE, RM_STTIME, RM_TAKHIRMO, RM_TAKHVAHED, RM_ELAMBE, TM_TIMENEED, TM_HESAB_HAZINE, CR, US, CRT, UID" },
-                { "PM_EM_FAILURE", "IDD, FI_NAME, CR, US, CRT, UID" },
-                { "PM_EM_FAILURE_EVENTS", "IDD, FI_IDD, FIO_JOB, AS_IDD, FIO_DATE, FIO_TIME, FIO_PERIO, FIO_AS_VAS, FIO_DESCRIPTION, FIO_ZAMEM, FIO_EVKIND, FIO_JOBIDD, SGN1, SGN2, SGN3, SGN4, sgn1usid, sgn2usid, sgn3usid, CR, US, CRT, UID" },
-                { "PM_JOB", "IDD, RM_IDD, AS_IDD, JO_JOB, JO_RSANGESH, JO_PERIOD, JO_MEGHDAR, JO_PERSON, JO_STDATE, JO_STTIME, JO_DONE, JO_ENDATE, JO_ENTIME, JO_HESAB_HAZINE, JO_LOCATION, JO_TAKHIRMO, JO_TAKHVAHED, JO_ELAMBE, JO_TIMENEED, JO_KIND, CR, US, CRT, UID" },
-                { "PM_JOBTITLE", "IDD, JOB_TITLE, CR, US, CRT, UID" },
-                { "PM_MVAD", "IDD, JOB_IDD, MV_ANBAR, MV_CODE, MV_MEGH, MV_MEGHk, MV_VAHED_K, MV_DESCRIPTION, CR, US, CRT, UID" },
-                { "PM_MVT", "IDD, RM_IDD, MV_CODE, MV_MEGH, MV_MEGHk, MV_VAHED_K, MV_DESCRIPTION, CR, US, CRT, UID" },
-                { "crmevents", "idde, COMPANY_NAME, INFO_DATE, INFO_TIME, SALER, BUYER, COMMENT, NEXT_DATE, NEXT_TIME, STATUS, pic, idc, PAYAM, miting, USERID, CDATETI, CRT, UID" },
-                { "Notes", "idd, Note, Ndate, Ntime, userid, Ndone, CRT, UID" }
-            };
+                // گروه ۴: جداول کلید خودکار (IDENTITY TABLES)
+                var identityTables = new Dictionary<string, string>
+                {
+                    { "COPMANES", "id, COMPANY_NAME, CITY, MANAGER, FACT_TEL, MOBILE, PERNUM, STATUS_FACT, PRODUCTS, ADDR, ACCOUNTANT, SOFTWARE, ESP_PERSON, REAGENT, STATUS, COMMENT, date_sabt, USER_NAME, pic, dt, userid, Longitude, Latitude, OSTANID, SHAHRID, CRT, UID" },
+                    { "TASKS", "IDNUM, GR, PERSONEL, TASK, PERIORITY, STATUS, STDATE, STTIME, ENDATE, ENTIME, USERNAME, COMP_COD, SUMTIME, pic, ss, skid, num, tg, CTIM, USERCO, SEE, SEET, CRT, UID" },
+                    { "EVENTS", "IDNUM, IDD, EVENTS, STDATE, STTIME, USERNAME, COMPANY, SUMTIME, pic, skid, num, tg, CRT, UID" },
+                    { "PM_location", "IDD, LO_NAME, LO_IDD, CR, US, CRT, UID" },
+                    { "PM_ASSETS", "IDD, AS_NAME, AS_SERIAL, AS_MODEL, AS_GRP, AS_Longitude, AS_Latitude, AS_IDDMAIN, AS_IDAMVAL, AS_IMAGE, AS_HESAB, AS_GARANTI, AS_GARANTICOMP, AS_LOCATION, AS_STATUS, AS_CODING, SGN1, SGN2, SGN3, SGN4, sgn1usid, sgn2usid, sgn3usid, CR, US, CRT, UID" },
+                    { "PM_RUMAINTE", "IDD, AS_IDD, RM_RSANGESH, RM_PERIOD, RM_MEGHDAR, RM_PERSON, RM_JOB, RM_STDATE, RM_STTIME, RM_TAKHIRMO, RM_TAKHVAHED, RM_ELAMBE, TM_TIMENEED, TM_HESAB_HAZINE, CR, US, CRT, UID" },
+                    { "PM_EM_FAILURE", "IDD, FI_NAME, CR, US, CRT, UID" },
+                    { "PM_EM_FAILURE_EVENTS", "IDD, FI_IDD, FIO_JOB, AS_IDD, FIO_DATE, FIO_TIME, FIO_PERIO, FIO_AS_VAS, FIO_DESCRIPTION, FIO_ZAMEM, FIO_EVKIND, FIO_JOBIDD, SGN1, SGN2, SGN3, SGN4, sgn1usid, sgn2usid, sgn3usid, CR, US, CRT, UID" },
+                    { "PM_JOB", "IDD, RM_IDD, AS_IDD, JO_JOB, JO_RSANGESH, JO_PERIOD, JO_MEGHDAR, JO_PERSON, JO_STDATE, JO_STTIME, JO_DONE, JO_ENDATE, JO_ENTIME, JO_HESAB_HAZINE, JO_LOCATION, JO_TAKHIRMO, JO_TAKHVAHED, JO_ELAMBE, JO_TIMENEED, JO_KIND, CR, US, CRT, UID" },
+                    { "PM_JOBTITLE", "IDD, JOB_TITLE, CR, US, CRT, UID" },
+                    { "PM_MVAD", "IDD, JOB_IDD, MV_ANBAR, MV_CODE, MV_MEGH, MV_MEGHk, MV_VAHED_K, MV_DESCRIPTION, CR, US, CRT, UID" },
+                    { "PM_MVT", "IDD, RM_IDD, MV_CODE, MV_MEGH, MV_MEGHk, MV_VAHED_K, MV_DESCRIPTION, CR, US, CRT, UID" },
+                    { "crmevents", "idde, COMPANY_NAME, INFO_DATE, INFO_TIME, SALER, BUYER, COMMENT, NEXT_DATE, NEXT_TIME, STATUS, pic, idc, PAYAM, miting, USERID, CDATETI, CRT, UID" },
+                    { "Notes", "idd, Note, Ndate, Ntime, userid, Ndone, CRT, UID" }
+                };
 
-            foreach (var kvp in identityTables)
-            {
-                UpdateStatus($"انتقال امن جدول Identity {kvp.Key}...");
-                string whereClause = "";
+                foreach (var kvp in identityTables)
+                {
+                    UpdateStatus($"انتقال امن جدول Identity {kvp.Key}...");
+                    string whereClause = "";
 
-                if (kvp.Key == "TASKS") whereClause = " WHERE STATUS = 1 AND (NUM IS NULL OR num = 101)";
-                if (kvp.Key == "EVENTS") whereClause = $" WHERE IDNUM IN (SELECT IDNUM FROM {safeOld}.dbo.TASKS WHERE STATUS = 1 AND (NUM IS NULL OR num = 101))";
+                    if (kvp.Key == "TASKS") whereClause = " WHERE STATUS = 1 AND (NUM IS NULL OR num = 101)";
+                    if (kvp.Key == "EVENTS") whereClause = $" WHERE IDNUM IN (SELECT IDNUM FROM {safeOld}.dbo.TASKS WHERE STATUS = 1 AND (NUM IS NULL OR num = 101))";
 
-                string identitySql = $@"
+                    string identitySql = $@"
                     BEGIN TRY
                         BEGIN TRAN;
                         SET IDENTITY_INSERT {safeNew}.dbo.[{kvp.Key}] ON;
@@ -545,12 +712,12 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         THROW;
                     END CATCH;
                 ";
-                dbms.DoExecuteSQL(identitySql);
-            }
+                    dbms.DoExecuteSQL(identitySql);
+                }
 
-            // --- اصلاحیه مهم: اصلاح پارامترهای lastavrage به شکل (AK.CODE, A.CODE) ---
-            UpdateStatus("انتقال و محاسبه اولیه موجودی‌های انبار...");
-            string stuffSql = $@"
+                // --- اصلاحیه مهم: اصلاح پارامترهای lastavrage به شکل (AK.CODE, A.CODE) ---
+                UpdateStatus("انتقال و محاسبه اولیه موجودی‌های انبار...");
+                string stuffSql = $@"
                 IF OBJECT_ID('{safeNew}.dbo.STUFFSK', 'U') IS NOT NULL DROP TABLE {safeNew}.dbo.STUFFSK;
                 
                 SELECT 
@@ -576,16 +743,16 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 FROM {safeNew}.dbo.STUFFSK S
                 INNER JOIN {safeOld}.dbo.STUF_FSK F ON S.CODE = F.CODE AND S.ANBAR = F.ANBAR;
             ";
-            dbms.DoExecuteSQL(stuffSql);
+                dbms.DoExecuteSQL(stuffSql);
 
-            UpdateStatus("انتقال جداول قیمت‌گذاری و آپدیت قیمت انبار...");
-            dbms.DoExecuteSQL($@"
+                UpdateStatus("انتقال جداول قیمت‌گذاری و آپدیت قیمت انبار...");
+                dbms.DoExecuteSQL($@"
                 IF OBJECT_ID('{safeNew}.dbo.GHEYMAT', 'U') IS NOT NULL DROP TABLE {safeNew}.dbo.GHEYMAT;
                 SELECT CODE, GHEMAT INTO {safeNew}.dbo.GHEYMAT FROM {safeOld}.dbo.GHEYMAT_TAMAM;
             ");
 
-            UpdateStatus("محاسبه ارزش ریالی کالاهای موجود...");
-            string updateFskPricesSql = $@"
+                UpdateStatus("محاسبه ارزش ریالی کالاهای موجود...");
+                string updateFskPricesSql = $@"
                 UPDATE F
                 SET 
                     F.FI_A = G.GHEMAT,
@@ -594,10 +761,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 INNER JOIN {safeNew}.dbo.GHEYMAT G ON F.CODE = G.CODE
                 WHERE F.MOGODI_A > 0;
             ";
-            dbms.DoExecuteSQL(updateFskPricesSql);
+                dbms.DoExecuteSQL(updateFskPricesSql);
 
-            UpdateStatus("انتقال و تسویه مانده وام‌ها...");
-            string pvamSql = $@"
+                UpdateStatus("انتقال و تسویه مانده وام‌ها...");
+                string pvamSql = $@"
                 INSERT INTO {safeNew}.dbo.PVAM (CODE, VAM_ID, SHARH, DATE_BP, NUM, MABL, MABLBZ)
                 SELECT P.CODE, P.VAM_ID, P.SHARH, P.DATE_BP, P.NUM, P.MABL, P.MABLBZ
                 FROM {safeOld}.dbo.PVAM P
@@ -609,7 +776,24 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 SELECT PB.* FROM {safeOld}.dbo.PVAM_BAZ PB
                 INNER JOIN {safeNew}.dbo.PVAM PNEW ON PB.CODE = PNEW.CODE AND PB.VAM_ID = PNEW.VAM_ID;
             ";
-            dbms.DoExecuteSQL(pvamSql);
+                dbms.DoExecuteSQL(pvamSql);
+            }
+            finally
+            {
+                // 2. روشن کردن مجدد کلیدهای خارجی به صورت هوشمند و بدون بروز خطای دیتای قدیمی (Legacy Check)
+                UpdateStatus("در حال اعمال مجدد قوانین کلیدهای خارجی و یکپارچه‌سازی پایگاه داده...");
+                string enableFkSql = $@"
+                        USE {safeNew};
+                        DECLARE @enableSql NVARCHAR(MAX) = N'';
+                        -- استفاده از WITH NOCHECK برای جلوگیری از توقف عملیات به دلیل وجود داده‌های کثیف قدیمی (Orphaned records)
+                        SELECT @enableSql += N'ALTER TABLE ' + QUOTENAME(s.name) + N'.' + QUOTENAME(t.name) + N' WITH NOCHECK CHECK CONSTRAINT ALL; '
+                        FROM sys.tables t
+                        JOIN sys.schemas s ON t.schema_id = s.schema_id;
+                        EXEC sp_executesql @enableSql;
+                    ";
+                dbms.DoExecuteSQL(enableFkSql);
+                UpdateStatus("انتقال با موفقیت به پایان رسید.");
+            }
         }
 
         private void UpdateStatus(string message)
@@ -630,10 +814,64 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             return $"[{dbName.Replace("]", "]]", StringComparison.Ordinal)}]";
         }
 
-        private class BackupFileModel
+        private void BTN_BROWSE_Click(object sender, RoutedEventArgs e)
         {
-            public string LogicalName { get; set; }
-            public string Type { get; set; }
+            var openFileDialog = new OpenFileDialog
+            {
+                Filter = "*.bak|*.bak",
+                Title = "neginsql.bak را انتخاب کنید",
+                CheckFileExists = true,
+                Multiselect = false
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                if (!string.IsNullOrWhiteSpace(openFileDialog.FileName))
+                {
+                    txtTemplateBackupFile.Text = openFileDialog.FileName;
+                }
+                else
+                {
+                    universControl.PopNotifyShowUp($"فایل معتبر انتخاب کنید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                }
+            }
         }
+
+        private void BTN_BROWSEFOLDER_Click(object sender, RoutedEventArgs e)
+        {
+            var openFolderDialog = new Microsoft.Win32.OpenFolderDialog
+            {
+                Title = "پوشه مورد نظر را انتخاب کنید",
+                Multiselect = false
+            };
+
+            // بررسی اینکه آیا تکست‌باکس مقداری دارد و آیا آن مسیر واقعاً روی سیستم وجود دارد
+            string currentPath = txtNewDbPath.Text.Trim();
+            if (!string.IsNullOrWhiteSpace(currentPath) && System.IO.Directory.Exists(currentPath))
+            {
+                openFolderDialog.InitialDirectory = currentPath;
+            }
+
+            if (openFolderDialog.ShowDialog() == true)
+            {
+                if (!string.IsNullOrWhiteSpace(openFolderDialog.FolderName))
+                {
+                    string selectedPath = openFolderDialog.FolderName;
+
+                    // بررسی وجود بک‌اسلش در انتهای مسیر و اضافه کردن آن در صورت نیاز
+                    if (!selectedPath.EndsWith(@"\"))
+                    {
+                        selectedPath += @"\";
+                    }
+
+                    txtNewDbPath.Text = selectedPath;
+                }
+                else
+                {
+                    universControl.PopNotifyShowUp($"پوشه معتبر انتخاب کنید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                }
+            }
+        }
+
     }
 }
