@@ -1,6 +1,7 @@
 ﻿using Interfaces;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
+using Microsoft.Win32;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
@@ -13,7 +14,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -21,10 +26,6 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Microsoft.Win32;
 
 namespace Prg_UI.Wins.WinMenus.HESABDARI
 {
@@ -222,7 +223,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     baseName = currentDbName;
                 }
 
-                YEA.Text = nextYear.ToString();
+                YEA.Text = (new PersianCalendar().GetYear(DateTime.Now) + 1).ToString();
                 txtNewDbName.Text = $"{baseName}{nextYear}";
 
                 // مسیر درست:
@@ -684,10 +685,10 @@ END CATCH;";
                 {
                     { "SAZMAN", "UNIVERSITY_CO, NAME, CITY, MANAGER, MOAVEN, ZIHESAB, AMINAMVAL, SANAD, GHAYM, KALA, PERSON, DIG, WAR, LST, TFTPAGE, TFSAZMAN, TFADDRESS, TFTEL, TFCODE_E, WIDTH_D, HIGH_D, CPI, SANDOGH, BANKHA, BESTANKAR, BEDEHKAR, KHARID, MKHARID, TKHARID, HKHARID, FROSH, MFROSH, TFROSH, HFROSH, MOGODIA, MOGODIP, DARAM, HDARAM, HKOL, ADA, APA, ADV, HAVALAH, CTRL_TS, F_ANBARF, GH_PK, L_NUMBER, SF_G, TAR_KM, BACKPATH, TKHF, HAZ_TOL, PJHAZ_TOL1, PHAZ_TOL, GHEYMAT, PPDAST, PPSAR, AMALKARD, PERSONEL, PERVAM, CONKAL, EMZA, HNAH, HEZA, HPAD, HOLA, HKHA, HJAZ, HRAN, HSAY, HCON, HSHI, HAZEDAR, EDABIM, HAZBIM, BESHO, BEDMOS, PARDAKH, HAZMALI, SAGHFH, MAND, MOJU, SA_HOGH, SA_40EZ, SA_EZAF, SA_PADA, SA_HOLA, SA_KHAR, SA_NAHA, SA_JAZB, SA_RAND, SA_COND, SA_SAYE, SA_23BI, HAZTOLID, HAZFROOSH, HAZKHADAMAT, PISHDAR, DEFANB, DEFTKH, ECONM, FRUP, UPDDATE, FINALS, PSANDHES, SANAVP, BON, ISO_FROOSH, ISO_KHAREED, ISO_MAVAD, ISO_TOLID, ISO_MAVADSAYER, SANAT, CODEVIEW, PKHARID, SIGN, BARCOD, SAGHF, SERVERNAM, TENDAR, LECOL1, LECOL2, LECOL3, LECOL4, LKCOL1, HESMBAA, ECODE, PCODE, IYALAT, MCODEM, HPOR, SAGHF2, OPTIONSS, CTL_DT, LOCKFAP, LOCKFSI, TRANSF, OKF, ARSESH, RMOG, APV, HOTCOD, STFR, STKH, STHFR, STHKH, STENT, STKHS, STKHH, STTOL, STFRB, STBKH, STMO, STKHA, SNDKH, SMS_USERNAME, SMS_PASSWORD, SMS_LIBKEY, SMS_TSMSHOST, SMS_ProxyUserName, SMS_ProxyPassword, SMS_ProxyServer, SMS_ProxyPort, SMS_FirewallUserName, SMS_FirewallPassword, SMS_FirewallHost, SMS_FirewallPort, SMS_FirewallType, DSMS, SMS_OWNER, PRMFR, SMSACT, HESDESK, ISO_DTOLID, SERFACB, HBON, pishpross, version, hesnaghd, IT1, IT2, IT3, IT4, IT5, IT6, IT7, IT8, IT9, IS1, IS2, IS3, IS4, IS5, IS6, IS7, IS8, IS9, IS10, IS11, IS12, IS13, IS14, IS15, IS16, SSMTRTAKM, SSMTRTAGM, SSMSNDAUTO, SSMTBMON, SSMDARSAD, HDARKASRTAKHF, CRT, UID" },
                     { "salA_dtl", "SAL_NAME, PSAL_NAME, GRSAL, ENABL, IDD, HES, PORID, EMZA, menup" },
-                    { "TDETA_HES", "N_KOL, NUMBER, TNUMBER, NAME, TOZIH, BED_BES, ADDRESS, TEL, CODE_E, ECODE, PCODE, IYALAT, CITY, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID" },
-                    { "TDETA_HES2", "N_KOL, NUMBER, TNUMBER, TNUMBER2, NAME, TOZIH, BED_BES, ADDRESS, TEL, CODE_E, ECODE, PCODE, IYALAT, CITY, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID" },
-                    { "TDETA_HES3", "N_KOL, NUMBER, TNUMBER, TNUMBER2, TNUMBER3, NAME, TOZIH, BED_BES, ADDRESS, TEL, CODE_E, ECODE, PCODE, IYALAT, CITY, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID" },
-                    { "TDETA_HES4", "N_KOL, NUMBER, TNUMBER, TNUMBER2, TNUMBER3, TNUMBER4, NAME, TOZIH, BED_BES, ADDRESS, TEL, CODE_E, ECODE, PCODE, IYALAT, CITY, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID" },
+                    { "TDETA_HES", "N_KOL, NUMBER, TNUMBER, NAME, TOZIH, BED_BES, ADDRESS, TEL, CODE_E, ECODE, PCODE, IYALAT, CITY, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID,tob" },
+                    { "TDETA_HES2", "N_KOL, NUMBER, TNUMBER, TNUMBER2, NAME, TOZIH, BED_BES, ADDRESS, TEL, CODE_E, ECODE, PCODE, IYALAT, CITY, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID,tob" },
+                    { "TDETA_HES3", "N_KOL, NUMBER, TNUMBER, TNUMBER2, TNUMBER3, NAME, TOZIH, BED_BES, ADDRESS, TEL, CODE_E, ECODE, PCODE, IYALAT, CITY, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID,tob" },
+                    { "TDETA_HES4", "N_KOL, NUMBER, TNUMBER, TNUMBER2, TNUMBER3, TNUMBER4, NAME, TOZIH, BED_BES, ADDRESS, TEL, CODE_E, ECODE, PCODE, IYALAT, CITY, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID,tob" },
                     { "TCOD_ANBAR", "CODE, NAMES, KIND" },
                     { "TCOD_BANKS", "CODE, NAMES, TEJ_C, MEL_C, SAD_C, MLA_C, REF_C, TOS_C, KES_C, KAR_C, POS_C, TAT_C, SEP_C, TSA_C, SAN_C, MAS_C, EGH_C, PAR_C, PAS_C, DEY_C, SAM_C, SAR_C, SIN_C, SHA_C" },
                     { "STUF_DEF", "CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F, DEPART, CMBAA, VAZN, OKF, MENUIT, MEGHTA, MEGHJAY, PGID, BARCODE" },
