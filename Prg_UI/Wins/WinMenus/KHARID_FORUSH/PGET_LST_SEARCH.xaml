@@ -534,14 +534,26 @@
 
         <DockPanel Margin="10,45,10,45" LastChildFill="True">
             <Label x:Name="LBL_STATE" DockPanel.Dock="Top" Content="" Margin="5" Visibility="Collapsed" FlowDirection="RightToLeft"/>
+            <!-- Row Count Bar -->
+            <Border DockPanel.Dock="Bottom" Background="{StaticResource MaterialDesign.Brush.Background}"
+        BorderBrush="{StaticResource MaterialDesignDivider}" BorderThickness="0,1,0,0"
+        Padding="10,4" Margin="0,4,0,0">
+                <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
+                    <TextBlock VerticalAlignment="Center" FlowDirection="RightToLeft"
+                   Foreground="{StaticResource MaterialDesignBody}" FontFamily="{StaticResource IRANYEKAN}">
+            <Run Text="تعداد ردیف‌ها : "/>
+            <Run x:Name="TXT_RowCount" Text="0"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
             <syncfusion:SfDataGrid x:Name="PGET_JOTEJU_DATA_SUB" ContextMenu="{StaticResource DataGridContextMenu}"
                    ItemsSource="{Binding PGET_JOTEJU_DATA}" FilterRowPosition="Top"
                    AutoGenerateColumns="False"
                    EnableDataVirtualization="True"
                    ColumnSizer="Auto"
                    SelectionUnit="Row"
-                   IsReadOnly="True"
-                   AllowDraggingRows="True"
+                   IsReadOnly="True" 
+                   SelectionMode="Extended"
                            
                    AllowDraggingColumns="True"
                    AllowResizingColumns="True"

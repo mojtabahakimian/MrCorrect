@@ -41,6 +41,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Wins.WinMenus.HESABDARI;
 using Wins.WinOther;
 using static Functions.DataGridClipboardManager;
 using static Interfaces.INavigator;
@@ -728,6 +729,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                new SearchableProperty { DisplayName = "تاریخ", PropertyPath = "DATE", PropertyType = typeof(long) },
                new SearchableProperty { DisplayName = "شماره برگه", PropertyPath = "IDK", PropertyType = typeof(double) },
                new SearchableProperty { DisplayName = "ملاحظات", PropertyPath = "MOLAH", PropertyType = typeof(string) },
+               new SearchableProperty { DisplayName = "کاربر", PropertyPath = "USER_NAME", PropertyType = typeof(string) },
                // Add other searchable properties
             };
         }

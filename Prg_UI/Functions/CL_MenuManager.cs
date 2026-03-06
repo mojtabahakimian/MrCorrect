@@ -33,7 +33,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows;
-using System.Windows.Interop;
 using Wins.WinMenus.ANBAR;
 using Wins.WinMenus.ANBAR.ANBAR_REPORTS;
 using Wins.WinMenus.Checkha;

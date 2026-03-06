@@ -8,7 +8,7 @@
         xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        Height="800" Width="800"
+        Height="765" Width="785"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         FontFamily="{StaticResource IRANYEKAN}"
         Background="{x:Null}"
@@ -58,39 +58,41 @@
         </Popup>
 
         <!-- Content area -->
-        <Grid Margin="0,38,0,0" FlowDirection="RightToLeft">          
+        <Grid Margin="0,38,0,0" FlowDirection="RightToLeft">
             <!-- Main Form Content -->
             <Border Margin="20" Padding="15" Background="White" CornerRadius="8">
                 <StackPanel>
 
                     <DockPanel Margin="0,10,0,10">
                         <TextBlock DockPanel.Dock="Left" Width="220" Text="نام دیتابیس در سال جاری:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
-                        <TextBox x:Name="txtCurrentDbName" IsReadOnly="True" Style="{StaticResource MaterialDesignOutlinedTextBox}" Background="#F0F0F0"/>
+                        <TextBox x:Name="txtCurrentDbName" IsReadOnly="True" Style="{StaticResource MaterialDesignOutlinedTextBox}" Background="#F0F0F0" TextAlignment="Right"/>
                     </DockPanel>
 
                     <DockPanel Margin="0,10,0,10">
                         <TextBlock DockPanel.Dock="Left" Width="220" Text="مسیر دیتابیس در سال جاری:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
-                        <TextBox x:Name="txtCurrentDbPath" IsReadOnly="True" Style="{StaticResource MaterialDesignOutlinedTextBox}" Background="#F0F0F0"/>
+                        <TextBox x:Name="txtCurrentDbPath" IsReadOnly="True" Style="{StaticResource MaterialDesignOutlinedTextBox}" Background="#F0F0F0" TextAlignment="Right"/>
                     </DockPanel>
 
                     <DockPanel Margin="0,10,0,10">
                         <TextBlock DockPanel.Dock="Left" Width="220" Text="فایل دیتابیس خام (neginsql.bak):" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
-                        <TextBox x:Name="txtTemplateBackupFile" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <Button x:Name="BTN_BROWSE" Content="مسیر فایل" Margin="5" Style="{StaticResource MaterialDesignFlatButton}" Width="75" FontSize="10" Click="BTN_BROWSE_Click"/>
+                        <TextBox x:Name="txtTemplateBackupFile" Style="{StaticResource MaterialDesignOutlinedTextBox}" TextAlignment="Right"/>
                     </DockPanel>
 
                     <DockPanel Margin="0,10,0,10">
                         <TextBlock DockPanel.Dock="Left" Width="220" Text="مسیر ایجاد فایل‌های دیتابیس جدید:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
-                        <TextBox x:Name="txtNewDbPath" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <Button x:Name="BTN_BROWSEFOLDER" Content="مسیر Folder" Margin="5" Style="{StaticResource MaterialDesignFlatButton}" Width="90" FontSize="10" Click="BTN_BROWSEFOLDER_Click"/>
+                        <TextBox x:Name="txtNewDbPath" TextAlignment="Left" FlowDirection="LeftToRight" Style="{StaticResource MaterialDesignOutlinedTextBox}" />
                     </DockPanel>
 
                     <DockPanel Margin="0,10,0,10">
                         <TextBlock DockPanel.Dock="Left" Width="220" Text="نام دیتابیس برای سال جدید:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
-                        <TextBox x:Name="txtNewDbName" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <TextBox x:Name="txtNewDbName"  MaxLength="100" Style="{StaticResource MaterialDesignOutlinedTextBox}" TextAlignment="Left" FlowDirection="LeftToRight"/>
                     </DockPanel>
 
                     <DockPanel Margin="0,10,0,10">
                         <TextBlock DockPanel.Dock="Left" Width="220" Text="سال مالی جدید:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
-                        <TextBox x:Name="YEA" Width="150" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <TextBox x:Name="YEA" Width="100" MaxLength="4" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignOutlinedTextBox}" TextAlignment="Right"/>
                     </DockPanel>
 
                     <!-- Warning and Fluent Progress Area -->
@@ -106,11 +108,11 @@
                     <DockPanel Margin="30" LastChildFill="True">
                         <Button x:Name="Command3" Content="تایید و ایجاد سال مالی" Click="Command3_Click" BorderBrush="{x:Null}" FontSize="14" Foreground="#DDFFFFFF" Height="40" />
                     </DockPanel>
-         
+
 
                 </StackPanel>
             </Border>
         </Grid>
-        
+
     </Grid>
 </Window>

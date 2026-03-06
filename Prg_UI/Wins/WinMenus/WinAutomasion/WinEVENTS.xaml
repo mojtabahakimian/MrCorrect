@@ -82,7 +82,7 @@
                         </Style>
                     </DataGridTextColumn.CellStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn x:Name="iDDColumn" Binding="{Binding IDD,UpdateSourceTrigger=PropertyChanged}" Header="ردیف" IsReadOnly="True"   MinWidth="60" Width="auto" >
+                <DataGridTextColumn x:Name="iDDColumn" Binding="{Binding IDD,UpdateSourceTrigger=PropertyChanged}" Header="ردیف" IsReadOnly="True" MinWidth="60" Width="auto" >
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MaterialDesignDataGridCell}">
                             <Setter Property = "IsTabStop" Value = "False" />

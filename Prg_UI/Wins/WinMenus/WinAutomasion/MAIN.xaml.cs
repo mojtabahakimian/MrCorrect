@@ -159,6 +159,8 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
         {
             FILL_ALL_COMBOBOXES();
 
+            AutoRefreshToggle.IsChecked = false;
+
             await DoLoadKartabl(true);
 
             await CheckRemindersAndMessages();
@@ -309,7 +311,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
 
         private const int MsgAndRemindersInterval = 10;
 
-                // Circuit Breaker fields
+        // Circuit Breaker fields
         private int _consecutiveFailures = 0;
         private const int MAX_FAILURES = 3;
         private DateTime _nextRetryTime = DateTime.MinValue;
