@@ -291,12 +291,10 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         }
 
         #region PROGRESSBAR
-        private static readonly System.Windows.Media.Brush NormalStatusBrush =
-    new System.Windows.Media.SolidColorBrush(
+        private static readonly System.Windows.Media.Brush NormalStatusBrush = new System.Windows.Media.SolidColorBrush(
         (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#0F172A"));
 
-        private static readonly System.Windows.Media.Brush ErrorStatusBrush =
-            System.Windows.Media.Brushes.Red;
+        private static readonly System.Windows.Media.Brush ErrorStatusBrush = System.Windows.Media.Brushes.Red;
 
         private int _progressCurrentStep = 0;
         private int _progressTotalSteps = 0;
