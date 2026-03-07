@@ -366,9 +366,8 @@
                                             <Button x:Name="Command3"
                                                     Grid.Column="1"
                                                     Width="220"
-                                                    Margin="16,0,0,0"
-                                                    Click="Command3_Click"
-                                                    Style="{StaticResource PrimaryActionButtonStyle}">
+                                                    Margin="16,0,0,0" BorderBrush="{x:Null}" Foreground="#DDFFFFFF" Height="50"
+                                                    Click="Command3_Click">
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                                     <materialDesign:PackIcon Kind="DatabasePlusOutline"
                                                                              Width="18"
