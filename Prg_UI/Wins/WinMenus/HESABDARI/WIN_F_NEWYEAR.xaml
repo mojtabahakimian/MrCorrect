@@ -308,23 +308,30 @@
                                                         <ProgressBar x:Name="prgBar" Width="24" Height="24" Margin="0,0,10,0" Style="{StaticResource MaterialDesignCircularProgressBar}" Value="0" IsIndeterminate="True" Visibility="Collapsed"/>
                                                         <TextBlock x:Name="txtStatus" Text="آماده عملیات." FontWeight="Bold" FontSize="14" Foreground="#0F172A" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                                     </StackPanel>
-
-                                                    <Border x:Name="ProgressPanel" Margin="0,14,0,0" Padding="12" CornerRadius="14" Background="#FFFFFF" BorderBrush="#DCE3EE" BorderThickness="1" Visibility="Collapsed">
+                                                    <Border x:Name="ProgressPanel" Margin="0,16,0,0" Padding="16" CornerRadius="12" Background="#FAFAFA" BorderBrush="#E5E7EB" BorderThickness="1" Visibility="Collapsed">
                                                         <StackPanel>
-                                                            <Grid Margin="0,0,0,10">
+                                                            <Grid Margin="0,0,0,14">
                                                                 <Grid.ColumnDefinitions>
                                                                     <ColumnDefinition Width="*"/>
                                                                     <ColumnDefinition Width="Auto"/>
                                                                 </Grid.ColumnDefinitions>
-                                                                <TextBlock x:Name="txtProgressMeta" Grid.Column="0" Text="0 از 0 مرحله" Foreground="#64748B" FontSize="12" VerticalAlignment="Center"/>
-                                                                <TextBlock x:Name="txtProgressPercent" Grid.Column="1" Text="0%" FontWeight="Bold" FontSize="15" Foreground="#0F172A" VerticalAlignment="Center"/>
+                                                                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                                                    <materialDesign:PackIcon Kind="ChartArc" Width="16" Height="16" Foreground="#64748B" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                                                    <TextBlock x:Name="txtProgressMeta" Text="0 از 0 مرحله" Foreground="#6B7280" FontSize="13" VerticalAlignment="Center"/>
+                                                                </StackPanel>
+                                                                <Border Grid.Column="1" Background="{StaticResource GENERAL_Grlicom}" CornerRadius="6" Padding="10,4">
+                                                                    <TextBlock x:Name="txtProgressPercent" Text="0%" FontWeight="Bold" FontSize="14" Foreground="{Binding ElementName=GENERAL_RANG, Path=Background}" VerticalAlignment="Center"/>
+                                                                </Border>
                                                             </Grid>
 
-                                                            <Border Height="10" CornerRadius="5" Background="#E2E8F0" ClipToBounds="True">
-                                                                <ProgressBar x:Name="prgLinear" Minimum="0" Maximum="100" Value="0" Height="10" BorderThickness="0" Foreground="{Binding ElementName=GENERAL_RANG, Path=Background}" Background="Transparent"/>
+                                                            <Border Height="8" CornerRadius="4" Background="#E5E7EB" ClipToBounds="True">
+                                                                <ProgressBar x:Name="prgLinear" Minimum="0" Maximum="100" Value="0" Height="8" BorderThickness="0" Foreground="{Binding ElementName=GENERAL_RANG, Path=Background}" Background="Transparent"/>
                                                             </Border>
 
-                                                            <TextBlock x:Name="txtRemainingSteps" Margin="0,10,0,0" Text="مراحل باقیمانده: 0" Foreground="#475569" FontSize="12"/>
+                                                            <StackPanel Orientation="Horizontal" Margin="0,14,0,0" HorizontalAlignment="Left">
+                                                                <materialDesign:PackIcon Kind="TimerSand" Width="15" Height="15" Foreground="#94A3B8" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                                                <TextBlock x:Name="txtRemainingSteps" Text="مراحل باقیمانده: 0" Foreground="#9CA3AF" FontSize="12" VerticalAlignment="Center"/>
+                                                            </StackPanel>
                                                         </StackPanel>
                                                     </Border>
 
@@ -355,7 +362,7 @@
                                             <StackPanel Margin="0,14,0,0">
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                                                     <materialDesign:PackIcon Kind="CheckCircleOutline" Width="18" Height="18" Foreground="#16A34A" Margin="0,0,8,0"/>
-                                                    <TextBlock Text="قبل از هر کاری از دیتابیس جاری خود یک بکاپتهیه کنید." Foreground="#334155" TextWrapping="Wrap"/>
+                                                    <TextBlock Text="قبل از هر کاری از دیتابیس جاری خود یک بکاپ تهیه کنید." Foreground="#334155" TextWrapping="Wrap"/>
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                                                     <materialDesign:PackIcon Kind="CheckCircleOutline" Width="18" Height="18" Foreground="#16A34A" Margin="0,0,8,0"/>
