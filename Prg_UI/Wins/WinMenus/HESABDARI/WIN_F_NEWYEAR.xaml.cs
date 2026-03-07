@@ -290,6 +290,117 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             //COMBOHESAB.ItemsSource = dbms.DoGetDataSQL<HESAB_CMB_MODEL>($"SELECT hes, NAME FROM CUST_HESAB ORDER BY hes").ToList();
         }
 
+        #region PROGRESSBAR
+        private static readonly System.Windows.Media.Brush NormalStatusBrush =
+    new System.Windows.Media.SolidColorBrush(
+        (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#0F172A"));
+
+        private static readonly System.Windows.Media.Brush ErrorStatusBrush =
+            System.Windows.Media.Brushes.Red;
+
+        private int _progressCurrentStep = 0;
+        private int _progressTotalSteps = 0;
+
+        private int GetProgressTotalSteps()
+        {
+            // شمارش بر اساس لیست‌های فعلی همین فایل
+            const int standardTablesCount = 79;
+            const int customTablesCount = 34;
+            const int conditionalTablesCount = 2;
+            const int specialTransferCount = 3;   // REMAINDER + PAY_GETD + PAY_GETP
+            const int identityTablesCount = 14;
+            const int initialAndFinalSteps = 7;   // پوشه + prebackup + restore + disable FK + STUFFSK + enable FK + update SAZMAN
+
+            return standardTablesCount
+                 + customTablesCount
+                 + conditionalTablesCount
+                 + specialTransferCount
+                 + identityTablesCount
+                 + initialAndFinalSteps;
+        }
+
+        private void BeginProgress()
+        {
+            _progressCurrentStep = 0;
+            _progressTotalSteps = GetProgressTotalSteps();
+
+            Dispatcher.Invoke(() =>
+            {
+                txtStatus.Text = "در حال آماده‌سازی عملیات...";
+                txtStatus.Foreground = NormalStatusBrush;
+
+                prgBar.Visibility = Visibility.Visible;
+                ProgressPanel.Visibility = Visibility.Visible;
+
+                prgLinear.Minimum = 0;
+                prgLinear.Maximum = 100;
+                prgLinear.Value = 0;
+
+                txtProgressPercent.Text = "0%";
+                txtProgressMeta.Text = $"0 از {_progressTotalSteps:N0} مرحله";
+                txtRemainingSteps.Text = $"مراحل باقیمانده: {_progressTotalSteps:N0}";
+            });
+        }
+
+        private void AdvanceProgress(string completedMessage)
+        {
+            if (_progressTotalSteps <= 0)
+            {
+                _progressTotalSteps = 1;
+            }
+
+            if (_progressCurrentStep < _progressTotalSteps)
+            {
+                _progressCurrentStep++;
+            }
+
+            int percent = (int)Math.Round((_progressCurrentStep * 100.0) / _progressTotalSteps, MidpointRounding.AwayFromZero);
+            int remaining = _progressTotalSteps - _progressCurrentStep;
+
+            Dispatcher.Invoke(() =>
+            {
+                txtStatus.Text = completedMessage;
+                txtStatus.Foreground = NormalStatusBrush;
+
+                prgLinear.Value = percent;
+                txtProgressPercent.Text = $"{percent}%";
+                txtProgressMeta.Text = $"{_progressCurrentStep:N0} از {_progressTotalSteps:N0} مرحله";
+                txtRemainingSteps.Text = $"مراحل باقیمانده: {remaining:N0}";
+            });
+        }
+
+        private void CompleteProgress(string message)
+        {
+            if (_progressTotalSteps <= 0)
+            {
+                _progressTotalSteps = 1;
+            }
+
+            _progressCurrentStep = _progressTotalSteps;
+
+            Dispatcher.Invoke(() =>
+            {
+                txtStatus.Text = message;
+                txtStatus.Foreground = NormalStatusBrush;
+
+                prgLinear.Value = 100;
+                txtProgressPercent.Text = "100%";
+                txtProgressMeta.Text = $"{_progressTotalSteps:N0} از {_progressTotalSteps:N0} مرحله";
+                txtRemainingSteps.Text = "مراحل باقیمانده: 0";
+            });
+        }
+
+        private void FailProgress(string message)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                txtStatus.Text = message;
+                txtStatus.Foreground = ErrorStatusBrush;
+            });
+        }
+
+        #endregion
+
         private void CopyTableAllRowsSmart(string oldDb, string newDb, string tableName)
         {
             string safeOld = QuoteDbName(oldDb);
@@ -497,7 +608,6 @@ END CATCH;";
                 return;
             }
 
-            // چک پیشگیرانه قبل از شروع عملیات
             string validationMessage = ValidateBeforeCreateNewYear(newDbName, newDbDirectory);
             if (!string.IsNullOrWhiteSpace(validationMessage))
             {
@@ -505,43 +615,44 @@ END CATCH;";
                 return;
             }
 
-            // قفل کردن فرم و نمایش انیمیشن
             Command3.IsEnabled = false;
-            prgBar.Visibility = Visibility.Visible;
+            BeginProgress();
 
             try
             {
-                // اجرای پروسه‌های سنگین در Background Thread
                 await Task.Run(() =>
                 {
+                    UpdateStatus("در حال آماده‌سازی پوشه دیتابیس جدید...");
                     if (!Directory.Exists(newDbDirectory))
                     {
                         Directory.CreateDirectory(newDbDirectory);
                     }
+                    AdvanceProgress("پوشه دیتابیس جدید آماده شد.");
 
-                    // --- اصلاحیه مهم: بکاپ‌گیری از اطلاعات انبار سال جاری (دقیقاً مشابه VBA) ---
                     UpdateStatus("در حال پشتیبان‌گیری اولیه اطلاعات انبار...");
                     ExecutePreBackupTrTables(oldDbName);
+                    AdvanceProgress("پشتیبان‌گیری اولیه اطلاعات انبار انجام شد.");
 
-                    UpdateStatus($"در حال بازیابی دیتابیس خام با موتور Turbo Restore ({newDbName})...");
+                    UpdateStatus($"در حال بازیابی دیتابیس خام ({newDbName})...");
                     RestoreDatabaseFromTemplate(newDbName, backupFilePath, newDbDirectory);
+                    AdvanceProgress($"بازیابی دیتابیس خام {newDbName} انجام شد.");
 
-                    UpdateStatus("دیتابیس خام ایجاد شد. در حال انتقال ساختار و اطلاعات...");
                     ExecuteDataTransfers(oldDbName, newDbName, currentYearVal);
 
+                    UpdateStatus("در حال بروزرسانی سال مالی در جدول SAZMAN...");
                     string safeNewDb = QuoteDbName(newDbName);
                     dbms.DoExecuteSQL($"UPDATE {safeNewDb}.dbo.SAZMAN SET YEA = @Year", new { Year = currentYearVal });
+                    AdvanceProgress("سال مالی جدید در جدول SAZMAN ثبت شد.");
                 });
 
-                UpdateStatus("عملیات با موفقیت به پایان رسید.");
+                CompleteProgress("عملیات با موفقیت به پایان رسید.");
                 new Msgwin(false, "عملیات ایجاد سال مالی با موفقیت انجام شد.").ShowDialog();
                 this.Close();
             }
             catch (Exception ex)
             {
+                FailProgress("خطا در عملیات!");
                 new Msgwin(false, "خطای بحرانی در عملیات ایجاد سال:\n" + ex.Message).ShowDialog();
-                txtStatus.Text = "خطا در عملیات!";
-                txtStatus.Foreground = System.Windows.Media.Brushes.Red;
             }
             finally
             {
@@ -650,6 +761,8 @@ END CATCH;";
                 JOIN sys.schemas s ON t.schema_id = s.schema_id;
                 EXEC sp_executesql @disableSql;";
                 dbms.DoExecuteSQL(disableFkSql);
+                AdvanceProgress("کلیدهای خارجی دیتابیس مقصد موقتاً غیرفعال شدند.");
+
 
                 // گروه ۱: جداول استاندارد (TCOD_OSTAN از این لیست حذف شد چون در VBA کامنت بود - BLOCKNON_HES در VBA اجرا می‌شود و باید باشد)
                 string[] standardTables = {
@@ -677,6 +790,7 @@ END CATCH;";
                 {
                     UpdateStatus($"انتقال کامل جدول {tbl}...");
                     CopyTableAllRowsSmart(oldDb, newDb, tbl);
+                    AdvanceProgress($"جدول {tbl} با موفقیت منتقل شد.");
                 }
 
                 // گروه ۲: جداول نیازمند تعریف دقیق ستون‌ها
@@ -741,6 +855,8 @@ END CATCH;";
                         dbms.DoExecuteSQL($"INSERT INTO {safeNew}.dbo.SAZMAN ({kvp.Value}, YEA) SELECT {kvp.Value}, {newYear} FROM {safeOld}.dbo.SAZMAN");
                     else
                         dbms.DoExecuteSQL($"INSERT INTO {safeNew}.dbo.[{kvp.Key}] ({kvp.Value}) SELECT {kvp.Value} FROM {safeOld}.dbo.[{kvp.Key}]");
+
+                    AdvanceProgress($"جدول {kvp.Key} با موفقیت منتقل شد.");
                 }
 
                 // گروه ۳: جداول شرطی
@@ -754,6 +870,8 @@ END CATCH;";
                 {
                     UpdateStatus($"انتقال شرطی جدول {kvp.Key}...");
                     dbms.DoExecuteSQL($"INSERT INTO {safeNew}.dbo.[{kvp.Key}] SELECT * FROM {safeOld}.dbo.[{kvp.Key}] WHERE {kvp.Value}");
+
+                    AdvanceProgress($"انتقال شرطی جدول {kvp.Key} انجام شد.");
                 }
 
                 // --- اصلاحیه مهم: تعیین دقیق ۱۰ فیلد برای جدول REMAINDER ---
@@ -763,6 +881,7 @@ END CATCH;";
                 SELECT PERSONEL, PAYAM, STATUS, CTDATE, CTTIME, USERNAME, COMP_COD, STDATE, STTIME, SMSOK 
                 FROM {safeOld}.dbo.REMAINDER WHERE STATUS = 1
             ");
+                AdvanceProgress("پیام‌های REMAINDER منتقل شد.");
 
                 // --- اصلاحیه مهم: مپینگ دقیق فیلدهای NULL AS Expr6 (NUMBER) و NULL AS Expr7 (TAG) برای اسناد ---
                 UpdateStatus($"انتقال اسناد خزانه‌داری...");
@@ -780,6 +899,7 @@ END CATCH;";
                 FROM {safeOld}.dbo.PAY_GETP 
                 WHERE N_KOL2 IS NULL AND N_KOL <> 911 AND N_MOIN2 IS NULL AND N_TAF2 IS NULL AND N_KOL3 IS NULL AND N_MOIN3 IS NULL AND N_TAF3 IS NULL
             ");
+                AdvanceProgress("اسناد PAY_GETD منتقل شد.");
 
                 // گروه ۴: جداول کلید خودکار (IDENTITY TABLES)
                 var identityTables = new Dictionary<string, string>
@@ -828,6 +948,8 @@ END CATCH;";
                     END CATCH;
                 ";
                     dbms.DoExecuteSQL(identitySql);
+
+                    AdvanceProgress($"جدول Identity {kvp.Key} منتقل شد.");
                 }
 
                 // --- اصلاحیه مهم: اصلاح پارامترهای lastavrage به شکل (AK.CODE, A.CODE) ---
@@ -859,6 +981,7 @@ END CATCH;";
                 INNER JOIN {safeOld}.dbo.STUF_FSK F ON S.CODE = F.CODE AND S.ANBAR = F.ANBAR;
             ";
                 dbms.DoExecuteSQL(stuffSql);
+                AdvanceProgress("موجودی‌های اولیه انبار محاسبه و ثبت شد.");
 
                 UpdateStatus("انتقال جداول قیمت‌گذاری و آپدیت قیمت انبار...");
                 dbms.DoExecuteSQL($@"
@@ -907,6 +1030,8 @@ END CATCH;";
                         EXEC sp_executesql @enableSql;
                     ";
                 dbms.DoExecuteSQL(enableFkSql);
+                AdvanceProgress("قوانین کلیدهای خارجی مجدداً اعمال شد.");
+
                 UpdateStatus("انتقال با موفقیت به پایان رسید.");
             }
         }
