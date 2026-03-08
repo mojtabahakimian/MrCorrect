@@ -477,12 +477,12 @@ namespace Wins.WinMenus.HESABDARI
             //به حساب
             CL_HESABDARI.GETTAF3(TOHES.Text, ref KOL, ref MOIN, ref taf, ref TAF2, ref taf3, ref taf4);
 
-            HKOL = string.IsNullOrEmpty(KOL?.ToStringNullSafe()) ? "NULL" : KOL?.ToStringNullSafe();
-            HMOIN = string.IsNullOrEmpty(MOIN?.ToStringNullSafe()) ? "NULL" : MOIN?.ToStringNullSafe();
-            HTAF = string.IsNullOrEmpty(taf?.ToStringNullSafe()) ? "NULL" : taf?.ToStringNullSafe();
-            HTAF2 = string.IsNullOrEmpty(TAF2?.ToStringNullSafe()) ? "NULL" : TAF2?.ToStringNullSafe();
-            HTAF3 = string.IsNullOrEmpty(taf3?.ToStringNullSafe()) ? "NULL" : taf3?.ToStringNullSafe();
-            HTAF4 = string.IsNullOrEmpty(taf4?.ToStringNullSafe()) ? "NULL" : taf4?.ToStringNullSafe();
+            HKOL = string.IsNullOrWhiteSpace(KOL?.ToStringNullSafe()) ? "NULL" : KOL?.ToStringNullSafe();
+            HMOIN = string.IsNullOrWhiteSpace(MOIN?.ToStringNullSafe()) ? "NULL" : MOIN?.ToStringNullSafe();
+            HTAF = string.IsNullOrWhiteSpace(taf?.ToStringNullSafe()) ? "NULL" : taf?.ToStringNullSafe();
+            HTAF2 = string.IsNullOrWhiteSpace(TAF2?.ToStringNullSafe()) ? "NULL" : TAF2?.ToStringNullSafe();
+            HTAF3 = string.IsNullOrWhiteSpace(taf3?.ToStringNullSafe()) ? "NULL" : taf3?.ToStringNullSafe();
+            HTAF4 = string.IsNullOrWhiteSpace(taf4?.ToStringNullSafe()) ? "NULL" : taf4?.ToStringNullSafe();
 
 
             if (IsFuzzyNull(SNDNUM1.Text))
