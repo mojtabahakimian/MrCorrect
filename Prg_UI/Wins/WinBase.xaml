@@ -605,6 +605,7 @@
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="صدور سند افتتاحیه" Tag="{x:Static materialDesign:PackIconKind.FileDocumentBoxPlus}"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="دریافت موجودی انتهای دوره از سال قبل" Tag="{x:Static materialDesign:PackIconKind.Import}"/>
                                         <Button Style="{StaticResource FluentSidebarItem}" Content="انتخاب یک سال مالی" Tag="{x:Static materialDesign:PackIconKind.Calendar}"/>
+                                        <Button Style="{StaticResource FluentSidebarItem}" Content="ایجاد سالی مالی جدید" Tag="{x:Static materialDesign:PackIconKind.DatabaseAdd}" Click="Button_Click_167"/>
                                     </StackPanel>
                                 </Expander>
 

@@ -29,7 +29,8 @@
                 <ResourceDictionary Source="pack://application:,,,/UiDictionary/Greeny.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/UiDictionary/Rangy.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/UiDictionary/ColorModel.xaml" />
-  
+                <ResourceDictionary Source="pack://application:,,,/UiDictionary/GlobalSoftTheme.xaml" />
+
                 <ResourceDictionary Source="pack://application:,,,/Syncfusion.SfGrid.WPF;component/Themes/Generic.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <FontFamily x:Key="IRANYEKAN">pack://application:,,,/UiDrive/FNT/#IRANYekanFN</FontFamily>
