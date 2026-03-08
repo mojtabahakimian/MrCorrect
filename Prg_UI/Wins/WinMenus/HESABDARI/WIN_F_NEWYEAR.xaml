@@ -4,115 +4,456 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.HESABDARI"
-        mc:Ignorable="d"
         xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        Height="765" Width="785"
+        mc:Ignorable="d"
+        Height="900" Width="1100"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         FontFamily="{StaticResource IRANYEKAN}"
-        Background="{x:Null}"
+        Background="Transparent"
         AllowsTransparency="True" AllowDrop="True"
         WindowStyle="None"
-        WindowStartupLocation="CenterScreen" ContentRendered="Window_ContentRendered" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
+        WindowStartupLocation="CenterScreen" 
+        ContentRendered="Window_ContentRendered" 
+        Loaded="Window_Loaded" 
+        PreviewKeyDown="Window_PreviewKeyDown"
+        FlowDirection="RightToLeft">
+
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="0" ResizeBorderThickness="15"/>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="15" GlassFrameThickness="0" CornerRadius="0"/>
     </WindowChrome.WindowChrome>
+
     <Window.Resources>
-        <ItemsPanelTemplate x:Key="VSP">
-            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ScrollViewer.CanContentScroll="True"/>
-        </ItemsPanelTemplate>
-        <SolidColorBrush x:Key="GENERAL_Grlicom" Color="{Binding ElementName=GENERAL_RANG, Path=Background.Color}" Opacity="0.3"/>
+
+        <!-- استایل اینپوت‌های نرم (Soft Input) -->
+        <Style x:Key="SoftTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Grid>
+                            <!-- لایه پس‌زمینه نیمه‌شفاف برای هماهنگی با دارک/لایت -->
+                            <Border Background="{DynamicResource MaterialDesignPaper}" Opacity="0.6" CornerRadius="16"/>
+
+                            <Border BorderBrush="{TemplateBinding BorderBrush}" 
+                                    BorderThickness="{TemplateBinding BorderThickness}" 
+                                    CornerRadius="16"
+                                    Padding="{TemplateBinding Padding}">
+                                <Grid>
+                                    <TextBlock x:Name="HintText" 
+                                               Text="{TemplateBinding materialDesign:HintAssist.Hint}" 
+                                               Foreground="{DynamicResource MaterialDesignBody}" Opacity="0.5"
+                                               Margin="0" 
+                                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}" 
+                                               IsHitTestVisible="False" 
+                                               Visibility="Collapsed"/>
+                                    <ScrollViewer x:Name="PART_ContentHost" Margin="0" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Text" Value="">
+                                <Setter TargetName="HintText" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="Text" Value="{x:Null}">
+                                <Setter TargetName="HintText" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsReadOnly" Value="True">
+                                <Setter Property="Opacity" Value="0.75"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- استایل دکمه‌های مرور فایل/پوشه -->
+        <Style x:Key="SoftActionBtnStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <!-- لایه پس‌زمینه -->
+                            <Border x:Name="BgBorder" Background="{DynamicResource MaterialDesignPaper}" Opacity="0.8" CornerRadius="12"/>
+
+                            <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="12">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="BgBorder" Property="Background" Value="{DynamicResource PrimaryHueMidBrush}"/>
+                                <Setter TargetName="BgBorder" Property="Opacity" Value="0.15"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- استایل دکمه اصلی (ذخیره) متصل به رنگ متریال سیستم -->
+        <Style x:Key="PrimaryGradientButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidForegroundBrush}"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="60"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" CornerRadius="24" Background="{DynamicResource PrimaryHueMidBrush}">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="20" ShadowDepth="6" Color="Black" Opacity="0.25"/>
+                            </Border.Effect>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource MaterialDesignDivider}"/>
+                                <Setter TargetName="border" Property="Effect" Value="{x:Null}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- دکمه‌های کنترل هدر -->
+        <Style x:Key="WindowControlButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="4,0,0,0"/>
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+            <Setter Property="IsTabStop" Value="False"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
-    <Grid x:Name="mygrid" Margin="8,8,8,0">
-        <!-- Hidden button for color binding reference -->
-        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Width="1" Height="1"/>
-        <!-- Main container -->
-        <Border Background="{StaticResource MaterialDesign.Brush.Background}" BorderBrush="{Binding ElementName=GENERAL_RANG, Path=Background}" BorderThickness="1" CornerRadius="10" Padding="8">
-            <!-- Title bar -->
-            <Border  x:Name="TitleDrawBar" Style="{StaticResource BordG}"  Background="{Binding ElementName=GENERAL_RANG, Path=Background}"  CornerRadius="10,10,0,0" Margin="-9,-9,-9,0"  Height="38"  VerticalAlignment="Top" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
-                <Grid>
-                    <!-- Window title -->
-                    <Label x:Name="LABEL_HEADER" Content="ایجاد سال مالی جدید" Padding="17,8,10,10" Foreground="White" Margin="0,0,110,0" VerticalAlignment="Center"/>
-                    <!-- Window control buttons -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,13,0">
-                        <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" Height="24" Padding="0,0,0,-1" IsTabStop="False" ToolTip="Minimize">
-                            <materialDesign:PackIcon Kind="WindowMinimize" Width="18" Height="18" Foreground="White"/>
-                        </Button>
-                        <Button x:Name="Btn_Max" Click="Btn_Max_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" FontSize="12" Height="24" Padding="0" Margin="4,0,0,0" IsTabStop="False" ToolTip="Maximize">
-                            <materialDesign:PackIcon Kind="WindowMaximize" Width="17" Height="17" Foreground="White"/>
-                        </Button>
-                        <Button x:Name="Btn_Close" Click="Btn_Close_Click" Style="{StaticResource MaterialDesignFlatButton}" Width="24" Height="24" Padding="0" Margin="4,0,0,0" FontSize="12" IsTabStop="False" ToolTip="Close">
-                            <materialDesign:PackIcon Kind="WindowClose" Width="19" Height="19" Foreground="White"/>
-                        </Button>
-                    </StackPanel>
-                </Grid>
-            </Border>
+    <Grid x:Name="mygrid" Margin="0">
+        <!-- دکمه مخفی مورد نیاز در Code-Behind -->
+        <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Width="1" Height="1" Background="#FF03A9F4"/>
+
+        <!-- 1. پس‌زمینه ملایم اصلی (هماهنگ با دارک/لایت) -->
+        <Border Background="{DynamicResource MaterialDesignPaper}" CornerRadius="40" Margin="10">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="30" ShadowDepth="15" Color="Black" Opacity="0.15"/>
+            </Border.Effect>
         </Border>
-        <!-- Notification popup -->
-        <Popup x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative" Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
-            <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Width="{Binding ElementName=mygrid, Path=ActualWidth, Mode=OneWay}" Height="84" Padding="10">
-                <TextBox x:Name="Pop1Text1" IsReadOnly="True" Background="Transparent" FlowDirection="RightToLeft" BorderBrush="Transparent" Foreground="White" Text="محل نمایش اعلان های سیستم" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
-            </Border>
-        </Popup>
 
-        <!-- Content area -->
-        <Grid Margin="0,38,0,0" FlowDirection="RightToLeft">
-            <!-- Main Form Content -->
-            <Border Margin="20" Padding="15" Background="White" CornerRadius="8">
-                <StackPanel>
-
-                    <DockPanel Margin="0,10,0,10">
-                        <TextBlock DockPanel.Dock="Left" Width="220" Text="نام دیتابیس در سال جاری:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
-                        <TextBox x:Name="txtCurrentDbName" IsReadOnly="True" Style="{StaticResource MaterialDesignOutlinedTextBox}" Background="#F0F0F0" TextAlignment="Right"/>
-                    </DockPanel>
-
-                    <DockPanel Margin="0,10,0,10">
-                        <TextBlock DockPanel.Dock="Left" Width="220" Text="مسیر دیتابیس در سال جاری:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
-                        <TextBox x:Name="txtCurrentDbPath" IsReadOnly="True" Style="{StaticResource MaterialDesignOutlinedTextBox}" Background="#F0F0F0" TextAlignment="Right"/>
-                    </DockPanel>
-
-                    <DockPanel Margin="0,10,0,10">
-                        <TextBlock DockPanel.Dock="Left" Width="220" Text="فایل دیتابیس خام (neginsql.bak):" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
-                        <Button x:Name="BTN_BROWSE" Content="مسیر فایل" Margin="5" Style="{StaticResource MaterialDesignFlatButton}" Width="75" FontSize="10" Click="BTN_BROWSE_Click"/>
-                        <TextBox x:Name="txtTemplateBackupFile" Style="{StaticResource MaterialDesignOutlinedTextBox}" TextAlignment="Right"/>
-                    </DockPanel>
-
-                    <DockPanel Margin="0,10,0,10">
-                        <TextBlock DockPanel.Dock="Left" Width="220" Text="مسیر ایجاد فایل‌های دیتابیس جدید:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
-                        <Button x:Name="BTN_BROWSEFOLDER" Content="مسیر Folder" Margin="5" Style="{StaticResource MaterialDesignFlatButton}" Width="90" FontSize="10" Click="BTN_BROWSEFOLDER_Click"/>
-                        <TextBox x:Name="txtNewDbPath" TextAlignment="Left" FlowDirection="LeftToRight" Style="{StaticResource MaterialDesignOutlinedTextBox}" />
-                    </DockPanel>
-
-                    <DockPanel Margin="0,10,0,10">
-                        <TextBlock DockPanel.Dock="Left" Width="220" Text="نام دیتابیس برای سال جدید:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
-                        <TextBox x:Name="txtNewDbName"  MaxLength="100" Style="{StaticResource MaterialDesignOutlinedTextBox}" TextAlignment="Left" FlowDirection="LeftToRight"/>
-                    </DockPanel>
-
-                    <DockPanel Margin="0,10,0,10">
-                        <TextBlock DockPanel.Dock="Left" Width="220" Text="سال مالی جدید:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
-                        <TextBox x:Name="YEA" Width="100" MaxLength="4" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignOutlinedTextBox}" TextAlignment="Right"/>
-                    </DockPanel>
-
-                    <!-- Warning and Fluent Progress Area -->
-                    <StackPanel Margin="0,30,0,0">
-                        <TextBlock Text="این عملیات فقط باید روی سرور اصلی انجام شود." Foreground="Red" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center" Margin="0,0,0,15"/>
-
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <ProgressBar x:Name="prgBar" Style="{StaticResource MaterialDesignCircularProgressBar}" Value="0" IsIndeterminate="True" Visibility="Collapsed" Width="24" Height="24" Margin="0,0,10,0"/>
-                            <TextBlock x:Name="txtStatus" Text="آماده عملیات..." Foreground="Teal" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <DockPanel Margin="30" LastChildFill="True">
-                        <Button x:Name="Command3" Content="تایید و ایجاد سال مالی" Click="Command3_Click" BorderBrush="{x:Null}" FontSize="14" Foreground="#DDFFFFFF" Height="40" />
-                    </DockPanel>
-
-
-                </StackPanel>
+        <Grid Margin="10" ClipToBounds="True">
+            <Border CornerRadius="40" Background="Transparent" ClipToBounds="True">
+                <Canvas>
+                    <!-- هاله‌های رنگی پویا بر اساس رنگ سیستم شما -->
+                    <Ellipse Fill="{DynamicResource PrimaryHueMidBrush}" Width="500" Height="500" Canvas.Left="300" Canvas.Top="200" Opacity="0.15">
+                        <Ellipse.Effect>
+                            <BlurEffect Radius="120" RenderingBias="Performance"/>
+                        </Ellipse.Effect>
+                    </Ellipse>
+                </Canvas>
             </Border>
         </Grid>
+
+        <!-- 2. کانتینر اصلی شیشه‌ای -->
+        <Grid Margin="30">
+            <!-- لایه نیمه شفاف برای ایجاد افکت شیشه‌ای روی دارک و لایت -->
+            <Border Background="{DynamicResource MaterialDesignPaper}" Opacity="0.85" CornerRadius="36" />
+            <Border BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="2" CornerRadius="36">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- هدر پنجره -->
+                    <Border x:Name="TitleDrawBar" Grid.Row="0" CornerRadius="36,36,0,0" Padding="24,20" Background="Transparent" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+                        <Grid>
+                            <!-- Title & Icon -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" FlowDirection="RightToLeft">
+                                <StackPanel VerticalAlignment="Center" Margin="0,0,10,0">
+                                    <TextBlock Text="ایجاد سال مالی جدید" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}"/>
+                                </StackPanel>
+                                <Grid Width="48" Height="48">
+                                    <Border Background="{DynamicResource MaterialDesignPaper}" CornerRadius="16"/>
+                                    <Border BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="16">
+                                        <Border.Effect>
+                                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Color="Black" Opacity="0.05"/>
+                                        </Border.Effect>
+                                        <materialDesign:PackIcon Kind="Database" Width="24" Height="24" Foreground="{DynamicResource PrimaryHueMidBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+
+                            <!-- Window Controls -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" FlowDirection="LeftToRight">
+                                <Button x:Name="Btn_Minimize" Click="Btn_Minimize_Click" Style="{StaticResource WindowControlButton}" ToolTip="Minimize">
+                                    <materialDesign:PackIcon Kind="WindowMinimize" Width="18" Height="18" Margin="0,0,0,-4"/>
+                                </Button>
+                                <Button x:Name="Btn_Max" Click="Btn_Max_Click" Style="{StaticResource WindowControlButton}" ToolTip="Maximize">
+                                    <materialDesign:PackIcon Kind="WindowMaximize" Width="17" Height="17"/>
+                                </Button>
+                                <Button x:Name="Btn_Close" Click="Btn_Close_Click" Style="{StaticResource WindowControlButton}" ToolTip="Close">
+                                    <materialDesign:PackIcon Kind="WindowClose" Width="19" Height="19"/>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Line X1="0" X2="2000" Y1="0" Y2="0" Stroke="{DynamicResource MaterialDesignDivider}" StrokeThickness="1" Grid.Row="0" VerticalAlignment="Bottom"/>
+
+                    <!-- محتوای اصلی -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <Grid Margin="32">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="6*"/>
+                                <ColumnDefinition Width="4*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- ستون فرم اطلاعات دیتابیس (راست) -->
+                            <Grid Grid.Column="0" Margin="0,0,16,0">
+                                <Border Background="{DynamicResource MaterialDesignPaper}" Opacity="0.6" CornerRadius="32"/>
+                                <Border BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="32" Padding="32">
+                                    <StackPanel>
+                                        <TextBlock Text="اطلاعات دیتابیس" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}" Margin="0,0,0,8"/>
+
+                                        <!-- اطلاعات دیتابیس فعلی (تکنیک لایه بندی رنگی) -->
+                                        <Grid Margin="0,0,0,24">
+                                            <Border Background="{DynamicResource PrimaryHueMidBrush}" Opacity="0.08" CornerRadius="20"/>
+                                            <Border BorderBrush="{DynamicResource PrimaryHueMidBrush}" Opacity="0.25" BorderThickness="1" CornerRadius="20"/>
+
+                                            <StackPanel Margin="20">
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                                    <materialDesign:PackIcon Kind="Database" Foreground="{DynamicResource PrimaryHueMidBrush}" Width="18" Height="18" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="دیتابیس در حال استفاده" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="1.5*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="نام دیتابیس" FontSize="12" Foreground="{DynamicResource MaterialDesignBody}" Opacity="0.7" Margin="0,0,0,4"/>
+                                                        <TextBox x:Name="txtCurrentDbName" Text="NEGIN_1402" Style="{StaticResource SoftTextBoxStyle}" IsReadOnly="True" FlowDirection="LeftToRight" Height="40"/>
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Column="1" Margin="16,0,0,0">
+                                                        <TextBlock Text="مسیر فایل" FontSize="12" Foreground="{DynamicResource MaterialDesignBody}" Opacity="0.7" Margin="0,0,0,4"/>
+                                                        <TextBox x:Name="txtCurrentDbPath" Text="D:\SQLData\Negin.mdf" Style="{StaticResource SoftTextBoxStyle}" IsReadOnly="True" FlowDirection="LeftToRight" Height="40"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- فایل پشتیبان -->
+                                        <StackPanel Margin="0,0,0,20">
+                                            <TextBlock Text="فایل پشتیبان الگو (neginsql.bak)" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource MaterialDesignBody}" Margin="4,0,0,8"/>
+                                            <Grid Height="45">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="120"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox x:Name="txtTemplateBackupFile" materialDesign:HintAssist.Hint="مسیر فایل الگو (bak)" Grid.Column="0" Style="{StaticResource SoftTextBoxStyle}" FlowDirection="LeftToRight" Margin="0,0,8,0"/>
+                                                <Button x:Name="BTN_BROWSE" Grid.Column="1" Click="BTN_BROWSE_Click" Style="{StaticResource SoftActionBtnStyle}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <materialDesign:PackIcon Kind="FileUploadOutline" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="مرور فایل" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
+                                            </Grid>
+                                        </StackPanel>
+
+                                        <!-- مسیر دیتابیس جدید -->
+                                        <StackPanel Margin="0,0,0,20">
+                                            <TextBlock Text="مسیر ایجاد دیتابیس جدید" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource MaterialDesignBody}" Margin="4,0,0,8"/>
+                                            <Grid Height="45">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="120"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox x:Name="txtNewDbPath" materialDesign:HintAssist.Hint="مسیر فولدر جدید دیتابیس" Grid.Column="0" Style="{StaticResource SoftTextBoxStyle}" FlowDirection="LeftToRight" Margin="0,0,8,0"/>
+                                                <Button x:Name="BTN_BROWSEFOLDER" Grid.Column="1" Click="BTN_BROWSEFOLDER_Click" Style="{StaticResource SoftActionBtnStyle}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <materialDesign:PackIcon Kind="FolderOutline" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="انتخاب مسیر" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
+                                            </Grid>
+                                        </StackPanel>
+
+                                        <!-- نام و سال مالی -->
+                                        <Grid Margin="0,0,0,32">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="1*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                                                <TextBlock Text="نام دیتابیس سال جدید" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource MaterialDesignBody}" Margin="4,0,0,8"/>
+                                                <TextBox x:Name="txtNewDbName" Text="" materialDesign:HintAssist.Hint="مثال: NEGIN_1403" Style="{StaticResource SoftTextBoxStyle}" FontWeight="Bold" FlowDirection="LeftToRight" Height="45"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="سال مالی جدید" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,8" HorizontalAlignment="Center"/>
+                                                <TextBox x:Name="YEA" materialDesign:HintAssist.Hint="1403" MaxLength="4" Style="{StaticResource SoftTextBoxStyle}" Foreground="{DynamicResource PrimaryHueMidBrush}" FontSize="18" FontWeight="Bold" TextAlignment="Center" Height="45"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- دکمه اکشن اصلی -->
+                                        <Button x:Name="Command3" Click="Command3_Click" Style="{StaticResource PrimaryGradientButton}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="ایجاد امن سال مالی جدید" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                                <materialDesign:PackIcon Kind="ArrowLeft" Width="20" Height="20" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Button>
+
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <!-- ستون وضعیت و راهنما (چپ) -->
+                            <Grid Grid.Column="1" Margin="16,0,0,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- پنل وضعیت و مانیتورینگ -->
+                                <Grid Grid.Row="0" Margin="0,0,0,24">
+                                    <Border Background="{DynamicResource MaterialDesignPaper}" Opacity="0.6" CornerRadius="32"/>
+                                    <Border BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="32" Padding="24">
+                                        <StackPanel>
+                                            <TextBlock Text="وضعیت فرآیند" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}" Margin="0,0,0,24"/>
+
+                                            <!-- آیکون وضعیت -->
+                                            <Grid Width="80" Height="80" HorizontalAlignment="Center" Margin="0,0,0,24">
+                                                <Border Background="{DynamicResource MaterialDesignPaper}" Opacity="0.8" CornerRadius="40"/>
+                                                <Border BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="2" CornerRadius="40">
+                                                    <materialDesign:PackIcon x:Name="iconStatus" Kind="CloudSyncOutline" Width="40" Height="40" Foreground="{DynamicResource PrimaryHueMidBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </Grid>
+
+                                            <!-- پیام وضعیت از سمت C# -->
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,24">
+                                                <ProgressBar x:Name="prgBar" Width="20" Height="20" Style="{StaticResource MaterialDesignCircularProgressBar}" Value="0" IsIndeterminate="True" Visibility="Collapsed" Margin="0,0,10,0" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                                                <TextBlock x:Name="txtStatus" Text="آماده شروع عملیات." FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryHueMidBrush}" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center"/>
+                                            </StackPanel>
+
+                                            <!-- نوار پیشرفت نرم -->
+                                            <Border x:Name="ProgressPanel" Visibility="Collapsed">
+                                                <StackPanel>
+                                                    <Grid Margin="0,0,0,8">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Right">
+                                                            <TextBlock Text="پیشرفت: " FontSize="13" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}" Opacity="0.7"/>
+                                                            <TextBlock x:Name="txtProgressPercent" Text="0%" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                                                            <TextBlock x:Name="txtProgressMeta" Text=" (0 از 0)" FontSize="12" Foreground="{DynamicResource MaterialDesignBody}" Opacity="0.5" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                                        </StackPanel>
+                                                        <TextBlock x:Name="txtRemainingSteps" Grid.Column="1" Text="مراحل باقیمانده: -" FontSize="12" Foreground="{DynamicResource MaterialDesignBody}" Opacity="0.5" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                                                    </Grid>
+
+                                                    <Border Height="12" Background="{DynamicResource MaterialDesignDivider}" CornerRadius="6" ClipToBounds="True">
+                                                        <ProgressBar x:Name="prgLinear" Minimum="0" Maximum="100" Value="0" Height="12" BorderThickness="0" Background="Transparent" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+
+                                <!-- هشدار دوستانه (رنگ نارنجی/زرد برای هر دو تم خوانا است) -->
+                                <Grid Grid.Row="1" Margin="0,0,0,24">
+                                    <Border Background="#F59E0B" Opacity="0.1" CornerRadius="24"/>
+                                    <Border BorderBrush="#F59E0B" BorderThickness="1" CornerRadius="24" Padding="20">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Grid Grid.Column="0" Width="44" Height="44" Margin="0,0,16,0">
+                                                <Border Background="#F59E0B" Opacity="0.15" CornerRadius="16"/>
+                                                <materialDesign:PackIcon Kind="ShieldAlertOutline" Width="24" Height="24" Foreground="#D97706" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Grid>
+
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="هشدار مهم" FontWeight="Bold" Foreground="#D97706" FontSize="14" Margin="0,0,0,4"/>
+                                                <TextBlock Text="اجرای این عملیات فقط باید روی سرور اصلی انجام شود تا فایل‌ها در مسیر درست ایجاد شوند." FontSize="12" Foreground="{DynamicResource MaterialDesignBody}" Opacity="0.85" TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+
+                                <!-- چک لیست قبل از اجرا -->
+                                <Grid Grid.Row="2" VerticalAlignment="Top">
+                                    <Border Background="{DynamicResource MaterialDesignPaper}" Opacity="0.6" CornerRadius="24"/>
+                                    <Border BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="24" Padding="24">
+                                        <StackPanel>
+                                            <TextBlock Text="چک‌لیست قبل از اجرا" FontSize="17" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}" Margin="0,0,0,16"/>
+                                            <StackPanel>
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                                    <materialDesign:PackIcon Kind="CheckCircleOutline" Width="20" Height="20" Foreground="{DynamicResource SecondaryHueMidBrush}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="از دیتابیس فعلی بکاپ تهیه کرده‌ام" Foreground="{DynamicResource MaterialDesignBody}" Opacity="0.8" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                                    <materialDesign:PackIcon Kind="CheckCircleOutline" Width="20" Height="20" Foreground="{DynamicResource SecondaryHueMidBrush}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="فایل خام (neginsql.bak) صحیح انتخاب شده" Foreground="{DynamicResource MaterialDesignBody}" Opacity="0.8" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                                    <materialDesign:PackIcon Kind="CheckCircleOutline" Width="20" Height="20" Foreground="{DynamicResource SecondaryHueMidBrush}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="درایو سرور دارای فضای خالی کافی است" Foreground="{DynamicResource MaterialDesignBody}" Opacity="0.8" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <materialDesign:PackIcon Kind="CheckCircleOutline" Width="20" Height="20" Foreground="{DynamicResource SecondaryHueMidBrush}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="نام دیتابیس سال جدید تکراری نیست" Foreground="{DynamicResource MaterialDesignBody}" Opacity="0.8" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+
+                            </Grid>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Notification Popup -->
+        <Popup x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Bottom" PlacementTarget="{Binding ElementName=TitleDrawBar}" Focusable="False" StaysOpen="True">
+            <Border x:Name="Pop_Border1" CornerRadius="20" Background="{DynamicResource MaterialDesignPaper}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" Width="400" Padding="16" Margin="0,10,0,0">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="20" ShadowDepth="10" Color="Black" Opacity="0.2"/>
+                </Border.Effect>
+                <TextBox x:Name="Pop1Text1" IsReadOnly="True" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource MaterialDesignBody}" FontSize="14" FontWeight="SemiBold" TextAlignment="Center" TextWrapping="Wrap" Margin="0"/>
+            </Border>
+        </Popup>
 
     </Grid>
 </Window>

@@ -1653,5 +1653,10 @@ namespace Prg_UI.Wins
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PRICE_ELAMIE_FORM_ELAMIYEH_TAKHFIF, default);
         }
+
+        private void Button_Click_167(object sender, RoutedEventArgs e)
+        {
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_F_NEWYEAR_SALEMALI, default);
+        }
     }
 }

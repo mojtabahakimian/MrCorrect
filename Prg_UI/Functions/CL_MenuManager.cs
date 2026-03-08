@@ -1066,6 +1066,10 @@ namespace Functions
             /// </summary>
             F_MENU_SSM_TAKHIR_PAR,
             /// <summary>
+            /// ایجاد سال مالی جدید
+            /// </summary>
+            WIN_F_NEWYEAR_SALEMALI,
+            /// <summary>
         }
         #endregion
 
@@ -1084,6 +1088,8 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+
+                case WinNameType.WIN_F_NEWYEAR_SALEMALI: /*ایجاد سال مالی جدید*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_F_NEWYEAR(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.F_MENU_SSM_TAKHIR_PAR: /*محاسبه تاخیر پرداخت ها*/ CL_LMethods.OpenWindow(OWNERWIN, new F_MENU_SSM(), isModalDialog: false, allowMultipleInstances: false); break;
 
