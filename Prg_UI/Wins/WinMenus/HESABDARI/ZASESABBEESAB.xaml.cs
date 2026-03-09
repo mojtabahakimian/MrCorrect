@@ -447,16 +447,11 @@ namespace Wins.WinMenus.HESABDARI
         List<MsgModel> MyMessages;
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            if (!HeaderIsValid())
-            {
-                return;
-            }
+            if (!HeaderIsValid()) return;
 
-            Msgwin msgwin = new Msgwin(true, "آیا از اجرای جایگذاری حساب مطمئن هستید ؟"); msgwin.ShowDialog();
-            if (msgwin.DialogResult == false)
-            {
-                return;
-            }
+            Msgwin msgwin = new Msgwin(true, "آیا از اجرای جایگذاری حساب مطمئن هستید ؟");
+            msgwin.ShowDialog();
+            if (msgwin.DialogResult == false) return;
 
             _ = AuditLogger.LogActionAsync(
                 actionType: "REPLACE HESAB",
@@ -466,267 +461,187 @@ namespace Wins.WinMenus.HESABDARI
                 newValue: $"NEW HESAB : {TOHES.Text}",
                 additionalInfo: $@"{this.GetType().Name} , EXE PATH : {System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}");
 
-            //Let's Go ................................
             Process Prc = ProcLoader.Start();
 
-            double? KOL = null, MOIN = null, taf = null;
-            double? TAF2 = null;
-            double? taf3 = null;
-            double? taf4 = null;
-
-            //به حساب
+            double? KOL = null, MOIN = null, taf = null, TAF2 = null, taf3 = null, taf4 = null;
             CL_HESABDARI.GETTAF3(TOHES.Text, ref KOL, ref MOIN, ref taf, ref TAF2, ref taf3, ref taf4);
 
-            HKOL = string.IsNullOrWhiteSpace(KOL?.ToStringNullSafe()) ? "NULL" : KOL?.ToStringNullSafe();
-            HMOIN = string.IsNullOrWhiteSpace(MOIN?.ToStringNullSafe()) ? "NULL" : MOIN?.ToStringNullSafe();
-            HTAF = string.IsNullOrWhiteSpace(taf?.ToStringNullSafe()) ? "NULL" : taf?.ToStringNullSafe();
-            HTAF2 = string.IsNullOrWhiteSpace(TAF2?.ToStringNullSafe()) ? "NULL" : TAF2?.ToStringNullSafe();
-            HTAF3 = string.IsNullOrWhiteSpace(taf3?.ToStringNullSafe()) ? "NULL" : taf3?.ToStringNullSafe();
-            HTAF4 = string.IsNullOrWhiteSpace(taf4?.ToStringNullSafe()) ? "NULL" : taf4?.ToStringNullSafe();
+            if (IsFuzzyNull(SNDNUM1.Text)) SNDNUM1.Text = "0";
+            if (IsFuzzyNull(SNDNUM2.Text)) SNDNUM2.Text = "99999999999999999999";
 
+            long.TryParse(DT1.Text.ToRawTarikh(), out long dt1Num);
+            long.TryParse(DT2.Text.ToRawTarikh(), out long dt2Num);
+            double.TryParse(SNDNUM1.Text, out double snd1);
+            double.TryParse(SNDNUM2.Text, out double snd2);
 
-            if (IsFuzzyNull(SNDNUM1.Text))
+            var parameters = new
             {
-                SNDNUM1.Text = "0";
-            }
-            if (IsFuzzyNull(SNDNUM2.Text))
-            {
-                SNDNUM2.Text = "99999999999999999999";
-            }
+                AzHes = AZHES.Text,
+                ToHes = TOHES.Text,
+                HKol = KOL,
+                HMoin = MOIN,
+                HTaf = taf,
+                HTaf2 = TAF2,
+                HTaf3 = taf3,
+                HTaf4 = taf4,
+                Dt1 = dt1Num,
+                Dt2 = dt2Num,
+                Snd1 = snd1,
+                Snd2 = snd2
+            };
 
-            MyMessages = new List<MsgModel>();
+            string sqlBatch = @"
+            SET NOCOUNT ON;
+            BEGIN TRY
+                SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+                BEGIN TRAN;
+                DECLARE @Results TABLE (Msg NVARCHAR(500));
+                DECLARE @Rows INT;
+                DECLARE @PgetRows INT = 0;
+
+                -- 1. اسناد حسابداری
+                UPDATE dbo.DEED_DTL
+                SET HES = @ToHes, HES_K = @HKol, HES_M = @HMoin, HES_T = @HTaf, HES_T2 = @HTaf2, HES_T3 = @HTaf3, HES_T4 = @HTaf4
+                WHERE (HES = @AzHes) AND n_s IN (SELECT n_s FROM dbo.deed_hed WHERE date_s BETWEEN @Dt1 AND @Dt2) AND n_s BETWEEN @Snd1 AND @Snd2;
+                
+                SET @Rows = @@ROWCOUNT;
+                IF @Rows > 0 
+                BEGIN
+                    INSERT INTO @Results (Msg) VALUES (N'تعداد سطر : ' + CAST(@Rows AS NVARCHAR(50)));
+                    INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در اسناد حسابداري انجام شد');
+                END
+
+                -- 2. خزانه داری (پرداخت)
+                UPDATE dbo.PGET_LST
+                SET FHES = @ToHes, FHES_K = @HKol, FHES_M = @HMoin, FHES_T = @HTaf, FHES_T2 = @HTaf2, FHES_T3 = @HTaf3, FHES_T4 = @HTaf4
+                WHERE (FHES = @AzHes) AND id IN (SELECT id FROM dbo.pget_hed WHERE date BETWEEN @Dt1 AND @Dt2 AND n_s BETWEEN @Snd1 AND @Snd2);
+
+                SET @PgetRows = @PgetRows + @@ROWCOUNT;
+
+                -- 3. خزانه داری (دریافت)
+                UPDATE dbo.PGET_LST
+                SET THES = @ToHes, THES_K = @HKol, THES_M = @HMoin, THES_T = @HTaf, THES_T2 = @HTaf2, THES_T3 = @HTaf3, THES_T4 = @HTaf4
+                WHERE (THES = @AzHes) AND id IN (SELECT id FROM dbo.pget_hed WHERE date BETWEEN @Dt1 AND @Dt2 AND n_s BETWEEN @Snd1 AND @Snd2);
+                
+                SET @PgetRows = @PgetRows + @@ROWCOUNT;
+
+                IF @PgetRows > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در خزانه داري انجام شد');
+
+                -- 4. سربرگ فاکتور (CUST_NO بر اساس deed_hed)
+                UPDATE dbo.HEAD_LST SET CUST_NO = @ToHes
+                WHERE (CUST_NO = @AzHes) AND n_s IN (SELECT n_s FROM dbo.deed_hed WHERE date_s BETWEEN @Dt1 AND @Dt2) AND n_s BETWEEN @Snd1 AND @Snd2;
+
+                IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در حساب فاکتورها (از طریق سند) انجام شد');
+
+                -- 5. حساب واریزی فاکتورها
+                UPDATE dbo.HEAD_LST SET MOIN_VAR = @ToHes
+                WHERE (MOIN_VAR = @AzHes) AND n_s IN (SELECT n_s FROM dbo.deed_hed WHERE date_s BETWEEN @Dt1 AND @Dt2) AND n_s BETWEEN @Snd1 AND @Snd2;
+                IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در حساب واريزي فاکتورها انجام شد');
+
+                -- 6. حواله واریزی فاکتورها
+                UPDATE dbo.HEAD_LST SET MOIN_HAV = @ToHes
+                WHERE (MOIN_HAV = @AzHes) AND n_s IN (SELECT n_s FROM dbo.deed_hed WHERE date_s BETWEEN @Dt1 AND @Dt2) AND n_s BETWEEN @Snd1 AND @Snd2;
+                IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در حساب حواله واريزي فاکتورها انجام شد');
+
+                -- 7. هزینه فاکتورها
+                UPDATE dbo.HEAD_LST SET MOIN_HAZ = @ToHes
+                WHERE (MOIN_HAZ = @AzHes) AND n_s IN (SELECT n_s FROM dbo.deed_hed WHERE date_s BETWEEN @Dt1 AND @Dt2) AND n_s BETWEEN @Snd1 AND @Snd2;
+                IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در حساب هزينه فاکتورها انجام شد');
+
+                -- 8. ارزش افزوده فاکتورها
+                UPDATE dbo.HEAD_LST SET HMBAA = @ToHes
+                WHERE (HMBAA = @AzHes) AND n_s IN (SELECT n_s FROM dbo.deed_hed WHERE date_s BETWEEN @Dt1 AND @Dt2) AND n_s BETWEEN @Snd1 AND @Snd2;
+                IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در حساب ماليات بر ارزش افزوده فاکتورها انجام شد');
+
+                -- 9. سربرگ فاکتور (CUST_NO بر اساس DATE_N)
+                UPDATE dbo.HEAD_LST SET CUST_NO = @ToHes
+                WHERE (CUST_NO = @AzHes) AND (DATE_N BETWEEN @Dt1 AND @Dt2) AND n_s BETWEEN @Snd1 AND @Snd2;
+                IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در حساب فاکتورها انجام شد');
+
+                -- 10. واگذار به حساب (PAY_GETD)
+                UPDATE dbo.PAY_GETD SET HES1 = @ToHes, N_KOL = @HKol, N_MOIN = @HMoin, N_TAF = @HTaf
+                WHERE (HES1 = @AzHes) AND (date BETWEEN @Dt1 AND @Dt2);
+                IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در واگذار به حساب چکهاي دريافتي انجام شد');
+
+                -- 11. برگشت به حساب (PAY_GETD)
+                UPDATE dbo.PAY_GETD SET HES2 = @ToHes, N_KOL2 = @HKol, N_MOIN2 = @HMoin, N_TAF2 = @HTaf
+                WHERE (HES2 = @AzHes) AND (date BETWEEN @Dt1 AND @Dt2);
+                IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در برگشت به حساب چکهاي دريافتي انجام شد');
+
+                -- 12. وصول به حساب (PAY_GETD)
+                UPDATE dbo.PAY_GETD SET HES3 = @ToHes, N_KOL3 = @HKol, N_MOIN3 = @HMoin, N_TAF3 = @HTaf
+                WHERE (HES3 = @AzHes) AND (date BETWEEN @Dt1 AND @Dt2);
+                IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در وصول به حساب چکهاي دريافتي انجام شد');
+
+                -- 13. پرداخت از حساب (PAY_GETP)
+                UPDATE dbo.PAY_GETP SET HES1 = @ToHes, N_KOL = @HKol, N_MOIN = @HMoin, N_TAF = @HTaf
+                WHERE (HES1 = @AzHes) AND (date BETWEEN @Dt1 AND @Dt2);
+                IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در پرداخت از حساب چکهاي پرداختي انجام شد');
+
+                -- 14. برگشت به حساب (PAY_GETP)
+                UPDATE dbo.PAY_GETP SET HES2 = @ToHes, N_KOL2 = @HKol, N_MOIN2 = @HMoin, N_TAF2 = @HTaf
+                WHERE (HES2 = @AzHes) AND (date BETWEEN @Dt1 AND @Dt2);
+                IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در برگشت به حساب چکهاي پرداختي انجام شد');
+
+                -- 15. وصول از حساب (PAY_GETP)
+                UPDATE dbo.PAY_GETP SET HES3 = @ToHes, N_KOL3 = @HKol, N_MOIN3 = @HMoin, N_TAF3 = @HTaf
+                WHERE (HES3 = @AzHes) AND (date BETWEEN @Dt1 AND @Dt2);
+                IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در وصول از حساب چکهاي پرداختي انجام شد');
+
+                -- 16. مصرف حواله خروج
+                UPDATE il SET N_RASID = @ToHes
+                FROM dbo.HEAD_LST hl INNER JOIN dbo.INVO_LST il ON hl.NUMBER = il.NUMBER AND hl.TAG = il.TAG
+                WHERE (hl.DATE_N BETWEEN @Dt1 AND @Dt2) AND (il.N_RASID = @AzHes);
+                IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در محل مصرف حواله خروج ساير انجام شد');
+
+                -- 17. مالک دستگاه (PTAMIRAT)
+                UPDATE dbo.PTAMIRAT SET POWNER = @ToHes
+                WHERE (POWNER = @AzHes) AND (PINDATE BETWEEN @Dt1 AND @Dt2);
+                IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در نام مالک دستگاه در تعميرات انجام شد');
+
+                -- 18. ویزیتورها (VISITOR_DTL)
+                UPDATE vd SET CUST_NO = @ToHes
+                FROM dbo.HEAD_LST hl INNER JOIN dbo.VISITOR_DTL vd ON hl.NUMBER = vd.NUMBER AND hl.TAG = vd.TAG
+                WHERE (vd.CUST_NO = @AzHes) AND (hl.DATE_N BETWEEN @Dt1 AND @Dt2);
+                IF @@ROWCOUNT > 0 INSERT INTO @Results (Msg) VALUES (N'جايگزاري حساب در ویزیتورها انجام شد');
+
+                COMMIT TRAN;
+                SELECT Msg FROM @Results;
+            END TRY
+            BEGIN CATCH
+                ROLLBACK TRAN;
+                THROW;
+            END CATCH
+            ";
 
             bool isSuccess = true;
-
-            using (SqlConnection db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+            try
             {
-                db.Open();
-                using (var transaction = db.BeginTransaction(IsolationLevel.Serializable))
+                // استفاده از توابع مجاز کلاس CL_CCNNMANAGER به جای ایجاد کانکشن ناامن
+                var resultMessages = dbms.DoGetDataSQL<string>(sqlBatch, parameters).ToList();
+
+                if (resultMessages.Count > 0)
                 {
-                    //Effectless Query to Lock Table:
-                    //db.Execute("UPDATE TOP(1) HEAD_LST SET MOLAH = MOLAH", null, transaction);
+                    List<MsgModel> MyMessages = resultMessages.Select(m => new MsgModel { MessageText_U = m }).ToList();
+                    new MsgListwin(false, MyMessages).ShowDialog();
+                }
+            }
+            catch (Exception)
+            {
+                isSuccess = false;
+                new Msgwin(false, "عملیات جایگذاری حساب با خطا مواجه شد؛ بنابراین، وضعیت به حالت اولیه بازمی‌گردد و هیچ تغییری اعمال نخواهد شد.").ShowDialog();
+            }
+            finally
+            {
+                ProcLoader.Stop(Prc);
 
-
-                    try
-                    {
-
-                        {
-                            var rst = db.Query<double?>("SELECT N_S   FROM dbo.DEED_DTL WHERE     (HES = N'" + AZHES.Text + "') and n_s in (select n_s from deed_hed where date_s between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ") and  n_s between " + SNDNUM1.Text + " and  " + SNDNUM2.Text, null, transaction).ToList();
-                            if (rst.Count > 0)
-                            {
-                                MyMessages.Add(new MsgModel { MessageText_U = "تعداد سطر : " + rst.Count });
-
-                                db.Execute("UPDATE    DEED_DTL SET   HES = '" + TOHES.Text + "', HES_K = " + HKOL + ", HES_M = " + HMOIN + "  , HES_T = " + HTAF + " , HES_T2 = " + Interaction.IIf(IsFuzzyNull(HTAF2), "NULL", HTAF2) + ", HES_T3 =  " + Interaction.IIf(IsFuzzyNull(HTAF3), "NULL", HTAF3) + ", HES_T4 = " + Interaction.IIf(IsFuzzyNull(HTAF4), "NULL", HTAF4) + "  FROM dbo.DEED_DTL WHERE     (HES = N'" + AZHES.Text + "') and n_s in (select n_s from deed_hed where date_s between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ") and  n_s between " + SNDNUM1.Text + " and  " + SNDNUM2.Text, null, transaction);
-                                MyMessages.Add(new MsgModel { MessageText_U = "جايگزاري حساب در اسناد حسابداري انجام شد" });
-                            }
-                        }
-
-                        {
-                            var rst = db.Query<double?>("SELECT ID   FROM dbo.PGET_LST WHERE     ((FHES = N'" + AZHES.Text + "') OR (THES = N'" + AZHES.Text + "')) and id in (select id from pget_hed where date between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + " and  n_s between " + SNDNUM1.Text + " and  " + SNDNUM2.Text + ")", null, transaction).ToList();
-
-                            if (rst.Count > 0)
-                            {
-                                db.Execute("UPDATE    PGET_LST SET   FHES = '" + TOHES.Text + "', FHES_K = " + HKOL + ", FHES_M = " + HMOIN + "  , FHES_T = " + HTAF + " , FHES_T2 = " + Interaction.IIf(IsFuzzyNull(HTAF2), "NULL", HTAF2) + ", FHES_T3 =  " + Interaction.IIf(IsFuzzyNull(HTAF3), "NULL", HTAF3) + ", FHES_T4 = " + Interaction.IIf(IsFuzzyNull(HTAF4), "NULL", HTAF4) + "  FROM dbo.PGET_LST WHERE     (FHES = N'" + AZHES.Text + "') and id in (select id from pget_hed where date between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + " and  n_s between " + SNDNUM1.Text + " and  " + SNDNUM2.Text + ")", null, transaction);
-
-                                db.Execute("UPDATE    PGET_LST SET   THES = '" + TOHES.Text + "', THES_K = " + HKOL + ", THES_M = " + HMOIN + "  , THES_T = " + HTAF + " , THES_T2 = " + Interaction.IIf(IsFuzzyNull(HTAF2), "NULL", HTAF2) + ", THES_T3 =  " + Interaction.IIf(IsFuzzyNull(HTAF3), "NULL", HTAF3) + ", THES_T4 = " + Interaction.IIf(IsFuzzyNull(HTAF4), "NULL", HTAF4) + "  FROM dbo.PGET_LST WHERE     (THES = N'" + AZHES.Text + "') and id in (select id from pget_hed where date between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + " and  n_s between " + SNDNUM1.Text + " and  " + SNDNUM2.Text + ")", null, transaction);
-
-                                MyMessages.Add(new MsgModel { MessageText_U = "جايگزاري حساب در خزانه داري  انجام شد" });
-                            }
-                        }
-
-                        {
-                            var rst = db.Query<double?>("SELECT NUMBER   FROM dbo.HEAD_LST WHERE     (CUST_NO = N'" + AZHES.Text + "') and n_s in (select n_s from deed_hed where date_s between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ") and  n_s between " + SNDNUM1.Text + " and  " + SNDNUM2.Text, null, transaction).ToList();
-
-                            if (rst.Count > 0)
-                            {
-                                db.Execute("UPDATE    HEAD_LST SET   CUST_NO = '" + TOHES.Text + "' FROM dbo.HEAD_LST WHERE     (CUST_NO = N'" + AZHES.Text + "') and n_s in (select n_s from deed_hed where date_s between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ") and  n_s between " + SNDNUM1.Text + " and  " + SNDNUM2.Text, null, transaction);
-                            }
-                        }
-
-                        {
-                            var rst = db.Query<double?>("SELECT NUMBER   FROM dbo.HEAD_LST WHERE     (MOIN_VAR = N'" + AZHES.Text + "') and n_s in (select n_s from deed_hed where date_s between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ") and  n_s between " + SNDNUM1.Text + " and  " + SNDNUM2.Text, null, transaction).ToList();
-
-                            if (rst.Count > 0)
-                            {
-                                db.Execute("UPDATE    HEAD_LST SET    MOIN_VAR = '" + TOHES.Text + "' FROM dbo.HEAD_LST WHERE     ( MOIN_VAR = N'" + AZHES.Text + "') and n_s in (select n_s from deed_hed where date_s between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ") and  n_s between " + SNDNUM1.Text + " and  " + SNDNUM2.Text, null, transaction);
-
-                                MyMessages.Add(new MsgModel { MessageText_U = "جايگزاري حساب در حساب واريزي فاکتورها انجام شد" });
-                            }
-                        }
-
-                        {
-                            var rst = db.Query<double?>("SELECT NUMBER   FROM dbo.HEAD_LST WHERE     (MOIN_HAV = N'" + AZHES.Text + "') and n_s in  (select n_s from deed_hed where date_s between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ") and  n_s between " + SNDNUM1.Text + " and  " + SNDNUM2.Text, null, transaction).ToList();
-
-                            if (rst.Count > 0)
-                            {
-                                db.Execute("UPDATE    HEAD_LST SET    MOIN_HAV = '" + TOHES.Text + "' FROM dbo.HEAD_LST WHERE     ( MOIN_HAV = N'" + AZHES.Text + "') and n_s in (select n_s from deed_hed where date_s between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ") and  n_s between " + SNDNUM1.Text + " and  " + SNDNUM2.Text, null, transaction);
-
-                                MyMessages.Add(new MsgModel { MessageText_U = "جايگزاري حساب در حساب حواله واريزي فاکتورها انجام شد" });
-                            }
-                        }
-
-                        {
-                            var rst = db.Query<double?>("SELECT NUMBER   FROM dbo.HEAD_LST WHERE     (MOIN_HAZ = N'" + AZHES.Text + "') and n_s in (select n_s from deed_hed where date_s between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ") and  n_s between " + SNDNUM1.Text + " and  " + SNDNUM2.Text, null, transaction).ToList();
-
-                            if (rst.Count > 0)
-                            {
-                                db.Execute("UPDATE    HEAD_LST SET    MOIN_HAZ = '" + TOHES.Text + "' FROM dbo.HEAD_LST WHERE     ( MOIN_HAZ = N'" + AZHES.Text + "') and n_s in (select n_s from deed_hed where date_s between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ") and  n_s between " + SNDNUM1.Text + " and  " + SNDNUM2.Text, null, transaction);
-
-                                MyMessages.Add(new MsgModel { MessageText_U = "جايگزاري حساب در حساب هزينه فاکتورها انجام شد" });
-                            }
-                        }
-
-                        {
-                            var rst = db.Query<double?>("SELECT NUMBER   FROM dbo.HEAD_LST WHERE     (HMBAA = N'" + AZHES.Text + "') and n_s in (select n_s from deed_hed where date_s between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ") and  n_s between " + SNDNUM1.Text + " and  " + SNDNUM2.Text, null, transaction).ToList();
-
-                            if (rst.Count > 0)
-                            {
-                                db.Execute("UPDATE    HEAD_LST SET    HMBAA = '" + TOHES.Text + "' FROM dbo.HEAD_LST WHERE     ( HMBAA = N'" + AZHES.Text + "') and n_s in (select n_s from deed_hed where date_s between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ") and  n_s between " + SNDNUM1.Text + " and  " + SNDNUM2.Text, null, transaction);
-
-                                MyMessages.Add(new MsgModel { MessageText_U = "جايگزاري حساب در حساب ماليات بر ارزش افزوده فاکتورها انجام شد" });
-                            }
-                        }
-
-                        {
-                            var rst = db.Query<double?>("SELECT NUMBER   FROM dbo.HEAD_LST WHERE    (CUST_NO = N'" + AZHES.Text + "') and  (date_n between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ") and  n_s between " + SNDNUM1.Text + " and  " + SNDNUM2.Text, null, transaction).ToList();
-                            if (rst.Count > 0)
-                            {
-                                db.Execute("UPDATE    HEAD_LST SET    CUST_NO = '" + TOHES.Text + "' FROM dbo.HEAD_LST WHERE  (CUST_NO = N'" + AZHES.Text + "') and  (date_n between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ") and  n_s between " + SNDNUM1.Text + " and  " + SNDNUM2.Text, null, transaction);
-                                MyMessages.Add(new MsgModel { MessageText_U = "جايگزاري حساب در حساب  فاکتورها انجام شد" });
-                            }
-                        }
-
-                        #region CHECKHA
-                        {
-                            var rst = db.Query<double?>("SELECT N_SERI   FROM dbo.PAY_GETD WHERE     (HES1 = N'" + AZHES.Text + "') and (date between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ")", null, transaction).ToList();
-
-                            if (rst.Count > 0)
-                            {
-                                db.Execute("UPDATE    PAY_GETD SET   HES1 = '" + TOHES.Text + "', N_KOL = " + HKOL + ", N_MOIN = " + HMOIN + "  , N_TAF = " + HTAF + "   FROM dbo.PAY_GETD WHERE     (HES1 = N'" + AZHES.Text + "') and (date between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ")", null, transaction);
-
-                                MyMessages.Add(new MsgModel { MessageText_U = "جايگزاري حساب در واگذار به حساب چکهاي دريافتي انجام شد" });
-                            }
-                        }
-
-                        {
-                            var rst = db.Query<double?>("SELECT N_SERI   FROM dbo.PAY_GETD WHERE     (HES2 = N'" + AZHES.Text + "') and (date between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ")", null, transaction).ToList();
-
-                            if (rst.Count > 0)
-                            {
-                                db.Execute("UPDATE    PAY_GETD SET   HES2 = '" + TOHES.Text + "', N_KOL2 = " + HKOL + ", N_MOIN2 = " + HMOIN + "  , N_TAF2 = " + HTAF + "   FROM dbo.PAY_GETD WHERE     (HES2 = N'" + AZHES.Text + "') and (date between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ")", null, transaction);
-
-                                MyMessages.Add(new MsgModel { MessageText_U = "جايگزاري حساب در برگشت به حساب چکهاي دريافتي انجام شد" });
-                            }
-                        }
-
-                        {
-                            var rst = db.Query<double?>("SELECT N_SERI   FROM dbo.PAY_GETD WHERE     (HES3 = N'" + AZHES.Text + "') and (date between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ")", null, transaction).ToList();
-
-                            if (rst.Count > 0)
-                            {
-                                db.Execute("UPDATE    PAY_GETD SET   HES3 = '" + TOHES.Text + "', N_KOL3 = " + HKOL + ", N_MOIN3 = " + HMOIN + "  , N_TAF3 = " + HTAF + "   FROM dbo.PAY_GETD WHERE     (HES3 = N'" + AZHES.Text + "') and (date between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ")", null, transaction);
-
-                                MyMessages.Add(new MsgModel { MessageText_U = "جايگزاري حساب در وصول به حساب چکهاي دريافتي انجام شد" });
-                            }
-                        }
-
-                        {
-                            var rst = db.Query<double?>("SELECT N_SERI   FROM dbo.PAY_GETP WHERE     (HES1 = N'" + AZHES.Text + "') and (date between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ") ", null, transaction).ToList();
-
-                            if (rst.Count > 0)
-                            {
-                                db.Execute("UPDATE    PAY_GETP SET   HES1 = '" + TOHES.Text + "', N_KOL = " + HKOL + ", N_MOIN = " + HMOIN + "  , N_TAF = " + HTAF + "   FROM dbo.PAY_GETP WHERE     (HES1 = N'" + AZHES.Text + "') and (date between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ")", null, transaction);
-
-                                MyMessages.Add(new MsgModel { MessageText_U = "جايگزاري حساب در پرداخت از حساب چکهاي پرداختي انجام شد" });
-                            }
-                        }
-
-                        {
-                            var rst = db.Query<double?>("SELECT N_SERI   FROM dbo.PAY_GETP WHERE     (HES2 = N'" + AZHES.Text + "') and (date between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ")", null, transaction).ToList();
-
-                            if (rst.Count > 0)
-                            {
-                                db.Execute("UPDATE    PAY_GETP SET   HES2 = '" + TOHES.Text + "', N_KOL2 = " + HKOL + ", N_MOIN2 = " + HMOIN + "  , N_TAF2 = " + HTAF + "   FROM dbo.PAY_GETP WHERE     (HES2 = N'" + AZHES.Text + "') and (date between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ")", null, transaction);
-
-                                MyMessages.Add(new MsgModel { MessageText_U = "جايگزاري حساب در برگشت به حساب چکهاي پرداختي انجام شد" });
-                            }
-                        }
-
-                        {
-                            var rst = db.Query<double?>("SELECT N_SERI   FROM dbo.PAY_GETP WHERE     (HES3 = N'" + AZHES.Text + "') and (date between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ")", null, transaction).ToList();
-                            if (rst.Count > 0)
-                            {
-                                db.Execute("UPDATE    PAY_GETP SET   HES3 = '" + TOHES.Text + "', N_KOL3 = " + HKOL + ", N_MOIN3 = " + HMOIN + "  , N_TAF3 = " + HTAF + "   FROM dbo.PAY_GETP WHERE     (HES3 = N'" + AZHES.Text + "') and (date between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ")", null, transaction);
-
-                                MyMessages.Add(new MsgModel { MessageText_U = "جايگزاري حساب در وصول از حساب چکهاي پرداختي انجام شد" });
-                            }
-                        }
-
-                        #endregion
-
-                        {
-                            var rst = db.Query<double?>("SELECT     dbo.INVO_LST.N_RASID FROM    dbo.HEAD_LST INNER JOIN   dbo.INVO_LST ON dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER AND dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG WHERE     (dbo.HEAD_LST.DATE_N BETWEEN " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ")  and   (N_RASID = N'" + AZHES.Text + "')", null, transaction).ToList();
-
-                            if (rst.Count > 0)
-                            {
-                                db.Execute("UPDATE    INVO_LST SET   N_RASID = '" + TOHES.Text + "'  FROM  dbo.HEAD_LST INNER JOIN   dbo.INVO_LST ON dbo.HEAD_LST.NUMBER = dbo.INVO_LST.NUMBER AND dbo.HEAD_LST.TAG = dbo.INVO_LST.TAG WHERE     (dbo.HEAD_LST.DATE_N BETWEEN " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ")  and   (N_RASID = N'" + AZHES.Text + "')", null, transaction);
-
-                                MyMessages.Add(new MsgModel { MessageText_U = "جايگزاري حساب در محل مصرف حواله خروج ساير انجام شد" });
-                            }
-                        }
-
-                        {
-                            var rst = db.Query<double?>("SELECT POWNER   FROM dbo.PTAMIRAT WHERE     (POWNER = N'" + AZHES.Text + "') and  (PINDATE between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ")", null, transaction).ToList();
-
-                            if (rst.Count > 0)
-                            {
-                                db.Execute("UPDATE    PTAMIRAT SET   POWNER = '" + TOHES.Text + "'  FROM dbo.PTAMIRAT WHERE      (POWNER = N'" + AZHES.Text + "') and  (PINDATE between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ")", null, transaction);
-
-                                MyMessages.Add(new MsgModel { MessageText_U = "جايگزاري حساب در نام مالک دستگاه در تعميرات انجام شد" });
-                            }
-                        }
-
-                        {
-                            var rst = db.Query<double?>("SELECT CUST_NO   FROM dbo.VISITOR_DTL WHERE     (CUST_NO = N'" + AZHES.Text + "')", null, transaction).ToList();
-
-                            if (rst.Count > 0)
-                            {
-                                db.Execute("UPDATE    VISITOR_DTL SET   CUST_NO = '" + TOHES.Text + "'  FROM          dbo.HEAD_LST INNER JOIN    dbo.VISITOR_DTL ON dbo.HEAD_LST.NUMBER = dbo.VISITOR_DTL.NUMBER AND dbo.HEAD_LST.TAG = dbo.VISITOR_DTL.TAG WHERE      (dbo.VISITOR_DTL.CUST_NO = N'" + AZHES.Text + "') and  (DATE_N between " + DT1.Text.ToRawTarikh() + " and " + DT2.Text.ToRawTarikh() + ")", null, transaction);
-
-                                MyMessages.Add(new MsgModel { MessageText_U = "جايگزاري حساب در پورسانت ویزیتوری انجام شد" });
-                            }
-                        }
-
-                        //Everything was Success
-                        if (MyMessages.Any())
-                        {
-                            MyMessages = MyMessages.Select(x => x.MessageText_U).Distinct()
-                                .Select(message => new MsgModel { MessageText_U = message }).ToList();
-                            new MsgListwin(false, MyMessages).ShowDialog();
-                        }
-                        transaction.Commit();
-
-                    }
-                    catch (Exception)
-                    {
-                        transaction.Rollback();
-                        isSuccess = false;
-
-                        new Msgwin(false, "عملیات جایگذاری حساب با خطا مواجه شد؛ بنابراین، وضعیت به حالت اولیه بازمی‌گردد و هیچ تغییری اعمال نخواهد شد.").ShowDialog();
-
-                    }
-
-                    db?.Close();
+                if (isSuccess)
+                {
+                    universControl.PopNotifyShow("جایگذاری حساب کامل انجام شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
                 }
             }
 
-            ProcLoader.Stop(Prc);
-
-            if (isSuccess)
-            {
-                universControl.PopNotifyShow("جایگذاری حساب کامل انجام شد.", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
-            }
-
+         
         }
 
     }
