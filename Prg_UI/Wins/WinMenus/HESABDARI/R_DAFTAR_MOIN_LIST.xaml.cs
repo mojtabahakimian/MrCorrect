@@ -1,5 +1,6 @@
 ﻿using Functions;
 using MaterialDesignThemes.Wpf;
+using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
@@ -13,6 +14,7 @@ using Syncfusion.UI.Xaml.BulletGraph;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -547,14 +549,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     return;
                 }
 
-                // NEW: Handle 'Ctrl+1' key for CURRENT ROW balance navigation
-                if (e.Key == Key.D1 && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-                {
-                    e.Handled = true;
-                    HandleNavigationToBalanceFromCurrentRow();
-                    return;
-                }
-
                 // VBA: KeyAscii = 49 (1 key)
                 // Handle '1' key for FINAL balance navigation (last row)
                 if (e.Key == Key.D1 && Keyboard.Modifiers == ModifierKeys.None)
@@ -798,67 +792,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         /// Starts from current row and navigates backward
         /// Triggered by: Ctrl+1
         /// </summary>
-        private void HandleNavigationToBalanceFromCurrentRow()
-        {
-            try
-            {
-                // Check if grid has data
-                if (SYNCFUSION_DG.View.Records.Count == 0)
-                {
-                    universControl.PopNotifyShow("هیچ رکوردی برای جستجو وجود ندارد", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
-                    return;
-                }
-
-                // Get current selected row
-                var currentRow = SYNCFUSION_DG.SelectedItem as MOIN_CUSTOM;
-                if (currentRow == null)
-                {
-                    universControl.PopNotifyShow("لطفاً یک سطر را انتخاب کنید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
-                    return;
-                }
-
-                // Get current row index
-                int currentIndex = SYNCFUSION_DG.SelectedIndex;
-                if (currentIndex < 0)
-                {
-                    return;
-                }
-
-                // Get MAND value from current row
-                decimal currentBalance = 0;
-                if (currentRow.MAND != null)
-                {
-                    decimal.TryParse(currentRow.MAND.ToString(), out currentBalance);
-                }
-
-                // Check if balance is zero
-                if (currentBalance == 0)
-                {
-                    universControl.PopNotifyShow("مانده سطر انتخابی صفر است", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
-                    return;
-                }
-
-                // Determine balance type and navigate
-                string balanceType = DetermineBalanceType(currentBalance);
-
-                if (balanceType == "بد") // Debit
-                {
-                    NavigateBackwardForDebit(currentBalance, currentIndex);
-                }
-                else // Credit
-                {
-                    currentBalance = Math.Abs(currentBalance);
-                    NavigateBackwardForCredit(currentBalance, currentIndex);
-                }
-            }
-            catch (Exception ex)
-            {
-                universControl.PopNotifyShow("خطا در جستجوی ریشه مانده سطر انتخابی", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
-            }
-        }
-        /// <summary>
-        /// Determine if balance is debit (بد) or credit (بس)
-        /// </summary>
         private string DetermineBalanceType(decimal balance)
         {
             // Positive balance typically means debit, negative means credit
@@ -1006,9 +939,440 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         {
             HandleNavigationToBalanceFromLastRow();
         }
-        private void MenuItem_Click_3(object sender, RoutedEventArgs e)
+
+        private void MenuItem_Click_4(object sender, RoutedEventArgs e)
         {
-            HandleNavigationToBalanceFromCurrentRow();
+            //HandleFindLastZeroPointFromLastRow();
+
+
+            //HandleFindSmartBalanceOriginFromLastRow();
+            //HandleFindNewDebtStartByThresholdFromLastRow();
+            HandleFindNewDebtStartByCreditCoverageFromLastRow();
         }
+
+        #region Threshold Balance Origin
+
+        private string GetBalanceTypeFromRow(MOIN_CUSTOM row)
+        {
+            if (row == null)
+                return "بد";
+
+            string tsh = row.TSH.ToStringNullSafe().Trim();
+            if (tsh == "بد" || tsh == "بس")
+                return tsh;
+
+            decimal mand = ParseDecimalSafe(row.MAND);
+            return mand < 0 ? "بس" : "بد";
+        }
+
+        private decimal GetDisplayedBalanceAbs(MOIN_CUSTOM row)
+        {
+            if (row == null)
+                return decimal.MaxValue;
+
+            return Math.Abs(ParseDecimalSafe(row.MAND));
+        }
+
+        /// <summary>
+        /// آخرین سطری که مانده آن <= آستانه باشد را پیدا می‌کند
+        /// سپس سطر بعدی آن را به عنوان شروع بدهی جدید برمی‌گرداند
+        /// </summary>
+
+
+        #region Smart Balance Origin
+
+        private sealed class OpenDebitItem
+        {
+            public int RowIndex { get; set; }
+            public decimal RemainingAmount { get; set; }
+        }
+
+        private bool ShouldUseCreditForSettlement(MOIN_CUSTOM row)
+        {
+            if (row == null)
+                return false;
+
+            decimal bes = ParseDecimalSafe(row.BES);
+            return bes > 0;
+        }
+
+        /// <summary>
+        /// منشأ تاریخی مانده با FIFO
+        /// قدیمی‌ترین بدهکاریِ باز تا سطر هدف
+        /// </summary>
+        private int FindFifoOriginIndex(int targetIndex)
+        {
+            if (targetIndex < 0 || targetIndex >= SYNCFUSION_DG.View.Records.Count)
+                return -1;
+
+            Queue<OpenDebitItem> openDebits = new Queue<OpenDebitItem>();
+
+            for (int i = 0; i <= targetIndex; i++)
+            {
+                var row = GetRowByViewIndex(i);
+                if (row == null)
+                    continue;
+
+                decimal bed = ParseDecimalSafe(row.BED);
+                decimal bes = ParseDecimalSafe(row.BES);
+
+                if (bed > 0)
+                {
+                    openDebits.Enqueue(new OpenDebitItem
+                    {
+                        RowIndex = i,
+                        RemainingAmount = bed
+                    });
+                }
+
+                if (ShouldUseCreditForSettlement(row) && bes > 0)
+                {
+                    decimal remainingCredit = bes;
+
+                    while (remainingCredit > 0 && openDebits.Count > 0)
+                    {
+                        OpenDebitItem oldestOpen = openDebits.Peek();
+
+                        if (oldestOpen.RemainingAmount <= remainingCredit)
+                        {
+                            remainingCredit -= oldestOpen.RemainingAmount;
+                            openDebits.Dequeue();
+                        }
+                        else
+                        {
+                            oldestOpen.RemainingAmount -= remainingCredit;
+                            remainingCredit = 0;
+                        }
+                    }
+                }
+            }
+
+            return openDebits.Count > 0 ? openDebits.Peek().RowIndex : -1;
+        }
+
+        /// <summary>
+        /// Pivot عملیاتی: از origin تا target کمترین ماندهٔ نمایش داده‌شده را پیدا می‌کند
+        /// فقط روی همان سمت ماندهٔ نهایی (بد/بس)
+        /// </summary>
+        private int FindOperationalPivotIndex(int originIndex, int targetIndex)
+        {
+            if (originIndex < 0 || targetIndex < originIndex)
+                return originIndex;
+
+            var targetRow = GetRowByViewIndex(targetIndex);
+            if (targetRow == null)
+                return originIndex;
+
+            string targetType = GetBalanceTypeFromRow(targetRow);
+
+            int bestIndex = originIndex;
+            decimal bestAbs = decimal.MaxValue;
+
+            for (int i = originIndex; i <= targetIndex; i++)
+            {
+                var row = GetRowByViewIndex(i);
+                if (row == null)
+                    continue;
+
+                if (GetBalanceTypeFromRow(row) != targetType)
+                    continue;
+
+                decimal absBalance = GetDisplayedBalanceAbs(row);
+
+                // اگر مساوی بود، آخری را بگیر تا نزدیک‌ترین نقطهٔ اخیر انتخاب شود
+                if (absBalance < bestAbs || (absBalance == bestAbs && i > bestIndex))
+                {
+                    bestAbs = absBalance;
+                    bestIndex = i;
+                }
+            }
+
+            return bestIndex;
+        }
+
+        /// <summary>
+        /// تصمیم هوشمند:
+        /// اگر منشأ FIFO = افتتاحیه → Pivot عملیاتی را انتخاب کن
+        /// اگر منشأ FIFO ≠ افتتاحیه → همان FIFO را انتخاب کن
+        /// </summary>
+        private int FindSmartBalanceOriginIndex(int targetIndex, out bool switchedFromOpening)
+        {
+            switchedFromOpening = false;
+
+            int fifoIndex = FindFifoOriginIndex(targetIndex);
+            if (fifoIndex < 0)
+                return -1;
+
+            var fifoRow = GetRowByViewIndex(fifoIndex);
+            if (fifoRow != null && IsOpeningRow(fifoRow))
+            {
+                switchedFromOpening = true;
+                return FindOperationalPivotIndex(fifoIndex, targetIndex);
+            }
+
+            return fifoIndex;
+        }
+
+        private void FindSmartBalanceOrigin(int targetIndex, bool isCurrentRow)
+        {
+            try
+            {
+                bool switchedFromOpening;
+                int resultIndex = FindSmartBalanceOriginIndex(targetIndex, out switchedFromOpening);
+
+                if (resultIndex < 0)
+                {
+                    universControl.PopNotifyShowUp(
+                        isCurrentRow ? "تا این سطر مانده باز وجود ندارد" : "مانده بازی وجود ندارد",
+                        Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green, 2);
+                    return;
+                }
+
+                SelectAndFocusRow(resultIndex);
+
+                var row = GetRowByViewIndex(resultIndex);
+                string dateText = row?.DATE_S.ToStringNullSafe() ?? "";
+
+                if (switchedFromOpening)
+                {
+                    universControl.PopNotifyShowUp(
+                        $"افتتاحیه منشأ تاریخی بود؛ نزدیک‌ترین نقطه شروع مانده انتخاب شد: {dateText}",
+                        Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 4);
+                }
+                else
+                {
+                    universControl.PopNotifyShowUp(
+                        $"منشأ مانده پیدا شد: {dateText}",
+                        Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green, 3);
+                }
+            }
+            catch
+            {
+                universControl.PopNotifyShow("خطا در پیدا کردن منشأ هوشمند مانده", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+            }
+        }
+
+        #endregion
+        #endregion
+
+        private decimal ParseDecimalSafe(object value)
+        {
+            if (value == null || value == DBNull.Value)
+                return 0m;
+
+            try
+            {
+                return Convert.ToDecimal(value);
+            }
+            catch
+            {
+                decimal result;
+                string text = value.ToStringNullSafe()?.Replace(",", "").Trim() ?? "0";
+
+                if (decimal.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out result))
+                    return result;
+
+                if (decimal.TryParse(text, NumberStyles.Any, CultureInfo.CurrentCulture, out result))
+                    return result;
+
+                return 0m;
+            }
+        }
+
+        private MOIN_CUSTOM GetRowByViewIndex(int index)
+        {
+            if (index < 0 || index >= SYNCFUSION_DG.View.Records.Count)
+                return null;
+
+            return SYNCFUSION_DG.View.Records.GetItemAt(index) as MOIN_CUSTOM;
+        }
+
+        private void SelectAndFocusRow(int index)
+        {
+            try
+            {
+                if (index < 0 || index >= SYNCFUSION_DG.View.Records.Count)
+                    return;
+
+                var record = SYNCFUSION_DG.View.Records.GetItemAt(index);
+                if (record == null)
+                    return;
+
+                SYNCFUSION_DG.SelectedIndex = index;
+                SYNCFUSION_DG.SelectedItem = record;
+                SYNCFUSION_DG.ScrollInView(new RowColumnIndex(index, 0));
+
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        SYNCFUSION_DG.SelectedIndex = index;
+                        SYNCFUSION_DG.SelectedItem = record;
+                        SYNCFUSION_DG.ScrollInView(new RowColumnIndex(index, 0));
+                        SYNCFUSION_DG.Focus();
+                        Keyboard.Focus(SYNCFUSION_DG);
+                    }
+                    catch { }
+                }), System.Windows.Threading.DispatcherPriority.Render);
+            }
+            catch { }
+        }
+
+        private bool IsOpeningRow(MOIN_CUSTOM row)
+        {
+            if (row == null)
+                return false;
+
+            string sharh = row.SHARH.ToStringNullSafe();
+            return sharh.Contains("افتتاح");
+        }
+
+        /// <summary>
+        /// جمع بستانکارها را تا سطر هدف می‌گیرد
+        /// سپس از اول، بدهکارها را جمع می‌زند
+        /// هرجا جمع بدهکار >= جمع بستانکار شد، سطر بعدی = شروع بدهی جدید
+        /// </summary>
+        private int FindNewDebtStartByCreditCoverage(int targetIndex)
+        {
+            if (targetIndex < 0 || targetIndex >= SYNCFUSION_DG.View.Records.Count)
+                return -1;
+
+            decimal totalCredit = 0m;
+
+            // 1) جمع کل بستانکارها تا سطر هدف
+            for (int i = 0; i <= targetIndex; i++)
+            {
+                var row = GetRowByViewIndex(i);
+                if (row == null)
+                    continue;
+
+                totalCredit += ParseDecimalSafe(row.BES);
+            }
+
+            // اگر اصلاً بستانکاری نداریم، شروع بدهی جدید از اولین ردیف غیر افتتاحیه
+            if (totalCredit <= 0)
+            {
+                for (int i = 0; i <= targetIndex; i++)
+                {
+                    var row = GetRowByViewIndex(i);
+                    if (row == null)
+                        continue;
+
+                    if (!IsOpeningRow(row))
+                        return i;
+                }
+
+                return 0;
+            }
+
+            decimal runningDebit = 0m;
+            int coverRowIndex = -1;
+            int nearestRowIndex = -1;
+            decimal nearestDiff = decimal.MaxValue;
+
+            // 2) از اول فقط بدهکارها را جمع می‌زنیم
+            for (int i = 0; i <= targetIndex; i++)
+            {
+                var row = GetRowByViewIndex(i);
+                if (row == null)
+                    continue;
+
+                decimal bed = ParseDecimalSafe(row.BED);
+                if (bed <= 0)
+                    continue;
+
+                runningDebit += bed;
+
+                decimal diff = Math.Abs(runningDebit - totalCredit);
+
+                if (diff < nearestDiff)
+                {
+                    nearestDiff = diff;
+                    nearestRowIndex = i;
+                }
+
+                if (runningDebit >= totalCredit)
+                {
+                    coverRowIndex = i;
+                    break;
+                }
+            }
+
+            // اگر دقیق/عبوری پیدا نشد، نزدیک‌ترین را بگیر
+            if (coverRowIndex < 0)
+                coverRowIndex = nearestRowIndex;
+
+            if (coverRowIndex < 0)
+                return -1;
+
+            // 3) سطر بعدی = شروع بدهی جدید
+            int startIndex = coverRowIndex + 1;
+
+            // اگر از آخر رد شد، خود همان سطر
+            if (startIndex > targetIndex)
+                startIndex = coverRowIndex;
+
+            // اگر روی افتتاحیه افتاد، تا اولین سطر غیر افتتاحیه جلو برو
+            while (startIndex <= targetIndex)
+            {
+                var row = GetRowByViewIndex(startIndex);
+                if (row == null)
+                {
+                    startIndex++;
+                    continue;
+                }
+
+                if (!IsOpeningRow(row))
+                    return startIndex;
+
+                startIndex++;
+            }
+
+            return coverRowIndex;
+        }
+
+        private void HandleFindNewDebtStartByCreditCoverageFromLastRow()
+        {
+            if (SYNCFUSION_DG.View.Records.Count == 0)
+            {
+                universControl.PopNotifyShow("هیچ رکوردی برای جستجو وجود ندارد", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                return;
+            }
+
+            FindNewDebtStartByCreditCoverageAndFocus(SYNCFUSION_DG.View.Records.Count - 1, false);
+        }
+
+        private void FindNewDebtStartByCreditCoverageAndFocus(int targetIndex, bool isCurrentRow)
+        {
+            try
+            {
+                int resultIndex = FindNewDebtStartByCreditCoverage(targetIndex);
+                if (resultIndex < 0)
+                {
+                    universControl.PopNotifyShow("سطر مناسب پیدا نشد", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+                    return;
+                }
+
+                int focusIndex = resultIndex + 1;
+
+                if (focusIndex >= SYNCFUSION_DG.View.Records.Count)
+                    focusIndex = resultIndex;
+
+                SelectAndFocusRow(focusIndex);
+
+                var row = GetRowByViewIndex(resultIndex);
+                string dateText = row?.DATE_S.ToStringNullSafe() ?? "";
+                string sharh = row?.SHARH.ToStringNullSafe() ?? "";
+
+                universControl.PopNotifyShowUp(
+                    $"شروع بدهی جدید پیدا شد: {dateText}",
+                    Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 3);
+            }
+            catch
+            {
+                universControl.PopNotifyShow("خطا در پیدا کردن شروع بدهی جدید", Pop1, Pop1Text1, Pop_Border1, "#E5EC2B2B");
+            }
+        }
+
     }
 }

@@ -405,6 +405,10 @@ namespace Wins.WinMenus.HESABDARI
                 }
             }
 
+            if (AZHES.Text.Trim() == TOHES.Text.Trim())
+            {
+                ErrosMessages.Add(new MsgModel { MessageText_U = $"حساب مبدا و مقصد نمیتواند یکی باشد" });
+            }
 
             if (!DATE_IS_VALID(DT1.Text))
             {
@@ -641,8 +645,6 @@ namespace Wins.WinMenus.HESABDARI
                 }
             }
 
-         
         }
-
     }
 }
