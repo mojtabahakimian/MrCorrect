@@ -58,12 +58,19 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
         private long? CurrentRecordID = null;
 
-        public GETCHEK(Visual the_win, string _mabl_chek_arg = null, int _current_index = -1, bool isreadonly = false)
+
+        // کلیدهای اصلی رکورد در زمان Load - برای استفاده در Save
+        private double? _original_N_SERI = null;
+        private int? _original_BANK = null;
+        private long? _original_DATE_S = null;
+        private double? _original_MABL = null;
+        public GETCHEK(Visual the_win, string _mabl_chek_arg = null, int _current_index = -1, bool isreadonly = false, double? _originMabl_ = null)
         {
             IsReadOnlyMode = isreadonly;
             THE_WIN = the_win;
             MABL_CHEK_ARG = _mabl_chek_arg;
             INDEX_DG = _current_index;
+            _original_MABL = _originMabl_;
             InitializeComponent();
         }
 
@@ -145,7 +152,9 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
             if (KhazanehRow?.N_SERI is not null && KhazanehRow.BANK is not null && KhazanehRow.MABL is not null)
             {
-                var CheckExistData = dbms.DoGetDataSQL<PAY_GETD>($"SELECT TOP 1 * FROM PAY_GETD WHERE N_SERI = {KhazanehRow.N_SERI} AND BANK = {KhazanehRow.BANK} AND MABL = {KhazanehRow.MABL} ORDER BY RADIF").ToList();
+                bool MablisChanged = _original_MABL != null && _original_MABL != KhazanehRow.MABL;
+
+                var CheckExistData = dbms.DoGetDataSQL<PAY_GETD>($"SELECT TOP 1 * FROM PAY_GETD WHERE N_SERI = {KhazanehRow.N_SERI} AND BANK = {KhazanehRow.BANK} AND MABL = {(MablisChanged ? _original_MABL : KhazanehRow.MABL)} ORDER BY RADIF").ToList();
                 if (CheckExistData.Count > 0)
                 {
                     CurrentRecordID = CheckExistData.FirstOrDefault()?.ID; // Capture ID
@@ -177,6 +186,19 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     N_HESAB.Text = CheckExistData.FirstOrDefault()?.N_HESAB?.ToString();
                     SANDUGH.SelectedValue = CheckExistData.FirstOrDefault()?.SANDUGH?.ToString();
                     SAYADI.Text = CheckExistData.FirstOrDefault()?.SAYADI?.ToString();
+
+
+                    // ✅ ذخیره کلید اولیه برای استفاده در Save
+                    _original_N_SERI = CheckExistData.FirstOrDefault()?.N_SERI;
+                    _original_BANK = CheckExistData.FirstOrDefault()?.BANK;
+                    _original_DATE_S = CheckExistData.FirstOrDefault()?.DATE_S;
+                    _original_MABL = KhazanehRow.MABL;
+                }
+                else
+                {
+                    _original_N_SERI = null;
+                    _original_BANK = null;
+                    _original_DATE_S = null;
                 }
             }
 

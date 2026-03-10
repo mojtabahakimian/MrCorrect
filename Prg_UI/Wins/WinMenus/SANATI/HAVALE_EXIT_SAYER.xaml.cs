@@ -1974,7 +1974,6 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                 return;
             }
 
-
             string _qre = null;
             var MasterTopErrorMessages = new List<MsgModel>();
 
