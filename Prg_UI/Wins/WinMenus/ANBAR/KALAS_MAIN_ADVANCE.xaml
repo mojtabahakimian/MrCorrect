@@ -523,7 +523,7 @@
         <!--HEADER↑-->
 
         <DockPanel Margin="10,45,10,45" LastChildFill="True">
-            <Label x:Name="LBL_STATE" DockPanel.Dock="Top" Content="" Margin="5" Visibility="Collapsed" FlowDirection="RightToLeft"/>
+            <Label x:Name="LBL_STATE" DockPanel.Dock="Top" Content="" Margin="5" Visibility="Collapsed" FontSize="16" FontWeight="Bold" FlowDirection="RightToLeft"/>
             <syncfusion:SfDataGrid x:Name="SYNCFUSION_DG" 
                 ContextMenu="{StaticResource DataGridContextMenu}"
                 ItemsSource="{Binding FACTOR_DATA}" 

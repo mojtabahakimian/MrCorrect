@@ -2374,7 +2374,7 @@ namespace Prg_UI.Functions
             bool IsZirMajmoehChart = false;
             bool IsDateLimited = false;
 
-            if (TAGCODE == 0) //یعنی خزانه داری
+            if (TAGCODE == 0 && isOthery) //یعنی خزانه داری
             {
                 CanSeeAll = CL_HESABDARI.LETSGO("DPDEED"); // اجازه دیدن تمام اسناد دریافت/پرداخت
             }

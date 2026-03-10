@@ -96,13 +96,14 @@ namespace Prg_UI.Wins.WinMenus.Checkha
         //Header Window End;
         #endregion
 
-        public PAYCHEK(string _serverfilter, Visual _thewin, string _mabl_check_arg = null, int _current_index = -1, bool isreadonly = false)
+        public PAYCHEK(string _serverfilter, Visual _thewin, string _mabl_check_arg = null, int _current_index = -1, bool isreadonly = false, double? _originMabl_ = null)
         {
             IsReadOnlyMode = isreadonly;
             THE_WIN = _thewin;
             MABL_CHEK_ARG = _mabl_check_arg;
             ServerFilter = _serverfilter;
             INDEX_DG = _current_index;
+            _original_MABL = _originMabl_;
             InitializeComponent();
         }
 
@@ -122,6 +123,12 @@ namespace Prg_UI.Wins.WinMenus.Checkha
             public string NAME_TAH { get; set; }
         }
         public bool IsReadOnlyMode { get; set; } = false;
+
+        // کلیدهای اصلی رکورد در زمان Load - برای استفاده در Save
+        private double? _original_N_SERI = null;
+        private int? _original_BANK = null;
+        private long? _original_DATE_S = null;
+        private double? _original_MABL = null;
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
@@ -135,7 +142,9 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
             if (KhazanehRow?.N_SERI is not null && KhazanehRow.BANK is not null && KhazanehRow.MABL is not null)
             {
-                var CheckExistData = dbms.DoGetDataSQL<PAY_GETP>($"SELECT * FROM PAY_GETP WHERE N_SERI = {KhazanehRow.N_SERI} AND BANK = {KhazanehRow.BANK} AND MABL = {KhazanehRow.MABL}").ToList();
+                bool MablisChanged = _original_MABL != null && _original_MABL != KhazanehRow.MABL;
+
+                var CheckExistData = dbms.DoGetDataSQL<PAY_GETP>($"SELECT * FROM PAY_GETP WHERE N_SERI = {KhazanehRow.N_SERI} AND BANK = {KhazanehRow.BANK} AND MABL = {(MablisChanged ? _original_MABL : KhazanehRow.MABL)}").ToList();
                 if (CheckExistData.Count > 0)
                 {
                     DaftarShouldUpdate = true;
@@ -149,10 +158,20 @@ namespace Prg_UI.Wins.WinMenus.Checkha
                     N_HESAB.Text = CheckExistData.FirstOrDefault()?.N_HESAB?.ToString();
                     HES1.SelectedValue = CheckExistData.FirstOrDefault()?.HES1?.ToString();
                     SAYADI.Text = CheckExistData.FirstOrDefault()?.SAYADI;
+
+                    // ✅ ذخیره کلید اولیه برای استفاده در Save
+                    _original_N_SERI = CheckExistData.FirstOrDefault()?.N_SERI;
+                    _original_BANK = CheckExistData.FirstOrDefault()?.BANK;
+                    _original_DATE_S = CheckExistData.FirstOrDefault()?.DATE_S;
+                    _original_MABL = KhazanehRow.MABL;
                 }
                 else
                 {
                     DaftarShouldUpdate = false;
+
+                    _original_N_SERI = null;
+                    _original_BANK = null;
+                    _original_DATE_S = null;
                 }
             }
             #endregion
@@ -517,12 +536,38 @@ namespace Prg_UI.Wins.WinMenus.Checkha
 
                 var _SHOBEH_ = SHOBEH.SelectedValue.ToStringNullSafe().Length > 50 ? SHOBEH.SelectedValue.ToStringNullSafe().Substring(0, 50) : SHOBEH.SelectedValue.ToStringNullSafe();
 
+
                 try
                 {
-                    if (CheckExistData.Count > 0)
+                    if (DaftarShouldUpdate)
                     {
-                        dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETP SET N_SERI = {N_SERI.Text}, BANK = {BANK.SelectedValue}, DATE_S = {DATE_S.Text.ToRawTarikh()}, DATE = {DATE.Text.ToRawTarikh()}, SHOBEH = N'{_SHOBEH_}', MABL = {MABL.Text}, NAME_TAH = N'{_NAME_TAH_}', N_HESAB = N'{_N_HESAB_}', N_S = NULL, N_KOL = {(N_KOL is null ? "NULL" : N_KOL)}, N_MOIN = {(N_MOIN is null ? "NULL" : N_MOIN)}, N_TAF = {(N_TAF is null ? "NULL" : N_TAF)}, N_KOL2 = NULL, N_MOIN2 = NULL, N_TAF2 = NULL, N_KOL3 = NULL, N_MOIN3 = NULL, N_TAF3 = NULL, NUMBER = NULL, TAG = NULL, ANBAR = NULL, RADIF = NULL, CUST_NO = DEFAULT, KIND = {KIND.SelectedValue}, VAZ = NULL, HES1 = N'{HES1.SelectedValue}', HES2 = NULL, HES3 = NULL, SAYADI = N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}'
-                                                           WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()}");
+                        //dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETP SET N_SERI = {N_SERI.Text}, BANK = {BANK.SelectedValue}, DATE_S = {DATE_S.Text.ToRawTarikh()}, DATE = {DATE.Text.ToRawTarikh()}, SHOBEH = N'{_SHOBEH_}', MABL = {MABL.Text}, NAME_TAH = N'{_NAME_TAH_}', N_HESAB = N'{_N_HESAB_}', N_S = NULL, N_KOL = {(N_KOL is null ? "NULL" : N_KOL)}, N_MOIN = {(N_MOIN is null ? "NULL" : N_MOIN)}, N_TAF = {(N_TAF is null ? "NULL" : N_TAF)}, N_KOL2 = NULL, N_MOIN2 = NULL, N_TAF2 = NULL, N_KOL3 = NULL, N_MOIN3 = NULL, N_TAF3 = NULL, NUMBER = NULL, TAG = NULL, ANBAR = NULL, RADIF = NULL, CUST_NO = DEFAULT, KIND = {KIND.SelectedValue}, VAZ = NULL, HES1 = N'{HES1.SelectedValue}', HES2 = NULL, HES3 = NULL, SAYADI = N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}'
+                        //                                   WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()}");
+
+                        // حالت ویرایش: UPDATE با کلید اصلی (نه کلید جدید کاربر)
+                        dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETP SET
+                                     N_SERI   = {N_SERI.Text},
+                                     BANK     = {BANK.SelectedValue},
+                                     DATE_S   = {DATE_S.Text.ToRawTarikh()},
+                                     DATE     = {DATE.Text.ToRawTarikh()},
+                                     SHOBEH   = N'{_SHOBEH_}',
+                                     MABL     = {MABL.Text},
+                                     NAME_TAH = N'{_NAME_TAH_}',
+                                     N_HESAB  = N'{_N_HESAB_}',
+                                     KIND     = {KIND.SelectedValue},
+                                     HES1     = N'{HES1.SelectedValue}',
+                                     SAYADI   = N'{(string.IsNullOrEmpty(SAYADI.Text) ? "0" : SAYADI.Text)}',
+                                     N_KOL    = {(N_KOL is null ? "NULL" : N_KOL)},
+                                     N_MOIN   = {(N_MOIN is null ? "NULL" : N_MOIN)},
+                                     N_TAF    = {(N_TAF is null ? "NULL" : N_TAF)},
+                                     N_S = NULL, N_KOL2 = NULL, N_MOIN2 = NULL, N_TAF2 = NULL,
+                                     N_KOL3 = NULL, N_MOIN3 = NULL, N_TAF3 = NULL,
+                                     NUMBER = NULL, TAG = NULL, ANBAR = NULL,
+                                     RADIF = NULL, CUST_NO = DEFAULT, VAZ = NULL,
+                                     HES2 = NULL, HES3 = NULL
+                                 WHERE N_SERI = {_original_N_SERI}
+                                   AND BANK   = {_original_BANK}
+                                   AND DATE_S = {_original_DATE_S}");
                     }
                     else
                     {

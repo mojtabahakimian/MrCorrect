@@ -227,14 +227,17 @@
                             </Style>
                         </DataGridComboBoxColumn.ElementStyle>
                     </DataGridComboBoxColumn>
+                 
 
-                    <!--<DataGridTextColumn x:Name="MANDAH_COLUMN" Binding="{Binding MANDAH,UpdateSourceTrigger=LostFocus}" Header="ملاحظات" MinWidth="80" Width="auto" Visibility="Visible">
+                    <DataGridTextColumn x:Name="MANDAH_COL" Header="ملاحظات" Binding="{Binding MANDAH,UpdateSourceTrigger=LostFocus}" Width="auto">
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                                 <Setter Property="MaxLength" Value="48" />
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
-                    </DataGridTextColumn>-->
+                    </DataGridTextColumn>
+                    
+                    
                 </DataGrid.Columns>
 
             </DataGrid>
