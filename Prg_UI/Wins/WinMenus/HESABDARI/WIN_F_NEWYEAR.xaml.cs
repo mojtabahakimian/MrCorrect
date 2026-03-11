@@ -155,6 +155,13 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
+            CL_HESABDARI.SETSECURITY(this.GetType().Name, "NEWYEAR", new WindowInteropHelper(this).Handle, this.GetType().Name);
+            if (!this.IsLoaded)
+            {
+                this.Close();
+                return;
+            }
+
             FILL_ALL_COMBOBOXES();
 
             try

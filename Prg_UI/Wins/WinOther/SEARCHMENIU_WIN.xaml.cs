@@ -375,6 +375,11 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "حسابهای ترازنامه", WIN_NAME = CL_MenuManager.WinNameType.TARAZHES_WIN });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "گزارش ویژه 115", WIN_NAME = CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN_NEW });
 
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "ایجاد سال مالی جدید", WIN_NAME = CL_MenuManager.WinNameType.WIN_F_NEWYEAR_SALEMALI });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سند افتتاحیه", WIN_NAME = CL_MenuManager.WinNameType.WIN_SANAD_EFTETAHIYAH });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "دریافت موجدوی انتهای دوره از سال قبل", WIN_NAME = CL_MenuManager.WinNameType.WIN_GETFIRSTMOG_DARYAFTMOG });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سند اختتـامیه", WIN_NAME = CL_MenuManager.WinNameType.WIN_SANAD_EKHTETAMIYAH });
+
 
             //تعاریف
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف مرکز هزینه", WIN_NAME = CL_MenuManager.WinNameType.TCOD_MARKAZHAZ_WIN });

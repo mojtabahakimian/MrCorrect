@@ -324,8 +324,8 @@
                                         <!-- دکمه اکشن اصلی -->
                                         <Button x:Name="Command3" Click="Command3_Click" Style="{StaticResource PrimaryGradientButton}">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="ایجاد امن سال مالی جدید" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                                                <materialDesign:PackIcon Kind="ArrowLeft" Width="20" Height="20" VerticalAlignment="Center"/>
+                                                <TextBlock Text="ایجاد سال مالی جدید" VerticalAlignment="Center" Margin="0,0,12,0" Foreground="#DDFFFFFF"/>
+                                                <materialDesign:PackIcon Kind="ArrowLeft" Width="20" Height="20" VerticalAlignment="Center" Foreground="#DDFFFFFF"/>
                                             </StackPanel>
                                         </Button>
 
