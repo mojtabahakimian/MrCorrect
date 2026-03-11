@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Functions;
 using Interfaces;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
@@ -98,6 +99,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         public class COMMODEL2
         {
             public double N_S { get; set; }
+            public long? DATE_S { get; set; }
+            public string? SHARH_S { get; set; }
+            public string? USER_NAME { get; set; }
         }
 
         private bool _bl;
@@ -282,10 +286,31 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         private void LoadNumberVouchers(string previousDbName)
         {
             //شماره سند اختتامیه سال قبل
-            S1.ItemsSource = dbms.DoGetDataSQL<COMMODEL2>($"SELECT N_S as N_S FROM [{previousDbName}].dbo.DEED_HED ORDER BY N_S DESC").ToList();
+            S1.ItemsSource = dbms.DoGetDataSQL<COMMODEL2>($"SELECT N_S as N_S, DATE_S, SHARH_S,USER_NAME  FROM [{previousDbName}].dbo.DEED_HED ORDER BY N_S DESC").ToList();
             S1.SelectedIndex = 0;
         }
+        private bool CheckIfSazmanNamesMatch(string currentDbName, string previousDbName)
+        {
+            // Safety: جلوگیری از اجرای کوئری در صورت خالی بودن نام دیتابیس‌ها
+            if (string.IsNullOrWhiteSpace(currentDbName) || string.IsNullOrWhiteSpace(previousDbName))
+                return false;
 
+            // Performance & Edge Cases: واکشی امن فقط 1 رکورد اول و مقایسه آن‌ها در سمت سرور (جلوگیری از انتقال دیتای اضافی به RAM)
+            string sql = $@"
+        DECLARE @Name1 NVARCHAR(MAX) = (SELECT TOP 1 NAME FROM [{currentDbName}].dbo.SAZMAN);
+        DECLARE @Name2 NVARCHAR(MAX) = (SELECT TOP 1 NAME FROM [{previousDbName}].dbo.SAZMAN);
+
+        IF (@Name1 = @Name2 AND @Name1 IS NOT NULL)
+            SELECT CAST(1 AS BIT);
+        ELSE
+            SELECT CAST(0 AS BIT);
+    ";
+
+            // Memory: استفاده از FirstOrDefault برای گرفتن نتیجه بولی (True/False)
+            bool isSame = dbms.DoGetDataSQL<bool>(sql).FirstOrDefault();
+
+            return isSame;
+        }
         private bool HeaderIsValid(bool _DisplayErrors = true)
         {
             List<MsgModel> ErrosMessages = new List<MsgModel>();
@@ -296,6 +321,15 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             if (string.IsNullOrWhiteSpace(DT.Text))
                 ErrosMessages.Add(new MsgModel { MessageText_U = "لطفا تاریخ سند را وارد کنید." });
+
+            string date_n_val = DT.Text.ToRawTarikh();
+            if (!string.IsNullOrEmpty(date_n_val))
+            {
+                if (!Tarikh.IsValidedDate(date_n_val))
+                {
+                    ErrosMessages.Add(new MsgModel { MessageText_U = "مقدار تاریخ صحیح نیست." });
+                }
+            }
 
             // 2. Numeric validations for Vouchers
             if (string.IsNullOrWhiteSpace(S1.Text) || !double.TryParse(S1.Text, out double s1Val) || s1Val <= 0)
@@ -352,6 +386,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             double s1Val = double.Parse(S1.Text);
             double s2Val = double.Parse(S2.Text);
             string cleanDate = DT.Text.ToRawTarikh();
+
+            var IsTheSameCompany = CheckIfSazmanNamesMatch(CL_Generaly.General_DBname, NDBS.Text);
+            if (!IsTheSameCompany)
+            {
+                Msgwin msgConfirm0 = new Msgwin(true, "به نظر میرسه دوتا دیتابیس انتخاب شده (سال قبل/سال جدید) مربوط به دو شرکت متفاوت هستند , آیا از ادامه عملیات اطمینان دارید ؟");
+                msgConfirm0.ShowDialog();
+                if (msgConfirm0.DialogResult != true) return;
+            }
 
             Msgwin msgConfirm = new Msgwin(true, "آيا درمورد صدور سند افتتاحيه اطمينان داريد؟");
             msgConfirm.ShowDialog();
@@ -422,6 +464,31 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             if (NDBS.SelectedValue != null)
             {
                 LoadNumberVouchers(NDBS.SelectedValue.ToString());
+            }
+        }
+
+        private void S1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (S1.SelectedItem != null)
+            {
+                // Memory/Performance: کست کردن آیتم انتخابی به مدل COMMODEL2 بدون نیاز به کوئری مجدد
+                var selectedItem = S1.SelectedItem as COMMODEL2;
+
+                if (selectedItem != null)
+                {
+                    // Safety: مقداردهی فیلدها با مدیریت مقادیر Null (DBNull) دیتابیس
+                    string rawDate = selectedItem.DATE_S?.ToString() ?? string.Empty;
+                    TXT_DATE_S.Text = (rawDate.Length == 8 && !rawDate.Contains("/")) ? rawDate.Insert(4, "/").Insert(7, "/") : rawDate;
+                    TXT_USER_NAME.Text = selectedItem.USER_NAME?.ToString() ?? string.Empty;
+                    TXT_SHARH_S.Text = selectedItem.SHARH_S?.ToString() ?? string.Empty;
+                }
+            }
+            else
+            {
+                // پاک کردن فیلدها در صورت عدم انتخاب سند
+                TXT_DATE_S.Text = string.Empty;
+                TXT_USER_NAME.Text = string.Empty;
+                TXT_SHARH_S.Text = string.Empty;
             }
         }
     }

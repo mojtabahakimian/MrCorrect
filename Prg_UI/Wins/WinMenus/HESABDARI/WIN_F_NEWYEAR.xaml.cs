@@ -957,6 +957,9 @@ END CATCH;";
                     AdvanceProgress($"جدول Identity {kvp.Key} منتقل شد.");
                 }
 
+                //-- پر کردن جدول کدینگ استان در صورت خالی بودن:
+                EnsureTcodOstanExists(safeNew);
+
                 // --- اصلاحیه مهم: اصلاح پارامترهای lastavrage به شکل (AK.CODE, A.CODE) ---
                 UpdateStatus("انتقال و محاسبه اولیه موجودی‌های انبار...");
                 string stuffSql = $@"
@@ -1048,6 +1051,67 @@ END CATCH;";
                 txtStatus.Text = message;
             });
         }
+
+        private void EnsureTcodOstanExists(string safeNew)
+        {
+            try
+            {
+                dbms.DoExecuteSQL($@"
+        IF NOT EXISTS (SELECT 1 FROM {safeNew}.dbo.TCOD_OSTAN)
+        BEGIN
+            INSERT INTO {safeNew}.dbo.TCOD_OSTAN (OSCODE, OSNAME)
+            SELECT V.OSCODE, V.OSNAME
+            FROM (VALUES
+                ( 1,   N'آذربايجان شرقي' ),
+                ( 2,   N'آذربايجان غربي' ),
+                ( 3,   N'اردبيل' ),
+                ( 4,   N'اصفهان' ),
+                ( 5,   N'ايلام' ),
+                ( 6,   N'بوشهر' ),
+                ( 7,   N'تهران' ),
+                ( 8,   N'چهارمحال و بختياري' ),
+                ( 9,   N'خراسان جنوبي' ),
+                ( 10,  N'خراسان رضوي' ),
+                ( 11,  N'خراسان شمالي' ),
+                ( 12,  N'خوزستان' ),
+                ( 13,  N'زنجان' ),
+                ( 14,  N'سمنان' ),
+                ( 15,  N'سيستان و بلوچستان' ),
+                ( 16,  N'فارس' ),
+                ( 17,  N'قزوين' ),
+                ( 18,  N'قم' ),
+                ( 19,  N'کردستان' ),
+                ( 20,  N'کرمان' ),
+                ( 21,  N'کرمانشاه' ),
+                ( 22,  N'کهگيلويه و بويراحمد' ),
+                ( 23,  N'گلستان' ),
+                ( 24,  N'گيلان' ),
+                ( 25,  N'لرستان' ),
+                ( 26,  N'مازندران' ),
+                ( 27,  N'مرکزي' ),
+                ( 28,  N'هرمزگان' ),
+                ( 29,  N'همدان' ),
+                ( 30,  N'يزد' ),
+                ( 31,  N'البرز' ),
+                ( 92,  N'پاکستان' ),
+                ( 93,  N'افغانستان' ),
+                ( 964, N'عراق' ),
+                ( 965, N'کویت' ),
+                ( 968, N'عمان' ),
+                ( 971, N'امارات' )
+            ) AS V(OSCODE, OSNAME)
+            WHERE NOT EXISTS
+            (
+                SELECT 1
+                FROM {safeNew}.dbo.TCOD_OSTAN T
+                WHERE T.OSCODE = V.OSCODE
+            );
+        END
+    ");
+            }
+            catch { }
+        }
+
 
         private void Command4_Click(object sender, RoutedEventArgs e)
         {
