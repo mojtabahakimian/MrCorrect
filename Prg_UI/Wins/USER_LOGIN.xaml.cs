@@ -129,6 +129,34 @@ namespace Prg_UI.Wins
             theme.SetPrimaryColor((Color)ColorConverter.ConvertFromString(primaryColor));
             paletteHelper.SetTheme(theme);
         }
+
+        /// <summary>
+        /// بعد از ورود کاربر، تم اختصاصی او را از دیتابیس بارگذاری و اعمال می‌کند.
+        /// </summary>
+        private void ApplyUserTheme(int userId)
+        {
+            try
+            {
+                GeneralOptionManager.InitializeThemeSync(userId);
+                bool? isDark = GeneralOptionManager.GetThemeIsDarkModeFromCache(userId);
+                string? primaryColor = GeneralOptionManager.GetThemePrimaryColorFromCache(userId);
+
+                if (!isDark.HasValue && primaryColor == null) return;
+
+                bool dark = isDark ?? Properties.Settings.Default.IsDarkMode;
+                string color = primaryColor ?? Properties.Settings.Default.PrimaryColor;
+
+                var paletteHelper = new PaletteHelper();
+                Theme theme = paletteHelper.GetTheme();
+                ThemeExtensions.SetBaseTheme(theme, dark ? BaseTheme.Dark : BaseTheme.Light);
+                theme.SetPrimaryColor((Color)ColorConverter.ConvertFromString(color));
+                paletteHelper.SetTheme(theme);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Theme] Failed to apply user theme: {ex.Message}");
+            }
+        }
         private static void IncreaseMemoryDesktopHeapExhaustion()
         {
             try
@@ -564,6 +592,7 @@ namespace Prg_UI.Wins
                         Baseknow.UUSER = CL_HESABDARI.Fixp(Krbri.Text).ToString();
                         Baseknow.USERCOD = USF.IDD;
                         Baseknow.UGRP = USF.GRSAL.ToString();
+                        ApplyUserTheme(USF.IDD);
                         StoreInRegister();
                         DEFAULT dEFAULT = new DEFAULT();
                         Close();
@@ -581,6 +610,7 @@ namespace Prg_UI.Wins
                             Baseknow.UUSER = CL_HESABDARI.Fixp(Krbri.Text).ToString();
                             Baseknow.USERCOD = USF.IDD;
                             Baseknow.UGRP = USF.GRSAL.ToString();
+                            ApplyUserTheme(USF.IDD);
                             StoreInRegister();
                             DEFAULT dEFAULT = new DEFAULT();
                             Close();
@@ -602,6 +632,7 @@ namespace Prg_UI.Wins
                             Baseknow.UUSER = CL_HESABDARI.Fixp(Krbri.Text).ToString();
                             Baseknow.USERCOD = USF.IDD;
                             Baseknow.UGRP = USF.GRSAL.ToString();
+                            ApplyUserTheme(USF.IDD);
                             StoreInRegister();
                             DEFAULT dEFAULT = new DEFAULT();
                             Close();

@@ -259,6 +259,128 @@ namespace Prg_UI.Functions
             return await GetIsRDPModeAsync(currentUserId);
         }
 
+        #region Theme Settings
+
+        private const string THEME_DARK_MODE_OPTION_NAME = "ThemeIsDarkMode";
+        private const string THEME_PRIMARY_COLOR_OPTION_NAME = "ThemePrimaryColor";
+
+        private static readonly ConcurrentDictionary<int, bool?> _themeDarkModeCache = new ConcurrentDictionary<int, bool?>();
+        private static readonly ConcurrentDictionary<int, string?> _themePrimaryColorCache = new ConcurrentDictionary<int, string?>();
+        private static readonly SemaphoreSlim _themeCacheSemaphore = new SemaphoreSlim(1, 1);
+
+        /// <summary>
+        /// تنظیمات تم را به صورت همزمان از دیتابیس بارگذاری کرده و در کش ذخیره می‌کند.
+        /// اگر مقداری در دیتابیس نباشد، null در کش ذخیره می‌شود.
+        /// </summary>
+        public static void InitializeThemeSync(int? userId = null)
+        {
+            int currentUserId = userId ?? Baseknow.USERCOD ?? 0;
+            if (currentUserId == 0) return;
+
+            // اگر قبلاً بارگذاری شده باشد، کاری نمی‌کنیم
+            if (_themeDarkModeCache.ContainsKey(currentUserId) && _themePrimaryColorCache.ContainsKey(currentUserId))
+                return;
+
+            _themeCacheSemaphore.Wait();
+            try
+            {
+                // بررسی مجدد (Double-Check Lock)
+                if (_themeDarkModeCache.ContainsKey(currentUserId) && _themePrimaryColorCache.ContainsKey(currentUserId))
+                    return;
+
+                var manager = new GeneralOptionManager();
+
+                var darkOption = manager.GetOptionSync(THEME_DARK_MODE_OPTION_NAME, currentUserId);
+                if (darkOption != null && bool.TryParse(darkOption.OptionValue, out bool isDark))
+                    _themeDarkModeCache.AddOrUpdate(currentUserId, isDark, (id, _) => isDark);
+                else
+                    _themeDarkModeCache.AddOrUpdate(currentUserId, (bool?)null, (id, _) => null);
+
+                var colorOption = manager.GetOptionSync(THEME_PRIMARY_COLOR_OPTION_NAME, currentUserId);
+                if (colorOption != null && !string.IsNullOrWhiteSpace(colorOption.OptionValue))
+                    _themePrimaryColorCache.AddOrUpdate(currentUserId, colorOption.OptionValue, (id, _) => colorOption.OptionValue);
+                else
+                    _themePrimaryColorCache.AddOrUpdate(currentUserId, (string?)null, (id, _) => null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GeneralOptionManager] Failed to init theme sync: {ex.Message}");
+            }
+            finally
+            {
+                _themeCacheSemaphore.Release();
+            }
+        }
+
+        /// <summary>
+        /// مقدار IsDarkMode تم را از کش برمی‌گرداند. اگر در دیتابیس ثبت نشده باشد null برمی‌گرداند.
+        /// </summary>
+        public static bool? GetThemeIsDarkModeFromCache(int? userId = null)
+        {
+            int currentUserId = userId ?? Baseknow.USERCOD ?? 0;
+            if (_themeDarkModeCache.TryGetValue(currentUserId, out bool? value))
+                return value;
+            return null;
+        }
+
+        /// <summary>
+        /// رنگ اصلی تم را از کش برمی‌گرداند. اگر در دیتابیس ثبت نشده باشد null برمی‌گرداند.
+        /// </summary>
+        public static string? GetThemePrimaryColorFromCache(int? userId = null)
+        {
+            int currentUserId = userId ?? Baseknow.USERCOD ?? 0;
+            if (_themePrimaryColorCache.TryGetValue(currentUserId, out string? value))
+                return value;
+            return null;
+        }
+
+        /// <summary>
+        /// تنظیمات تم را برای کاربر فعلی در دیتابیس ذخیره کرده و کش را به‌روزرسانی می‌کند.
+        /// </summary>
+        public static async Task SaveThemeAsync(bool isDark, string primaryColor, int? userId = null)
+        {
+            int currentUserId = userId ?? Baseknow.USERCOD ?? 0;
+            var manager = new GeneralOptionManager();
+
+            var darkOption = new GENERAL_OPTIONS
+            {
+                OptionName = THEME_DARK_MODE_OPTION_NAME,
+                OptionValue = isDark.ToString(),
+                Description = "Theme Dark Mode - حالت تاریک تم",
+                UID = currentUserId
+            };
+            var colorOption = new GENERAL_OPTIONS
+            {
+                OptionName = THEME_PRIMARY_COLOR_OPTION_NAME,
+                OptionValue = primaryColor,
+                Description = "Theme Primary Color - رنگ اصلی تم",
+                UID = currentUserId
+            };
+
+            await manager.SaveOptionAsync(darkOption, currentUserId);
+            await manager.SaveOptionAsync(colorOption, currentUserId);
+
+            _themeDarkModeCache.AddOrUpdate(currentUserId, isDark, (id, _) => isDark);
+            _themePrimaryColorCache.AddOrUpdate(currentUserId, primaryColor, (id, _) => primaryColor);
+        }
+
+        /// <summary>
+        /// تنظیمات تم کاربر را از دیتابیس و کش حذف می‌کند (ریست به حالت پیش‌فرض).
+        /// </summary>
+        public static async Task DeleteThemeAsync(int? userId = null)
+        {
+            int currentUserId = userId ?? Baseknow.USERCOD ?? 0;
+            var manager = new GeneralOptionManager();
+
+            await manager.DeleteOptionAsync(THEME_DARK_MODE_OPTION_NAME, currentUserId);
+            await manager.DeleteOptionAsync(THEME_PRIMARY_COLOR_OPTION_NAME, currentUserId);
+
+            _themeDarkModeCache.TryRemove(currentUserId, out _);
+            _themePrimaryColorCache.TryRemove(currentUserId, out _);
+        }
+
+        #endregion
+
         /// <summary>
         /// یک متد کمکی داخلی برای ذخیره RDPMode در دیتابیس.
         /// </summary>

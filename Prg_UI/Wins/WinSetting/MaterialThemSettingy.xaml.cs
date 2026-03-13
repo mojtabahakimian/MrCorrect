@@ -3,6 +3,7 @@ using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -123,18 +124,42 @@ namespace Prg_UI.Wins.WinSetting
         #region ThemeMethods
         private void LoadTheme()
         {
-            _isDark = Properties.Settings.Default.IsDarkMode;
-            TColory.Text = Properties.Settings.Default.PrimaryColor;
-            MyColorPicker1.Color = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.PrimaryColor);
+            // بارگذاری تنظیمات تم از دیتابیس برای کاربر جاری
+            GeneralOptionManager.InitializeThemeSync();
+            bool? dbIsDark = GeneralOptionManager.GetThemeIsDarkModeFromCache();
+            string? dbPrimaryColor = GeneralOptionManager.GetThemePrimaryColorFromCache();
+
+            // اگر در دیتابیس تنظیم شده باشد از آن استفاده می‌شود، در غیر این‌صورت از Properties.Settings
+            _isDark = dbIsDark ?? Properties.Settings.Default.IsDarkMode;
+            string primaryColor = dbPrimaryColor ?? Properties.Settings.Default.PrimaryColor;
+
+            TColory.Text = primaryColor;
+            MyColorPicker1.Color = (Color)ColorConverter.ConvertFromString(primaryColor);
             ThemeActivationsBtn.IsChecked = _isDark;
             ApplyTheme();
         }
 
         private void SaveThemeSettings()
         {
+            string primaryColor = MyColorPicker1.Color.ToString();
+
+            // ذخیره در Properties.Settings (برای سازگاری با نسخه‌های قبلی)
             Properties.Settings.Default.IsDarkMode = _isDark;
-            Properties.Settings.Default.PrimaryColor = MyColorPicker1.Color.ToString();
+            Properties.Settings.Default.PrimaryColor = primaryColor;
             Properties.Settings.Default.Save();
+
+            // ذخیره در دیتابیس به ازای کاربر جاری (Fire-and-Forget)
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await GeneralOptionManager.SaveThemeAsync(_isDark, primaryColor);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Theme] Background save failed: {ex.Message}");
+                }
+            });
         }
 
         private void LoadTheme_0()
@@ -242,6 +267,20 @@ namespace Prg_UI.Wins.WinSetting
                 MyColorPicker1.Color = (Color)ColorConverter.ConvertFromString(TColory.Text);
                 ThemeActivationsBtn.IsChecked = _isDark;
                 ApplyTheme();
+                ChangeHappened = false;
+
+                // حذف تنظیمات تم کاربر از دیتابیس (باز نشانی) - Fire-and-Forget
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        await GeneralOptionManager.DeleteThemeAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[Theme] Background reset failed: {ex.Message}");
+                    }
+                });
             }
             catch
             {
