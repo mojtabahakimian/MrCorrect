@@ -136,21 +136,8 @@ namespace Wins.WinMenus.HESABDARI
                 ////MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>("SELECT BEDBESMAH" + Baseknow.USERCOD + ".*  FROM BEDBESMAH" + Baseknow.USERCOD + " WHERE (HES_K = " + KOL_PASSED + ") And (HES_M = " + MOIN_PASSED + ")  ORDER BY HES_K, HES_M, HES_T").ToList();
 
                 var limitedQuery = $@"
-                    SELECT src.*, balanceOrigin.BALANCE_DATE AS LAST_DEED_DATE
+                    SELECT src.*
                     FROM BEDBESMAH{Baseknow.USERCOD} AS src
-                    OUTER APPLY (
-                        SELECT TOP (1) orderedRows.DATE_S AS BALANCE_DATE
-                        FROM (
-                            SELECT h.DATE_S,
-                                   SUM(CASE WHEN ISNULL(src.BEDBES, 0) > 0 THEN ISNULL(d.BED, 0) ELSE ISNULL(d.BES, 0) END)
-                                       OVER (ORDER BY h.DATE_S DESC, d.N_S DESC ROWS UNBOUNDED PRECEDING) AS RunningAmount
-                            FROM DEED_DTL d
-                            INNER JOIN DEED_HED h ON h.N_S = d.N_S
-                            WHERE d.HES_K = src.HES_K AND d.HES_M = src.HES_M AND d.HES_T = src.HES_T
-                        ) AS orderedRows
-                        WHERE orderedRows.RunningAmount >= ABS(ISNULL(src.BEDBES, 0)) AND ABS(ISNULL(src.BEDBES, 0)) > 0
-                        ORDER BY orderedRows.DATE_S DESC
-                    ) AS balanceOrigin
                     WHERE (src.HES_K = {KOL_PASSED}) And (src.HES_M = {MOIN_PASSED})
                     ORDER BY src.HES_K, src.HES_M, src.HES_T";
 
@@ -160,26 +147,12 @@ namespace Wins.WinMenus.HESABDARI
             {
                 ////MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>("SELECT * FROM Q_BEDEHBESTANH_MAIN OPTION (FORCE ORDER, QUERYTRACEON 2312)").ToList();
 
-                const string fullQuery = @"
-                             SELECT main.*, balanceOrigin.BALANCE_DATE AS LAST_DEED_DATE
-                             FROM Q_BEDEHBESTANH_MAIN AS main
-                             OUTER APPLY (
-                                 SELECT TOP (1) orderedRows.DATE_S AS BALANCE_DATE
-                                 FROM (
-                                     SELECT h.DATE_S,
-                                            SUM(CASE WHEN ISNULL(main.BEDBES, 0) > 0 THEN ISNULL(d.BED, 0) ELSE ISNULL(d.BES, 0) END)
-                                                OVER (ORDER BY h.DATE_S DESC, d.N_S DESC ROWS UNBOUNDED PRECEDING) AS RunningAmount
-                                     FROM DEED_DTL d
-                                     INNER JOIN DEED_HED h ON h.N_S = d.N_S
-                                     WHERE d.HES_K = main.HES_K AND d.HES_M = main.HES_M AND d.HES_T = main.HES_T
-                                 ) AS orderedRows
-                                 WHERE orderedRows.RunningAmount >= ABS(ISNULL(main.BEDBES, 0)) AND ABS(ISNULL(main.BEDBES, 0)) > 0
-                                 ORDER BY orderedRows.DATE_S DESC
-                             ) AS balanceOrigin
-                             OPTION (FORCE ORDER, QUERYTRACEON 2312)";
+                const string fullQuery = @"SELECT * FROM Q_BEDEHBESTANH_MAIN OPTION (FORCE ORDER, QUERYTRACEON 2312)";
 
                 MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>(fullQuery).ToList();
             }
+
+            ComputeLastDeedDates(MasterHead);
 
             foreach (var item in MasterHead)
             {
@@ -575,6 +548,126 @@ namespace Wins.WinMenus.HESABDARI
                 }
             }
         }
+
+        #region محاسبه تاریخ ایجاد مانده - روش پوشش بستانکار
+
+        private class DeedRowForBalance
+        {
+            public long DATE_S { get; set; }
+            public double N_S { get; set; }
+            public double BED { get; set; }
+            public double BES { get; set; }
+            public string SHARH { get; set; }
+        }
+
+        /// <summary>
+        /// محاسبه تاریخ ایجاد مانده برای همه ردیف‌ها
+        /// بر اساس روش پوشش بستانکار (مشابه FindNewDebtStartByCreditCoverage در R_DAFTAR_MOIN_LIST)
+        /// </summary>
+        private void ComputeLastDeedDates(System.Collections.Generic.List<Q_BEDEHBESTANH_MAIN> rows)
+        {
+            if (rows == null || rows.Count == 0) return;
+
+            foreach (var row in rows)
+            {
+                if (!row.HES_K.HasValue || !row.HES_M.HasValue || !row.HES_T.HasValue)
+                    continue;
+                if (!row.BEDBES.HasValue || row.BEDBES.Value == 0)
+                    continue;
+
+                try
+                {
+                    row.LAST_DEED_DATE = FindBalanceOriginDate(row.HES_K.Value, row.HES_M.Value, row.HES_T.Value);
+                }
+                catch { }
+            }
+        }
+
+        /// <summary>
+        /// جمع بستانکارها را می‌گیرد، سپس از اول بدهکارها را جمع می‌زند
+        /// هرجا جمع بدهکار >= جمع بستانکار شد، سطر بعدی = شروع بدهی جدید
+        /// تاریخ آن سطر = تاریخ ایجاد مانده
+        /// </summary>
+        private long? FindBalanceOriginDate(int hesK, int hesM, int hesT)
+        {
+            var deedRows = dbms.DoGetDataSQL<DeedRowForBalance>(
+                $@"SELECT h.DATE_S, d.N_S, ISNULL(d.BED, 0) AS BED, ISNULL(d.BES, 0) AS BES, ISNULL(d.SHARH, '') AS SHARH
+                   FROM DEED_DTL d
+                   INNER JOIN DEED_HED h ON h.N_S = d.N_S
+                   WHERE d.HES_K = {hesK} AND d.HES_M = {hesM} AND d.HES_T = {hesT}
+                   ORDER BY h.DATE_S, d.N_S").ToList();
+
+            if (deedRows.Count == 0)
+                return null;
+
+            // 1) جمع کل بستانکارها
+            decimal totalCredit = 0m;
+            foreach (var r in deedRows)
+                totalCredit += (decimal)r.BES;
+
+            // اگر اصلاً بستانکاری نداریم، شروع بدهی جدید از اولین ردیف غیر افتتاحیه
+            if (totalCredit <= 0)
+            {
+                foreach (var r in deedRows)
+                {
+                    if (!r.SHARH.Contains("افتتاح"))
+                        return r.DATE_S;
+                }
+                return deedRows[0].DATE_S;
+            }
+
+            // 2) از اول فقط بدهکارها را جمع می‌زنیم
+            decimal runningDebit = 0m;
+            int coverIndex = -1;
+            int nearestIndex = -1;
+            decimal nearestDiff = decimal.MaxValue;
+
+            for (int i = 0; i < deedRows.Count; i++)
+            {
+                decimal bed = (decimal)deedRows[i].BED;
+                if (bed <= 0) continue;
+
+                runningDebit += bed;
+
+                decimal diff = Math.Abs(runningDebit - totalCredit);
+                if (diff < nearestDiff)
+                {
+                    nearestDiff = diff;
+                    nearestIndex = i;
+                }
+
+                if (runningDebit >= totalCredit)
+                {
+                    coverIndex = i;
+                    break;
+                }
+            }
+
+            // اگر دقیق/عبوری پیدا نشد، نزدیک‌ترین را بگیر
+            if (coverIndex < 0)
+                coverIndex = nearestIndex;
+
+            if (coverIndex < 0)
+                return null;
+
+            // 3) سطر بعدی = شروع بدهی جدید
+            int startIndex = coverIndex + 1;
+
+            if (startIndex >= deedRows.Count)
+                startIndex = coverIndex;
+
+            // اگر روی افتتاحیه افتاد، تا اولین سطر غیر افتتاحیه جلو برو
+            while (startIndex < deedRows.Count)
+            {
+                if (!deedRows[startIndex].SHARH.Contains("افتتاح"))
+                    return deedRows[startIndex].DATE_S;
+                startIndex++;
+            }
+
+            return deedRows[coverIndex].DATE_S;
+        }
+
+        #endregion
     }
 
 }
