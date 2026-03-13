@@ -1070,6 +1070,18 @@ namespace Functions
             /// </summary>
             WIN_F_NEWYEAR_SALEMALI,
             /// <summary>
+            /// دریافت موجدوی انتهای دوره از سال قبل
+            /// </summary>
+            WIN_GETFIRSTMOG_DARYAFTMOG,
+            /// <summary>
+            /// سند افتتاحیه
+            /// </summary>
+            WIN_SANAD_EFTETAHIYAH,
+            /// <summary>
+            /// سند اختتـامیه
+            /// </summary>
+            WIN_SANAD_EKHTETAMIYAH,
+            /// <summary>
         }
         #endregion
 
@@ -1088,6 +1100,12 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+
+                case WinNameType.WIN_SANAD_EKHTETAMIYAH: /*سند اختتـامیه*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_SANAD_EKHTETAMIYAH(), isModalDialog: false, allowMultipleInstances: false); break;
+
+                case WinNameType.WIN_SANAD_EFTETAHIYAH: /*سند افتتاحیه*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_SANAD_EFTETAHIYAH(), isModalDialog: false, allowMultipleInstances: false); break;
+
+                case WinNameType.WIN_GETFIRSTMOG_DARYAFTMOG: /*دریافت موجدوی انتهای دوره از سال قبل*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_GETFIRSTMOG(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_F_NEWYEAR_SALEMALI: /*ایجاد سال مالی جدید*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_F_NEWYEAR(), isModalDialog: false, allowMultipleInstances: false); break;
 

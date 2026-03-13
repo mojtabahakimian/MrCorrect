@@ -8,7 +8,7 @@
         xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        Height="450" Width="800"
+        Height="500" Width="800"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         MinHeight="400"
         FontFamily="{StaticResource IRANYEKAN}"
@@ -61,12 +61,6 @@
         <!-- Content area -->
         <Grid Margin="0,38,0,0" FlowDirection="RightToLeft">
             <StackPanel>
-
-                <DockPanel Margin="15" LastChildFill="True">
-                    <Label Content="نام دیتابیس در سال جاری:" HorizontalAlignment="Right" FlowDirection="RightToLeft"/>
-                    <TextBox x:Name="ODBS" Text="Database Name" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" TextAlignment="Right" IsReadOnly="True"/>
-                </DockPanel>
-
                 <DockPanel Margin="15,5,15,15" LastChildFill="True">
                     <Label Content="نام دیتابیس برای سال قبل:" HorizontalAlignment="Right" FlowDirection="RightToLeft"/>
                     <ComboBox x:Name="NDBS" PreviewLostKeyboardFocus="NDBS_PreviewLostKeyboardFocus"
@@ -80,22 +74,57 @@
                             </ItemsPanelTemplate>
                         </ComboBox.ItemsPanel>
                     </ComboBox>
-
                 </DockPanel>
 
-                <DockPanel Margin="15,5,15,15" LastChildFill="True">
-                    <Label Content="شماره سند اختتاميه سال قبل:" HorizontalAlignment="Right" FlowDirection="RightToLeft"/>
-                    <ComboBox x:Name="S1" Width="150" HorizontalAlignment="Left"
-                              SelectedValuePath="N_S"
-                              DisplayMemberPath="N_S" HorizontalContentAlignment="Right"
-                              Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1">
-                        <ComboBox.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
-                            </ItemsPanelTemplate>
-                        </ComboBox.ItemsPanel>
-                    </ComboBox>
+                <DockPanel  Margin="15,5,15,15" LastChildFill="True">
+                    <Label Content="نام دیتابیس در سال جاری:" HorizontalAlignment="Right" FlowDirection="RightToLeft"/>
+                    <TextBox x:Name="ODBS" Text="Database Name" Height="30" Style="{StaticResource FuzzyOut}" Padding="3" TextAlignment="Right" IsReadOnly="True"/>
                 </DockPanel>
+
+                <!-- بخش بازنویسی شده: نمایش سند اختتامیه و جزئیات آن -->
+                <Border Margin="15" BorderBrush="{StaticResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="5" Padding="10">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <!-- Spacing -->
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="110"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- ردیف اول: کامبوباکس سند، تاریخ، کاربر -->
+                        <Label Grid.Row="0" Grid.Column="0" Content="شماره سند اختتاميه سال قبل:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <ComboBox x:Name="S1" Grid.Row="0" Grid.Column="1"
+                                  SelectionChanged="S1_SelectionChanged"
+                                  SelectedValuePath="N_S"
+                                  DisplayMemberPath="N_S" HorizontalContentAlignment="Right"
+                                  Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" Height="30" FlowDirection="RightToLeft" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+                        </ComboBox>
+
+                        <Label Grid.Row="0" Grid.Column="2" Content="تاریخ سند:" VerticalAlignment="Center" Margin="15,0,5,0"/>
+                        <TextBox x:Name="TXT_DATE_S" Grid.Row="0" Grid.Column="3" IsReadOnly="True" Style="{StaticResource FuzzyOut}" Height="30" Padding="3" Foreground="{StaticResource MaterialDesignBodyLight}" Background="#0A000000" TextAlignment="Center"/>
+
+                        <Label Grid.Row="0" Grid.Column="4" Content="کاربر ثبت‌کننده:" VerticalAlignment="Center" Margin="15,0,5,0"/>
+                        <TextBox x:Name="TXT_USER_NAME" Grid.Row="0" Grid.Column="5" IsReadOnly="True" Style="{StaticResource FuzzyOut}" Height="30" Padding="3" Foreground="{StaticResource MaterialDesignBodyLight}" Background="#0A000000"/>
+
+                        <!-- ردیف دوم: شرح سند -->
+                        <Label Grid.Row="2" Grid.Column="0" Content="شرح سند اختتامیه:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <TextBox x:Name="TXT_SHARH_S" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="5" IsReadOnly="True" Style="{StaticResource FuzzyOut}" Height="30" Padding="3" Foreground="{StaticResource MaterialDesignBodyLight}" Background="#0A000000"/>
+                    </Grid>
+                </Border>
+
                 <Separator Background="{StaticResource MaterialDesignDivider}"/>
 
                 <DockPanel Margin="15" LastChildFill="True">

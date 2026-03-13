@@ -34,13 +34,13 @@
 
             <ToggleButton x:Name="ThemeActivationsBtn" Style="{StaticResource MaterialDesignSwitchToggleButton}" ToolTip="Activation Of Dark Theme" IsChecked="False" Margin="112,392,0,0" Click="ThemeActivationsBtn_Click" HorizontalAlignment="Left" Width="63" Height="28" VerticalAlignment="Top" Cursor="Hand" />
             <Label Content="Dark Mode" HorizontalAlignment="Left" Height="24" Margin="22,394,0,0" VerticalAlignment="Top" Width="69"/>
-            <Button x:Name="GENERAL_RANG" Content="ذخیره تم" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Left" Margin="197,388,0,0" VerticalAlignment="Top" Width="170" Click="GENERAL_RANG_Click" Height="36" FontSize="12" />
+            <Button x:Name="GENERAL_RANG" Content="ذخیره تم" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Left" Margin="197,0,0,30" VerticalAlignment="Bottom" Width="170" Click="GENERAL_RANG_Click" Height="36" FontSize="12" />
 
             <materialDesign:ColorPicker x:Name="MyColorPicker1" Margin="20,17,26,0" VerticalAlignment="Top" Height="353" Color="{Binding ElementName=TColory,Path=Text,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" PreviewMouseMove="MyColorPicker1_PreviewMouseMove" ColorChanged="MyColorPicker1_ColorChanged" />
 
             <TextBox x:Name="TColory" HorizontalAlignment="Left" Height="28" Margin="390,392,0,0" TextWrapping="Wrap" Text="{Binding ElementName=MyColorPicker1,Path=Color,IsAsync=True}" VerticalAlignment="Top" Width="115" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" TextChanged="TColory_TextChanged"/>
             <Label x:Name="CNN_SETTING" Visibility="Collapsed" Content="اتصال به دیتابیس . . . " Height="26" Margin="20,0,10,10" VerticalAlignment="Bottom" Cursor="Hand"  PreviewMouseLeftButtonUp="CNN_SETTING_PreviewMouseLeftButtonUp"/>
-            <Button x:Name="BTN_RESET" Content="Reset" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Left" Margin="526,388,0,0" VerticalAlignment="Top" Width="170" Click="BTN_RESET_Click" Height="36" FontSize="12" />
+            <Button x:Name="BTN_RESET" Content="Reset" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Left" Margin="526,0,0,30" VerticalAlignment="Bottom" Width="170" Click="BTN_RESET_Click" Height="36" FontSize="12" />
         </Grid>
     </Grid>
 </Window>

@@ -155,6 +155,13 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
 
+            CL_HESABDARI.SETSECURITY(this.GetType().Name, "NEWYEAR", new WindowInteropHelper(this).Handle, this.GetType().Name);
+            if (!this.IsLoaded)
+            {
+                this.Close();
+                return;
+            }
+
             FILL_ALL_COMBOBOXES();
 
             try
@@ -802,7 +809,7 @@ END CATCH;";
                     { "TDETA_HES4", "N_KOL, NUMBER, TNUMBER, TNUMBER2, TNUMBER3, TNUMBER4, NAME, TOZIH, BED_BES, ADDRESS, TEL, CODE_E, ECODE, PCODE, IYALAT, CITY, MCODEM, CUST_COD, MOBILE, ROUTE_NAME, Longitude, Latitude, OSTANID, SHAHRID,tob" },
                     { "TCOD_ANBAR", "CODE, NAMES, KIND" },
                     { "TCOD_BANKS", "CODE, NAMES, TEJ_C, MEL_C, SAD_C, MLA_C, REF_C, TOS_C, KES_C, KAR_C, POS_C, TAT_C, SEP_C, TSA_C, SAN_C, MAS_C, EGH_C, PAR_C, PAS_C, DEY_C, SAM_C, SAR_C, SIN_C, SHA_C" },
-                    { "STUF_DEF", "CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F, DEPART, CMBAA, VAZN, OKF, MENUIT, MEGHTA, MEGHJAY, PGID, BARCODE" },
+                    { "STUF_DEF", "CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F, DEPART, CMBAA, VAZN, OKF, MENUIT, MEGHTA, MEGHJAY, PGID, BARCODE,sstid,mu,vra" },
                     { "DEPART", "DEPATMAN, DEPNAME" },
                     { "SHARH", "SHARH" },
                     { "OPANBACCESS", "USERCO, ANBCO" },
@@ -950,6 +957,9 @@ END CATCH;";
                     AdvanceProgress($"جدول Identity {kvp.Key} منتقل شد.");
                 }
 
+                //-- پر کردن جدول کدینگ استان در صورت خالی بودن:
+                EnsureTcodOstanExists(safeNew);
+
                 // --- اصلاحیه مهم: اصلاح پارامترهای lastavrage به شکل (AK.CODE, A.CODE) ---
                 UpdateStatus("انتقال و محاسبه اولیه موجودی‌های انبار...");
                 string stuffSql = $@"
@@ -1041,6 +1051,67 @@ END CATCH;";
                 txtStatus.Text = message;
             });
         }
+
+        private void EnsureTcodOstanExists(string safeNew)
+        {
+            try
+            {
+                dbms.DoExecuteSQL($@"
+        IF NOT EXISTS (SELECT 1 FROM {safeNew}.dbo.TCOD_OSTAN)
+        BEGIN
+            INSERT INTO {safeNew}.dbo.TCOD_OSTAN (OSCODE, OSNAME)
+            SELECT V.OSCODE, V.OSNAME
+            FROM (VALUES
+                ( 1,   N'آذربايجان شرقي' ),
+                ( 2,   N'آذربايجان غربي' ),
+                ( 3,   N'اردبيل' ),
+                ( 4,   N'اصفهان' ),
+                ( 5,   N'ايلام' ),
+                ( 6,   N'بوشهر' ),
+                ( 7,   N'تهران' ),
+                ( 8,   N'چهارمحال و بختياري' ),
+                ( 9,   N'خراسان جنوبي' ),
+                ( 10,  N'خراسان رضوي' ),
+                ( 11,  N'خراسان شمالي' ),
+                ( 12,  N'خوزستان' ),
+                ( 13,  N'زنجان' ),
+                ( 14,  N'سمنان' ),
+                ( 15,  N'سيستان و بلوچستان' ),
+                ( 16,  N'فارس' ),
+                ( 17,  N'قزوين' ),
+                ( 18,  N'قم' ),
+                ( 19,  N'کردستان' ),
+                ( 20,  N'کرمان' ),
+                ( 21,  N'کرمانشاه' ),
+                ( 22,  N'کهگيلويه و بويراحمد' ),
+                ( 23,  N'گلستان' ),
+                ( 24,  N'گيلان' ),
+                ( 25,  N'لرستان' ),
+                ( 26,  N'مازندران' ),
+                ( 27,  N'مرکزي' ),
+                ( 28,  N'هرمزگان' ),
+                ( 29,  N'همدان' ),
+                ( 30,  N'يزد' ),
+                ( 31,  N'البرز' ),
+                ( 92,  N'پاکستان' ),
+                ( 93,  N'افغانستان' ),
+                ( 964, N'عراق' ),
+                ( 965, N'کویت' ),
+                ( 968, N'عمان' ),
+                ( 971, N'امارات' )
+            ) AS V(OSCODE, OSNAME)
+            WHERE NOT EXISTS
+            (
+                SELECT 1
+                FROM {safeNew}.dbo.TCOD_OSTAN T
+                WHERE T.OSCODE = V.OSCODE
+            );
+        END
+    ");
+            }
+            catch { }
+        }
+
 
         private void Command4_Click(object sender, RoutedEventArgs e)
         {

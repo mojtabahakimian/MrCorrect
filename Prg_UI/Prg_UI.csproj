@@ -442,6 +442,8 @@
 		<None Remove="UiDrive\IMGS\PICMENU\VISITORY\VisitWayForCustomers.png" />
 		<None Remove="UiDrive\IMGS\SplashHandwrite.gif" />
 		<None Remove="UiDrive\IMGS\Tanzimat.png" />
+		<None Remove="Utilityfiles\neginsql.rar" />
+		<None Remove="Utilityfiles\new_neginsql_no_any_data2_shrinked.rar" />
 		<None Remove="Wins\WinMenus\KHARID_FORUSH\b3xmkfow.h3h~" />
 	</ItemGroup>
 
@@ -1026,6 +1028,7 @@
 	<ItemGroup>
 		<Folder Include="AddonPrg\" />
 		<Folder Include="DLLS\" />
+		<Folder Include="Utilityfiles\" />
 	</ItemGroup>
 
 	<ItemGroup>

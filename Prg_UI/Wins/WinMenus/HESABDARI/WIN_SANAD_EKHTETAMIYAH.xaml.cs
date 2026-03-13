@@ -220,16 +220,48 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
             return true;
         }
+        private bool DATE_VALIDATE(bool DisplayMsg = true)
+        {
+            string date_n_val = DT.Text.ToRawTarikh();
+            if (!string.IsNullOrEmpty(date_n_val))
+            {
+                if (!Tarikh.IsValidedDate(date_n_val))
+                {
+                    DT.Text = null;
+                    if (DisplayMsg)
+                    {
+                        universControl.PopNotifyShow("مقدار تاریخ صحیح نیست.", Pop1, Pop1Text1, Pop_Border1);
+                    }
+                    return false;
+                }
+            }
+            else
+            {
+                DT.Text = null;
+                if (DisplayMsg)
+                {
+                    universControl.PopNotifyShow("تاریخ نمی تواند خالی باشد.", Pop1, Pop1Text1, Pop_Border1);
+                }
+                return false;
+            }
 
+            return true;
+        }
         private void BTN_GO_Click(object sender, RoutedEventArgs e)
         {
             try
             {
+                if (!DATE_VALIDATE())
+                {
+                    return;
+                }
+
                 if (string.IsNullOrWhiteSpace(DT.Text) || string.IsNullOrWhiteSpace(S2.Text))
                 {
                     new Msgwin(false, "پارامترها کافی نیست!").ShowDialog();
                     return;
                 }
+
 
                 Msgwin msgDup = new Msgwin(true, "آیا در مورد صدور سند اختتامیه اطمینان دارید ؟");
                 msgDup.ShowDialog();

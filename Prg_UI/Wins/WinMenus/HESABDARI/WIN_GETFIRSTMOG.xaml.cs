@@ -145,7 +145,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             try
             {
                 // Preserve legacy security and initializations
-                CL_HESABDARI.SETSECURITY(this.GetType().Name, "NEWYEAR", new WindowInteropHelper(this).Handle, this.GetType().Name);
+                CL_HESABDARI.SETSECURITY(this.GetType().Name, "DMSGH", new WindowInteropHelper(this).Handle, this.GetType().Name);
 
                 LoadYearSources();
             }
