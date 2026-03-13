@@ -1,8 +1,12 @@
 ﻿using MaterialDesignThemes.Wpf;
+using Prg_Proccessy.MODELS;
+using Prg_Proccessy.SQLMODELS;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using System;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -44,8 +48,14 @@ namespace Prg_UI.Wins.WinSetting
         #endregion
 
         private readonly PaletteHelper _paletteHelper = new PaletteHelper();
+        private readonly GeneralOptionManager _generalOptionManager = new GeneralOptionManager();
         private Theme _theme;
         private bool _isDark;
+        private readonly int _currentUserId;
+
+        private const string ThemeIsDarkOptionName = "Theme.IsDarkMode";
+        private const string ThemePrimaryColorOptionName = "Theme.PrimaryColor";
+        private const string DefaultPrimaryColor = "#03A9F4";
 
         private System.Threading.Timer _colorUpdateTimer;
         private Color _pendingColor;
@@ -54,7 +64,8 @@ namespace Prg_UI.Wins.WinSetting
         public MaterialThemSettingy()
         {
             InitializeComponent();
-            LoadTheme();
+            _currentUserId = Baseknow.USERCOD ?? 0;
+            _ = LoadThemeAsync();
         }
 
         private void MyColorPicker1_PreviewMouseMove(object sender, MouseEventArgs e)
@@ -82,7 +93,7 @@ namespace Prg_UI.Wins.WinSetting
             _isDark = ThemeActivationsBtn.IsChecked ?? false;
             ApplyTheme();
         }
-        private void GENERAL_RANG_Click(object sender, RoutedEventArgs e)
+        private async void GENERAL_RANG_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -93,10 +104,15 @@ namespace Prg_UI.Wins.WinSetting
                     return;
                 }
 
-                SaveThemeSettings();
+                bool saved = await SaveThemeSettingsAsync();
+                if (!saved)
+                {
+                    new Msgwin(false, "خطا در ذخیره تنظیمات تِم در دیتابیس").ShowDialog();
+                    return;
+                }
 
                 ChangeHappened = false;
-               
+
                 new Msgwin(false, "ذخیره انجام شد.").ShowDialog();
             }
             catch
@@ -121,20 +137,70 @@ namespace Prg_UI.Wins.WinSetting
         }
 
         #region ThemeMethods
-        private void LoadTheme()
+        private async Task LoadThemeAsync()
         {
-            _isDark = Properties.Settings.Default.IsDarkMode;
-            TColory.Text = Properties.Settings.Default.PrimaryColor;
-            MyColorPicker1.Color = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.PrimaryColor);
+            string primaryColor = DefaultPrimaryColor;
+            bool isDark = false;
+
+            try
+            {
+                int? userId = _currentUserId > 0 ? _currentUserId : (int?)null;
+                var options = await _generalOptionManager.GetOptionsAsync(new[] { ThemeIsDarkOptionName, ThemePrimaryColorOptionName }, userId);
+
+                string? darkModeDb = options.FirstOrDefault(x => x.OptionName == ThemeIsDarkOptionName)?.OptionValue;
+                string? primaryColorDb = options.FirstOrDefault(x => x.OptionName == ThemePrimaryColorOptionName)?.OptionValue;
+
+                if (!string.IsNullOrWhiteSpace(darkModeDb))
+                {
+                    bool.TryParse(darkModeDb, out isDark);
+                }
+
+                if (!string.IsNullOrWhiteSpace(primaryColorDb))
+                {
+                    primaryColor = primaryColorDb;
+                }
+            }
+            catch
+            {
+                // اگر دیتابیس در دسترس نبود، مقدار پیش‌فرض استفاده می‌شود.
+            }
+
+            _isDark = isDark;
+            TColory.Text = primaryColor;
+            MyColorPicker1.Color = (Color)ColorConverter.ConvertFromString(primaryColor);
             ThemeActivationsBtn.IsChecked = _isDark;
             ApplyTheme();
         }
 
-        private void SaveThemeSettings()
+        private async Task<bool> SaveThemeSettingsAsync()
         {
-            Properties.Settings.Default.IsDarkMode = _isDark;
-            Properties.Settings.Default.PrimaryColor = MyColorPicker1.Color.ToString();
-            Properties.Settings.Default.Save();
+            ////Properties.Settings.Default.IsDarkMode = _isDark;
+            ////Properties.Settings.Default.PrimaryColor = MyColorPicker1.Color.ToString();
+            ////Properties.Settings.Default.Save();
+            
+            if (_currentUserId <= 0)
+            {
+                return false;
+            }
+
+            var darkModeOption = new GENERAL_OPTIONS
+            {
+                OptionName = ThemeIsDarkOptionName,
+                OptionValue = _isDark.ToString(),
+                Description = "Material Theme Dark Mode"
+            };
+
+            var primaryColorOption = new GENERAL_OPTIONS
+            {
+                OptionName = ThemePrimaryColorOptionName,
+                OptionValue = MyColorPicker1.Color.ToString(),
+                Description = "Material Theme Primary Color"
+            };
+
+            bool darkModeSaved = await _generalOptionManager.SaveOptionAsync(darkModeOption, _currentUserId);
+            bool primaryColorSaved = await _generalOptionManager.SaveOptionAsync(primaryColorOption, _currentUserId);
+
+            return darkModeSaved && primaryColorSaved;
         }
 
         private void LoadTheme_0()
@@ -226,7 +292,7 @@ namespace Prg_UI.Wins.WinSetting
             catch (Exception) { }
         }
 
-        private void BTN_RESET_Click(object sender, RoutedEventArgs e)
+        private async void BTN_RESET_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -242,6 +308,15 @@ namespace Prg_UI.Wins.WinSetting
                 MyColorPicker1.Color = (Color)ColorConverter.ConvertFromString(TColory.Text);
                 ThemeActivationsBtn.IsChecked = _isDark;
                 ApplyTheme();
+
+                bool saved = await SaveThemeSettingsAsync();
+                if (!saved)
+                {
+                    new Msgwin(false, "خطا در ذخیره Reset تِم در دیتابیس").ShowDialog();
+                    return;
+                }
+
+                ChangeHappened = false;
             }
             catch
             {

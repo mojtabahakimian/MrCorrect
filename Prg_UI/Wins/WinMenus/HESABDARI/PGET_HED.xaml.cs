@@ -1014,7 +1014,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             WHERE  hes = p.THES
         ) AS ct
 
-        WHERE p.ID = @ID
+        WHERE p.ID = @ID ORDER BY p.IDH
 
         -- ✅ BOTTLENECK #3 FIX: جلوگیری از استفاده از پلن کش نامناسب
         OPTION (OPTIMIZE FOR (@ID UNKNOWN));";
