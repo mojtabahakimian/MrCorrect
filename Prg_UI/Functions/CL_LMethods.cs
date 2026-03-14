@@ -1349,91 +1349,86 @@ namespace Prg_UI.Functions
 
         public static class ProcLoader
         {
-            private static readonly ConcurrentDictionary<int, Process> _runningProcesses = new ConcurrentDictionary<int, Process>();
-            private static readonly List<string> _tempExePaths = new List<string>();
-            private static Mutex _parentMutex; // باید static بمونه تا GC نشه
+            private record LoaderEntry(Process Process, Mutex Mutex, string TempPath);
+
+            private static readonly ConcurrentDictionary<int, LoaderEntry> _entries = new();
+            private const string ResourceName = "Prg_UI.UiDrive.EXEFILES.Preloader.exe";
 
             public static Process Start()
             {
-                string resourceName = "Prg_UI.UiDrive.EXEFILES.Preloader.exe";
-
                 string mutexName = $"PreloaderSync_{Guid.NewGuid():N}";
-                _parentMutex = new Mutex(initiallyOwned: true, name: mutexName);
+                var mutex = new Mutex(initiallyOwned: true, name: mutexName);
 
-                // HWND پنجره اصلی Parent را می‌گیریم
-                IntPtr parentHwnd = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
-                string arguments = $"1354 {mutexName} {parentHwnd.ToInt64()}";
+                IntPtr parentHwnd = Process.GetCurrentProcess().MainWindowHandle;
+                string tempPath = ExtractExe();
 
-                using (Stream stream = Assembly.GetExecutingAssembly()?.GetManifestResourceStream(resourceName))
+                var process = new Process
                 {
-                    byte[] exeBytes = new byte[stream.Length];
-                    stream.Read(exeBytes, 0, exeBytes.Length);
-
-                    string tempExePath = Path.GetTempFileName() + ".exe";
-                    _tempExePaths.Add(tempExePath);
-                    File.WriteAllBytes(tempExePath, exeBytes);
-
-                    var process = new Process
+                    StartInfo = new ProcessStartInfo
                     {
-                        StartInfo =
-                        {
-                            FileName = tempExePath,
-                            Arguments = arguments,
-                            UseShellExecute = false,
-                            RedirectStandardOutput = true,
-                            RedirectStandardError = true,
-                            CreateNoWindow = true
-                        }
-                    };
-
-                    process.Start();
-                    _runningProcesses.TryAdd(process.Id, process);
-                    return process;
-                }
-            }
-
-            public static void Stop(Process process)
-            {
-                if (process == null) return;
-
-                int processId;
-                try { processId = process.Id; }
-                catch (InvalidOperationException) { return; }
-                catch (Exception) { return; }
-
-                if (_runningProcesses.TryRemove(processId, out var removedProcess))
-                {
-                    try { removedProcess.Kill(); } catch { }
-                    removedProcess.WaitForExit(500);
-                    removedProcess.Dispose();
-
-                    string tempExePath = _tempExePaths.FirstOrDefault(p =>
-                        string.Equals(p, removedProcess.StartInfo.FileName, StringComparison.OrdinalIgnoreCase));
-
-                    if (tempExePath != null)
-                    {
-                        try
-                        {
-                            File.Delete(tempExePath);
-                            _tempExePaths.Remove(tempExePath);
-                        }
-                        catch { }
+                        FileName = tempPath,
+                        Arguments = $"1354 {mutexName} {parentHwnd.ToInt64()}",
+                        UseShellExecute = false,
+                        CreateNoWindow = true
                     }
-                }
+                };
 
-                try
-                {
-                    _parentMutex?.ReleaseMutex();
-                    _parentMutex?.Dispose();
-                    _parentMutex = null;
-                }
-                catch { }
+                process.Start();
+                _entries[process.Id] = new LoaderEntry(process, mutex, tempPath);
+                return process;
             }
 
-            public static void Dispose()
+            public static void Stop(Process? process)
             {
-                foreach (var process in _runningProcesses.Values)
-                    Stop(process);
+                if (process is null) return;
+
+                int pid;
+                try { pid = process.Id; }
+                catch { return; }
+
+                if (!_entries.TryRemove(pid, out var entry)) return;
+
+                // Release mutex → preloader خودش WaitOne رو می‌گیره و exit می‌کنه
+                try { entry.Mutex.ReleaseMutex(); } catch { }
+                try { entry.Mutex.Dispose(); } catch { }
+
+                // graceful exit، بعدش kill اگه لازم بود
+                if (!entry.Process.WaitForExit(800))
+                {
+                    try { entry.Process.Kill(); } catch { }
+                    entry.Process.WaitForExit(300);
+                }
+
+                entry.Process.Dispose();
+                TryDeleteTemp(entry.TempPath);
+            }
+
+            public static void DisposeAll()
+            {
+                foreach (var pid in _entries.Keys)
+                {
+                    if (_entries.TryRemove(pid, out var entry))
+                        Stop(entry.Process);
+                }
+            }
+
+            private static string ExtractExe()
+            {
+                var asm = Assembly.GetExecutingAssembly();
+                using var stream = asm.GetManifestResourceStream(ResourceName)
+                    ?? throw new InvalidOperationException($"Resource not found: {ResourceName}");
+
+                using var ms = new MemoryStream();
+                stream.CopyTo(ms);
+
+                string path = Path.Combine(Path.GetTempPath(), $"Preloader_{Guid.NewGuid():N}.exe");
+                File.WriteAllBytes(path, ms.ToArray());
+                return path;
+            }
+
+            private static void TryDeleteTemp(string path)
+            {
+                try { File.Delete(path); } catch { }
             }
         }
 
@@ -2239,7 +2234,7 @@ namespace Prg_UI.Functions
         public static void CleanupBeforeExiting()
         {
 
-            try { ProcLoader.Dispose(); } catch (Exception) { }
+            try { ProcLoader.DisposeAll(); } catch (Exception) { }
 
             try
             {
