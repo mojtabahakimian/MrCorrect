@@ -1360,7 +1360,9 @@ namespace Prg_UI.Functions
                 string mutexName = $"PreloaderSync_{Guid.NewGuid():N}";
                 _parentMutex = new Mutex(initiallyOwned: true, name: mutexName);
 
-                string arguments = $"1354 {mutexName}";
+                // HWND پنجره اصلی Parent را می‌گیریم
+                IntPtr parentHwnd = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
+                string arguments = $"1354 {mutexName} {parentHwnd.ToInt64()}";
 
                 using (Stream stream = Assembly.GetExecutingAssembly()?.GetManifestResourceStream(resourceName))
                 {
