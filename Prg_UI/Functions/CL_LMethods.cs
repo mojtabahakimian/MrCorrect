@@ -1,47 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Windows.Controls.Primitives;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows;
+﻿using AUTO_BAZ.HelperWins;
+using Functions;
 using MaterialDesignThemes.Wpf;
-using System.Collections;
-using System.Security;
-using System.Windows.Threading;
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Reflection;
-using System.Windows.Media.Imaging;
-using System.Text.RegularExpressions;
-using System.Buffers;
-using Prg_Proccessy.Generaly;
-using System.ComponentModel;
-using System.Globalization;
-using AUTO_BAZ.HelperWins;
+using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
+using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
+using Prg_UI.Functions.Jostejoo;
+using Prg_UI.Wins.WinOther;
 using Syncfusion.Data.Extensions;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.Grid.Helpers;
 using Syncfusion.UI.Xaml.ScrollAxis;
+using System;
+using System.Buffers;
+using System.Collections;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
-using Microsoft.VisualBasic;
-using Prg_Proccessy.SQLMODELS;
-using Prg_UI.Wins.WinOther;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security;
+using System.Security.Principal;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Effects;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
 using static Prg_UI.Wins.WinMenus.KHARID_FORUSH.HEAD_LST_FROOSH22;
-using System.Text;
-using System.Runtime.InteropServices;
-using System.Windows.Interop;
-using Functions;
-using System.Windows.Data;
-using Prg_UI.Functions.Jostejoo;
-using System.Windows.Media.Effects;
-using System.Security.Principal;
 
 namespace Prg_UI.Functions
 {
@@ -1346,101 +1347,88 @@ namespace Prg_UI.Functions
             }
         }
 
-        public static class ProcLoader // This is Current use
+        public static class ProcLoader
         {
-            private static readonly object _lock = new object();
-            private static readonly ConcurrentDictionary<int, Process> _runningProcesses = new ConcurrentDictionary<int, Process>();
-            private static readonly List<string> _tempExePaths = new List<string>();
+            private record LoaderEntry(Process Process, Mutex Mutex, string TempPath);
 
-            public static Process Start(string resourceName = null, string arguments = null)
+            private static readonly ConcurrentDictionary<int, LoaderEntry> _entries = new();
+            private const string ResourceName = "Prg_UI.UiDrive.EXEFILES.Preloader.exe";
+
+            public static Process Start()
             {
-                resourceName = "Prg_UI.UiDrive.EXEFILES.Preloader.exe";
-                arguments = "1354";
-                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
+                string mutexName = $"PreloaderSync_{Guid.NewGuid():N}";
+                var mutex = new Mutex(initiallyOwned: true, name: mutexName);
+
+                IntPtr parentHwnd = Process.GetCurrentProcess().MainWindowHandle;
+                string tempPath = ExtractExe();
+
+                var process = new Process
                 {
-                    byte[] exeBytes = new byte[stream.Length];
-                    stream.Read(exeBytes, 0, exeBytes.Length);
-
-                    // Save the byte array to a temporary file
-                    string tempExePath = Path.GetTempFileName() + ".exe";
-                    _tempExePaths.Add(tempExePath); // Store the temp path for later cleanup
-
-                    File.WriteAllBytes(tempExePath, exeBytes);
-
-                    // Start the process from the byte array with arguments
-                    var process = new Process
+                    StartInfo = new ProcessStartInfo
                     {
-                        StartInfo =
-                            {
-                                FileName = tempExePath,
-                                Arguments = arguments,
-                                UseShellExecute = false,
-                                RedirectStandardOutput = true,
-                                RedirectStandardError = true,
-                                CreateNoWindow = true
-                            }
-                    };
-                    process.Start();
-
-                    // Store the process in the dictionary
-                    _runningProcesses.TryAdd(process.Id, process);
-
-                    return process;
-                }
-            }
-
-            public static void Stop(Process process)
-            {
-                if (process == null)
-                {
-                    return;
-                }
-
-                // If process is already disposed or stopped, accessing Id might throw InvalidOperationException
-                int processId;
-                try
-                {
-                    processId = process.Id;
-                }
-                catch (InvalidOperationException)
-                {
-                    // Process is likely disposed or not associated with a running process.
-                    return;
-                }
-                catch (Exception)
-                {
-                    return;
-                }
-
-                if (_runningProcesses.TryRemove(processId, out var removedProcess))
-                {
-                    removedProcess.Kill();
-                    removedProcess.WaitForExit(500); // Set a 500ms timeout
-                    removedProcess.Dispose();
-
-                    // Clean up temporary file
-                    string tempExePath = _tempExePaths.FirstOrDefault(p => string.Equals(p, removedProcess.StartInfo.FileName, StringComparison.OrdinalIgnoreCase));
-                    if (tempExePath != null)
-                    {
-                        try
-                        {
-                            File.Delete(tempExePath);
-                            _tempExePaths.Remove(tempExePath);
-                        }
-                        catch (Exception)
-                        {
-                            // Handle the exception as needed
-                        }
+                        FileName = tempPath,
+                        Arguments = $"1354 {mutexName} {parentHwnd.ToInt64()}",
+                        UseShellExecute = false,
+                        CreateNoWindow = true
                     }
+                };
+
+                process.Start();
+                _entries[process.Id] = new LoaderEntry(process, mutex, tempPath);
+                return process;
+            }
+
+            public static void Stop(Process? process)
+            {
+                if (process is null) return;
+
+                int pid;
+                try { pid = process.Id; }
+                catch { return; }
+
+                if (!_entries.TryRemove(pid, out var entry)) return;
+
+                // Release mutex → preloader خودش WaitOne رو می‌گیره و exit می‌کنه
+                try { entry.Mutex.ReleaseMutex(); } catch { }
+                try { entry.Mutex.Dispose(); } catch { }
+
+                // graceful exit، بعدش kill اگه لازم بود
+                if (!entry.Process.WaitForExit(800))
+                {
+                    try { entry.Process.Kill(); } catch { }
+                    entry.Process.WaitForExit(300);
                 }
 
+                entry.Process.Dispose();
+                TryDeleteTemp(entry.TempPath);
             }
-            public static void Dispose()
+
+            public static void DisposeAll()
             {
-                foreach (var process in _runningProcesses.Values)
+                foreach (var pid in _entries.Keys)
                 {
-                    Stop(process);
+                    if (_entries.TryRemove(pid, out var entry))
+                        Stop(entry.Process);
                 }
+            }
+
+            private static string ExtractExe()
+            {
+                var asm = Assembly.GetExecutingAssembly();
+                using var stream = asm.GetManifestResourceStream(ResourceName)
+                    ?? throw new InvalidOperationException($"Resource not found: {ResourceName}");
+
+                using var ms = new MemoryStream();
+                stream.CopyTo(ms);
+
+                string path = Path.Combine(Path.GetTempPath(), $"Preloader_{Guid.NewGuid():N}.exe");
+                File.WriteAllBytes(path, ms.ToArray());
+                return path;
+            }
+
+            private static void TryDeleteTemp(string path)
+            {
+                try { File.Delete(path); } catch { }
             }
         }
 
@@ -2246,7 +2234,7 @@ namespace Prg_UI.Functions
         public static void CleanupBeforeExiting()
         {
 
-            try { ProcLoader.Dispose(); } catch (Exception) { }
+            try { ProcLoader.DisposeAll(); } catch (Exception) { }
 
             try
             {

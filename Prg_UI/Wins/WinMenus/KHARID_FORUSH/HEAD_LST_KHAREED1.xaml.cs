@@ -591,7 +591,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
 
                 if (!((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Any(item => item?.hes == thevalue))
                 {
-                    ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data.NAME });
+                    ((List<Custom_CUST_HESAB>)CUST_NO.ItemsSource).Add(new Custom_CUST_HESAB { hes = thevalue, NAME = data?.NAME ?? string.Empty });
                 }
                 CUST_NO.SelectedValue = HEADER_FAC.CUST_NO; //مشتری
                 CUST_NO.Items.Refresh();
@@ -604,9 +604,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 SGN2usid.Tag = Convert.ToInt32(HEADER_FAC.sgn2usid);
                 SGN3usid.Tag = Convert.ToInt32(HEADER_FAC.sgn3usid);
 
-                SGN1usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn1usid)?.SAL_NAME;
-                SGN2usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn2usid)?.SAL_NAME;
-                SGN3usid.Text = rst_personel.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn3usid)?.SAL_NAME;
+                SGN1usid.Text = rst_personel?.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn1usid)?.SAL_NAME;
+                SGN2usid.Text = rst_personel?.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn2usid)?.SAL_NAME;
+                SGN3usid.Text = rst_personel?.FirstOrDefault(x => x.IDD == HEADER_FAC?.sgn3usid)?.SAL_NAME;
 
                 PERSONEL.SelectionChanged -= PERSONEL_SelectionChanged;
                 PERSONEL.Text = null;

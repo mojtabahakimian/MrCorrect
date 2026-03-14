@@ -130,26 +130,67 @@ namespace Wins.WinMenus.HESABDARI
 
             Process Prc = Prg_UI.Functions.CL_LMethods.ProcLoader.Start();
 
+            #region DateOfMandehCreation
             if (IsCTRLF9)
             {
                 WINTILENAME.Content = "لیست بدهکاران و بستانکاران محدود شده";
                 ////MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>("SELECT BEDBESMAH" + Baseknow.USERCOD + ".*  FROM BEDBESMAH" + Baseknow.USERCOD + " WHERE (HES_K = " + KOL_PASSED + ") And (HES_M = " + MOIN_PASSED + ")  ORDER BY HES_K, HES_M, HES_T").ToList();
 
-                var limitedQuery = $@"
+                string limitedQuery = $@"
                     SELECT src.*, balanceOrigin.BALANCE_DATE AS LAST_DEED_DATE
                     FROM BEDBESMAH{Baseknow.USERCOD} AS src
                     OUTER APPLY (
-                        SELECT TOP (1) orderedRows.DATE_S AS BALANCE_DATE
+                        SELECT TOP (1) 
+                            CASE 
+                                WHEN calc.TotalCoverage <= 0 THEN NextRow.DATE_S
+                                ELSE COALESCE(NextRow.DATE_S, CoverRow.DATE_S)
+                            END AS BALANCE_DATE
                         FROM (
-                            SELECT h.DATE_S,
-                                   SUM(CASE WHEN ISNULL(src.BEDBES, 0) > 0 THEN ISNULL(d.BED, 0) ELSE ISNULL(d.BES, 0) END)
-                                       OVER (ORDER BY h.DATE_S DESC, d.N_S DESC ROWS UNBOUNDED PRECEDING) AS RunningAmount
-                            FROM DEED_DTL d
-                            INNER JOIN DEED_HED h ON h.N_S = d.N_S
-                            WHERE d.HES_K = src.HES_K AND d.HES_M = src.HES_M AND d.HES_T = src.HES_T
-                        ) AS orderedRows
-                        WHERE orderedRows.RunningAmount >= ABS(ISNULL(src.BEDBES, 0)) AND ABS(ISNULL(src.BEDBES, 0)) > 0
-                        ORDER BY orderedRows.DATE_S DESC
+                            SELECT 
+                                CASE WHEN ISNULL(src.BEDBES, 0) > 0 THEN TotalBes ELSE TotalBed END AS TotalCoverage
+                            FROM (
+                                SELECT ISNULL(SUM(BES), 0) AS TotalBes, ISNULL(SUM(BED), 0) AS TotalBed
+                                FROM DEED_DTL 
+                                WHERE HES_K = src.HES_K AND HES_M = src.HES_M AND HES_T = src.HES_T 
+                                  AND ISNULL(HES_T2, 0) = ISNULL(src.HES_T2, 0) AND ISNULL(HES_T3, 0) = ISNULL(src.HES_T3, 0) AND ISNULL(HES_T4, 0) = ISNULL(src.HES_T4, 0)
+                            ) inner_calc
+                        ) AS calc
+                        OUTER APPLY (
+                                SELECT TOP (1) cover.DATE_S, cover.N_S, cover.RADIF, cover.RunAmount
+                            FROM (
+                                    SELECT inner_cover.N_S, inner_cover.DATE_S, inner_cover.RADIF,
+                                       CASE WHEN ISNULL(src.BEDBES, 0) > 0 THEN RunBed ELSE RunBes END AS RunAmount
+                                FROM (
+                                        SELECT d_inn.N_S, h_inn.DATE_S, d_inn.RADIF,
+                                               SUM(ISNULL(d_inn.BED, 0)) OVER (ORDER BY h_inn.DATE_S ASC, d_inn.N_S ASC, d_inn.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBed,
+                                               SUM(ISNULL(d_inn.BES, 0)) OVER (ORDER BY h_inn.DATE_S ASC, d_inn.N_S ASC, d_inn.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBes
+                                    FROM DEED_DTL d_inn
+                                    INNER JOIN DEED_HED h_inn ON h_inn.N_S = d_inn.N_S
+                                    WHERE d_inn.HES_K = src.HES_K AND d_inn.HES_M = src.HES_M AND d_inn.HES_T = src.HES_T
+                                      AND ISNULL(d_inn.HES_T2, 0) = ISNULL(src.HES_T2, 0) AND ISNULL(d_inn.HES_T3, 0) = ISNULL(src.HES_T3, 0) AND ISNULL(d_inn.HES_T4, 0) = ISNULL(src.HES_T4, 0)
+                                ) inner_cover
+                            ) AS cover
+                            WHERE calc.TotalCoverage > 0 AND cover.RunAmount >= calc.TotalCoverage
+                                ORDER BY cover.DATE_S ASC, cover.N_S ASC, cover.RADIF ASC
+                        ) AS CoverRow
+                        OUTER APPLY (
+                            SELECT TOP (1) h_n.DATE_S
+                            FROM DEED_DTL d_n
+                            INNER JOIN DEED_HED h_n ON h_n.N_S = d_n.N_S
+                            WHERE d_n.HES_K = src.HES_K AND d_n.HES_M = src.HES_M AND d_n.HES_T = src.HES_T
+                              AND ISNULL(d_n.HES_T2, 0) = ISNULL(src.HES_T2, 0) AND ISNULL(d_n.HES_T3, 0) = ISNULL(src.HES_T3, 0) AND ISNULL(d_n.HES_T4, 0) = ISNULL(src.HES_T4, 0)
+                              AND ISNULL(d_n.SHARH, '') NOT LIKE N'%افتتاح%'
+                              AND (
+                                  calc.TotalCoverage <= 0
+                                  OR
+                                      (CoverRow.DATE_S IS NOT NULL AND (
+                                          h_n.DATE_S > CoverRow.DATE_S OR 
+                                          (h_n.DATE_S = CoverRow.DATE_S AND d_n.N_S > CoverRow.N_S) OR
+                                          (h_n.DATE_S = CoverRow.DATE_S AND d_n.N_S = CoverRow.N_S AND d_n.RADIF > CoverRow.RADIF)
+                                      ))
+                              )
+                                ORDER BY h_n.DATE_S ASC, d_n.N_S ASC, d_n.RADIF ASC
+                        ) AS NextRow
                     ) AS balanceOrigin
                     WHERE (src.HES_K = {KOL_PASSED}) And (src.HES_M = {MOIN_PASSED})
                     ORDER BY src.HES_K, src.HES_M, src.HES_T";
@@ -164,22 +205,116 @@ namespace Wins.WinMenus.HESABDARI
                              SELECT main.*, balanceOrigin.BALANCE_DATE AS LAST_DEED_DATE
                              FROM Q_BEDEHBESTANH_MAIN AS main
                              OUTER APPLY (
-                                 SELECT TOP (1) orderedRows.DATE_S AS BALANCE_DATE
+                                 SELECT TOP (1) 
+                                     CASE 
+                                         WHEN calc.TotalCoverage <= 0 THEN NextRow.DATE_S
+                                         ELSE COALESCE(NextRow.DATE_S, CoverRow.DATE_S)
+                                     END AS BALANCE_DATE
                                  FROM (
-                                     SELECT h.DATE_S,
-                                            SUM(CASE WHEN ISNULL(main.BEDBES, 0) > 0 THEN ISNULL(d.BED, 0) ELSE ISNULL(d.BES, 0) END)
-                                                OVER (ORDER BY h.DATE_S DESC, d.N_S DESC ROWS UNBOUNDED PRECEDING) AS RunningAmount
-                                     FROM DEED_DTL d
-                                     INNER JOIN DEED_HED h ON h.N_S = d.N_S
-                                     WHERE d.HES_K = main.HES_K AND d.HES_M = main.HES_M AND d.HES_T = main.HES_T
-                                 ) AS orderedRows
-                                 WHERE orderedRows.RunningAmount >= ABS(ISNULL(main.BEDBES, 0)) AND ABS(ISNULL(main.BEDBES, 0)) > 0
-                                 ORDER BY orderedRows.DATE_S DESC
+                                     SELECT 
+                                         CASE WHEN ISNULL(main.BEDBES, 0) > 0 THEN TotalBes ELSE TotalBed END AS TotalCoverage
+                                     FROM (
+                                         SELECT ISNULL(SUM(BES), 0) AS TotalBes, ISNULL(SUM(BED), 0) AS TotalBed
+                                         FROM DEED_DTL 
+                                         WHERE HES_K = main.HES_K AND HES_M = main.HES_M AND HES_T = main.HES_T 
+                                           AND ISNULL(HES_T2, 0) = ISNULL(main.HES_T2, 0) AND ISNULL(HES_T3, 0) = ISNULL(main.HES_T3, 0) AND ISNULL(HES_T4, 0) = ISNULL(main.HES_T4, 0)
+                                     ) inner_calc
+                                 ) AS calc
+                                 OUTER APPLY (
+                                         SELECT TOP (1) cover.DATE_S, cover.N_S, cover.RADIF, cover.RunAmount
+                                     FROM (
+                                             SELECT inner_cover.N_S, inner_cover.DATE_S, inner_cover.RADIF,
+                                                CASE WHEN ISNULL(main.BEDBES, 0) > 0 THEN RunBed ELSE RunBes END AS RunAmount
+                                         FROM (
+                                                 SELECT d_inn.N_S, h_inn.DATE_S, d_inn.RADIF,
+                                                        SUM(ISNULL(d_inn.BED, 0)) OVER (ORDER BY h_inn.DATE_S ASC, d_inn.N_S ASC, d_inn.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBed,
+                                                        SUM(ISNULL(d_inn.BES, 0)) OVER (ORDER BY h_inn.DATE_S ASC, d_inn.N_S ASC, d_inn.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBes
+                                             FROM DEED_DTL d_inn
+                                             INNER JOIN DEED_HED h_inn ON h_inn.N_S = d_inn.N_S
+                                             WHERE d_inn.HES_K = main.HES_K AND d_inn.HES_M = main.HES_M AND d_inn.HES_T = main.HES_T
+                                               AND ISNULL(d_inn.HES_T2, 0) = ISNULL(main.HES_T2, 0) AND ISNULL(d_inn.HES_T3, 0) = ISNULL(main.HES_T3, 0) AND ISNULL(d_inn.HES_T4, 0) = ISNULL(main.HES_T4, 0)
+                                         ) inner_cover
+                                     ) AS cover
+                                     WHERE calc.TotalCoverage > 0 AND cover.RunAmount >= calc.TotalCoverage
+                                         ORDER BY cover.DATE_S ASC, cover.N_S ASC, cover.RADIF ASC
+                                 ) AS CoverRow
+                                 OUTER APPLY (
+                                     SELECT TOP (1) h_n.DATE_S
+                                     FROM DEED_DTL d_n
+                                     INNER JOIN DEED_HED h_n ON h_n.N_S = d_n.N_S
+                                     WHERE d_n.HES_K = main.HES_K AND d_n.HES_M = main.HES_M AND d_n.HES_T = main.HES_T
+                                       AND ISNULL(d_n.HES_T2, 0) = ISNULL(main.HES_T2, 0) AND ISNULL(d_n.HES_T3, 0) = ISNULL(main.HES_T3, 0) AND ISNULL(d_n.HES_T4, 0) = ISNULL(main.HES_T4, 0)
+                                       AND (
+                                           calc.TotalCoverage <= 0
+                                           OR
+                                               (CoverRow.DATE_S IS NOT NULL AND (
+                                                   h_n.DATE_S > CoverRow.DATE_S OR 
+                                                   (h_n.DATE_S = CoverRow.DATE_S AND d_n.N_S > CoverRow.N_S) OR
+                                                   (h_n.DATE_S = CoverRow.DATE_S AND d_n.N_S = CoverRow.N_S AND d_n.RADIF > CoverRow.RADIF)
+                                               ))
+                                       )
+                                         ORDER BY h_n.DATE_S ASC, d_n.N_S ASC, d_n.RADIF ASC
+                                 ) AS NextRow
                              ) AS balanceOrigin
                              OPTION (FORCE ORDER, QUERYTRACEON 2312)";
 
                 MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>(fullQuery).ToList();
             }
+            #endregion
+
+            #region OLD
+            //if (IsCTRLF9)
+            //{
+            //    WINTILENAME.Content = "لیست بدهکاران و بستانکاران محدود شده";
+            //    ////MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>("SELECT BEDBESMAH" + Baseknow.USERCOD + ".*  FROM BEDBESMAH" + Baseknow.USERCOD + " WHERE (HES_K = " + KOL_PASSED + ") And (HES_M = " + MOIN_PASSED + ")  ORDER BY HES_K, HES_M, HES_T").ToList();
+
+            //    var limitedQuery = $@"
+            //SELECT src.*, balanceOrigin.BALANCE_DATE AS LAST_DEED_DATE
+            //FROM BEDBESMAH{Baseknow.USERCOD} AS src
+            //OUTER APPLY (
+            //    SELECT TOP (1) orderedRows.DATE_S AS BALANCE_DATE
+            //    FROM (
+            //        SELECT h.DATE_S,
+            //               SUM(CASE WHEN ISNULL(src.BEDBES, 0) > 0 THEN ISNULL(d.BED, 0) ELSE ISNULL(d.BES, 0) END)
+            //                   OVER (ORDER BY h.DATE_S DESC, d.N_S DESC ROWS UNBOUNDED PRECEDING) AS RunningAmount
+            //        FROM DEED_DTL d
+            //        INNER JOIN DEED_HED h ON h.N_S = d.N_S
+            //        WHERE d.HES_K = src.HES_K AND d.HES_M = src.HES_M AND d.HES_T = src.HES_T
+            //    ) AS orderedRows
+            //    WHERE orderedRows.RunningAmount >= ABS(ISNULL(src.BEDBES, 0)) AND ABS(ISNULL(src.BEDBES, 0)) > 0
+            //    ORDER BY orderedRows.DATE_S DESC
+            //) AS balanceOrigin
+            //WHERE (src.HES_K = {KOL_PASSED}) And (src.HES_M = {MOIN_PASSED})
+            //ORDER BY src.HES_K, src.HES_M, src.HES_T";
+
+            //    MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>(limitedQuery).ToList();
+            //}
+            //else
+            //{
+            //    ////MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>("SELECT * FROM Q_BEDEHBESTANH_MAIN OPTION (FORCE ORDER, QUERYTRACEON 2312)").ToList();
+
+            //    const string fullQuery = @"
+            //         SELECT main.*, balanceOrigin.BALANCE_DATE AS LAST_DEED_DATE
+            //         FROM Q_BEDEHBESTANH_MAIN AS main
+            //         OUTER APPLY (
+            //             SELECT TOP (1) orderedRows.DATE_S AS BALANCE_DATE
+            //             FROM (
+            //                 SELECT h.DATE_S,
+            //                        SUM(CASE WHEN ISNULL(main.BEDBES, 0) > 0 THEN ISNULL(d.BED, 0) ELSE ISNULL(d.BES, 0) END)
+            //                            OVER (ORDER BY h.DATE_S DESC, d.N_S DESC ROWS UNBOUNDED PRECEDING) AS RunningAmount
+            //                 FROM DEED_DTL d
+            //                 INNER JOIN DEED_HED h ON h.N_S = d.N_S
+            //                 WHERE d.HES_K = main.HES_K AND d.HES_M = main.HES_M AND d.HES_T = main.HES_T
+            //             ) AS orderedRows
+            //             WHERE orderedRows.RunningAmount >= ABS(ISNULL(main.BEDBES, 0)) AND ABS(ISNULL(main.BEDBES, 0)) > 0
+            //             ORDER BY orderedRows.DATE_S DESC
+            //         ) AS balanceOrigin
+            //         OPTION (FORCE ORDER, QUERYTRACEON 2312)";
+
+            //    MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>(fullQuery).ToList();
+            //}
+            #endregion
+
 
             foreach (var item in MasterHead)
             {

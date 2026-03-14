@@ -629,7 +629,7 @@
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 
-                <syncfusion:GridTextColumn HeaderText="مانده مطلق" MappingName="AbsBalance">
+                <syncfusion:GridTextColumn HeaderText="مانده Abs" MappingName="AbsBalance">
                     <syncfusion:GridTextColumn.DisplayBinding>
                         <Binding Path="AbsBalance"  StringFormat="{}{0:#,0}" />
                     </syncfusion:GridTextColumn.DisplayBinding>
