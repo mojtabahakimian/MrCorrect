@@ -521,7 +521,7 @@ namespace Functions
             /// </summary>
             F_MENU_DATE_HBGHB,
             /// <summary>
-            /// گزارش فروش روزانه کاربران
+            /// گزارش فروش روزانه محصولات
             /// </summary>
             F_MENU_DATE_CROS,
             /// <summary>

@@ -5,7 +5,7 @@
     <Databases isList="true" count="1">
       <MS_x0020_SQL Ref="2" type="Stimulsoft.Report.Dictionary.StiSqlDatabase" isKey="true">
         <Alias>MS SQL</Alias>
-        <ConnectionStringEncrypted>9Bp3iU18QpxqFb34TQCk59V8lWhFBZPIfwjt3P4cokbE8vcJTkwTmelpTZh/ATI30Xhl609Xk/VrQajM5Bgl</ConnectionStringEncrypted>
+        <ConnectionStringEncrypted>9BrNoe9K+yFqe73M+lTjF9U0gS5FWVKk4k25gHM9InvVeHfP5wX6XX0IqNRjbCIPxHD7z2J9c91qbFm9eh3rG8lwdytTe0mMR1rZzOnc</ConnectionStringEncrypted>
         <Key>6f2a847f8b23432eafaa10f7ed6e88ac</Key>
         <Name>MS SQL</Name>
       </MS_x0020_SQL>
@@ -42,14 +42,39 @@
           <value>FDATE_PARM,,12,20</value>
           <value>EDATE_PARM,,12,20</value>
         </Parameters>
-        <SqlCommand>SELECT * FROM dbo.GOZARESH_FROOSH_ROZANEH3(@DEPART_PARM, @FDATE_PARM, @EDATE_PARM)</SqlCommand>
+        <SqlCommand>SELECT SumOfM_NAGHD,
+	SumOfMABL_VAR,
+	SumOfMABL_HAV,
+	SumOfMABL_HAZ,
+	chk,
+	DEPATMAN,
+	NAME,
+	SUMOFMEGHK,
+	MABL,
+	SumOfMABL_K,
+	SHNAME,
+	DEPNAME,
+	TFP,
+	TAKH,
+	SIMBAA,
+	MBAAs,
+	TAKHFIFs FROM dbo.GOZARESH_FROOSH_ROZANEH3(@DEPART_PARM, @FDATE_PARM, @EDATE_PARM)</SqlCommand>
       </GOZARESH_FROOSH_ROZANEH3>
     </DataSources>
     <Relations isList="true" count="0" />
     <Report isRef="0" />
     <Resources isList="true" count="0" />
-    <Variables isList="true" count="1">
+    <Variables isList="true" count="10">
       <value>,Variable1,Variable1,,System.String,,False,False,False,False,,_x0034_a489de2b2874635b512360184c96647</value>
+      <value>,Var_Naghd_Count,Var_Naghd_Count,,System.Int32,,False,False,False,False</value>
+      <value>,Var_Takhfif_Count,Var_Takhfif_Count,,System.Int32,,False,False,False,False</value>
+      <value>,Var_Var_Count,Var_Var_Count,,System.Int32,,False,False,False,False</value>
+      <value>,Var_Hav_Count,Var_Hav_Count,,System.Int32,,False,False,False,False</value>
+      <value>,Var_Asn_Count,Var_Asn_Count,,System.Int32,,False,False,False,False</value>
+      <value>,Var_Bed_MAND,Var_Bed_MAND,,System.Double,,False,False,False,False</value>
+      <value>,Var_Bed_TEDAD,Var_Bed_TEDAD,,System.Int32,,False,False,False,False</value>
+      <value>,Var_Bes_MAND,Var_Bes_MAND,,System.Double,,False,False,False,False</value>
+      <value>,Var_Bes_TEDAD,Var_Bes_TEDAD,,System.Int32,,False,False,False,False</value>
     </Variables>
   </Dictionary>
   <EngineVersion>EngineV2</EngineVersion>
@@ -427,7 +452,7 @@
               <Page isRef="4" />
               <Parent isRef="17" />
               <Restrictions>AllowMove, AllowSelect, AllowChange</Restrictions>
-              <Text>{GOZARESH_FROOSH_ROZANEH3.SumOfMABL_K - GOZARESH_FROOSH_ROZANEH3.TAKH + GOZARESH_FROOSH_ROZANEH3.SIMBAA}</Text>
+              <Text>{GOZARESH_FROOSH_ROZANEH3.TAKH}</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="29" type="NumberFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
@@ -606,7 +631,7 @@
         <FooterBand1 Ref="39" type="FooterBand" isKey="true">
           <Brush>Transparent</Brush>
           <ClientRectangle>0,5.4,19,8.2</ClientRectangle>
-          <Components isList="true" count="42">
+          <Components isList="true" count="43">
             <Text5 Ref="40" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>17.6,0,1.4,0.8</ClientRectangle>
@@ -686,7 +711,7 @@
               <Page isRef="4" />
               <Parent isRef="39" />
               <ShrinkFontToFit>True</ShrinkFontToFit>
-              <Text>{Sum(Table1,GOZARESH_FROOSH_ROZANEH3.SumOfMABL_K - GOZARESH_FROOSH_ROZANEH3.TAKH + GOZARESH_FROOSH_ROZANEH3.SIMBAA)}</Text>
+              <Text>{Sum(Table1,GOZARESH_FROOSH_ROZANEH3.TAKH)}</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="46" type="NumberFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
@@ -836,6 +861,7 @@
               <Name>bed</Name>
               <Page isRef="4" />
               <Parent isRef="39" />
+              <Text>{Var_Bed_MAND}</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="57" type="NumberFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
@@ -922,7 +948,7 @@
               <Name>CNAGHD</Name>
               <Page isRef="4" />
               <Parent isRef="39" />
-              <Text>مبلغ نقد:</Text>
+              <Text>( {Var_Naghd_Count} )</Text>
               <TextBrush>[149:55:52]</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
@@ -938,7 +964,7 @@
               <Name>CBED</Name>
               <Page isRef="4" />
               <Parent isRef="39" />
-              <Text>بدهکاران:</Text>
+              <Text>( {Var_Bed_TEDAD} )</Text>
               <TextBrush>[149:55:52]</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
@@ -954,7 +980,7 @@
               <Name>CASN</Name>
               <Page isRef="4" />
               <Parent isRef="39" />
-              <Text>اسناد دریافتنی:</Text>
+              <Text>( {Var_Asn_Count} )</Text>
               <TextBrush>[149:55:52]</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
@@ -971,7 +997,7 @@
               <Name>CHAV</Name>
               <Page isRef="4" />
               <Parent isRef="39" />
-              <Text>مبالغ حواله:</Text>
+              <Text>( {Var_Hav_Count} )</Text>
               <TextBrush>[149:55:52]</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
@@ -987,7 +1013,7 @@
               <Name>CVAR</Name>
               <Page isRef="4" />
               <Parent isRef="39" />
-              <Text>مبلغ واریزی:</Text>
+              <Text>( {Var_Var_Count} )</Text>
               <TextBrush>[149:55:52]</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
@@ -1057,7 +1083,7 @@
               <Name>bes</Name>
               <Page isRef="4" />
               <Parent isRef="39" />
-              <Text>0</Text>
+              <Text>{Math.Abs(Var_Bes_MAND)}</Text>
               <TextBrush>Black</TextBrush>
               <TextFormat Ref="74" type="NumberFormat" isKey="true">
                 <DecimalDigits>0</DecimalDigits>
@@ -1079,7 +1105,7 @@
               <Name>cbes</Name>
               <Page isRef="4" />
               <Parent isRef="39" />
-              <Text>بدهکاران:</Text>
+              <Text>( {Var_Bes_TEDAD} )</Text>
               <TextBrush>[149:55:52]</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
@@ -1111,7 +1137,7 @@
               <Name>CTAKH</Name>
               <Page isRef="4" />
               <Parent isRef="39" />
-              <Text>تخفیف:</Text>
+              <Text>( {Var_Takhfif_Count} )</Text>
               <TextBrush>[149:55:52]</TextBrush>
               <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
               <Type>Expression</Type>
@@ -1133,58 +1159,7 @@
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text25>
-            <Text102 Ref="79" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>13.36,5.4,3.2,0.8</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,9</Font>
-              <Margins>0,0,0,0</Margins>
-              <Name>Text102</Name>
-              <Page isRef="4" />
-              <Parent isRef="39" />
-              <Text>=[SumOfM_NAGHD]+[bedd]+[chk]+[SumOfMABL_HAV]+[SumOfMABL_VAR]</Text>
-              <TextBrush>Black</TextBrush>
-              <TextFormat Ref="80" type="NumberFormat" isKey="true">
-                <DecimalDigits>0</DecimalDigits>
-                <GroupSeparator>,</GroupSeparator>
-                <NegativePattern>3</NegativePattern>
-                <UseLocalSetting>False</UseLocalSetting>
-              </TextFormat>
-              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
-              <Type>Expression</Type>
-              <VertAlignment>Center</VertAlignment>
-            </Text102>
-            <bedd Ref="81" type="Text" isKey="true">
-              <Brush>Transparent</Brush>
-              <ClientRectangle>0,5.4,5,0.8</ClientRectangle>
-              <Conditions isList="true" count="0" />
-              <Expressions isList="true" count="0" />
-              <Font>IRANYekanFN,9</Font>
-              <Margins>0,0,0,0</Margins>
-              <Name>bedd</Name>
-              <Page isRef="4" />
-              <Parent isRef="39" />
-              <Text>{
-    (decimal)(Sum(Table1, 
-        (decimal)GOZARESH_FROOSH_ROZANEH3.SumOfMABL_K - 
-        (decimal)GOZARESH_FROOSH_ROZANEH3.TAKH + 
-        (decimal)GOZARESH_FROOSH_ROZANEH3.SIMBAA
-    ) + 
-    (decimal)GOZARESH_FROOSH_ROZANEH3.SumOfMABL_HAZ)
-}</Text>
-              <TextBrush>Black</TextBrush>
-              <TextFormat Ref="82" type="NumberFormat" isKey="true">
-                <DecimalDigits>0</DecimalDigits>
-                <GroupSeparator>,</GroupSeparator>
-                <NegativePattern>3</NegativePattern>
-                <UseLocalSetting>False</UseLocalSetting>
-              </TextFormat>
-              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
-              <Type>Expression</Type>
-              <VertAlignment>Center</VertAlignment>
-            </bedd>
-            <Text9 Ref="83" type="Text" isKey="true">
+            <Text9 Ref="79" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>4.99,5.4,0.68,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1201,7 +1176,7 @@
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </Text9>
-            <LMNAGHD Ref="84" type="Text" isKey="true">
+            <LMNAGHD Ref="80" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>16.59,6.2,2.28,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1218,7 +1193,7 @@
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </LMNAGHD>
-            <MNAGHD Ref="85" type="Text" isKey="true">
+            <MNAGHD Ref="81" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>13.4,6.2,3.2,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1235,7 +1210,7 @@
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </MNAGHD>
-            <LSANDOGH Ref="86" type="Text" isKey="true">
+            <LSANDOGH Ref="82" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>16.6,7,1.8,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1252,7 +1227,7 @@
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </LSANDOGH>
-            <SANDOGH Ref="87" type="Text" isKey="true">
+            <SANDOGH Ref="83" type="Text" isKey="true">
               <Brush>Transparent</Brush>
               <ClientRectangle>13.4,7,3.2,0.8</ClientRectangle>
               <Conditions isList="true" count="0" />
@@ -1269,37 +1244,140 @@
               <Type>Expression</Type>
               <VertAlignment>Center</VertAlignment>
             </SANDOGH>
-            <HorizontalLinePrimitive1 Ref="88" type="HorizontalLinePrimitive" isKey="true">
+            <leftsumtext Ref="84" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,5.4,5,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>leftsumtext</Name>
+              <Page isRef="4" />
+              <Parent isRef="39" />
+              <Text>{
+(decimal)Sum(Table1,
+    (decimal)GOZARESH_FROOSH_ROZANEH3.SumOfMABL_K
+    - (decimal)GOZARESH_FROOSH_ROZANEH3.TAKH
+    + (decimal)GOZARESH_FROOSH_ROZANEH3.SIMBAA
+)
++ (decimal)GOZARESH_FROOSH_ROZANEH3.SumOfMABL_HAZ
+}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="85" type="NumberFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <GroupSeparator>,</GroupSeparator>
+                <NegativePattern>3</NegativePattern>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </leftsumtext>
+            <bedd Ref="86" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>9.4,6.4,3.2,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Enabled>False</Enabled>
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>bedd</Name>
+              <Page isRef="4" />
+              <Parent isRef="39" />
+              <Printable>False</Printable>
+              <Text>{
+    (decimal)Sum(Table1,
+        (decimal)GOZARESH_FROOSH_ROZANEH3.SumOfMABL_K
+        - (decimal)GOZARESH_FROOSH_ROZANEH3.TAKH
+        + (decimal)GOZARESH_FROOSH_ROZANEH3.SIMBAA
+    )
+    + (decimal)GOZARESH_FROOSH_ROZANEH3.SumOfMABL_HAZ
+    - (decimal)GOZARESH_FROOSH_ROZANEH3.SumOfM_NAGHD
+    - (decimal)GOZARESH_FROOSH_ROZANEH3.chk
+    - (decimal)GOZARESH_FROOSH_ROZANEH3.SumOfMABL_HAV
+    - (decimal)GOZARESH_FROOSH_ROZANEH3.SumOfMABL_VAR
+}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="87" type="NumberFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <GroupSeparator>,</GroupSeparator>
+                <NegativePattern>3</NegativePattern>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </bedd>
+            <Text24 Ref="88" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>11.6,5.4,5,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>IRANYekanFN,9</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text24</Name>
+              <Page isRef="4" />
+              <Parent isRef="39" />
+              <Text>{
+    (decimal)GOZARESH_FROOSH_ROZANEH3.SumOfM_NAGHD
+    + (
+        (decimal)Sum(Table1,
+            (decimal)GOZARESH_FROOSH_ROZANEH3.SumOfMABL_K
+            - (decimal)GOZARESH_FROOSH_ROZANEH3.TAKH
+            + (decimal)GOZARESH_FROOSH_ROZANEH3.SIMBAA
+        )
+        + (decimal)GOZARESH_FROOSH_ROZANEH3.SumOfMABL_HAZ
+        - (decimal)GOZARESH_FROOSH_ROZANEH3.SumOfM_NAGHD
+        - (decimal)GOZARESH_FROOSH_ROZANEH3.chk
+        - (decimal)GOZARESH_FROOSH_ROZANEH3.SumOfMABL_HAV
+        - (decimal)GOZARESH_FROOSH_ROZANEH3.SumOfMABL_VAR
+    )
+    + (decimal)GOZARESH_FROOSH_ROZANEH3.chk
+    + (decimal)GOZARESH_FROOSH_ROZANEH3.SumOfMABL_HAV
+    + (decimal)GOZARESH_FROOSH_ROZANEH3.SumOfMABL_VAR
+}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextFormat Ref="89" type="NumberFormat" isKey="true">
+                <DecimalDigits>0</DecimalDigits>
+                <GroupSeparator>,</GroupSeparator>
+                <NegativePattern>3</NegativePattern>
+                <UseLocalSetting>False</UseLocalSetting>
+              </TextFormat>
+              <TextOptions>,,RightToLeft=True,,,A=0</TextOptions>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text24>
+            <HorizontalLinePrimitive1 Ref="90" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>0,0,19,0.0254</ClientRectangle>
               <Color>192, 0, 0</Color>
               <Conditions isList="true" count="0" />
-              <EndCap Ref="89" type="Cap" isKey="true">
+              <EndCap Ref="91" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Expressions isList="true" count="0" />
               <Name>HorizontalLinePrimitive1</Name>
               <Page isRef="4" />
               <Parent isRef="39" />
-              <StartCap Ref="90" type="Cap" isKey="true">
+              <StartCap Ref="92" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive1>
-            <HorizontalLinePrimitive2 Ref="91" type="HorizontalLinePrimitive" isKey="true">
+            <HorizontalLinePrimitive2 Ref="93" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>0,0.8,19,0.0254</ClientRectangle>
               <Color>192, 0, 0</Color>
               <Conditions isList="true" count="0" />
-              <EndCap Ref="92" type="Cap" isKey="true">
+              <EndCap Ref="94" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Expressions isList="true" count="0" />
               <Name>HorizontalLinePrimitive2</Name>
               <Page isRef="4" />
               <Parent isRef="39" />
-              <StartCap Ref="93" type="Cap" isKey="true">
+              <StartCap Ref="95" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive2>
-            <StartPointPrimitive4 Ref="94" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive4 Ref="96" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>0,0,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -1308,7 +1386,7 @@
               <Parent isRef="39" />
               <ReferenceToGuid>5a06f913dda64774a1defbe563950ce5</ReferenceToGuid>
             </StartPointPrimitive4>
-            <EndPointPrimitive4 Ref="95" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive4 Ref="97" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>0,0.8,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -1317,7 +1395,7 @@
               <Parent isRef="39" />
               <ReferenceToGuid>5a06f913dda64774a1defbe563950ce5</ReferenceToGuid>
             </EndPointPrimitive4>
-            <StartPointPrimitive6 Ref="96" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+            <StartPointPrimitive6 Ref="98" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
               <ClientRectangle>19,0,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -1326,7 +1404,7 @@
               <Parent isRef="39" />
               <ReferenceToGuid>075f28343bf54c9f8f972234d453f907</ReferenceToGuid>
             </StartPointPrimitive6>
-            <EndPointPrimitive6 Ref="97" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+            <EndPointPrimitive6 Ref="99" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
               <ClientRectangle>19,0.8,0,0</ClientRectangle>
               <Conditions isList="true" count="0" />
               <Expressions isList="true" count="0" />
@@ -1335,18 +1413,18 @@
               <Parent isRef="39" />
               <ReferenceToGuid>075f28343bf54c9f8f972234d453f907</ReferenceToGuid>
             </EndPointPrimitive6>
-            <HorizontalLinePrimitive3 Ref="98" type="HorizontalLinePrimitive" isKey="true">
+            <HorizontalLinePrimitive3 Ref="100" type="HorizontalLinePrimitive" isKey="true">
               <ClientRectangle>0,5.2,19,0.0254</ClientRectangle>
               <Color>192, 0, 0</Color>
               <Conditions isList="true" count="0" />
-              <EndCap Ref="99" type="Cap" isKey="true">
+              <EndCap Ref="101" type="Cap" isKey="true">
                 <Color>Black</Color>
               </EndCap>
               <Expressions isList="true" count="0" />
               <Name>HorizontalLinePrimitive3</Name>
               <Page isRef="4" />
               <Parent isRef="39" />
-              <StartCap Ref="100" type="Cap" isKey="true">
+              <StartCap Ref="102" type="Cap" isKey="true">
                 <Color>Black</Color>
               </StartCap>
             </HorizontalLinePrimitive3>
@@ -1357,11 +1435,11 @@
           <Page isRef="4" />
           <Parent isRef="4" />
         </FooterBand1>
-        <VerticalLinePrimitive4 Ref="101" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive4 Ref="103" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>0,5.4,0.0254,0.8</ClientRectangle>
           <Color>192, 0, 0</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="102" type="Cap" isKey="true">
+          <EndCap Ref="104" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1369,15 +1447,15 @@
           <Name>VerticalLinePrimitive4</Name>
           <Page isRef="4" />
           <Parent isRef="4" />
-          <StartCap Ref="103" type="Cap" isKey="true">
+          <StartCap Ref="105" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive4>
-        <VerticalLinePrimitive6 Ref="104" type="VerticalLinePrimitive" isKey="true">
+        <VerticalLinePrimitive6 Ref="106" type="VerticalLinePrimitive" isKey="true">
           <ClientRectangle>19,5.4,0.0254,0.8</ClientRectangle>
           <Color>192, 0, 0</Color>
           <Conditions isList="true" count="0" />
-          <EndCap Ref="105" type="Cap" isKey="true">
+          <EndCap Ref="107" type="Cap" isKey="true">
             <Color>Black</Color>
           </EndCap>
           <Expressions isList="true" count="0" />
@@ -1385,7 +1463,7 @@
           <Name>VerticalLinePrimitive6</Name>
           <Page isRef="4" />
           <Parent isRef="4" />
-          <StartCap Ref="106" type="Cap" isKey="true">
+          <StartCap Ref="108" type="Cap" isKey="true">
             <Color>Black</Color>
           </StartCap>
         </VerticalLinePrimitive6>
@@ -1411,10 +1489,10 @@
     <value>Stimulsoft.Report.Dll</value>
   </ReferencedAssemblies>
   <ReportAlias>Report</ReportAlias>
-  <ReportChanged>8/31/2025 3:13:59 PM</ReportChanged>
+  <ReportChanged>3/15/2026 12:39:11 AM</ReportChanged>
   <ReportCreated>1/29/2024 9:06:45 AM</ReportCreated>
-  <ReportFile>C:\prg\Made Reports\All\GOZARESH_FROOSH_USER3.mrt</ReportFile>
-  <ReportGuid>db63aada6a5c4307934bf7013aaeaa64</ReportGuid>
+  <ReportFile>E:\prg\MrCorrect\Prg_UI\Rpts\Factors\GOZARESH_FROOSH_USER3.mrt</ReportFile>
+  <ReportGuid>cf24656827aa4bf5873766f73410fba7</ReportGuid>
   <ReportName>Report</ReportName>
   <ReportUnit>Centimeters</ReportUnit>
   <ReportVersion>2023.1.1.0</ReportVersion>

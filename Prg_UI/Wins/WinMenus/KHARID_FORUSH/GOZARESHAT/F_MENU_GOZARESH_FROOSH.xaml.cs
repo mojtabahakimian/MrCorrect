@@ -22,6 +22,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Wins.WinOther;
 using static Prg_Proccessy.SQLMODELS.CTABLES;
+using static Stimulsoft.Base.StiDbType;
 
 namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 {
@@ -116,10 +117,16 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                 DEPART.IsEnabled = false;
             }
 
-            if (OpenArgs == "FK")
+            if (OpenArgs.ToUpper() == "FK")
             {
                 SHIFT.Visibility = Visibility.Hidden;
                 USERR.Visibility = Visibility.Hidden;
+                WIN_HEADER_NAME.Content = "گزارش فروش روزانه کاربران";
+            }
+            else if (OpenArgs.ToUpper() == "F")
+            {
+
+                WIN_HEADER_NAME.Content = "گزارش خلاصه فروش روزانه ";
             }
 
             DEPART.Focus();
@@ -205,12 +212,115 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
             (report.GetComponentByName("TADATE") as StiText).Text = DT2.Text.ToString();
 
 
-            report["DEPART_PARM"] = DEPART.SelectedValue.ToString();
-            report["FDATE_PARM"] = DT1.Text.ToRawTarikh();
-            report["EDATE_PARM"] = DT2.Text.ToRawTarikh();
+            var depart = DEPART.SelectedValue.ToString();
+            var dt1 = DT1.Text.ToRawTarikh();
+            var dt2 = DT2.Text.ToRawTarikh();
+
+            report["DEPART_PARM"] = depart;
+            report["FDATE_PARM"] = dt1;
+            report["EDATE_PARM"] = dt2;
+
+            // تجمیع تمامی کوئری‌های رویداد GroupFooter0_Format اکسس در یک دستور SQL بهینه‌شده
+            string sqlAggregates = @"
+                SELECT
+                    ISNULL((SELECT COUNT(M_NAGHD) FROM dbo.HEAD_LST WHERE (DATE_N BETWEEN @DT1 AND @DT2) AND TAG = 13 AND DEPATMAN = @DEPART AND M_NAGHD > 0), 0) AS NaghdCount,
+                    ISNULL((SELECT COUNT(TAKHFIF) FROM dbo.HEAD_LST WHERE (DATE_N BETWEEN @DT1 AND @DT2) AND TAG = 13 AND DEPATMAN = @DEPART AND TAKHFIF > 0), 0) AS TakhfifCount,
+                    ISNULL((SELECT COUNT(MABL_VAR) FROM dbo.HEAD_LST WHERE (DATE_N BETWEEN @DT1 AND @DT2) AND TAG = 13 AND DEPATMAN = @DEPART AND MABL_VAR > 0), 0) AS VarCount,
+                    ISNULL((SELECT COUNT(MABL_HAV) FROM dbo.HEAD_LST WHERE (DATE_N BETWEEN @DT1 AND @DT2) AND TAG = 13 AND DEPATMAN = @DEPART AND MABL_HAV > 0), 0) AS HavCount,
+                    ISNULL((SELECT COUNT(P.MABL) FROM dbo.HEAD_LST H INNER JOIN dbo.PAY_GETD P ON H.TAG = P.TAG AND H.NUMBER = P.NUMBER WHERE (H.DATE_N BETWEEN @DT1 AND @DT2) AND H.DEPATMAN = @DEPART AND H.TAG = 2), 0) AS AsnCount,
+                    ISNULL((SELECT SUM(SMAB + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD) FROM dbo.GUSER_FACT_PERDEPART_SUB3(@DT1, @DT2, @DEPART, '%', '%') WHERE (SMAB + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD > 0)), 0) AS BedMand,
+                    ISNULL((SELECT COUNT(smab + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD) FROM dbo.GUSER_FACT_PERDEPART_SUB3(@DT1, @DT2, @DEPART, '%', '%') WHERE (SMAB + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD > 0)), 0) AS BedTedad,
+                    ISNULL((SELECT SUM(SMAB + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD) FROM dbo.GUSER_FACT_PERDEPART_SUB3(@DT1, @DT2, @DEPART, '%', '%') WHERE (SMAB + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD < 0)), 0) AS BesMand,
+                    ISNULL((SELECT COUNT(smab + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD) FROM dbo.GUSER_FACT_PERDEPART_SUB3(@DT1, @DT2, @DEPART, '%', '%') WHERE (SMAB + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD < 0)), 0) AS BesTedad
+            ";
+
+            // 1. دریافت مقادیر Footer گزارش
+            var footerData = dbms.DoGetDataSQL<ReportFooterDto>(sqlAggregates, new { DT1 = dt1, DT2 = dt2, DEPART = depart }).FirstOrDefault();
+
+            // 3. تزریق مقادیر محاسبه شده دیتابیس به متغیرهای گزارش
+            if (footerData != null)
+            {
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Naghd_Count", footerData.NaghdCount));
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Takhfif_Count", footerData.TakhfifCount));
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Var_Count", footerData.VarCount));
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Hav_Count", footerData.HavCount));
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Asn_Count", footerData.AsnCount));
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Bed_MAND", footerData.BedMand));
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Bed_TEDAD", footerData.BedTedad));
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Bes_MAND", footerData.BesMand));
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Bes_TEDAD", footerData.BesTedad));
+            }
+
+            // در اینجا می‌توانید داده‌های اصلی رکوردها را نیز Bind کنید
+            // var mainData = dbms.DoGetDataSQL<YourMainModel>("SELECT * FROM dbo.GOZARESH_FROOSH_ROZANEH3(@DEPART, @DT1, @DT2)", new { DT1 = dt1, DT2 = dt2, DEPART = depart });
+            // report.RegData("GOZARESH_FROOSH_ROZANEH3", mainData);
+
 
             new WINRPT(report, "گزارش خلاصه فروش روزانه کاربران").Show();
         }
+
+        #region MyRegion
+        // مدل کلاس برای دریافت مقادیر Footer از دیتابیس (حفظ نام‌گذاری‌های لگاسی)
+        public class ReportFooterDto
+        {
+            public int NaghdCount { get; set; }
+            public int TakhfifCount { get; set; }
+            public int VarCount { get; set; }
+            public int HavCount { get; set; }
+            public int AsnCount { get; set; }
+            public double BedMand { get; set; }
+            public int BedTedad { get; set; }
+            public double BesMand { get; set; }
+            public int BesTedad { get; set; }
+        }
+        /// <summary>
+        /// متد بارگذاری و نمایش گزارش فروش اداری
+        /// </summary>
+        private void PrintGozarehFroosh(long dt1, long dt2, int depart)
+        {
+            // تجمیع تمامی کوئری‌های رویداد GroupFooter0_Format اکسس در یک دستور SQL بهینه‌شده
+            string sqlAggregates = @"
+                SELECT
+                    ISNULL((SELECT COUNT(M_NAGHD) FROM dbo.HEAD_LST WHERE (DATE_N BETWEEN @DT1 AND @DT2) AND TAG = 13 AND DEPATMAN = @DEPART AND M_NAGHD > 0), 0) AS NaghdCount,
+                    ISNULL((SELECT COUNT(TAKHFIF) FROM dbo.HEAD_LST WHERE (DATE_N BETWEEN @DT1 AND @DT2) AND TAG = 13 AND DEPATMAN = @DEPART AND TAKHFIF > 0), 0) AS TakhfifCount,
+                    ISNULL((SELECT COUNT(MABL_VAR) FROM dbo.HEAD_LST WHERE (DATE_N BETWEEN @DT1 AND @DT2) AND TAG = 13 AND DEPATMAN = @DEPART AND MABL_VAR > 0), 0) AS VarCount,
+                    ISNULL((SELECT COUNT(MABL_HAV) FROM dbo.HEAD_LST WHERE (DATE_N BETWEEN @DT1 AND @DT2) AND TAG = 13 AND DEPATMAN = @DEPART AND MABL_HAV > 0), 0) AS HavCount,
+                    ISNULL((SELECT COUNT(P.MABL) FROM dbo.HEAD_LST H INNER JOIN dbo.PAY_GETD P ON H.TAG = P.TAG AND H.NUMBER = P.NUMBER WHERE (H.DATE_N BETWEEN @DT1 AND @DT2) AND H.DEPATMAN = @DEPART AND H.TAG = 2), 0) AS AsnCount,
+                    ISNULL((SELECT SUM(SMAB + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD) FROM dbo.GUSER_FACT_PERDEPART_SUB3(@DT1, @DT2, @DEPART, '%', '%') WHERE (SMAB + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD > 0)), 0) AS BedMand,
+                    ISNULL((SELECT COUNT(smab + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD) FROM dbo.GUSER_FACT_PERDEPART_SUB3(@DT1, @DT2, @DEPART, '%', '%') WHERE (SMAB + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD > 0)), 0) AS BedTedad,
+                    ISNULL((SELECT SUM(SMAB + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD) FROM dbo.GUSER_FACT_PERDEPART_SUB3(@DT1, @DT2, @DEPART, '%', '%') WHERE (SMAB + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD < 0)), 0) AS BesMand,
+                    ISNULL((SELECT COUNT(smab + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD) FROM dbo.GUSER_FACT_PERDEPART_SUB3(@DT1, @DT2, @DEPART, '%', '%') WHERE (SMAB + MBAA - TAKHFIF - MABL_VAR - MABL_HAV - CHK + HAZ - M_NAGHD < 0)), 0) AS BesTedad
+            ";
+
+            // 1. دریافت مقادیر Footer گزارش
+            var footerData = dbms.DoGetDataSQL<ReportFooterDto>(sqlAggregates, new { DT1 = dt1, DT2 = dt2, DEPART = depart }).FirstOrDefault();
+
+            // 2. مقداردهی فایل استیمول سافت
+            StiReport report = new StiReport();
+            report.Load("GOZARESH_FROOSH_USER3.mrt");
+
+            // 3. تزریق مقادیر محاسبه شده دیتابیس به متغیرهای گزارش
+            if (footerData != null)
+            {
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Naghd_Count", footerData.NaghdCount));
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Takhfif_Count", footerData.TakhfifCount));
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Var_Count", footerData.VarCount));
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Hav_Count", footerData.HavCount));
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Asn_Count", footerData.AsnCount));
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Bed_MAND", footerData.BedMand));
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Bed_TEDAD", footerData.BedTedad));
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Bes_MAND", footerData.BesMand));
+                report.Dictionary.Variables.Add(new StiVariable("", "Var_Bes_TEDAD", footerData.BesTedad));
+            }
+
+            // در اینجا می‌توانید داده‌های اصلی رکوردها را نیز Bind کنید
+            // var mainData = dbms.DoGetDataSQL<YourMainModel>("SELECT * FROM dbo.GOZARESH_FROOSH_ROZANEH3(@DEPART, @DT1, @DT2)", new { DT1 = dt1, DT2 = dt2, DEPART = depart });
+            // report.RegData("GOZARESH_FROOSH_ROZANEH3", mainData);
+
+            report.Compile();
+            report.Show();
+        }
+        #endregion
 
         private void BTN_GO_Click(object sender, RoutedEventArgs e)
         {
@@ -276,7 +386,8 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
                 // Handle different cases for OpenArgs
                 switch (OpenArgs)
                 {
-                    case "F":
+                    case "F": // گزارش خلاصه فروش روزانه Case "F": GOZARESH_FROOSH_USER3
+
                         if (SSHIFT == "%")
                         {
                             //OpenReport("GOZARESH_FROOSH_USER3");
@@ -299,7 +410,7 @@ namespace Wins.WinMenus.KHARID_FORUSH.GOZARESHAT
 
                         break;
 
-                    case "FK":
+                    case "FK": //گزارش فروش روزانه کاربران //Case "FK": GOZARESH_FROOSH_USER3
                         if (DTL.IsChecked == true)
                         {
                             if (USERR.SelectedValue == null)
