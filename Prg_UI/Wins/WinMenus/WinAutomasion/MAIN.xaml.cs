@@ -1630,7 +1630,10 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
         {
             try
             {
-                AutoRefreshToggle.IsChecked = Properties.Settings.Default.IsAutoRefreshEnabled;
+                if (Properties.Settings.Default.IsAutoRefreshEnabled)
+                {
+                    AutoRefreshToggle.IsChecked = Properties.Settings.Default.IsAutoRefreshEnabled;
+                }
                 RefreshIntervalCombo.SelectedValue = Properties.Settings.Default.RefreshInterval; RefreshIntervalCombo.Items.Refresh();
             }
             catch { }
