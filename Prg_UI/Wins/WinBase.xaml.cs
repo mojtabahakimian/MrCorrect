@@ -49,6 +49,7 @@ namespace Prg_UI.Wins
                                                    WHERE (dbo.SHIFT.SHIFT_ID = {CL_Generaly.SHIFT_OF_USER}) AND (dbo.DEPART.DEPATMAN = {CL_Generaly.VAHED_OF_USER});").FirstOrDefault();
 
             LBL_VahedAndShift.Content = $"واحد : {VSH?.DEPNAME?.FixPersianChars()} | شیفت : {VSH?.SHNAME?.FixPersianChars()}";
+            SERVERDB.Content = $"{CL_Generaly.General_Servername} | {CL_Generaly.General_DBname}";
             VSH = null; dbms = null; //Tiny Clear
 
             this.MaxHeight = CL_LMethods.GetWindowSizeLessTaskbaer();

@@ -2815,18 +2815,28 @@ namespace Prg_Proccessy.FUNCTIONS
                 // 3️⃣ AUTO‑CREATE SECURITY ROW IF MISSING ✅
                 if (RST == null)
                 {
-                    dbms.DoExecuteSQL(
-                        @"INSERT INTO SAL_CHEK 
-              (USERCO, OBJECT, RUN, SEE, INP, UPD, DEL, CRT, UID)
-              VALUES
-              (@USERCO, @OBJECT, 0, 0, 0, 0, 0, GETDATE(), @UID)",
-                        new
-                        {
-                            USERCO = Baseknow.USERCOD,
-                            OBJECT = formInfo.IDH,
-                            UID = Baseknow.USERCOD
-                        }
-                    );
+                    try
+                    {
+                        dbms.DoExecuteSQL(
+                            @"INSERT INTO SAL_CHEK 
+(USERCO, OBJECT, RUN, SEE, INP, UPD, DEL, CRT, UID)
+VALUES
+(@USERCO, @OBJECT, 0, 0, 0, 0, 0, GETDATE(), @UID)",
+                            new
+                            {
+                                USERCO = Baseknow.USERCOD,
+                                OBJECT = formInfo.IDH,
+                                UID = Baseknow.USERCOD
+                            }
+                            );
+                    }
+                    catch (Exception)
+                    {
+                        TheWind?.Close();
+                        new Msgwin(false, "این کاربری اطلاعات آن ناقص است خطا در انجام عملیات.").ShowDialog();
+                        return false;
+                    }
+
 
                     TheWind?.Close();
                     new Msgwin(false, "دسترسی به فرم فعال شد، ولی هنوز تنظیمات مجوز کامل نیست. بعد از تنظیم مجوزها در تعیین سطح دسترسی دوباره وارد شوید.").ShowDialog();
