@@ -2,6 +2,7 @@
 using MaterialDesignThemes.Wpf;
 using Microsoft.Data.SqlClient;
 using Prg_Proccessy.FUNCTIONS;
+using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
@@ -194,9 +195,16 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 }
             }
         }
+
+        public class CUST_HESAB_2
+        {
+            public string NAME { get; set; }
+            public string hes { get; set; }
+            public override string ToString() => NAME;
+        }
         private void FILL_ALL_COMBOBOXES()
         {
-            cmbAmal.ItemsSource = dbms.DoGetDataSQL<Custom_CUST_HESAB>($"SELECT hes, NAME FROM CUST_HESAB").ToList();
+            cmbAmal.ItemsSource = dbms.DoGetDataSQL<CUST_HESAB_2>($"SELECT hes, NAME FROM CUST_HESAB").ToList();
         }
 
         private bool HeaderIsValid(bool _DisplayErrors = true)

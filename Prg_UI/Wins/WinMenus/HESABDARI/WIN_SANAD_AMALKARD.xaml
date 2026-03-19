@@ -86,7 +86,6 @@
                           Margin="0,28,0,0"
                           Height="34" Padding="7,0,10,0" Style="{StaticResource FuzzyOutComboBox}" 
                           TabIndex="1" IsEditable="True"
-                          DisplayMemberPath="NAME"
                           SelectedValuePath="hes"
                           FlowDirection="RightToLeft"
                           FontSize="12"
@@ -95,11 +94,17 @@
                           HorizontalAlignment="Stretch">
                     <ComboBox.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <VirtualizingStackPanel
-                                VirtualizingPanel.IsVirtualizing="True"
-                                VirtualizingPanel.VirtualizationMode="Recycling"/>
+                            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
                         </ItemsPanelTemplate>
                     </ComboBox.ItemsPanel>
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding NAME}" TextAlignment="Justify" Width="500"  />
+                                <TextBlock Text="{Binding hes}" TextAlignment="Justify" Width="100"  />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
                 </ComboBox>
 
                 <!-- ── نوار پیشرفت + نام حساب جاری ── -->
