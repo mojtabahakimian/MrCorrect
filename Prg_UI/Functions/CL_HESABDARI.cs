@@ -1,40 +1,42 @@
 ﻿using Dapper;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Functions;
+using iText.Layout.Font;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.CompilerServices;
+using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
+using Prg_UI.Functions;
 using Prg_UI.HelperWins;
+using Prg_UI.UiTools;
+using Prg_UI.Wins.WinMenus.ANBAR;
+using Prg_UI.Wins.WinMenus.HESABDARI;
+using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
+using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
+using Prg_UI.Wins.WinMenus.WinDEFAULT;
+using Syncfusion.Data.Extensions;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net.Sockets;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using static Prg_Proccessy.SQLMODELS.CTABLES;
-using Prg_UI.Functions;
-using Prg_UI.Wins.WinMenus.KHARID_FORUSH;
-using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
-using Syncfusion.Data.Extensions;
-using Prg_Proccessy.Generaly;
-using Wins.WinMenus.Taarif;
-using Wins.WinMenus.ANBAR;
-using Prg_UI.Wins.WinMenus.WinDEFAULT;
-using Prg_UI.Wins.WinMenus.ANBAR;
-using Prg_UI.Wins.WinMenus.HESABDARI;
-using Wins.WinMenus.KHARID_FORUSH;
-using Functions;
-using Path = System.IO.Path;
-using System.Collections.Generic;
 using System.Windows.Interop;
-using System.Threading.Tasks;
-using System.Threading;
-using Prg_UI.UiTools;
+using Wins.WinMenus.ANBAR;
+using Wins.WinMenus.KHARID_FORUSH;
+using Wins.WinMenus.Taarif;
+using static Prg_Proccessy.SQLMODELS.CTABLES;
+using Path = System.IO.Path;
 
 namespace Prg_Proccessy.FUNCTIONS
 {
@@ -2797,10 +2799,39 @@ namespace Prg_Proccessy.FUNCTIONS
             }
             else //SQLY
             {
+                string formName = WANTEDFORM(frm);
+
+                // 1️⃣ Get FORM ID
+                var formInfo = dbms.DoGetDataSQL<TFORMS>(
+                    "SELECT IDH, CAPTION, KIND FROM TFORMS WHERE FORMNAME = @FORMNAME",
+                    new { FORMNAME = formName }
+                ).FirstOrDefault();
+
                 var RST = dbms.DoGetDataSQL<SECURITYQuery>("SELECT TFORMS.CAPTION, TFORMS.kind, SAL_CHEK.USERCO, SAL_CHEK.RUN, SAL_CHEK.SEE, SAL_CHEK.INP, SAL_CHEK.UPD, SAL_CHEK.DEL FROM TFORMS INNER JOIN (SALA_DTL INNER JOIN SAL_CHEK ON SALA_DTL.IDD = SAL_CHEK.USERCO) ON TFORMS.IDH = SAL_CHEK.OBJECT WHERE  " +
-                    "   (TFORMS.FORMNAME = '" + WANTEDFORM(frm) + "') AND (SAL_CHEK.USERCO = " + Baseknow.USERCOD + " )").FirstOrDefault();
+                    "   (TFORMS.FORMNAME = '" + formName + "') AND (SAL_CHEK.USERCO = " + Baseknow.USERCOD + " )").FirstOrDefault();
 
                 ////if (RST.INP != true || RST.UPD != true) { TheWind.IsEnabled = false; return; }
+
+                // 3️⃣ AUTO‑CREATE SECURITY ROW IF MISSING ✅
+                if (RST == null)
+                {
+                    dbms.DoExecuteSQL(
+                        @"INSERT INTO SAL_CHEK 
+              (USERCO, OBJECT, RUN, SEE, INP, UPD, DEL, CRT, UID)
+              VALUES
+              (@USERCO, @OBJECT, 0, 0, 0, 0, 0, GETDATE(), @UID)",
+                        new
+                        {
+                            USERCO = Baseknow.USERCOD,
+                            OBJECT = formInfo.IDH,
+                            UID = Baseknow.USERCOD
+                        }
+                    );
+
+                    TheWind?.Close();
+                    new Msgwin(false, "دسترسی به فرم فعال شد، ولی هنوز تنظیمات مجوز کامل نیست. بعد از تنظیم مجوزها در تعیین سطح دسترسی دوباره وارد شوید.").ShowDialog();
+                    return false;
+                }
 
                 if (RST != null)
                 {

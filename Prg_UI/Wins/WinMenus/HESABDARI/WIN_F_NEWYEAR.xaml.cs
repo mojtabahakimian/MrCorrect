@@ -8,6 +8,7 @@ using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
+using Prg_UI.Scriptses;
 using Prg_UI.UiTools;
 using Syncfusion.Data.Extensions;
 using System;
@@ -411,7 +412,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             string safeOld = QuoteDbName(oldDb);
             string safeNew = QuoteDbName(newDb);
 
-            string getColumnsSql = $@"
+            // خواندن ستون‌های دیتابیس مقصد (جدید)
+            string getNewColumnsSql = $@"
 SELECT 
     c.name AS ColumnName,
     c.is_identity AS IsIdentity,
@@ -423,17 +425,37 @@ WHERE s.name = 'dbo'
   AND t.name = @TableName
 ORDER BY c.column_id;";
 
-            var columns = dbms.DoGetDataSQL<ColumnMetaModel>(getColumnsSql, new { TableName = tableName }).ToList();
-
-            if (columns == null || columns.Count == 0)
-            {
+            var newColumns = dbms.DoGetDataSQL<ColumnMetaModel>(getNewColumnsSql, new { TableName = tableName }).ToList();
+            if (newColumns == null || newColumns.Count == 0)
                 throw new Exception($"ساختار جدول [{tableName}] در دیتابیس مقصد پیدا نشد.");
-            }
 
-            bool hasIdentity = columns.Any(c => c.IsIdentity);
+            // خواندن ستون‌های دیتابیس مبدا (قدیم)
+            string getOldColumnsSql = $@"
+SELECT 
+    c.name AS ColumnName,
+    c.is_identity AS IsIdentity,
+    c.column_id AS ColumnOrder
+FROM {safeOld}.sys.columns c
+INNER JOIN {safeOld}.sys.tables t ON c.object_id = t.object_id
+INNER JOIN {safeOld}.sys.schemas s ON t.schema_id = s.schema_id
+WHERE s.name = 'dbo'
+  AND t.name = @TableName
+ORDER BY c.column_id;";
 
-            string allColumnList = string.Join(", ", columns.Select(c => $"[{c.ColumnName}]"));
-            string nonIdentityColumnList = string.Join(", ", columns.Where(c => !c.IsIdentity).Select(c => $"[{c.ColumnName}]"));
+            var oldColumns = dbms.DoGetDataSQL<ColumnMetaModel>(getOldColumnsSql, new { TableName = tableName }).ToList();
+            if (oldColumns == null || oldColumns.Count == 0)
+                throw new Exception($"ساختار جدول [{tableName}] در دیتابیس مبدا پیدا نشد.");
+
+            // پیدا کردن ستون‌های مشترک (فقط ستون‌هایی که در هر دو دیتابیس هستند)
+            var oldColumnNames = new HashSet<string>(oldColumns.Select(c => c.ColumnName), StringComparer.OrdinalIgnoreCase);
+            var commonColumns = newColumns.Where(c => oldColumnNames.Contains(c.ColumnName)).ToList();
+
+            if (commonColumns.Count == 0)
+                throw new Exception($"هیچ ستون مشترکی بین دو دیتابیس برای جدول [{tableName}] پیدا نشد.");
+
+            bool hasIdentity = commonColumns.Any(c => c.IsIdentity);
+            string allColumnList = string.Join(", ", commonColumns.Select(c => $"[{c.ColumnName}]"));
+            string nonIdentityColumnList = string.Join(", ", commonColumns.Where(c => !c.IsIdentity).Select(c => $"[{c.ColumnName}]"));
 
             if (!hasIdentity)
             {
@@ -468,14 +490,20 @@ BEGIN CATCH
         SET IDENTITY_INSERT {safeNew}.dbo.[{tableName}] OFF;
     END TRY
     BEGIN CATCH
+        -- Ignore nested error
     END CATCH;
 
-    THROW;
+    DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+    DECLARE @ErrorState INT = ERROR_STATE();
+    
+    RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
 END CATCH;";
 
                 dbms.DoExecuteSQL(identitySql);
             }
         }
+
         private string ValidateBeforeCreateNewYear(string newDbName, string newDbDirectory)
         {
             List<string> problems = new List<string>();
@@ -618,6 +646,12 @@ END CATCH;";
             {
                 new Msgwin(false, validationMessage).ShowDialog();
                 return;
+            }
+
+            Msgwin MSG2 = new Msgwin(true, "آیا اسکریپت اجرا شود ؟"); MSG2.ShowDialog();
+            if (MSG2.DialogResult == true)
+            {
+                ScriptSqly.LetsGo(true);
             }
 
             Command3.IsEnabled = false;

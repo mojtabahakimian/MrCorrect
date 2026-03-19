@@ -264,7 +264,9 @@
                                                         <TextBox x:Name="txtCurrentDbPath" Text="D:\SQLData\Negin.mdf" Style="{StaticResource SoftTextBoxStyle}" IsReadOnly="True" FlowDirection="LeftToRight" Height="40"/>
                                                     </StackPanel>
                                                 </Grid>
-                                            </StackPanel>
+                                            </StackPanel>                                         
+
+                                            
                                         </Grid>
 
                                         <!-- فایل پشتیبان -->
@@ -318,7 +320,9 @@
                                             <StackPanel Grid.Column="1">
                                                 <TextBlock Text="سال مالی جدید" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,8" HorizontalAlignment="Center"/>
                                                 <TextBox x:Name="YEA" materialDesign:HintAssist.Hint="1403" MaxLength="4" Style="{StaticResource SoftTextBoxStyle}" Foreground="{DynamicResource PrimaryHueMidBrush}" FontSize="18" FontWeight="Bold" TextAlignment="Center" Height="45"/>
-                                            </StackPanel>
+                                            </StackPanel>                                            
+                                            
+
                                         </Grid>
 
                                         <!-- دکمه اکشن اصلی -->
@@ -417,6 +421,10 @@
                                         <StackPanel>
                                             <TextBlock Text="چک‌لیست قبل از اجرا" FontSize="17" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}" Margin="0,0,0,16"/>
                                             <StackPanel>
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                                    <materialDesign:PackIcon Kind="CheckCircleOutline" Width="20" Height="20" Foreground="{DynamicResource SecondaryHueMidBrush}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="اجرای اسکریپت روی دیتابیس جاری" Foreground="{DynamicResource MaterialDesignBody}" Opacity="0.8" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                                </StackPanel>
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                                     <materialDesign:PackIcon Kind="CheckCircleOutline" Width="20" Height="20" Foreground="{DynamicResource SecondaryHueMidBrush}" Margin="0,0,8,0" VerticalAlignment="Center"/>
                                                     <TextBlock Text="از دیتابیس فعلی بکاپ تهیه کرده‌ام" Foreground="{DynamicResource MaterialDesignBody}" Opacity="0.8" TextWrapping="Wrap" VerticalAlignment="Center"/>
