@@ -1082,6 +1082,10 @@ namespace Functions
             /// </summary>
             WIN_SANAD_EKHTETAMIYAH,
             /// <summary>
+            /// سند عملکرد از Ctrl + F1
+            /// </summary>
+            WIN_SANAD_AMALKARD,
+            /// <summary>
         }
         #endregion
 
@@ -1100,6 +1104,8 @@ namespace Functions
             switch (_TYPE_)
             {
                 //Mojtaba{
+
+                case WinNameType.WIN_SANAD_AMALKARD: /*سند عملکرد از Ctrl + F1*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_SANAD_AMALKARD(), isModalDialog: false, allowMultipleInstances: false); break;
 
                 case WinNameType.WIN_SANAD_EKHTETAMIYAH: /*سند اختتـامیه*/ CL_LMethods.OpenWindow(OWNERWIN, new WIN_SANAD_EKHTETAMIYAH(), isModalDialog: false, allowMultipleInstances: false); break;
 

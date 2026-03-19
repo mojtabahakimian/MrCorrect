@@ -187,9 +187,14 @@ namespace Prg_UI.Wins.WinMenus.SPECIAL_F1
 
         private void BTN_GO_Click(object sender, RoutedEventArgs e)
         {
-            if (PASSWORDBOX.Password.ToString().ToLower() == "zparam") //پارامتر های شیر
+            string passed = PASSWORDBOX.Password.ToString().ToLower();
+            if (passed == "zparam") //پارامتر های شیر
             {
                 CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_ZCHRBI, this);
+            }
+            else if (passed == "sanadskn") //صدور سند عملکرد
+            {
+                CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_SANAD_AMALKARD, this);
             }
             this.Close();
         }
