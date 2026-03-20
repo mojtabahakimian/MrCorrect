@@ -368,16 +368,17 @@ namespace Prg_UI.Wins
             //Baseknow.USERCOD = 150; Baseknow.UUSER = "Mr mehdi fattahi";
             //Baseknow.USERCOD = 73; Baseknow.UUSER = "Mr Rahimi";
             Baseknow.USERCOD = 78; Baseknow.UUSER = "Controller";
+            //Baseknow.USERCOD = 35; Baseknow.UUSER = "كنترل";
 
             CL_Generaly.SHIFT_OF_USER = 1; //شیفت صبح
             CL_Generaly.VAHED_OF_USER = 1; //دپارتمان DEPARTEMAN اداری
             Baseknow.UGRP = "1";
             //CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
 
-            //new WinBase().Show();
+            new WinBase().Show();
             //new WIN_SANAD_AMALKARD().Show();
             //new F_MENU_DATE("CROS").Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, this);
             //new WIN_F_NEWYEAR().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this, 1642d);
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
