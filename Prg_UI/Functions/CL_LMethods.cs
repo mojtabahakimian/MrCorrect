@@ -2053,28 +2053,29 @@ namespace Prg_UI.Functions
         }
         private static void ShowWindowWithFocus(Window? owner, Window newWindow, bool isModalDialog)
         {
-            // Create timer to ensure focus after window is shown
+            // نمایش پنجره‌های modal به صورت معمول (دیالوگ)
+            if (isModalDialog)
+            {
+                newWindow.ShowDialog();
+                return;
+            }
+
+            // نمایش پنجره‌های غیر modal داخل پنجره اصلی (MDI)
+            if (MdiManager.IsEnabled)
+            {
+                MdiManager.ShowInMdi(newWindow);
+                return;
+            }
+
+            // اگر MDI فعال نبود (قبل از بارگذاری WinBase) - نمایش معمولی
             var focusTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
             focusTimer.Tick += (s, e) =>
             {
                 focusTimer.Stop();
                 EnsureWindowFocus(newWindow);
             };
-
-            // Show window either modal or non-modal
-            if (isModalDialog)
-            {
-                newWindow.ShowDialog();
-            }
-            else
-            {
-                newWindow.Show();
-                focusTimer.Start();
-            }
-
-            //focusTimer.Stop();
-            //focusTimer.IsEnabled = false;
-            //focusTimer = null;
+            newWindow.Show();
+            focusTimer.Start();
         }
 
         private static void EnsureWindowFocus(Window window)
@@ -2132,6 +2133,13 @@ namespace Prg_UI.Functions
         {
             try
             {
+                // اگر پنجره در MDI است، آن را به جلو بیاور
+                if (MdiManager.IsEnabled)
+                {
+                    MdiManager.BringWindowToFront(window);
+                    return;
+                }
+
                 // Restore window if minimized
                 if (window.WindowState == WindowState.Minimized)
                 {

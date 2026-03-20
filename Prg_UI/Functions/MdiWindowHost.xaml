@@ -1,0 +1,137 @@
+<UserControl x:Class="Prg_UI.Functions.MdiWindowHost"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d"
+             FlowDirection="RightToLeft">
+
+    <UserControl.Resources>
+        <Style x:Key="MdiTitleBarButton" TargetType="Button">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#33FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#55FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="MdiCloseBtnStyle" TargetType="Button" BasedOn="{StaticResource MdiTitleBarButton}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E81123"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Border x:Name="RootBorder"
+            CornerRadius="8"
+            BorderThickness="1"
+            BorderBrush="{DynamicResource MaterialDesignDivider}">
+        <Border.Background>
+            <SolidColorBrush Color="{DynamicResource MaterialDesignPaper}" Opacity="0.97"/>
+        </Border.Background>
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" ShadowDepth="4" Opacity="0.35" Direction="270"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="36"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Title Bar -->
+            <Border x:Name="TitleBar"
+                    Grid.Row="0"
+                    CornerRadius="8,8,0,0"
+                    Background="{DynamicResource PrimaryHueMidBrush}"
+                    MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"
+                    MouseLeftButtonUp="TitleBar_MouseLeftButtonUp"
+                    MouseMove="TitleBar_MouseMove"
+                    Cursor="SizeAll">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Title Text -->
+                    <TextBlock x:Name="TitleText"
+                               Grid.Column="0"
+                               Text="پنجره"
+                               Foreground="White"
+                               FontSize="13"
+                               FontFamily="{StaticResource IRANYEKAN}"
+                               VerticalAlignment="Center"
+                               Margin="10,0,0,0"
+                               TextTrimming="CharacterEllipsis"/>
+
+                    <!-- Window Control Buttons -->
+                    <StackPanel Grid.Column="1"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Margin="0,0,4,0"
+                                FlowDirection="LeftToRight">
+
+                        <Button x:Name="BtnMinimize"
+                                Style="{StaticResource MdiTitleBarButton}"
+                                ToolTip="کوچک کردن"
+                                Click="BtnMinimize_Click"
+                                Margin="2,0">
+                            <materialDesign:PackIcon Kind="WindowMinimize" Width="14" Height="14"/>
+                        </Button>
+
+                        <Button x:Name="BtnMaximize"
+                                Style="{StaticResource MdiTitleBarButton}"
+                                ToolTip="بزرگ کردن"
+                                Click="BtnMaximize_Click"
+                                Margin="2,0">
+                            <materialDesign:PackIcon Kind="WindowMaximize" Width="14" Height="14"/>
+                        </Button>
+
+                        <Button x:Name="BtnClose"
+                                Style="{StaticResource MdiCloseBtnStyle}"
+                                ToolTip="بستن"
+                                Click="BtnClose_Click"
+                                Margin="2,0">
+                            <materialDesign:PackIcon Kind="Close" Width="14" Height="14"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Content Area -->
+            <ContentPresenter x:Name="ContentArea"
+                              Grid.Row="1"
+                              x:FieldModifier="public"/>
+
+            <!-- Minimized Overlay (shown when minimized) -->
+            <Border x:Name="MinimizedOverlay"
+                    Grid.Row="1"
+                    Background="{DynamicResource MaterialDesignPaper}"
+                    Visibility="Collapsed"/>
+
+        </Grid>
+    </Border>
+</UserControl>

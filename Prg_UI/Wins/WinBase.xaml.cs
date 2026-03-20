@@ -124,6 +124,7 @@ namespace Prg_UI.Wins
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             PageManagement.TheMainFame = MainorginFrame;
+            MdiManager.MdiCanvas = MdiAreaCanvas;
 
             HEADINFO.Content = Baseknow.WIDTH_D + " سال " + Baseknow.YEA;
 
@@ -1446,29 +1447,22 @@ namespace Prg_UI.Wins
         {
             try
             {
-                // لیست پنجره‌هایی که باید بسته شوند
+                // بستن پنجره‌های MDI
+                MdiManager.CloseAll();
+
+                // بستن پنجره‌های OS باقیمانده
                 var windowsToClose = Application.Current.Windows
                     .OfType<Window>()
                     .Where(w => w != this && !(w is USER_LOGIN))
                     .ToList();
 
-                // بستن تمام پنجره‌ها
                 foreach (var window in windowsToClose)
                 {
-                    try
-                    {
-                        window.Close();
-                    }
-                    catch
-                    {
-                        // اگر پنجره‌ای نتوانست بسته شود، ادامه بده
-                    }
+                    try { window.Close(); }
+                    catch { }
                 }
             }
-            catch
-            {
-                // در صورت هر گونه خطا، ادامه بده
-            }
+            catch { }
         }
         /// <summary>
         /// پاک کردن PageManagement و navigation stack

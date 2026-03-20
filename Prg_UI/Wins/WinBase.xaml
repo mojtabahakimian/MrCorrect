@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Prg_UI.Wins"
+        xmlns:mdi="clr-namespace:Prg_UI.Functions"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:gif="http://wpfanimatedgif.codeplex.com" x:Class="Prg_UI.Wins.WinBase"
         mc:Ignorable="d"
@@ -1147,6 +1148,12 @@
 
         </UniformGrid>
 
+        <!-- MDI Container: پنجره‌های نرم‌افزار داخل این ناحیه باز می‌شوند -->
+        <Canvas x:Name="MdiAreaCanvas"
+                Margin="0,38,0,0"
+                Panel.ZIndex="10"
+                ClipToBounds="True"
+                Background="Transparent"/>
 
     </Grid>
 </Window>
