@@ -894,7 +894,10 @@ namespace Wins.WinMenus.CONFIGS
 
                     SMSPINFO.USERNAME = SMS_USERNAME.Text;
                     SMSPINFO.PASSWORD = SMS_PASSWORD.Password;
-                    SMSPINFO.LINE_NUMBER = Convert.ToInt64(SMS_TSMSHOST.Text);
+                    if (!string.IsNullOrWhiteSpace(SMS_TSMSHOST.Text))
+                    {
+                        SMSPINFO.LINE_NUMBER = Convert.ToInt64(SMS_TSMSHOST.Text);
+                    }
 
                     if ((bool)RB_SMSIR.IsChecked)
                     {

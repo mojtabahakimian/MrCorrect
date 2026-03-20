@@ -3075,6 +3075,15 @@ END;";
 									END
 									GO
 									"); } catch { }
+                
+				try { db.Execute(@"CREATE TABLE [dbo].[Travelreason]
+(
+[Code] [int] NULL,
+[TravelreasonName] [nvarchar] (25) COLLATE Arabic_CI_AS NULL,
+[CRT] [datetime] NULL CONSTRAINT [DF__Travelreaso__CRT__5E7FE7D2] DEFAULT (getdate()),
+[UID] [int] NULL
+) ON [PRIMARY]
+"); } catch { }
 
             }
         }

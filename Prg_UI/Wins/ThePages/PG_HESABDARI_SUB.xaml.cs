@@ -1,5 +1,6 @@
 ﻿using Functions;
 using Prg_UI.Functions;
+using Prg_UI.Wins.ThePages;
 using Prg_UI.Wins.WinMenus.HESABDARI;
 using System.Windows;
 using System.Windows.Controls;
@@ -89,6 +90,11 @@ namespace Wins.ThePages
         private void WrapPanel_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.CONTROL_ASNAD_DAFATERCHECK_FORM11, default);
+        }
+
+        private void WrapPanel_PreviewMouseDown_1(object sender, MouseButtonEventArgs e)
+        {
+            PageManagement.OpenPage(new PG_SALEND());
         }
     }
 }

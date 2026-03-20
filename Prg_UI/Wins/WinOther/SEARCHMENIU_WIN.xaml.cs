@@ -377,8 +377,8 @@ namespace Wins.WinOther
 
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "ایجاد سال مالی جدید", WIN_NAME = CL_MenuManager.WinNameType.WIN_F_NEWYEAR_SALEMALI });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سند افتتاحیه", WIN_NAME = CL_MenuManager.WinNameType.WIN_SANAD_EFTETAHIYAH });
-            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "دریافت موجدوی انتهای دوره از سال قبل", WIN_NAME = CL_MenuManager.WinNameType.WIN_GETFIRSTMOG_DARYAFTMOG });
-            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سند اختتـامیه", WIN_NAME = CL_MenuManager.WinNameType.WIN_SANAD_EKHTETAMIYAH });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "دریافت موجودی انتهای دوره از سال قبل", WIN_NAME = CL_MenuManager.WinNameType.WIN_GETFIRSTMOG_DARYAFTMOG });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سند اختتامیه", WIN_NAME = CL_MenuManager.WinNameType.WIN_SANAD_EKHTETAMIYAH });
 
 
             //تعاریف
@@ -422,7 +422,7 @@ namespace Wins.WinOther
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "تعریف گروه قیمت گذاری", WIN_NAME = CL_MenuManager.WinNameType.WIN_PRICE_GRP });
 
             //سوابق
-            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق (سند دستی) صدور و ویرایش اسناد", WIN_NAME = CL_MenuManager.WinNameType.TR_DEED_HEAD });
+            MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق سند دستی صدور و ویرایش اسناد", WIN_NAME = CL_MenuManager.WinNameType.TR_DEED_HEAD });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق (دریافت پرداخت) خزانه داری", WIN_NAME = CL_MenuManager.WinNameType.TR_PGET_HED });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق تعریف کالا", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_STUF_DEF });
             MenuItemModels.Add(new MenuItemModel { ISCONFIRMED = true, CAPTION = "سوابق رسید انبار", WIN_NAME = CL_MenuManager.WinNameType.TR_HISTORY_RASID_ANBAR });

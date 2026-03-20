@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.HESABDARI"
         mc:Ignorable="d"
-
+        xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:DGE="clr-namespace:Prg_UI.Functions"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="Prg_UI.Wins.WinMenus.HESABDARI.DEED_HEAD"
@@ -106,13 +106,13 @@
         <TextBox x:Name="Text10" Text="" IsReadOnly="True" Tag="RD" Margin="0,0,75,94"  Style="{StaticResource FuzzyOut}" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Right" Width="488" Height="25" VerticalAlignment="Bottom" />
         <Label x:Name="Label11_Copy6" Content="شرح ردیف : " Margin="0,0,13,94"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="61"/>
 
-        <TextBox x:Name="bedt" Text="" IsReadOnly="True" Tag="RD" Margin="141,0,0,124"  Style="{StaticResource FuzzyOut}" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Left" Width="116" Height="25" VerticalAlignment="Bottom" />
+        <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" x:Name="bedt" Text="" IsReadOnly="True" Tag="RD" Margin="141,0,0,124"  TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Left" Width="116" Height="25" VerticalAlignment="Bottom" />
         <Label x:Name="Label11_Copy7" Content="جمع تا سطر سند : " Margin="254,0,0,124"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="89"/>
-        <TextBox x:Name="best" Text="" IsReadOnly="True" Tag="RD" Margin="22,0,0,124"  Style="{StaticResource FuzzyOut}" TextAlignment="Right"  Visibility="Visible"  Padding="3" Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="116" />
+        <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" x:Name="best" Text="" IsReadOnly="True" Tag="RD" Margin="22,0,0,124"  TextAlignment="Right"  Visibility="Visible"  Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="116" />
 
         <Label x:Name="Label11_Copy8" Content="جمع سند : " Margin="258,0,0,94"  FlowDirection="RightToLeft" FontSize="10" Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="54"/>
-        <TextBox x:Name="SSBED"   IsReadOnly="True" Tag="RD" Margin="142,0,0,94"  Style="{StaticResource FuzzyOut}" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Left" Width="116" Height="25" VerticalAlignment="Bottom" />
-        <TextBox x:Name="SSBES"  IsReadOnly="True" Tag="RD" Margin="23,0,0,94"  Style="{StaticResource FuzzyOut}" TextAlignment="Right"  Visibility="Visible"  Padding="3" HorizontalAlignment="Left" Width="116" Height="25" VerticalAlignment="Bottom" />
+        <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" x:Name="SSBED"   IsReadOnly="True" Tag="RD" Margin="142,0,0,94"  TextAlignment="Right"  Visibility="Visible"  HorizontalAlignment="Left" Width="116" Height="25" VerticalAlignment="Bottom" />
+        <CNC:NumericTextBox DoesAcceptDouble="False" IsDigitGroupActive="True" DigitGroupOnEnter="True" x:Name="SSBES"  IsReadOnly="True" Tag="RD" Margin="23,0,0,94"  TextAlignment="Right"  Visibility="Visible" HorizontalAlignment="Left" Width="116" Height="25" VerticalAlignment="Bottom" />
 
         <CheckBox x:Name="SGN1" IsEnabled="True"  Content="تنظیم کننده" Margin="0,0,16,48" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="88" Click="SGN1_Click" IsChecked="False"/>
         <TextBox x:Name="sgn1usid" Style="{StaticResource FuzzyOut}" IsReadOnly="True" Tag="RD" Padding="7,0,10,0" Margin="0,0,110,44" VerticalAlignment="Bottom" FlowDirection="RightToLeft" Background="{x:Null}" BorderThickness="1" Height="25" HorizontalAlignment="Right" Width="126" />
