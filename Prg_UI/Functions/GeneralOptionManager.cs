@@ -26,6 +26,13 @@ namespace Prg_UI.Functions
         // این کش استاتیک است و در طول عمر برنامه باقی می‌ماند.
         private static readonly ConcurrentDictionary<int, bool> _rdpModeCache = new ConcurrentDictionary<int, bool>();
 
+        // کش تنظیمات تم
+        private static bool _cachedIsDarkMode = false;
+        private static string _cachedPrimaryColor = "#03A9F4";
+
+        public static bool CachedIsDarkMode => _cachedIsDarkMode;
+        public static string CachedPrimaryColor => _cachedPrimaryColor;
+
         // یک قفل ناهمزمان (Async Lock) برای جلوگیری از فراخوانی همزمان دیتابیس هنگام پر کردن کش
         private static readonly SemaphoreSlim _cacheSemaphore = new SemaphoreSlim(1, 1);
 
@@ -125,6 +132,39 @@ namespace Prg_UI.Functions
             finally
             {
                 _cacheSemaphore.Release();
+            }
+        }
+
+        /// <summary>
+        /// تنظیمات تم را به صورت همزمان از دیتابیس بارگذاری می‌کند.
+        /// باید پس از ورود کاربر و در سازنده WinBase فراخوانی شود.
+        /// </summary>
+        public static void InitializeThemeSync(int? userId = null)
+        {
+            int currentUserId = userId ?? Baseknow.USERCOD ?? 0;
+            if (currentUserId == 0) return;
+
+            try
+            {
+                const string sql = "SELECT OptionName, OptionValue FROM dbo.GENERAL_OPTIONS WHERE OptionName IN @OptionNames AND UID = @UID;";
+                using (var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
+                {
+                    db.Open();
+                    var options = db.Query<GENERAL_OPTIONS>(sql, new { OptionNames = new[] { "Theme.IsDarkMode", "Theme.PrimaryColor" }, UID = currentUserId }).ToList();
+
+                    var darkOption = options.FirstOrDefault(x => x.OptionName == "Theme.IsDarkMode");
+                    var colorOption = options.FirstOrDefault(x => x.OptionName == "Theme.PrimaryColor");
+
+                    if (darkOption != null && !string.IsNullOrWhiteSpace(darkOption.OptionValue))
+                        bool.TryParse(darkOption.OptionValue, out _cachedIsDarkMode);
+
+                    if (colorOption != null && !string.IsNullOrWhiteSpace(colorOption.OptionValue))
+                        _cachedPrimaryColor = colorOption.OptionValue;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GeneralOptionManager] Failed to init theme sync: {ex.Message}");
             }
         }
 

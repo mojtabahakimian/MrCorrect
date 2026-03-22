@@ -56,6 +56,13 @@ namespace Prg_UI.Wins
             WindowState = WindowState.Maximized;
 
             GeneralOptionManager.InitializeSync(Baseknow.USERCOD);
+            GeneralOptionManager.InitializeThemeSync(Baseknow.USERCOD);
+
+            var _paletteHelper = new PaletteHelper();
+            var _theme = _paletteHelper.GetTheme();
+            ThemeExtensions.SetBaseTheme(_theme, GeneralOptionManager.CachedIsDarkMode ? BaseTheme.Dark : BaseTheme.Light);
+            try { _theme.SetPrimaryColor((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(GeneralOptionManager.CachedPrimaryColor)); } catch { }
+            _paletteHelper.SetTheme(_theme);
 
             if (GeneralOptionManager.IsRDPMode)
             {
