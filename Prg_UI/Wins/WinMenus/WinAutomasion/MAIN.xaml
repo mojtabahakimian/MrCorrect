@@ -402,20 +402,15 @@
 
             <Border x:Name="LBL_STATE_RESULT" Margin="8,147,3,10" Opacity="0" Visibility="Hidden" Panel.ZIndex="10">
                 <Grid>
-                    <Border Background="#CC0A0A0A" CornerRadius="10"/>
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <ProgressBar IsIndeterminate="True"
-                                     Style="{StaticResource MaterialDesignCircularProgressBar}"
-                                     Width="52" Height="52"
-                                     Foreground="White"
-                                     HorizontalAlignment="Center"/>
-                        <TextBlock Text="در حال بارگذاری ..."
-                                   Foreground="#DDFFFFFF"
-                                   FontSize="15"
-                                   FontFamily="{StaticResource IRANYEKAN}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,14,0,0"/>
-                    </StackPanel>
+                    <Border Background="White" Opacity="0.55" CornerRadius="10"/>
+                    <materialDesign:Card UniformCornerRadius="50" Width="58" Height="58" Padding="0"
+                                         VerticalAlignment="Center" HorizontalAlignment="Center"
+                                         materialDesign:ElevationAssist.Elevation="Dp6">
+                        <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                     Value="0" IsIndeterminate="True"
+                                     Width="34" Height="34"
+                                     Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                    </materialDesign:Card>
                 </Grid>
             </Border>
             <Border CornerRadius="10" Grid.Column="1" Margin="8,372,10,10" Background="#E5028BC8">

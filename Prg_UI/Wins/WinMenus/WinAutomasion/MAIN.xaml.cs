@@ -750,17 +750,18 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
 
         private async Task DoLoadKartabl(bool _IsFirstTime_ = false)
         {
-            CanUisBeActive = false;
+            RefloadBtn.IsEnabled = false;
+            SaveBtn.IsEnabled = false;
+            STK_RIGHTPANEL.IsEnabled = false;
+
+            bool loaderShown = false;
             try
             {
-                //int gronum = Convert.ToInt32(((RadioButton)gro.Children.Cast<UIElement>().FirstOrDefault(r => r is RadioButton rb && rb.IsChecked == true))?.Tag);
-                //int gronum = Convert.ToInt32(((CheckBox)gro.Children.Cast<UIElement>().FirstOrDefault(r => r is CheckBox rb && rb.IsChecked == true))?.Tag);
-
                 string checkedTags = string.Join(",",
-                                                 gro.Children.OfType<CheckBox>() // Get all CheckBox controls
-                                                     .Where(cb => cb.IsChecked == true) // Filter only checked ones
-                                                     .Select(cb => cb.Tag?.ToString()) // Select the Tag value as a string
-                                                     .Where(tag => !string.IsNullOrEmpty(tag))); // Exclude null or empty tags
+                                                 gro.Children.OfType<CheckBox>()
+                                                     .Where(cb => cb.IsChecked == true)
+                                                     .Select(cb => cb.Tag?.ToString())
+                                                     .Where(tag => !string.IsNullOrEmpty(tag)));
 
                 if (string.IsNullOrEmpty(checkedTags) || checkedTags == ",")
                 {
@@ -802,13 +803,17 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                                 WHERE {status} ({(checkedTags == "1000" ? "TSK.IDNUM > 0" : $"TSK.skid IN ({checkedTags}) ")}) {personelQueryCondition}
                                 ORDER BY TSK.IDNUM";
 
+                // شروع fetch داده و مسابقه با تاخیر ۳۰۰ms
+                // لودینگ فقط اگر بیش از ۳۰۰ms طول بکشد نمایش داده می‌شود
+                var dataFetchTask = dbms.DoGetDataSQLAsync<TASKS>(query);
+                if (await Task.WhenAny(dataFetchTask, Task.Delay(300)) != dataFetchTask)
+                {
+                    _ShowLoadingOverlay();
+                    loaderShown = true;
+                }
 
-                // Fetch data asynchronously
-                //******************************
-                var RowsTask = await dbms.DoGetDataSQLAsync<TASKS>(query);
-                //******************************
+                var RowsTask = await dataFetchTask;
 
-                await Task.Delay(100); // Small delay to allow UI to update
                 await this.Dispatcher.InvokeAsync(() =>
                 {
                     TASK_DATA.ReplaceAll(RowsTask);
@@ -830,7 +835,11 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             finally
             {
                 UpdateDataGridFocus(_IsFirstTime_);
-                CanUisBeActive = true;
+                RefloadBtn.IsEnabled = true;
+                SaveBtn.IsEnabled = true;
+                STK_RIGHTPANEL.IsEnabled = true;
+                if (loaderShown)
+                    _HideLoadingOverlay();
             }
         }
 
