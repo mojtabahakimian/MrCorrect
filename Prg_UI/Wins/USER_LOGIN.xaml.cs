@@ -118,16 +118,11 @@ namespace Prg_UI.Wins
             Pop1.IsOpen = false;
         }
 
-        private void LoadTheme()
+        private async Task LoadThemeAsync()
         {
-            bool isDarkMode = Properties.Settings.Default.IsDarkMode;
-            string primaryColor = Properties.Settings.Default.PrimaryColor;
-
-            var paletteHelper = new PaletteHelper();
-            Theme theme = paletteHelper.GetTheme(); //issue line
-            ThemeExtensions.SetBaseTheme(theme, isDarkMode ? BaseTheme.Dark : BaseTheme.Light);
-            theme.SetPrimaryColor((Color)ColorConverter.ConvertFromString(primaryColor));
-            paletteHelper.SetTheme(theme);
+            AppThemeSettings themeSettings = await AppThemeManager.LoadThemeSettingsAsync(Baseknow.USERCOD);
+            AppThemeManager.ApplyTheme(themeSettings);
+            AppThemeManager.SaveLocalSettings(themeSettings.IsDark, themeSettings.PrimaryColor);
         }
         private static void IncreaseMemoryDesktopHeapExhaustion()
         {
@@ -226,7 +221,7 @@ namespace Prg_UI.Wins
             //Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("ODc4NkAzMjMwMkUzNDJFMzBsa2MvT0xqRTVEaHV1d01nNjUveFFoV2dWbHhhTVBIWVZ4alJjS3ltaVZnPQ==");
             //"ODc4NkAzMjMwMkUzNDJFMzBsa2MvT0xqRTVEaHV1d01nNjUveFFoV2dWbHhhTVBIWVZ4alJjS3ltaVZnPQ=="
 
-            LoadTheme();
+            _ = LoadThemeAsync();
 
             //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 

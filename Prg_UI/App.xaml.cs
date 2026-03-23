@@ -32,6 +32,7 @@ using Stimulsoft.Base;
 using Microsoft.Xaml.Behaviors;
 using System.Threading.Tasks;
 using Prg_UI.Wins.WinSetting;
+using MaterialDesignThemes.Wpf;
 
 namespace Prg_UI
 {
@@ -745,7 +746,12 @@ namespace Prg_UI
             }
             #endregion
 
-        
+            AppThemeManager.ApplyTheme(new AppThemeSettings
+            {
+                IsDark = Prg_UI.Properties.Settings.Default.IsDarkMode,
+                PrimaryColor = Prg_UI.Properties.Settings.Default.PrimaryColor
+            });
+
 
             #region SplashWindowy
 
