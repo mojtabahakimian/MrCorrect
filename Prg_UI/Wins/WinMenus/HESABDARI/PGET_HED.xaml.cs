@@ -1786,10 +1786,10 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                          VALUES({_id},
                                          {DATE.Text.ToRawTarikh()}   ,
                                          N'{MOLAH.Text.Trim()}' ,
-                                         {DEPATMAN.SelectedValue}   ,
-                                         {SHIFT.SelectedValue}   ,
+                                         {DEPATMAN.SelectedValue ?? "NULL"}   ,
+                                         {SHIFT.SelectedValue ?? "NULL"}   ,
                                          N'{USER_NAME.Text}' ,
-                                         {KIND.SelectedValue}   ,
+                                         {KIND.SelectedValue ?? "NULL"}   ,
                                          {(Convert.ToByte(OKF.IsChecked))}   ,
                                          {IDK.Text} , {Baseknow.USERCOD})
                                          ", null, transaction);
@@ -1833,9 +1833,9 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 try
                 {
                     dbms.DoExecuteSQL($@"UPDATE dbo.PGET_HED
-                                        SET DATE = {DATE.Text.ToRawTarikh()}, MOLAH = N'{MOLAH.Text.Trim()}', 
-                                        DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue},
-                                        KIND = {KIND.SelectedValue},
+                                        SET DATE = {DATE.Text.ToRawTarikh()}, MOLAH = N'{MOLAH.Text.Trim()}',
+                                        DEPATMAN = {DEPATMAN.SelectedValue ?? "NULL"}, SHIFT = {SHIFT.SelectedValue ?? "NULL"},
+                                        KIND = {KIND.SelectedValue ?? "NULL"},
                                         OKF={Convert.ToByte(OKF.IsChecked)} ,IDK = {IDK.Text}, SGN1 = {_SGN1_}, SGN2 = {_SGN2_}, SGN3 = {_SGN3_}
                                         WHERE ID = {ID.Text}");
 

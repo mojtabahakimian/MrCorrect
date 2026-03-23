@@ -1343,13 +1343,13 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 return true;
             }
 
-            if (!HeaderIsValid() || (string.IsNullOrWhiteSpace(NUMBER.Text) || NUMBER.Text == "0"))
+            if (!HeaderIsValid())
             {
                 universControl.PopNotifyShowUp("ابتدا اطلاعات سربرگ را تکمیل و ذخیره کنید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
                 return false;
             }
 
-            return true;
+            return DoCmdSaveHeader();
         }
         private void Window_ContentRendered(object sender, EventArgs e)
         {

@@ -350,9 +350,9 @@ namespace Prg_UI.Functions
             }
 
             const string sql = @"
-                MERGE dbo.GENERAL_OPTIONS AS target
+                MERGE dbo.GENERAL_OPTIONS WITH (HOLDLOCK) AS target
                 USING (SELECT @OptionName AS OptionName, @UID AS UID) AS source
-                ON (target.OptionName = source.OptionName 
+                ON (target.OptionName = source.OptionName
                     AND (target.UID = source.UID OR (target.UID IS NULL AND source.UID IS NULL)))
                 WHEN MATCHED THEN
                     UPDATE SET
