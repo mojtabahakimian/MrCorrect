@@ -400,14 +400,22 @@
                 <CheckBox Click="RefloadBtn_Click" Foreground="{DynamicResource MaterialDesignBody}" Content="مرخصی" Tag="37" Margin="5" VerticalAlignment="Top" HorizontalAlignment="Right" Width="auto" FlowDirection="RightToLeft" FontSize="11" />
             </WrapPanel>
 
-            <Border x:Name="LBL_STATE_RESULT" Margin="8,147,3,10" d:Visibility="Hidden">
+            <Border x:Name="LBL_STATE_RESULT" Margin="8,147,3,10" Opacity="0" Visibility="Hidden" Panel.ZIndex="10">
                 <Grid>
-                    <Border Background="#BF1A1A1A" CornerRadius="7">
-                        <Border.Effect>
-                            <BlurEffect Radius="10"/>
-                        </Border.Effect>
-                    </Border>
-                    <Label Content=". . . در حال بارگذاری " Visibility="Visible" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" Foreground="#DDFFFFFF"/>
+                    <Border Background="#CC0A0A0A" CornerRadius="10"/>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <ProgressBar IsIndeterminate="True"
+                                     Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                     Width="52" Height="52"
+                                     Foreground="White"
+                                     HorizontalAlignment="Center"/>
+                        <TextBlock Text="در حال بارگذاری ..."
+                                   Foreground="#DDFFFFFF"
+                                   FontSize="15"
+                                   FontFamily="{StaticResource IRANYEKAN}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,14,0,0"/>
+                    </StackPanel>
                 </Grid>
             </Border>
             <Border CornerRadius="10" Grid.Column="1" Margin="8,372,10,10" Background="#E5028BC8">

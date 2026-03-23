@@ -28,6 +28,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using UiTools;
 using Wins.WinMenus.WinAutomasion;
@@ -243,20 +244,42 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                 if (_can is true)
                 {
                     STK_RIGHTPANEL.IsEnabled = true;
-                    LBL_STATE_RESULT.Visibility = Visibility.Hidden;
-                    tASKSDataGrid.Visibility = Visibility.Visible;
                     RefloadBtn.IsEnabled = true;
                     SaveBtn.IsEnabled = true;
+                    _HideLoadingOverlay();
                 }
                 else
                 {
                     STK_RIGHTPANEL.IsEnabled = false;
-                    LBL_STATE_RESULT.Visibility = Visibility.Visible;
-                    tASKSDataGrid.Visibility = Visibility.Hidden;
                     RefloadBtn.IsEnabled = false;
                     SaveBtn.IsEnabled = false;
+                    _ShowLoadingOverlay();
                 }
             }
+        }
+
+        private void _ShowLoadingOverlay()
+        {
+            LBL_STATE_RESULT.Visibility = Visibility.Visible;
+            var fadeIn = new DoubleAnimation(0, 1, new Duration(TimeSpan.FromMilliseconds(220)))
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+            LBL_STATE_RESULT.BeginAnimation(OpacityProperty, fadeIn);
+        }
+
+        private void _HideLoadingOverlay()
+        {
+            var fadeOut = new DoubleAnimation(LBL_STATE_RESULT.Opacity, 0, new Duration(TimeSpan.FromMilliseconds(300)))
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
+            };
+            fadeOut.Completed += (s, e) =>
+            {
+                LBL_STATE_RESULT.Visibility = Visibility.Hidden;
+                LBL_STATE_RESULT.BeginAnimation(OpacityProperty, null);
+            };
+            LBL_STATE_RESULT.BeginAnimation(OpacityProperty, fadeOut);
         }
 
         public bool DoesTextedOnCOMP_COD { get; set; } = false;
