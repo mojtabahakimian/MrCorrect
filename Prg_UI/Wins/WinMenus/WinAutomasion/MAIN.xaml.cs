@@ -358,7 +358,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             await Dispatcher.InvokeAsync(() => { userIsEditing = IsUserActivelyEditing(); });
             if (userIsEditing)
             {
-                _KartablSemaphore.Release();
+                _Semaphore_.Release();
                 return;
             }
 
@@ -424,12 +424,21 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                 return; // Another instance is running
             }
 
+            // Skip auto-refresh if user is actively typing in an editable field
+            bool userIsEditing = false;
+            await Dispatcher.InvokeAsync(() => { userIsEditing = IsUserActivelyEditing(); });
+            if (userIsEditing)
+            {
+                _KartablSemaphore.Release();
+                return;
+            }
+
             try
             {
                 //Interlocked.Increment(ref _refreshCounter);
                 //await Dispatcher.InvokeAsync(() => LBL_COUNTER.Content = _refreshCounter.ToString());
 
-                await DoLoadKartabl();
+                await DoLoadKartabl(isAutoRefresh: true);
             }
             catch (ObjectDisposedException)
             {
@@ -734,11 +743,12 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             }
         }
 
-        private async Task DoLoadKartabl(bool _IsFirstTime_ = false)
+        private async Task DoLoadKartabl(bool _IsFirstTime_ = false, bool isAutoRefresh = false)
         {
             RefloadBtn.IsEnabled = false;
             SaveBtn.IsEnabled = false;
-            STK_RIGHTPANEL.IsEnabled = false;
+            if (!isAutoRefresh)
+                STK_RIGHTPANEL.IsEnabled = false;
 
             bool loaderShown = false;
             try
@@ -823,10 +833,12 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             }
             finally
             {
-                UpdateDataGridFocus(_IsFirstTime_);
+                if (!isAutoRefresh || !IsUserActivelyEditing())
+                    UpdateDataGridFocus(_IsFirstTime_);
                 RefloadBtn.IsEnabled = true;
                 SaveBtn.IsEnabled = true;
-                STK_RIGHTPANEL.IsEnabled = true;
+                if (!isAutoRefresh)
+                    STK_RIGHTPANEL.IsEnabled = true;
                 if (loaderShown)
                     _HideLoadingOverlay();
             }
@@ -1213,6 +1225,16 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             if (COMP_COD?.IsKeyboardFocusWithin == true)
             {
                 return true;
+            }
+
+            // کاربر در حال ویرایش سلول داخل DataGrid است
+            if (tASKSDataGrid != null)
+            {
+                foreach (var item in tASKSDataGrid.Items)
+                {
+                    if (tASKSDataGrid.ItemContainerGenerator.ContainerFromItem(item) is DataGridRow row && row.IsEditing)
+                        return true;
+                }
             }
 
             return false;
