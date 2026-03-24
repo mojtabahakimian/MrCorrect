@@ -1053,6 +1053,7 @@ namespace AUTO_BAZ.Functions
                     if (!IsNull(HFRST[HFRST_EOF]?.CUST_NO))
                     {
                         GETTAF3(HFRST[HFRST_EOF].CUST_NO, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+                        CREATHES(CKOL, CMOIN, CTAF, GETTAFNAME(HFRST[HFRST_EOF].CUST_NO));
                     }
 
                     SHSH = Convert.ToString(Interaction.IIf((bool)Baseknow.SNDKH, Strings.Left(" فاكتورهاي  فروش  " + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255), Strings.Left(" فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " خريدار: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255)));
@@ -1342,6 +1343,10 @@ namespace AUTO_BAZ.Functions
                                 {
                                     CREATHES(Baseknow.GHEYMAT, Convert.ToInt64(jst_thr[jst_thr_EOF].CODE), Convert.ToInt64(jst_thr[jst_thr_EOF].CODE), jst_thr[jst_thr_EOF].NAME);
                                 }
+                                else
+                                {
+                                    CREATHES(Baseknow.GHEYMAT, 1, 1, "قیمت تمام شده");
+                                }
                                 if (MAVAD > 0d)
                                 {
                                     object N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, ARZD, NUMBER, TAG = default;
@@ -1441,12 +1446,14 @@ namespace AUTO_BAZ.Functions
                                         HES_M = 1;
                                         HES_T = 1;
                                         hes = Baseknow.GHEYMAT + "-1-1";
+                                        CREATHES(Baseknow.GHEYMAT, 1, 1, "قیمت تمام شده");
                                     }
                                     else
                                     {
                                         HES_M = jst_thr[jst_thr_EOF].CODE;
                                         HES_T = jst_thr[jst_thr_EOF].CODE;
                                         hes = Baseknow.GHEYMAT + "-" + Convert.ToDouble(jst_thr[jst_thr_EOF].CODE) + "-" + Convert.ToDouble(jst_thr[jst_thr_EOF].CODE);
+                                        CREATHES(Baseknow.GHEYMAT, Convert.ToInt64(jst_thr[jst_thr_EOF].CODE), Convert.ToInt64(jst_thr[jst_thr_EOF].CODE), "قیمت تمام شده " + jst_thr[jst_thr_EOF].NAME);
                                     }
                                 }
                                 else
@@ -1454,8 +1461,8 @@ namespace AUTO_BAZ.Functions
                                     HES_M = jst_thr[jst_thr_EOF].CODE;
                                     HES_T = jst_thr[jst_thr_EOF].CODE;
                                     hes = Baseknow.GHEYMAT + "-" + Convert.ToDouble(jst_thr[jst_thr_EOF].CODE) + "-" + Convert.ToDouble(jst_thr[jst_thr_EOF].CODE);
+                                    CREATHES(Baseknow.GHEYMAT, Convert.ToInt64(jst_thr[jst_thr_EOF].CODE), Convert.ToInt64(jst_thr[jst_thr_EOF].CODE), "قیمت تمام شده " + jst_thr[jst_thr_EOF].NAME);
                                 }
-                                CREATHES(Baseknow.GHEYMAT, Convert.ToInt64(jst_thr[jst_thr_EOF].CODE), Convert.ToInt64(jst_thr[jst_thr_EOF].CODE), "قیمیت تمام شده " + jst_thr[jst_thr_EOF].NAME);
 
                                 SHARH = Strings.Left("فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " به مقدار" + jst_thr[jst_thr_EOF].MEGHk + " فروش " + Strings.Trim(jst_thr[jst_thr_EOF].NAME), 255);
                                 BED = Math.Round((double)(jst_thr[jst_thr_EOF].AVRAGE * jst_thr[jst_thr_EOF].MEGHk));
@@ -1488,6 +1495,7 @@ namespace AUTO_BAZ.Functions
                             if (!IsNull(HFRST[HFRST_EOF].MOIN_HAZ))
                             {
                                 GETTAF3(HFRST[HFRST_EOF].MOIN_HAZ, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                                CREATHES(HKOL, HMOIN, HTAF, GETTAFNAME(HFRST[HFRST_EOF].MOIN_HAZ));
                             }
 
                             HES_K = HKOL;
@@ -1533,6 +1541,7 @@ namespace AUTO_BAZ.Functions
                                 HES_K = GETKOL(Baseknow.ADA);
                                 HES_M = GETMOIN(Baseknow.ADA);
                                 HES_T = GETTAF(Baseknow.ADA);
+                                CREATHES(GETKOL(Baseknow.ADA), GETMOIN(Baseknow.ADA), GETTAF(Baseknow.ADA), GETTAFNAME(Baseknow.ADA));
                                 hes = Baseknow.ADA;
                                 SHARH = Strings.Right("چك " + CHRST[CHRST_EOF].N_SERI + "بانك " + GETBANK((double)CHRST[CHRST_EOF].BANK) + " " + CHRST[CHRST_EOF].SHOBEH + " مورخ " + Strings.Format(CHRST[CHRST_EOF].DATE_S, "####/##/##"), 255);
                                 BED = CHRST[CHRST_EOF].MABL;
@@ -1631,6 +1640,7 @@ namespace AUTO_BAZ.Functions
                         HES_K = Baseknow.SANDOGH;
                         HES_M = HFRST[HFRST_EOF].DEPATMAN;
                         HES_T = HFRST[HFRST_EOF].SHIFT;
+                        CREATHES(Baseknow.SANDOGH, HFRST[HFRST_EOF].DEPATMAN, HFRST[HFRST_EOF].SHIFT, "صندوق");
                         SHARH = Strings.Right("مبلغ نقد فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
                         hes = Baseknow.SANDOGH + "-" + HFRST[HFRST_EOF].DEPATMAN + "-" + HFRST[HFRST_EOF].SHIFT;
                         if (HFRST[HFRST_EOF].M_NAGHD > 0)
@@ -1670,6 +1680,7 @@ namespace AUTO_BAZ.Functions
                             HES_K = Baseknow.TFROSH;
                             HES_M = 1;
                             HES_T = 1;
+                            CREATHES(Baseknow.TFROSH, 1, 1, "تخفیف فروش");
                             SHARH = Strings.Right("مبلغ تخفيف فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255);
                             hes = Baseknow.TFROSH + "-1-1";
                             BED = HFRST[HFRST_EOF].TAKHFIF;
@@ -1719,6 +1730,7 @@ namespace AUTO_BAZ.Functions
                                         }
                                         else
                                         {
+                                            CREATHES(Baseknow.TFROSH, HFRST[HFRST_EOF].CUST_KIND, Convert.ToInt64(rst6[rst6_EOF].TAKH_COD), "تخفيف " + GETKALANAME(Convert.ToDouble(rst6[rst6_EOF].TAKH_COD)));
                                             object N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG = default;
 
                                             //SDRST.AddNew(); // تخفيف فروش
@@ -1861,6 +1873,7 @@ namespace AUTO_BAZ.Functions
                         if (!IsNull(HFRST[HFRST_EOF].MOIN_HAV))
                         {
                             GETTAF3(HFRST[HFRST_EOF].MOIN_HAV, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                            CREATHES(HKOL, HMOIN, HTAF, GETTAFNAME(HFRST[HFRST_EOF].MOIN_HAV));
                         }
                         HES_K = HKOL;
                         HES_M = HMOIN;
@@ -1919,6 +1932,7 @@ namespace AUTO_BAZ.Functions
                         if (!IsNull(HFRST[HFRST_EOF].MOIN_VAR))
                         {
                             GETTAF3(HFRST[HFRST_EOF].MOIN_VAR, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                            CREATHES(HKOL, HMOIN, HTAF, GETTAFNAME(HFRST[HFRST_EOF].MOIN_VAR));
                         }
                         HES_K = HKOL;
                         HES_M = HMOIN;
@@ -1950,12 +1964,14 @@ namespace AUTO_BAZ.Functions
                         if (!IsNull(HFRST[HFRST_EOF].HMBAA) && !string.IsNullOrWhiteSpace(HFRST[HFRST_EOF].HMBAA))
                         {
                             GETTAF3(HFRST[HFRST_EOF].HMBAA, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                            CREATHES(HKOL, HMOIN, HTAF, GETTAFNAME(HFRST[HFRST_EOF].HMBAA));
                             hes = HFRST[HFRST_EOF].HMBAA;
                         }
                         else //اگر حساب مالیات نداره از پیش فرض حساب مالیات در تعریف حساب های خودگردان بگیر
                         {
                             LogWriter.WriteLog($@"#WARNING  در بازسازی سند فروش : برای شماره فاکتور (حواله) {HFRST[HFRST_EOF].NUMBER1} به شرح {SHARH} حساب مالیات آن وجود نداشت , بنابر این با حساب پیش فرض مالیات در حسابهای خودگردان سند زدم ");
                             GETTAF3(Baseknow.HESMBAA, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                            CREATHES(HKOL, HMOIN, HTAF, GETTAFNAME(Baseknow.HESMBAA));
                             hes = Baseknow.HESMBAA;
                         }
                         HES_K = HKOL;
@@ -1992,6 +2008,7 @@ namespace AUTO_BAZ.Functions
                             if (!IsNull(PRST[PRST_EOF].CUST_NO))
                             {
                                 GETTAF3(PRST[PRST_EOF].CUST_NO, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                                CREATHES(HKOL, HMOIN, HTAF, GETTAFNAME(PRST[PRST_EOF].CUST_NO));
                             }
                             HES_K = HKOL;
                             HES_M = HMOIN;
@@ -2098,6 +2115,7 @@ namespace AUTO_BAZ.Functions
                                 HES_K = GETKOL(Baseknow.HPOR);
                                 HES_M = GETMOIN(Baseknow.HPOR);
                                 HES_T = GETTAF(Baseknow.HPOR);
+                                CREATHES(GETKOL(Baseknow.HPOR), GETMOIN(Baseknow.HPOR), GETTAF(Baseknow.HPOR), GETTAFNAME(Baseknow.HPOR));
                                 hes = Baseknow.HPOR;
                                 SHARH = Strings.Left("بابت درصد سهم  فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER + " : " + HFRST[HFRST_EOF].NUMBER1 + GETTAFNAME(TAMIR), 255);
                                 BED = JAMP;
