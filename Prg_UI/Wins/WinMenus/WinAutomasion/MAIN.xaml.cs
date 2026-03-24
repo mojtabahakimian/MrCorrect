@@ -28,6 +28,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using UiTools;
 using Wins.WinMenus.WinAutomasion;
@@ -243,16 +244,14 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                 if (_can is true)
                 {
                     STK_RIGHTPANEL.IsEnabled = true;
-                    LBL_STATE_RESULT.Visibility = Visibility.Hidden;
-                    tASKSDataGrid.Visibility = Visibility.Visible;
+                    _HideLoadingOverlay();
                     RefloadBtn.IsEnabled = true;
                     SaveBtn.IsEnabled = true;
                 }
                 else
                 {
                     STK_RIGHTPANEL.IsEnabled = false;
-                    LBL_STATE_RESULT.Visibility = Visibility.Visible;
-                    tASKSDataGrid.Visibility = Visibility.Hidden;
+                    _ShowLoadingOverlay();
                     RefloadBtn.IsEnabled = false;
                     SaveBtn.IsEnabled = false;
                 }
@@ -353,6 +352,16 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             {
                 return; // Another instance is running or auto-refresh is disabled
             }
+
+            // Skip auto-refresh if user is actively typing in an editable field
+            bool userIsEditing = false;
+            await Dispatcher.InvokeAsync(() => { userIsEditing = IsUserActivelyEditing(); });
+            if (userIsEditing)
+            {
+                _KartablSemaphore.Release();
+                return;
+            }
+
 
             try
             {
@@ -727,17 +736,21 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
 
         private async Task DoLoadKartabl(bool _IsFirstTime_ = false)
         {
-            CanUisBeActive = false;
+            RefloadBtn.IsEnabled = false;
+            SaveBtn.IsEnabled = false;
+            STK_RIGHTPANEL.IsEnabled = false;
+
+            bool loaderShown = false;
             try
             {
-                //int gronum = Convert.ToInt32(((RadioButton)gro.Children.Cast<UIElement>().FirstOrDefault(r => r is RadioButton rb && rb.IsChecked == true))?.Tag);
-                //int gronum = Convert.ToInt32(((CheckBox)gro.Children.Cast<UIElement>().FirstOrDefault(r => r is CheckBox rb && rb.IsChecked == true))?.Tag);
+
+
 
                 string checkedTags = string.Join(",",
-                                                 gro.Children.OfType<CheckBox>() // Get all CheckBox controls
-                                                     .Where(cb => cb.IsChecked == true) // Filter only checked ones
-                                                     .Select(cb => cb.Tag?.ToString()) // Select the Tag value as a string
-                                                     .Where(tag => !string.IsNullOrEmpty(tag))); // Exclude null or empty tags
+                                                 gro.Children.OfType<CheckBox>()
+                                                     .Where(cb => cb.IsChecked == true)
+                                                     .Select(cb => cb.Tag?.ToString())
+                                                     .Where(tag => !string.IsNullOrEmpty(tag)));
 
                 if (string.IsNullOrEmpty(checkedTags) || checkedTags == ",")
                 {
@@ -779,13 +792,17 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                                 WHERE {status} ({(checkedTags == "1000" ? "TSK.IDNUM > 0" : $"TSK.skid IN ({checkedTags}) ")}) {personelQueryCondition}
                                 ORDER BY TSK.IDNUM";
 
+                // شروع fetch داده و مسابقه با تاخیر ۳۰۰ms
+                // لودینگ فقط اگر بیش از ۳۰۰ms طول بکشد نمایش داده می‌شود
+                var dataFetchTask = dbms.DoGetDataSQLAsync<TASKS>(query);
+                if (await Task.WhenAny(dataFetchTask, Task.Delay(300)) != dataFetchTask)
+                {
+                    _ShowLoadingOverlay();
+                    loaderShown = true;
+                }
 
-                // Fetch data asynchronously
-                //******************************
-                var RowsTask = await dbms.DoGetDataSQLAsync<TASKS>(query);
-                //******************************
+                var RowsTask = await dataFetchTask;
 
-                await Task.Delay(100); // Small delay to allow UI to update
                 await this.Dispatcher.InvokeAsync(() =>
                 {
                     TASK_DATA.ReplaceAll(RowsTask);
@@ -807,10 +824,36 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             finally
             {
                 UpdateDataGridFocus(_IsFirstTime_);
-                CanUisBeActive = true;
+                RefloadBtn.IsEnabled = true;
+                SaveBtn.IsEnabled = true;
+                STK_RIGHTPANEL.IsEnabled = true;
+                if (loaderShown)
+                    _HideLoadingOverlay();
             }
         }
+        private void _ShowLoadingOverlay()
+        {
+            LBL_STATE_RESULT.Visibility = Visibility.Visible;
+            var fadeIn = new DoubleAnimation(0, 1, new Duration(TimeSpan.FromMilliseconds(220)))
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+            LBL_STATE_RESULT.BeginAnimation(OpacityProperty, fadeIn);
+        }
 
+        private void _HideLoadingOverlay()
+        {
+            var fadeOut = new DoubleAnimation(LBL_STATE_RESULT.Opacity, 0, new Duration(TimeSpan.FromMilliseconds(300)))
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
+            };
+            fadeOut.Completed += (s, e) =>
+            {
+                LBL_STATE_RESULT.Visibility = Visibility.Hidden;
+                LBL_STATE_RESULT.BeginAnimation(OpacityProperty, null);
+            };
+            LBL_STATE_RESULT.BeginAnimation(OpacityProperty, fadeOut);
+        }
         private void FILL_ALL_COMBOBOXES()
         {
             //کبموباکس مجری
@@ -1152,6 +1195,28 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             }, System.Windows.Threading.DispatcherPriority.Background);
         }
 
+        private bool IsUserActivelyEditing()
+        {
+            // کاربر روی فیلد وظیفه در حال تایپ است
+            if (TASK?.IsKeyboardFocusWithin == true)
+            {
+                return true;
+            }
+
+            // کاربر روی مجری (کمبوباکس قابل‌ویرایش) در حال تایپ/انتخاب است
+            if (PERSONEL?.IsKeyboardFocusWithin == true)
+            {
+                return true;
+            }
+
+            // کاربر روی تماس گیرنده (کمبوباکس قابل‌ویرایش) در حال تایپ/انتخاب است
+            if (COMP_COD?.IsKeyboardFocusWithin == true)
+            {
+                return true;
+            }
+
+            return false;
+        }
 
         public void RestoreLastFocus(DataGrid dtgrd)
         {
