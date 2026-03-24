@@ -797,7 +797,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                                    TSK.ss, TSK.skid,
                                    TSK.num, TSK.tg,
                                    TSK.CTIM, TSK.USERCO, TSK.SEE
-                                FROM dbo.TASKS AS TSK WITH (INDEX(IX_TASKS_Status1))
+                                FROM dbo.TASKS AS TSK
                                      LEFT HASH JOIN dbo.CUST_HESAB AS CH
                                          ON CH.hes = TSK.COMP_COD
                                 WHERE {status} ({(checkedTags == "1000" ? "TSK.IDNUM > 0" : $"TSK.skid IN ({checkedTags}) ")}) {personelQueryCondition}
