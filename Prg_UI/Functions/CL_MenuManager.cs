@@ -2198,7 +2198,6 @@ namespace Functions
                 case WinNameType.Automasion_MAIN: //اتوماسیون اداری
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        MAIN.MAIN_INST.Owner = PublicVRB.WINBASE;
                         MAIN.MAIN_INST.Show();
                         MAIN.MAIN_INST.Activate();
                     });
