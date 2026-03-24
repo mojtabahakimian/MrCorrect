@@ -400,16 +400,20 @@
                 <CheckBox Click="RefloadBtn_Click" Foreground="{DynamicResource MaterialDesignBody}" Content="مرخصی" Tag="37" Margin="5" VerticalAlignment="Top" HorizontalAlignment="Right" Width="auto" FlowDirection="RightToLeft" FontSize="11" />
             </WrapPanel>
 
-            <Border x:Name="LBL_STATE_RESULT" Margin="8,147,3,10" d:Visibility="Hidden">
+            <Border x:Name="LBL_STATE_RESULT" Margin="8,147,3,10" Opacity="0" Visibility="Hidden" Panel.ZIndex="10">
                 <Grid>
-                    <Border Background="#BF1A1A1A" CornerRadius="7">
-                        <Border.Effect>
-                            <BlurEffect Radius="10"/>
-                        </Border.Effect>
-                    </Border>
-                    <Label Content=". . . در حال بارگذاری " Visibility="Visible" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" Foreground="#DDFFFFFF"/>
+                    <Border Background="White" Opacity="0.55" CornerRadius="10"/>
+                    <materialDesign:Card UniformCornerRadius="50" Width="58" Height="58" Padding="0"
+                                         VerticalAlignment="Center" HorizontalAlignment="Center"
+                                         materialDesign:ElevationAssist.Elevation="Dp6">
+                        <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                     Value="0" IsIndeterminate="True"
+                                     Width="34" Height="34"
+                                     Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                    </materialDesign:Card>
                 </Grid>
             </Border>
+
             <Border CornerRadius="10" Grid.Column="1" Margin="8,372,10,10" Background="#E5028BC8">
                 <StackPanel x:Name="STK_RIGHTPANEL" KeyboardNavigation.TabNavigation="None">
                     <RadioButton  Margin="10" KeyboardNavigation.TabNavigation="None"  x:Name="AnjamNashodeh" Content="انجام نشده"  Tag="1" GroupName="Frame102" IsChecked="True"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="102"   FlowDirection="RightToLeft" Foreground="White" Click="AnjamNashodeh_Click" BorderBrush="White" Background="White"/>
