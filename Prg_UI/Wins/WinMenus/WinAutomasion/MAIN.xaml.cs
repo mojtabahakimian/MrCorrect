@@ -397,6 +397,13 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                 }
             }
         }
+        private bool IsUserActivelyEditing()
+        {
+            return PERSONEL.IsKeyboardFocusWithin ||
+                   TASK.IsKeyboardFocusWithin ||
+                   COMP_COD.IsKeyboardFocusWithin;
+        }
+
         private async Task KartablTimer_Tick()
         {
             if (_isKartablDisposed)
@@ -413,6 +420,15 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             if (!Convert.ToBoolean(AutoRefreshToggle.IsChecked) || !_KartablSemaphore.Wait(0))
             {
                 return; // Another instance is running
+            }
+
+            // Skip auto-refresh if user is actively typing in an editable field
+            bool userIsEditing = false;
+            await Dispatcher.InvokeAsync(() => { userIsEditing = IsUserActivelyEditing(); });
+            if (userIsEditing)
+            {
+                _KartablSemaphore.Release();
+                return;
             }
 
             try
