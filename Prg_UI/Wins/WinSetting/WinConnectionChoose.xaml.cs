@@ -246,22 +246,27 @@ namespace Prg_UI.Wins.WinSetting
             DbChooser.SelectedIndex = -1;
 
             List<string> servers = null;
-            await Task.Run(() => { servers = SqlServerScanner.GetAllSqlServerNames(); });
+            try
+            {
+                await Task.Run(() => { servers = SqlServerScanner.GetAllSqlServerNames(); });
 
-            ServerChooser.ItemsSource = servers;
-            if (servers?.Count > 0)
-                ServerChooser.SelectedIndex = 0;
+                ServerChooser.ItemsSource = servers;
+                if (servers?.Count > 0)
+                    ServerChooser.SelectedIndex = 0;
 
-            ServerChooser.SelectionChanged += ServerChooser_SelectionChanged;
-
-            PgbScanLoading.Visibility = Visibility.Collapsed;
-            Btn_GetServers.IsEnabled = true;
-
-            var found = servers?.Count > 0;
-            ShowToast(
-                found ? $"{servers.Count} سرور SQL پیدا شد" : "هیچ سرور SQL یافت نشد",
-                found ? "#DD1A7A3C" : "#DDB71C1C"
-            );
+                var found = servers?.Count > 0;
+                ShowToast(
+                    found ? $"{servers.Count} سرور SQL پیدا شد" : "هیچ سرور SQL یافت نشد",
+                    found ? "#DD1A7A3C" : "#DDB71C1C"
+                );
+            }
+            catch { /* scanner errors are non-fatal; UI is always reset in finally */ }
+            finally
+            {
+                ServerChooser.SelectionChanged += ServerChooser_SelectionChanged;
+                PgbScanLoading.Visibility = Visibility.Collapsed;
+                Btn_GetServers.IsEnabled = true;
+            }
         }
 
         private void ShowToast(string message, string colorHex)
