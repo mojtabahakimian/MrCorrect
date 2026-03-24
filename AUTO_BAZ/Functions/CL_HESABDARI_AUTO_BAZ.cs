@@ -1053,6 +1053,11 @@ namespace AUTO_BAZ.Functions
                     if (!IsNull(HFRST[HFRST_EOF]?.CUST_NO))
                     {
                         GETTAF3(HFRST[HFRST_EOF].CUST_NO, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+                        // اطمینان از وجود حساب مشتری در TDETA_HES قبل از INSERT به DEED_DTL
+                        if (!IsNull(CKOL) && !IsNull(CMOIN) && !IsNull(CTAF))
+                        {
+                            CREATHES(CKOL, CMOIN, CTAF, GETTAFNAME(HFRST[HFRST_EOF].CUST_NO));
+                        }
                     }
 
                     SHSH = Convert.ToString(Interaction.IIf((bool)Baseknow.SNDKH, Strings.Left(" فاكتورهاي  فروش  " + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255), Strings.Left(" فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " خريدار: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255)));
@@ -1488,6 +1493,11 @@ namespace AUTO_BAZ.Functions
                             if (!IsNull(HFRST[HFRST_EOF].MOIN_HAZ))
                             {
                                 GETTAF3(HFRST[HFRST_EOF].MOIN_HAZ, ref HKOL, ref HMOIN, ref HTAF, ref HTAF2, ref HTAF3, ref HTAF4);
+                                // اطمینان از وجود حساب سرویس/حمل در TDETA_HES قبل از INSERT به DEED_DTL
+                                if (!IsNull(HKOL) && !IsNull(HMOIN) && !IsNull(HTAF))
+                                {
+                                    CREATHES(HKOL, HMOIN, HTAF, GETTAFNAME(HFRST[HFRST_EOF].MOIN_HAZ));
+                                }
                             }
 
                             HES_K = HKOL;
@@ -1627,6 +1637,11 @@ namespace AUTO_BAZ.Functions
                         object BED = null;
 
                         //SDRST.AddNew(); // مبلغ نقدصندوق
+                        // اطمینان از وجود حساب صندوق در TDETA_HES
+                        if (!IsNull(Baseknow.SANDOGH) && !IsNull(HFRST[HFRST_EOF].DEPATMAN) && !IsNull(HFRST[HFRST_EOF].SHIFT))
+                        {
+                            CREATHES(Baseknow.SANDOGH, HFRST[HFRST_EOF].DEPATMAN, HFRST[HFRST_EOF].SHIFT, "صندوق");
+                        }
                         N_S = max_ns;
                         HES_K = Baseknow.SANDOGH;
                         HES_M = HFRST[HFRST_EOF].DEPATMAN;
@@ -1664,6 +1679,9 @@ namespace AUTO_BAZ.Functions
                         if (HFRST[HFRST_EOF].TAKHFIF != 0)
                         {
                             object N_S, HES_K, HES_M, HES_T, SHARH, hes, BED, NUMBER, ARZD, TAG = default;
+
+                            // اطمینان از وجود حساب تخفیف در TDETA_HES
+                            CREATHES(Baseknow.TFROSH, 1, 1, "تخفيف فروش");
 
                             //SDRST.AddNew(); // تخفيف فروش
                             N_S = max_ns;
@@ -2322,13 +2340,13 @@ namespace AUTO_BAZ.Functions
                         catch (SqlException ex)
                         {
                             // 2627 = Violation of PRIMARY KEY constraint (Duplicate Key)
-                            // If duplicate key, it means record exists (created by another thread/process), so we are good.
-                            // Rethrow other SQL errors.
-                            //if (ex.Number != 2627 && ex.Number != 2601)
-                            //{
-                            //   throw;
-                            //}
-                            dbms.DoExecuteSQL($"INSERT INTO dbo.TDETA_HES(N_KOL, NUMBER, TNUMBER, NAME) VALUES({KOL},{MOIN},{taf},N'{nam + " " + taf}')");
+                            // 2601 = Violation of UNIQUE constraint
+                            // اگر رکورد توسط thread دیگری ایجاد شده، خطا را نادیده بگیر
+                            // برای سایر خطاهای SQL، فقط لاگ بزن تا جلوی FK violation اصلی را نگیرد
+                            if (ex.Number != 2627 && ex.Number != 2601)
+                            {
+                                LogWriter.WriteLog($"CREATHES error (KOL={KOL}, MOIN={MOIN}, TAF={taf}): {ex.Message}");
+                            }
                         }
                     }
                 }
