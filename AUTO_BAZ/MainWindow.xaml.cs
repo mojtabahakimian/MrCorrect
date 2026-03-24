@@ -577,7 +577,7 @@ namespace AUTO_BAZ
             // Loop through each checkbox and set the IsChecked property
             foreach (CheckBox checkbox in checkboxes)
             {
-                if (checkbox.Name == "FORMOL" || checkbox.Name == "UseParallelProcessing" || checkbox.Name == "defacc" || checkbox.Name == "C00" || checkbox.Name == "chkUseSmartThrottling")
+                if (checkbox.Name == "FORMOL" || checkbox.Name == "defacc" || checkbox.Name == "C00" || checkbox.Name == "UseParallelProcessing" || checkbox.Name == "chkUseSmartThrottling")
                 {
                 }
                 else
@@ -719,12 +719,15 @@ namespace AUTO_BAZ
                         IsWorkisDone = true;
                         if (AnyErrorHappend)
                         {
-                            foreach (var item in ERTRACKLIST)
+                            lock (ERTRACKLIST)
                             {
-                                LST_DATA5.Add(item.SectionName);
+                                foreach (var item in ERTRACKLIST)
+                                {
+                                    LST_DATA5.Add(item.SectionName);
+                                }
+                                LogWriter.WriteLog($@"ERTRACKLIST : {ERTRACKLIST.Count} => {ERTRACKLIST.FirstOrDefault()?.SectionName}");
+                                ERTRACKLIST?.Clear();
                             }
-                            ERTRACKLIST?.Clear();
-                            LogWriter.WriteLog($@"ERTRACKLIST : {ERTRACKLIST.Count} => {ERTRACKLIST.FirstOrDefault()}");
                             LST_DATA5.Add("پایان یافته با خطا :" + Conversions.ToString(DateTime.Now));
                         }
                         else //Successfull
@@ -760,7 +763,11 @@ namespace AUTO_BAZ
                     Btn_DoCancel.Content = "لغو";
 
                     var taskInfo = string.Join(", ", tasks.Select(t => $"Id:{t.Id},Status:{t.Status}"));
-                    var errorSections = string.Join(" | ", ERTRACKLIST.Select(x => x.SectionName));
+                    var errorSections = "";
+                    lock (ERTRACKLIST)
+                    {
+                        errorSections = string.Join(" | ", ERTRACKLIST.Select(x => x.SectionName));
+                    }
                     LogWriter.WriteLog($"Exception in LetsGoBtn_Click (iteration {r + 1} of {repeatCount}). AnyErrorHappend={AnyErrorHappend}. Tasks: {taskInfo}. ErrorSections: {errorSections}");
                     ExpectionLogWriter.WriteLog(ex, "Exception in LetsGoBtn_Click");
 
