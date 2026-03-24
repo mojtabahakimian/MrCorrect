@@ -272,7 +272,7 @@ namespace Prg_UI.Wins.WinSetting
         private void ShowToast(string message, string colorHex)
         {
             TxtToast.Text = message;
-            BrdToast.Background = new SolidColorBrush((Color)ColorConverter.ConvertFrom(colorHex));
+            BrdToast.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(colorHex));
             BrdToast.Visibility = Visibility.Visible;
 
             var storyboard = new Storyboard();
