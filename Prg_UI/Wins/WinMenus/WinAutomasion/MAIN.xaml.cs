@@ -424,10 +424,16 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                 return; // Another instance is running
             }
 
-            // Skip auto-refresh if user is actively typing in an editable field
-            bool userIsEditing = false;
-            await Dispatcher.InvokeAsync(() => { userIsEditing = IsUserActivelyEditing(); });
-            if (userIsEditing)
+            // Skip auto-refresh only if user is directly editing a cell inside the DataGrid
+            bool dgCellEditing = false;
+            await Dispatcher.InvokeAsync(() =>
+            {
+                if (tASKSDataGrid != null)
+                    foreach (var item in tASKSDataGrid.Items)
+                        if (tASKSDataGrid.ItemContainerGenerator.ContainerFromItem(item) is DataGridRow dgRow && dgRow.IsEditing)
+                        { dgCellEditing = true; break; }
+            });
+            if (dgCellEditing)
             {
                 _KartablSemaphore.Release();
                 return;
@@ -815,7 +821,10 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
 
                 await this.Dispatcher.InvokeAsync(() =>
                 {
-                    TASK_DATA.ReplaceAll(RowsTask);
+                    if (isAutoRefresh)
+                        SmartUpdateTaskData(RowsTask);
+                    else
+                        TASK_DATA.ReplaceAll(RowsTask);
                 });
             }
             catch (Exception ex)
@@ -1238,6 +1247,62 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// در حین auto-refresh، ردیف‌ها را in-place آپدیت می‌کند بدون اینکه
+        /// SelectedItem تغییر کند یا متن در حال تایپ کاربر پاک شود.
+        /// </summary>
+        private void SmartUpdateTaskData(List<TASKS> newRows)
+        {
+            var newDict = newRows.ToDictionary(r => r.IDNUM ?? -1);
+            var selectedIdnum = (tASKSDataGrid.SelectedItem as TASKS)?.IDNUM ?? -1;
+            bool isEditingTask = TASK?.IsKeyboardFocusWithin == true;
+
+            // حذف ردیف‌هایی که دیگر در دیتابیس نیستند
+            for (int i = TASK_DATA.Count - 1; i >= 0; i--)
+            {
+                if (!newDict.ContainsKey(TASK_DATA[i].IDNUM ?? -1))
+                    TASK_DATA.RemoveAt(i);
+            }
+
+            var currentDict = TASK_DATA.ToDictionary(r => r.IDNUM ?? -1, r => r);
+
+            foreach (var newRow in newRows)
+            {
+                var idnum = newRow.IDNUM ?? -1;
+                if (currentDict.TryGetValue(idnum, out var existing))
+                {
+                    // آپدیت in-place — فقط اگر کاربر روی TASK این ردیف در حال تایپ است، فیلد TASK دست نخورد
+                    existing.GR = newRow.GR;
+                    existing.NAME = newRow.NAME;
+                    existing.PERSONEL = newRow.PERSONEL;
+                    if (!(isEditingTask && idnum == selectedIdnum))
+                        existing.TASK = newRow.TASK;
+                    existing.PERIORITY = newRow.PERIORITY;
+                    existing.STATUS = newRow.STATUS;
+                    existing.STDATE = newRow.STDATE;
+                    existing.STTIME = newRow.STTIME;
+                    existing.ENDATE = newRow.ENDATE;
+                    existing.ENTIME = newRow.ENTIME;
+                    existing.USERNAME = newRow.USERNAME;
+                    existing.COMP_COD = newRow.COMP_COD;
+                    existing.SUMTIME = newRow.SUMTIME;
+                    existing.pic = newRow.pic;
+                    existing.ss = newRow.ss;
+                    existing.skid = newRow.skid;
+                    existing.num = newRow.num;
+                    existing.tg = newRow.tg;
+                    existing.CTIM = newRow.CTIM;
+                    existing.USERCO = newRow.USERCO;
+                    existing.SEE = newRow.SEE;
+                }
+                else
+                {
+                    // ردیف جدید — اضافه کن
+                    TASK_DATA.Add(newRow);
+                }
+            }
         }
 
         public void RestoreLastFocus(DataGrid dtgrd)
