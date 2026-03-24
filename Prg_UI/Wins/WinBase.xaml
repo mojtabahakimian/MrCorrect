@@ -504,7 +504,7 @@
                         </Viewbox>
                     </Button>
 
-                    <Label x:Name="HEADINFO" Content="" IsHitTestVisible="False" Focusable="False" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="62,0,148,0" Foreground="White" FontSize="16" Padding="4,7,4,4"/>
+                    <Label x:Name="HEADINFO" Content="" IsHitTestVisible="False" Focusable="False" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Margin="62,0,148,0" Foreground="White" FontSize="16" Padding="4,7,4,4"/>
                 </Grid>
             </Border>
         </Border>

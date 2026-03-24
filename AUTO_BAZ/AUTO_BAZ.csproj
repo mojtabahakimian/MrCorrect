@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    <ApplicationIcon>Assets\1.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\icon_autobaz.ico</ApplicationIcon>
 	<UseWindowsForms>true</UseWindowsForms>
 	  
 	 <!--<IsExe>false</IsExe>
@@ -22,6 +22,10 @@
 
   <ItemGroup>
     <None Remove="Assets\IranYekanRG.TTF" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\icon_autobaz.ico" />
   </ItemGroup>
 
   <!--<ItemGroup>
@@ -43,9 +47,6 @@
 		</Reference>
 	</ItemGroup>
 
-  <ItemGroup>
-    <Content Include="Assets\1.ico" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MaterialDesignThemes" Version="5.2.1" />

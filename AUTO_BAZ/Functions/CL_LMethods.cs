@@ -106,8 +106,8 @@ namespace AUTO_BAZ.Functions
                     _path = "C:\\CORRECT\\AUTO_BAZ_LOG\\" + $"MatterLog_{CL_Generaly.General_Servername.Replace("\"", "_").Replace("\\", "_") + "_" + CL_Generaly.General_DBname}.txt";
                 }
 
-                string method_source = System.Reflection.MethodBase.GetCurrentMethod().Name;
-                string methodName = er.TargetSite.Name;
+                string method_source = System.Reflection.MethodBase.GetCurrentMethod()?.Name ?? "Unknown";
+                string methodName = er.TargetSite?.Name ?? "Unknown";
                 Exception baseException = er.GetBaseException();
                 IDictionary data = er.Data;
                 string helpLink = er.HelpLink;
@@ -115,22 +115,22 @@ namespace AUTO_BAZ.Functions
 
                 File.AppendAllText(_path, $"{tittle} : " +
                     $"{er.Message} \n {er.InnerException} \n {er.StackTrace} \n {er.Source} \n method_source : {method_source}" +
-                    $"\n Method Name: {er.TargetSite.Name} \n Base Exception: {er.GetBaseException().Message} \n Exception Data: {er.Data}" +
+                    $"\n Method Name: {methodName} \n Base Exception: {er.GetBaseException().Message} \n Exception Data: {er.Data}" +
                     $"\n Help Link: {er.HelpLink} \n  ExceptionType: {er.GetType().FullName} \n" +
                     $"[[[ {CL_CCNNMANAGER.CONNECTION_STR} ]]]");
 
                 var stackTrace = new StackTrace(er, true);
                 var allFrames = stackTrace.GetFrames().ToList();
                 StringBuilder logmsg = new StringBuilder();
-                foreach (var frame in allFrames)
-                {
-                    logmsg.AppendLine($"FileName : {frame.GetFileName()}");
-                    logmsg.AppendLine($"LineNumber : {frame.GetFileLineNumber()}");
-                    logmsg.AppendLine($"method : {frame.GetMethod()}");
-                    logmsg.AppendLine($"method name : {frame.GetMethod().Name}");
-                    logmsg.AppendLine($"ClassName : {frame.GetMethod().DeclaringType.ToString()}");
-                    logmsg.AppendLine(); // for an extra line space
-                }
+                //foreach (var frame in allFrames)
+                //{
+                //    logmsg.AppendLine($"FileName : {frame.GetFileName()}");
+                //    logmsg.AppendLine($"LineNumber : {frame.GetFileLineNumber()}");
+                //    logmsg.AppendLine($"method : {frame.GetMethod()}");
+                //    logmsg.AppendLine($"method name : {frame.GetMethod().Name}");
+                //    logmsg.AppendLine($"ClassName : {frame.GetMethod().DeclaringType.ToString()}");
+                //    logmsg.AppendLine(); // for an extra line space
+                //}
                 File.AppendAllText(_path, logmsg.ToString());
             }
         }

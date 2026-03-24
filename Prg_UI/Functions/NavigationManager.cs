@@ -458,6 +458,11 @@ namespace Functions
                     break;
             }
 
+            if (recordCount == 0)
+            {
+                IsNewRecord = true;
+            }
+
             GetDbUpdateRecord();
             OnCurrentRecordIndexChanged(CurrentRecordIndex);
             OnRecordsDataCountChanged(RecordsData.Count);

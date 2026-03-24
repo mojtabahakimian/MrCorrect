@@ -1053,6 +1053,13 @@ namespace AUTO_BAZ.Functions
                     if (!IsNull(HFRST[HFRST_EOF]?.CUST_NO))
                     {
                         GETTAF3(HFRST[HFRST_EOF].CUST_NO, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+
+                        if (CKOL.HasValue && CMOIN.HasValue && CTAF.HasValue && CKOL > 0 && CMOIN > 0 && CTAF > 0)
+                        {
+                            // جلوگیری از خطای FK_DEED_DTL_TDETA_HES در زمان درج موازی اسناد فروش
+                            // اگر کد حساب مشتری در TDETA_HES وجود نداشته باشد، قبل از درج DEED_DTL ایجاد می‌شود.
+                            CREATHES(CKOL, CMOIN, CTAF, GETTAFNAME(HFRST[HFRST_EOF].CUST_NO));
+                        }
                     }
 
                     SHSH = Convert.ToString(Interaction.IIf((bool)Baseknow.SNDKH, Strings.Left(" فاكتورهاي  فروش  " + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255), Strings.Left(" فاكتور فروش شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " خريدار: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255)));
@@ -1177,6 +1184,10 @@ namespace AUTO_BAZ.Functions
                         string CTAF3T = (CTAF3 == 0 || CTAF3 is null) ? "NULL" : CTAF3.ToString();
                         string CTAF4T = (CTAF4 == 0 || CTAF4 is null) ? "NULL" : CTAF4.ToString();
 
+                        if (CKOL is not null && CMOIN is not null && CTAF is not null)
+                        {
+                            CREATHES(CKOL, CMOIN, CTAF, GETTAFNAME(HFRST[HFRST_EOF].CUST_NO));
+                        }
 
                         dbms.DoExecuteSQL($"INSERT INTO dbo.DEED_DTL(N_S,  HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, HES,SHARH, BED, NUMBER, TAG, RADIF ) VALUES( {max_ns},{CKOL},{CMOIN},{CTAF},{CTAF2T},{CTAF3T},{CTAF4T},N'{HFRST[HFRST_EOF].CUST_NO}',N'{Strings.Right("ف ف ش " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ" + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + HFRST[HFRST_EOF].MOLAH + Interaction.IIf(Strings.Mid(Baseknow.OPTIONSS, 55, 1) == "5", " - " + GETF_DEPART(HFRST[HFRST_EOF]?.DEPATMAN), " "), 255)}',{Math.Round((double)(JAMF + HFRST[HFRST_EOF].MABL_HAZ + HFRST[HFRST_EOF].MBAA - HFRST[HFRST_EOF].TAKHFIF))},{HFRST[HFRST_EOF].NUMBER},13,{HFRST[HFRST_EOF].NUMBER})");
 
@@ -2289,51 +2300,96 @@ namespace AUTO_BAZ.Functions
 
         private static readonly object _creatHesLock = new object();
 
+
         [System.Diagnostics.DebuggerStepThrough]
         public static void CREATHES(double? KOL, double? MOIN, double? taf, string nam)
         {
-            // First check (optimization)
-            if (!ISHESAB(KOL, MOIN, taf))
+            // ۱. اعتبارسنجی اولیه
+            if (KOL is null || MOIN is null || taf is null)
             {
-                lock (_creatHesLock)
-                {
-                    // Double check locking
-                    if (!ISHESAB(KOL, MOIN, taf))
-                    {
-                        // Ensure parent record exists in DETA_HES
-                        try
-                        {
-                            var rst = dbms.DoGetDataSQL<DETA_HES_MODEL1>("SELECT * FROM DETA_HES WHERE N_KOL = " + KOL.ToString() + " AND NUMBER = " + MOIN.ToString()).ToList();
-                            if (rst.Count == 0)
-                            {
-                                // Use IF NOT EXISTS for safety
-                                dbms.DoExecuteSQL($"IF NOT EXISTS (SELECT * FROM DETA_HES WHERE N_KOL = {KOL} AND NUMBER = {MOIN}) INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME) VALUES({KOL},{MOIN},N'{nam}')");
-                            }
-                        }
-                        catch (Exception) { /* Log or ignore if DETA_HES already exists or fails, we proceed to TDETA_HES */ }
+                LogWriter.WriteLog($"[CREATHES] حساب نامعتبر است و قابل ایجاد نیست. KOL={KOL}, MOIN={MOIN}, TAF={taf}, NAME={nam}");
+                throw new ArgumentException($"[CREATHES] حساب نامعتبر است و سند نباید ثبت شود. KOL={KOL}, MOIN={MOIN}, TAF={taf}");
+            }
 
-                        // Insert into TDETA_HES
-                        try
-                        {
-                            // Use IF NOT EXISTS to prevent race conditions at SQL level
-                            string sql = $"IF NOT EXISTS (SELECT * FROM TDETA_HES WHERE N_KOL = {KOL} AND NUMBER = {MOIN} AND TNUMBER = {taf}) INSERT INTO dbo.TDETA_HES(N_KOL, NUMBER, TNUMBER, NAME) VALUES({KOL},{MOIN},{taf},N'{nam}')";
-                            dbms.DoExecuteSQL(sql);
-                        }
-                        catch (SqlException ex)
-                        {
-                            // 2627 = Violation of PRIMARY KEY constraint (Duplicate Key)
-                            // If duplicate key, it means record exists (created by another thread/process), so we are good.
-                            // Rethrow other SQL errors.
-                            //if (ex.Number != 2627 && ex.Number != 2601)
-                            //{
-                            //   throw;
-                            //}
-                            dbms.DoExecuteSQL($"INSERT INTO dbo.TDETA_HES(N_KOL, NUMBER, TNUMBER, NAME) VALUES({KOL},{MOIN},{taf},N'{nam + " " + taf}')");
-                        }
+            // ۲. حل مشکل Type Conversion: انتقال مستقیم اعداد اعشاری به عنوان پارامتر
+            double kolValue = KOL.Value;
+            double moinValue = MOIN.Value;
+            double tafValue = taf.Value;
+
+            // ۳. حل مشکل String Truncation: محدود کردن طول نام حساب (تطبیق با سایز فیلد NAME در دیتابیس)
+            // فرض میکنیم در دیتابیس فیلد NAME حداکثر 255 کاراکتر است.
+            string accountName = nam ?? string.Empty;
+            if (accountName.Length > 250)
+            {
+                accountName = accountName.Substring(0, 250);
+            }
+
+            // ۴. مسیر سریع (Fast-Path)
+            if (ISHESAB(kolValue, moinValue, tafValue))
+            {
+                return;
+            }
+
+            // ۵. تور ایمنی SQL با بلوک‌های مستقل
+            string sql = @"
+        BEGIN TRY
+            IF NOT EXISTS (SELECT 1 FROM dbo.DETA_HES WHERE N_KOL = @Kol AND NUMBER = @Moin)
+            BEGIN
+                INSERT INTO dbo.DETA_HES (N_KOL, NUMBER, NAME) 
+                VALUES (@Kol, @Moin, @Name);
+            END
+        END TRY
+        BEGIN CATCH
+            IF ERROR_NUMBER() NOT IN (2601, 2627) THROW;
+        END CATCH;
+
+        BEGIN TRY
+            IF NOT EXISTS (SELECT 1 FROM dbo.TDETA_HES WHERE N_KOL = @Kol AND NUMBER = @Moin AND TNUMBER = @Taf)
+            BEGIN
+                INSERT INTO dbo.TDETA_HES (N_KOL, NUMBER, TNUMBER, NAME) 
+                VALUES (@Kol, @Moin, @Taf, @Name);
+            END
+        END TRY
+        BEGIN CATCH
+            IF ERROR_NUMBER() NOT IN (2601, 2627) THROW;
+        END CATCH;
+    ";
+
+            // ۶. مدیریت بن‌بست (Deadlock Retry Pattern)
+            int maxRetries = 3;
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
+            {
+                try
+                {
+                    // اجرای کوئری با دیتابیس اختصاصی همین Thread
+                    dbms.DoExecuteSQL(sql, new { Kol = kolValue, Moin = moinValue, Taf = tafValue, Name = accountName });
+                    return; // اگر موفق بود، از متد خارج شو
+                }
+                catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 1205 || ex.Number == -2)
+                {
+                    // Error 1205 = Deadlock | Error -2 = TimeOut
+                    if (attempt == maxRetries)
+                    {
+                        var msg = $"خطای بن‌بست (Deadlock) یا Timeout پس از {maxRetries} تلاش. KOL={kolValue}, MOIN={moinValue}, TAF={tafValue}";
+                        LogWriter.WriteLog(msg + " | " + ex.Message);
+                        ExpectionLogWriter.WriteLog(ex, "CREATHES");
+                        throw new Exception(msg, ex);
                     }
+                    // یک مکث بسیار کوتاه و تصادفی برای خروج از تداخل Threadها
+                    System.Threading.Thread.Sleep(new Random().Next(10, 50));
+                }
+                catch (Exception ex)
+                {
+                    // خطاهای بحرانی (مثل قطع اتصال سرور یا خطای Foreign Key مربوط به سطح کل) مستقیماً Throw می‌شوند
+                    var message = $"خطای بحرانی در ساخت سرفصل حساب. KOL={kolValue}, MOIN={moinValue}, TAF={tafValue}";
+                    LogWriter.WriteLog(message + " | " + ex.Message);
+                    ExpectionLogWriter.WriteLog(ex, "CREATHES");
+
+                    throw new Exception(message, ex);
                 }
             }
         }
+
 
         [System.Diagnostics.DebuggerStepThrough]
         public static bool ISHESAB(double? KOL, double? MOIN, double? taf)
@@ -3882,9 +3938,9 @@ namespace AUTO_BAZ.Functions
             if (InternalCalling)
             {
                 auto_run.Dispatcher.Invoke(new Action(() =>
-                           {
-                               valdefacc = Convert.ToBoolean(auto_run.defacc.IsChecked);
-                           }));
+                {
+                    valdefacc = Convert.ToBoolean(auto_run.defacc.IsChecked);
+                }));
             }
 
             var HEDRST = dbms.DoGetDataSQL<QRE_BAZ_0>("SELECT HEAD_LST.NUMBER, HEAD_LST.TAG, HEAD_LST.ANBAR, HEAD_LST.NUMBER1, HEAD_LST.DATE_N, HEAD_LST.TAH, HEAD_LST.MAS, HEAD_LST.VAS, HEAD_LST.N_S, HEAD_LST.CUST_NO, HEAD_LST.MOLAH, HEAD_LST.M_NAGHD, HEAD_LST.MABL_VAR, HEAD_LST.MOIN_VAR, HEAD_LST.MABL_HAV, HEAD_LST.MOIN_HAV, HEAD_LST.MABL_HAZ, HEAD_LST.MOIN_HAZ, HEAD_LST.TAKHFIF, HEAD_LST.MOIN_KHF, HEAD_LST.ANBARF, HEAD_LST.FNUMCO, HEAD_LST.DEPATMAN, HEAD_LST.SHIFT, HEAD_LST.CUST_KIND, HEAD_LST.USER_NAME FROM HEAD_LST WHERE ((HEAD_LST.NUMBER >= " + NUMBER + " AND HEAD_LST.NUMBER <=" + NUMBER2 + "  and HEAD_LST.tag = 10 ) )").ToList();
