@@ -1782,17 +1782,23 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                         }
                         try
                         {
-                            db.Execute($@"INSERT INTO dbo.PGET_HED(ID, DATE, MOLAH, DEPATMAN, SHIFT, USER_NAME, KIND, OKF, IDK , UID)
-                                         VALUES({_id},
-                                         {DATE.Text.ToRawTarikh()}   ,
-                                         N'{MOLAH.Text.Trim()}' ,
-                                         {DEPATMAN.SelectedValue}   ,
-                                         {SHIFT.SelectedValue}   ,
-                                         N'{USER_NAME.Text}' ,
-                                         {KIND.SelectedValue}   ,
-                                         {(Convert.ToByte(OKF.IsChecked))}   ,
-                                         {IDK.Text} , {Baseknow.USERCOD})
-                                         ", null, transaction);
+                            const string insertSql = @"
+                                INSERT INTO dbo.PGET_HED(ID, DATE, MOLAH, DEPATMAN, SHIFT, USER_NAME, KIND, OKF, IDK, UID)
+                                VALUES (@ID, @DATE, @MOLAH, @DEPATMAN, @SHIFT, @USER_NAME, @KIND, @OKF, @IDK, @UID)";
+                            var insertParameters = new
+                            {
+                                ID = _id,
+                                DATE = DATE.Text.ToRawTarikh(),
+                                MOLAH = MOLAH.Text.Trim(),
+                                DEPATMAN = DEPATMAN.SelectedValue,
+                                SHIFT = SHIFT.SelectedValue,
+                                USER_NAME = USER_NAME.Text,
+                                KIND = KIND.SelectedValue,
+                                OKF = Convert.ToByte(OKF.IsChecked),
+                                IDK = IDK.Text,
+                                UID = Baseknow.USERCOD
+                            };
+                            db.Execute(insertSql, insertParameters, transaction);
 
 
                             SANAD(transaction); //برای اینکه در زمان صدور خزانه جدید برای اینکه همزمان دوتا شماره سند خالی نخوره برای خزانه جدید , سریع میگیم سند بزنه توی خزانه جدید که تداخل ایجاد نشه
@@ -1832,12 +1838,34 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                 try
                 {
-                    dbms.DoExecuteSQL($@"UPDATE dbo.PGET_HED
-                                        SET DATE = {DATE.Text.ToRawTarikh()}, MOLAH = N'{MOLAH.Text.Trim()}', 
-                                        DEPATMAN = {DEPATMAN.SelectedValue}, SHIFT = {SHIFT.SelectedValue},
-                                        KIND = {KIND.SelectedValue},
-                                        OKF={Convert.ToByte(OKF.IsChecked)} ,IDK = {IDK.Text}, SGN1 = {_SGN1_}, SGN2 = {_SGN2_}, SGN3 = {_SGN3_}
-                                        WHERE ID = {ID.Text}");
+                    const string updateSql = @"
+                        UPDATE dbo.PGET_HED
+                        SET DATE = @DATE,
+                            MOLAH = @MOLAH,
+                            DEPATMAN = @DEPATMAN,
+                            SHIFT = @SHIFT,
+                            KIND = @KIND,
+                            OKF = @OKF,
+                            IDK = @IDK,
+                            SGN1 = @SGN1,
+                            SGN2 = @SGN2,
+                            SGN3 = @SGN3
+                        WHERE ID = @ID";
+                    var updateParameters = new
+                    {
+                        DATE = DATE.Text.ToRawTarikh(),
+                        MOLAH = MOLAH.Text.Trim(),
+                        DEPATMAN = DEPATMAN.SelectedValue,
+                        SHIFT = SHIFT.SelectedValue,
+                        KIND = KIND.SelectedValue,
+                        OKF = Convert.ToByte(OKF.IsChecked),
+                        IDK = IDK.Text,
+                        SGN1 = _SGN1_,
+                        SGN2 = _SGN2_,
+                        SGN3 = _SGN3_,
+                        ID = ID.Text
+                    };
+                    dbms.DoExecuteSQL(updateSql, updateParameters);
 
                     SuccessSave = true;
                 }

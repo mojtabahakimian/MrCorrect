@@ -577,7 +577,7 @@ namespace AUTO_BAZ
             // Loop through each checkbox and set the IsChecked property
             foreach (CheckBox checkbox in checkboxes)
             {
-                if (checkbox.Name == "FORMOL" || checkbox.Name == "defacc" || checkbox.Name == "C00" || checkbox.Name == "chkUseSmartThrottling")
+                if (checkbox.Name == "FORMOL" || checkbox.Name == "UseParallelProcessing" || checkbox.Name == "defacc" || checkbox.Name == "C00" || checkbox.Name == "chkUseSmartThrottling")
                 {
                 }
                 else

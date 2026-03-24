@@ -235,6 +235,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             }
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
+
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
             I_AM_RASID_KHAREED = CL_LMethods.GetTheWindow(new WindowInteropHelper(this).Handle);
@@ -1343,7 +1344,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 return true;
             }
 
-            if (!HeaderIsValid() || (string.IsNullOrWhiteSpace(NUMBER.Text) || NUMBER.Text == "0"))
+            if (!HeaderIsValid() || (string.IsNullOrWhiteSpace(NUMBER?.Text) || NUMBER?.Text == "0"))
             {
                 universControl.PopNotifyShowUp("ابتدا اطلاعات سربرگ را تکمیل و ذخیره کنید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
                 return false;
@@ -1764,7 +1765,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     }
                     //this.INVO_LST_RASID_SUB.Requery();
                 }
-            };
+            }
+            ;
             if (!IsNull(this.NUMBER.Text) && !IsNull(this.CUST_NO.SelectedValue))
             {
                 var rst = dbms.DoGetDataSQL<HEAD_LST_CSHARP>("select * from head_lst where tag = 12 and NUMBER =  " + this.NUMBER.Text).ToList();
@@ -2957,9 +2959,16 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                             //Fake Query for Lock Table
 
                             var rst_11 = db.Query<double?>("SELECT Max(HEAD_LST.NUMBER) AS MaxOfNUMBER FROM HEAD_LST WHERE (((HEAD_LST.TAG)=1))", null, transaction).FirstOrDefault();
-                            if (rst_11 == 0 || ReferenceEquals(rst_11, null))
+                            if (rst_11 == null || rst_11 == 0 || ReferenceEquals(rst_11, null))
                             {
-                                num = Baseknow.STHFR;
+                                if (Baseknow.STHFR > 0)
+                                {
+                                    num = Baseknow.STHFR;
+                                }
+                                else
+                                {
+                                    num = 1;
+                                }
                                 NUMBER.Text = num.ToString();
                                 NUMBER.UpdateLayout();
                             }
