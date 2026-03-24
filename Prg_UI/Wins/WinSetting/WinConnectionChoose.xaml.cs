@@ -1,5 +1,4 @@
-﻿using Dapper;
-using Microsoft.Data.Sql;
+using Dapper;
 using Microsoft.Data.SqlClient;
 using Prg_Proccessy.Generaly;
 using Prg_SendInvoice.CNNMANAGER;
@@ -17,6 +16,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using static Dapper.SqlMapper;
 
@@ -91,32 +92,6 @@ namespace Prg_UI.Wins.WinSetting
             return servers;
         }
 
-        //public static List<string> GetAllSqlServerNames_Fast()
-        //{
-        //    // Use a HashSet to store the server names
-        //    HashSet<string> servers = new HashSet<string>();
-
-        //    // Use a parallel loop to iterate through the rows
-        //    Parallel.ForEach(SqlDataSourceEnumerator.Instance.GetDataSources().AsEnumerable(), row =>
-        //    {
-        //        string serverName = row.Field<string>("ServerName");
-        //        string instanceName = row.Field<string>("InstanceName");
-
-        //        // Use a StringBuilder to construct the server name
-        //        StringBuilder sb = new StringBuilder(serverName);
-        //        if (!string.IsNullOrEmpty(instanceName))
-        //        {
-        //            sb.Append("\\").Append(instanceName);
-        //        }
-
-        //        // Use the Add method of the HashSet to avoid duplicates
-        //        servers.Add(sb.ToString());
-        //    });
-
-        //    // Convert the HashSet to a List and return it
-        //    return servers.ToList();
-        //}
-
         private void Btn_SaveConnection_Click(object sender, RoutedEventArgs e)
         {
             string ServerChooser_TEX = ((TextBox)ServerChooser.Template.FindName("PART_EditableTextBox", ServerChooser)).Text;
@@ -166,24 +141,6 @@ namespace Prg_UI.Wins.WinSetting
             Application.Current.Shutdown();
             CL_LMethods.GoExitTheApplication(); //#NABILOO#
             return;
-
-            //Restart Application
-            //try
-            //{
-            //    // Get the path to the current executable
-            //    string appPath = Assembly.GetEntryAssembly().Location;
-            //    // Start a new process using the current executable
-            //    Process.Start(new ProcessStartInfo
-            //    {
-            //        FileName = "cmd.exe",
-            //        Arguments = $"/c start \"\" \"{appPath}\"",
-            //        UseShellExecute = false,
-            //        CreateNoWindow = true
-            //    });
-            //    // Terminate the current process
-            //    Process.GetCurrentProcess().Kill();
-            //}
-            //catch (Exception) { Environment.Exit(0); }
         }
         internal bool GoTestConnectionOK()
         {
@@ -275,21 +232,63 @@ namespace Prg_UI.Wins.WinSetting
             }
             catch (Exception) { }
         }
-        private void Btn_GetServers_Click(object sender, RoutedEventArgs e)
-        {
-            ServerChooser.SelectionChanged -= ServerChooser_SelectionChanged; //برای ایکه رویداد الکی اجرا نشه تداخل درست کنه
 
+        private async void Btn_GetServers_Click(object sender, RoutedEventArgs e)
+        {
+            Btn_GetServers.IsEnabled = false;
+            PgbScanLoading.Visibility = Visibility.Visible;
+
+            ServerChooser.SelectionChanged -= ServerChooser_SelectionChanged;
             ServerChooser.ItemsSource = null;
             ServerChooser.Items?.Clear();
-            ServerChooser.ItemsSource = GetAllSqlServerNames();
-            ServerChooser.SelectedIndex = 0;
-
-            ServerChooser.SelectionChanged += ServerChooser_SelectionChanged; //برای ایکه رویداد الکی اجرا نشه تداخل درست کنه
-
             DbChooser.ItemsSource = null;
             DbChooser.Items?.Clear();
             DbChooser.SelectedIndex = -1;
+
+            List<string> servers = null;
+            await Task.Run(() => { servers = SqlServerScanner.GetAllSqlServerNames(); });
+
+            ServerChooser.ItemsSource = servers;
+            if (servers?.Count > 0)
+                ServerChooser.SelectedIndex = 0;
+
+            ServerChooser.SelectionChanged += ServerChooser_SelectionChanged;
+
+            PgbScanLoading.Visibility = Visibility.Collapsed;
+            Btn_GetServers.IsEnabled = true;
+
+            var found = servers?.Count > 0;
+            ShowToast(
+                found ? $"{servers.Count} سرور SQL پیدا شد" : "هیچ سرور SQL یافت نشد",
+                found ? "#DD1A7A3C" : "#DDB71C1C"
+            );
         }
+
+        private void ShowToast(string message, string colorHex)
+        {
+            TxtToast.Text = message;
+            BrdToast.Background = new SolidColorBrush((Color)ColorConverter.ConvertFrom(colorHex));
+            BrdToast.Visibility = Visibility.Visible;
+
+            var storyboard = new Storyboard();
+
+            var fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(300));
+            Storyboard.SetTarget(fadeIn, BrdToast);
+            Storyboard.SetTargetProperty(fadeIn, new PropertyPath(UIElement.OpacityProperty));
+
+            var fadeOut = new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(500))
+            {
+                BeginTime = TimeSpan.FromSeconds(3.5)
+            };
+            Storyboard.SetTarget(fadeOut, BrdToast);
+            Storyboard.SetTargetProperty(fadeOut, new PropertyPath(UIElement.OpacityProperty));
+            fadeOut.Completed += (s, ev) => BrdToast.Visibility = Visibility.Collapsed;
+
+            storyboard.Children.Add(fadeIn);
+            storyboard.Children.Add(fadeOut);
+            storyboard.Begin(this);
+        }
+
         private void GetDBSFromServer()
         {
             try

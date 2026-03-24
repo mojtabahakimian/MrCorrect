@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,10 +21,18 @@ namespace Prg_UI.Functions
         {
             var servers = new ConcurrentDictionary<string, byte>(StringComparer.OrdinalIgnoreCase);
 
-            // ➊ UDP network scan (broadcast)
-            foreach (var s in ScanUdpNetwork(udpTimeoutMs)) servers.TryAdd(s, 0);
+            // ➊ UDP network scan and hostname scan run in parallel for speed
+            var udpTask = Task.Run(() =>
+            {
+                foreach (var s in ScanUdpNetwork(udpTimeoutMs)) servers.TryAdd(s, 0);
+            });
 
-            // ➋ Local registry (64-bit and 32-bit views if available)
+            var hostnameTask = Task.Run(() =>
+            {
+                foreach (var s in ScanCommonHostnames()) servers.TryAdd(s, 0);
+            });
+
+            // ➋ Local registry is instant – run on current thread while network scans run
             RegistryView[] views = Environment.Is64BitOperatingSystem
                 ? new[] { RegistryView.Registry64, RegistryView.Registry32 }
                 : new[] { RegistryView.Registry32 };
@@ -33,9 +41,7 @@ namespace Prg_UI.Functions
                 foreach (var s in GetSqlInstancesFromRegistry(view))
                     servers.TryAdd(s, 0);
 
-            // ➌ (Optional) Try pinging some common hostnames on LAN, NetBIOS style (uncomment if needed)
-            //foreach (var s in ScanCommonHostnames())
-            //    servers.TryAdd(s, 0);
+            Task.WaitAll(udpTask, hostnameTask);
 
             return servers.Keys.OrderBy(s => s, StringComparer.OrdinalIgnoreCase).ToList();
         }
@@ -84,7 +90,7 @@ namespace Prg_UI.Functions
                         if (udp.Available == 0) { Thread.Sleep(40); continue; }
                         var remote = new IPEndPoint(IPAddress.Any, 0);
                         var resp = udp.Receive(ref remote);
-                        if (resp.Length > 0)
+                        if (resp.Length > 3)
                         {
                             foreach (var srv in ParseServerInfoList(resp, remote.Address))
                                 results.Add(srv);
@@ -100,10 +106,14 @@ namespace Prg_UI.Functions
         }
 
         // Handles multiple server instances in response (covers clusters/AG)
+        // SQL Browser response format: byte[0]=0x05, bytes[1-2]=length (LE), bytes[3+]=data
         private static IEnumerable<string> ParseServerInfoList(byte[] payload, IPAddress ip)
         {
-            var txt = Encoding.ASCII.GetString(payload);
-            // Can contain multiple instances in one response (split by ; and look for ServerName/InstanceName pairs)
+            if (payload.Length <= 3) yield break;
+
+            // Skip the 3-byte header (0x05 + 2-byte length) to get the actual data
+            var txt = Encoding.ASCII.GetString(payload, 3, payload.Length - 3);
+
             string server = null;
             var tokens = txt.Split(';');
             for (int i = 0; i < tokens.Length - 1; i++)
@@ -117,9 +127,10 @@ namespace Prg_UI.Functions
                         yield return server;
                     else
                         yield return $"{server}\\{instance}";
+                    server = null; // reset for next server block in multi-instance response
                 }
             }
-            // Some servers (default instance) might only return server name
+            // Fallback: some servers (default instance) might only return server name
             if (!tokens.Any(t => t.Equals("InstanceName", StringComparison.OrdinalIgnoreCase)) && !string.IsNullOrEmpty(server))
                 yield return server;
         }
@@ -160,22 +171,20 @@ namespace Prg_UI.Functions
         }
 
         // ---------------------------------------------------------------------------
-        //        (OPTIONAL) FAST NETBIOS/LAN SWEEP FOR COMMON SQL HOSTNAMES
+        //        FAST TCP PORT CHECK FOR COMMON SQL SERVER HOSTNAMES
+        //        Catches servers where SQL Browser is disabled (port 1433 is open)
         // ---------------------------------------------------------------------------
-        // This is only a bonus: it tries to ping common hostnames, e.g. MAIN, SQL, SERVER, etc.
-        // Uncomment in GetAllSqlServerNames if you want this too.
         private static IEnumerable<string> ScanCommonHostnames()
         {
-            // You can add more known/likely hostnames here
             string[] hostnames = { "MAIN", "SQL", "SERVER", "DBSERVER", "PC229" };
             var found = new ConcurrentBag<string>();
             Parallel.ForEach(hostnames, hn =>
             {
                 try
                 {
-                    var ping = new Ping();
-                    var reply = ping.Send(hn, 350);
-                    if (reply.Status == IPStatus.Success)
+                    using var client = new TcpClient();
+                    var ar = client.BeginConnect(hn, 1433, null, null);
+                    if (ar.AsyncWaitHandle.WaitOne(300) && client.Connected)
                         found.Add(hn);
                 }
                 catch { }
