@@ -183,8 +183,10 @@ namespace Prg_UI.Functions
                 try
                 {
                     using var client = new TcpClient();
-                    var ar = client.BeginConnect(hn, 1433, null, null);
-                    if (ar.AsyncWaitHandle.WaitOne(300) && client.Connected)
+                    // ConnectAsync (Task-based) is always completed by the using-dispose;
+                    // Wait(ms) returns false on timeout so no resources are orphaned.
+                    var connectTask = client.ConnectAsync(hn, 1433);
+                    if (connectTask.Wait(300) && client.Connected)
                         found.Add(hn);
                 }
                 catch { }
