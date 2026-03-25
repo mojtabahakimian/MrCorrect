@@ -94,11 +94,12 @@ namespace Prg_UI.Wins.WinSetting
 
         private void Btn_SaveConnection_Click(object sender, RoutedEventArgs e)
         {
-            string ServerChooser_TEX = ((TextBox)ServerChooser.Template.FindName("PART_EditableTextBox", ServerChooser)).Text;
+            var serverChooserTextBox = ServerChooser.Template?.FindName("PART_EditableTextBox", ServerChooser) as TextBox;
+            string ServerChooser_TEX = serverChooserTextBox?.Text?.Trim() ?? ServerChooser.Text?.Trim() ?? string.Empty;
 
-            var DbChooser_TEXBOX = (TextBox)DbChooser.Template.FindName("PART_EditableTextBox", DbChooser);
-            DbChooser.SelectedValue = DbChooser_TEXBOX.Text.Trim();
-            var DbChooser_TEX = DbChooser_TEXBOX.Text.Trim();
+            var DbChooser_TEXBOX = DbChooser.Template?.FindName("PART_EditableTextBox", DbChooser) as TextBox;
+            var DbChooser_TEX = DbChooser_TEXBOX?.Text?.Trim() ?? DbChooser.Text?.Trim() ?? string.Empty;
+            DbChooser.SelectedValue = DbChooser_TEX;
 
             if (string.IsNullOrEmpty(ServerChooser_TEX))
             {
@@ -111,11 +112,15 @@ namespace Prg_UI.Wins.WinSetting
                 return;
             }
 
-            if (CL_Generaly.General_Servername.Trim() == ServerChooser_TEX.Trim() && CL_Generaly.General_DBname.Trim() == DbChooser_TEX.Trim())
+            try
             {
-                this.Close();
-                return;
+                if ((CL_Generaly.General_Servername ?? string.Empty).Trim() == ServerChooser_TEX.Trim() && (CL_Generaly.General_DBname ?? string.Empty).Trim() == DbChooser_TEX.Trim())
+                {
+                    this.Close();
+                    return;
+                }
             }
+            catch { /*ignore*/ }
 
             if (rd_WinAuth.IsChecked is true) //Windows Authentication
                 CNN_STR = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;"; //WIN
