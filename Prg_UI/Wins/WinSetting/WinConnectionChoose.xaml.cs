@@ -94,11 +94,12 @@ namespace Prg_UI.Wins.WinSetting
 
         private void Btn_SaveConnection_Click(object sender, RoutedEventArgs e)
         {
-            string ServerChooser_TEX = ((TextBox)ServerChooser.Template.FindName("PART_EditableTextBox", ServerChooser)).Text;
+            var _serverTextBox = ServerChooser.Template?.FindName("PART_EditableTextBox", ServerChooser) as TextBox;
+            string ServerChooser_TEX = _serverTextBox?.Text ?? ServerChooser.Text ?? string.Empty;
 
-            var DbChooser_TEXBOX = (TextBox)DbChooser.Template.FindName("PART_EditableTextBox", DbChooser);
-            DbChooser.SelectedValue = DbChooser_TEXBOX.Text.Trim();
-            var DbChooser_TEX = DbChooser_TEXBOX.Text.Trim();
+            var DbChooser_TEXBOX = DbChooser.Template?.FindName("PART_EditableTextBox", DbChooser) as TextBox;
+            var DbChooser_TEX = DbChooser_TEXBOX?.Text?.Trim() ?? DbChooser.Text?.Trim() ?? string.Empty;
+            DbChooser.SelectedValue = DbChooser_TEX;
 
             if (string.IsNullOrEmpty(ServerChooser_TEX))
             {
@@ -155,14 +156,14 @@ namespace Prg_UI.Wins.WinSetting
             Dispatcher.Invoke(() =>
             {
                 ServerChooser.UpdateLayout();
-                var ServerChooser_TEXBOX = (TextBox)ServerChooser.Template.FindName("PART_EditableTextBox", ServerChooser);
-                ServerChooser.SelectedValue = ServerChooser_TEXBOX.Text.Trim();
-                var ServerChooser_TEX = ServerChooser_TEXBOX.Text.Trim();
+                var ServerChooser_TEXBOX = ServerChooser.Template?.FindName("PART_EditableTextBox", ServerChooser) as TextBox;
+                var ServerChooser_TEX = ServerChooser_TEXBOX?.Text?.Trim() ?? ServerChooser.Text?.Trim() ?? string.Empty;
+                ServerChooser.SelectedValue = ServerChooser_TEX;
 
                 DbChooser.UpdateLayout();
-                var DbChooser_TEXBOX = (TextBox)DbChooser.Template.FindName("PART_EditableTextBox", DbChooser);
-                DbChooser.SelectedValue = DbChooser_TEXBOX.Text.Trim();
-                var DbChooser_TEX = DbChooser_TEXBOX.Text.Trim();
+                var DbChooser_TEXBOX = DbChooser.Template?.FindName("PART_EditableTextBox", DbChooser) as TextBox;
+                var DbChooser_TEX = DbChooser_TEXBOX?.Text?.Trim() ?? DbChooser.Text?.Trim() ?? string.Empty;
+                DbChooser.SelectedValue = DbChooser_TEX;
 
                 if (rd_WinAuth.IsChecked is true) //Windows Authentication
                     _cnn = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;"; //WIN
@@ -304,7 +305,8 @@ namespace Prg_UI.Wins.WinSetting
         {
             try
             {
-                string ServerChooser_TEX = ((TextBox)ServerChooser.Template.FindName("PART_EditableTextBox", ServerChooser)).Text;
+                var _srvTextBox = ServerChooser.Template?.FindName("PART_EditableTextBox", ServerChooser) as TextBox;
+                string ServerChooser_TEX = _srvTextBox?.Text ?? ServerChooser.Text ?? string.Empty;
 
                 var _TMPCNN = "";
                 if (rd_WinAuth.IsChecked is true) //Windows Authentication
@@ -345,8 +347,9 @@ namespace Prg_UI.Wins.WinSetting
 
         private void DbChooser_DropDownOpened(object sender, EventArgs e)
         {
-            var ServerChooser_TEX = (TextBox)ServerChooser.Template.FindName("PART_EditableTextBox", ServerChooser);
-            if (!string.IsNullOrEmpty(ServerChooser_TEX.Text.Trim()))
+            var _srvEditBox = ServerChooser.Template?.FindName("PART_EditableTextBox", ServerChooser) as TextBox;
+            var _srvText = _srvEditBox?.Text ?? ServerChooser.Text ?? string.Empty;
+            if (!string.IsNullOrEmpty(_srvText.Trim()))
             {
                 GetDBSFromServer();
             }
