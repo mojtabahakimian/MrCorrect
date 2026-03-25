@@ -120,7 +120,7 @@ namespace Prg_UI.Wins.WinSetting
                     return;
                 }
             }
-            catch { /*ignore*/ }
+            catch { /*ignore*/ return; }
 
             if (rd_WinAuth.IsChecked is true) //Windows Authentication
                 CNN_STR = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;"; //WIN
