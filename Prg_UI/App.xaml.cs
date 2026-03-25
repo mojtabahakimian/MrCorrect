@@ -100,6 +100,20 @@ namespace Prg_UI
                 return;
             }
 
+            if (IsSyncfusionTreeGridPrimaryKeyIssue(e.Exception))
+            {
+                LogException(e.Exception, "Handled Syncfusion TreeGrid primary key filter crash.");
+
+                try
+                {
+                    new Msgwin(false, "یک خطای موقت هنگام استفاده از فیلتر رخ داد. لطفاً دوباره تلاش کنید.").ShowDialog();
+                }
+                catch { }
+
+                e.Handled = true;
+                return;
+            }
+
             try
             {
                 string userMessage = string.Empty;
@@ -798,6 +812,23 @@ namespace Prg_UI
 
                 if (string.Equals(declaringType, "Syncfusion.UI.Xaml.Grid.CheckboxFilterControl", StringComparison.Ordinal) &&
                     string.Equals(methodName, "OnPreviewKeyDown", StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsSyncfusionTreeGridPrimaryKeyIssue(Exception exception)
+        {
+            if (exception is not null && exception.GetType() == typeof(Exception) && exception.TargetSite != null)
+            {
+                var declaringType = exception.TargetSite.DeclaringType?.FullName;
+                var methodName = exception.TargetSite.Name;
+
+                if (string.Equals(declaringType, "Syncfusion.UI.Xaml.TreeGrid.TreeGridSelfRelationalView", StringComparison.Ordinal) &&
+                    string.Equals(methodName, "CheckPrimaryKey", StringComparison.Ordinal))
                 {
                     return true;
                 }
