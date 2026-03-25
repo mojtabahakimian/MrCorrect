@@ -111,6 +111,12 @@ namespace Prg_UI.Wins.WinSetting
                 return;
             }
 
+            if (CL_Generaly.General_Servername.Trim() == ServerChooser_TEX.Trim() && CL_Generaly.General_DBname.Trim() == DbChooser_TEX.Trim())
+            {
+                this.Close();
+                return;
+            }
+
             if (rd_WinAuth.IsChecked is true) //Windows Authentication
                 CNN_STR = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;"; //WIN
             else if (rd_SqlAuth.IsChecked is true) //SQL Authentication
@@ -168,7 +174,7 @@ namespace Prg_UI.Wins.WinSetting
             CL_CCNNMANAGER.CONNECTION_STR = _cnn;
             try
             {
-                _result = tsdb.DoGetDataSQL<string>("SELECT SERVERNAM FROM dbo.SAZMAN").FirstOrDefault();
+                _result = tsdb.DoGetDataSQL<string>("SELECT SERVERNAM FROM dbo.SAZMAN --TEST").FirstOrDefault();
             }
             catch (Exception ex)
             {
