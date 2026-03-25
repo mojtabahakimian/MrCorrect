@@ -315,6 +315,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             const int conditionalTablesCount = 2;
             const int specialTransferCount = 3;   // REMAINDER + PAY_GETD + PAY_GETP
             const int identityTablesCount = 14;
+            const int nonCriticalTablesCount = 2; // GENERAL_OPTIONS + USER_PERSONEL_ORDER
             const int initialAndFinalSteps = 7;   // پوشه + prebackup + restore + disable FK + STUFFSK + enable FK + update SAZMAN
 
             return standardTablesCount
@@ -322,6 +323,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                  + conditionalTablesCount
                  + specialTransferCount
                  + identityTablesCount
+                 + nonCriticalTablesCount
                  + initialAndFinalSteps;
         }
 
@@ -830,6 +832,26 @@ END CATCH;";
                     UpdateStatus($"انتقال کامل جدول {tbl}...");
                     CopyTableAllRowsSmart(oldDb, newDb, tbl);
                     AdvanceProgress($"جدول {tbl} با موفقیت منتقل شد.");
+                }
+
+
+                // جداول غیر حیاتی (در صورت خطا از آنها چشم پوشی می‌شود)
+                string[] nonCriticalTables = { "GENERAL_OPTIONS", "USER_PERSONEL_ORDER" };
+                foreach (string tbl in nonCriticalTables)
+                {
+                    try
+                    {
+                        UpdateStatus($"انتقال جدول (غیر حیاتی) {tbl}...");
+                        CopyTableAllRowsSmart(oldDb, newDb, tbl);
+                    }
+                    catch
+                    {
+                        // خطا نادیده گرفته می‌شود
+                    }
+                    finally
+                    {
+                        AdvanceProgress($"جدول {tbl} با موفقیت منتقل شد.");
+                    }
                 }
 
                 // گروه ۲: جداول نیازمند تعریف دقیق ستون‌ها

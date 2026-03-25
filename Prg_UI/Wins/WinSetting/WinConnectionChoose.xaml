@@ -69,8 +69,8 @@
         <ProgressBar x:Name="PgbScanLoading"
                      IsIndeterminate="True"
                      HorizontalAlignment="Left" VerticalAlignment="Top"
-                     Margin="11,121,0,0" Width="108" Height="3"
-                     Visibility="Collapsed"/>
+                     Margin="23,140,0,0" Width="108" Height="3"
+                     Visibility="Hidden"/>
 
         <!-- Toast notification – soft popup shown after scan -->
         <Border x:Name="BrdToast"

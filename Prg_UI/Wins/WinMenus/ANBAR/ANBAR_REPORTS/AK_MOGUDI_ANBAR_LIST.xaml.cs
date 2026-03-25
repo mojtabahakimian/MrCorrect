@@ -8,6 +8,7 @@ using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using Prg_UI.Wins.WinMenus.ANBAR;
+using Prg_UI.Wins.WinMenus.ANBAR.ANBAR_REPORTS;
 using Syncfusion.Data;
 using Syncfusion.Data.Extensions;
 using Syncfusion.UI.Xaml.BulletGraph;
@@ -712,6 +713,18 @@ namespace Wins.WinMenus.ANBAR.ANBAR_REPORTS
             if (currentRow?.ANBAR != null && currentRow?.CODE != null)
             {
                 new MOGHAYERAT_ANBAR_WIN("99999999",currentRow?.ANBAR.ToString()!).Show();  //' ! ' this means I know What I'm doing , Just Disable The Warnings
+            }
+        }
+
+        private void BTN_KART_TMP_Click(object sender, RoutedEventArgs e)
+        {
+            var currentRow = SYNCFUSION_DG.SelectedItem as MDS;
+            if (currentRow?.CODE != null && currentRow?.ANBAR != null)
+            {
+                string dateFrom = Baseknow.YEA + "0101";
+                string dateTo = "99991230";
+                var kartWindow = new AK_MOGUDI_ANBAR_LIST_KART_TMP(currentRow.ANBAR.ToString(), currentRow.CODE, dateFrom, dateTo);
+                kartWindow.Show();
             }
         }
     }
