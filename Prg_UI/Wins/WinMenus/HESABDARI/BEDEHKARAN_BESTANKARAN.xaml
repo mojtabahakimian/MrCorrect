@@ -381,7 +381,7 @@
 
 
                                                 <syncfusion:SfTreeGrid x:Name="PART_ItemsControl" Margin="0,30,0,0"
-                                                ColumnSizer="Star"
+                                              ColumnSizer="Star"
                                               Height="{TemplateBinding Height}"
                                               HorizontalAlignment="Stretch"
                                               VerticalAlignment="Stretch"
@@ -390,25 +390,23 @@
                                               IsTabStop="false"
                                               ShowCheckBox="True"
                                               SelectionMode="None"
-                                                      AllowEditing="True"
-                                                    RowHeight="30"   
-                                                          FontFamily="{TemplateBinding FontFamily}"
-                                          FontSize="{TemplateBinding FontSize}"
-                                          FontStretch="{TemplateBinding FontWeight}"
-                                          FontStyle="{TemplateBinding FontStyle}"
-                                          FontWeight="{TemplateBinding FontWeight}"
-                                          Foreground="{TemplateBinding Foreground}"
-                                               AutoExpandMode="AllNodesExpanded"                                                                         
+                                              RowHeight="30"   
+                                              FontFamily="{TemplateBinding FontFamily}"
+                                              FontSize="{TemplateBinding FontSize}"
+                                              FontStretch="{TemplateBinding FontWeight}"
+                                              FontStyle="{TemplateBinding FontStyle}"
+                                              FontWeight="{TemplateBinding FontWeight}"
+                                              Foreground="{TemplateBinding Foreground}"
+                                              AutoExpandMode="AllNodesExpanded"                                                               
                                               CheckBoxMappingName="IsSelected"
                                               HorizontalContentAlignment="Stretch"
                                               VerticalContentAlignment="Stretch" 
-                                              EnableRecursiveChecking="False"
+                                              EnableRecursiveChecking="True"
+                                              ChildPropertyName="ChildFilterElements"
+                                              ExpanderColumn="DisplayText"
                                               ItemsSource="{TemplateBinding ItemsSource}"
-                                                           AutoGenerateColumns="False"
-                                                           HeaderRowHeight="0"
-                                              ParentPropertyName="DisplayText"
-                                              ChildPropertyName="ActualValue"
-                                              SelfRelationRootValue="Variable"
+                                              AutoGenerateColumns="False"
+                                              HeaderRowHeight="0"
                                               KeyboardNavigation.TabNavigation="Continue"
                                               Visibility="{Binding IsItemSourceLoaded,
                                                                    RelativeSource={RelativeSource TemplatedParent},
@@ -582,7 +580,7 @@
                         </Style>
                     </syncfusion:GridTemplateColumn.CellStyle>
                 </syncfusion:GridTemplateColumn>
-                
+
                 <syncfusion:GridTemplateColumn   MappingName="IsButtony" FilterRowEditorType="None"   HeaderText="" IsReadOnly="True" AllowResizing="False" Width="60" AllowFiltering="False" AllowSorting="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
