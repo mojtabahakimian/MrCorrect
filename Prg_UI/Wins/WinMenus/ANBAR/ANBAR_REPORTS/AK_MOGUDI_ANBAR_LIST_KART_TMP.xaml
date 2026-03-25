@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Prg_UI.Wins.WinMenus.ANBAR.ANBAR_REPORTS"
         mc:Ignorable="d"
-                MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        xmlns:VERT="clr-namespace:Prg_UI.CNVR"
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         xmlns:sfusion="clr-namespace:Syncfusion.UI.Xaml.Grid;assembly=Syncfusion.SfGrid.WPF"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -22,6 +23,7 @@
     </WindowChrome.WindowChrome>
 
     <Window.Resources>
+        <VERT:MegBackgroundColorConverter x:Key="MegBgColorConverter" />
         <ItemsPanelTemplate x:Key="VSP">
             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
         </ItemsPanelTemplate>
@@ -557,15 +559,20 @@
                 <!--<syncfusion:GridTextColumn HeaderText="شماره برگه" MappingName="NUMBER" Width="100"/>-->
                 <syncfusion:GridTextColumn HeaderText="نوع برگه" MappingName="BARGAH" Width="130"/>
                 <!--<syncfusion:GridTextColumn HeaderText="تاريخ" MappingName="DATE_N" Width="110"/>-->
-                
+
                 <syncfusion:GridTemplateColumn HeaderText="موجودي" MappingName="MEG" Width="110">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding MEG, StringFormat='{}{0:#,0.00}'}" Foreground="{Binding MegForeground}" VerticalAlignment="Center" HorizontalAlignment="Left" Padding="5,0,5,0" />
+                            <Border Background="{Binding MEG, Converter={StaticResource MegBgColorConverter}}">
+                                <TextBlock Text="{Binding MEG, StringFormat='{}{0:#,0.00}'}" 
+                                           VerticalAlignment="Center" 
+                                           HorizontalAlignment="Left" 
+                                           Padding="5,0,5,0" />
+                            </Border>
                         </DataTemplate>
                     </syncfusion:GridTemplateColumn.CellTemplate>
                 </syncfusion:GridTemplateColumn>
-                
+
                 <syncfusion:GridTextColumn HeaderText="مقدار" MappingName="MEGK" Width="110">
                     <syncfusion:GridTextColumn.DisplayBinding>
                         <Binding Path="MEGK" StringFormat="{}{0:#,0.00}" />
@@ -573,8 +580,8 @@
                 </syncfusion:GridTextColumn>
                 <syncfusion:GridTextColumn HeaderText="كد كالا" MappingName="CODE" Width="100"/>
                 <syncfusion:GridTextColumn HeaderText="نام كالا" MappingName="NAME" Width="250"/>
-                <syncfusion:GridTextColumn HeaderText="شماره داخلي" MappingName="FNUMCO" Width="100"/>
-                <syncfusion:GridTextColumn HeaderText="شماره فني" MappingName="N_FANI" Width="110"/>
+                <syncfusion:GridTextColumn HeaderText="شماره داخلی" MappingName="FNUMCO" Width="120"/>
+                <syncfusion:GridTextColumn HeaderText="شماره فنی" MappingName="N_FANI" Width="110"/>
                 <syncfusion:GridTextColumn HeaderText="كد انبار" MappingName="ANBAR" Width="80"/>
                 
                 <!--<syncfusion:GridTextColumn HeaderText="مبلغ كل" MappingName="MABLK" Width="130">

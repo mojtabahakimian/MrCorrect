@@ -626,7 +626,7 @@ CornerRadius="2" />
                 </syncfusion:GridTemplateColumn>
 
                 <syncfusion:GridTextColumn HeaderText="انبار" MappingName="ANBARN" Width="100"/>
-                <syncfusion:GridTextColumn HeaderText="کد انبار" MappingName="ANBAR" Width="80"/>
+                <syncfusion:GridTextColumn HeaderText="کد انبار" MappingName="ANBAR" Width="90"/>
                 <syncfusion:GridTextColumn HeaderText="کدکالا" MappingName="CODE" Width="80" />
                 <syncfusion:GridTextColumn HeaderText="فی" MappingName="FII" Width="110"/>
                 <syncfusion:GridTextColumn HeaderText=" مبلغ موجودی" MappingName="MABLK" Width="120">
