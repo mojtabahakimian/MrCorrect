@@ -592,31 +592,123 @@ namespace Wins.WinMenus.Checkha
                         this.ANBAR = dfn.ToString();
                     }
 
-                    N_KOL = CL_HESABDARI.GETKOL(HES.SelectedValue.ToString()).ToString();
-                    N_MOIN = CL_HESABDARI.GETMOIN(HES.SelectedValue.ToString()).ToString();
-                    N_TAF = CL_HESABDARI.GETTAF(HES.SelectedValue.ToString()).ToString();
+                    if (HES.SelectedValue != null)
+                    {
+                        N_KOL = CL_HESABDARI.GETKOL(HES.SelectedValue.ToString()).ToString();
+                        N_MOIN = CL_HESABDARI.GETMOIN(HES.SelectedValue.ToString()).ToString();
+                        N_TAF = CL_HESABDARI.GETTAF(HES.SelectedValue.ToString()).ToString();
+                    }
 
                     var KhazanehRow = ((THE_WIN as DEED_HEAD).Child14.Items[INDEX_DG] as DEED_DTL);
                     var CheckExistData = dbms.DoGetDataSQL<PAY_GETD>($"SELECT * FROM PAY_GETD WHERE N_SERI = {KhazanehRow.N_SERI} AND BANK = {KhazanehRow.BANK} AND DATE_S = {DATE_S.Text.ToRawTarikh()}").ToList();
 
                     var _NAME_TAH_ = NAME_TAH.Text.Length > 198 ? NAME_TAH.Text.Substring(0, 198) : NAME_TAH.Text;
 
+                    var param = new
+                    {
+                        N_SERI = N_SERI.Text,
+                        BANK = BANK.SelectedValue,
+                        DATE_S = DATE_S.Text.ToRawTarikh(),
+                        DATE = DATE.Text.ToRawTarikh(),
+                        SHOBEH = SHOBEH.SelectedValue,
+                        MABL = MABL.Text,
+                        NAME_TAH = _NAME_TAH_,
+                        ANBAR = ANBAR,
+                        RADIF = RADIF.Text,
+                        CUST_NO = CUST_NO.SelectedValue,
+                        LIST_NO = LIST_NO.SelectedValue,
+                        KIND = KIND.SelectedValue,
+                        SANDUGH = SANDUGH.SelectedValue,
+                        SAYADI = SAYADI.Text,
+                        N_HESAB = string.IsNullOrWhiteSpace(N_HESAB.Text) ? null : N_HESAB.Text,
+                        N_KOL = N_KOL,
+                        N_MOIN = N_MOIN,
+                        N_TAF = N_TAF
+                    };
+
                     if (CheckExistData.Count > 0)
                     {
-                        dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD SET N_SERI = {N_SERI.Text}, BANK = {BANK.SelectedValue}, DATE_S = {DATE_S.Text.ToRawTarikh()}, DATE = {DATE.Text.ToRawTarikh()}, SHOBEH = N'{SHOBEH.SelectedValue}', MABL = {MABL.Text}, NAME_TAH = N'{_NAME_TAH_}', ANBAR = {ANBAR}, RADIF = {RADIF.Text}, CUST_NO = N'{CUST_NO.SelectedValue}', VAZ = 1, LIST_NO = {LIST_NO.SelectedValue}, KIND = {KIND.SelectedValue}, SANDUGH = {SANDUGH.SelectedValue} , SAYADI = N'{SAYADI.Text}' , N_KOL = {(N_KOL is null ? "NULL" : N_KOL)} , N_MOIN = {(N_MOIN is null ? "NULL" : N_MOIN)} , N_TAF = {(N_TAF is null ? "NULL" : N_TAF)} 
-                                                             WHERE N_SERI = {N_SERI.Text} AND BANK = {BANK.SelectedValue} AND DATE_S = {DATE_S.Text.ToRawTarikh()}");
+                        dbms.DoExecuteSQL(@"
+        UPDATE dbo.PAY_GETD SET
+            N_SERI   = @N_SERI,
+            BANK     = @BANK,
+            DATE_S   = @DATE_S,
+            DATE     = @DATE,
+            SHOBEH   = @SHOBEH,
+            MABL     = @MABL,
+            NAME_TAH = @NAME_TAH,
+            ANBAR    = @ANBAR,
+            RADIF    = @RADIF,
+            CUST_NO  = @CUST_NO,
+            VAZ      = 1,
+            LIST_NO  = @LIST_NO,
+            KIND     = @KIND,
+            SANDUGH  = @SANDUGH,
+            SAYADI   = @SAYADI,
+            N_KOL    = @N_KOL,
+            N_MOIN   = @N_MOIN,
+            N_TAF    = @N_TAF
+        WHERE 
+            N_SERI = @N_SERI AND
+            BANK   = @BANK AND
+            DATE_S = @DATE_S
+    ", param);
                     }
                     else
                     {
-                        dbms.DoExecuteSQL($@"INSERT INTO dbo.PAY_GETD(N_SERI,                BANK,                     DATE_S,                     DATE,                   SHOBEH,       MABL,          NAME_TAH,  ANBAR,       RADIF,                   CUST_NO,VAZ,                LIST_NO,                KIND,                SANDUGH,                                          N_HESAB,            SAYADI,                              N_KOL,                               N_MOIN,                              N_TAF)
-				                                       VALUES( {N_SERI.Text},{BANK.SelectedValue},{DATE_S.Text.ToRawTarikh()},{DATE.Text.ToRawTarikh()},N'{SHOBEH.SelectedValue}',{MABL.Text},N'{_NAME_TAH_}',{ANBAR},{RADIF.Text},N'{CUST_NO.SelectedValue}',  1,{LIST_NO.SelectedValue},{KIND.SelectedValue},{SANDUGH.SelectedValue},{(N_HESAB.Text is null ? "NULL" : N_HESAB.Text)} , N'{SAYADI.Text}' , {(N_KOL is null ? "NULL" : N_KOL)}, {(N_MOIN is null ? "NULL" : N_MOIN)}, {(N_TAF is null ? "NULL" : N_TAF)})");
+                        dbms.DoExecuteSQL(@"
+        INSERT INTO dbo.PAY_GETD
+        (
+            N_SERI,
+            BANK,
+            DATE_S,
+            DATE,
+            SHOBEH,
+            MABL,
+            NAME_TAH,
+            ANBAR,
+            RADIF,
+            CUST_NO,
+            VAZ,
+            LIST_NO,
+            KIND,
+            SANDUGH,
+            N_HESAB,
+            SAYADI,
+            N_KOL,
+            N_MOIN,
+            N_TAF
+        )
+        VALUES
+        (
+            @N_SERI,
+            @BANK,
+            @DATE_S,
+            @DATE,
+            @SHOBEH,
+            @MABL,
+            @NAME_TAH,
+            @ANBAR,
+            @RADIF,
+            @CUST_NO,
+            1,
+            @LIST_NO,
+            @KIND,
+            @SANDUGH,
+            @N_HESAB,
+            @SAYADI,
+            @N_KOL,
+            @N_MOIN,
+            @N_TAF
+        )
+    ", param);
                     }
+
 
                     Msgwin msgwin1 = new Msgwin(false, $"شماره دفتر :{this.RADIF.Text}");
                     msgwin1.ShowDialog();
 
                     //(THE_WIN as DEED_HEAD).CmdSaveRecord(((THE_WIN as DEED_HEAD).Child14.Items[INDEX_DG] as DEED_DTL));
-                    (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();
 
                     this.Close();
                 }

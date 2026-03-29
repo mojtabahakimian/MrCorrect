@@ -1,9 +1,12 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using Functions;
+using MaterialDesignThemes.Wpf;
 using Microsoft.IdentityModel.Tokens;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
+using Prg_UI.HelperWins;
+using Prg_UI.UiTools;
 using Prg_UI.Wins.WinMenus.ANBAR;
 using System;
 using System.Collections.Generic;
@@ -70,6 +73,9 @@ namespace Wins.WinMenus.Taarif
         }
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         public List<STUF_DEF> MASTER_DATA { get; set; } = new List<STUF_DEF>();
+
+        UniversControl universControl = new UniversControl();
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             CL_HESABDARI.AMALIYAT_USER(this.GetType().Name);
@@ -331,6 +337,19 @@ namespace Wins.WinMenus.Taarif
                     return;
 
                 }
+            }
+        }
+
+        private async void EXPORTEXCEL_BTN(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                universControl.PopNotifyShowUp($" ... در حال آماده سازی فایل اکسل این عملیات مدتی طول خواهد کشید", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Blue, 4);
+                await UniversalExcelExporter.ExportToExcelAsync(MasterDataGrid, "ExportedExcel");
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خروجی اکسل به دلیل بروز خطا انجام نشد").ShowDialog();
             }
         }
     }

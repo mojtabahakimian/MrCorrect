@@ -18,6 +18,15 @@
         Title="PGET_HED_LIST" Height="785" Width="1095" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+
+        <ContextMenu x:Key="DataGridContextMenu" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="خروجی اکسل" Click="EXPORTEXCEL_BTN" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="FileExcelOutline" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+
+        </ContextMenu>
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="12"/>
@@ -40,16 +49,17 @@
             </Border>
         </Border>
         <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="95,56,0,0"  Width="1"/>
-        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True" Grid.RowSpan="2">
+        <Popup  x:Name="Pop1" AllowsTransparency="True" PopupAnimation="Fade" Placement="Relative"  Focusable="False" PlacementTarget="{Binding ElementName=TitleDrawBar}" StaysOpen="True">
             <StackPanel  Width="{Binding ActualWidth, ElementName=mygrid, Mode=OneWay}">
                 <Border x:Name="Pop_Border1" CornerRadius="7" Background="#F20584AA" Height="84">
-                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"  Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
+                    <TextBox Padding="10" IsReadOnly="True" x:Name="Pop1Text1"   VerticalAlignment="Center" Background="{x:Null}"
+                        Text="محل نمایش اعلان های سیستم" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="auto" Width="auto" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" HorizontalAlignment="Center" Foreground="White"/>
                 </Border>
             </StackPanel>
         </Popup>
         <UniformGrid Columns="1" Margin="10,338,10,10">
 
-            <DataGrid x:Name="MasterDataGrid" 
+            <DataGrid x:Name="MasterDataGrid" ContextMenu="{StaticResource DataGridContextMenu}"
                   ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
                   CellStyle="{StaticResource CellFocusyBorder}"
                   HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"
