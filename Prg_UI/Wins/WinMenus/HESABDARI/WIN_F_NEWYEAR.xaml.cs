@@ -231,7 +231,19 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     baseName = currentDbName;
                 }
 
-                YEA.Text = (new PersianCalendar().GetYear(DateTime.Now) + 1).ToString();
+                int CurretYear = new PersianCalendar().GetYear(DateTime.Now);
+
+                if (CurretYear <= Baseknow.YEA)
+                {
+                    while (CurretYear <= Baseknow.YEA)
+                    {
+                        YEA.Text = (CurretYear + 1).ToString();
+                    }
+                }
+                else
+                {
+                    YEA.Text = (CurretYear).ToString(); //تاریخ سال جدید هست
+                }
                 txtNewDbName.Text = $"{baseName}{nextYear}";
 
                 // مسیر درست:

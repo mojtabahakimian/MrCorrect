@@ -431,6 +431,89 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     });
                 }
 
+                try
+                {
+                    // انتقال حساب‌های مورد نیاز از سال قبل
+                    string transferAccountsSql = $@"
+            INSERT INTO TOTA_HES (HES_K, NAM_HES_K)
+            SELECT DISTINCT HES_K, NAM_HES_K
+            FROM [{dbName}].dbo.TOTA_HES tk
+            WHERE HES_K IN (
+                SELECT DISTINCT HES_K FROM [{dbName}].dbo.DEED_DTL WHERE N_S = @Old_NS
+            )
+            AND NOT EXISTS (SELECT 1 FROM TOTA_HES WHERE HES_K = tk.HES_K);
+
+            INSERT INTO DETA_HES (HES_K, HES_M, NAM_HES_M)
+            SELECT DISTINCT HES_K, HES_M, NAM_HES_M
+            FROM [{dbName}].dbo.DETA_HES dm
+            WHERE EXISTS (
+                SELECT 1 FROM [{dbName}].dbo.DEED_DTL 
+                WHERE N_S = @Old_NS AND HES_K = dm.HES_K AND HES_M = dm.HES_M)
+            AND NOT EXISTS (
+                SELECT 1 FROM DETA_HES WHERE HES_K = dm.HES_K AND HES_M = dm.HES_M
+            );
+
+            INSERT INTO TDETA_HES (HES_K, HES_M, HES_T, NAM_HES_T)
+            SELECT DISTINCT HES_K, HES_M, HES_T, NAM_HES_T
+            FROM [{dbName}].dbo.TDETA_HES tm
+            WHERE EXISTS (
+                SELECT 1 FROM [{dbName}].dbo.DEED_DTL 
+                WHERE N_S = @Old_NS AND HES_K = tm.HES_K AND HES_M = tm.HES_M AND HES_T = tm.HES_T
+            )
+            AND NOT EXISTS (
+                SELECT 1 FROM TDETA_HES 
+                WHERE HES_K = tm.HES_K AND HES_M = tm.HES_M AND HES_T = tm.HES_T
+            );
+
+            INSERT INTO TDETA_HES2 (HES_K, HES_M, HES_T, HES_T2, NAM_HES_T2)
+            SELECT DISTINCT HES_K, HES_M, HES_T, HES_T2, NAM_HES_T2
+            FROM [{dbName}].dbo.TDETA_HES2 t2
+            WHERE EXISTS (
+                SELECT 1 FROM [{dbName}].dbo.DEED_DTL 
+                WHERE N_S = @Old_NS 
+                AND HES_K = t2.HES_K AND HES_M = t2.HES_M 
+                AND HES_T = t2.HES_T AND HES_T2 = t2.HES_T2
+            )
+            AND NOT EXISTS (
+                SELECT 1 FROM TDETA_HES2 
+                WHERE HES_K = t2.HES_K AND HES_M = t2.HES_M 
+                AND HES_T = t2.HES_T AND HES_T2 = t2.HES_T2
+            );
+
+            INSERT INTO TDETA_HES3 (HES_K, HES_M, HES_T, HES_T2, HES_T3, NAM_HES_T3)
+            SELECT DISTINCT HES_K, HES_M, HES_T, HES_T2, HES_T3, NAM_HES_T3
+            FROM [{dbName}].dbo.TDETA_HES3 t3
+            WHERE EXISTS (
+                SELECT 1 FROM [{dbName}].dbo.DEED_DTL 
+                WHERE N_S = @Old_NS 
+                AND HES_K = t3.HES_K AND HES_M = t3.HES_M 
+                AND HES_T = t3.HES_T AND HES_T2 = t3.HES_T2 AND HES_T3 = t3.HES_T3
+            )
+            AND NOT EXISTS (
+                SELECT 1 FROM TDETA_HES3 
+                WHERE HES_K = t3.HES_K AND HES_M = t3.HES_M 
+                AND HES_T = t3.HES_T AND HES_T2 = t3.HES_T2 AND HES_T3 = t3.HES_T3
+            );
+
+            INSERT INTO TDETA_HES4 (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, NAM_HES_T4)
+            SELECT DISTINCT HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, NAM_HES_T4
+            FROM [{dbName}].dbo.TDETA_HES4 t4
+            WHERE EXISTS (
+                SELECT 1 FROM [{dbName}].dbo.DEED_DTL 
+                WHERE N_S = @Old_NS 
+                AND HES_K = t4.HES_K AND HES_M = t4.HES_M 
+                AND HES_T = t4.HES_T AND HES_T2 = t4.HES_T2 
+                AND HES_T3 = t4.HES_T3 AND HES_T4 = t4.HES_T4
+            )
+            AND NOT EXISTS (
+                SELECT 1 FROM TDETA_HES4 
+                WHERE HES_K = t4.HES_K AND HES_M = t4.HES_M 
+                AND HES_T = t4.HES_T AND HES_T2 = t4.HES_T2 
+                AND HES_T3 = t4.HES_T3 AND HES_T4 = t4.HES_T4
+            );"; dbms.DoExecuteSQL(transferAccountsSql, new { Old_NS = s1Val });
+                }
+                catch (Exception) { }
+
                 // Clean Details
                 dbms.DoExecuteSQL("DELETE FROM DEED_DTL WHERE N_S = @N_S", new { N_S = s2Val });
 
@@ -451,10 +534,55 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 new Msgwin(false, "عملیات با موفقیت انجام شد.").ShowDialog();
                 this.Close();
             }
+            catch (SqlException sqlEx)
+            {
+                string userMessage = "خطا: ";
+                switch (sqlEx.Number)
+                {
+                    case 547: // Foreign key constraint
+                        userMessage = "خطا: برخی حساب‌ها در سال جدید یافت نشد. لطفاً ابتدا ساختار حساب‌ها را بررسی کنید.";
+                        break;
+                    case 2627: // Duplicate key
+                    case 2601:
+                        userMessage = "خطا: شماره سند تکراری است. لطفاً شماره دیگری انتخاب کنید.";
+                        break;
+                    case 4060: // Cannot open databaseuserMessage = "خطا: دیتابیس سال قبل در دسترس نیست. نام دیتابیس را بررسی کنید.";
+                        break;
+                    case 208: // Invalid object name
+                        userMessage = "خطا: جدول مورد نظر در دیتابیس یافت نشد. ساختار دیتابیس را بررسی کنید.";
+                        break;
+                    case 515: // Cannot insert NULL
+                        userMessage = "خطا: اطلاعات ناقص است. تمام فیلدهای ضروری را پر کنید.";
+                        break;
+                    case 1205: // Deadlock
+                        userMessage = "خطا: دیتابیس مشغول است. لطفاً دوباره تلاش کنید.";
+                        break;
+                    case -1: // Connection timeout
+                    case -2:
+                        userMessage = "خطا: ارتباط با دیتابیس قطع شد. اتصال شبکه را بررسی کنید.";
+                        break;
+                    case 18456: // Login failed
+                        userMessage = "خطا: دسترسی به دیتابیس رد شد. مجوزهای کاربری را بررسی کنید.";
+                        break;
+                    default: userMessage = $"خطای دیتابیس: "; break; //{sqlEx.Message}
+                }
+
+                new Msgwin(false, userMessage).ShowDialog();
+            }
+            catch (FormatException)
+            {
+                new Msgwin(false, "خطا: فرمت شماره سند یا تاریخ نامعتبر است.").ShowDialog();
+            }
+            catch (InvalidOperationException)
+            {
+                new Msgwin(false, "خطا: ارتباط با دیتابیس برقرار نیست.").ShowDialog();
+            }
             catch (Exception ex)
             {
-                new Msgwin(false, "خطا: " + ex.Message).ShowDialog();
+                //new Msgwin(false, $"خطای غیرمنتظره: {ex.Message}").ShowDialog();
+                new Msgwin(false, $"خطای در انجام عملیات").ShowDialog();
             }
+
         }
 
         private void NDBS_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
