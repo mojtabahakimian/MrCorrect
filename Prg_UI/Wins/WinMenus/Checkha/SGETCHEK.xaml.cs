@@ -621,9 +621,9 @@ namespace Wins.WinMenus.Checkha
                         SANDUGH = SANDUGH.SelectedValue,
                         SAYADI = SAYADI.Text,
                         N_HESAB = string.IsNullOrWhiteSpace(N_HESAB.Text) ? null : N_HESAB.Text,
-                        N_KOL = N_KOL,
-                        N_MOIN = N_MOIN,
-                        N_TAF = N_TAF
+                        N_KOL = string.IsNullOrWhiteSpace(N_KOL) ? null : N_KOL,
+                        N_MOIN = string.IsNullOrWhiteSpace(N_MOIN) ? null : N_MOIN,
+                        N_TAF = string.IsNullOrWhiteSpace(N_TAF) ? null : N_TAF
                     };
 
                     if (CheckExistData.Count > 0)
