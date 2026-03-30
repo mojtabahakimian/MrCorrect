@@ -254,7 +254,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
         }
 
-        private void Command3_Click(object sender, RoutedEventArgs e)
+        private async void Command3_Click(object sender, RoutedEventArgs e)
         {
             if (YEA.SelectedItem == null)
             {
@@ -286,6 +286,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             // UI Constraint: Prevent double clicks
             Command3.IsEnabled = false;
+            YEA.IsEnabled = false;
+            SetProgressState(0, "شروع عملیات...");
 
             try
             {
@@ -297,16 +299,13 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 string pcName = CL_HESABDARI.CurrentMachineName();
                 string ipAddress = CL_HESABDARI.GETIPADD();
                 string safeDbName = QuoteDbName(selectedDb);
+                var dbWorker = new CL_CCNNMANAGER();
 
-                // Performance & Safety Optimization: 
-                // Using SET-BASED T-SQL with CROSS APPLY and TRANSACTIONS instead of C# foreach loops
-                string sql = $@"
-                SET NOCOUNT ON;
-
-                BEGIN TRY
-                    BEGIN TRAN;
-
-                    -- 1. Backup STUF_DEF
+                // گام 1 - پشتیبان گیری
+                SetProgressState(10, "در حال پشتیبان‌گیری از اطلاعات...");
+                await Task.Run(() =>
+                {
+                    dbWorker.DoExecuteSQL(@"
                     INSERT INTO dbo.TR_STUF_DEF
                     (
                         CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F,
@@ -317,7 +316,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         DEPART, IDD, CMBAA, VAZN, OKF, @UpTime, @UpDate, @UpUserName, @PcName, @IpAdd
                     FROM dbo.STUF_DEF;
 
-                    -- 2. Backup STUF_FSK
                     INSERT INTO dbo.TR_STUF_FSK
                     (
                         CODE, ANBAR, MOGODI_A, FI_A, MABL_A, MANDAH_A, VAZ, IDD, POSITION,
@@ -326,24 +324,37 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     SELECT
                         CODE, ANBAR, MOGODI_A, FI_A, MABL_A, MANDAH_A, VAZ, IDD, POSITION,
                         B_SEF, N_SEF, MIN_M, MAX_M, @UpTime, @UpDate
-                    FROM dbo.STUF_FSK;
+                    FROM dbo.STUF_FSK;", new
+                    {
+                        UpTime = upTime,
+                        UpDate = upDate,
+                        UpUserName = upUserName,
+                        PcName = pcName,
+                        IpAdd = ipAddress
+                    });
+                });
 
-                    -- 3. Drop existing temp table
-                    IF OBJECT_ID(N'dbo.STUFFSK', N'U') IS NOT NULL
-                        DROP TABLE dbo.STUFFSK;
+                // گام 2 - محاسبه موجودی دیتابیس سال قبل و انتقال در یک تراکنش
+                SetProgressState(45, "در حال محاسبه و انتقال موجودی...");
+                await Task.Run(() =>
+                {
+                    dbWorker.DoExecuteSQL($@"
+                    BEGIN TRY
+                        BEGIN TRAN;
 
-                    -- 4. Calculate inventory from Previous Year DB (Replaces VBA While Loop)
-                    SELECT
-                        AK.CODE,
-                        AK.MAND,
-                        AK.FII,
-                        AK.MABLK,
-                        AK.ANBAR
-                    INTO dbo.STUFFSK
-                    FROM {safeDbName}.dbo.TCOD_ANBAR AS A
-                    CROSS APPLY {safeDbName}.dbo.AKMOGUDI_KOL_ANBAR(99999999, A.CODE) AS AK;
+                        IF OBJECT_ID(N'dbo.STUFFSK', N'U') IS NOT NULL
+                            DROP TABLE dbo.STUFFSK;
 
-                    -- 5. Update Current Year Inventory (Replaces second VBA While Loop)
+                        SELECT
+                            AK.CODE,
+                            AK.MAND,
+                            AK.FII,
+                            AK.MABLK,
+                            AK.ANBAR
+                        INTO dbo.STUFFSK
+                        FROM {safeDbName}.dbo.TCOD_ANBAR AS A
+                        CROSS APPLY {safeDbName}.dbo.AKMOGUDI_KOL_ANBAR(99999999, A.CODE) AS AK;
+
                     UPDATE F
                     SET
                         F.MOGODI_A = S.MAND,
@@ -354,36 +365,37 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         ON S.CODE = F.CODE
                        AND S.ANBAR = F.ANBAR;
 
-                    COMMIT;
-                END TRY
-                BEGIN CATCH
-                    IF @@TRANCOUNT > 0
-                        ROLLBACK;
-                    THROW;
-                END CATCH;";
-
-                // Execute the entire block synchronously as mandated
-                dbms.DoExecuteSQL(sql, new
-                {
-                    UpTime = upTime,
-                    UpDate = upDate,
-                    UpUserName = upUserName,
-                    PcName = pcName,
-                    IpAdd = ipAddress
+                        COMMIT;
+                    END TRY
+                    BEGIN CATCH
+                        IF @@TRANCOUNT > 0
+                            ROLLBACK;
+                        THROW;
+                    END CATCH;");
                 });
+
+                SetProgressState(100, "عملیات با موفقیت انجام شد.");
 
                 new Msgwin(false, "موجودی‌ها با موفقیت به‌روزرسانی شد.").ShowDialog();
                 this.Close();
             }
             catch (Exception ex)
             {
+                SetProgressState(0, "عملیات با خطا متوقف شد.");
                 new Msgwin(false, "خطا در انتقال موجودی:\n" + ex.Message).ShowDialog();
             }
             finally
             {
                 // Restore UI state in case of failure
                 Command3.IsEnabled = true;
+                YEA.IsEnabled = true;
             }
+        }
+
+        private void SetProgressState(double percent, string message)
+        {
+            OperationProgressBar.Value = percent;
+            TxtProgressStatus.Text = message;
         }
 
         private void Command4_Click(object sender, RoutedEventArgs e)

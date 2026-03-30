@@ -8,7 +8,7 @@
         xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        Height="250" Width="600"
+        Height="310" Width="600"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         FontFamily="{StaticResource IRANYEKAN}"
         Background="{x:Null}"
@@ -80,7 +80,19 @@
                 <TextBlock Text="انتخاب سال مالی، موجودی انبارها را از دیتابیس انتخاب شده به سال جاری منتقل می‌کند."
                                TextWrapping="Wrap"
                                Foreground="#444"
-                               Margin="0,4,0,32"/>
+                               Margin="0,4,0,14"/>
+
+                <StackPanel Margin="0,0,0,18">
+                    <TextBlock x:Name="TxtProgressStatus"
+                               Text="آماده شروع عملیات"
+                               Foreground="#555"
+                               Margin="0,0,0,8"/>
+                    <ProgressBar x:Name="OperationProgressBar"
+                                 Height="16"
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Value="0"/>
+                </StackPanel>
 
                 <DockPanel LastChildFill="True">
                     <Button  x:Name="Command3" Click="Command3_Click" Content="شروع دریافت موجودی انتهای از سال قبل" BorderBrush="{x:Null}" FontSize="11" Foreground="#DDFFFFFF" Height="34" />
