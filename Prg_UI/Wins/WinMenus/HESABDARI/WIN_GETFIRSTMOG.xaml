@@ -8,7 +8,7 @@
         xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        Height="250" Width="600"
+        Height="310" Width="600"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         FontFamily="{StaticResource IRANYEKAN}"
         Background="{x:Null}"
@@ -86,6 +86,44 @@
                     <Button  x:Name="Command3" Click="Command3_Click" Content="شروع دریافت موجودی انتهای از سال قبل" BorderBrush="{x:Null}" FontSize="11" Foreground="#DDFFFFFF" Height="34" />
                 </DockPanel>
 
+                <Border x:Name="ProgressPanel" Visibility="Visible"
+        Background="{DynamicResource MaterialDesignPaper}"
+        BorderThickness="1" CornerRadius="8" Padding="16,12">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <DockPanel Grid.Row="0" Margin="0,0,0,10" LastChildFill="False">
+
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                <materialDesign:PackIcon Kind="CloudUploadOutline" Width="18" Height="18" 
+                                         Foreground="{Binding ElementName=GENERAL_RANG, Path=Background}" 
+                                         Margin="0,0,0,0"/>
+                                <TextBlock x:Name="ProgText" Text="در حال آماده‌سازی..."
+                           Foreground="{DynamicResource MaterialDesignBody}"
+                           FontSize="13" FontWeight="Medium" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center" FlowDirection="LeftToRight">
+                                <TextBlock Text="{Binding ElementName=ProgBar, Path=Value, StringFormat={}{0:0}}"
+                           Foreground="{Binding ElementName=GENERAL_RANG, Path=Background}"
+                           FontSize="14" FontWeight="Bold"/>
+                                <TextBlock Text="%" 
+                           Foreground="{Binding ElementName=GENERAL_RANG, Path=Background}"
+                           FontSize="12" Margin="2,2,0,0" Opacity="0.8"/>
+                            </StackPanel>
+
+                        </DockPanel>
+
+                        <ProgressBar x:Name="ProgBar" Grid.Row="1" Minimum="0" Maximum="100" Height="8"
+                     Foreground="{Binding ElementName=GENERAL_RANG, Path=Background}"
+                     Background="{DynamicResource MaterialDesignDivider}"
+                     Style="{StaticResource MaterialDesignLinearProgressBar}"
+                     materialDesign:TransitionAssist.DisableTransitions="False" />
+                    </Grid>
+                </Border>
 
             </StackPanel>
         </Grid>

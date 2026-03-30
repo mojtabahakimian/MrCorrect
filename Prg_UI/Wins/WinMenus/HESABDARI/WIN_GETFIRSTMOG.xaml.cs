@@ -254,7 +254,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
         }
 
-        private void Command3_Click(object sender, RoutedEventArgs e)
+        private async void Command3_Click(object sender, RoutedEventArgs e)
         {
             if (YEA.SelectedItem == null)
             {
@@ -284,29 +284,39 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             msgwin.ShowDialog();
             if (msgwin.DialogResult != true) { return; }
 
-            // UI Constraint: Prevent double clicks
+            // UI Constraint: Prevent double clicks and show progress
             Command3.IsEnabled = false;
+            ProgressPanel.Visibility = Visibility.Visible;
+            ProgBar.Value = 0;
+            ProgText.Text = "در حال آماده‌سازی...";
 
             try
             {
                 // Gather parameters
                 DateTime dt = DateTime.Now;
-                double upTime = dt.ToOADate();
+                double upTime = Tarikh.GET_OADATE_DAO(); // Using GET_OADATE_DAO as per memory
                 long upDate = CL_HESABDARI.FARSIDATE();
                 string upUserName = "System" + (CL_HESABDARI.UCurrentUser()?.ToString() ?? string.Empty);
                 string pcName = CL_HESABDARI.CurrentMachineName();
                 string ipAddress = CL_HESABDARI.GETIPADD();
                 string safeDbName = QuoteDbName(selectedDb);
 
-                // Performance & Safety Optimization: 
-                // Using SET-BASED T-SQL with CROSS APPLY and TRANSACTIONS instead of C# foreach loops
-                string sql = $@"
-                SET NOCOUNT ON;
+                await Task.Run(() =>
+                {
+                    // Action helper to update UI
+                    void UpdateProgress(int percentage, string messageText)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            ProgBar.Value = percentage;
+                            ProgText.Text = messageText;
+                        });
+                    }
 
-                BEGIN TRY
-                    BEGIN TRAN;
+                    UpdateProgress(5, "در حال پشتیبان‌گیری از کالاها...");
 
-                    -- 1. Backup STUF_DEF
+                    string sqlBackupDef = $@"
+                    SET NOCOUNT ON;
                     INSERT INTO dbo.TR_STUF_DEF
                     (
                         CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F,
@@ -315,9 +325,21 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     SELECT
                         CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F,
                         DEPART, IDD, CMBAA, VAZN, OKF, @UpTime, @UpDate, @UpUserName, @PcName, @IpAdd
-                    FROM dbo.STUF_DEF;
+                    FROM dbo.STUF_DEF;";
 
-                    -- 2. Backup STUF_FSK
+                    dbms.DoExecuteSQL(sqlBackupDef, new
+                    {
+                        UpTime = upTime,
+                        UpDate = upDate,
+                        UpUserName = upUserName,
+                        PcName = pcName,
+                        IpAdd = ipAddress
+                    });
+
+                    UpdateProgress(15, "در حال پشتیبان‌گیری از موجودی‌ها...");
+
+                    string sqlBackupFsk = $@"
+                    SET NOCOUNT ON;
                     INSERT INTO dbo.TR_STUF_FSK
                     (
                         CODE, ANBAR, MOGODI_A, FI_A, MABL_A, MANDAH_A, VAZ, IDD, POSITION,
@@ -326,24 +348,45 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     SELECT
                         CODE, ANBAR, MOGODI_A, FI_A, MABL_A, MANDAH_A, VAZ, IDD, POSITION,
                         B_SEF, N_SEF, MIN_M, MAX_M, @UpTime, @UpDate
-                    FROM dbo.STUF_FSK;
+                    FROM dbo.STUF_FSK;";
 
-                    -- 3. Drop existing temp table
-                    IF OBJECT_ID(N'dbo.STUFFSK', N'U') IS NOT NULL
-                        DROP TABLE dbo.STUFFSK;
+                    dbms.DoExecuteSQL(sqlBackupFsk, new { UpTime = upTime, UpDate = upDate });
 
-                    -- 4. Calculate inventory from Previous Year DB (Replaces VBA While Loop)
-                    SELECT
-                        AK.CODE,
-                        AK.MAND,
-                        AK.FII,
-                        AK.MABLK,
-                        AK.ANBAR
-                    INTO dbo.STUFFSK
-                    FROM {safeDbName}.dbo.TCOD_ANBAR AS A
-                    CROSS APPLY {safeDbName}.dbo.AKMOGUDI_KOL_ANBAR(99999999, A.CODE) AS AK;
+                    UpdateProgress(25, "در حال دریافت لیست انبارها...");
 
-                    -- 5. Update Current Year Inventory (Replaces second VBA While Loop)
+                    // Create/Recreate empty STUFFSK temp table
+                    string sqlCreateTemp = @"
+                    IF OBJECT_ID(N'dbo.STUFFSK', N'U') IS NOT NULL DROP TABLE dbo.STUFFSK;
+                    CREATE TABLE dbo.STUFFSK (CODE NVARCHAR(50), MAND FLOAT, FII FLOAT, MABLK FLOAT, ANBAR NVARCHAR(50));";
+                    dbms.DoExecuteSQL(sqlCreateTemp);
+
+                    // Fetch list of warehouses
+                    var anbars = dbms.DoGetDataSQL<string>($"SELECT CODE FROM {safeDbName}.dbo.TCOD_ANBAR").ToList();
+
+                    if (anbars.Count > 0)
+                    {
+                        for (int i = 0; i < anbars.Count; i++)
+                        {
+                            string anbarCode = anbars[i] ?? string.Empty;
+                            if (string.IsNullOrWhiteSpace(anbarCode)) continue;
+
+                            int progressValue = 25 + (int)(((float)(i + 1) / anbars.Count) * 55); // 25% to 80%
+                            UpdateProgress(progressValue, $"در حال محاسبه موجودی انبار {anbarCode} ({i + 1} از {anbars.Count})...");
+
+                            // Execute AKMOGUDI_KOL_ANBAR for this specific warehouse
+                            string sqlCalc = $@"
+                            INSERT INTO dbo.STUFFSK (CODE, MAND, FII, MABLK, ANBAR)
+                            SELECT AK.CODE, AK.MAND, AK.FII, AK.MABLK, AK.ANBAR
+                            FROM {safeDbName}.dbo.AKMOGUDI_KOL_ANBAR(99999999, @AnbarCode) AS AK;";
+
+                            dbms.DoExecuteSQL(sqlCalc, new { AnbarCode = anbarCode });
+                        }
+                    }
+
+                    UpdateProgress(85, "در حال بروزرسانی اطلاعات سال جاری...");
+
+                    string sqlUpdate = @"
+                    SET NOCOUNT ON;
                     UPDATE F
                     SET
                         F.MOGODI_A = S.MAND,
@@ -352,24 +395,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     FROM dbo.STUF_FSK AS F
                     INNER JOIN dbo.STUFFSK AS S
                         ON S.CODE = F.CODE
-                       AND S.ANBAR = F.ANBAR;
+                       AND S.ANBAR = F.ANBAR;";
 
-                    COMMIT;
-                END TRY
-                BEGIN CATCH
-                    IF @@TRANCOUNT > 0
-                        ROLLBACK;
-                    THROW;
-                END CATCH;";
+                    dbms.DoExecuteSQL(sqlUpdate);
 
-                // Execute the entire block synchronously as mandated
-                dbms.DoExecuteSQL(sql, new
-                {
-                    UpTime = upTime,
-                    UpDate = upDate,
-                    UpUserName = upUserName,
-                    PcName = pcName,
-                    IpAdd = ipAddress
+                    UpdateProgress(100, "عملیات با موفقیت پایان یافت");
                 });
 
                 new Msgwin(false, "موجودی‌ها با موفقیت به‌روزرسانی شد.").ShowDialog();
@@ -381,8 +411,9 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
             finally
             {
-                // Restore UI state in case of failure
+                // Restore UI state
                 Command3.IsEnabled = true;
+                ProgressPanel.Visibility = Visibility.Collapsed;
             }
         }
 
