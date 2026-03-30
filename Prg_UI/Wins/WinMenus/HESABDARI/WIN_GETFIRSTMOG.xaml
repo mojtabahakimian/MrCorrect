@@ -86,6 +86,16 @@
                     <Button  x:Name="Command3" Click="Command3_Click" Content="شروع دریافت موجودی انتهای از سال قبل" BorderBrush="{x:Null}" FontSize="11" Foreground="#DDFFFFFF" Height="34" />
                 </DockPanel>
 
+                <TextBlock x:Name="ProgressStatusText"
+                           Text="آماده شروع عملیات"
+                           Margin="0,12,0,6"
+                           Foreground="#555"/>
+                <ProgressBar x:Name="InventoryProgressBar"
+                             Height="16"
+                             Minimum="0"
+                             Maximum="100"
+                             Value="0"
+                             Visibility="Collapsed"/>
 
             </StackPanel>
         </Grid>
