@@ -254,7 +254,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
         }
 
-        private void Command3_Click(object sender, RoutedEventArgs e)
+        private async void Command3_Click(object sender, RoutedEventArgs e)
         {
             if (YEA.SelectedItem == null)
             {
@@ -286,6 +286,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             // UI Constraint: Prevent double clicks
             Command3.IsEnabled = false;
+            SetProgress(5, "شروع عملیات...", false);
 
             try
             {
@@ -298,85 +299,101 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 string ipAddress = CL_HESABDARI.GETIPADD();
                 string safeDbName = QuoteDbName(selectedDb);
 
-                // Performance & Safety Optimization: 
-                // Using SET-BASED T-SQL with CROSS APPLY and TRANSACTIONS instead of C# foreach loops
-                string sql = $@"
-                SET NOCOUNT ON;
-
-                BEGIN TRY
-                    BEGIN TRAN;
-
-                    -- 1. Backup STUF_DEF
-                    INSERT INTO dbo.TR_STUF_DEF
-                    (
-                        CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F,
-                        DEPART, IDD, CMBAA, VAZN, OKF, UP_TIME, UP_DATE, UP_USER_NAME, PC_NAME, IPADD
-                    )
-                    SELECT
-                        CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F,
-                        DEPART, IDD, CMBAA, VAZN, OKF, @UpTime, @UpDate, @UpUserName, @PcName, @IpAdd
-                    FROM dbo.STUF_DEF;
-
-                    -- 2. Backup STUF_FSK
-                    INSERT INTO dbo.TR_STUF_FSK
-                    (
-                        CODE, ANBAR, MOGODI_A, FI_A, MABL_A, MANDAH_A, VAZ, IDD, POSITION,
-                        B_SEF, N_SEF, MIN_M, MAX_M, UP_TIME, UP_DATE
-                    )
-                    SELECT
-                        CODE, ANBAR, MOGODI_A, FI_A, MABL_A, MANDAH_A, VAZ, IDD, POSITION,
-                        B_SEF, N_SEF, MIN_M, MAX_M, @UpTime, @UpDate
-                    FROM dbo.STUF_FSK;
-
-                    -- 3. Drop existing temp table
-                    IF OBJECT_ID(N'dbo.STUFFSK', N'U') IS NOT NULL
-                        DROP TABLE dbo.STUFFSK;
-
-                    -- 4. Calculate inventory from Previous Year DB (Replaces VBA While Loop)
-                    SELECT
-                        AK.CODE,
-                        AK.MAND,
-                        AK.FII,
-                        AK.MABLK,
-                        AK.ANBAR
-                    INTO dbo.STUFFSK
-                    FROM {safeDbName}.dbo.TCOD_ANBAR AS A
-                    CROSS APPLY {safeDbName}.dbo.AKMOGUDI_KOL_ANBAR(99999999, A.CODE) AS AK;
-
-                    -- 5. Update Current Year Inventory (Replaces second VBA While Loop)
-                    UPDATE F
-                    SET
-                        F.MOGODI_A = S.MAND,
-                        F.FI_A = S.FII,
-                        F.MABL_A = S.MABLK
-                    FROM dbo.STUF_FSK AS F
-                    INNER JOIN dbo.STUFFSK AS S
-                        ON S.CODE = F.CODE
-                       AND S.ANBAR = F.ANBAR;
-
-                    COMMIT;
-                END TRY
-                BEGIN CATCH
-                    IF @@TRANCOUNT > 0
-                        ROLLBACK;
-                    THROW;
-                END CATCH;";
-
-                // Execute the entire block synchronously as mandated
-                dbms.DoExecuteSQL(sql, new
+                // Performance optimization:
+                // 1) Run each major phase separately to report progress in UI.
+                // 2) Replace costly row-by-row/cross-apply inventory calculation with set-based aggregation from previous year STUF_FSK.
+                var steps = new[]
                 {
-                    UpTime = upTime,
-                    UpDate = upDate,
-                    UpUserName = upUserName,
-                    PcName = pcName,
-                    IpAdd = ipAddress
-                });
+                    new
+                    {
+                        Percent = 20,
+                        Message = "مرحله 1 از 4: تهیه نسخه پشتیبان از STUF_DEF...",
+                        Sql = @"INSERT INTO dbo.TR_STUF_DEF
+                            (
+                                CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F,
+                                DEPART, IDD, CMBAA, VAZN, OKF, UP_TIME, UP_DATE, UP_USER_NAME, PC_NAME, IPADD
+                            )
+                            SELECT
+                                CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F,
+                                DEPART, IDD, CMBAA, VAZN, OKF, @UpTime, @UpDate, @UpUserName, @PcName, @IpAdd
+                            FROM dbo.STUF_DEF;"
+                    },
+                    new
+                    {
+                        Percent = 40,
+                        Message = "مرحله 2 از 4: تهیه نسخه پشتیبان از STUF_FSK...",
+                        Sql = @"INSERT INTO dbo.TR_STUF_FSK
+                            (
+                                CODE, ANBAR, MOGODI_A, FI_A, MABL_A, MANDAH_A, VAZ, IDD, POSITION,
+                                B_SEF, N_SEF, MIN_M, MAX_M, UP_TIME, UP_DATE
+                            )
+                            SELECT
+                                CODE, ANBAR, MOGODI_A, FI_A, MABL_A, MANDAH_A, VAZ, IDD, POSITION,
+                                B_SEF, N_SEF, MIN_M, MAX_M, @UpTime, @UpDate
+                            FROM dbo.STUF_FSK;"
+                    },
+                    new
+                    {
+                        Percent = 70,
+                        Message = "مرحله 3 از 4: محاسبه موجودی سال قبل (بهینه‌شده)...",
+                        Sql = $@"IF OBJECT_ID(N'dbo.STUFFSK', N'U') IS NOT NULL
+                                DROP TABLE dbo.STUFFSK;
 
+                            SELECT
+                                P.CODE,
+                                P.ANBAR,
+                                SUM(ISNULL(P.MOGODI_A, 0)) AS MAND,
+                                CASE
+                                    WHEN SUM(ISNULL(P.MOGODI_A, 0)) = 0 THEN MAX(ISNULL(P.FI_A, 0))
+                                    ELSE SUM(ISNULL(P.MABL_A, 0)) / NULLIF(SUM(ISNULL(P.MOGODI_A, 0)), 0)
+                                END AS FII,
+                                SUM(ISNULL(P.MABL_A, 0)) AS MABLK
+                            INTO dbo.STUFFSK
+                            FROM {safeDbName}.dbo.STUF_FSK AS P WITH (NOLOCK)
+                            GROUP BY P.CODE, P.ANBAR;"
+                    },
+                    new
+                    {
+                        Percent = 95,
+                        Message = "مرحله 4 از 4: به‌روزرسانی موجودی سال جاری...",
+                        Sql = @"UPDATE F
+                            SET
+                                F.MOGODI_A = S.MAND,
+                                F.FI_A = S.FII,
+                                F.MABL_A = S.MABLK
+                            FROM dbo.STUF_FSK AS F
+                            INNER JOIN dbo.STUFFSK AS S
+                                ON S.CODE = F.CODE
+                               AND S.ANBAR = F.ANBAR;"
+                    }
+                };
+
+                foreach (var step in steps)
+                {
+                    SetProgress(step.Percent, step.Message, true);
+
+                    await Task.Run(() =>
+                    {
+                        var sql = "SET XACT_ABORT ON; BEGIN TRAN; " + step.Sql + " COMMIT;";
+
+                        dbms.DoExecuteSQL(sql, new
+                        {
+                            UpTime = upTime,
+                            UpDate = upDate,
+                            UpUserName = upUserName,
+                            PcName = pcName,
+                            IpAdd = ipAddress
+                        });
+                    });
+                }
+
+                SetProgress(100, "عملیات با موفقیت انجام شد.", false);
                 new Msgwin(false, "موجودی‌ها با موفقیت به‌روزرسانی شد.").ShowDialog();
                 this.Close();
             }
             catch (Exception ex)
             {
+                SetProgress(0, "خطا در اجرای عملیات", false);
                 new Msgwin(false, "خطا در انتقال موجودی:\n" + ex.Message).ShowDialog();
             }
             finally
@@ -384,6 +401,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 // Restore UI state in case of failure
                 Command3.IsEnabled = true;
             }
+        }
+
+
+        private void SetProgress(double value, string message, bool isBusy)
+        {
+            InventoryProgressBar.Value = value;
+            InventoryProgressBar.IsIndeterminate = isBusy && value <= 0;
+            ProgressText.Text = message;
         }
 
         private void Command4_Click(object sender, RoutedEventArgs e)

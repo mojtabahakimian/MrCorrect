@@ -8,7 +8,7 @@
         xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        Height="250" Width="600"
+        Height="300" Width="600"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         FontFamily="{StaticResource IRANYEKAN}"
         Background="{x:Null}"
@@ -86,6 +86,19 @@
                     <Button  x:Name="Command3" Click="Command3_Click" Content="شروع دریافت موجودی انتهای از سال قبل" BorderBrush="{x:Null}" FontSize="11" Foreground="#DDFFFFFF" Height="34" />
                 </DockPanel>
 
+                <StackPanel Margin="0,14,0,0">
+                    <ProgressBar x:Name="InventoryProgressBar"
+                                 Height="14"
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Value="0"
+                                 IsIndeterminate="False"/>
+                    <TextBlock x:Name="ProgressText"
+                               Margin="0,8,0,0"
+                               Foreground="#444"
+                               Text="آماده شروع عملیات"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
 
             </StackPanel>
         </Grid>
