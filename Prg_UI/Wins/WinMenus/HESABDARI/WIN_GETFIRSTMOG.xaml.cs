@@ -301,7 +301,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                 // Performance optimization:
                 // 1) Run each major phase separately to report progress in UI.
-                // 2) Keep legacy AKMOGUDI_KOL_ANBAR calculation but reduce function calls and speed up update joins with indexed temp table.
+                // 2) Keep legacy AKMOGUDI_KOL_ANBAR calculation but run AK only for distinct current-year warehouses and update only changed rows.
                 var steps = new[]
                 {
                     new
@@ -339,6 +339,12 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         Sql = $@"IF OBJECT_ID(N'dbo.STUFFSK', N'U') IS NOT NULL
                                 DROP TABLE dbo.STUFFSK;
 
+                            ;WITH CurrentAnbar AS
+                            (
+                                SELECT DISTINCT F.ANBAR
+                                FROM dbo.STUF_FSK AS F WITH (NOLOCK)
+                                WHERE F.ANBAR IS NOT NULL
+                            )
                             SELECT
                                 AK.CODE,
                                 AK.MAND,
@@ -346,13 +352,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                                 AK.MABLK,
                                 AK.ANBAR
                             INTO dbo.STUFFSK
-                            FROM {safeDbName}.dbo.TCOD_ANBAR AS A WITH (NOLOCK)
-                            CROSS APPLY {safeDbName}.dbo.AKMOGUDI_KOL_ANBAR(99999999, A.CODE) AS AK
+                            FROM CurrentAnbar AS A
+                            CROSS APPLY {safeDbName}.dbo.AKMOGUDI_KOL_ANBAR(99999999, A.ANBAR) AS AK
                             WHERE EXISTS
                             (
                                 SELECT 1
                                 FROM dbo.STUF_FSK AS F
-                                WHERE F.ANBAR = A.CODE
+                                WHERE F.CODE = AK.CODE
+                                  AND F.ANBAR = AK.ANBAR
                             );
 
                             CREATE CLUSTERED INDEX IX_STUFFSK_CODE_ANBAR
@@ -370,7 +377,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                             FROM dbo.STUF_FSK AS F
                             INNER JOIN dbo.STUFFSK AS S
                                 ON S.CODE = F.CODE
-                               AND S.ANBAR = F.ANBAR;"
+                               AND S.ANBAR = F.ANBAR
+                            WHERE
+                                ISNULL(F.MOGODI_A, 0) <> ISNULL(S.MAND, 0)
+                                OR ISNULL(F.FI_A, 0) <> ISNULL(S.FII, 0)
+                                OR ISNULL(F.MABL_A, 0) <> ISNULL(S.MABLK, 0);"
                     }
                 };
 
