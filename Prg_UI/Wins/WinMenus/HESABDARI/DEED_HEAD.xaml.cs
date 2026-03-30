@@ -1588,8 +1588,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 {
                     if (CURRENT_ITMES_ROW.BES > 0 && CURRENT_ITMES_ROW.BED > 0)
                     {
-                        Child14_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                        CURRENT_ITMES_ROW.BED = WAS_ROW_ITEM?.BED;
+                        //Child14_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                        //CURRENT_ITMES_ROW.BED = WAS_ROW_ITEM?.BED;
                         universControl.PopNotifyShow("بدهكار و بستانكار سند صحيح نمي باشد", Pop1, Pop1Text1, Pop_Border1);
                         return;
                     }
@@ -1633,7 +1633,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     {
                         //CURRENT_ITMES_ROW.BES = WAS_ROW_ITEM?.BES;
                         //Child14_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                        RestoreFocusCell(e);
+                        //RestoreFocusCell(e);
                         universControl.PopNotifyShow("بدهكار و بستانكار سند صحيح نمي باشد", Pop1, Pop1Text1, Pop_Border1);
                         return;
                     }
@@ -1729,8 +1729,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     if (CURRENT_ITMES_ROW.BES > 0 && CURRENT_ITMES_ROW.BED > 0 || CURRENT_ITMES_ROW.BES <= 0 && CURRENT_ITMES_ROW.BED <= 0)
                     {
                         Child14_CANCEL_EDIT();
-                        Msgwin msgwin = new Msgwin(false, "بدهكار و بستانكار سند صحيح نمي باشد");
-                        msgwin.ShowDialog();
+                        universControl.PopNotifyShow("بدهكار و بستانكار سند صحيح نمي باشد!", Pop1, Pop1Text1, Pop_Border1);
                         return;
                     }
                 }
