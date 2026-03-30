@@ -1629,10 +1629,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                 if (CURRENT_ITMES_ROW.BES is not null && CURRENT_ITMES_ROW.BED is not null)
                 {
-                    if (CURRENT_ITMES_ROW.BES > 0 && CURRENT_ITMES_ROW.BED > 0 || CURRENT_ITMES_ROW.BES == 0 && CURRENT_ITMES_ROW.BED == 0)
+                    if (CURRENT_ITMES_ROW.BES > 0 && CURRENT_ITMES_ROW.BED > 0)
                     {
-                        //CURRENT_ITMES_ROW.BES = WAS_ROW_ITEM?.BES;
-                        //Child14_CANCEL_EDIT(DataGridEditingUnit.Cell);
                         RestoreFocusCell(e);
                         universControl.PopNotifyShow("بدهكار و بستانكار سند صحيح نمي باشد", Pop1, Pop1Text1, Pop_Border1);
                         return;
@@ -1713,9 +1711,18 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
             if (ROW.BED == 0 && ROW.BES == 0)
             {
+                e.Cancel = true;
                 universControl.PopNotifyShow("بدهکار یا بستانکار نمیتواند خالی باشد !.", Pop1, Pop1Text1, Pop_Border1);
-
-                Child14_CANCEL_EDIT();
+                var rowItem = e.Row.Item;
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    var targetCol = Child14.Columns.FirstOrDefault(c => c.SortMemberPath == "BES");
+                    if (targetCol != null)
+                    {
+                        Child14.CurrentCell = new DataGridCellInfo(rowItem, targetCol);
+                        Child14.BeginEdit();
+                    }
+                }), DispatcherPriority.Background);
                 return;
             }
             #endregion
