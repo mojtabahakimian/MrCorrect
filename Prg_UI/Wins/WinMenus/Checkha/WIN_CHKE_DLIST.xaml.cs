@@ -286,7 +286,7 @@ namespace Wins.WinMenus.Checkha
             #endregion
 
             SFDATAGRID_DATA?.Clear();
-            var RST = dbms.DoGetDataSQL<CHKE_DLIST>($"SELECT N_SERI, BANK, DATE_S, DATE, SHOBEH, MABL, NAME_TAH, N_HESAB, N_S, N_KOL, N_MOIN, N_KOL2, N_MOIN2, N_KOL3, N_MOIN3, NUMBER, TAG, ANBAR, RADIF, CUST_NO, VAZ, NAMES, N_TAF, N_TAF2, N_TAF3, NAME, SANDUGH, SHOB_COD, KIND, LISTNO, HES1, HES2, HES3, modat, ESTELAM, DS, MS, YS, DD, MD, YD,SAYADI FROM dbo.CHKE_DLIST ORDER BY DATE_S").ToList();
+            var RST = dbms.DoGetDataSQL<CHKE_DLIST>($"SELECT N_SERI, BANK, DATE_S, DATE, SHOBEH, MABL, NAME_TAH, N_HESAB, N_S, N_KOL, N_MOIN, N_KOL2, N_MOIN2, N_KOL3, N_MOIN3, NUMBER, TAG, ANBAR, RADIF, CUST_NO, VAZ, NAMES, N_TAF, N_TAF2, N_TAF3, NAME, SANDUGH, SHOB_COD, KIND, LISTNO, HES1, HES2, HES3, modat, ESTELAM, DS, MS, YS, DD, MD, YD,SAYADI FROM dbo.CHKE_DLIST").ToList(); //--ORDER BY DATE_S این تیکه باعث کندی شدید میشه !
             foreach (var item in RST)
             {
                 SFDATAGRID_DATA.Add(item);

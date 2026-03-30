@@ -1685,10 +1685,10 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
 
         private void OpenWinBaseRow()
         {
-            if (!CanUisBeActive) //Wait till Refreshing be done
-            {
-                return;
-            }
+            //if (!CanUisBeActive) //Wait till Refreshing be done
+            //{
+            //    return;
+            //}
 
             var SelectedRow = tASKSDataGrid.SelectedItem as TASKS;
 

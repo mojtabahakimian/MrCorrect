@@ -1,5 +1,6 @@
 ﻿using Functions;
 using MaterialDesignThemes.Wpf;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.MODELS;
@@ -802,313 +803,47 @@ namespace Wins.WinMenus.Checkha
                 return;
             }
 
-            List<NAZDBANK_D_MODEL> SelectedRows = SFDATAGRID_SUB.SelectedItems.OfType<NAZDBANK_D_MODEL>().ToList();
-
-            ITEM_SELECTED_VOSUL = new COME_FROM_VOSULDIALOG2();
-            VAZ_USER_CHOOSED = null;
-
-            List<MsgModel> MyMessages = new List<MsgModel>();
-
-            string HADA;
-            var mab = default(double);
-            double max_ns, MABL_CHK;
-            string SHART;
-            double? CKOLV = default, CMOINV = default, CTAFV = default, CTAF2V = default, CTAF3V = default, CTAF4V = default, CKOL = default, CMOIN = default, CTAF = default, CTAF2 = default, CTAF3 = default, CTAF4 = default, CKOLD = default, CMOIND = default, CTAFD = default, CTAF2D = default, CTAF3D = default, CTAF4D = default;
-            var NNS = default(long);
-            var NB = default(long);
-            if (SelectedRows.FirstOrDefault()?.KIND == 1 || SelectedRows.FirstOrDefault()?.KIND is null)
+            try
             {
-                HADA = Baseknow.ADA;
-            }
-            else
-            {
-                HADA = Baseknow.ADV;
-            }
+                List<NAZDBANK_D_MODEL> SelectedRows = SFDATAGRID_SUB.SelectedItems.OfType<NAZDBANK_D_MODEL>().ToList();
 
-            //SFDATAGRID_DATA
+                ITEM_SELECTED_VOSUL = new COME_FROM_VOSULDIALOG2();
+                VAZ_USER_CHOOSED = null;
 
-            //اعلام وصول چک
-            if (BTNCALLED == BTN_SINGLE_PASS_CHECK) // if (KeyAscii == 96 || KeyAscii == 129 || KeyAscii == 1662)
-            {
-                //DoCmd.OpenForm("VOSULDIALOG", default, default, default, default, acDialog, Interaction.IIf(IsNull(this.N_TAF), "", this.N_KOL + "-" + this.N_MOIN + "-" + this.N_TAF));
-                var _HES_ = SelectedRows.FirstOrDefault().N_KOL + "-" + SelectedRows.FirstOrDefault().N_MOIN + "-" + SelectedRows.FirstOrDefault().N_TAF;
+                List<MsgModel> MyMessages = new List<MsgModel>();
 
-                VOSULDIALOG WIN_VOSUL = new VOSULDIALOG(I_AM_CHEK_VLISTALL, SelectedRows, "CHEK_VLISTALL", _HES_, SelectedRows.FirstOrDefault().N_SERI);
-                WIN_VOSUL.ShowDialog();
-
-                if (ITEM_SELECTED_VOSUL.HHMOIN_VOSUL == null)
+                string HADA;
+                var mab = default(double);
+                double max_ns, MABL_CHK;
+                string SHART;
+                double? CKOLV = default, CMOINV = default, CTAFV = default, CTAF2V = default, CTAF3V = default, CTAF4V = default, CKOL = default, CMOIN = default, CTAF = default, CTAF2 = default, CTAF3 = default, CTAF4 = default, CKOLD = default, CMOIND = default, CTAFD = default, CTAF2D = default, CTAF3D = default, CTAF4D = default;
+                var NNS = default(long);
+                var NB = default(long);
+                if (SelectedRows.FirstOrDefault()?.KIND == 1 || SelectedRows.FirstOrDefault()?.KIND is null)
                 {
-                    return;
-                }
-
-                var rstfirst = dbms.DoGetDataSQL<double?>("SELECT Max(DEED_HED.N_S) AS MaxOfN_S FROM DEED_HED").FirstOrDefault();
-                if (rstfirst == null)
-                {
-                    max_ns = 1d;
+                    HADA = Baseknow.ADA;
                 }
                 else
                 {
-                    max_ns = (double)(rstfirst + 1);
+                    HADA = Baseknow.ADV;
                 }
-                //SHRST.Open("deed_hed", CurrentProject.Connection, adOpenKeyset, adLockOptimistic);
-                var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM dbo.DEED_HED WHERE NO_S = 6 AND DATE_S = " + ITEM_SELECTED_VOSUL.DTS_DATE).FirstOrDefault();
-                if (SHRST == null)
-                {
-                    var _N_S_ = max_ns;
-                    var _DATE_S_ = ITEM_SELECTED_VOSUL.DTS_DATE;
-                    var _SHARH_S_ = "اعلام وصول چكهاي دريافتي";
-                    var _GHATEI_ = 0;
-                    var _NO_S_ = 6;
-                    var _USER_NAME_ = CL_HESABDARI.UCurrentUser();
-                    var _UID_ = Baseknow.USERCOD;
-                    var _QRE_base_ = dbms.DoGetDataSQL<int?>($@"INSERT INTO dbo.DEED_HED(N_S, DATE_S, SHARH_S,GHATEI, NO_S, USER_NAME,UID)
-                                                       OUTPUT INSERTED.base
-                                                       VALUES({_N_S_},
-                                                       {_DATE_S_} ,
-                                                       N'{_SHARH_S_}' ,
-                                                       {_GHATEI_},
-                                                       {_NO_S_} ,
-                                                       N'{_USER_NAME_}' ,
-                                                       {_UID_} )").FirstOrDefault();
-                    NB = (int)_QRE_base_;
 
-                }
-                else
+                //SFDATAGRID_DATA
+
+                //اعلام وصول چک
+                if (BTNCALLED == BTN_SINGLE_PASS_CHECK) // if (KeyAscii == 96 || KeyAscii == 129 || KeyAscii == 1662)
                 {
-                    max_ns = SHRST.N_S;
-                    NB = SHRST.@base;
-                }
-                NNS = (long)Math.Round(max_ns);
-                //rst.Open("CHKREC_H", CurrentProject.Connection, adOpenKeyset, adLockOptimistic);
-                {
-                    var rst = dbms.DoGetDataSQL<CHKREC_H>("SELECT * FROM CHKREC_H WHERE [DATE] = " + ITEM_SELECTED_VOSUL.DTS_DATE).FirstOrDefault();
-                    if (rst == null)
+                    //DoCmd.OpenForm("VOSULDIALOG", default, default, default, default, acDialog, Interaction.IIf(IsNull(this.N_TAF), "", this.N_KOL + "-" + this.N_MOIN + "-" + this.N_TAF));
+                    var _HES_ = SelectedRows.FirstOrDefault().N_KOL + "-" + SelectedRows.FirstOrDefault().N_MOIN + "-" + SelectedRows.FirstOrDefault().N_TAF;
+
+                    VOSULDIALOG WIN_VOSUL = new VOSULDIALOG(I_AM_CHEK_VLISTALL, SelectedRows, "CHEK_VLISTALL", _HES_, SelectedRows.FirstOrDefault().N_SERI);
+                    WIN_VOSUL.ShowDialog();
+
+                    if (ITEM_SELECTED_VOSUL.HHMOIN_VOSUL == null)
                     {
-                        //rst.AddNew();
-                        var _DATE_ = ITEM_SELECTED_VOSUL.DTS_DATE;
-                        var _MOLAH_ = "وصولي ثبت شده توسط گزارش";
-                        var _N_S_ = max_ns;
-                        //rst.update();
-                        dbms.DoExecuteSQL($@"INSERT INTO dbo.CHKREC_H(DATE, MOLAH, N_S)
-                                                     VALUES({_DATE_}, N'{_MOLAH_}' , {_N_S_} )");
+                        return;
                     }
-                }
-                {
-                    var rst = dbms.DoGetDataSQL<CHRE_LST>("SELECT * FROM CHRE_LST WHERE N_SERI =" + SelectedRows.FirstOrDefault().N_SERI + " AND BANK = " + SelectedRows.FirstOrDefault().BANK + " AND DATE_S = " + SelectedRows.FirstOrDefault().DATE_S).FirstOrDefault();
-                    if (rst == null)
-                    {
-                        //rst.AddNew();
-                        var _N_SERI_ = SelectedRows.FirstOrDefault().N_SERI;
-                        var _BANK_ = SelectedRows.FirstOrDefault().BANK;
-                        var _DATE_S_ = SelectedRows.FirstOrDefault().DATE_S;
-                        var _DATE_ = ITEM_SELECTED_VOSUL.DTS_DATE;
 
-                        dbms.DoExecuteSQL($@"INSERT INTO dbo.CHRE_LST(N_SERI, BANK, DATE_S, DATE)
-                                                     VALUES({_N_SERI_},
-                                                     {_BANK_} ,
-                                                     {_DATE_S_} ,
-                                                     {_DATE_} )");
-                        //rst.update();
-                    }
-                }
-
-                {
-                    string _WHERE_ = " WHERE N_SERI =" + SelectedRows.FirstOrDefault().N_SERI + " AND BANK = " + SelectedRows.FirstOrDefault().BANK + " AND DATE_S = " + SelectedRows.FirstOrDefault().DATE_S;
-                    var rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD " + _WHERE_).FirstOrDefault();
-                    if (rst != null)
-                    {
-                        var _N_KOL3_ = Baseknow.BANKHA;
-                        var _N_MOIN3_ = CL_HESABDARI.GETMOIN(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
-                        var _N_TAF3_ = CL_HESABDARI.GETTAF(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
-                        var _N_KOL_ = Baseknow.BANKHA;
-                        var _N_MOIN_ = CL_HESABDARI.GETMOIN(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
-                        var _N_TAF_ = CL_HESABDARI.GETTAF(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
-                        var _HES1_ = ITEM_SELECTED_VOSUL.HHMOIN_VOSUL;
-                        var _HES3_ = ITEM_SELECTED_VOSUL.HHMOIN_VOSUL;
-                        var _N_S_ = NNS;
-                        //rst.update();
-                        dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD SET 
-                                                     N_KOL3 = {_N_KOL3_} , N_MOIN3 = {_N_MOIN3_} , N_TAF3 = {_N_TAF3_} ,  N_KOL = {_N_KOL_},
-                                                     N_MOIN = {_N_MOIN_} , N_TAF = {_N_TAF_} , HES1 = N'{_HES1_}' , HES3 = N'{_HES3_}' , N_S = {_N_S_} , 
-                                                     VAZ = 3
-                                                     {_WHERE_}");
-                        mab = (double)rst.MABL;
-                    }
-                }
-
-                CL_HESABDARI.GETDLOG(3, SelectedRows.FirstOrDefault().N_SERI.ToString(), (int)SelectedRows.FirstOrDefault().BANK, (long)SelectedRows.FirstOrDefault().DATE_S, (int)SelectedRows.FirstOrDefault().SANDUGH);
-                //rst.Open("PAY_GETD_LOG", CurrentProject.Connection, adOpenKeyset, adLockOptimistic);
-                //rst.AddNew();
-                //rst.Fields("N_SERI") = this.N_SERI;
-                //rst.Fields("BANK") = this.BANK;
-                //rst.Fields("DATE_S") = this.DATE_S;
-                //rst.Fields("DATE_V") = FARSIDATE(DateTime.Now);
-                //rst.Fields("DATETIM") = DateTime.Now;
-                //rst.Fields("VAZ") = 3;
-                //rst.Fields("SANDUGH") = this.SANDUGH;
-                //rst.Fields("USER_NAME") = UCurrentUser();
-                //rst.update();
-
-                dbms.DoExecuteSQL("DELETE FROM DEED_DTL WHERE (((DEED_DTL.N_S)= " + max_ns + " ))");
-
-                if (!string.IsNullOrEmpty(Baseknow.ADA))
-                {
-                    CL_HESABDARI.GETTAF3(Baseknow.ADA, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
-                }
-                if (!string.IsNullOrEmpty(Baseknow.ADV))
-                {
-                    CL_HESABDARI.GETTAF3(Baseknow.ADV, ref CKOLV, ref CMOINV, ref CTAFV, ref CTAF2V, ref CTAF3V, ref CTAF4V);
-                }
-
-                {
-                    var rst = dbms.DoGetDataSQL<VOSUL_MODEL_QRE1>("SELECT dbo.CHKREC_H.*, dbo.CHRE_LST.*, dbo.TCOD_BANKS.NAMES, dbo.PAY_GETD.SHOBEH,dbo.PAY_GETD.N_S, dbo.PAY_GETD.MABL, dbo.PAY_GETD.N_KOL,  dbo.PAY_GETD.N_MOIN, dbo.PAY_GETD.N_TAF, dbo.PAY_GETD.KIND, dbo.PAY_GETD.HES1    FROM         dbo.CHKREC_H INNER JOIN dbo.CHRE_LST ON dbo.CHKREC_H.DATE = dbo.CHRE_LST.DATE INNER JOIN  dbo.PAY_GETD ON dbo.CHRE_LST.N_SERI = dbo.PAY_GETD.N_SERI AND dbo.CHRE_LST.BANK = dbo.PAY_GETD.BANK AND  dbo.CHRE_LST.DATE_S = dbo.PAY_GETD.DATE_S INNER JOIN dbo.TCOD_BANKS ON dbo.PAY_GETD.BANK = dbo.TCOD_BANKS.CODE WHERE     (dbo.CHKREC_H.DATE = " + ITEM_SELECTED_VOSUL.DTS_DATE + ")").ToList();
-                    foreach (var item in rst) //while (!rst.EOF)
-                    {
-                        //SDRST.AddNew(); //INSERT
-                        var _N_S_ = NNS;
-
-                        string? HES_K = null;
-                        string? HES_M = null;
-                        string? HES_T = null;
-                        string? HES_T2 = null;
-                        string? HES_T3 = null;
-                        string? HES_T4 = null;
-                        string? hes = null;
-
-                        if (item.KIND == 1 || item.KIND == null)
-                        {
-                            HES_K = CKOL.ToStringNullSafe();
-                            HES_M = CMOIN.ToStringNullSafe();
-                            HES_T = CTAF.ToStringNullSafe();
-                            HES_T2 = CTAF2.ToStringNullSafe();
-                            HES_T3 = CTAF3.ToStringNullSafe();
-                            HES_T4 = CTAF4.ToStringNullSafe();
-                            hes = Baseknow.ADA;
-                        }
-                        else
-                        {
-                            HES_K = CKOLV.ToStringNullSafe();
-                            HES_M = CMOINV.ToStringNullSafe();
-                            HES_T = CTAFV.ToStringNullSafe();
-                            HES_T2 = CTAF2V.ToStringNullSafe();
-                            HES_T3 = CTAF3V.ToStringNullSafe();
-                            HES_T4 = CTAF4V.ToStringNullSafe();
-                            hes = Baseknow.ADV;
-                        }
-                        var N_SERI = item.N_SERI;
-                        var BANK = item.BANK;
-                        var BES = item.MABL;
-                        var SHARH = Strings.Left(" چك " + item.N_SERI + " بانك " + item.NAMES + " " + item.SHOBEH + " مورخ " + Strings.Format(item.DATE_S, "####/##/##"), 255);
-                        //SDRST.update();
-                        dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, BED, BES, N_SERI, BANK, HES, HES_T2, HES_T3, HES_T4)
-                                                 VALUES({_N_S_},
-                                                 {HES_K},
-                                                 {HES_M} ,
-                                                 {HES_T} ,
-                                                 N'{SHARH}' ,
-                                                 0 ,
-                                                 {BES} ,
-                                                 {N_SERI} ,
-                                                 {BANK} ,
-                                                 N'{hes}' ,
-                                                 {(string.IsNullOrEmpty(HES_T2) ? "NULL" : HES_T2)} ,
-                                                 {(string.IsNullOrEmpty(HES_T3) ? "NULL" : HES_T3)} ,
-                                                 {(string.IsNullOrEmpty(HES_T4) ? "NULL" : HES_T4)} )");
-
-                        CL_HESABDARI.GETTAF3(item.HES1, ref CKOLD, ref CMOIND, ref CTAFD, ref CTAF2D, ref CTAF3D, ref CTAF4D);
-
-                        //SDRST.AddNew();
-                        //SDRST.Fields("N_S") = NNS;
-                        //SDRST.Fields("HES_K") = CKOLD;
-                        //SDRST.Fields("HES_M") = CMOIND;
-                        //SDRST.Fields("HES_T") = CTAFD;
-                        //SDRST.Fields("HES_T2") = CTAF2D;
-                        //SDRST.Fields("HES_T3") = CTAF3D;
-                        //SDRST.Fields("HES_T4") = CTAF4D;
-                        //SDRST.Fields("hes") = item.HES1;
-                        //SDRST.Fields("N_SERI") = item.N_SERI;
-                        //SDRST.Fields("BANK") = item.BANK;
-                        //SDRST.Fields("BED") = item.MABL;
-
-                        var SHARH_ = Strings.Left(" چك " + item.N_SERI + " بانك " + item.NAMES + " " + item.SHOBEH + " مورخ " + Strings.Format(item.DATE_S, "####/##/##"), 255);
-                        //SDRST.update();
-
-                        dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, BED, BES, N_SERI, BANK, HES, HES_T2, HES_T3, HES_T4)
-                                                 VALUES({NNS},
-                                                 {CKOLD},
-                                                 {CMOIND} ,
-                                                 {CTAFD} ,
-                                                 N'{SHARH_}' ,
-                                                 {item.MABL} ,
-                                                 0 ,
-                                                 {item.N_SERI} ,
-                                                 {item.BANK} ,
-                                                 N'{item.HES1}' ,
-                                                 {(string.IsNullOrEmpty(CTAF2D.ToStringNullSafe()) ? "NULL" : CTAF2D)} ,
-                                                 {(string.IsNullOrEmpty(CTAF3D.ToStringNullSafe()) ? "NULL" : CTAF3D)} ,
-                                                 {(string.IsNullOrEmpty(CTAF4D.ToStringNullSafe()) ? "NULL" : CTAF4D)} )");
-
-                        item.N_S = NNS;
-                        mab = (double)item.MABL;
-                        //rst.update();
-                    }
-                    new Msgwin(false, "ثبت در سند شماره :" + NNS + "  شماره مبناي سند : " + NB /*+ "  به مبلغ : " + Strings.Format(Convert.ToInt64(mab), "#,###")*/).ShowDialog();
-                }
-
-                foreach (var row in SFDATAGRID_DATA.OfType<NAZDBANK_D_MODEL>().ToList())
-                {
-                    if (row.ID == SelectedRows?.FirstOrDefault()?.ID)
-                    {
-                        SFDATAGRID_DATA.Remove(row);
-                    }
-                }
-
-            }
-
-            // تغيير صندوق
-            if (BTNCALLED == BTN_TRANSFER_SANDOGH) //if (KeyAscii == 69 | KeyAscii == 101 | KeyAscii == 1579)
-            {
-                new VSANDUGHDIALOG(I_AM_CHEK_VLISTALL, (int)SelectedRows.FirstOrDefault().VAZ).ShowDialog();
-
-                if (VAZ_USER_CHOOSED == null)
-                {
-                    return;
-                }
-
-                foreach (var item in SelectedRows)
-                {
-                    string _WHERE_ = " WHERE N_SERI =" + item.N_SERI + " AND BANK = " + item.BANK + " AND DATE_S = " + item.DATE_S;
-                    var rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD" + _WHERE_).FirstOrDefault();
-                    if (rst != null)
-                    {
-                        //rst.Fields("VAZ") = Forms["VSANDUGHDIALOG"]["VAZ"];
-                        dbms.DoExecuteSQL($"UPDATE dbo.PAY_GETD SET VAZ = {VAZ_USER_CHOOSED} {_WHERE_} ");
-                        item.VAZ = VAZ_USER_CHOOSED;
-                        //rst.update();
-                    }
-                }
-                SFDATAGRID_SUB.View.Refresh();
-
-                universControl.PopNotifyShowUp("انتقال به صندوق مورد نظر انجام شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
-            }
-
-            // وصولي گروهي
-            if (BTNCALLED == BTN_GROUP_PASS) //if (KeyAscii == 71 | KeyAscii == 103 | KeyAscii == 1604)
-            {
-                //SHRST.Open("deed_hed", CurrentProject.Connection, adOpenKeyset, adLockOptimistic);
-                var _HES_ = SelectedRows.FirstOrDefault().N_KOL + "-" + SelectedRows.FirstOrDefault().N_MOIN + "-" + SelectedRows.FirstOrDefault().N_TAF;
-                new VOSULDIALOG2(I_AM_CHEK_VLISTALL, "CHEK_VLISTALL", _HES_).ShowDialog();
-                //DoCmd.OpenForm("VOSULDIALOG2", default, default, default, default, acDialog, Interaction.IIf(IsNull(this.N_TAF), "", this.N_KOL + "-" + this.N_MOIN + "-" + this.N_TAF));
-
-                if (ITEM_SELECTED_VOSUL.HHMOIN_VOSUL == null)
-                {
-                    return;
-                }
-
-                long JAM = 0; //برای روز وصول چک
-
-                foreach (var item in SelectedRows)
-                {
                     var rstfirst = dbms.DoGetDataSQL<double?>("SELECT Max(DEED_HED.N_S) AS MaxOfN_S FROM DEED_HED").FirstOrDefault();
                     if (rstfirst == null)
                     {
@@ -1118,29 +853,12 @@ namespace Wins.WinMenus.Checkha
                     {
                         max_ns = (double)(rstfirst + 1);
                     }
-                    switch (ITEM_SELECTED_VOSUL.VCLC)
-                    {
-                        case 1:
-                            {
-                                JAM = (long)item.DATE_S;
-                                break;
-                            }
-                        case 2:
-                            {
-                                JAM = CL_HESABDARI.ADDDAY((long)item.DATE_S, ITEM_SELECTED_VOSUL.NUMBERIC_DTC_DAY_2);
-                                break;
-                            }
-                        case 3:
-                            {
-                                JAM = Convert.ToInt64(ITEM_SELECTED_VOSUL.DTS_DATE);
-                                break;
-                            }
-                    }
-                    var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM dbo.DEED_HED WHERE NO_S = 6 AND DATE_S = " + JAM).FirstOrDefault();
+                    //SHRST.Open("deed_hed", CurrentProject.Connection, adOpenKeyset, adLockOptimistic);
+                    var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM dbo.DEED_HED WHERE NO_S = 6 AND DATE_S = " + ITEM_SELECTED_VOSUL.DTS_DATE).FirstOrDefault();
                     if (SHRST == null)
                     {
                         var _N_S_ = max_ns;
-                        var _DATE_S_ = JAM;
+                        var _DATE_S_ = ITEM_SELECTED_VOSUL.DTS_DATE;
                         var _SHARH_S_ = "اعلام وصول چكهاي دريافتي";
                         var _GHATEI_ = 0;
                         var _NO_S_ = 6;
@@ -1156,45 +874,49 @@ namespace Wins.WinMenus.Checkha
                                                        N'{_USER_NAME_}' ,
                                                        {_UID_} )").FirstOrDefault();
                         NB = (int)_QRE_base_;
+
                     }
                     else
                     {
-                        max_ns = (int)SHRST.N_S;
+                        max_ns = SHRST.N_S;
                         NB = SHRST.@base;
                     }
                     NNS = (long)Math.Round(max_ns);
-
+                    //rst.Open("CHKREC_H", CurrentProject.Connection, adOpenKeyset, adLockOptimistic);
                     {
-                        var rst = dbms.DoGetDataSQL<CHKREC_H>("SELECT * FROM CHKREC_H WHERE [DATE] = " + JAM).FirstOrDefault();
+                        var rst = dbms.DoGetDataSQL<CHKREC_H>("SELECT * FROM CHKREC_H WHERE [DATE] = " + ITEM_SELECTED_VOSUL.DTS_DATE).FirstOrDefault();
                         if (rst == null)
                         {
-                            var _DATE_ = JAM;
+                            //rst.AddNew();
+                            var _DATE_ = ITEM_SELECTED_VOSUL.DTS_DATE;
                             var _MOLAH_ = "وصولي ثبت شده توسط گزارش";
                             var _N_S_ = max_ns;
+                            //rst.update();
                             dbms.DoExecuteSQL($@"INSERT INTO dbo.CHKREC_H(DATE, MOLAH, N_S)
                                                      VALUES({_DATE_}, N'{_MOLAH_}' , {_N_S_} )");
                         }
                     }
-
                     {
-                        var rst = dbms.DoGetDataSQL<CHRE_LST>("SELECT * FROM CHRE_LST WHERE N_SERI =" + item.N_SERI + " AND BANK = " + item.BANK + " AND DATE_S = " + item.DATE_S).FirstOrDefault();
+                        var rst = dbms.DoGetDataSQL<CHRE_LST>("SELECT * FROM CHRE_LST WHERE N_SERI =" + SelectedRows.FirstOrDefault().N_SERI + " AND BANK = " + SelectedRows.FirstOrDefault().BANK + " AND DATE_S = " + SelectedRows.FirstOrDefault().DATE_S).FirstOrDefault();
                         if (rst == null)
                         {
-                            var _N_SERI_ = item.N_SERI;
-                            var _BANK_ = item.BANK;
-                            var _DATE_S_ = item.DATE_S;
-                            var _DATE_ = JAM;
+                            //rst.AddNew();
+                            var _N_SERI_ = SelectedRows.FirstOrDefault().N_SERI;
+                            var _BANK_ = SelectedRows.FirstOrDefault().BANK;
+                            var _DATE_S_ = SelectedRows.FirstOrDefault().DATE_S;
+                            var _DATE_ = ITEM_SELECTED_VOSUL.DTS_DATE;
 
                             dbms.DoExecuteSQL($@"INSERT INTO dbo.CHRE_LST(N_SERI, BANK, DATE_S, DATE)
                                                      VALUES({_N_SERI_},
                                                      {_BANK_} ,
                                                      {_DATE_S_} ,
                                                      {_DATE_} )");
+                            //rst.update();
                         }
                     }
 
                     {
-                        string _WHERE_ = " WHERE N_SERI =" + item.N_SERI + " AND BANK = " + item.BANK + " AND DATE_S = " + item.DATE_S;
+                        string _WHERE_ = " WHERE N_SERI =" + SelectedRows.FirstOrDefault().N_SERI + " AND BANK = " + SelectedRows.FirstOrDefault().BANK + " AND DATE_S = " + SelectedRows.FirstOrDefault().DATE_S;
                         var rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD " + _WHERE_).FirstOrDefault();
                         if (rst != null)
                         {
@@ -1207,16 +929,28 @@ namespace Wins.WinMenus.Checkha
                             var _HES1_ = ITEM_SELECTED_VOSUL.HHMOIN_VOSUL;
                             var _HES3_ = ITEM_SELECTED_VOSUL.HHMOIN_VOSUL;
                             var _N_S_ = NNS;
-
+                            //rst.update();
                             dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD SET 
                                                      N_KOL3 = {_N_KOL3_} , N_MOIN3 = {_N_MOIN3_} , N_TAF3 = {_N_TAF3_} ,  N_KOL = {_N_KOL_},
-                                                     N_MOIN = {_N_MOIN_} , N_TAF = {_N_TAF_} , HES1 = N'{_HES1_}' , HES3 = N'{_HES3_}' , N_S = {_N_S_} ,
-                                                     VAZ = 3        
+                                                     N_MOIN = {_N_MOIN_} , N_TAF = {_N_TAF_} , HES1 = N'{_HES1_}' , HES3 = N'{_HES3_}' , N_S = {_N_S_} , 
+                                                     VAZ = 3
                                                      {_WHERE_}");
+                            mab = (double)rst.MABL;
                         }
                     }
-                    dbms.DoExecuteSQL($@"INSERT INTO dbo.PAY_GETD_LOG(N_SERI, BANK, DATE_S, DATE_V, DATETIM, VAZ, SANDUGH, USER_NAME)
-                                         VALUES({item.N_SERI}, {item.BANK} , {item.DATE_S} , {CL_HESABDARI.FARSIDATE()} , GETDATE(),3 , {item.SANDUGH} , N'{CL_HESABDARI.UCurrentUser()}' )");
+
+                    CL_HESABDARI.GETDLOG(3, SelectedRows.FirstOrDefault().N_SERI.ToString(), (int)SelectedRows.FirstOrDefault().BANK, (long)SelectedRows.FirstOrDefault().DATE_S, (int)SelectedRows.FirstOrDefault().SANDUGH);
+                    //rst.Open("PAY_GETD_LOG", CurrentProject.Connection, adOpenKeyset, adLockOptimistic);
+                    //rst.AddNew();
+                    //rst.Fields("N_SERI") = this.N_SERI;
+                    //rst.Fields("BANK") = this.BANK;
+                    //rst.Fields("DATE_S") = this.DATE_S;
+                    //rst.Fields("DATE_V") = FARSIDATE(DateTime.Now);
+                    //rst.Fields("DATETIM") = DateTime.Now;
+                    //rst.Fields("VAZ") = 3;
+                    //rst.Fields("SANDUGH") = this.SANDUGH;
+                    //rst.Fields("USER_NAME") = UCurrentUser();
+                    //rst.update();
 
                     dbms.DoExecuteSQL("DELETE FROM DEED_DTL WHERE (((DEED_DTL.N_S)= " + max_ns + " ))");
 
@@ -1230,9 +964,10 @@ namespace Wins.WinMenus.Checkha
                     }
 
                     {
-                        var rst = dbms.DoGetDataSQL<VOSUL_MODEL_QRE1>("SELECT dbo.CHKREC_H.*, dbo.CHRE_LST.*, dbo.TCOD_BANKS.NAMES, dbo.PAY_GETD.SHOBEH,dbo.PAY_GETD.N_S, dbo.PAY_GETD.MABL, dbo.PAY_GETD.N_KOL,  dbo.PAY_GETD.N_MOIN, dbo.PAY_GETD.N_TAF, dbo.PAY_GETD.KIND, dbo.PAY_GETD.HES1    FROM         dbo.CHKREC_H INNER JOIN dbo.CHRE_LST ON dbo.CHKREC_H.DATE = dbo.CHRE_LST.DATE INNER JOIN  dbo.PAY_GETD ON dbo.CHRE_LST.N_SERI = dbo.PAY_GETD.N_SERI AND dbo.CHRE_LST.BANK = dbo.PAY_GETD.BANK AND  dbo.CHRE_LST.DATE_S = dbo.PAY_GETD.DATE_S INNER JOIN dbo.TCOD_BANKS ON dbo.PAY_GETD.BANK = dbo.TCOD_BANKS.CODE WHERE     (dbo.CHKREC_H.DATE = " + JAM + ")").ToList();
-                        foreach (var rst_field in rst)
+                        var rst = dbms.DoGetDataSQL<VOSUL_MODEL_QRE1>("SELECT dbo.CHKREC_H.*, dbo.CHRE_LST.*, dbo.TCOD_BANKS.NAMES, dbo.PAY_GETD.SHOBEH,dbo.PAY_GETD.N_S, dbo.PAY_GETD.MABL, dbo.PAY_GETD.N_KOL,  dbo.PAY_GETD.N_MOIN, dbo.PAY_GETD.N_TAF, dbo.PAY_GETD.KIND, dbo.PAY_GETD.HES1    FROM         dbo.CHKREC_H INNER JOIN dbo.CHRE_LST ON dbo.CHKREC_H.DATE = dbo.CHRE_LST.DATE INNER JOIN  dbo.PAY_GETD ON dbo.CHRE_LST.N_SERI = dbo.PAY_GETD.N_SERI AND dbo.CHRE_LST.BANK = dbo.PAY_GETD.BANK AND  dbo.CHRE_LST.DATE_S = dbo.PAY_GETD.DATE_S INNER JOIN dbo.TCOD_BANKS ON dbo.PAY_GETD.BANK = dbo.TCOD_BANKS.CODE WHERE     (dbo.CHKREC_H.DATE = " + ITEM_SELECTED_VOSUL.DTS_DATE + ")").ToList();
+                        foreach (var item in rst) //while (!rst.EOF)
                         {
+                            //SDRST.AddNew(); //INSERT
                             var _N_S_ = NNS;
 
                             string? HES_K = null;
@@ -1243,7 +978,7 @@ namespace Wins.WinMenus.Checkha
                             string? HES_T4 = null;
                             string? hes = null;
 
-                            if (rst_field.KIND == 1 || rst_field.KIND == null)
+                            if (item.KIND == 1 || item.KIND == null)
                             {
                                 HES_K = CKOL.ToStringNullSafe();
                                 HES_M = CMOIN.ToStringNullSafe();
@@ -1263,12 +998,280 @@ namespace Wins.WinMenus.Checkha
                                 HES_T4 = CTAF4V.ToStringNullSafe();
                                 hes = Baseknow.ADV;
                             }
-                            var N_SERI = rst_field.N_SERI;
-                            var BANK = rst_field.BANK;
-                            var BES = rst_field.MABL;
-                            var SHARH = Strings.Left(" چك " + rst_field.N_SERI + " بانك " + rst_field.NAMES + " " + rst_field.SHOBEH + " مورخ " + Strings.Format(rst_field.DATE_S, "####/##/##"), 255);
+                            var N_SERI = item.N_SERI;
+                            var BANK = item.BANK;
+                            var BES = item.MABL;
+                            var SHARH = Strings.Left(" چك " + item.N_SERI + " بانك " + item.NAMES + " " + item.SHOBEH + " مورخ " + Strings.Format(item.DATE_S, "####/##/##"), 255);
+                            //SDRST.update();
+                            dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, BED, BES, N_SERI, BANK, HES, HES_T2, HES_T3, HES_T4)
+                                                 VALUES({_N_S_},
+                                                 {HES_K},
+                                                 {HES_M} ,
+                                                 {HES_T} ,
+                                                 N'{SHARH}' ,
+                                                 0 ,
+                                                 {BES} ,
+                                                 {N_SERI} ,
+                                                 {BANK} ,
+                                                 N'{hes}' ,
+                                                 {(string.IsNullOrEmpty(HES_T2) ? "NULL" : HES_T2)} ,
+                                                 {(string.IsNullOrEmpty(HES_T3) ? "NULL" : HES_T3)} ,
+                                                 {(string.IsNullOrEmpty(HES_T4) ? "NULL" : HES_T4)} )");
+
+                            CL_HESABDARI.GETTAF3(item.HES1, ref CKOLD, ref CMOIND, ref CTAFD, ref CTAF2D, ref CTAF3D, ref CTAF4D);
+
+                            //SDRST.AddNew();
+                            //SDRST.Fields("N_S") = NNS;
+                            //SDRST.Fields("HES_K") = CKOLD;
+                            //SDRST.Fields("HES_M") = CMOIND;
+                            //SDRST.Fields("HES_T") = CTAFD;
+                            //SDRST.Fields("HES_T2") = CTAF2D;
+                            //SDRST.Fields("HES_T3") = CTAF3D;
+                            //SDRST.Fields("HES_T4") = CTAF4D;
+                            //SDRST.Fields("hes") = item.HES1;
+                            //SDRST.Fields("N_SERI") = item.N_SERI;
+                            //SDRST.Fields("BANK") = item.BANK;
+                            //SDRST.Fields("BED") = item.MABL;
+
+                            var SHARH_ = Strings.Left(" چك " + item.N_SERI + " بانك " + item.NAMES + " " + item.SHOBEH + " مورخ " + Strings.Format(item.DATE_S, "####/##/##"), 255);
+                            //SDRST.update();
 
                             dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, BED, BES, N_SERI, BANK, HES, HES_T2, HES_T3, HES_T4)
+                                                 VALUES({NNS},
+                                                 {CKOLD},
+                                                 {CMOIND} ,
+                                                 {CTAFD} ,
+                                                 N'{SHARH_}' ,
+                                                 {item.MABL} ,
+                                                 0 ,
+                                                 {item.N_SERI} ,
+                                                 {item.BANK} ,
+                                                 N'{item.HES1}' ,
+                                                 {(string.IsNullOrEmpty(CTAF2D.ToStringNullSafe()) ? "NULL" : CTAF2D)} ,
+                                                 {(string.IsNullOrEmpty(CTAF3D.ToStringNullSafe()) ? "NULL" : CTAF3D)} ,
+                                                 {(string.IsNullOrEmpty(CTAF4D.ToStringNullSafe()) ? "NULL" : CTAF4D)} )");
+
+                            item.N_S = NNS;
+                            mab = (double)item.MABL;
+                            //rst.update();
+                        }
+                        new Msgwin(false, "ثبت در سند شماره :" + NNS + "  شماره مبناي سند : " + NB /*+ "  به مبلغ : " + Strings.Format(Convert.ToInt64(mab), "#,###")*/).ShowDialog();
+                    }
+
+                    foreach (var row in SFDATAGRID_DATA.OfType<NAZDBANK_D_MODEL>().ToList())
+                    {
+                        if (row.ID == SelectedRows?.FirstOrDefault()?.ID)
+                        {
+                            SFDATAGRID_DATA.Remove(row);
+                        }
+                    }
+
+                }
+
+                // تغيير صندوق
+                if (BTNCALLED == BTN_TRANSFER_SANDOGH) //if (KeyAscii == 69 | KeyAscii == 101 | KeyAscii == 1579)
+                {
+                    new VSANDUGHDIALOG(I_AM_CHEK_VLISTALL, (int)SelectedRows.FirstOrDefault().VAZ).ShowDialog();
+
+                    if (VAZ_USER_CHOOSED == null)
+                    {
+                        return;
+                    }
+
+                    foreach (var item in SelectedRows)
+                    {
+                        string _WHERE_ = " WHERE N_SERI =" + item.N_SERI + " AND BANK = " + item.BANK + " AND DATE_S = " + item.DATE_S;
+                        var rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD" + _WHERE_).FirstOrDefault();
+                        if (rst != null)
+                        {
+                            //rst.Fields("VAZ") = Forms["VSANDUGHDIALOG"]["VAZ"];
+                            dbms.DoExecuteSQL($"UPDATE dbo.PAY_GETD SET VAZ = {VAZ_USER_CHOOSED} {_WHERE_} ");
+                            item.VAZ = VAZ_USER_CHOOSED;
+                            //rst.update();
+                        }
+                    }
+                    SFDATAGRID_SUB.View.Refresh();
+
+                    universControl.PopNotifyShowUp("انتقال به صندوق مورد نظر انجام شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
+                }
+
+                // وصولي گروهي
+                if (BTNCALLED == BTN_GROUP_PASS) //if (KeyAscii == 71 | KeyAscii == 103 | KeyAscii == 1604)
+                {
+                    //SHRST.Open("deed_hed", CurrentProject.Connection, adOpenKeyset, adLockOptimistic);
+                    var _HES_ = SelectedRows.FirstOrDefault().N_KOL + "-" + SelectedRows.FirstOrDefault().N_MOIN + "-" + SelectedRows.FirstOrDefault().N_TAF;
+                    new VOSULDIALOG2(I_AM_CHEK_VLISTALL, "CHEK_VLISTALL", _HES_).ShowDialog();
+                    //DoCmd.OpenForm("VOSULDIALOG2", default, default, default, default, acDialog, Interaction.IIf(IsNull(this.N_TAF), "", this.N_KOL + "-" + this.N_MOIN + "-" + this.N_TAF));
+
+                    if (ITEM_SELECTED_VOSUL.HHMOIN_VOSUL == null)
+                    {
+                        return;
+                    }
+
+                    long JAM = 0; //برای روز وصول چک
+
+                    foreach (var item in SelectedRows)
+                    {
+                        var rstfirst = dbms.DoGetDataSQL<double?>("SELECT Max(DEED_HED.N_S) AS MaxOfN_S FROM DEED_HED").FirstOrDefault();
+                        if (rstfirst == null)
+                        {
+                            max_ns = 1d;
+                        }
+                        else
+                        {
+                            max_ns = (double)(rstfirst + 1);
+                        }
+                        switch (ITEM_SELECTED_VOSUL.VCLC)
+                        {
+                            case 1:
+                                {
+                                    JAM = (long)item.DATE_S;
+                                    break;
+                                }
+                            case 2:
+                                {
+                                    JAM = CL_HESABDARI.ADDDAY((long)item.DATE_S, ITEM_SELECTED_VOSUL.NUMBERIC_DTC_DAY_2);
+                                    break;
+                                }
+                            case 3:
+                                {
+                                    JAM = Convert.ToInt64(ITEM_SELECTED_VOSUL.DTS_DATE);
+                                    break;
+                                }
+                        }
+                        var SHRST = dbms.DoGetDataSQL<DEED_HED>("SELECT * FROM dbo.DEED_HED WHERE NO_S = 6 AND DATE_S = " + JAM).FirstOrDefault();
+                        if (SHRST == null)
+                        {
+                            var _N_S_ = max_ns;
+                            var _DATE_S_ = JAM;
+                            var _SHARH_S_ = "اعلام وصول چكهاي دريافتي";
+                            var _GHATEI_ = 0;
+                            var _NO_S_ = 6;
+                            var _USER_NAME_ = CL_HESABDARI.UCurrentUser();
+                            var _UID_ = Baseknow.USERCOD;
+                            var _QRE_base_ = dbms.DoGetDataSQL<int?>($@"INSERT INTO dbo.DEED_HED(N_S, DATE_S, SHARH_S,GHATEI, NO_S, USER_NAME,UID)
+                                                       OUTPUT INSERTED.base
+                                                       VALUES({_N_S_},
+                                                       {_DATE_S_} ,
+                                                       N'{_SHARH_S_}' ,
+                                                       {_GHATEI_},
+                                                       {_NO_S_} ,
+                                                       N'{_USER_NAME_}' ,
+                                                       {_UID_} )").FirstOrDefault();
+                            NB = (int)_QRE_base_;
+                        }
+                        else
+                        {
+                            max_ns = (int)SHRST.N_S;
+                            NB = SHRST.@base;
+                        }
+                        NNS = (long)Math.Round(max_ns);
+
+                        {
+                            var rst = dbms.DoGetDataSQL<CHKREC_H>("SELECT * FROM CHKREC_H WHERE [DATE] = " + JAM).FirstOrDefault();
+                            if (rst == null)
+                            {
+                                var _DATE_ = JAM;
+                                var _MOLAH_ = "وصولي ثبت شده توسط گزارش";
+                                var _N_S_ = max_ns;
+                                dbms.DoExecuteSQL($@"INSERT INTO dbo.CHKREC_H(DATE, MOLAH, N_S)
+                                                     VALUES({_DATE_}, N'{_MOLAH_}' , {_N_S_} )");
+                            }
+                        }
+
+                        {
+                            var rst = dbms.DoGetDataSQL<CHRE_LST>("SELECT * FROM CHRE_LST WHERE N_SERI =" + item.N_SERI + " AND BANK = " + item.BANK + " AND DATE_S = " + item.DATE_S).FirstOrDefault();
+                            if (rst == null)
+                            {
+                                var _N_SERI_ = item.N_SERI;
+                                var _BANK_ = item.BANK;
+                                var _DATE_S_ = item.DATE_S;
+                                var _DATE_ = JAM;
+
+                                dbms.DoExecuteSQL($@"INSERT INTO dbo.CHRE_LST(N_SERI, BANK, DATE_S, DATE)
+                                                     VALUES({_N_SERI_},
+                                                     {_BANK_} ,
+                                                     {_DATE_S_} ,
+                                                     {_DATE_} )");
+                            }
+                        }
+
+                        {
+                            string _WHERE_ = " WHERE N_SERI =" + item.N_SERI + " AND BANK = " + item.BANK + " AND DATE_S = " + item.DATE_S;
+                            var rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD " + _WHERE_).FirstOrDefault();
+                            if (rst != null)
+                            {
+                                var _N_KOL3_ = Baseknow.BANKHA;
+                                var _N_MOIN3_ = CL_HESABDARI.GETMOIN(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
+                                var _N_TAF3_ = CL_HESABDARI.GETTAF(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
+                                var _N_KOL_ = Baseknow.BANKHA;
+                                var _N_MOIN_ = CL_HESABDARI.GETMOIN(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
+                                var _N_TAF_ = CL_HESABDARI.GETTAF(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
+                                var _HES1_ = ITEM_SELECTED_VOSUL.HHMOIN_VOSUL;
+                                var _HES3_ = ITEM_SELECTED_VOSUL.HHMOIN_VOSUL;
+                                var _N_S_ = NNS;
+
+                                dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD SET 
+                                                     N_KOL3 = {_N_KOL3_} , N_MOIN3 = {_N_MOIN3_} , N_TAF3 = {_N_TAF3_} ,  N_KOL = {_N_KOL_},
+                                                     N_MOIN = {_N_MOIN_} , N_TAF = {_N_TAF_} , HES1 = N'{_HES1_}' , HES3 = N'{_HES3_}' , N_S = {_N_S_} ,
+                                                     VAZ = 3        
+                                                     {_WHERE_}");
+                            }
+                        }
+                        dbms.DoExecuteSQL($@"INSERT INTO dbo.PAY_GETD_LOG(N_SERI, BANK, DATE_S, DATE_V, DATETIM, VAZ, SANDUGH, USER_NAME)
+                                         VALUES({item.N_SERI}, {item.BANK} , {item.DATE_S} , {CL_HESABDARI.FARSIDATE()} , GETDATE(),3 , {item.SANDUGH} , N'{CL_HESABDARI.UCurrentUser()}' )");
+
+                        dbms.DoExecuteSQL("DELETE FROM DEED_DTL WHERE (((DEED_DTL.N_S)= " + max_ns + " ))");
+
+                        if (!string.IsNullOrEmpty(Baseknow.ADA))
+                        {
+                            CL_HESABDARI.GETTAF3(Baseknow.ADA, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+                        }
+                        if (!string.IsNullOrEmpty(Baseknow.ADV))
+                        {
+                            CL_HESABDARI.GETTAF3(Baseknow.ADV, ref CKOLV, ref CMOINV, ref CTAFV, ref CTAF2V, ref CTAF3V, ref CTAF4V);
+                        }
+
+                        {
+                            var rst = dbms.DoGetDataSQL<VOSUL_MODEL_QRE1>("SELECT dbo.CHKREC_H.*, dbo.CHRE_LST.*, dbo.TCOD_BANKS.NAMES, dbo.PAY_GETD.SHOBEH,dbo.PAY_GETD.N_S, dbo.PAY_GETD.MABL, dbo.PAY_GETD.N_KOL,  dbo.PAY_GETD.N_MOIN, dbo.PAY_GETD.N_TAF, dbo.PAY_GETD.KIND, dbo.PAY_GETD.HES1    FROM         dbo.CHKREC_H INNER JOIN dbo.CHRE_LST ON dbo.CHKREC_H.DATE = dbo.CHRE_LST.DATE INNER JOIN  dbo.PAY_GETD ON dbo.CHRE_LST.N_SERI = dbo.PAY_GETD.N_SERI AND dbo.CHRE_LST.BANK = dbo.PAY_GETD.BANK AND  dbo.CHRE_LST.DATE_S = dbo.PAY_GETD.DATE_S INNER JOIN dbo.TCOD_BANKS ON dbo.PAY_GETD.BANK = dbo.TCOD_BANKS.CODE WHERE     (dbo.CHKREC_H.DATE = " + JAM + ")").ToList();
+                            foreach (var rst_field in rst)
+                            {
+                                var _N_S_ = NNS;
+
+                                string? HES_K = null;
+                                string? HES_M = null;
+                                string? HES_T = null;
+                                string? HES_T2 = null;
+                                string? HES_T3 = null;
+                                string? HES_T4 = null;
+                                string? hes = null;
+
+                                if (rst_field.KIND == 1 || rst_field.KIND == null)
+                                {
+                                    HES_K = CKOL.ToStringNullSafe();
+                                    HES_M = CMOIN.ToStringNullSafe();
+                                    HES_T = CTAF.ToStringNullSafe();
+                                    HES_T2 = CTAF2.ToStringNullSafe();
+                                    HES_T3 = CTAF3.ToStringNullSafe();
+                                    HES_T4 = CTAF4.ToStringNullSafe();
+                                    hes = Baseknow.ADA;
+                                }
+                                else
+                                {
+                                    HES_K = CKOLV.ToStringNullSafe();
+                                    HES_M = CMOINV.ToStringNullSafe();
+                                    HES_T = CTAFV.ToStringNullSafe();
+                                    HES_T2 = CTAF2V.ToStringNullSafe();
+                                    HES_T3 = CTAF3V.ToStringNullSafe();
+                                    HES_T4 = CTAF4V.ToStringNullSafe();
+                                    hes = Baseknow.ADV;
+                                }
+                                var N_SERI = rst_field.N_SERI;
+                                var BANK = rst_field.BANK;
+                                var BES = rst_field.MABL;
+                                var SHARH = Strings.Left(" چك " + rst_field.N_SERI + " بانك " + rst_field.NAMES + " " + rst_field.SHOBEH + " مورخ " + Strings.Format(rst_field.DATE_S, "####/##/##"), 255);
+
+                                dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, BED, BES, N_SERI, BANK, HES, HES_T2, HES_T3, HES_T4)
                            VALUES({_N_S_},
                            {HES_K},
                            {HES_M} ,
@@ -1283,10 +1286,10 @@ namespace Wins.WinMenus.Checkha
                            {(string.IsNullOrEmpty(HES_T3) ? "NULL" : HES_T3)} ,
                            {(string.IsNullOrEmpty(HES_T4) ? "NULL" : HES_T4)} )");
 
-                            CL_HESABDARI.GETTAF3(rst_field.HES1, ref CKOLD, ref CMOIND, ref CTAFD, ref CTAF2D, ref CTAF3D, ref CTAF4D);
+                                CL_HESABDARI.GETTAF3(rst_field.HES1, ref CKOLD, ref CMOIND, ref CTAFD, ref CTAF2D, ref CTAF3D, ref CTAF4D);
 
-                            var SHARH_ = Strings.Left(" چك " + rst_field.N_SERI + " بانك " + rst_field.NAMES + " " + rst_field.SHOBEH + " مورخ " + Strings.Format(rst_field.DATE_S, "####/##/##"), 255);
-                            dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, BED, BES, N_SERI, BANK, HES, HES_T2, HES_T3, HES_T4)
+                                var SHARH_ = Strings.Left(" چك " + rst_field.N_SERI + " بانك " + rst_field.NAMES + " " + rst_field.SHOBEH + " مورخ " + Strings.Format(rst_field.DATE_S, "####/##/##"), 255);
+                                dbms.DoExecuteSQL($@"INSERT INTO dbo.DEED_DTL(N_S, HES_K, HES_M, HES_T, SHARH, BED, BES, N_SERI, BANK, HES, HES_T2, HES_T3, HES_T4)
                                                  VALUES({NNS},
                                                  {CKOLD},
                                                  {CMOIND} ,
@@ -1301,106 +1304,124 @@ namespace Wins.WinMenus.Checkha
                                                  {(string.IsNullOrEmpty(CTAF3D.ToStringNullSafe()) ? "NULL" : CTAF3D)} ,
                                                  {(string.IsNullOrEmpty(CTAF4D.ToStringNullSafe()) ? "NULL" : CTAF4D)} )");
 
-                            rst_field.N_S = NNS;
+                                rst_field.N_S = NNS;
+                            }
                         }
+
+                        MyMessages.Add(new MsgModel { MessageText_U = "ثبت در سند شماره :" + NNS + "  شماره مبناي سند : " + NB /*+ "  به مبلغ : " + Strings.Format(Convert.ToInt64(mab), "#,###")*/ });
                     }
 
-                    MyMessages.Add(new MsgModel { MessageText_U = "ثبت در سند شماره :" + NNS + "  شماره مبناي سند : " + NB /*+ "  به مبلغ : " + Strings.Format(Convert.ToInt64(mab), "#,###")*/ });
-                }
-
-                if (MyMessages.Any())
-                {
-                    MyMessages = MyMessages.Select(x => x.MessageText_U).Distinct()
-                        .Select(message => new MsgModel { MessageText_U = message }).ToList();
-                    new MsgListwin(false, MyMessages).ShowDialog();
-                }
-
-                foreach (var row in SFDATAGRID_DATA.OfType<NAZDBANK_D_MODEL>().ToList())
-                {
-                    foreach (var choosedrow in SelectedRows)
+                    if (MyMessages.Any())
                     {
-                        if (row.ID == choosedrow?.ID)
+                        MyMessages = MyMessages.Select(x => x.MessageText_U).Distinct()
+                            .Select(message => new MsgModel { MessageText_U = message }).ToList();
+                        new MsgListwin(false, MyMessages).ShowDialog();
+                    }
+
+                    foreach (var row in SFDATAGRID_DATA.OfType<NAZDBANK_D_MODEL>().ToList())
+                    {
+                        foreach (var choosedrow in SelectedRows)
                         {
-                            SFDATAGRID_DATA.Remove(row);
+                            if (row.ID == choosedrow?.ID)
+                            {
+                                SFDATAGRID_DATA.Remove(row);
+                            }
                         }
                     }
                 }
-            }
 
-            //به حساب گذاشتن
-            if (BTNCALLED == BTN_BEHESAB) //if (KeyAscii == 70 | KeyAscii == 102 | KeyAscii == 1576)
-            {
-                var _HES_ = SelectedRows.FirstOrDefault().N_KOL + "-" + SelectedRows.FirstOrDefault().N_MOIN + "-" + SelectedRows.FirstOrDefault().N_TAF;
-                new BEHESABDIALOG(I_AM_CHEK_VLISTALL, "CHEK_VLISTALL", _HES_).ShowDialog();
-
-                if (ITEM_SELECTED_VOSUL.DTS_DATE == null)
+                //به حساب گذاشتن
+                if (BTNCALLED == BTN_BEHESAB) //if (KeyAscii == 70 | KeyAscii == 102 | KeyAscii == 1576)
                 {
-                    return;
-                }
+                    var _HES_ = SelectedRows.FirstOrDefault().N_KOL + "-" + SelectedRows.FirstOrDefault().N_MOIN + "-" + SelectedRows.FirstOrDefault().N_TAF;
+                    new BEHESABDIALOG(I_AM_CHEK_VLISTALL, "CHEK_VLISTALL", _HES_).ShowDialog();
 
-                {
-                    var rst = dbms.DoGetDataSQL<CHREC_HES>("SELECT * FROM CHREC_HES WHERE [DATE]= " + ITEM_SELECTED_VOSUL.DTS_DATE).FirstOrDefault();
-                    if (rst == null)
+                    if (ITEM_SELECTED_VOSUL.DTS_DATE == null)
                     {
-                        dbms.DoExecuteSQL($@"INSERT INTO dbo.CHREC_HES(DATE, MOLAH)
-                                             VALUES({ITEM_SELECTED_VOSUL.DTS_DATE}, N'به حساب گذاشته شده توسط گزارش' ) ");
+                        return;
                     }
-                }
-                {
-                    var rst = dbms.DoGetDataSQL<CHRE_LSPH>("SELECT * FROM CHRE_LSPH WHERE N_SERI =" + SelectedRows.FirstOrDefault().N_SERI + " AND BANK = " + SelectedRows.FirstOrDefault().BANK + " AND DATE = " + SelectedRows.FirstOrDefault().DATE_S).FirstOrDefault();
-                    if (rst == null)
+
                     {
-                        var _N_SERI_ = SelectedRows.FirstOrDefault().N_SERI;
-                        var _BANK_ = SelectedRows.FirstOrDefault().BANK;
-                        var _DATE_S_ = SelectedRows.FirstOrDefault().DATE_S;
-                        var _DATE_ = ITEM_SELECTED_VOSUL.DTS_DATE;
-                        var _USER_NAME_ = CL_HESABDARI.UCurrentUser();
-                        dbms.DoExecuteSQL($@"INSERT INTO dbo.CHRE_LSPH(N_SERI, BANK, DATE_S, DATE, USER_NAME)
+                        var rst = dbms.DoGetDataSQL<CHREC_HES>("SELECT * FROM CHREC_HES WHERE [DATE]= " + ITEM_SELECTED_VOSUL.DTS_DATE).FirstOrDefault();
+                        if (rst == null)
+                        {
+                            dbms.DoExecuteSQL($@"INSERT INTO dbo.CHREC_HES(DATE, MOLAH)
+                                             VALUES({ITEM_SELECTED_VOSUL.DTS_DATE}, N'به حساب گذاشته شده توسط گزارش' ) ");
+                        }
+                    }
+                    {
+                        var rst = dbms.DoGetDataSQL<CHRE_LSPH>("SELECT * FROM CHRE_LSPH WHERE N_SERI =" + SelectedRows.FirstOrDefault().N_SERI + " AND BANK = " + SelectedRows.FirstOrDefault().BANK + " AND DATE = " + SelectedRows.FirstOrDefault().DATE_S).FirstOrDefault();
+                        if (rst == null)
+                        {
+                            var _N_SERI_ = SelectedRows.FirstOrDefault().N_SERI;
+                            var _BANK_ = SelectedRows.FirstOrDefault().BANK;
+                            var _DATE_S_ = SelectedRows.FirstOrDefault().DATE_S;
+                            var _DATE_ = ITEM_SELECTED_VOSUL.DTS_DATE;
+                            var _USER_NAME_ = CL_HESABDARI.UCurrentUser();
+                            dbms.DoExecuteSQL($@"INSERT INTO dbo.CHRE_LSPH(N_SERI, BANK, DATE_S, DATE, USER_NAME)
                                              VALUES({_N_SERI_},
                                              {_BANK_} ,
                                              {_DATE_S_} ,
                                              {_DATE_} ,
                                              N'{_USER_NAME_}' )");
+                        }
                     }
-                }
-                {
-                    string _WHERE_ = " WHERE N_SERI =" + SelectedRows.FirstOrDefault().N_SERI + " AND BANK = " + SelectedRows.FirstOrDefault().BANK + " AND DATE_S = " + SelectedRows.FirstOrDefault().DATE_S;
-                    var rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD " + _WHERE_).FirstOrDefault();
-                    if (rst != null)
                     {
-                        var _N_KOL_ = Baseknow.BANKHA;
-                        var _N_MOIN_ = CL_HESABDARI.GETMOIN(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
-                        var _N_TAF_ = CL_HESABDARI.GETTAF(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
-                        var _hes1_ = ITEM_SELECTED_VOSUL.HHMOIN_VOSUL;
-                        var _VAZ_ = 2;
+                        string _WHERE_ = " WHERE N_SERI =" + SelectedRows.FirstOrDefault().N_SERI + " AND BANK = " + SelectedRows.FirstOrDefault().BANK + " AND DATE_S = " + SelectedRows.FirstOrDefault().DATE_S;
+                        var rst = dbms.DoGetDataSQL<PAY_GETD>("SELECT * FROM PAY_GETD " + _WHERE_).FirstOrDefault();
+                        if (rst != null)
+                        {
+                            var _N_KOL_ = Baseknow.BANKHA;
+                            var _N_MOIN_ = CL_HESABDARI.GETMOIN(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
+                            var _N_TAF_ = CL_HESABDARI.GETTAF(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
+                            var _hes1_ = ITEM_SELECTED_VOSUL.HHMOIN_VOSUL;
+                            var _VAZ_ = 2;
 
-                        dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD SET
+                            dbms.DoExecuteSQL($@"UPDATE dbo.PAY_GETD SET
                                              N_KOL = {_N_KOL_} , N_MOIN = {_N_MOIN_} , N_TAF = {_N_TAF_},
                                              HES1 = N'{_hes1_}' , VAZ = {_VAZ_} {_WHERE_}");
+                        }
                     }
-                }
-                {
-                    var _N_SERI_ = SelectedRows.FirstOrDefault().N_SERI;
-                    var _BANK_ = SelectedRows.FirstOrDefault().BANK;
-                    var _DATE_S_ = SelectedRows.FirstOrDefault().DATE_S;
-                    var _DATE_V_ = CL_HESABDARI.FARSIDATE();
-                    var _VAZ_ = 2;
-                    var _SANDUGH_ = SelectedRows.FirstOrDefault().SANDUGH;
-                    var _USER_NAME_ = CL_HESABDARI.UCurrentUser();
+                    {
+                        var _N_SERI_ = SelectedRows.FirstOrDefault().N_SERI;
+                        var _BANK_ = SelectedRows.FirstOrDefault().BANK;
+                        var _DATE_S_ = SelectedRows.FirstOrDefault().DATE_S;
+                        var _DATE_V_ = CL_HESABDARI.FARSIDATE();
+                        var _VAZ_ = 2;
+                        var _SANDUGH_ = SelectedRows.FirstOrDefault().SANDUGH;
+                        var _USER_NAME_ = CL_HESABDARI.UCurrentUser();
 
-                    dbms.DoExecuteSQL($@"INSERT INTO dbo.PAY_GETD_LOG(N_SERI, BANK, DATE_S, DATE_V, DATETIM, VAZ, SANDUGH, USER_NAME)
+                        dbms.DoExecuteSQL($@"INSERT INTO dbo.PAY_GETD_LOG(N_SERI, BANK, DATE_S, DATE_V, DATETIM, VAZ, SANDUGH, USER_NAME)
                                              VALUES({_N_SERI_}, {_BANK_} , {_DATE_S_} , {_DATE_V_} , GETDATE(), {_VAZ_} , {_SANDUGH_} , N'{_USER_NAME_}' )");
+                    }
+
+                    //Updaete Ui too
+                    SelectedRows.FirstOrDefault().VAZ = 2;
+                    SelectedRows.FirstOrDefault().N_KOL = (int?)CL_HESABDARI.GETKOL(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
+                    SelectedRows.FirstOrDefault().N_MOIN = (int?)CL_HESABDARI.GETMOIN(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
+                    SelectedRows.FirstOrDefault().N_TAF = (int?)CL_HESABDARI.GETTAF(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
+                    SelectedRows.FirstOrDefault().HES1 = ITEM_SELECTED_VOSUL.HHMOIN_VOSUL;
+                    SFDATAGRID_SUB.View.Refresh();
+
+                    universControl.PopNotifyShowUp("چک به حساب مورد نظر واگذار شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
+                }
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Number == 547)
+                {
+                    new Msgwin(false, "این رکورد دارای اطلاعات وابسته است").ShowDialog();
+                    return;
                 }
 
-                //Updaete Ui too
-                SelectedRows.FirstOrDefault().VAZ = 2;
-                SelectedRows.FirstOrDefault().N_KOL = (int?)CL_HESABDARI.GETKOL(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
-                SelectedRows.FirstOrDefault().N_MOIN = (int?)CL_HESABDARI.GETMOIN(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
-                SelectedRows.FirstOrDefault().N_TAF = (int?)CL_HESABDARI.GETTAF(ITEM_SELECTED_VOSUL.HHMOIN_VOSUL);
-                SelectedRows.FirstOrDefault().HES1 = ITEM_SELECTED_VOSUL.HHMOIN_VOSUL;
-                SFDATAGRID_SUB.View.Refresh();
-
-                universControl.PopNotifyShowUp("چک به حساب مورد نظر واگذار شد.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
+                if (ex.Message.Contains("PRIMARY KEY") || ex.Message.Contains("UNIQUE"))
+                    universControl.PopNotifyShowUp($"خطا به خاطر اطلاعات تکراری است", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                else
+                    universControl.PopNotifyShowUp($"خطا در ذخیره اطلاعات", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+            }
+            catch (Exception ex)
+            {
+                universControl.PopNotifyShowUp($"خطا در ذخیره اطلاعات", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
             }
 
         }

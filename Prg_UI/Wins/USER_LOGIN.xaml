@@ -103,7 +103,7 @@
         <Button  Cursor="Hand" Margin="0,0,1,13" Content="اتصال به پایگاه داده" Click="Button_Click_1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="22" Width="109" FontSize="9" Background="{x:Null}" BorderBrush="{x:Null}" />
         <Label HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="0,52,280,39" Foreground="#DDFFFFFF" FontSize="30" FontFamily="/WpfApp5;component/FNT/#Raleway Light" IsHitTestVisible="False" d:IsLocked="True">Mr Correct</Label>
         <Label x:Name="lbloader" Content="در حال ورود به سیستم ..." HorizontalContentAlignment="Center" Visibility="Collapsed" VerticalContentAlignment="Center"   Background="#BF1B1B1C" Foreground="White" FontSize="16" FlowDirection="RightToLeft"/>
-        <Label x:Name="LBL_VERSION" Content="" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="291,341,115,10" FontSize="9" />
+        <Label x:Name="LBL_VERSION" Content="" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="291,341,115,10" FontSize="9" PreviewMouseDoubleClick="LBL_VERSION_PreviewMouseDoubleClick" />
 
         <!--SmallDarkOverlay:-->
         <Border CornerRadius="10,10,0,0" Margin="0,0,0,325" Background="#11000000" IsHitTestVisible="False" Focusable="False">
@@ -112,7 +112,7 @@
             </Border.Effect>
         </Border>
 
-        <Border CornerRadius="0,0,0,10" Margin="0,50,276,0" Background="#11000000" IsHitTestVisible="False" Focusable="False">
+        <Border CornerRadius="0,0,0,10" Margin="0,50,276,0" Background="#11000000" Focusable="False">
             <Border.Effect>
                 <BlurEffect Radius="1"/>
             </Border.Effect>

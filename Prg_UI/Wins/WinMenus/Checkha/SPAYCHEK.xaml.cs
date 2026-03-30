@@ -452,7 +452,6 @@ namespace Wins.WinMenus.Checkha
 
                 //ERROR
                 //(THE_WIN as DEED_HEAD).CmdSaveRecord(((THE_WIN as DEED_HEAD).Child14.Items[INDEX_DG] as DEED_DTL));
-                (THE_WIN as Prg_UI.Wins.WinMenus.HESABDARI.PGET_HED).SANAD();
 
                 this.Close();
             }

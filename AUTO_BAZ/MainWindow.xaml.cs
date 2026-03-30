@@ -965,11 +965,25 @@ namespace AUTO_BAZ
                         rcount = Convert.ToInt64(Text23.Text);
                     }));
                     var RST4 = dbms.DoGetDataSQL<rst4_model>("SELECT TCOD_STUFGROUP.CODE, TCOD_STUFGROUP.NAMES FROM TCOD_STUFGROUP WHERE (((TCOD_STUFGROUP.CODE)<>0)) ORDER BY TCOD_STUFGROUP.NAMES").ToList(); LogWriter.WriteLog($"RST4.Count = {RST4.Count}");
-                    var rst3 = dbms.DoGetDataSQL<INVO_LST>("SELECT * FROM INVO_LST").ToList(); LogWriter.WriteLog($"rst3.Count = {rst3.Count}");
+                    var rst3 = dbms.DoGetDataSQL<INVO_LST>("SELECT CODE,ANBAR,ID FROM INVO_LST").ToList(); LogWriter.WriteLog($"rst3.Count = {rst3.Count}");
                     var RST6 = dbms.DoGetDataSQL<ANBGRD_LST>("SELECT * FROM ANBGRD_LST").ToList(); LogWriter.WriteLog($"RST6.Count = {RST6.Count}");
                     if (Strings.Mid(Baseknow.OPTIONSS, 66, 1) == "5")
                     {
                         var rst = dbms.DoGetDataSQL<THE_QUERY1>("SELECT     dbo.STUF_FSK.CODE, dbo.STUF_FSK.ANBAR, dbo.STUF_FSK.MOGODI_A, dbo.STUF_FSK.FI_A, dbo.STUF_FSK.MABL_A FROM         dbo.STUF_DEF INNER JOIN                      dbo.STUF_FSK ON dbo.STUF_DEF.CODE = dbo.STUF_FSK.CODE GROUP BY dbo.STUF_FSK.CODE, dbo.STUF_FSK.ANBAR, dbo.STUF_FSK.MOGODI_A, dbo.STUF_FSK.FI_A, dbo.STUF_FSK.MABL_A").ToList(); LogWriter.WriteLog($" After    if (Strings.Mid(Baseknow.OPTIONSS, 66, 1) == \"5\") rst.Count = {rst.Count}");
+
+                        //قبل از شروع حلقه، کالاهایی که هیچ فاکتوری ندارند را از لیست حذف کردیم تا برای آن‌ها بی‌خودی VIEW ساخته نشود.
+                        // فیلتر کردن کدهایی که هیچ تراکنشی ندارند تا از ساخت VIEW بی‌مورد جلوگیری شود
+                        // کالاهایی که فاکتور دارند (INVO_LST)
+                        var rst3Lookup = rst3.Select(x => (x.CODE?.Trim(), x.ANBAR)).ToHashSet();
+                        // کالاهایی که انبارگردانی دارند (ANBGRD_LST) — بدون ANBAR چون در جدول نیست
+                        var rst6CodeLookup = RST6.Select(x => x.CODE?.Trim()).ToHashSet();
+                        // نگه‌دار کالایی که حداقل یکی از دو منبع را داشته باشد
+                        rst = rst.Where(r =>
+                            rst3Lookup.Contains((r.CODE?.Trim(), r.ANBAR ?? 0))  // دارای فاکتور
+                            || rst6CodeLookup.Contains(r.CODE?.Trim())            // یا دارای انبارگردانی
+                        ).ToList();
+                        LogWriter.WriteLog($"rst.Count after filtering by rst3 transactions = {rst.Count}");
+
                         //CL_HESABDARI_AUTO_BAZ.ExecuteWithPreferredLoop(0, rst.Count, r =>
                         var dbParallelOptions = CL_HESABDARI_AUTO_BAZ.BuildDbAwareParallelOptions(rst.Count);
                         CL_HESABDARI_AUTO_BAZ.ExecuteWithPreferredLoop(0, rst.Count, dbParallelOptions, r => //while (!rst.EOF)

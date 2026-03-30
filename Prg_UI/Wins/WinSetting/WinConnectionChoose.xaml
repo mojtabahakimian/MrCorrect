@@ -62,15 +62,15 @@
         <Label Content="اتصال به سرور"   HorizontalContentAlignment="Center" Margin="0,50,0,0" VerticalAlignment="Top"  FlowDirection="RightToLeft" FontSize="14" Foreground="#E51B1B1C" Height="34" PreviewMouseLeftButtonDown="Label_PreviewMouseLeftButtonDown"/>
 
         <Button x:Name="GENERAL_RANG" Visibility="Collapsed" Margin="109,204,550,149"/>
-        <Button x:Name="Btn_GetServers"  Style="{StaticResource MaterialDesignFlatButton}" Content="دریافت سرور ها" HorizontalAlignment="Left" Margin="11,90,0,0" VerticalAlignment="Top" Height="31" Width="108" Click="Btn_GetServers_Click" FontSize="11" Foreground="#FF1A1A1A" Background="{x:Null}" BorderBrush="{x:Null}"/>
+        <Button x:Name="Btn_GetServers"  Style="{StaticResource MaterialDesignFlatButton}" Content="دریافت سرور ها" HorizontalAlignment="Left" Margin="24,109,0,0" VerticalAlignment="Top" Height="31" Width="108" Click="Btn_GetServers_Click" FontSize="11" Foreground="#FF1A1A1A" Background="{x:Null}" BorderBrush="{x:Null}"/>
         <Label x:Name="lblconnecting" Visibility="Hidden" Content=". . . در حال تست" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Background="#D8252526" Foreground="White"  FontSize="22"/>
 
         <!-- Thin progress bar for server scan – appears just below the GetServers button -->
         <ProgressBar x:Name="PgbScanLoading"
                      IsIndeterminate="True"
                      HorizontalAlignment="Left" VerticalAlignment="Top"
-                     Margin="11,121,0,0" Width="108" Height="3"
-                     Visibility="Collapsed"/>
+                     Margin="23,140,0,0" Width="108" Height="3"
+                     Visibility="Hidden"/>
 
         <!-- Toast notification – soft popup shown after scan -->
         <Border x:Name="BrdToast"

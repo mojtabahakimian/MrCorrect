@@ -582,7 +582,19 @@ CornerRadius="2" />
             </syncfusion:SfDataGrid.Resources>
 
             <syncfusion:SfDataGrid.Columns>
-                
+                <syncfusion:GridTemplateColumn HeaderText="ليست كارت انبار" Width="120" MappingName="IsButtony" FilterRowEditorType="None" AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
+                    <syncfusion:GridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button x:Name="BTN_KART_TMP" IsTabStop="False" Click="BTN_KART_TMP_Click" Tag="{Binding}"
+                                    materialDesign:ButtonAssist.CornerRadius="2"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                                    HorizontalContentAlignment="Center">
+                                <materialDesign:PackIcon Kind="ViewList"/>
+                            </Button>
+                        </DataTemplate>
+                    </syncfusion:GridTemplateColumn.CellTemplate>
+                </syncfusion:GridTemplateColumn>
                 <syncfusion:GridTemplateColumn HeaderText="مغایرت گیری"  Width="100" MappingName="IsButtony" FilterRowEditorType="None"   AllowSorting="False" AllowFiltering="False" AllowEditing="False" AllowGrouping="False">
                     <syncfusion:GridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -614,7 +626,7 @@ CornerRadius="2" />
                 </syncfusion:GridTemplateColumn>
 
                 <syncfusion:GridTextColumn HeaderText="انبار" MappingName="ANBARN" Width="100"/>
-                <syncfusion:GridTextColumn HeaderText="کد انبار" MappingName="ANBAR" Width="80"/>
+                <syncfusion:GridTextColumn HeaderText="کد انبار" MappingName="ANBAR" Width="90"/>
                 <syncfusion:GridTextColumn HeaderText="کدکالا" MappingName="CODE" Width="80" />
                 <syncfusion:GridTextColumn HeaderText="فی" MappingName="FII" Width="110"/>
                 <syncfusion:GridTextColumn HeaderText=" مبلغ موجودی" MappingName="MABLK" Width="120">

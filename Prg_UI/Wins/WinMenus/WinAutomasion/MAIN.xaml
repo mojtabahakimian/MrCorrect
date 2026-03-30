@@ -400,7 +400,7 @@
                 <CheckBox Click="RefloadBtn_Click" Foreground="{DynamicResource MaterialDesignBody}" Content="مرخصی" Tag="37" Margin="5" VerticalAlignment="Top" HorizontalAlignment="Right" Width="auto" FlowDirection="RightToLeft" FontSize="11" />
             </WrapPanel>
 
-            <Border x:Name="LBL_STATE_RESULT" Margin="8,213,3,10" Opacity="0" Visibility="Visible" Panel.ZIndex="10">
+            <Border x:Name="LBL_STATE_RESULT" Margin="8,213,3,10" Opacity="0" Visibility="Hidden" Panel.ZIndex="10">
                 <Grid>
                     <Border Background="White" Opacity="0.55" CornerRadius="10"/>
                     <materialDesign:Card UniformCornerRadius="50" Width="58" Height="58" Padding="0"
