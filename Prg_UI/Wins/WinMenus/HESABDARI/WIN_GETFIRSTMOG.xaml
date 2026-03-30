@@ -8,7 +8,7 @@
         xmlns:CNC="clr-namespace:Prg_UI.CUC"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        Height="310" Width="600"
+        Height="340" Width="600"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         FontFamily="{StaticResource IRANYEKAN}"
         Background="{x:Null}"
@@ -83,26 +83,26 @@
                                Margin="0,4,0,32"/>
 
                 <DockPanel LastChildFill="True">
-                    <Button  x:Name="Command3" Click="Command3_Click" Content="شروع دریافت موجودی انتهای از سال قبل" BorderBrush="{x:Null}" FontSize="11" Foreground="#DDFFFFFF" Height="34" />
+                    <Button  x:Name="Command3" Click="Command3_Click" Content="شروع دریافت موجودی انتهای از سال قبل" BorderBrush="{x:Null}" FontSize="12" Foreground="#DDFFFFFF" Height="40" />
                 </DockPanel>
 
-                <Border x:Name="ProgressPanel" Visibility="Visible"
-        Background="{DynamicResource MaterialDesignPaper}"
-        BorderThickness="1" CornerRadius="8" Padding="16,12">
+                <Border x:Name="ProgressPanel" Visibility="Hidden" Margin="0,15,0,0"
+                        Background="{StaticResource MaterialDesignPaper}"
+                        BorderThickness="1" CornerRadius="8" Padding="16,12">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <DockPanel Grid.Row="0" Margin="0,0,0,10" LastChildFill="False">
+                        <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="False">
 
                             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
                                 <materialDesign:PackIcon Kind="CloudUploadOutline" Width="18" Height="18" 
                                          Foreground="{Binding ElementName=GENERAL_RANG, Path=Background}" 
                                          Margin="0,0,0,0"/>
                                 <TextBlock x:Name="ProgText" Text="در حال آماده‌سازی..."
-                           Foreground="{DynamicResource MaterialDesignBody}"
+                           Foreground="{StaticResource MaterialDesignBody}"
                            FontSize="13" FontWeight="Medium" Margin="6,0,0,0" VerticalAlignment="Center"/>
                             </StackPanel>
 
@@ -117,11 +117,26 @@
 
                         </DockPanel>
 
-                        <ProgressBar x:Name="ProgBar" Grid.Row="1" Minimum="0" Maximum="100" Height="8"
+                        <ProgressBar x:Name="ProgBar" Grid.Row="1" Minimum="0" Maximum="100" Height="14"
                      Foreground="{Binding ElementName=GENERAL_RANG, Path=Background}"
-                     Background="{DynamicResource MaterialDesignDivider}"
-                     Style="{StaticResource MaterialDesignLinearProgressBar}"
-                     materialDesign:TransitionAssist.DisableTransitions="False" />
+                     Background="{StaticResource MaterialDesignDivider}"
+                     BorderThickness="0">
+                            <ProgressBar.Template>
+                                <ControlTemplate TargetType="ProgressBar">
+                                    <Grid x:Name="TemplateRoot">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="7" />
+
+                                        <Grid x:Name="PART_Track">
+                                            <Border x:Name="PART_Indicator" 
+                                    Background="{TemplateBinding Foreground}" 
+                                    CornerRadius="7" 
+                                    HorizontalAlignment="Left" />
+                                        </Grid>
+                                    </Grid>
+                                </ControlTemplate>
+                            </ProgressBar.Template>
+                        </ProgressBar>
+
                     </Grid>
                 </Border>
 
