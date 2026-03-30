@@ -92,6 +92,11 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         public double? NUMBER_TO_OPEN { get; set; }
         public bool ChangeIsHappend { get; private set; }
 
+        public class MissingAccountInfo
+        {
+            public string HES { get; set; }
+            public string Level { get; set; }
+        }
         public class COMMODEL1
         {
             public string NAME { get; set; } = "";
@@ -435,82 +440,89 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 {
                     // انتقال حساب‌های مورد نیاز از سال قبل
                     string transferAccountsSql = $@"
-            INSERT INTO TOTA_HES (HES_K, NAM_HES_K)
-            SELECT DISTINCT HES_K, NAM_HES_K
-            FROM [{dbName}].dbo.TOTA_HES tk
-            WHERE HES_K IN (
-                SELECT DISTINCT HES_K FROM [{dbName}].dbo.DEED_DTL WHERE N_S = @Old_NS
-            )
-            AND NOT EXISTS (SELECT 1 FROM TOTA_HES WHERE HES_K = tk.HES_K);
+    -- 1) TOTA_HES (کل)
+    INSERT INTO TOTA_HES (NUMBER, NAME)
+    SELECT DISTINCT tk.NUMBER, tk.NAME
+    FROM [{dbName}].dbo.TOTA_HES tk
+    WHERE EXISTS (
+        SELECT 1 FROM [{dbName}].dbo.DEED_DTL 
+        WHERE N_S = @Old_NS AND HES_K = tk.NUMBER
+    )
+    AND NOT EXISTS (SELECT 1 FROM TOTA_HES WHERE NUMBER = tk.NUMBER);
 
-            INSERT INTO DETA_HES (HES_K, HES_M, NAM_HES_M)
-            SELECT DISTINCT HES_K, HES_M, NAM_HES_M
-            FROM [{dbName}].dbo.DETA_HES dm
-            WHERE EXISTS (
-                SELECT 1 FROM [{dbName}].dbo.DEED_DTL 
-                WHERE N_S = @Old_NS AND HES_K = dm.HES_K AND HES_M = dm.HES_M)
-            AND NOT EXISTS (
-                SELECT 1 FROM DETA_HES WHERE HES_K = dm.HES_K AND HES_M = dm.HES_M
-            );
+    -- 2) DETA_HES (معین)
+    INSERT INTO DETA_HES (N_KOL, NUMBER, NAME)
+    SELECT DISTINCT dm.N_KOL, dm.NUMBER, dm.NAME
+    FROM [{dbName}].dbo.DETA_HES dm
+    WHERE EXISTS (
+        SELECT 1 FROM [{dbName}].dbo.DEED_DTL 
+        WHERE N_S = @Old_NS AND HES_K = dm.N_KOL AND HES_M = dm.NUMBER
+    )
+    AND NOT EXISTS (
+        SELECT 1 FROM DETA_HES WHERE N_KOL = dm.N_KOL AND NUMBER = dm.NUMBER
+    );
 
-            INSERT INTO TDETA_HES (HES_K, HES_M, HES_T, NAM_HES_T)
-            SELECT DISTINCT HES_K, HES_M, HES_T, NAM_HES_T
-            FROM [{dbName}].dbo.TDETA_HES tm
-            WHERE EXISTS (
-                SELECT 1 FROM [{dbName}].dbo.DEED_DTL 
-                WHERE N_S = @Old_NS AND HES_K = tm.HES_K AND HES_M = tm.HES_M AND HES_T = tm.HES_T
-            )
-            AND NOT EXISTS (
-                SELECT 1 FROM TDETA_HES 
-                WHERE HES_K = tm.HES_K AND HES_M = tm.HES_M AND HES_T = tm.HES_T
-            );
+    -- 3) TDETA_HES (تفصیلی 1)
+    INSERT INTO TDETA_HES (N_KOL, NUMBER, TNUMBER, NAME)
+    SELECT DISTINCT tm.N_KOL, tm.NUMBER, tm.TNUMBER, tm.NAME
+    FROM [{dbName}].dbo.TDETA_HES tm
+    WHERE EXISTS (
+        SELECT 1 FROM [{dbName}].dbo.DEED_DTL 
+        WHERE N_S = @Old_NS AND HES_K = tm.N_KOL AND HES_M = tm.NUMBER AND HES_T = tm.TNUMBER
+    )
+    AND NOT EXISTS (
+        SELECT 1 FROM TDETA_HES 
+        WHERE N_KOL = tm.N_KOL AND NUMBER = tm.NUMBER AND TNUMBER = tm.TNUMBER
+    );
 
-            INSERT INTO TDETA_HES2 (HES_K, HES_M, HES_T, HES_T2, NAM_HES_T2)
-            SELECT DISTINCT HES_K, HES_M, HES_T, HES_T2, NAM_HES_T2
-            FROM [{dbName}].dbo.TDETA_HES2 t2
-            WHERE EXISTS (
-                SELECT 1 FROM [{dbName}].dbo.DEED_DTL 
-                WHERE N_S = @Old_NS 
-                AND HES_K = t2.HES_K AND HES_M = t2.HES_M 
-                AND HES_T = t2.HES_T AND HES_T2 = t2.HES_T2
-            )
-            AND NOT EXISTS (
-                SELECT 1 FROM TDETA_HES2 
-                WHERE HES_K = t2.HES_K AND HES_M = t2.HES_M 
-                AND HES_T = t2.HES_T AND HES_T2 = t2.HES_T2
-            );
+    -- 4) TDETA_HES2 (تفصیلی 2)
+    INSERT INTO TDETA_HES2 (N_KOL, NUMBER, TNUMBER, TNUMBER2, NAME)
+    SELECT DISTINCT t2.N_KOL, t2.NUMBER, t2.TNUMBER, t2.TNUMBER2, t2.NAME
+    FROM [{dbName}].dbo.TDETA_HES2 t2
+    WHERE EXISTS (
+        SELECT 1 FROM [{dbName}].dbo.DEED_DTL 
+        WHERE N_S = @Old_NS AND HES_K = t2.N_KOL AND HES_M = t2.NUMBER 
+        AND HES_T = t2.TNUMBER AND HES_T2 = t2.TNUMBER2
+    )
+    AND NOT EXISTS (
+        SELECT 1 FROM TDETA_HES2 
+        WHERE N_KOL = t2.N_KOL AND NUMBER = t2.NUMBER 
+        AND TNUMBER = t2.TNUMBER AND TNUMBER2 = t2.TNUMBER2
+    );
 
-            INSERT INTO TDETA_HES3 (HES_K, HES_M, HES_T, HES_T2, HES_T3, NAM_HES_T3)
-            SELECT DISTINCT HES_K, HES_M, HES_T, HES_T2, HES_T3, NAM_HES_T3
-            FROM [{dbName}].dbo.TDETA_HES3 t3
-            WHERE EXISTS (
-                SELECT 1 FROM [{dbName}].dbo.DEED_DTL 
-                WHERE N_S = @Old_NS 
-                AND HES_K = t3.HES_K AND HES_M = t3.HES_M 
-                AND HES_T = t3.HES_T AND HES_T2 = t3.HES_T2 AND HES_T3 = t3.HES_T3
-            )
-            AND NOT EXISTS (
-                SELECT 1 FROM TDETA_HES3 
-                WHERE HES_K = t3.HES_K AND HES_M = t3.HES_M 
-                AND HES_T = t3.HES_T AND HES_T2 = t3.HES_T2 AND HES_T3 = t3.HES_T3
-            );
+    -- 5) TDETA_HES3 (تفصیلی 3)
+    INSERT INTO TDETA_HES3 (N_KOL, NUMBER, TNUMBER, TNUMBER2, TNUMBER3, NAME)
+    SELECT DISTINCT t3.N_KOL, t3.NUMBER, t3.TNUMBER, t3.TNUMBER2, t3.TNUMBER3, t3.NAME
+    FROM [{dbName}].dbo.TDETA_HES3 t3
+    WHERE EXISTS (
+        SELECT 1 FROM [{dbName}].dbo.DEED_DTL 
+        WHERE N_S = @Old_NS AND HES_K = t3.N_KOL AND HES_M = t3.NUMBER 
+        AND HES_T = t3.TNUMBER AND HES_T2 = t3.TNUMBER2 AND HES_T3 = t3.TNUMBER3
+    )
+    AND NOT EXISTS (
+        SELECT 1 FROM TDETA_HES3 
+        WHERE N_KOL = t3.N_KOL AND NUMBER = t3.NUMBER 
+        AND TNUMBER = t3.TNUMBER AND TNUMBER2 = t3.TNUMBER2 AND TNUMBER3 = t3.TNUMBER3
+    );
 
-            INSERT INTO TDETA_HES4 (HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, NAM_HES_T4)
-            SELECT DISTINCT HES_K, HES_M, HES_T, HES_T2, HES_T3, HES_T4, NAM_HES_T4
-            FROM [{dbName}].dbo.TDETA_HES4 t4
-            WHERE EXISTS (
-                SELECT 1 FROM [{dbName}].dbo.DEED_DTL 
-                WHERE N_S = @Old_NS 
-                AND HES_K = t4.HES_K AND HES_M = t4.HES_M 
-                AND HES_T = t4.HES_T AND HES_T2 = t4.HES_T2 
-                AND HES_T3 = t4.HES_T3 AND HES_T4 = t4.HES_T4
-            )
-            AND NOT EXISTS (
-                SELECT 1 FROM TDETA_HES4 
-                WHERE HES_K = t4.HES_K AND HES_M = t4.HES_M 
-                AND HES_T = t4.HES_T AND HES_T2 = t4.HES_T2 
-                AND HES_T3 = t4.HES_T3 AND HES_T4 = t4.HES_T4
-            );"; dbms.DoExecuteSQL(transferAccountsSql, new { Old_NS = s1Val });
+    -- 6) TDETA_HES4 (تفصیلی 4)
+    INSERT INTO TDETA_HES4 (N_KOL, NUMBER, TNUMBER, TNUMBER2, TNUMBER3, TNUMBER4, NAME)
+    SELECT DISTINCT t4.N_KOL, t4.NUMBER, t4.TNUMBER, t4.TNUMBER2, t4.TNUMBER3, t4.TNUMBER4, t4.NAME
+    FROM [{dbName}].dbo.TDETA_HES4 t4
+    WHERE EXISTS (
+        SELECT 1 FROM [{dbName}].dbo.DEED_DTL 
+        WHERE N_S = @Old_NS AND HES_K = t4.N_KOL AND HES_M = t4.NUMBER 
+        AND HES_T = t4.TNUMBER AND HES_T2 = t4.TNUMBER2 
+        AND HES_T3 = t4.TNUMBER3 AND HES_T4 = t4.TNUMBER4
+    )
+    AND NOT EXISTS (
+        SELECT 1 FROM TDETA_HES4 
+        WHERE N_KOL = t4.N_KOL AND NUMBER = t4.NUMBER 
+        AND TNUMBER = t4.TNUMBER AND TNUMBER2 = t4.TNUMBER2 
+        AND TNUMBER3 = t4.TNUMBER3 AND TNUMBER4 = t4.TNUMBER4
+    );";
+
+                    dbms.DoExecuteSQL(transferAccountsSql, new { Old_NS = s1Val });
                 }
                 catch (Exception) { }
 
@@ -536,38 +548,84 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             }
             catch (SqlException sqlEx)
             {
-                string userMessage = "خطا: ";
-                switch (sqlEx.Number)
+                if (sqlEx.Message.Contains("FK_DEED_DTL") || sqlEx.Message.Contains("FOREIGN KEY"))
                 {
-                    case 547: // Foreign key constraint
-                        userMessage = "خطا: برخی حساب‌ها در سال جدید یافت نشد. لطفاً ابتدا ساختار حساب‌ها را بررسی کنید.";
-                        break;
-                    case 2627: // Duplicate key
-                    case 2601:
-                        userMessage = "خطا: شماره سند تکراری است. لطفاً شماره دیگری انتخاب کنید.";
-                        break;
-                    case 4060: // Cannot open databaseuserMessage = "خطا: دیتابیس سال قبل در دسترس نیست. نام دیتابیس را بررسی کنید.";
-                        break;
-                    case 208: // Invalid object name
-                        userMessage = "خطا: جدول مورد نظر در دیتابیس یافت نشد. ساختار دیتابیس را بررسی کنید.";
-                        break;
-                    case 515: // Cannot insert NULL
-                        userMessage = "خطا: اطلاعات ناقص است. تمام فیلدهای ضروری را پر کنید.";
-                        break;
-                    case 1205: // Deadlock
-                        userMessage = "خطا: دیتابیس مشغول است. لطفاً دوباره تلاش کنید.";
-                        break;
-                    case -1: // Connection timeout
-                    case -2:
-                        userMessage = "خطا: ارتباط با دیتابیس قطع شد. اتصال شبکه را بررسی کنید.";
-                        break;
-                    case 18456: // Login failed
-                        userMessage = "خطا: دسترسی به دیتابیس رد شد. مجوزهای کاربری را بررسی کنید.";
-                        break;
-                    default: userMessage = $"خطای دیتابیس: "; break; //{sqlEx.Message}
-                }
+                    string checkSql = $@"
+            SELECT DISTINCT 
+                d.HES,
+                CASE 
+                    WHEN NOT EXISTS (SELECT 1 FROM TOTA_HES WHERE NUMBER = d.HES_K) THEN N'کل'
+                    WHEN NOT EXISTS (SELECT 1 FROM DETA_HES WHERE N_KOL = d.HES_K AND NUMBER = d.HES_M) THEN N'معین'
+                    WHEN d.HES_T IS NOT NULL AND NOT EXISTS (SELECT 1 FROM TDETA_HES WHERE N_KOL = d.HES_K AND NUMBER = d.HES_M AND TNUMBER = d.HES_T) THEN N'تفصیلی1'
+                    WHEN d.HES_T2 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM TDETA_HES2 WHERE N_KOL = d.HES_K AND NUMBER = d.HES_M AND TNUMBER = d.HES_T AND TNUMBER2 = d.HES_T2) THEN N'تفصیلی2'
+                    WHEN d.HES_T3 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM TDETA_HES3 WHERE N_KOL = d.HES_K AND NUMBER = d.HES_M AND TNUMBER = d.HES_T AND TNUMBER2 = d.HES_T2 AND TNUMBER3 = d.HES_T3) THEN N'تفصیلی3'
+                    WHEN d.HES_T4 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM TDETA_HES4 WHERE N_KOL = d.HES_K AND NUMBER = d.HES_M AND TNUMBER = d.HES_T AND TNUMBER2 = d.HES_T2 AND TNUMBER3 = d.HES_T3 AND TNUMBER4 = d.HES_T4) THEN N'تفصیلی4'
+                END AS Level
+            FROM [{dbName}].dbo.DEED_DTL d
+            WHERE N_S = @Old_NS
+            AND (
+                NOT EXISTS (SELECT 1 FROM TOTA_HES WHERE NUMBER = d.HES_K)
+                OR NOT EXISTS (SELECT 1 FROM DETA_HES WHERE N_KOL = d.HES_K AND NUMBER = d.HES_M)
+                OR (d.HES_T IS NOT NULL AND NOT EXISTS (SELECT 1 FROM TDETA_HES WHERE N_KOL = d.HES_K AND NUMBER = d.HES_M AND TNUMBER = d.HES_T))
+                OR (d.HES_T2 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM TDETA_HES2 WHERE N_KOL = d.HES_K AND NUMBER = d.HES_M AND TNUMBER = d.HES_T AND TNUMBER2 = d.HES_T2))
+                OR (d.HES_T3 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM TDETA_HES3 WHERE N_KOL = d.HES_K AND NUMBER = d.HES_M AND TNUMBER = d.HES_T AND TNUMBER2 = d.HES_T2 AND TNUMBER3 = d.HES_T3))
+                OR (d.HES_T4 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM TDETA_HES4 WHERE N_KOL = d.HES_K AND NUMBER = d.HES_M AND TNUMBER = d.HES_T AND TNUMBER2 = d.HES_T2 AND TNUMBER3 = d.HES_T3 AND TNUMBER4 = d.HES_T4))
+            )";
 
-                new Msgwin(false, userMessage).ShowDialog();
+                    var missingAccounts = dbms.DoGetDataSQL<MissingAccountInfo>(checkSql, new { Old_NS = s1Val });
+
+                    if (missingAccounts != null && missingAccounts.Any())
+                    {
+                        List<MsgModel> errorMessages = new List<MsgModel>();
+                        errorMessages.Add(new MsgModel { MessageText_U = "حساب‌های زیر در سال جاری موجود نیستند:" });
+
+                        foreach (var acc in missingAccounts)
+                        {
+                            errorMessages.Add(new MsgModel { MessageText_U = $"کد: {acc.HES} - سطح: {acc.Level}" });
+                        }
+
+                        new MsgListwin(false, errorMessages).ShowDialog();
+                    }
+                    else
+                    {
+                        new Msgwin(false, "خطا در انجام عملیات: ").ShowDialog();
+                    }
+                }
+                else
+                {
+                    string userMessage = "خطا: ";
+                    switch (sqlEx.Number)
+                    {
+                        case 547: // Foreign key constraint
+                            userMessage = "خطا: برخی حساب‌ها در سال جدید یافت نشد. لطفاً ابتدا ساختار حساب‌ها را بررسی کنید.";
+                            break;
+                        case 2627: // Duplicate key
+                        case 2601:
+                            userMessage = "خطا: شماره سند تکراری است. لطفاً شماره دیگری انتخاب کنید.";
+                            break;
+                        case 4060: // Cannot open databaseuserMessage = "خطا: دیتابیس سال قبل در دسترس نیست. نام دیتابیس را بررسی کنید.";
+                            break;
+                        case 208: // Invalid object name
+                            userMessage = "خطا: جدول مورد نظر در دیتابیس یافت نشد. ساختار دیتابیس را بررسی کنید.";
+                            break;
+                        case 515: // Cannot insert NULL
+                            userMessage = "خطا: اطلاعات ناقص است. تمام فیلدهای ضروری را پر کنید.";
+                            break;
+                        case 1205: // Deadlock
+                            userMessage = "خطا: دیتابیس مشغول است. لطفاً دوباره تلاش کنید.";
+                            break;
+                        case -1: // Connection timeout
+                        case -2:
+                            userMessage = "خطا: ارتباط با دیتابیس قطع شد. اتصال شبکه را بررسی کنید.";
+                            break;
+                        case 18456: // Login failed
+                            userMessage = "خطا: دسترسی به دیتابیس رد شد. مجوزهای کاربری را بررسی کنید.";
+                            break;
+                        default: userMessage = $"خطای دیتابیس: "; break; //{sqlEx.Message}
+                    }
+
+                    new Msgwin(false, userMessage).ShowDialog();
+                }
             }
             catch (FormatException)
             {
