@@ -301,7 +301,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
 
                 // Performance optimization:
                 // 1) Run each major phase separately to report progress in UI.
-                // 2) Replace costly row-by-row/cross-apply inventory calculation with set-based aggregation from previous year STUF_FSK.
+                // 2) Keep legacy AKMOGUDI_KOL_ANBAR calculation but reduce function calls and speed up update joins with indexed temp table.
                 var steps = new[]
                 {
                     new
@@ -335,22 +335,28 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     new
                     {
                         Percent = 70,
-                        Message = "مرحله 3 از 4: محاسبه موجودی سال قبل (بهینه‌شده)...",
+                        Message = "مرحله 3 از 4: محاسبه موجودی سال قبل با AKMOGUDI_KOL_ANBAR...",
                         Sql = $@"IF OBJECT_ID(N'dbo.STUFFSK', N'U') IS NOT NULL
                                 DROP TABLE dbo.STUFFSK;
 
                             SELECT
-                                P.CODE,
-                                P.ANBAR,
-                                SUM(ISNULL(P.MOGODI_A, 0)) AS MAND,
-                                CASE
-                                    WHEN SUM(ISNULL(P.MOGODI_A, 0)) = 0 THEN MAX(ISNULL(P.FI_A, 0))
-                                    ELSE SUM(ISNULL(P.MABL_A, 0)) / NULLIF(SUM(ISNULL(P.MOGODI_A, 0)), 0)
-                                END AS FII,
-                                SUM(ISNULL(P.MABL_A, 0)) AS MABLK
+                                AK.CODE,
+                                AK.MAND,
+                                AK.FII,
+                                AK.MABLK,
+                                AK.ANBAR
                             INTO dbo.STUFFSK
-                            FROM {safeDbName}.dbo.STUF_FSK AS P WITH (NOLOCK)
-                            GROUP BY P.CODE, P.ANBAR;"
+                            FROM {safeDbName}.dbo.TCOD_ANBAR AS A WITH (NOLOCK)
+                            CROSS APPLY {safeDbName}.dbo.AKMOGUDI_KOL_ANBAR(99999999, A.CODE) AS AK
+                            WHERE EXISTS
+                            (
+                                SELECT 1
+                                FROM dbo.STUF_FSK AS F
+                                WHERE F.ANBAR = A.CODE
+                            );
+
+                            CREATE CLUSTERED INDEX IX_STUFFSK_CODE_ANBAR
+                                ON dbo.STUFFSK (CODE, ANBAR);"
                     },
                     new
                     {
