@@ -1,6 +1,8 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_SendInvoice.CNNMANAGER;
+using Dapper;
+using Microsoft.Data.SqlClient;
 using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
@@ -289,7 +291,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             ProgressPanel.Visibility = Visibility.Visible;
             ProgBar.Value = 0;
             ProgText.Text = "در حال آماده‌سازی...";
-
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             try
             {
                 // Gather parameters
@@ -313,94 +315,105 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         });
                     }
 
-                    UpdateProgress(5, "در حال پشتیبان‌گیری از کالاها...");
-
-                    string sqlBackupDef = $@"
-                    SET NOCOUNT ON;
-                    INSERT INTO dbo.TR_STUF_DEF
-                    (
-                        CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F,
-                        DEPART, IDD, CMBAA, VAZN, OKF, UP_TIME, UP_DATE, UP_USER_NAME, PC_NAME, IPADD
-                    )
-                    SELECT
-                        CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F,
-                        DEPART, IDD, CMBAA, VAZN, OKF, @UpTime, @UpDate, @UpUserName, @PcName, @IpAdd
-                    FROM dbo.STUF_DEF;";
-
-                    dbms.DoExecuteSQL(sqlBackupDef, new
+                    using (var connection = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
                     {
-                        UpTime = upTime,
-                        UpDate = upDate,
-                        UpUserName = upUserName,
-                        PcName = pcName,
-                        IpAdd = ipAddress
-                    });
-
-                    UpdateProgress(15, "در حال پشتیبان‌گیری از موجودی‌ها...");
-
-                    string sqlBackupFsk = $@"
-                    SET NOCOUNT ON;
-                    INSERT INTO dbo.TR_STUF_FSK
-                    (
-                        CODE, ANBAR, MOGODI_A, FI_A, MABL_A, MANDAH_A, VAZ, IDD, POSITION,
-                        B_SEF, N_SEF, MIN_M, MAX_M, UP_TIME, UP_DATE
-                    )
-                    SELECT
-                        CODE, ANBAR, MOGODI_A, FI_A, MABL_A, MANDAH_A, VAZ, IDD, POSITION,
-                        B_SEF, N_SEF, MIN_M, MAX_M, @UpTime, @UpDate
-                    FROM dbo.STUF_FSK;";
-
-                    dbms.DoExecuteSQL(sqlBackupFsk, new { UpTime = upTime, UpDate = upDate });
-
-                    UpdateProgress(25, "در حال دریافت لیست انبارها...");
-
-                    // Create/Recreate empty STUFFSK temp table
-                    string sqlCreateTemp = @"
-                    IF OBJECT_ID(N'dbo.STUFFSK', N'U') IS NOT NULL DROP TABLE dbo.STUFFSK;
-                    CREATE TABLE dbo.STUFFSK (CODE NVARCHAR(50), MAND FLOAT, FII FLOAT, MABLK FLOAT, ANBAR NVARCHAR(50));";
-                    dbms.DoExecuteSQL(sqlCreateTemp);
-
-                    // Fetch list of warehouses
-                    var anbars = dbms.DoGetDataSQL<string>($"SELECT CODE FROM {safeDbName}.dbo.TCOD_ANBAR").ToList();
-
-                    if (anbars.Count > 0)
-                    {
-                        for (int i = 0; i < anbars.Count; i++)
+                        connection.Open();
+                        using (var transaction = connection.BeginTransaction())
                         {
-                            string anbarCode = anbars[i] ?? string.Empty;
-                            if (string.IsNullOrWhiteSpace(anbarCode)) continue;
+                            try
+                            {
+                                UpdateProgress(5, "در حال دریافت لیست انبارها...");
 
-                            int progressValue = 25 + (int)(((float)(i + 1) / anbars.Count) * 55); // 25% to 80%
-                            UpdateProgress(progressValue, $"در حال محاسبه موجودی انبار {anbarCode} ({i + 1} از {anbars.Count})...");
+                                // Create/Recreate empty STUFFSK temp table within the transaction
+                                string sqlCreateTemp = @"
+                                IF OBJECT_ID(N'dbo.STUFFSK', N'U') IS NOT NULL DROP TABLE dbo.STUFFSK;
+                                CREATE TABLE dbo.STUFFSK (CODE NVARCHAR(50), MAND FLOAT, FII FLOAT, MABLK FLOAT, ANBAR NVARCHAR(50));";
+                                connection.Execute(sqlCreateTemp, transaction: transaction, commandTimeout: 0);
 
-                            // Execute AKMOGUDI_KOL_ANBAR for this specific warehouse
-                            string sqlCalc = $@"
-                            INSERT INTO dbo.STUFFSK (CODE, MAND, FII, MABLK, ANBAR)
-                            SELECT AK.CODE, AK.MAND, AK.FII, AK.MABLK, AK.ANBAR
-                            FROM {safeDbName}.dbo.AKMOGUDI_KOL_ANBAR(99999999, @AnbarCode) AS AK;";
+                                // Fetch list of warehouses
+                                var anbars = connection.Query<string>($"SELECT CODE FROM {safeDbName}.dbo.TCOD_ANBAR", transaction: transaction, commandTimeout: 0).ToList();
 
-                            dbms.DoExecuteSQL(sqlCalc, new { AnbarCode = anbarCode });
+                                if (anbars.Count > 0)
+                                {
+                                    for (int i = 0; i < anbars.Count; i++)
+                                    {
+                                        string anbarCode = anbars[i] ?? string.Empty;
+                                        if (string.IsNullOrWhiteSpace(anbarCode)) continue;
+
+                                        int progressValue = 5 + (int)(((float)(i + 1) / anbars.Count) * 75); // 5% to 80%
+                                        UpdateProgress(progressValue, $"در حال محاسبه موجودی انبار {anbarCode} ({i + 1} از {anbars.Count})...");
+
+                                        // Execute original AKMOGUDI_KOL_ANBAR to ensure perfect decimal/float precision and legacy MSACCESS compatibility
+                                        string sqlCalc = $@"
+                                        INSERT INTO dbo.STUFFSK (CODE, MAND, FII, MABLK, ANBAR)
+                                        SELECT AK.CODE, AK.MAND, AK.FII, AK.MABLK, AK.ANBAR
+                                        FROM {safeDbName}.dbo.AKMOGUDI_KOL_ANBAR(99999999, @AnbarCode) AS AK;";
+
+                                        connection.Execute(sqlCalc, new { AnbarCode = anbarCode }, transaction: transaction, commandTimeout: 0);
+                                    }
+                                }
+
+                                UpdateProgress(85, "در حال پشتیبان‌گیری و بروزرسانی اطلاعات سال جاری...");
+
+                                // Update and Backup phase
+                                string sqlUpdateTransaction = @"
+                                SET NOCOUNT ON;
+
+                                -- 1. Backup STUF_DEF
+                                INSERT INTO dbo.TR_STUF_DEF
+                                (
+                                    CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F,
+                                    DEPART, IDD, CMBAA, VAZN, OKF, UP_TIME, UP_DATE, UP_USER_NAME, PC_NAME, IPADD
+                                )
+                                SELECT
+                                    CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F,
+                                    DEPART, IDD, CMBAA, VAZN, OKF, @UpTime, @UpDate, @UpUserName, @PcName, @IpAdd
+                                FROM dbo.STUF_DEF;
+
+                                -- 2. Backup STUF_FSK
+                                INSERT INTO dbo.TR_STUF_FSK
+                                (
+                                    CODE, ANBAR, MOGODI_A, FI_A, MABL_A, MANDAH_A, VAZ, IDD, POSITION,
+                                    B_SEF, N_SEF, MIN_M, MAX_M, UP_TIME, UP_DATE
+                                )
+                                SELECT
+                                    CODE, ANBAR, MOGODI_A, FI_A, MABL_A, MANDAH_A, VAZ, IDD, POSITION,
+                                    B_SEF, N_SEF, MIN_M, MAX_M, @UpTime, @UpDate
+                                FROM dbo.STUF_FSK;
+
+                                -- 3. Update Current Year Inventory
+                                UPDATE F
+                                SET
+                                    F.MOGODI_A = S.MAND,
+                                    F.FI_A = S.FII,
+                                    F.MABL_A = S.MABLK
+                                FROM dbo.STUF_FSK AS F
+                                INNER JOIN dbo.STUFFSK AS S
+                                    ON S.CODE = F.CODE
+                                   AND S.ANBAR = F.ANBAR;";
+
+                                connection.Execute(sqlUpdateTransaction, new
+                                {
+                                    UpTime = upTime,
+                                    UpDate = upDate,
+                                    UpUserName = upUserName,
+                                    PcName = pcName,
+                                    IpAdd = ipAddress
+                                }, transaction: transaction, commandTimeout: 0);
+
+                                transaction.Commit();
+                                UpdateProgress(100, "عملیات با موفقیت پایان یافت");
+                            }
+                            catch (Exception)
+                            {
+                                transaction.Rollback();
+                                throw; // Re-throw to be caught by outer catch block
+                            }
                         }
                     }
-
-                    UpdateProgress(85, "در حال بروزرسانی اطلاعات سال جاری...");
-
-                    string sqlUpdate = @"
-                    SET NOCOUNT ON;
-                    UPDATE F
-                    SET
-                        F.MOGODI_A = S.MAND,
-                        F.FI_A = S.FII,
-                        F.MABL_A = S.MABLK
-                    FROM dbo.STUF_FSK AS F
-                    INNER JOIN dbo.STUFFSK AS S
-                        ON S.CODE = F.CODE
-                       AND S.ANBAR = F.ANBAR;";
-
-                    dbms.DoExecuteSQL(sqlUpdate);
-
-                    UpdateProgress(100, "عملیات با موفقیت پایان یافت");
                 });
+                string finalMessage = $"موجودی‌ها با موفقیت به‌روزرسانی شد.\n\nزمان کل اجرای عملیات: {stopwatch.Elapsed.TotalSeconds:F2} ثانیه";
+                new Msgwin(false, finalMessage).ShowDialog();
 
                 new Msgwin(false, "موجودی‌ها با موفقیت به‌روزرسانی شد.").ShowDialog();
                 this.Close();
