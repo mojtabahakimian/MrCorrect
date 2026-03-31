@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Drawing;
+using Functions;
 using MaterialDesignThemes.Wpf;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
@@ -78,6 +79,7 @@ namespace Prg_UI.Wins.WinSetting
 
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         public bool NowIsReady { get; private set; }
+        private bool _canResetOtherUsersPassword;
 
         private static bool IsNull(object p)
         {
@@ -106,8 +108,22 @@ namespace Prg_UI.Wins.WinSetting
                 return;
             }
 
+            //-- تعریف کاربر جدید : USERS
+            //--تغییر نام یا حذف کاربر : USER_CHANGE
+            _canResetOtherUsersPassword = CL_HESABDARI.LETSGO("USERS") && CL_HESABDARI.LETSGO("USER_CHANGE");
+
             usname.Text = Baseknow.USERCOD.ToString();
             usna.Text = CL_HESABDARI.GETUSERNAME(Convert.ToInt32(usname.Text));
+            usna.IsReadOnly = true;
+
+            if (!_canResetOtherUsersPassword)
+            {
+                usname.IsReadOnly = true;
+            }
+            else
+            {
+                Label11_Copy1.Content = "آی دی کاربر : ";
+            }
 
             OLDPASS.Focus();
         }
@@ -165,9 +181,13 @@ namespace Prg_UI.Wins.WinSetting
                 }
                 else
                 {
-                    if (OLDPASS.Text == CL_HESABDARI.DECODEPS(rst.PSAL_NAME))
+                    bool isCurrentUser = rst.IDD == Baseknow.USERCOD;
+                    bool canChangeWithoutOldPassword = _canResetOtherUsersPassword && !isCurrentUser;
+                    bool oldPasswordIsValid = OLDPASS.Text == CL_HESABDARI.DECODEPS(rst.PSAL_NAME);
+
+                    if (canChangeWithoutOldPassword || oldPasswordIsValid)
                     {
-                        var NewPass = Strings.Trim( CL_HESABDARI.CODEPAL(pass1.Text));
+                        var NewPass = Strings.Trim(CL_HESABDARI.CODEPAL(pass1.Text));
                         SALA_DTL sALA_DTL = new SALA_DTL()
                         {
                             IDD = rst.IDD,
@@ -175,10 +195,20 @@ namespace Prg_UI.Wins.WinSetting
                         };
                         //rst.update();
                         dbms.DoExecuteSQL("UPDATE SALA_DTL SET PSAL_NAME = @PSAL_NAME WHERE IDD = @IDD", sALA_DTL);
+
+                        _ = AuditLogger.LogActionAsync(
+                            actionType: "PASSWORD_CHANGE",
+                            tableName: "SALA_DTL",
+                            recordId: rst.IDD.ToString(),
+                            oldValue: null,
+                            newValue: null,
+                            additionalInfo: $"تغییر رمز کاربر. اجراکننده: {Baseknow.UUSER} ({Baseknow.USERCOD}) | کاربر هدف: {rst.SAL_NAME} ({rst.IDD}) | روش: {(canChangeWithoutOldPassword ? "مدیر/بدون رمز قبلی" : "با رمز قبلی")}"
+                        );
                     }
                     else
                     {
                         universControl.PopNotifyShow("!آی دی کاربر یا رمز عبور صحیح نمی باشد.", Pop1, Pop1Text1, Pop_Border1);
+                        return;
                     }
 
                     this.Close();
@@ -188,7 +218,13 @@ namespace Prg_UI.Wins.WinSetting
 
         private void usname_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            usna.Text = CL_HESABDARI.GETUSERNAME(Convert.ToInt32(usname.Text));
+            if (!int.TryParse(usname.Text, out int userId))
+            {
+                usna.Text = string.Empty;
+                return;
+            }
+
+            usna.Text = CL_HESABDARI.GETUSERNAME(userId);
         }
     }
 }

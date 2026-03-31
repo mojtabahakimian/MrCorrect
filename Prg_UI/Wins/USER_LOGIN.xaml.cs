@@ -372,7 +372,7 @@ namespace Prg_UI.Wins
 
             //new WinBase().Show();
             //new WIN_GETFIRSTMOG().Show();
-            new WinConnectionChoose().Show();
+            new NEWPASSWORD().Show();
             //new F_MENU_DATE("CROS").Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_LST_SEARCH, this);
             //new WIN_F_NEWYEAR().Show();
