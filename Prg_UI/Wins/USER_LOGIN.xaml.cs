@@ -372,9 +372,9 @@ namespace Prg_UI.Wins
 
             //new WinBase().Show();
             //new WIN_GETFIRSTMOG().Show();
-            //new WIN_SANAD_EFTETAHIYAH().Show();
+            new WinConnectionChoose().Show();
             //new F_MENU_DATE("CROS").Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_LST_SEARCH, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_LST_SEARCH, this);
             //new WIN_F_NEWYEAR().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this, 1642d);
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
