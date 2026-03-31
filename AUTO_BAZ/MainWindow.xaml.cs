@@ -1252,7 +1252,7 @@ namespace AUTO_BAZ
                                                 {
                                                     rst3Filter_.FirstOrDefault().MABL = CL_HESABDARI_AUTO_BAZ.GETFIRSTPRICE(rst[r].CODE);
                                                 }
-                                                rst3Filter_.FirstOrDefault().MABL_K = Math.Round((double)(rst3Filter_.FirstOrDefault().MABL * RST2[eof].MEGHk));
+                                                rst3Filter_.FirstOrDefault().MABL_K = Math.Round(rst3Filter_.FirstOrDefault().MABL * (RST2[eof].MEGHk ?? 0));
 
                                                 dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET
                                                                                      MABL = {rst3Filter_.FirstOrDefault().MABL} ,
@@ -1261,7 +1261,7 @@ namespace AUTO_BAZ
                                                 //rst3Filter_.update();
                                             }
                                             MBKM = MBKM + rst3Filter_.FirstOrDefault().MABL_K;
-                                            MOGUDI = Math.Round(Math.Round((double)(MOGUDI + RST2[eof].MEGHk), 6), 6);
+                                            MOGUDI = Math.Round(Math.Round(MOGUDI + (RST2[eof].MEGHk ?? 0), 6), 6);
                                             if (MBKM == 0d)
                                             {
                                             }
@@ -1277,7 +1277,7 @@ namespace AUTO_BAZ
                                             }
                                             rst3Filter_.FirstOrDefault().AVRAGE = MIAN;
                                             dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET
-                                                                                     AVRAGE = {MIAN} 
+                                                                                     AVRAGE = {MIAN}
                                                             WHERE ID = {rst3Filter_.FirstOrDefault().id}");
                                             //rst3Filter_.update();
                                             break;
@@ -1285,8 +1285,8 @@ namespace AUTO_BAZ
 
                                     case 17: // كسري انبار
                                         {
-                                            MBKM = (double)(MBKM + MIAN * RST2[eof].MEGHk);
-                                            MOGUDI = Math.Round(Math.Round((double)(MOGUDI + RST2[eof].MEGHk), 6), 6);
+                                            MBKM = MBKM + MIAN * (RST2[eof].MEGHk ?? 0);
+                                            MOGUDI = Math.Round(Math.Round(MOGUDI + (RST2[eof].MEGHk ?? 0), 6), 6);
                                             if (MBKM == 0d)
                                             {
                                             }
@@ -1313,8 +1313,8 @@ namespace AUTO_BAZ
                                         }
                                     case 18: // فروش
                                         {
-                                            MBKM = (double)(MBKM - RST2[eof].MEGHk * MIAN);
-                                            MOGUDI = (double)(MOGUDI - RST2[eof].MEGHk);
+                                            MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
+                                            MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
                                             var RST6Filter = RST6.Where(x => x.CODE == RST2[eof].CODE && x.GRD_NUM == RST2[eof].NUMBER).FirstOrDefault();
                                             //RST6.Filter = "CODE = '" + RST2[eof].CODE + "' AND GRD_NUM = " + RST2[eof].NUMBER;
                                             RST6.FirstOrDefault().MABL = MIAN;
@@ -1324,8 +1324,8 @@ namespace AUTO_BAZ
                                         }
                                     case 26: // برگشت خريد
                                         {
-                                            MBKM = (double)(MBKM - RST2[eof].MEGHk * MIAN);
-                                            MOGUDI = (double)(MOGUDI - RST2[eof].MEGHk);
+                                            MBKM = MBKM - (RST2[eof].MEGHk ?? 0) * MIAN;
+                                            MOGUDI = MOGUDI - (RST2[eof].MEGHk ?? 0);
                                             rst3Filter_.FirstOrDefault().AVRAGE = MIAN;
 
                                             dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET AVRAGE = {MIAN} WHERE ID = {rst3Filter_.FirstOrDefault().id}");
@@ -1392,7 +1392,7 @@ namespace AUTO_BAZ
                                                         UpdateOverallProgressBar();
 
                                                     }));
-                                                    MIAN = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE_KOL(rst[rstI].CODE, (long)RST2[f].DATE_N);
+                                                    MIAN = CL_HESABDARI_AUTO_BAZ.GETSTANDARDPRICE_KOL(rst[rstI].CODE, RST2[f].DATE_N ?? 0L);
 
                                                     Dispatcher.Invoke(new Action(() =>
                                                     {
@@ -1441,7 +1441,7 @@ namespace AUTO_BAZ
                                                                 rst3Filter.AVRAGE = MIAN;
                                                                 rst3Filter.AVRAGE2 = MIAN;
                                                                 rst3Filter.MABL = MIAN;
-                                                                rst3Filter.MABL_K = Math.Round((double)(MIAN * RST2[f].MEGHk));
+                                                                rst3Filter.MABL_K = Math.Round(MIAN * (RST2[f].MEGHk ?? 0));
                                                                 dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET AVRAGE = {MIAN} ,
                                                                                     AVRAGE2 = {MIAN} ,
                                                                                     MABL = {MIAN},
@@ -1454,7 +1454,7 @@ namespace AUTO_BAZ
                                                             {
                                                                 rst3Filter.AVRAGE2 = MIAN;
                                                                 rst3Filter.MABL = MIAN;
-                                                                rst3Filter.MABL_K = Math.Round((double)(MIAN * RST2[f].MEGHk));
+                                                                rst3Filter.MABL_K = Math.Round(MIAN * (RST2[f].MEGHk ?? 0));
                                                                 dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
                                                                                     AVRAGE2 = {MIAN} ,
                                                                                     MABL = {MIAN},
@@ -1467,7 +1467,7 @@ namespace AUTO_BAZ
                                                             {
                                                                 rst3Filter.AVRAGE = MIAN;
                                                                 rst3Filter.MABL = MIAN;
-                                                                rst3Filter.MABL_K = Math.Round((double)(MIAN * RST2[f].MEGHk));
+                                                                rst3Filter.MABL_K = Math.Round(MIAN * (RST2[f].MEGHk ?? 0));
                                                                 dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
                                                                                     AVRAGE = {MIAN} ,
                                                                                     MABL = {MIAN},
@@ -1480,8 +1480,8 @@ namespace AUTO_BAZ
                                                             {
                                                                 rst3Filter.AVRAGE = MIAN;
                                                                 rst3Filter.MABL = MIAN;
-                                                                rst3Filter.MABL_K = Math.Round((double)(MIAN * RST2[f].MEGHk));
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
+                                                                rst3Filter.MABL_K = Math.Round(MIAN * (RST2[f].MEGHk ?? 0));
+                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET
                                                                                     AVRAGE = {MIAN} ,
                                                                                     MABL = {MIAN},
                                                                                     MABL_K = {rst3Filter.MABL_K}
@@ -1497,13 +1497,13 @@ namespace AUTO_BAZ
                                                                     if (RST7.Count > 0)
                                                                     {
                                                                         //MIAN = RST7.Fields(0) + RST7.Fields(1) + RST7.Fields(2);
-                                                                        MIAN = (double)(RST7.FirstOrDefault().IMBIBE_MANF + RST7.FirstOrDefault().IMBIBE_SAR + RST7.FirstOrDefault().MABLKs);
+                                                                        MIAN = (RST7.FirstOrDefault().IMBIBE_MANF ?? 0) + (RST7.FirstOrDefault().IMBIBE_SAR ?? 0) + (RST7.FirstOrDefault().MABLKs ?? 0);
                                                                     }
                                                                 }
                                                                 rst3Filter.AVRAGE = MIAN;
                                                                 rst3Filter.MABL = MIAN;
-                                                                rst3Filter.MABL_K = Math.Round((double)(MIAN * RST2[f].MEGHk));
-                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
+                                                                rst3Filter.MABL_K = Math.Round(MIAN * (RST2[f].MEGHk ?? 0));
+                                                                dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET
                                                                                     AVRAGE = {MIAN} ,
                                                                                     MABL = {MIAN},
                                                                                     MABL_K = {rst3Filter.MABL_K}
@@ -1516,7 +1516,7 @@ namespace AUTO_BAZ
                                                                 // MBKM = MBKM + rst[rstI].2.Fields("MABL_K")
                                                                 var RST6Filter = RST6.Where(x => x.CODE == RST2[f].CODE && x.GRD_NUM == RST2[f].NUMBER).ToList();
                                                                 //RST6.Filter = "code = '" + RST2[f].("code") + "' and GRD_NUM = " + RST2[f].NUMBER;
-                                                                MOGUDI = Math.Round(Math.Round((double)(MOGUDI + RST2[f].MEGHk), 6), 6);
+                                                                MOGUDI = Math.Round(Math.Round(MOGUDI + (RST2[f].MEGHk ?? 0), 6), 6);
                                                                 RST6Filter.FirstOrDefault().MABL = MIAN;
                                                                 dbms.DoExecuteSQL($@"UPDATE dbo.ANBGRD_LST SET MABL = {MIAN} WHERE GRD_NUM = {RST6Filter.FirstOrDefault().GRD_NUM}");
                                                                 //RST6.update();
@@ -1525,7 +1525,7 @@ namespace AUTO_BAZ
                                                         case 18: // فروش
                                                             {
                                                                 // MBKM = MBKM - (rst[rstI].2.FieldsMEGHk * MIAN)
-                                                                MOGUDI = (double)(MOGUDI - RST2[f].MEGHk);
+                                                                MOGUDI = MOGUDI - (RST2[f].MEGHk ?? 0);
                                                                 var RST6Filter = RST6.Where(x => x.CODE == RST2[f].CODE && x.GRD_NUM == RST2[f].NUMBER).ToList();
                                                                 //RST6.Filter = "code = '" + RST2[f].("code") + "' and GRD_NUM = " + RST2[f].("NUMBER");
                                                                 RST6Filter.FirstOrDefault().MABL = MIAN;
@@ -1537,7 +1537,7 @@ namespace AUTO_BAZ
                                                             {
                                                                 rst3Filter.AVRAGE = MIAN;
                                                                 rst3Filter.MABL = MIAN;
-                                                                rst3Filter.MABL_K = Math.Round((double)(MIAN * RST2[f].MEGHk));
+                                                                rst3Filter.MABL_K = Math.Round(MIAN * (RST2[f].MEGHk ?? 0));
                                                                 dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET 
                                                                                     AVRAGE = {MIAN} ,
                                                                                     MABL = {MIAN},
