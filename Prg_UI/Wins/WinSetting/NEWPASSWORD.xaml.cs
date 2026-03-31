@@ -30,6 +30,13 @@ namespace Prg_UI.Wins.WinSetting
     /// </summary>
     public partial class NEWPASSWORD : Window
     {
+        private sealed class UserLookupItem
+        {
+            public int IDD { get; set; }
+            public string SAL_NAME { get; set; } = string.Empty;
+            public string DisplayText => $"{IDD} - {SAL_NAME}";
+        }
+
         #region Header Window Begin
         //Header Window Begin
         private void Btn_Close_Click(object sender, RoutedEventArgs e)
@@ -109,21 +116,32 @@ namespace Prg_UI.Wins.WinSetting
             }
 
             _canResetOtherUsersPassword = CL_HESABDARI.LETSGO("USERS") || CL_HESABDARI.LETSGO("USER_CHANGE");
+            LoadUsersForSelection();
 
-            usname.Text = Baseknow.USERCOD.ToString();
-            usna.Text = CL_HESABDARI.GETUSERNAME(Convert.ToInt32(usname.Text));
-            usna.IsReadOnly = true;
+            OLDPASS.Focus();
+        }
+
+        private void LoadUsersForSelection()
+        {
+            var allUsers = dbms.DoGetDataSQL<SALA_DTL>("SELECT IDD,SAL_NAME FROM SALA_DTL WHERE IDD IS NOT NULL").ToList();
+            var validUsers = allUsers
+                .Where(x => x != null && !string.IsNullOrWhiteSpace(x.SAL_NAME))
+                .Select(x => new UserLookupItem
+                {
+                    IDD = x.IDD,
+                    SAL_NAME = x.SAL_NAME
+                })
+                .OrderBy(x => x.SAL_NAME)
+                .ToList();
 
             if (!_canResetOtherUsersPassword)
             {
-                usname.IsReadOnly = true;
-            }
-            else
-            {
-                Label11_Copy1.Content = "آی دی کاربر : ";
+                validUsers = validUsers.Where(x => x.IDD == Baseknow.USERCOD).ToList();
+                cmbUsers.IsEnabled = false;
             }
 
-            OLDPASS.Focus();
+            cmbUsers.ItemsSource = validUsers;
+            cmbUsers.SelectedValue = Baseknow.USERCOD;
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -161,9 +179,9 @@ namespace Prg_UI.Wins.WinSetting
                 //pass1 = Null;
                 //pass2 = Null;
             }
-            else if (string.IsNullOrEmpty(usname.Text))
+            else if (cmbUsers.SelectedValue == null || !int.TryParse(cmbUsers.SelectedValue.ToString(), out int selectedUserId))
             {
-                universControl.PopNotifyShow("!کد کاربری صحیح نیست.", Pop1, Pop1Text1, Pop_Border1);
+                universControl.PopNotifyShow("!کاربر را انتخاب کنید.", Pop1, Pop1Text1, Pop_Border1);
             }
             else if (pass1.Text.Length > 40)
             {
@@ -171,7 +189,7 @@ namespace Prg_UI.Wins.WinSetting
             }
             else
             {
-                var rst = dbms.DoGetDataSQL<SALA_DTL>("select * from SALA_DTL where idd = " + usname.Text).FirstOrDefault();
+                var rst = dbms.DoGetDataSQL<SALA_DTL>("select * from SALA_DTL where idd = " + selectedUserId).FirstOrDefault();
                 if (rst == null)
                 {
                     universControl.PopNotifyShow("!آی دی کاربر یا رمز عبور صحیح نمی باشد.", Pop1, Pop1Text1, Pop_Border1);
@@ -212,17 +230,6 @@ namespace Prg_UI.Wins.WinSetting
                     this.Close();
                 }
             }
-        }
-
-        private void usname_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-        {
-            if (!int.TryParse(usname.Text, out int userId))
-            {
-                usna.Text = string.Empty;
-                return;
-            }
-
-            usna.Text = CL_HESABDARI.GETUSERNAME(userId);
         }
     }
 }
