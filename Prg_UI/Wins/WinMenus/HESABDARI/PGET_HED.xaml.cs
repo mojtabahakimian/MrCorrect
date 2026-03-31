@@ -774,25 +774,21 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
         }
         public void ReGetData_0()
         {
-            //پر کردن دیتا گرید از دیتابیس برای سطر های خزانه
-            //با این روش فقط اومدین با قدرت چند هسته ای سی شارپ اسم های سطر های خزانه رو جداگانه با کمک سی شارپ پارالل پر کردیم
-
-            var QRE_KHZ_DATA = dbms.DoGetDataSQL<PGET_LST>($"SELECT ID, DATE, RADIF, NO_AM, NAHVA, FHES_K, FHES_M, FHES_T, THES_K, THES_M, THES_T, SHARH, MABL, N_SERI, BANK, IDH, FHES, THES, ARZD, FHES_T2, THES_T2, FHES_T3, THES_T3, FHES_T4, THES_T4, CRT, UID, " +
-                $"CAST(CASE WHEN EXISTS(SELECT 1 FROM dbo.TASKS WHERE num = dbo.PGET_LST.IDH AND tg = 34) THEN 1 ELSE 0 END AS BIT) AS HasAttachment" +
-                $" FROM dbo.PGET_LST WHERE ID = {ID.Text}").ToList();
-
-            //var QRE_KHZ_DATA = dbms.DoGetDataSQL<PGET_LST>($"SELECT ID, DATE, RADIF, NO_AM, NAHVA, FHES_K, FHES_M, FHES_T, THES_K, THES_M, THES_T, SHARH, MABL, N_SERI, BANK, IDH, FHES, THES, ARZD, FHES_T2, THES_T2, FHES_T3, THES_T3, FHES_T4, THES_T4, CRT, UID, " +
-            //    $"CAST(CASE WHEN EXISTS(SELECT 1 FROM dbo.TASKS WHERE skid=34 AND num=dbo.PGET_LST.ID AND tg=34) THEN 1 ELSE 0 END AS BIT) AS HasCheckAttachment FROM dbo.PGET_LST WHERE ID = {ID.Text}").ToList();
-
+            var QRE_KHZ_DATA = dbms.DoGetDataSQL<PGET_LST>($@"
+                SELECT p.ID, p.DATE, p.RADIF, p.NO_AM, p.NAHVA, p.FHES_K, p.FHES_M, p.FHES_T, 
+                       p.THES_K, p.THES_M, p.THES_T, p.SHARH, p.MABL, p.N_SERI, p.BANK, p.IDH, 
+                       p.FHES, p.THES, p.ARZD, p.FHES_T2, p.THES_T2, p.FHES_T3, p.THES_T3, 
+                       p.FHES_T4, p.THES_T4, p.CRT, p.UID, 
+                       CAST(CASE WHEN EXISTS(SELECT 1 FROM dbo.TASKS WHERE num = p.IDH AND tg = 34) THEN 1 ELSE 0 END AS BIT) AS HasAttachment,
+                       c1.NAME AS NAME_FHES, 
+                       c2.NAME AS NAME_THES
+                FROM dbo.PGET_LST p
+                LEFT JOIN dbo.CUST_HESAB c1 ON p.FHES = c1.hes
+                LEFT JOIN dbo.CUST_HESAB c2 ON p.THES = c2.hes
+                WHERE p.ID = {ID.Text}").ToList();
 
             if (QRE_KHZ_DATA != null)
             {
-                Parallel.For(0, QRE_KHZ_DATA.Count, i =>
-                {
-                    QRE_KHZ_DATA[i].NAME_FHES = dbms.DoGetDataSQL<string>($"SELECT TOP 1 NAME FROM dbo.CUST_HESAB WHERE hes = N'{QRE_KHZ_DATA[i].FHES}'").FirstOrDefault();
-                    QRE_KHZ_DATA[i].NAME_THES = dbms.DoGetDataSQL<string>($"SELECT TOP 1 NAME FROM dbo.CUST_HESAB WHERE hes = N'{QRE_KHZ_DATA[i].THES}'").FirstOrDefault();
-                });
-
                 KHAZANEH_DATA?.Clear();
                 foreach (var item in QRE_KHZ_DATA)
                 {
@@ -806,7 +802,6 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             {
                 KHAZANEH_DATA?.Clear();
             }
-
 
             this.MABL.Text = SUM_OF_MABL.ToString();
         }

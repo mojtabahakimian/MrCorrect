@@ -1224,8 +1224,12 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 if (Convert.ToInt32(N_S.Text) > 0)
                 {
                     //var Sanaddata = dbms.DoGetDataSQL<DEED_DTL>($"SELECT N_S, RADIF, HES_K, HES_M, HES_T, SHARH, BED, BES, N_SERI, BANK, NUMBER, TAG, HES, id, ARZD, MHAZ_NO, HES_T2, HES_T3, HES_T4, CRT, UID FROM DEED_DTL WHERE N_S = {N_S.Text}").ToList();
-                    var Sanaddata = dbms.DoGetDataSQL<DEED_DTL>($"SELECT N_S, RADIF, HES_K, HES_M, HES_T, SHARH, BED, BES, N_SERI, BANK, NUMBER, TAG, HES, id, ARZD, MHAZ_NO, HES_T2, HES_T3, HES_T4, CRT, UID FROM dbo.DEED_DTL WITH (INDEX(N_SI)) WHERE N_S = {N_S.Text}").ToList();
-                    if (Sanaddata.Count > 0)
+                    var Sanaddata = dbms.DoGetDataSQL<DEED_DTL>($@"
+SELECT dd.N_S, dd.RADIF, dd.HES_K, dd.HES_M, dd.HES_T, dd.SHARH, dd.BED, dd.BES, dd.N_SERI, dd.BANK, dd.NUMBER, dd.TAG, dd.HES, dd.id, dd.ARZD, dd.MHAZ_NO, dd.HES_T2, dd.HES_T3, dd.HES_T4, dd.CRT, dd.UID,
+       ch.NAME AS NAME_HES
+FROM dbo.DEED_DTL dd WITH (INDEX(N_SI))
+LEFT JOIN dbo.CUST_HESAB ch ON ch.hes = dd.HES
+WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
                     {
                         for (int i = 0; i < Sanaddata.Count; i++)
                         {
@@ -1237,11 +1241,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                         //    SANAD_DATA.Add(item);
                         //}
 
-                        Parallel.For(0, SANAD_DATA.Count, i =>
-                        {
-                            //SANAD_DATA[i].HES = dbms.DoGetDataSQL<string>($"SELECT TOP 1 NAME FROM dbo.CUST_HESAB WHERE hes = N'{SANAD_DATA[i].HES}'").FirstOrDefault();
-                            SANAD_DATA[i].NAME_HES = dbms.DoGetDataSQL<string>($"SELECT TOP 1 NAME FROM dbo.CUST_HESAB WHERE hes = N'{SANAD_DATA[i].HES}'").FirstOrDefault();
-                        });
+                 
                     }
                 }
                 else
@@ -1588,8 +1588,8 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 {
                     if (CURRENT_ITMES_ROW.BES > 0 && CURRENT_ITMES_ROW.BED > 0)
                     {
-                        Child14_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                        CURRENT_ITMES_ROW.BED = WAS_ROW_ITEM?.BED;
+                        //Child14_CANCEL_EDIT(DataGridEditingUnit.Cell);
+                        //CURRENT_ITMES_ROW.BED = WAS_ROW_ITEM?.BED;
                         universControl.PopNotifyShow("بدهكار و بستانكار سند صحيح نمي باشد", Pop1, Pop1Text1, Pop_Border1);
                         return;
                     }
@@ -1633,7 +1633,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     {
                         //CURRENT_ITMES_ROW.BES = WAS_ROW_ITEM?.BES;
                         //Child14_CANCEL_EDIT(DataGridEditingUnit.Cell);
-                        RestoreFocusCell(e);
+                        //RestoreFocusCell(e);
                         universControl.PopNotifyShow("بدهكار و بستانكار سند صحيح نمي باشد", Pop1, Pop1Text1, Pop_Border1);
                         return;
                     }
@@ -1729,8 +1729,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                     if (CURRENT_ITMES_ROW.BES > 0 && CURRENT_ITMES_ROW.BED > 0 || CURRENT_ITMES_ROW.BES <= 0 && CURRENT_ITMES_ROW.BED <= 0)
                     {
                         Child14_CANCEL_EDIT();
-                        Msgwin msgwin = new Msgwin(false, "بدهكار و بستانكار سند صحيح نمي باشد");
-                        msgwin.ShowDialog();
+                        universControl.PopNotifyShow("بدهكار و بستانكار سند صحيح نمي باشد!", Pop1, Pop1Text1, Pop_Border1);
                         return;
                     }
                 }

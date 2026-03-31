@@ -615,15 +615,15 @@ namespace Wins.WinMenus.Checkha
                         NAME_TAH = _NAME_TAH_,
                         ANBAR = ANBAR,
                         RADIF = RADIF.Text,
-                        CUST_NO = CUST_NO.SelectedValue,
+                        CUST_NO = string.IsNullOrWhiteSpace(CUST_NO.SelectedValue?.ToString()) || CUST_NO.SelectedValue?.ToString() == "0" ? null : CUST_NO.SelectedValue,
                         LIST_NO = LIST_NO.SelectedValue,
                         KIND = KIND.SelectedValue,
                         SANDUGH = SANDUGH.SelectedValue,
                         SAYADI = SAYADI.Text,
                         N_HESAB = string.IsNullOrWhiteSpace(N_HESAB.Text) ? null : N_HESAB.Text,
-                        N_KOL = N_KOL,
-                        N_MOIN = N_MOIN,
-                        N_TAF = N_TAF
+                        N_KOL = string.IsNullOrWhiteSpace(N_KOL) || N_KOL == "0" ? null : N_KOL,
+                        N_MOIN = string.IsNullOrWhiteSpace(N_MOIN) || N_MOIN == "0" ? null : N_MOIN,
+                        N_TAF = string.IsNullOrWhiteSpace(N_TAF) || N_TAF == "0" ? null : N_TAF
                     };
 
                     if (CheckExistData.Count > 0)
