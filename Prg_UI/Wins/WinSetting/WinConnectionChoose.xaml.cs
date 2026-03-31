@@ -153,27 +153,34 @@ namespace Prg_UI.Wins.WinSetting
             CL_LMethods.GoExitTheApplication(); //#NABILOO#
             return;
         }
-        internal bool GoTestConnectionOK()
+        internal (bool success, string errorMessage) GoTestConnectionOK()
         {
             string _result = null;
             string _cnn = null;
+            string _serverName = null;
+            string _dbName = null;
             Dispatcher.Invoke(() =>
             {
                 ServerChooser.UpdateLayout();
                 var ServerChooser_TEXBOX = (TextBox)ServerChooser.Template.FindName("PART_EditableTextBox", ServerChooser);
                 ServerChooser.SelectedValue = ServerChooser_TEXBOX.Text.Trim();
-                var ServerChooser_TEX = ServerChooser_TEXBOX.Text.Trim();
+                _serverName = ServerChooser_TEXBOX.Text.Trim();
 
                 DbChooser.UpdateLayout();
                 var DbChooser_TEXBOX = (TextBox)DbChooser.Template.FindName("PART_EditableTextBox", DbChooser);
                 DbChooser.SelectedValue = DbChooser_TEXBOX.Text.Trim();
-                var DbChooser_TEX = DbChooser_TEXBOX.Text.Trim();
+                _dbName = DbChooser_TEXBOX.Text.Trim();
 
                 if (rd_WinAuth.IsChecked is true) //Windows Authentication
-                    _cnn = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;"; //WIN
+                    _cnn = $@"Data Source={_serverName};Initial Catalog={_dbName};Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;"; //WIN
                 else if (rd_SqlAuth.IsChecked is true) //SQL Authentication
-                    _cnn = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Password};Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=True;"; // SQL
+                    _cnn = $@"Data Source={_serverName};Initial Catalog={_dbName};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Password};Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=True;"; // SQL
             });
+
+            if (string.IsNullOrWhiteSpace(_serverName))
+                return (false, "نام سرور وارد نشده است.");
+            if (string.IsNullOrWhiteSpace(_dbName))
+                return (false, "نام دیتابیس وارد نشده است.");
 
             CL_CCNNMANAGER tsdb = new CL_CCNNMANAGER();
             CL_CCNNMANAGER.CONNECTION_STR = _cnn;
@@ -181,31 +188,50 @@ namespace Prg_UI.Wins.WinSetting
             {
                 _result = tsdb.DoGetDataSQL<string>("SELECT SERVERNAM FROM dbo.SAZMAN --TEST").FirstOrDefault();
             }
+            catch (Microsoft.Data.SqlClient.SqlException sqlEx)
+            {
+                var msg = sqlEx.Number switch
+                {
+                    53 or 2   => $"سرور '{_serverName}' در شبکه پیدا نشد.\nنام سرور را بررسی کنید یا مطمئن شوید SQL Server در حال اجرا است.",
+                    26        => $"نام سرور یا instance اشتباه است: '{_serverName}'.\nفرمت صحیح: ServerName یا ServerName\\InstanceName",
+                    -2        => $"مهلت اتصال به سرور '{_serverName}' به پایان رسید (Timeout).\nسرور پاسخ نداد.",
+                    18456     => "نام کاربری یا رمز عبور اشتباه است.\nاطلاعات ورود SQL را بررسی کنید.",
+                    4060      => $"دیتابیس '{_dbName}' روی سرور وجود ندارد یا دسترسی ندارید.",
+                    233 or 232 or 64 => $"اتصال به سرور '{_serverName}' قطع شد.\nسرویس SQL Server را بررسی کنید.",
+                    17142     => $"SQL Server در حالت Pause قرار دارد.",
+                    _         => $"خطای SQL (کد {sqlEx.Number}):\n{sqlEx.Message}"
+                };
+                return (false, msg);
+            }
+            catch (InvalidOperationException)
+            {
+                return (false, "رشته اتصال معتبر نیست. سرور و دیتابیس را بررسی کنید.");
+            }
             catch (Exception ex)
             {
-                return false;
+                return (false, $"خطای غیرمنتظره:\n{ex.Message}");
             }
 
             if (_result is not null)
-                return true;
+                return (true, null);
             else
-                return false;
+                return (false, $"اتصال برقرار شد اما دیتابیس '{_dbName}' متعلق به این نرم‌افزار نیست.");
         }
         private async void Btn_TestConnection_Click(object sender, RoutedEventArgs e)
         {
             lblconnecting.Visibility = Visibility.Visible;
             this.IsEnabled = false;
 
-            var _isconnect = false;
+            (bool success, string errorMessage) testResult = (false, null);
             await Task.Run(() =>
             {
-                _isconnect = GoTestConnectionOK();
+                testResult = GoTestConnectionOK();
             });
 
-            if (_isconnect is true)
-                new Msgwin(false, "تست موفقیت آمیز بودارتباط بر قرار شد").ShowDialog();
+            if (testResult.success)
+                new Msgwin(false, "تست موفقیت‌آمیز بود - ارتباط برقرار شد").ShowDialog();
             else
-                new Msgwin(false, "تست ناموفق بود !").ShowDialog();
+                new Msgwin(false, $"تست ناموفق بود !\n\n{testResult.errorMessage}").ShowDialog();
 
             lblconnecting.Visibility = Visibility.Hidden;
             this.IsEnabled = true;
