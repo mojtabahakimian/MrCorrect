@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
@@ -51,6 +52,24 @@ namespace AUTO_BAZ
                 File.AppendAllText(@"C:\CORRECT\AUTO_BAZ_LOG\AUTO_EXCP.txt", logmsg.ToString());
             }
             catch { }
+            finally
+            {
+                try
+                {
+                    string cnn = Prg_SendInvoice.CNNMANAGER.CL_CCNNMANAGER.CONNECTION_STR;
+                    if (!string.IsNullOrWhiteSpace(cnn))
+                    {
+                        using var db = new SqlConnection(cnn);
+                        db.Open();
+                        using var cmd = db.CreateCommand();
+                        cmd.CommandText =
+                            "ALTER DATABASE YAZDSEPAR1404 SET DELAYED_DURABILITY = DISABLED; " +
+                            "ALTER DATABASE YAZDSEPAR1405 SET DELAYED_DURABILITY = DISABLED;";
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                catch { }
+            }
         }
     }
 }

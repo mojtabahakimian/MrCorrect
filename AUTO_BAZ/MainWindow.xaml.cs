@@ -270,6 +270,7 @@ namespace AUTO_BAZ
             //CHKITEMS = booleanArray;
 
             LST_DATA5.CollectionChanged += LST_DATA5_CollectionChanged;
+            this.Closing += Window_Closing;
 
             DataContext = AutoBazBridgeViewModel;
         }
@@ -367,6 +368,10 @@ namespace AUTO_BAZ
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             NowIsReady = true;
+        }
+        private void Window_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            SetDelayedDurability(false);
         }
         private void LST_DATA5_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
@@ -624,6 +629,21 @@ namespace AUTO_BAZ
             }
             return false;
         }
+        private void SetDelayedDurability(bool enable)
+        {
+            try
+            {
+                string mode = enable ? "FORCED" : "DISABLED";
+                dbms.DoExecuteSQL($"ALTER DATABASE YAZDSEPAR1404 SET DELAYED_DURABILITY = {mode}");
+                dbms.DoExecuteSQL($"ALTER DATABASE YAZDSEPAR1405 SET DELAYED_DURABILITY = {mode}");
+                LogWriter.WriteLog($"DELAYED_DURABILITY set to {mode}");
+            }
+            catch (Exception ex)
+            {
+                ExpectionLogWriter.WriteLog(ex, "SetDelayedDurability");
+            }
+        }
+
         public async void LetsGoBtn_Click(object sender, RoutedEventArgs e)
         {
             if (StillMethodIsWorking) return;
@@ -642,7 +662,10 @@ namespace AUTO_BAZ
             }));
 
 
+            SetDelayedDurability(true);
             //{Begin---------------------------------
+            try
+            {
             for (int r = 0; r < repeatCount; r++)
             {
                 tasks = new List<Task>();
@@ -774,7 +797,11 @@ namespace AUTO_BAZ
                     Console.WriteLine(ex.ToString());
                 }
             }
-
+            } // end try
+            finally
+            {
+                SetDelayedDurability(false);
+            }
 
             //End}-----------------------------------
         }
