@@ -118,6 +118,12 @@ namespace AUTO_BAZ
     #endregion
     public partial class MainWindow : Window
     {
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            DelayedDurabilityGuard.TryDisableForcefully();
+            base.OnClosing(e);
+        }
+
         #region Header Window Begin
         //Header Window Begin
         private void Btn_Close_Click(object sender, RoutedEventArgs e)
@@ -628,6 +634,7 @@ namespace AUTO_BAZ
         {
             if (StillMethodIsWorking) return;
             int repeatCount = 1;
+            bool enteredDurabilityScope = false;
 
             Dispatcher.Invoke(new Action(() =>
             {
@@ -643,135 +650,147 @@ namespace AUTO_BAZ
 
 
             //{Begin---------------------------------
-            for (int r = 0; r < repeatCount; r++)
+            try
             {
-                tasks = new List<Task>();
-                AnyErrorHappend = false;
+                DelayedDurabilityGuard.EnterRebuildScope();
+                enteredDurabilityScope = true;
 
-                Dispatcher.Invoke(new Action(() =>
+                for (int r = 0; r < repeatCount; r++)
                 {
-                    if (LST_DATA5.Count > 30)
-                    {
-                        LST_DATA5.CollectionChanged -= LST_DATA5_CollectionChanged;
-                        LST_DATA5?.Clear();
-                        LST_DATA5.CollectionChanged += LST_DATA5_CollectionChanged;
-                        Properties.Settings.Default.TheHistoryLST = null;
-                        Properties.Settings.Default.Save();
-                    }
-
-                    LST_DATA5.Add("شروع" + Conversions.ToString(DateTime.Now));
-                    StillMethodIsWorking = true;
-                }));
-
-                if (Generaly.C0) { await Task.Run(async () => { await C0_TASK(); }); } //باز سازی نرخ میانگین
-                if (Generaly.C00) { await Task.Run(async () => { await C00_TASK(); }); } //باز سازی موجودی انبار
-
-
-                if (Generaly.C1) { tasks.Add(C1_TASK()); } //سند فروش
-                if (Generaly.C2) { tasks.Add(C2_TASK()); } //سند خرید
-                if (Generaly.C3) { tasks.Add(C3_TASK()); } //سند خزانه
-                if (Generaly.C4) { tasks.Add(C4_TASK()); } //سند انتقالی
-                if (Generaly.C5) { tasks.Add(C5_TASK()); } //سند خروج مواد
-                if (Generaly.C6) { tasks.Add(C6_TASK()); } //سند خروج سایر
-                if (Generaly.C7) { tasks.Add(C7_TASK()); } //سند تولید ورود
-                if (Generaly.C8) { tasks.Add(C8_TASK()); } //سند برگشت فروش + آزاد
-                if (Generaly.C9) { tasks.Add(C9_TASK()); } //سند برگشت فروش + آزاد
-                if (Generaly.C10) { tasks.Add(C10_TASK()); } //سند برگشت فروش + آزاد
-                if (Generaly.C11) { tasks.Add(C11_TASK()); } // سند وصولی اسناد دریافتنی
-
-                // Start all tasks concurrently
-                var allTasks = Task.WhenAll(tasks); //Start and Wait until When all tasks are finished.
-
-                #region MyRegion
-                //این تیکه رو فقط برای دیباگ استفاده میکنم
-                //await allTasks;
-
-                //Dispatcher.Invoke(new Action(() =>
-                //{
-                //    IsWorkisDone = true;
-                //    if (AnyErrorHappend)
-                //    {
-                //        foreach (var item in ERTRACKLIST)
-                //        {
-                //            LST_DATA5.Add(item.SectionName);
-                //        }
-                //        ERTRACKLIST?.Clear();
-                //        LogWriter.WriteLog($@"ERTRACKLIST : {ERTRACKLIST.Count} => {ERTRACKLIST.FirstOrDefault()}");
-                //        LST_DATA5.Add("پایان یافته با خطا :" + Conversions.ToString(DateTime.Now));
-                //    }
-                //    else //Successfull
-                //    {
-                //        LST_DATA5.Add("پايان :" + Conversions.ToString(DateTime.Now));
-                //    }
-
-                //}));
-                //SayOprationsFinished();
-                //return;
-                #endregion
-
-
-                try
-                {
-                    await allTasks;
+                    tasks = new List<Task>();
+                    AnyErrorHappend = false;
 
                     Dispatcher.Invoke(new Action(() =>
                     {
-                        IsWorkisDone = true;
-                        if (AnyErrorHappend)
+                        if (LST_DATA5.Count > 30)
                         {
-                            lock (ERTRACKLIST)
+                            LST_DATA5.CollectionChanged -= LST_DATA5_CollectionChanged;
+                            LST_DATA5?.Clear();
+                            LST_DATA5.CollectionChanged += LST_DATA5_CollectionChanged;
+                            Properties.Settings.Default.TheHistoryLST = null;
+                            Properties.Settings.Default.Save();
+                        }
+
+                        LST_DATA5.Add("شروع" + Conversions.ToString(DateTime.Now));
+                        StillMethodIsWorking = true;
+                    }));
+
+                    if (Generaly.C0) { await Task.Run(async () => { await C0_TASK(); }); } //باز سازی نرخ میانگین
+                    if (Generaly.C00) { await Task.Run(async () => { await C00_TASK(); }); } //باز سازی موجودی انبار
+
+                    if (Generaly.C1) { tasks.Add(C1_TASK()); } //سند فروش
+                    if (Generaly.C2) { tasks.Add(C2_TASK()); } //سند خرید
+                    if (Generaly.C3) { tasks.Add(C3_TASK()); } //سند خزانه
+                    if (Generaly.C4) { tasks.Add(C4_TASK()); } //سند انتقالی
+                    if (Generaly.C5) { tasks.Add(C5_TASK()); } //سند خروج مواد
+                    if (Generaly.C6) { tasks.Add(C6_TASK()); } //سند خروج سایر
+                    if (Generaly.C7) { tasks.Add(C7_TASK()); } //سند تولید ورود
+                    if (Generaly.C8) { tasks.Add(C8_TASK()); } //سند برگشت فروش + آزاد
+                    if (Generaly.C9) { tasks.Add(C9_TASK()); } //سند برگشت فروش + آزاد
+                    if (Generaly.C10) { tasks.Add(C10_TASK()); } //سند برگشت فروش + آزاد
+                    if (Generaly.C11) { tasks.Add(C11_TASK()); } // سند وصولی اسناد دریافتنی
+
+                    // Start all tasks concurrently
+                    var allTasks = Task.WhenAll(tasks); //Start and Wait until When all tasks are finished.
+
+                    #region MyRegion
+                    //این تیکه رو فقط برای دیباگ استفاده میکنم
+                    //await allTasks;
+
+                    //Dispatcher.Invoke(new Action(() =>
+                    //{
+                    //    IsWorkisDone = true;
+                    //    if (AnyErrorHappend)
+                    //    {
+                    //        foreach (var item in ERTRACKLIST)
+                    //        {
+                    //            LST_DATA5.Add(item.SectionName);
+                    //        }
+                    //        ERTRACKLIST?.Clear();
+                    //        LogWriter.WriteLog($@"ERTRACKLIST : {ERTRACKLIST.Count} => {ERTRACKLIST.FirstOrDefault()}");
+                    //        LST_DATA5.Add("پایان یافته با خطا :" + Conversions.ToString(DateTime.Now));
+                    //    }
+                    //    else //Successfull
+                    //    {
+                    //        LST_DATA5.Add("پايان :" + Conversions.ToString(DateTime.Now));
+                    //    }
+
+                    //}));
+                    //SayOprationsFinished();
+                    //return;
+                    #endregion
+
+
+                    try
+                    {
+                        await allTasks;
+
+                        Dispatcher.Invoke(new Action(() =>
+                        {
+                            IsWorkisDone = true;
+                            if (AnyErrorHappend)
                             {
-                                foreach (var item in ERTRACKLIST)
+                                lock (ERTRACKLIST)
                                 {
-                                    LST_DATA5.Add(item.SectionName);
+                                    foreach (var item in ERTRACKLIST)
+                                    {
+                                        LST_DATA5.Add(item.SectionName);
+                                    }
+                                    LogWriter.WriteLog($@"ERTRACKLIST : {ERTRACKLIST.Count} => {ERTRACKLIST.FirstOrDefault()?.SectionName}");
+                                    ERTRACKLIST?.Clear();
                                 }
-                                LogWriter.WriteLog($@"ERTRACKLIST : {ERTRACKLIST.Count} => {ERTRACKLIST.FirstOrDefault()?.SectionName}");
-                                ERTRACKLIST?.Clear();
+                                LST_DATA5.Add("پایان یافته با خطا :" + Conversions.ToString(DateTime.Now));
                             }
-                            LST_DATA5.Add("پایان یافته با خطا :" + Conversions.ToString(DateTime.Now));
-                        }
-                        else //Successfull
-                        {
-                            LST_DATA5.Add("پايان :" + Conversions.ToString(DateTime.Now));
-                        }
+                            else //Successfull
+                            {
+                                LST_DATA5.Add("پايان :" + Conversions.ToString(DateTime.Now));
+                            }
 
-                    }));
-                    SayOprationsFinished();
-                }
-                catch (OperationCanceledException ecx)
-                {
-                    Dispatcher.Invoke(new Action(() =>
-                    {
-                        TOGHER_PROGRESS.Value = 0;
-                        COUNTER_TXBL.Content = $"0.00%";
-                        LST_DATA5.Add("لغو شده :" + Conversions.ToString(DateTime.Now));
-                    }));
-
-                    StillMethodIsWorking = false;
-
-                    var taskInfo = string.Join(", ", tasks.Select(t => $"Id:{t.Id},Status:{t.Status}"));
-                    LogWriter.WriteLog($"Operation canceled in LetsGoBtn_Click (iteration {r + 1} of {repeatCount}). Tasks: {taskInfo}");
-                    ExpectionLogWriter.WriteLog(ecx, "OperationCanceledException in LetsGoBtn_Click");
-
-                    Console.WriteLine("Operation was canceled.");
-                }
-                catch (Exception ex)
-                {
-                    StillMethodIsWorking = false;
-
-                    LST_DATA5.Add("به خاطر خطا لغو شد. :" + Conversions.ToString(DateTime.Now));
-                    Btn_DoCancel.Content = "لغو";
-
-                    var taskInfo = string.Join(", ", tasks.Select(t => $"Id:{t.Id},Status:{t.Status}"));
-                    var errorSections = "";
-                    lock (ERTRACKLIST)
-                    {
-                        errorSections = string.Join(" | ", ERTRACKLIST.Select(x => x.SectionName));
+                        }));
+                        SayOprationsFinished();
                     }
-                    LogWriter.WriteLog($"Exception in LetsGoBtn_Click (iteration {r + 1} of {repeatCount}). AnyErrorHappend={AnyErrorHappend}. Tasks: {taskInfo}. ErrorSections: {errorSections}");
-                    ExpectionLogWriter.WriteLog(ex, "Exception in LetsGoBtn_Click");
+                    catch (OperationCanceledException ecx)
+                    {
+                        Dispatcher.Invoke(new Action(() =>
+                        {
+                            TOGHER_PROGRESS.Value = 0;
+                            COUNTER_TXBL.Content = $"0.00%";
+                            LST_DATA5.Add("لغو شده :" + Conversions.ToString(DateTime.Now));
+                        }));
 
-                    Console.WriteLine(ex.ToString());
+                        StillMethodIsWorking = false;
+
+                        var taskInfo = string.Join(", ", tasks.Select(t => $"Id:{t.Id},Status:{t.Status}"));
+                        LogWriter.WriteLog($"Operation canceled in LetsGoBtn_Click (iteration {r + 1} of {repeatCount}). Tasks: {taskInfo}");
+                        ExpectionLogWriter.WriteLog(ecx, "OperationCanceledException in LetsGoBtn_Click");
+
+                        Console.WriteLine("Operation was canceled.");
+                    }
+                    catch (Exception ex)
+                    {
+                        StillMethodIsWorking = false;
+
+                        LST_DATA5.Add("به خاطر خطا لغو شد. :" + Conversions.ToString(DateTime.Now));
+                        Btn_DoCancel.Content = "لغو";
+
+                        var taskInfo = string.Join(", ", tasks.Select(t => $"Id:{t.Id},Status:{t.Status}"));
+                        var errorSections = "";
+                        lock (ERTRACKLIST)
+                        {
+                            errorSections = string.Join(" | ", ERTRACKLIST.Select(x => x.SectionName));
+                        }
+                        LogWriter.WriteLog($"Exception in LetsGoBtn_Click (iteration {r + 1} of {repeatCount}). AnyErrorHappend={AnyErrorHappend}. Tasks: {taskInfo}. ErrorSections: {errorSections}");
+                        ExpectionLogWriter.WriteLog(ex, "Exception in LetsGoBtn_Click");
+
+                        Console.WriteLine(ex.ToString());
+                    }
+                }
+            }
+            finally
+            {
+                if (enteredDurabilityScope)
+                {
+                    DelayedDurabilityGuard.ExitRebuildScope();
                 }
             }
 
