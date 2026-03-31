@@ -87,6 +87,7 @@ namespace Prg_UI.Wins.WinSetting
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         public bool NowIsReady { get; private set; }
         private bool _canResetOtherUsersPassword;
+        private bool _isSyncingPasswordFields;
 
         private static bool IsNull(object p)
         {
@@ -163,17 +164,21 @@ namespace Prg_UI.Wins.WinSetting
         private void Command5_Click(object sender, RoutedEventArgs e)
         {
             int i;
-            if (string.IsNullOrEmpty(pass1.Text))
+            var oldPassValue = GetPasswordValue(OLDPASS, OLDPASS_Text);
+            var newPassValue = GetPasswordValue(pass1, pass1_Text);
+            var repeatPassValue = GetPasswordValue(pass2, pass2_Text);
+
+            if (string.IsNullOrEmpty(newPassValue))
             {
-                pass1.Text = "";
+                newPassValue = "";
             }
 
-            if (string.IsNullOrEmpty(pass2.Text))
+            if (string.IsNullOrEmpty(repeatPassValue))
             {
-                pass2.Text = "";
+                repeatPassValue = "";
             }
 
-            if (pass1.Text != pass2.Text)
+            if (newPassValue != repeatPassValue)
             {
                 universControl.PopNotifyShow(".کلمه عبور جدید یکسان نیست! مجدد سعی کنید.", Pop1, Pop1Text1, Pop_Border1);
                 //pass1 = Null;
@@ -183,7 +188,7 @@ namespace Prg_UI.Wins.WinSetting
             {
                 universControl.PopNotifyShow("!کاربر را انتخاب کنید.", Pop1, Pop1Text1, Pop_Border1);
             }
-            else if (pass1.Text.Length > 40)
+            else if (newPassValue.Length > 40)
             {
                 universControl.PopNotifyShow("!رمز عبور نباید بیشتر از 40 کاراکتر باشد.", Pop1, Pop1Text1, Pop_Border1);
             }
@@ -199,11 +204,11 @@ namespace Prg_UI.Wins.WinSetting
                 {
                     bool isCurrentUser = rst.IDD == Baseknow.USERCOD;
                     bool canChangeWithoutOldPassword = _canResetOtherUsersPassword && !isCurrentUser;
-                    bool oldPasswordIsValid = OLDPASS.Text == CL_HESABDARI.DECODEPS(rst.PSAL_NAME);
+                    bool oldPasswordIsValid = oldPassValue == CL_HESABDARI.DECODEPS(rst.PSAL_NAME);
 
                     if (canChangeWithoutOldPassword || oldPasswordIsValid)
                     {
-                        var NewPass = Strings.Trim( CL_HESABDARI.CODEPAL(pass1.Text));
+                        var NewPass = Strings.Trim(CL_HESABDARI.CODEPAL(newPassValue));
                         SALA_DTL sALA_DTL = new SALA_DTL()
                         {
                             IDD = rst.IDD,
@@ -230,6 +235,51 @@ namespace Prg_UI.Wins.WinSetting
                     this.Close();
                 }
             }
+        }
+
+        private static string GetPasswordValue(PasswordBox passwordBox, TextBox passwordTextBox)
+        {
+            return passwordTextBox.Visibility == Visibility.Visible ? passwordTextBox.Text : passwordBox.Password;
+        }
+
+        private void PasswordControl_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (_isSyncingPasswordFields)
+            {
+                return;
+            }
+
+            _isSyncingPasswordFields = true;
+            OLDPASS_Text.Text = OLDPASS.Password;
+            pass1_Text.Text = pass1.Password;
+            pass2_Text.Text = pass2.Password;
+            _isSyncingPasswordFields = false;
+        }
+
+        private void PasswordText_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_isSyncingPasswordFields)
+            {
+                return;
+            }
+
+            _isSyncingPasswordFields = true;
+            OLDPASS.Password = OLDPASS_Text.Text;
+            pass1.Password = pass1_Text.Text;
+            pass2.Password = pass2_Text.Text;
+            _isSyncingPasswordFields = false;
+        }
+
+        private void ChkShowPassword_CheckedChanged(object sender, RoutedEventArgs e)
+        {
+            bool showPassword = ChkShowPassword.IsChecked == true;
+            OLDPASS.Visibility = showPassword ? Visibility.Collapsed : Visibility.Visible;
+            pass1.Visibility = showPassword ? Visibility.Collapsed : Visibility.Visible;
+            pass2.Visibility = showPassword ? Visibility.Collapsed : Visibility.Visible;
+
+            OLDPASS_Text.Visibility = showPassword ? Visibility.Visible : Visibility.Collapsed;
+            pass1_Text.Visibility = showPassword ? Visibility.Visible : Visibility.Collapsed;
+            pass2_Text.Visibility = showPassword ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 }
