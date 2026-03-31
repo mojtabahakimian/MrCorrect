@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Drawing;
+using Functions;
 using MaterialDesignThemes.Wpf;
 using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
@@ -79,6 +80,10 @@ namespace Prg_UI.Wins.WinSetting
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         public bool NowIsReady { get; private set; }
 
+        // کاربرانی که می‌توانند رمز عبور هر کاربر دیگری را بدون نیاز به رمز قدیمی تغییر دهند
+        // گروه 1 = مدیران، گروه 12 = سفیر مدیران
+        private bool _isPrivileged;
+
         private static bool IsNull(object p)
         {
             if (!(p is null))
@@ -109,7 +114,26 @@ namespace Prg_UI.Wins.WinSetting
             usname.Text = Baseknow.USERCOD.ToString();
             usna.Text = CL_HESABDARI.GETUSERNAME(Convert.ToInt32(usname.Text));
 
-            OLDPASS.Focus();
+            // بررسی اینکه آیا کاربر جاری دسترسی تغییر رمز دیگران را دارد
+            _isPrivileged = Baseknow.UGRP == "1" || Baseknow.UGRP == "12";
+
+            if (_isPrivileged)
+            {
+                // مدیران می‌توانند آی‌دی هر کاربری را وارد کنند
+                usname.IsReadOnly = false;
+                // رمز قدیمی برای مدیران الزامی نیست
+                OLDPASS.IsEnabled = false;
+                OLDPASS.Tag = "ADMIN_SKIP";
+                LblOldPass.Content = "رمز عبور قدیمی (ادمین - اختیاری) : ";
+                LblPrivileged.Visibility = Visibility.Visible;
+                usname.Focus();
+            }
+            else
+            {
+                usname.IsReadOnly = true;
+                LblPrivileged.Visibility = Visibility.Collapsed;
+                OLDPASS.Focus();
+            }
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -130,7 +154,6 @@ namespace Prg_UI.Wins.WinSetting
 
         private void Command5_Click(object sender, RoutedEventArgs e)
         {
-            int i;
             if (string.IsNullOrEmpty(pass1.Text))
             {
                 pass1.Text = "";
@@ -144,8 +167,6 @@ namespace Prg_UI.Wins.WinSetting
             if (pass1.Text != pass2.Text)
             {
                 universControl.PopNotifyShow(".کلمه عبور جدید یکسان نیست! مجدد سعی کنید.", Pop1, Pop1Text1, Pop_Border1);
-                //pass1 = Null;
-                //pass2 = Null;
             }
             else if (string.IsNullOrEmpty(usname.Text))
             {
@@ -165,16 +186,33 @@ namespace Prg_UI.Wins.WinSetting
                 }
                 else
                 {
-                    if (OLDPASS.Text == CL_HESABDARI.DECODEPS(rst.PSAL_NAME))
+                    // مدیران بدون نیاز به رمز قدیمی مجاز به تغییر هستند
+                    bool authorized = _isPrivileged || (OLDPASS.Text == CL_HESABDARI.DECODEPS(rst.PSAL_NAME));
+
+                    if (authorized)
                     {
-                        var NewPass = Strings.Trim( CL_HESABDARI.CODEPAL(pass1.Text));
+                        var NewPass = Strings.Trim(CL_HESABDARI.CODEPAL(pass1.Text));
                         SALA_DTL sALA_DTL = new SALA_DTL()
                         {
                             IDD = rst.IDD,
                             PSAL_NAME = NewPass,
                         };
-                        //rst.update();
                         dbms.DoExecuteSQL("UPDATE SALA_DTL SET PSAL_NAME = @PSAL_NAME WHERE IDD = @IDD", sALA_DTL);
+
+                        // لاگ تغییر رمز عبور
+                        string targetUserName = CL_HESABDARI.GETUSERNAME(rst.IDD);
+                        string additionalInfo = _isPrivileged && rst.IDD != Baseknow.USERCOD
+                            ? $"تغییر رمز توسط مدیر - کاربر هدف: {targetUserName} (ID:{rst.IDD})"
+                            : $"تغییر رمز توسط خود کاربر - کاربر: {targetUserName} (ID:{rst.IDD})";
+
+                        _ = AuditLogger.LogActionAsync(
+                            actionType: "PASSWORD_CHANGE",
+                            tableName: "SALA_DTL",
+                            recordId: rst.IDD.ToString(),
+                            oldValue: (object)null,
+                            newValue: (object)null,
+                            additionalInfo: additionalInfo
+                        );
                     }
                     else
                     {
