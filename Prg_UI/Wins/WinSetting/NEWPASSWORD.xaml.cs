@@ -7,6 +7,7 @@ using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
+using Prg_UI.HelperWins;
 using Prg_UI.UiTools;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,13 @@ namespace Prg_UI.Wins.WinSetting
     /// </summary>
     public partial class NEWPASSWORD : Window
     {
+        private sealed class UserLookupItem
+        {
+            public int IDD { get; set; }
+            public string SAL_NAME { get; set; } = string.Empty;
+            public string DisplayText => $"{IDD} - {SAL_NAME}";
+        }
+
         #region Header Window Begin
         //Header Window Begin
         private void Btn_Close_Click(object sender, RoutedEventArgs e)
@@ -80,6 +88,7 @@ namespace Prg_UI.Wins.WinSetting
         CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
         public bool NowIsReady { get; private set; }
         private bool _canResetOtherUsersPassword;
+        private bool _isSyncingPasswordFields;
 
         private static bool IsNull(object p)
         {
@@ -107,25 +116,35 @@ namespace Prg_UI.Wins.WinSetting
                 this.Close();
                 return;
             }
+            //-- تعریف کاربر جدید : USERS = 106
+            //-- تغییر نام یا حذف کاربر : USER_CHANGE = 205
+            _canResetOtherUsersPassword = CL_HESABDARI.LETSGO("USERS") || CL_HESABDARI.LETSGO("USER_CHANGE");
+            LoadUsersForSelection();
 
-            //-- تعریف کاربر جدید : USERS
-            //--تغییر نام یا حذف کاربر : USER_CHANGE
-            _canResetOtherUsersPassword = CL_HESABDARI.LETSGO("USERS") && CL_HESABDARI.LETSGO("USER_CHANGE");
+            OLDPASS.Focus();
+        }
 
-            usname.Text = Baseknow.USERCOD.ToString();
-            usna.Text = CL_HESABDARI.GETUSERNAME(Convert.ToInt32(usname.Text));
-            usna.IsReadOnly = true;
+        private void LoadUsersForSelection()
+        {
+            var allUsers = dbms.DoGetDataSQL<SALA_DTL>("SELECT IDD,SAL_NAME FROM SALA_DTL WHERE IDD IS NOT NULL").ToList();
+            var validUsers = allUsers
+                .Where(x => x != null && !string.IsNullOrWhiteSpace(x.SAL_NAME))
+                .Select(x => new UserLookupItem
+                {
+                    IDD = x.IDD,
+                    SAL_NAME = CL_HESABDARI.DECODEUN(x.SAL_NAME) ?? string.Empty
+                })
+                .OrderBy(x => x.SAL_NAME)
+                .ToList();
 
             if (!_canResetOtherUsersPassword)
             {
-                usname.IsReadOnly = true;
-            }
-            else
-            {
-                Label11_Copy1.Content = "آی دی کاربر : ";
+                validUsers = validUsers.Where(x => x.IDD == Baseknow.USERCOD).ToList();
+                cmbUsers.IsEnabled = false;
             }
 
-            OLDPASS.Focus();
+            cmbUsers.ItemsSource = validUsers;
+            cmbUsers.SelectedValue = Baseknow.USERCOD;
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -147,33 +166,37 @@ namespace Prg_UI.Wins.WinSetting
         private void Command5_Click(object sender, RoutedEventArgs e)
         {
             int i;
-            if (string.IsNullOrEmpty(pass1.Text))
+            var oldPassValue = GetPasswordValue(OLDPASS, OLDPASS_Text);
+            var newPassValue = GetPasswordValue(pass1, pass1_Text);
+            var repeatPassValue = GetPasswordValue(pass2, pass2_Text);
+
+            if (string.IsNullOrEmpty(newPassValue))
             {
-                pass1.Text = "";
+                newPassValue = "";
             }
 
-            if (string.IsNullOrEmpty(pass2.Text))
+            if (string.IsNullOrEmpty(repeatPassValue))
             {
-                pass2.Text = "";
+                repeatPassValue = "";
             }
 
-            if (pass1.Text != pass2.Text)
+            if (newPassValue != repeatPassValue)
             {
                 universControl.PopNotifyShow(".کلمه عبور جدید یکسان نیست! مجدد سعی کنید.", Pop1, Pop1Text1, Pop_Border1);
                 //pass1 = Null;
                 //pass2 = Null;
             }
-            else if (string.IsNullOrEmpty(usname.Text))
+            else if (cmbUsers.SelectedValue == null || !int.TryParse(cmbUsers.SelectedValue.ToString(), out int selectedUserId))
             {
-                universControl.PopNotifyShow("!کد کاربری صحیح نیست.", Pop1, Pop1Text1, Pop_Border1);
+                universControl.PopNotifyShow("!کاربر را انتخاب کنید.", Pop1, Pop1Text1, Pop_Border1);
             }
-            else if (pass1.Text.Length > 40)
+            else if (newPassValue.Length > 40)
             {
                 universControl.PopNotifyShow("!رمز عبور نباید بیشتر از 40 کاراکتر باشد.", Pop1, Pop1Text1, Pop_Border1);
             }
             else
             {
-                var rst = dbms.DoGetDataSQL<SALA_DTL>("select * from SALA_DTL where idd = " + usname.Text).FirstOrDefault();
+                var rst = dbms.DoGetDataSQL<SALA_DTL>("select * from SALA_DTL where idd = " + selectedUserId).FirstOrDefault();
                 if (rst == null)
                 {
                     universControl.PopNotifyShow("!آی دی کاربر یا رمز عبور صحیح نمی باشد.", Pop1, Pop1Text1, Pop_Border1);
@@ -183,11 +206,11 @@ namespace Prg_UI.Wins.WinSetting
                 {
                     bool isCurrentUser = rst.IDD == Baseknow.USERCOD;
                     bool canChangeWithoutOldPassword = _canResetOtherUsersPassword && !isCurrentUser;
-                    bool oldPasswordIsValid = OLDPASS.Text == CL_HESABDARI.DECODEPS(rst.PSAL_NAME);
+                    bool oldPasswordIsValid = oldPassValue == CL_HESABDARI.DECODEPS(rst.PSAL_NAME);
 
                     if (canChangeWithoutOldPassword || oldPasswordIsValid)
                     {
-                        var NewPass = Strings.Trim(CL_HESABDARI.CODEPAL(pass1.Text));
+                        var NewPass = Strings.Trim(CL_HESABDARI.CODEPAL(newPassValue));
                         SALA_DTL sALA_DTL = new SALA_DTL()
                         {
                             IDD = rst.IDD,
@@ -210,21 +233,55 @@ namespace Prg_UI.Wins.WinSetting
                         universControl.PopNotifyShow("!آی دی کاربر یا رمز عبور صحیح نمی باشد.", Pop1, Pop1Text1, Pop_Border1);
                         return;
                     }
-
+                    new Msgwin(false, "عملیات با موفقیت انجام شد.").ShowDialog();
                     this.Close();
                 }
             }
         }
 
-        private void usname_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        private static string GetPasswordValue(PasswordBox passwordBox, TextBox passwordTextBox)
         {
-            if (!int.TryParse(usname.Text, out int userId))
+            return passwordTextBox.Visibility == Visibility.Visible ? passwordTextBox.Text : passwordBox.Password;
+        }
+
+        private void PasswordControl_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (_isSyncingPasswordFields)
             {
-                usna.Text = string.Empty;
                 return;
             }
 
-            usna.Text = CL_HESABDARI.GETUSERNAME(userId);
+            _isSyncingPasswordFields = true;
+            OLDPASS_Text.Text = OLDPASS.Password;
+            pass1_Text.Text = pass1.Password;
+            pass2_Text.Text = pass2.Password;
+            _isSyncingPasswordFields = false;
+        }
+
+        private void PasswordText_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_isSyncingPasswordFields)
+            {
+                return;
+            }
+
+            _isSyncingPasswordFields = true;
+            OLDPASS.Password = OLDPASS_Text.Text;
+            pass1.Password = pass1_Text.Text;
+            pass2.Password = pass2_Text.Text;
+            _isSyncingPasswordFields = false;
+        }
+
+        private void ChkShowPassword_CheckedChanged(object sender, RoutedEventArgs e)
+        {
+            bool showPassword = ChkShowPassword.IsChecked == true;
+            OLDPASS.Visibility = showPassword ? Visibility.Collapsed : Visibility.Visible;
+            pass1.Visibility = showPassword ? Visibility.Collapsed : Visibility.Visible;
+            pass2.Visibility = showPassword ? Visibility.Collapsed : Visibility.Visible;
+
+            OLDPASS_Text.Visibility = showPassword ? Visibility.Visible : Visibility.Collapsed;
+            pass1_Text.Visibility = showPassword ? Visibility.Visible : Visibility.Collapsed;
+            pass2_Text.Visibility = showPassword ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 }
