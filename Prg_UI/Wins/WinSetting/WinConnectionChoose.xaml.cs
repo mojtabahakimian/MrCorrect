@@ -153,59 +153,114 @@ namespace Prg_UI.Wins.WinSetting
             CL_LMethods.GoExitTheApplication(); //#NABILOO#
             return;
         }
-        internal bool GoTestConnectionOK()
+        internal (bool Success, string ErrorMessage) GoTestConnectionOK()
         {
-            string _result = null;
             string _cnn = null;
+            string serverName = null;
+            string dbName = null;
+
             Dispatcher.Invoke(() =>
             {
                 ServerChooser.UpdateLayout();
                 var ServerChooser_TEXBOX = (TextBox)ServerChooser.Template.FindName("PART_EditableTextBox", ServerChooser);
                 ServerChooser.SelectedValue = ServerChooser_TEXBOX.Text.Trim();
-                var ServerChooser_TEX = ServerChooser_TEXBOX.Text.Trim();
+                serverName = ServerChooser_TEXBOX.Text.Trim();
 
                 DbChooser.UpdateLayout();
                 var DbChooser_TEXBOX = (TextBox)DbChooser.Template.FindName("PART_EditableTextBox", DbChooser);
                 DbChooser.SelectedValue = DbChooser_TEXBOX.Text.Trim();
-                var DbChooser_TEX = DbChooser_TEXBOX.Text.Trim();
+                dbName = DbChooser_TEXBOX.Text.Trim();
 
                 if (rd_WinAuth.IsChecked is true) //Windows Authentication
-                    _cnn = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;"; //WIN
+                    _cnn = $@"Data Source={serverName};Initial Catalog={dbName};Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;Connect Timeout=15;"; //WIN
                 else if (rd_SqlAuth.IsChecked is true) //SQL Authentication
-                    _cnn = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Password};Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=True;"; // SQL
+                    _cnn = $@"Data Source={serverName};Initial Catalog={dbName};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Password};Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=True;Connect Timeout=15;"; // SQL
             });
 
-            CL_CCNNMANAGER tsdb = new CL_CCNNMANAGER();
-            CL_CCNNMANAGER.CONNECTION_STR = _cnn;
+            if (string.IsNullOrWhiteSpace(serverName))
+                return (false, "نام سرور خالی است.\nلطفاً نام سرور SQL Server را وارد کنید.");
+
+            if (string.IsNullOrWhiteSpace(dbName))
+                return (false, "نام دیتابیس خالی است.\nلطفاً نام دیتابیس را وارد کنید.");
+
             try
             {
-                _result = tsdb.DoGetDataSQL<string>("SELECT SERVERNAM FROM dbo.SAZMAN --TEST").FirstOrDefault();
+                using var conn = new SqlConnection(_cnn);
+                conn.Open();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "SELECT SERVERNAM FROM dbo.SAZMAN";
+                cmd.CommandTimeout = 15;
+                var result = cmd.ExecuteScalar();
+                return (true, null);
+            }
+            catch (SqlException ex)
+            {
+                return (false, GetSqlConnectionErrorMessage(ex));
+            }
+            catch (InvalidOperationException)
+            {
+                return (false, "تنظیمات اتصال ناقص است.\nلطفاً نام سرور و دیتابیس را کامل وارد کنید.");
+            }
+            catch (ArgumentException)
+            {
+                return (false, "فرمت رشته اتصال نامعتبر است.\nنام سرور یا دیتابیس حاوی کاراکتر غیرمجاز است.");
             }
             catch (Exception ex)
             {
-                return false;
+                return (false, $"خطا در برقراری اتصال:\n{ex.Message}");
+            }
+        }
+
+        private static string GetSqlConnectionErrorMessage(SqlException ex)
+        {
+            // بررسی خطای Win32 (سطح شبکه/سیستم‌عامل)
+            if (ex.InnerException is System.ComponentModel.Win32Exception win32)
+            {
+                return win32.NativeErrorCode switch
+                {
+                    10061 => "سرویس SQL Server در حال اجرا نیست یا اتصال رد شد.\n\nراه‌حل پیشنهادی:\n• از طریق Services.msc سرویس SQL Server را راه‌اندازی کنید.\n• مطمئن شوید پورت 1433 در فایروال باز است.",
+                    53    => "مسیر شبکه به سرور یافت نشد.\n\nراه‌حل پیشنهادی:\n• نام سرور را بررسی کنید.\n• مطمئن شوید سرور روشن و در شبکه قرار دارد.",
+                    64    => "اتصال شبکه به سرور قطع شد.\n\nراه‌حل پیشنهادی:\n• کابل شبکه یا Wi-Fi را بررسی کنید.\n• مطمئن شوید سرویس SQL Server در حال اجرا است.",
+                    10060 => "اتصال به سرور با خطای وقفه زمانی مواجه شد.\n\nراه‌حل پیشنهادی:\n• آدرس IP یا نام سرور را بررسی کنید.\n• فایروال را بررسی کنید.",
+                    _     => $"خطای شبکه (کد: {win32.NativeErrorCode}):\n{win32.Message}\n\nراه‌حل: با مدیر شبکه تماس بگیرید.",
+                };
             }
 
-            if (_result is not null)
-                return true;
-            else
-                return false;
+            return ex.Number switch
+            {
+                2 or 53   => "سرور SQL Server یافت نشد.\n\nراه‌حل پیشنهادی:\n• نام سرور را دوباره بررسی کنید.\n• مطمئن شوید سرور روشن است و در شبکه قرار دارد.\n• پورت 1433 باید در فایروال باز باشد.",
+                26        => "نام سرور یا اینستنس پیدا نشد.\n\nراه‌حل پیشنهادی:\n• نام سرور و اینستنس را بررسی کنید (مثال: SERVER\\SQLEXPRESS).\n• مطمئن شوید سرویس SQL Server Browser روشن است.",
+                -2        => "اتصال به سرور با وقفه زمانی قطع شد.\n\nراه‌حل پیشنهادی:\n• مطمئن شوید سرور در دسترس است.\n• شبکه را بررسی کنید.\n• فایروال ممکن است اتصال را مسدود کرده باشد.",
+                4060      => "دیتابیس مورد نظر یافت نشد یا دسترسی ندارید.\n\nراه‌حل پیشنهادی:\n• نام دیتابیس را بررسی کنید.\n• مطمئن شوید کاربر به این دیتابیس دسترسی دارد.",
+                4064      => "دیتابیس پیش‌فرض کاربر در دسترس نیست.\n\nراه‌حل پیشنهادی:\n• با مدیر دیتابیس تماس بگیرید تا دیتابیس پیش‌فرض کاربر را تنظیم کند.",
+                18456     => "ورود به SQL Server ناموفق بود.\n\nراه‌حل پیشنهادی:\n• نام کاربری SQL را بررسی کنید.\n• رمز عبور را مجدداً وارد کنید.\n• مطمئن شوید کاربر در SQL Server تعریف شده است.",
+                18452     => "احراز هویت ناموفق - نوع ورود نادرست است.\n\nراه‌حل پیشنهادی:\n• بین Windows Authentication و SQL Authentication انتخاب درستی داشته باشید.",
+                18470     => "حساب کاربری غیرفعال شده است.\n\nراه‌حل پیشنهادی:\n• با مدیر SQL Server تماس بگیرید تا حساب کاربری را فعال کند.",
+                64        => "اتصال به سرور قطع شد.\n\nراه‌حل پیشنهادی:\n• شبکه را بررسی کنید.\n• مطمئن شوید سرویس SQL Server در حال اجرا است.",
+                121 or
+                232 or
+                233       => "خطای ارتباط با Named Pipe سرور.\n\nراه‌حل پیشنهادی:\n• Named Pipes و TCP/IP را در SQL Server Configuration Manager فعال کنید.\n• سرویس SQL Server را ریستارت کنید.",
+                17142     => "سرویس SQL Server موقتاً متوقف شده است.\n\nراه‌حل پیشنهادی:\n• با مدیر سیستم تماس بگیرید تا سرویس SQL Server را راه‌اندازی کند.",
+                1205      => "تداخل در تراکنش‌های دیتابیس (Deadlock).\n\nراه‌حل پیشنهادی:\n• چند لحظه صبر کنید و دوباره تست کنید.\n• اگر مشکل ادامه داشت با مدیر دیتابیس تماس بگیرید.",
+                _         => $"خطای SQL Server (کد: {ex.Number}):\n{ex.Message}\n\nراه‌حل: با مدیر سیستم تماس بگیرید.",
+            };
         }
+
         private async void Btn_TestConnection_Click(object sender, RoutedEventArgs e)
         {
             lblconnecting.Visibility = Visibility.Visible;
             this.IsEnabled = false;
 
-            var _isconnect = false;
+            (bool Success, string ErrorMessage) result = default;
             await Task.Run(() =>
             {
-                _isconnect = GoTestConnectionOK();
+                result = GoTestConnectionOK();
             });
 
-            if (_isconnect is true)
-                new Msgwin(false, "تست موفقیت آمیز بودارتباط بر قرار شد").ShowDialog();
+            if (result.Success)
+                new Msgwin(false, "اتصال با موفقیت برقرار شد!", "#FF1A7A3C").ShowDialog();
             else
-                new Msgwin(false, "تست ناموفق بود !").ShowDialog();
+                new Msgwin(false, result.ErrorMessage, "", true).ShowDialog();
 
             lblconnecting.Visibility = Visibility.Hidden;
             this.IsEnabled = true;
