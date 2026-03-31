@@ -6,6 +6,7 @@ using Prg_UI.Functions;
 using Prg_UI.HelperWins;
 using Syncfusion.Windows.Shared;
 using System;
+using System.ComponentModel;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -191,21 +192,242 @@ namespace Prg_UI.Wins.WinSetting
             else
                 return false;
         }
+
+        private sealed class ConnectionTestResult
+        {
+            public bool IsSuccess { get; set; }
+            public string Message { get; set; }
+        }
+
+        private ConnectionTestResult TestConnectionWithDetails()
+        {
+            string serverName = string.Empty;
+            string databaseName = string.Empty;
+            string username = string.Empty;
+            bool isWindowsAuth = false;
+            string connectionString = null;
+
+            Dispatcher.Invoke(() =>
+            {
+                ServerChooser.UpdateLayout();
+                var serverChooserTextBox = ServerChooser.Template.FindName("PART_EditableTextBox", ServerChooser) as TextBox;
+                serverName = serverChooserTextBox?.Text?.Trim() ?? ServerChooser.Text?.Trim() ?? string.Empty;
+
+                DbChooser.UpdateLayout();
+                var dbChooserTextBox = DbChooser.Template.FindName("PART_EditableTextBox", DbChooser) as TextBox;
+                databaseName = dbChooserTextBox?.Text?.Trim() ?? DbChooser.Text?.Trim() ?? string.Empty;
+
+                username = Textbox_DataUsername.Text?.Trim() ?? string.Empty;
+                isWindowsAuth = rd_WinAuth.IsChecked is true;
+            });
+
+            if (string.IsNullOrWhiteSpace(serverName))
+            {
+                return new ConnectionTestResult
+                {
+                    IsSuccess = false,
+                    Message = "نام سرور خالی است.\nراهنما: نام یا IP سرور SQL را وارد کنید (مثال: SERVER\\SQL2019 یا 192.168.1.10)."
+                };
+            }
+
+            if (string.IsNullOrWhiteSpace(databaseName))
+            {
+                return new ConnectionTestResult
+                {
+                    IsSuccess = false,
+                    Message = "نام دیتابیس خالی است.\nراهنما: ابتدا سرور را انتخاب کنید و سپس یک دیتابیس معتبر را انتخاب/وارد کنید."
+                };
+            }
+
+            if (!isWindowsAuth)
+            {
+                if (string.IsNullOrWhiteSpace(username))
+                {
+                    return new ConnectionTestResult
+                    {
+                        IsSuccess = false,
+                        Message = "نام کاربری SQL خالی است.\nراهنما: در حالت SQL Authentication باید نام کاربری معتبر وارد شود."
+                    };
+                }
+
+                if (string.IsNullOrWhiteSpace(Textbox_Datapass.Password))
+                {
+                    return new ConnectionTestResult
+                    {
+                        IsSuccess = false,
+                        Message = "رمز عبور SQL خالی است.\nراهنما: در حالت SQL Authentication باید رمز عبور معتبر وارد شود."
+                    };
+                }
+            }
+
+            if (isWindowsAuth)
+                connectionString = $@"Data Source={serverName};Initial Catalog={databaseName};Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;";
+            else
+                connectionString = $@"Data Source={serverName};Initial Catalog={databaseName};User ID={username};Password={Textbox_Datapass.Password};Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=True;";
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    using (var command = new SqlCommand("SELECT TOP (1) SERVERNAM FROM dbo.SAZMAN", connection))
+                    {
+                        command.CommandTimeout = 15;
+                        command.ExecuteScalar();
+                    }
+                }
+
+                return new ConnectionTestResult
+                {
+                    IsSuccess = true,
+                    Message = "تست اتصال موفق بود و ارتباط با دیتابیس برقرار شد."
+                };
+            }
+            catch (SqlException ex)
+            {
+                return new ConnectionTestResult
+                {
+                    IsSuccess = false,
+                    Message = BuildSqlErrorMessage(ex, serverName, databaseName, isWindowsAuth)
+                };
+            }
+            catch (InvalidOperationException ex)
+            {
+                return new ConnectionTestResult
+                {
+                    IsSuccess = false,
+                    Message = $"تنظیمات اتصال معتبر نیست یا وضعیت اتصال صحیح نیست.\nجزئیات: {ex.Message}\nراهنما: اطلاعات سرور/دیتابیس/احراز هویت را بررسی کنید و دوباره تست بگیرید."
+                };
+            }
+            catch (TimeoutException)
+            {
+                return new ConnectionTestResult
+                {
+                    IsSuccess = false,
+                    Message = "اتصال به دلیل تاخیر زیاد سرور (Timeout) برقرار نشد.\nراهنما: شبکه/VPN را بررسی کنید، از روشن بودن SQL Server مطمئن شوید و دوباره تلاش کنید."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ConnectionTestResult
+                {
+                    IsSuccess = false,
+                    Message = BuildFallbackErrorMessage(ex)
+                };
+            }
+        }
+
+        private string BuildSqlErrorMessage(SqlException ex, string serverName, string databaseName, bool isWindowsAuth)
+        {
+            if (ex == null)
+                return "خطا در اتصال به دیتابیس رخ داد.\nراهنما: اطلاعات اتصال را بررسی کرده و مجدد تلاش کنید.";
+
+            if (ex.InnerException is Win32Exception win32)
+            {
+                return win32.NativeErrorCode switch
+                {
+                    10061 => "سرویس SQL Server در حال اجرا نیست یا اتصال رد شد.\n\nراه‌حل پیشنهادی:\n• از طریق Services.msc سرویس SQL Server را راه‌اندازی کنید.\n• مطمئن شوید پورت 1433 در فایروال باز است.",
+                    53 => $"مسیر شبکه به سرور «{serverName}» یافت نشد.\n\nراه‌حل پیشنهادی:\n• نام سرور را بررسی کنید.\n• مطمئن شوید سرور روشن و در شبکه قرار دارد.",
+                    64 => $"اتصال شبکه به سرور «{serverName}» قطع شد.\n\nراه‌حل پیشنهادی:\n• کابل شبکه یا Wi-Fi را بررسی کنید.\n• مطمئن شوید سرویس SQL Server در حال اجرا است.",
+                    10060 => $"اتصال به سرور «{serverName}» با خطای وقفه زمانی مواجه شد.\n\nراه‌حل پیشنهادی:\n• آدرس IP یا نام سرور را بررسی کنید.\n• فایروال را بررسی کنید.",
+                    _ => $"خطای شبکه (کد: {win32.NativeErrorCode}):\n{win32.Message}\n\nراه‌حل: با مدیر شبکه تماس بگیرید."
+                };
+            }
+
+            switch (ex.Number)
+            {
+                case 2:
+                case 53:
+                case 40:
+                case 11001:
+                    return $"سرور SQL Server «{serverName}» یافت نشد یا در دسترس نیست.\n\nراه‌حل پیشنهادی:\n• نام سرور را دوباره بررسی کنید.\n• مطمئن شوید سرور روشن است و در شبکه قرار دارد.\n• پورت 1433 باید در فایروال باز باشد.";
+
+                case -2:
+                case 121:
+                case 258:
+                    return $"اتصال به سرور «{serverName}» با وقفه زمانی (Timeout) قطع شد.\n\nراه‌حل پیشنهادی:\n• مطمئن شوید سرور در دسترس است.\n• شبکه و VPN را بررسی کنید.\n• فایروال ممکن است اتصال را مسدود کرده باشد.";
+
+                case 26:
+                    return "نام سرور یا Instance پیدا نشد.\n\nراه‌حل پیشنهادی:\n• نام سرور و Instance را بررسی کنید (مثال: SERVER\\SQLEXPRESS).\n• مطمئن شوید سرویس SQL Server Browser روشن است.";
+
+                case 4060:
+                    return $"دیتابیس «{databaseName}» یافت نشد یا دسترسی ندارید.\n\nراه‌حل پیشنهادی:\n• نام دیتابیس را بررسی کنید.\n• مطمئن شوید کاربر به این دیتابیس دسترسی دارد.";
+
+                case 4064:
+                    return "دیتابیس پیش‌فرض کاربر در دسترس نیست.\n\nراه‌حل پیشنهادی:\n• با مدیر دیتابیس تماس بگیرید تا دیتابیس پیش‌فرض کاربر را تنظیم کند.";
+
+                case 18456:
+                    if (isWindowsAuth)
+                        return "ورود ناموفق بود (Windows Authentication).\n\nراه‌حل پیشنهادی:\n• حساب ویندوز فعلی باید روی SQL Server دسترسی داشته باشد.\n• در صورت نیاز از SQL Authentication استفاده کنید.";
+
+                    return "ورود به SQL Server ناموفق بود.\n\nراه‌حل پیشنهادی:\n• نام کاربری SQL را بررسی کنید.\n• رمز عبور را مجدداً وارد کنید.\n• مطمئن شوید کاربر در SQL Server تعریف شده است.";
+
+                case 18452:
+                    return "احراز هویت ناموفق - نوع ورود نادرست است.\n\nراه‌حل پیشنهادی:\n• بین Windows Authentication و SQL Authentication انتخاب درستی داشته باشید.";
+
+                case 18470:
+                    return "حساب کاربری SQL غیرفعال شده است.\n\nراه‌حل پیشنهادی:\n• با مدیر SQL Server تماس بگیرید تا حساب کاربری را فعال کند.";
+
+                case 64:
+                    return $"اتصال به سرور «{serverName}» قطع شد.\n\nراه‌حل پیشنهادی:\n• شبکه را بررسی کنید.\n• مطمئن شوید سرویس SQL Server در حال اجرا است.";
+
+                case 232:
+                case 233:
+                    return "خطای ارتباط با Named Pipe/Transport سرور رخ داد.\n\nراه‌حل پیشنهادی:\n• Named Pipes و TCP/IP را در SQL Server Configuration Manager فعال کنید.\n• سرویس SQL Server را ریستارت کنید.";
+
+                case 17142:
+                    return "سرویس SQL Server موقتاً متوقف شده است.\n\nراه‌حل پیشنهادی:\n• با مدیر سیستم تماس بگیرید تا سرویس SQL Server را راه‌اندازی کند.";
+
+                case 1205:
+                    return "تداخل در تراکنش‌های دیتابیس (Deadlock) رخ داده است.\n\nراه‌حل پیشنهادی:\n• چند لحظه صبر کنید و دوباره تست کنید.\n• اگر مشکل ادامه داشت با مدیر دیتابیس تماس بگیرید.";
+
+                case 229:
+                case 916:
+                    return "کاربر دسترسی لازم به دیتابیس یا اشیای آن را ندارد.\n\nراه‌حل پیشنهادی:\n• از مدیر دیتابیس بخواهید دسترسی‌های لازم (حداقل خواندن جدول SAZMAN) را اعطا کند.";
+
+                case 208:
+                    return "جدول «dbo.SAZMAN» در دیتابیس انتخابی یافت نشد.\n\nراه‌حل پیشنهادی:\n• دیتابیس صحیح برنامه را انتخاب کنید.\n• اسکریپت‌های ایجاد/به‌روزرسانی جداول را اجرا کنید.";
+
+                case 207:
+                    return "ساختار دیتابیس با نسخه برنامه سازگار نیست (ستون لازم وجود ندارد).\n\nراه‌حل پیشنهادی:\n• اسکریپت‌های به‌روزرسانی دیتابیس را اجرا کنید یا نسخه برنامه را همسان کنید.";
+
+                case 1326:
+                    return "اعتبارسنجی کاربر در شبکه/دامنه ناموفق بود.\n\nراه‌حل پیشنهادی:\n• نام کاربری و رمز عبور ویندوز/دامنه را بررسی کنید.\n• از دسترسی شبکه و Domain Controller مطمئن شوید.";
+
+                default:
+                    return $"خطای SQL Server (کد: {ex.Number}):\n{ex.Message}\n\nراه‌حل: تنظیمات سرور/شبکه/دسترسی را بررسی کنید یا با مدیر سیستم تماس بگیرید.";
+            }
+        }
+
+        private string BuildFallbackErrorMessage(Exception ex)
+        {
+            if (ex is ArgumentException || ex is FormatException)
+                return $"فرمت اطلاعات اتصال صحیح نیست.\nجزئیات: {ex.Message}\nراهنما: نام سرور/دیتابیس و اطلاعات احراز هویت را با فرمت درست وارد کنید.";
+
+            if (ex is COMException)
+                return $"خطای سیستمی هنگام ارتباط با SQL رخ داد.\nجزئیات: {ex.Message}\nراهنما: سرویس‌های SQL Server و SQL Browser را بررسی کرده و سیستم را مجدد تست کنید.";
+
+            if (ex is AccessViolationException || ex is OutOfMemoryException)
+                return "خطای سطح سیستم رخ داد و اتصال کامل نشد.\nراهنما: برنامه را ببندید و دوباره اجرا کنید؛ اگر ادامه داشت با پشتیبانی سیستم تماس بگیرید.";
+
+            return $"امکان اتصال به دیتابیس وجود ندارد.\nجزئیات: {ex.Message}\nراهنما: تنظیمات سرور، شبکه، فایروال، احراز هویت و وجود دیتابیس صحیح را بررسی کنید.";
+        }
+
         private async void Btn_TestConnection_Click(object sender, RoutedEventArgs e)
         {
             lblconnecting.Visibility = Visibility.Visible;
             this.IsEnabled = false;
 
-            var _isconnect = false;
+            ConnectionTestResult testResult = null;
             await Task.Run(() =>
             {
-                _isconnect = GoTestConnectionOK();
+                testResult = TestConnectionWithDetails();
             });
 
-            if (_isconnect is true)
-                new Msgwin(false, "تست موفقیت آمیز بودارتباط بر قرار شد").ShowDialog();
+            if (testResult?.IsSuccess is true)
+                new Msgwin(false, testResult.Message).ShowDialog();
             else
-                new Msgwin(false, "تست ناموفق بود !").ShowDialog();
+                new Msgwin(false, testResult?.Message ?? "امکان اتصال به دیتابیس وجود ندارد.\nراهنما: اطلاعات اتصال را مجدد بررسی کنید و دوباره تلاش کنید.").ShowDialog();
 
             lblconnecting.Visibility = Visibility.Hidden;
             this.IsEnabled = true;
