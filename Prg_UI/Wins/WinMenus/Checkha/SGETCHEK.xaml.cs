@@ -509,6 +509,8 @@ namespace Wins.WinMenus.Checkha
                 }
                 else
                 {
+                try
+                {
                     ((THE_WIN as DEED_HEAD).Child14.Items[INDEX_DG] as DEED_DTL).N_SERI = Convert.ToDouble(N_SERI.Text);
                     //Forms["PGET_HED"]["PGET_LST_SUB"].Form["N_SERI"] = this.N_SERI;
                     ((THE_WIN as DEED_HEAD).Child14.Items[INDEX_DG] as DEED_DTL).BANK = Convert.ToInt32(BANK.SelectedValue);
@@ -711,6 +713,17 @@ namespace Wins.WinMenus.Checkha
                     //(THE_WIN as DEED_HEAD).CmdSaveRecord(((THE_WIN as DEED_HEAD).Child14.Items[INDEX_DG] as DEED_DTL));
 
                     this.Close();
+                }
+                catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 547)
+                {
+                    new Msgwin(false, "کد حساب انتخاب شده در سیستم حسابداری وجود ندارد. لطفاً یک حساب معتبر انتخاب نمایید.").ShowDialog();
+                    return;
+                }
+                catch (Exception)
+                {
+                    new Msgwin(false, "خطا در ذخیره اطلاعات چک.").ShowDialog();
+                    return;
+                }
                 }
             }
             #endregion

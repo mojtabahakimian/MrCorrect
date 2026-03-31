@@ -590,7 +590,10 @@
 		<PackageReference Include="MaterialDesignThemes" Version="5.2.1" />
 		<PackageReference Include="Microsoft.Office.Interop.Excel" Version="15.0.4795.1001" />
 		<PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
-		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135">
+			<ExcludeFromSingleFile>false</ExcludeFromSingleFile>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</PackageReference>
 		<PackageReference Include="Mime-Detective" Version="23.10.1" />
 		<PackageReference Include="MimeTypeMapOfficial" Version="1.0.17" />
 		<PackageReference Include="MimeTypesMap" Version="1.0.8" />

@@ -1138,6 +1138,7 @@ namespace Prg_UI.Wins.WinMenus.SANATI
 
                 if (SUB_DATA.Count > 0 && DG_SUB.SelectedItems != null && DG_SUB.SelectedItems.Count > 0)
                 {
+                    if (DG_SUB.SelectedItem is not DTL_MANF) { return; }
                     var NewRow = ((DTL_MANF)DG_SUB.SelectedItem).Clone() as DTL_MANF;
                     _ = AuditLogger.LogActionAsync(
                                       actionType: "Delete",

@@ -144,7 +144,7 @@ namespace Prg_UI.Wins.WinSetting
             new Msgwin(false, "با موفق به دیتابیس متصل شد , برنامه باید یکبار ری استارت شود.").ShowDialog();
             this.Close();
 
-            var currentExecutablePath = Process.GetCurrentProcess().MainModule.FileName;
+            var currentExecutablePath = Process.GetCurrentProcess().MainModule?.FileName ?? Environment.ProcessPath;
             Process.Start(currentExecutablePath);
 
             CL_LMethods.CleanupBeforeExiting();
