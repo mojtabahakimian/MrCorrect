@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AUTO_BAZ.Functions;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
@@ -17,10 +18,36 @@ namespace AUTO_BAZ
     /// </summary>
     public partial class App : Application
     {
+        public App()
+        {
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            Exit += App_Exit;
+            var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+            currentProcess.EnableRaisingEvents = true;
+            currentProcess.Exited += CurrentProcess_Exited;
+        }
+
+        private void App_Exit(object sender, ExitEventArgs e)
+        {
+            DelayedDurabilityGuard.TryDisableForcefully();
+        }
+
+        private void CurrentProcess_Exited(object? sender, EventArgs e)
+        {
+            DelayedDurabilityGuard.TryDisableForcefully();
+        }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            DelayedDurabilityGuard.TryDisableForcefully();
+        }
+
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
             try
             {
+                DelayedDurabilityGuard.TryDisableForcefully();
+
                 var _er = e.Exception + Environment.NewLine + e.Handled + Environment.NewLine + e.Dispatcher;
                 File.WriteAllText(@"C:\CORRECT\AUTO_BAZ_LOG\AUTO_EXCP.txt", _er);
 

@@ -118,6 +118,12 @@ namespace AUTO_BAZ
     #endregion
     public partial class MainWindow : Window
     {
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            DelayedDurabilityGuard.TryDisableForcefully();
+            base.OnClosing(e);
+        }
+
         #region Header Window Begin
         //Header Window Begin
         private void Btn_Close_Click(object sender, RoutedEventArgs e)
@@ -628,6 +634,7 @@ namespace AUTO_BAZ
         {
             if (StillMethodIsWorking) return;
             int repeatCount = 1;
+            bool enteredDurabilityScope = false;
 
             Dispatcher.Invoke(new Action(() =>
             {
@@ -643,44 +650,48 @@ namespace AUTO_BAZ
 
 
             //{Begin---------------------------------
-            for (int r = 0; r < repeatCount; r++)
+            try
             {
-                tasks = new List<Task>();
-                AnyErrorHappend = false;
+                DelayedDurabilityGuard.EnterRebuildScope();
+                enteredDurabilityScope = true;
 
-                Dispatcher.Invoke(new Action(() =>
+                for (int r = 0; r < repeatCount; r++)
                 {
-                    if (LST_DATA5.Count > 30)
+                    tasks = new List<Task>();
+                    AnyErrorHappend = false;
+
+                    Dispatcher.Invoke(new Action(() =>
                     {
-                        LST_DATA5.CollectionChanged -= LST_DATA5_CollectionChanged;
-                        LST_DATA5?.Clear();
-                        LST_DATA5.CollectionChanged += LST_DATA5_CollectionChanged;
-                        Properties.Settings.Default.TheHistoryLST = null;
-                        Properties.Settings.Default.Save();
-                    }
+                        if (LST_DATA5.Count > 30)
+                        {
+                            LST_DATA5.CollectionChanged -= LST_DATA5_CollectionChanged;
+                            LST_DATA5?.Clear();
+                            LST_DATA5.CollectionChanged += LST_DATA5_CollectionChanged;
+                            Properties.Settings.Default.TheHistoryLST = null;
+                            Properties.Settings.Default.Save();
+                        }
 
-                    LST_DATA5.Add("شروع" + Conversions.ToString(DateTime.Now));
-                    StillMethodIsWorking = true;
-                }));
+                        LST_DATA5.Add("شروع" + Conversions.ToString(DateTime.Now));
+                        StillMethodIsWorking = true;
+                    }));
 
-                if (Generaly.C0) { await Task.Run(async () => { await C0_TASK(); }); } //باز سازی نرخ میانگین
-                if (Generaly.C00) { await Task.Run(async () => { await C00_TASK(); }); } //باز سازی موجودی انبار
+                    if (Generaly.C0) { await Task.Run(async () => { await C0_TASK(); }); } //باز سازی نرخ میانگین
+                    if (Generaly.C00) { await Task.Run(async () => { await C00_TASK(); }); } //باز سازی موجودی انبار
 
+                    if (Generaly.C1) { tasks.Add(C1_TASK()); } //سند فروش
+                    if (Generaly.C2) { tasks.Add(C2_TASK()); } //سند خرید
+                    if (Generaly.C3) { tasks.Add(C3_TASK()); } //سند خزانه
+                    if (Generaly.C4) { tasks.Add(C4_TASK()); } //سند انتقالی
+                    if (Generaly.C5) { tasks.Add(C5_TASK()); } //سند خروج مواد
+                    if (Generaly.C6) { tasks.Add(C6_TASK()); } //سند خروج سایر
+                    if (Generaly.C7) { tasks.Add(C7_TASK()); } //سند تولید ورود
+                    if (Generaly.C8) { tasks.Add(C8_TASK()); } //سند برگشت فروش + آزاد
+                    if (Generaly.C9) { tasks.Add(C9_TASK()); } //سند برگشت فروش + آزاد
+                    if (Generaly.C10) { tasks.Add(C10_TASK()); } //سند برگشت فروش + آزاد
+                    if (Generaly.C11) { tasks.Add(C11_TASK()); } // سند وصولی اسناد دریافتنی
 
-                if (Generaly.C1) { tasks.Add(C1_TASK()); } //سند فروش
-                if (Generaly.C2) { tasks.Add(C2_TASK()); } //سند خرید
-                if (Generaly.C3) { tasks.Add(C3_TASK()); } //سند خزانه
-                if (Generaly.C4) { tasks.Add(C4_TASK()); } //سند انتقالی
-                if (Generaly.C5) { tasks.Add(C5_TASK()); } //سند خروج مواد
-                if (Generaly.C6) { tasks.Add(C6_TASK()); } //سند خروج سایر
-                if (Generaly.C7) { tasks.Add(C7_TASK()); } //سند تولید ورود
-                if (Generaly.C8) { tasks.Add(C8_TASK()); } //سند برگشت فروش + آزاد
-                if (Generaly.C9) { tasks.Add(C9_TASK()); } //سند برگشت فروش + آزاد
-                if (Generaly.C10) { tasks.Add(C10_TASK()); } //سند برگشت فروش + آزاد
-                if (Generaly.C11) { tasks.Add(C11_TASK()); } // سند وصولی اسناد دریافتنی
-
-                // Start all tasks concurrently
-                var allTasks = Task.WhenAll(tasks); //Start and Wait until When all tasks are finished.
+                    // Start all tasks concurrently
+                    var allTasks = Task.WhenAll(tasks); //Start and Wait until When all tasks are finished.
 
                 #region MyRegion
                 //این تیکه رو فقط برای دیباگ استفاده میکنم
@@ -710,9 +721,9 @@ namespace AUTO_BAZ
                 #endregion
 
 
-                try
-                {
-                    await allTasks;
+                    try
+                    {
+                        await allTasks;
 
                     Dispatcher.Invoke(new Action(() =>
                     {
@@ -737,9 +748,9 @@ namespace AUTO_BAZ
 
                     }));
                     SayOprationsFinished();
-                }
-                catch (OperationCanceledException ecx)
-                {
+                    }
+                    catch (OperationCanceledException ecx)
+                    {
                     Dispatcher.Invoke(new Action(() =>
                     {
                         TOGHER_PROGRESS.Value = 0;
@@ -754,9 +765,9 @@ namespace AUTO_BAZ
                     ExpectionLogWriter.WriteLog(ecx, "OperationCanceledException in LetsGoBtn_Click");
 
                     Console.WriteLine("Operation was canceled.");
-                }
-                catch (Exception ex)
-                {
+                    }
+                    catch (Exception ex)
+                    {
                     StillMethodIsWorking = false;
 
                     LST_DATA5.Add("به خاطر خطا لغو شد. :" + Conversions.ToString(DateTime.Now));
@@ -772,6 +783,14 @@ namespace AUTO_BAZ
                     ExpectionLogWriter.WriteLog(ex, "Exception in LetsGoBtn_Click");
 
                     Console.WriteLine(ex.ToString());
+                    }
+                }
+            }
+            finally
+            {
+                if (enteredDurabilityScope)
+                {
+                    DelayedDurabilityGuard.ExitRebuildScope();
                 }
             }
 
