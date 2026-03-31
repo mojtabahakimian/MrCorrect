@@ -1223,25 +1223,13 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             {
                 if (Convert.ToInt32(N_S.Text) > 0)
                 {
-                    //var Sanaddata = dbms.DoGetDataSQL<DEED_DTL>($"SELECT N_S, RADIF, HES_K, HES_M, HES_T, SHARH, BED, BES, N_SERI, BANK, NUMBER, TAG, HES, id, ARZD, MHAZ_NO, HES_T2, HES_T3, HES_T4, CRT, UID FROM DEED_DTL WHERE N_S = {N_S.Text}").ToList();
-                    var Sanaddata = dbms.DoGetDataSQL<DEED_DTL>($"SELECT N_S, RADIF, HES_K, HES_M, HES_T, SHARH, BED, BES, N_SERI, BANK, NUMBER, TAG, HES, id, ARZD, MHAZ_NO, HES_T2, HES_T3, HES_T4, CRT, UID FROM dbo.DEED_DTL WITH (INDEX(N_SI)) WHERE N_S = {N_S.Text}").ToList();
+                    var Sanaddata = dbms.DoGetDataSQL<DEED_DTL>($"SELECT d.N_S, d.RADIF, d.HES_K, d.HES_M, d.HES_T, d.SHARH, d.BED, d.BES, d.N_SERI, d.BANK, d.NUMBER, d.TAG, d.HES, d.id, d.ARZD, d.MHAZ_NO, d.HES_T2, d.HES_T3, d.HES_T4, d.CRT, d.UID, h.NAME AS NAME_HES FROM dbo.DEED_DTL d WITH (INDEX(N_SI)) LEFT JOIN dbo.CUST_HESAB h ON d.HES = h.hes WHERE d.N_S = {N_S.Text}").ToList();
                     if (Sanaddata.Count > 0)
                     {
-                        for (int i = 0; i < Sanaddata.Count; i++)
+                        foreach (var item in Sanaddata)
                         {
-                            SANAD_DATA.Add(Sanaddata[i]);
+                            SANAD_DATA.Add(item);
                         }
-
-                        //foreach (var item in Sanaddata)
-                        //{
-                        //    SANAD_DATA.Add(item);
-                        //}
-
-                        Parallel.For(0, SANAD_DATA.Count, i =>
-                        {
-                            //SANAD_DATA[i].HES = dbms.DoGetDataSQL<string>($"SELECT TOP 1 NAME FROM dbo.CUST_HESAB WHERE hes = N'{SANAD_DATA[i].HES}'").FirstOrDefault();
-                            SANAD_DATA[i].NAME_HES = dbms.DoGetDataSQL<string>($"SELECT TOP 1 NAME FROM dbo.CUST_HESAB WHERE hes = N'{SANAD_DATA[i].HES}'").FirstOrDefault();
-                        });
                     }
                 }
                 else
