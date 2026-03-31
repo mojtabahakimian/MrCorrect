@@ -125,13 +125,13 @@ namespace Prg_UI.Wins.WinSetting
             if (rd_WinAuth.IsChecked is true) //Windows Authentication
                 CNN_STR = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;"; //WIN
             else if (rd_SqlAuth.IsChecked is true) //SQL Authentication
-                CNN_STR = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Password};Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=True;"; // SQL
+                CNN_STR = $@"Data Source={ServerChooser_TEX};Initial Catalog={DbChooser_TEX};User ID={Textbox_DataUsername.Text?.Trim() ?? string.Empty};Password={Textbox_Datapass.Password ?? string.Empty};Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=True;"; // SQL
 
             try
             {
                 CL_CCNNMANAGER.CONNECTION_STR = CNN_STR; // قرار دادن رشته اتصال نهایی به کلاس اصلی
 
-                var TestCnn = dbms.DoGetDataSQL<string>("SELECT SERVERNAM FROM dbo.SAZMAN").FirstOrDefault(); //تست نهایی برای اطمینان
+                var TestCnn = dbms.DoGetDataSQL<string>("SELECT SERVERNAM FROM dbo.SAZMAN")?.FirstOrDefault(); //تست نهایی برای اطمینان
 
                 CL_CCNNMANAGER.ConnectedToSQLDB = true;
             }
@@ -144,13 +144,16 @@ namespace Prg_UI.Wins.WinSetting
             new Msgwin(false, "با موفق به دیتابیس متصل شد , برنامه باید یکبار ری استارت شود.").ShowDialog();
             this.Close();
 
-            var currentExecutablePath = Process.GetCurrentProcess().MainModule.FileName;
-            Process.Start(currentExecutablePath);
+            var currentExecutablePath = Process.GetCurrentProcess().MainModule?.FileName ?? Environment.ProcessPath;
+            if (!string.IsNullOrEmpty(currentExecutablePath))
+            {
+                Process.Start(currentExecutablePath);
+            }
 
             CL_LMethods.CleanupBeforeExiting();
 
-            Application.Current.Shutdown();
-            CL_LMethods.GoExitTheApplication(); //#NABILOO#
+            Application.Current?.Shutdown();
+            try { CL_LMethods.GoExitTheApplication(); } catch { } //#NABILOO#
             return;
         }
         internal bool GoTestConnectionOK()

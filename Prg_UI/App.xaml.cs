@@ -42,41 +42,41 @@ namespace Prg_UI
 
 
         #region NEW_ADDED_FOR_FIX
-        //static App()
-        //{
-        //    AppDomain.CurrentDomain.AssemblyResolve += ResolveAssemblies;
-        //}
-        //private static System.Reflection.Assembly? ResolveAssemblies(object? sender, ResolveEventArgs args)
-        //{
-        //    var requested = new AssemblyName(args.Name);
-        //    if (requested.Name == "Microsoft.Xaml.Behaviors")
-        //    {
-        //        return typeof(Behavior).Assembly;
-        //    }
-        //    try
-        //    {
-        //        if (requested.Name.StartsWith("Stimulsoft.", StringComparison.OrdinalIgnoreCase))
-        //        {
-        //            try
-        //            {
-        //                string searchRoot = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DLLS");
-        //                if (System.IO.Directory.Exists(searchRoot))
-        //                {
-        //                    string[] matches = System.IO.Directory.GetFiles(searchRoot, requested.Name + ".dll", System.IO.SearchOption.AllDirectories);
-        //                    if (matches.Length > 0 && System.IO.File.Exists(matches[0]))
-        //                    {
-        //                        return System.Reflection.Assembly.LoadFrom(matches[0]);
-        //                    }
-        //                }
-        //            }
-        //            catch { }
-        //        }
-        //        var _ = typeof(Stimulsoft.Report.StiReport).Assembly.FullName; // Just in case
-        //    }
-        //    catch { }
+        static App()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += ResolveAssemblies;
+        }
+        private static System.Reflection.Assembly? ResolveAssemblies(object? sender, ResolveEventArgs args)
+        {
+            var requested = new AssemblyName(args.Name);
+            if (requested.Name == "Microsoft.Xaml.Behaviors")
+            {
+                return typeof(Behavior).Assembly;
+            }
+            try
+            {
+                if (requested != null && requested.Name.StartsWith("Stimulsoft.", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        string searchRoot = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DLLS");
+                        if (System.IO.Directory.Exists(searchRoot))
+                        {
+                            string[] matches = System.IO.Directory.GetFiles(searchRoot, requested.Name + ".dll", System.IO.SearchOption.AllDirectories);
+                            if (matches.Length > 0 && System.IO.File.Exists(matches[0]))
+                            {
+                                return System.Reflection.Assembly.LoadFrom(matches[0]);
+                            }
+                        }
+                    }
+                    catch { }
+                }
+                var _ = typeof(Stimulsoft.Report.StiReport).Assembly.FullName; // Just in case
+            }
+            catch { }
 
-        //    return null;
-        //}
+            return null;
+        }
         #endregion
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
@@ -528,13 +528,13 @@ namespace Prg_UI
                                 {
                                     CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.FMENU_TARAZ_4_KOL_FT4, default);
                                 });
-                                break;                      
+                                break;
                             case Key.F8:
                                 Application.Current.Dispatcher.Invoke(() =>
                                 {
                                     CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KOL_MOIN_TAFZIL_VAZ, default);
                                 });
-                                break;                      
+                                break;
                         }
                     }
                     else if (altPressed)
@@ -664,7 +664,7 @@ namespace Prg_UI
                                     CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, default);
                                 });
                                 break;
-                      
+
                             case Key.F12:
                                 Application.Current.Dispatcher.Invoke(() =>
                                 {

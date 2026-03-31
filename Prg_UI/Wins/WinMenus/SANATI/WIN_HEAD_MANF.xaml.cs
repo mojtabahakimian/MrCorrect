@@ -1135,29 +1135,28 @@ namespace Prg_UI.Wins.WinMenus.SANATI
             msgwin.ShowDialog();
             if (msgwin.DialogResult == true)
             {
+                var selectedDtlManfItems = DG_SUB.SelectedItems?.OfType<DTL_MANF>().Where(x => !CL_LMethods.IsNewPlaceHolder(DG_SUB, x)).ToList();
 
-                if (SUB_DATA.Count > 0 && DG_SUB.SelectedItems != null && DG_SUB.SelectedItems.Count > 0)
+                if (SUB_DATA.Count > 0 && selectedDtlManfItems != null && selectedDtlManfItems.Count > 0)
                 {
-                    var NewRow = ((DTL_MANF)DG_SUB.SelectedItem).Clone() as DTL_MANF;
-                    _ = AuditLogger.LogActionAsync(
-                                      actionType: "Delete",
-                                      tableName: "ایجاد فرمول ساخت : سطر ها",
-                                      recordId: FNUMB.Text,
-                                      oldValue: default,
-                                      newValue: NewRow,
-                                      additionalInfo: $@"{this.GetType().Name} , EXE PATH : {System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}");
+                    var NewRow = selectedDtlManfItems.FirstOrDefault()?.Clone() as DTL_MANF;
+                    if (NewRow != null)
+                    {
+                        _ = AuditLogger.LogActionAsync(
+                                          actionType: "Delete",
+                                          tableName: "ایجاد فرمول ساخت : سطر ها",
+                                          recordId: FNUMB.Text,
+                                          oldValue: default,
+                                          newValue: NewRow,
+                                          additionalInfo: $@"{this.GetType().Name} , EXE PATH : {System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}");
+                    }
 
                     GET_TR();
 
                     List<MsgModel> ErrosMessages = new List<MsgModel>();
-                    for (int i = 0; i < DG_SUB.SelectedItems.Count; i++)
+                    for (int i = 0; i < selectedDtlManfItems.Count; i++)
                     {
-                        var item = DG_SUB.SelectedItems[i] as DTL_MANF;
-
-                        if (CL_LMethods.IsNewPlaceHolder(DG_SUB, item))
-                        {
-                            continue; // Skip deletion for new placeholder items
-                        }
+                        var item = selectedDtlManfItems[i];
 
                         if (item?.FNUMB != null && item?.CODE != null)
                         {
@@ -1676,16 +1675,16 @@ namespace Prg_UI.Wins.WinMenus.SANATI
                     var view = DG_SUB.Items as IEditableCollectionView;
                     if (view.IsAddingNew) { return; }
 
-                    if (DG_SUB.SelectedItem.ToStringNullSafe() != "{NewItemPlaceholder}")
+                    if (DG_SUB.SelectedItem is DTL_MANF selectedItem)
                     {
-                        WAS_ROW_ITEM = ((DTL_MANF)DG_SUB.SelectedItem).Clone() as DTL_MANF;
+                        WAS_ROW_ITEM = selectedItem.Clone() as DTL_MANF;
                     }
                 }
             }
         }
         private void DG_SUB_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
-            if (e == null || !(e.Row.Item is TOZIE_SUB rowItem)) return;
+            if (e == null || !(e.Row.Item is DTL_MANF rowItem)) return;
             if (rowItem == null) return;
             if (Equals(e.Row.Item, CollectionView.NewItemPlaceholder)) return;
             var view = DG_SUB.Items as IEditableCollectionView;

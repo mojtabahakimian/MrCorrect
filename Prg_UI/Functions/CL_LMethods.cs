@@ -1759,7 +1759,7 @@ namespace Prg_UI.Functions
             bool isAddingNewItem = collectionView?.IsAddingNew ?? false;
 
             // Check if the item is the special placeholder for new items
-            bool isNewItemPlaceholder = item is null || item.ToStringNullSafe() == "{NewItemPlaceholder}";
+            bool isNewItemPlaceholder = item is null || item?.ToStringNullSafe() == "{NewItemPlaceholder}";
 
             // Check if the item is the internal "NamedObject", used as placeholders in some cases
             bool isInternalNamedObject = item?.GetType()?.FullName == "MS.Internal.NamedObject";
