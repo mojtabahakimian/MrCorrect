@@ -158,6 +158,7 @@ namespace Prg_UI.Wins.WinSetting
             string _cnn = null;
             string serverName = null;
             string dbName = null;
+            bool isWindowsAuth = false;
 
             Dispatcher.Invoke(() =>
             {
@@ -172,7 +173,10 @@ namespace Prg_UI.Wins.WinSetting
                 dbName = DbChooser_TEXBOX.Text.Trim();
 
                 if (rd_WinAuth.IsChecked is true) //Windows Authentication
+                {
+                    isWindowsAuth = true;
                     _cnn = $@"Data Source={serverName};Initial Catalog={dbName};Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;Connect Timeout=15;"; //WIN
+                }
                 else if (rd_SqlAuth.IsChecked is true) //SQL Authentication
                     _cnn = $@"Data Source={serverName};Initial Catalog={dbName};User ID={Textbox_DataUsername.Text.Trim()};Password={Textbox_Datapass.Password};Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=True;Connect Timeout=15;"; // SQL
             });
@@ -195,7 +199,7 @@ namespace Prg_UI.Wins.WinSetting
             }
             catch (SqlException ex)
             {
-                return (false, GetSqlConnectionErrorMessage(ex));
+                return (false, BuildSqlErrorMessage(ex, serverName, dbName, isWindowsAuth));
             }
             catch (InvalidOperationException)
             {
@@ -211,39 +215,116 @@ namespace Prg_UI.Wins.WinSetting
             }
         }
 
-        private static string GetSqlConnectionErrorMessage(SqlException ex)
+        private static string BuildSqlErrorMessage(SqlException ex, string serverName, string databaseName, bool isWindowsAuth)
         {
-            // بررسی خطای Win32 (سطح شبکه/سیستم‌عامل)
+            if (ex == null)
+                return "خطا در اتصال به دیتابیس رخ داد.\nراهنما: اطلاعات اتصال را بررسی کرده و مجدد تلاش کنید.";
+
+            // بررسی خطاهای Win32 (سطح شبکه / سیستم‌عامل)
             if (ex.InnerException is System.ComponentModel.Win32Exception win32)
             {
                 return win32.NativeErrorCode switch
                 {
-                    10061 => "سرویس SQL Server در حال اجرا نیست یا اتصال رد شد.\n\nراه‌حل پیشنهادی:\n• از طریق Services.msc سرویس SQL Server را راه‌اندازی کنید.\n• مطمئن شوید پورت 1433 در فایروال باز است.",
-                    53    => "مسیر شبکه به سرور یافت نشد.\n\nراه‌حل پیشنهادی:\n• نام سرور را بررسی کنید.\n• مطمئن شوید سرور روشن و در شبکه قرار دارد.",
-                    64    => "اتصال شبکه به سرور قطع شد.\n\nراه‌حل پیشنهادی:\n• کابل شبکه یا Wi-Fi را بررسی کنید.\n• مطمئن شوید سرویس SQL Server در حال اجرا است.",
-                    10060 => "اتصال به سرور با خطای وقفه زمانی مواجه شد.\n\nراه‌حل پیشنهادی:\n• آدرس IP یا نام سرور را بررسی کنید.\n• فایروال را بررسی کنید.",
+                    10061 => $"سرویس SQL Server روی «{serverName}» در حال اجرا نیست یا اتصال رد شد.\n\nراه‌حل پیشنهادی:\n• از طریق Services.msc سرویس SQL Server را راه‌اندازی کنید.\n• مطمئن شوید پورت 1433 در فایروال باز است.",
+                    53    => $"مسیر شبکه به سرور «{serverName}» یافت نشد.\n\nراه‌حل پیشنهادی:\n• نام سرور را بررسی کنید.\n• مطمئن شوید سرور روشن و در شبکه قرار دارد.",
+                    64    => $"اتصال شبکه به سرور «{serverName}» قطع شد.\n\nراه‌حل پیشنهادی:\n• کابل شبکه یا Wi-Fi را بررسی کنید.\n• مطمئن شوید سرویس SQL Server در حال اجرا است.",
+                    10060 => $"اتصال به سرور «{serverName}» با خطای وقفه زمانی مواجه شد.\n\nراه‌حل پیشنهادی:\n• آدرس IP یا نام سرور را بررسی کنید.\n• فایروال را بررسی کنید.",
+                    10054 => $"اتصال به سرور «{serverName}» توسط طرف مقابل بازنشینی شد.\n\nراه‌حل پیشنهادی:\n• سرویس SQL Server را ریستارت کنید.\n• تنظیمات شبکه و فایروال را بررسی کنید.",
+                    10053 => $"اتصال به سرور «{serverName}» توسط شبکه قطع شد.\n\nراه‌حل پیشنهادی:\n• پایداری شبکه را بررسی کنید.\n• VPN یا Proxy را بررسی کنید.",
+                    1722  => $"سرویس RPC روی سرور «{serverName}» در دسترس نیست.\n\nراه‌حل پیشنهادی:\n• مطمئن شوید سرویس SQL Server در حال اجرا است.\n• Named Pipes را در SQL Server Configuration Manager فعال کنید.",
+                    5     => $"دسترسی به سرور «{serverName}» رد شد.\n\nراه‌حل پیشنهادی:\n• مطمئن شوید حساب کاربری جاری مجاز به اتصال است.\n• تنظیمات فایروال سرور را بررسی کنید.",
                     _     => $"خطای شبکه (کد: {win32.NativeErrorCode}):\n{win32.Message}\n\nراه‌حل: با مدیر شبکه تماس بگیرید.",
                 };
             }
 
-            return ex.Number switch
+            switch (ex.Number)
             {
-                2 or 53   => "سرور SQL Server یافت نشد.\n\nراه‌حل پیشنهادی:\n• نام سرور را دوباره بررسی کنید.\n• مطمئن شوید سرور روشن است و در شبکه قرار دارد.\n• پورت 1433 باید در فایروال باز باشد.",
-                26        => "نام سرور یا اینستنس پیدا نشد.\n\nراه‌حل پیشنهادی:\n• نام سرور و اینستنس را بررسی کنید (مثال: SERVER\\SQLEXPRESS).\n• مطمئن شوید سرویس SQL Server Browser روشن است.",
-                -2        => "اتصال به سرور با وقفه زمانی قطع شد.\n\nراه‌حل پیشنهادی:\n• مطمئن شوید سرور در دسترس است.\n• شبکه را بررسی کنید.\n• فایروال ممکن است اتصال را مسدود کرده باشد.",
-                4060      => "دیتابیس مورد نظر یافت نشد یا دسترسی ندارید.\n\nراه‌حل پیشنهادی:\n• نام دیتابیس را بررسی کنید.\n• مطمئن شوید کاربر به این دیتابیس دسترسی دارد.",
-                4064      => "دیتابیس پیش‌فرض کاربر در دسترس نیست.\n\nراه‌حل پیشنهادی:\n• با مدیر دیتابیس تماس بگیرید تا دیتابیس پیش‌فرض کاربر را تنظیم کند.",
-                18456     => "ورود به SQL Server ناموفق بود.\n\nراه‌حل پیشنهادی:\n• نام کاربری SQL را بررسی کنید.\n• رمز عبور را مجدداً وارد کنید.\n• مطمئن شوید کاربر در SQL Server تعریف شده است.",
-                18452     => "احراز هویت ناموفق - نوع ورود نادرست است.\n\nراه‌حل پیشنهادی:\n• بین Windows Authentication و SQL Authentication انتخاب درستی داشته باشید.",
-                18470     => "حساب کاربری غیرفعال شده است.\n\nراه‌حل پیشنهادی:\n• با مدیر SQL Server تماس بگیرید تا حساب کاربری را فعال کند.",
-                64        => "اتصال به سرور قطع شد.\n\nراه‌حل پیشنهادی:\n• شبکه را بررسی کنید.\n• مطمئن شوید سرویس SQL Server در حال اجرا است.",
-                121 or
-                232 or
-                233       => "خطای ارتباط با Named Pipe سرور.\n\nراه‌حل پیشنهادی:\n• Named Pipes و TCP/IP را در SQL Server Configuration Manager فعال کنید.\n• سرویس SQL Server را ریستارت کنید.",
-                17142     => "سرویس SQL Server موقتاً متوقف شده است.\n\nراه‌حل پیشنهادی:\n• با مدیر سیستم تماس بگیرید تا سرویس SQL Server را راه‌اندازی کند.",
-                1205      => "تداخل در تراکنش‌های دیتابیس (Deadlock).\n\nراه‌حل پیشنهادی:\n• چند لحظه صبر کنید و دوباره تست کنید.\n• اگر مشکل ادامه داشت با مدیر دیتابیس تماس بگیرید.",
-                _         => $"خطای SQL Server (کد: {ex.Number}):\n{ex.Message}\n\nراه‌حل: با مدیر سیستم تماس بگیرید.",
-            };
+                // ─── یافت نشدن سرور ───
+                case 2:
+                case 53:
+                case 40:
+                case 11001:
+                    return $"سرور SQL Server «{serverName}» یافت نشد یا در دسترس نیست.\n\nراه‌حل پیشنهادی:\n• نام سرور را دوباره بررسی کنید.\n• مطمئن شوید سرور روشن است و در شبکه قرار دارد.\n• پورت 1433 باید در فایروال باز باشد.";
+
+                // ─── نام یا Instance اشتباه ───
+                case 26:
+                    return $"نام سرور یا Instance «{serverName}» پیدا نشد.\n\nراه‌حل پیشنهادی:\n• نام سرور و Instance را بررسی کنید (مثال: SERVER\\SQLEXPRESS).\n• مطمئن شوید سرویس SQL Server Browser روشن است.";
+
+                // ─── وقفه زمانی ───
+                case -2:
+                case 121:
+                case 258:
+                    return $"اتصال به سرور «{serverName}» با وقفه زمانی (Timeout) قطع شد.\n\nراه‌حل پیشنهادی:\n• مطمئن شوید سرور در دسترس است.\n• شبکه و VPN را بررسی کنید.\n• فایروال ممکن است اتصال را مسدود کرده باشد.";
+
+                // ─── قطع شدن اتصال ───
+                case 64:
+                    return $"اتصال به سرور «{serverName}» قطع شد.\n\nراه‌حل پیشنهادی:\n• شبکه را بررسی کنید.\n• مطمئن شوید سرویس SQL Server در حال اجرا است.";
+
+                // ─── Named Pipe / Transport ───
+                case 232:
+                case 233:
+                    return "خطای ارتباط با Named Pipe/Transport سرور رخ داد.\n\nراه‌حل پیشنهادی:\n• Named Pipes و TCP/IP را در SQL Server Configuration Manager فعال کنید.\n• سرویس SQL Server را ریستارت کنید.";
+
+                // ─── دیتابیس یافت نشد یا دسترسی ندارید ───
+                case 4060:
+                    return $"دیتابیس «{databaseName}» یافت نشد یا دسترسی ندارید.\n\nراه‌حل پیشنهادی:\n• نام دیتابیس را بررسی کنید.\n• مطمئن شوید کاربر به این دیتابیس دسترسی دارد.";
+
+                case 4064:
+                    return "دیتابیس پیش‌فرض کاربر در دسترس نیست.\n\nراه‌حل پیشنهادی:\n• با مدیر دیتابیس تماس بگیرید تا دیتابیس پیش‌فرض کاربر را تنظیم کند.";
+
+                // ─── خطاهای ورود / احراز هویت ───
+                case 18456:
+                    if (isWindowsAuth)
+                        return "ورود ناموفق بود (Windows Authentication).\n\nراه‌حل پیشنهادی:\n• حساب ویندوز فعلی باید روی SQL Server دسترسی داشته باشد.\n• در صورت نیاز از SQL Authentication استفاده کنید.";
+                    return "ورود به SQL Server ناموفق بود.\n\nراه‌حل پیشنهادی:\n• نام کاربری SQL را بررسی کنید.\n• رمز عبور را مجدداً وارد کنید.\n• مطمئن شوید کاربر در SQL Server تعریف شده است.";
+
+                case 18452:
+                    return "احراز هویت ناموفق - نوع ورود نادرست است.\n\nراه‌حل پیشنهادی:\n• بین Windows Authentication و SQL Authentication انتخاب درستی داشته باشید.";
+
+                case 18470:
+                    return "حساب کاربری SQL غیرفعال شده است.\n\nراه‌حل پیشنهادی:\n• با مدیر SQL Server تماس بگیرید تا حساب کاربری را فعال کند.";
+
+                case 18487:
+                    return "رمز عبور حساب کاربری منقضی شده است.\n\nراه‌حل پیشنهادی:\n• رمز عبور SQL را از طریق SQL Server Management Studio تغییر دهید.\n• با مدیر SQL Server تماس بگیرید.";
+
+                case 18488:
+                    return "رمز عبور حساب کاربری باید تغییر کند (اولین ورود).\n\nراه‌حل پیشنهادی:\n• یک بار از طریق SSMS با این کاربر وارد شوید و رمز عبور جدید تعیین کنید.";
+
+                case 18401:
+                    return $"سرور «{serverName}» در حالت تک‌کاربره (Single-User Mode) است.\n\nراه‌حل پیشنهادی:\n• با مدیر سیستم تماس بگیرید تا SQL Server را به حالت عادی برگردانند.\n• سرویس SQL Server را ریستارت کنید.";
+
+                case 1326:
+                    return "اعتبارسنجی کاربر در شبکه/دامنه ناموفق بود.\n\nراه‌حل پیشنهادی:\n• نام کاربری و رمز عبور ویندوز/دامنه را بررسی کنید.\n• از دسترسی شبکه و Domain Controller مطمئن شوید.";
+
+                // ─── دسترسی به اشیای دیتابیس ───
+                case 229:
+                case 916:
+                    return $"کاربر دسترسی لازم به دیتابیس «{databaseName}» یا اشیای آن را ندارد.\n\nراه‌حل پیشنهادی:\n• از مدیر دیتابیس بخواهید دسترسی‌های لازم (حداقل خواندن جدول SAZMAN) را اعطا کند.";
+
+                // ─── ساختار دیتابیس ───
+                case 208:
+                    return $"جدول «dbo.SAZMAN» در دیتابیس «{databaseName}» یافت نشد.\n\nراه‌حل پیشنهادی:\n• دیتابیس صحیح برنامه را انتخاب کنید.\n• اسکریپت‌های ایجاد/به‌روزرسانی جداول را اجرا کنید.";
+
+                case 207:
+                    return $"ساختار دیتابیس «{databaseName}» با نسخه برنامه سازگار نیست (ستون لازم وجود ندارد).\n\nراه‌حل پیشنهادی:\n• اسکریپت‌های به‌روزرسانی دیتابیس را اجرا کنید یا نسخه برنامه را همسان کنید.";
+
+                // ─── تداخل / قفل ───
+                case 1205:
+                    return "تداخل در تراکنش‌های دیتابیس (Deadlock) رخ داده است.\n\nراه‌حل پیشنهادی:\n• چند لحظه صبر کنید و دوباره تست کنید.\n• اگر مشکل ادامه داشت با مدیر دیتابیس تماس بگیرید.";
+
+                case 1222:
+                    return "درخواست قفل دیتابیس با وقفه زمانی مواجه شد.\n\nراه‌حل پیشنهادی:\n• چند لحظه صبر کرده و دوباره تست کنید.\n• اگر مشکل تکرار شد با مدیر دیتابیس تماس بگیرید.";
+
+                // ─── وضعیت سرور ───
+                case 17142:
+                    return "سرویس SQL Server موقتاً متوقف شده است.\n\nراه‌حل پیشنهادی:\n• با مدیر سیستم تماس بگیرید تا سرویس SQL Server را راه‌اندازی کند.";
+
+                case 9002:
+                    return $"فضای لاگ تراکنش دیتابیس «{databaseName}» پر شده است.\n\nراه‌حل پیشنهادی:\n• با مدیر دیتابیس تماس بگیرید تا فضای لاگ را آزاد کنند.\n• پشتیبان‌گیری از لاگ یا تغییر Recovery Model می‌تواند کمک کند.";
+
+                default:
+                    return $"خطای SQL Server (کد: {ex.Number}):\n{ex.Message}\n\nراه‌حل: تنظیمات سرور/شبکه/دسترسی را بررسی کنید یا با مدیر سیستم تماس بگیرید.";
+            }
         }
 
         private async void Btn_TestConnection_Click(object sender, RoutedEventArgs e)
