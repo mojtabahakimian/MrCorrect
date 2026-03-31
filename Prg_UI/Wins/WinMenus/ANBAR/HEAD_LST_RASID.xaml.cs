@@ -2094,8 +2094,8 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             MID = CL_HESABDARI.Gettaskid(Convert.ToDouble(this.NUMBER.Text), 1);
             if (MID > 0d)
             {
-                //dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + MID + ",'" + CL_HESABDARI.UCurrentUser() + "','" + (Convert.ToBoolean(SGN1.IsChecked) ? "امضا شد1 " : ":امضا برداشته شد1:") + "'," + CL_HESABDARI.FARSIDATE() + "," + DateTime.Now.Hour * (100 + DateTime.Now.Minute) + ",2," + this.NUMBER.Text + ",2 )");
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + MID + ",'" + CL_HESABDARI.UCurrentUser() + "','" + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), "امضا شد1 ", ":امضا برداشته شد1:") + "'," + CL_HESABDARI.FARSIDATE() + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",1," + this.NUMBER.Text + ",1 )");
+                //dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG, isAutomation: true)  values (" + MID + ",'" + CL_HESABDARI.UCurrentUser() + "','" + (Convert.ToBoolean(SGN1.IsChecked) ? "امضا شد1 " : ":امضا برداشته شد1:", isAutomation: true) + "'," + CL_HESABDARI.FARSIDATE() + "," + DateTime.Now.Hour * (100 + DateTime.Now.Minute) + ",2," + this.NUMBER.Text + ",2 )");
+                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG, isAutomation: true)  values (" + MID + ",'" + CL_HESABDARI.UCurrentUser() + "','" + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), "امضا شد1 ", ":امضا برداشته شد1:") + "'," + CL_HESABDARI.FARSIDATE() + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",1," + this.NUMBER.Text + ",1 )");
                 dbms.DoExecuteSQL("UPDATE TASKS SET PERSONEL = " + CL_HESABDARI.GETUSERTASK(MID) + ",STATUS = 1 WHERE IDNUM = " + MID);
             }
             else
@@ -2110,7 +2110,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 string query = "insert into tasks(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO)  values (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.UCurrentUser() + "'," + SHARH + "," + CL_HESABDARI.FARSIDATE() + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",1," + this.NUMBER.Text + ",1, GETDATE() ," + Baseknow.USERCOD + " )";
                 dbms.DoExecuteSQL(query);
                 MID = CL_HESABDARI.Gettaskid(Convert.ToDouble(this.NUMBER.Text), 1);
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + MID + ",'" + CL_HESABDARI.UCurrentUser() + "','" + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), "امضا شد1 ", ":امضا برداشته شد1:") + "'," + CL_HESABDARI.FARSIDATE() + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",1," + this.NUMBER.Text + ",1 )");
+                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG, isAutomation: true)  values (" + MID + ",'" + CL_HESABDARI.UCurrentUser() + "','" + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), "امضا شد1 ", ":امضا برداشته شد1:") + "'," + CL_HESABDARI.FARSIDATE() + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",1," + this.NUMBER.Text + ",1 )");
             }
             PERSONEL.Visibility = Visibility.Visible;
             Meidnum = MID;
@@ -2151,7 +2151,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             MID = CL_HESABDARI.Gettaskid(Convert.ToDouble(NUMBER.Text), 1);
             if (MID > 0d)
             {
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + MID + ",'" + CL_HESABDARI.UCurrentUser() + "','" + Interaction.IIf((bool)SGN2.IsChecked, "امضا شد2 ", "امضا برداشته شد2 ") + "'," + CL_HESABDARI.FARSIDATE() + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",1," + this.NUMBER.Text + ",1 )");
+                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG, isAutomation: true)  values (" + MID + ",'" + CL_HESABDARI.UCurrentUser() + "','" + Interaction.IIf((bool)SGN2.IsChecked, "امضا شد2 ", "امضا برداشته شد2 ") + "'," + CL_HESABDARI.FARSIDATE() + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",1," + this.NUMBER.Text + ",1 )");
                 dbms.DoExecuteSQL("UPDATE TASKS SET PERSONEL = " + CL_HESABDARI.GETUSERTASK(MID) + ",STATUS = 1 WHERE IDNUM = " + MID);
             }
             else
@@ -2163,9 +2163,9 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
                 td = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.GetCultureInfo("en-US"));
                 SHARH = "'رسيد انبار شماره: " + this.NUMBER.Text + " مورخ " + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToString()) + "','" + this.CUST_NO.SelectedValue + "'";
-                dbms.DoExecuteSQL("insert into tasks(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO)  values (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.UCurrentUser() + "'," + SHARH + "," + CL_HESABDARI.FARSIDATE() + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",1," + this.NUMBER.Text + ",1, GETDATE() ," + Baseknow.USERCOD + " )");
+                dbms.DoExecuteSQL("insert into tasks(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO, isAutomation: true)  values (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.UCurrentUser() + "'," + SHARH + "," + CL_HESABDARI.FARSIDATE() + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",1," + this.NUMBER.Text + ",1, GETDATE() ," + Baseknow.USERCOD + ", isAutomation: true)", isAutomation: true);
                 MID = CL_HESABDARI.Gettaskid(Convert.ToDouble(this.NUMBER.Text), 1);
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + MID + ",'" + CL_HESABDARI.UCurrentUser() + "','" + Interaction.IIf((bool)SGN2.IsChecked, "امضا شد2 ", "امضا برداشته شد2 ") + "'," + CL_HESABDARI.FARSIDATE() + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",1," + this.NUMBER.Text + ",1 )");
+                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG, isAutomation: true)  values (" + MID + ",'" + CL_HESABDARI.UCurrentUser() + "','" + Interaction.IIf((bool)SGN2.IsChecked, "امضا شد2 ", "امضا برداشته شد2 ") + "'," + CL_HESABDARI.FARSIDATE() + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",1," + this.NUMBER.Text + ",1 )");
 
             }
             this.PERSONEL.Visibility = Visibility.Visible;

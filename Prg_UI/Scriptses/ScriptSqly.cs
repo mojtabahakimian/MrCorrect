@@ -20,6 +20,8 @@ namespace Prg_UI.Scriptses
         /// </summary>
         public static void LetsGo(bool isCustomCall = false)
         {
+            CreateAutomationDB();
+
             CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
             using (var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
             {
@@ -3269,6 +3271,64 @@ SELECT TOP 100 PERCENT
 FROM BaseData B
 ORDER BY B.NAME;"); } catch { }
 
+            }
+        }
+
+
+        private static void CreateAutomationDB()
+        {
+            try
+            {
+                string dbName = Prg_Proccessy.Generaly.CL_Generaly.General_AutomationDBname;
+                var builder = new SqlConnectionStringBuilder(CL_CCNNMANAGER.CONNECTION_STR);
+                builder.InitialCatalog = "master";
+                using (var masterDb = new SqlConnection(builder.ConnectionString))
+                {
+                    masterDb.Open();
+                    var exists = masterDb.ExecuteScalar<int>($"SELECT COUNT(*) FROM sys.databases WHERE name = '{dbName}'");
+                    if (exists == 0)
+                    {
+                        masterDb.Execute($"CREATE DATABASE [{dbName}]");
+
+                        try
+                        {
+                            string dataPath = masterDb.ExecuteScalar<string>("SELECT CONVERT(nvarchar(MAX), SERVERPROPERTY('InstanceDefaultDataPath'))");
+                            masterDb.Execute($@"ALTER DATABASE [{dbName}] ADD FILEGROUP {dbName}_FS_Group CONTAINS FILESTREAM;");
+                            masterDb.Execute($@"ALTER DATABASE [{dbName}] ADD FILE (NAME = {dbName}_FS, FILENAME = '{dataPath}FS_{dbName}') TO FILEGROUP {dbName}_FS_Group;");
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Console.WriteLine("Could not enable filestream: " + ex.Message);
+                        }
+                    }
+                }
+
+                using (var db = new SqlConnection(CL_CCNNMANAGER.AUTOMATION_CONNECTION_STR))
+                {
+                    db.Open();
+
+                    try { db.Execute(@"CREATE TABLE TASKS (IDNUM int IDENTITY(1,1) NOT NULL PRIMARY KEY, StreamId UNIQUEIDENTIFIER ROWGUIDCOL NOT NULL UNIQUE DEFAULT NEWID(), GR int, PERSONEL int, IDD int, TASK nvarchar(MAX), PERIORITY int, STATUS int, STDATE int, STTIME int, ENDATE int, ENTIME int, USERNAME nvarchar(MAX), COMP_COD nvarchar(50), hes nvarchar(50), SUMTIME int, pic varbinary(MAX) FILESTREAM, ss float, skid int, num bigint, tg bigint, CTIM datetime DEFAULT GETDATE(), USERCO int, SEE int, SEET datetime, CRT datetime DEFAULT GETDATE(), UID int, FXTYPE nvarchar(50))"); } catch { }
+                    try { db.Execute(@"CREATE TABLE EVENTS (IDNUM int, StreamId UNIQUEIDENTIFIER ROWGUIDCOL NOT NULL UNIQUE DEFAULT NEWID(), IDD int, EVENTS nvarchar(MAX), STDATE int, STTIME int, USERNAME nvarchar(MAX), COMPANY int, SUMTIME int, pic varbinary(MAX) FILESTREAM, skid int, num bigint, tg bigint, CRT datetime DEFAULT GETDATE(), UID int, FXTYPE nvarchar(50))"); } catch { }
+
+                    try
+                    {
+                        string sourceDb = new SqlConnectionStringBuilder(CL_CCNNMANAGER.CONNECTION_STR).InitialCatalog;
+                        if (!string.IsNullOrWhiteSpace(sourceDb) && sourceDb != "master")
+                        {
+                            try { db.Execute($@"IF NOT EXISTS(SELECT 1 FROM TASKS) AND EXISTS(SELECT 1 FROM [{sourceDb}].dbo.TASKS) BEGIN SET IDENTITY_INSERT TASKS ON; INSERT INTO TASKS (IDNUM, GR, PERSONEL, IDD, TASK, PERIORITY, STATUS, STDATE, STTIME, ENDATE, ENTIME, USERNAME, COMP_COD, hes, SUMTIME, pic, ss, skid, num, tg, CTIM, USERCO, SEE, SEET, CRT, UID, FXTYPE) SELECT IDNUM, GR, PERSONEL, IDD, TASK, PERIORITY, STATUS, STDATE, STTIME, ENDATE, ENTIME, USERNAME, COMP_COD, hes, SUMTIME, CAST(pic AS varbinary(MAX)), ss, skid, num, tg, CTIM, USERCO, SEE, SEET, CRT, UID, FXTYPE FROM [{sourceDb}].dbo.TASKS; SET IDENTITY_INSERT TASKS OFF; END", commandTimeout: 0); } catch {}
+                            try { db.Execute($@"IF NOT EXISTS(SELECT 1 FROM EVENTS) AND EXISTS(SELECT 1 FROM [{sourceDb}].dbo.EVENTS) BEGIN INSERT INTO EVENTS (IDNUM, IDD, EVENTS, STDATE, STTIME, USERNAME, COMPANY, SUMTIME, pic, skid, num, tg, CRT, UID, FXTYPE) SELECT IDNUM, IDD, EVENTS, STDATE, STTIME, USERNAME, COMPANY, SUMTIME, CAST(pic AS varbinary(MAX)), skid, num, tg, CRT, UID, FXTYPE FROM [{sourceDb}].dbo.EVENTS; END", commandTimeout: 0); } catch {}
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Console.WriteLine("Error migrating data: " + ex.Message);
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine("Error creating Automation DB: " + ex.Message);
             }
         }
 

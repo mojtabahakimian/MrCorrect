@@ -1721,9 +1721,9 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             //        $"'{CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD))}" +
             //        $"{(SGN1.IsChecked == true ? " :امضا شد1 " : " :امضا برداشته شد1:")}'," +
             //        $"{Tarikh.FullCurrentDate}," +
-            //        $"{(DateTime.Now.Hour * 100 + DateTime.Now.Minute)},{TAG},{PEPID.Text},{TAG})");
+            //        $"{(DateTime.Now.Hour * 100 + DateTime.Now.Minute)},{TAG},{PEPID.Text},{TAG})", isAutomation: true);
             //    dbms.DoExecuteSQL(
-            //        $"UPDATE TASKS SET PERSONEL = {CL_HESABDARI.GETUSERTASK(mid)}, STATUS = 1 WHERE IDNUM = {mid}");
+            //        $"UPDATE TASKS SET PERSONEL = {CL_HESABDARI.GETUSERTASK(mid)}, STATUS = 1 WHERE IDNUM = {mid}", isAutomation: true);
             //}
             //else
             //{
@@ -1734,7 +1734,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             //        $"INSERT INTO TASKS(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO) " +
             //        $"VALUES ({Baseknow.USERCOD},'{CL_HESABDARI.UCurrentUser()}',{sharh}," +
             //        $"{Tarikh.FullCurrentDate},{(DateTime.Now.Hour * 100 + DateTime.Now.Minute)}," +
-            //        $"{TAG},{PEPID.Text},{TAG},GETDATE(),{Baseknow.USERCOD})");
+            //        $"{TAG},{PEPID.Text},{TAG},GETDATE(),{Baseknow.USERCOD})", isAutomation: true);
             //    mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(PEPID.Text), TAG);
             //    dbms.DoExecuteSQL(
             //        $"INSERT INTO EVENTS(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG) " +
@@ -1742,7 +1742,7 @@ namespace Prg_UI.Wins.WinMenus.Taarif
             //        $"'{CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD))}" +
             //        $"{(SGN1.IsChecked == true ? " : امضا شد1 " : " :امضا برداشته شد1 ")}'," +
             //        $"{Tarikh.FullCurrentDate},{(DateTime.Now.Hour * 100 + DateTime.Now.Minute)}," +
-            //        $"{TAG},{PEPID.Text},{TAG})");
+            //        $"{TAG},{PEPID.Text},{TAG})", isAutomation: true);
             //}
             //Meidnum = mid;
 

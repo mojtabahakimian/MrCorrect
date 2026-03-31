@@ -41,6 +41,25 @@ namespace Prg_SendInvoice.CNNMANAGER
                 }
             }
         }
+        private static string _automationConnectionStr;
+        public static string AUTOMATION_CONNECTION_STR
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return _automationConnectionStr;
+                }
+            }
+            set
+            {
+                lock (_lock)
+                {
+                    _automationConnectionStr = value;
+                }
+            }
+        }
+
         private static string NormalizeConnectionString(string connectionString)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
@@ -183,9 +202,10 @@ namespace Prg_SendInvoice.CNNMANAGER
         const string DbmsFullPathFile = @"C:\CORRECT\DBMSLOG2.txt";
 
         [System.Diagnostics.DebuggerStepThrough]
-        public IEnumerable<TEntity> DoGetDataSQL<TEntity>(string sql, object parameters = null)
+        public IEnumerable<TEntity> DoGetDataSQL<TEntity>(string sql, object parameters = null, bool isAutomation = false)
         {
-            //using (SqlConnection db = new SqlConnection(CONNECTION_STR))
+            string connectionString = isAutomation ? AUTOMATION_CONNECTION_STR : CONNECTION_STR;
+            //using (SqlConnection db = new SqlConnection(isAutomation ? AUTOMATION_CONNECTION_STR : CONNECTION_STR))
             //{
             //    try
             //    {
@@ -205,7 +225,7 @@ namespace Prg_SendInvoice.CNNMANAGER
             //    }
             //}
 
-            if (string.IsNullOrWhiteSpace(CONNECTION_STR))
+            if (string.IsNullOrWhiteSpace(isAutomation ? AUTOMATION_CONNECTION_STR : CONNECTION_STR))
             {
                 // سعی کن دوباره از Registry بخونی
                 var dbms = new CL_CCNNMANAGER();
@@ -221,7 +241,7 @@ namespace Prg_SendInvoice.CNNMANAGER
 
             for (int attempt = 0; attempt <= maxRetries; attempt++)
             {
-                using var db = new SqlConnection(CONNECTION_STR);
+                using var db = new SqlConnection(isAutomation ? AUTOMATION_CONNECTION_STR : CONNECTION_STR);
                 try
                 {
                     db.Open();
@@ -261,9 +281,10 @@ namespace Prg_SendInvoice.CNNMANAGER
             return null;
         }
         [System.Diagnostics.DebuggerStepThrough]
-        public int? DoExecuteSQL(string sql, object parameters = null)
+        public int? DoExecuteSQL(string sql, object parameters = null, bool isAutomation = false)
         {
-            if (string.IsNullOrWhiteSpace(CONNECTION_STR))
+            string connectionString = isAutomation ? AUTOMATION_CONNECTION_STR : CONNECTION_STR;
+            if (string.IsNullOrWhiteSpace(isAutomation ? AUTOMATION_CONNECTION_STR : CONNECTION_STR))
             {
                 // سعی کن دوباره از Registry بخونی
                 var dbms = new CL_CCNNMANAGER();
@@ -275,12 +296,12 @@ namespace Prg_SendInvoice.CNNMANAGER
                 }
             }
 
-            //using var db = new SqlConnection(CONNECTION_STR);
+            //using var db = new SqlConnection(isAutomation ? AUTOMATION_CONNECTION_STR : CONNECTION_STR);
 
             int maxRetries = 3;
             for (int i = 0; i <= maxRetries; i++)
             {
-                using var db = new SqlConnection(CONNECTION_STR);
+                using var db = new SqlConnection(isAutomation ? AUTOMATION_CONNECTION_STR : CONNECTION_STR);
                 try
                 {
                     db.Open();
@@ -329,9 +350,10 @@ namespace Prg_SendInvoice.CNNMANAGER
         }
 
         [System.Diagnostics.DebuggerStepThrough]
-        public async Task<int?> DoExecuteSQLAsync(string sql, object parameters = null)
+        public async Task<int?> DoExecuteSQLAsync(string sql, object parameters = null, bool isAutomation = false)
         {
-            using (var db = new SqlConnection(CONNECTION_STR))
+            string connectionString = isAutomation ? AUTOMATION_CONNECTION_STR : CONNECTION_STR;
+            using (var db = new SqlConnection(isAutomation ? AUTOMATION_CONNECTION_STR : CONNECTION_STR))
             {
                 try
                 {
@@ -374,9 +396,9 @@ namespace Prg_SendInvoice.CNNMANAGER
             }
         }
         //Safe {↓
-        public IEnumerable<TEntity> DoGetDataSQL_Safe<TEntity>(string sql, object parameters = null)
+        public IEnumerable<TEntity> DoGetDataSQL_Safe<TEntity>(string sql, object parameters = null, bool isAutomation = false)
         {
-            using (IDbConnection db = new SqlConnection(CONNECTION_STR))
+            using (IDbConnection db = new SqlConnection(isAutomation ? AUTOMATION_CONNECTION_STR : CONNECTION_STR))
             {
                 //db.Open();
                 using (var transaction = db.BeginTransaction(System.Data.IsolationLevel.Serializable))
@@ -402,9 +424,9 @@ namespace Prg_SendInvoice.CNNMANAGER
         //var rowsAffected = dbms.DoExecuteSQL("UPDATE MyTable SET Column1 = @value WHERE Id = @id", new { value = "NewValue", id = 1 });
 
         //Asyncronize{↓
-        public async Task<IEnumerable<TEntity>> DoGetDataSQLAsync2<TEntity>(string sql, object parameters = null)
+        public async Task<IEnumerable<TEntity>> DoGetDataSQLAsync2<TEntity>(string sql, object parameters = null, bool isAutomation = false)
         {
-            using (SqlConnection db = new SqlConnection(CONNECTION_STR))
+            using (SqlConnection db = new SqlConnection(isAutomation ? AUTOMATION_CONNECTION_STR : CONNECTION_STR))
             {
                 try
                 {
@@ -418,9 +440,9 @@ namespace Prg_SendInvoice.CNNMANAGER
                 }
             }
         }
-        public async Task ExecuteStoredProcedureAsync(string storedProcedureName, object parameters = null)
+        public async Task ExecuteStoredProcedureAsync(string storedProcedureName, object parameters = null, bool isAutomation = false)
         {
-            using (SqlConnection db = new SqlConnection(CONNECTION_STR))
+            using (SqlConnection db = new SqlConnection(isAutomation ? AUTOMATION_CONNECTION_STR : CONNECTION_STR))
             {
                 try
                 {
@@ -437,9 +459,9 @@ namespace Prg_SendInvoice.CNNMANAGER
                 }
             }
         }
-        public async Task<IEnumerable<TEntity>> DoGetDataSQLAsync<TEntity>(string sql, object? parameters = null)
+        public async Task<IEnumerable<TEntity>> DoGetDataSQLAsync<TEntity>(string sql, object? parameters = null, bool isAutomation = false)
         {
-            using (SqlConnection db = new SqlConnection(CONNECTION_STR))
+            using (SqlConnection db = new SqlConnection(isAutomation ? AUTOMATION_CONNECTION_STR : CONNECTION_STR))
             {
                 try
                 {
@@ -461,9 +483,9 @@ namespace Prg_SendInvoice.CNNMANAGER
         }
 
         //Asyncronize}↑
-        public void OpenStoredProcedure(string storedProcedureName, object parameters = null)
+        public void OpenStoredProcedure(string storedProcedureName, object parameters = null, bool isAutomation = false)
         {
-            using (IDbConnection db = new SqlConnection(CONNECTION_STR))
+            using (IDbConnection db = new SqlConnection(isAutomation ? AUTOMATION_CONNECTION_STR : CONNECTION_STR))
             {
                 try
                 {
@@ -483,9 +505,9 @@ namespace Prg_SendInvoice.CNNMANAGER
 
 
         [System.Diagnostics.DebuggerStepThrough]
-        public IEnumerable<TEntity> DoGetStoreProcedureSQL<TEntity>(string sql, object parameters = null)
+        public IEnumerable<TEntity> DoGetStoreProcedureSQL<TEntity>(string sql, object parameters = null, bool isAutomation = false)
         {
-            using (SqlConnection db = new SqlConnection(CONNECTION_STR))
+            using (SqlConnection db = new SqlConnection(isAutomation ? AUTOMATION_CONNECTION_STR : CONNECTION_STR))
             {
                 try
                 {
@@ -513,7 +535,7 @@ namespace Prg_SendInvoice.CNNMANAGER
         /// این متد دارای منطق تلاش مجدد برای خطاهای گذرا و قابلیت لغو عملیات است.
         /// </summary>
         [System.Diagnostics.DebuggerStepThrough]
-        public async Task<IEnumerable<TEntity>> SqlQueryAsync<TEntity>(string sql, object? parameters = null, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<TEntity>> SqlQueryAsync<TEntity>(string sql, object? parameters = null, CancellationToken cancellationToken = default, bool isAutomation = false)
         {
             // این خط باعث می‌شود متد بلافاصله آزاد شود و UI قفل نشود
             // Defensive coding: Force continuation on a ThreadPool thread to mitigate deadlocks 
@@ -531,7 +553,7 @@ namespace Prg_SendInvoice.CNNMANAGER
                 SqlConnection? db = null;
                 try
                 {
-                    db = new SqlConnection(CONNECTION_STR);
+                    db = new SqlConnection(isAutomation ? AUTOMATION_CONNECTION_STR : CONNECTION_STR);
 
                     // CRITICAL FIX: Pass CancellationToken to OpenAsync
                     await db.OpenAsync(cancellationToken).ConfigureAwait(false);
@@ -880,6 +902,10 @@ namespace Prg_SendInvoice.CNNMANAGER
                     builder.MultipleActiveResultSets = true;
                     builder.MaxPoolSize = 1000;
                     CONNECTION_STR = builder.ConnectionString + ";";
+                    var automationBuilder = new SqlConnectionStringBuilder(CONNECTION_STR);
+                    automationBuilder.InitialCatalog = CL_Generaly.General_AutomationDBname;
+                    AUTOMATION_CONNECTION_STR = automationBuilder.ConnectionString + ";";
+
 
                     CL_CCNNMANAGER dbms = new CL_CCNNMANAGER();
 

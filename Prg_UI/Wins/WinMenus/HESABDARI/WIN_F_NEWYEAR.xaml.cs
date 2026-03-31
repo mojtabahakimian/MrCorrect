@@ -978,8 +978,6 @@ END CATCH;";
                 var identityTables = new Dictionary<string, string>
                 {
                     { "COPMANES", "id, COMPANY_NAME, CITY, MANAGER, FACT_TEL, MOBILE, PERNUM, STATUS_FACT, PRODUCTS, ADDR, ACCOUNTANT, SOFTWARE, ESP_PERSON, REAGENT, STATUS, COMMENT, date_sabt, USER_NAME, pic, dt, userid, Longitude, Latitude, OSTANID, SHAHRID, CRT, UID" },
-                    { "TASKS", "IDNUM, GR, PERSONEL, TASK, PERIORITY, STATUS, STDATE, STTIME, ENDATE, ENTIME, USERNAME, COMP_COD, SUMTIME, pic, ss, skid, num, tg, CTIM, USERCO, SEE, SEET, CRT, UID" },
-                    { "EVENTS", "IDNUM, IDD, EVENTS, STDATE, STTIME, USERNAME, COMPANY, SUMTIME, pic, skid, num, tg, CRT, UID" },
                     { "PM_location", "IDD, LO_NAME, LO_IDD, CR, US, CRT, UID" },
                     { "PM_ASSETS", "IDD, AS_NAME, AS_SERIAL, AS_MODEL, AS_GRP, AS_Longitude, AS_Latitude, AS_IDDMAIN, AS_IDAMVAL, AS_IMAGE, AS_HESAB, AS_GARANTI, AS_GARANTICOMP, AS_LOCATION, AS_STATUS, AS_CODING, SGN1, SGN2, SGN3, SGN4, sgn1usid, sgn2usid, sgn3usid, CR, US, CRT, UID" },
                     { "PM_RUMAINTE", "IDD, AS_IDD, RM_RSANGESH, RM_PERIOD, RM_MEGHDAR, RM_PERSON, RM_JOB, RM_STDATE, RM_STTIME, RM_TAKHIRMO, RM_TAKHVAHED, RM_ELAMBE, TM_TIMENEED, TM_HESAB_HAZINE, CR, US, CRT, UID" },
@@ -1091,6 +1089,11 @@ END CATCH;";
                 INNER JOIN {safeNew}.dbo.PVAM PNEW ON PB.CODE = PNEW.CODE AND PB.VAM_ID = PNEW.VAM_ID;
             ";
                 dbms.DoExecuteSQL(pvamSql);
+
+                // Remove Automation tables from the new database, as they are now centralized in AutomationDB
+                UpdateStatus("حذف جداول اتوماسیون از دیتابیس سال جدید...");
+                dbms.DoExecuteSQL($"IF OBJECT_ID('{safeNew}.dbo.TASKS', 'U') IS NOT NULL DROP TABLE {safeNew}.dbo.TASKS");
+                dbms.DoExecuteSQL($"IF OBJECT_ID('{safeNew}.dbo.EVENTS', 'U') IS NOT NULL DROP TABLE {safeNew}.dbo.EVENTS");
             }
             finally
             {

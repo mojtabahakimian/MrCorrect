@@ -5027,7 +5027,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                             VALUES 
                                 ({Baseknow.USERCOD}, N'{CL_HESABDARI.UCurrentUser()}', N'{sharh}', 
                                  '{CUST_NO.SelectedValue}', {Tarikh.FullCurrentDate}, {currentTime}, 
-                                 2, {num}, 2, {td}, {Baseknow.USERCOD})");
+                                 2, {num}, 2, {td}, {Baseknow.USERCOD})", isAutomation: true);
                     }
 
                     // ذخیره نهایی
@@ -5705,16 +5705,16 @@ namespace Wins.WinMenus.KHARID_FORUSH
             mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(NUMBER.Text), 20);
             if (mid > 0d)
             {
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), " :امضا شد1 ", " :امضا برداشته شد1:") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + NUMBER.Text + ",20 )");
-                dbms.DoExecuteSQL("UPDATE TASKS SET PERSONEL = " + CL_HESABDARI.GETUSERTASK(mid) + ",STATUS = 1 WHERE IDNUM = " + mid);
+                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), " :امضا شد1 ", " :امضا برداشته شد1:") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + NUMBER.Text + ",20 )", isAutomation: true);
+                dbms.DoExecuteSQL("UPDATE TASKS SET PERSONEL = " + CL_HESABDARI.GETUSERTASK(mid) + ",STATUS = 1 WHERE IDNUM = " + mid, isAutomation: true);
             }
             else
             {
                 td = Tarikh.GET_OADATE_DAO();
                 SHARH = "'پيش فاکتور  شماره: " + NUMBER.Text + " مورخ " + Strings.Format(Convert.ToInt32(DATE_N.Text.ToRawTarikh()), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToString()) + "','" + this.CUST_NO.SelectedValue + "'";
-                dbms.DoExecuteSQL("insert into tasks(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO)  values (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.UCurrentUser() + "'," + SHARH + "," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20, GETDATE() ," + Baseknow.USERCOD + " )");
+                dbms.DoExecuteSQL("insert into tasks(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO)  values (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.UCurrentUser() + "'," + SHARH + "," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20, GETDATE() ," + Baseknow.USERCOD + ", isAutomation: true)");
                 mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(NUMBER.Text), 20);
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), " : امضا شد1 ", " :امضا برداشته شد1 ") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20 )");
+                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN1.IsChecked), " : امضا شد1 ", " :امضا برداشته شد1 ") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20 )", isAutomation: true);
             }
 
             SGN1usid.Tag = Baseknow.USERCOD;
@@ -5749,16 +5749,16 @@ namespace Wins.WinMenus.KHARID_FORUSH
             mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(NUMBER.Text), 20);
             if (mid > 0d)
             {
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN2.IsChecked), " :امضا شد2 ", " :امضا برداشته شد2:") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + NUMBER.Text + ",20 )");
-                dbms.DoExecuteSQL("UPDATE TASKS SET PERSONEL = " + CL_HESABDARI.GETUSERTASK(mid) + ",STATUS = 1 WHERE IDNUM = " + mid);
+                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN2.IsChecked), " :امضا شد2 ", " :امضا برداشته شد2:") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + NUMBER.Text + ",20 )", isAutomation: true);
+                dbms.DoExecuteSQL("UPDATE TASKS SET PERSONEL = " + CL_HESABDARI.GETUSERTASK(mid) + ",STATUS = 1 WHERE IDNUM = " + mid, isAutomation: true);
             }
             else
             {
                 td = Tarikh.GET_OADATE_DAO();
                 SHARH = "'پيش فاکتور  شماره: " + NUMBER.Text + " مورخ " + Strings.Format(Convert.ToInt32(DATE_N.Text.ToRawTarikh()), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToString()) + "','" + this.CUST_NO.SelectedValue + "'";
-                dbms.DoExecuteSQL("insert into tasks(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO)  values (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.UCurrentUser() + "'," + SHARH + "," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20, GETDATE() ," + Baseknow.USERCOD + " )");
+                dbms.DoExecuteSQL("insert into tasks(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO)  values (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.UCurrentUser() + "'," + SHARH + "," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20, GETDATE() ," + Baseknow.USERCOD + ", isAutomation: true)");
                 mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(NUMBER.Text), 20);
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN2.IsChecked), " : امضا شد2 ", " :امضا برداشته شد2 ") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20 )");
+                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN2.IsChecked), " : امضا شد2 ", " :امضا برداشته شد2 ") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20 )", isAutomation: true);
             }
 
             SGN2usid.Tag = Baseknow.USERCOD;
@@ -5792,16 +5792,16 @@ namespace Wins.WinMenus.KHARID_FORUSH
             mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(NUMBER.Text), 20);
             if (mid > 0d)
             {
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN3.IsChecked), " :امضا شد3 ", " :امضا برداشته شد3:") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + NUMBER.Text + ",20 )");
-                dbms.DoExecuteSQL("UPDATE TASKS SET PERSONEL = " + CL_HESABDARI.GETUSERTASK(mid) + ",STATUS = 1 WHERE IDNUM = " + mid);
+                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN3.IsChecked), " :امضا شد3 ", " :امضا برداشته شد3:") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + NUMBER.Text + ",20 )", isAutomation: true);
+                dbms.DoExecuteSQL("UPDATE TASKS SET PERSONEL = " + CL_HESABDARI.GETUSERTASK(mid) + ",STATUS = 1 WHERE IDNUM = " + mid, isAutomation: true);
             }
             else
             {
                 td = Tarikh.GET_OADATE_DAO();
                 SHARH = "'پيش فاکتور  شماره: " + NUMBER.Text + " مورخ " + Strings.Format(Convert.ToInt32(DATE_N.Text.ToRawTarikh()), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(this.CUST_NO.SelectedValue.ToString()) + "','" + this.CUST_NO.SelectedValue + "'";
-                dbms.DoExecuteSQL("insert into tasks(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO)  values (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.UCurrentUser() + "'," + SHARH + "," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20, GETDATE() ," + Baseknow.USERCOD + " )");
+                dbms.DoExecuteSQL("insert into tasks(PERSONEL,USERNAME,TASK,COMP_COD,STDATE,STTIME,SKID,NUM,TG,CTIM,USERCO)  values (" + Baseknow.USERCOD + ",'" + CL_HESABDARI.UCurrentUser() + "'," + SHARH + "," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20, GETDATE() ," + Baseknow.USERCOD + ", isAutomation: true)");
                 mid = CL_HESABDARI.Gettaskid(Convert.ToDouble(NUMBER.Text), 20);
-                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN3.IsChecked), " : امضا شد3 ", " :امضا برداشته شد3 ") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20 )");
+                dbms.DoExecuteSQL("insert into events(IDNUM,USERNAME,EVENTS,STDATE,STTIME,SKID,NUM,TG)  values (" + mid + ",'" + CL_HESABDARI.UCurrentUser() + "','" + CL_HESABDARI.GETUSERNAME(Convert.ToInt32(Baseknow.USERCOD)) + Interaction.IIf(Convert.ToBoolean(SGN3.IsChecked), " : امضا شد3 ", " :امضا برداشته شد3 ") + "'," + Tarikh.FullCurrentDate + "," + (System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetHour(DateTime.Now) * 100 + System.Threading.Thread.CurrentThread.CurrentCulture.Calendar.GetMinute(DateTime.Now)) + ",20," + this.NUMBER.Text + ",20 )", isAutomation: true);
             }
 
             SGN3usid.Tag = Baseknow.USERCOD;
@@ -5825,7 +5825,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
             //After Update
             if (PERSONEL.SelectedItem != null && !NewRecord && NUMBER.Text != "0")
             {
-                //dbms.DoExecuteSQL($"UPDATE TASKS SET PERSONEL = {PERSONEL.SelectedValue} WHERE IDNUM = {Meidnum}");
+                //dbms.DoExecuteSQL($"UPDATE TASKS SET PERSONEL = {PERSONEL.SelectedValue} WHERE IDNUM = {Meidnum}", isAutomation: true);
 
                 Meidnum = CL_HESABDARI.PERSONELUpdate(20, Convert.ToDouble(NUMBER.Text), Convert.ToInt32(PERSONEL.SelectedValue), "'پيش فاکتور  شماره: " + NUMBER.Text + " مورخ " + Strings.Format(Convert.ToInt64(DATE_N.Text.ToRawTarikh()), "####/##/##") + "  به نام: " + CL_HESABDARI.GETTAFNAME(CUST_NO.SelectedValue.ToStringNullSafe()) + "','" + CUST_NO.SelectedValue + "'");
 
