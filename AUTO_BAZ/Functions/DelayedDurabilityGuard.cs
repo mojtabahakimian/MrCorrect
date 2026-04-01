@@ -1,6 +1,8 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Dapper;
+using Microsoft.Data.SqlClient;
 using Prg_SendInvoice.CNNMANAGER;
 using System;
+using System.Linq;
 
 namespace AUTO_BAZ.Functions
 {
@@ -65,9 +67,22 @@ namespace AUTO_BAZ.Functions
         {
             lock (SyncObj)
             {
-                if (!_isForced)
+                try
                 {
-                    return;
+                    using var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR);
+                    db.Open();
+                    string? DelayedStateValue = db.Query<string?>("SELECT delayed_durability_desc FROM sys.databases WHERE name = DB_NAME()", default).FirstOrDefault();
+                    if (DelayedStateValue != null)
+                    {
+                        _isForced = DelayedStateValue.Equals("FORCED", StringComparison.CurrentCultureIgnoreCase);
+                    }
+                }
+                catch (Exception er)
+                {
+                    if (!_isForced)
+                    {
+                        return;
+                    }
                 }
 
                 try
