@@ -38,5 +38,25 @@
         public int? OSTANID { get; set; }
         public int? SHAHRID { get; set; }
         public long? LAST_DEED_DATE { get; set; }
+        public int? BALANCE_ORIGIN_NS { get; set; }
+        public int? BALANCE_ORIGIN_DTL_ID { get; set; }
+        public int? DAYS_FROM_BALANCE_ORIGIN
+        {
+            get
+            {
+                if (!LAST_DEED_DATE.HasValue || LAST_DEED_DATE.Value <= 0) return null;
+                try
+                {
+                    long d = LAST_DEED_DATE.Value;
+                    int year = (int)(d / 10000);
+                    int month = (int)((d % 10000) / 100);
+                    int day = (int)(d % 100);
+                    var pc = new System.Globalization.PersianCalendar();
+                    var originDate = pc.ToDateTime(year, month, day, 0, 0, 0, 0);
+                    return (int)(System.DateTime.Today - originDate).TotalDays;
+                }
+                catch { return null; }
+            }
+        }
     }
 }
