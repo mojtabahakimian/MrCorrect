@@ -38,5 +38,8 @@
         public int? OSTANID { get; set; }
         public int? SHAHRID { get; set; }
         public long? LAST_DEED_DATE { get; set; }
+        public int? DAYS_FROM_BALANCE_ORIGIN { get; set; }
+        public double? BALANCE_ORIGIN_NS { get; set; }
+        public long? BALANCE_ORIGIN_DTL_ID { get; set; }
     }
 }

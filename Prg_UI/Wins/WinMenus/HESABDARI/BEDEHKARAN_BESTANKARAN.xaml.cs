@@ -137,14 +137,33 @@ namespace Wins.WinMenus.HESABDARI
                 ////MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>("SELECT BEDBESMAH" + Baseknow.USERCOD + ".*  FROM BEDBESMAH" + Baseknow.USERCOD + " WHERE (HES_K = " + KOL_PASSED + ") And (HES_M = " + MOIN_PASSED + ")  ORDER BY HES_K, HES_M, HES_T").ToList();
 
                 string limitedQuery = $@"
-                    SELECT src.*, balanceOrigin.BALANCE_DATE AS LAST_DEED_DATE
+                    SELECT src.*, 
+                           balanceOrigin.BALANCE_DATE AS LAST_DEED_DATE,
+                           CASE 
+                               WHEN balanceOrigin.BALANCE_DATE IS NULL THEN NULL 
+                               ELSE DATEDIFF( 
+                                       DAY, 
+                                       dbo.fn_JalaliIntToGregorianDate(balanceOrigin.BALANCE_DATE), 
+                                       CONVERT(DATETIME, CONVERT(DATE, GETDATE())) 
+                                    ) 
+                           END AS DAYS_FROM_BALANCE_ORIGIN,
+                           balanceOrigin.BALANCE_ORIGIN_NS AS BALANCE_ORIGIN_NS,
+                           balanceOrigin.BALANCE_ORIGIN_DTL_ID AS BALANCE_ORIGIN_DTL_ID
                     FROM BEDBESMAH{Baseknow.USERCOD} AS src
                     OUTER APPLY (
                         SELECT TOP (1) 
                             CASE 
                                 WHEN calc.TotalCoverage <= 0 THEN NextRow.DATE_S
                                 ELSE COALESCE(NextRow.DATE_S, CoverRow.DATE_S)
-                            END AS BALANCE_DATE
+                            END AS BALANCE_DATE,
+                            CASE 
+                                WHEN calc.TotalCoverage <= 0 THEN NextRow.N_S
+                                ELSE COALESCE(NextRow.N_S, CoverRow.N_S)
+                            END AS BALANCE_ORIGIN_NS,
+                            CASE 
+                                WHEN calc.TotalCoverage <= 0 THEN NextRow.id
+                                ELSE COALESCE(NextRow.id, CoverRow.id)
+                            END AS BALANCE_ORIGIN_DTL_ID
                         FROM (
                             SELECT 
                                 CASE WHEN ISNULL(src.BEDBES, 0) > 0 THEN TotalBes ELSE TotalBed END AS TotalCoverage
@@ -156,12 +175,12 @@ namespace Wins.WinMenus.HESABDARI
                             ) inner_calc
                         ) AS calc
                         OUTER APPLY (
-                                SELECT TOP (1) cover.DATE_S, cover.N_S, cover.RADIF, cover.RunAmount
+                                SELECT TOP (1) cover.DATE_S, cover.N_S, cover.RADIF, cover.RunAmount, cover.id
                             FROM (
-                                    SELECT inner_cover.N_S, inner_cover.DATE_S, inner_cover.RADIF,
+                                    SELECT inner_cover.N_S, inner_cover.DATE_S, inner_cover.RADIF, inner_cover.id,
                                        CASE WHEN ISNULL(src.BEDBES, 0) > 0 THEN RunBed ELSE RunBes END AS RunAmount
                                 FROM (
-                                        SELECT d_inn.N_S, h_inn.DATE_S, d_inn.RADIF,
+                                        SELECT d_inn.N_S, h_inn.DATE_S, d_inn.RADIF, d_inn.id,
                                                SUM(ISNULL(d_inn.BED, 0)) OVER (ORDER BY h_inn.DATE_S ASC, d_inn.N_S ASC, d_inn.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBed,
                                                SUM(ISNULL(d_inn.BES, 0)) OVER (ORDER BY h_inn.DATE_S ASC, d_inn.N_S ASC, d_inn.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBes
                                     FROM DEED_DTL d_inn
@@ -174,7 +193,7 @@ namespace Wins.WinMenus.HESABDARI
                                 ORDER BY cover.DATE_S ASC, cover.N_S ASC, cover.RADIF ASC
                         ) AS CoverRow
                         OUTER APPLY (
-                            SELECT TOP (1) h_n.DATE_S
+                            SELECT TOP (1) h_n.DATE_S, d_n.N_S, d_n.id
                             FROM DEED_DTL d_n
                             INNER JOIN DEED_HED h_n ON h_n.N_S = d_n.N_S
                             WHERE d_n.HES_K = src.HES_K AND d_n.HES_M = src.HES_M AND d_n.HES_T = src.HES_T
@@ -202,14 +221,33 @@ namespace Wins.WinMenus.HESABDARI
                 ////MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>("SELECT * FROM Q_BEDEHBESTANH_MAIN OPTION (FORCE ORDER, QUERYTRACEON 2312)").ToList();
 
                 const string fullQuery = @"
-                             SELECT main.*, balanceOrigin.BALANCE_DATE AS LAST_DEED_DATE
+                             SELECT main.*, 
+                                    balanceOrigin.BALANCE_DATE AS LAST_DEED_DATE,
+                                    CASE 
+                                        WHEN balanceOrigin.BALANCE_DATE IS NULL THEN NULL 
+                                        ELSE DATEDIFF( 
+                                                DAY, 
+                                                dbo.fn_JalaliIntToGregorianDate(balanceOrigin.BALANCE_DATE), 
+                                                CONVERT(DATETIME, CONVERT(DATE, GETDATE())) 
+                                             ) 
+                                    END AS DAYS_FROM_BALANCE_ORIGIN,
+                                    balanceOrigin.BALANCE_ORIGIN_NS AS BALANCE_ORIGIN_NS,
+                                    balanceOrigin.BALANCE_ORIGIN_DTL_ID AS BALANCE_ORIGIN_DTL_ID
                              FROM Q_BEDEHBESTANH_MAIN AS main
                              OUTER APPLY (
                                  SELECT TOP (1) 
                                      CASE 
                                          WHEN calc.TotalCoverage <= 0 THEN NextRow.DATE_S
                                          ELSE COALESCE(NextRow.DATE_S, CoverRow.DATE_S)
-                                     END AS BALANCE_DATE
+                                     END AS BALANCE_DATE,
+                                     CASE 
+                                         WHEN calc.TotalCoverage <= 0 THEN NextRow.N_S
+                                         ELSE COALESCE(NextRow.N_S, CoverRow.N_S)
+                                     END AS BALANCE_ORIGIN_NS,
+                                     CASE 
+                                         WHEN calc.TotalCoverage <= 0 THEN NextRow.id
+                                         ELSE COALESCE(NextRow.id, CoverRow.id)
+                                     END AS BALANCE_ORIGIN_DTL_ID
                                  FROM (
                                      SELECT 
                                          CASE WHEN ISNULL(main.BEDBES, 0) > 0 THEN TotalBes ELSE TotalBed END AS TotalCoverage
@@ -221,12 +259,12 @@ namespace Wins.WinMenus.HESABDARI
                                      ) inner_calc
                                  ) AS calc
                                  OUTER APPLY (
-                                         SELECT TOP (1) cover.DATE_S, cover.N_S, cover.RADIF, cover.RunAmount
+                                         SELECT TOP (1) cover.DATE_S, cover.N_S, cover.RADIF, cover.RunAmount, cover.id
                                      FROM (
-                                             SELECT inner_cover.N_S, inner_cover.DATE_S, inner_cover.RADIF,
+                                             SELECT inner_cover.N_S, inner_cover.DATE_S, inner_cover.RADIF, inner_cover.id,
                                                 CASE WHEN ISNULL(main.BEDBES, 0) > 0 THEN RunBed ELSE RunBes END AS RunAmount
                                          FROM (
-                                                 SELECT d_inn.N_S, h_inn.DATE_S, d_inn.RADIF,
+                                                 SELECT d_inn.N_S, h_inn.DATE_S, d_inn.RADIF, d_inn.id,
                                                         SUM(ISNULL(d_inn.BED, 0)) OVER (ORDER BY h_inn.DATE_S ASC, d_inn.N_S ASC, d_inn.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBed,
                                                         SUM(ISNULL(d_inn.BES, 0)) OVER (ORDER BY h_inn.DATE_S ASC, d_inn.N_S ASC, d_inn.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBes
                                              FROM DEED_DTL d_inn
@@ -239,7 +277,7 @@ namespace Wins.WinMenus.HESABDARI
                                          ORDER BY cover.DATE_S ASC, cover.N_S ASC, cover.RADIF ASC
                                  ) AS CoverRow
                                  OUTER APPLY (
-                                     SELECT TOP (1) h_n.DATE_S
+                                     SELECT TOP (1) h_n.DATE_S, d_n.N_S, d_n.id
                                      FROM DEED_DTL d_n
                                      INNER JOIN DEED_HED h_n ON h_n.N_S = d_n.N_S
                                      WHERE d_n.HES_K = main.HES_K AND d_n.HES_M = main.HES_M AND d_n.HES_T = main.HES_T
