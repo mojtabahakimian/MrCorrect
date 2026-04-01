@@ -150,26 +150,26 @@ namespace Wins.WinMenus.HESABDARI
                                 ELSE COALESCE(NextRow.N_S, CoverRow.N_S)
                             END AS BALANCE_ORIGIN_NS,
                             CASE
-                                WHEN calc.TotalCoverage <= 0 THEN NextRow.RADIF
-                                ELSE COALESCE(NextRow.RADIF, CoverRow.RADIF)
+                                WHEN calc.TotalCoverage <= 0 THEN NextRow.id
+                                ELSE COALESCE(NextRow.id, CoverRow.id)
                             END AS BALANCE_ORIGIN_DTL_ID
                         FROM (
-                            SELECT 
+                            SELECT
                                 CASE WHEN ISNULL(src.BEDBES, 0) > 0 THEN TotalBes ELSE TotalBed END AS TotalCoverage
                             FROM (
                                 SELECT ISNULL(SUM(BES), 0) AS TotalBes, ISNULL(SUM(BED), 0) AS TotalBed
-                                FROM DEED_DTL 
-                                WHERE HES_K = src.HES_K AND HES_M = src.HES_M AND HES_T = src.HES_T 
+                                FROM DEED_DTL
+                                WHERE HES_K = src.HES_K AND HES_M = src.HES_M AND HES_T = src.HES_T
                                   AND ISNULL(HES_T2, 0) = ISNULL(src.HES_T2, 0) AND ISNULL(HES_T3, 0) = ISNULL(src.HES_T3, 0) AND ISNULL(HES_T4, 0) = ISNULL(src.HES_T4, 0)
                             ) inner_calc
                         ) AS calc
                         OUTER APPLY (
-                                SELECT TOP (1) cover.DATE_S, cover.N_S, cover.RADIF, cover.RunAmount
+                                SELECT TOP (1) cover.DATE_S, cover.N_S, cover.RADIF, cover.RunAmount, cover.id
                             FROM (
-                                    SELECT inner_cover.N_S, inner_cover.DATE_S, inner_cover.RADIF,
+                                    SELECT inner_cover.N_S, inner_cover.DATE_S, inner_cover.RADIF, inner_cover.id,
                                        CASE WHEN ISNULL(src.BEDBES, 0) > 0 THEN RunBed ELSE RunBes END AS RunAmount
                                 FROM (
-                                        SELECT d_inn.N_S, h_inn.DATE_S, d_inn.RADIF,
+                                        SELECT d_inn.N_S, h_inn.DATE_S, d_inn.RADIF, d_inn.id,
                                                SUM(ISNULL(d_inn.BED, 0)) OVER (ORDER BY h_inn.DATE_S ASC, d_inn.N_S ASC, d_inn.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBed,
                                                SUM(ISNULL(d_inn.BES, 0)) OVER (ORDER BY h_inn.DATE_S ASC, d_inn.N_S ASC, d_inn.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBes
                                     FROM DEED_DTL d_inn
@@ -182,7 +182,7 @@ namespace Wins.WinMenus.HESABDARI
                                 ORDER BY cover.DATE_S ASC, cover.N_S ASC, cover.RADIF ASC
                         ) AS CoverRow
                         OUTER APPLY (
-                            SELECT TOP (1) h_n.DATE_S, d_n.N_S, d_n.RADIF
+                            SELECT TOP (1) h_n.DATE_S, d_n.N_S, d_n.id
                             FROM DEED_DTL d_n
                             INNER JOIN DEED_HED h_n ON h_n.N_S = d_n.N_S
                             WHERE d_n.HES_K = src.HES_K AND d_n.HES_M = src.HES_M AND d_n.HES_T = src.HES_T
@@ -192,7 +192,7 @@ namespace Wins.WinMenus.HESABDARI
                                   calc.TotalCoverage <= 0
                                   OR
                                       (CoverRow.DATE_S IS NOT NULL AND (
-                                          h_n.DATE_S > CoverRow.DATE_S OR 
+                                          h_n.DATE_S > CoverRow.DATE_S OR
                                           (h_n.DATE_S = CoverRow.DATE_S AND d_n.N_S > CoverRow.N_S) OR
                                           (h_n.DATE_S = CoverRow.DATE_S AND d_n.N_S = CoverRow.N_S AND d_n.RADIF > CoverRow.RADIF)
                                       ))
@@ -223,26 +223,26 @@ namespace Wins.WinMenus.HESABDARI
                                          ELSE COALESCE(NextRow.N_S, CoverRow.N_S)
                                      END AS BALANCE_ORIGIN_NS,
                                      CASE
-                                         WHEN calc.TotalCoverage <= 0 THEN NextRow.RADIF
-                                         ELSE COALESCE(NextRow.RADIF, CoverRow.RADIF)
+                                         WHEN calc.TotalCoverage <= 0 THEN NextRow.id
+                                         ELSE COALESCE(NextRow.id, CoverRow.id)
                                      END AS BALANCE_ORIGIN_DTL_ID
                                  FROM (
-                                     SELECT 
+                                     SELECT
                                          CASE WHEN ISNULL(main.BEDBES, 0) > 0 THEN TotalBes ELSE TotalBed END AS TotalCoverage
                                      FROM (
                                          SELECT ISNULL(SUM(BES), 0) AS TotalBes, ISNULL(SUM(BED), 0) AS TotalBed
-                                         FROM DEED_DTL 
-                                         WHERE HES_K = main.HES_K AND HES_M = main.HES_M AND HES_T = main.HES_T 
+                                         FROM DEED_DTL
+                                         WHERE HES_K = main.HES_K AND HES_M = main.HES_M AND HES_T = main.HES_T
                                            AND ISNULL(HES_T2, 0) = ISNULL(main.HES_T2, 0) AND ISNULL(HES_T3, 0) = ISNULL(main.HES_T3, 0) AND ISNULL(HES_T4, 0) = ISNULL(main.HES_T4, 0)
                                      ) inner_calc
                                  ) AS calc
                                  OUTER APPLY (
-                                         SELECT TOP (1) cover.DATE_S, cover.N_S, cover.RADIF, cover.RunAmount
+                                         SELECT TOP (1) cover.DATE_S, cover.N_S, cover.RADIF, cover.RunAmount, cover.id
                                      FROM (
-                                             SELECT inner_cover.N_S, inner_cover.DATE_S, inner_cover.RADIF,
+                                             SELECT inner_cover.N_S, inner_cover.DATE_S, inner_cover.RADIF, inner_cover.id,
                                                 CASE WHEN ISNULL(main.BEDBES, 0) > 0 THEN RunBed ELSE RunBes END AS RunAmount
                                          FROM (
-                                                 SELECT d_inn.N_S, h_inn.DATE_S, d_inn.RADIF,
+                                                 SELECT d_inn.N_S, h_inn.DATE_S, d_inn.RADIF, d_inn.id,
                                                         SUM(ISNULL(d_inn.BED, 0)) OVER (ORDER BY h_inn.DATE_S ASC, d_inn.N_S ASC, d_inn.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBed,
                                                         SUM(ISNULL(d_inn.BES, 0)) OVER (ORDER BY h_inn.DATE_S ASC, d_inn.N_S ASC, d_inn.RADIF ASC ROWS UNBOUNDED PRECEDING) AS RunBes
                                              FROM DEED_DTL d_inn
@@ -255,16 +255,17 @@ namespace Wins.WinMenus.HESABDARI
                                          ORDER BY cover.DATE_S ASC, cover.N_S ASC, cover.RADIF ASC
                                  ) AS CoverRow
                                  OUTER APPLY (
-                                     SELECT TOP (1) h_n.DATE_S, d_n.N_S, d_n.RADIF
+                                     SELECT TOP (1) h_n.DATE_S, d_n.N_S, d_n.id
                                      FROM DEED_DTL d_n
                                      INNER JOIN DEED_HED h_n ON h_n.N_S = d_n.N_S
                                      WHERE d_n.HES_K = main.HES_K AND d_n.HES_M = main.HES_M AND d_n.HES_T = main.HES_T
                                        AND ISNULL(d_n.HES_T2, 0) = ISNULL(main.HES_T2, 0) AND ISNULL(d_n.HES_T3, 0) = ISNULL(main.HES_T3, 0) AND ISNULL(d_n.HES_T4, 0) = ISNULL(main.HES_T4, 0)
+                                       AND ISNULL(d_n.SHARH, '') NOT LIKE N'%افتتاح%'
                                        AND (
                                            calc.TotalCoverage <= 0
                                            OR
                                                (CoverRow.DATE_S IS NOT NULL AND (
-                                                   h_n.DATE_S > CoverRow.DATE_S OR 
+                                                   h_n.DATE_S > CoverRow.DATE_S OR
                                                    (h_n.DATE_S = CoverRow.DATE_S AND d_n.N_S > CoverRow.N_S) OR
                                                    (h_n.DATE_S = CoverRow.DATE_S AND d_n.N_S = CoverRow.N_S AND d_n.RADIF > CoverRow.RADIF)
                                                ))
