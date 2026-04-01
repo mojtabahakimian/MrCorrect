@@ -143,17 +143,14 @@ namespace Wins.WinMenus.HESABDARI
                         SELECT TOP (1)
                             CASE
                                 WHEN calc.TotalCoverage <= 0 THEN NextRow.DATE_S
-                                WHEN CoverRow.RunAmount > calc.TotalCoverage THEN CoverRow.DATE_S
                                 ELSE COALESCE(NextRow.DATE_S, CoverRow.DATE_S)
                             END AS BALANCE_DATE,
                             CASE
                                 WHEN calc.TotalCoverage <= 0 THEN NextRow.N_S
-                                WHEN CoverRow.RunAmount > calc.TotalCoverage THEN CoverRow.N_S
                                 ELSE COALESCE(NextRow.N_S, CoverRow.N_S)
                             END AS BALANCE_ORIGIN_NS,
                             CASE
                                 WHEN calc.TotalCoverage <= 0 THEN NextRow.RADIF
-                                WHEN CoverRow.RunAmount > calc.TotalCoverage THEN CoverRow.RADIF
                                 ELSE COALESCE(NextRow.RADIF, CoverRow.RADIF)
                             END AS BALANCE_ORIGIN_DTL_ID
                         FROM (
@@ -219,17 +216,14 @@ namespace Wins.WinMenus.HESABDARI
                                  SELECT TOP (1)
                                      CASE
                                          WHEN calc.TotalCoverage <= 0 THEN NextRow.DATE_S
-                                         WHEN CoverRow.RunAmount > calc.TotalCoverage THEN CoverRow.DATE_S
                                          ELSE COALESCE(NextRow.DATE_S, CoverRow.DATE_S)
                                      END AS BALANCE_DATE,
                                      CASE
                                          WHEN calc.TotalCoverage <= 0 THEN NextRow.N_S
-                                         WHEN CoverRow.RunAmount > calc.TotalCoverage THEN CoverRow.N_S
                                          ELSE COALESCE(NextRow.N_S, CoverRow.N_S)
                                      END AS BALANCE_ORIGIN_NS,
                                      CASE
                                          WHEN calc.TotalCoverage <= 0 THEN NextRow.RADIF
-                                         WHEN CoverRow.RunAmount > calc.TotalCoverage THEN CoverRow.RADIF
                                          ELSE COALESCE(NextRow.RADIF, CoverRow.RADIF)
                                      END AS BALANCE_ORIGIN_DTL_ID
                                  FROM (
