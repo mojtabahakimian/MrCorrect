@@ -37,14 +37,28 @@ namespace Prg_UI.Functions
 
             try
             {
+                string darkModeScopedName = BuildScopedOptionName(AppThemeSettings.ThemeIsDarkOptionName, userId.Value);
+                string primaryColorScopedName = BuildScopedOptionName(AppThemeSettings.ThemePrimaryColorOptionName, userId.Value);
+
                 var options = await GeneralOptionManager
                     .GetOptionsAsync(
-                        new[] { AppThemeSettings.ThemeIsDarkOptionName, AppThemeSettings.ThemePrimaryColorOptionName },
+                        new[]
+                        {
+                            darkModeScopedName,
+                            primaryColorScopedName,
+                            AppThemeSettings.ThemeIsDarkOptionName,        // Legacy fallback
+                            AppThemeSettings.ThemePrimaryColorOptionName   // Legacy fallback
+                        },
                         userId)
                     .ConfigureAwait(false);
 
-                string? darkModeDb = options.FirstOrDefault(x => x.OptionName == AppThemeSettings.ThemeIsDarkOptionName)?.OptionValue;
-                string? primaryColorDb = options.FirstOrDefault(x => x.OptionName == AppThemeSettings.ThemePrimaryColorOptionName)?.OptionValue;
+                string? darkModeDb =
+                    options.FirstOrDefault(x => x.OptionName == darkModeScopedName)?.OptionValue
+                    ?? options.FirstOrDefault(x => x.OptionName == AppThemeSettings.ThemeIsDarkOptionName)?.OptionValue;
+
+                string? primaryColorDb =
+                    options.FirstOrDefault(x => x.OptionName == primaryColorScopedName)?.OptionValue
+                    ?? options.FirstOrDefault(x => x.OptionName == AppThemeSettings.ThemePrimaryColorOptionName)?.OptionValue;
 
                 if (!string.IsNullOrWhiteSpace(darkModeDb) && bool.TryParse(darkModeDb, out bool isDark))
                 {
@@ -95,16 +109,19 @@ namespace Prg_UI.Functions
                 return false;
             }
 
+            string darkModeScopedName = BuildScopedOptionName(AppThemeSettings.ThemeIsDarkOptionName, userId.Value);
+            string primaryColorScopedName = BuildScopedOptionName(AppThemeSettings.ThemePrimaryColorOptionName, userId.Value);
+
             var darkModeOption = new GENERAL_OPTIONS
             {
-                OptionName = AppThemeSettings.ThemeIsDarkOptionName,
+                OptionName = darkModeScopedName,
                 OptionValue = isDark.ToString(),
                 Description = "Material Theme Dark Mode"
             };
 
             var primaryColorOption = new GENERAL_OPTIONS
             {
-                OptionName = AppThemeSettings.ThemePrimaryColorOptionName,
+                OptionName = primaryColorScopedName,
                 OptionValue = string.IsNullOrWhiteSpace(primaryColor) ? AppThemeSettings.DefaultPrimaryColor : primaryColor,
                 Description = "Material Theme Primary Color"
             };
@@ -127,6 +144,11 @@ namespace Prg_UI.Functions
             {
                 return (Color)ColorConverter.ConvertFromString(AppThemeSettings.DefaultPrimaryColor);
             }
+        }
+
+        private static string BuildScopedOptionName(string baseOptionName, int userId)
+        {
+            return $"{baseOptionName}.U{userId}";
         }
     }
 }
