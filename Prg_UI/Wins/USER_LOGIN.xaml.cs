@@ -123,6 +123,24 @@ namespace Prg_UI.Wins
             AppThemeSettings themeSettings = await AppThemeManager.LoadThemeSettingsAsync(Baseknow.USERCOD);
             AppThemeManager.ApplyTheme(themeSettings);
         }
+
+        /// <summary>
+        /// بعد از لاگین موفق، تم ذخیره‌شده کاربر را از DB لود و اعمال می‌کند،
+        /// سپس پنجره اصلی را باز می‌کند.
+        /// </summary>
+        private async Task OpenMainWindowAsync()
+        {
+            try
+            {
+                var themeSettings = await AppThemeManager.LoadThemeSettingsAsync(Baseknow.USERCOD);
+                AppThemeManager.ApplyTheme(themeSettings);
+            }
+            catch { /* در صورت خطا با تم فعلی ادامه می‌دهیم */ }
+
+            DEFAULT dEFAULT = new DEFAULT();
+            Close();
+            dEFAULT.ShowDialog();
+        }
         private static void IncreaseMemoryDesktopHeapExhaustion()
         {
             try
@@ -561,9 +579,7 @@ namespace Prg_UI.Wins
                         Baseknow.USERCOD = USF.IDD;
                         Baseknow.UGRP = USF.GRSAL.ToString();
                         StoreInRegister();
-                        DEFAULT dEFAULT = new DEFAULT();
-                        Close();
-                        dEFAULT.ShowDialog();
+                        await OpenMainWindowAsync();
                         return;
 
                     }
@@ -578,9 +594,7 @@ namespace Prg_UI.Wins
                             Baseknow.USERCOD = USF.IDD;
                             Baseknow.UGRP = USF.GRSAL.ToString();
                             StoreInRegister();
-                            DEFAULT dEFAULT = new DEFAULT();
-                            Close();
-                            dEFAULT.ShowDialog();
+                            await OpenMainWindowAsync();
                         }
                         else
                         {
@@ -599,9 +613,7 @@ namespace Prg_UI.Wins
                             Baseknow.USERCOD = USF.IDD;
                             Baseknow.UGRP = USF.GRSAL.ToString();
                             StoreInRegister();
-                            DEFAULT dEFAULT = new DEFAULT();
-                            Close();
-                            dEFAULT.ShowDialog();
+                            await OpenMainWindowAsync();
                         }
                         else
                         {
