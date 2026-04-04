@@ -77,13 +77,13 @@
             </MenuItem>
 
             <Separator/>
-            <MenuItem Header="ریشه مانده نهایی" InputGestureText="1" Click="MenuItem_Click_2">
+            <!--<MenuItem Header="ریشه مانده نهایی" InputGestureText="1" Click="MenuItem_Click_2">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="ArrowUpBoldCircleOutline" FontSize="14" />
                 </MenuItem.Icon>
             </MenuItem>
-            <Separator/>
-            <MenuItem Header="ریشه حدی مانده" InputGestureText="3" Click="MenuItem_Click_4">
+            <Separator/>-->
+            <MenuItem Header="ریشه حدی مانده" InputGestureText="1" Click="MenuItem_Click_4">
                 <MenuItem.Icon>
                     <materialDesign:PackIcon Kind="ArrowUpBoldCircleOutline" FontSize="14" />
                 </MenuItem.Icon>
