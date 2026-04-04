@@ -748,8 +748,8 @@ namespace Prg_UI
 
             AppThemeManager.ApplyTheme(new AppThemeSettings
             {
-                IsDark = Prg_UI.Properties.Settings.Default.IsDarkMode,
-                PrimaryColor = Prg_UI.Properties.Settings.Default.PrimaryColor
+                IsDark = false,
+                PrimaryColor = AppThemeSettings.DefaultPrimaryColor
             });
 
 

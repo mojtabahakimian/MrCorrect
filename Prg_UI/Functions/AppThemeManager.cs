@@ -26,10 +26,8 @@ namespace Prg_UI.Functions
         {
             var themeSettings = new AppThemeSettings
             {
-                IsDark = Properties.Settings.Default.IsDarkMode,
-                PrimaryColor = string.IsNullOrWhiteSpace(Properties.Settings.Default.PrimaryColor)
-                    ? AppThemeSettings.DefaultPrimaryColor
-                    : Properties.Settings.Default.PrimaryColor
+                IsDark = false,
+                PrimaryColor = AppThemeSettings.DefaultPrimaryColor
             };
 
             if (!(userId > 0))
@@ -81,6 +79,8 @@ namespace Prg_UI.Functions
 
         public static void SaveLocalSettings(bool isDark, string primaryColor)
         {
+            // فقط برای سازگاری نسخه‌های قبلی نگه داشته شده است.
+            // مسیر اصلی ذخیره تم، جدول dbo.GENERAL_OPTIONS به ازای هر کاربر است.
             Properties.Settings.Default.IsDarkMode = isDark;
             Properties.Settings.Default.PrimaryColor = string.IsNullOrWhiteSpace(primaryColor)
                 ? AppThemeSettings.DefaultPrimaryColor
@@ -90,11 +90,9 @@ namespace Prg_UI.Functions
 
         public static async Task<bool> SaveThemeSettingsAsync(bool isDark, string primaryColor, int? userId = null)
         {
-            SaveLocalSettings(isDark, primaryColor);
-
             if (!(userId > 0))
             {
-                return true;
+                return false;
             }
 
             var darkModeOption = new GENERAL_OPTIONS
@@ -107,7 +105,7 @@ namespace Prg_UI.Functions
             var primaryColorOption = new GENERAL_OPTIONS
             {
                 OptionName = AppThemeSettings.ThemePrimaryColorOptionName,
-                OptionValue = primaryColor,
+                OptionValue = string.IsNullOrWhiteSpace(primaryColor) ? AppThemeSettings.DefaultPrimaryColor : primaryColor,
                 Description = "Material Theme Primary Color"
             };
 

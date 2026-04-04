@@ -135,17 +135,34 @@ namespace Prg_UI.Wins.WinSetting
         #region ThemeMethods
         private async Task LoadThemeAsync()
         {
-            int? userId = _currentUserId > 0 ? _currentUserId : (int?)null;
-            AppThemeSettings themeSettings = await AppThemeManager.LoadThemeSettingsAsync(userId);
-            _isDark = themeSettings.IsDark;
-            TColory.Text = themeSettings.PrimaryColor;
-            MyColorPicker1.Color = (Color)ColorConverter.ConvertFromString(themeSettings.PrimaryColor);
-            ThemeActivationsBtn.IsChecked = _isDark;
-            ApplyTheme();
+            try
+            {
+                int? userId = _currentUserId > 0 ? _currentUserId : (int?)null;
+                AppThemeSettings themeSettings = await AppThemeManager.LoadThemeSettingsAsync(userId);
+                _isDark = themeSettings.IsDark;
+                TColory.Text = themeSettings.PrimaryColor;
+                MyColorPicker1.Color = (Color)ColorConverter.ConvertFromString(themeSettings.PrimaryColor);
+                ThemeActivationsBtn.IsChecked = _isDark;
+                ApplyTheme();
+            }
+            catch
+            {
+                _isDark = false;
+                TColory.Text = AppThemeSettings.DefaultPrimaryColor;
+                MyColorPicker1.Color = (Color)ColorConverter.ConvertFromString(AppThemeSettings.DefaultPrimaryColor);
+                ThemeActivationsBtn.IsChecked = _isDark;
+                ApplyTheme();
+            }
         }
 
         private async Task<bool> SaveThemeSettingsAsync()
         {
+            if (!(_currentUserId > 0))
+            {
+                new Msgwin(false, "شناسه کاربر معتبر نیست. امکان ذخیره تِم در دیتابیس وجود ندارد.").ShowDialog();
+                return false;
+            }
+
             int? userId = _currentUserId > 0 ? _currentUserId : (int?)null;
             return await AppThemeManager.SaveThemeSettingsAsync(_isDark, MyColorPicker1.Color.ToString(), userId);
         }
