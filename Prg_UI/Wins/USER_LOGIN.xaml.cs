@@ -122,7 +122,24 @@ namespace Prg_UI.Wins
         {
             AppThemeSettings themeSettings = await AppThemeManager.LoadThemeSettingsAsync(Baseknow.USERCOD);
             AppThemeManager.ApplyTheme(themeSettings);
-            AppThemeManager.SaveLocalSettings(themeSettings.IsDark, themeSettings.PrimaryColor);
+        }
+
+        /// <summary>
+        /// بعد از لاگین موفق، تم ذخیره‌شده کاربر را از DB لود و اعمال می‌کند،
+        /// سپس پنجره اصلی را باز می‌کند.
+        /// </summary>
+        private async Task OpenMainWindowAsync()
+        {
+            try
+            {
+                var themeSettings = await AppThemeManager.LoadThemeSettingsAsync(Baseknow.USERCOD);
+                AppThemeManager.ApplyTheme(themeSettings);
+            }
+            catch { /* در صورت خطا با تم فعلی ادامه می‌دهیم */ }
+
+            DEFAULT dEFAULT = new DEFAULT();
+            Close();
+            dEFAULT.ShowDialog();
         }
         private static void IncreaseMemoryDesktopHeapExhaustion()
         {
@@ -372,9 +389,9 @@ namespace Prg_UI.Wins
 
             new WinBase().Show();
             //new WIN_GETFIRSTMOG().Show();
-            //new NEWPASSWORD().Show();
+            //new WinConnectionChoose().Show();
             //new F_MENU_DATE("CROS").Show();
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.BEDEHKARAN_BESTANKARAN, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_LST_SEARCH, this);
             //new WIN_F_NEWYEAR().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this, 1642d);
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
@@ -562,9 +579,7 @@ namespace Prg_UI.Wins
                         Baseknow.USERCOD = USF.IDD;
                         Baseknow.UGRP = USF.GRSAL.ToString();
                         StoreInRegister();
-                        DEFAULT dEFAULT = new DEFAULT();
-                        Close();
-                        dEFAULT.ShowDialog();
+                        await OpenMainWindowAsync();
                         return;
 
                     }
@@ -579,9 +594,7 @@ namespace Prg_UI.Wins
                             Baseknow.USERCOD = USF.IDD;
                             Baseknow.UGRP = USF.GRSAL.ToString();
                             StoreInRegister();
-                            DEFAULT dEFAULT = new DEFAULT();
-                            Close();
-                            dEFAULT.ShowDialog();
+                            await OpenMainWindowAsync();
                         }
                         else
                         {
@@ -600,9 +613,7 @@ namespace Prg_UI.Wins
                             Baseknow.USERCOD = USF.IDD;
                             Baseknow.UGRP = USF.GRSAL.ToString();
                             StoreInRegister();
-                            DEFAULT dEFAULT = new DEFAULT();
-                            Close();
-                            dEFAULT.ShowDialog();
+                            await OpenMainWindowAsync();
                         }
                         else
                         {

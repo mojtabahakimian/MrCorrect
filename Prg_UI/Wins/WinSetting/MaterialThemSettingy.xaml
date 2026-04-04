@@ -7,15 +7,15 @@
         mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        FontFamily="{StaticResource IRANYEKAN}"
+        FontFamily="{DynamicResource IRANYEKAN}"
    	    Background="{x:Null}"
         AllowsTransparency="True"
-        AllowDrop="True" WindowStyle="None"
-        Title="Setting" Height="500" Width="745" MaxHeight="500" MaxWidth="745" WindowStartupLocation="CenterScreen" Closing="Window_Closing">
+        AllowDrop="True" WindowStyle="None"  Opacity="0"  d:Opacity="1"
+        Title="Setting" Height="500" Width="745" MaxHeight="500" MaxWidth="745" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered" WindowStartupLocation="CenterScreen" Closing="Window_Closing">
     <Grid>
         <Button x:Name="GENERAL_RANG_0" Visibility="Collapsed" Margin="600,410,504,273"  Width="1"/>
         <Border Background="{DynamicResource MaterialDesign.Brush.Background}" BorderBrush="{Binding Background, ElementName=GENERAL_RANG_0}"  CornerRadius="10,10,10,10" Padding="8" RenderTransformOrigin="0.5,0.5" BorderThickness="1">
-            <Border x:Name="TitleDrawBar" Style="{StaticResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG_0}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
+            <Border x:Name="TitleDrawBar" Style="{DynamicResource BordG}" Background="{Binding Background, ElementName=GENERAL_RANG_0}" Margin="-9,-9,-9,0" VerticalAlignment="Top" MinHeight="38" UseLayoutRounding="False" Height="10" MouseLeftButtonDown="TitleDrawBar_MouseLeftButtonDown">
                 <Grid>
                     <Label Content="قالب و رنگ" Padding="21,10,10,10" Foreground="White"/>
                     <Button x:Name="Btn_Close" Margin="0,10,13,0"  BorderBrush="{x:Null}" Background="Transparent" FontSize="12"  Height="19" VerticalAlignment="Top" HorizontalAlignment="Right" Click="Btn_Close_Click" FontFamily="Tahoma" Foreground="White" Width="24" Padding="1,-2,1,1" IsTabStop="False" >
@@ -32,15 +32,15 @@
         </Border>
         <Grid Margin="0,46,0,0">
 
-            <ToggleButton x:Name="ThemeActivationsBtn" Style="{StaticResource MaterialDesignSwitchToggleButton}" ToolTip="Activation Of Dark Theme" IsChecked="False" Margin="112,392,0,0" Click="ThemeActivationsBtn_Click" HorizontalAlignment="Left" Width="63" Height="28" VerticalAlignment="Top" Cursor="Hand" />
+            <ToggleButton x:Name="ThemeActivationsBtn" Style="{DynamicResource MaterialDesignSwitchToggleButton}" ToolTip="Activation Of Dark Theme" IsChecked="False" Margin="112,392,0,0" Click="ThemeActivationsBtn_Click" HorizontalAlignment="Left" Width="63" Height="28" VerticalAlignment="Top" Cursor="Hand" />
             <Label Content="Dark Mode" HorizontalAlignment="Left" Height="24" Margin="22,394,0,0" VerticalAlignment="Top" Width="69"/>
-            <Button x:Name="GENERAL_RANG" Content="ذخیره تم" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Left" Margin="197,0,0,30" VerticalAlignment="Bottom" Width="170" Click="GENERAL_RANG_Click" Height="36" FontSize="12" />
+            <Button x:Name="GENERAL_RANG" Content="ذخیره تم" Style="{DynamicResource MaterialDesignFlatButton}" HorizontalAlignment="Left" Margin="197,0,0,30" VerticalAlignment="Bottom" Width="170" Click="GENERAL_RANG_Click" Height="36" FontSize="12" />
 
             <materialDesign:ColorPicker x:Name="MyColorPicker1" Margin="20,17,26,0" VerticalAlignment="Top" Height="353" Color="{Binding ElementName=TColory,Path=Text,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" PreviewMouseMove="MyColorPicker1_PreviewMouseMove" ColorChanged="MyColorPicker1_ColorChanged" />
 
             <TextBox x:Name="TColory" HorizontalAlignment="Left" Height="28" Margin="390,392,0,0" TextWrapping="Wrap" Text="{Binding ElementName=MyColorPicker1,Path=Color,IsAsync=True}" VerticalAlignment="Top" Width="115" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" TextChanged="TColory_TextChanged"/>
             <Label x:Name="CNN_SETTING" Visibility="Collapsed" Content="اتصال به دیتابیس . . . " Height="26" Margin="20,0,10,10" VerticalAlignment="Bottom" Cursor="Hand"  PreviewMouseLeftButtonUp="CNN_SETTING_PreviewMouseLeftButtonUp"/>
-            <Button x:Name="BTN_RESET" Content="Reset" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Left" Margin="526,0,0,30" VerticalAlignment="Bottom" Width="170" Click="BTN_RESET_Click" Height="36" FontSize="12" />
+            <Button x:Name="BTN_RESET" Content="Reset" Style="{DynamicResource MaterialDesignFlatButton}" HorizontalAlignment="Left" Margin="526,0,0,30" VerticalAlignment="Bottom" Width="170" Click="BTN_RESET_Click" Height="36" FontSize="12" />
         </Grid>
     </Grid>
 </Window>

@@ -289,11 +289,11 @@ namespace Prg_UI.Functions
             {
                 extra = " AND UID = @UID ";
             }
-            string sql = $"SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName IN @OptionNames {extra}";
+            string sql = $"SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName {extra}";
             try
             {
                 var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { OptionName = optionName, UID = currentUserId })
-                                       .ConfigureAwait(false); // جلوگیری از ددلاک
+                                       .ConfigureAwait(false);
                 return result.FirstOrDefault();
             }
             catch (Exception ex)
@@ -312,7 +312,7 @@ namespace Prg_UI.Functions
             {
                 return new List<GENERAL_OPTIONS>();
             }
-            int? currentUserId = userId /*?? Baseknow.USERCOD ?? 0*/;
+            int? currentUserId = userId;
             string extra = "";
             if (currentUserId > 0)
             {
@@ -322,7 +322,7 @@ namespace Prg_UI.Functions
             try
             {
                 var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { OptionNames = optionNames, UID = currentUserId })
-                                       .ConfigureAwait(false); // جلوگیری از ددلاک
+                                       .ConfigureAwait(false);
                 return result.ToList();
             }
             catch (Exception ex)

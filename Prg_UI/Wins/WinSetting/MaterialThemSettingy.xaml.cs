@@ -178,22 +178,24 @@ namespace Prg_UI.Wins.WinSetting
                 100,
                 Timeout.Infinite);
         }
+        private bool _isClosed = false;
+
         private async System.Threading.Tasks.Task UpdatePrimaryColorAsync(Color newColor)
         {
-            // Get the current theme
-            _theme = _paletteHelper.GetTheme();
-
-            // Update the primary color on the UI thread
             await Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                // Set the new primary color
-                _theme.SetPrimaryColor(newColor);
+                if (_isClosed) return;
 
-                // Apply the updated theme
+                // GetTheme باید روی UI Thread فراخوانی شود
+                _theme = _paletteHelper.GetTheme();
+                _theme.SetPrimaryColor(newColor);
                 _paletteHelper.SetTheme(_theme);
 
-                // Update the TextBox value
+                // بدون unsubscribe، این set باعث TextChanged دوباره می‌شود
+                TColory.TextChanged -= TColory_TextChanged;
                 TColory.Text = newColor.ToString();
+                TColory.Text = newColor.ToString();
+                TColory.TextChanged += TColory_TextChanged;
             });
         }
 
@@ -229,10 +231,12 @@ namespace Prg_UI.Wins.WinSetting
                 if (msgwin.DialogResult is true)
                 {
                     e.Cancel = true;
-                    return;
+                    return; // پنجره باز می‌ماند - timer را dispose نکن
                 }
             }
 
+            // پنجره واقعاً دارد بسته می‌شود
+            _isClosed = true;
             try
             {
                 _colorUpdateTimer?.Dispose();
@@ -271,6 +275,17 @@ namespace Prg_UI.Wins.WinSetting
             {
                 new Msgwin(false, "خطا در انجام علمیات Reset تِم").ShowDialog();
             }
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+     
+        }
+
+        private void Window_ContentRendered(object sender, EventArgs e)
+        {
+            // Make the window visible after theme is fully applied
+            this.Opacity = 1;
         }
     }
 }
