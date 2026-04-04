@@ -49,29 +49,47 @@ namespace Prg_UI
         private static System.Reflection.Assembly? ResolveAssemblies(object? sender, ResolveEventArgs args)
         {
             var requested = new AssemblyName(args.Name);
+            if (string.IsNullOrWhiteSpace(requested.Name))
+            {
+                return null;
+            }
+
             if (requested.Name == "Microsoft.Xaml.Behaviors")
             {
                 return typeof(Behavior).Assembly;
             }
             try
             {
-                if (requested != null && requested.Name.StartsWith("Stimulsoft.", StringComparison.OrdinalIgnoreCase))
+                string requestedFileName = requested.Name + ".dll";
+                string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                string[] candidateFiles =
                 {
-                    try
+                    System.IO.Path.Combine(baseDirectory, requestedFileName),
+                    System.IO.Path.Combine(baseDirectory, "DLLS", requestedFileName)
+                };
+
+                foreach (string candidate in candidateFiles)
+                {
+                    if (System.IO.File.Exists(candidate))
                     {
-                        string searchRoot = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DLLS");
-                        if (System.IO.Directory.Exists(searchRoot))
-                        {
-                            string[] matches = System.IO.Directory.GetFiles(searchRoot, requested.Name + ".dll", System.IO.SearchOption.AllDirectories);
-                            if (matches.Length > 0 && System.IO.File.Exists(matches[0]))
-                            {
-                                return System.Reflection.Assembly.LoadFrom(matches[0]);
-                            }
-                        }
+                        return System.Reflection.Assembly.LoadFrom(candidate);
                     }
-                    catch { }
                 }
-                var _ = typeof(Stimulsoft.Report.StiReport).Assembly.FullName; // Just in case
+
+                string searchRoot = System.IO.Path.Combine(baseDirectory, "DLLS");
+                if (System.IO.Directory.Exists(searchRoot))
+                {
+                    string[] matches = System.IO.Directory.GetFiles(searchRoot, requestedFileName, System.IO.SearchOption.AllDirectories);
+                    if (matches.Length > 0)
+                    {
+                        return System.Reflection.Assembly.LoadFrom(matches[0]);
+                    }
+                }
+
+                if (requested.Name.StartsWith("Stimulsoft.", StringComparison.OrdinalIgnoreCase))
+                {
+                    var _ = typeof(Stimulsoft.Report.StiReport).Assembly.FullName;
+                }
             }
             catch { }
 

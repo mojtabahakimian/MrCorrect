@@ -593,7 +593,6 @@
 		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
 		<PackageReference Include="Mime-Detective" Version="23.10.1" />
 		<PackageReference Include="MimeTypeMapOfficial" Version="1.0.17" />
-		<PackageReference Include="MimeTypesMap" Version="1.0.8" />
 		<PackageReference Include="OpenMcdf" Version="2.3.0" />
 		<PackageReference Include="syncfusion.ui.wpf.net" Version="20.4.0.48" />
 		<PackageReference Include="System.IO.Ports" Version="7.0.0" />
@@ -631,6 +630,9 @@
 		</Reference>-->
 		<Reference Include="Microsoft.SqlServer.Server">
 			<HintPath>DLLS\stimulydlls\Microsoft.SqlServer.Server.dll</HintPath>
+			<Private>True</Private>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
 		</Reference>
 		<Reference Include="SixLabors.Fonts">
 			<HintPath>DLLS\stimulydlls\SixLabors.Fonts.dll</HintPath>

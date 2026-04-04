@@ -1,4 +1,5 @@
 ﻿using HeyRed.Mime;
+using MimeTypes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -102,10 +103,10 @@ namespace Functions
 
             try
             {
-                string mimeType = MimeTypesMap.GetMimeType(tempFile);
+                string mimeType = MimeTypeMap.GetMimeType(tempFile);
                 File.Delete(tempFile);  // Clean up the temporary file
 
-                string extension = MimeTypesMap.GetExtension(mimeType);
+                string extension = MimeTypeMap.GetExtension(mimeType);
                 return extension ?? ".unknown";
             }
             catch

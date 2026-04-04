@@ -44,6 +44,9 @@
 		<Reference Include="Interop.TINYLib">
 			<HintPath>DLLS\Interop.TINYLib.dll</HintPath>
 			<EmbedInteropTypes>true</EmbedInteropTypes>
+			<Private>True</Private>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
 		</Reference>
 	</ItemGroup>
 
@@ -92,6 +95,9 @@
   <ItemGroup>
     <Reference Include="AxInterop.TINYLib">
       <HintPath>DLLS\AxInterop.TINYLib.dll</HintPath>
+      <Private>True</Private>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </Reference>
   </ItemGroup>
 

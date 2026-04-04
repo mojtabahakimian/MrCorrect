@@ -7,6 +7,7 @@ using Prg_Proccessy.MODELS;
 using Prg_Proccessy.SQLMODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
+using MimeTypes;
 using Prg_UI.HelperWins;
 using System;
 using System.Collections.Generic;
@@ -635,7 +636,7 @@ namespace Prg_UI.Wins.WinMenus.WinAutomasion
                                 }
                                 else
                                 {
-                                    THE_TYPEFILE = MimeTypesMap.GetExtension(THE_MIMTYP);
+                                    THE_TYPEFILE = MimeTypeMap.GetExtension(THE_MIMTYP);
                                 }
 
                                 THE_PATH_FILE = THE_PATH_FILE + THE_TYPEFILE;   ////C:\Users\ADMINI~1\AppData\Local\Temp\csharp.png
