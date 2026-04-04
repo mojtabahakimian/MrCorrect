@@ -141,7 +141,7 @@ namespace Prg_UI.Functions
             if (string.IsNullOrEmpty(_connectionString))
                 throw new InvalidOperationException("Connection string is not initialized in GeneralOptionManager.");
 
-            const string sql = "SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName AND UID = @UID;";
+            const string sql = "SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName AND UID = ISNULL(@UID, 0);";
             try
             {
                 // استفاده از Dapper به صورت همزمان، دقیقاً مانند App.xaml.cs
@@ -283,17 +283,11 @@ namespace Prg_UI.Functions
             {
                 throw new ArgumentException("نام تنظیم نمی‌تواند خالی باشد.", nameof(optionName));
             }
-            int? currentUserId = userId;
-            string extra = "";
-            if (currentUserId > 0)
-            {
-                extra = " AND UID = @UID ";
-            }
-            string sql = $"SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName IN @OptionNames {extra}";
+            const string sql = "SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName AND UID = ISNULL(@UID, 0)";
             try
             {
-                var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { OptionName = optionName, UID = currentUserId })
-                                       .ConfigureAwait(false); // جلوگیری از ددلاک
+                var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { OptionName = optionName, UID = userId })
+                                       .ConfigureAwait(false);
                 return result.FirstOrDefault();
             }
             catch (Exception ex)
@@ -312,17 +306,11 @@ namespace Prg_UI.Functions
             {
                 return new List<GENERAL_OPTIONS>();
             }
-            int? currentUserId = userId /*?? Baseknow.USERCOD ?? 0*/;
-            string extra = "";
-            if (currentUserId > 0)
-            {
-                extra = " AND UID = @UID ";
-            }
-            string sql = $"SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName IN @OptionNames {extra}";
+            const string sql = "SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName IN @OptionNames AND UID = ISNULL(@UID, 0)";
             try
             {
-                var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { OptionNames = optionNames, UID = currentUserId })
-                                       .ConfigureAwait(false); // جلوگیری از ددلاک
+                var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { OptionNames = optionNames, UID = userId })
+                                       .ConfigureAwait(false);
                 return result.ToList();
             }
             catch (Exception ex)
@@ -349,11 +337,11 @@ namespace Prg_UI.Functions
                 option.UID = currentUserId;
             }
 
+            // ISNULL(@UID, 0): کاربر بدون ID به عنوان global (UID=0) ذخیره می‌شود
             const string sql = @"
                 MERGE dbo.GENERAL_OPTIONS AS target
-                USING (SELECT @OptionName AS OptionName, @UID AS UID) AS source
-                ON (target.OptionName = source.OptionName
-                    AND ((source.UID IS NULL AND target.UID IS NULL) OR target.UID = source.UID))
+                USING (SELECT @OptionName AS OptionName, ISNULL(@UID, 0) AS UID) AS source
+                ON (target.OptionName = source.OptionName AND target.UID = source.UID)
                 WHEN MATCHED THEN
                     UPDATE SET
                         OptionValue = @OptionValue,
@@ -361,7 +349,7 @@ namespace Prg_UI.Functions
                         LastUpdated = GETDATE()
                 WHEN NOT MATCHED THEN
                     INSERT (OptionName, OptionValue, Description, UID, CRT)
-                    VALUES (@OptionName, @OptionValue, @Description, @UID, GETDATE());";
+                    VALUES (@OptionName, @OptionValue, @Description, ISNULL(@UID, 0), GETDATE());";
             try
             {
                 var parameters = new
@@ -392,7 +380,7 @@ namespace Prg_UI.Functions
                 throw new ArgumentException("نام تنظیم نمی‌تواند خالی باشد.", nameof(optionName));
             }
             int currentUserId = userId ?? Baseknow.USERCOD ?? 0;
-            const string sql = "DELETE FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName AND UID = @UID;";
+            const string sql = "DELETE FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName AND UID = ISNULL(@UID, 0);";
             try
             {
                 int? affectedRows = await _dbms.ExecuteSqlCommandAsync(sql, new { OptionName = optionName, UID = currentUserId })
