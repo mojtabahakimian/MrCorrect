@@ -351,13 +351,13 @@ namespace Prg_UI.Functions
 
             const string sql = @"
                 MERGE dbo.GENERAL_OPTIONS AS target
-                USING (SELECT @OptionName AS OptionName) AS source
-                ON (target.OptionName = source.OptionName)
+                USING (SELECT @OptionName AS OptionName, @UID AS UID) AS source
+                ON (target.OptionName = source.OptionName
+                    AND ((source.UID IS NULL AND target.UID IS NULL) OR target.UID = source.UID))
                 WHEN MATCHED THEN
                     UPDATE SET
                         OptionValue = @OptionValue,
                         Description = @Description,
-                        UID = @UID,
                         LastUpdated = GETDATE()
                 WHEN NOT MATCHED THEN
                     INSERT (OptionName, OptionValue, Description, UID, CRT)

@@ -122,7 +122,6 @@ namespace Prg_UI.Wins
         {
             AppThemeSettings themeSettings = await AppThemeManager.LoadThemeSettingsAsync(Baseknow.USERCOD);
             AppThemeManager.ApplyTheme(themeSettings);
-            AppThemeManager.SaveLocalSettings(themeSettings.IsDark, themeSettings.PrimaryColor);
         }
         private static void IncreaseMemoryDesktopHeapExhaustion()
         {

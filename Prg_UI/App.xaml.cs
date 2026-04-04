@@ -746,11 +746,9 @@ namespace Prg_UI
             }
             #endregion
 
-            AppThemeManager.ApplyTheme(new AppThemeSettings
-            {
-                IsDark = Prg_UI.Properties.Settings.Default.IsDarkMode,
-                PrimaryColor = Prg_UI.Properties.Settings.Default.PrimaryColor
-            });
+            // قبل از لاگین کاربر، تم پیش‌فرض اعمال می‌شود.
+            // پس از لاگین، تم واقعی از dbo.GENERAL_OPTIONS بارگذاری خواهد شد.
+            AppThemeManager.ApplyTheme(new AppThemeSettings());
 
 
             #region SplashWindowy
