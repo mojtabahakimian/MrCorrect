@@ -641,6 +641,10 @@
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
 
+                <syncfusion:GridTextColumn HeaderText="تعداد روز از مبدا" MappingName="DAYS_FROM_BALANCE_ORIGIN" />
+                <syncfusion:GridTextColumn HeaderText="شماره سند مبدا" MappingName="BALANCE_ORIGIN_NS" />
+                <syncfusion:GridTextColumn HeaderText="شناسه جزئیات سند مبدا" MappingName="BALANCE_ORIGIN_DTL_ID" />
+
                 <syncfusion:GridTextColumn HeaderText="نام حساب کل" MappingName="NAME" />
                 <syncfusion:GridTextColumn HeaderText="نام حساب معین" MappingName="MOIN" />
                 <syncfusion:GridTextColumn HeaderText="حساب تفضیلی" MappingName="TAFZIL" />

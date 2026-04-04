@@ -830,7 +830,7 @@ END CATCH;";
                 "SMS_FORMATS", "VISITORS_PORSANT", "VISITORS_PORSANT_KALA", "TAKHFIF_DEF", "TAKHFIF_DEF_DTL", "amval",
                 "PRICE_GRP", "PRICE_LIST", "PRICE_PAYNO", "PRICE_ELAMIE", "PRICE_ELAMIE_DTL", "PRICE_ELAMIETF",
                 "PRICE_ELAMIETF_DTL", "BUGET_DEFAULT", "USEROPTION", "SSM_CUST_ANALYS", "SSM_CUST_RASPAY", "TCOD_Countries",
-                "ENHESAR_MOSHTARI", "ENHESAR_KALA", "MORINFO", "MORINFO_SUB"
+                "ENHESAR_MOSHTARI", "ENHESAR_KALA", "MORINFO", "MORINFO_SUB" , "PRICE_ELAMIETF_EXCEPTION"
             };
 
                 //foreach (string tbl in standardTables)

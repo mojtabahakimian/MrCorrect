@@ -554,7 +554,7 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
                 if (e.Key == Key.D1 && Keyboard.Modifiers == ModifierKeys.None)
                 {
                     e.Handled = true;
-                    HandleNavigationToBalanceFromLastRow();
+                    HandleFindNewDebtStartByCreditCoverageFromLastRow();
                     return;
                 }
 
