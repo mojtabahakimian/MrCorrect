@@ -23,28 +23,41 @@ namespace Prg_UI.Functions
         private static readonly GeneralOptionManager GeneralOptionManager = new GeneralOptionManager();
 
         /// <summary>
-        /// تنظیمات تم را از dbo.GENERAL_OPTIONS بر اساس کاربر بارگذاری می‌کند.
-        /// اگر کاربر وجود نداشته باشد یا رکورد در دیتابیس نباشد، مقادیر پیش‌فرض برگردانده می‌شود.
+        /// UID را در نام کلید encode می‌کند تا بدون تغییر schema، ذخیره per-user ممکن شود.
+        /// مثال: "Theme.IsDarkMode_U78" برای کاربر 78
+        /// </summary>
+        private static string BuildIsDarkKey(int userId) =>
+            $"{AppThemeSettings.ThemeIsDarkOptionName}_U{userId}";
+
+        private static string BuildPrimaryColorKey(int userId) =>
+            $"{AppThemeSettings.ThemePrimaryColorOptionName}_U{userId}";
+
+        /// <summary>
+        /// تنظیمات تم را از dbo.GENERAL_OPTIONS بارگذاری می‌کند.
+        /// کلید per-user: "Theme.IsDarkMode_U{userId}"
+        /// اگر رکورد نباشد یا userId معتبر نباشد، مقادیر پیش‌فرض برگشت داده می‌شود.
         /// </summary>
         public static async Task<AppThemeSettings> LoadThemeSettingsAsync(int? userId = null)
         {
-            var themeSettings = new AppThemeSettings(); // مقادیر پیش‌فرض
+            var themeSettings = new AppThemeSettings();
 
             if (!(userId > 0))
             {
                 return themeSettings;
             }
 
+            string isDarkKey = BuildIsDarkKey(userId.Value);
+            string colorKey = BuildPrimaryColorKey(userId.Value);
+
             try
             {
+                // userId=null تا فیلتر UID اعمال نشود؛ کلید خودش per-user است
                 var options = await GeneralOptionManager
-                    .GetOptionsAsync(
-                        new[] { AppThemeSettings.ThemeIsDarkOptionName, AppThemeSettings.ThemePrimaryColorOptionName },
-                        userId)
+                    .GetOptionsAsync(new[] { isDarkKey, colorKey }, userId: null)
                     .ConfigureAwait(false);
 
-                string darkModeDb = options.FirstOrDefault(x => x.OptionName == AppThemeSettings.ThemeIsDarkOptionName)?.OptionValue;
-                string primaryColorDb = options.FirstOrDefault(x => x.OptionName == AppThemeSettings.ThemePrimaryColorOptionName)?.OptionValue;
+                string darkModeDb = options.FirstOrDefault(x => x.OptionName == isDarkKey)?.OptionValue;
+                string primaryColorDb = options.FirstOrDefault(x => x.OptionName == colorKey)?.OptionValue;
 
                 if (!string.IsNullOrWhiteSpace(darkModeDb) && bool.TryParse(darkModeDb, out bool isDark))
                 {
@@ -59,7 +72,6 @@ namespace Prg_UI.Functions
             catch (Exception ex)
             {
                 Console.WriteLine($"[AppThemeManager] خطا در بارگذاری تنظیمات تم از دیتابیس: {ex.Message}");
-                // در صورت خطای دیتابیس، مقادیر پیش‌فرض بازگردانده می‌شود
             }
 
             return themeSettings;
@@ -79,8 +91,8 @@ namespace Prg_UI.Functions
         }
 
         /// <summary>
-        /// تنظیمات تم را فقط در dbo.GENERAL_OPTIONS ذخیره می‌کند (per-user).
-        /// اگر userId معتبر نباشد، false برمی‌گردد چون نمی‌توان بدون کاربر ذخیره کرد.
+        /// تنظیمات تم را در dbo.GENERAL_OPTIONS با کلید per-user ذخیره می‌کند.
+        /// کلید: "Theme.IsDarkMode_U{userId}" - بدون نیاز به تغییر schema دیتابیس.
         /// </summary>
         public static async Task<bool> SaveThemeSettingsAsync(bool isDark, string primaryColor, int? userId = null)
         {
@@ -95,22 +107,23 @@ namespace Prg_UI.Functions
 
             var darkModeOption = new GENERAL_OPTIONS
             {
-                OptionName = AppThemeSettings.ThemeIsDarkOptionName,
+                OptionName = BuildIsDarkKey(userId.Value),
                 OptionValue = isDark.ToString(),
-                Description = "Material Theme Dark Mode"
+                Description = $"Material Theme Dark Mode - User {userId}"
             };
 
             var primaryColorOption = new GENERAL_OPTIONS
             {
-                OptionName = AppThemeSettings.ThemePrimaryColorOptionName,
+                OptionName = BuildPrimaryColorKey(userId.Value),
                 OptionValue = colorValue,
-                Description = "Material Theme Primary Color"
+                Description = $"Material Theme Primary Color - User {userId}"
             };
 
             try
             {
-                bool darkModeSaved = await GeneralOptionManager.SaveOptionAsync(darkModeOption, userId).ConfigureAwait(false);
-                bool primaryColorSaved = await GeneralOptionManager.SaveOptionAsync(primaryColorOption, userId).ConfigureAwait(false);
+                // userId=null: MERGE بر اساس OptionName (که خودش per-user است) match می‌کند
+                bool darkModeSaved = await GeneralOptionManager.SaveOptionAsync(darkModeOption, userId: null).ConfigureAwait(false);
+                bool primaryColorSaved = await GeneralOptionManager.SaveOptionAsync(primaryColorOption, userId: null).ConfigureAwait(false);
                 return darkModeSaved && primaryColorSaved;
             }
             catch (Exception ex)

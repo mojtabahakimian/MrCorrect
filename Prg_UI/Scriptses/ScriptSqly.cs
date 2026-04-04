@@ -2152,33 +2152,6 @@ END;";
                     try { db.Execute(@"ALTER TABLE [dbo].[GENERAL_OPTIONS]
                                    ADD [UID] bigint NULL;"); } catch { }
 
-                    // مایگریشن: تبدیل PK تکی OptionName به PK کامپوزیت (OptionName, UID) برای پشتیبانی per-user
-                    // گام 1: مقادیر NULL را به 0 (global) تبدیل می‌کنیم
-                    try { db.Execute(@"UPDATE dbo.GENERAL_OPTIONS SET UID = 0 WHERE UID IS NULL;"); } catch { }
-
-                    // گام 2: PK قدیمی را با Dynamic SQL حذف می‌کنیم (نام auto-generated است)
-                    try
-                    {
-                        db.Execute(@"
-                            DECLARE @pkName NVARCHAR(128);
-                            SELECT @pkName = kc.name
-                            FROM sys.key_constraints kc
-                            WHERE kc.type = 'PK'
-                              AND kc.parent_object_id = OBJECT_ID('dbo.GENERAL_OPTIONS');
-                            IF @pkName IS NOT NULL AND @pkName <> 'PK_GENERAL_OPTIONS'
-                                EXEC('ALTER TABLE dbo.GENERAL_OPTIONS DROP CONSTRAINT [' + @pkName + ']');");
-                    }
-                    catch { }
-
-                    // گام 3: ستون UID را NOT NULL می‌کنیم
-                    try { db.Execute(@"ALTER TABLE [dbo].[GENERAL_OPTIONS] ALTER COLUMN [UID] bigint NOT NULL;"); } catch { }
-
-                    // گام 4: Default Constraint برای UID=0
-                    try { db.Execute(@"ALTER TABLE [dbo].[GENERAL_OPTIONS] ADD CONSTRAINT [DF_GENERAL_OPTIONS_UID] DEFAULT 0 FOR [UID];"); } catch { }
-
-                    // گام 5: PK کامپوزیت جدید (OptionName, UID)
-                    try { db.Execute(@"ALTER TABLE [dbo].[GENERAL_OPTIONS] ADD CONSTRAINT [PK_GENERAL_OPTIONS] PRIMARY KEY ([OptionName], [UID]);"); } catch { }
-
 
 
                     //باز گردانی اصلاحیه اشتباه برای این تابع , برش میگردونیم به چیزی که قبلا بود مثل اکسس

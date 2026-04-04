@@ -141,7 +141,7 @@ namespace Prg_UI.Functions
             if (string.IsNullOrEmpty(_connectionString))
                 throw new InvalidOperationException("Connection string is not initialized in GeneralOptionManager.");
 
-            const string sql = "SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName AND UID = ISNULL(@UID, 0);";
+            const string sql = "SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName AND UID = @UID;";
             try
             {
                 // استفاده از Dapper به صورت همزمان، دقیقاً مانند App.xaml.cs
@@ -283,10 +283,16 @@ namespace Prg_UI.Functions
             {
                 throw new ArgumentException("نام تنظیم نمی‌تواند خالی باشد.", nameof(optionName));
             }
-            const string sql = "SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName AND UID = ISNULL(@UID, 0)";
+            int? currentUserId = userId;
+            string extra = "";
+            if (currentUserId > 0)
+            {
+                extra = " AND UID = @UID ";
+            }
+            string sql = $"SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName {extra}";
             try
             {
-                var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { OptionName = optionName, UID = userId })
+                var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { OptionName = optionName, UID = currentUserId })
                                        .ConfigureAwait(false);
                 return result.FirstOrDefault();
             }
@@ -306,10 +312,16 @@ namespace Prg_UI.Functions
             {
                 return new List<GENERAL_OPTIONS>();
             }
-            const string sql = "SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName IN @OptionNames AND UID = ISNULL(@UID, 0)";
+            int? currentUserId = userId;
+            string extra = "";
+            if (currentUserId > 0)
+            {
+                extra = " AND UID = @UID ";
+            }
+            string sql = $"SELECT * FROM dbo.GENERAL_OPTIONS WHERE OptionName IN @OptionNames {extra}";
             try
             {
-                var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { OptionNames = optionNames, UID = userId })
+                var result = await _dbms.SqlQueryAsync<GENERAL_OPTIONS>(sql, new { OptionNames = optionNames, UID = currentUserId })
                                        .ConfigureAwait(false);
                 return result.ToList();
             }
@@ -337,19 +349,19 @@ namespace Prg_UI.Functions
                 option.UID = currentUserId;
             }
 
-            // ISNULL(@UID, 0): کاربر بدون ID به عنوان global (UID=0) ذخیره می‌شود
             const string sql = @"
                 MERGE dbo.GENERAL_OPTIONS AS target
-                USING (SELECT @OptionName AS OptionName, ISNULL(@UID, 0) AS UID) AS source
-                ON (target.OptionName = source.OptionName AND target.UID = source.UID)
+                USING (SELECT @OptionName AS OptionName) AS source
+                ON (target.OptionName = source.OptionName)
                 WHEN MATCHED THEN
                     UPDATE SET
                         OptionValue = @OptionValue,
                         Description = @Description,
+                        UID = @UID,
                         LastUpdated = GETDATE()
                 WHEN NOT MATCHED THEN
                     INSERT (OptionName, OptionValue, Description, UID, CRT)
-                    VALUES (@OptionName, @OptionValue, @Description, ISNULL(@UID, 0), GETDATE());";
+                    VALUES (@OptionName, @OptionValue, @Description, @UID, GETDATE());";
             try
             {
                 var parameters = new
@@ -380,7 +392,7 @@ namespace Prg_UI.Functions
                 throw new ArgumentException("نام تنظیم نمی‌تواند خالی باشد.", nameof(optionName));
             }
             int currentUserId = userId ?? Baseknow.USERCOD ?? 0;
-            const string sql = "DELETE FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName AND UID = ISNULL(@UID, 0);";
+            const string sql = "DELETE FROM dbo.GENERAL_OPTIONS WHERE OptionName = @OptionName AND UID = @UID;";
             try
             {
                 int? affectedRows = await _dbms.ExecuteSqlCommandAsync(sql, new { OptionName = optionName, UID = currentUserId })
