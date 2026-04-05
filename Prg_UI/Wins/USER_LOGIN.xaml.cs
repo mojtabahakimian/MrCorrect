@@ -771,7 +771,7 @@ namespace Prg_UI.Wins
 
         #region AutoUpdate
         // Configuration Constants
-        private const string UPDATE_SERVER_PATH = @"\\win-server2016\ade\EXE\1404\update";
+        private const string UPDATE_SERVER_PATH = @"\\win-server2016\ade\EXE\update";
         private const string UPDATE_LOCAL_FOLDER = "update";
         private const string TEMP_FILE_SUFFIX = "_UpdateTemp.exe";
         private const int COPY_BUFFER_SIZE = 81920; // 80KB
