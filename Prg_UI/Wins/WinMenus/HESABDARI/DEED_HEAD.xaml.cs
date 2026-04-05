@@ -3080,6 +3080,18 @@ WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
                 IsDataGrid_SUB_IsFocused = true;
             }
         }
+        private void Child14_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
+        {
+            if (e.EditingElement is TextBox textBox)
+            {
+                var behaviors = Microsoft.Xaml.Behaviors.Interaction.GetBehaviors(textBox);
+                var lineCountBehavior = behaviors
+                    .FirstOrDefault(b => b.GetType().Name == "TextBoxLineCountBehavior");
+                if (lineCountBehavior != null)
+                    behaviors.Remove(lineCountBehavior);
+            }
+        }
+
         private void Child14_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
             if (NowIsReady && !(e is null))
