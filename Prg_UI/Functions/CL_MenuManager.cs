@@ -2299,191 +2299,198 @@ namespace Functions
 
         public static void MenuBaseOnKindOpen(Window Thewindowthis, CL_CCNNMANAGER dbms, int kind, object _NUM_, bool SanadMabnaee = true, bool _isCalledFromAutomasion_ = false)
         {
-            switch (kind)
+            try
             {
-                case 0:
-                    if (SanadMabnaee)
-                    {
-                        //شماره مبنا درج شده num base
-                        var _N_Sb_ = dbms.DoGetDataSQL<double?>($"SELECT TOP 1 N_S FROM dbo.DEED_HED WHERE base = {_NUM_}").FirstOrDefault();
-                        if (_N_Sb_ != null)
+                switch (kind)
+                {
+                    case 0:
+                        if (SanadMabnaee)
                         {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, Thewindowthis, (double)_N_Sb_, _isCalledFromAutomasion_);
+                            //شماره مبنا درج شده num base
+                            var _N_Sb_ = dbms.DoGetDataSQL<double?>($"SELECT TOP 1 N_S FROM dbo.DEED_HED WHERE base = {_NUM_}").FirstOrDefault();
+                            if (_N_Sb_ != null)
+                            {
+                                CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, Thewindowthis, (double)_N_Sb_, _isCalledFromAutomasion_);
+                            }
                         }
-                    }
-                    else
-                    {
-                        //شماره سند درج شده num N_S
-                        var _N_S2_ = dbms.DoGetDataSQL<double?>($"SELECT TOP 1 N_S FROM dbo.DEED_HED WHERE N_S = {_NUM_}").FirstOrDefault();
-                        if (_N_S2_ != null)
+                        else
                         {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, Thewindowthis, (double)_N_S2_, _isCalledFromAutomasion_);
+                            //شماره سند درج شده num N_S
+                            var _N_S2_ = dbms.DoGetDataSQL<double?>($"SELECT TOP 1 N_S FROM dbo.DEED_HED WHERE N_S = {_NUM_}").FirstOrDefault();
+                            if (_N_S2_ != null)
+                            {
+                                CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.DEED_HEAD, Thewindowthis, (double)_N_S2_, _isCalledFromAutomasion_);
+                            }
                         }
-                    }
-                    break;
+                        break;
 
-                case 1:
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
-                    break;
+                    case 1:
+                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
+                        break;
 
-                case 2:
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAVL, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
-                    break;
+                    case 2:
+                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAVL, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
+                        break;
 
-                case 3:
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
-                    break;
+                    case 3:
+                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
+                        break;
 
-                case 4:
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_BACK2, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
-                    break;
+                    case 4:
+                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_FROOSH_BACK2, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
+                        break;
 
-                case 5:
-                case 34:
-                    double _KHAZANEH_ = Convert.ToDouble(_NUM_);
-                    var THE_KHAZANEH = dbms.DoGetDataSQL<double?>($"SELECT ID FROM dbo.PGET_HED WHERE ID = {_NUM_}").FirstOrDefault();
-                    if (THE_KHAZANEH != null)
-                    {
-                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, Thewindowthis, _KHAZANEH_, _isCalledFromAutomasion_);
-                    }
-                    else
-                    {
-                        THE_KHAZANEH = dbms.DoGetDataSQL<double?>($"SELECT ID FROM dbo.PGET_HED WHERE N_S = {_NUM_}").FirstOrDefault();
+                    case 5:
+                    case 34:
+                        double _KHAZANEH_ = Convert.ToDouble(_NUM_);
+                        var THE_KHAZANEH = dbms.DoGetDataSQL<double?>($"SELECT ID FROM dbo.PGET_HED WHERE ID = {_NUM_}").FirstOrDefault();
                         if (THE_KHAZANEH != null)
                         {
-                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, Thewindowthis, THE_KHAZANEH, _isCalledFromAutomasion_);
+                            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, Thewindowthis, _KHAZANEH_, _isCalledFromAutomasion_);
                         }
-                    }
-                    break;
+                        else
+                        {
+                            THE_KHAZANEH = dbms.DoGetDataSQL<double?>($"SELECT ID FROM dbo.PGET_HED WHERE N_S = {_NUM_}").FirstOrDefault();
+                            if (THE_KHAZANEH != null)
+                            {
+                                CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_HED, Thewindowthis, THE_KHAZANEH, _isCalledFromAutomasion_);
+                            }
+                        }
+                        break;
 
-                case 6:
-                    //new HEAD_LST_ENTEGHAL_WIN(_NUM_).Show();
-                    break;
+                    case 6:
+                        //new HEAD_LST_ENTEGHAL_WIN(_NUM_).Show();
+                        break;
 
-                case 12:
-                    CL_MenuManager.OpenWinMenu(
-                          CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID,
-                          Thewindowthis,
-                          Convert.ToDouble(_NUM_),
-                          false,
-                          false,
-                          _isCalledFromAutomasion_    // FromAutomation
-                          );
-                    break;
-
-                case 13:
-                    //گرفتن شماره فاکتور و شماره حواله از فاکتور های فروش
-                    //Get Parameters: Numbers > IsDirect > IsExport > IsfromAutomasion
-                    var RST = dbms.DoGetDataSQL<HEAD_LST>($"SELECT NUMBER, NUMBER1 FROM dbo.HEAD_LST WHERE NUMBER={_NUM_} AND TAG=13").FirstOrDefault();
-                    if (RST != null && RST?.NUMBER1 != null)
-                    {
-                        var NUMBERTOOPEN = $"{RST.NUMBER1},{RST.NUMBER}";
+                    case 12:
                         CL_MenuManager.OpenWinMenu(
-                            CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT,
-                            Thewindowthis,             // 👈 این باید OWNERWIN باشد، نه داخل params
-                            NUMBERTOOPEN,               // string? numbersPair
-                            false,                      // IsDirect (در Auto-Detect تعیین نهایی می‌شود)
-                            false,                      // IsExport  (در Auto-Detect ممکنه override بشه)
-                            _isCalledFromAutomasion_    // FromAutomation
-                            );
-                    }
+                              CL_MenuManager.WinNameType.HEAD_LST_KHAREED1_RASID,
+                              Thewindowthis,
+                              Convert.ToDouble(_NUM_),
+                              false,
+                              false,
+                              _isCalledFromAutomasion_    // FromAutomation
+                              );
+                        break;
 
-                    //HEAD_LST_FROOSH22? newWindow = null;
-                    //if (Strings.Mid(Baseknow.OPTIONSS, 53, 1) == "5")
-                    //{
-                    //    newWindow = new HEAD_LST_FROOSH22($"{RST.NUMBER1},{RST.NUMBER}", false); //حواله ای
-                    //}
-                    //else if (Strings.Mid(Baseknow.OPTIONSS, 18, 1) != "5")
-                    //{
-                    //    if (Baseknow.TKHF < 2) { }
-                    //    else
-                    //    {
-                    //        newWindow = new HEAD_LST_FROOSH22($"{RST.NUMBER1},{RST.NUMBER}", false); //حواله ای
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    newWindow = new HEAD_LST_FROOSH22($"{RST.NUMBER1},{RST.NUMBER}", true);
-                    //}
-                    //CL_LMethods.OpenWindow(Thewindowthis, newWindow, isModalDialog: false, allowMultipleInstances: true);
-                    break;
+                    case 13:
+                        //گرفتن شماره فاکتور و شماره حواله از فاکتور های فروش
+                        //Get Parameters: Numbers > IsDirect > IsExport > IsfromAutomasion
+                        var RST = dbms.DoGetDataSQL<HEAD_LST>($"SELECT NUMBER, NUMBER1 FROM dbo.HEAD_LST WHERE NUMBER={_NUM_} AND TAG=13").FirstOrDefault();
+                        if (RST != null && RST?.NUMBER1 != null)
+                        {
+                            var NUMBERTOOPEN = $"{RST.NUMBER1},{RST.NUMBER}";
+                            CL_MenuManager.OpenWinMenu(
+                                CL_MenuManager.WinNameType.HEAD_LST_FROOSH_AUTO_DETECT,
+                                Thewindowthis,             // 👈 این باید OWNERWIN باشد، نه داخل params
+                                NUMBERTOOPEN,               // string? numbersPair
+                                false,                      // IsDirect (در Auto-Detect تعیین نهایی می‌شود)
+                                false,                      // IsExport  (در Auto-Detect ممکنه override بشه)
+                                _isCalledFromAutomasion_    // FromAutomation
+                                );
+                        }
 
-                case 20:
-                    //new HEAD_LST_PISHFROOSH2(_NUM_).Show();
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
-                    break;
+                        //HEAD_LST_FROOSH22? newWindow = null;
+                        //if (Strings.Mid(Baseknow.OPTIONSS, 53, 1) == "5")
+                        //{
+                        //    newWindow = new HEAD_LST_FROOSH22($"{RST.NUMBER1},{RST.NUMBER}", false); //حواله ای
+                        //}
+                        //else if (Strings.Mid(Baseknow.OPTIONSS, 18, 1) != "5")
+                        //{
+                        //    if (Baseknow.TKHF < 2) { }
+                        //    else
+                        //    {
+                        //        newWindow = new HEAD_LST_FROOSH22($"{RST.NUMBER1},{RST.NUMBER}", false); //حواله ای
+                        //    }
+                        //}
+                        //else
+                        //{
+                        //    newWindow = new HEAD_LST_FROOSH22($"{RST.NUMBER1},{RST.NUMBER}", true);
+                        //}
+                        //CL_LMethods.OpenWindow(Thewindowthis, newWindow, isModalDialog: false, allowMultipleInstances: true);
+                        break;
 
-                case 24:
-                    //new HEAD_LST_RASID_OTHER_WIN(_NUM_).Show();
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID_OTHER_WIN, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
-                    break;
+                    case 20:
+                        //new HEAD_LST_PISHFROOSH2(_NUM_).Show();
+                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_PISHFROOSH2, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
+                        break;
 
-                case 25:
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_BRFR, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
-                    break;
+                    case 24:
+                        //new HEAD_LST_RASID_OTHER_WIN(_NUM_).Show();
+                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_RASID_OTHER_WIN, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
+                        break;
 
-                case 26:
-                    //new HEAD_LST_HAV_OTHER_WIN(_NUM_).Show();
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAV_OTHER_WIN, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
-                    break;
+                    case 25:
+                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_BRFR, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
+                        break;
 
-                case 27:
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK_AZAD, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
-                    break;
+                    case 26:
+                        //new HEAD_LST_HAV_OTHER_WIN(_NUM_).Show();
+                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAV_OTHER_WIN, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
+                        break;
 
-                case 32:
-                    //new HEAD_LST_KHAREED1_SADER(_NUM_).Show();
-                    break;
+                    case 27:
+                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_KH_BACK_AZAD, Thewindowthis, Convert.ToDouble(_NUM_), _isCalledFromAutomasion_);
+                        break;
 
-                case 33:
-                    //new HEAD_LST_FROOSH2_SADER(_NUM_).Show();
-                    break;
+                    case 32:
+                        //new HEAD_LST_KHAREED1_SADER(_NUM_).Show();
+                        break;
 
-                case 35:
-                    //new ORDR_HED(_NUM_).Show();
-                    break;
+                    case 33:
+                        //new HEAD_LST_FROOSH2_SADER(_NUM_).Show();
+                        break;
 
-                case 36:
-                    //new HEAD_LST_REQUEST(_NUM_).Show();
-                    break;
+                    case 35:
+                        //new ORDR_HED(_NUM_).Show();
+                        break;
 
-                case 37:
-                    //new PMORAKH(_NUM_).Show();
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PMORAKH, default, Convert.ToInt32(_NUM_));
-                    break;
+                    case 36:
+                        //new HEAD_LST_REQUEST(_NUM_).Show();
+                        break;
 
-                case 38:
-                    //new HAVALAH_EXIT_SAYER(_NUM_).Show();
-                    break;
+                    case 37:
+                        //new PMORAKH(_NUM_).Show();
+                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PMORAKH, default, Convert.ToInt32(_NUM_));
+                        break;
 
-                case 39:
-                    //new HAVALAH_EXIT(_NUM_).Show();
-                    break;
+                    case 38:
+                        //new HAVALAH_EXIT_SAYER(_NUM_).Show();
+                        break;
 
-                case 40:
-                    //new PM_ASSETS_FR(_NUM_).Show();
-                    break;
+                    case 39:
+                        //new HAVALAH_EXIT(_NUM_).Show();
+                        break;
 
-                case 41:
-                    //new PM_HEAD_LST_REQUEST_ANBAR(_NUM_).Show();
-                    break;
+                    case 40:
+                        //new PM_ASSETS_FR(_NUM_).Show();
+                        break;
 
-                case 42:
-                    //new PM_EM_FAILURE_EVENTS_FR(_NUM_).Show();
-                    break;
+                    case 41:
+                        //new PM_HEAD_LST_REQUEST_ANBAR(_NUM_).Show();
+                        break;
 
-                case 100:
-                    CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, Thewindowthis, Convert.ToDouble(_NUM_), false, _isCalledFromAutomasion_);
-                    break;
+                    case 42:
+                        //new PM_EM_FAILURE_EVENTS_FR(_NUM_).Show();
+                        break;
 
-                case 90:
-                    //new PTAMIR(_NUM_).Show();
-                    break;
+                    case 100:
+                        CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, Thewindowthis, Convert.ToDouble(_NUM_), false, _isCalledFromAutomasion_);
+                        break;
+
+                    case 90:
+                        //new PTAMIR(_NUM_).Show();
+                        break;
 
 
 
 
-                default: break;
+                    default: break;
+                }
+            }
+            catch (Exception)
+            {
+                new Msgwin(false, "خطا در انجام عملیات باز کردن برگه").ShowDialog();
             }
         }
     }

@@ -624,13 +624,14 @@
 			<HintPath>DLLS\stimulydlls\Microsoft.CodeAnalysis.VisualBasic.dll</HintPath>
 		</Reference>
 		<Reference Include="Microsoft.Data.SqlClient">
-		  <HintPath>DLLS\stimulydlls\Microsoft.Data.SqlClient.dll</HintPath>
+			<HintPath>DLLS\stimulydlls\Microsoft.Data.SqlClient.dll</HintPath>
 		</Reference>
 		<!--<Reference Include="Microsoft.Data.SqlClient">
 			<HintPath>DLLS\stimulydlls\Microsoft.Data.SqlClient.dll</HintPath>
 		</Reference>-->
 		<Reference Include="Microsoft.SqlServer.Server">
 			<HintPath>DLLS\stimulydlls\Microsoft.SqlServer.Server.dll</HintPath>
+			<Private>True</Private>
 		</Reference>
 		<Reference Include="SixLabors.Fonts">
 			<HintPath>DLLS\stimulydlls\SixLabors.Fonts.dll</HintPath>

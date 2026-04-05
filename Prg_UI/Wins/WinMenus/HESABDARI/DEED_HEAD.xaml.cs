@@ -1241,7 +1241,7 @@ WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
                         //    SANAD_DATA.Add(item);
                         //}
 
-                 
+
                     }
                 }
                 else
@@ -1701,7 +1701,13 @@ WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
                 Child14_CANCEL_EDIT();
                 return;
             }
+            if (ROW?.SHARH?.Length > 250)
+            {
+                universControl.PopNotifyShow("طول شرح حداکثر میتواند 250 کاراکتر باشد.", Pop1, Pop1Text1, Pop_Border1);
 
+                Child14_CANCEL_EDIT();
+                return;
+            }
 
             if (ROW?.NAME_HES is null || ROW.HES is null)
             {
