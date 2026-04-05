@@ -160,7 +160,7 @@
 
                 <DataGridTextColumn x:Name="sHARHColumn" Binding="{Binding SHARH, UpdateSourceTrigger=LostFocus}" Header="شرح" Width="*">
                     <DataGridTextColumn.EditingElementStyle>
-                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
+                        <Style TargetType="{x:Type TextBox}">
                             <Setter Property="MaxLength" Value="250"/>
                             <Setter Property="TextWrapping" Value="WrapWithOverflow"/>
                             <Setter Property="AcceptsReturn" Value="True"/>
