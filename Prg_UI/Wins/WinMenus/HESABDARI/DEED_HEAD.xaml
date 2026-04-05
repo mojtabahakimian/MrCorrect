@@ -143,7 +143,7 @@
                   IsKeyboardFocusWithinChanged="Child14_IsKeyboardFocusWithinChanged"
                   ContextMenu="{StaticResource ContextUtilityMenu1}"
                   VirtualizingPanel.IsVirtualizing="True"
-                  VirtualizingPanel.VirtualizationMode="Recycling"
+                  VirtualizingPanel.VirtualizationMode="Standard"
                   FlowDirection="RightToLeft" EnableRowVirtualization="True" Margin="20,165,14,163" LostFocus="Child14_LostFocus" PreviewMouseDoubleClick="Child14_PreviewMouseDoubleClick" PreviewKeyDown="Child14_PreviewKeyDown" PreviewMouseLeftButtonUp="Child14_PreviewMouseLeftButtonUp" SelectionChanged="Child14_SelectionChanged" BeginningEdit="Child14_BeginningEdit" CanUserDeleteRows="False" IsReadOnly="True"  ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
             <DataGrid.Style>
@@ -160,7 +160,7 @@
 
                 <DataGridTextColumn x:Name="sHARHColumn" Binding="{Binding SHARH, UpdateSourceTrigger=LostFocus}" Header="شرح" Width="*">
                     <DataGridTextColumn.EditingElementStyle>
-                        <Style TargetType="{x:Type TextBox}">
+                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignTextBox}">
                             <Setter Property="MaxLength" Value="250"/>
                             <Setter Property="TextWrapping" Value="WrapWithOverflow"/>
                             <Setter Property="AcceptsReturn" Value="True"/>
