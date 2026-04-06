@@ -457,30 +457,33 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         {
             float L_CAM_KHALY = 0;
             float L_CAM_POOR = 0;
-            _ = CAM_KHALY.Text != "" ? L_CAM_KHALY = Convert.ToInt32(CAM_KHALY.Text) : default;
-            _ = CAM_POOR.Text != "" ? L_CAM_POOR = Convert.ToInt32(CAM_POOR.Text) : default;
+            if (CAM_KHALY.Text != "") float.TryParse(CAM_KHALY.Text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out L_CAM_KHALY);
+            if (CAM_POOR.Text != "") float.TryParse(CAM_POOR.Text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out L_CAM_POOR);
+
+            string camKhalyVal = CAM_KHALY.Text != "" ? L_CAM_KHALY.ToString(System.Globalization.CultureInfo.InvariantCulture) : "NULL";
+            string camPoorVal = CAM_POOR.Text != "" ? L_CAM_POOR.ToString(System.Globalization.CultureInfo.InvariantCulture) : "NULL";
 
             if (G_Flag == 0)
             {
                 string query = $@"INSERT INTO dbo.OTHER_DTL
                                           (NUMBER, TAG, REQUEST_NO, BARNAMEH, DRIVER, DRIVER_MOB, CAMIUN_NUM, MAGHSAD, CAM_KHALY, CAM_POOR, TOZIH, CAMIUN)
                                           VALUES
-                                          ({NUMBER},{TAG},N'{REQUEST_NO.Text}',N'{BARNAMEH.Text}',N'{DRIVER.Text}',N'{DRIVER_MOB.Text}',N'{CAMIUN_NUM.Text}',{(MAGHSAD.SelectedValue is null ? "NULL" : MAGHSAD.SelectedValue)},{(string.IsNullOrEmpty(L_CAM_KHALY.ToStringNullSafe()) ? "NULL" : L_CAM_KHALY)},
-                                          {(string.IsNullOrEmpty(L_CAM_POOR.ToStringNullSafe()) ? "NULL" : L_CAM_POOR)},N'{TOZIH.Text}',N'{CAMIUN.Text}')";
+                                          ({NUMBER},{TAG},N'{REQUEST_NO.Text}',N'{BARNAMEH.Text}',N'{DRIVER.Text}',N'{DRIVER_MOB.Text}',N'{CAMIUN_NUM.Text}',{(MAGHSAD.SelectedValue is null ? "NULL" : MAGHSAD.SelectedValue)},{camKhalyVal},
+                                          {camPoorVal},N'{TOZIH.Text}',N'{CAMIUN.Text}')";
                 dbms.DoExecuteSQL(query);
             }
             else if (G_Flag == 1)
             {
-                string query = $@"UPDATE dbo.OTHER_DTL SET	
+                string query = $@"UPDATE dbo.OTHER_DTL SET
                                           REQUEST_NO = N'{REQUEST_NO.Text}',
-                                          BARNAMEH = N'{BARNAMEH.Text}' , 
-                                          DRIVER = N'{DRIVER.Text}' , 
-                                          DRIVER_MOB = N'{DRIVER_MOB.Text}' , 
-                                          CAMIUN_NUM = N'{CAMIUN_NUM.Text}' , 
-                                          MAGHSAD = {(MAGHSAD.SelectedValue is null ? "NULL" : MAGHSAD.SelectedValue)} , 
-                                          CAM_KHALY = {(string.IsNullOrEmpty(L_CAM_KHALY.ToStringNullSafe()) ? "NULL" : L_CAM_KHALY)} , 
-                                          CAM_POOR ={(string.IsNullOrEmpty(L_CAM_POOR.ToStringNullSafe()) ? "NULL" : L_CAM_POOR)} , 
-                                          TOZIH = N'{TOZIH.Text}' , 
+                                          BARNAMEH = N'{BARNAMEH.Text}' ,
+                                          DRIVER = N'{DRIVER.Text}' ,
+                                          DRIVER_MOB = N'{DRIVER_MOB.Text}' ,
+                                          CAMIUN_NUM = N'{CAMIUN_NUM.Text}' ,
+                                          MAGHSAD = {(MAGHSAD.SelectedValue is null ? "NULL" : MAGHSAD.SelectedValue)} ,
+                                          CAM_KHALY = {camKhalyVal} ,
+                                          CAM_POOR = {camPoorVal} ,
+                                          TOZIH = N'{TOZIH.Text}' ,
                                           CAMIUN = N'{CAMIUN.Text}'
                                           WHERE NUMBER = " + NUMBER + $" AND TAG = {TAG}";
                 dbms.DoExecuteSQL(query);
@@ -520,13 +523,14 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             {
                 if (item.NUMBER >= 0 && item.CAM_POOR >= 0 && item.CAM_KHALY >= 0 && item.MEGHk >= 0 && item.VAZNH >= 0)
                 {
+                    var ic = System.Globalization.CultureInfo.InvariantCulture;
                     string query = $@"UPDATE dbo.OTHER_DTL_SUB  SET
-                                  CAM_KHALY = {item.CAM_KHALY},
-                                  CAM_POOR = {item.CAM_POOR},
-                                  MEGHk = {item.MEGHk},
+                                  CAM_KHALY = {item.CAM_KHALY?.ToString(ic) ?? "NULL"},
+                                  CAM_POOR = {item.CAM_POOR?.ToString(ic) ?? "NULL"},
+                                  MEGHk = {item.MEGHk?.ToString(ic) ?? "NULL"},
                                   TOZIH = N'{item.TOZIH}',
-                                  RADIF = {item.RADIF},
-                                  VAZNH = {item.VAZNH}
+                                  RADIF = {item.RADIF?.ToString(ic) ?? "NULL"},
+                                  VAZNH = {item.VAZNH?.ToString(ic) ?? "NULL"}
                                   WHERE NUMBER = {NUMBER} AND TAGG = {TAG} AND CODE = N'{item.CODE}'";
                     dbms.DoExecuteSQL(query);
                 }
