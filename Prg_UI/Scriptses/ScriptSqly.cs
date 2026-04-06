@@ -3269,6 +3269,8 @@ SELECT TOP 100 PERCENT
 FROM BaseData B
 ORDER BY B.NAME;"); } catch { }
 
+                try { db.Execute($@"ALTER TABLE dbo.OTHER_DTL ALTER COLUMN CAMIUN_NUM NVARCHAR(100) COLLATE Arabic_CI_AS NULL"); } catch { } // افزایش طول ستون شماره کامیون
+
             }
         }
 
