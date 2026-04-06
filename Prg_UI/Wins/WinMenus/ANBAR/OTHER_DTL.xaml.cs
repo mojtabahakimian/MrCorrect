@@ -455,6 +455,12 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         /// </summary>
         bool IsSavedHeader_OTHER_DTL()
         {
+            if (CAMIUN_NUM.Text?.Length > 25)
+            {
+                universControl.PopNotifyShowUp(".شماره ماشین نباید بیشتر از ۲۵ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                return false;
+            }
+
             double? L_CAM_KHALY = null;
             double? L_CAM_POOR = null;
             if (double.TryParse(CAM_KHALY.Text, out double parsedKhaly)) L_CAM_KHALY = parsedKhaly;
