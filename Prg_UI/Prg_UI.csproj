@@ -25,7 +25,7 @@
 
 
 		<PublishTrimmed>false</PublishTrimmed>
-		<EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<!--<PublishSingleFile>true</PublishSingleFile>-->
 		<!--<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>-->
@@ -1045,6 +1045,19 @@
 			<Generator>SettingsSingleFileGenerator</Generator>
 			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
 		</None>
+	</ItemGroup>
+
+	<!--
+		حذف Microsoft.CodeAnalysis از داخل exe تک‌فایلی
+		این DLL ها (~13 MB) فقط برای اسکریپت‌نویسی در طراح Stimulsoft لازم هستند.
+		با این تنظیم، کنار exe کپی می‌شوند ولی داخل exe جاسازی نمی‌شوند.
+		اگر هیچ گزارشی از اسکریپت C# یا VB.NET استفاده نمی‌کند، می‌توان
+		این Reference ها را از csproj حذف کرد تا کاملاً از خروجی برداشته شوند.
+	-->
+	<ItemGroup Condition="'$(PublishSingleFile)' == 'true'">
+		<ExcludeFromSingleFile Include="Microsoft.CodeAnalysis.dll" />
+		<ExcludeFromSingleFile Include="Microsoft.CodeAnalysis.CSharp.dll" />
+		<ExcludeFromSingleFile Include="Microsoft.CodeAnalysis.VisualBasic.dll" />
 	</ItemGroup>
 
 </Project>
