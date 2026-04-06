@@ -5,9 +5,11 @@ using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.XlsIO;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,6 +22,7 @@ namespace Functions
     public static class UniversalExcelExporter
     {
         private static readonly object _lockObject = new object();
+        private static readonly ConcurrentDictionary<string, System.Reflection.PropertyInfo> _propertyInfoCache = new ConcurrentDictionary<string, System.Reflection.PropertyInfo>();
 
         public static async Task ExportToExcelAsync(object grid, string fileName = null, bool openAfterExport = true, bool KeepTypeFormat = true)
         {
@@ -93,8 +96,7 @@ namespace Functions
                     var binding = boundColumn.Binding as System.Windows.Data.Binding;
                     if (binding != null)
                     {
-                        var property = item.GetType().GetProperty(binding.Path.Path);
-                        return property?.GetValue(item) ?? "";
+                        return GetPropertyValue(item, binding.Path.Path) ?? "";
                     }
                 }
                 else if (column is DataGridComboBoxColumn comboBoxColumn)
@@ -111,38 +113,26 @@ namespace Functions
                         var binding = comboBoxColumn.SelectedValueBinding as Binding;
                         if (binding != null && !string.IsNullOrEmpty(binding.Path.Path))
                         {
-                            var property = item.GetType().GetProperty(binding.Path.Path);
-                            if (property != null)
-                            {
-                                var value = property.GetValue(item);
+                            var value = GetPropertyValue(item, binding.Path.Path);
 
-                                // If there's display text we need to show instead of raw value
-                                if (value != null && comboBoxColumn.ItemsSource != null &&
-                                    !string.IsNullOrEmpty(comboBoxColumn.DisplayMemberPath) &&
-                                    !string.IsNullOrEmpty(comboBoxColumn.SelectedValuePath))
+                            // If there's display text we need to show instead of raw value
+                            if (value != null && comboBoxColumn.ItemsSource != null &&
+                                !string.IsNullOrEmpty(comboBoxColumn.DisplayMemberPath) &&
+                                !string.IsNullOrEmpty(comboBoxColumn.SelectedValuePath))
+                            {
+                                // Try to find matching item in the ItemsSource
+                                foreach (var comboItem in comboBoxColumn.ItemsSource)
                                 {
-                                    // Try to find matching item in the ItemsSource
-                                    foreach (var comboItem in comboBoxColumn.ItemsSource)
+                                    var itemValue = GetPropertyValue(comboItem, comboBoxColumn.SelectedValuePath);
+                                    if (itemValue != null && itemValue.Equals(value))
                                     {
-                                        var valueProperty = comboItem.GetType().GetProperty(comboBoxColumn.SelectedValuePath);
-                                        if (valueProperty != null)
-                                        {
-                                            var itemValue = valueProperty.GetValue(comboItem);
-                                            if (itemValue != null && itemValue.Equals(value))
-                                            {
-                                                var displayProperty = comboItem.GetType().GetProperty(comboBoxColumn.DisplayMemberPath);
-                                                if (displayProperty != null)
-                                                {
-                                                    var displayValue = displayProperty.GetValue(comboItem);
-                                                    return displayValue?.ToString() ?? string.Empty;
-                                                }
-                                            }
-                                        }
+                                        var displayValue = GetPropertyValue(comboItem, comboBoxColumn.DisplayMemberPath);
+                                        return displayValue?.ToString() ?? string.Empty;
                                     }
                                 }
-
-                                return value?.ToString() ?? string.Empty;
                             }
+
+                            return value?.ToString() ?? string.Empty;
                         }
                     }
                     return ""; // Default return if ComboBox is not found
@@ -182,6 +172,80 @@ namespace Functions
             }
         }
 
+        private static object GetPropertyValue(object target, string propertyName)
+        {
+            if (target == null || string.IsNullOrWhiteSpace(propertyName))
+                return null;
+
+            string cacheKey = $"{target.GetType().FullName}|{propertyName}";
+            var propertyInfo = _propertyInfoCache.GetOrAdd(cacheKey, _ => target.GetType().GetProperty(propertyName));
+
+            return propertyInfo?.GetValue(target);
+        }
+
+        private static Dictionary<string, object> BuildComboDisplayMap(IEnumerable itemsSource, string selectedValuePath, string displayMemberPath)
+        {
+            var map = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            if (itemsSource == null ||
+                string.IsNullOrWhiteSpace(selectedValuePath) ||
+                string.IsNullOrWhiteSpace(displayMemberPath))
+            {
+                return map;
+            }
+
+            foreach (var item in itemsSource)
+            {
+                if (item == null) continue;
+
+                var keyValue = GetPropertyValue(item, selectedValuePath);
+                if (keyValue == null) continue;
+
+                string key = keyValue.ToString();
+                if (string.IsNullOrWhiteSpace(key) || map.ContainsKey(key)) continue;
+
+                map[key] = GetPropertyValue(item, displayMemberPath) ?? string.Empty;
+            }
+
+            return map;
+        }
+
+        /// <summary>
+        /// برای Syncfusion: برای هر ستون یک extractor سریع می‌سازد تا در ردیف‌های زیاد Reflection تکراری کم شود
+        /// </summary>
+        private static Func<object, object> BuildSyncfusionValueExtractor(GridColumnBase column)
+        {
+            if (column == null || string.IsNullOrWhiteSpace(column.MappingName))
+            {
+                return _ => string.Empty;
+            }
+
+            if (column is GridComboBoxColumn comboColumn)
+            {
+                var displayMap = BuildComboDisplayMap(
+                    comboColumn.ItemsSource,
+                    comboColumn.SelectedValuePath,
+                    comboColumn.DisplayMemberPath);
+
+                return record =>
+                {
+                    var rawValue = GetPropertyValue(record, column.MappingName);
+                    if (rawValue == null) return string.Empty;
+
+                    if (displayMap.Count > 0)
+                    {
+                        var rawValueStr = rawValue.ToString();
+                        if (!string.IsNullOrWhiteSpace(rawValueStr) && displayMap.TryGetValue(rawValueStr, out var displayValue))
+                                        {
+                            return displayValue ?? string.Empty;
+                                        }
+                    }
+                    return rawValue;
+                };
+            }
+
+            return record => GetPropertyValue(record, column.MappingName) ?? string.Empty;
+        }
+
         private static void ExportWpfDataGrid(DataGrid dataGrid, string filePath)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -203,7 +267,12 @@ namespace Functions
                 }
 
                 // Capture data from selected items
-                foreach (var item in dataGrid.SelectedItems)
+                var orderedSelectedItems = dataGrid.SelectedItems
+                    .Cast<object>()
+                    .OrderBy(item => dataGrid.Items.IndexOf(item))
+                    .ToList();
+
+                foreach (var item in orderedSelectedItems)
                 {
                     var rowData = new List<object>();
                     for (int i = 0; i < dataGrid.Columns.Count; i++)
@@ -303,7 +372,12 @@ namespace Functions
                 }
 
                 // Capture data from selected items
-                foreach (var item in dataGrid.SelectedItems)
+                var orderedSelectedItems = dataGrid.SelectedItems
+                    .Cast<object>()
+                    .OrderBy(item => dataGrid.Items.IndexOf(item))
+                    .ToList();
+
+                foreach (var item in orderedSelectedItems)
                 {
                     var rowData = new List<object>();
                     for (int i = 0; i < dataGrid.Columns.Count; i++)
@@ -386,92 +460,6 @@ namespace Functions
             return null;
         }
 
-        /// <summary>
-        /// متد جدید برای گرفتن مقدار از ستون‌های SfDataGrid
-        /// </summary>
-        /// <param name="record">رکورد داده</param>
-        /// <param name="column">ستون</param>
-        /// <param name="useDisplayValue">آیا از مقدار نمایشی استفاده شود (برای ComboBox)</param>
-        /// <returns>مقدار سلول به صورت object</returns>
-        private static object GetSyncfusionCellValue(object record, GridColumnBase column, bool useDisplayValue = true)
-        {
-            try
-            {
-                // بررسی اینکه آیا ستون از نوع GridComboBoxColumn است
-                if (column is GridComboBoxColumn comboColumn)
-                {
-                    // دریافت مقدار خام از property
-                    var propertyInfo = record.GetType().GetProperty(column.MappingName);
-                    if (propertyInfo != null)
-                    {
-                        var rawValue = propertyInfo.GetValue(record);
-
-                        // اگر باید از display value استفاده کنیم
-                        if (useDisplayValue && comboColumn.ItemsSource != null &&
-                            !string.IsNullOrWhiteSpace(comboColumn.DisplayMemberPath) &&
-                            !string.IsNullOrWhiteSpace(comboColumn.SelectedValuePath))
-                        {
-                            // جستجو در ItemsSource برای پیدا کردن مقدار نمایشی
-                            foreach (var item in comboColumn.ItemsSource)
-                            {
-                                if (item == null) continue;
-
-                                // دریافت property مربوط به SelectedValuePath
-                                var valueProperty = item.GetType().GetProperty(comboColumn.SelectedValuePath);
-                                if (valueProperty != null)
-                                {
-                                    var itemValue = valueProperty.GetValue(item);
-
-                                    // مقایسه مقدار
-                                    if (itemValue != null && rawValue != null)
-                                    {
-                                        // تبدیل هر دو به string برای مقایسه ایمن
-                                        string itemValueStr = itemValue.ToString();
-                                        string rawValueStr = rawValue.ToString();
-
-                                        if (itemValueStr.Equals(rawValueStr, StringComparison.OrdinalIgnoreCase))
-                                        {
-                                            // دریافت مقدار نمایشی
-                                            var displayProperty = item.GetType().GetProperty(comboColumn.DisplayMemberPath);
-                                            if (displayProperty != null)
-                                            {
-                                                var displayValue = displayProperty.GetValue(item);
-                                                return displayValue ?? string.Empty;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        // اگر مقدار نمایشی پیدا نشد یا نباید استفاده شود، مقدار خام را برگردان
-                        return rawValue ?? string.Empty;
-                    }
-                }
-                else
-                {
-                    // برای ستون‌های معمولی، مقدار را به صورت مستقیم برگردان
-                    if (!string.IsNullOrWhiteSpace(column.MappingName))
-                    {
-                        var propertyInfo = record.GetType().GetProperty(column.MappingName);
-                        if (propertyInfo != null)
-                        {
-                            var value = propertyInfo.GetValue(record);
-                            return value ?? string.Empty;
-                        }
-                    }
-                }
-
-                return string.Empty;
-            }
-            catch (Exception ex)
-            {
-                // Log the error if needed
-                Debug.WriteLine($"Error getting cell value: {ex.Message}");
-                return string.Empty;
-            }
-        }
-
         private static void ExportSyncfusionDataGrid(SfDataGrid dataGrid, string filePath, bool keepTypeFormat = true)
         {
             // Capture data on UI thread first
@@ -481,29 +469,52 @@ namespace Functions
             // Use Dispatcher to safely access UI elements
             dataGrid.Dispatcher.Invoke(() =>
             {
+                var visibleColumns = dataGrid.Columns.Where(c => !c.IsHidden).ToList();
+                var valueExtractors = visibleColumns
+                    .Select(BuildSyncfusionValueExtractor)
+                    .ToList();
+
                 // Capture headers
-                for (int i = 0; i < dataGrid.Columns.Count; i++)
+                for (int i = 0; i < visibleColumns.Count; i++)
                 {
-                    if (!dataGrid.Columns[i].IsHidden)
+                    headers.Add(visibleColumns[i].HeaderText);
+                }
+
+                // Capture selected records in the exact order shown in the grid
+                var selectedRecordsSet = dataGrid.SelectedItems.Cast<object>().ToHashSet();
+                var orderedSelectedRecords = new List<object>();
+                var orderedSelectedRecordsSet = new HashSet<object>();
+
+                if (dataGrid.View?.Records != null)
+                {
+                    foreach (var recordEntry in dataGrid.View.Records)
                     {
-                        headers.Add(dataGrid.Columns[i].HeaderText);
+                        var recordData = recordEntry?.Data;
+                        if (recordData != null && selectedRecordsSet.Contains(recordData))
+                        {
+                            orderedSelectedRecords.Add(recordData);
+                            orderedSelectedRecordsSet.Add(recordData);
+                        }
                     }
                 }
 
-                // Capture data from selected items
-                foreach (var record in dataGrid.SelectedItems)
+                // Fallback for records that might not be present in View.Records
+                foreach (var selectedRecord in dataGrid.SelectedItems)
                 {
-                    var rowData = new List<object>();
-                    for (int colIndex = 0; colIndex < dataGrid.Columns.Count; colIndex++)
+                    if (!orderedSelectedRecordsSet.Contains(selectedRecord))
                     {
-                        var column = dataGrid.Columns[colIndex];
-                        if (!column.IsHidden)
-                        {
-                            // استفاده از متد جدید برای دریافت مقدار
-                            // برای ComboBox از display value استفاده می‌شود
-                            var cellValue = GetSyncfusionCellValue(record, column, useDisplayValue: true);
-                            rowData.Add(cellValue);
-                        }
+                        orderedSelectedRecords.Add(selectedRecord);
+                        orderedSelectedRecordsSet.Add(selectedRecord);
+                    }
+                }
+
+                foreach (var record in orderedSelectedRecords)
+                {
+                    var rowData = new List<object>(valueExtractors.Count);
+                    for (int colIndex = 0; colIndex < valueExtractors.Count; colIndex++)
+                    {
+                        var cellValue = valueExtractors[colIndex](record);
+                        rowData.Add(cellValue);
                     }
                     data.Add(rowData);
                 }
