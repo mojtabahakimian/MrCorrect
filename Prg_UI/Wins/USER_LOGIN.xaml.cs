@@ -391,7 +391,7 @@ namespace Prg_UI.Wins
             //new WIN_GETFIRSTMOG().Show();
             //new WinConnectionChoose().Show();
             //new F_MENU_DATE("CROS").Show();
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_LST_SEARCH, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAVL, this);
             //new WIN_F_NEWYEAR().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this, 1642d);
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
@@ -771,7 +771,8 @@ namespace Prg_UI.Wins
 
         #region AutoUpdate
         // Configuration Constants
-        private const string UPDATE_SERVER_PATH = @"\\win-server2016\ade\EXE\1404";
+        private const string UPDATE_SERVER_PATH = @"\\win-server2016\ade\EXE\update";
+        private const string UPDATE_LOCAL_FOLDER = "update";
         private const string TEMP_FILE_SUFFIX = "_UpdateTemp.exe";
         private const int COPY_BUFFER_SIZE = 81920; // 80KB
         private const int READ_TIMEOUT_SECONDS = 20; // Timeout for a single read operation (inactivity timeout)
@@ -813,7 +814,11 @@ namespace Prg_UI.Wins
                 string currentDir = Path.GetDirectoryName(currentExe);
                 string exeName = Path.GetFileName(currentExe);
                 sourcePath = Path.Combine(UPDATE_SERVER_PATH, exeName);
-                tempExePath = Path.Combine(currentDir, exeName + TEMP_FILE_SUFFIX);
+
+                // Local update subfolder for temp download and batch script
+                string localUpdateDir = Path.Combine(currentDir, UPDATE_LOCAL_FOLDER);
+                Directory.CreateDirectory(localUpdateDir);
+                tempExePath = Path.Combine(localUpdateDir, exeName + TEMP_FILE_SUFFIX);
 
                 // 2. Pre-Flight Checks
                 if (!File.Exists(sourcePath))
@@ -892,7 +897,7 @@ namespace Prg_UI.Wins
                 }
 
                 // 5. Execute Atomic Swap Script
-                ExecuteUpdateScript(currentExe, tempExePath, exeName, currentDir);
+                ExecuteUpdateScript(currentExe, tempExePath, exeName, currentDir, localUpdateDir);
             }
             catch (Exception ex)
             {
@@ -967,24 +972,30 @@ namespace Prg_UI.Wins
             }
         }
 
-        private void ExecuteUpdateScript(string currentExe, string tempExe, string exeName, string currentDir)
+        private void ExecuteUpdateScript(string currentExe, string tempExe, string exeName, string currentDir, string localUpdateDir)
         {
-            string batPath = Path.Combine(currentDir, "update_installer.bat");
+            string batPath = Path.Combine(localUpdateDir, "update_installer.bat");
 
             // Hardened Batch Script
-            // 1. Loops trying to overwrite (handles file locking)
+            // 1. Loops trying to overwrite (handles file locking) with max retry limit
             // 2. Starts app in correct Working Directory (/D)
             // 3. Quotes paths to handle spaces
-            string batchScript = $@"
-@echo off
+            string batchScript = $@"@echo off
 title Updating Application...
 echo Waiting for application to close...
+set RETRY_COUNT=0
 
 :RETRY_COPY
+set /a RETRY_COUNT+=1
+if %RETRY_COUNT% gtr 30 (
+    echo Update failed: file remained locked after 30 attempts.
+    pause
+    exit /b 1
+)
 timeout /t 1 /nobreak > nul
-copy /Y ""{tempExe}"" ""{currentExe}"" > nul
+copy /Y ""{tempExe}"" ""{currentExe}"" > nul 2>&1
 if %errorlevel% neq 0 (
-    echo File is locked. Retrying...
+    echo File is locked. Retrying ^(%RETRY_COUNT%/30^)...
     goto RETRY_COPY
 )
 
@@ -992,7 +1003,7 @@ echo Update Successful. Starting application...
 start """" /D ""{currentDir}"" ""{currentExe}""
 
 :CLEANUP
-del ""{tempExe}""
+del ""{tempExe}"" > nul 2>&1
 del ""%~f0"" & exit
 ";
 
@@ -1002,7 +1013,6 @@ del ""%~f0"" & exit
             {
                 FileName = batPath,
                 UseShellExecute = true, // Required for batch file execution in this context
-                CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden
             };
 

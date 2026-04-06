@@ -11,7 +11,7 @@ namespace Functions
     public static class CL_VERSION
     {
         //public static string MrCorrectFullVersion { get; } = "Version 1.0.0.327 Date : 1404/09/24";
-        public static string MrCorrectFullVersion { get; } = "Version 1.0.0.389 Date : 1405/01/15";
+        public static string MrCorrectFullVersion { get; } = "Version 1.0.0.391 Date : 1405/01/17";
 
         /// <summary>
         /// Checks if the current application version is valid and greater than or equal to the version stored in the database.

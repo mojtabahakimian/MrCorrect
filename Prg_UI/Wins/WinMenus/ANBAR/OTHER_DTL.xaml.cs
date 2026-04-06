@@ -455,55 +455,52 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         /// </summary>
         bool IsSavedHeader_OTHER_DTL()
         {
-            float L_CAM_KHALY = 0;
-            float L_CAM_POOR = 0;
-            _ = CAM_KHALY.Text != "" ? L_CAM_KHALY = Convert.ToInt32(CAM_KHALY.Text) : default;
-            _ = CAM_POOR.Text != "" ? L_CAM_POOR = Convert.ToInt32(CAM_POOR.Text) : default;
+            double? L_CAM_KHALY = null;
+            double? L_CAM_POOR = null;
+            if (double.TryParse(CAM_KHALY.Text, out double parsedKhaly)) L_CAM_KHALY = parsedKhaly;
+            if (double.TryParse(CAM_POOR.Text, out double parsedPoor)) L_CAM_POOR = parsedPoor;
+
+            var param = new
+            {
+                Number = NUMBER,
+                Tag = TAG,
+                RequestNo = string.IsNullOrWhiteSpace(REQUEST_NO.Text) ? null : REQUEST_NO.Text,
+                Barnameh = string.IsNullOrWhiteSpace(BARNAMEH.Text) ? null : BARNAMEH.Text,
+                Driver = string.IsNullOrWhiteSpace(DRIVER.Text) ? null : DRIVER.Text,
+                DriverMob = string.IsNullOrWhiteSpace(DRIVER_MOB.Text) ? null : DRIVER_MOB.Text,
+                CamiunNum = string.IsNullOrWhiteSpace(CAMIUN_NUM.Text) ? null : CAMIUN_NUM.Text,
+                Maghsad = MAGHSAD.SelectedValue,
+                CamKhaly = L_CAM_KHALY,
+                CamPoor = L_CAM_POOR,
+                Tozih = string.IsNullOrWhiteSpace(TOZIH.Text) ? null : TOZIH.Text,
+                Camiun = string.IsNullOrWhiteSpace(CAMIUN.Text) ? null : CAMIUN.Text
+            };
 
             if (G_Flag == 0)
             {
-                string query = $@"INSERT INTO dbo.OTHER_DTL
+                string query = @"INSERT INTO dbo.OTHER_DTL
                                           (NUMBER, TAG, REQUEST_NO, BARNAMEH, DRIVER, DRIVER_MOB, CAMIUN_NUM, MAGHSAD, CAM_KHALY, CAM_POOR, TOZIH, CAMIUN)
                                           VALUES
-                                          ({NUMBER},{TAG},N'{REQUEST_NO.Text}',N'{BARNAMEH.Text}',N'{DRIVER.Text}',N'{DRIVER_MOB.Text}',N'{CAMIUN_NUM.Text}',{(MAGHSAD.SelectedValue is null ? "NULL" : MAGHSAD.SelectedValue)},{(string.IsNullOrEmpty(L_CAM_KHALY.ToStringNullSafe()) ? "NULL" : L_CAM_KHALY)},
-                                          {(string.IsNullOrEmpty(L_CAM_POOR.ToStringNullSafe()) ? "NULL" : L_CAM_POOR)},N'{TOZIH.Text}',N'{CAMIUN.Text}')";
-                dbms.DoExecuteSQL(query);
+                                          (@Number, @Tag, @RequestNo, @Barnameh, @Driver, @DriverMob, @CamiunNum, @Maghsad, @CamKhaly, @CamPoor, @Tozih, @Camiun)";
+                dbms.DoExecuteSQL(query, param);
             }
             else if (G_Flag == 1)
             {
-                string query = $@"UPDATE dbo.OTHER_DTL SET	
-                                          REQUEST_NO = N'{REQUEST_NO.Text}',
-                                          BARNAMEH = N'{BARNAMEH.Text}' , 
-                                          DRIVER = N'{DRIVER.Text}' , 
-                                          DRIVER_MOB = N'{DRIVER_MOB.Text}' , 
-                                          CAMIUN_NUM = N'{CAMIUN_NUM.Text}' , 
-                                          MAGHSAD = {(MAGHSAD.SelectedValue is null ? "NULL" : MAGHSAD.SelectedValue)} , 
-                                          CAM_KHALY = {(string.IsNullOrEmpty(L_CAM_KHALY.ToStringNullSafe()) ? "NULL" : L_CAM_KHALY)} , 
-                                          CAM_POOR ={(string.IsNullOrEmpty(L_CAM_POOR.ToStringNullSafe()) ? "NULL" : L_CAM_POOR)} , 
-                                          TOZIH = N'{TOZIH.Text}' , 
-                                          CAMIUN = N'{CAMIUN.Text}'
-                                          WHERE NUMBER = " + NUMBER + $" AND TAG = {TAG}";
-                dbms.DoExecuteSQL(query);
+                string query = @"UPDATE dbo.OTHER_DTL SET	
+                                          REQUEST_NO = @RequestNo,
+                                          BARNAMEH = @Barnameh, 
+                                          DRIVER = @Driver, 
+                                          DRIVER_MOB = @DriverMob, 
+                                          CAMIUN_NUM = @CamiunNum, 
+                                          MAGHSAD = @Maghsad, 
+                                          CAM_KHALY = @CamKhaly, 
+                                          CAM_POOR = @CamPoor, 
+                                          TOZIH = @Tozih, 
+                                          CAMIUN = @Camiun
+                                          WHERE NUMBER = @Number AND TAG = @Tag";
+                dbms.DoExecuteSQL(query, param);
             }
             return true;
-
-            //if (Convert.ToInt32(CAM_POOR.Text) >= Convert.ToInt32(CAM_KHALY.Text))
-            //{
-            //}
-            //else
-            //{
-            //    new Msgwin(false, "وزن خالی نمی تواند بیشتر از وزن پر باشد").ShowDialog();
-            //    return false;
-            //}
-
-            //if (DRIVER.SelectedIndex != -1 && CAMIUN_NUM.SelectedIndex != -1 && CAMIUN.SelectedIndex != -1 && MAGHSAD.SelectedIndex != -1)
-            //{
-            //}
-            //else
-            //{
-            //    new Msgwin(false, "موارد خواسته شده را وارد کنید").ShowDialog();
-            //    return false;
-            //}
         }
         /// <summary>
         /// OtherDtl_Sub فقط ویرایش می شود
@@ -520,15 +517,28 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             {
                 if (item.NUMBER >= 0 && item.CAM_POOR >= 0 && item.CAM_KHALY >= 0 && item.MEGHk >= 0 && item.VAZNH >= 0)
                 {
-                    string query = $@"UPDATE dbo.OTHER_DTL_SUB  SET
-                                  CAM_KHALY = {item.CAM_KHALY},
-                                  CAM_POOR = {item.CAM_POOR},
-                                  MEGHk = {item.MEGHk},
-                                  TOZIH = N'{item.TOZIH}',
-                                  RADIF = {item.RADIF},
-                                  VAZNH = {item.VAZNH}
-                                  WHERE NUMBER = {NUMBER} AND TAGG = {TAG} AND CODE = N'{item.CODE}'";
-                    dbms.DoExecuteSQL(query);
+                    var param = new
+                    {
+                        CamKhaly = item.CAM_KHALY,
+                        CamPoor = item.CAM_POOR,
+                        Meghk = item.MEGHk,
+                        Tozih = string.IsNullOrWhiteSpace(item.TOZIH) ? null : item.TOZIH,
+                        Radif = item.RADIF,
+                        Vaznh = item.VAZNH,
+                        Number = NUMBER,
+                        Tag = TAG,
+                        Code = item.CODE
+                    };
+
+                    string query = @"UPDATE dbo.OTHER_DTL_SUB  SET
+                                  CAM_KHALY = @CamKhaly,
+                                  CAM_POOR = @CamPoor,
+                                  MEGHk = @Meghk,
+                                  TOZIH = @Tozih,
+                                  RADIF = @Radif,
+                                  VAZNH = @Vaznh
+                                  WHERE NUMBER = @Number AND TAGG = @Tag AND CODE = @Code";
+                    dbms.DoExecuteSQL(query, param);
                 }
                 else
                 {
