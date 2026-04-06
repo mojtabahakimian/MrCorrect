@@ -25,17 +25,29 @@
 
 
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-		<!--
-			تنظیمات publish را اینجا اضافه نکنید!
-			از publish profile استفاده کنید:
-			  - Properties/PublishProfiles/SelfContained.pubxml     (~130-160 MB، بدون نیاز به .NET Runtime)
-			  - Properties/PublishProfiles/FrameworkDependent.pubxml (~50-80 MB، نیاز به .NET 8 Runtime)
 
-			یا از command line:
-			  dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained true
-			    -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true
-			    -o "E:\prg\PublishedFiles"
-		-->
+		<!-- ───── تنظیمات Publish ───── -->
+
+		<!-- معماری هدف: Windows 64-bit -->
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+
+		<!-- runtime .NET داخل exe جاسازی می‌شود → بدون نیاز به نصب .NET روی دستگاه کاربر -->
+		<SelfContained>true</SelfContained>
+
+		<!-- یک فایل exe واحد تولید می‌شود -->
+		<PublishSingleFile>true</PublishSingleFile>
+
+		<!-- فشرده‌سازی محتوای داخل exe (~30-40% کاهش حجم) - فقط با SelfContained=true مجاز است -->
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+
+		<!-- WPF با Trimming سازگار نیست → حتماً false بماند -->
+		<PublishTrimmed>false</PublishTrimmed>
+
+		<!-- ReadyToRun: حجم را زیاد می‌کند، خاموش است -->
+		<PublishReadyToRun>false</PublishReadyToRun>
+
+		<!-- از خطای DLL تکراری جلوگیری می‌کند -->
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
 
 	</PropertyGroup>
 
