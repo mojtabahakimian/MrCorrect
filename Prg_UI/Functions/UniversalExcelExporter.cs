@@ -5,10 +5,12 @@ using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.XlsIO;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,6 +23,13 @@ namespace Functions
     public static class UniversalExcelExporter
     {
         private static readonly object _lockObject = new object();
+
+        // Cache PropertyInfo lookups to avoid repeated reflection per cell
+        private static readonly ConcurrentDictionary<(Type type, string propName), PropertyInfo> _propCache =
+            new ConcurrentDictionary<(Type, string), PropertyInfo>();
+
+        private static PropertyInfo GetCachedProp(Type type, string propName) =>
+            _propCache.GetOrAdd((type, propName), k => k.type.GetProperty(k.propName));
 
         public static async Task ExportToExcelAsync(object grid, string fileName = null, bool openAfterExport = true, bool KeepTypeFormat = true)
         {
@@ -187,100 +196,86 @@ namespace Functions
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-            // Capture the data on the UI thread first
             var headers = new List<string>();
-            var data = new List<List<object>>();
+            object[,] dataArray = null;
+            var dateColIndices = new HashSet<int>();
 
-            // Use Dispatcher to safely access UI elements
             dataGrid.Dispatcher.Invoke(() =>
             {
-                // Capture headers
+                // Pre-build visible column metadata once (binding path extracted per column, not per row)
+                var visibleCols = new List<(DataGridColumn col, string bindingPath)>();
                 for (int i = 0; i < dataGrid.Columns.Count; i++)
                 {
-                    if (dataGrid.Columns[i].Visibility == Visibility.Visible)
-                    {
-                        headers.Add(dataGrid.Columns[i].Header?.ToString() ?? $"Column {i + 1}");
-                    }
+                    var col = dataGrid.Columns[i];
+                    if (col.Visibility != Visibility.Visible) continue;
+                    headers.Add(col.Header?.ToString() ?? $"Column {i + 1}");
+                    string path = null;
+                    if (col is DataGridBoundColumn bc && bc.Binding is Binding b)
+                        path = b.Path.Path;
+                    else if (col is DataGridComboBoxColumn cbc && cbc.SelectedValueBinding is Binding svb)
+                        path = svb.Path.Path;
+                    visibleCols.Add((col, path));
                 }
 
-                // Capture data in display order (Items respects sorting/filtering)
                 var selectedSet = new HashSet<object>(dataGrid.SelectedItems.Cast<object>());
-                foreach (var item in dataGrid.Items)
+                var orderedItems = dataGrid.Items.Cast<object>().Where(x => selectedSet.Contains(x)).ToList();
+                if (orderedItems.Count == 0 || visibleCols.Count == 0) return;
+
+                int rowCount = orderedItems.Count;
+                int colCount = visibleCols.Count;
+                dataArray = new object[rowCount, colCount];
+
+                // Cache PropertyInfos once from first row type
+                Type rowType = orderedItems[0].GetType();
+                var propInfos = visibleCols
+                    .Select(vc => vc.bindingPath != null ? GetCachedProp(rowType, vc.bindingPath) : null)
+                    .ToArray();
+
+                for (int r = 0; r < rowCount; r++)
                 {
-                    if (!selectedSet.Contains(item)) continue;
-                    var rowData = new List<object>();
-                    for (int i = 0; i < dataGrid.Columns.Count; i++)
+                    var item = orderedItems[r];
+                    for (int c = 0; c < colCount; c++)
                     {
-                        if (dataGrid.Columns[i].Visibility == Visibility.Visible)
-                        {
-                            rowData.Add(GetCellValue(item, dataGrid.Columns[i]));
-                        }
+                        object val = propInfos[c] != null
+                            ? propInfos[c].GetValue(item) ?? ""
+                            : GetCellValue(item, visibleCols[c].col);
+
+                        if (val is bool bv)
+                            val = bv ? "True" : "False";
+                        else if (val is DateTime)
+                            dateColIndices.Add(c);
+
+                        dataArray[r, c] = val;
                     }
-                    data.Add(rowData);
                 }
             });
 
-            // Create Excel file with captured data (not on UI thread)
+            if (dataArray == null) return;
+
             using (var package = new ExcelPackage())
             {
                 var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-
-                // Ensure RTL is applied at the worksheet level
                 worksheet.View.RightToLeft = true;
 
-                // Export headers
                 for (int i = 0; i < headers.Count; i++)
                 {
                     worksheet.Cells[1, i + 1].Value = headers[i];
                     worksheet.Cells[1, i + 1].Style.Font.Bold = true;
                 }
 
-                // Export data با حفظ فرمت
-                for (int rowIndex = 0; rowIndex < data.Count; rowIndex++)
+                int rowCount = dataArray.GetLength(0);
+                int colCount = dataArray.GetLength(1);
+                if (rowCount > 0)
                 {
-                    for (int colIndex = 0; colIndex < data[rowIndex].Count; colIndex++)
-                    {
-                        var value = data[rowIndex][colIndex];
-                        var cell = worksheet.Cells[rowIndex + 2, colIndex + 1];
+                    // Bulk write: orders of magnitude faster than cell-by-cell for large datasets
+                    worksheet.Cells[2, 1, rowCount + 1, colCount].Value = dataArray;
 
-                        if (value != null)
-                        {
-                            // حفظ فرمت بر اساس نوع داده
-                            if (value is int || value is long || value is short || value is byte ||
-                                value is uint || value is ulong || value is ushort || value is sbyte ||
-                                value is decimal || value is double || value is float)
-                            {
-                                // اعداد (صحیح و اعشاری)
-                                cell.Value = value;
-                            }
-                            else if (value is DateTime dateTime)
-                            {
-                                // تاریخ و زمان
-                                cell.Value = dateTime;
-                                cell.Style.Numberformat.Format = "yyyy/mm/dd hh:mm:ss";
-                            }
-                            else if (value is bool boolValue)
-                            {
-                                // Boolean - ذخیره به صورت متن
-                                cell.Value = boolValue ? "True" : "False";
-                            }
-                            else
-                            {
-                                // سایر انواع به صورت متن
-                                cell.Value = value.ToString();
-                            }
-                        }
-                        else
-                        {
-                            cell.Value = "";
-                        }
-                    }
+                    // Apply date format per column range (not per cell)
+                    foreach (int ci in dateColIndices)
+                        worksheet.Cells[2, ci + 1, rowCount + 1, ci + 1].Style.Numberformat.Format = "yyyy/mm/dd hh:mm:ss";
                 }
 
-                // Auto-fit columns
                 worksheet.Cells.AutoFitColumns();
-
-                // Save the package
                 package.SaveAs(new FileInfo(filePath));
             }
         }
@@ -289,68 +284,70 @@ namespace Functions
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-            // Capture the data on the UI thread first
             var headers = new List<string>();
-            var data = new List<List<object>>();
+            object[,] dataArray = null;
 
-            // Use Dispatcher to safely access UI elements
             dataGrid.Dispatcher.Invoke(() =>
             {
-                // Capture headers
+                var visibleCols = new List<(DataGridColumn col, string bindingPath)>();
                 for (int i = 0; i < dataGrid.Columns.Count; i++)
                 {
-                    if (dataGrid.Columns[i].Visibility == Visibility.Visible)
-                    {
-                        headers.Add(dataGrid.Columns[i].Header?.ToString() ?? $"Column {i + 1}");
-                    }
+                    var col = dataGrid.Columns[i];
+                    if (col.Visibility != Visibility.Visible) continue;
+                    headers.Add(col.Header?.ToString() ?? $"Column {i + 1}");
+                    string path = null;
+                    if (col is DataGridBoundColumn bc && bc.Binding is Binding b)
+                        path = b.Path.Path;
+                    else if (col is DataGridComboBoxColumn cbc && cbc.SelectedValueBinding is Binding svb)
+                        path = svb.Path.Path;
+                    visibleCols.Add((col, path));
                 }
 
-                // Capture data in display order (Items respects sorting/filtering)
                 var selectedSet = new HashSet<object>(dataGrid.SelectedItems.Cast<object>());
-                foreach (var item in dataGrid.Items)
+                var orderedItems = dataGrid.Items.Cast<object>().Where(x => selectedSet.Contains(x)).ToList();
+                if (orderedItems.Count == 0 || visibleCols.Count == 0) return;
+
+                int rowCount = orderedItems.Count;
+                int colCount = visibleCols.Count;
+                dataArray = new object[rowCount, colCount];
+
+                Type rowType = orderedItems[0].GetType();
+                var propInfos = visibleCols
+                    .Select(vc => vc.bindingPath != null ? GetCachedProp(rowType, vc.bindingPath) : null)
+                    .ToArray();
+
+                for (int r = 0; r < rowCount; r++)
                 {
-                    if (!selectedSet.Contains(item)) continue;
-                    var rowData = new List<object>();
-                    for (int i = 0; i < dataGrid.Columns.Count; i++)
+                    var item = orderedItems[r];
+                    for (int c = 0; c < colCount; c++)
                     {
-                        if (dataGrid.Columns[i].Visibility == Visibility.Visible)
-                        {
-                            rowData.Add(GetCellValue(item, dataGrid.Columns[i]));
-                        }
+                        object val = propInfos[c] != null
+                            ? propInfos[c].GetValue(item)
+                            : GetCellValue(item, visibleCols[c].col);
+                        dataArray[r, c] = val?.ToString() ?? "";
                     }
-                    data.Add(rowData);
                 }
             });
 
-            // Create Excel file with captured data (not on UI thread)
+            if (dataArray == null) return;
+
             using (var package = new ExcelPackage())
             {
                 var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-
-                // Ensure RTL is applied at the worksheet level
                 worksheet.View.RightToLeft = true;
 
-                // Export headers
                 for (int i = 0; i < headers.Count; i++)
                 {
                     worksheet.Cells[1, i + 1].Value = headers[i];
                     worksheet.Cells[1, i + 1].Style.Font.Bold = true;
                 }
 
-                // Export data AS TEXT to avoid formatting issues
-                for (int rowIndex = 0; rowIndex < data.Count; rowIndex++)
-                {
-                    for (int colIndex = 0; colIndex < data[rowIndex].Count; colIndex++)
-                    {
-                        var value = data[rowIndex][colIndex];
-                        worksheet.Cells[rowIndex + 2, colIndex + 1].Value = value?.ToString() ?? "";
-                    }
-                }
+                int rowCount = dataArray.GetLength(0);
+                int colCount = dataArray.GetLength(1);
+                if (rowCount > 0)
+                    worksheet.Cells[2, 1, rowCount + 1, colCount].Value = dataArray;
 
-                // Auto-fit columns
                 worksheet.Cells.AutoFitColumns();
-
-                // Save the package
                 package.SaveAs(new FileInfo(filePath));
             }
         }
@@ -479,114 +476,133 @@ namespace Functions
 
         private static void ExportSyncfusionDataGrid(SfDataGrid dataGrid, string filePath, bool keepTypeFormat = true)
         {
-            // Capture data on UI thread first
             var headers = new List<string>();
-            var data = new List<List<object>>();
+            object[,] dataArray = null;
+            var dateColIndices = new HashSet<int>();
 
-            // Use Dispatcher to safely access UI elements
             dataGrid.Dispatcher.Invoke(() =>
             {
-                // Capture headers
+                // Pre-build visible column metadata with combo lookup dictionaries built once per column
+                var colMeta = new List<(GridColumnBase col, string mappingName, Dictionary<string, object> comboLookup)>();
                 for (int i = 0; i < dataGrid.Columns.Count; i++)
                 {
-                    if (!dataGrid.Columns[i].IsHidden)
-                    {
-                        headers.Add(dataGrid.Columns[i].HeaderText);
-                    }
-                }
+                    var col = dataGrid.Columns[i];
+                    if (col.IsHidden) continue;
+                    headers.Add(col.HeaderText);
 
-                // Capture data in display order using View.Records (respects sorting/grouping/filtering)
-                var selectedSet = new HashSet<object>(dataGrid.SelectedItems.Cast<object>());
-                foreach (var nodeEntry in dataGrid.View.Records)
-                {
-                    var record = nodeEntry.Data;
-                    if (!selectedSet.Contains(record)) continue;
-                    var rowData = new List<object>();
-                    for (int colIndex = 0; colIndex < dataGrid.Columns.Count; colIndex++)
+                    Dictionary<string, object> comboLookup = null;
+                    if (col is GridComboBoxColumn comboCol &&
+                        comboCol.ItemsSource != null &&
+                        !string.IsNullOrWhiteSpace(comboCol.DisplayMemberPath) &&
+                        !string.IsNullOrWhiteSpace(comboCol.SelectedValuePath))
                     {
-                        var column = dataGrid.Columns[colIndex];
-                        if (!column.IsHidden)
+                        // Build O(1) lookup dictionary once per combo column instead of O(m) per row
+                        comboLookup = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                        foreach (var comboItem in comboCol.ItemsSource)
                         {
-                            // استفاده از متد جدید برای دریافت مقدار
-                            // برای ComboBox از display value استفاده می‌شود
-                            var cellValue = GetSyncfusionCellValue(record, column, useDisplayValue: true);
-                            rowData.Add(cellValue);
+                            if (comboItem == null) continue;
+                            var itemType = comboItem.GetType();
+                            var valProp = GetCachedProp(itemType, comboCol.SelectedValuePath);
+                            var dispProp = GetCachedProp(itemType, comboCol.DisplayMemberPath);
+                            if (valProp == null || dispProp == null) continue;
+                            var key = valProp.GetValue(comboItem)?.ToString();
+                            if (key != null)
+                                comboLookup[key] = dispProp.GetValue(comboItem) ?? string.Empty;
                         }
                     }
-                    data.Add(rowData);
+                    colMeta.Add((col, col.MappingName, comboLookup));
+                }
+
+                var selectedSet = new HashSet<object>(dataGrid.SelectedItems.Cast<object>());
+                var orderedRecords = dataGrid.View.Records
+                    .Select(r => r.Data)
+                    .Where(d => selectedSet.Contains(d))
+                    .ToList();
+
+                if (orderedRecords.Count == 0 || colMeta.Count == 0) return;
+
+                int rowCount = orderedRecords.Count;
+                int colCount = colMeta.Count;
+                dataArray = new object[rowCount, colCount];
+
+                // Cache PropertyInfos once from first row type
+                Type rowType = orderedRecords[0].GetType();
+                var propInfos = colMeta
+                    .Select(cm => !string.IsNullOrWhiteSpace(cm.mappingName) ? GetCachedProp(rowType, cm.mappingName) : null)
+                    .ToArray();
+
+                for (int r = 0; r < rowCount; r++)
+                {
+                    var record = orderedRecords[r];
+                    for (int c = 0; c < colCount; c++)
+                    {
+                        object val = string.Empty;
+                        if (propInfos[c] != null)
+                        {
+                            var rawVal = propInfos[c].GetValue(record);
+                            var comboLookup = colMeta[c].comboLookup;
+                            if (comboLookup != null && rawVal != null)
+                            {
+                                // O(1) dictionary lookup instead of iterating all combo items per row
+                                val = comboLookup.TryGetValue(rawVal.ToString(), out var display) ? display : rawVal;
+                            }
+                            else
+                            {
+                                val = rawVal ?? string.Empty;
+                            }
+                        }
+
+                        if (!keepTypeFormat)
+                        {
+                            val = val?.ToString() ?? "";
+                        }
+                        else if (val is bool bv)
+                        {
+                            val = bv ? "True" : "False";
+                        }
+                        else if (val is DateTime)
+                        {
+                            dateColIndices.Add(c);
+                        }
+
+                        dataArray[r, c] = val;
+                    }
                 }
             });
 
-            // Create Excel file with captured data
+            if (dataArray == null) return;
+
             using (ExcelEngine excelEngine = new ExcelEngine())
             {
                 IApplication application = excelEngine.Excel;
                 application.DefaultVersion = ExcelVersion.Excel2016;
                 IWorkbook workbook = application.Workbooks.Create(1);
                 IWorksheet worksheet = workbook.Worksheets[0];
-
-                // Set RightToLeft orientation
                 worksheet.IsRightToLeft = true;
 
-                // Export headers
                 for (int i = 0; i < headers.Count; i++)
                 {
                     worksheet.Range[1, i + 1].Text = headers[i];
                     worksheet.Range[1, i + 1].CellStyle.Font.Bold = true;
                 }
 
-                // Export data با حفظ فرمت
-                for (int rowIndex = 0; rowIndex < data.Count; rowIndex++)
+                int rowCount = dataArray.GetLength(0);
+                int colCount = dataArray.GetLength(1);
+                if (rowCount > 0)
                 {
-                    for (int colIndex = 0; colIndex < data[rowIndex].Count; colIndex++)
-                    {
-                        var value = data[rowIndex][colIndex];
-                        var cell = worksheet.Range[rowIndex + 2, colIndex + 1];
+                    // Bulk import: orders of magnitude faster than cell-by-cell for large datasets
+                    worksheet.ImportArray(dataArray, 2, 1);
 
-                        if (keepTypeFormat && value != null)
-                        {
-                            // حفظ فرمت بر اساس نوع داده
-                            if (value is int || value is long || value is short || value is byte ||
-                                value is uint || value is ulong || value is ushort || value is sbyte)
-                            {
-                                // اعداد صحیح
-                                cell.Number = Convert.ToDouble(value);
-                            }
-                            else if (value is decimal || value is double || value is float)
-                            {
-                                // اعداد اعشاری
-                                cell.Number = Convert.ToDouble(value);
-                            }
-                            else if (value is DateTime dateTime)
-                            {
-                                // تاریخ و زمان
-                                cell.DateTime = dateTime;
-                                cell.NumberFormat = "yyyy/mm/dd hh:mm:ss";
-                            }
-                            else if (value is bool boolValue)
-                            {
-                                // Boolean
-                                cell.Text = boolValue ? "True" : "False";
-                            }
-                            else
-                            {
-                                // سایر انواع به صورت متن
-                                cell.Text = value.ToString();
-                            }
-                        }
-                        else
-                        {
-                            // بدون حفظ فرمت، همه چیز به صورت متن
-                            cell.Text = value?.ToString() ?? "";
-                        }
+                    // Apply date format per column range (not per cell)
+                    if (keepTypeFormat)
+                    {
+                        foreach (int ci in dateColIndices)
+                            worksheet.Range[2, ci + 1, rowCount + 1, ci + 1].NumberFormat = "yyyy/mm/dd hh:mm:ss";
                     }
                 }
 
-                // Auto-fit columns
                 worksheet.UsedRange.AutofitColumns();
                 worksheet.UsedRange.AutofitRows();
-
-                // Save the workbook
                 workbook.SaveAs(filePath);
             }
         }
