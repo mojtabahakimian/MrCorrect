@@ -25,7 +25,8 @@
 
 
 		<PublishTrimmed>false</PublishTrimmed>
-		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+		<!-- فشرده‌سازی فقط با SelfContained=true مجاز است - در publish profile مربوطه تنظیم شده -->
+		<EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<!--<PublishSingleFile>true</PublishSingleFile>-->
 		<!--<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>-->
