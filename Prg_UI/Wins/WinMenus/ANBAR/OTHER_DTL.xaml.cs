@@ -200,7 +200,9 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             // var rst = new ADODB.Recordset();
             if (DRIVER.SelectedItem != null && DRIVER.SelectedValue != null)
             {
-                var rst = dbms.DoGetDataSQL<QRE_KH_05>("SELECT   TOP 100 PERCENT * FROM OTHER_DTL WHERE DRIVER = '" + DRIVER.SelectedValue.ToString() + "' ORDER BY NUMBER DESC").ToList();
+                var rst = dbms.DoGetDataSQL<QRE_KH_05>(
+                    "SELECT TOP 100 PERCENT * FROM OTHER_DTL WHERE DRIVER = @Driver ORDER BY NUMBER DESC",
+                    new { Driver = DRIVER.SelectedValue.ToString() }).ToList();
                 if (rst.Count > 0)
                 {
                     _ = rst.FirstOrDefault().DRIVER_MOB != null ? DRIVER_MOB.Text = rst.FirstOrDefault().DRIVER_MOB.ToString() : DRIVER_MOB.Text = "";
@@ -260,13 +262,17 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     //}
 
                     dbms.DoExecuteSQL(
-                   "INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) " +
-                   "SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i " +
-                   "WHERE i.NUMBER = " + _NUMBER_ + $" AND i.TAG = {_TG_} " +
-                   "AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) " +
-                   "GROUP BY i.NUMBER, i.TAG, i.CODE");
+                        "INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) " +
+                        "SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i " +
+                        "WHERE i.NUMBER = @Number AND i.TAG = @Tag " +
+                        "AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) " +
+                        "GROUP BY i.NUMBER, i.TAG, i.CODE",
+                        new { Number = NUMBER, Tag = (int)_TG_ });
 
-                    dbms.DoExecuteSQL($"DELETE FROM dbo.OTHER_DTL_SUB WHERE     (TAGG = {_TG_}) AND (NUMBER = " + _NUMBER_ + ") AND (NOT (CODE IN   (SELECT     CODE  FROM dbo.INVO_LST   WHERE     (NUMBER = " + _NUMBER_ + $") AND (TAG = {_TG_}))))");
+                    dbms.DoExecuteSQL(
+                        "DELETE FROM dbo.OTHER_DTL_SUB WHERE TAGG = @Tag AND NUMBER = @Number " +
+                        "AND CODE NOT IN (SELECT CODE FROM dbo.INVO_LST WHERE NUMBER = @Number AND TAG = @Tag)",
+                        new { Number = NUMBER, Tag = (int)_TG_ });
                     // this.OTHER_DTL_SUB_SUB.Requery();
                 }
                 KINDF = "PISH";
@@ -284,13 +290,17 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     RecordSource = $"SELECT * FROM OTHER_DTL WHERE TAG = {_TG_} and NUMBER = " + _NUMBER_;
 
                     dbms.DoExecuteSQL(
-                      "INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) " +
-                      "SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i " +
-                      "WHERE i.NUMBER = " + _NUMBER_ + $" AND i.TAG = {_TG_} " +
-                      "AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) " +
-                      "GROUP BY i.NUMBER, i.TAG, i.CODE");
+                        "INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) " +
+                        "SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i " +
+                        "WHERE i.NUMBER = @Number AND i.TAG = @Tag " +
+                        "AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) " +
+                        "GROUP BY i.NUMBER, i.TAG, i.CODE",
+                        new { Number = NUMBER, Tag = (int)_TG_ });
 
-                    dbms.DoExecuteSQL($"DELETE FROM dbo.OTHER_DTL_SUB WHERE     (TAGG = {_TG_}) AND (NUMBER = " + _NUMBER_ + ") AND (NOT (CODE IN   (SELECT     CODE  FROM dbo.INVO_LST   WHERE     (NUMBER = " + _NUMBER_ + $") AND (TAG = {_TG_}))))");
+                    dbms.DoExecuteSQL(
+                        "DELETE FROM dbo.OTHER_DTL_SUB WHERE TAGG = @Tag AND NUMBER = @Number " +
+                        "AND CODE NOT IN (SELECT CODE FROM dbo.INVO_LST WHERE NUMBER = @Number AND TAG = @Tag)",
+                        new { Number = NUMBER, Tag = (int)_TG_ });
                 }
             }
             else if (Win_US is HEAD_LST_HAVL)
@@ -330,13 +340,17 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     //}
 
                     dbms.DoExecuteSQL(
-                               "INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) " +
-                               "SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i " +
-                               "WHERE i.NUMBER = " + _NUMBER_ + $" AND i.TAG = {_TG_} " +
-                               "AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) " +
-                               "GROUP BY i.NUMBER, i.TAG, i.CODE");
+                        "INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) " +
+                        "SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i " +
+                        "WHERE i.NUMBER = @Number AND i.TAG = @Tag " +
+                        "AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) " +
+                        "GROUP BY i.NUMBER, i.TAG, i.CODE",
+                        new { Number = NUMBER, Tag = (int)_TG_ });
 
-                    dbms.DoExecuteSQL($"DELETE FROM dbo.OTHER_DTL_SUB WHERE     (TAGG = {_TG_}) AND (NUMBER = " + _NUMBER_ + ") AND (NOT (CODE IN   (SELECT     CODE  FROM dbo.INVO_LST   WHERE     (NUMBER = " + _NUMBER_ + $") AND (TAG = {_TG_}))))");
+                    dbms.DoExecuteSQL(
+                        "DELETE FROM dbo.OTHER_DTL_SUB WHERE TAGG = @Tag AND NUMBER = @Number " +
+                        "AND CODE NOT IN (SELECT CODE FROM dbo.INVO_LST WHERE NUMBER = @Number AND TAG = @Tag)",
+                        new { Number = NUMBER, Tag = (int)_TG_ });
                     // this.OTHER_DTL_SUB_SUB.Requery();
                 }
             }
@@ -372,13 +386,17 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                     //}
 
                     dbms.DoExecuteSQL(
-                      "INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) " +
-                      "SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i " +
-                      "WHERE i.NUMBER = " + _NUMBER_ + $" AND i.TAG = {_TG_} " +
-                      "AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) " +
-                      "GROUP BY i.NUMBER, i.TAG, i.CODE");
+                        "INSERT INTO dbo.OTHER_DTL_SUB (NUMBER, TAGG, CODE, RADIF) " +
+                        "SELECT i.NUMBER, i.TAG, i.CODE, MIN(i.RADIF) FROM dbo.INVO_LST i " +
+                        "WHERE i.NUMBER = @Number AND i.TAG = @Tag " +
+                        "AND NOT EXISTS (SELECT 1 FROM dbo.OTHER_DTL_SUB s WHERE s.NUMBER = i.NUMBER AND s.TAGG = i.TAG AND s.CODE = i.CODE) " +
+                        "GROUP BY i.NUMBER, i.TAG, i.CODE",
+                        new { Number = NUMBER, Tag = (int)_TG_ });
 
-                    dbms.DoExecuteSQL($"DELETE FROM dbo.OTHER_DTL_SUB WHERE     (TAGG = {_TG_}) AND (NUMBER = " + _NUMBER_ + ") AND (NOT (CODE IN   (SELECT     CODE  FROM dbo.INVO_LST   WHERE     (NUMBER = " + _NUMBER_ + $") AND (TAG = {_TG_}))))");
+                    dbms.DoExecuteSQL(
+                        "DELETE FROM dbo.OTHER_DTL_SUB WHERE TAGG = @Tag AND NUMBER = @Number " +
+                        "AND CODE NOT IN (SELECT CODE FROM dbo.INVO_LST WHERE NUMBER = @Number AND TAG = @Tag)",
+                        new { Number = NUMBER, Tag = (int)_TG_ });
                     // this.OTHER_DTL_SUB_SUB.Requery();
                 }
             }
@@ -425,11 +443,12 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         {
             if (NUMBER > 0)
             {
-                var query = dbms.DoGetDataSQL<OTHER_DTL_SUB_MONITOR>($@"SELECT dbo.OTHER_DTL_SUB.NUMBER, dbo.OTHER_DTL_SUB.TAGG, dbo.OTHER_DTL_SUB.CODE, dbo.STUF_DEF.NAME AS NAME_CODE, dbo.OTHER_DTL_SUB.CAM_KHALY, dbo.OTHER_DTL_SUB.CAM_POOR, 
-                                                                             dbo.OTHER_DTL_SUB.MEGHk, dbo.OTHER_DTL_SUB.TOZIH, dbo.OTHER_DTL_SUB.RADIF, dbo.OTHER_DTL_SUB.VAZNH, dbo.OTHER_DTL_SUB.CRT, dbo.OTHER_DTL_SUB.UID
-                                                                             FROM dbo.OTHER_DTL_SUB INNER JOIN
-                                                                             dbo.STUF_DEF ON dbo.OTHER_DTL_SUB.CODE = dbo.STUF_DEF.CODE
-                                                                             WHERE (dbo.OTHER_DTL_SUB.TAGG = {TAG}) AND dbo.OTHER_DTL_SUB.NUMBER =" + NUMBER).ToList();
+                var query = dbms.DoGetDataSQL<OTHER_DTL_SUB_MONITOR>(
+                    @"SELECT dbo.OTHER_DTL_SUB.NUMBER, dbo.OTHER_DTL_SUB.TAGG, dbo.OTHER_DTL_SUB.CODE, dbo.STUF_DEF.NAME AS NAME_CODE, dbo.OTHER_DTL_SUB.CAM_KHALY, dbo.OTHER_DTL_SUB.CAM_POOR,
+                      dbo.OTHER_DTL_SUB.MEGHk, dbo.OTHER_DTL_SUB.TOZIH, dbo.OTHER_DTL_SUB.RADIF, dbo.OTHER_DTL_SUB.VAZNH, dbo.OTHER_DTL_SUB.CRT, dbo.OTHER_DTL_SUB.UID
+                      FROM dbo.OTHER_DTL_SUB INNER JOIN dbo.STUF_DEF ON dbo.OTHER_DTL_SUB.CODE = dbo.STUF_DEF.CODE
+                      WHERE dbo.OTHER_DTL_SUB.TAGG = @Tag AND dbo.OTHER_DTL_SUB.NUMBER = @Number",
+                    new { Tag = (int)TAG, Number = NUMBER }).ToList();
                 OTHER_DTL_DATA?.Clear();
                 foreach (var item in query)
                     OTHER_DTL_DATA.Add(item);
@@ -460,33 +479,63 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             if (CAM_KHALY.Text != "") float.TryParse(CAM_KHALY.Text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out L_CAM_KHALY);
             if (CAM_POOR.Text != "") float.TryParse(CAM_POOR.Text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out L_CAM_POOR);
 
-            string camKhalyVal = CAM_KHALY.Text != "" ? L_CAM_KHALY.ToString(System.Globalization.CultureInfo.InvariantCulture) : "NULL";
-            string camPoorVal = CAM_POOR.Text != "" ? L_CAM_POOR.ToString(System.Globalization.CultureInfo.InvariantCulture) : "NULL";
+            float? camKhalyParam = CAM_KHALY.Text != "" ? L_CAM_KHALY : (float?)null;
+            float? camPoorParam  = CAM_POOR.Text  != "" ? L_CAM_POOR  : (float?)null;
+            int? maghsadParam    = MAGHSAD.SelectedValue is null ? (int?)null : Convert.ToInt32(MAGHSAD.SelectedValue);
 
             if (G_Flag == 0)
             {
-                string query = $@"INSERT INTO dbo.OTHER_DTL
-                                          (NUMBER, TAG, REQUEST_NO, BARNAMEH, DRIVER, DRIVER_MOB, CAMIUN_NUM, MAGHSAD, CAM_KHALY, CAM_POOR, TOZIH, CAMIUN)
-                                          VALUES
-                                          ({NUMBER},{TAG},N'{REQUEST_NO.Text}',N'{BARNAMEH.Text}',N'{DRIVER.Text}',N'{DRIVER_MOB.Text}',N'{CAMIUN_NUM.Text}',{(MAGHSAD.SelectedValue is null ? "NULL" : MAGHSAD.SelectedValue)},{camKhalyVal},
-                                          {camPoorVal},N'{TOZIH.Text}',N'{CAMIUN.Text}')";
-                dbms.DoExecuteSQL(query);
+                dbms.DoExecuteSQL(
+                    @"INSERT INTO dbo.OTHER_DTL
+                      (NUMBER, TAG, REQUEST_NO, BARNAMEH, DRIVER, DRIVER_MOB, CAMIUN_NUM, MAGHSAD, CAM_KHALY, CAM_POOR, TOZIH, CAMIUN)
+                      VALUES
+                      (@Number, @Tag, @RequestNo, @Barnameh, @Driver, @DriverMob, @CamiunNum, @Maghsad, @CamKhaly, @CamPoor, @Tozih, @Camiun)",
+                    new
+                    {
+                        Number    = NUMBER,
+                        Tag       = (int)TAG,
+                        RequestNo = REQUEST_NO.Text,
+                        Barnameh  = BARNAMEH.Text,
+                        Driver    = DRIVER.Text,
+                        DriverMob = DRIVER_MOB.Text,
+                        CamiunNum = CAMIUN_NUM.Text,
+                        Maghsad   = maghsadParam,
+                        CamKhaly  = camKhalyParam,
+                        CamPoor   = camPoorParam,
+                        Tozih     = TOZIH.Text,
+                        Camiun    = CAMIUN.Text
+                    });
             }
             else if (G_Flag == 1)
             {
-                string query = $@"UPDATE dbo.OTHER_DTL SET
-                                          REQUEST_NO = N'{REQUEST_NO.Text}',
-                                          BARNAMEH = N'{BARNAMEH.Text}' ,
-                                          DRIVER = N'{DRIVER.Text}' ,
-                                          DRIVER_MOB = N'{DRIVER_MOB.Text}' ,
-                                          CAMIUN_NUM = N'{CAMIUN_NUM.Text}' ,
-                                          MAGHSAD = {(MAGHSAD.SelectedValue is null ? "NULL" : MAGHSAD.SelectedValue)} ,
-                                          CAM_KHALY = {camKhalyVal} ,
-                                          CAM_POOR = {camPoorVal} ,
-                                          TOZIH = N'{TOZIH.Text}' ,
-                                          CAMIUN = N'{CAMIUN.Text}'
-                                          WHERE NUMBER = " + NUMBER + $" AND TAG = {TAG}";
-                dbms.DoExecuteSQL(query);
+                dbms.DoExecuteSQL(
+                    @"UPDATE dbo.OTHER_DTL SET
+                      REQUEST_NO = @RequestNo,
+                      BARNAMEH   = @Barnameh,
+                      DRIVER     = @Driver,
+                      DRIVER_MOB = @DriverMob,
+                      CAMIUN_NUM = @CamiunNum,
+                      MAGHSAD    = @Maghsad,
+                      CAM_KHALY  = @CamKhaly,
+                      CAM_POOR   = @CamPoor,
+                      TOZIH      = @Tozih,
+                      CAMIUN     = @Camiun
+                      WHERE NUMBER = @Number AND TAG = @Tag",
+                    new
+                    {
+                        Number    = NUMBER,
+                        Tag       = (int)TAG,
+                        RequestNo = REQUEST_NO.Text,
+                        Barnameh  = BARNAMEH.Text,
+                        Driver    = DRIVER.Text,
+                        DriverMob = DRIVER_MOB.Text,
+                        CamiunNum = CAMIUN_NUM.Text,
+                        Maghsad   = maghsadParam,
+                        CamKhaly  = camKhalyParam,
+                        CamPoor   = camPoorParam,
+                        Tozih     = TOZIH.Text,
+                        Camiun    = CAMIUN.Text
+                    });
             }
             return true;
 
@@ -523,16 +572,26 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             {
                 if (item.NUMBER >= 0 && item.CAM_POOR >= 0 && item.CAM_KHALY >= 0 && item.MEGHk >= 0 && item.VAZNH >= 0)
                 {
-                    var ic = System.Globalization.CultureInfo.InvariantCulture;
-                    string query = $@"UPDATE dbo.OTHER_DTL_SUB  SET
-                                  CAM_KHALY = {item.CAM_KHALY?.ToString(ic) ?? "NULL"},
-                                  CAM_POOR = {item.CAM_POOR?.ToString(ic) ?? "NULL"},
-                                  MEGHk = {item.MEGHk?.ToString(ic) ?? "NULL"},
-                                  TOZIH = N'{item.TOZIH}',
-                                  RADIF = {item.RADIF?.ToString(ic) ?? "NULL"},
-                                  VAZNH = {item.VAZNH?.ToString(ic) ?? "NULL"}
-                                  WHERE NUMBER = {NUMBER} AND TAGG = {TAG} AND CODE = N'{item.CODE}'";
-                    dbms.DoExecuteSQL(query);
+                    string query = @"UPDATE dbo.OTHER_DTL_SUB SET
+                                  CAM_KHALY = @CamKhaly,
+                                  CAM_POOR  = @CamPoor,
+                                  MEGHk     = @Meghk,
+                                  TOZIH     = @Tozih,
+                                  RADIF     = @Radif,
+                                  VAZNH     = @Vaznh
+                                  WHERE NUMBER = @Number AND TAGG = @Tag AND CODE = @Code";
+                    dbms.DoExecuteSQL(query, new
+                    {
+                        CamKhaly = item.CAM_KHALY,
+                        CamPoor  = item.CAM_POOR,
+                        Meghk    = item.MEGHk,
+                        Tozih    = item.TOZIH,
+                        Radif    = item.RADIF,
+                        Vaznh    = item.VAZNH,
+                        Number   = NUMBER,
+                        Tag      = (int)TAG,
+                        Code     = item.CODE
+                    });
                 }
                 else
                 {
@@ -545,7 +604,9 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         /// </summary>
         void Loaded_OtherDTL()
         {
-            var query = dbms.DoGetDataSQL<OTHER_DTL_CSHARP>("SELECT * FROM dbo.OTHER_DTL WHERE NUMBER=" + NUMBER + $" AND TAG={TAG}");
+            var query = dbms.DoGetDataSQL<OTHER_DTL_CSHARP>(
+                "SELECT * FROM dbo.OTHER_DTL WHERE NUMBER = @Number AND TAG = @Tag",
+                new { Number = NUMBER, Tag = (int)TAG });
             if (query.Any())
             {
                 var result = query.First();
@@ -638,30 +699,47 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 {
                     case "PISH":
                         {
-                            var rst = dbms.DoGetDataSQL<QRE_KH_06>("SELECT * FROM OTHER_DTL_sub WHERE tagg= 20 and MEGHk > 0 and NUMBER = " + NUMBER).ToList();
+                            var rst = dbms.DoGetDataSQL<QRE_KH_06>(
+                                "SELECT * FROM OTHER_DTL_sub WHERE tagg = @Tag AND MEGHk > 0 AND NUMBER = @Number",
+                                new { Tag = 20, Number = NUMBER }).ToList();
                             if (rst.Count > 0)
                             {
                                 for (int i = 0; i < rst.Count; i++)
                                 {
-                                    var RST2 = dbms.DoGetDataSQL<INVO_LST_CSHARP>("SELECT * FROM INVO_LST where tag = 20 and NUMBER = " + NUMBER + " and code = '" + rst[i].CODE + "'").ToList();
+                                    var RST2 = dbms.DoGetDataSQL<INVO_LST_CSHARP>(
+                                        "SELECT * FROM INVO_LST WHERE tag = @Tag AND NUMBER = @Number AND code = @Code",
+                                        new { Tag = 20, Number = NUMBER, Code = rst[i].CODE }).ToList();
                                     if (RST2.Count == 1)
                                     {
-                                        dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET
-                                                                           MEGH ={rst[i].MEGHk} ,
-                                                                           MEGHk = {rst[i].MEGHk} ,
-                                                                           MABL_K = {Math.Round((double)(rst[i].MEGHk * RST2[i].MABL))},
-                                                                           N_MOIN = {Math.Round((double)(rst[i].MEGHk * RST2[i].MABL * RST2[i].N_KOL / 100))} 
-                                                                           WHERE TAG = 20 AND NUMBER = " + NUMBER + " AND CODE = '" + rst[i].CODE + "'" + $"  AND id = {RST2.FirstOrDefault().id}  ");
-                                        // RST2.update();
+                                        dbms.DoExecuteSQL(
+                                            @"UPDATE dbo.INVO_LST SET
+                                              MEGH   = @Megh,
+                                              MEGHk  = @Megh,
+                                              MABL_K = @MablK,
+                                              N_MOIN = @Nmoin
+                                              WHERE TAG = @Tag AND NUMBER = @Number AND CODE = @Code AND id = @Id",
+                                            new
+                                            {
+                                                Megh   = rst[i].MEGHk,
+                                                MablK  = Math.Round((double)(rst[i].MEGHk * RST2[i].MABL)),
+                                                Nmoin  = Math.Round((double)(rst[i].MEGHk * RST2[i].MABL * RST2[i].N_KOL / 100)),
+                                                Tag    = 20,
+                                                Number = NUMBER,
+                                                Code   = rst[i].CODE,
+                                                Id     = RST2.FirstOrDefault().id
+                                            });
                                     }
-                                    // rst.MoveNext();
                                 }
                                 if ((bool)(Win_US as HEAD_LST_PISHFROOSH2).TICMBAA.IsChecked)
                                 {
-                                    var rst3 = dbms.DoGetDataSQL<INVO_LST_CSHARP>("SELECT * FROM INVO_LST WHERE NUMBER = " + NUMBER + " AND TAG = 20").ToList();
+                                    var rst3 = dbms.DoGetDataSQL<INVO_LST_CSHARP>(
+                                        "SELECT * FROM INVO_LST WHERE NUMBER = @Number AND TAG = @Tag",
+                                        new { Number = NUMBER, Tag = 20 }).ToList();
                                     for (int i = 0; i < rst3.Count; i++)
                                     {
-                                        var RST2 = dbms.DoGetDataSQL<STUF_DEF_CSHARP>("SELECT CMBAA ,CODE FROM STUF_DEF WHERE CODE = '" + rst.FirstOrDefault().CODE + "'").ToList();
+                                        var RST2 = dbms.DoGetDataSQL<STUF_DEF_CSHARP>(
+                                            "SELECT CMBAA, CODE FROM STUF_DEF WHERE CODE = @Code",
+                                            new { Code = rst.FirstOrDefault().CODE }).ToList();
                                         if (RST2.Count > 0)
                                         {
                                             if ((bool)RST2[i].CMBAA)
@@ -674,9 +752,9 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                                                 rst3.FirstOrDefault().IMBAA = 0;
                                             }
                                         }
-                                        dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET IMBAA = {rst3[i].IMBAA} WHERE NUMBER = {NUMBER} AND TAG = 20 AND id = {rst3[i].id}");
-                                        //rst.update();
-                                        //rst.MoveNext();
+                                        dbms.DoExecuteSQL(
+                                            "UPDATE dbo.INVO_LST SET IMBAA = @Imbaa WHERE NUMBER = @Number AND TAG = @Tag AND id = @Id",
+                                            new { Imbaa = rst3[i].IMBAA, Number = NUMBER, Tag = 20, Id = rst3[i].id });
                                     }
                                     if (SMBAA != Convert.ToDouble((Win_US as HEAD_LST_PISHFROOSH2).MBAA.Text) && SMBAA > 0)
                                     {
@@ -689,31 +767,47 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                         }
                     case "FROOSH22":
                         {
-                            var rst = dbms.DoGetDataSQL<QRE_KH_06>("SELECT * FROM OTHER_DTL_sub WHERE tagg= 2 and MEGHk > 0 and NUMBER = " + NUMBER).ToList();
+                            var rst = dbms.DoGetDataSQL<QRE_KH_06>(
+                                "SELECT * FROM OTHER_DTL_sub WHERE tagg = @Tag AND MEGHk > 0 AND NUMBER = @Number",
+                                new { Tag = 2, Number = NUMBER }).ToList();
                             if (rst.Count > 0)
                             {
-                                for (int i = 0; i < rst.Count; i++) //while (/*!rst.EOF 1 == 1)
+                                for (int i = 0; i < rst.Count; i++)
                                 {
-                                    var RST2 = dbms.DoGetDataSQL<INVO_LST_CSHARP>("select * from invo_lst where tag = 2 and NUMBER = " + NUMBER + " and code = '" + rst[i].CODE + "'").ToList();
+                                    var RST2 = dbms.DoGetDataSQL<INVO_LST_CSHARP>(
+                                        "SELECT * FROM INVO_LST WHERE tag = @Tag AND NUMBER = @Number AND code = @Code",
+                                        new { Tag = 2, Number = NUMBER, Code = rst[i].CODE }).ToList();
                                     if (RST2.Count == 1)
                                     {
-                                        dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET
-                                                                           MEGH ={rst[i].MEGHk} ,
-                                                                           MEGHk = {rst[i].MEGHk} ,
-                                                                           MABL_K = {Math.Round((double)(rst[i].MEGHk * RST2[i].MABL))},
-                                                                           N_MOIN = {Math.Round((double)(rst[i].MEGHk * RST2[i].MABL * RST2[i].N_KOL / 100))} 
-                                                                           WHERE TAG = 2 AND NUMBER = " + NUMBER + " AND CODE = '" + rst[i].CODE + "'" + $"  AND id = {RST2.FirstOrDefault().id}  ");
-
-                                        //RST2.update();
+                                        dbms.DoExecuteSQL(
+                                            @"UPDATE dbo.INVO_LST SET
+                                              MEGH   = @Megh,
+                                              MEGHk  = @Megh,
+                                              MABL_K = @MablK,
+                                              N_MOIN = @Nmoin
+                                              WHERE TAG = @Tag AND NUMBER = @Number AND CODE = @Code AND id = @Id",
+                                            new
+                                            {
+                                                Megh   = rst[i].MEGHk,
+                                                MablK  = Math.Round((double)(rst[i].MEGHk * RST2[i].MABL)),
+                                                Nmoin  = Math.Round((double)(rst[i].MEGHk * RST2[i].MABL * RST2[i].N_KOL / 100)),
+                                                Tag    = 2,
+                                                Number = NUMBER,
+                                                Code   = rst[i].CODE,
+                                                Id     = RST2.FirstOrDefault().id
+                                            });
                                     }
-                                    // rst.MoveNext();
                                 }
                                 if ((bool)(Win_US as HEAD_LST_FROOSH22).TICMBAA.IsChecked)
                                 {
-                                    var rst3 = dbms.DoGetDataSQL<INVO_LST_CSHARP>("SELECT * FROM INVO_LST WHERE NUMBER = " + NUMBER + " AND TAG = 2").ToList();
+                                    var rst3 = dbms.DoGetDataSQL<INVO_LST_CSHARP>(
+                                        "SELECT * FROM INVO_LST WHERE NUMBER = @Number AND TAG = @Tag",
+                                        new { Number = NUMBER, Tag = 2 }).ToList();
                                     for (int i = 0; i < rst3.Count; i++)
                                     {
-                                        var RST2 = dbms.DoGetDataSQL<STUF_DEF_CSHARP>("SELECT CMBAA ,CODE FROM STUF_DEF WHERE CODE = '" + rst.FirstOrDefault().CODE + "'").ToList();
+                                        var RST2 = dbms.DoGetDataSQL<STUF_DEF_CSHARP>(
+                                            "SELECT CMBAA, CODE FROM STUF_DEF WHERE CODE = @Code",
+                                            new { Code = rst.FirstOrDefault().CODE }).ToList();
                                         if (RST2.Count > 0)
                                         {
                                             if ((bool)RST2[i].CMBAA)
@@ -726,9 +820,9 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                                                 rst3.FirstOrDefault().IMBAA = 0;
                                             }
                                         }
-                                        dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET IMBAA = {rst3[i].IMBAA} WHERE NUMBER = {NUMBER} AND TAG = 2 AND id = {rst3[i].id}");
-                                        //rst.update();
-                                        //rst.MoveNext();
+                                        dbms.DoExecuteSQL(
+                                            "UPDATE dbo.INVO_LST SET IMBAA = @Imbaa WHERE NUMBER = @Number AND TAG = @Tag AND id = @Id",
+                                            new { Imbaa = rst3[i].IMBAA, Number = NUMBER, Tag = 2, Id = rst3[i].id });
                                     }
                                     if (SMBAA != Convert.ToDouble((Win_US as HEAD_LST_FROOSH22).MBAA.Text) && SMBAA > 0)
                                     {
@@ -742,23 +836,35 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                         }
                     case "RASID":
                         {
-                            var rst = dbms.DoGetDataSQL<QRE_KH_06>("SELECT * FROM OTHER_DTL_sub WHERE tagg= 1 and MEGHk > 0 and NUMBER = " + NUMBER).ToList();
+                            var rst = dbms.DoGetDataSQL<QRE_KH_06>(
+                                "SELECT * FROM OTHER_DTL_sub WHERE tagg = @Tag AND MEGHk > 0 AND NUMBER = @Number",
+                                new { Tag = 1, Number = NUMBER }).ToList();
                             if (rst.Count > 0)
                             {
                                 for (int i = 0; i < rst.Count; i++)
                                 {
-                                    var RST2 = dbms.DoGetDataSQL<INVO_LST_FACTOR22>("SELECT * FROM INVO_LST WHERE tag = 1 and NUMBER = " + NUMBER + " and code = '" + rst[i].CODE + "'").ToList();
+                                    var RST2 = dbms.DoGetDataSQL<INVO_LST_FACTOR22>(
+                                        "SELECT * FROM INVO_LST WHERE tag = @Tag AND NUMBER = @Number AND code = @Code",
+                                        new { Tag = 1, Number = NUMBER, Code = rst[i].CODE }).ToList();
                                     if (RST2.Count == 1)
                                     {
-                                        dbms.DoExecuteSQL($@"UPDATE dbo.INVO_LST SET
-                                                                           MEGH = {rst[i].VAZNH} ,
-                                                                           MEGHk = {rst[i].VAZNH} ,
-                                                                           MEGH_R = {rst[i].VAZNH} ,
-                                                                           MABL_K = {Math.Round((double)(rst[i].VAZNH * RST2[0].MABL))}
-                                                                           WHERE tag = 1 AND NUMBER = " + NUMBER + " and code = '" + rst[i].CODE + "'" + $" AND id = {RST2.FirstOrDefault().id} ");
-                                        // RST2.update();
+                                        dbms.DoExecuteSQL(
+                                            @"UPDATE dbo.INVO_LST SET
+                                              MEGH   = @Vaznh,
+                                              MEGHk  = @Vaznh,
+                                              MEGH_R = @Vaznh,
+                                              MABL_K = @MablK
+                                              WHERE tag = @Tag AND NUMBER = @Number AND code = @Code AND id = @Id",
+                                            new
+                                            {
+                                                Vaznh  = rst[i].VAZNH,
+                                                MablK  = Math.Round((double)(rst[i].VAZNH * RST2[0].MABL)),
+                                                Tag    = 1,
+                                                Number = NUMBER,
+                                                Code   = rst[i].CODE,
+                                                Id     = RST2.FirstOrDefault().id
+                                            });
                                     }
-                                    //rst.MoveNext();
                                 }
                                 universControl.PopNotifyShow(".وزن کالاها به حواله انتقال یافت", Pop1, Pop1Text1, Pop_Border1, "#FF1AAA2C");
                             }
@@ -927,7 +1033,9 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                                 {
                                     try
                                     {
-                                        dbms.DoExecuteSQL($@"DELETE FROM dbo.OTHER_DTL_SUB WHERE NUMBER = {_NUMBER_} AND TAGG = {_TAGG_} AND CODE = {_CODE_}");
+                                        dbms.DoExecuteSQL(
+                                            "DELETE FROM dbo.OTHER_DTL_SUB WHERE NUMBER = @Number AND TAGG = @Tagg AND CODE = @Code",
+                                            new { Number = _NUMBER_, Tagg = _TAGG_, Code = _CODE_ });
                                     }
                                     catch (SqlException ex)
                                     {
