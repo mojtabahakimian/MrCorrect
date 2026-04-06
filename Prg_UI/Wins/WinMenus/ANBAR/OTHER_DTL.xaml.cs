@@ -455,9 +455,24 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         /// </summary>
         bool IsSavedHeader_OTHER_DTL()
         {
+            if (REQUEST_NO.Text?.Length > 10)
+            {
+                universControl.PopNotifyShowUp(".شماره درخواست نباید بیشتر از ۱۰ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                return false;
+            }
+            if (BARNAMEH.Text?.Length > 25)
+            {
+                universControl.PopNotifyShowUp(".شماره بارنامه نباید بیشتر از ۲۵ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                return false;
+            }
             if (DRIVER.Text?.Length > 50)
             {
                 universControl.PopNotifyShowUp(".نام راننده نباید بیشتر از ۵۰ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                return false;
+            }
+            if (DRIVER_MOB.Text?.Length > 25)
+            {
+                universControl.PopNotifyShowUp(".موبایل راننده نباید بیشتر از ۲۵ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
                 return false;
             }
             if (CAMIUN_NUM.Text?.Length > 25)
@@ -468,6 +483,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             if (CAMIUN.Text?.Length > 50)
             {
                 universControl.PopNotifyShowUp(".نوع ماشین نباید بیشتر از ۵۰ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                return false;
+            }
+            if (TOZIH.Text?.Length > 150)
+            {
+                universControl.PopNotifyShowUp(".توضیحات نباید بیشتر از ۱۵۰ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
                 return false;
             }
 
