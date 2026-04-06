@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -202,9 +203,11 @@ namespace Functions
                     }
                 }
 
-                // Capture data from selected items
-                foreach (var item in dataGrid.SelectedItems)
+                // Capture data in display order (Items respects sorting/filtering)
+                var selectedSet = new HashSet<object>(dataGrid.SelectedItems.Cast<object>());
+                foreach (var item in dataGrid.Items)
                 {
+                    if (!selectedSet.Contains(item)) continue;
                     var rowData = new List<object>();
                     for (int i = 0; i < dataGrid.Columns.Count; i++)
                     {
@@ -302,9 +305,11 @@ namespace Functions
                     }
                 }
 
-                // Capture data from selected items
-                foreach (var item in dataGrid.SelectedItems)
+                // Capture data in display order (Items respects sorting/filtering)
+                var selectedSet = new HashSet<object>(dataGrid.SelectedItems.Cast<object>());
+                foreach (var item in dataGrid.Items)
                 {
+                    if (!selectedSet.Contains(item)) continue;
                     var rowData = new List<object>();
                     for (int i = 0; i < dataGrid.Columns.Count; i++)
                     {
@@ -490,9 +495,12 @@ namespace Functions
                     }
                 }
 
-                // Capture data from selected items
-                foreach (var record in dataGrid.SelectedItems)
+                // Capture data in display order using View.Records (respects sorting/grouping/filtering)
+                var selectedSet = new HashSet<object>(dataGrid.SelectedItems.Cast<object>());
+                foreach (var nodeEntry in dataGrid.View.Records)
                 {
+                    var record = nodeEntry.Data;
+                    if (!selectedSet.Contains(record)) continue;
                     var rowData = new List<object>();
                     for (int colIndex = 0; colIndex < dataGrid.Columns.Count; colIndex++)
                     {
