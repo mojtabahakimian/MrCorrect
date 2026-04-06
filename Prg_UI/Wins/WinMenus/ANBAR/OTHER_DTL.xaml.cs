@@ -455,9 +455,19 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         /// </summary>
         bool IsSavedHeader_OTHER_DTL()
         {
+            if (DRIVER.Text?.Length > 50)
+            {
+                universControl.PopNotifyShowUp(".نام راننده نباید بیشتر از ۵۰ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                return false;
+            }
             if (CAMIUN_NUM.Text?.Length > 25)
             {
                 universControl.PopNotifyShowUp(".شماره ماشین نباید بیشتر از ۲۵ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                return false;
+            }
+            if (CAMIUN.Text?.Length > 50)
+            {
+                universControl.PopNotifyShowUp(".نوع ماشین نباید بیشتر از ۵۰ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
                 return false;
             }
 
