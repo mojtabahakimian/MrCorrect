@@ -220,14 +220,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
             FILL_ALL_COMBOBOXES();
 
             // Using Stored Procedure with parameters inferred from Access InputParameters
-            string sql = "ASNAD_WITHOUT_CHEK";
+            string sql = "SELECT * FROM dbo.ASNAD_WITHOUT_CHEK(@Forms___Baseknow___ADA, @Forms___Baseknow___ADV)";
             var parameters = new
             {
                 Forms___Baseknow___ADA = Baseknow.ADA,
                 Forms___Baseknow___ADV = Baseknow.ADV
             };
 
-            var RST = dbms.DoGetStoreProcedureSQL<FASNAD_WITHOUT_CHEK_MODEL>(sql, parameters).ToList();
+            var RST = dbms.DoGetDataSQL<FASNAD_WITHOUT_CHEK_MODEL>(sql, parameters).ToList();
 
 
             if (RST.Count == 0)
