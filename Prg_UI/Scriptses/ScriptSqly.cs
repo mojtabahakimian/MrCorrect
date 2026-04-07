@@ -27,6 +27,14 @@ namespace Prg_UI.Scriptses
 
                 if (isCustomCall)
                 {
+                    #region ALTER OTHER_DTL
+
+                    // Prevent truncation errors when saving longer truck plate/description values.
+                    // NOTE: keep this idempotent; if the column already has a larger size the command is harmless.
+                    try { db.Execute("ALTER TABLE dbo.OTHER_DTL ALTER COLUMN CAMIUN_NUM NVARCHAR(100) NULL"); } catch { }
+
+                    #endregion
+
                     try { db.Execute($@"ALTER TABLE PAY_GETD
 									   ADD ID BIGINT IDENTITY(1,1) NOT NULL"); } catch { } //برای پشت فاکتور و دریافت چک برای قادر به ذخیره با شرط آیدی
                     try { db.Execute($@"INSERT INTO dbo.PRICE_PAYNO ([PPID], [PPAME], [TR_DATE], [USERNAME], [MODAT]) VALUES (0, N'آزاد', GETDATE(), N'System', 0);"); } catch { } //برای کمبوباکس نحوه پرداخت ازاد خالی نباشه
