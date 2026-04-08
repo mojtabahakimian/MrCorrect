@@ -32,7 +32,7 @@ namespace Functions
             _propCache.GetOrAdd((type, propName), k => k.type.GetProperty(k.propName));
 
         // Excel double precision supports up to 15 significant digits.
-        // Integers beyond this range must be written as text to preserve their exact value.
+        // Any value beyond this range must be written as text to preserve its exact value.
         private static bool IsLargeNumber(object val)
         {
             const long limitL = 999_999_999_999_999L;
@@ -41,6 +41,13 @@ namespace Functions
             if (val is ulong ulv)  return ulv  > (ulong)limitL;
             // decimal with no fractional part and integer portion > 15 digits
             if (val is decimal dv) return (dv > limitD || dv < -limitD) && dv == Math.Truncate(dv);
+            // Pure numeric strings longer than 15 chars: ImportArray (Syncfusion) and EPPlus
+            // both risk converting them to double and losing the trailing digits.
+            if (val is string sv && sv.Length > 15)
+            {
+                var digits = sv.StartsWith("-") ? sv.Substring(1) : sv;
+                return digits.Length > 15 && digits.All(char.IsDigit);
+            }
             return false;
         }
 
