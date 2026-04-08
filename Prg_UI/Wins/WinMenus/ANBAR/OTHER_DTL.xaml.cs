@@ -806,6 +806,42 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
 
         private bool SaveAllSuccess()
         {
+            if (CAMIUN_NUM.Text?.Length > 100)
+            {
+                universControl.PopNotifyShowUp(".شماره ماشین نباید بیشتر از 100 کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                return false;
+            }
+            if (REQUEST_NO.Text?.Length > 10)
+            {
+                universControl.PopNotifyShowUp(".شماره درخواست نباید بیشتر از ۱۰ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                return false;
+            }
+            if (BARNAMEH.Text?.Length > 25)
+            {
+                universControl.PopNotifyShowUp(".شماره بارنامه نباید بیشتر از ۲۵ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                return false;
+            }
+            if (DRIVER.Text?.Length > 50)
+            {
+                universControl.PopNotifyShowUp(".نام راننده نباید بیشتر از ۵۰ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                return false;
+            }
+            if (DRIVER_MOB.Text?.Length > 25)
+            {
+                universControl.PopNotifyShowUp(".موبایل راننده نباید بیشتر از ۲۵ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                return false;
+            }
+            if (CAMIUN.Text?.Length > 50)
+            {
+                universControl.PopNotifyShowUp(".نوع ماشین نباید بیشتر از ۵۰ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                return false;
+            }
+            if (TOZIH.Text?.Length > 150)
+            {
+                universControl.PopNotifyShowUp(".توضیحات نباید بیشتر از ۱۵۰ کاراکتر باشد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                return false;
+            }
+
             try
             {
                 if (IsSavedHeader_OTHER_DTL()) //Succeed Saved Header
@@ -819,11 +855,12 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 }
                 else
                 {
-                    universControl.PopNotifyShowUp(".مقادیر ذخیره شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                    universControl.PopNotifyShowUp(".مقادیر ذخیره شد", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Green);
                 }
             }
             catch (Exception ex)
             {
+
                 CL_LMethods.DoWriteMyLog("Error In SaveAllSuccess() Method In Other_Dtl_CSharp", ex);
                 new Msgwin(false, "خطایی وجود دارد و امکان ذخیره نیست مجددا تلاش کنید").Show();
                 return false;

@@ -1,36 +1,69 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+
+		<!-- نوع خروجی برنامه: WinExe یعنی برنامه ویندوزی با رابط گرافیکی (بدون کنسول) -->
 		<OutputType>WinExe</OutputType>
+
+		<!-- فریمورک هدف: .NET 8 مخصوص ویندوز، با حداقل نسخه ویندوز 7 -->
 		<TargetFramework>net8.0-windows7.0</TargetFramework>
+
+		<!-- فعال‌سازی Nullable Reference Types برای جلوگیری از خطاهای Null -->
 		<Nullable>enable</Nullable>
+
+		<!-- فعال کردن پشتیبانی از WPF -->
 		<UseWPF>true</UseWPF>
+
+		<!-- فعال کردن پشتیبانی از Windows Forms (در صورتی که در پروژه استفاده شود) -->
 		<UseWindowsForms>true</UseWindowsForms>
 
-		<ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
+		<!-- نسخه فایل اجرایی (در Properties فایل exe نمایش داده می‌شود) -->
+		<FileVersion>1.0.0.199</FileVersion>
 
-		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-
-		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-
-		<ApplicationIcon>UiDrive\IMGS\MyMrCorrect.ico</ApplicationIcon>
-
-		<AssemblyVersion></AssemblyVersion>
-
-		<FileVersion>1.0.0.194</FileVersion>
-
+		<!-- عنوان برنامه که در برخی متادیتاهای ویندوز استفاده می‌شود -->
 		<Title>MrCorrect</Title>
+
+		<!-- نام اسمبلی خروجی (نام فایل exe یا dll) -->
 		<AssemblyName>MrCorrect</AssemblyName>
+
+		<!-- عنوان اسمبلی که در متادیتای اسمبلی ثبت می‌شود -->
 		<AssemblyTitle>MrCorrect</AssemblyTitle>
 
+		<!-- معماری هدف: اجرای برنامه فقط روی ویندوز 64 بیتی -->
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 
-		<PublishTrimmed>false</PublishTrimmed>
-		<EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+		<!-- جلوگیری از خطای تطابق نداشتن کتابخانه‌ها با حالت SelfContained -->
+		<ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
+
+		<!-- قرار دادن کتابخانه‌های Native داخل فایل exe و استخراج خودکار هنگام اجرا -->
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+
+		<!-- همه فایل‌های محتوا (Content) داخل exe قرار می‌گیرند و هنگام اجرا استخراج می‌شوند -->
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+
+		<!-- آیکن برنامه که روی فایل exe نمایش داده می‌شود -->
+		<ApplicationIcon>UiDrive\IMGS\MyMrCorrect.ico</ApplicationIcon>
+
+		<!-- همه وابستگی‌های NuGet در پوشه خروجی کپی می‌شوند -->
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-		<!--<PublishSingleFile>true</PublishSingleFile>-->
-		<!--<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>-->
+
+		<!-- ساخت یک فایل exe واحد (Single File Publish) -->
+		<PublishSingleFile>true</PublishSingleFile>
+
+		<!-- فشرده‌سازی فایل‌های داخل exe برای کاهش حجم (حدود 30 تا 40 درصد) -->
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+
+		<!-- Trimming حذف کدهای بلااستفاده است، اما WPF با آن مشکل دارد پس غیرفعال -->
+		<PublishTrimmed>false</PublishTrimmed>
+
+		<!-- ReadyToRun باعث سریع‌تر اجرا شدن می‌شود ولی حجم فایل را زیاد می‌کند -->
+		<PublishReadyToRun>false</PublishReadyToRun>
+
+		<!-- جلوگیری از خطا در صورت وجود فایل‌های خروجی تکراری هنگام Publish -->
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
 
 	</PropertyGroup>
+
 
 	<ItemGroup>
 		<None Remove="DLLS\AxInterop.TINYLib.dll" />

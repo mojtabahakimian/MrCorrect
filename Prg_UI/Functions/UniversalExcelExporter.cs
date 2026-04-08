@@ -31,6 +31,26 @@ namespace Functions
         private static PropertyInfo GetCachedProp(Type type, string propName) =>
             _propCache.GetOrAdd((type, propName), k => k.type.GetProperty(k.propName));
 
+        // Excel double precision supports up to 15 significant digits.
+        // Any value beyond this range must be written as text to preserve its exact value.
+        private static bool IsLargeNumber(object val)
+        {
+            const long limitL = 999_999_999_999_999L;
+            const decimal limitD = 999_999_999_999_999m;
+            if (val is long lv) return lv > limitL || lv < -limitL;
+            if (val is ulong ulv) return ulv > (ulong)limitL;
+            // decimal with no fractional part and integer portion > 15 digits
+            if (val is decimal dv) return (dv > limitD || dv < -limitD) && dv == Math.Truncate(dv);
+            // Pure numeric strings longer than 15 chars: ImportArray (Syncfusion) and EPPlus
+            // both risk converting them to double and losing the trailing digits.
+            if (val is string sv && sv.Length > 15)
+            {
+                var digits = sv.StartsWith("-") ? sv.Substring(1) : sv;
+                return digits.Length > 15 && digits.All(char.IsDigit);
+            }
+            return false;
+        }
+
         public static async Task ExportToExcelAsync(object grid, string fileName = null, bool openAfterExport = true, bool KeepTypeFormat = true)
         {
             try
@@ -199,6 +219,7 @@ namespace Functions
             var headers = new List<string>();
             object[,] dataArray = null;
             var dateColIndices = new HashSet<int>();
+            var largeNumCells = new List<(int r, int c)>();
 
             dataGrid.Dispatcher.Invoke(() =>
             {
@@ -244,6 +265,11 @@ namespace Functions
                             val = bv ? "True" : "False";
                         else if (val is DateTime)
                             dateColIndices.Add(c);
+                        else if (IsLargeNumber(val))
+                        {
+                            largeNumCells.Add((r, c));
+                            val = val.ToString();
+                        }
 
                         dataArray[r, c] = val;
                     }
@@ -273,6 +299,12 @@ namespace Functions
                     // Apply date format per column range (not per cell)
                     foreach (int ci in dateColIndices)
                         worksheet.Cells[2, ci + 1, rowCount + 1, ci + 1].Style.Numberformat.Format = "yyyy/mm/dd hh:mm:ss";
+
+                    // Apply text format to large-number cells to prevent precision loss.
+                    // Excel double precision only supports 15 significant digits; numbers beyond
+                    // that threshold must be stored as text to preserve their exact value.
+                    foreach (var (r, c) in largeNumCells)
+                        worksheet.Cells[r + 2, c + 1].Style.Numberformat.Format = "@";
                 }
 
                 worksheet.Cells.AutoFitColumns();
@@ -479,6 +511,7 @@ namespace Functions
             var headers = new List<string>();
             object[,] dataArray = null;
             var dateColIndices = new HashSet<int>();
+            var largeNumCells = new List<(int r, int c)>();
 
             dataGrid.Dispatcher.Invoke(() =>
             {
@@ -564,6 +597,11 @@ namespace Functions
                         {
                             dateColIndices.Add(c);
                         }
+                        else if (IsLargeNumber(val))
+                        {
+                            largeNumCells.Add((r, c));
+                            val = val.ToString();
+                        }
 
                         dataArray[r, c] = val;
                     }
@@ -598,6 +636,16 @@ namespace Functions
                     {
                         foreach (int ci in dateColIndices)
                             worksheet.Range[2, ci + 1, rowCount + 1, ci + 1].NumberFormat = "yyyy/mm/dd hh:mm:ss";
+                    }
+
+                    // Apply text format and rewrite large-number cells to prevent precision loss.
+                    // Excel double precision only supports 15 significant digits; numbers beyond
+                    // that threshold must be stored as text to preserve their exact value.
+                    foreach (var (r, c) in largeNumCells)
+                    {
+                        var cell = worksheet.Range[r + 2, c + 1];
+                        cell.NumberFormat = "@";
+                        cell.Text = dataArray[r, c]?.ToString() ?? "";
                     }
                 }
 
