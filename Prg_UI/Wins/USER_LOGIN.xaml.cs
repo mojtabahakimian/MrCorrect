@@ -387,11 +387,11 @@ namespace Prg_UI.Wins
             Baseknow.UGRP = "1";
             //CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
 
-            new WinBase().Show();
+            //new WinBase().Show();
             //new WIN_GETFIRSTMOG().Show();
             //new WinConnectionChoose().Show();
             //new F_MENU_DATE("CROS").Show();
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.HEAD_LST_HAVL, this);
+            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHKE_DLIST_KOLCHECKD, this);
             //new WIN_F_NEWYEAR().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this, 1642d);
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
@@ -670,6 +670,11 @@ namespace Prg_UI.Wins
                     if (!ReferenceEquals(keyreg.GetValue("DU"), null))
                     {
                         Krbri.Text = keyreg.GetValue("DU").ToString();
+
+                        if (CmbUsers.SelectedValue == null)
+                        {
+                            Krbri.Text = null;
+                        }
                     }
                 }
             }
