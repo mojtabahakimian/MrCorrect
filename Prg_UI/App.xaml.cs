@@ -691,6 +691,18 @@ namespace Prg_UI
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            // Splash را اول از همه نمایش می‌دهیم تا کاربر بلافاصله بازخورد بصری داشته باشد
+            // قبلاً بعد از ApplyTheme اجرا می‌شد که ۳۰۰-۵۰۰ms تأخیر ایجاد می‌کرد
+            #region SplashWindowy
+            ResetSplashCreated = new ManualResetEvent(false);
+            SplashThread = new Thread(ShowSplash);
+            SplashThread.SetApartmentState(ApartmentState.STA);
+            SplashThread.IsBackground = true;
+            SplashThread.Name = "Splash Screen";
+            SplashThread.Start();
+            ResetSplashCreated.WaitOne();
+            #endregion
+
             _hookID = SetHook(_proc); //Global HotKeys Initilize
 
             #region CALL_FROM_MSACCESS
@@ -755,23 +767,8 @@ namespace Prg_UI
 
             // قبل از لاگین کاربر، تم پیش‌فرض اعمال می‌شود.
             // پس از لاگین، تم واقعی از dbo.GENERAL_OPTIONS بارگذاری خواهد شد.
+            // (Splash قبلاً بالاتر، اول از همه، نمایش داده شده است)
             AppThemeManager.ApplyTheme(new AppThemeSettings());
-
-
-            #region SplashWindowy
-
-            // ManualResetEvent acts as a block.  It waits for a signal to be set.
-            ResetSplashCreated = new ManualResetEvent(false);
-            // Create a new thread for the splash screen to run on
-            SplashThread = new Thread(ShowSplash);
-            SplashThread.SetApartmentState(ApartmentState.STA);
-            SplashThread.IsBackground = true;
-            SplashThread.Name = "Splash Screen";
-            SplashThread.Start();
-            // Wait for the blocker to be signaled before continuing. This is essentially the same as: while(ResetSplashCreated.NotSet) {}
-            ResetSplashCreated.WaitOne();
-
-            #endregion
 
             //Licenses:
             try

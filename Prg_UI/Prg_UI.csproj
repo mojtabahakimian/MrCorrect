@@ -27,6 +27,8 @@
 		<PublishTrimmed>false</PublishTrimmed>
 		<EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<!-- کاهش تأخیر راه‌اندازی: کد در زمان Publish پیش‌JIT می‌شود به جای اینکه در زمان اجرا JIT شود -->
+		<PublishReadyToRun>true</PublishReadyToRun>
 		<!--<PublishSingleFile>true</PublishSingleFile>-->
 		<!--<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>-->
 
