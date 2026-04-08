@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -22,6 +23,7 @@ namespace Functions
 {
     public static class UniversalExcelExporter
     {
+        private const int ExcelMaxPreciseDigits = 15;
         private static readonly object _lockObject = new object();
 
         // Cache PropertyInfo lookups to avoid repeated reflection per cell
@@ -192,6 +194,39 @@ namespace Functions
             }
         }
 
+        private static bool ShouldExportAsTextToPreventPrecisionLoss(object value)
+        {
+            if (value == null)
+                return false;
+
+            switch (value)
+            {
+                case sbyte _:
+                case byte _:
+                case short _:
+                case ushort _:
+                case int _:
+                case uint _:
+                case long _:
+                case ulong _:
+                    return Math.Abs(Convert.ToDecimal(value, CultureInfo.InvariantCulture)) >= 1000000000000000m;
+
+                case decimal dec:
+                    return dec == decimal.Truncate(dec) && Math.Abs(dec) >= 1000000000000000m;
+
+                case string str:
+                    {
+                        var trimmed = str.Trim();
+                        if (trimmed.StartsWith("+") || trimmed.StartsWith("-"))
+                            trimmed = trimmed.Substring(1);
+
+                        return trimmed.Length > ExcelMaxPreciseDigits && trimmed.All(char.IsDigit);
+                    }
+            }
+
+            return false;
+        }
+
         private static void ExportWpfDataGrid(DataGrid dataGrid, string filePath)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -199,6 +234,7 @@ namespace Functions
             var headers = new List<string>();
             object[,] dataArray = null;
             var dateColIndices = new HashSet<int>();
+            var textColIndices = new HashSet<int>();
 
             dataGrid.Dispatcher.Invoke(() =>
             {
@@ -244,6 +280,11 @@ namespace Functions
                             val = bv ? "True" : "False";
                         else if (val is DateTime)
                             dateColIndices.Add(c);
+                        else if (ShouldExportAsTextToPreventPrecisionLoss(val))
+                        {
+                            textColIndices.Add(c);
+                            val = val?.ToStringNullSafe() ?? string.Empty;
+                        }
 
                         dataArray[r, c] = val;
                     }
@@ -273,6 +314,10 @@ namespace Functions
                     // Apply date format per column range (not per cell)
                     foreach (int ci in dateColIndices)
                         worksheet.Cells[2, ci + 1, rowCount + 1, ci + 1].Style.Numberformat.Format = "yyyy/mm/dd hh:mm:ss";
+
+                    // Prevent Excel from converting long numeric identifiers and losing precision
+                    foreach (int ci in textColIndices)
+                        worksheet.Cells[2, ci + 1, rowCount + 1, ci + 1].Style.Numberformat.Format = "@";
                 }
 
                 worksheet.Cells.AutoFitColumns();
@@ -479,6 +524,7 @@ namespace Functions
             var headers = new List<string>();
             object[,] dataArray = null;
             var dateColIndices = new HashSet<int>();
+            var textColIndices = new HashSet<int>();
 
             dataGrid.Dispatcher.Invoke(() =>
             {
@@ -564,6 +610,11 @@ namespace Functions
                         {
                             dateColIndices.Add(c);
                         }
+                        else if (ShouldExportAsTextToPreventPrecisionLoss(val))
+                        {
+                            textColIndices.Add(c);
+                            val = val?.ToStringNullSafe() ?? string.Empty;
+                        }
 
                         dataArray[r, c] = val;
                     }
@@ -598,6 +649,9 @@ namespace Functions
                     {
                         foreach (int ci in dateColIndices)
                             worksheet.Range[2, ci + 1, rowCount + 1, ci + 1].NumberFormat = "yyyy/mm/dd hh:mm:ss";
+
+                        foreach (int ci in textColIndices)
+                            worksheet.Range[2, ci + 1, rowCount + 1, ci + 1].NumberFormat = "@";
                     }
                 }
 
