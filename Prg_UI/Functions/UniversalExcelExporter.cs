@@ -35,9 +35,13 @@ namespace Functions
         // Integers beyond this range must be written as text to preserve their exact value.
         private static bool IsLargeNumber(object val)
         {
-            const long limit = 999_999_999_999_999L;
-            return (val is long lv   && (lv  >  limit || lv  < -limit)) ||
-                   (val is ulong ulv &&  ulv  > (ulong)limit);
+            const long limitL = 999_999_999_999_999L;
+            const decimal limitD = 999_999_999_999_999m;
+            if (val is long lv)    return lv  >  limitL || lv  < -limitL;
+            if (val is ulong ulv)  return ulv  > (ulong)limitL;
+            // decimal with no fractional part and integer portion > 15 digits
+            if (val is decimal dv) return (dv > limitD || dv < -limitD) && dv == Math.Truncate(dv);
+            return false;
         }
 
         public static async Task ExportToExcelAsync(object grid, string fileName = null, bool openAfterExport = true, bool KeepTypeFormat = true)
