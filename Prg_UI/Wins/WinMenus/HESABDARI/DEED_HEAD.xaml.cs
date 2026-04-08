@@ -1346,8 +1346,10 @@ WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
             }
             if (!ReferenceEquals(Comboval, null))
                 ENTERED_VALUE_ROW = Comboval.SelectedValue;
-            else
+            else if (TexboVal != null)
                 ENTERED_VALUE_ROW = TexboVal.Text.Trim();
+            else
+                ENTERED_VALUE_ROW = null;
 
             CURRENT_ITMES_ROW = e.Row.Item as DEED_DTL;
 
@@ -1553,7 +1555,7 @@ WHERE dd.N_S = {N_S.Text}").ToList(); if (Sanaddata.Count > 0)
                 if (CURRENT_ITMES_ROW.HES is not null && CURRENT_ITMES_ROW.HES != "")
                 {
                     var NAME = dbms.DoGetDataSQL<CUST_HESAB>($"SELECT hes , NAME FROM  CUST_HESAB WHERE hes = N'{CURRENT_ITMES_ROW.HES}'").ToList();
-                    CURRENT_ITMES_ROW.NAME_HES = NAME.FirstOrDefault().NAME;
+                    CURRENT_ITMES_ROW.NAME_HES = NAME.FirstOrDefault()?.NAME;
                 }
             }
 
