@@ -878,7 +878,7 @@ END CATCH;";
                     { "TCOD_ANBAR", "CODE, NAMES, KIND" },
                     { "TCOD_BANKS", "CODE, NAMES, TEJ_C, MEL_C, SAD_C, MLA_C, REF_C, TOS_C, KES_C, KAR_C, POS_C, TAT_C, SEP_C, TSA_C, SAN_C, MAS_C, EGH_C, PAR_C, PAS_C, DEY_C, SAM_C, SAR_C, SIN_C, SHA_C" },
                     { "STUF_DEF", "CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F, DEPART, CMBAA, VAZN, OKF, MENUIT, MEGHTA, MEGHJAY, PGID, BARCODE,sstid,mu,vra" },
-                    { "DEPART", "DEPATMAN, DEPNAME" },
+                    { "DEPART", "DEPATMAN, DEPNAME, DEPART, PCODE,BBC" },
                     { "SHARH", "SHARH" },
                     { "OPANBACCESS", "USERCO, ANBCO" },
                     { "SIGN_TRAN", "NUMBER, TAG, SGN_ID, SGN_USER_NAME, SGN_DATE, SGN_TIME" },

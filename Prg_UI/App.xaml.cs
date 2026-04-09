@@ -689,6 +689,57 @@ namespace Prg_UI
         }
         #endregion
 
+        public App()
+        {
+            #region SplashWindowy
+
+            // ManualResetEvent acts as a block.  It waits for a signal to be set.
+            ResetSplashCreated = new ManualResetEvent(false);
+            // Create a new thread for the splash screen to run on
+            SplashThread = new Thread(ShowSplash);
+            SplashThread.SetApartmentState(ApartmentState.STA);
+            SplashThread.IsBackground = true;
+            SplashThread.Name = "Splash Screen";
+            SplashThread.Start();
+            // Wait for the blocker to be signaled before continuing. This is essentially the same as: while(ResetSplashCreated.NotSet) {}
+            ResetSplashCreated.WaitOne();
+
+            #endregion
+        }
+
+        private static bool _applicationResourcesLoaded;
+        private static void EnsureApplicationResourcesLoaded()
+        {
+            if (_applicationResourcesLoaded)
+            {
+                return;
+            }
+
+            string[] deferredResourceUris =
+            {
+                "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml",
+                "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml",
+                "pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.LightBlue.xaml",
+                "pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Secondary/MaterialDesignColor.LightBlue.xaml",
+                "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ObsoleteBrushes.xaml",
+                "pack://application:,,,/UiDictionary/Greeny.xaml",
+                "pack://application:,,,/UiDictionary/Rangy.xaml",
+                "pack://application:,,,/UiDictionary/ColorModel.xaml",
+                "pack://application:,,,/UiDictionary/GlobalSoftTheme.xaml",
+                "pack://application:,,,/Syncfusion.SfGrid.WPF;component/Themes/Generic.xaml"
+            };
+
+            foreach (string resourceUri in deferredResourceUris)
+            {
+                Current.Resources.MergedDictionaries.Add(new ResourceDictionary
+                {
+                    Source = new Uri(resourceUri, UriKind.Absolute)
+                });
+            }
+
+            _applicationResourcesLoaded = true;
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             _hookID = SetHook(_proc); //Global HotKeys Initilize
@@ -755,23 +806,9 @@ namespace Prg_UI
 
             // قبل از لاگین کاربر، تم پیش‌فرض اعمال می‌شود.
             // پس از لاگین، تم واقعی از dbo.GENERAL_OPTIONS بارگذاری خواهد شد.
-            AppThemeManager.ApplyTheme(new AppThemeSettings());
+            ////AppThemeManager.ApplyTheme(new AppThemeSettings());
 
-
-            #region SplashWindowy
-
-            // ManualResetEvent acts as a block.  It waits for a signal to be set.
-            ResetSplashCreated = new ManualResetEvent(false);
-            // Create a new thread for the splash screen to run on
-            SplashThread = new Thread(ShowSplash);
-            SplashThread.SetApartmentState(ApartmentState.STA);
-            SplashThread.IsBackground = true;
-            SplashThread.Name = "Splash Screen";
-            SplashThread.Start();
-            // Wait for the blocker to be signaled before continuing. This is essentially the same as: while(ResetSplashCreated.NotSet) {}
-            ResetSplashCreated.WaitOne();
-
-            #endregion
+            ////EnsureApplicationResourcesLoaded();
 
             //Licenses:
             try
