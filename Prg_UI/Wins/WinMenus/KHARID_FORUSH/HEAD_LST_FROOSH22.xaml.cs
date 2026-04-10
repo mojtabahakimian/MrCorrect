@@ -3864,6 +3864,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 return;
             }
+            var currentMeghk = CURRENT_ROW_ITEMS.MEGHk.GetValueOrDefault();
+            var currentMeghMar = CURRENT_ROW_ITEMS.MEGH_MAR.GetValueOrDefault();
+            var wasMeghk = WAS_ROW_ITEM?.MEGHk.GetValueOrDefault() ?? 0;
 
             #region MEGH_AfterUpdate
             double min;
@@ -3934,7 +3937,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     {
                         var mandValue = RSTM0.FirstOrDefault();
                         MAND = mandValue.GetValueOrDefault();
-                        if (Math.Round((double)(mandValue.GetValueOrDefault() - (CURRENT_ROW_ITEMS.MEGHk - (Conversion.Val(WAS_ROW_ITEM.MEGHk/*.TAG*/) - CURRENT_ROW_ITEMS.MEGH_MAR))), (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && CURRENT_ROW_ITEMS.ANBAR != 0 && Baseknow.MOJU)
+                        if (Math.Round((double)(mandValue.GetValueOrDefault() - (currentMeghk - (wasMeghk - currentMeghMar))), (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && CURRENT_ROW_ITEMS.ANBAR != 0 && Baseknow.MOJU)
                         {
                             Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد.");
                             msgwin.ShowDialog();
@@ -3960,7 +3963,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                             var _where = " WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "' AND ANBAR = " + CURRENT_ROW_ITEMS.ANBAR;
                             if (RSTM2.Count > 0)
                             {
-                                RSTM2.FirstOrDefault().MOGODI = MAND - (CURRENT_ROW_ITEMS.MEGHk - (Conversion.Val(WAS_ROW_ITEM.MEGHk/*.TAG*/) - CURRENT_ROW_ITEMS.MEGH_MAR));
+                                RSTM2.FirstOrDefault().MOGODI = MAND - (currentMeghk - (wasMeghk - currentMeghMar));
                                 RSTM2.FirstOrDefault().MOGODI_A = 0;
                                 //dbms.DoExecuteSQL($"UPDATE dbo.STUF_STK SET MOGODI = {RSTM2.FirstOrDefault().MOGODI},MOGODI_A = 0 {_where}");
                                 //در اینجا موجودی بروز نمیشود فقط بررسی میشود
@@ -3980,7 +3983,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     }
                     else if (CURRENT_ROW_ITEMS.CODE == WAS_ROW_ITEM.CODE/*.TAG*/)
                     {
-                        if (RSTM3.FirstOrDefault().MOGODI + RSTM3.FirstOrDefault().MOGODI_A - (CURRENT_ROW_ITEMS.MEGHk - (Conversion.Val(WAS_ROW_ITEM.MEGHk/*.TAG*/) - CURRENT_ROW_ITEMS.MEGH_MAR)) < min && Baseknow.MOJU)
+                        if (RSTM3.FirstOrDefault().MOGODI + RSTM3.FirstOrDefault().MOGODI_A - (currentMeghk - (wasMeghk - currentMeghMar)) < min && Baseknow.MOJU)
                         {
                             Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد.");
                             msgwin.ShowDialog();
@@ -3990,7 +3993,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                             chek = true;
                         }
                     }
-                    else if (RSTM3.FirstOrDefault().MOGODI + RSTM3.FirstOrDefault().MOGODI_A - (CURRENT_ROW_ITEMS.MEGHk - CURRENT_ROW_ITEMS.MEGH_MAR) < min && Baseknow.MOJU)
+                    else if (RSTM3.FirstOrDefault().MOGODI + RSTM3.FirstOrDefault().MOGODI_A - (currentMeghk - currentMeghMar) < min && Baseknow.MOJU)
                     {
                         Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد.");
                         msgwin.ShowDialog();

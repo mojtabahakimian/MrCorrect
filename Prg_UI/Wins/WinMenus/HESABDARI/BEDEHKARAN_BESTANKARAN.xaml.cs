@@ -127,6 +127,12 @@ namespace Wins.WinMenus.HESABDARI
 
             FACTOR_DATA?.Clear();
             System.Collections.Generic.List<Q_BEDEHBESTANH_MAIN> MasterHead = null;
+            bool hasJalaliFunction = dbms.DoGetDataSQL<int>(
+                "SELECT COUNT(1) FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.fn_JalaliIntToGregorianDate') AND type IN (N'FN', N'IF', N'TF')")
+                .FirstOrDefault() > 0;
+            string balanceOriginDateExpression = hasJalaliFunction
+                ? "dbo.fn_JalaliIntToGregorianDate(balanceOrigin.BALANCE_DATE)"
+                : "NULL";
 
             Process Prc = Prg_UI.Functions.CL_LMethods.ProcLoader.Start();
 
@@ -143,7 +149,7 @@ namespace Wins.WinMenus.HESABDARI
                                WHEN balanceOrigin.BALANCE_DATE IS NULL THEN NULL 
                                ELSE DATEDIFF( 
                                        DAY, 
-                                       dbo.fn_JalaliIntToGregorianDate(balanceOrigin.BALANCE_DATE), 
+                                       {balanceOriginDateExpression}, 
                                        CONVERT(DATETIME, CONVERT(DATE, GETDATE())) 
                                     ) 
                            END AS DAYS_FROM_BALANCE_ORIGIN,
@@ -220,14 +226,14 @@ namespace Wins.WinMenus.HESABDARI
             {
                 ////MasterHead = dbms.DoGetDataSQL<Q_BEDEHBESTANH_MAIN>("SELECT * FROM Q_BEDEHBESTANH_MAIN OPTION (FORCE ORDER, QUERYTRACEON 2312)").ToList();
 
-                const string fullQuery = @"
+                string fullQuery = $@"
                              SELECT main.*, 
                                     balanceOrigin.BALANCE_DATE AS LAST_DEED_DATE,
                                     CASE 
                                         WHEN balanceOrigin.BALANCE_DATE IS NULL THEN NULL 
                                         ELSE DATEDIFF( 
                                                 DAY, 
-                                                dbo.fn_JalaliIntToGregorianDate(balanceOrigin.BALANCE_DATE), 
+                                                {balanceOriginDateExpression}, 
                                                 CONVERT(DATETIME, CONVERT(DATE, GETDATE())) 
                                              ) 
                                     END AS DAYS_FROM_BALANCE_ORIGIN,
