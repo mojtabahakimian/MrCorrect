@@ -28,6 +28,11 @@
 
 		<!-- عنوان اسمبلی که در متادیتای اسمبلی ثبت می‌شود -->
 		<AssemblyTitle>MrCorrect</AssemblyTitle>
+		
+		<!-- آیکن برنامه که روی فایل exe نمایش داده می‌شود -->
+		<ApplicationIcon>UiDrive\IMGS\MyMrCorrect.ico</ApplicationIcon>
+		
+		<!--_______________________________________________________Seprator_______________________________________________________-->
 
 		<!-- معماری هدف: اجرای برنامه فقط روی ویندوز 64 بیتی -->
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
@@ -41,9 +46,6 @@
 		<!-- همه فایل‌های محتوا (Content) داخل exe قرار می‌گیرند و هنگام اجرا استخراج می‌شوند -->
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
 
-		<!-- آیکن برنامه که روی فایل exe نمایش داده می‌شود -->
-		<ApplicationIcon>UiDrive\IMGS\MyMrCorrect.ico</ApplicationIcon>
-
 		<!-- همه وابستگی‌های NuGet در پوشه خروجی کپی می‌شوند -->
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 
@@ -51,7 +53,7 @@
 		<PublishSingleFile>true</PublishSingleFile>
 
 		<!-- فشرده‌سازی فایل‌های داخل exe برای کاهش حجم (حدود 30 تا 40 درصد) -->
-		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+		<EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
 
 		<!-- Trimming حذف کدهای بلااستفاده است، اما WPF با آن مشکل دارد پس غیرفعال -->
 		<PublishTrimmed>false</PublishTrimmed>
@@ -60,7 +62,7 @@
 		<PublishReadyToRun>false</PublishReadyToRun>
 
 		<!-- جلوگیری از خطا در صورت وجود فایل‌های خروجی تکراری هنگام Publish -->
-		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+		<!--<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>-->
 
 	</PropertyGroup>
 

@@ -3864,6 +3864,9 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 return;
             }
+            var currentMeghk = CURRENT_ROW_ITEMS.MEGHk.GetValueOrDefault();
+            var currentMeghMar = CURRENT_ROW_ITEMS.MEGH_MAR.GetValueOrDefault();
+            var wasMeghk = WAS_ROW_ITEM?.MEGHk.GetValueOrDefault() ?? 0;
 
             #region MEGH_AfterUpdate
             double min;
@@ -3934,7 +3937,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     {
                         var mandValue = RSTM0.FirstOrDefault();
                         MAND = mandValue.GetValueOrDefault();
-                        if (Math.Round((double)(mandValue.GetValueOrDefault() - (CURRENT_ROW_ITEMS.MEGHk - (Conversion.Val(WAS_ROW_ITEM.MEGHk/*.TAG*/) - CURRENT_ROW_ITEMS.MEGH_MAR))), (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && CURRENT_ROW_ITEMS.ANBAR != 0 && Baseknow.MOJU)
+                        if (Math.Round((double)(mandValue.GetValueOrDefault() - (currentMeghk - (wasMeghk - currentMeghMar))), (int)Baseknow.DIG) < Math.Round(min, (int)Baseknow.DIG) && CURRENT_ROW_ITEMS.ANBAR != 0 && Baseknow.MOJU)
                         {
                             Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد.");
                             msgwin.ShowDialog();
@@ -3960,7 +3963,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                             var _where = " WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "' AND ANBAR = " + CURRENT_ROW_ITEMS.ANBAR;
                             if (RSTM2.Count > 0)
                             {
-                                RSTM2.FirstOrDefault().MOGODI = MAND - (CURRENT_ROW_ITEMS.MEGHk - (Conversion.Val(WAS_ROW_ITEM.MEGHk/*.TAG*/) - CURRENT_ROW_ITEMS.MEGH_MAR));
+                                RSTM2.FirstOrDefault().MOGODI = MAND - (currentMeghk - (wasMeghk - currentMeghMar));
                                 RSTM2.FirstOrDefault().MOGODI_A = 0;
                                 //dbms.DoExecuteSQL($"UPDATE dbo.STUF_STK SET MOGODI = {RSTM2.FirstOrDefault().MOGODI},MOGODI_A = 0 {_where}");
                                 //در اینجا موجودی بروز نمیشود فقط بررسی میشود
@@ -3980,7 +3983,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     }
                     else if (CURRENT_ROW_ITEMS.CODE == WAS_ROW_ITEM.CODE/*.TAG*/)
                     {
-                        if (RSTM3.FirstOrDefault().MOGODI + RSTM3.FirstOrDefault().MOGODI_A - (CURRENT_ROW_ITEMS.MEGHk - (Conversion.Val(WAS_ROW_ITEM.MEGHk/*.TAG*/) - CURRENT_ROW_ITEMS.MEGH_MAR)) < min && Baseknow.MOJU)
+                        if (RSTM3.FirstOrDefault().MOGODI + RSTM3.FirstOrDefault().MOGODI_A - (currentMeghk - (wasMeghk - currentMeghMar)) < min && Baseknow.MOJU)
                         {
                             Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد.");
                             msgwin.ShowDialog();
@@ -3990,7 +3993,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                             chek = true;
                         }
                     }
-                    else if (RSTM3.FirstOrDefault().MOGODI + RSTM3.FirstOrDefault().MOGODI_A - (CURRENT_ROW_ITEMS.MEGHk - CURRENT_ROW_ITEMS.MEGH_MAR) < min && Baseknow.MOJU)
+                    else if (RSTM3.FirstOrDefault().MOGODI + RSTM3.FirstOrDefault().MOGODI_A - (currentMeghk - currentMeghMar) < min && Baseknow.MOJU)
                     {
                         Msgwin msgwin = new Msgwin(false, "خروج كالا از انبار موجودي را به مقدار غير مجاز كاهش ميدهد.");
                         msgwin.ShowDialog();
@@ -4024,7 +4027,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
             CURRENT_ROW_ITEMS.AVRAGE = CL_HESABDARI.LASTAVRAGE(CURRENT_ROW_ITEMS.CODE, Convert.ToInt64(CURRENT_ROW_ITEMS.ANBAR), Convert.ToInt64(DATE_N.Text.ToRawTarikh()));
             CURRENT_ROW_ITEMS.N_MOIN = Math.Round((double)(CURRENT_ROW_ITEMS.N_KOL * CURRENT_ROW_ITEMS.MABL_K / 100)) + Math.Round((double)((CURRENT_ROW_ITEMS.MABL_K - Math.Round((double)(CURRENT_ROW_ITEMS.N_KOL * CURRENT_ROW_ITEMS.MABL_K / 100))) * CURRENT_ROW_ITEMS.TKHN / 100));
-            if ((bool)TICMBAA.IsChecked)
+            if ((TICMBAA.IsChecked ?? false))
             {
                 var RSTM7 = dbms.DoGetDataSQL<HLF2>("SELECT CMBAA ,CODE FROM STUF_DEF WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "'").ToList();
                 if (RSTM7.Count > 0)
@@ -4095,7 +4098,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             var tkhn_safe = ROW.TKHN.GetValueOrDefault();
 
             ROW.N_MOIN = Math.Round(n_kol_safe * mabl_k_safe / 100) + Math.Round((mabl_k_safe - Math.Round(n_kol_safe * mabl_k_safe / 100)) * tkhn_safe / 100); //#Changed 2024
-            if ((bool)TICMBAA.IsChecked)
+            if ((TICMBAA.IsChecked ?? false))
             {
                 var RSTT = dbms.DoGetDataSQL<HLF2>("SELECT CMBAA ,CODE FROM STUF_DEF WHERE CODE = '" + ROW.CODE + "'").ToList();
                 if (RSTT.Count > 0)
@@ -4239,7 +4242,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 }
             }
 
-            if ((bool)TICMBAA.IsChecked)
+            if ((TICMBAA.IsChecked ?? false))
             {
                 var RSTC6 = dbms.DoGetDataSQL<CUSTOM_STUF_DEF_2>("select CMBAA ,code from STUF_DEF where code = '" + ROW.CODE + "'").ToList();
                 if (RSTC6.Count > 0)
@@ -5746,7 +5749,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                                 THECELL1.IsTabStop = false;
                         }
                         CURRENT_ROW_ITEMS.N_MOIN = Math.Round((double)(CURRENT_ROW_ITEMS.N_KOL * CURRENT_ROW_ITEMS.MABL_K / 100)) + Math.Round((double)((CURRENT_ROW_ITEMS.MABL_K - Math.Round((double)(CURRENT_ROW_ITEMS.N_KOL * CURRENT_ROW_ITEMS.MABL_K / 100))) * CURRENT_ROW_ITEMS.TKHN / 100));
-                        if ((bool)TICMBAA.IsChecked)
+                        if ((TICMBAA.IsChecked ?? false))
                         {
                             var RST = dbms.DoGetDataSQL<HLF2>("SELECT CMBAA ,CODE FROM STUF_DEF WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "'").ToList();
                             if (RST.Count > 0)
@@ -5844,7 +5847,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                         }
                         #region TKHN_AfterUpdate
                         CURRENT_ROW_ITEMS.N_MOIN = Math.Round((double)(CURRENT_ROW_ITEMS.N_KOL * CURRENT_ROW_ITEMS.MABL_K / 100)) + Math.Round((double)((CURRENT_ROW_ITEMS.MABL_K - Math.Round((double)(CURRENT_ROW_ITEMS.N_KOL * CURRENT_ROW_ITEMS.MABL_K / 100))) * CURRENT_ROW_ITEMS.TKHN / 100));
-                        if ((bool)TICMBAA.IsChecked)
+                        if ((TICMBAA.IsChecked ?? false))
                         {
                             var RST = dbms.DoGetDataSQL<HLF2>("SELECT CMBAA ,CODE FROM STUF_DEF WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "'").ToList();
                             if (RST.Count > 0)
@@ -5908,7 +5911,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
                             #region N_KOL_AfterUpdate
                             CURRENT_ROW_ITEMS.N_MOIN = Math.Round((double)(CURRENT_ROW_ITEMS.N_KOL * CURRENT_ROW_ITEMS.MABL_K / 100)) + Math.Round((double)((CURRENT_ROW_ITEMS.MABL_K - Math.Round((double)(CURRENT_ROW_ITEMS.N_KOL * CURRENT_ROW_ITEMS.MABL_K / 100))) * CURRENT_ROW_ITEMS.TKHN / 100));
-                            if ((bool)TICMBAA.IsChecked)
+                            if ((TICMBAA.IsChecked ?? false))
                             {
                                 var RST = dbms.DoGetDataSQL<HLF2>("SELECT CMBAA ,CODE FROM STUF_DEF WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "'").ToList();
                                 if (RST.Count > 0)
@@ -5975,7 +5978,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                                 CURRENT_ROW_ITEMS.N_KOL = 0;
                                 CURRENT_ROW_ITEMS.TKHN = 0;
                             }
-                            if ((bool)TICMBAA.IsChecked)
+                            if ((TICMBAA.IsChecked ?? false))
                             {
                                 var RST = dbms.DoGetDataSQL<HLF2>("SELECT CMBAA ,CODE FROM STUF_DEF WHERE CODE = '" + CURRENT_ROW_ITEMS.CODE + "'").ToList();
                                 if (RST.Count > 0)
@@ -6147,7 +6150,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             }
             Rowy.AVRAGE = CL_HESABDARI.LASTAVRAGE(Rowy.CODE, (long)Rowy.ANBAR, Convert.ToInt64(DATE_N.Text.ToRawTarikh()));
             Rowy.N_MOIN = Math.Round((double)(Rowy.N_KOL * Rowy.MABL_K / 100)) + Math.Round((double)((Rowy.MABL_K - Math.Round((double)(Rowy.N_KOL * Rowy.MABL_K / 100))) * Rowy.TKHN / 100));
-            if ((bool)TICMBAA.IsChecked)
+            if ((TICMBAA.IsChecked ?? false))
             {
                 var RST = dbms.DoGetDataSQL<HLF2>("SELECT CMBAA ,CODE FROM STUF_DEF WHERE CODE = '" + Rowy.CODE + "'").ToList();
                 if (RST.Count > 0)
@@ -8872,7 +8875,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
         private void M_NAGHD_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            //CL_HESABDARI.APLAYTAKH(Convert.ToInt64(NUMBER.Text), 2, Convert.ToDouble(M_NAGHD.Text), Convert.ToDouble(MABL_VAR.Text), Convert.ToDouble(MABL_HAV.Text), (bool)TICMBAA.IsChecked); //#Check Matter این باید توی حالت دکمه ذخیره فعال بشه
+            //CL_HESABDARI.APLAYTAKH(Convert.ToInt64(NUMBER.Text), 2, Convert.ToDouble(M_NAGHD.Text), Convert.ToDouble(MABL_VAR.Text), Convert.ToDouble(MABL_HAV.Text), (TICMBAA.IsChecked ?? false)); //#Check Matter این باید توی حالت دکمه ذخیره فعال بشه
         }
 
         private void MABL_HAV2_AfterUpdate()
@@ -8886,7 +8889,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 this.MOIN_HAV2.Text = "";
             }
-            //CL_HESABDARI.APLAYTAKH(Convert.ToInt64(NUMBER.Text), 2, Convert.ToDouble(M_NAGHD.Text), Convert.ToDouble(MABL_VAR.Text), Convert.ToDouble(MABL_HAV.Text), (bool)TICMBAA.IsChecked); //#CheckMatter
+            //CL_HESABDARI.APLAYTAKH(Convert.ToInt64(NUMBER.Text), 2, Convert.ToDouble(M_NAGHD.Text), Convert.ToDouble(MABL_VAR.Text), Convert.ToDouble(MABL_HAV.Text), (TICMBAA.IsChecked ?? false)); //#CheckMatter
         }
 
         private void MABL_VAR2_AfterUpdate()
@@ -12457,7 +12460,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             {
                 this.MOIN_HAV.Text = "";
             }
-            //CL_HESABDARI.APLAYTAKH(Convert.ToInt64(NUMBER.Text), 2, Convert.ToDouble(M_NAGHD.Text), Convert.ToDouble(MABL_VAR.Text), Convert.ToDouble(MABL_HAV.Text), (bool)TICMBAA.IsChecked); //#CheckMatter
+            //CL_HESABDARI.APLAYTAKH(Convert.ToInt64(NUMBER.Text), 2, Convert.ToDouble(M_NAGHD.Text), Convert.ToDouble(MABL_VAR.Text), Convert.ToDouble(MABL_HAV.Text), (TICMBAA.IsChecked ?? false)); //#CheckMatter
         }
 
         private void TAKHFIF_NumericLostFocus(object sender, RoutedEventArgs e)
