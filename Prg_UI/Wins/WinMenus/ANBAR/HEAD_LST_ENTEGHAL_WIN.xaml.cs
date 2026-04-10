@@ -2284,7 +2284,9 @@ namespace Wins.WinMenus.ANBAR
                 return;
             }
 
-            var rst = dbms.DoGetDataSQL<STUF_STK>($"SELECT * FROM STUF_STK WHERE CODE = {CURRENT_ITMES_ROW.CODE} AND ANBAR = {ANBAR.SelectedValue}").ToList();
+            var rst = dbms.DoGetDataSQL<STUF_STK>(
+                "SELECT * FROM STUF_STK WHERE CODE = @code AND ANBAR = @anbar",
+                new { code = CURRENT_ITMES_ROW.CODE, anbar = ANBAR.SelectedValue }).ToList();
             if (rst.Count == 0)
             {
                 Msgwin msgwin = new Msgwin(false, "كالا به انبار فوق تعلق ندارد.");
@@ -2312,7 +2314,14 @@ namespace Wins.WinMenus.ANBAR
             }
             else if (CURRENT_ITMES_ROW.CODE != WAS_ROW_ITEM.CODE)
             {
-                var rst = dbms.DoGetDataSQL<STUF_STK>($"SELECT * FROM STUF_STK WHERE CODE = {WAS_ROW_ITEM.CODE} AND ANBAR = {ANBAR.SelectedValue}").ToList();
+                if (string.IsNullOrWhiteSpace(WAS_ROW_ITEM.CODE))
+                {
+                    return;
+                }
+
+                var rst = dbms.DoGetDataSQL<STUF_STK>(
+                    "SELECT * FROM STUF_STK WHERE CODE = @code AND ANBAR = @anbar",
+                    new { code = WAS_ROW_ITEM.CODE, anbar = ANBAR.SelectedValue }).ToList();
 
                 if (rst.Count == 0)
                 {
@@ -2325,7 +2334,9 @@ namespace Wins.WinMenus.ANBAR
 
                     rst.FirstOrDefault().MOGODI = Convert.ToDouble(rst.FirstOrDefault().MOGODI + WAS_ROW_ITEM.MEGHk - CURRENT_ITMES_ROW.MEGH_MAR);
 
-                    dbms.DoExecuteSQL($"UPDATE STUF_STK SET MOGODI = {rst.FirstOrDefault().MOGODI} WHERE CODE = {WAS_ROW_ITEM.CODE} AND ANBAR = {ANBAR.SelectedValue}");
+                    dbms.DoExecuteSQL(
+                        "UPDATE STUF_STK SET MOGODI = @mogodi WHERE CODE = @code AND ANBAR = @anbar",
+                        new { mogodi = rst.FirstOrDefault().MOGODI, code = WAS_ROW_ITEM.CODE, anbar = ANBAR.SelectedValue });
 
                     WAS_ROW_ITEM.MEGHk = 0;
                 }
@@ -2333,7 +2344,9 @@ namespace Wins.WinMenus.ANBAR
             min = CL_HESABDARI.Getmin(Convert.ToInt32(this.ANBAR.SelectedValue), CURRENT_ITMES_ROW.CODE);
 
 
-            var rst_second = dbms.DoGetDataSQL<STUF_STK>($"SELECT * FROM STUF_STK WHERE CODE = {CURRENT_ITMES_ROW.CODE} AND ANBAR = {ANBAR.SelectedValue}").ToList();
+            var rst_second = dbms.DoGetDataSQL<STUF_STK>(
+                "SELECT * FROM STUF_STK WHERE CODE = @code AND ANBAR = @anbar",
+                new { code = CURRENT_ITMES_ROW.CODE, anbar = ANBAR.SelectedValue }).ToList();
             if (rst_second.Count == 0)
             {
                 Msgwin msgwin = new Msgwin(false, "كالا به انبار فوق تعلق ندارد.");
@@ -2352,21 +2365,22 @@ namespace Wins.WinMenus.ANBAR
                 {
                     rst_second.FirstOrDefault().MOGODI = Convert.ToDouble(rst_second.FirstOrDefault().MOGODI - CURRENT_ITMES_ROW.MEGHk - WAS_ROW_ITEM.MEGHk - CURRENT_ITMES_ROW.MEGH_MAR);
 
-                    dbms.DoExecuteSQL($"UPDATE STUF_STK SET MOGODI = {rst_second.FirstOrDefault().MOGODI} WHERE CODE = {WAS_ROW_ITEM.CODE} AND ANBAR = {ANBAR.SelectedValue}");
+                    dbms.DoExecuteSQL(
+                        "UPDATE STUF_STK SET MOGODI = @mogodi WHERE CODE = @code AND ANBAR = @anbar",
+                        new { mogodi = rst_second.FirstOrDefault().MOGODI, code = CURRENT_ITMES_ROW.CODE, anbar = ANBAR.SelectedValue });
 
                 }
             }
             if (!chek && !((bool)Baseknow.RMOG && !IsNull(Baseknow.RMOG)))
             {
-                var RST2 = dbms.DoGetDataSQL<STUF_STK>($"SELECT * FROM STUF_STK WHERE CODE = {CURRENT_ITMES_ROW.CODE} AND ANBAR = {ANBARF.SelectedValue}").ToList();
+                var RST2 = dbms.DoGetDataSQL<STUF_STK>(
+                    "SELECT * FROM STUF_STK WHERE CODE = @code AND ANBAR = @anbar",
+                    new { code = CURRENT_ITMES_ROW.CODE, anbar = ANBARF.SelectedValue }).ToList();
                 if (RST2.Count == 0)
                 {
-
-                    RST2.FirstOrDefault().CODE = CURRENT_ITMES_ROW.CODE;
-                    RST2.FirstOrDefault().ANBAR = Convert.ToInt32(ANBARF.SelectedValue);
-                    RST2.FirstOrDefault().MOGODI = Convert.ToDouble(CURRENT_ITMES_ROW.MEGHk);
-
-                    dbms.DoExecuteSQL($"INSERT INTO STUF_STK (CODE , ANBAR ,MOGODI) VALUES({RST2.FirstOrDefault().CODE},{RST2.FirstOrDefault().ANBAR},{RST2.FirstOrDefault().MOGODI})");
+                    dbms.DoExecuteSQL(
+                        "INSERT INTO STUF_STK (CODE , ANBAR ,MOGODI) VALUES(@code,@anbar,@mogodi)",
+                        new { code = CURRENT_ITMES_ROW.CODE, anbar = ANBARF.SelectedValue, mogodi = Convert.ToDouble(CURRENT_ITMES_ROW.MEGHk) });
 
                 }
                 else if (RST2.FirstOrDefault().MOGODI + RST2.FirstOrDefault().MOGODI_A + CURRENT_ITMES_ROW.MEGHk - WAS_ROW_ITEM.MEGHk - CURRENT_ITMES_ROW.MEGH_MAR < min && Baseknow.MOJU)
@@ -2382,7 +2396,9 @@ namespace Wins.WinMenus.ANBAR
 
                     RST2.FirstOrDefault().MOGODI = Convert.ToDouble(RST2.FirstOrDefault().MOGODI + CURRENT_ITMES_ROW.MEGHk - WAS_ROW_ITEM.MEGHk - CURRENT_ITMES_ROW.MEGH_MAR);
 
-                    dbms.DoExecuteSQL($"UPDATE STUF_STK SET MOGODI = {RST2.FirstOrDefault().MOGODI} WHERE CODE = {WAS_ROW_ITEM.CODE} AND ANBAR = {ANBAR.SelectedValue}");
+                    dbms.DoExecuteSQL(
+                        "UPDATE STUF_STK SET MOGODI = @mogodi WHERE CODE = @code AND ANBAR = @anbar",
+                        new { mogodi = RST2.FirstOrDefault().MOGODI, code = CURRENT_ITMES_ROW.CODE, anbar = ANBARF.SelectedValue });
                 }
             }
             SANAD();

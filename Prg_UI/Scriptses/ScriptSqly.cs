@@ -7,6 +7,7 @@ using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using static Stimulsoft.Report.Func;
 using static Stimulsoft.Report.StiOptions;
@@ -24,6 +25,13 @@ namespace Prg_UI.Scriptses
             using (var db = new SqlConnection(CL_CCNNMANAGER.CONNECTION_STR))
             {
                 //try { db.Execute($@""); } catch { }
+
+                var SanadCount = db.Query<double?>("SELECT COUNT(*) FROM dbo.DEED_HED").FirstOrDefault();
+
+                if (SanadCount == null || SanadCount <= 0)
+                {
+                    isCustomCall = true;
+                }
 
                 if (isCustomCall)
                 {
