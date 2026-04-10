@@ -1,7 +1,7 @@
 ﻿using Prg_UI.Functions;
 using System.Windows;
 
-namespace Prg_UI.SplashScreen
+namespace Prg_UI.MySplashScreen
 {
     public partial class WinSplashy : Window, ISplashScreen
     {

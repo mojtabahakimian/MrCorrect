@@ -44,7 +44,8 @@
 		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
 
 		<!-- همه فایل‌های محتوا (Content) داخل exe قرار می‌گیرند و هنگام اجرا استخراج می‌شوند -->
-		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+		<!--Suspected to this option: (suggest to set IncludeAllContentForSelfExtract = false)-->
+		<IncludeAllContentForSelfExtract>false</IncludeAllContentForSelfExtract>
 
 		<!-- همه وابستگی‌های NuGet در پوشه خروجی کپی می‌شوند -->
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
