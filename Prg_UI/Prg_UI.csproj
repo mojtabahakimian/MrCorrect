@@ -53,7 +53,7 @@
 		<PublishSingleFile>true</PublishSingleFile>
 
 		<!-- فشرده‌سازی فایل‌های داخل exe برای کاهش حجم (حدود 30 تا 40 درصد) -->
-		<EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
 
 		<!-- Trimming حذف کدهای بلااستفاده است، اما WPF با آن مشکل دارد پس غیرفعال -->
 		<PublishTrimmed>false</PublishTrimmed>
