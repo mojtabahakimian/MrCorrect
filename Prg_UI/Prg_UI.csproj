@@ -46,7 +46,8 @@
 
 		<!-- همه فایل‌های محتوا (Content) داخل exe قرار می‌گیرند و هنگام اجرا استخراج می‌شوند -->
 		<!--Suspected to this option: (suggest to set IncludeAllContentForSelfExtract = false)-->
-		<IncludeAllContentForSelfExtract>false</IncludeAllContentForSelfExtract>
+		<!--مشکلی که ایجاد میکنه اینه که بعیضی از ستون ها در ریپورتی مثل کارت انبار مثل ستون موجودی میپره !-->
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
 
 		<!-- همه وابستگی‌های NuGet در پوشه خروجی کپی می‌شوند -->
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
