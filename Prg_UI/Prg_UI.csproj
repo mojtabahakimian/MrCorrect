@@ -28,10 +28,10 @@
 
 		<!-- عنوان اسمبلی که در متادیتای اسمبلی ثبت می‌شود -->
 		<AssemblyTitle>MrCorrect</AssemblyTitle>
-		
+
 		<!-- آیکن برنامه که روی فایل exe نمایش داده می‌شود -->
 		<ApplicationIcon>UiDrive\IMGS\MyMrCorrect.ico</ApplicationIcon>
-		
+
 		<!--_______________________________________________________Seprator_______________________________________________________-->
 
 		<!-- معماری هدف: اجرای برنامه فقط روی ویندوز 64 بیتی -->
@@ -41,6 +41,7 @@
 		<ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
 
 		<!-- قرار دادن کتابخانه‌های Native داخل فایل exe و استخراج خودکار هنگام اجرا -->
+		<!--این مخصوص exe اتوباز و یکسری dll های خود wpf هست-->
 		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
 
 		<!-- همه فایل‌های محتوا (Content) داخل exe قرار می‌گیرند و هنگام اجرا استخراج می‌شوند -->
