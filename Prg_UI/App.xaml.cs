@@ -2,7 +2,6 @@
 using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_Proccessy.Generaly;
-using Prg_UI.SplashScreen;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -33,6 +32,7 @@ using Microsoft.Xaml.Behaviors;
 using System.Threading.Tasks;
 using Prg_UI.Wins.WinSetting;
 using MaterialDesignThemes.Wpf;
+using Prg_UI.MySplashScreen;
 
 namespace Prg_UI
 {

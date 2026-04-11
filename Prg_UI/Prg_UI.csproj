@@ -28,10 +28,10 @@
 
 		<!-- عنوان اسمبلی که در متادیتای اسمبلی ثبت می‌شود -->
 		<AssemblyTitle>MrCorrect</AssemblyTitle>
-		
+
 		<!-- آیکن برنامه که روی فایل exe نمایش داده می‌شود -->
 		<ApplicationIcon>UiDrive\IMGS\MyMrCorrect.ico</ApplicationIcon>
-		
+
 		<!--_______________________________________________________Seprator_______________________________________________________-->
 
 		<!-- معماری هدف: اجرای برنامه فقط روی ویندوز 64 بیتی -->
@@ -41,9 +41,12 @@
 		<ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
 
 		<!-- قرار دادن کتابخانه‌های Native داخل فایل exe و استخراج خودکار هنگام اجرا -->
+		<!--این مخصوص exe اتوباز و یکسری dll های خود wpf هست-->
 		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
 
 		<!-- همه فایل‌های محتوا (Content) داخل exe قرار می‌گیرند و هنگام اجرا استخراج می‌شوند -->
+		<!--Suspected to this option: (suggest to set IncludeAllContentForSelfExtract = false)-->
+		<!--مشکلی که ایجاد میکنه اینه که بعیضی از ستون ها در ریپورتی مثل کارت انبار مثل ستون موجودی میپره !-->
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
 
 		<!-- همه وابستگی‌های NuGet در پوشه خروجی کپی می‌شوند -->
@@ -53,7 +56,7 @@
 		<PublishSingleFile>true</PublishSingleFile>
 
 		<!-- فشرده‌سازی فایل‌های داخل exe برای کاهش حجم (حدود 30 تا 40 درصد) -->
-		<EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
 
 		<!-- Trimming حذف کدهای بلااستفاده است، اما WPF با آن مشکل دارد پس غیرفعال -->
 		<PublishTrimmed>false</PublishTrimmed>
