@@ -19,6 +19,9 @@ using Prg_UI.Wins.WinMenus.SANATI;
 using Prg_UI.Wins.WinMenus.WinAutomasion;
 using Prg_UI.Wins.WinMenus.WinDEFAULT;
 using Prg_UI.Wins.WinSetting;
+using Rpts;
+using Stimulsoft.Report.Components.Table;
+using Stimulsoft.Report.Dictionary;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -38,7 +41,9 @@ using Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.KHARID_FORUSH;
 using Wins.WinMenus.Taarif;
 using Wins.WinSetting;
+using static Functions.InventoryManager;
 using static Functions.SMSService.SmsServiceFactory;
+using static Stimulsoft.Base.StiDbType;
 
 namespace Prg_UI.Wins
 {
@@ -391,7 +396,31 @@ namespace Prg_UI.Wins
             //new WIN_GETFIRSTMOG().Show();
             //new WinConnectionChoose().Show();
             //new F_MENU_DATE("CROS").Show();
-            CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_CHKE_DLIST_KOLCHECKD, this);
+            var report = new Prg_UI.Rpts.ANBAR.R_KA_KALA();
+
+            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
+            report.Dictionary.Databases.Clear();
+            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
+
+            report["AZDATE"] = Baseknow.YEA + "0101";
+            report["ANBAR"] = 2;
+
+            string TaTarikh = "99999999";
+            report["TADATE"] = "99991230";
+
+            report["KALACODE"] = 3365;
+            ((StiSqlSource)report.Dictionary.DataSources["KART_KALA"]).CommandTimeout = 900;
+
+            var decimalPlaces = Baseknow.DIG.HasValue ? (int)Baseknow.DIG.Value : 2;
+
+            //report.Render();
+            //report.Show();
+            //
+            //pathreport?.Dispose();
+
+            new WINRPT(report, "کارت انبار کالا").Show();
+
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KART, this);
             //new WIN_F_NEWYEAR().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this, 1642d);
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles

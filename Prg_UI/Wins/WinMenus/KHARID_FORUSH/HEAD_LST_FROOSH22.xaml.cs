@@ -2861,8 +2861,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
             if (!_navigationManager.IsNewRecord)
             {
                 var rst = dbms.DoGetDataSQL<int?>("SELECT     DEPATMAN FROM dbo.HEAD_LST WHERE     (NUMBER = " + this.NUMBER.Text + ") AND (TAG = 2)").ToList();
-                var where = " WHERE     (NUMBER = " + this.NUMBER.Text + ") AND (TAG = 2)";
-                if (rst.Count == 1)
+                string where = " WHERE     (NUMBER = " + this.NUMBER.Text + ") AND (TAG = 2)";
+                if (rst.Count == 1 && !string.IsNullOrWhiteSpace(where))
                 {
                     var _DEPATMAN_ = this.DEPATMAN.SelectedValue;
                     dbms.DoExecuteSQL($"UPDATE dbo.HEAD_LST SET DEPATMAN = {_DEPATMAN_} {where}");
