@@ -394,31 +394,9 @@ namespace Prg_UI.Wins
 
             //new WinBase().Show();
             //new WIN_GETFIRSTMOG().Show();
-            //new WinConnectionChoose().Show();
+            new WinConnectionChoose().Show();
             //new F_MENU_DATE("CROS").Show();
-            var report = new Prg_UI.Rpts.ANBAR.R_KA_KALA();
-
-            string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
-            report.Dictionary.Databases.Clear();
-            report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));
-
-            report["AZDATE"] = Baseknow.YEA + "0101";
-            report["ANBAR"] = 2;
-
-            string TaTarikh = "99999999";
-            report["TADATE"] = "99991230";
-
-            report["KALACODE"] = 3365;
-            ((StiSqlSource)report.Dictionary.DataSources["KART_KALA"]).CommandTimeout = 900;
-
-            var decimalPlaces = Baseknow.DIG.HasValue ? (int)Baseknow.DIG.Value : 2;
-
-            //report.Render();
-            //report.Show();
-            //
-            //pathreport?.Dispose();
-
-            new WINRPT(report, "کارت انبار کالا").Show();
+      
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KART, this);
             //new WIN_F_NEWYEAR().Show();

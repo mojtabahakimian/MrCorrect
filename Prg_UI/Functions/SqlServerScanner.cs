@@ -1,14 +1,14 @@
 using Microsoft.Win32;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Net;
 using System.Text;
-using System.Threading.Tasks;
-using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Prg_UI.Functions
 {
@@ -21,15 +21,15 @@ namespace Prg_UI.Functions
         {
             var servers = new ConcurrentDictionary<string, byte>(StringComparer.OrdinalIgnoreCase);
 
-            // ➊ UDP network scan and hostname scan run in parallel for speed
+            // ➊ UDP network scan and Subnet TCP scan run in parallel for maximum speed
             var udpTask = Task.Run(() =>
             {
                 foreach (var s in ScanUdpNetwork(udpTimeoutMs)) servers.TryAdd(s, 0);
             });
 
-            var hostnameTask = Task.Run(() =>
+            var subnetTcpTask = Task.Run(() =>
             {
-                foreach (var s in ScanCommonHostnames()) servers.TryAdd(s, 0);
+                foreach (var s in ScanLocalSubnetForSql()) servers.TryAdd(s, 0);
             });
 
             // ➋ Local registry is instant – run on current thread while network scans run
@@ -41,7 +41,7 @@ namespace Prg_UI.Functions
                 foreach (var s in GetSqlInstancesFromRegistry(view))
                     servers.TryAdd(s, 0);
 
-            Task.WaitAll(udpTask, hostnameTask);
+            Task.WaitAll(udpTask, subnetTcpTask);
 
             return servers.Keys.OrderBy(s => s, StringComparer.OrdinalIgnoreCase).ToList();
         }
@@ -56,7 +56,6 @@ namespace Prg_UI.Functions
             var results = new ConcurrentBag<string>();
             var request = new byte[] { 0x02 }; // SQL Server browser request
 
-            // Collect all local IPv4 broadcast addresses
             var broadcasts = NetworkInterface.GetAllNetworkInterfaces()
                 .Where(nic =>
                     nic.OperationalStatus == OperationalStatus.Up &&
@@ -75,7 +74,6 @@ namespace Prg_UI.Functions
                 udp.EnableBroadcast = true;
                 udp.Client.ReceiveTimeout = receiveTimeoutMs;
 
-                // Send UDP broadcast on all networks
                 foreach (var ep in broadcasts)
                 {
                     try { udp.Send(request, request.Length, ep); }
@@ -96,22 +94,19 @@ namespace Prg_UI.Functions
                                 results.Add(srv);
                         }
                     }
-                    catch (SocketException) { break; } // timeout, done
+                    catch (SocketException) { break; }
                     catch { /* ignore */ }
                 }
             }
-            // Remove duplicates
+
             foreach (var s in results.Distinct(StringComparer.OrdinalIgnoreCase))
                 yield return s;
         }
 
-        // Handles multiple server instances in response (covers clusters/AG)
-        // SQL Browser response format: byte[0]=0x05, bytes[1-2]=length (LE), bytes[3+]=data
         private static IEnumerable<string> ParseServerInfoList(byte[] payload, IPAddress ip)
         {
             if (payload.Length <= 3) yield break;
 
-            // Skip the 3-byte header (0x05 + 2-byte length) to get the actual data
             var txt = Encoding.ASCII.GetString(payload, 3, payload.Length - 3);
 
             string server = null;
@@ -127,10 +122,9 @@ namespace Prg_UI.Functions
                         yield return server;
                     else
                         yield return $"{server}\\{instance}";
-                    server = null; // reset for next server block in multi-instance response
+                    server = null;
                 }
             }
-            // Fallback: some servers (default instance) might only return server name
             if (!tokens.Any(t => t.Equals("InstanceName", StringComparison.OrdinalIgnoreCase)) && !string.IsNullOrEmpty(server))
                 yield return server;
         }
@@ -171,30 +165,72 @@ namespace Prg_UI.Functions
         }
 
         // ---------------------------------------------------------------------------
-        //        FAST TCP PORT CHECK FOR COMMON SQL SERVER HOSTNAMES
-        //        Catches servers where SQL Browser is disabled (port 1433 is open)
+        //        DYNAMIC SUBNET TCP PORT CHECK (Replaces Hardcoded Hostnames)
+        //        Catches servers blocking UDP 1434 by sweeping the local /24 subnet.
         // ---------------------------------------------------------------------------
-        private static IEnumerable<string> ScanCommonHostnames()
+        private static IEnumerable<string> ScanLocalSubnetForSql(int timeoutMs = 300)
         {
-            string[] hostnames = { "MAIN", "SQL", "SERVER", "DBSERVER", "PC229" };
-            var found = new ConcurrentBag<string>();
-            Parallel.ForEach(hostnames, hn =>
+            var foundServers = new ConcurrentBag<string>();
+            var ipAddressesToScan = new List<IPAddress>();
+
+            // Find local IPv4 /24 subnets
+            var interfaces = NetworkInterface.GetAllNetworkInterfaces()
+                .Where(nic => nic.OperationalStatus == OperationalStatus.Up && nic.NetworkInterfaceType != NetworkInterfaceType.Loopback);
+
+            foreach (var nic in interfaces)
+            {
+                var props = nic.GetIPProperties();
+                foreach (var unicast in props.UnicastAddresses)
+                {
+                    if (unicast.Address.AddressFamily == AddressFamily.InterNetwork && unicast.IPv4Mask != null)
+                    {
+                        byte[] ipBytes = unicast.Address.GetAddressBytes();
+                        byte[] maskBytes = unicast.IPv4Mask.GetAddressBytes();
+
+                        // Optimize for standard Class C (/24) subnets
+                        if (maskBytes[0] == 255 && maskBytes[1] == 255 && maskBytes[2] == 255)
+                        {
+                            for (int i = 1; i < 255; i++)
+                            {
+                                ipAddressesToScan.Add(new IPAddress(new byte[] { ipBytes[0], ipBytes[1], ipBytes[2], (byte)i }));
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Parallel sweep on port 1433
+            Parallel.ForEach(ipAddressesToScan, ip =>
             {
                 try
                 {
                     using var client = new TcpClient();
-                    // ConnectAsync (Task-based) is always completed by the using-dispose;
-                    // Wait(ms) returns false on timeout so no resources are orphaned.
-                    var connectTask = client.ConnectAsync(hn, 1433);
-                    if (connectTask.Wait(300) && client.Connected)
-                        found.Add(hn);
+                    var connectTask = client.ConnectAsync(ip.ToString(), 1433);
+
+                    if (connectTask.Wait(timeoutMs) && client.Connected)
+                    {
+                        string discoveredName = ip.ToString();
+
+                        // Attempt reverse DNS to get actual hostname (e.g., 'DB2')
+                        try
+                        {
+                            var entry = Dns.GetHostEntry(ip);
+                            if (!string.IsNullOrEmpty(entry.HostName))
+                            {
+                                discoveredName = entry.HostName.Split('.')[0].ToUpper();
+                            }
+                        }
+                        catch { /* Fallback to IP if reverse DNS fails */ }
+
+                        foundServers.Add(discoveredName);
+                    }
                 }
-                catch { }
+                catch { /* Ignore dead IP addresses */ }
             });
-            return found;
+
+            return foundServers.Distinct(StringComparer.OrdinalIgnoreCase);
         }
 
-        // Helper for IP broadcast deduplication
         private class IPEndPointComparer : IEqualityComparer<IPEndPoint>
         {
             public bool Equals(IPEndPoint x, IPEndPoint y) => x.Address.Equals(y.Address) && x.Port == y.Port;
