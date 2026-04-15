@@ -2262,142 +2262,178 @@ namespace Wins.WinMenus.KHARID_FORUSH
             string _qre = null;
             var MasterTopErrorMessages = new List<MsgModel>();
 
-            IVM.StartTransaction(); // Start the transaction again if is disposed before ****************************************************************
-
-            List<MsgModel> ErrosMessages = new List<MsgModel>();
-
-            if (TheRow.id is null || TheRow.id <= 0) //INSERT
+            try
             {
-                _qre = $@"INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
-                              OUTPUT INSERTED.id
-                              VALUES({NUMBER.Text},
-                              {HTAG} ,
-                              {TheRow.ANBAR}   ,
-                              NULL,
-                              N'{TheRow.CODE}' ,
-                              {TheRow.MEGH} ,
-                              {TheRow.MEGHk} ,
-                              {(TheRow.MEGH_MAR is null ? "NULL" : TheRow.MEGH_MAR)} ,
-                              N'{TheRow.MANDAH}' ,
-                              {TheRow.MABL} ,
-                              {TheRow.MABL_K} ,
-                              0,
-                              N'{(TheRow.N_RASID is null ? "NULL" : TheRow.N_RASID)}' ,
-                              {(TheRow.MEGH_R is null ? "NULL" : TheRow.MEGH_R)} ,
-                              {(TheRow.RADAH is null ? "NULL" : TheRow.RADAH)} ,
-                              {(TheRow.SANAD_NO is null ? "NULL" : TheRow.SANAD_NO)} ,
-                              NULL,
-                              {(TheRow.ANBARF is null ? "NULL" : TheRow.ANBARF)} ,
-                              {TheRow.VAHED_K}   ,
-                              {(TheRow.N_KOL is null ? "NULL" : TheRow.N_KOL)} ,
-                              {(TheRow.N_MOIN is null ? "NULL" : TheRow.N_MOIN)} ,
-                              {(TheRow.N_TAF is null ? "NULL" : TheRow.N_TAF)} ,
-                              {(TheRow.AVRAGE is null ? "NULL" : TheRow.AVRAGE)} ,
-                              {(TheRow.AVRAGE2 is null ? "NULL" : TheRow.AVRAGE2)} ,
-                              {TheRow.IMBAA} ,
-                              {(TheRow.TOTALARZ is null ? "NULL" : TheRow.TOTALARZ)} ,
-                              N'{(TheRow.VISITOR is null ? "NULL" : TheRow.VISITOR)}' ,
-                              {TheRow.TKHN} ,
-                              {(TheRow.JAY?.ToString() is null ? "NULL" : TheRow.JAY.ToString())}   ,
-                              {(TheRow.JAYO?.ToString() is null ? "NULL" : TheRow.JAYO.ToString())} )";
+                IVM.StartTransaction(); // Start the transaction again if is disposed before ****************************************************************
 
-                var (errorMsgs, _, _, queryOutputs) = IVM.CheckInventoryAndExecuteQuery<long>(new List<object> { TheRow }, _qre, null, false);
-                ErrosMessages.AddRange(errorMsgs);
+                List<MsgModel> ErrosMessages = new List<MsgModel>();
 
-                if (queryOutputs.Any())
+                if (TheRow.id is null || TheRow.id <= 0) //INSERT
                 {
-                    TheRow.id = queryOutputs.FirstOrDefault(); // Update the list with the new ID
-                                                               //اصلاح شماره ردیف
-                    IVM.TM.ExecuteSqlCommandCtc($"UPDATE dbo.INVO_LST SET RADIF = (SELECT ISNULL(MAX(RADIF) + 1, 1) AS NewRADIF FROM dbo.INVO_LST WHERE NUMBER={NUMBER.Text} AND TAG={HTAG}) FROM dbo.INVO_LST WHERE id = {TheRow.id}");
+                    _qre = $@"INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
+                                  OUTPUT INSERTED.id
+                                  VALUES({NUMBER.Text},
+                                  {HTAG} ,
+                                  {TheRow.ANBAR}   ,
+                                  NULL,
+                                  N'{TheRow.CODE}' ,
+                                  {TheRow.MEGH} ,
+                                  {TheRow.MEGHk} ,
+                                  {(TheRow.MEGH_MAR is null ? "NULL" : TheRow.MEGH_MAR)} ,
+                                  N'{TheRow.MANDAH}' ,
+                                  {TheRow.MABL} ,
+                                  {TheRow.MABL_K} ,
+                                  0,
+                                  N'{(TheRow.N_RASID is null ? "NULL" : TheRow.N_RASID)}' ,
+                                  {(TheRow.MEGH_R is null ? "NULL" : TheRow.MEGH_R)} ,
+                                  {(TheRow.RADAH is null ? "NULL" : TheRow.RADAH)} ,
+                                  {(TheRow.SANAD_NO is null ? "NULL" : TheRow.SANAD_NO)} ,
+                                  NULL,
+                                  {(TheRow.ANBARF is null ? "NULL" : TheRow.ANBARF)} ,
+                                  {TheRow.VAHED_K}   ,
+                                  {(TheRow.N_KOL is null ? "NULL" : TheRow.N_KOL)} ,
+                                  {(TheRow.N_MOIN is null ? "NULL" : TheRow.N_MOIN)} ,
+                                  {(TheRow.N_TAF is null ? "NULL" : TheRow.N_TAF)} ,
+                                  {(TheRow.AVRAGE is null ? "NULL" : TheRow.AVRAGE)} ,
+                                  {(TheRow.AVRAGE2 is null ? "NULL" : TheRow.AVRAGE2)} ,
+                                  {TheRow.IMBAA} ,
+                                  {(TheRow.TOTALARZ is null ? "NULL" : TheRow.TOTALARZ)} ,
+                                  N'{(TheRow.VISITOR is null ? "NULL" : TheRow.VISITOR)}' ,
+                                  {TheRow.TKHN} ,
+                                  {(TheRow.JAY?.ToString() is null ? "NULL" : TheRow.JAY.ToString())}   ,
+                                  {(TheRow.JAYO?.ToString() is null ? "NULL" : TheRow.JAYO.ToString())} )";
+
+                    var (errorMsgs, _, _, queryOutputs) = IVM.CheckInventoryAndExecuteQuery<long>(new List<object> { TheRow }, _qre, null, false);
+                    ErrosMessages.AddRange(errorMsgs);
+
+                    if (queryOutputs.Any())
+                    {
+                        TheRow.id = queryOutputs.FirstOrDefault(); // Update the list with the new ID
+                                                                   //اصلاح شماره ردیف
+                        IVM.TM.ExecuteSqlCommandCtc($"UPDATE dbo.INVO_LST SET RADIF = (SELECT ISNULL(MAX(RADIF) + 1, 1) AS NewRADIF FROM dbo.INVO_LST WHERE NUMBER={NUMBER.Text} AND TAG={HTAG}) FROM dbo.INVO_LST WHERE id = {TheRow.id}");
+                    }
                 }
-            }
-            else //UPDATE
-            {
-                _qre = $@"UPDATE dbo.INVO_LST
-                   SET ANBAR = {TheRow.ANBAR}, CODE = N'{TheRow.CODE}',
-                   MEGH = {TheRow.MEGH}, MEGHk = {TheRow.MEGHk}, MEGH_MAR = {(TheRow.MEGH_MAR is null ? "NULL" : TheRow.MEGH_MAR)},
-                   MANDAH = N'{TheRow.MANDAH}', MABL = {TheRow.MABL}, MABL_K = {TheRow.MABL_K},
-                   N_RASID = N'{(TheRow.N_RASID is null ? "NULL" : TheRow.N_RASID)}',
-                   MEGH_R = {(TheRow.MEGH_R is null ? "NULL" : TheRow.MEGH_R)}, 
-                   RADAH = {(TheRow.RADAH is null ? "NULL" : TheRow.RADAH)}, 
-                   SANAD_NO = {(TheRow.SANAD_NO is null ? "NULL" : TheRow.SANAD_NO)},
-                   ANBARF = {(TheRow.ANBARF is null ? "NULL" : TheRow.ANBARF)}, 
-                   VAHED_K = {TheRow.VAHED_K}, N_KOL = {(TheRow.N_KOL is null ? "NULL" : TheRow.N_KOL)}, 
-                   N_MOIN = {(TheRow.N_MOIN is null ? "NULL" : TheRow.N_MOIN)}, N_TAF = {(TheRow.N_TAF is null ? "NULL" : TheRow.N_TAF)},
-                   AVRAGE = {(TheRow.AVRAGE is null ? "NULL" : TheRow.AVRAGE)},
-                   AVRAGE2 = {(TheRow.AVRAGE2 is null ? "NULL" : TheRow.AVRAGE2)}, IMBAA = {TheRow.IMBAA}, 
-                   TOTALARZ = {(TheRow.TOTALARZ is null ? "NULL" : TheRow.TOTALARZ)}, VISITOR = N'{(TheRow.VISITOR is null ? "NULL" : TheRow.VISITOR)}',
-                   TKHN = {TheRow.TKHN}, JAY = {(TheRow.JAY?.ToString() is null ? "NULL" : TheRow.JAY.ToString())}, JAYO = {(TheRow.JAYO?.ToString() is null ? "NULL" : TheRow.JAYO.ToString())}
-                   WHERE id = {TheRow.id}";
-
-                var (errorMsgs, _, _, _) = IVM.CheckInventoryAndExecuteQuery<int>(new List<object> { TheRow }, _qre, null, false);
-                ErrosMessages.AddRange(errorMsgs);
-            }
-
-            //انبار خالی نباشد
-            if (TheRow?.ANBAR is null)
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = $"اطلاعات ناقص است انبار و كالا نمي تواند داراي مقدار خالي باشد {TheRow.ANBAR}." });
-            }
-            //بررسی تعلق انبار و کالا به هم
-            else if (!IsNull(TheRow.CODE))
-            {
-                var RST_STUF_STK = IVM.TM.SqlQueryCtc<STUF_STK_CSHARP>("SELECT * FROM STUF_STK WHERE CODE = '" + TheRow.CODE + "' AND ANBAR = " + TheRow.ANBAR).ToList();
-                if (RST_STUF_STK.Count == 0)
+                else //UPDATE
                 {
-                    ErrosMessages.Add(new MsgModel { MessageText_U = $"كالا {TheRow.CODE} به انبار {TheRow.ANBAR} فوق تعلق ندارد." });
-                }
-            }
+                    _qre = $@"UPDATE dbo.INVO_LST
+                       SET ANBAR = {TheRow.ANBAR}, CODE = N'{TheRow.CODE}',
+                       MEGH = {TheRow.MEGH}, MEGHk = {TheRow.MEGHk}, MEGH_MAR = {(TheRow.MEGH_MAR is null ? "NULL" : TheRow.MEGH_MAR)},
+                       MANDAH = N'{TheRow.MANDAH}', MABL = {TheRow.MABL}, MABL_K = {TheRow.MABL_K},
+                       N_RASID = N'{(TheRow.N_RASID is null ? "NULL" : TheRow.N_RASID)}',
+                       MEGH_R = {(TheRow.MEGH_R is null ? "NULL" : TheRow.MEGH_R)},
+                       RADAH = {(TheRow.RADAH is null ? "NULL" : TheRow.RADAH)},
+                       SANAD_NO = {(TheRow.SANAD_NO is null ? "NULL" : TheRow.SANAD_NO)},
+                       ANBARF = {(TheRow.ANBARF is null ? "NULL" : TheRow.ANBARF)},
+                       VAHED_K = {TheRow.VAHED_K}, N_KOL = {(TheRow.N_KOL is null ? "NULL" : TheRow.N_KOL)},
+                       N_MOIN = {(TheRow.N_MOIN is null ? "NULL" : TheRow.N_MOIN)}, N_TAF = {(TheRow.N_TAF is null ? "NULL" : TheRow.N_TAF)},
+                       AVRAGE = {(TheRow.AVRAGE is null ? "NULL" : TheRow.AVRAGE)},
+                       AVRAGE2 = {(TheRow.AVRAGE2 is null ? "NULL" : TheRow.AVRAGE2)}, IMBAA = {TheRow.IMBAA},
+                       TOTALARZ = {(TheRow.TOTALARZ is null ? "NULL" : TheRow.TOTALARZ)}, VISITOR = N'{(TheRow.VISITOR is null ? "NULL" : TheRow.VISITOR)}',
+                       TKHN = {TheRow.TKHN}, JAY = {(TheRow.JAY?.ToString() is null ? "NULL" : TheRow.JAY.ToString())}, JAYO = {(TheRow.JAYO?.ToString() is null ? "NULL" : TheRow.JAYO.ToString())}
+                       WHERE id = {TheRow.id}";
 
-            //بررسی صحیح بودن واحد کالا نسبت به خود کالا
-            var RSTV1 = IVM.TM.SqlQueryCtc<VAHED_K_NESBAT_2>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + TheRow.CODE + "' AND ((VAHEDS.VAHED)= " + TheRow.VAHED_K + ")))").ToList();
-            if (RSTV1.Count == 0)
-            {
-                ErrosMessages.Add(new MsgModel { MessageText_U = "واحد تعريف شده ناقص ميباشد نسبت آن مشخص نگرديده است.در بخش تعريف كالا آن را اصلاح كنيد." });
-                TheRow.VAHED_K = null;
-            }
-            //واحد کالا بررسی مقدار کل باتوجه به نسبت
-            else
-            {
-                var NesbatMegh = RSTV1.FirstOrDefault()?.NESBAT * TheRow.MEGH;
-                if (NesbatMegh != TheRow.MEGHk)
+                    var (errorMsgs, _, _, _) = IVM.CheckInventoryAndExecuteQuery<int>(new List<object> { TheRow }, _qre, null, false);
+                    ErrosMessages.AddRange(errorMsgs);
+                }
+
+                //انبار خالی نباشد
+                if (TheRow?.ANBAR is null)
                 {
-
-                    TheRow.MEGHk = NesbatMegh;
-                    ErrosMessages.Add(new MsgModel { MessageText_U = $"مقدار کل این سطر کالا با این مشخصات : کد کالا {TheRow.CODE} به مقدار کل {TheRow.MEGHk} با مبلغ {TheRow.MABL} مغایرت داشت و من آنرا به مقدار کل {NesbatMegh} اصلاح کردم , درصورتی که مورد تایید است جهت ذخیره آن مجددا دکمه ذخیره را بزنید" });
+                    ErrosMessages.Add(new MsgModel { MessageText_U = $"اطلاعات ناقص است انبار و كالا نمي تواند داراي مقدار خالي باشد {TheRow.ANBAR}." });
                 }
-            }
-            //بررسی صحیحی بودن مبلغ
-            if (TheRow.MABL_K != Math.Round((double)(TheRow.MABL * TheRow.MEGHk)))
-            {
-                var _mablk = Math.Round((double)(TheRow.MABL * TheRow.MEGHk));
-                if (TheRow.MABL_K != _mablk)
+                //بررسی تعلق انبار و کالا به هم
+                else if (!IsNull(TheRow.CODE))
                 {
-                    TheRow.MABL_K = Math.Round((double)(TheRow.MABL * TheRow.MEGHk));
-                    ErrosMessages.Add(new MsgModel { MessageText_U = $"مبلغ کل این سطر کالا با این مشخصات : کد کالا {TheRow.CODE} به مقدار کل {TheRow.MEGHk} با مبلغ {TheRow.MABL} مغایرت داشت و من آنرا به مبلغ کل {_mablk} اصلاح کردم , درصورتی که مورد تایید است جهت ذخیره آن مجددا دکمه ذخیره را بزنید" });
+                    var RST_STUF_STK = IVM.TM.SqlQueryCtc<STUF_STK_CSHARP>("SELECT * FROM STUF_STK WHERE CODE = '" + TheRow.CODE + "' AND ANBAR = " + TheRow.ANBAR).ToList();
+                    if (RST_STUF_STK.Count == 0)
+                    {
+                        ErrosMessages.Add(new MsgModel { MessageText_U = $"كالا {TheRow.CODE} به انبار {TheRow.ANBAR} فوق تعلق ندارد." });
+                    }
                 }
-            }
 
-            if (ErrosMessages.Any())
-            {
-                IVM.RollbackTransaction(); //Undo
-            }
-            else
-            {
-                IVM.CommitTransaction(); // Commit Apply Save
-            }
-            MasterTopErrorMessages.AddRange(ErrosMessages);
+                //بررسی صحیح بودن واحد کالا نسبت به خود کالا
+                var RSTV1 = IVM.TM.SqlQueryCtc<VAHED_K_NESBAT_2>("SELECT VAHEDS.CODE, VAHEDS.VAHED, VAHEDS.NESBAT FROM VAHEDS WHERE (((VAHEDS.CODE)= '" + TheRow.CODE + "' AND ((VAHEDS.VAHED)= " + TheRow.VAHED_K + ")))").ToList();
+                if (RSTV1.Count == 0)
+                {
+                    ErrosMessages.Add(new MsgModel { MessageText_U = "واحد تعريف شده ناقص ميباشد نسبت آن مشخص نگرديده است.در بخش تعريف كالا آن را اصلاح كنيد." });
+                    TheRow.VAHED_K = null;
+                }
+                //واحد کالا بررسی مقدار کل باتوجه به نسبت
+                else
+                {
+                    var NesbatMegh = RSTV1.FirstOrDefault()?.NESBAT * TheRow.MEGH;
+                    if (NesbatMegh != TheRow.MEGHk)
+                    {
 
-            SANAD();
+                        TheRow.MEGHk = NesbatMegh;
+                        ErrosMessages.Add(new MsgModel { MessageText_U = $"مقدار کل این سطر کالا با این مشخصات : کد کالا {TheRow.CODE} به مقدار کل {TheRow.MEGHk} با مبلغ {TheRow.MABL} مغایرت داشت و من آنرا به مقدار کل {NesbatMegh} اصلاح کردم , درصورتی که مورد تایید است جهت ذخیره آن مجددا دکمه ذخیره را بزنید" });
+                    }
+                }
+                //بررسی صحیحی بودن مبلغ
+                if (TheRow.MABL_K != Math.Round((double)(TheRow.MABL * TheRow.MEGHk)))
+                {
+                    var _mablk = Math.Round((double)(TheRow.MABL * TheRow.MEGHk));
+                    if (TheRow.MABL_K != _mablk)
+                    {
+                        TheRow.MABL_K = Math.Round((double)(TheRow.MABL * TheRow.MEGHk));
+                        ErrosMessages.Add(new MsgModel { MessageText_U = $"مبلغ کل این سطر کالا با این مشخصات : کد کالا {TheRow.CODE} به مقدار کل {TheRow.MEGHk} با مبلغ {TheRow.MABL} مغایرت داشت و من آنرا به مبلغ کل {_mablk} اصلاح کردم , درصورتی که مورد تایید است جهت ذخیره آن مجددا دکمه ذخیره را بزنید" });
+                    }
+                }
 
-            if (MasterTopErrorMessages.Any())
+                if (ErrosMessages.Any())
+                {
+                    IVM.RollbackTransaction(); //Undo
+                }
+                else
+                {
+                    IVM.CommitTransaction(); // Commit Apply Save
+                }
+                MasterTopErrorMessages.AddRange(ErrosMessages);
+
+                SANAD();
+
+                if (MasterTopErrorMessages.Any())
+                {
+                    INVO_LST_SUB_CANCEL_EDIT();
+                    e.Cancel = true;
+                    IVM.ShowErrorMessages(MasterTopErrorMessages);
+                    return;
+                }
+
+                AVRAGE_UPDATE();
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex)
             {
+                if (IVM.TM != null)
+                {
+                    IVM.RollbackTransaction();
+                }
                 INVO_LST_SUB_CANCEL_EDIT();
-                IVM.ShowErrorMessages(MasterTopErrorMessages);
-                return;
-            }
+                e.Cancel = true;
+                string userMessage = "خطایی در ارتباط با پایگاه داده رخ داده است.";
+                if (ex.Number == 2 || ex.Number == 53)
+                    userMessage = "سرور پایگاه داده یافت نشد. لطفاً وضعیت شبکه را بررسی کنید.";
+                else if (ex.Number == 4060)
+                    userMessage = "پایگاه داده یافت نشد. لطفاً با پشتیبانی تماس بگیرید.";
+                else if (ex.Number == 18456)
+                    userMessage = "اطلاعات ورود به پایگاه داده نامعتبر است.";
+                else if (ex.Number == 233)
+                    userMessage = "ارتباط با سرور قطع شده است.";
+                else if (ex.Number == 1205)
+                    userMessage = "عملیات همزمان دیگری در حال انجام است. لطفاً مجدداً تلاش کنید.";
 
-            AVRAGE_UPDATE();
+                new Msgwin(false, userMessage).ShowDialog();
+            }
+            catch (Exception)
+            {
+                if (IVM.TM != null)
+                {
+                    IVM.RollbackTransaction();
+                }
+                INVO_LST_SUB_CANCEL_EDIT();
+                e.Cancel = true;
+                new Msgwin(false, "خطای نامشخصی رخ داده است. لطفاً مجدداً تلاش کنید.").ShowDialog();
+            }
         }
 
         private void MABL_AfterUpdate(INVO_LST_FACTOR22? Rowy, bool IsSingleCurrentRow = true, bool DoShoeMessages = true)
@@ -2439,22 +2475,45 @@ namespace Wins.WinMenus.KHARID_FORUSH
             //CODE_AfterUpdate
             if (CURRENT_ITEMS_ROW?.MEGH > 0 && CURRENT_ITEMS_ROW?.MABL > 0 && CURRENT_ITEMS_ROW?.CODE != null && CURRENT_ITEMS_ROW?.id != null)
             {
-                //var RST = dbms.DoGetDataSQL<STUF_DEF>($@"SELECT CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F, DEPART, IDD, CMBAA, VAZN, OKF, MENUIT, MEGHTA, MEGHJAY, PGID, BARCODE, CRT, UID, mu, sstid, vra
-                //  FROM dbo.STUF_DEF WHERE CODE = N'{CURRENT_ITEMS_ROW.CODE}' ").FirstOrDefault();
-
-                //-- ANBAR , DATE , PARA id , COD (CODE)
-                var rst3 = dbms.DoGetDataSQL<AVRAGE_MOG>($@"SELECT CODE, MOG, MABL, VMEGHK, VMABK, FMABK, FMEGHK 
-                FROM dbo.AVRAGE_MOG('{CURRENT_ITEMS_ROW.ANBAR}', '{DATE_N.Text.ToRawTarikh()}', '{CURRENT_ITEMS_ROW.id}', '{CURRENT_ITEMS_ROW.CODE}')").FirstOrDefault();
-
-                //میانگین
-                if (rst3 != null && (rst3.MOG + CURRENT_ITEMS_ROW.MEGHk) != 0)
+                try
                 {
-                    long temp = (long)Math.Round((double)((rst3.MABL + CURRENT_ITEMS_ROW.MABL_K) / (rst3.MOG + CURRENT_ITEMS_ROW.MEGHk) * 100));
-                    CURRENT_ITEMS_ROW.AVRAGE = temp / 100d;
+                    //var RST = dbms.DoGetDataSQL<STUF_DEF>($@"SELECT CODE, NAME, N_FANI, TOZIH, VAHED, B_SEF, N_SEF, MIN_M, MAX_M, RADAH, KINDK, MABL_F, DEPART, IDD, CMBAA, VAZN, OKF, MENUIT, MEGHTA, MEGHJAY, PGID, BARCODE, CRT, UID, mu, sstid, vra
+                    //  FROM dbo.STUF_DEF WHERE CODE = N'{CURRENT_ITEMS_ROW.CODE}' ").FirstOrDefault();
+
+                    //-- ANBAR , DATE , PARA id , COD (CODE)
+                    var rst3 = dbms.DoGetDataSQL<AVRAGE_MOG>($@"SELECT CODE, MOG, MABL, VMEGHK, VMABK, FMABK, FMEGHK
+                    FROM dbo.AVRAGE_MOG('{CURRENT_ITEMS_ROW.ANBAR}', '{DATE_N.Text.ToRawTarikh()}', '{CURRENT_ITEMS_ROW.id}', '{CURRENT_ITEMS_ROW.CODE}')").FirstOrDefault();
+
+                    //میانگین
+                    if (rst3 != null && (rst3.MOG + CURRENT_ITEMS_ROW.MEGHk) != 0)
+                    {
+                        long temp = (long)Math.Round((double)((rst3.MABL + CURRENT_ITEMS_ROW.MABL_K) / (rst3.MOG + CURRENT_ITEMS_ROW.MEGHk) * 100));
+                        CURRENT_ITEMS_ROW.AVRAGE = temp / 100d;
+                    }
+                    else
+                    {
+                        CURRENT_ITEMS_ROW.AVRAGE = 0;
+                    }
                 }
-                else
+                catch (Microsoft.Data.SqlClient.SqlException ex)
                 {
-                    CURRENT_ITEMS_ROW.AVRAGE = 0;
+                    string userMessage = "خطایی در ارتباط با پایگاه داده رخ داده است.";
+                    if (ex.Number == 2 || ex.Number == 53)
+                        userMessage = "سرور پایگاه داده یافت نشد. لطفاً وضعیت شبکه را بررسی کنید.";
+                    else if (ex.Number == 4060)
+                        userMessage = "پایگاه داده یافت نشد. لطفاً با پشتیبانی تماس بگیرید.";
+                    else if (ex.Number == 18456)
+                        userMessage = "اطلاعات ورود به پایگاه داده نامعتبر است.";
+                    else if (ex.Number == 233)
+                        userMessage = "ارتباط با سرور قطع شده است.";
+                    else if (ex.Number == 1205)
+                        userMessage = "عملیات همزمان دیگری در حال انجام است. لطفاً مجدداً تلاش کنید.";
+
+                    new Msgwin(false, userMessage).ShowDialog();
+                }
+                catch (Exception)
+                {
+                    new Msgwin(false, "خطای نامشخصی در به‌روزرسانی میانگین رخ داده است.").ShowDialog();
                 }
             }
         }

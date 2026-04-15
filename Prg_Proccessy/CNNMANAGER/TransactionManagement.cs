@@ -29,10 +29,11 @@ namespace Prg_Proccessy.CNNMANAGER
             {
                 try
                 {
-                    return _connection.Execute(sql, parameters, _transaction, commandTimeout: 3600);
+                    return _connection.Execute(sql, parameters, _transaction, commandTimeout: 0);
                 }
                 catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
                 {
+                    if (_transaction != null) throw; // Cannot retry query on deadlocked transaction, it must bubble up
                     // Deadlock detected - log and retry with exponential backoff
                     LogDeadlock(sql, attempt + 1, maxRetries, ex);
                     System.Threading.Thread.Sleep(200 * (attempt + 1));
@@ -57,10 +58,11 @@ namespace Prg_Proccessy.CNNMANAGER
             {
                 try
                 {
-                    return _connection.Query<T>(sql, parameters, _transaction, commandTimeout: 3600);
+                    return _connection.Query<T>(sql, parameters, _transaction, commandTimeout: 0);
                 }
                 catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
                 {
+                    if (_transaction != null) throw; // Cannot retry query on deadlocked transaction, it must bubble up
                     // Deadlock detected - log and retry with exponential backoff
                     LogDeadlock(sql, attempt + 1, maxRetries, ex);
                     System.Threading.Thread.Sleep(200 * (attempt + 1));
@@ -86,10 +88,11 @@ namespace Prg_Proccessy.CNNMANAGER
             {
                 try
                 {
-                    return await _connection.ExecuteAsync(sql, parameters, _transaction, commandTimeout: 3600);
+                    return await _connection.ExecuteAsync(sql, parameters, _transaction, commandTimeout: 0);
                 }
                 catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
                 {
+                    if (_transaction != null) throw; // Cannot retry query on deadlocked transaction, it must bubble up
                     // Deadlock detected - log and retry with exponential backoff
                     LogDeadlock(sql, attempt + 1, maxRetries, ex);
                     await Task.Delay(200 * (attempt + 1));
@@ -115,10 +118,11 @@ namespace Prg_Proccessy.CNNMANAGER
             {
                 try
                 {
-                    return await _connection.QueryAsync<T>(sql, parameters, _transaction, commandTimeout: 3600);
+                    return await _connection.QueryAsync<T>(sql, parameters, _transaction, commandTimeout: 0);
                 }
                 catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
                 {
+                    if (_transaction != null) throw; // Cannot retry query on deadlocked transaction, it must bubble up
                     // Deadlock detected - log and retry with exponential backoff
                     LogDeadlock(sql, attempt + 1, maxRetries, ex);
                     await Task.Delay(200 * (attempt + 1));
