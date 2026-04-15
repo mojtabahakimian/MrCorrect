@@ -9,6 +9,8 @@ namespace Prg_Proccessy.CNNMANAGER
     /// </summary>
     public class TransactionManagement : IDisposable
     {
+        private const int DeadlockErrorNumber = 1205;
+        private const int DefaultDeadlockMaxRetries = 5;
         private SqlConnection _connection;
         private IDbTransaction _transaction;
         public TransactionManagement(string connectionString)
@@ -23,7 +25,7 @@ namespace Prg_Proccessy.CNNMANAGER
         [System.Diagnostics.DebuggerStepThrough]
         public int ExecuteSqlCommandCtc(string sql, object parameters = null)
         {
-            const int maxRetries = 3;
+            const int maxRetries = DefaultDeadlockMaxRetries;
 
             for (int attempt = 0; attempt <= maxRetries; attempt++)
             {
@@ -31,14 +33,16 @@ namespace Prg_Proccessy.CNNMANAGER
                 {
                     return _connection.Execute(sql, parameters, _transaction, commandTimeout: 3600);
                 }
-                catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
+                catch (SqlException ex) when (ex.Number == DeadlockErrorNumber && attempt < maxRetries)
                 {
-                    // Deadlock detected - log and retry with exponential backoff
+                    // Deadlock detected: SQL Server has already rolled back the victim transaction.
+                    // Re-create transaction context and retry current command.
                     LogDeadlock(sql, attempt + 1, maxRetries, ex);
-                    System.Threading.Thread.Sleep(200 * (attempt + 1));
+                    ResetTransactionAfterDeadlock();
+                    System.Threading.Thread.Sleep(GetDeadlockRetryDelayMs(attempt));
                     continue;
                 }
-                catch (SqlException ex) when (ex.Number == 1205)
+                catch (SqlException ex) when (ex.Number == DeadlockErrorNumber)
                 {
                     // Max retries exceeded - log and rethrow
                     LogDeadlock(sql, maxRetries + 1, maxRetries, ex);
@@ -51,7 +55,7 @@ namespace Prg_Proccessy.CNNMANAGER
         [System.Diagnostics.DebuggerStepThrough]
         public IEnumerable<T> SqlQueryCtc<T>(string sql, object parameters = null)
         {
-            const int maxRetries = 3;
+            const int maxRetries = DefaultDeadlockMaxRetries;
 
             for (int attempt = 0; attempt <= maxRetries; attempt++)
             {
@@ -59,16 +63,15 @@ namespace Prg_Proccessy.CNNMANAGER
                 {
                     return _connection.Query<T>(sql, parameters, _transaction, commandTimeout: 3600);
                 }
-                catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
+                catch (SqlException ex) when (ex.Number == DeadlockErrorNumber && attempt < maxRetries)
                 {
-                    // Deadlock detected - log and retry with exponential backoff
                     LogDeadlock(sql, attempt + 1, maxRetries, ex);
-                    System.Threading.Thread.Sleep(200 * (attempt + 1));
+                    ResetTransactionAfterDeadlock();
+                    System.Threading.Thread.Sleep(GetDeadlockRetryDelayMs(attempt));
                     continue;
                 }
-                catch (SqlException ex) when (ex.Number == 1205)
+                catch (SqlException ex) when (ex.Number == DeadlockErrorNumber)
                 {
-                    // Max retries exceeded - log and rethrow
                     LogDeadlock(sql, maxRetries + 1, maxRetries, ex);
                     throw;
                 }
@@ -80,7 +83,7 @@ namespace Prg_Proccessy.CNNMANAGER
         [System.Diagnostics.DebuggerStepThrough]
         public async Task<int> ExecuteSqlCommandCtcAsync(string sql, object parameters = null)
         {
-            const int maxRetries = 3;
+            const int maxRetries = DefaultDeadlockMaxRetries;
 
             for (int attempt = 0; attempt <= maxRetries; attempt++)
             {
@@ -88,16 +91,15 @@ namespace Prg_Proccessy.CNNMANAGER
                 {
                     return await _connection.ExecuteAsync(sql, parameters, _transaction, commandTimeout: 3600);
                 }
-                catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
+                catch (SqlException ex) when (ex.Number == DeadlockErrorNumber && attempt < maxRetries)
                 {
-                    // Deadlock detected - log and retry with exponential backoff
                     LogDeadlock(sql, attempt + 1, maxRetries, ex);
-                    await Task.Delay(200 * (attempt + 1));
+                    ResetTransactionAfterDeadlock();
+                    await Task.Delay(GetDeadlockRetryDelayMs(attempt));
                     continue;
                 }
-                catch (SqlException ex) when (ex.Number == 1205)
+                catch (SqlException ex) when (ex.Number == DeadlockErrorNumber)
                 {
-                    // Max retries exceeded - log and rethrow
                     LogDeadlock(sql, maxRetries + 1, maxRetries, ex);
                     throw;
                 }
@@ -109,7 +111,7 @@ namespace Prg_Proccessy.CNNMANAGER
         [System.Diagnostics.DebuggerStepThrough]
         public async Task<IEnumerable<T>> SqlQueryCtcAsync<T>(string sql, object parameters = null)
         {
-            const int maxRetries = 3;
+            const int maxRetries = DefaultDeadlockMaxRetries;
 
             for (int attempt = 0; attempt <= maxRetries; attempt++)
             {
@@ -117,16 +119,15 @@ namespace Prg_Proccessy.CNNMANAGER
                 {
                     return await _connection.QueryAsync<T>(sql, parameters, _transaction, commandTimeout: 3600);
                 }
-                catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
+                catch (SqlException ex) when (ex.Number == DeadlockErrorNumber && attempt < maxRetries)
                 {
-                    // Deadlock detected - log and retry with exponential backoff
                     LogDeadlock(sql, attempt + 1, maxRetries, ex);
-                    await Task.Delay(200 * (attempt + 1));
+                    ResetTransactionAfterDeadlock();
+                    await Task.Delay(GetDeadlockRetryDelayMs(attempt));
                     continue;
                 }
-                catch (SqlException ex) when (ex.Number == 1205)
+                catch (SqlException ex) when (ex.Number == DeadlockErrorNumber)
                 {
-                    // Max retries exceeded - log and rethrow
                     LogDeadlock(sql, maxRetries + 1, maxRetries, ex);
                     throw;
                 }
@@ -167,6 +168,46 @@ namespace Prg_Proccessy.CNNMANAGER
             _connection?.Close();
             _connection?.Dispose();
             _connection = null;
+        }
+
+        private void ResetTransactionAfterDeadlock()
+        {
+            try
+            {
+                if (_transaction != null && _transaction.Connection != null)
+                {
+                    _transaction.Rollback();
+                }
+            }
+            catch
+            {
+                // SQL Server may already have rolled transaction back as deadlock victim.
+            }
+            finally
+            {
+                _transaction?.Dispose();
+                _transaction = null;
+            }
+
+            if (_connection == null)
+            {
+                throw new InvalidOperationException("Database connection is not initialized.");
+            }
+
+            if (_connection.State != ConnectionState.Open)
+            {
+                _connection.Open();
+            }
+
+            _transaction = _connection.BeginTransaction();
+        }
+
+        private static int GetDeadlockRetryDelayMs(int attempt)
+        {
+            // Exponential backoff with bounded jitter to avoid immediate contention.
+            int baseDelay = (int)Math.Min(200 * Math.Pow(2, attempt), 5000);
+            int jitter = Random.Shared.Next(50, 201);
+            return baseDelay + jitter;
         }
 
         private static void LogDeadlock(string sql, int attempt, int maxRetries, SqlException ex)
