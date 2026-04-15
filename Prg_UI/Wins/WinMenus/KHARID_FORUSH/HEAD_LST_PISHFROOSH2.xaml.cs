@@ -4946,7 +4946,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                                 double jayMeghk = Math.Truncate(Convert.ToDouble(jayItem.MEGHk / jayItem.MEGHTA) * jayItem.MEGHJAY);
 
                                                 // دریافت ردیف جدید
-                                                var newRadif = db.Query<int>("SELECT ISNULL(MAX(RADIF), 0) + 1 FROM dbo.INVO_LST WHERE NUMBER = @num AND TAG = 2",
+                                                var newRadif = db.Query<int>("SELECT ISNULL(MAX(RADIF), 0) + 1 FROM dbo.INVO_LST WITH (UPDLOCK, HOLDLOCK) WHERE NUMBER = @num AND TAG = 2",
                                                                              new { num }, transaction).FirstOrDefault();
 
                                                 // درج کالای جایزه
@@ -5572,7 +5572,7 @@ namespace Wins.WinMenus.KHARID_FORUSH
                                                 double jayMeghk = Math.Truncate(Convert.ToDouble(jayItem.MEGHk / jayItem.MEGHTA) * jayItem.MEGHJAY);
 
                                                 // دریافت ردیف جدید
-                                                var newRadif = db.Query<int>("SELECT ISNULL(MAX(RADIF), 0) + 1 FROM dbo.INVO_LST WHERE NUMBER = @num AND TAG = 2",
+                                                var newRadif = db.Query<int>("SELECT ISNULL(MAX(RADIF), 0) + 1 FROM dbo.INVO_LST WITH (UPDLOCK, HOLDLOCK) WHERE NUMBER = @num AND TAG = 2",
                                                                              new { num }, transaction).FirstOrDefault();
 
                                                 // درج کالای جایزه

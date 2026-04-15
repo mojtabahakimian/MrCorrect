@@ -6229,12 +6229,15 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                 bool CurrentRowisNew = true;
                 if (ROW.id is null || ROW.id <= 0) //INSERT
                 {
-                    _qre = $@"INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
+                    _qre = $@"DECLARE @NewRADIF INT;
+                              SELECT @NewRADIF = ISNULL(MAX(RADIF) + 1, 1) FROM dbo.INVO_LST WITH (UPDLOCK, HOLDLOCK) WHERE NUMBER={NUMBER.Text} AND TAG={hTAG};
+
+                              INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
                               OUTPUT INSERTED.id
                               VALUES({NUMBER.Text},
                               {hTAG} ,
                               {ROW.ANBAR}   ,
-                              NULL,
+                              @NewRADIF,
                               N'{ROW.CODE}' ,
                               {ROW.MEGH} ,
                               {ROW.MEGHk} ,
@@ -6270,7 +6273,7 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
                     {
                         ROW.id = queryOutputs.FirstOrDefault(); // Update the list with the new ID
                                                                 //اصلاح شماره ردیف
-                        IVM.TM.ExecuteSqlCommandCtc($"UPDATE dbo.INVO_LST SET RADIF = (SELECT ISNULL(MAX(RADIF) + 1, 1) AS NewRADIF FROM dbo.INVO_LST WHERE NUMBER={NUMBER.Text} AND TAG={hTAG}) FROM dbo.INVO_LST WHERE id = {ROW.id}");
+
                     }
                 }
                 else //UPDATE

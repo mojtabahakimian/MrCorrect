@@ -2433,9 +2433,12 @@ namespace Wins.WinMenus.ANBAR
 
             if (TheRow.id is null || TheRow.id <= 0) //INSERT
             {
-                _qre = $@"INSERT INTO INVO_LST (       NUMBER, TAG,         ANBAR,                                           RADIF,             CODE,         MEGH,         MEGHk,                                              MEGH_MAR,                                          MABL,                                            MABL_K,                         FROM_A,                                            MEGH_R,         VAHED_K,                                           N_KOL,                                            N_MOIN,                                            AVRAGE,                                             AVRAGE2,                                           IMBAA,                                              TOTALARZ,                                          TKHN,                                      JAY , MANDAH) 
+                _qre = $@"DECLARE @NewRADIF INT;
+                          SELECT @NewRADIF = ISNULL(MAX(RADIF) + 1, 1) FROM dbo.INVO_LST WITH (UPDLOCK, HOLDLOCK) WHERE NUMBER={NUMBER.Text} AND TAG=26;
+
+                          INSERT INTO INVO_LST (       NUMBER, TAG,         ANBAR,                                           RADIF,             CODE,         MEGH,         MEGHk,                                              MEGH_MAR,                                          MABL,                                            MABL_K,                         FROM_A,                                            MEGH_R,         VAHED_K,                                           N_KOL,                                            N_MOIN,                                            AVRAGE,                                             AVRAGE2,                                           IMBAA,                                              TOTALARZ,                                          TKHN,                                      JAY , MANDAH)
                           OUTPUT INSERTED.id
-			                                                       VALUES ({NUMBER.Text},  26,{TheRow.ANBAR},{(TheRow.RADIF is null ? "NULL" : TheRow.RADIF)}, N'{TheRow.CODE}',{TheRow.MEGH},{TheRow.MEGHk},{(TheRow.MEGH_MAR is null ? "NULL" : TheRow.MEGH_MAR)},{(TheRow.MABL is null ? "NULL" : TheRow.MABL)},{(TheRow.MABL_K is null ? "NULL" : TheRow.MABL_K)},{Convert.ToByte(TheRow.FROM_A)},{(TheRow.MEGH_R is null ? "NULL" : TheRow.MEGH_R)},{TheRow.VAHED_K},{(TheRow.N_KOL is null ? "NULL" : TheRow.N_KOL)},{(TheRow.N_MOIN is null ? "NULL" : TheRow.N_MOIN)},{(TheRow.AVRAGE is null ? "NULL" : TheRow.AVRAGE)},{(TheRow.AVRAGE2 is null ? "NULL" : TheRow.AVRAGE2)},{(TheRow.IMBAA is null ? "NULL" : TheRow.IMBAA)},{(TheRow.TOTALARZ is null ? "NULL" : TheRow.TOTALARZ)},{(TheRow.TKHN is null ? "NULL" : TheRow.TKHN)},{(TheRow.JAY is null ? "0" : TheRow.JAY)},N'{(TheRow.MANDAH is null ? "NULL" : TheRow.MANDAH)}')";
+			                                                       VALUES ({NUMBER.Text},  26,{TheRow.ANBAR},@NewRADIF, N'{TheRow.CODE}',{TheRow.MEGH},{TheRow.MEGHk},{(TheRow.MEGH_MAR is null ? "NULL" : TheRow.MEGH_MAR)},{(TheRow.MABL is null ? "NULL" : TheRow.MABL)},{(TheRow.MABL_K is null ? "NULL" : TheRow.MABL_K)},{Convert.ToByte(TheRow.FROM_A)},{(TheRow.MEGH_R is null ? "NULL" : TheRow.MEGH_R)},{TheRow.VAHED_K},{(TheRow.N_KOL is null ? "NULL" : TheRow.N_KOL)},{(TheRow.N_MOIN is null ? "NULL" : TheRow.N_MOIN)},{(TheRow.AVRAGE is null ? "NULL" : TheRow.AVRAGE)},{(TheRow.AVRAGE2 is null ? "NULL" : TheRow.AVRAGE2)},{(TheRow.IMBAA is null ? "NULL" : TheRow.IMBAA)},{(TheRow.TOTALARZ is null ? "NULL" : TheRow.TOTALARZ)},{(TheRow.TKHN is null ? "NULL" : TheRow.TKHN)},{(TheRow.JAY is null ? "0" : TheRow.JAY)},N'{(TheRow.MANDAH is null ? "NULL" : TheRow.MANDAH)}')";
 
                 var (errorMsgs, _, _, queryOutputs) = IVM.CheckInventoryAndExecuteQuery<long>(new List<object> { TheRow }, _qre, null, false);
                 ErrosMessages.AddRange(errorMsgs);
@@ -2444,7 +2447,7 @@ namespace Wins.WinMenus.ANBAR
                 {
                     TheRow.id = queryOutputs.FirstOrDefault(); // Update the list with the new ID
                                                                //اصلاح شماره ردیف
-                    IVM.TM.ExecuteSqlCommandCtc($"UPDATE dbo.INVO_LST SET RADIF = (SELECT ISNULL(MAX(RADIF) + 1, 1) AS NewRADIF FROM dbo.INVO_LST WHERE NUMBER={NUMBER.Text} AND TAG=26) FROM dbo.INVO_LST WHERE id = {TheRow.id}");
+
                 }
             }
             else //UPDATE

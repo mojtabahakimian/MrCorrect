@@ -1850,12 +1850,15 @@ namespace Wins.WinMenus.SANATI
 
             if (TheRow.id is null || TheRow.id <= 0) //INSERT
             {
-                _qre = $@"INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH,FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
+                _qre = $@"DECLARE @NewRADIF INT;
+                              SELECT @NewRADIF = ISNULL(MAX(RADIF) + 1, 1) FROM dbo.INVO_LST WITH (UPDLOCK, HOLDLOCK) WHERE NUMBER={NUMBER.Text} AND TAG={FTAG};
+
+                              INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH,FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
                               OUTPUT INSERTED.id
                               VALUES({NUMBER.Text},
                               {FTAG} ,
                               {TheRow.ANBAR}   ,
-                              NULL,
+                              @NewRADIF,
                               N'{TheRow.CODE}' ,
                               {TheRow.MEGH} ,
                               {TheRow.MEGHk} ,
@@ -1888,7 +1891,7 @@ namespace Wins.WinMenus.SANATI
                 {
                     TheRow.id = queryOutputs.FirstOrDefault(); // Update the list with the new ID
                                                                //اصلاح شماره ردیف
-                    IVM.TM.ExecuteSqlCommandCtc($"UPDATE dbo.INVO_LST SET RADIF = (SELECT ISNULL(MAX(RADIF) + 1, 1) AS NewRADIF FROM dbo.INVO_LST WHERE NUMBER={NUMBER.Text} AND TAG={FTAG}) FROM dbo.INVO_LST WHERE id = {TheRow.id}");
+
                 }
             }
             else //UPDATE
