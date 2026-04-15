@@ -383,7 +383,7 @@ namespace Prg_UI.Wins
             Baseknow.UGRP = "1";
             //CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
 
-            new WinBase().Show();
+            //new WinBase().Show();
             //new WIN_GETFIRSTMOG().Show();
             //new WinConnectionChoose().Show();
             //new F_MENU_DATE("CROS").Show();
