@@ -3106,9 +3106,12 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             string _qre = "";
             if (ROW.id is null || ROW.id <= 0) //INSERT
             {
-                _qre = $@"INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
+                _qre = $@"DECLARE @NewRADIF INT;
+                                SELECT @NewRADIF = ISNULL(MAX(RADIF) + 1, 1) FROM dbo.INVO_LST WITH (UPDLOCK, HOLDLOCK) WHERE NUMBER={NUMBER.Text} AND TAG=2;
+
+                                INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
                                 OUTPUT INSERTED.id
-                                VALUES({NUMBER.Text},2,{ROW.ANBAR},NULL,N'{ROW.CODE}',{ROW.MEGH},{ROW.MEGHk},{ROW.MEGH_MAR},N'{ROW.MANDAH}',{ROW.MABL},{ROW.MABL_K},{Convert.ToByte(ROW.FROM_A)},N'{ROW.N_RASID}',
+                                VALUES({NUMBER.Text},2,{ROW.ANBAR},@NewRADIF,N'{ROW.CODE}',{ROW.MEGH},{ROW.MEGHk},{ROW.MEGH_MAR},N'{ROW.MANDAH}',{ROW.MABL},{ROW.MABL_K},{Convert.ToByte(ROW.FROM_A)},N'{ROW.N_RASID}',
                                 {ROW.MEGH_R},{ROW.SANAD_NO},NULL,{ROW.ANBARF},{ROW.VAHED_K},{ROW.N_KOL},{ROW.N_MOIN},{ROW.N_TAF},{ROW.AVRAGE},{ROW.AVRAGE2},{ROW.IMBAA},{ROW.TOTALARZ},N'{ROW.VISITOR}',{ROW.TKHN},
                                 {(ROW.JAY is null ? "NULL" : ROW.JAY)},{(ROW.JAYO is null ? "NULL" : ROW.JAYO)})";
 
@@ -3118,7 +3121,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 if (queryOutputs.Any())
                 {
                     ROW.id = queryOutputs.FirstOrDefault(); // Update the list with the new ID
-                    IVM.TM.ExecuteSqlCommandCtc($"UPDATE dbo.INVO_LST SET RADIF = (SELECT ISNULL(MAX(RADIF) + 1, 1) AS NewRADIF FROM dbo.INVO_LST WHERE NUMBER={NUMBER.Text} AND TAG=2) FROM dbo.INVO_LST WHERE id = {ROW.id}");
+
                 }
             }
             else //UPDATE
