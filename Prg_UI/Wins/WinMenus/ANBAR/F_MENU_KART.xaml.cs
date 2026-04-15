@@ -223,11 +223,8 @@ namespace Wins.WinMenus.ANBAR
 
         private void OpenReport()
         {
+            var report = new Prg_UI.Rpts.ANBAR.R_KA_KALA();
 
-            var report = new StiReport();
-            //var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.{THE_RPT_NAME}.mrt");
-            var pathreport = Assembly.GetEntryAssembly().GetManifestResourceStream($"Prg_UI.Rpts.ANBAR.{THE_RPT_NAME}.mrt");
-            report.Load(pathreport);
             string connstr = CL_CCNNMANAGER.CONNECTION_STR + "Connect Timeout=900";
             report.Dictionary.Databases.Clear();
             report.Dictionary.Databases.Add(new StiSqlDatabase("MS SQL", connstr));

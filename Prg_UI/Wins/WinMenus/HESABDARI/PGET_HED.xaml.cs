@@ -2585,69 +2585,65 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
         private void PGET_LST_SUB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //Additional Saftey Check:
+            // Additional Safety Check:
             if (PGET_LST_SUB == null || PGET_LST_SUB?.SelectedItem == null)
             {
                 return;
             }
-            else
-            {
-                var selectedItem = PGET_LST_SUB.SelectedItem as PGET_LST;
-                if (selectedItem == null)
-                {
-                    e.Handled = true;  // Stop further execution
-                    return;
-                }
-            }
 
+            var selectedItem = PGET_LST_SUB.SelectedItem as PGET_LST;
+            if (selectedItem == null)
+            {
+                e.Handled = true;  // Stop further execution
+                return;
+            }
 
             if (NowIsReady && !(e is null))
             {
-                //IF IS NOT NULL
-                if (PGET_LST_SUB?.SelectedItem != null)
+                if (PGET_LST_SUB.SelectedItem.ToStringNullSafe() != "{NewItemPlaceholder}")
                 {
-                    if (PGET_LST_SUB.SelectedItem.ToStringNullSafe() != "{NewItemPlaceholder}")
+                    if (!(PGET_LST_SUB?.CurrentCell.Column is null))
+                        CURRENT_COLUMN_INDEX = PGET_LST_SUB.CurrentCell.Column.DisplayIndex;
+
+                    CURRENT_ROW_INDEX = PGET_LST_SUB.SelectedIndex;
+
+                    var _satr = (PGET_LST_SUB.SelectedItem as PGET_LST);
+                    if (_satr != null)
                     {
-                        if (!(PGET_LST_SUB?.CurrentCell.Column is null))
-                            CURRENT_COLUMN_INDEX = PGET_LST_SUB.CurrentCell.Column.DisplayIndex;
-
-                        CURRENT_ROW_INDEX = PGET_LST_SUB.SelectedIndex;
-
-                        var _satr = (PGET_LST_SUB.SelectedItem as PGET_LST);
-                        #region SUB_Form_Current
-                        if (_satr != null)
+                        if (Strings.Mid(Baseknow.OPTIONSS, 42, 1) == "5")
                         {
-                            //Check Matter
-                            //this.FHES.TabStop = true;
-                            //this.THES.TabStop = true;
-                            if (Strings.Mid(Baseknow.OPTIONSS, 42, 1) == "5")
+                            try
                             {
-                                if (!IsNull(_satr?.FHES))
+                                // SPME Fix: Parameterized queries to prevent SQL Injection & optimize execution plan
+                                if (!string.IsNullOrEmpty(_satr?.FHES))
                                 {
-                                    var rst = dbms.DoGetDataSQL<double?>("SELECT SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE (HES = '" + _satr.FHES + "')").ToList();
-                                    if (rst.Count == 0)
+                                    var rst = dbms.DoGetDataSQL<double?>("SELECT SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE HES = @Hes", new { Hes = _satr.FHES }).ToList();
+                                    if (rst.Count == 0 || rst.FirstOrDefault() == null)
                                     {
                                         MANDB.Text = "0";
                                     }
                                     else
                                     {
-                                        MANDB.Text = Convert.ToString(Interaction.IIf(rst.FirstOrDefault() > 0, Strings.Format(rst.FirstOrDefault(), "#,### ريال بدهكار"), Strings.Format(rst.FirstOrDefault() * -1, "#,### ريال بستانكار")));
+                                        double val = rst.FirstOrDefault().Value;
+                                        MANDB.Text = val > 0 ? Strings.Format(val, "#,### ريال بدهكار") : Strings.Format(val * -1, "#,### ريال بستانكار");
                                     }
                                 }
                                 else
                                 {
                                     MANDB.Text = "";
                                 }
-                                if (!IsNull(_satr?.THES))
+
+                                if (!string.IsNullOrEmpty(_satr?.THES))
                                 {
-                                    var rst = dbms.DoGetDataSQL<double?>("SELECT     SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE     (HES = '" + _satr.THES + "')").ToList();
-                                    if (rst.Count == 0)
+                                    var rst = dbms.DoGetDataSQL<double?>("SELECT SUM(BED - BES) AS MAN FROM dbo.DEED_DTL WHERE HES = @Hes", new { Hes = _satr.THES }).ToList();
+                                    if (rst.Count == 0 || rst.FirstOrDefault() == null)
                                     {
                                         MANDS.Text = "0";
                                     }
                                     else
                                     {
-                                        MANDS.Text = Convert.ToString(Interaction.IIf(rst.FirstOrDefault() > 0, Strings.Format(rst.FirstOrDefault(), "#,### ريال بدهكار"), Strings.Format(rst.FirstOrDefault() * -1, "#,### ريال بستانكار")));
+                                        double val = rst.FirstOrDefault().Value;
+                                        MANDS.Text = val > 0 ? Strings.Format(val, "#,### ريال بدهكار") : Strings.Format(val * -1, "#,### ريال بستانكار");
                                     }
                                 }
                                 else
@@ -2655,15 +2651,20 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                     MANDS.Text = "";
                                 }
                             }
+                            catch (Microsoft.Data.SqlClient.SqlException)
+                            {
+                                // SPME Fix: Graceful degradation on network timeout (Prevents App Crash)
+                                MANDB.Text = "";
+                                MANDS.Text = "";
+                            }
                         }
-                        #endregion
                     }
                 }
             }
         }
         private void PGET_HED_SUB_CANCEL_EDIT(DataGridEditingUnit? _RC_ = null)
         {
-            PGET_LST_SUB.Dispatcher.InvokeAsync(() =>
+            PGET_LST_SUB.Dispatcher.Invoke(() =>
             {
                 PGET_LST_SUB.CellEditEnding -= PGET_LST_SUB_CellEditEnding;
                 PGET_LST_SUB.RowEditEnding -= PGET_LST_SUB_RowEditEnding;
@@ -3941,9 +3942,9 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
         private void RestoreFocusCell(DataGridCellEditEndingEventArgs e)
         {
-            e.Cancel = true;
             try
             {
+                e.Cancel = true;
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     PGET_LST_SUB.CurrentCell = _editingCellInfo.Value;

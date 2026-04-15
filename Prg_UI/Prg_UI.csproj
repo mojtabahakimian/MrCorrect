@@ -46,7 +46,8 @@
 
 		<!-- همه فایل‌های محتوا (Content) داخل exe قرار می‌گیرند و هنگام اجرا استخراج می‌شوند -->
 		<!--Suspected to this option: (suggest to set IncludeAllContentForSelfExtract = false)-->
-		<!--مشکلی که ایجاد میکنه اینه که بعیضی از ستون ها در ریپورتی مثل کارت انبار مثل ستون موجودی میپره !-->
+		<!--مشکلی که ایجاد میکنه اینه که بعیضی از ستون ها در ریپورتی مثل کارت انبار مثل ستون موجودی میپره Expression in Stimulsoft!-->
+		<!--گزارشاتی هم در تغییر واحد فاکتور وجود داره ممکنه این توش دخیل باشه-->
 		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
 
 		<!-- همه وابستگی‌های NuGet در پوشه خروجی کپی می‌شوند -->
@@ -95,7 +96,6 @@
 		<None Remove="Rpts\ANBAR\r_counter1.mrt" />
 		<None Remove="Rpts\ANBAR\r_counter2.mrt" />
 		<None Remove="Rpts\ANBAR\r_counter3.mrt" />
-		<None Remove="Rpts\ANBAR\R_KA_KALA.mrt" />
 		<None Remove="Rpts\ANBAR\R_KA_KALA2.mrt" />
 		<None Remove="Rpts\ANBAR\R_MOGUDI_ANBARHA.mrt" />
 		<None Remove="Rpts\ANBAR\R_TAG.mrt" />
@@ -515,7 +515,6 @@
 		<EmbeddedResource Include="Rpts\ANBAR\r_counter1.mrt" />
 		<EmbeddedResource Include="Rpts\ANBAR\r_counter2.mrt" />
 		<EmbeddedResource Include="Rpts\ANBAR\r_counter3.mrt" />
-		<EmbeddedResource Include="Rpts\ANBAR\R_KA_KALA.mrt" />
 		<EmbeddedResource Include="Rpts\ANBAR\R_KA_KALA2.mrt" />
 		<EmbeddedResource Include="Rpts\ANBAR\R_MOGUDI_ANBARHA.mrt" />
 		<EmbeddedResource Include="Rpts\ANBAR\R_TAG.mrt" />
