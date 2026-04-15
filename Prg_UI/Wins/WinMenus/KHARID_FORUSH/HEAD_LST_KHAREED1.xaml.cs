@@ -2259,16 +2259,18 @@ namespace Wins.WinMenus.KHARID_FORUSH
             }
 
 
-            string _qre = null;
-            var MasterTopErrorMessages = new List<MsgModel>();
-
-            IVM.StartTransaction(); // Start the transaction again if is disposed before ****************************************************************
-
-            List<MsgModel> ErrosMessages = new List<MsgModel>();
-
-            if (TheRow.id is null || TheRow.id <= 0) //INSERT
+            try
             {
-                _qre = $@"INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
+                string _qre = null;
+                var MasterTopErrorMessages = new List<MsgModel>();
+
+                IVM.StartTransaction(); // Start the transaction again if is disposed before ****************************************************************
+
+                List<MsgModel> ErrosMessages = new List<MsgModel>();
+
+                if (TheRow.id is null || TheRow.id <= 0) //INSERT
+                {
+                    _qre = $@"INSERT INTO dbo.INVO_LST(NUMBER, TAG, ANBAR, RADIF, CODE, MEGH, MEGHk, MEGH_MAR, MANDAH, MABL, MABL_K, FROM_A, N_RASID, MEGH_R, RADAH, SANAD_NO, CUST_NO, ANBARF, VAHED_K, N_KOL, N_MOIN, N_TAF, AVRAGE, AVRAGE2, IMBAA, TOTALARZ, VISITOR, TKHN, JAY, JAYO)
                               OUTPUT INSERTED.id
                               VALUES({NUMBER.Text},
                               {HTAG} ,
@@ -2301,19 +2303,19 @@ namespace Wins.WinMenus.KHARID_FORUSH
                               {(TheRow.JAY?.ToString() is null ? "NULL" : TheRow.JAY.ToString())}   ,
                               {(TheRow.JAYO?.ToString() is null ? "NULL" : TheRow.JAYO.ToString())} )";
 
-                var (errorMsgs, _, _, queryOutputs) = IVM.CheckInventoryAndExecuteQuery<long>(new List<object> { TheRow }, _qre, null, false);
-                ErrosMessages.AddRange(errorMsgs);
+                    var (errorMsgs, _, _, queryOutputs) = IVM.CheckInventoryAndExecuteQuery<long>(new List<object> { TheRow }, _qre, null, false);
+                    ErrosMessages.AddRange(errorMsgs);
 
-                if (queryOutputs.Any())
-                {
-                    TheRow.id = queryOutputs.FirstOrDefault(); // Update the list with the new ID
-                                                               //اصلاح شماره ردیف
-                    IVM.TM.ExecuteSqlCommandCtc($"UPDATE dbo.INVO_LST SET RADIF = (SELECT ISNULL(MAX(RADIF) + 1, 1) AS NewRADIF FROM dbo.INVO_LST WHERE NUMBER={NUMBER.Text} AND TAG={HTAG}) FROM dbo.INVO_LST WHERE id = {TheRow.id}");
+                    if (queryOutputs.Any())
+                    {
+                        TheRow.id = queryOutputs.FirstOrDefault(); // Update the list with the new ID
+                                                                   //اصلاح شماره ردیف
+                        IVM.TM.ExecuteSqlCommandCtc($"UPDATE dbo.INVO_LST SET RADIF = (SELECT ISNULL(MAX(RADIF) + 1, 1) AS NewRADIF FROM dbo.INVO_LST WHERE NUMBER={NUMBER.Text} AND TAG={HTAG}) FROM dbo.INVO_LST WHERE id = {TheRow.id}");
+                    }
                 }
-            }
-            else //UPDATE
-            {
-                _qre = $@"UPDATE dbo.INVO_LST
+                else //UPDATE
+                {
+                    _qre = $@"UPDATE dbo.INVO_LST
                    SET ANBAR = {TheRow.ANBAR}, CODE = N'{TheRow.CODE}',
                    MEGH = {TheRow.MEGH}, MEGHk = {TheRow.MEGHk}, MEGH_MAR = {(TheRow.MEGH_MAR is null ? "NULL" : TheRow.MEGH_MAR)},
                    MANDAH = N'{TheRow.MANDAH}', MABL = {TheRow.MABL}, MABL_K = {TheRow.MABL_K},
@@ -2330,9 +2332,9 @@ namespace Wins.WinMenus.KHARID_FORUSH
                    TKHN = {TheRow.TKHN}, JAY = {(TheRow.JAY?.ToString() is null ? "NULL" : TheRow.JAY.ToString())}, JAYO = {(TheRow.JAYO?.ToString() is null ? "NULL" : TheRow.JAYO.ToString())}
                    WHERE id = {TheRow.id}";
 
-                var (errorMsgs, _, _, _) = IVM.CheckInventoryAndExecuteQuery<int>(new List<object> { TheRow }, _qre, null, false);
-                ErrosMessages.AddRange(errorMsgs);
-            }
+                    var (errorMsgs, _, _, _) = IVM.CheckInventoryAndExecuteQuery<int>(new List<object> { TheRow }, _qre, null, false);
+                    ErrosMessages.AddRange(errorMsgs);
+                }
 
             //انبار خالی نباشد
             if (TheRow?.ANBAR is null)
@@ -2378,26 +2380,40 @@ namespace Wins.WinMenus.KHARID_FORUSH
                 }
             }
 
-            if (ErrosMessages.Any())
-            {
-                IVM.RollbackTransaction(); //Undo
-            }
-            else
-            {
-                IVM.CommitTransaction(); // Commit Apply Save
-            }
-            MasterTopErrorMessages.AddRange(ErrosMessages);
+                if (ErrosMessages.Any())
+                {
+                    IVM.RollbackTransaction(); //Undo
+                }
+                else
+                {
+                    IVM.CommitTransaction(); // Commit Apply Save
+                }
+                MasterTopErrorMessages.AddRange(ErrosMessages);
 
-            SANAD();
+                SANAD();
 
-            if (MasterTopErrorMessages.Any())
+                if (MasterTopErrorMessages.Any())
+                {
+                    INVO_LST_SUB_CANCEL_EDIT();
+                    IVM.ShowErrorMessages(MasterTopErrorMessages);
+                    return;
+                }
+
+                AVRAGE_UPDATE();
+            }
+            catch (SqlException ex) when (ex.Number == 1205)
             {
+                try { IVM?.RollbackTransaction(); } catch { }
                 INVO_LST_SUB_CANCEL_EDIT();
-                IVM.ShowErrorMessages(MasterTopErrorMessages);
-                return;
-            }
 
-            AVRAGE_UPDATE();
+                IVM.ShowErrorMessages(new List<MsgModel>
+                {
+                    new MsgModel
+                    {
+                        MessageText_U = "به دلیل تداخل همزمانی در پایگاه‌داده (Deadlock)، عملیات ذخیره انجام نشد. لطفاً چند ثانیه بعد دوباره ذخیره را انجام دهید."
+                    }
+                });
+            }
         }
 
         private void MABL_AfterUpdate(INVO_LST_FACTOR22? Rowy, bool IsSingleCurrentRow = true, bool DoShoeMessages = true)

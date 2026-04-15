@@ -78,6 +78,26 @@ namespace Prg_Proccessy.CNNMANAGER
         }
 
         [System.Diagnostics.DebuggerStepThrough]
+        public void AcquireTransactionAppLock(string resource, int timeoutMs = 10000)
+        {
+            const string appLockSql = @"
+DECLARE @result INT;
+EXEC @result = sp_getapplock
+    @Resource = @Resource,
+    @LockMode = 'Exclusive',
+    @LockOwner = 'Transaction',
+    @LockTimeout = @LockTimeout;
+SELECT @result;";
+
+            int result = SqlQueryCtc<int>(appLockSql, new { Resource = resource, LockTimeout = timeoutMs }).FirstOrDefault();
+
+            if (result < 0)
+            {
+                throw new TimeoutException($"Failed to acquire application lock for resource '{resource}'. sp_getapplock result: {result}");
+            }
+        }
+
+        [System.Diagnostics.DebuggerStepThrough]
         public async Task<int> ExecuteSqlCommandCtcAsync(string sql, object parameters = null)
         {
             const int maxRetries = 3;

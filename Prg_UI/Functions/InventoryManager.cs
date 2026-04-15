@@ -163,6 +163,7 @@ namespace Functions
             List<MsgModel> infoMessages = new List<MsgModel>();
             List<KALA> inventoryDetails = new List<KALA>();
             List<T> queryOutputs = new List<T>();
+            var inventoryLockKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             bool internalTransactionStarted = false;
             int maxRetries = autoManageTransaction ? 3 : 0;
@@ -173,6 +174,7 @@ namespace Functions
                 infoMessages.Clear();
                 inventoryDetails.Clear();
                 queryOutputs.Clear();
+                inventoryLockKeys.Clear();
 
                 try
                 {
@@ -186,7 +188,13 @@ namespace Functions
                         throw new InvalidOperationException("Transaction not started. Call StartTransaction() before performing operations.");
                     }
 
-                    foreach (var item in items)
+                    // Deterministic order for multi-item operations prevents lock-order cycles.
+                    var orderedItems = items
+                        .OrderBy(x => Convert.ToInt32(x.GetType().GetProperty("ANBAR")?.GetValue(x) ?? 0))
+                        .ThenBy(x => Convert.ToString(x.GetType().GetProperty("CODE")?.GetValue(x)) ?? string.Empty)
+                        .ToList();
+
+                    foreach (var item in orderedItems)
                     {
                         var meghMarProperty = item.GetType().GetProperty("MEGH_MAR");
                         double MEGH_MAR = meghMarProperty != null ? (double)(meghMarProperty.GetValue(item) ?? 0) : 0;
@@ -195,6 +203,11 @@ namespace Functions
                         string CODE = Convert.ToString(item.GetType().GetProperty("CODE").GetValue(item)); // Commodity CODE
                         int ANBAR = Convert.ToInt32(item.GetType().GetProperty("ANBAR").GetValue(item)); // Warehouse (Stock) Amount CODE
                         double MEGHk = Convert.ToDouble(item.GetType().GetProperty("MEGHk").GetValue(item));
+                        string lockKey = $"INV_STUF_STK:{ANBAR}:{CODE}";
+                        if (inventoryLockKeys.Add(lockKey))
+                        {
+                            TM.AcquireTransactionAppLock(lockKey, timeoutMs: 15000);
+                        }
                         bool HaveNotMarguee = MEGH_MAR == 0; // Has some of this invoice been returned? (return value)
                         string ANBAR_NAME = TM.SqlQueryCtc<string>("SELECT TOP 1 NAMES FROM dbo.TCOD_ANBAR WITH (NOLOCK) WHERE CODE = @ANBAR", new { ANBAR }).FirstOrDefault(); // Warehouse (Stock) Name
                         string NAME_CODE = TM.SqlQueryCtc<string>("SELECT NAME FROM dbo.STUF_DEF WITH (NOLOCK) WHERE CODE = @CODE", new { CODE }).FirstOrDefault(); // Commodity Name
@@ -202,7 +215,7 @@ namespace Functions
 
                         if (isBarGashti) //فاکتور/انبار برگشت فروش
                         {
-                            var RST = TM.SqlQueryCtc<STUF_STK_CSHARP>("SELECT * FROM dbo.STUF_STK WHERE CODE = @CODE AND ANBAR = @ANBAR",
+                            var RST = TM.SqlQueryCtc<STUF_STK_CSHARP>("SELECT * FROM dbo.STUF_STK WITH (UPDLOCK, ROWLOCK) WHERE CODE = @CODE AND ANBAR = @ANBAR",
                                new { CODE, ANBAR }).FirstOrDefault();
 
                             if (RST == null)
@@ -212,12 +225,6 @@ namespace Functions
                                     MessageText_U = $"اطلاعات این کالا با کد {CODE} از انبار {ANBAR_NAME} ناقص مي باشد , با پشتیبانی در ارتباط باشید."
                                 });
                                 continue;
-                            }
-
-                            // Execute query if provided and not in check-only mode
-                            if (performQuery && !string.IsNullOrEmpty(query))
-                            {
-                                queryOutputs = TM.SqlQueryCtc<T>(query, queryParams).ToList(); //Main INVO_LST Query
                             }
 
                             //محاسبه موجودی واقعی این کالا
@@ -235,7 +242,7 @@ namespace Functions
                                 {
                                     //بروز رسانی جدول برای موجودی موقت
                                     TM.ExecuteSqlCommandCtc("UPDATE dbo.STUF_STK SET MOGODI = @MOGODI WHERE CODE = @CODE AND ANBAR = @ANBAR",
-                                        new { MOGODI = MAND.HasValue, CODE, ANBAR });
+                                        new { MOGODI = MAND.Value, CODE, ANBAR });
 
                                 }
                             }
@@ -294,7 +301,7 @@ namespace Functions
                         {
                             if (HaveNotMarguee) // If no returns
                             {
-                                var RST = TM.SqlQueryCtc<STUF_STK_CSHARP>("SELECT MOGODI FROM dbo.STUF_STK WHERE CODE = @CODE AND ANBAR = @ANBAR",
+                                var RST = TM.SqlQueryCtc<STUF_STK_CSHARP>("SELECT MOGODI FROM dbo.STUF_STK WITH (UPDLOCK, ROWLOCK) WHERE CODE = @CODE AND ANBAR = @ANBAR",
                                     new { CODE, ANBAR }).FirstOrDefault();
 
                                 if (RST == null)
@@ -304,12 +311,6 @@ namespace Functions
                                         MessageText_U = $"اطلاعات این کالا با کد {CODE} از انبار {ANBAR_NAME} ناقص مي باشد , با پشتیبانی در ارتباط باشید."
                                     });
                                     continue;
-                                }
-
-                                // Execute query if provided and not in check-only mode
-                                if (performQuery && !string.IsNullOrEmpty(query))
-                                {
-                                    queryOutputs = TM.SqlQueryCtc<T>(query, queryParams).ToList(); //Main INVO_LST Query
                                 }
 
                                 //محاسبه موجودی واقعی این کالا
@@ -328,7 +329,7 @@ namespace Functions
                                     {
                                         //بروز رسانی جدول برای موجودی موقت
                                         TM.ExecuteSqlCommandCtc("UPDATE dbo.STUF_STK SET MOGODI = @MOGODI WHERE CODE = @CODE AND ANBAR = @ANBAR",
-                                            new { MOGODI = MAND.HasValue, CODE, ANBAR });
+                                            new { MOGODI = MAND.Value, CODE, ANBAR });
 
                                     }
                                 }
@@ -372,6 +373,13 @@ namespace Functions
                             }
                         }
 
+                    }
+
+                    // Main query should run after inventory checks so all sessions lock resources in a consistent order
+                    // (STUF_STK first, then INVO_LST). This reduces lock-cycle deadlocks.
+                    if (performQuery && !string.IsNullOrEmpty(query) && errorMessages.Count == 0)
+                    {
+                        queryOutputs = TM.SqlQueryCtc<T>(query, queryParams).ToList();
                     }
 
                     if (internalTransactionStarted)
