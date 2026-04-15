@@ -806,7 +806,7 @@ namespace Prg_UI
 
             // قبل از لاگین کاربر، تم پیش‌فرض اعمال می‌شود.
             // پس از لاگین، تم واقعی از dbo.GENERAL_OPTIONS بارگذاری خواهد شد.
-            ////AppThemeManager.ApplyTheme(new AppThemeSettings());
+            //AppThemeManager.ApplyTheme(new AppThemeSettings());
 
             ////EnsureApplicationResourcesLoaded();
 

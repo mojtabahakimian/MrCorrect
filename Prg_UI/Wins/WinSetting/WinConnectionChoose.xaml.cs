@@ -193,7 +193,7 @@ namespace Prg_UI.Wins.WinSetting
                 conn.Open();
                 using var cmd = conn.CreateCommand();
                 cmd.CommandText = "SELECT SERVERNAM FROM dbo.SAZMAN";
-                cmd.CommandTimeout = 15;
+                cmd.CommandTimeout = 30;
                 var result = cmd.ExecuteScalar();
                 return (true, null);
             }
@@ -349,7 +349,6 @@ namespace Prg_UI.Wins.WinSetting
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            if (CL_CCNNMANAGER.ConnectedToSQLDB == true)
             {
                 ServerChooser.SelectionChanged -= ServerChooser_SelectionChanged; //برای ایکه رویداد الکی اجرا نشه تداخل درست کنه
 

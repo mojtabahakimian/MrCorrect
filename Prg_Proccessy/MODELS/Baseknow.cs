@@ -98,7 +98,7 @@ namespace Prg_Proccessy.MODELS
         public static bool? UPDDATE { get; set; }
         public static bool? RMOG { get; set; }
         public static bool? LOCKFAP { get; set; }
-     
+
 
         public static string ISO_FROOSH { get; set; }
         public static bool? HOLA { get; set; }
@@ -143,7 +143,7 @@ namespace Prg_Proccessy.MODELS
         public static string TFSAZMAN { get; set; }
         public static string TFCODE_E { get; set; }
 
-       
+
 
         public static string SMS_OWNER { get; set; }
         public static string WIDTH_D { get; set; }
@@ -207,72 +207,59 @@ namespace Prg_Proccessy.MODELS
             }
             //1- بررسی نهایی و مقدار دهی
             //StiLicense.Key = StiLicKey; //#Left
+
+            string connetionstring = "";
+            if (!CL_Generaly.IsCalledExternally)
+            {
+                connetionstring = CL_CryptionAlgorithem.DecryptTextUsingUTF8(dbms.GetConnectionSpecifyNameApp());
+            }
+            else
+            {
+                connetionstring = CL_CCNNMANAGER.CONNECTION_STR;
+            }
+
+            // استفاده از بیلد برای تجزیه استاندارد کانکشن استرینگ
+            var builder = new SqlConnectionStringBuilder(connetionstring);
+
+            // استخراج نام سرور (خودش هندل میکنه چه Data Source باشه چه Server)
+            CL_Generaly.General_Servername = builder.DataSource;
+
+            // استخراج نام دیتابیس (خودش هندل میکنه چه Initial Catalog باشه چه Database)
+            CL_Generaly.General_DBname = builder.InitialCatalog;
+
+            // استخراج نام کاربری و رمز عبور (اگر وجود داشته باشند)
+            CL_Generaly.General_Username = builder.UserID;
+            CL_Generaly.General_Password = builder.Password;
+
+            // بررسی اینکه آیا ویندوزی است یا نه
+            bool isWindowsAuth = builder.IntegratedSecurity;
+
+
+            #region GetTarikh_Times_OfToday
+            DateTime thisDate = DateTime.Now;
+            PersianCalendar perscal = new PersianCalendar();
+            string mah = (perscal.GetMonth(thisDate)).ToString();
+            string rooz = (perscal.GetDayOfMonth(thisDate)).ToString();
+            //Make 2 digit if is one without zero at first of that
+            if (mah.Length < 2)
+            {
+                mah = ("0" + mah).ToString();
+            }
+            if (rooz.Length < 2)
+            {
+                rooz = ("0" + rooz).ToString();
+            }
+
+            Tarikh.Current_Sal = perscal.GetYear(thisDate).ToString();
+            Tarikh.Current_Mah = mah.ToString();
+            Tarikh.Current_Rooz = rooz.ToString();
+
+            Tarikh.FullCurrentDate = $"{Tarikh.Current_Sal}{Tarikh.Current_Mah}{Tarikh.Current_Rooz}"; //تاریخ بدون اسلش
+
+            Tarikh.SlashyFullDate = $"{Tarikh.Current_Sal}/{Tarikh.Current_Mah}/{Tarikh.Current_Rooz}";//تاریخ با اسلش 
+            #endregion
             if (CL_CCNNMANAGER.ConnectedToSQLDB == true)
             {
-                string connetionstring = "";
-                if (!CL_Generaly.IsCalledExternally)
-                {
-                    connetionstring = CL_CryptionAlgorithem.DecryptTextUsingUTF8(dbms.GetConnectionSpecifyNameApp());
-                }
-                else
-                {
-                    connetionstring = CL_CCNNMANAGER.CONNECTION_STR;
-                }
-
-                //int DataSrcIndx = connetionstring.IndexOf("Data Source=", StringComparison.CurrentCultureIgnoreCase);//++11
-                //int InitlCtalg = connetionstring.IndexOf(";Initial Catalog", StringComparison.CurrentCultureIgnoreCase);//++15
-                //int Integrated_Secrt = connetionstring.IndexOf(";Integrated Security", StringComparison.CurrentCultureIgnoreCase);
-                //int intiti2 = InitlCtalg;
-                //string servnm = connetionstring.Substring(DataSrcIndx + 12, ((InitlCtalg - DataSrcIndx) - 12));
-                //string dbnm = connetionstring.Substring(InitlCtalg + 17, ((Integrated_Secrt - intiti2) - 17)); // چون در ساب استرینگ فاصله میخوام یعنی میگه چندتا برم جلو نه مختصات
-                //string qt = "\"";
-                ////char nothing = '';
-                //if (dbnm.Contains(qt))
-                //{
-                //    dbnm = dbnm.Replace(qt, "");
-                //}
-
-                // استفاده از بیلد برای تجزیه استاندارد کانکشن استرینگ
-                var builder = new SqlConnectionStringBuilder(connetionstring);
-
-                // استخراج نام سرور (خودش هندل میکنه چه Data Source باشه چه Server)
-                CL_Generaly.General_Servername = builder.DataSource;
-                
-                // استخراج نام دیتابیس (خودش هندل میکنه چه Initial Catalog باشه چه Database)
-                CL_Generaly.General_DBname = builder.InitialCatalog;
-
-                // استخراج نام کاربری و رمز عبور (اگر وجود داشته باشند)
-                CL_Generaly.General_Username = builder.UserID;
-                CL_Generaly.General_Password = builder.Password;
-
-                // بررسی اینکه آیا ویندوزی است یا نه
-                bool isWindowsAuth = builder.IntegratedSecurity;
-
-
-                #region GetTarikh_Times_OfToday
-                DateTime thisDate = DateTime.Now;
-                PersianCalendar perscal = new PersianCalendar();
-                string mah = (perscal.GetMonth(thisDate)).ToString();
-                string rooz = (perscal.GetDayOfMonth(thisDate)).ToString();
-                //Make 2 digit if is one without zero at first of that
-                if (mah.Length < 2)
-                {
-                    mah = ("0" + mah).ToString();
-                }
-                if (rooz.Length < 2)
-                {
-                    rooz = ("0" + rooz).ToString();
-                }
-
-                Tarikh.Current_Sal = perscal.GetYear(thisDate).ToString();
-                Tarikh.Current_Mah = mah.ToString();
-                Tarikh.Current_Rooz = rooz.ToString();
-
-                Tarikh.FullCurrentDate = $"{Tarikh.Current_Sal}{Tarikh.Current_Mah}{Tarikh.Current_Rooz}"; //تاریخ بدون اسلش
-
-                Tarikh.SlashyFullDate = $"{Tarikh.Current_Sal}/{Tarikh.Current_Mah}/{Tarikh.Current_Rooz}";//تاریخ با اسلش 
-                #endregion
-
                 //2- مقدار دهی بیس نو
                 var quer_loadbase = dbms.DoGetDataSQL<SAZMAN>("SELECT * FROM SAZMAN").ToList();
                 foreach (var item in quer_loadbase)

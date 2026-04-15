@@ -1,6 +1,5 @@
 ﻿using Functions;
 using Functions.SMSService;
-using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.Generaly;
@@ -15,13 +14,9 @@ using Prg_UI.Wins.WinMenus.ANBAR;
 using Prg_UI.Wins.WinMenus.HESABDARI;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD;
 using Prg_UI.Wins.WinMenus.MANAGE_DASHBOARD.BUDGET;
-using Prg_UI.Wins.WinMenus.SANATI;
 using Prg_UI.Wins.WinMenus.WinAutomasion;
 using Prg_UI.Wins.WinMenus.WinDEFAULT;
 using Prg_UI.Wins.WinSetting;
-using Rpts;
-using Stimulsoft.Report.Components.Table;
-using Stimulsoft.Report.Dictionary;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -41,9 +36,7 @@ using Wins.WinMenus.HESABDARI;
 using Wins.WinMenus.KHARID_FORUSH;
 using Wins.WinMenus.Taarif;
 using Wins.WinSetting;
-using static Functions.InventoryManager;
 using static Functions.SMSService.SmsServiceFactory;
-using static Stimulsoft.Base.StiDbType;
 
 namespace Prg_UI.Wins
 {
@@ -264,13 +257,11 @@ namespace Prg_UI.Wins
             //    SMSPINFO.LINE_NUMBER = 30007227002577;
             //}
 
-
-
-            ScriptSqly.LetsGo();
-
 #if DEBUG
             return;//Should Remove this lone
 #endif
+
+            ScriptSqly.LetsGo();
 
             #region TinyLockCheck
             CL_LOCKWATCH Lockwatch = new CL_LOCKWATCH();
@@ -392,11 +383,11 @@ namespace Prg_UI.Wins
             Baseknow.UGRP = "1";
             //CL_Generaly.VAHED_OF_USER = 20; //دپارتمان DEPARTEMAN یزد ویزیتوری
 
-            //new WinBase().Show();
+            new WinBase().Show();
             //new WIN_GETFIRSTMOG().Show();
-            new WinConnectionChoose().Show();
+            //new WinConnectionChoose().Show();
             //new F_MENU_DATE("CROS").Show();
-      
+
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KART, this);
             //new WIN_F_NEWYEAR().Show();
@@ -427,6 +418,8 @@ namespace Prg_UI.Wins
             return;
 #endif
 
+
+
             this.Show(); //Here for debug comment
             this.Activate();
 
@@ -447,10 +440,6 @@ namespace Prg_UI.Wins
                 SMSPINFO.LINE_NUMBER = 3000119981;
             }
             #endregion
-
-
-            //Thread.Sleep(3000);
-            //CL_PRC_LOADER.HidePreloader();
 
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
