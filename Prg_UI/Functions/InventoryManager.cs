@@ -151,6 +151,36 @@ namespace Functions
             return MogudiCheckInternal<T>(items, true, query, queryParams, false, isBarGashti);
         }
 
+        private static string BuildInventoryLockResource(int ANBAR, string CODE)
+        {
+            return $"INV_STUF_STK_{ANBAR}_{CODE}";
+        }
+
+        private static string GetItemCode(object item)
+        {
+            return Convert.ToString(item.GetType().GetProperty("CODE").GetValue(item));
+        }
+
+        private static int GetItemAnbar(object item)
+        {
+            return Convert.ToInt32(item.GetType().GetProperty("ANBAR").GetValue(item));
+        }
+
+        private void AcquireInventoryAppLock(int ANBAR, string CODE)
+        {
+            string resource = BuildInventoryLockResource(ANBAR, CODE);
+            int lockResult = TM.SqlQueryCtc<int>(
+                "DECLARE @LockResult INT; " +
+                "EXEC @LockResult = sp_getapplock @Resource = @Resource, @LockMode = 'Exclusive', @LockOwner = 'Transaction', @LockTimeout = @LockTimeout; " +
+                "SELECT @LockResult;",
+                new { Resource = resource, LockTimeout = 15000 }).FirstOrDefault();
+
+            if (lockResult < 0)
+            {
+                throw new InvalidOperationException($"عدم امکان دریافت قفل همزمانی برای کالا {CODE} در انبار {ANBAR}. لطفاً مجدداً تلاش کنید.");
+            }
+        }
+
         // Internal method to handle the logic for both cases
         private (List<MsgModel> errorMessages, List<MsgModel> infoMessages, List<KALA> inventoryDetails, List<T> queryOutputs) MogudiCheckInternal<T>(
             IEnumerable<object> items,
@@ -186,23 +216,29 @@ namespace Functions
                         throw new InvalidOperationException("Transaction not started. Call StartTransaction() before performing operations.");
                     }
 
-                    foreach (var item in items)
+                    var orderedItems = items
+                        .OrderBy(x => GetItemAnbar(x))
+                        .ThenBy(x => GetItemCode(x))
+                        .ToList();
+
+                    foreach (var item in orderedItems)
                     {
                         var meghMarProperty = item.GetType().GetProperty("MEGH_MAR");
                         double MEGH_MAR = meghMarProperty != null ? (double)(meghMarProperty.GetValue(item) ?? 0) : 0;
 
 
-                        string CODE = Convert.ToString(item.GetType().GetProperty("CODE").GetValue(item)); // Commodity CODE
-                        int ANBAR = Convert.ToInt32(item.GetType().GetProperty("ANBAR").GetValue(item)); // Warehouse (Stock) Amount CODE
+                        string CODE = GetItemCode(item); // Commodity CODE
+                        int ANBAR = GetItemAnbar(item); // Warehouse (Stock) Amount CODE
                         double MEGHk = Convert.ToDouble(item.GetType().GetProperty("MEGHk").GetValue(item));
                         bool HaveNotMarguee = MEGH_MAR == 0; // Has some of this invoice been returned? (return value)
                         string ANBAR_NAME = TM.SqlQueryCtc<string>("SELECT TOP 1 NAMES FROM dbo.TCOD_ANBAR WITH (NOLOCK) WHERE CODE = @ANBAR", new { ANBAR }).FirstOrDefault(); // Warehouse (Stock) Name
                         string NAME_CODE = TM.SqlQueryCtc<string>("SELECT NAME FROM dbo.STUF_DEF WITH (NOLOCK) WHERE CODE = @CODE", new { CODE }).FirstOrDefault(); // Commodity Name
+                        AcquireInventoryAppLock(ANBAR, CODE);
 
 
                         if (isBarGashti) //فاکتور/انبار برگشت فروش
                         {
-                            var RST = TM.SqlQueryCtc<STUF_STK_CSHARP>("SELECT * FROM dbo.STUF_STK WHERE CODE = @CODE AND ANBAR = @ANBAR",
+                            var RST = TM.SqlQueryCtc<STUF_STK_CSHARP>("SELECT * FROM dbo.STUF_STK WITH (UPDLOCK, ROWLOCK) WHERE CODE = @CODE AND ANBAR = @ANBAR",
                                new { CODE, ANBAR }).FirstOrDefault();
 
                             if (RST == null)
@@ -235,7 +271,7 @@ namespace Functions
                                 {
                                     //بروز رسانی جدول برای موجودی موقت
                                     TM.ExecuteSqlCommandCtc("UPDATE dbo.STUF_STK SET MOGODI = @MOGODI WHERE CODE = @CODE AND ANBAR = @ANBAR",
-                                        new { MOGODI = MAND.HasValue, CODE, ANBAR });
+                                        new { MOGODI = MAND.Value, CODE, ANBAR });
 
                                 }
                             }
@@ -294,7 +330,7 @@ namespace Functions
                         {
                             if (HaveNotMarguee) // If no returns
                             {
-                                var RST = TM.SqlQueryCtc<STUF_STK_CSHARP>("SELECT MOGODI FROM dbo.STUF_STK WHERE CODE = @CODE AND ANBAR = @ANBAR",
+                                var RST = TM.SqlQueryCtc<STUF_STK_CSHARP>("SELECT MOGODI FROM dbo.STUF_STK WITH (UPDLOCK, ROWLOCK) WHERE CODE = @CODE AND ANBAR = @ANBAR",
                                     new { CODE, ANBAR }).FirstOrDefault();
 
                                 if (RST == null)
@@ -328,7 +364,7 @@ namespace Functions
                                     {
                                         //بروز رسانی جدول برای موجودی موقت
                                         TM.ExecuteSqlCommandCtc("UPDATE dbo.STUF_STK SET MOGODI = @MOGODI WHERE CODE = @CODE AND ANBAR = @ANBAR",
-                                            new { MOGODI = MAND.HasValue, CODE, ANBAR });
+                                            new { MOGODI = MAND.Value, CODE, ANBAR });
 
                                     }
                                 }
