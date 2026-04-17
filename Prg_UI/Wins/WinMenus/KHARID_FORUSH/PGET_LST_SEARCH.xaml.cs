@@ -106,27 +106,104 @@ namespace Wins.WinMenus.KHARID_FORUSH
             if (!this.IsLoaded) { this.Close(); return; }
             #endregion
 
+            NO_AM_COLUMN.ItemsSource = dbms.DoGetDataSQL<TCOD_BANKS>("SELECT CODE, NAMES FROM dbo.TCOD_DPS").ToList();
+
             var inv = CL_LMethods.GetRestrictedSqlQueryWithDetails(0, default, true); // HEAD_LST-oriented
             var pgetWhere = inv.WhereClause.Replace("dbo.HEAD_LST.", "dbo.PGET_HED.").Replace("DATE_N", "DATE");
 
             PGET_JOTEJU_DATA?.Clear();
-            var MasterHead = dbms.DoGetDataSQL<PGET_JOTEJU>(@$"SELECT        dbo.PGET_LST.ID, dbo.PGET_LST.DATE, dbo.PGET_LST.RADIF, dbo.PGET_LST.NO_AM, dbo.PGET_LST.NAHVA, dbo.PGET_LST.FHES_K, dbo.PGET_LST.FHES_M, dbo.PGET_LST.THES_K, dbo.PGET_LST.THES_M, 
-                                                                                        dbo.PGET_LST.SHARH, dbo.PGET_LST.MABL, dbo.PGET_LST.N_SERI, dbo.PGET_LST.BANK, ISNULL(TOTA_HES_1.NAME, N' ') + N'-' + ISNULL(DETA_HES_1.NAME, N' ') + N'-' + ISNULL(TDETA_HES_1.NAME, N' ') AS FHES, 
-                                                                                        ISNULL(TOTA_HES_1.NAME, N' ') + N'-' + ISNULL(DETA_HES_1.NAME, N' ') + N'-' + ISNULL(TDETA_HES_1.NAME, N' ') AS THES, dbo.PGET_LST.FHES_T, dbo.PGET_LST.THES_T, ISNULL(dbo.PAY_GETD.DATE_S, 
-                                                                                        dbo.PAY_GETP.DATE_S) AS dates, dbo.PGET_LST.FHES AS Expr1, dbo.PGET_LST.THES AS Expr2, dbo.PGET_LST.ARZD, dbo.PGET_LST.FHES_T2, dbo.PGET_LST.THES_T2, dbo.PGET_LST.FHES_T3, dbo.PGET_LST.THES_T3, 
-                                                                                        dbo.PGET_LST.FHES_T4, dbo.PGET_LST.THES_T4, dbo.PGET_HED.USER_NAME
-                                                               FROM            dbo.TOTA_HES AS TOTA_HES_1 INNER JOIN
-                                                                                        dbo.DETA_HES AS DETA_HES_1 INNER JOIN
-                                                                                        dbo.TDETA_HES AS TDETA_HES_1 ON DETA_HES_1.NUMBER = TDETA_HES_1.NUMBER AND DETA_HES_1.N_KOL = TDETA_HES_1.N_KOL ON TOTA_HES_1.NUMBER = DETA_HES_1.N_KOL INNER JOIN
-                                                                                        dbo.TOTA_HES AS TOTA_HES_2 INNER JOIN
-                                                                                        dbo.DETA_HES AS DETA_HES_2 ON TOTA_HES_2.NUMBER = DETA_HES_2.N_KOL INNER JOIN
-                                                                                        dbo.TDETA_HES AS TDETA_HES_2 INNER JOIN
-                                                                                        dbo.PGET_LST ON TDETA_HES_2.TNUMBER = dbo.PGET_LST.FHES_T AND TDETA_HES_2.NUMBER = dbo.PGET_LST.FHES_M AND TDETA_HES_2.N_KOL = dbo.PGET_LST.FHES_K ON 
-                                                                                        DETA_HES_2.NUMBER = TDETA_HES_2.NUMBER AND DETA_HES_2.N_KOL = TDETA_HES_2.N_KOL ON TDETA_HES_1.TNUMBER = dbo.PGET_LST.THES_T AND TDETA_HES_1.NUMBER = dbo.PGET_LST.THES_M AND 
-                                                                                        TDETA_HES_1.N_KOL = dbo.PGET_LST.THES_K INNER JOIN
-                                                                                        dbo.PGET_HED ON dbo.PGET_LST.ID = dbo.PGET_HED.ID AND dbo.PGET_LST.DATE = dbo.PGET_HED.DATE LEFT OUTER JOIN
-                                                                                        dbo.PAY_GETP ON dbo.PGET_LST.N_SERI = dbo.PAY_GETP.N_SERI AND dbo.PGET_LST.BANK = dbo.PAY_GETP.BANK LEFT OUTER JOIN
-                                                                                        dbo.PAY_GETD ON dbo.PGET_LST.N_SERI = dbo.PAY_GETD.N_SERI AND dbo.PGET_LST.BANK = dbo.PAY_GETD.BANK {pgetWhere}").ToList();
+            //var MasterHead = dbms.DoGetDataSQL<PGET_JOTEJU>(@$"SELECT        dbo.PGET_LST.ID, dbo.PGET_LST.DATE, dbo.PGET_LST.RADIF, dbo.PGET_LST.NO_AM, dbo.PGET_LST.NAHVA, dbo.PGET_LST.FHES_K, dbo.PGET_LST.FHES_M, dbo.PGET_LST.THES_K, dbo.PGET_LST.THES_M, 
+            //                                                                            dbo.PGET_LST.SHARH, dbo.PGET_LST.MABL, dbo.PGET_LST.N_SERI, dbo.PGET_LST.BANK, ISNULL(TOTA_HES_1.NAME, N' ') + N'-' + ISNULL(DETA_HES_1.NAME, N' ') + N'-' + ISNULL(TDETA_HES_1.NAME, N' ') AS FHES, 
+            //                                                                            ISNULL(TOTA_HES_1.NAME, N' ') + N'-' + ISNULL(DETA_HES_1.NAME, N' ') + N'-' + ISNULL(TDETA_HES_1.NAME, N' ') AS THES, dbo.PGET_LST.FHES_T, dbo.PGET_LST.THES_T, ISNULL(dbo.PAY_GETD.DATE_S, 
+            //                                                                            dbo.PAY_GETP.DATE_S) AS dates, dbo.PGET_LST.FHES AS Expr1, dbo.PGET_LST.THES AS Expr2, dbo.PGET_LST.ARZD, dbo.PGET_LST.FHES_T2, dbo.PGET_LST.THES_T2, dbo.PGET_LST.FHES_T3, dbo.PGET_LST.THES_T3, 
+            //                                                                            dbo.PGET_LST.FHES_T4, dbo.PGET_LST.THES_T4, dbo.PGET_HED.USER_NAME
+            //                                                   FROM            dbo.TOTA_HES AS TOTA_HES_1 INNER JOIN
+            //                                                                            dbo.DETA_HES AS DETA_HES_1 INNER JOIN
+            //                                                                            dbo.TDETA_HES AS TDETA_HES_1 ON DETA_HES_1.NUMBER = TDETA_HES_1.NUMBER AND DETA_HES_1.N_KOL = TDETA_HES_1.N_KOL ON TOTA_HES_1.NUMBER = DETA_HES_1.N_KOL INNER JOIN
+            //                                                                            dbo.TOTA_HES AS TOTA_HES_2 INNER JOIN
+            //                                                                            dbo.DETA_HES AS DETA_HES_2 ON TOTA_HES_2.NUMBER = DETA_HES_2.N_KOL INNER JOIN
+            //                                                                            dbo.TDETA_HES AS TDETA_HES_2 INNER JOIN
+            //                                                                            dbo.PGET_LST ON TDETA_HES_2.TNUMBER = dbo.PGET_LST.FHES_T AND TDETA_HES_2.NUMBER = dbo.PGET_LST.FHES_M AND TDETA_HES_2.N_KOL = dbo.PGET_LST.FHES_K ON 
+            //                                                                            DETA_HES_2.NUMBER = TDETA_HES_2.NUMBER AND DETA_HES_2.N_KOL = TDETA_HES_2.N_KOL ON TDETA_HES_1.TNUMBER = dbo.PGET_LST.THES_T AND TDETA_HES_1.NUMBER = dbo.PGET_LST.THES_M AND 
+            //                                                                            TDETA_HES_1.N_KOL = dbo.PGET_LST.THES_K INNER JOIN
+            //                                                                            dbo.PGET_HED ON dbo.PGET_LST.ID = dbo.PGET_HED.ID AND dbo.PGET_LST.DATE = dbo.PGET_HED.DATE LEFT OUTER JOIN
+            //                                                                            dbo.PAY_GETP ON dbo.PGET_LST.N_SERI = dbo.PAY_GETP.N_SERI AND dbo.PGET_LST.BANK = dbo.PAY_GETP.BANK LEFT OUTER JOIN
+            //                                                                            dbo.PAY_GETD ON dbo.PGET_LST.N_SERI = dbo.PAY_GETD.N_SERI AND dbo.PGET_LST.BANK = dbo.PAY_GETD.BANK {pgetWhere}").ToList();
+
+
+            var MasterHead = dbms.DoGetDataSQL<PGET_JOTEJU>($@"SELECT  dbo.PGET_LST.ID,
+        dbo.PGET_LST.DATE,
+        dbo.PGET_LST.RADIF,
+        dbo.PGET_LST.NO_AM,
+        dbo.PGET_LST.NAHVA,
+        dbo.PGET_LST.FHES_K,
+        dbo.PGET_LST.FHES_M,
+        dbo.PGET_LST.THES_K,
+        dbo.PGET_LST.THES_M,
+        dbo.PGET_LST.SHARH,
+        dbo.PGET_LST.MABL,
+        dbo.PGET_LST.N_SERI,
+        dbo.PGET_LST.BANK,
+
+        -- ✅ FHES = از حساب → از alias های 2 (که JOIN روی FHES_K, FHES_M, FHES_T شده)
+        ISNULL(TOTA_HES_2.NAME, N' ') + N'-' + 
+        ISNULL(DETA_HES_2.NAME, N' ') + N'-' + 
+        ISNULL(TDETA_HES_2.NAME, N' ') AS FHES,
+
+        -- ✅ THES = به حساب → از alias های 1 (که JOIN روی THES_K, THES_M, THES_T شده)
+        ISNULL(TOTA_HES_1.NAME, N' ') + N'-' + 
+        ISNULL(DETA_HES_1.NAME, N' ') + N'-' + 
+        ISNULL(TDETA_HES_1.NAME, N' ') AS THES,
+
+        dbo.PGET_LST.FHES_T,
+        dbo.PGET_LST.THES_T,
+        ISNULL(dbo.PAY_GETD.DATE_S, dbo.PAY_GETP.DATE_S) AS dates,
+        dbo.PGET_LST.FHES  AS Expr1,
+        dbo.PGET_LST.THES  AS Expr2,
+        dbo.PGET_LST.ARZD,
+        dbo.PGET_LST.FHES_T2,
+        dbo.PGET_LST.THES_T2,
+        dbo.PGET_LST.FHES_T3,
+        dbo.PGET_LST.THES_T3,
+        dbo.PGET_LST.FHES_T4,
+        dbo.PGET_LST.THES_T4,
+        dbo.PGET_HED.USER_NAME
+
+FROM    dbo.PGET_LST
+        INNER JOIN dbo.PGET_HED 
+            ON  dbo.PGET_LST.ID   = dbo.PGET_HED.ID 
+            AND dbo.PGET_LST.DATE = dbo.PGET_HED.DATE
+
+        -- از حساب (F = From)
+        INNER JOIN dbo.TDETA_HES  AS TDETA_HES_2 
+            ON  TDETA_HES_2.N_KOL   = dbo.PGET_LST.FHES_K
+            AND TDETA_HES_2.NUMBER   = dbo.PGET_LST.FHES_M
+            AND TDETA_HES_2.TNUMBER  = dbo.PGET_LST.FHES_T
+        INNER JOIN dbo.DETA_HES   AS DETA_HES_2 
+            ON  DETA_HES_2.N_KOL  = TDETA_HES_2.N_KOL
+            AND DETA_HES_2.NUMBER  = TDETA_HES_2.NUMBER
+        INNER JOIN dbo.TOTA_HES   AS TOTA_HES_2 
+            ON  TOTA_HES_2.NUMBER  = DETA_HES_2.N_KOL
+
+        -- به حساب (T = To)
+        INNER JOIN dbo.TDETA_HES  AS TDETA_HES_1 
+            ON  TDETA_HES_1.N_KOL   = dbo.PGET_LST.THES_K
+            AND TDETA_HES_1.NUMBER   = dbo.PGET_LST.THES_M
+            AND TDETA_HES_1.TNUMBER  = dbo.PGET_LST.THES_T
+        INNER JOIN dbo.DETA_HES   AS DETA_HES_1 
+            ON  DETA_HES_1.N_KOL  = TDETA_HES_1.N_KOL
+            AND DETA_HES_1.NUMBER  = TDETA_HES_1.NUMBER
+        INNER JOIN dbo.TOTA_HES   AS TOTA_HES_1 
+            ON  TOTA_HES_1.NUMBER  = DETA_HES_1.N_KOL
+
+        -- چک
+        LEFT OUTER JOIN dbo.PAY_GETP 
+            ON  dbo.PGET_LST.N_SERI = dbo.PAY_GETP.N_SERI 
+            AND dbo.PGET_LST.BANK   = dbo.PAY_GETP.BANK
+        LEFT OUTER JOIN dbo.PAY_GETD 
+            ON  dbo.PGET_LST.N_SERI = dbo.PAY_GETD.N_SERI 
+            AND dbo.PGET_LST.BANK   = dbo.PAY_GETD.BANK {pgetWhere}").ToList();
+
             foreach (var item in MasterHead)
             {
                 PGET_JOTEJU_DATA.Add(item);
