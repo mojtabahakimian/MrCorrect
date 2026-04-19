@@ -56,6 +56,7 @@ namespace Prg_Proccessy.SQLMODELS
         public string? PEPNAME { get; set; }
         public string? PENAME { get; set; }
         public string? PPAME { get; set; }
+        public bool? IsButtony { get; set; }
 
     }
 }

@@ -12,6 +12,7 @@ using Prg_UI.UiTools;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -723,11 +724,28 @@ namespace Wins.WinMenus.Taarif
             }
         }
 
+        private void EnsureCollectionViewTransactionClosed()
+        {
+            if (RecordsKhad?.View is not IEditableCollectionView editableView)
+            {
+                return;
+            }
 
+            if (editableView.IsEditingItem)
+            {
+                editableView.CommitEdit();
+            }
+
+            if (editableView.IsAddingNew)
+            {
+                editableView.CommitNew();
+            }
+        }
 
         KHAD_MODEL NewRecordFresh;
         private void MoveReGetData(Jahat jahat, int? custom_postiion = null)
         {
+            EnsureCollectionViewTransactionClosed();
             //Update CurrentViewItem
             if (RecordsKhad.View.CurrentItem != null)
             {
@@ -744,6 +762,7 @@ namespace Wins.WinMenus.Taarif
                             property.SetValue(HEADER, value);
                         }
                     }
+                    EnsureCollectionViewTransactionClosed();
                     RecordsKhad.View.Refresh();
                 }
             }
