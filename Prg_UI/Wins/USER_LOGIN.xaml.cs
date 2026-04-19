@@ -326,17 +326,6 @@ namespace Prg_UI.Wins
         {
             NowIsReady = true;
 
-            // Check version logic (Assuming CL_VERSION is reliable)
-            if (!CL_VERSION.IsValidGreaterVersion())
-            {
-                // Disable UI interactions immediately
-                DisableLoginUI();
-
-                // Await the task to ensure exceptions are caught within the context if possible, 
-                // though usually top-level event handlers are void.
-                await PerformAutoUpdateAsync();
-            }
-
             try
             {
                 if (App.splashScreen is not null)
@@ -345,13 +334,6 @@ namespace Prg_UI.Wins
                 }
             }
             catch { }
-
-
-            if (CL_Generaly.IsCalledExternally)
-            {
-                CL_LMethods.GoExitTheApplication(); return;// for access
-            }
-
 
 #if DEBUG
             //Baseknow.tindata = "0000000000000000000CORRECT";
@@ -389,7 +371,7 @@ namespace Prg_UI.Wins
             //new F_MENU_DATE("CROS").Show();
 
 
-            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.F_MENU_KART, this);
+            //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_LST_SEARCH, this);
             //new WIN_F_NEWYEAR().Show();
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.paymentformorder, this, 1642d);
             //dotnet publish Prg_UI.csproj -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true -o E:\prg\PublishedFiles; explorer E:\prg\PublishedFiles
@@ -417,8 +399,22 @@ namespace Prg_UI.Wins
             //new WinEVENTS(37729).ShowDialog();
             return;
 #endif
+            // Check version logic (Assuming CL_VERSION is reliable)
+            if (!CL_VERSION.IsValidGreaterVersion())
+            {
+                // Disable UI interactions immediately
+                DisableLoginUI();
+
+                // Await the task to ensure exceptions are caught within the context if possible, 
+                // though usually top-level event handlers are void.
+                await PerformAutoUpdateAsync();
+            }     
 
 
+            if (CL_Generaly.IsCalledExternally)
+            {
+                CL_LMethods.GoExitTheApplication(); return;// for access
+            }
 
             this.Show(); //Here for debug comment
             this.Activate();

@@ -1251,7 +1251,12 @@ namespace Wins.WinMenus.HESABDARI
 
         private void BTN_CTRLF8_Click(object sender, RoutedEventArgs e)
         {
-            var Hes = CUST_NO.SelectedValue.ToString();
+            var Hes = CUST_NO?.SelectedValue?.ToString();
+            if (string.IsNullOrWhiteSpace(Hes))
+            {
+                universControl.PopNotifyShowUp("ابتدا حساب دریافت کننده را انتخاب کنید.", Pop1, Pop1Text1, Pop_Border1, UniversControl.RangPop.Red);
+                return;
+            }
             var Kol = CL_HESABDARI.GETKOL(Hes);
             var Moin = CL_HESABDARI.GETMOIN(Hes);
             var Taf = CL_HESABDARI.GETTAF(Hes);
