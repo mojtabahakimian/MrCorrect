@@ -223,8 +223,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI
             YEA.Items.Clear();
             validDbNames.Clear();
 
-            // Fetch all database names
-            var databases = dbms.DoGetDataSQL<DB_NAME_MODEL>("SELECT [name] FROM master.dbo.sysdatabases ORDER BY [name]").ToList();
+            // Fetch only user databases (exclude system databases: master/model/msdb/tempdb)
+            var databases = dbms.DoGetDataSQL<DB_NAME_MODEL>(@"
+                SELECT [name]
+                FROM sys.databases
+                WHERE database_id > 4
+                  AND [state] = 0
+                ORDER BY [name]").ToList();
+
 
             foreach (var db in databases)
             {
