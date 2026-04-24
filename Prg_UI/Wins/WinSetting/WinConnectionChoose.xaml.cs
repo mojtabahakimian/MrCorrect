@@ -279,7 +279,7 @@ namespace Prg_UI.Wins.WinSetting
                     return "ورود به SQL Server ناموفق بود.\n\nراه‌حل پیشنهادی:\n• نام کاربری SQL را بررسی کنید.\n• رمز عبور را مجدداً وارد کنید.\n• مطمئن شوید کاربر در SQL Server تعریف شده است.";
 
                 case 18452:
-                    return "احراز هویت ناموفق - نوع ورود نادرست است.\n\nراه‌حل پیشنهادی:\n• بین Windows Authentication و SQL Authentication انتخاب درستی داشته باشید.";
+                    return "ورود با Windows Authentication ناموفق بود چون کلاینت در Domain مورد اعتماد SQL Server نیست.\n\nراه‌حل پیشنهادی:\n• اگر سرور با IP یا از شبکه/Domain دیگر وصل می‌شود، SQL Authentication را انتخاب کنید.\n• در صورت نیاز از مدیر شبکه بخواهید Trust بین Domainها را تنظیم کند.\n• اگر باید Windows Auth استفاده شود، برنامه را با کاربر دامنه مجاز اجرا کنید.";
 
                 case 18470:
                     return "حساب کاربری SQL غیرفعال شده است.\n\nراه‌حل پیشنهادی:\n• با مدیر SQL Server تماس بگیرید تا حساب کاربری را فعال کند.";

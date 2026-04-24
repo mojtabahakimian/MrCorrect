@@ -139,6 +139,32 @@ namespace Prg_SendInvoice.CNNMANAGER
             17142,  // The server is paused
             18456   // Login failed for user
         };
+        private static readonly int[] NonRetriableAuthenticationErrorNumbers =
+        {
+            18452,  // The login is from an untrusted domain and cannot be used with Integrated authentication
+            18456,  // Login failed for user
+            18470,  // Login failed for user because account is disabled
+            18487,  // The password of the account has expired
+            18488   // The password must be changed before logging on for the first time
+        };
+
+        private static bool IsNonRetriableAuthenticationError(SqlException? exception)
+        {
+            if (exception is null)
+            {
+                return false;
+            }
+
+            foreach (SqlError error in exception.Errors)
+            {
+                if (NonRetriableAuthenticationErrorNumbers.Contains(error.Number))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
         public static bool IsConnectionRelated(SqlException? exception)
         {
             if (exception is null)
@@ -229,8 +255,7 @@ namespace Prg_SendInvoice.CNNMANAGER
                     return results;
                 }
                 //catch (SqlException ex) when (ex.Number == 1205 && attempt < maxRetries)
-                catch (SqlException ex) when ((ex.Number == 1205 || IsConnectionRelated(ex)) && attempt < maxRetries)
-
+                catch (SqlException ex) when ((ex.Number == 1205 || (IsConnectionRelated(ex) && !IsNonRetriableAuthenticationError(ex))) && attempt < maxRetries)
                 {
                     Thread.Sleep(200 * (attempt + 1));
                     continue;
@@ -289,7 +314,7 @@ namespace Prg_SendInvoice.CNNMANAGER
                 }
                 catch (SqlException ex)
                 {
-                    if ((ex.Number == 1205 || IsConnectionRelated(ex)) && i < maxRetries) // 1205 = Deadlock or Connection Error
+                    if ((ex.Number == 1205 || (IsConnectionRelated(ex) && !IsNonRetriableAuthenticationError(ex))) && i < maxRetries) // 1205 = Deadlock or transient connection error
                     {
                         System.Threading.Thread.Sleep(200 * (i + 1)); // Wait and retry
                         continue;
