@@ -3467,7 +3467,7 @@ namespace Wins.WinSetting
             }
             else
             {
-                var (_IsValid_, _Msg_) = CL_LMethods.DATE_IS_VALID(_row.STBLKDT.ToString(), "تاریخ مسدود شدن");
+                var (_IsValid_, _Msg_) = CL_LMethods.DATE_IS_VALID(_row.STBLKDT.ToString(), "تاریخ مسدود شدن", false);
                 if (!_IsValid_)
                 {
                     ErrosMessages.Add(new MsgModel { MessageText_U = _Msg_ });
@@ -3480,7 +3480,7 @@ namespace Wins.WinSetting
             }
             else
             {
-                var (_IsValid_, _Msg_) = CL_LMethods.DATE_IS_VALID(_row.ENDBLKDT.ToString(), "تاریخ باز شدن");
+                var (_IsValid_, _Msg_) = CL_LMethods.DATE_IS_VALID(_row.ENDBLKDT.ToString(), "تاریخ باز شدن", false);
                 if (!_IsValid_)
                 {
                     ErrosMessages.Add(new MsgModel { MessageText_U = _Msg_ });
@@ -3590,7 +3590,7 @@ namespace Wins.WinSetting
                 }
                 else
                 {
-                    var (_IsValid_, _Msg_) = CL_LMethods.DATE_IS_VALID(MyTarikh, "تاریخ مسدود شدن");
+                    var (_IsValid_, _Msg_) = CL_LMethods.DATE_IS_VALID(MyTarikh, "تاریخ مسدود شدن", false);
                     if (!_IsValid_)
                     {
                         CURRENT_ROW_LOCK_CUSTOMER.STBLKDT = BLOCK_CUSTOMER_WAS_ROW_ITEM.STBLKDT;
@@ -3608,7 +3608,7 @@ namespace Wins.WinSetting
                 }
                 else
                 {
-                    var (_IsValid_, _Msg_) = CL_LMethods.DATE_IS_VALID(MyTarikh, "تاریخ باز شدن");
+                    var (_IsValid_, _Msg_) = CL_LMethods.DATE_IS_VALID(MyTarikh, "تاریخ باز شدن", false);
                     if (!_IsValid_)
                     {
                         CURRENT_ROW_LOCK_CUSTOMER.ENDBLKDT = BLOCK_CUSTOMER_WAS_ROW_ITEM.ENDBLKDT;

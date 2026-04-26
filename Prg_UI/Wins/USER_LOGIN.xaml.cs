@@ -368,7 +368,7 @@ namespace Prg_UI.Wins
             //new WinBase().Show();
             //new WIN_GETFIRSTMOG().Show();
             //new WinConnectionChoose().Show();
-            new DEED_SEARCH_MAIN().Show();
+            new F_USER_PERMITION_FORMS().Show();
 
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_LST_SEARCH, this);

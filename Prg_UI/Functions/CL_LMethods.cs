@@ -3119,7 +3119,7 @@ namespace Prg_UI.Functions
             return r.IsMatch(Phone);
         }
 
-        public static (bool, string) DATE_IS_VALID(string _DATEVALUE_, string FiledName = "تاریخ")
+        public static (bool, string) DATE_IS_VALID(string _DATEVALUE_, string FiledName = "تاریخ", bool _SyncDateCheck = true)
         {
             bool Date_Is_Valid = true;
             string? RESULT = null;
@@ -3133,7 +3133,7 @@ namespace Prg_UI.Functions
                 }
                 else
                 {
-                    if (!Tarikh.IsSyncedDateNow(date_n_val, (bool)Baseknow.CTL_DT))
+                    if (_SyncDateCheck && !Tarikh.IsSyncedDateNow(date_n_val, (bool)Baseknow.CTL_DT))
                     {
                         RESULT = $".{FiledName} مربوط به سال جاری نیست";
                         Date_Is_Valid = false;
