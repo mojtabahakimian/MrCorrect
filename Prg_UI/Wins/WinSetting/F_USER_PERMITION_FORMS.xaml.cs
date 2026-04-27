@@ -3642,6 +3642,24 @@ namespace Wins.WinSetting
 
             try
             {
+                // بررسی داده تکراری در پایگاه داده پیش از عملیات ثبت یا ویرایش
+                string checkDuplicateSql = ROW.ID is null or 0
+                    ? "SELECT COUNT(1) FROM dbo.BLOCK_CUSTOMER WHERE HES = @HES"
+                    : "SELECT COUNT(1) FROM dbo.BLOCK_CUSTOMER WHERE HES = @HES AND ID != @ID";
+
+                var checkParams = ROW.ID is null
+                    ? (object)new { HES = ROW.HES }
+                    : (object)new { HES = ROW.HES, ID = ROW.ID };
+
+                int duplicateCount = dbms.DoGetDataSQL<int>(checkDuplicateSql, checkParams).FirstOrDefault();
+
+                if (duplicateCount > 0)
+                {
+                    new Msgwin(false, $"حساب وارد شده ({ROW.NAME_HES}) قبلاً در لیست سیاه ثبت شده و تکراری می‌باشد!").ShowDialog();
+                    BLOCK_CUSTOMER_SUB_CANCEL_EDIT();
+                    return;
+                }
+
                 int? theidd = null;
 
                 if (ROW?.ID is null) //Insert
@@ -3702,6 +3720,8 @@ namespace Wins.WinSetting
             }
             catch (SqlException ex)
             {
+                BLOCK_CUSTOMER_SUB_CANCEL_EDIT();
+
                 if (ex.Number == 2601 || ex.Number == 2627)
                 {
                     new Msgwin(false, "این سطر حاوی اطلاعات تکراری است و نمیتواند ذخیره کرد").ShowDialog();
@@ -3714,7 +3734,9 @@ namespace Wins.WinSetting
             }
             catch (Exception)
             {
-                new Msgwin(false, "خطا در انجام عملیات ذخیره!").ShowDialog(); return;
+                BLOCK_CUSTOMER_SUB_CANCEL_EDIT();
+                new Msgwin(false, "خطا در انجام عملیات ذخیره!").ShowDialog();
+                return;
             }
         }
 
