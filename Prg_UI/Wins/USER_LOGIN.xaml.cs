@@ -368,7 +368,7 @@ namespace Prg_UI.Wins
             //new WinBase().Show();
             //new WIN_GETFIRSTMOG().Show();
             //new WinConnectionChoose().Show();
-            //new F_MENU_DATE("CROS").Show();
+            new DEPART_WIN().Show();
 
 
             //CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.PGET_LST_SEARCH, this);
@@ -408,7 +408,7 @@ namespace Prg_UI.Wins
                 // Await the task to ensure exceptions are caught within the context if possible, 
                 // though usually top-level event handlers are void.
                 await PerformAutoUpdateAsync();
-            }     
+            }
 
 
             if (CL_Generaly.IsCalledExternally)

@@ -3467,7 +3467,7 @@ namespace Wins.WinSetting
             }
             else
             {
-                var (_IsValid_, _Msg_) = CL_LMethods.DATE_IS_VALID(_row.STBLKDT.ToString(), "تاریخ مسدود شدن");
+                var (_IsValid_, _Msg_) = CL_LMethods.DATE_IS_VALID(_row.STBLKDT.ToString(), "تاریخ مسدود شدن", false);
                 if (!_IsValid_)
                 {
                     ErrosMessages.Add(new MsgModel { MessageText_U = _Msg_ });
@@ -3480,7 +3480,7 @@ namespace Wins.WinSetting
             }
             else
             {
-                var (_IsValid_, _Msg_) = CL_LMethods.DATE_IS_VALID(_row.ENDBLKDT.ToString(), "تاریخ باز شدن");
+                var (_IsValid_, _Msg_) = CL_LMethods.DATE_IS_VALID(_row.ENDBLKDT.ToString(), "تاریخ باز شدن", false);
                 if (!_IsValid_)
                 {
                     ErrosMessages.Add(new MsgModel { MessageText_U = _Msg_ });
@@ -3530,8 +3530,12 @@ namespace Wins.WinSetting
             ComboBox HES_COMBO = null;
             if (e.EditingElement is ContentPresenter contentPresenter)
             {
-                HES_COMBO = contentPresenter.ContentTemplate.FindName("EditCombo", contentPresenter) as ComboBox;
+                HES_COMBO = contentPresenter.ContentTemplate.FindName("HESEditCombo", contentPresenter) as ComboBox;
 
+                if (HES_COMBO == null)
+                {
+                    HES_COMBO = contentPresenter.ContentTemplate.FindName("EditCombo", contentPresenter) as ComboBox;
+                }
                 if (HES_COMBO == null)
                 {
                     HES_COMBO = DataGridHelper.FindVisualChild<ComboBox>(contentPresenter);
@@ -3590,7 +3594,7 @@ namespace Wins.WinSetting
                 }
                 else
                 {
-                    var (_IsValid_, _Msg_) = CL_LMethods.DATE_IS_VALID(MyTarikh, "تاریخ مسدود شدن");
+                    var (_IsValid_, _Msg_) = CL_LMethods.DATE_IS_VALID(MyTarikh, "تاریخ مسدود شدن", false);
                     if (!_IsValid_)
                     {
                         CURRENT_ROW_LOCK_CUSTOMER.STBLKDT = BLOCK_CUSTOMER_WAS_ROW_ITEM.STBLKDT;
@@ -3608,7 +3612,7 @@ namespace Wins.WinSetting
                 }
                 else
                 {
-                    var (_IsValid_, _Msg_) = CL_LMethods.DATE_IS_VALID(MyTarikh, "تاریخ باز شدن");
+                    var (_IsValid_, _Msg_) = CL_LMethods.DATE_IS_VALID(MyTarikh, "تاریخ باز شدن", false);
                     if (!_IsValid_)
                     {
                         CURRENT_ROW_LOCK_CUSTOMER.ENDBLKDT = BLOCK_CUSTOMER_WAS_ROW_ITEM.ENDBLKDT;
@@ -3638,6 +3642,24 @@ namespace Wins.WinSetting
 
             try
             {
+                // بررسی داده تکراری در پایگاه داده پیش از عملیات ثبت یا ویرایش
+                string checkDuplicateSql = ROW.ID is null or 0
+                    ? "SELECT COUNT(1) FROM dbo.BLOCK_CUSTOMER WHERE HES = @HES"
+                    : "SELECT COUNT(1) FROM dbo.BLOCK_CUSTOMER WHERE HES = @HES AND ID != @ID";
+
+                var checkParams = ROW.ID is null
+                    ? (object)new { HES = ROW.HES }
+                    : (object)new { HES = ROW.HES, ID = ROW.ID };
+
+                int duplicateCount = dbms.DoGetDataSQL<int>(checkDuplicateSql, checkParams).FirstOrDefault();
+
+                if (duplicateCount > 0)
+                {
+                    new Msgwin(false, $"حساب وارد شده ({ROW.NAME_HES}) قبلاً در لیست سیاه ثبت شده و تکراری می‌باشد!").ShowDialog();
+                    BLOCK_CUSTOMER_SUB_CANCEL_EDIT();
+                    return;
+                }
+
                 int? theidd = null;
 
                 if (ROW?.ID is null) //Insert
@@ -3698,6 +3720,8 @@ namespace Wins.WinSetting
             }
             catch (SqlException ex)
             {
+                BLOCK_CUSTOMER_SUB_CANCEL_EDIT();
+
                 if (ex.Number == 2601 || ex.Number == 2627)
                 {
                     new Msgwin(false, "این سطر حاوی اطلاعات تکراری است و نمیتواند ذخیره کرد").ShowDialog();
@@ -3710,7 +3734,9 @@ namespace Wins.WinSetting
             }
             catch (Exception)
             {
-                new Msgwin(false, "خطا در انجام عملیات ذخیره!").ShowDialog(); return;
+                BLOCK_CUSTOMER_SUB_CANCEL_EDIT();
+                new Msgwin(false, "خطا در انجام عملیات ذخیره!").ShowDialog();
+                return;
             }
         }
 
@@ -3834,15 +3860,19 @@ namespace Wins.WinSetting
         {
             if (!(sender is ComboBox combo)) return;
 
-            // The DataContext here is the underlying INVO_LST row.
-            if (!(combo.DataContext is BLOCK_CUSTOMER currentRow)) return;
-
             // Update the row with the selected item.
             if (combo.SelectedItem is CUST_HESAB_COMBINED selectedStuf)
             {
-                // CODE is already bound via SelectedValue.
-                //currentRow.HES = selectedStuf.hes;
-                currentRow.NAME_HES = selectedStuf.NAME;
+                if (combo.DataContext is BLOCK_CUSTOMER blockCust)
+                {
+                    blockCust.HES = selectedStuf.hes;
+                    blockCust.NAME_HES = selectedStuf.NAME;
+                }
+                else if (combo.DataContext is SALGROUP_MODEL salGrp)
+                {
+                    salGrp.HES = selectedStuf.hes;
+                    salGrp.NAME_HES = selectedStuf.NAME;
+                }
             }
         }
         private void EditCombo_Loaded(object sender, RoutedEventArgs e)
@@ -3867,6 +3897,7 @@ namespace Wins.WinSetting
                         // Set the ComboBox to display the existing item.
                         combo.ItemsSource = new List<CUST_HESAB_COMBINED> { existingItem };
                         combo.SelectedItem = existingItem;
+                        //combo.Text = existingItem.NAME;
                     }
                     else
                     {
@@ -4048,7 +4079,12 @@ namespace Wins.WinSetting
             ComboBox HES_COMBO = null;
             if (e.EditingElement is ContentPresenter contentPresenter)
             {
-                HES_COMBO = contentPresenter.ContentTemplate.FindName("EditCombo", contentPresenter) as ComboBox;
+                HES_COMBO = contentPresenter.ContentTemplate.FindName("HESEditCombo", contentPresenter) as ComboBox;
+
+                if (HES_COMBO == null)
+                {
+                    HES_COMBO = contentPresenter.ContentTemplate.FindName("EditCombo", contentPresenter) as ComboBox;
+                }
 
                 if (HES_COMBO == null)
                 {
@@ -4299,7 +4335,7 @@ namespace Wins.WinSetting
             try
             {
                 // Wait for 300ms; if the user types again, the token will cancel this delay.
-                await Task.Delay(300, cts.Token);
+                await Task.Delay(500, cts.Token);
             }
             catch (TaskCanceledException)
             {
@@ -4344,15 +4380,34 @@ namespace Wins.WinSetting
         {
             if (!(sender is ComboBox combo)) return;
 
-            // The DataContext here is the underlying INVO_LST row.
-            if (!(combo.DataContext is BLOCK_CUSTOMER currentRow)) return;
-
             // Update the row with the selected item.
             if (combo.SelectedItem is CUST_HESAB_COMBINED selectedStuf)
             {
                 // CODE is already bound via SelectedValue.
-                //currentRow.HES = selectedStuf.hes;
-                currentRow.NAME_HES = selectedStuf.NAME;
+                if (combo.DataContext is BLOCK_CUSTOMER blockCust)
+                {
+                    blockCust.HES = selectedStuf.hes;
+                    blockCust.NAME_HES = selectedStuf.NAME;
+
+                    //// Force binding refresh
+                    //var bindingExpression = combo.GetBindingExpression(ComboBox.SelectedValueProperty);
+                    //bindingExpression?.UpdateSource();
+                }
+                else if (combo.DataContext is SALGROUP_MODEL salGrp)
+                {
+                    salGrp.HES = selectedStuf.hes;
+                    salGrp.NAME_HES = selectedStuf.NAME;
+
+                    // Force binding refresh
+                    var bindingExpression = combo.GetBindingExpression(ComboBox.SelectedValueProperty);
+                    bindingExpression?.UpdateSource();
+                }
+                //else if (!string.IsNullOrEmpty(combo.Text))
+                //{
+                //    // Fallback: user typed a code directly
+                //    currentRow.HES = combo.Text.Trim();
+                //    currentRow.NAME_HES = GetNameHes(combo.Text.Trim());
+                //}
             }
         }
         private void HESEditCombo_Loaded(object sender, RoutedEventArgs e)
@@ -4362,14 +4417,26 @@ namespace Wins.WinSetting
             // Delay focus setting to ensure that the control is ready.
             Dispatcher.BeginInvoke(new Action(() => combo.Focus()), DispatcherPriority.Input);
 
-            if (!(combo.DataContext is BLOCK_CUSTOMER currentRow)) return;
+            string? hesCode = null;
+            if (combo.DataContext is BLOCK_CUSTOMER blockCust)
+            {
+                hesCode = blockCust.HES;
+            }
+            else if (combo.DataContext is SALGROUP_MODEL salGrp)
+            {
+                hesCode = salGrp.HES;
+            }
+            else
+            {
+                return;
+            }
 
-            if (!string.IsNullOrEmpty(currentRow.HES))
+            if (!string.IsNullOrEmpty(hesCode))
             {
                 try
                 {
                     string sql = "SELECT TOP 1 hes, NAME FROM dbo.CUST_HESAB WHERE hes = @pCode";
-                    var parameters = new { pCode = currentRow.HES };
+                    var parameters = new { pCode = hesCode };
                     var existingItem = dbms.DoGetDataSQL<CUST_HESAB_COMBINED>(sql, parameters).FirstOrDefault();
 
                     if (existingItem != null)

@@ -14,6 +14,14 @@
         Title="Window3" Height="450" Width="800" Loaded="Window_Loaded" PreviewKeyDown="Window_PreviewKeyDown" ContentRendered="Window_ContentRendered">
     <Window.Resources>
         <SolidColorBrush x:Key="GENERAL_Grlicom" Opacity="0.3" Color="{Binding Background.Color, ElementName=GENERAL_RANG}"/>
+
+        <ContextMenu x:Key="DataGridContextMenu" FontFamily="{StaticResource IRANYEKAN}">
+            <MenuItem Header="خروجی اکسل" Click="EXPORTEXCEL_BTN" >
+                <MenuItem.Icon>
+                    <materialDesign:PackIcon Kind="FileExcelOutline" FontSize="14" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
     </Window.Resources>
 
     <WindowChrome.WindowChrome>
@@ -48,7 +56,7 @@
             </StackPanel>
         </Popup>
 
-        <DataGrid x:Name="DEPART_SUB" ItemsSource="{Binding DEPART_DATA}" 
+        <DataGrid x:Name="DEPART_SUB" ItemsSource="{Binding DEPART_DATA}" ContextMenu="{StaticResource DataGridContextMenu}"
                   ColumnHeaderStyle="{StaticResource CenteryHeaderstyle}"
                   CellStyle="{StaticResource CellFocusyBorder}"
                   HorizontalGridLinesBrush="{StaticResource GENERAL_Grlicom}"

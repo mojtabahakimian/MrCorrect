@@ -407,7 +407,7 @@ namespace Wins.WinMenus.HESABDARI
 
             if (!string.IsNullOrEmpty(DATE_S.Text.ToRawTarikh()))
             {
-                if (DATE_SB.Text.Equals(BEYN.FixPersianChars()))
+                if (DATE_SB.Text.FixPersianChars().Equals(BEYN.FixPersianChars()))
                 {
                     if (string.IsNullOrEmpty(DATE_ST.Text.ToRawTarikh()))
                     {
@@ -425,7 +425,7 @@ namespace Wins.WinMenus.HESABDARI
             if (!string.IsNullOrEmpty(N_S.Text))
             {
                 Chshart();
-                if (N_SB.Text.Equals(BEYN.FixPersianChars()))
+                if (N_SB.Text.FixPersianChars().Equals(BEYN.FixPersianChars()))
                 {
                     if (string.IsNullOrEmpty(N_ST.Text))
                     {
@@ -443,7 +443,7 @@ namespace Wins.WinMenus.HESABDARI
             if (!string.IsNullOrEmpty(HES_K.Text))
             {
                 Chshart();
-                if (HES_KB.Text.Equals(BEYN.FixPersianChars()))
+                if (HES_KB.Text.FixPersianChars().Equals(BEYN.FixPersianChars()))
                 {
                     if (string.IsNullOrEmpty(HES_KT.Text))
                     {
@@ -461,7 +461,7 @@ namespace Wins.WinMenus.HESABDARI
             if (!string.IsNullOrEmpty(HES_M.Text))
             {
                 Chshart();
-                if (HES_MB.Text.Equals(BEYN.FixPersianChars()))
+                if (HES_MB.Text.FixPersianChars().Equals(BEYN.FixPersianChars()))
                 {
                     if (string.IsNullOrEmpty(HES_MT.Text))
                     {
@@ -479,7 +479,7 @@ namespace Wins.WinMenus.HESABDARI
             if (!string.IsNullOrEmpty(TNUMBER.Text))
             {
                 Chshart();
-                if (TNUMBERB.Text.Equals(BEYN.FixPersianChars()))
+                if (TNUMBERB.Text.FixPersianChars().Equals(BEYN.FixPersianChars()))
                 {
                     if (string.IsNullOrEmpty(TNUMBERT.Text))
                     {
@@ -517,7 +517,7 @@ namespace Wins.WinMenus.HESABDARI
             if (!string.IsNullOrEmpty(BED.Text))
             {
                 Chshart();
-                if (BEDB.Text.Equals(BEYN.FixPersianChars()))
+                if (BEDB.Text.FixPersianChars().Equals(BEYN.FixPersianChars()))
                 {
                     if (string.IsNullOrEmpty(BEDT.Text))
                     {
@@ -535,7 +535,7 @@ namespace Wins.WinMenus.HESABDARI
             if (!string.IsNullOrEmpty(BES.Text))
             {
                 Chshart();
-                if (BESB.Text.Equals(BEYN.FixPersianChars()))
+                if (BESB.Text.FixPersianChars().Equals(BEYN.FixPersianChars()))
                 {
                     if (string.IsNullOrEmpty(BEST.Text))
                     {
@@ -565,7 +565,7 @@ namespace Wins.WinMenus.HESABDARI
             if (!string.IsNullOrEmpty(NUMBER.Text))
             {
                 Chshart();
-                if (NUMBERB.Text.Equals(BEYN.FixPersianChars()))
+                if (NUMBERB.Text.FixPersianChars().Equals(BEYN.FixPersianChars()))
                 {
                     if (string.IsNullOrEmpty(NUMBERT.Text))
                     {
