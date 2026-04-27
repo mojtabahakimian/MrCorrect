@@ -3530,8 +3530,12 @@ namespace Wins.WinSetting
             ComboBox HES_COMBO = null;
             if (e.EditingElement is ContentPresenter contentPresenter)
             {
-                HES_COMBO = contentPresenter.ContentTemplate.FindName("EditCombo", contentPresenter) as ComboBox;
+                HES_COMBO = contentPresenter.ContentTemplate.FindName("HESEditCombo", contentPresenter) as ComboBox;
 
+                if (HES_COMBO == null)
+                {
+                    HES_COMBO = contentPresenter.ContentTemplate.FindName("EditCombo", contentPresenter) as ComboBox;
+                }
                 if (HES_COMBO == null)
                 {
                     HES_COMBO = DataGridHelper.FindVisualChild<ComboBox>(contentPresenter);
@@ -3834,15 +3838,19 @@ namespace Wins.WinSetting
         {
             if (!(sender is ComboBox combo)) return;
 
-            // The DataContext here is the underlying INVO_LST row.
-            if (!(combo.DataContext is BLOCK_CUSTOMER currentRow)) return;
-
             // Update the row with the selected item.
             if (combo.SelectedItem is CUST_HESAB_COMBINED selectedStuf)
             {
-                // CODE is already bound via SelectedValue.
-                //currentRow.HES = selectedStuf.hes;
-                currentRow.NAME_HES = selectedStuf.NAME;
+                if (combo.DataContext is BLOCK_CUSTOMER blockCust)
+                {
+                    blockCust.HES = selectedStuf.hes;
+                    blockCust.NAME_HES = selectedStuf.NAME;
+                }
+                else if (combo.DataContext is SALGROUP_MODEL salGrp)
+                {
+                    salGrp.HES = selectedStuf.hes;
+                    salGrp.NAME_HES = selectedStuf.NAME;
+                }
             }
         }
         private void EditCombo_Loaded(object sender, RoutedEventArgs e)
@@ -3867,6 +3875,7 @@ namespace Wins.WinSetting
                         // Set the ComboBox to display the existing item.
                         combo.ItemsSource = new List<CUST_HESAB_COMBINED> { existingItem };
                         combo.SelectedItem = existingItem;
+                        //combo.Text = existingItem.NAME;
                     }
                     else
                     {
@@ -4048,7 +4057,12 @@ namespace Wins.WinSetting
             ComboBox HES_COMBO = null;
             if (e.EditingElement is ContentPresenter contentPresenter)
             {
-                HES_COMBO = contentPresenter.ContentTemplate.FindName("EditCombo", contentPresenter) as ComboBox;
+                HES_COMBO = contentPresenter.ContentTemplate.FindName("HESEditCombo", contentPresenter) as ComboBox;
+
+                if (HES_COMBO == null)
+                {
+                    HES_COMBO = contentPresenter.ContentTemplate.FindName("EditCombo", contentPresenter) as ComboBox;
+                }
 
                 if (HES_COMBO == null)
                 {
@@ -4299,7 +4313,7 @@ namespace Wins.WinSetting
             try
             {
                 // Wait for 300ms; if the user types again, the token will cancel this delay.
-                await Task.Delay(300, cts.Token);
+                await Task.Delay(500, cts.Token);
             }
             catch (TaskCanceledException)
             {
@@ -4344,15 +4358,34 @@ namespace Wins.WinSetting
         {
             if (!(sender is ComboBox combo)) return;
 
-            // The DataContext here is the underlying INVO_LST row.
-            if (!(combo.DataContext is BLOCK_CUSTOMER currentRow)) return;
-
             // Update the row with the selected item.
             if (combo.SelectedItem is CUST_HESAB_COMBINED selectedStuf)
             {
                 // CODE is already bound via SelectedValue.
-                //currentRow.HES = selectedStuf.hes;
-                currentRow.NAME_HES = selectedStuf.NAME;
+                if (combo.DataContext is BLOCK_CUSTOMER blockCust)
+                {
+                    blockCust.HES = selectedStuf.hes;
+                    blockCust.NAME_HES = selectedStuf.NAME;
+
+                    //// Force binding refresh
+                    //var bindingExpression = combo.GetBindingExpression(ComboBox.SelectedValueProperty);
+                    //bindingExpression?.UpdateSource();
+                }
+                else if (combo.DataContext is SALGROUP_MODEL salGrp)
+                {
+                    salGrp.HES = selectedStuf.hes;
+                    salGrp.NAME_HES = selectedStuf.NAME;
+
+                    // Force binding refresh
+                    var bindingExpression = combo.GetBindingExpression(ComboBox.SelectedValueProperty);
+                    bindingExpression?.UpdateSource();
+                }
+                //else if (!string.IsNullOrEmpty(combo.Text))
+                //{
+                //    // Fallback: user typed a code directly
+                //    currentRow.HES = combo.Text.Trim();
+                //    currentRow.NAME_HES = GetNameHes(combo.Text.Trim());
+                //}
             }
         }
         private void HESEditCombo_Loaded(object sender, RoutedEventArgs e)
@@ -4362,14 +4395,26 @@ namespace Wins.WinSetting
             // Delay focus setting to ensure that the control is ready.
             Dispatcher.BeginInvoke(new Action(() => combo.Focus()), DispatcherPriority.Input);
 
-            if (!(combo.DataContext is BLOCK_CUSTOMER currentRow)) return;
+            string? hesCode = null;
+            if (combo.DataContext is BLOCK_CUSTOMER blockCust)
+            {
+                hesCode = blockCust.HES;
+            }
+            else if (combo.DataContext is SALGROUP_MODEL salGrp)
+            {
+                hesCode = salGrp.HES;
+            }
+            else
+            {
+                return;
+            }
 
-            if (!string.IsNullOrEmpty(currentRow.HES))
+            if (!string.IsNullOrEmpty(hesCode))
             {
                 try
                 {
                     string sql = "SELECT TOP 1 hes, NAME FROM dbo.CUST_HESAB WHERE hes = @pCode";
-                    var parameters = new { pCode = currentRow.HES };
+                    var parameters = new { pCode = hesCode };
                     var existingItem = dbms.DoGetDataSQL<CUST_HESAB_COMBINED>(sql, parameters).FirstOrDefault();
 
                     if (existingItem != null)

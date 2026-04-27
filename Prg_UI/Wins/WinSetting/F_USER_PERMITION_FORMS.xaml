@@ -999,9 +999,12 @@
                                                 IsEditable="True"
                                                 IsTextSearchEnabled="False"
                                                 StaysOpenOnEdit="True"
+                                                 
+                                                TextSearch.TextPath="NAME"
+                                                DisplayMemberPath="NAME"
                                                   
                                                 SelectedValuePath="hes"
-                                                SelectedValue="{Binding HES, UpdateSourceTrigger=PropertyChanged}"
+                                                SelectedValue="{Binding HES, UpdateSourceTrigger=LostFocus}"
                                                   
                                                 VerticalContentAlignment="Center"
                                                 MaxDropDownHeight="200"
@@ -1173,9 +1176,12 @@
                                                   IsEditable="True"
                                                   IsTextSearchEnabled="False"
                                                   StaysOpenOnEdit="True"
-                                                    
+                                                  
+                                                  TextSearch.TextPath="NAME"
+                                                  DisplayMemberPath="NAME"
+                                                  
                                                   SelectedValuePath="hes"
-                                                  SelectedValue="{Binding HES, UpdateSourceTrigger=PropertyChanged}"
+                                                  SelectedValue="{Binding HES, UpdateSourceTrigger=LostFocus}"
                                                     
                                                   VerticalContentAlignment="Center"
                                                   MaxDropDownHeight="200"
