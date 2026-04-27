@@ -234,7 +234,11 @@ namespace Wins.WinMenus.Taarif
                                     // Add focus to new row if needed
                                     DG.SelectedIndex++; // DG.SelectedIndex = DG.Items.Count - 1;
 
-                                    DG.CurrentCell = new DataGridCellInfo(DG.SelectedItem, DG.Columns[NAME_CODE_INDEX_COL]);
+                                    var safeSelectedItem = DG.SelectedItem;
+                                    if (safeSelectedItem != null && safeSelectedItem != CollectionView.NewItemPlaceholder)
+                                    {
+                                        DG.CurrentCell = new DataGridCellInfo(safeSelectedItem, DG.Columns[NAME_CODE_INDEX_COL]);
+                                    }
 
                                     Dispatcher.BeginInvoke(new Action(() =>
                                     {
@@ -1289,16 +1293,35 @@ namespace Wins.WinMenus.Taarif
                 return;
             }
 
-            var itemsView = grid.Items as IEditableCollectionView;
-            var hasInvalidCell = !grid.CurrentCell.IsValid || grid.CurrentItem is null || grid.SelectedItem is null;
-          
-            if (hasInvalidCell)
+            try
             {
-                bool canCancel = itemsView?.CanCancelEdit == true && (itemsView.IsEditingItem || itemsView.IsAddingNew);
-                if (canCancel)
+                var itemsView = grid.Items as IEditableCollectionView;
+                var hasInvalidCell =
+                    !grid.CurrentCell.IsValid
+                    || grid.CurrentColumn is null
+                    || grid.CurrentItem is null
+                    || grid.CurrentItem == CollectionView.NewItemPlaceholder
+                    || (grid.SelectedItem is null && grid.SelectedItems.Count == 0);
+
+                if (hasInvalidCell)
                 {
-                    itemsView!.CancelEdit();
+                    bool canCancel = itemsView?.CanCancelEdit == true && (itemsView.IsEditingItem || itemsView.IsAddingNew);
+                    if (canCancel)
+                    {
+                        itemsView!.CancelEdit();
+                    }
+
+                    if (grid.CurrentItem != null && grid.CurrentItem != CollectionView.NewItemPlaceholder && grid.CurrentColumn != null)
+                    {
+                        grid.CurrentCell = new DataGridCellInfo(grid.CurrentItem, grid.CurrentColumn);
+                    }
+
+                    e.Handled = true;
                 }
+            }
+            catch
+            {
+                // Stay safe: prevent WPF from continuing an invalid internal commit path.
                 e.Handled = true;
             }
         }
