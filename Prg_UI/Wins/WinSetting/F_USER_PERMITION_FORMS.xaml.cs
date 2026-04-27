@@ -3834,8 +3834,8 @@ namespace Wins.WinSetting
         {
             if (!(sender is ComboBox combo)) return;
 
-            // The DataContext here is the underlying INVO_LST row.
-            if (!(combo.DataContext is BLOCK_CUSTOMER currentRow)) return;
+            // The DataContext here is the underlying SALGROUP row.
+            if (!(combo.DataContext is SALGROUP_MODEL currentRow)) return;
 
             // Update the row with the selected item.
             if (combo.SelectedItem is CUST_HESAB_COMBINED selectedStuf)
@@ -3852,7 +3852,7 @@ namespace Wins.WinSetting
             // Delay focus setting to ensure that the control is ready.
             Dispatcher.BeginInvoke(new Action(() => combo.Focus()), DispatcherPriority.Input);
 
-            if (!(combo.DataContext is BLOCK_CUSTOMER currentRow)) return;
+            if (!(combo.DataContext is SALGROUP_MODEL currentRow)) return;
 
             if (!string.IsNullOrEmpty(currentRow.HES))
             {
@@ -4344,15 +4344,10 @@ namespace Wins.WinSetting
         {
             if (!(sender is ComboBox combo)) return;
 
-            // The DataContext here is the underlying INVO_LST row.
-            if (!(combo.DataContext is BLOCK_CUSTOMER currentRow)) return;
-
-            // Update the row with the selected item.
+            // Keep UI text in sync with selected item during edit.
             if (combo.SelectedItem is CUST_HESAB_COMBINED selectedStuf)
             {
-                // CODE is already bound via SelectedValue.
-                //currentRow.HES = selectedStuf.hes;
-                currentRow.NAME_HES = selectedStuf.NAME;
+                combo.Text = selectedStuf.NAME;
             }
         }
         private void HESEditCombo_Loaded(object sender, RoutedEventArgs e)
@@ -4362,34 +4357,53 @@ namespace Wins.WinSetting
             // Delay focus setting to ensure that the control is ready.
             Dispatcher.BeginInvoke(new Action(() => combo.Focus()), DispatcherPriority.Input);
 
-            if (!(combo.DataContext is BLOCK_CUSTOMER currentRow)) return;
+            if (!(combo.DataContext is SALGROUP_MODEL currentRow)) return;
+            SyncComboWithCurrentHes(combo, currentRow.HES);
+        }
 
-            if (!string.IsNullOrEmpty(currentRow.HES))
+        private void HESEditCombo_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Escape) return;
+            if (!(sender is ComboBox combo)) return;
+            if (!(combo.DataContext is SALGROUP_MODEL currentRow)) return;
+
+            if (combo.Tag is CancellationTokenSource oldCts)
             {
-                try
-                {
-                    string sql = "SELECT TOP 1 hes, NAME FROM dbo.CUST_HESAB WHERE hes = @pCode";
-                    var parameters = new { pCode = currentRow.HES };
-                    var existingItem = dbms.DoGetDataSQL<CUST_HESAB_COMBINED>(sql, parameters).FirstOrDefault();
-
-                    if (existingItem != null)
-                    {
-                        // Set the ComboBox to display the existing item.
-                        combo.ItemsSource = new List<CUST_HESAB_COMBINED> { existingItem };
-                        combo.SelectedItem = existingItem;
-                    }
-                    else
-                    {
-                        combo.ItemsSource = null;
-                    }
-                }
-                catch (Exception ex)
-                {
-                }
+                oldCts.Cancel();
             }
-            else
+
+            SyncComboWithCurrentHes(combo, currentRow.HES);
+        }
+
+        private void SyncComboWithCurrentHes(ComboBox combo, string? hesCode)
+        {
+            if (string.IsNullOrEmpty(hesCode))
             {
                 combo.ItemsSource = null;
+                combo.Text = string.Empty;
+                return;
+            }
+
+            try
+            {
+                string sql = "SELECT TOP 1 hes, NAME FROM dbo.CUST_HESAB WHERE hes = @pCode";
+                var parameters = new { pCode = hesCode };
+                var existingItem = dbms.DoGetDataSQL<CUST_HESAB_COMBINED>(sql, parameters).FirstOrDefault();
+
+                if (existingItem != null)
+                {
+                    combo.ItemsSource = new List<CUST_HESAB_COMBINED> { existingItem };
+                    combo.SelectedItem = existingItem;
+                    combo.Text = existingItem.NAME;
+                }
+                else
+                {
+                    combo.ItemsSource = null;
+                    combo.Text = string.Empty;
+                }
+            }
+            catch (Exception ex)
+            {
             }
         }
 

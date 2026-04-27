@@ -1172,15 +1172,18 @@
                                                   Loaded="HESEditCombo_Loaded" 
                                                   IsEditable="True"
                                                   IsTextSearchEnabled="False"
+                                                  TextSearch.TextPath="NAME"
+                                                  DisplayMemberPath="NAME"
                                                   StaysOpenOnEdit="True"
                                                     
                                                   SelectedValuePath="hes"
-                                                  SelectedValue="{Binding HES, UpdateSourceTrigger=PropertyChanged}"
+                                                  SelectedValue="{Binding HES, UpdateSourceTrigger=LostFocus}"
                                                     
                                                   VerticalContentAlignment="Center"
                                                   MaxDropDownHeight="200"
                                                     
                                                   KeyUp="HESGRP_ComboBox_KeyUp"
+                                                  PreviewKeyDown="HESEditCombo_PreviewKeyDown"
                                                   SelectionChanged="HESEditCombo_SelectionChanged">
                                             <ComboBox.ItemTemplate>
                                                 <DataTemplate >
@@ -1364,4 +1367,3 @@
 
     </Grid>
 </Window>
-
