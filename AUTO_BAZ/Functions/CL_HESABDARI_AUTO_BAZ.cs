@@ -2752,10 +2752,10 @@ namespace AUTO_BAZ.Functions
                     if (jst[jst_EOF].MABL_K != 0)
                     {
 
-                        if (isDefaccChecked)
-                        {
-                            CREATHES(Baseknow.MOGODIA, jst[jst_EOF].ANBAR, Convert.ToInt64(jst[jst_EOF].CODE), jst[jst_EOF].NAME);
-                        }
+                        // جلوگیری از خطای FK_DEED_DTL_TDETA_HES:
+                        // قبل از درج ردیف خرید، حساب کالا/انبار را در TDETA_HES تضمین می‌کنیم.
+                        // در برخی دیتابیس‌ها هنگام غیرفعال بودن defacc، این حساب قبلاً ساخته نشده است.
+                        CREATHES(Baseknow.MOGODIA, jst[jst_EOF].ANBAR, Convert.ToInt64(jst[jst_EOF].CODE), jst[jst_EOF].NAME);
                         object N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD = default;
                         //SDRST.AddNew(); // خريد
                         //N_S = max_ns;
