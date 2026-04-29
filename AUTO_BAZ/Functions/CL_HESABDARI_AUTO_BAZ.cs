@@ -2357,8 +2357,23 @@ namespace AUTO_BAZ.Functions
         BEGIN TRY
             IF NOT EXISTS (SELECT 1 FROM dbo.TDETA_HES WHERE N_KOL = @Kol AND NUMBER = @Moin AND TNUMBER = @Taf)
             BEGIN
-                INSERT INTO dbo.TDETA_HES (N_KOL, NUMBER, TNUMBER, NAME)
-                VALUES (@Kol, @Moin, @Taf, @Name);
+                BEGIN TRY
+                    INSERT INTO dbo.TDETA_HES (N_KOL, NUMBER, TNUMBER, NAME)
+                    VALUES (@Kol, @Moin, @Taf, @Name);
+                END TRY
+                BEGIN CATCH
+                    IF ERROR_NUMBER() IN (2601, 2627)
+                    BEGIN
+                        -- IX_TDETA_HES_NAME: نام تکراری - درج با نام منحصربه‌فرد (نام + کد تفصیلی)
+                        IF NOT EXISTS (SELECT 1 FROM dbo.TDETA_HES WHERE N_KOL = @Kol AND NUMBER = @Moin AND TNUMBER = @Taf)
+                        BEGIN
+                            INSERT INTO dbo.TDETA_HES (N_KOL, NUMBER, TNUMBER, NAME)
+                            VALUES (@Kol, @Moin, @Taf,
+                                LEFT(@Name, 240) + N' (' + CAST(CAST(@Taf AS INT) AS NVARCHAR(20)) + N')');
+                        END
+                    END
+                    ELSE THROW;
+                END CATCH;
             END
         END TRY
         BEGIN CATCH
