@@ -2363,7 +2363,23 @@ namespace AUTO_BAZ.Functions
                 {
                     // اجرای کوئری با دیتابیس اختصاصی همین Thread
                     dbms.DoExecuteSQL(sql, new { Kol = kolValue, Moin = moinValue, Taf = tafValue, Name = accountName });
-                    return; // اگر موفق بود، از متد خارج شو
+
+                    // مهم: صرف Execute شدن کافی نیست؛ باید واقعاً رکورد مرجع در TDETA_HES ثبت شده باشد.
+                    // در برخی شرایط همزمانی/کانکشن، اجرای دستور بدون Exception دیده شده ولی رکورد قابل مشاهده نیست.
+                    if (ISHESAB(kolValue, moinValue, tafValue))
+                    {
+                        return; // اگر واقعا ثبت شده، خروج
+                    }
+
+                    if (attempt == maxRetries)
+                    {
+                        var notPersistedMsg = $"[CREATHES] اجرای SQL بدون خطا انجام شد ولی حساب در TDETA_HES ثبت نشد. KOL={kolValue}, MOIN={moinValue}, TAF={tafValue}, NAME={accountName}";
+                        LogWriter.WriteLog(notPersistedMsg);
+                        throw new Exception(notPersistedMsg);
+                    }
+
+                    // یک فرصت مجدد برای نهایی شدن/قابل مشاهده شدن رکورد
+                    System.Threading.Thread.Sleep(25);
                 }
                 catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 1205 || ex.Number == -2)
                 {
