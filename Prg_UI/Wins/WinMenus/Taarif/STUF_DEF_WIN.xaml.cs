@@ -1970,11 +1970,16 @@ namespace Wins.WinMenus.Taarif
                             if (rst.Count == 0)
                             {
                                 //rst.AddNew();
-                                dbms.DoExecuteSQL($@"INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME, BED_BES)
-                                                     VALUES({_N_KOL_},
-                                                     {_NUMBER_} ,
-                                                     N'{_NAME_}' ,
-                                                     {_BED_BES_} ) ");
+                                dbms.DoExecuteSQL($@"
+IF NOT EXISTS (
+    SELECT 1
+    FROM dbo.DETA_HES
+    WHERE NUMBER = {_NUMBER_} AND NAME = N'{_NAME_}'
+)
+BEGIN
+    INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME, BED_BES)
+    VALUES({_N_KOL_}, {_NUMBER_}, N'{_NAME_}', {_BED_BES_})
+END");
                             }
                             else
                             {
@@ -2122,11 +2127,16 @@ namespace Wins.WinMenus.Taarif
                             if (rst.Count == 0)
                             {
                                 //rst.AddNew();
-                                dbms.DoExecuteSQL($@"INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME, BED_BES)
-                                                     VALUES({_N_KOL_},
-                                                     {_NUMBER_} ,
-                                                     N'{_NAME_}' ,
-                                                     {_BED_BES_} ) ");
+                                dbms.DoExecuteSQL($@"
+IF NOT EXISTS (
+    SELECT 1
+    FROM dbo.DETA_HES
+    WHERE NUMBER = {_NUMBER_} AND NAME = N'{_NAME_}'
+)
+BEGIN
+    INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME, BED_BES)
+    VALUES({_N_KOL_}, {_NUMBER_}, N'{_NAME_}', {_BED_BES_})
+END");
                             }
                             else
                             {
@@ -2214,11 +2224,16 @@ namespace Wins.WinMenus.Taarif
                         if (rst.Count == 0)
                         {
                             //rst.AddNew();
-                            dbms.DoExecuteSQL($@"INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME, BED_BES)
-                                                     VALUES({_N_KOL_},
-                                                     {_NUMBER_} ,
-                                                     N'{_NAME_}' ,
-                                                     {_BED_BES_} ) ");
+                            dbms.DoExecuteSQL($@"
+IF NOT EXISTS (
+    SELECT 1
+    FROM dbo.DETA_HES
+    WHERE NUMBER = {_NUMBER_} AND NAME = N'{_NAME_}'
+)
+BEGIN
+    INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME, BED_BES)
+    VALUES({_N_KOL_}, {_NUMBER_}, N'{_NAME_}', {_BED_BES_})
+END");
                         }
                         else
                         {
@@ -2242,11 +2257,16 @@ namespace Wins.WinMenus.Taarif
                         if (rst.Count == 0)
                         {
                             //rst.AddNew();
-                            dbms.DoExecuteSQL($@"INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME, BED_BES)
-                                                     VALUES({_N_KOL_},
-                                                     {_NUMBER_} ,
-                                                     N'{_NAME_}' ,
-                                                     {_BED_BES_} ) ");
+                            dbms.DoExecuteSQL($@"
+IF NOT EXISTS (
+    SELECT 1
+    FROM dbo.DETA_HES
+    WHERE NUMBER = {_NUMBER_} AND NAME = N'{_NAME_}'
+)
+BEGIN
+    INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME, BED_BES)
+    VALUES({_N_KOL_}, {_NUMBER_}, N'{_NAME_}', {_BED_BES_})
+END");
                         }
                         else
                         {
@@ -2302,11 +2322,16 @@ namespace Wins.WinMenus.Taarif
                         if (rst.Count == 0)
                         {
                             //rst.AddNew();
-                            dbms.DoExecuteSQL($@"INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME, BED_BES)
-                                                     VALUES({_N_KOL_},
-                                                     {_NUMBER_} ,
-                                                     N'{_NAME_}' ,
-                                                     {_BED_BES_} ) ");
+                            dbms.DoExecuteSQL($@"
+IF NOT EXISTS (
+    SELECT 1
+    FROM dbo.DETA_HES
+    WHERE NUMBER = {_NUMBER_} AND NAME = N'{_NAME_}'
+)
+BEGIN
+    INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME, BED_BES)
+    VALUES({_N_KOL_}, {_NUMBER_}, N'{_NAME_}', {_BED_BES_})
+END");
                         }
                         else
                         {
@@ -2452,11 +2477,16 @@ namespace Wins.WinMenus.Taarif
                         if (rst.Count == 0)
                         {
                             //rst.AddNew();
-                            dbms.DoExecuteSQL($@"INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME, BED_BES)
-                                                     VALUES({_N_KOL_},
-                                                     {_NUMBER_} ,
-                                                     N'{_NAME_}' ,
-                                                     {_BED_BES_} ) ");
+                            dbms.DoExecuteSQL($@"
+IF NOT EXISTS (
+    SELECT 1
+    FROM dbo.DETA_HES
+    WHERE NUMBER = {_NUMBER_} AND NAME = N'{_NAME_}'
+)
+BEGIN
+    INSERT INTO dbo.DETA_HES(N_KOL, NUMBER, NAME, BED_BES)
+    VALUES({_N_KOL_}, {_NUMBER_}, N'{_NAME_}', {_BED_BES_})
+END");
                         }
                         else
                         {

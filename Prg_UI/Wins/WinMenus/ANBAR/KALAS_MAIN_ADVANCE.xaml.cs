@@ -84,6 +84,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("fa-IR");
 
             GridResourceWrapper.SetResources(Assembly.Load("MrCorrect"), "Prg_UI");
+
+            if (SYNCFUSION_DG != null)
+            {
+                SYNCFUSION_DG.SelectionController = new SafeGridSelectionController(SYNCFUSION_DG);
+            }
         }
 
         UniversControl universControl = new UniversControl();
