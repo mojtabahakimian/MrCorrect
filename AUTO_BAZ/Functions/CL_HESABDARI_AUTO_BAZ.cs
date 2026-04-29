@@ -2600,6 +2600,11 @@ namespace AUTO_BAZ.Functions
                 if (!IsNull(HFRST[HFRST_EOF].CUST_NO))
                 {
                     GETTAF3(HFRST[HFRST_EOF].CUST_NO, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+
+                    if (CKOL.HasValue && CMOIN.HasValue && CTAF.HasValue && CKOL > 0 && CMOIN > 0 && CTAF > 0)
+                    {
+                        CREATHES(CKOL, CMOIN, CTAF, GETTAFNAME(HFRST[HFRST_EOF].CUST_NO));
+                    }
                 }
                 SHSH = Conversions.ToString(Interaction.IIf((bool)Baseknow.SNDKH, Strings.Left(" فاكتورهاي  خريد  " + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255), Strings.Left(" فاكتور خريد شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " خريدار: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255)));
                 if ((bool)Baseknow.SNDKH) // سند روزانه است
@@ -2752,10 +2757,7 @@ namespace AUTO_BAZ.Functions
                     if (jst[jst_EOF].MABL_K != 0)
                     {
 
-                        if (isDefaccChecked)
-                        {
-                            CREATHES(Baseknow.MOGODIA, jst[jst_EOF].ANBAR, Convert.ToInt64(jst[jst_EOF].CODE), jst[jst_EOF].NAME);
-                        }
+                        CREATHES(Baseknow.MOGODIA, jst[jst_EOF].ANBAR, Convert.ToInt64(jst[jst_EOF].CODE), jst[jst_EOF].NAME);
                         object N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD = default;
                         //SDRST.AddNew(); // خريد
                         //N_S = max_ns;
@@ -3054,11 +3056,7 @@ namespace AUTO_BAZ.Functions
                     }
                     if (KHSAY != 0d)
                     {
-                        if (isDefaccChecked)
-                        {
-                            CREATHES(Baseknow.KHARID, 11, 1, "ساير 2");
-                            // كنترل خريد '
-                        }
+                        CREATHES(Baseknow.KHARID, 11, 1, "ساير 2");
                         object BED = null;
                         //{ N_S },{ HES_K},{ HES_M},{ HES_T},{ hes },{ SHARH},{ BED },{ NUMBER},{ TAG },{ ARZD}
 
@@ -3081,13 +3079,8 @@ namespace AUTO_BAZ.Functions
                     {
                         if (HS[(int)K] != 0d)
                         {
-                            // كنترل خريد '
-                            if (isDefaccChecked)
-                            {
-                                var INP1 = K + 4L;
-                                //CREATHES(System.Convert.ToInt64(@Forms["baseknow"]["KHARID"]), K + 4, 1, GETGRPKALA(K + 4));
-                                CREATHES(Baseknow.KHARID, K + 4L, 1, GETGRPKALA(Convert.ToInt32(INP1)));
-                            }
+                            var INP1 = K + 4L;
+                            CREATHES(Baseknow.KHARID, K + 4L, 1, GETGRPKALA(Convert.ToInt32(INP1)));
                             //{N_S},{HES_K},{HES_M},{HES_T},{hes},{SHARH},{BED},{NUMBER},{TAG},{ARZD}
                             object BED = null;
 
