@@ -2330,12 +2330,23 @@ namespace AUTO_BAZ.Functions
                 return;
             }
 
-            // ۵. تور ایمنی SQL با بلوک‌های مستقل
+            // ۵. تور ایمنی SQL با بلوک‌های مستقل - کل زنجیره FK: TOTA_HES → DETA_HES → TDETA_HES
             string sql = @"
+        BEGIN TRY
+            IF NOT EXISTS (SELECT 1 FROM dbo.TOTA_HES WHERE NUMBER = @Kol)
+            BEGIN
+                INSERT INTO dbo.TOTA_HES (NUMBER, NAME)
+                VALUES (@Kol, @Name);
+            END
+        END TRY
+        BEGIN CATCH
+            IF ERROR_NUMBER() NOT IN (2601, 2627) THROW;
+        END CATCH;
+
         BEGIN TRY
             IF NOT EXISTS (SELECT 1 FROM dbo.DETA_HES WHERE N_KOL = @Kol AND NUMBER = @Moin)
             BEGIN
-                INSERT INTO dbo.DETA_HES (N_KOL, NUMBER, NAME) 
+                INSERT INTO dbo.DETA_HES (N_KOL, NUMBER, NAME)
                 VALUES (@Kol, @Moin, @Name);
             END
         END TRY
@@ -2346,7 +2357,7 @@ namespace AUTO_BAZ.Functions
         BEGIN TRY
             IF NOT EXISTS (SELECT 1 FROM dbo.TDETA_HES WHERE N_KOL = @Kol AND NUMBER = @Moin AND TNUMBER = @Taf)
             BEGIN
-                INSERT INTO dbo.TDETA_HES (N_KOL, NUMBER, TNUMBER, NAME) 
+                INSERT INTO dbo.TDETA_HES (N_KOL, NUMBER, TNUMBER, NAME)
                 VALUES (@Kol, @Moin, @Taf, @Name);
             END
         END TRY
