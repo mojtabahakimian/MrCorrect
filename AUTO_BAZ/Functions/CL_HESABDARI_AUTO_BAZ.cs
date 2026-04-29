@@ -2364,6 +2364,17 @@ namespace AUTO_BAZ.Functions
         BEGIN CATCH
             IF ERROR_NUMBER() NOT IN (2601, 2627) THROW;
         END CATCH;
+
+        BEGIN TRY
+            UPDATE dbo.TDETA_HES
+            SET HESAB = CAST(CAST(@Kol AS INT) AS NVARCHAR(20)) + N'-'
+                      + CAST(CAST(@Moin AS INT) AS NVARCHAR(20)) + N'-'
+                      + CAST(CAST(@Taf AS INT) AS NVARCHAR(20))
+            WHERE N_KOL = @Kol AND NUMBER = @Moin AND TNUMBER = @Taf
+              AND (HESAB IS NULL OR HESAB = N'');
+        END TRY
+        BEGIN CATCH
+        END CATCH;
     ";
 
             // ۶. مدیریت بن‌بست (Deadlock Retry Pattern)
@@ -2406,7 +2417,7 @@ namespace AUTO_BAZ.Functions
         public static bool ISHESAB(double? KOL, double? MOIN, double? taf)
         {
             bool tempISHESAB = false;
-            var rst = dbms.DoGetDataSQL<QRE13>("SELECT N_KOL,NUMBER,TNUMBER FROM TDETA_HES WHERE N_KOL = " + KOL.ToString() + " AND NUMBER = " + MOIN.ToString() + " AND TNUMBER = " + taf).ToList();
+            var rst = dbms.DoGetDataSQL<QRE13>("SELECT N_KOL,NUMBER,TNUMBER FROM TDETA_HES WHERE N_KOL = " + KOL.ToString() + " AND NUMBER = " + MOIN.ToString() + " AND TNUMBER = " + taf + " AND HESAB IS NOT NULL AND HESAB <> ''").ToList();
             if (rst.Count == 0)
             {
                 tempISHESAB = false;
