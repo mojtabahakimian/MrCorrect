@@ -2332,25 +2332,27 @@ namespace AUTO_BAZ.Functions
 
             // ۵. تور ایمنی SQL با بلوک‌های مستقل
             string sql = @"
-        BEGIN TRY
-            IF NOT EXISTS (SELECT 1 FROM dbo.DETA_HES WHERE N_KOL = @Kol AND NUMBER = @Moin)
-            BEGIN
-                INSERT INTO dbo.DETA_HES (N_KOL, NUMBER, NAME) 
-                VALUES (@Kol, @Moin, @Name);
-            END
-        END TRY
-        BEGIN CATCH
-            IF ERROR_NUMBER() NOT IN (2601, 2627) THROW;
-        END CATCH;
+        SET XACT_ABORT ON;
+        BEGIN TRAN;
 
         BEGIN TRY
-            IF NOT EXISTS (SELECT 1 FROM dbo.TDETA_HES WHERE N_KOL = @Kol AND NUMBER = @Moin AND TNUMBER = @Taf)
+            IF NOT EXISTS (SELECT 1 FROM dbo.DETA_HES WITH (UPDLOCK, HOLDLOCK) WHERE N_KOL = @Kol AND NUMBER = @Moin)
             BEGIN
-                INSERT INTO dbo.TDETA_HES (N_KOL, NUMBER, TNUMBER, NAME) 
+                INSERT INTO dbo.DETA_HES (N_KOL, NUMBER, NAME)
+                VALUES (@Kol, @Moin, @Name);
+            END
+
+            IF NOT EXISTS (SELECT 1 FROM dbo.TDETA_HES WITH (UPDLOCK, HOLDLOCK) WHERE N_KOL = @Kol AND NUMBER = @Moin AND TNUMBER = @Taf)
+            BEGIN
+                INSERT INTO dbo.TDETA_HES (N_KOL, NUMBER, TNUMBER, NAME)
                 VALUES (@Kol, @Moin, @Taf, @Name);
             END
+
+            COMMIT TRAN;
         END TRY
         BEGIN CATCH
+            IF @@TRANCOUNT > 0 ROLLBACK TRAN;
+
             IF ERROR_NUMBER() NOT IN (2601, 2627) THROW;
         END CATCH;
     ";
