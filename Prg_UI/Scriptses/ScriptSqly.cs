@@ -3102,9 +3102,7 @@ END;";
 									        RIGHT('00' + CAST(@gd AS VARCHAR(2)), 2),
 									        120
 									    );
-									END
-									GO
-									"); } catch { }
+									END"); } catch { }
 
                 try { db.Execute(@"CREATE TABLE [dbo].[Travelreason]
 (
