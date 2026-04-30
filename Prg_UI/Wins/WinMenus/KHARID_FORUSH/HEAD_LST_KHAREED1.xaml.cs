@@ -3786,7 +3786,14 @@ namespace Wins.WinMenus.KHARID_FORUSH
             {
                 AUTO_BAZ.Functions.CL_LMethods.LogWriter.WriteLog($"GENSANADKHAREED exception for invoice {NUMBER.Text}: {ex.Message}");
                 AUTO_BAZ.Functions.CL_LMethods.ExpectionLogWriter.WriteLog(ex, "GENSANADKHAREED");
-                new Msgwin(false, "خطا در انجام علمیات صدور سند برای فاکتور خرید").Show();
+
+                string userMsg;
+                if (ex.Message.Contains("FOREIGN KEY") || ex.Message.Contains("FK_DEED_DTL"))
+                    userMsg = $"خطا در صدور سند فاکتور خرید شماره {NUMBER.Text}:\nحساب مورد نیاز در سرفصل حسابها تعریف نشده است.\nلطفاً ابتدا حساب کالا یا فروشنده را در سیستم حسابداری تعریف کنید.";
+                else
+                    userMsg = $"خطا در انجام عملیات صدور سند برای فاکتور خرید شماره {NUMBER.Text}.\n{ex.Message}";
+
+                new Msgwin(false, userMsg).Show();
             }
 
         }
@@ -5251,5 +5258,26 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
 
         }
+        private void N_S_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (!NewRecord)
+            {
+                if (!string.IsNullOrEmpty(N_S.Text) && N_S.Text != "0")
+                {
+                    CL_MenuManager.MenuBaseOnKindOpen(this, dbms, 0, Convert.ToDouble(N_S.Text), false);
+                }
+            }
+        }
+        private void MABNA_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (!NewRecord)
+            {
+                if (!string.IsNullOrEmpty(N_S.Text) && N_S.Text != "0")
+                {
+                    CL_MenuManager.MenuBaseOnKindOpen(this, dbms, 0, Convert.ToDouble(N_S.Text), true);
+                }
+            }
+        }
+
     }
 }
