@@ -5258,5 +5258,26 @@ namespace Wins.WinMenus.KHARID_FORUSH
         {
 
         }
+        private void N_S_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (!NewRecord)
+            {
+                if (!string.IsNullOrEmpty(N_S.Text) && N_S.Text != "0")
+                {
+                    CL_MenuManager.MenuBaseOnKindOpen(this, dbms, 0, Convert.ToDouble(N_S.Text), false);
+                }
+            }
+        }
+        private void MABNA_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (!NewRecord)
+            {
+                if (!string.IsNullOrEmpty(N_S.Text) && N_S.Text != "0")
+                {
+                    CL_MenuManager.MenuBaseOnKindOpen(this, dbms, 0, Convert.ToDouble(N_S.Text), true);
+                }
+            }
+        }
+
     }
 }
