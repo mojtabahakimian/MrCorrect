@@ -2304,91 +2304,99 @@ namespace AUTO_BAZ.Functions
         [System.Diagnostics.DebuggerStepThrough]
         public static void CREATHES(double? KOL, double? MOIN, double? taf, string nam)
         {
-            // ۱. اعتبارسنجی اولیه
             if (KOL is null || MOIN is null || taf is null)
             {
-                LogWriter.WriteLog($"[CREATHES] حساب نامعتبر است و قابل ایجاد نیست. KOL={KOL}, MOIN={MOIN}, TAF={taf}, NAME={nam}");
-                throw new ArgumentException($"[CREATHES] حساب نامعتبر است و سند نباید ثبت شود. KOL={KOL}, MOIN={MOIN}, TAF={taf}");
+                LogWriter.WriteLog($"[CREATHES] حساب نامعتبر است. KOL={KOL}, MOIN={MOIN}, TAF={taf}, NAME={nam}");
+                throw new ArgumentException($"[CREATHES] حساب نامعتبر است. KOL={KOL}, MOIN={MOIN}, TAF={taf}");
             }
 
-            // ۲. حل مشکل Type Conversion: انتقال مستقیم اعداد اعشاری به عنوان پارامتر
-            double kolValue = KOL.Value;
-            double moinValue = MOIN.Value;
-            double tafValue = taf.Value;
-
-            // ۳. حل مشکل String Truncation: محدود کردن طول نام حساب (تطبیق با سایز فیلد NAME در دیتابیس)
-            // فرض میکنیم در دیتابیس فیلد NAME حداکثر 255 کاراکتر است.
+            int kolValue = Convert.ToInt32(KOL.Value);
+            int moinValue = Convert.ToInt32(MOIN.Value);
+            int tafValue = Convert.ToInt32(taf.Value);
             string accountName = nam ?? string.Empty;
+
             if (accountName.Length > 250)
             {
                 accountName = accountName.Substring(0, 250);
             }
 
-            // ۴. مسیر سریع (Fast-Path)
             if (ISHESAB(kolValue, moinValue, tafValue))
             {
                 return;
             }
 
-            // ۵. تور ایمنی SQL با بلوک‌های مستقل
             string sql = @"
-        BEGIN TRY
-            IF NOT EXISTS (SELECT 1 FROM dbo.DETA_HES WHERE N_KOL = @Kol AND NUMBER = @Moin)
-            BEGIN
-                INSERT INTO dbo.DETA_HES (N_KOL, NUMBER, NAME) 
-                VALUES (@Kol, @Moin, @Name);
-            END
-        END TRY
-        BEGIN CATCH
-            IF ERROR_NUMBER() NOT IN (2601, 2627) THROW;
-        END CATCH;
+    BEGIN TRY
+        IF NOT EXISTS (SELECT 1 FROM dbo.DETA_HES WHERE N_KOL = @Kol AND NUMBER = @Moin)
+        BEGIN
+            INSERT INTO dbo.DETA_HES (N_KOL, NUMBER, NAME)
+            VALUES (@Kol, @Moin, @Name);
+        END
+    END TRY
+    BEGIN CATCH
+        IF ERROR_NUMBER() NOT IN (2601, 2627) THROW;
+    END CATCH;
 
-        BEGIN TRY
-            IF NOT EXISTS (SELECT 1 FROM dbo.TDETA_HES WHERE N_KOL = @Kol AND NUMBER = @Moin AND TNUMBER = @Taf)
-            BEGIN
-                INSERT INTO dbo.TDETA_HES (N_KOL, NUMBER, TNUMBER, NAME) 
-                VALUES (@Kol, @Moin, @Taf, @Name);
-            END
-        END TRY
-        BEGIN CATCH
-            IF ERROR_NUMBER() NOT IN (2601, 2627) THROW;
-        END CATCH;
-    ";
+   BEGIN TRY
+                    INSERT INTO dbo.TDETA_HES (N_KOL, NUMBER, TNUMBER, NAME)
+                    VALUES (@Kol, @Moin, @Taf, @Name);
+                END TRY
+                BEGIN CATCH
+                    IF ERROR_NUMBER() IN (2601, 2627)
+                    BEGIN
+                        -- IX_TDETA_HES_NAME: نام تکراری - درج با نام منحصربه‌فرد (نام + کد تفصیلی)
+                        IF NOT EXISTS (SELECT 1 FROM dbo.TDETA_HES WHERE N_KOL = @Kol AND NUMBER = @Moin AND TNUMBER = @Taf)
+                        BEGIN
+                            INSERT INTO dbo.TDETA_HES (N_KOL, NUMBER, TNUMBER, NAME)
+                            VALUES (@Kol, @Moin, @Taf,
+                                LEFT(@Name, 240) + N' (' + CAST(CAST(@Taf AS INT) AS NVARCHAR(20)) + N')');
+                        END
+                    END
+                    ELSE THROW;
+                END CATCH;
+";
 
-            // ۶. مدیریت بن‌بست (Deadlock Retry Pattern)
             int maxRetries = 3;
             for (int attempt = 1; attempt <= maxRetries; attempt++)
             {
                 try
                 {
-                    // اجرای کوئری با دیتابیس اختصاصی همین Thread
                     dbms.DoExecuteSQL(sql, new { Kol = kolValue, Moin = moinValue, Taf = tafValue, Name = accountName });
-                    return; // اگر موفق بود، از متد خارج شو
+                    return;
+                }
+                catch (Microsoft.Data.SqlClient.SqlException ex) when ((ex.Number == 2601 || ex.Number == 2627) && ex.Message.Contains("IX_TDETA_HES_NAME"))
+                {
+                    var message =
+                        $"حساب با این نام قبلاً در همین سطح کل/معین ثبت شده است و امکان ساخت تفصیلی جدید وجود ندارد. " +
+                        $"کل={kolValue}، معین={moinValue}، تفصیلی درخواستی={tafValue}، نام='{accountName}'. " +
+                        "لطفاً یا از همان تفصیلی قبلی استفاده کنید، یا نام حساب را اصلاح/یکتا کنید.";
+
+                    LogWriter.WriteLog("[CREATHES] " + message + " | " + ex.Message);
+                    ExpectionLogWriter.WriteLog(ex, "CREATHES");
+                    throw new Exception(message, ex);
                 }
                 catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 1205 || ex.Number == -2)
                 {
-                    // Error 1205 = Deadlock | Error -2 = TimeOut
                     if (attempt == maxRetries)
                     {
-                        var msg = $"خطای بن‌بست (Deadlock) یا Timeout پس از {maxRetries} تلاش. KOL={kolValue}, MOIN={moinValue}, TAF={tafValue}";
+                        var msg = $"خطای بن‌بست پس از {maxRetries} تلاش. KOL={kolValue}, MOIN={moinValue}, TAF={tafValue}";
                         LogWriter.WriteLog(msg + " | " + ex.Message);
                         ExpectionLogWriter.WriteLog(ex, "CREATHES");
                         throw new Exception(msg, ex);
                     }
-                    // یک مکث بسیار کوتاه و تصادفی برای خروج از تداخل Threadها
                     System.Threading.Thread.Sleep(new Random().Next(10, 50));
                 }
                 catch (Exception ex)
                 {
-                    // خطاهای بحرانی (مثل قطع اتصال سرور یا خطای Foreign Key مربوط به سطح کل) مستقیماً Throw می‌شوند
                     var message = $"خطای بحرانی در ساخت سرفصل حساب. KOL={kolValue}, MOIN={moinValue}, TAF={tafValue}";
                     LogWriter.WriteLog(message + " | " + ex.Message);
                     ExpectionLogWriter.WriteLog(ex, "CREATHES");
-
                     throw new Exception(message, ex);
                 }
             }
         }
+
+
 
 
         [System.Diagnostics.DebuggerStepThrough]
@@ -2600,6 +2608,11 @@ namespace AUTO_BAZ.Functions
                 if (!IsNull(HFRST[HFRST_EOF].CUST_NO))
                 {
                     GETTAF3(HFRST[HFRST_EOF].CUST_NO, ref CKOL, ref CMOIN, ref CTAF, ref CTAF2, ref CTAF3, ref CTAF4);
+
+                    if (CKOL.HasValue && CMOIN.HasValue && CTAF.HasValue && CKOL > 0 && CMOIN > 0 && CTAF > 0)
+                    {
+                        CREATHES(CKOL, CMOIN, CTAF, GETTAFNAME(HFRST[HFRST_EOF].CUST_NO));
+                    }
                 }
                 SHSH = Conversions.ToString(Interaction.IIf((bool)Baseknow.SNDKH, Strings.Left(" فاكتورهاي  خريد  " + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##"), 255), Strings.Left(" فاكتور خريد شماره " + HFRST[HFRST_EOF].NUMBER1 + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + " خريدار: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255)));
                 if ((bool)Baseknow.SNDKH) // سند روزانه است
@@ -2748,28 +2761,13 @@ namespace AUTO_BAZ.Functions
                 //while (!jst.EOF())
                 for (int jst_EOF = 0; jst_EOF < jst.Count; jst_EOF++)
                 {
-
                     if (jst[jst_EOF].MABL_K != 0)
                     {
-
-                        if (isDefaccChecked)
-                        {
-                            CREATHES(Baseknow.MOGODIA, jst[jst_EOF].ANBAR, Convert.ToInt64(jst[jst_EOF].CODE), jst[jst_EOF].NAME);
-                        }
+                        CREATHES(Baseknow.MOGODIA, jst[jst_EOF].ANBAR, Convert.ToInt64(jst[jst_EOF].CODE), jst[jst_EOF].NAME);
                         object N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD = default;
-                        //SDRST.AddNew(); // خريد
-                        //N_S = max_ns;
-                        //HES_K = Baseknow.MOGODIA;
-                        //HES_M = jst[jst_EOF].ANBAR;
-                        //HES_T = jst[jst_EOF].CODE;
-                        //hes = Baseknow.MOGODIA + "-" + jst[jst_EOF].ANBAR + "-" + jst[jst_EOF].CODE;
-                        //SHARH = Strings.Right("خريدفاكتورشماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255);
-                        //BED = Math.Round((double)jst[jst_EOF].MABL_K);
-                        //NUMBER = HFRST[HFRST_EOF].NUMBER;
-                        //TAG = 12;
-                        //ARZD = Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD);
                         dbms.DoExecuteSQL($"INSERT INTO DEED_DTL (N_S, HES_K, HES_M, HES_T, hes, SHARH, BED, NUMBER, TAG, ARZD) " +
                             $"VALUES({max_ns},{Baseknow.MOGODIA},{jst[jst_EOF].ANBAR},{jst[jst_EOF].CODE},N'{Baseknow.MOGODIA + "-" + jst[jst_EOF].ANBAR + "-" + jst[jst_EOF].CODE}',N'{Strings.Right("خريدفاكتورشماره " + HFRST[HFRST_EOF].NUMBER1 + "-" + HFRST[HFRST_EOF].FNUMCO + " مورخ " + Strings.Format(HFRST[HFRST_EOF].DATE_N, "####/##/##") + "فروشنده: " + GETTAFNAME(HFRST[HFRST_EOF].CUST_NO), 255)}',{Math.Round((double)jst[jst_EOF].MABL_K)},{HFRST[HFRST_EOF].NUMBER},12,{Interaction.IIf(IsNull(HFRST[HFRST_EOF].ARZD), 1, HFRST[HFRST_EOF].ARZD)})");
+
                         switch (jst[jst_EOF].RADAH)
                         {
                             case 1:
@@ -3054,11 +3052,7 @@ namespace AUTO_BAZ.Functions
                     }
                     if (KHSAY != 0d)
                     {
-                        if (isDefaccChecked)
-                        {
-                            CREATHES(Baseknow.KHARID, 11, 1, "ساير 2");
-                            // كنترل خريد '
-                        }
+                        CREATHES(Baseknow.KHARID, 11, 1, "ساير 2");
                         object BED = null;
                         //{ N_S },{ HES_K},{ HES_M},{ HES_T},{ hes },{ SHARH},{ BED },{ NUMBER},{ TAG },{ ARZD}
 
@@ -3081,13 +3075,8 @@ namespace AUTO_BAZ.Functions
                     {
                         if (HS[(int)K] != 0d)
                         {
-                            // كنترل خريد '
-                            if (isDefaccChecked)
-                            {
-                                var INP1 = K + 4L;
-                                //CREATHES(System.Convert.ToInt64(@Forms["baseknow"]["KHARID"]), K + 4, 1, GETGRPKALA(K + 4));
-                                CREATHES(Baseknow.KHARID, K + 4L, 1, GETGRPKALA(Convert.ToInt32(INP1)));
-                            }
+                            var INP1 = K + 4L;
+                            CREATHES(Baseknow.KHARID, K + 4L, 1, GETGRPKALA(Convert.ToInt32(INP1)));
                             //{N_S},{HES_K},{HES_M},{HES_T},{hes},{SHARH},{BED},{NUMBER},{TAG},{ARZD}
                             object BED = null;
 
