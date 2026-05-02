@@ -217,16 +217,16 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
             // 1. Get Bank Map
             var banks = dbms.DoGetDataSQL<TCOD_BANKS>("SELECT CODE, NAMES FROM TCOD_BANKS").ToDictionary(k => k.CODE, v => v.NAMES);
 
-            // 2. Get Procedure Data
-            string sql = "CHEK_W_PASSP";
+            // 2. Table‑Valued Function :
+            string sql = @"SELECT * FROM dbo.CHEK_W_PASSP(@Forms___Baseknow___ADA,@Forms___Baseknow___BANKHA,@Forms___Baseknow___ADV)";
+
             var parameters = new
             {
                 Forms___Baseknow___ADA = Baseknow.ADA,
-                Forms___Baseknow___ADV = Baseknow.ADV,
-                Forms___Baseknow___BANKHA = Baseknow.BANKHA
+                Forms___Baseknow___BANKHA = Baseknow.BANKHA,
+                Forms___Baseknow___ADV = Baseknow.ADV
             };
-
-            var data = dbms.DoGetStoreProcedureSQL<FCHEK_W_PASS_MODEL>(sql, parameters).ToList();
+            var data = dbms.DoGetDataSQL<FCHEK_W_PASS_MODEL>(sql, parameters).ToList();
             if (data.Count == 0)
             {
                 this?.Close();
