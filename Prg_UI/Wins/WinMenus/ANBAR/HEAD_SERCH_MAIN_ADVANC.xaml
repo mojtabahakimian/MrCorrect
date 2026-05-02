@@ -1152,7 +1152,7 @@
 
                     <Label Content="واحد فروش :" Grid.Row="9" Grid.Column="2" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
                     <StackPanel Orientation="Horizontal" Grid.Row="9" Grid.Column="4">
-                        <ComboBox Padding="7,0,10,0" Width="150" x:Name="DEPATMAN" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" DisplayMemberPath="DEPATMAN" SelectedValuePath="DEPNAME">
+                        <ComboBox Padding="7,0,10,0" Width="150" x:Name="DEPATMAN" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" DisplayMemberPath="DEPNAME" SelectedValuePath="DEPATMAN">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -1186,7 +1186,7 @@
 
                     <Label Content="شیفت :" Grid.Row="10" Grid.Column="2" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
                     <StackPanel Orientation="Horizontal" Grid.Row="10" Grid.Column="4">
-                        <ComboBox Padding="7,0,10,0" Width="150" x:Name="SHIFT_ID" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" DisplayMemberPath="SHIFT_ID" SelectedValuePath="SHNAME">
+                        <ComboBox Padding="7,0,10,0" Width="150" x:Name="SHIFT_ID" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" DisplayMemberPath="SHNAME" SelectedValuePath="SHIFT_ID">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>

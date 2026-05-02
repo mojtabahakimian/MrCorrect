@@ -1319,12 +1319,20 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
                         if (CL_LMethods.IsNewPlaceHolder(DG_SUB, item))
                         {
-                            PRICE_ELAMIETF_DTL_DATA.Remove((PRICE_ELAMIETF_DTL_MODEL)item);
+                            if (item is PRICE_ELAMIETF_DTL_MODEL placeholderModel)
+                            {
+                                PRICE_ELAMIETF_DTL_DATA.Remove(placeholderModel);
+                            }
                             continue; // Skip deletion for new placeholder items
                         }
 
-                        var _PEID_ = item.GetType().GetProperty("PEID").GetValue(item);
-                        var _PETID_ = item.GetType().GetProperty("PETID").GetValue(item);
+                        if (item is not PRICE_ELAMIETF_DTL_MODEL detailItem)
+                        {
+                            continue;
+                        }
+
+                        var _PEID_ = detailItem.PEID;
+                        var _PETID_ = detailItem.PETID;
 
                         if (_PEID_ != null && _PETID_ != null)
                         {
