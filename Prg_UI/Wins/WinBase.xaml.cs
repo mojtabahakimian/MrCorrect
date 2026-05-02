@@ -1,11 +1,13 @@
 ﻿using AUTO_BAZ.HelperWins;
 using Functions;
 using MaterialDesignThemes.Wpf;
+using Microsoft.VisualBasic;
 using Prg_Proccessy.FUNCTIONS;
 using Prg_Proccessy.Generaly;
 using Prg_Proccessy.MODELS;
 using Prg_SendInvoice.CNNMANAGER;
 using Prg_UI.Functions;
+using Prg_UI.Wins.WinMenus.SALARY;
 using Prg_UI.Wins.WinMenus.SPECIAL_F1;
 using Prg_UI.Wins.WinSetting;
 using Rpts;
@@ -1659,6 +1661,20 @@ namespace Prg_UI.Wins
         private void Button_Click_167(object sender, RoutedEventArgs e)
         {
             CL_MenuManager.OpenWinMenu(CL_MenuManager.WinNameType.WIN_F_NEWYEAR_SALEMALI, default);
+        }
+
+        private void Button_Click_168(object sender, RoutedEventArgs e)
+        {
+            string password = Interaction.InputBox("Enter Administrative Password", "Security Check", "");
+
+            if (password == "110")
+            {
+                new WIN_SALARY_MANAGE().Show();
+            }
+            else
+            {
+                MessageBox.Show("Access Denied: Incorrect Password", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
