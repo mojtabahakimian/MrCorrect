@@ -224,14 +224,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
             var banks = dbms.DoGetDataSQL<TCOD_BANKS>("SELECT CODE, NAMES FROM TCOD_BANKS").ToDictionary(k => k.CODE, v => v.NAMES);
 
             // 2. Get Procedure Data
-            string sql = "CHEK_WITHOUT_SANAD";
+            string sql = "SELECT * FROM dbo.CHEK_WITHOUT_SANAD(@Forms___Baseknow___ADA, @Forms___Baseknow___ADV)";
             var parameters = new
             {
                 Forms___Baseknow___ADA = Baseknow.ADA,
                 Forms___Baseknow___ADV = Baseknow.ADV
             };
 
-            var data = dbms.DoGetStoreProcedureSQL<FCHEK_WITHOUT_SANAD_MODEL>(sql, parameters).ToList();
+            var data = dbms.DoGetDataSQL<FCHEK_WITHOUT_SANAD_MODEL>(sql, parameters).ToList();
             if (data.Count == 0)
             {
                 this?.Close();

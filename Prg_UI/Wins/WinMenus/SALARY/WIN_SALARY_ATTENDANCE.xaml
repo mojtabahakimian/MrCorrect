@@ -1,0 +1,92 @@
+﻿<Window x:Class="Prg_UI.Wins.WinMenus.SALARY.WIN_SALARY_ATTENDANCE"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="ورود کارکرد ماهیانه پرسنل" Height="750" Width="1300"
+        WindowStartupLocation="CenterScreen"
+        FlowDirection="RightToLeft"
+        FontFamily="{StaticResource IRANYEKAN}"
+        Background="#f8fafc"
+        Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="Primary" Color="#2563eb"/>
+        <SolidColorBrush x:Key="BorderLight" Color="#e2e8f0"/>
+        <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+            <Setter Property="Background" Value="#f1f5f9"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="BorderBrush" Value="#cbd5e1"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="Padding" Value="8"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header Controls -->
+        <Border Grid.Row="0" Background="White" Padding="16" Margin="16" CornerRadius="8" BorderBrush="{StaticResource BorderLight}" BorderThickness="1">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <ComboBox x:Name="CmbWorkshops" Width="250" materialDesign:HintAssist.Hint="انتخاب کارگاه" 
+                          DisplayMemberPath="WS_NAME" SelectedValuePath="WS_ID" Margin="0,0,16,0"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
+
+                <TextBox x:Name="TxtPeriodDate" Width="150" materialDesign:HintAssist.Hint="ماه (مثال: 14030700)" 
+                         MaxLength="8" Margin="0,0,16,0" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+
+                <TextBox x:Name="TxtHolidayDays" Width="150" materialDesign:HintAssist.Hint="تعطیلات رسمی (روز)" 
+                         Text="0" Margin="0,0,16,0" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+
+                <CheckBox x:Name="ChkTendarApply" Content="اعمال کسر ۱۰٪ (ده‌درصدی)" Margin="0,0,24,0"/>
+
+                <Button x:Name="BtnLoad" Content="بارگذاری لیست کارکرد" Width="180" Height="45"
+                        Background="{StaticResource Primary}" Foreground="White" Click="BtnLoad_Click"/>
+            </StackPanel>
+        </Border>
+
+        <!-- DataGrid -->
+        <Border Grid.Row="1" Background="White" Margin="16,0,16,16" CornerRadius="8" BorderBrush="{StaticResource BorderLight}" BorderThickness="1">
+            <DataGrid x:Name="DgAttendance" AutoGenerateColumns="False" CanUserAddRows="False" 
+                      AlternatingRowBackground="#f8fafc" HeadersVisibility="Column"
+                      GridLinesVisibility="All" VerticalScrollBarVisibility="Auto">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="کد پرسنلی" Binding="{Binding EMP_CODE}" IsReadOnly="True" Width="80"/>
+                    <DataGridTextColumn Header="نام و نام خانوادگی" Binding="{Binding FULL_NAME}" IsReadOnly="True" Width="180"/>
+
+                    <DataGridTextColumn Header="روز کارکرد کل" Binding="{Binding WORK_DAYS, StringFormat={}{0:N2}}" Width="100"/>
+                    <DataGridTextColumn Header="روز تولید" Binding="{Binding DAYS_TOLID, StringFormat={}{0:N2}}" Width="80"/>
+                    <DataGridTextColumn Header="روز اداری" Binding="{Binding DAYS_EDARI, StringFormat={}{0:N2}}" Width="80"/>
+
+                    <DataGridTextColumn Header="اضافه کار عادی (ساعت)" Binding="{Binding OT_NORMAL_H, StringFormat={}{0:N2}}" Width="140"/>
+                    <DataGridTextColumn Header="اضافه کار تعطیل" Binding="{Binding OT_HOLIDAY_H, StringFormat={}{0:N2}}" Width="110"/>
+
+                    <DataGridTextColumn Header="کارکرد اسمی (روز)" Binding="{Binding DAYS, StringFormat={}{0:N2}}" Width="120"
+                                        ToolTipService.ToolTip="DAYS: مبنای محاسبه پایه بیمه"/>
+                    <DataGridTextColumn Header="کارکرد رسمی (روز)" Binding="{Binding DAYSB, StringFormat={}{0:N2}}" Width="120"
+                                        ToolTipService.ToolTip="DAYSB: مبنای پرداخت آیتم‌های روزانه"/>
+
+                    <DataGridTextColumn Header="روز مرخصی" Binding="{Binding LEAVE_DAYS, StringFormat={}{0:N2}}" Width="90"/>
+                    <DataGridTextColumn Header="روز غیبت" Binding="{Binding ABSENT_DAYS, StringFormat={}{0:N2}}" Width="80"/>
+
+                    <DataGridTextColumn Header="تعداد جمعه" Binding="{Binding FRID_COUNT}" Width="80"/>
+
+                    <DataGridTextColumn Header="پاداش/راندمان (ریال)" Binding="{Binding PERF_AMOUNT}" Width="140"/>
+                    <DataGridTextColumn Header="سایر کسورات (ریال)" Binding="{Binding KASR_OTHER}" Width="130"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- Footer / Actions -->
+        <Border Grid.Row="2" Background="White" Padding="16" BorderBrush="{StaticResource BorderLight}" BorderThickness="0,1,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <Button x:Name="BtnSave" Content="ذخیره اطلاعات کارکرد" Width="200" Height="45" 
+                        Background="#10b981" Foreground="White" BorderBrush="Transparent" Click="BtnSave_Click"/>
+                <TextBlock x:Name="TxtStatus" VerticalAlignment="Center" Margin="16,0,0,0" Foreground="#64748b" FontWeight="Medium"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

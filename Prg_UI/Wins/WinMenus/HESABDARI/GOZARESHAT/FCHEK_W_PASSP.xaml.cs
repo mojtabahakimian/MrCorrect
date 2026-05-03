@@ -218,15 +218,14 @@ namespace Prg_UI.Wins.WinMenus.HESABDARI.GOZARESHAT
             var banks = dbms.DoGetDataSQL<TCOD_BANKS>("SELECT CODE, NAMES FROM TCOD_BANKS").ToDictionary(k => k.CODE, v => v.NAMES);
 
             // 2. Get Procedure Data
-            string sql = "CHEK_W_PASSPW";
+            string sql = "SELECT * FROM dbo.CHEK_W_PASSPW(@Forms___Baseknow___ADA,@Forms___Baseknow___BANKHA,@Forms___Baseknow___ADV)";
             var parameters = new
             {
                 Forms___Baseknow___ADA = Baseknow.ADA,
+                Forms___Baseknow___BANKHA = Baseknow.BANKHA,
                 Forms___Baseknow___ADV = Baseknow.ADV,
-                Forms___Baseknow___BANKHA = Baseknow.BANKHA
             };
-
-            var RST = dbms.DoGetStoreProcedureSQL<FCHEK_W_PASSP_MODEL>(sql, parameters).ToList();
+            var RST = dbms.DoGetDataSQL<FCHEK_W_PASSP_MODEL>(sql, parameters).ToList();
 
             if (RST.Count == 0)
             {

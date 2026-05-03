@@ -1268,22 +1268,25 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
                 try
                 {
-                    var view = (IEditableCollectionView)CollectionViewSource.GetDefaultView(DG_SUB.ItemsSource);
-                    if (view.IsAddingNew && view.CanCancelEdit)
+                    var view = CollectionViewSource.GetDefaultView(DG_SUB.ItemsSource) as IEditableCollectionView;
+                    if (view != null)
                     {
-                        //view.CancelNew();
-                        return; //Get out to avoid delete for deleting part of text inside the cell in DataGrid to conflict with Delete Row !
-                    }
-                    else if (view.IsEditingItem && view.CanCancelEdit)
-                    {
-                        //view.CancelEdit();
-                        return; //Get out to avoid delete for deleting part of text inside the cell in DataGrid to conflict with Delete Row !
-                    }
-                    else
-                    {
-                        //Cancel Any Editting to avoid conflict during remove
-                        DG_SUB.CommitEdit(DataGridEditingUnit.Cell, true);
-                        DG_SUB.CommitEdit(DataGridEditingUnit.Row, true);
+                        if (view.IsAddingNew && view.CanCancelEdit)
+                        {
+                            //view.CancelNew();
+                            return; //Get out to avoid delete for deleting part of text inside the cell in DataGrid to conflict with Delete Row !
+                        }
+                        else if (view.IsEditingItem && view.CanCancelEdit)
+                        {
+                            //view.CancelEdit();
+                            return; //Get out to avoid delete for deleting part of text inside the cell in DataGrid to conflict with Delete Row !
+                        }
+                        else
+                        {
+                            //Cancel Any Editting to avoid conflict during remove
+                            DG_SUB.CommitEdit(DataGridEditingUnit.Cell, true);
+                            DG_SUB.CommitEdit(DataGridEditingUnit.Row, true);
+                        }
                     }
                 }
                 catch { }
@@ -1319,12 +1322,20 @@ namespace Prg_UI.Wins.WinMenus.Taarif
 
                         if (CL_LMethods.IsNewPlaceHolder(DG_SUB, item))
                         {
-                            PRICE_ELAMIETF_DTL_DATA.Remove((PRICE_ELAMIETF_DTL_MODEL)item);
+                            if (item is PRICE_ELAMIETF_DTL_MODEL placeholderModel)
+                            {
+                                PRICE_ELAMIETF_DTL_DATA.Remove(placeholderModel);
+                            }
                             continue; // Skip deletion for new placeholder items
                         }
 
-                        var _PEID_ = item.GetType().GetProperty("PEID").GetValue(item);
-                        var _PETID_ = item.GetType().GetProperty("PETID").GetValue(item);
+                        if (item is not PRICE_ELAMIETF_DTL_MODEL detailItem)
+                        {
+                            continue;
+                        }
+
+                        var _PEID_ = detailItem.PEID;
+                        var _PETID_ = detailItem.PETID;
 
                         if (_PEID_ != null && _PETID_ != null)
                         {

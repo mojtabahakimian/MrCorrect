@@ -171,8 +171,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
                 new OperatorItem { OpValue = ">", OpDisplay = ">" },
                 new OperatorItem { OpValue = ">=", OpDisplay = ">=" },
                 new OperatorItem { OpValue = "<", OpDisplay = "<" },
-                new OperatorItem { OpValue = "<=", OpDisplay = "<=" },
-                new OperatorItem { OpValue = BEYN, OpDisplay = BEYN }
+                new OperatorItem { OpValue = "<=", OpDisplay = "<=" }
             };
 
             //text operators

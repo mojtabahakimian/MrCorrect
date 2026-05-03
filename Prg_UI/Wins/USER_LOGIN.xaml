@@ -100,10 +100,10 @@
 
         <materialDesign:PackIcon Kind="Password" Margin="312,189,0,0" Visibility="Visible" Height="23" Width="26"/>
         <Label x:Name="SD_Status" Content="Server : SERVER1      Database : COR1"  VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="26" Margin="10,339,0,0" VerticalAlignment="Top" Width="275"  Foreground="#DDFFFFFF" FontSize="9"/>
-        <Button  Cursor="Hand" Margin="0,0,6,15" Content="اتصال به پایگاه داده" Click="Button_Click_1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="27" Width="124" FontSize="11" Background="{x:Null}" BorderBrush="{x:Null}" />
+        <Button  Cursor="Hand" Margin="0,0,4,15" Content="اتصال به پایگاه داده" Click="Button_Click_1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="27" Width="124" FontSize="11" Background="{x:Null}" BorderBrush="{x:Null}" />
         <Label HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="0,52,280,39" Foreground="#DDFFFFFF" FontSize="30" FontFamily="/WpfApp5;component/FNT/#Raleway Light" IsHitTestVisible="False" d:IsLocked="True">Mr Correct</Label>
         <Label x:Name="lbloader" Content="در حال ورود به سیستم ..." HorizontalContentAlignment="Center" Visibility="Collapsed" VerticalContentAlignment="Center"   Background="#BF1B1B1C" Foreground="White" FontSize="16" FlowDirection="RightToLeft"/>
-        <Label x:Name="LBL_VERSION" Content="Version 1.0.0.396 Date : 1405/01/30" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="288,335,131,16" FontSize="9" PreviewMouseDoubleClick="LBL_VERSION_PreviewMouseDoubleClick" />
+        <Label x:Name="LBL_VERSION" Content="Version 1.0.0.396 Date : 1405/01/30" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="288,335,129,16" FontSize="9" PreviewMouseDoubleClick="LBL_VERSION_PreviewMouseDoubleClick" />
 
         <!--SmallDarkOverlay:-->
         <Border CornerRadius="10,10,0,0" Margin="0,0,0,325" Background="#11000000" IsHitTestVisible="False" Focusable="False">

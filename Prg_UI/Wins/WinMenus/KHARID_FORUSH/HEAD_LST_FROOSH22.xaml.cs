@@ -13170,7 +13170,8 @@ namespace Prg_UI.Wins.WinMenus.KHARID_FORUSH
 
             dbms.OpenStoredProcedure("sp_UpdateInvoicePricingAndDiscount", param);
 
-            return param.Get<int>("@ReturnValue");
+            var returnValue = param.Get<int?>("@ReturnValue");
+            return returnValue ?? 0;
         }
 
         private void N_S_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
