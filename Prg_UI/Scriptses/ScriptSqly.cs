@@ -1077,7 +1077,7 @@ ALTER TABLE [dbo].[DEFAULTDEP] ADD  DEFAULT (getdate()) FOR [CRT]"); } catch { }
 								              WHILE @@FETCH_STATUS = 0
 								              BEGIN
 								                  -- محاسبه مجموع مقدار کالا در فاکتور
-								                  SELECT @TotalProductQuantityInInvoice = ISNULL(SUM(IL.MEGH), 0)
+								                  SELECT @TotalProductQuantityInInvoice = ISNULL(SUM(IL.MEGHk), 0)
 								                  FROM dbo.INVO_LST AS IL
 								                  WHERE IL.NUMBER = @InvoiceNumber
 								                      AND IL.TAG = @InvoiceTag
