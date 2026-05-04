@@ -594,6 +594,13 @@
                         <Binding Path="DATE" StringFormat="####/##/##" />
                     </syncfusion:GridTextColumn.DisplayBinding>
                 </syncfusion:GridTextColumn>
+
+                <syncfusion:GridTextColumn HeaderText="تاریخ واگذاری" MappingName="DATE_V" IsReadOnly="True" >
+                    <syncfusion:GridTextColumn.DisplayBinding>
+                        <Binding Path="DATE_V" StringFormat="####/##/##" />
+                    </syncfusion:GridTextColumn.DisplayBinding>
+                </syncfusion:GridTextColumn>
+
                 <syncfusion:GridTextColumn MappingName="modat" HeaderText="مدت" MinimumWidth="90" IsReadOnly="True" />
 
                 <syncfusion:GridComboBoxColumn x:Name="BANK_COLUMN" HeaderText="نام بانک" MappingName="BANK" SelectedValuePath="CODE" DisplayMemberPath="NAMES" IsReadOnly="True"  />

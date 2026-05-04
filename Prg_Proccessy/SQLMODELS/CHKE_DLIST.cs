@@ -98,5 +98,7 @@ namespace Prg_Proccessy.SQLMODELS
 
         private string? _SAYADI;
         public string? SAYADI { get => _SAYADI; set { if (_SAYADI == value) return; _SAYADI = value; OnPropertyChanged("SAYADI"); } }
+        private long? _date_v;
+        public long? DATE_V { get => _date_v; set { if (_date_v == value) return; _date_v = value; OnPropertyChanged("DATE_V"); } }
     }
 }
