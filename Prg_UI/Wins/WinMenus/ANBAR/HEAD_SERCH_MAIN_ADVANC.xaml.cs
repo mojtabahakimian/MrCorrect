@@ -775,7 +775,12 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             if (isNumeric)
                 return $" {agg}({TryCastNumeric(field)}) AS {field}";
 
-            // بقیه‌ی موارد متنی
+            // SUM/AVG روی فیلد متنی: با TryCastNumeric از خطای nvarchar جلوگیری می‌کنیم
+            if (agg.Equals("SUM", StringComparison.OrdinalIgnoreCase) ||
+                agg.Equals("AVG", StringComparison.OrdinalIgnoreCase))
+                return $" {agg}({TryCastNumeric(field)}) AS {field}";
+
+            // MIN/MAX روی متن مستقیماً قابل اجراست
             return $" {agg}({field}) AS {field}";
         }
 
