@@ -141,6 +141,7 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         private ObservableCollection<OperatorItem> _textOpData;
         private ObservableCollection<OperatorItem> _dateOpData;
         private ObservableCollection<AggregateItem> _aggOpData;
+        private ObservableCollection<AggregateItem> _aggOpDataText;
         public ObservableCollection<OperatorItem> NUMERIC_OP_DATA
         {
             get => _numericOpData;
@@ -160,6 +161,11 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
         {
             get => _aggOpData;
             set { _aggOpData = value; OnPropertyChanged(); }
+        }
+        public ObservableCollection<AggregateItem> AGG_OP_DATA_TEXT
+        {
+            get => _aggOpDataText;
+            set { _aggOpDataText = value; OnPropertyChanged(); }
         }
         private void InitializeOperatorData()
         {
@@ -203,6 +209,12 @@ namespace Prg_UI.Wins.WinMenus.ANBAR
             {
                 new AggregateItem { OpValue = "SUM", OpDisplay = "جمع" },
                 new AggregateItem { OpValue = "AVG", OpDisplay = "میانگین" },
+                new AggregateItem { OpValue = "MIN", OpDisplay = "حداقل" },
+                new AggregateItem { OpValue = "MAX", OpDisplay = "حداکثر" },
+                new AggregateItem { OpValue = "COUNT", OpDisplay = "تعداد (شمارش)" }
+            };
+            AGG_OP_DATA_TEXT = new ObservableCollection<AggregateItem>
+            {
                 new AggregateItem { OpValue = "MIN", OpDisplay = "حداقل" },
                 new AggregateItem { OpValue = "MAX", OpDisplay = "حداکثر" },
                 new AggregateItem { OpValue = "COUNT", OpDisplay = "تعداد (شمارش)" }

@@ -252,11 +252,11 @@
                             </ComboBox.ItemsPanel>
                         </ComboBox>
                         <CheckBox IsChecked="False"  x:Name="KALAC" VerticalAlignment="Center" Margin="5,0,0,0"/>
-                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="KALABS" 
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="KALABS"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpDisplay" 
+                                  DisplayMemberPath="OpDisplay"
                                   SelectedValuePath="OpValue"
-                                  ItemsSource="{Binding DataContext.AGG_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                                  ItemsSource="{Binding DataContext.AGG_OP_DATA_TEXT, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -336,11 +336,11 @@
                             </ComboBox.ItemsPanel>
                         </ComboBox>
                         <CheckBox IsChecked="False"  x:Name="CUSTNAMEC" VerticalAlignment="Center" Margin="5,0,0,0"/>
-                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="CUSTNAMEBS" 
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="CUSTNAMEBS"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpDisplay" 
+                                  DisplayMemberPath="OpDisplay"
                                   SelectedValuePath="OpValue"
-                                  ItemsSource="{Binding DataContext.AGG_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                                  ItemsSource="{Binding DataContext.AGG_OP_DATA_TEXT, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -364,11 +364,11 @@
                             </ComboBox.ItemsPanel>
                         </ComboBox>
                         <CheckBox IsChecked="False"  x:Name="hesC" VerticalAlignment="Center" Margin="5,0,0,0"/>
-                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="hesBS" 
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="hesBS"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpDisplay" 
+                                  DisplayMemberPath="OpDisplay"
                                   SelectedValuePath="OpValue"
-                                  ItemsSource="{Binding DataContext.AGG_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                                  ItemsSource="{Binding DataContext.AGG_OP_DATA_TEXT, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -872,11 +872,11 @@
                             </ComboBox.ItemsPanel>
                         </ComboBox>
                         <CheckBox IsChecked="False"  x:Name="ROUTE_NAMEC" VerticalAlignment="Center" Margin="5,0,0,0"/>
-                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="ROUTE_NAMEBS" 
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="ROUTE_NAMEBS"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpDisplay" 
+                                  DisplayMemberPath="OpDisplay"
                                   SelectedValuePath="OpValue"
-                                  ItemsSource="{Binding DataContext.AGG_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                                  ItemsSource="{Binding DataContext.AGG_OP_DATA_TEXT, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -901,11 +901,11 @@
                             </ComboBox.ItemsPanel>
                         </ComboBox>
                         <CheckBox IsChecked="False"  x:Name="MOLAHC" VerticalAlignment="Center" Margin="5,0,0,0"/>
-                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="MOLAHBS" 
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="MOLAHBS"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpDisplay" 
+                                  DisplayMemberPath="OpDisplay"
                                   SelectedValuePath="OpValue"
-                                  ItemsSource="{Binding DataContext.AGG_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                                  ItemsSource="{Binding DataContext.AGG_OP_DATA_TEXT, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -929,11 +929,11 @@
                             </ComboBox.ItemsPanel>
                         </ComboBox>
                         <CheckBox IsChecked="False"  x:Name="SHARAYETC" VerticalAlignment="Center" Margin="5,0,0,0"/>
-                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="SHARAYETBS" 
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="SHARAYETBS"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpDisplay" 
+                                  DisplayMemberPath="OpDisplay"
                                   SelectedValuePath="OpValue"
-                                  ItemsSource="{Binding DataContext.AGG_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                                  ItemsSource="{Binding DataContext.AGG_OP_DATA_TEXT, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -1137,11 +1137,11 @@
                             </ComboBox.ItemsPanel>
                         </ComboBox>
                         <CheckBox IsChecked="False"  x:Name="USER_NAMEC" VerticalAlignment="Center" Margin="5,0,0,0"/>
-                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="USER_NAMEBS" 
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="USER_NAMEBS"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpDisplay" 
+                                  DisplayMemberPath="OpDisplay"
                                   SelectedValuePath="OpValue"
-                                  ItemsSource="{Binding DataContext.AGG_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                                  ItemsSource="{Binding DataContext.AGG_OP_DATA_TEXT, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
@@ -1329,11 +1329,11 @@
                             </ComboBox.ItemsPanel>
                         </ComboBox>
                         <CheckBox IsChecked="False"  x:Name="N_FANIC" VerticalAlignment="Center" Margin="5,0,0,0"/>
-                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="N_FANIBS" 
+                        <ComboBox Padding="7,0,10,0" Width="100" x:Name="N_FANIBS"
                                   HorizontalContentAlignment="Center"
-                                  DisplayMemberPath="OpDisplay" 
+                                  DisplayMemberPath="OpDisplay"
                                   SelectedValuePath="OpValue"
-                                  ItemsSource="{Binding DataContext.AGG_OP_DATA, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
+                                  ItemsSource="{Binding DataContext.AGG_OP_DATA_TEXT, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Margin="5,0,0,0" Style="{StaticResource FuzzyOutComboBox}" IsTextSearchEnabled="True" Height="30" IsEditable="True" Background="{x:Null}" BorderThickness="1">
                             <ComboBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"/>
